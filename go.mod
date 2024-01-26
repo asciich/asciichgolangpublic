@@ -1,4 +1,4 @@
-module asciichgolangpublic
+module github.com/asciich/asciichgolangpublic
 
 go 1.21.1
 
