@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package github.com/asciichgolangpublic
 
 type Directory interface {
 	GetLocalPath() (localPath string, err error)

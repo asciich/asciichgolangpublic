@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package github.com/asciichgolangpublic
 
 // A File represents any kind of file regardless if a local file or a remote file.
 type File interface {
