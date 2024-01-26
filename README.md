@@ -2,6 +2,39 @@
 
 Helper functions for writing infrastructure related CLIs easier and faster.
 
+## Logging
+
+To provide easy readable CLI output its recommended to use the provided logging functions:
+
+```golang
+package main
+
+import "github.com/asciich/asciichgolangpublic"
+
+func main() {
+	asciichgolangpublic.LogInfo("Shown without additional color.")
+	asciichgolangpublic.LogInfof("Shown without additional color. %s", "Also available with formatting.")
+
+	asciichgolangpublic.LogGood("Good messages are green.")
+	asciichgolangpublic.LogGoodf("Good messages are green. %s", "Also available with formatting.")
+
+	asciichgolangpublic.LogChanged("Changes are purple.")
+	asciichgolangpublic.LogChangedf("Changes are purple. %s", "Also available with formatting.")
+
+	asciichgolangpublic.LogWarn("Warnings are yellow.")
+	asciichgolangpublic.LogWarnf("Warnings are yellow. %s", "Also available with formatting.")
+
+	asciichgolangpublic.LogError("Errors are red.")
+	asciichgolangpublic.LogErrorf("Errors are red. %s", "Also available with formatting.")
+
+	asciichgolangpublic.LogFatalf("Fatal will exit with a red error message and exit code %d", 1)
+}
+```
+
+Output produced by this example code:
+
+![](docs/log_example.png)
+
 ## Errors
 
 It's recommended to use `TracedError` whenever an error occurs with a custom error message.
