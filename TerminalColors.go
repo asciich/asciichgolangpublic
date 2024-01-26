@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package github.com/asciich/asciichgolangpublic
 
 // Color codes for terminal.
 //
