@@ -1,4 +1,4 @@
-package github.com/asciich/asciichgolangpublic
+package asciichgolangpublic
 
 import (
 	"errors"
