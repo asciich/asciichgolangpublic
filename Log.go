@@ -40,8 +40,8 @@ func LogFatal(logmessage string) {
 	os.Exit(1)
 }
 
-func LogFatalWithTrace(message string) {
-	LogGoErrorFatal(TracedError(message))
+func LogFatalWithTrace(errorMessageOrError interface{}) {
+	LogGoErrorFatal(TracedError(errorMessageOrError))
 }
 
 func LogFatalWithTracef(logmessage string, args ...interface{}) {
