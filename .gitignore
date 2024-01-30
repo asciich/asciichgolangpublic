@@ -1,2 +1,4 @@
 # Temporary root certificate used during build processes
 asciich_root_ca.crt
+# VSCode related files
+.vscode/

@@ -1,11 +1,14 @@
 package asciichgolangpublic
 
 import (
+	"errors"
 	"fmt"
+	"os"
 )
 
 // A LocalFile represents a locally available file.
 type LocalFile struct {
+	FileBase
 	path string
 }
 
@@ -19,7 +22,12 @@ func MustNewLocalFileByPath(localPath string) (l *LocalFile) {
 }
 
 func NewLocalFile() (l *LocalFile) {
-	return new(LocalFile)
+	l = new(LocalFile)
+
+	// Allow usage of the base class functions:
+	l.MustSetParentFileForBaseClass(l)
+
+	return l
 }
 
 func NewLocalFileByPath(localPath string) (l *LocalFile, err error) {
@@ -35,6 +43,55 @@ func NewLocalFileByPath(localPath string) (l *LocalFile, err error) {
 	}
 
 	return l, nil
+}
+
+// Delete a file if it exists.
+// If the file is already absent this function does nothing.
+func (l *LocalFile) Delete(verbose bool) (err error) {
+	path, err := l.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	exists, err := l.Exists()
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		err = os.Remove(path)
+		if err != nil {
+			return TracedErrorf("Failed to delet localFile '%s': '%w'", path, err)
+		}
+
+		if verbose {
+			LogChangedf("Local file '%s' deleted.", path)
+		}
+	} else {
+		if verbose {
+			LogChangedf("Local file '%s' is already absent. Skip delete.", path)
+		}
+	}
+
+	return nil
+}
+
+func (l *LocalFile) Exists() (exists bool, err error) {
+	localPath, err := l.GetLocalPath()
+	if err != nil {
+		return false, err
+	}
+
+	_, err = os.Stat(localPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return false, nil
+		}
+
+		return false, TracedErrorf("Unable to evaluet if local file exists: '%w'", err)
+	}
+
+	return true, nil
 }
 
 func (l *LocalFile) GetLocalPath() (path string, err error) {
@@ -62,6 +119,17 @@ func (l *LocalFile) GetUriAsString() (uri string, err error) {
 	uri = "file://" + path
 
 	return uri, nil
+}
+
+func (l *LocalFile) IsPathSet() (isSet bool) {
+	return false
+}
+
+func (l *LocalFile) MustDelete(verbose bool) {
+	err := l.Delete(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (l *LocalFile) MustExists() (exists bool) {
@@ -100,11 +168,41 @@ func (l *LocalFile) MustGetUriAsString() (uri string) {
 	return uri
 }
 
+func (l *LocalFile) MustReadAsBytes() (content []byte) {
+	content, err := l.ReadAsBytes()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return content
+}
+
 func (l *LocalFile) MustSetPath(path string) {
 	err := l.SetPath(path)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (l *LocalFile) MustWriteBytes(toWrite []byte, verbose bool) {
+	err := l.WriteBytes(toWrite, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (l *LocalFile) ReadAsBytes() (content []byte, err error) {
+	path, err := l.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
+	content, err = os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return content, err
 }
 
 func (l *LocalFile) SetPath(path string) (err error) {
@@ -117,10 +215,20 @@ func (l *LocalFile) SetPath(path string) (err error) {
 	return nil
 }
 
-func (l LocalFile) Exists() (exists bool, err error) {
-	return false, TracedError("not implemented")
-}
+func (l *LocalFile) WriteBytes(toWrite []byte, verbose bool) (err error) {
+	if toWrite == nil {
+		return TracedErrorNil("toWrite")
+	}
 
-func (l LocalFile) IsPathSet() (isSet bool) {
-	return false
+	path, err := l.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(path, toWrite, 0644)
+	if err != nil {
+		return TracedErrorf("Unable to write file '%s': %w", path, err)
+	}
+
+	return nil
 }
