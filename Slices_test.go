@@ -149,3 +149,30 @@ func TestSlicesMaxIntValuePerIndex(t *testing.T) {
 		)
 	}
 }
+
+func TestSlicesRemoveLastElementIfEmptyString(t *testing.T) {
+	tests := []struct {
+		input          []string
+		expectedOutput []string
+	}{
+		{[]string{}, []string{}},
+		{nil, []string{}},
+		{[]string{""}, []string{}},
+		{[]string{"a"}, []string{"a"}},
+		{[]string{"a", ""}, []string{"a"}},
+		{[]string{"a", "b", ""}, []string{"a", "b"}},
+		{[]string{"a", "b", "", "c"}, []string{"a", "b", "", "c"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				output := Slices().RemoveLastElementIfEmptyString(tt.input)
+				assert.EqualValues(tt.expectedOutput, output)
+			},
+		)
+	}
+}
