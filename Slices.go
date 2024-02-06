@@ -17,6 +17,26 @@ func Slices() (slices *SlicesService) {
 	return new(SlicesService)
 }
 
+func (o *SlicesService) RemoveLastElementIfEmptyString(sliceOfStrings []string) (cleanedUp []string) {
+	if len(sliceOfStrings) <= 0 {
+		return []string{}
+	}
+
+	if len(sliceOfStrings) == 1 {
+		if sliceOfStrings[0] == "" {
+			return []string{}
+		}
+
+		return sliceOfStrings
+	}
+
+	if sliceOfStrings[len(sliceOfStrings)-1] == "" {
+		return sliceOfStrings[:len(sliceOfStrings)-1]
+	}
+
+	return sliceOfStrings
+}
+
 func (o *SlicesService) TrimAllPrefix(sliceOfStrings []string, prefixToRemove string) (sliceOfStringsWithPrefixRemoved []string) {
 	if len(sliceOfStrings) <= 0 {
 		return []string{}
