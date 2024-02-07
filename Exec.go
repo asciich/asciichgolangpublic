@@ -72,6 +72,12 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 		m := scanner.Text()
 
 		if OS().IsRunningOnWindows() {
+			if len(m) > 0 {
+				if []byte(m)[0] == 0x00 {
+					m = string([]byte(m)[1:])
+				}
+			}
+
 			m, err = Windows().DecodeStringAsString(m)
 			if err != nil {
 				return nil, err
