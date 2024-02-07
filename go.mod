@@ -5,6 +5,7 @@ go 1.21.1
 require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/stretchr/testify v1.8.4
+	golang.org/x/text v0.14.0
 )
 
 require (
