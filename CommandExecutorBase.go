@@ -49,8 +49,8 @@ func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsString(options *RunCom
 	return stdout
 }
 
-func (c *CommandExecutorBase) MustRunCommandAngGetStdoutAsLines(options *RunCommandOptions) (stdoutLines []string) {
-	stdoutLines, err := c.RunCommandAngGetStdoutAsLines(options)
+func (c *CommandExecutorBase) MustRunCommandandGetStdoutAsLines(options *RunCommandOptions) (stdoutLines []string) {
+	stdoutLines, err := c.RunCommandandGetStdoutAsLines(options)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -131,7 +131,7 @@ func (c *CommandExecutorBase) RunCommandAndGetStdoutAsString(options *RunCommand
 	return stdout, nil
 }
 
-func (c *CommandExecutorBase) RunCommandAngGetStdoutAsLines(options *RunCommandOptions) (stdoutLines []string, err error) {
+func (c *CommandExecutorBase) RunCommandandGetStdoutAsLines(options *RunCommandOptions) (stdoutLines []string, err error) {
 	if options == nil {
 		return nil, TracedErrorNil("options")
 	}

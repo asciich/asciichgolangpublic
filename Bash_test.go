@@ -160,7 +160,7 @@ func TestBashRunCommandAndGetStdoutAsLines(t *testing.T) {
 
 				const verbose bool = true
 
-				output := Bash().MustRunCommandAngGetStdoutAsLines(
+				output := Bash().MustRunCommandandGetStdoutAsLines(
 					&RunCommandOptions{
 						Command: tt.command,
 						Verbose: verbose,
