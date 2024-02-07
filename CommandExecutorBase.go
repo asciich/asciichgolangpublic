@@ -40,6 +40,15 @@ func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsFloat64(options *RunCo
 	return stdout
 }
 
+func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsLines(options *RunCommandOptions) (stdoutLines []string) {
+	stdoutLines, err := c.RunCommandAndGetStdoutAsLines(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return stdoutLines
+}
+
 func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsString(options *RunCommandOptions) (stdout string) {
 	stdout, err := c.RunCommandAndGetStdoutAsString(options)
 	if err != nil {
@@ -47,15 +56,6 @@ func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsString(options *RunCom
 	}
 
 	return stdout
-}
-
-func (c *CommandExecutorBase) MustRunCommandandGetStdoutAsLines(options *RunCommandOptions) (stdoutLines []string) {
-	stdoutLines, err := c.RunCommandandGetStdoutAsLines(options)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-
-	return stdoutLines
 }
 
 func (c *CommandExecutorBase) MustSetParentCommandExecutorForBaseClass(parentCommandExecutorForBaseClass CommandExecutor) {
@@ -111,27 +111,7 @@ func (c *CommandExecutorBase) RunCommandAndGetStdoutAsFloat64(options *RunComman
 	return stdout, nil
 }
 
-func (c *CommandExecutorBase) RunCommandAndGetStdoutAsString(options *RunCommandOptions) (stdout string, err error) {
-	if options == nil {
-		return "", TracedErrorNil("options")
-	}
-
-	parent, err := c.GetParentCommandExecutorForBaseClass()
-	if err != nil {
-		return "", err
-	}
-
-	stdoutBytes, err := parent.RunCommandAndGetStdoutAsBytes(options)
-	if err != nil {
-		return "", err
-	}
-
-	stdout = string(stdoutBytes)
-
-	return stdout, nil
-}
-
-func (c *CommandExecutorBase) RunCommandandGetStdoutAsLines(options *RunCommandOptions) (stdoutLines []string, err error) {
+func (c *CommandExecutorBase) RunCommandAndGetStdoutAsLines(options *RunCommandOptions) (stdoutLines []string, err error) {
 	if options == nil {
 		return nil, TracedErrorNil("options")
 	}
@@ -152,6 +132,26 @@ func (c *CommandExecutorBase) RunCommandandGetStdoutAsLines(options *RunCommandO
 	}
 
 	return stdoutLines, nil
+}
+
+func (c *CommandExecutorBase) RunCommandAndGetStdoutAsString(options *RunCommandOptions) (stdout string, err error) {
+	if options == nil {
+		return "", TracedErrorNil("options")
+	}
+
+	parent, err := c.GetParentCommandExecutorForBaseClass()
+	if err != nil {
+		return "", err
+	}
+
+	stdoutBytes, err := parent.RunCommandAndGetStdoutAsBytes(options)
+	if err != nil {
+		return "", err
+	}
+
+	stdout = string(stdoutBytes)
+
+	return stdout, nil
 }
 
 func (c *CommandExecutorBase) SetParentCommandExecutorForBaseClass(parentCommandExecutorForBaseClass CommandExecutor) (err error) {
