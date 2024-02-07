@@ -70,6 +70,14 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
 		m := scanner.Text()
+
+		if OS().IsRunningOnWindows() {
+			m, err = Windows().DecodeStringAsString(m)
+			if err != nil {
+				return nil, err
+			}
+		}
+
 		stdoutString += m + "\n"
 		if options.LiveOutputOnStdout {
 			fmt.Println(m)
@@ -85,7 +93,15 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 		return nil, err
 	}
 
-	err = commandOutput.SetStderr(stderr.Bytes())
+	stderrBytes := stderr.Bytes()
+	if OS().IsRunningOnWindows() {
+		stderrBytes, err = Windows().DecodeAsBytes(stderrBytes)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = commandOutput.SetStderr(stderrBytes)
 	if err != nil {
 		return nil, err
 	}
