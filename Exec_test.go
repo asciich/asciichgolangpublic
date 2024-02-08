@@ -31,7 +31,16 @@ func TestExecRunCommandAndGetStdoutAsString(t *testing.T) {
 					},
 				)
 
+				output2 := exec.MustRunCommandAndGetStdoutAsString(
+					&RunCommandOptions{
+						Command:            tt.command,
+						Verbose:            verbose,
+						LiveOutputOnStdout: true,
+					},
+				)
+
 				assert.EqualValues(tt.expectedOutput, output)
+				assert.EqualValues(tt.expectedOutput, output2)
 			},
 		)
 	}
