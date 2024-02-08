@@ -78,6 +78,12 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 				}
 			}
 
+			if len(m) > 0 {
+				if []byte(m)[len(m)-1] == '\r' {
+					m = string([]byte(m)[:len(m)-2])
+				}
+			}
+
 			m, err = Windows().DecodeStringAsString(m)
 			if err != nil {
 				return nil, err
