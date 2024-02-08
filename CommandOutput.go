@@ -207,12 +207,22 @@ func (o *CommandOutput) GetReturnCode() (returnCode int, err error) {
 	return returnCode, nil
 }
 
-func (o *CommandOutput) GetStderrAsString() (stdout string, err error) {
+func (o *CommandOutput) GetStderrAsString() (stderr string, err error) {
 	if o.stderr == nil {
-		return "", TracedError("stdout is not set")
+		return "", TracedError("stderr is not set")
 	}
 
-	return string(*o.stderr), nil
+	if OS().IsRunningOnWindows() {
+		stderr, err = UTF16().DecodeAsString(*o.stderr)
+		if err != nil {
+			return "", err
+		}
+
+		stderr = strings.ReplaceAll(stderr, "\r\n", "\n")
+		return stderr, nil
+	} else {
+		return string(*o.stderr), nil
+	}
 }
 
 func (o *CommandOutput) GetStderrAsStringOrEmptyIfUnset() (stderr string) {
@@ -248,7 +258,17 @@ func (o *CommandOutput) GetStdoutAsString() (stdout string, err error) {
 		return "", TracedError("stdout is not set")
 	}
 
-	return string(*o.stdout), nil
+	if OS().IsRunningOnWindows() {
+		stdout, err = UTF16().DecodeAsString(*o.stdout)
+		if err != nil {
+			return "", err
+		}
+
+		stdout = strings.ReplaceAll(stdout, "\r\n", "\n")
+		return stdout, nil
+	} else {
+		return string(*o.stdout), nil
+	}
 }
 
 func (o *CommandOutput) IsExitSuccess() (isSuccess bool) {

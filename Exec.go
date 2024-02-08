@@ -60,7 +60,6 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 		return nil, TracedError(err.Error())
 	}
 	cmd.Stderr = &stderr
-	stdoutString := ""
 
 	commandOutput = new(CommandOutput)
 
@@ -68,39 +67,42 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 
 	scanner := bufio.NewScanner(stdoutPipe)
 	scanner.Split(bufio.ScanLines)
+	stdoutBytes := []byte{}
 	for scanner.Scan() {
 		m := scanner.Text()
 
-		if OS().IsRunningOnWindows() {
-			if len(m) > 0 {
-				if []byte(m)[0] == 0x00 {
-					m = string([]byte(m)[1:])
-				}
-			}
-
-			if len(m) > 0 {
-				if []byte(m)[len(m)-1] == '\r' {
-					m = string([]byte(m)[:len(m)-2])
-				}
-			}
-
-			m, err = Windows().DecodeStringAsString(m)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		stdoutString += m + "\n"
 		if options.LiveOutputOnStdout {
-			fmt.Println(m)
+			mOutput := m
+
+			if OS().IsRunningOnWindows() {
+				if len(mOutput) > 0 {
+					if []byte(mOutput)[0] == 0x00 {
+						mOutput = string([]byte(mOutput)[1:])
+					}
+				}
+
+				mOutput, err = Windows().DecodeStringAsString(mOutput)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			fmt.Println(mOutput)
 		}
+
+		stdoutBytes = append(stdoutBytes, []byte(m)...)
+		stdoutBytes = append(stdoutBytes, byte('\n'))
 	}
 	err = cmd.Wait()
 	if err != nil {
 		commandOutput.SetCmdRunError(err)
 	}
 
-	err = commandOutput.SetStdout([]byte(stdoutString))
+	unprocessedBytes := scanner.Bytes()
+
+	stdoutBytes = append(stdoutBytes, unprocessedBytes...)
+
+	err = commandOutput.SetStdout(stdoutBytes)
 	if err != nil {
 		return nil, err
 	}

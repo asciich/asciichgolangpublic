@@ -35,8 +35,16 @@ func TestBashRunCommandAndGetStdoutAsString(t *testing.T) {
 						Verbose: verbose,
 					},
 				)
+				output2 := bash.MustRunCommandAndGetStdoutAsString(
+					&RunCommandOptions{
+						Command:            tt.command,
+						Verbose:            verbose,
+						LiveOutputOnStdout: true,
+					},
+				)
 
 				assert.EqualValues(tt.expectedOutput, output)
+				assert.EqualValues(tt.expectedOutput, output2)
 			},
 		)
 	}
@@ -73,6 +81,18 @@ func TestBashRunCommand(t *testing.T) {
 				assert.EqualValues(tt.expectedStdout, output.MustGetStdoutAsString())
 				assert.EqualValues(tt.expectedStderr, output.MustGetStderrAsString())
 				assert.EqualValues(0, output.MustGetReturnCode())
+
+				output2 := Bash().MustRunCommand(
+					&RunCommandOptions{
+						Command:            tt.command,
+						Verbose:            verbose,
+						LiveOutputOnStdout: true,
+					},
+				)
+
+				assert.EqualValues(tt.expectedStdout, output2.MustGetStdoutAsString())
+				assert.EqualValues(tt.expectedStderr, output2.MustGetStderrAsString())
+				assert.EqualValues(0, output2.MustGetReturnCode())
 			},
 		)
 	}
@@ -103,8 +123,16 @@ func TestBashRunCommandAndGetStdoutAsFloat64(t *testing.T) {
 						Verbose: verbose,
 					},
 				)
+				output2 := Bash().MustRunCommandAndGetStdoutAsFloat64(
+					&RunCommandOptions{
+						Command:            tt.command,
+						Verbose:            verbose,
+						LiveOutputOnStdout: true,
+					},
+				)
 
 				assert.EqualValues(tt.expectedFloat64, output)
+				assert.EqualValues(tt.expectedFloat64, output2)
 			},
 		)
 	}
@@ -166,8 +194,16 @@ func TestBashRunCommandAndGetStdoutAsLines(t *testing.T) {
 						Verbose: verbose,
 					},
 				)
+				output2 := Bash().MustRunCommandAndGetStdoutAsLines(
+					&RunCommandOptions{
+						Command:            tt.command,
+						Verbose:            verbose,
+						LiveOutputOnStdout: true,
+					},
+				)
 
 				assert.EqualValues(tt.expectedLines, output)
+				assert.EqualValues(tt.expectedLines, output2)
 			},
 		)
 	}
