@@ -16,6 +16,17 @@ func UTF16() (u *UTF16Service) {
 }
 
 func (u *UTF16Service) DecodeAsBytes(utf16 []byte) (decoded []byte, err error) {
+	if len(utf16) < 2 {
+		return utf16, err
+	}
+
+	if len(utf16) > 2 {
+		if utf16[1] != 0x00 {
+			// no decode needed.
+			return utf16, nil
+		}
+	}
+
 	decoded, _, err = transform.Bytes(unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewDecoder(), utf16)
 	if err != nil {
 		return nil, TracedError(err)

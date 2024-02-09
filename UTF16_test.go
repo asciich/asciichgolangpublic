@@ -16,6 +16,11 @@ func TestUTF16DecodeAsString(t *testing.T) {
 		{[]byte{0x48, 0x00}, "H"},
 		{[]byte{0x48, 0x00, 0x65, 0x00}, "He"},
 		{[]byte{0x48, 0x00, 0x65, 0x00, 0x6c, 0x00, 0x6c, 0x00, 0x6f, 0x00}, "Hello"},
+
+		// Do not convert already UTF8 strings:
+		{[]byte("h"), "h"},
+		{[]byte("hello"), "hello"},
+		{[]byte(" hello"), " hello"},
 	}
 
 	for _, tt := range tests {
