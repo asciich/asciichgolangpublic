@@ -12,6 +12,19 @@ type LocalFile struct {
 	path string
 }
 
+func GetLocalFileByPath(localPath string) (l *LocalFile, err error) {
+	return NewLocalFileByPath(localPath)
+}
+
+func MustGetLocalFileByPath(localPath string) (l *LocalFile) {
+	l, err := GetLocalFileByPath(localPath)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return l
+}
+
 func MustNewLocalFileByPath(localPath string) (l *LocalFile) {
 	l, err := NewLocalFileByPath(localPath)
 	if err != nil {
