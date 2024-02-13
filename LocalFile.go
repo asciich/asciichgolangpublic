@@ -95,16 +95,16 @@ func (l *LocalFile) Exists() (exists bool, err error) {
 		return false, err
 	}
 
-	_, err = os.Stat(localPath)
+	fileInfo, err := os.Stat(localPath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return false, nil
 		}
 
-		return false, TracedErrorf("Unable to evaluet if local file exists: '%w'", err)
+		return false, TracedErrorf("Unable to evaluate if local file exists: '%w'", err)
 	}
 
-	return true, nil
+	return !fileInfo.IsDir(), err
 }
 
 func (l *LocalFile) GetLocalPath() (path string, err error) {

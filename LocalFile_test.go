@@ -49,7 +49,7 @@ func TestLocalFileExists(t *testing.T) {
 
 				assert.True(file.MustExists())
 
-				file.Delete(verbose)
+				file.MustDelete(verbose)
 
 				assert.False(file.MustExists())
 			},
