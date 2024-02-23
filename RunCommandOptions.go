@@ -6,6 +6,9 @@ type RunCommandOptions struct {
 	Verbose            bool
 	AllowAllExitCodes  bool
 	LiveOutputOnStdout bool
+
+	// Run as "root" user (or Administrator on Windows):
+	RunAsRoot bool
 }
 
 func NewRunCommandOptions() (runCommandOptions *RunCommandOptions) {
@@ -76,6 +79,11 @@ func (r *RunCommandOptions) GetAllowAllExitCodes() (allowAllExitCodes bool, err 
 func (r *RunCommandOptions) GetLiveOutputOnStdout() (liveOutputOnStdout bool, err error) {
 
 	return r.LiveOutputOnStdout, nil
+}
+
+func (r *RunCommandOptions) GetRunAsRoot() (runAsRoot bool) {
+
+	return r.RunAsRoot
 }
 
 func (r *RunCommandOptions) GetTimeoutString() (timeoutString string, err error) {
@@ -213,6 +221,10 @@ func (r *RunCommandOptions) SetLiveOutputOnStdout(liveOutputOnStdout bool) (err 
 	r.LiveOutputOnStdout = liveOutputOnStdout
 
 	return nil
+}
+
+func (r *RunCommandOptions) SetRunAsRoot(runAsRoot bool) {
+	r.RunAsRoot = runAsRoot
 }
 
 func (r *RunCommandOptions) SetTimeoutString(timeoutString string) (err error) {
