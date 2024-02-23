@@ -6,6 +6,8 @@ import (
 	"os"
 )
 
+var globalLogSettings LogSettings
+
 func Log(logmessage string) {
 	log.Println(logmessage)
 }
@@ -15,7 +17,9 @@ func LogBold(logmessage string) {
 }
 
 func LogChanged(logmessage string) {
-	logmessage = TerminalColors().GetCodeMangenta() + logmessage + TerminalColors().GetCodeNoColor()
+	if globalLogSettings.IsColorEnabled() {
+		logmessage = TerminalColors().GetCodeMangenta() + logmessage + TerminalColors().GetCodeNoColor()
+	}
 	Log(logmessage)
 }
 
@@ -25,7 +29,9 @@ func LogChangedf(logmessage string, args ...interface{}) {
 }
 
 func LogError(logmessage string) {
-	logmessage = TerminalColors().GetCodeRed() + logmessage + TerminalColors().GetCodeNoColor()
+	if globalLogSettings.IsColorEnabled() {
+		logmessage = TerminalColors().GetCodeRed() + logmessage + TerminalColors().GetCodeNoColor()
+	}
 	Log(logmessage)
 }
 
@@ -35,7 +41,9 @@ func LogErrorf(logmessage string, args ...interface{}) {
 }
 
 func LogFatal(logmessage string) {
-	logmessage = TerminalColors().GetCodeRed() + logmessage + TerminalColors().GetCodeNoColor()
+	if globalLogSettings.IsColorEnabled() {
+		logmessage = TerminalColors().GetCodeRed() + logmessage + TerminalColors().GetCodeNoColor()
+	}
 	Log(logmessage)
 	os.Exit(1)
 }
@@ -67,7 +75,9 @@ func LogGoErrorFatalWithTrace(err error) {
 }
 
 func LogGood(logmessage string) {
-	logmessage = TerminalColors().GetCodeGreen() + logmessage + TerminalColors().GetCodeNoColor()
+	if globalLogSettings.IsColorEnabled() {
+		logmessage = TerminalColors().GetCodeGreen() + logmessage + TerminalColors().GetCodeNoColor()
+	}
 	LogInfo(logmessage)
 }
 
@@ -85,8 +95,18 @@ func LogInfof(logmessage string, args ...interface{}) {
 	LogInfo(message)
 }
 
+func LogTurnOfColorOutput() {
+	globalLogSettings.SetColorEnabled(false)
+}
+
+func LogTurnOnColorOutput() {
+	globalLogSettings.SetColorEnabled(true)
+}
+
 func LogWarn(logmessage string) {
-	logmessage = TerminalColors().GetCodeYellow() + logmessage + TerminalColors().GetCodeNoColor()
+	if globalLogSettings.IsColorEnabled() {
+		logmessage = TerminalColors().GetCodeYellow() + logmessage + TerminalColors().GetCodeNoColor()
+	}
 	Log(logmessage)
 }
 
