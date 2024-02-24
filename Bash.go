@@ -23,6 +23,24 @@ func (b *BashService) MustRunCommand(options *RunCommandOptions) (commandOutput 
 	return commandOutput
 }
 
+func (b *BashService) MustRunOneLiner(oneLiner string, verbose bool) (output *CommandOutput) {
+	output, err := b.RunOneLiner(oneLiner, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return output
+}
+
+func (b *BashService) MustRunOneLinerAndGetStdoutAsString(oneLiner string, verbose bool) (stdout string) {
+	stdout, err := b.RunOneLinerAndGetStdoutAsString(oneLiner, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return stdout
+}
+
 func (b *BashService) RunCommand(options *RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	if options == nil {
 		return nil, TracedErrorNil("options")
@@ -48,4 +66,37 @@ func (b *BashService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 	}
 
 	return commandOutput, nil
+}
+
+func (b *BashService) RunOneLiner(oneLiner string, verbose bool) (output *CommandOutput, err error) {
+	if oneLiner == "" {
+		return nil, TracedErrorEmptyString("oneLiner")
+	}
+
+	output, err = b.RunCommand(
+		&RunCommandOptions{
+			Command:            []string{oneLiner},
+			Verbose:            verbose,
+			LiveOutputOnStdout: verbose,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return output, nil
+}
+
+func (b *BashService) RunOneLinerAndGetStdoutAsString(oneLiner string, verbose bool) (stdout string, err error) {
+	output, err := b.RunOneLiner(oneLiner, verbose)
+	if err != nil {
+		return "", err
+	}
+
+	stdout, err = output.GetStdoutAsString()
+	if err != nil {
+		return "", err
+	}
+
+	return stdout, nil
 }
