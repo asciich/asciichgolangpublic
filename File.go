@@ -20,6 +20,8 @@ type File interface {
 	WriteBytes(toWrite []byte, verbose bool) (err error)
 
 	// All methods below this line can be implemented by embedding the `FileBase` struct:
+	GetSha256Sum() (sha256sum string, err error)
+	MustGetSha256Sum() (sha256sum string)
 	MustReadAsString() (content string)
 	MustWriteString(content string, verbose bool)
 	ReadAsString() (content string, err error)

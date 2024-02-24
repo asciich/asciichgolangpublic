@@ -143,3 +143,32 @@ func TestLocalFileReadAndWriteAsString(t *testing.T) {
 		)
 	}
 }
+
+func TestLocalFileGetSha256Sum(t *testing.T) {
+	tests := []struct {
+		input            string
+		expectedChecksum string
+	}{
+		{"", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+		{"hello world", "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				temporaryFile := TemporaryFiles().MustCreateFromString(tt.input, verbose)
+				defer temporaryFile.Delete(verbose)
+
+				assert.EqualValues(
+					tt.expectedChecksum,
+					temporaryFile.MustGetSha256Sum(),
+				)
+			},
+		)
+	}
+}

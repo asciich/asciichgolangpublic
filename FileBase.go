@@ -1,5 +1,9 @@
 package asciichgolangpublic
 
+import "errors"
+
+var ErrFileBaseParentNotSet = errors.New("parent is not set")
+
 // This is the base for `File` providing most convenience functions for file operations.
 type FileBase struct {
 	parentFileForBaseClass File
@@ -10,8 +14,26 @@ func NewFileBase() (f *FileBase) {
 }
 
 func (f *FileBase) GetParentFileForBaseClass() (parentFileForBaseClass File, err error) {
-
+	if f.parentFileForBaseClass == nil {
+		return nil, TracedErrorf("%w", ErrFileBaseParentNotSet)
+	}
 	return f.parentFileForBaseClass, nil
+}
+
+func (f *FileBase) GetSha256Sum() (sha256sum string, err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return "", err
+	}
+
+	content, err := parent.ReadAsString()
+	if err != nil {
+		return "", err
+	}
+
+	sha256sum = Checksums().GetSha256SumFromString(content)
+
+	return sha256sum, nil
 }
 
 func (f *FileBase) MustGetParentFileForBaseClass() (parentFileForBaseClass File) {
@@ -21,6 +43,15 @@ func (f *FileBase) MustGetParentFileForBaseClass() (parentFileForBaseClass File)
 	}
 
 	return parentFileForBaseClass
+}
+
+func (f *FileBase) MustGetSha256Sum() (sha256sum string) {
+	sha256sum, err := f.GetSha256Sum()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return sha256sum
 }
 
 func (f *FileBase) MustReadAsString() (content string) {

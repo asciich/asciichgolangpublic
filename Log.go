@@ -4,12 +4,78 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 var globalLogSettings LogSettings
+var globalLoggers []*log.Logger
+
+func EnableLoggingToUsersHome(applicationName string, verbose bool) (logFile File, err error) {
+	applicationName = strings.TrimSpace(applicationName)
+
+	if applicationName == "" {
+		return nil, TracedErrorEmptyString("applicationName")
+	}
+
+	homeDir, err := Users().GetHomeDirectory()
+	if err != nil {
+		return nil, err
+	}
+
+	logsDir, err := homeDir.GetSubDirectory("logs")
+	if err != nil {
+		return nil, err
+	}
+
+	err = logsDir.Create(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	applicationLogsDir, err := logsDir.GetSubDirectory(applicationName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = applicationLogsDir.Create(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	logFileName := Time().GetCurrentTimeAsSortableString() + ".log"
+
+	logFile, err = applicationLogsDir.GetFileInDirectory(logFileName)
+	if err != nil {
+		return nil, err
+	}
+
+	logFilePath, err := logFile.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
+	file, err := os.Create(logFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	loggerToAdd := log.New(file, "", log.LstdFlags|log.Lshortfile)
+
+	globalLoggers = append(globalLoggers, loggerToAdd)
+
+	if verbose {
+		LogInfof("All logs are now written to the log file '%s'.", logFilePath)
+	}
+
+	return logFile, nil
+}
 
 func Log(logmessage string) {
 	log.Println(logmessage)
+
+	for _, l := range globalLoggers {
+		l.Println(logmessage)
+	}
 }
 
 func LogBold(logmessage string) {
@@ -113,4 +179,13 @@ func LogWarn(logmessage string) {
 func LogWarnf(logmessage string, args ...interface{}) {
 	message := fmt.Sprintf(logmessage, args...)
 	LogWarn(message)
+}
+
+func MustEnableLoggingToUsersHome(applicationName string, verbose bool) (logFile File) {
+	logFile, err := EnableLoggingToUsersHome(applicationName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return logFile
 }
