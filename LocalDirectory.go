@@ -3,28 +3,30 @@ package asciichgolangpublic
 import (
 	"errors"
 	"os"
+	"path/filepath"
 )
 
 type LocalDirectory struct {
+	DirectoryBase
 	localPath string
 }
 
-func GetLocalDirectoryByPath(path string) (directory *LocalDirectory, err error) {
+func GetLocalDirectoryByPath(path string) (directory Directory, err error) {
 	if path == "" {
 		return nil, TracedErrorEmptyString("path")
 	}
 
-	directory = NewLocalDirectory()
+	localDirectory := NewLocalDirectory()
 
-	err = directory.SetLocalPath(path)
+	err = localDirectory.SetLocalPath(path)
 	if err != nil {
 		return nil, err
 	}
 
-	return directory, nil
+	return localDirectory, nil
 }
 
-func MustGetLocalDirectoryByPath(path string) (directory *LocalDirectory) {
+func MustGetLocalDirectoryByPath(path string) (directory Directory) {
 	directory, err := GetLocalDirectoryByPath(path)
 	if err != nil {
 		LogGoErrorFatal(err)
@@ -34,7 +36,12 @@ func MustGetLocalDirectoryByPath(path string) (directory *LocalDirectory) {
 }
 
 func NewLocalDirectory() (l *LocalDirectory) {
-	return new(LocalDirectory)
+	l = new(LocalDirectory)
+
+	// Allow usage of the base class functions:
+	l.MustSetParentDirectoryForBaseClass(l)
+
+	return l
 }
 
 func (l *LocalDirectory) Create(verbose bool) (err error) {
@@ -113,12 +120,58 @@ func (l *LocalDirectory) Exists() (exists bool, err error) {
 	return dirInfo.IsDir(), nil
 }
 
+func (l *LocalDirectory) GetFileInDirectory(path ...string) (file File, err error) {
+	if len(path) <= 0 {
+		return nil, TracedError("path has no elements")
+	}
+
+	dirPath, err := l.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
+	filePath := dirPath
+	for _, p := range path {
+		filePath = filepath.Join(filePath, p)
+	}
+
+	file, err = GetLocalFileByPath(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
+}
+
 func (l *LocalDirectory) GetLocalPath() (localPath string, err error) {
 	if l.localPath == "" {
 		return "", TracedErrorf("localPath not set")
 	}
 
 	return l.localPath, nil
+}
+
+func (l *LocalDirectory) GetSubDirectory(path ...string) (subDirectory Directory, err error) {
+	if len(path) <= 0 {
+		return nil, TracedError("path has no elements")
+	}
+
+	dirPath, err := l.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
+	directoryPath := dirPath
+	for _, p := range path {
+		directoryPath = filepath.Join(directoryPath, p)
+	}
+
+	subDirectory, err = GetLocalDirectoryByPath(directoryPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return subDirectory, nil
 }
 
 func (l *LocalDirectory) MustCreate(verbose bool) {
@@ -144,6 +197,15 @@ func (l *LocalDirectory) MustExists() (exists bool) {
 	return exists
 }
 
+func (l *LocalDirectory) MustGetFileInDirectory(path ...string) (file File) {
+	file, err := l.GetFileInDirectory(path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return file
+}
+
 func (l *LocalDirectory) MustGetLocalPath() (localPath string) {
 	localPath, err := l.GetLocalPath()
 	if err != nil {
@@ -151,6 +213,15 @@ func (l *LocalDirectory) MustGetLocalPath() (localPath string) {
 	}
 
 	return localPath
+}
+
+func (l *LocalDirectory) MustGetSubDirectory(path ...string) (subDirectory Directory) {
+	subDirectory, err := l.GetSubDirectory(path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return subDirectory
 }
 
 func (l *LocalDirectory) MustSetLocalPath(localPath string) {
