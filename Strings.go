@@ -41,6 +41,13 @@ func (s *StringsService) ContainsCommentOnly(input string) (containsCommentOnly 
 	return withoutComment == ""
 }
 
+func (s *StringsService) ContainsIgnoreCase(input string, substring string) (contains bool) {
+	return strings.Contains(
+		strings.ToLower(input),
+		strings.ToLower(substring),
+	)
+}
+
 func (s *StringsService) CountLines(input string) (nLines int) {
 	if len(input) <= 0 {
 		return 0

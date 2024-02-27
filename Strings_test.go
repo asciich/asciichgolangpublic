@@ -451,3 +451,114 @@ func TestStringsTrimSpacesLeft(t *testing.T) {
 		)
 	}
 }
+
+func TestStringsContainsAtLeastOneSubstring(t *testing.T) {
+	tests := []struct {
+		input            string
+		subsrings        []string
+		expectedContains bool
+	}{
+		{"", []string{}, false},
+		{"a", []string{"a"}, true},
+		{"a", []string{"a", "b"}, true},
+		{"a", []string{"z", "a", "b"}, true},
+		{"A", []string{"a"}, false},
+		{"A", []string{"a", "b"}, false},
+		{"A", []string{"z", "a", "b"}, false},
+		{"ABC", []string{"a"}, false},
+		{"ABC", []string{"a", "b"}, false},
+		{"ABC", []string{"z", "a", "b"}, false},
+		{"aBC", []string{"a"}, true},
+		{"aBC", []string{"a", "b"}, true},
+		{"aBC", []string{"z", "a", "b"}, true},
+		{"iJc", []string{"a"}, false},
+		{"iJc", []string{"a", "b"}, false},
+		{"iJc", []string{"z", "a", "b"}, false},
+		{"IJC", []string{"a"}, false},
+		{"IJC", []string{"a", "b"}, false},
+		{"IJC", []string{"z", "a", "b"}, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(
+					tt.expectedContains,
+					Strings().ContainsAtLeastOneSubstring(tt.input, tt.subsrings),
+				)
+			},
+		)
+	}
+}
+
+func TestContainsAtLeastOneSubstringIngoreCase(t *testing.T) {
+	tests := []struct {
+		input            string
+		subsrings        []string
+		expectedContains bool
+	}{
+		{"", []string{}, false},
+		{"a", []string{"a"}, true},
+		{"a", []string{"a", "b"}, true},
+		{"a", []string{"z", "a", "b"}, true},
+		{"A", []string{"a"}, true},
+		{"A", []string{"a", "b"}, true},
+		{"A", []string{"z", "a", "b"}, true},
+		{"ABC", []string{"a"}, true},
+		{"ABC", []string{"a", "b"}, true},
+		{"ABC", []string{"z", "a", "b"}, true},
+		{"aBC", []string{"a"}, true},
+		{"aBC", []string{"a", "b"}, true},
+		{"aBC", []string{"z", "a", "b"}, true},
+		{"iJc", []string{"a"}, false},
+		{"iJc", []string{"a", "b"}, false},
+		{"iJc", []string{"z", "a", "b"}, false},
+		{"IJC", []string{"a"}, false},
+		{"IJC", []string{"a", "b"}, false},
+		{"IJC", []string{"z", "a", "b"}, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(
+					tt.expectedContains,
+					Strings().ContainsAtLeastOneSubstringIgnoreCase(tt.input, tt.subsrings),
+				)
+			},
+		)
+	}
+}
+
+func TestStringsContainsIgnoreCase(t *testing.T) {
+	tests := []struct {
+		input            string
+		subsring         string
+		expectedContains bool
+	}{
+		{"hello WORLD", "hallo", false},
+		{"hello WORLD", "HALLO", false},
+		{"hello WORLD", "hello", true},
+		{"hello WORLD", "HELLO", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(
+					tt.expectedContains,
+					Strings().ContainsIgnoreCase(tt.input, tt.subsring),
+				)
+			},
+		)
+	}
+}
