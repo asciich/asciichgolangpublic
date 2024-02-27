@@ -89,6 +89,35 @@ func (l *LocalFile) Delete(verbose bool) (err error) {
 	return nil
 }
 
+func (l *LocalFile) Create(verbose bool) (err error) {
+	exists, err := l.Exists()
+	if err != nil {
+		return err
+	}
+
+	path, err := l.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		if verbose {
+			LogInfof("Local file '%s' already exists", path)
+		}
+	} else {
+		err = l.WriteString("", false)
+		if err != nil {
+			return err
+		}
+
+		if verbose {
+			LogInfof("Local file '%s' created", path)
+		}
+	}
+
+	return nil
+}
+
 func (l *LocalFile) Exists() (exists bool, err error) {
 	localPath, err := l.GetLocalPath()
 	if err != nil {
@@ -136,6 +165,13 @@ func (l *LocalFile) GetUriAsString() (uri string, err error) {
 
 func (l *LocalFile) IsPathSet() (isSet bool) {
 	return false
+}
+
+func (l *LocalFile) MustCreate(verbose bool) {
+	err := l.Create(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (l *LocalFile) MustDelete(verbose bool) {

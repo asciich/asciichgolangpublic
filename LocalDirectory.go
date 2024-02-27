@@ -73,6 +73,21 @@ func (l *LocalDirectory) Create(verbose bool) (err error) {
 	return nil
 }
 
+func (l *LocalDirectory) CreateFileInDirectory(path ...string) (createdFile File, err error) {
+	createdFile, err = l.GetFileInDirectory(path...)
+	if err != nil {
+		return nil, err
+	}
+
+	const verbose = false
+	err = createdFile.Create(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdFile, nil
+}
+
 func (l *LocalDirectory) Delete(verbose bool) (err error) {
 	exists, err := l.Exists()
 	if err != nil {
@@ -179,6 +194,15 @@ func (l *LocalDirectory) MustCreate(verbose bool) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (l *LocalDirectory) MustCreateFileInDirectory(path ...string) (createdFile File) {
+	createdFile, err := l.CreateFileInDirectory(path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdFile
 }
 
 func (l *LocalDirectory) MustDelete(verbose bool) {
