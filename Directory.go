@@ -7,6 +7,7 @@ type Directory interface {
 	GetFileInDirectory(pathToFile ...string) (file File, err error)
 	GetLocalPath() (localPath string, err error)
 	GetSubDirectory(path ...string) (subDirectory Directory, err error)
+	IsLocalDirectory() (isLocalDirectory bool)
 	MustCreate(verbose bool)
 	MustDelete(verbose bool)
 	MustExists() (exists bool)

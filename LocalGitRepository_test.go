@@ -25,7 +25,7 @@ func TestLocalGitRepositoryInit(t *testing.T) {
 				emptyDir := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
 				defer emptyDir.MustDelete(verbose)
 
-				repo := MustGetLocalGitRepositoryByPath(emptyDir.MustGetLocalPath())
+				repo := MustGetLocalGitReposioryFromDirectory(emptyDir)
 
 				assert.False(repo.MustIsInitialized())
 
@@ -54,7 +54,11 @@ func TestLocalGitRepositoryHasUncommitedChanges(t *testing.T) {
 
 				const verbose bool = true
 
-				repo := GitRepositories().MustCreateTemporaryInitializedRepository(verbose)
+				repo := GitRepositories().MustCreateTemporaryInitializedRepository(
+					&CreateRepositoryOptions{
+						Verbose: verbose,
+					},
+				)
 				defer repo.MustDelete(verbose)
 
 				assert.False(repo.MustHasUncommittedChanges())
@@ -69,7 +73,6 @@ func TestLocalGitRepositoryHasUncommitedChanges(t *testing.T) {
 }
 
 func TestLocalGitRepositoryPullAndPush(t *testing.T) {
-
 	tests := []struct {
 		testcase string
 	}{
@@ -84,7 +87,12 @@ func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 
 				const verbose bool = true
 
-				upstreamRepo := GitRepositories().MustCreateTemporaryInitializedRepository(verbose)
+				upstreamRepo := GitRepositories().MustCreateTemporaryInitializedRepository(
+					&CreateRepositoryOptions{
+						Verbose:        verbose,
+						BareRepository: true,
+					},
+				)
 				defer upstreamRepo.MustDelete(verbose)
 				upstreamRepo.MustSetGitConfig(
 					&GitConfigSetOptions{

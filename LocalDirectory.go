@@ -11,7 +11,7 @@ type LocalDirectory struct {
 	localPath string
 }
 
-func GetLocalDirectoryByPath(path string) (directory Directory, err error) {
+func GetLocalDirectoryByPath(path string) (l *LocalDirectory, err error) {
 	if path == "" {
 		return nil, TracedErrorEmptyString("path")
 	}
@@ -26,13 +26,13 @@ func GetLocalDirectoryByPath(path string) (directory Directory, err error) {
 	return localDirectory, nil
 }
 
-func MustGetLocalDirectoryByPath(path string) (directory Directory) {
-	directory, err := GetLocalDirectoryByPath(path)
+func MustGetLocalDirectoryByPath(path string) (l *LocalDirectory) {
+	l, err := GetLocalDirectoryByPath(path)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
 
-	return directory
+	return l
 }
 
 func NewLocalDirectory() (l *LocalDirectory) {
@@ -187,6 +187,10 @@ func (l *LocalDirectory) GetSubDirectory(path ...string) (subDirectory Directory
 	}
 
 	return subDirectory, nil
+}
+
+func (l *LocalDirectory) IsLocalDirectory() (isLocalDirectory bool) {
+	return true
 }
 
 func (l *LocalDirectory) MustCreate(verbose bool) {
