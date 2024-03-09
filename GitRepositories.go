@@ -72,8 +72,12 @@ func (g *GitRepositoriesService) CloneToTemporaryDirectory(urlOrPath string, ver
 	return repo, nil
 }
 
-func (g *GitRepositoriesService) CreateTemporaryInitializedRepository(verbose bool) (repo *LocalGitRepository, err error) {
-	repoPath, err := TemporaryDirectories().CreateEmptyTemporaryDirectoryAndGetPath(verbose)
+func (g *GitRepositoriesService) CreateTemporaryInitializedRepository(options *CreateRepositoryOptions) (repo *LocalGitRepository, err error) {
+	if options == nil {
+		return nil, TracedErrorNil("options")
+	}
+
+	repoPath, err := TemporaryDirectories().CreateEmptyTemporaryDirectoryAndGetPath(options.Verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +87,7 @@ func (g *GitRepositoriesService) CreateTemporaryInitializedRepository(verbose bo
 		return nil, err
 	}
 
-	err = repo.Init(verbose)
+	err = repo.Init(options.Verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -109,8 +113,8 @@ func (g *GitRepositoriesService) MustCloneToTemporaryDirectory(urlOrPath string,
 	return repo
 }
 
-func (g *GitRepositoriesService) MustCreateTemporaryInitializedRepository(verbose bool) (repo *LocalGitRepository) {
-	repo, err := g.CreateTemporaryInitializedRepository(verbose)
+func (g *GitRepositoriesService) MustCreateTemporaryInitializedRepository(options *CreateRepositoryOptions) (repo *LocalGitRepository) {
+	repo, err := g.CreateTemporaryInitializedRepository(options)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

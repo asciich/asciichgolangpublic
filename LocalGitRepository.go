@@ -12,6 +12,28 @@ type LocalGitRepository struct {
 	LocalDirectory
 }
 
+func GetLocalGitReposioryFromDirectory(directory Directory) (l *LocalGitRepository, err error) {
+	if directory == nil {
+		return nil, TracedErrorNil("directory")
+	}
+
+	if !directory.IsLocalDirectory() {
+		return nil, TracedError("Only local directories are supported.")
+	}
+
+	localPath, err := directory.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
+	l, err = GetLocalGitRepositoryByPath(localPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return l, nil
+}
+
 func GetLocalGitRepositoryByPath(path string) (l *LocalGitRepository, err error) {
 	if path == "" {
 		return nil, TracedErrorEmptyString("path")
@@ -25,6 +47,15 @@ func GetLocalGitRepositoryByPath(path string) (l *LocalGitRepository, err error)
 	}
 
 	return l, nil
+}
+
+func MustGetLocalGitReposioryFromDirectory(directory Directory) (l *LocalGitRepository) {
+	l, err := GetLocalGitReposioryFromDirectory(directory)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return l
 }
 
 func MustGetLocalGitRepositoryByPath(path string) (l *LocalGitRepository) {
