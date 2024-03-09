@@ -2,3 +2,4 @@
 asciich_root_ca.crt
 # VSCode related files
 .vscode/
+__debug_*
