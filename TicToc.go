@@ -136,7 +136,7 @@ func (t *TicToc) Start(verbose bool) {
 	title := t.GetTitleOrDefaultIfUnset()
 
 	if verbose {
-		LogInfof("%s: started", title)
+		LogInfof("TicToc timer '%s': started", title)
 	}
 }
 
@@ -157,7 +157,7 @@ func (t *TicToc) Toc(verbose bool) (elapsedTime *time.Duration, err error) {
 			return nil, err
 		}
 
-		LogInfof("%s: elapsed duration: %s", title, elapsedDurationString)
+		LogInfof("TicToc timer '%s': elapsed duration: %s", title, elapsedDurationString)
 	}
 
 	return elapsedDuration, nil
