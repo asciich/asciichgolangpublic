@@ -204,7 +204,7 @@ func (o *CommandOutput) GetReturnCode() (returnCode int, err error) {
 		return -1, TracedError("returnCode not set")
 	}
 
-	return returnCode, nil
+	return *o.returnCode, nil
 }
 
 func (o *CommandOutput) GetStderrAsString() (stderr string, err error) {
