@@ -147,7 +147,8 @@ func TestBashRunCommandExitCode(t *testing.T) {
 	tests := []TestCase{}
 	for i := 0; i < 128; i++ {
 		tests = append(tests, TestCase{
-			command: []string{"bash", "-c", fmt.Sprintf("exit %v", i)},
+			command:          []string{"bash", "-c", fmt.Sprintf("exit %v", i)},
+			expectedExitCode: i,
 		})
 	}
 
