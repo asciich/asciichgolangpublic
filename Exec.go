@@ -133,10 +133,19 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 		return nil, err
 	}
 
+	returnCode, err := commandOutput.GetReturnCode()
+	if err != nil {
+		return nil, err
+	}
+
 	if !commandOutput.IsExitSuccess() {
 		if options.AllowAllExitCodes {
 			if options.Verbose {
-				LogInfof("Command '%v' has exit code != 0 but all exit codes are allowed by runOptions.AllowAllExitCodes.", commandJoined)
+				LogInfof(
+					"Command '%v' has exit code '%d' != 0 but all exit codes are allowed by runOptions.AllowAllExitCodes.",
+					commandJoined,
+					returnCode,
+				)
 			}
 		} else {
 			errorMessage := fmt.Sprintf(
