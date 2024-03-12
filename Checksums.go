@@ -16,11 +16,15 @@ func NewChecksumsService() (c *ChecksumsService) {
 	return new(ChecksumsService)
 }
 
-func (c *ChecksumsService) GetSha256SumFromString(stringToHash string) (checksum string) {
+func (c *ChecksumsService) GetSha256SumFromBytes(bytesToHash []byte) (checksum string) {
 	// Source: https://gobyexample.com/sha256-hashes
 	h := sha256.New()
-	h.Write([]byte(stringToHash))
+	h.Write(bytesToHash)
 	checksumBytes := h.Sum(nil)
 	checksum = fmt.Sprintf("%x", checksumBytes)
 	return checksum
+}
+
+func (c *ChecksumsService) GetSha256SumFromString(stringToHash string) (checksum string) {
+	return c.GetSha256SumFromBytes([]byte(stringToHash))
 }
