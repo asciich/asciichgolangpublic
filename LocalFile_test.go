@@ -144,6 +144,32 @@ func TestLocalFileReadAndWriteAsString(t *testing.T) {
 	}
 }
 
+func TestLocalFileGetBaseName(t *testing.T) {
+	tests := []struct {
+		path             string
+		expectedBaseName string
+	}{
+		{"hello", "hello"},
+		{"this/hello", "hello"},
+		{"/this/hello", "hello"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = false
+
+				var file File = MustGetLocalFileByPath(tt.path)
+
+				assert.EqualValues(tt.expectedBaseName, file.MustGetBaseName())
+			},
+		)
+	}
+}
+
 func TestLocalFileGetSha256Sum(t *testing.T) {
 	tests := []struct {
 		input            string
