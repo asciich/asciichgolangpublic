@@ -198,3 +198,35 @@ func TestLocalFileGetSha256Sum(t *testing.T) {
 		)
 	}
 }
+
+func TestLocalFileIsMatchingSha256Sum(t *testing.T) {
+	tests := []struct {
+		input              string
+		sha256sum          string
+		expectedIsMatching bool
+	}{
+		{"", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", true},
+		{"hello world", "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9", true},
+		{"", "aaaaaae3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", false},
+		{"hello world", "aaaaaab94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				temporaryFile := TemporaryFiles().MustCreateFromString(tt.input, verbose)
+				defer temporaryFile.Delete(verbose)
+
+				assert.EqualValues(
+					tt.expectedIsMatching,
+					temporaryFile.MustIsMatchingSha256Sum(tt.sha256sum),
+				)
+			},
+		)
+	}
+}

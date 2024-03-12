@@ -36,6 +36,16 @@ func (f *FileBase) GetSha256Sum() (sha256sum string, err error) {
 	return sha256sum, nil
 }
 
+func (f *FileBase) IsMatchingSha256Sum(sha256sum string) (isMatching bool, err error) {
+	currentSum, err := f.GetSha256Sum()
+	if err != nil {
+		return false, err
+	}
+
+	isMatching = currentSum == sha256sum
+	return isMatching, nil
+}
+
 func (f *FileBase) MustGetParentFileForBaseClass() (parentFileForBaseClass File) {
 	parentFileForBaseClass, err := f.GetParentFileForBaseClass()
 	if err != nil {
@@ -52,6 +62,15 @@ func (f *FileBase) MustGetSha256Sum() (sha256sum string) {
 	}
 
 	return sha256sum
+}
+
+func (f *FileBase) MustIsMatchingSha256Sum(sha256sum string) (isMatching bool) {
+	isMatching, err := f.IsMatchingSha256Sum(sha256sum)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isMatching
 }
 
 func (f *FileBase) MustReadAsString() (content string) {
