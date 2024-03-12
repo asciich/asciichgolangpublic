@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 // A LocalFile represents a locally available file.
@@ -136,6 +137,24 @@ func (l *LocalFile) Exists() (exists bool, err error) {
 	return !fileInfo.IsDir(), err
 }
 
+func (l *LocalFile) GetBaseName() (baseName string, err error) {
+	path, err := l.GetLocalPath()
+	if err != nil {
+		return "", err
+	}
+
+	baseName = filepath.Base(path)
+
+	if baseName == "" {
+		return "", TracedErrorf(
+			"Base name is empty string after evaluation of path='%s'",
+			path,
+		)
+	}
+
+	return baseName, nil
+}
+
 func (l *LocalFile) GetLocalPath() (path string, err error) {
 	return l.GetPath()
 }
@@ -188,6 +207,15 @@ func (l *LocalFile) MustExists() (exists bool) {
 	}
 
 	return exists
+}
+
+func (l *LocalFile) MustGetBaseName() (baseName string) {
+	baseName, err := l.GetBaseName()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return baseName
 }
 
 func (l *LocalFile) MustGetLocalPath() (path string) {
