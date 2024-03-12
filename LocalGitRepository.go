@@ -131,6 +131,24 @@ func (l *LocalGitRepository) Commit(commitOptions *GitCommitOptions) (createdCom
 	return createdCommit, nil
 }
 
+func (l *LocalGitRepository) CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
+	if commitOptions == nil {
+		return nil, TracedErrorNil("commitOptions")
+	}
+
+	createdCommit, err = l.Commit(commitOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	err = l.Push(commitOptions.Verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdCommit, nil
+}
+
 func (l *LocalGitRepository) GetAsGoGitRepository() (goGitRepository *git.Repository, err error) {
 	repoPath, err := l.GetLocalPath()
 	if err != nil {
@@ -295,7 +313,11 @@ func (l *LocalGitRepository) HasUncommittedChanges() (hasUncommittedChanges bool
 	return true, nil
 }
 
-func (l *LocalGitRepository) Init(verbose bool) (err error) {
+func (l *LocalGitRepository) Init(options *CreateRepositoryOptions) (err error) {
+	if options == nil {
+		return TracedErrorNil("options")
+	}
+
 	repoPath, err := l.GetLocalPath()
 	if err != nil {
 		return err
@@ -307,21 +329,81 @@ func (l *LocalGitRepository) Init(verbose bool) (err error) {
 	}
 
 	if isInitialized {
-		if verbose {
+		if options.Verbose {
 			LogInfof("Local git repository '%s' is already initialized.", repoPath)
 		}
 	} else {
-		const isBare = false
-		_, err = git.PlainInit(repoPath, isBare)
+		_, err = git.PlainInit(repoPath, options.BareRepository)
 		if err != nil {
 			return TracedErrorf("%w", err)
 		}
-		if verbose {
+		if options.Verbose {
 			LogChangedf("Local git repository '%s' is initialized.", repoPath)
+		}
+
+		if options.InitializeWithEmptyCommit {
+			temporaryRepository, err := GitRepositories().CloneGitRepositoryToTemporaryDirectory(
+				l,
+				options.Verbose,
+			)
+			if err != nil {
+				return err
+			}
+			defer temporaryRepository.Delete(options.Verbose)
+
+			err = temporaryRepository.SetGitConfig(
+				&GitConfigSetOptions{
+					Name:    "asciichgolangpublic git repo initilaizer",
+					Email:   "asciichgolangpublic@example.net",
+					Verbose: options.Verbose,
+				},
+			)
+			if err != nil {
+				return err
+			}
+
+			_, err = temporaryRepository.CommitAndPush(
+				&GitCommitOptions{
+					Message:    "Initial empty commit during repo initialization",
+					AllowEmpty: true,
+					Verbose:    true,
+				},
+			)
+			if err != nil {
+				return err
+			}
+
+			if options.Verbose {
+				LogChangedf("Initialized repository '%s' with an empty commit.", repoPath)
+			}
 		}
 	}
 
 	return nil
+}
+
+func (l *LocalGitRepository) IsBareRepository(verbose bool) (isBareRepository bool, err error) {
+	config, err := l.GetGoGitConfig()
+	if err != nil {
+		return false, err
+	}
+
+	isBareRepository = config.Core.IsBare
+
+	if verbose {
+		repoRoot, err := l.GetLocalPath()
+		if err != nil {
+			return false, err
+		}
+
+		if isBareRepository {
+			LogInfof("Git repository '%s' is a bare repository.", repoRoot)
+		} else {
+			LogInfof("Git repository '%s' is not a bare repository.", repoRoot)
+		}
+	}
+
+	return isBareRepository, nil
 }
 
 func (l *LocalGitRepository) IsInitialized() (isInitialized bool, err error) {
@@ -345,6 +427,15 @@ func (l *LocalGitRepository) MustAdd(path string) {
 
 func (l *LocalGitRepository) MustCommit(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
 	createdCommit, err := l.Commit(commitOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdCommit
+}
+
+func (l *LocalGitRepository) MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
+	createdCommit, err := l.CommitAndPush(commitOptions)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -442,11 +533,20 @@ func (l *LocalGitRepository) MustHasUncommittedChanges() (hasUncommittedChanges 
 	return hasUncommittedChanges
 }
 
-func (l *LocalGitRepository) MustInit(verbose bool) {
-	err := l.Init(verbose)
+func (l *LocalGitRepository) MustInit(options *CreateRepositoryOptions) {
+	err := l.Init(options)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (l *LocalGitRepository) MustIsBareRepository(verbose bool) (isBareRepository bool) {
+	isBareRepository, err := l.IsBareRepository(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isBareRepository
 }
 
 func (l *LocalGitRepository) MustIsInitialized() (isInitialized bool) {
@@ -484,6 +584,15 @@ func (l *LocalGitRepository) MustSetGitConfigByGoGitConfig(config *config.Config
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (l *LocalGitRepository) MustSetRemote(remoteName string, remotUrl string, verbose bool) (remote *LocalGitRemote) {
+	remote, err := l.SetRemote(remoteName, remotUrl, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return remote
 }
 
 func (l *LocalGitRepository) Pull(verbose bool) (err error) {
@@ -601,4 +710,34 @@ func (l *LocalGitRepository) SetGitConfigByGoGitConfig(config *config.Config, ve
 	}
 
 	return nil
+}
+
+func (l *LocalGitRepository) SetRemote(remoteName string, remotUrl string, verbose bool) (remote *LocalGitRemote, err error) {
+	if remoteName == "" {
+		return nil, TracedErrorEmptyString("remoteName")
+	}
+
+	if remotUrl == "" {
+		return nil, TracedErrorEmptyString("remotUrl")
+	}
+
+	goGitRepo, err := l.GetAsGoGitRepository()
+	if err != nil {
+		return nil, err
+	}
+
+	nativeRemote, err := goGitRepo.CreateRemote(&config.RemoteConfig{
+		Name: remoteName,
+		URLs: []string{remotUrl},
+	})
+	if err != nil {
+		return nil, TracedErrorf("Create remote failed: '%w'", err)
+	}
+
+	remote, err = NewLocalGitRemoteByNativeGoGitRemote(nativeRemote)
+	if err != nil {
+		return nil, err
+	}
+
+	return remote, err
 }
