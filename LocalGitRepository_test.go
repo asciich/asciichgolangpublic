@@ -30,7 +30,7 @@ func TestLocalGitRepositoryInit(t *testing.T) {
 				assert.False(repo.MustIsInitialized())
 
 				for i := 0; i < 3; i++ {
-					repo.MustInit(verbose)
+					repo.MustInit(&CreateRepositoryOptions{Verbose: verbose})
 					assert.True(repo.MustIsInitialized())
 				}
 			},
@@ -39,7 +39,6 @@ func TestLocalGitRepositoryInit(t *testing.T) {
 }
 
 func TestLocalGitRepositoryHasUncommitedChanges(t *testing.T) {
-
 	tests := []struct {
 		testcase string
 	}{
@@ -72,6 +71,45 @@ func TestLocalGitRepositoryHasUncommitedChanges(t *testing.T) {
 	}
 }
 
+func TestLocalGitRepositoryIsBareRepository(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				repo := GitRepositories().MustCreateTemporaryInitializedRepository(
+					&CreateRepositoryOptions{
+						Verbose:        verbose,
+						BareRepository: false,
+					},
+				)
+				defer repo.MustDelete(verbose)
+
+				assert.False(repo.MustIsBareRepository(verbose))
+
+				repo_bare := GitRepositories().MustCreateTemporaryInitializedRepository(
+					&CreateRepositoryOptions{
+						Verbose:        verbose,
+						BareRepository: true,
+					},
+				)
+				defer repo.MustDelete(verbose)
+
+				assert.True(repo_bare.MustIsBareRepository(verbose))
+			},
+		)
+	}
+}
+
 func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 	tests := []struct {
 		testcase string
@@ -89,29 +127,25 @@ func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 
 				upstreamRepo := GitRepositories().MustCreateTemporaryInitializedRepository(
 					&CreateRepositoryOptions{
-						Verbose:        verbose,
-						BareRepository: true,
+						Verbose:                   verbose,
+						BareRepository:            true,
+						InitializeWithEmptyCommit: true,
 					},
 				)
 				defer upstreamRepo.MustDelete(verbose)
-				upstreamRepo.MustSetGitConfig(
+
+				clonedRepo := GitRepositories().MustCloneToTemporaryDirectory(upstreamRepo.MustGetLocalPath(), verbose)
+				defer clonedRepo.MustDelete(verbose)
+				clonedRepo.MustSetGitConfig(
 					&GitConfigSetOptions{
 						Name:  "Test User",
 						Email: "user@example.com",
 					},
 				)
 
-				upstreamRepo.MustCommit(
-					&GitCommitOptions{
-						Message:    "inital commit",
-						AllowEmpty: true,
-						Verbose:    verbose,
-					},
-				)
-
-				clonedRepo := GitRepositories().MustCloneToTemporaryDirectory(upstreamRepo.MustGetLocalPath(), verbose)
-				defer clonedRepo.MustDelete(verbose)
-				clonedRepo.MustSetGitConfig(
+				clonedRepo2 := GitRepositories().MustCloneToTemporaryDirectory(upstreamRepo.MustGetLocalPath(), verbose)
+				defer clonedRepo2.MustDelete(verbose)
+				clonedRepo2.MustSetGitConfig(
 					&GitConfigSetOptions{
 						Name:  "Test User2",
 						Email: "user2@example.com",
@@ -122,11 +156,15 @@ func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 					upstreamRepo.MustGetCurrentCommitHash(),
 					clonedRepo.MustGetCurrentCommitHash(),
 				)
+				assert.EqualValues(
+					upstreamRepo.MustGetCurrentCommitHash(),
+					clonedRepo2.MustGetCurrentCommitHash(),
+				)
 
 				fileName := "abc.txt"
-				upstreamRepo.MustCreateFileInDirectory(fileName)
-				upstreamRepo.MustAdd(fileName)
-				upstreamRepo.MustCommit(
+				clonedRepo2.MustCreateFileInDirectory(fileName)
+				clonedRepo2.MustAdd(fileName)
+				clonedRepo2.MustCommit(
 					&GitCommitOptions{
 						Message: "another commit",
 						Verbose: verbose,
@@ -135,26 +173,30 @@ func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 
 				assert.NotEqualValues(
 					upstreamRepo.MustGetCurrentCommitHash(),
+					clonedRepo2.MustGetCurrentCommitHash(),
+				)
+
+				assert.NotEqualValues(
+					clonedRepo.MustGetCurrentCommitHash(),
+					clonedRepo2.MustGetCurrentCommitHash(),
+				)
+
+				clonedRepo2.MustPush(verbose)
+				assert.EqualValues(
+					upstreamRepo.MustGetCurrentCommitHash(),
+					clonedRepo2.MustGetCurrentCommitHash(),
+				)
+				assert.NotEqualValues(
+					upstreamRepo.MustGetCurrentCommitHash(),
 					clonedRepo.MustGetCurrentCommitHash(),
 				)
 
 				clonedRepo.MustPull(verbose)
 				assert.EqualValues(
 					upstreamRepo.MustGetCurrentCommitHash(),
-					clonedRepo.MustGetCurrentCommitHash(),
+					clonedRepo2.MustGetCurrentCommitHash(),
 				)
-
-				fileName2 := "abc2.txt"
-				clonedRepo.MustCreateFileInDirectory(fileName2)
-				clonedRepo.MustAdd(fileName2)
-				clonedRepo.MustCommit(
-					&GitCommitOptions{
-						Message: "another commit2",
-						Verbose: verbose,
-					},
-				)
-
-				assert.NotEqualValues(
+				assert.EqualValues(
 					upstreamRepo.MustGetCurrentCommitHash(),
 					clonedRepo.MustGetCurrentCommitHash(),
 				)
