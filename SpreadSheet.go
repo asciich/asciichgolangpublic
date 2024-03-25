@@ -419,6 +419,13 @@ func (s *SpreadSheet) MustRenderTitleRowAsString(options *SpreadSheetRenderRowOp
 	return rendered
 }
 
+func (s *SpreadSheet) MustRenderToStdout(options *SpreadSheetRenderOptions) {
+	err := s.RenderToStdout(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (s *SpreadSheet) MustSetColumnTitles(titles []string) {
 	err := s.SetColumnTitles(titles)
 	if err != nil {
@@ -525,7 +532,7 @@ func (s *SpreadSheet) RemoveColumnByName(columnName string) (err error) {
 
 func (s *SpreadSheet) RenderAsString(options *SpreadSheetRenderOptions) (rendered string, err error) {
 	if options == nil {
-		return "", TracedError("options is nil")
+		return "", TracedErrorNil("options")
 	}
 
 	var minColumnWidths []int = nil
@@ -584,6 +591,23 @@ func (s *SpreadSheet) RenderTitleRowAsString(options *SpreadSheetRenderRowOption
 	}
 
 	return rendered, nil
+}
+
+func (s *SpreadSheet) RenderToStdout(options *SpreadSheetRenderOptions) (err error) {
+	if options == nil {
+		return TracedErrorNil("options")
+	}
+
+	rendered, err := s.RenderAsString(options)
+	if err != nil {
+		return err
+	}
+
+	rendered = Strings().EnsureEndsWithLineBreak(rendered)
+
+	fmt.Print(rendered)
+
+	return nil
 }
 
 func (s *SpreadSheet) SetColumnTitles(titles []string) (err error) {
