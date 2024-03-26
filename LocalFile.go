@@ -159,6 +159,22 @@ func (l *LocalFile) GetLocalPath() (path string, err error) {
 	return l.GetPath()
 }
 
+func (l *LocalFile) GetParentDirectory() (parentDirectory Directory, err error) {
+	localPath, err := l.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
+	localDirPath := filepath.Dir(localPath)
+
+	parentDirectory, err = GetLocalDirectoryByPath(localDirPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return parentDirectory, nil
+}
+
 func (l *LocalFile) GetPath() (path string, err error) {
 	if l.path == "" {
 		return "", fmt.Errorf("path not set")
@@ -225,6 +241,15 @@ func (l *LocalFile) MustGetLocalPath() (path string) {
 	}
 
 	return path
+}
+
+func (l *LocalFile) MustGetParentDirectory() (parentDirectory Directory) {
+	parentDirectory, err := l.GetParentDirectory()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return parentDirectory
 }
 
 func (l *LocalFile) MustGetPath() (path string) {

@@ -8,6 +8,39 @@ func NewDirectoryBase() (d *DirectoryBase) {
 	return new(DirectoryBase)
 }
 
+func (d *DirectoryBase) CreateFileInDirectoryByString(content string, verbose bool, pathToCreate ...string) (createdFile File, err error) {
+	if len(pathToCreate) <= 0 {
+		return nil, TracedErrorf("Invalid pathToCreate='%v'", pathToCreate)
+	}
+
+	parent, err := d.GetParentDirectoryForBaseClass()
+	if err != nil {
+		return nil, nil
+	}
+
+	createdFile, err = parent.GetFileInDirectory(pathToCreate...)
+	if err != nil {
+		return nil, err
+	}
+
+	parentDir, err := createdFile.GetParentDirectory()
+	if err != nil {
+		return nil, err
+	}
+
+	err = parentDir.Create(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	err = createdFile.WriteString(content, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdFile, nil
+}
+
 func (d *DirectoryBase) GetFilePathInDirectory(path ...string) (filePath string, err error) {
 	if len(path) <= 0 {
 		return "", TracedError("path has no elements")
@@ -36,6 +69,15 @@ func (d *DirectoryBase) GetParentDirectoryForBaseClass() (parentDirectoryForBase
 		return nil, TracedError("parentDirectoryForBaseClass not set")
 	}
 	return d.parentDirectoryForBaseClass, nil
+}
+
+func (d *DirectoryBase) MustCreateFileInDirectoryByString(content string, verbose bool, pathToCreate ...string) (createdFile File) {
+	createdFile, err := d.CreateFileInDirectoryByString(content, verbose, pathToCreate...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdFile
 }
 
 func (d *DirectoryBase) MustGetFilePathInDirectory(path ...string) (filePath string) {

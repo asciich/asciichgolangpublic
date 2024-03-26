@@ -13,18 +13,18 @@ func TemporaryDirectories() (TemporaryDirectorys *TemporaryDirectoriesService) {
 	return new(TemporaryDirectoriesService)
 }
 
-func (t *TemporaryDirectoriesService) CreateEmptyTemporaryDirectory(verbose bool) (TemporaryDirectory Directory, err error) {
+func (t *TemporaryDirectoriesService) CreateEmptyTemporaryDirectory(verbose bool) (temporaryDirectory *LocalDirectory, err error) {
 	dirPath, err := os.MkdirTemp("", "empty")
 	if err != nil {
 		return nil, err
 	}
 
-	TemporaryDirectory, err = GetLocalDirectoryByPath(dirPath)
+	temporaryDirectory, err = GetLocalDirectoryByPath(dirPath)
 	if err != nil {
 		return nil, err
 	}
 
-	return TemporaryDirectory, nil
+	return temporaryDirectory, nil
 }
 
 func (t *TemporaryDirectoriesService) CreateEmptyTemporaryDirectoryAndGetPath(verbose bool) (TemporaryDirectoryPath string, err error) {
@@ -41,12 +41,12 @@ func (t *TemporaryDirectoriesService) CreateEmptyTemporaryDirectoryAndGetPath(ve
 	return TemporaryDirectoryPath, nil
 }
 
-func (t *TemporaryDirectoriesService) MustCreateEmptyTemporaryDirectory(verbose bool) (TemporaryDirectory Directory) {
-	TemporaryDirectory, err := t.CreateEmptyTemporaryDirectory(verbose)
+func (t *TemporaryDirectoriesService) MustCreateEmptyTemporaryDirectory(verbose bool) (temporaryDirectory *LocalDirectory) {
+	temporaryDirectory, err := t.CreateEmptyTemporaryDirectory(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
-	return TemporaryDirectory
+	return temporaryDirectory
 }
 
 func (t *TemporaryDirectoriesService) MustCreateEmptyTemporaryDirectoryAndGetPath(verbose bool) (TemporaryDirectoryPath string) {
