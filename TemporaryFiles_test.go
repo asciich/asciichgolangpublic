@@ -87,3 +87,33 @@ func TestCreateEmptyTemporaryFileAndGetPath(t *testing.T) {
 		)
 	}
 }
+
+func TestTemporaryFilesCreateFromFile(t *testing.T) {
+	tests := []struct {
+		content string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				sourceFile := TemporaryFiles().MustCreateTemporaryFileFromString(tt.content, verbose)
+				defer sourceFile.Delete(verbose)
+
+				assert.EqualValues(
+					tt.content,
+					sourceFile.MustReadAsString(),
+				)
+
+				tempFile := TemporaryFiles().MustCreateTemporaryFileFromFile(sourceFile, verbose)
+				defer tempFile.Delete(verbose)
+			},
+		)
+	}
+}
