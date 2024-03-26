@@ -8,7 +8,7 @@ func NewDirectoryBase() (d *DirectoryBase) {
 	return new(DirectoryBase)
 }
 
-func (d *DirectoryBase) CreateFileInDirectoryByString(content string, verbose bool, pathToCreate ...string) (createdFile File, err error) {
+func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose bool, pathToCreate ...string) (createdFile File, err error) {
 	if len(pathToCreate) <= 0 {
 		return nil, TracedErrorf("Invalid pathToCreate='%v'", pathToCreate)
 	}
@@ -71,8 +71,8 @@ func (d *DirectoryBase) GetParentDirectoryForBaseClass() (parentDirectoryForBase
 	return d.parentDirectoryForBaseClass, nil
 }
 
-func (d *DirectoryBase) MustCreateFileInDirectoryByString(content string, verbose bool, pathToCreate ...string) (createdFile File) {
-	createdFile, err := d.CreateFileInDirectoryByString(content, verbose, pathToCreate...)
+func (d *DirectoryBase) MustCreateFileInDirectoryFromString(content string, verbose bool, pathToCreate ...string) (createdFile File) {
+	createdFile, err := d.CreateFileInDirectoryFromString(content, verbose, pathToCreate...)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

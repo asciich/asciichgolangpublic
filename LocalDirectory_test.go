@@ -158,7 +158,7 @@ func TestLocalDirectoryParentForBaseClassSet(t *testing.T) {
 	}
 }
 
-func TestLocalDirectoryCreateFileInDirectoryByString(t *testing.T) {
+func TestLocalDirectoryCreateFileInDirectoryFromString(t *testing.T) {
 
 	tests := []struct {
 		filename []string
@@ -179,7 +179,7 @@ func TestLocalDirectoryCreateFileInDirectoryByString(t *testing.T) {
 				dir := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
 				defer dir.Delete(verbose)
 
-				createdFile := dir.MustCreateFileInDirectoryByString(tt.content, verbose, tt.filename...)
+				createdFile := dir.MustCreateFileInDirectoryFromString(tt.content, verbose, tt.filename...)
 
 				pathElements := []string{dir.MustGetLocalPath()}
 				pathElements = append(pathElements, tt.filename...)
