@@ -230,3 +230,33 @@ func TestLocalFileIsMatchingSha256Sum(t *testing.T) {
 		)
 	}
 }
+
+func TestLocalFileGetParentDirectory(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				temporaryDir := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
+				defer temporaryDir.Delete(verbose)
+
+				temporaryFile := temporaryDir.MustCreateFileInDirectory("test.txt")
+				parentDir := temporaryFile.MustGetParentDirectory()
+
+				assert.EqualValues(
+					temporaryDir.MustGetLocalPath(),
+					parentDir.MustGetLocalPath(),
+				)
+			},
+		)
+	}
+}

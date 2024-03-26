@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -152,6 +153,40 @@ func TestLocalDirectoryParentForBaseClassSet(t *testing.T) {
 
 				dir := NewLocalDirectory()
 				assert.NotNil(dir.MustGetParentDirectoryForBaseClass())
+			},
+		)
+	}
+}
+
+func TestLocalDirectoryCreateFileInDirectoryByString(t *testing.T) {
+
+	tests := []struct {
+		filename []string
+		content  string
+	}{
+		{[]string{"testcase"}, "content"},
+		{[]string{"testcase", "test.txt"}, "content"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				dir := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
+				defer dir.Delete(verbose)
+
+				createdFile := dir.MustCreateFileInDirectoryByString(tt.content, verbose, tt.filename...)
+
+				pathElements := []string{dir.MustGetLocalPath()}
+				pathElements = append(pathElements, tt.filename...)
+				expectedFileName := filepath.Join(pathElements...)
+
+				assert.EqualValues(expectedFileName, createdFile.MustGetLocalPath())
+				assert.EqualValues(tt.content, createdFile.MustReadAsString())
 			},
 		)
 	}
