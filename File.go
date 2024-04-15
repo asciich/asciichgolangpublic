@@ -27,8 +27,10 @@ type File interface {
 
 	// All methods below this line can be implemented by embedding the `FileBase` struct:
 	GetSha256Sum() (sha256sum string, err error)
+	IsContentEqualByComparingSha256Sum(other File, verbose bool) (isMatching bool, err error)
 	IsMatchingSha256Sum(sha256sum string) (isMatching bool, err error)
 	MustGetSha256Sum() (sha256sum string)
+	MustIsContentEqualByComparingSha256Sum(other File, verbose bool) (isMatching bool)
 	MustIsMatchingSha256Sum(sha256sum string) (isMatching bool)
 	MustReadAsString() (content string)
 	MustWriteString(content string, verbose bool)
