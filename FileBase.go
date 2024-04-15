@@ -36,6 +36,26 @@ func (f *FileBase) GetSha256Sum() (sha256sum string, err error) {
 	return sha256sum, nil
 }
 
+func (f *FileBase) IsContentEqualByComparingSha256Sum(otherFile File, verbose bool) (isEqual bool, err error) {
+	if otherFile == nil {
+		return false, TracedErrorNil("otherFile")
+	}
+
+	thisChecksum, err := f.GetSha256Sum()
+	if err != nil {
+		return false, err
+	}
+
+	otherChecksum, err := otherFile.GetSha256Sum()
+	if err != nil {
+		return false, err
+	}
+
+	isEqual = thisChecksum == otherChecksum
+
+	return isEqual, nil
+}
+
 func (f *FileBase) IsMatchingSha256Sum(sha256sum string) (isMatching bool, err error) {
 	currentSum, err := f.GetSha256Sum()
 	if err != nil {
@@ -62,6 +82,15 @@ func (f *FileBase) MustGetSha256Sum() (sha256sum string) {
 	}
 
 	return sha256sum
+}
+
+func (f *FileBase) MustIsContentEqualByComparingSha256Sum(otherFile File, verbose bool) (isEqual bool) {
+	isEqual, err := f.IsContentEqualByComparingSha256Sum(otherFile, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isEqual
 }
 
 func (f *FileBase) MustIsMatchingSha256Sum(sha256sum string) (isMatching bool) {

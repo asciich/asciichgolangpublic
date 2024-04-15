@@ -260,3 +260,37 @@ func TestLocalFileGetParentDirectory(t *testing.T) {
 		)
 	}
 }
+
+func TestLocalFileIsContentEqualByComparingSha256Sum(t *testing.T) {
+	tests := []struct {
+		contentFile1    string
+		contentFile2    string
+		expectedIsEqual bool
+	}{
+		{"", "", true},
+		{"testcase", "testcase", true},
+		{"testcase1", "testcase", false},
+		{"testcase1", "testcase2", false},
+		{"testcase", "testcase3", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				tempFile1 := TemporaryFiles().MustCreateFromString(tt.contentFile1, verbose)
+				defer tempFile1.Delete(verbose)
+
+				tempFile2 := TemporaryFiles().MustCreateFromString(tt.contentFile2, verbose)
+				defer tempFile2.Delete(verbose)
+
+				assert.EqualValues(tt.expectedIsEqual, tempFile1.MustIsContentEqualByComparingSha256Sum(tempFile2, verbose))
+				assert.EqualValues(tt.expectedIsEqual, tempFile2.MustIsContentEqualByComparingSha256Sum(tempFile1, verbose))
+			},
+		)
+	}
+}
