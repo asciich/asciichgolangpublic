@@ -155,7 +155,7 @@ func (l *LocalGitRepository) GetAsGoGitRepository() (goGitRepository *git.Reposi
 		return nil, err
 	}
 
-	goGitRepository, err = git.PlainOpen(repoPath)
+	goGitRepository, err = git.PlainOpenWithOptions(repoPath, &git.PlainOpenOptions{DetectDotGit: true})
 	if err != nil {
 		return nil, TracedErrorf("%w: repoPath='%s'", err, repoPath)
 	}
