@@ -157,7 +157,7 @@ func (l *LocalGitRepository) GetAsGoGitRepository() (goGitRepository *git.Reposi
 
 	goGitRepository, err = git.PlainOpen(repoPath)
 	if err != nil {
-		return nil, TracedErrorf("%w", err)
+		return nil, TracedErrorf("%w: repoPath='%s'", err, repoPath)
 	}
 
 	if goGitRepository == nil {
