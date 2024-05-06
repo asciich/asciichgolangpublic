@@ -287,12 +287,12 @@ func (l *LocalGitRepository) GetGoGitWorktree() (worktree *git.Worktree, err err
 }
 
 func (l *LocalGitRepository) HasNoUncommittedChanges() (hasUncommittedChanges bool, err error) {
-	hasUncommitedChanges, err := l.HasUncommittedChanges()
+	hasUncommittedChanges, err = l.HasUncommittedChanges()
 	if err != nil {
 		return false, err
 	}
 
-	return !hasUncommitedChanges, nil
+	return !hasUncommittedChanges, nil
 }
 
 func (l *LocalGitRepository) HasUncommittedChanges() (hasUncommittedChanges bool, err error) {

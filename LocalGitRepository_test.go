@@ -38,7 +38,7 @@ func TestLocalGitRepositoryInit(t *testing.T) {
 	}
 }
 
-func TestLocalGitRepositoryHasUncommitedChanges(t *testing.T) {
+func TestLocalGitRepositoryHasUncommittedChanges(t *testing.T) {
 	tests := []struct {
 		testcase string
 	}{
