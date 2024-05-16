@@ -264,6 +264,18 @@ func (l *LocalDirectory) SetLocalPath(localPath string) (err error) {
 		return TracedErrorf("localPath is empty string")
 	}
 
+	localPath, err = Paths().GetAbsolutePath(localPath)
+	if err != nil {
+		return err
+	}
+
+	if !Paths().IsAbsolutePath(localPath) {
+		return TracedErrorf(
+			"Path '%s' is not absolute. Beware this is an internal issue since the code before this line should fix that.",
+			localPath,
+		)
+	}
+
 	l.localPath = localPath
 
 	return nil
