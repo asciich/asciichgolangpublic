@@ -191,3 +191,28 @@ func TestLocalDirectoryCreateFileInDirectoryFromString(t *testing.T) {
 		)
 	}
 }
+
+func TestLocalDirectoryGetLocalPathIsAbsolute(t *testing.T) {
+	tests := []struct {
+		pathToTest string
+	}{
+		{"/"},
+		{"/tmp"},
+		{"abc"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				localDir := MustGetLocalDirectoryByPath(tt.pathToTest)
+
+				localPath := localDir.MustGetLocalPath()
+
+				assert.True(Paths().IsAbsolutePath(localPath))
+			},
+		)
+	}
+}

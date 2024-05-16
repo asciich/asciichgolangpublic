@@ -312,6 +312,18 @@ func (l *LocalFile) SetPath(path string) (err error) {
 		return TracedError("path is empty string")
 	}
 
+	path, err = Paths().GetAbsolutePath(path)
+	if err != nil {
+		return err
+	}
+
+	if !Paths().IsAbsolutePath(path) {
+		return TracedErrorf(
+			"Path '%s' is not absolute. Beware this is an internal issue since the code before this line should fix that.",
+			path,
+		)
+	}
+
 	l.path = path
 
 	return nil

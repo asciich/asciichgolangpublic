@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,7 +26,7 @@ func TestLocalFileSetAndGetPath(t *testing.T) {
 
 	receivedPath, err := localFile.GetPath()
 	assert.EqualValues(nil, err)
-	assert.EqualValues("testpath", receivedPath)
+	assert.True(strings.HasSuffix(receivedPath, "/testpath"))
 }
 
 func TestLocalFileExists(t *testing.T) {
@@ -290,6 +291,31 @@ func TestLocalFileIsContentEqualByComparingSha256Sum(t *testing.T) {
 
 				assert.EqualValues(tt.expectedIsEqual, tempFile1.MustIsContentEqualByComparingSha256Sum(tempFile2, verbose))
 				assert.EqualValues(tt.expectedIsEqual, tempFile2.MustIsContentEqualByComparingSha256Sum(tempFile1, verbose))
+			},
+		)
+	}
+}
+
+func TestLocalFileGetLocalPathIsAbsolute(t *testing.T) {
+	tests := []struct {
+		pathToTest string
+	}{
+		{"/"},
+		{"/tmp"},
+		{"abc"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				localFile := MustGetLocalFileByPath(tt.pathToTest)
+
+				localPath := localFile.MustGetLocalPath()
+
+				assert.True(Paths().IsAbsolutePath(localPath))
 			},
 		)
 	}
