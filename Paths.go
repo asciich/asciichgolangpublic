@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -22,7 +23,11 @@ func (p *PathsService) IsRelativePath(path string) (isRelative bool) {
 		return false
 	}
 
-	return !strings.HasPrefix(path, "/")
+	if p.IsAbsolutePath(path) {
+		return false
+	}
+
+	return true
 }
 
 // Returns true if path is an absolute path.
@@ -32,7 +37,12 @@ func (p *PathsService) IsAbsolutePath(path string) (isAbsolute bool) {
 		return false
 	}
 
-	return strings.HasPrefix(path, "/")
+	if strings.HasPrefix(path, "/") {
+		return true
+	}
+
+	re := regexp.MustCompile("^[a-zA-Z]\\:\\\\")
+	return re.Match([]byte(path))
 }
 
 func (p *PathsService) GetAbsolutePath(path string) (absolutePath string, err error) {
