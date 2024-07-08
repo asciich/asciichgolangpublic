@@ -83,7 +83,7 @@ func (l *LocalFile) Delete(verbose bool) (err error) {
 		}
 	} else {
 		if verbose {
-			LogChangedf("Local file '%s' is already absent. Skip delete.", path)
+			LogInfof("Local file '%s' is already absent. Skip delete.", path)
 		}
 	}
 
