@@ -213,6 +213,74 @@ func (l *LocalDirectory) GetFileInDirectory(path ...string) (file File, err erro
 	return file, nil
 }
 
+func (l *LocalDirectory) GetGitRepositories(verbose bool) (gitRepos []GitRepository, err error) {
+	localRepositories, err := l.GetGitRepositoriesAsLocalGitRepositories(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, toAdd := range localRepositories {
+		gitRepos = append(gitRepos, toAdd)
+	}
+
+	return gitRepos, nil
+}
+
+func (l *LocalDirectory) GetGitRepositoriesAsLocalGitRepositories(verbose bool) (gitRepos []*LocalGitRepository, err error) {
+	subDirectories, err := l.GetSubDirectories(&ListDirectoryOptions{
+		Recursive: true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	repoPaths := []string{}
+	for _, subDir := range subDirectories {
+		gitRepo, err := GetLocalGitReposioryFromDirectory(subDir)
+		if err != nil {
+			return nil, err
+		}
+
+		isGitRepo, err := gitRepo.IsGitRepository()
+		if err != nil {
+			return nil, err
+		}
+
+		if !isGitRepo {
+			continue
+		}
+
+		rootDirectoryPath, err := gitRepo.GetRootDirectoryPath()
+		if err != nil {
+			return nil, err
+		}
+
+		if !Slices().ContainsString(repoPaths, rootDirectoryPath) {
+			repoPaths = append(repoPaths, rootDirectoryPath)
+		}
+	}
+
+	for _, toAdd := range repoPaths {
+		gitRepo, err := GetLocalGitRepositoryByPath(toAdd)
+		if err != nil {
+			return nil, err
+		}
+
+		gitRepos = append(gitRepos, gitRepo)
+	}
+
+	if verbose {
+		localPath, err := l.GetLocalPath()
+		if err != nil {
+			return nil, err
+		}
+
+		LogInfof("Found '%d' git repositories in '%s'.", len(gitRepos), localPath)
+	}
+
+	return gitRepos, nil
+}
+
 func (l *LocalDirectory) GetLocalPath() (localPath string, err error) {
 	if l.localPath == "" {
 		return "", TracedErrorf("localPath not set")
@@ -278,6 +346,9 @@ func (l *LocalDirectory) GetSubDirectoriesAsAbsolutePaths(listDirectoryOptions *
 						Recursive: true,
 					},
 				)
+				if err != nil {
+					return nil, err
+				}
 
 				subDirectoryPaths = append(subDirectoryPaths, subDirectoriesToAdd...)
 			}
@@ -396,6 +467,24 @@ func (l *LocalDirectory) MustGetFileInDirectory(path ...string) (file File) {
 	}
 
 	return file
+}
+
+func (l *LocalDirectory) MustGetGitRepositories(verbose bool) (gitRepos []GitRepository) {
+	gitRepos, err := l.GetGitRepositories(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitRepos
+}
+
+func (l *LocalDirectory) MustGetGitRepositoriesAsLocalGitRepositories(verbose bool) (gitRepos []*LocalGitRepository) {
+	gitRepos, err := l.GetGitRepositoriesAsLocalGitRepositories(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitRepos
 }
 
 func (l *LocalDirectory) MustGetLocalPath() (localPath string) {
