@@ -10,7 +10,9 @@ func NewGitCommit() (g *GitCommit) {
 }
 
 func (g *GitCommit) GetGitRepo() (gitRepo GitRepository, err error) {
-
+	if g.gitRepo == nil {
+		return nil, TracedError("gitRepo not set")
+	}
 	return g.gitRepo, nil
 }
 

@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	"errors"
+	"path/filepath"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
@@ -286,6 +287,54 @@ func (l *LocalGitRepository) GetGoGitWorktree() (worktree *git.Worktree, err err
 	return worktree, nil
 }
 
+func (l *LocalGitRepository) GetRootDirectory() (rootDirectory Directory, err error) {
+	rootDirectoryPath, err := l.GetRootDirectoryPath()
+	if err != nil {
+		return nil, err
+	}
+
+	rootDirectory, err = GetLocalDirectoryByPath(rootDirectoryPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return rootDirectory, nil
+}
+
+func (l *LocalGitRepository) GetRootDirectoryPath() (rootDirectoryPath string, err error) {
+	pathToCheck, err := l.GetLocalPath()
+	if err != nil {
+		return "", nil
+	}
+
+	isGitRepo, err := l.IsGitRepository()
+	if err != nil {
+		return "", err
+	}
+
+	if !isGitRepo {
+		return "", TracedErrorf("'%s' is not a git repository.", pathToCheck)
+	}
+
+	for {
+		localDirToCheck, err := GetLocalDirectoryByPath(pathToCheck)
+		if err != nil {
+			return "", nil
+		}
+
+		dotGitExists, err := localDirToCheck.SubDirectoryExists(".git", false)
+		if err != nil {
+			return "", nil
+		}
+
+		if dotGitExists {
+			return pathToCheck, nil
+		}
+
+		pathToCheck = filepath.Dir(pathToCheck)
+	}
+}
+
 func (l *LocalGitRepository) HasNoUncommittedChanges() (hasUncommittedChanges bool, err error) {
 	hasUncommittedChanges, err = l.HasUncommittedChanges()
 	if err != nil {
@@ -406,6 +455,15 @@ func (l *LocalGitRepository) IsBareRepository(verbose bool) (isBareRepository bo
 	return isBareRepository, nil
 }
 
+func (l *LocalGitRepository) IsGitRepository() (isGitRepository bool, err error) {
+	isInitialited, err := l.IsInitialized()
+	if err != nil {
+		return false, nil
+	}
+
+	return isInitialited, nil
+}
+
 func (l *LocalGitRepository) IsInitialized() (isInitialized bool, err error) {
 	_, err = l.GetAsGoGitRepository()
 	if err != nil {
@@ -515,6 +573,24 @@ func (l *LocalGitRepository) MustGetGoGitWorktree() (worktree *git.Worktree) {
 	return worktree
 }
 
+func (l *LocalGitRepository) MustGetRootDirectory() (rootDirectory Directory) {
+	rootDirectory, err := l.GetRootDirectory()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return rootDirectory
+}
+
+func (l *LocalGitRepository) MustGetRootDirectoryPath() (rootDirectoryPath string) {
+	rootDirectoryPath, err := l.GetRootDirectoryPath()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return rootDirectoryPath
+}
+
 func (l *LocalGitRepository) MustHasNoUncommittedChanges() (hasUncommittedChanges bool) {
 	hasUncommittedChanges, err := l.HasNoUncommittedChanges()
 	if err != nil {
@@ -547,6 +623,15 @@ func (l *LocalGitRepository) MustIsBareRepository(verbose bool) (isBareRepositor
 	}
 
 	return isBareRepository
+}
+
+func (l *LocalGitRepository) MustIsGitRepository() (isGitRepository bool) {
+	isGitRepository, err := l.IsGitRepository()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isGitRepository
 }
 
 func (l *LocalGitRepository) MustIsInitialized() (isInitialized bool) {

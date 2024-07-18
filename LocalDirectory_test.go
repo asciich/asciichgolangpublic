@@ -275,3 +275,50 @@ func TestLocalDirectoryGetSubDirectories(t *testing.T) {
 		)
 	}
 }
+
+func TestLocalDirectoryGetGitRepositories(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+
+				testDirectory := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
+
+				test1 := testDirectory.MustCreateSubDirectory("test1", verbose)
+				test2 := testDirectory.MustCreateSubDirectory("test2", verbose)
+
+				test2.MustCreateSubDirectory("a", verbose)
+				test2.MustCreateSubDirectory("b", verbose)
+				c := test2.MustCreateSubDirectory("c", verbose)
+
+				test1GitRepo := MustGetLocalGitReposioryFromDirectory(test1)
+				test1GitRepo.MustInit(&CreateRepositoryOptions{
+					Verbose: true,
+				})
+
+				cGitRepo := MustGetLocalGitReposioryFromDirectory(c)
+				cGitRepo.MustInit(&CreateRepositoryOptions{
+					Verbose: true,
+				})
+
+				gitRepos := testDirectory.MustGetGitRepositoriesAsLocalGitRepositories(verbose)
+
+				assert.Len(gitRepos, 2)
+				assert.EqualValues(gitRepos[0].MustGetBaseName(), "test1")
+				assert.EqualValues(gitRepos[1].MustGetBaseName(), "c")
+				assert.EqualValues(gitRepos[0].MustGetDirName(), testDirectory.MustGetLocalPath())
+				assert.EqualValues(gitRepos[1].MustGetDirName(), filepath.Join(testDirectory.MustGetLocalPath(), "test2"))
+
+			},
+		)
+	}
+}

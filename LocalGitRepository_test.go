@@ -204,3 +204,35 @@ func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 		)
 	}
 }
+
+func TestLocalGitRepositoryGetRootDirectory(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				bareRepo := TemporaryDirectories().MustCreateEmptyTemporaryGitRepository(
+					&CreateRepositoryOptions{
+						Verbose:        verbose,
+						BareRepository: false,
+					})
+				nonBareRepo := TemporaryDirectories().MustCreateEmptyTemporaryGitRepository(
+					&CreateRepositoryOptions{
+						Verbose:        verbose,
+						BareRepository: false,
+					})
+
+				assert.EqualValues(bareRepo.MustGetLocalPath(), bareRepo.MustGetRootDirectoryPath())
+				assert.EqualValues(nonBareRepo.MustGetLocalPath(), nonBareRepo.MustGetRootDirectoryPath())
+			},
+		)
+	}
+}
