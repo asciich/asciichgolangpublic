@@ -13,6 +13,42 @@ func Users() (u *UsersService) {
 	return NewUsersService()
 }
 
+func (u *UsersService) GetDirectoryInHomeDirectory(path ...string) (fileInUnsersHome Directory, err error) {
+	if len(path) <= 0 {
+		return nil, TracedError("path has no length")
+	}
+
+	usersHome, err := u.GetHomeDirectory()
+	if err != nil {
+		return nil, err
+	}
+
+	fileInUnsersHome, err = usersHome.GetSubDirectory(path...)
+	if err != nil {
+		return nil, err
+	}
+
+	return fileInUnsersHome, nil
+}
+
+func (u *UsersService) GetFileInHomeDirectory(path ...string) (fileInUnsersHome File, err error) {
+	if len(path) <= 0 {
+		return nil, TracedError("path has no length")
+	}
+
+	usersHome, err := u.GetHomeDirectory()
+	if err != nil {
+		return nil, err
+	}
+
+	fileInUnsersHome, err = usersHome.GetFileInDirectory(path...)
+	if err != nil {
+		return nil, err
+	}
+
+	return fileInUnsersHome, nil
+}
+
 func (u *UsersService) GetHomeDirectory() (homeDir Directory, err error) {
 	homeDirPath, err := u.GetHomeDirectoryAsString()
 	if err != nil {
@@ -34,6 +70,24 @@ func (u *UsersService) GetHomeDirectoryAsString() (homeDirPath string, err error
 	}
 
 	return homeDirPath, nil
+}
+
+func (u *UsersService) MustGetDirectoryInHomeDirectory(path ...string) (fileInUnsersHome Directory) {
+	fileInUnsersHome, err := u.GetDirectoryInHomeDirectory(path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return fileInUnsersHome
+}
+
+func (u *UsersService) MustGetFileInHomeDirectory(path ...string) (fileInUnsersHome File) {
+	fileInUnsersHome, err := u.GetFileInHomeDirectory(path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return fileInUnsersHome
 }
 
 func (u *UsersService) MustGetHomeDirectory() (homeDir Directory) {

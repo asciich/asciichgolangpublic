@@ -41,7 +41,7 @@ func (p *PathsService) IsAbsolutePath(path string) (isAbsolute bool) {
 		return true
 	}
 
-	re := regexp.MustCompile("^[a-zA-Z]\\:\\\\")
+	re := regexp.MustCompile(`^[a-zA-Z]\:\\`)
 	return re.Match([]byte(path))
 }
 

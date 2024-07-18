@@ -161,8 +161,6 @@ func TestLocalFileGetBaseName(t *testing.T) {
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				const verbose bool = false
-
 				var file File = MustGetLocalFileByPath(tt.path)
 
 				assert.EqualValues(tt.expectedBaseName, file.MustGetBaseName())
