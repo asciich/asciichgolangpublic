@@ -1,6 +1,9 @@
 package asciichgolangpublic
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 var ErrFileBaseParentNotSet = errors.New("parent is not set")
 
@@ -34,6 +37,76 @@ func (f *FileBase) GetSha256Sum() (sha256sum string, err error) {
 	sha256sum = Checksums().GetSha256SumFromString(content)
 
 	return sha256sum, nil
+}
+
+func (f *FileBase) GetTextBlocks(verbose bool) (textBlocks []string, err error) {
+	lines, err := f.ReadAsLines()
+	if err != nil {
+		return nil, err
+	}
+
+	var blockToAdd string = ""
+	textBlocks = []string{}
+
+	if len(lines) >= 1 {
+		if lines[0] == "---" {
+			textBlocks = append(textBlocks, "---")
+			lines = lines[1:]
+		}
+	}
+
+	insideBlock := false
+	braceEndMarker := ""
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+		if insideBlock {
+			if line == braceEndMarker {
+				if len(line) > 0 {
+					blockToAdd += "\n" + line
+				}
+				textBlocks = append(textBlocks, blockToAdd)
+				insideBlock = false
+				braceEndMarker = ""
+			} else {
+				if !strings.HasPrefix(trimmedLine, "//") {
+					currentBlockWithoutComments := Strings().RemoveCommentsAndTrimSpace(blockToAdd)
+					if currentBlockWithoutComments == "" {
+						if strings.HasSuffix(trimmedLine, "(") {
+							braceEndMarker = ")"
+						}
+						if strings.HasSuffix(trimmedLine, "{") {
+							braceEndMarker = "}"
+						}
+					}
+				}
+				blockToAdd += "\n" + line
+			}
+		} else {
+			if trimmedLine == "" {
+				continue
+			} else {
+				blockToAdd = line
+				insideBlock = true
+				if strings.HasSuffix(trimmedLine, "(") {
+					braceEndMarker = ")"
+				}
+				if strings.HasSuffix(trimmedLine, "{") {
+					braceEndMarker = "}"
+				}
+			}
+		}
+	}
+
+	if insideBlock {
+		textBlocks = append(textBlocks, blockToAdd)
+		insideBlock = false
+	}
+
+	if verbose {
+		LogInfof("Splitted file into '%d' text blocks.", len(textBlocks))
+	}
+
+	return textBlocks, nil
 }
 
 func (f *FileBase) IsContentEqualByComparingSha256Sum(otherFile File, verbose bool) (isEqual bool, err error) {
@@ -84,6 +157,15 @@ func (f *FileBase) MustGetSha256Sum() (sha256sum string) {
 	return sha256sum
 }
 
+func (f *FileBase) MustGetTextBlocks(verbose bool) (textBlocks []string) {
+	textBlocks, err := f.GetTextBlocks(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return textBlocks
+}
+
 func (f *FileBase) MustIsContentEqualByComparingSha256Sum(otherFile File, verbose bool) (isEqual bool) {
 	isEqual, err := f.IsContentEqualByComparingSha256Sum(otherFile, verbose)
 	if err != nil {
@@ -100,6 +182,15 @@ func (f *FileBase) MustIsMatchingSha256Sum(sha256sum string) (isMatching bool) {
 	}
 
 	return isMatching
+}
+
+func (f *FileBase) MustReadAsLines() (contentLines []string) {
+	contentLines, err := f.ReadAsLines()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return contentLines
 }
 
 func (f *FileBase) MustReadAsString() (content string) {
@@ -123,6 +214,24 @@ func (f *FileBase) MustWriteString(toWrite string, verbose bool) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (f *FileBase) MustWriteTextBlocks(textBlocks []string, verbose bool) {
+	err := f.WriteTextBlocks(textBlocks, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (f *FileBase) ReadAsLines() (contentLines []string, err error) {
+	content, err := f.ReadAsString()
+	if err != nil {
+		return nil, err
+	}
+
+	contentLines = Strings().SplitLines(content)
+
+	return contentLines, nil
 }
 
 func (f *FileBase) ReadAsString() (content string, err error) {
@@ -152,4 +261,27 @@ func (f *FileBase) WriteString(toWrite string, verbose bool) (err error) {
 	}
 
 	return parent.WriteBytes([]byte(toWrite), verbose)
+}
+
+func (f *FileBase) WriteTextBlocks(textBlocks []string, verbose bool) (err error) {
+	const useSystemCalls bool = true
+
+	textToWrite := ""
+
+	for i, blockToWrite := range textBlocks {
+		if i > 0 {
+			blockToWrite = "\n" + blockToWrite
+		}
+		blockToWrite = Strings().EnsureEndsWithExactlyOneLineBreak(blockToWrite)
+
+		textToWrite += blockToWrite
+	}
+
+	err = f.WriteString(textToWrite, verbose)
+	if err != nil {
+		return nil
+	}
+
+	return nil
+
 }
