@@ -36,10 +36,12 @@ type File interface {
 	MustIsMatchingSha256Sum(sha256sum string) (isMatching bool)
 	MustReadAsLines() (contentLines []string)
 	MustReadAsString() (content string)
+	MustSortBlocksInFile(verbose bool)
 	MustWriteString(content string, verbose bool)
 	MustWriteTextBlocks(textBlocks []string, verose bool)
 	ReadAsLines() (contentLines []string, err error)
 	ReadAsString() (content string, err error)
+	SortBlocksInFile(verbose bool) (err error)
 	WriteString(content string, verbose bool) (err error)
 	WriteTextBlocks(textBlocks []string, verbose bool) (err error)
 }

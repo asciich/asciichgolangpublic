@@ -209,6 +209,13 @@ func (f *FileBase) MustSetParentFileForBaseClass(parentFileForBaseClass File) {
 	}
 }
 
+func (f *FileBase) MustSortBlocksInFile(verbose bool) {
+	err := f.SortBlocksInFile(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (f *FileBase) MustWriteString(toWrite string, verbose bool) {
 	err := f.WriteString(toWrite, verbose)
 	if err != nil {
@@ -250,6 +257,22 @@ func (f *FileBase) ReadAsString() (content string, err error) {
 
 func (f *FileBase) SetParentFileForBaseClass(parentFileForBaseClass File) (err error) {
 	f.parentFileForBaseClass = parentFileForBaseClass
+
+	return nil
+}
+
+func (f *FileBase) SortBlocksInFile(verbose bool) (err error) {
+	blocks, err := f.GetTextBlocks(verbose)
+	if err != nil {
+		return err
+	}
+
+	blocks = Slices().SortStringSlice(blocks)
+
+	err = f.WriteTextBlocks(blocks, verbose)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
