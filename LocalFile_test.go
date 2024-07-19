@@ -318,3 +318,92 @@ func TestLocalFileGetLocalPathIsAbsolute(t *testing.T) {
 		)
 	}
 }
+
+func TestFileGetTextBlocksGolangWithCommentAboveFunction(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				testData := "package main\n"
+				testData += "\n"
+				testData += "//this comment\n"
+				testData += "func belongsToMe() (err error) {\n"
+				testData += "\n" // ensure empty lines do not split the function block
+				testData += "\treturn nil\n"
+				testData += "}\n"
+
+				testFile := TemporaryFiles().MustCreateFromString(testData, verbose)
+				blocks := testFile.MustGetTextBlocks(verbose)
+
+				assert.Len(blocks, 2)
+			},
+		)
+	}
+}
+
+func TestFileGetTextBlocksYamlWithoutLeadingThreeMinuses(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				testData := "a: b\n"
+				testData += "\n"
+				testData += "c: d\n"
+
+				testFile := TemporaryFiles().MustCreateFromString(testData, verbose)
+				blocks := testFile.MustGetTextBlocks(verbose)
+
+				assert.Len(blocks, 2)
+			},
+		)
+	}
+}
+
+func TestFileGetTextBlocksYamlWithLeadingThreeMinuses(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				testData := "---\n"
+				testData += "a: b\n"
+				testData += "\n"
+				testData += "c: d\n"
+
+				testFile := TemporaryFiles().MustCreateFromString(testData, verbose)
+				blocks := testFile.MustGetTextBlocks(verbose)
+
+				assert.Len(blocks, 3)
+			},
+		)
+	}
+}

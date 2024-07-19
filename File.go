@@ -27,15 +27,21 @@ type File interface {
 
 	// All methods below this line can be implemented by embedding the `FileBase` struct:
 	GetSha256Sum() (sha256sum string, err error)
+	GetTextBlocks(verbose bool) (textBlocks []string, err error)
 	IsContentEqualByComparingSha256Sum(other File, verbose bool) (isMatching bool, err error)
 	IsMatchingSha256Sum(sha256sum string) (isMatching bool, err error)
 	MustGetSha256Sum() (sha256sum string)
+	MustGetTextBlocks(verbose bool) (textBlocks []string)
 	MustIsContentEqualByComparingSha256Sum(other File, verbose bool) (isMatching bool)
 	MustIsMatchingSha256Sum(sha256sum string) (isMatching bool)
+	MustReadAsLines() (contentLines []string)
 	MustReadAsString() (content string)
 	MustWriteString(content string, verbose bool)
+	MustWriteTextBlocks(textBlocks []string, verose bool)
+	ReadAsLines() (contentLines []string, err error)
 	ReadAsString() (content string, err error)
 	WriteString(content string, verbose bool) (err error)
+	WriteTextBlocks(textBlocks []string, verbose bool) (err error)
 }
 
 func GetFileByOsFile(osFile *os.File) (file File, err error) {

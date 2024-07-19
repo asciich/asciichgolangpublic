@@ -241,6 +241,20 @@ func (l *LocalGitRepository) GetCurrentCommitHash() (commitHash string, err erro
 	return commitHash, nil
 }
 
+func (l *LocalGitRepository) GetGitlabCiYamlFile() (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
+	ciYamlFile, err := l.GetFileInDirectory(Gitlab().GetDefaultGitlabCiYamlFileName())
+	if err != nil {
+		return nil, err
+	}
+
+	gitlabCiYamlFile, err = GetGitlabCiYamlFileByFile(ciYamlFile)
+	if err != nil {
+		return nil, err
+	}
+
+	return gitlabCiYamlFile, nil
+}
+
 func (l *LocalGitRepository) GetGoGitConfig() (config *config.Config, err error) {
 	goGitRepo, err := l.GetAsGoGitRepository()
 	if err != nil {
@@ -544,6 +558,15 @@ func (l *LocalGitRepository) MustGetCurrentCommitHash() (commitHash string) {
 	}
 
 	return commitHash
+}
+
+func (l *LocalGitRepository) MustGetGitlabCiYamlFile() (gitlabCiYamlFile *GitlabCiYamlFile) {
+	gitlabCiYamlFile, err := l.GetGitlabCiYamlFile()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitlabCiYamlFile
 }
 
 func (l *LocalGitRepository) MustGetGoGitConfig() (config *config.Config) {

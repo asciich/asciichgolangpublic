@@ -8,6 +8,7 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/text v0.14.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -62,5 +63,4 @@ require (
 	google.golang.org/grpc v1.61.1 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
