@@ -176,3 +176,34 @@ func TestSlicesRemoveLastElementIfEmptyString(t *testing.T) {
 		)
 	}
 }
+
+
+func TestSlicesRemoveDuplicatedEntries(t *testing.T) {
+	tests := []struct {
+		input          []string
+		expectedOutput []string
+	}{
+		{[]string{}, []string{}},
+		{nil, []string{}},
+		{[]string{""}, []string{""}},
+		{[]string{"a"}, []string{"a"}},
+		{[]string{"a", ""}, []string{"a", ""}},
+		{[]string{"a", "b", ""}, []string{"a", "b", ""}},
+		{[]string{"a", "b", "", "c"}, []string{"a", "b", "", "c"}},
+		{[]string{"a", "a", "", "c"}, []string{"a", "", "c"}},
+		{[]string{"a", "a", "a", "c"}, []string{"a", "c"}},
+		{[]string{"a", "a", "a", "a"}, []string{"a"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				output := Slices().RemoveDuplicatedStrings(tt.input)
+				assert.EqualValues(tt.expectedOutput, output)
+			},
+		)
+	}
+}
