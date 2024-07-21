@@ -334,14 +334,18 @@ func (l *LocalFile) WriteBytes(toWrite []byte, verbose bool) (err error) {
 		return TracedErrorNil("toWrite")
 	}
 
-	path, err := l.GetLocalPath()
+	localPath, err := l.GetLocalPath()
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(path, toWrite, 0644)
+	err = os.WriteFile(localPath, toWrite, 0644)
 	if err != nil {
-		return TracedErrorf("Unable to write file '%s': %w", path, err)
+		return TracedErrorf("Unable to write file '%s': %w", localPath, err)
+	}
+
+	if verbose {
+		LogInfof("Wrote data to '%s'", localPath)
 	}
 
 	return nil
