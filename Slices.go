@@ -17,6 +17,26 @@ func Slices() (slices *SlicesService) {
 	return new(SlicesService)
 }
 
+func (o *SlicesService) RemoveDuplicatedStrings(sliceOfStrings []string) (cleaned []string) {
+	if sliceOfStrings == nil {
+		return []string{}
+	}
+
+	if len(sliceOfStrings) <= 0 {
+		return []string{}
+	}
+
+	for _, entry := range sliceOfStrings {
+		if o.ContainsString(cleaned, entry) {
+			continue
+		}
+
+		cleaned = append(cleaned, entry)
+	}
+
+	return cleaned
+}
+
 func (o *SlicesService) RemoveLastElementIfEmptyString(sliceOfStrings []string) (cleanedUp []string) {
 	if len(sliceOfStrings) <= 0 {
 		return []string{}
