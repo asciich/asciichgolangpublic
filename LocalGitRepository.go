@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	"errors"
+	"fmt"
 	"path/filepath"
 
 	"github.com/go-git/go-git/v5"
@@ -680,6 +681,15 @@ func (l *LocalGitRepository) MustPush(verbose bool) {
 	}
 }
 
+func (l *LocalGitRepository) MustRunGitCommand(gitCommand string, verbose bool) (commandOutput *CommandOutput) {
+	commandOutput, err := l.RunGitCommand(gitCommand, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return commandOutput
+}
+
 func (l *LocalGitRepository) MustSetGitConfig(options *GitConfigSetOptions) {
 	err := l.SetGitConfig(options)
 	if err != nil {
@@ -729,6 +739,26 @@ func (l *LocalGitRepository) Push(verbose bool) (err error) {
 	}
 
 	return nil
+}
+
+func (l *LocalGitRepository) RunGitCommand(gitCommand string, verbose bool) (commandOutput *CommandOutput, err error) {
+	if gitCommand == "" {
+		return nil, TracedErrorEmptyString("gitCommand")
+	}
+
+	repoRootPath, err := l.GetRootDirectoryPath()
+	if err != nil {
+		return nil, err
+	}
+
+	command := fmt.Sprintf("git -C '%s' %s", repoRootPath, gitCommand)
+
+	commandOutput, err = Bash().RunOneLiner(command, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return commandOutput, nil
 }
 
 func (l *LocalGitRepository) SetGitConfig(options *GitConfigSetOptions) (err error) {
