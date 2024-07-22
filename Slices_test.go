@@ -177,7 +177,6 @@ func TestSlicesRemoveLastElementIfEmptyString(t *testing.T) {
 	}
 }
 
-
 func TestSlicesRemoveDuplicatedEntries(t *testing.T) {
 	tests := []struct {
 		input          []string
