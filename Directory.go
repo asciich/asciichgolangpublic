@@ -23,5 +23,7 @@ type Directory interface {
 
 	// All methods below this line can be implemented by embedding the `DirectoryBase` struct:
 	GetFilePathInDirectory(path ...string) (filePath string, err error)
+	FileInDirectoryExists(path ...string) (exists bool, err error)
 	MustGetFilePathInDirectory(path ...string) (filePath string)
+	MustFileInDirectoryExists(path ...string) (exists bool)
 }

@@ -15,7 +15,7 @@ func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose 
 
 	parent, err := d.GetParentDirectoryForBaseClass()
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	createdFile, err = parent.GetFileInDirectory(pathToCreate...)
@@ -41,6 +41,24 @@ func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose 
 	return createdFile, nil
 }
 
+func (d *DirectoryBase) FileInDirectoryExists(path ...string) (fileExists bool, err error) {
+	if len(path) <= 0 {
+		return false, TracedError("path has no elements")
+	}
+
+	parent, err := d.GetParentDirectoryForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	fileExists, err = parent.Exists()
+	if err != nil {
+		return false, err
+	}
+
+	return fileExists, nil
+}
+
 func (d *DirectoryBase) GetFilePathInDirectory(path ...string) (filePath string, err error) {
 	if len(path) <= 0 {
 		return "", TracedError("path has no elements")
@@ -48,7 +66,7 @@ func (d *DirectoryBase) GetFilePathInDirectory(path ...string) (filePath string,
 
 	parent, err := d.GetParentDirectoryForBaseClass()
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	localFile, err := parent.GetFileInDirectory(path...)
@@ -78,6 +96,15 @@ func (d *DirectoryBase) MustCreateFileInDirectoryFromString(content string, verb
 	}
 
 	return createdFile
+}
+
+func (d *DirectoryBase) MustFileInDirectoryExists(path ...string) (fileExists bool) {
+	fileExists, err := d.FileInDirectoryExists(path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return fileExists
 }
 
 func (d *DirectoryBase) MustGetFilePathInDirectory(path ...string) (filePath string) {
