@@ -49,6 +49,24 @@ func (u *UsersService) GetFileInHomeDirectory(path ...string) (fileInUnsersHome 
 	return fileInUnsersHome, nil
 }
 
+func (u *UsersService) GetFileInHomeDirectoryAsLocalFile(path ...string) (localFile *LocalFile, err error) {
+	if len(path) <= 0 {
+		return nil, TracedError("path is empty")
+	}
+
+	fileToReturn, err := u.GetFileInHomeDirectory(path...)
+	if err != nil {
+		return nil, err
+	}
+
+	localFile, ok := fileToReturn.(*LocalFile)
+	if !ok {
+		return nil, TracedError("Unable to convert to local file")
+	}
+
+	return localFile, nil
+}
+
 func (u *UsersService) GetHomeDirectory() (homeDir Directory, err error) {
 	homeDirPath, err := u.GetHomeDirectoryAsString()
 	if err != nil {
@@ -88,6 +106,15 @@ func (u *UsersService) MustGetFileInHomeDirectory(path ...string) (fileInUnsersH
 	}
 
 	return fileInUnsersHome
+}
+
+func (u *UsersService) MustGetFileInHomeDirectoryAsLocalFile(path ...string) (localFile *LocalFile) {
+	localFile, err := u.GetFileInHomeDirectoryAsLocalFile(path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return localFile
 }
 
 func (u *UsersService) MustGetHomeDirectory() (homeDir Directory) {
