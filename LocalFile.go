@@ -301,7 +301,7 @@ func (l *LocalFile) ReadAsBytes() (content []byte, err error) {
 
 	content, err = os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, TracedError(err)
 	}
 
 	return content, err
