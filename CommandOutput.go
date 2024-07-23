@@ -25,6 +25,16 @@ func (c *CommandOutput) GetCmdRunError() (cmdRunError *error, err error) {
 	return c.cmdRunError, nil
 }
 
+func (c *CommandOutput) GetFirstLineOfStdoutAsString() (firstLine string, err error) {
+	lines, err := c.GetStdoutAsLines()
+	if err != nil {
+		return "", err
+	}
+
+	firstLine = lines[0]
+	return firstLine, nil
+}
+
 func (c *CommandOutput) GetStderr() (stderr *[]byte, err error) {
 	if c.stderr == nil {
 		return nil, TracedErrorf("stderr not set")
@@ -75,6 +85,15 @@ func (c *CommandOutput) MustGetCmdRunError() (cmdRunError *error) {
 	}
 
 	return cmdRunError
+}
+
+func (c *CommandOutput) MustGetFirstLineOfStdoutAsString() (firstLine string) {
+	firstLine, err := c.GetFirstLineOfStdoutAsString()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return firstLine
 }
 
 func (c *CommandOutput) MustGetReturnCode() (returnCode int) {
