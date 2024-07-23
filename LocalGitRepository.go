@@ -350,6 +350,20 @@ func (l *LocalGitRepository) GetRootDirectoryPath() (rootDirectoryPath string, e
 	}
 }
 
+func (l *LocalGitRepository) GitlabCiYamlFileExists() (gitlabCiYamlFileExists bool, err error) {
+	gitlabCiYamlFile, err := l.GetGitlabCiYamlFile()
+	if err != nil {
+		return false, err
+	}
+
+	gitlabCiYamlFileExists, err = gitlabCiYamlFile.Exists()
+	if err != nil {
+		return false, err
+	}
+
+	return gitlabCiYamlFileExists, nil
+}
+
 func (l *LocalGitRepository) HasNoUncommittedChanges() (hasUncommittedChanges bool, err error) {
 	hasUncommittedChanges, err = l.HasUncommittedChanges()
 	if err != nil {
@@ -613,6 +627,15 @@ func (l *LocalGitRepository) MustGetRootDirectoryPath() (rootDirectoryPath strin
 	}
 
 	return rootDirectoryPath
+}
+
+func (l *LocalGitRepository) MustGitlabCiYamlFileExists() (gitlabCiYamlFileExists bool) {
+	gitlabCiYamlFileExists, err := l.GitlabCiYamlFileExists()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitlabCiYamlFileExists
 }
 
 func (l *LocalGitRepository) MustHasNoUncommittedChanges() (hasUncommittedChanges bool) {
