@@ -233,3 +233,35 @@ func TestBashRunOneLinerAndGetStdoutAsString(t *testing.T) {
 		)
 	}
 }
+
+func TestBashCommandAndGetFirstLineOfStdoutAsString(t *testing.T) {
+	tests := []struct {
+		command        []string
+		expectedOutput string
+	}{
+		{[]string{"echo hallo"}, "hallo"},
+		{[]string{"echo -ne hallo"}, "hallo"},
+		{[]string{"echo -ne 'hallo\ndu'"}, "hallo"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				output := Bash().MustRunCommand(&RunCommandOptions{
+					Command: tt.command,
+					Verbose: verbose,
+				})
+
+				assert.EqualValues(
+					output.MustGetFirstLineOfStdoutAsString(),
+					tt.expectedOutput,
+				)
+			},
+		)
+	}
+}
