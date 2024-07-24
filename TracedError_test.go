@@ -149,3 +149,31 @@ func TestTracedErrorNotImplemented(t *testing.T) {
 		)
 	}
 }
+
+
+func TestTracedErrorGetErrorMessage(t *testing.T) {
+	tests := []struct {
+		errorMessage                string
+		expectedErrorMessage  string
+	}{
+		{"errorMessage", "errorMessage"},
+		{"errorMessage2", "errorMessage2"},
+		{"errorMessage3", "errorMessage3"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+				
+				tracedError := Errors().MustGetAsTracedError(TracedError(tt.errorMessage))
+
+				assert.EqualValues(
+					tt.expectedErrorMessage,
+					tracedError.MustGetErrorMessage(),
+				)
+			},
+		)
+	}
+}
