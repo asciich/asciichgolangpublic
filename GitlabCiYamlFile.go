@@ -182,85 +182,33 @@ func (g *GitlabCiYamlFile) ContainsInclude(include *GitlabCiYamlInclude, ignoreV
 }
 
 func (g *GitlabCiYamlFile) GetIncludes(verbose bool) (includes []*GitlabCiYamlInclude, err error) {
+	localPath, err := g.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
 	includeBlock, err := g.getIncludeBlock(verbose)
 	if err != nil {
 		return nil, err
 	}
 
-	includeBlock = strings.TrimSpace(includeBlock)
-
-	includes = []*GitlabCiYamlInclude{}
-	blockToAdd := NewGitlabCiYamlInclude()
-	multilineFile := false
-	for _, line := range Strings().SplitLines(includeBlock) {
-		trimmedLine := strings.TrimSpace(line)
-		if trimmedLine == "" {
-			continue
-		}
-
-		if multilineFile {
-			multilineFile = false
-			if strings.HasPrefix(trimmedLine, "-") {
-				fileToAdd := strings.TrimPrefix(trimmedLine, "-")
-				fileToAdd = strings.TrimSpace(fileToAdd)
-				blockToAdd.SetFile(fileToAdd)
-				continue
-			} else {
-				return nil, TracedErrorf("Unexpected line to extract multiline file: '%s'", trimmedLine)
-			}
-		}
-
-		if strings.HasPrefix(trimmedLine, "include:") {
-			continue
-		}
-
-		if strings.HasPrefix(trimmedLine, "-") {
-			if blockToAdd.IsNonEmpty() {
-				includes = append(includes, blockToAdd)
-			}
-
-			blockToAdd = NewGitlabCiYamlInclude()
-		}
-
-		keyValueLine := strings.TrimSpace(strings.TrimPrefix(trimmedLine, "-"))
-		splitted := strings.Split(keyValueLine, ":")
-		if len(splitted) != 2 {
-			return nil, TracedErrorf(
-				"Unexpected splitted '%v' for line '%s'",
-				splitted,
-				keyValueLine,
-			)
-		}
-
-		key := strings.TrimSpace(splitted[0])
-		value := strings.TrimSpace(splitted[1])
-
-		if key == "project" {
-			err = blockToAdd.SetProject(value)
-			if err != nil {
-				return nil, err
-			}
-		} else if key == "ref" {
-			err = blockToAdd.SetRef(value)
-			if err != nil {
-				return nil, err
-			}
-		} else if key == "file" {
-			if value == "" {
-				multilineFile = true
-			} else {
-				err = blockToAdd.SetFile(value)
-				if err != nil {
-					return nil, err
-				}
-			}
-		} else {
-			return nil, TracedErrorf("Unknown key: '%s' in line '%s'", splitted[0], keyValueLine)
-		}
+	type IncludesYaml struct {
+		Includes []*GitlabCiYamlInclude `yaml:"include"`
 	}
 
-	if blockToAdd.IsNonEmpty() {
-		includes = append(includes, blockToAdd)
+	includesYaml := new(IncludesYaml)
+
+	includeBlock = strings.TrimSpace(includeBlock)
+
+	err = yaml.Unmarshal([]byte(includeBlock), includesYaml)
+	if err != nil {
+		return nil, TracedErrorf("Unable to parse inclues in gitlab-ci.yaml '%s': %w", localPath, err)
+	}
+
+	includes = includesYaml.Includes
+
+	if verbose {
+		LogInfof("Found '%d' includes in gitlab-ci.yml '%s'.", len(includes), localPath)
 	}
 
 	return includes, nil
