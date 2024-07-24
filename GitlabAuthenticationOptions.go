@@ -5,6 +5,7 @@ import (
 )
 
 type GitlabAuthenticationOptions struct {
+	AccessToken            string
 	AccessTokensFromGopass []string
 	Verbose                bool
 	GitlabUrl              string
@@ -12,6 +13,18 @@ type GitlabAuthenticationOptions struct {
 
 func NewGitlabAuthenticationOptions() (g *GitlabAuthenticationOptions) {
 	return new(GitlabAuthenticationOptions)
+}
+
+func (g *GitlabAuthenticationOptions) IsAccessTokenSet() (isSet bool) {
+	return g.AccessToken != ""
+}
+
+func (g *GitlabAuthenticationOptions) GetAccessToken() (accessToken string, err error) {
+	if g.AccessToken == "" {
+		return "", TracedErrorf("AccessToken not set")
+	}
+
+	return g.AccessToken, nil
 }
 
 func (g *GitlabAuthenticationOptions) GetAccessTokensFromGopass() (accessTokensFromGopass []string, err error) {
@@ -54,6 +67,15 @@ func (g *GitlabAuthenticationOptions) IsVerbose() (isVerbose bool) {
 	return g.Verbose
 }
 
+func (g *GitlabAuthenticationOptions) MustGetAccessToken() (accessToken string) {
+	accessToken, err := g.GetAccessToken()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return accessToken
+}
+
 func (g *GitlabAuthenticationOptions) MustGetAccessTokensFromGopass() (accessTokensFromGopass []string) {
 	accessTokensFromGopass, err := g.GetAccessTokensFromGopass()
 	if err != nil {
@@ -90,6 +112,13 @@ func (g *GitlabAuthenticationOptions) MustIsAuthenticatingAgainst(serviceName st
 	return isAuthenticatingAgainst
 }
 
+func (g *GitlabAuthenticationOptions) MustSetAccessToken(accessToken string) {
+	err := g.SetAccessToken(accessToken)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (g *GitlabAuthenticationOptions) MustSetAccessTokensFromGopass(accessTokensFromGopass []string) {
 	err := g.SetAccessTokensFromGopass(accessTokensFromGopass)
 	if err != nil {
@@ -109,6 +138,16 @@ func (g *GitlabAuthenticationOptions) MustSetVerbose(verbose bool) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (g *GitlabAuthenticationOptions) SetAccessToken(accessToken string) (err error) {
+	if accessToken == "" {
+		return TracedErrorf("accessToken is empty string")
+	}
+
+	g.AccessToken = accessToken
+
+	return nil
 }
 
 func (g *GitlabAuthenticationOptions) SetAccessTokensFromGopass(accessTokensFromGopass []string) (err error) {

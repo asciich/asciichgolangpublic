@@ -83,6 +83,29 @@ func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) 
 
 	g.nativeClient = nil
 
+	if authOptions.IsAccessTokenSet() {
+		accessToken, err := authOptions.GetAccessToken()
+		if err != nil {
+			return err
+		}
+
+		apiV4Url, err := g.GetApiV4Url()
+		if err != nil {
+			return err
+		}
+
+		nativeClient, err := gitlab.NewClient(
+			accessToken,
+			gitlab.WithBaseURL(apiV4Url),
+		)
+		if err != nil {
+			return TracedError(err.Error())
+		}
+
+		g.nativeClient = nativeClient
+		g.currentlyUsedAccessToken = &accessToken
+	}
+
 	for _, gopassPath := range authOptions.AccessTokensFromGopass {
 		credentialExists, err := Gopass().CredentialExists(gopassPath)
 		if err != nil {
