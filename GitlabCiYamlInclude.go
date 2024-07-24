@@ -14,6 +14,60 @@ func NewGitlabCiYamlInclude() (g *GitlabCiYamlInclude) {
 	return new(GitlabCiYamlInclude)
 }
 
+// The UnmarshalYAML is used as custom unmarshal function to avoid issues with multinine file sections.
+// E.g this works anyway:
+//
+// include:
+//   - file: "c.yaml"
+//
+// But this is a problem without custom UnmarshalYaml function:
+//
+// include:
+//   - file:
+//   - "c.yaml"
+func (g *GitlabCiYamlInclude) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
+	type SingleFileInclude struct {
+		Project string `yaml:"project"`
+		File    string `yaml:"file"`
+		Ref     string `yaml:"ref"`
+	}
+
+	type MultiFileInclude struct {
+		Project string   `yaml:"project"`
+		File    []string `yaml:"file"`
+		Ref     string   `yaml:"ref"`
+	}
+
+	singleFile := new(SingleFileInclude)
+	multiFile := new(MultiFileInclude)
+
+	err = unmarshal(singleFile)
+	if err == nil {
+		g.File = singleFile.File
+		g.Project = singleFile.Project
+		g.Ref = singleFile.Ref
+	} else {
+		err = unmarshal(multiFile)
+		if err != nil {
+			return TracedErrorf("Custom UnmarshalYAML for GitlabCiYamlInclude failed: %w", err)
+		}
+
+		if len(multiFile.File) <= 0 {
+			return TracedErrorf("No files found")
+		}
+
+		if len(multiFile.File) != 1 {
+			return TracedErrorf("Only one file supported at the moment but got '%v'", multiFile.File)
+		}
+
+		g.File = multiFile.File[0]
+		g.Project = multiFile.Project
+		g.Ref = multiFile.Ref
+	}
+
+	return nil
+}
+
 func (g *GitlabCiYamlInclude) EqualsIgnoreVersion(other *GitlabCiYamlInclude) (isEqual bool, err error) {
 	if other == nil {
 		return false, TracedError("other is nil")
@@ -104,9 +158,9 @@ func (g *GitlabCiYamlInclude) IsEmpty() (isEmpty bool) {
 		return false
 	}
 
-	if g.File != "" {
-		return false
-	}
+	// TODO if g.File != "" {
+	// TODO 	return false
+	// TODO }
 
 	if g.Ref != "" {
 		return false
