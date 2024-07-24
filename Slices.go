@@ -361,3 +361,31 @@ func (s *SlicesService) TrimSpace(toTrim []string) (trimmed []string) {
 
 	return trimmed
 }
+
+func (s *SlicesService) ContainsSshPublicKeyWithSameKeyMaterial(sshKeys []*SSHPublicKey, keyToSearch *SSHPublicKey) (contains bool) {
+	if len(sshKeys) <= 0 {
+		return false
+	}
+
+	if keyToSearch == nil {
+		return false
+	}
+
+	keyMaterialToSearch, err := keyToSearch.GetKeyMaterialAsString()
+	if err != nil {
+		return false
+	}
+
+	for _, toCheck := range sshKeys {
+		keyMaterialToCheck, err := toCheck.GetKeyMaterialAsString()
+		if err != nil {
+			continue
+		}
+
+		if keyMaterialToCheck == keyMaterialToSearch {
+			return true
+		}
+	}
+
+	return false
+}
