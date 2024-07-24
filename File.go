@@ -6,6 +6,8 @@ import (
 
 // A File represents any kind of file regardless if a local file or a remote file.
 type File interface {
+	AppendBytes(toWrite []byte, verbose bool) (err error)
+	AppendString(toWrite string, verbose bool) (err error)
 	Create(verbose bool) (err error)
 	Delete(verbose bool) (err error)
 	Exists() (exists bool, err error)
@@ -13,6 +15,8 @@ type File interface {
 	GetLocalPath() (localPath string, err error)
 	GetParentDirectory() (parentDirectory Directory, err error)
 	GetUriAsString() (uri string, err error)
+	MustAppendBytes(toWrtie []byte, verbose bool)
+	MustAppendString(toWrtie string, verbose bool)
 	MustCreate(verbose bool)
 	MustDelete(verbose bool)
 	MustExists() (exists bool)

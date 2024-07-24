@@ -191,10 +191,23 @@ func (g *GitlabCiYamlFile) GetIncludes(verbose bool) (includes []*GitlabCiYamlIn
 
 	includes = []*GitlabCiYamlInclude{}
 	blockToAdd := NewGitlabCiYamlInclude()
+	multilineFile := false
 	for _, line := range Strings().SplitLines(includeBlock) {
 		trimmedLine := strings.TrimSpace(line)
 		if trimmedLine == "" {
 			continue
+		}
+
+		if multilineFile {
+			multilineFile = false
+			if strings.HasPrefix(trimmedLine, "-") {
+				fileToAdd := strings.TrimPrefix(trimmedLine, "-")
+				fileToAdd = strings.TrimSpace(fileToAdd)
+				blockToAdd.SetFile(fileToAdd)
+				continue
+			} else {
+				return nil, TracedErrorf("Unexpected line to extract multiline file: '%s'", trimmedLine)
+			}
 		}
 
 		if strings.HasPrefix(trimmedLine, "include:") {
@@ -233,9 +246,13 @@ func (g *GitlabCiYamlFile) GetIncludes(verbose bool) (includes []*GitlabCiYamlIn
 				return nil, err
 			}
 		} else if key == "file" {
-			err = blockToAdd.SetFile(value)
-			if err != nil {
-				return nil, err
+			if value == "" {
+				multilineFile = true
+			} else {
+				err = blockToAdd.SetFile(value)
+				if err != nil {
+					return nil, err
+				}
 			}
 		} else {
 			return nil, TracedErrorf("Unknown key: '%s' in line '%s'", splitted[0], keyValueLine)
