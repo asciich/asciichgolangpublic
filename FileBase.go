@@ -193,6 +193,15 @@ func (f *FileBase) MustReadAsLines() (contentLines []string) {
 	return contentLines
 }
 
+func (f *FileBase) MustReadAsLinesWithoutComments() (contentLines []string) {
+	contentLines, err := f.ReadAsLinesWithoutComments()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return contentLines
+}
+
 func (f *FileBase) MustReadAsString() (content string) {
 	content, err := f.ReadAsString()
 	if err != nil {
@@ -237,6 +246,18 @@ func (f *FileBase) ReadAsLines() (contentLines []string, err error) {
 	}
 
 	contentLines = Strings().SplitLines(content)
+
+	return contentLines, nil
+}
+
+func (f *FileBase) ReadAsLinesWithoutComments() (contentLines []string, err error) {
+	contentString, err := f.ReadAsString()
+	if err != nil {
+		return nil, err
+	}
+
+	contentString = Strings().RemoveComments(contentString)
+	contentLines = Strings().SplitLines(contentString)
 
 	return contentLines, nil
 }

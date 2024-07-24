@@ -125,11 +125,39 @@ func (d *DirectoryBase) MustGetParentDirectoryForBaseClass() (parentDirectoryFor
 	return parentDirectoryForBaseClass
 }
 
+func (d *DirectoryBase) MustReadFileInDirectoryAsString(path ...string) (content string) {
+	content, err := d.ReadFileInDirectoryAsString(path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return content
+}
+
 func (d *DirectoryBase) MustSetParentDirectoryForBaseClass(parentDirectoryForBaseClass Directory) {
 	err := d.SetParentDirectoryForBaseClass(parentDirectoryForBaseClass)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (d *DirectoryBase) ReadFileInDirectoryAsString(path ...string) (content string, err error) {
+	parent, err := d.GetParentDirectoryForBaseClass()
+	if err != nil {
+		return "", err
+	}
+
+	fileToRead, err := parent.GetFileInDirectory(path...)
+	if err != nil {
+		return "", err
+	}
+
+	content, err = fileToRead.ReadAsString()
+	if err != nil {
+		return "", err
+	}
+
+	return content, nil
 }
 
 func (d *DirectoryBase) SetParentDirectoryForBaseClass(parentDirectoryForBaseClass Directory) (err error) {
