@@ -90,6 +90,46 @@ func (l *LocalFile) Delete(verbose bool) (err error) {
 	return nil
 }
 
+func (l *LocalFile) AppendBytes(toWrite []byte, verbose bool) (err error) {
+	if toWrite == nil {
+		return TracedErrorNil("toWrite")
+	}
+
+	localPath, err := l.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	fileToWrite, err := os.OpenFile(localPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return TracedErrorf("Unable to open file to append: '%w'", err)
+	}
+	_, err = fileToWrite.Write(toWrite)
+	if err != nil {
+		return TracedErrorf("Unable to append: '%w'", err)
+	}
+
+	err = fileToWrite.Close()
+	if err != nil {
+		return TracedErrorf("Unable to close file after append: '%w'", err)
+	}
+
+	if verbose {
+		LogChangedf("Appended data to localfile '%s'.", localPath)
+	}
+
+	return nil
+}
+
+func (l *LocalFile) AppendString(toWrite string, verbose bool) (err error) {
+	err = l.AppendBytes([]byte(toWrite), verbose)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (l *LocalFile) Create(verbose bool) (err error) {
 	exists, err := l.Exists()
 	if err != nil {
@@ -200,6 +240,20 @@ func (l *LocalFile) GetUriAsString() (uri string, err error) {
 
 func (l *LocalFile) IsPathSet() (isSet bool) {
 	return false
+}
+
+func (l *LocalFile) MustAppendBytes(toWrite []byte, verbose bool) {
+	err := l.AppendBytes(toWrite, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (l *LocalFile) MustAppendString(toWrite string, verbose bool) {
+	err := l.AppendString(toWrite, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (l *LocalFile) MustCreate(verbose bool) {
