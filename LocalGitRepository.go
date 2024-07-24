@@ -697,6 +697,13 @@ func (l *LocalGitRepository) MustPull(verbose bool) {
 	}
 }
 
+func (l *LocalGitRepository) MustPullUsingGitCli(verbose bool) {
+	err := l.PullUsingGitCli(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (l *LocalGitRepository) MustPush(verbose bool) {
 	err := l.Push(verbose)
 	if err != nil {
@@ -745,6 +752,15 @@ func (l *LocalGitRepository) Pull(verbose bool) (err error) {
 	err = worktree.Pull(&git.PullOptions{})
 	if err != nil {
 		return TracedErrorf("%w", err)
+	}
+
+	return nil
+}
+
+func (l *LocalGitRepository) PullUsingGitCli(verbose bool) (err error) {
+	_, err = l.RunGitCommand("pull", verbose)
+	if err != nil {
+		return err
 	}
 
 	return nil
