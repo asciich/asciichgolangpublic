@@ -26,4 +26,6 @@ type Directory interface {
 	FileInDirectoryExists(path ...string) (exists bool, err error)
 	MustGetFilePathInDirectory(path ...string) (filePath string)
 	MustFileInDirectoryExists(path ...string) (exists bool)
+	MustReadFileInDirectoryAsString(path ...string) (content string)
+	ReadFileInDirectoryAsString(path ...string) (content string, err error)
 }
