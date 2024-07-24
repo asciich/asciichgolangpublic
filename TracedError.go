@@ -110,6 +110,17 @@ func TracedErrorNotImplemented() (tracedError error) {
 	return toReturn
 }
 
+func (t *TracedErrorType) GetErrorMessage() (errorMessage string, err error) {
+	formattedError, err := t.GetFormattedError()
+	if err != nil {
+		return "", err
+	}
+
+	errorMessage = formattedError.Error()
+
+	return errorMessage, nil
+}
+
 func (t *TracedErrorType) GetErrorsToUnwrap() (errorsToUnwrap []error, err error) {
 	if t.errorsToUnwrap == nil {
 		return nil, TracedErrorf("errorsToUnwrap not set")
@@ -137,6 +148,15 @@ func (t *TracedErrorType) GetFunctionCalls() (functionCalls []string, err error)
 	}
 
 	return t.functionCalls, nil
+}
+
+func (t *TracedErrorType) MustGetErrorMessage() (errorMessage string) {
+	errorMessage, err := t.GetErrorMessage()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return errorMessage
 }
 
 func (t *TracedErrorType) MustGetErrorsToUnwrap() (errorsToUnwrap []error) {
