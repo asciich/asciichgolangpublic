@@ -222,7 +222,40 @@ func TestLocalGitRepositoryGetRootDirectory(t *testing.T) {
 				bareRepo := TemporaryDirectories().MustCreateEmptyTemporaryGitRepository(
 					&CreateRepositoryOptions{
 						Verbose:        verbose,
+						BareRepository: true,
+					})
+				nonBareRepo := TemporaryDirectories().MustCreateEmptyTemporaryGitRepository(
+					&CreateRepositoryOptions{
+						Verbose:        verbose,
 						BareRepository: false,
+					})
+
+				assert.EqualValues(bareRepo.MustGetLocalPath(), bareRepo.MustGetRootDirectoryPath())
+				assert.EqualValues(nonBareRepo.MustGetLocalPath(), nonBareRepo.MustGetRootDirectoryPath())
+			},
+		)
+	}
+}
+
+func TestLocalGitRepositoryGetCommit(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				bareRepo := TemporaryDirectories().MustCreateEmptyTemporaryGitRepository(
+					&CreateRepositoryOptions{
+						Verbose:                   verbose,
+						BareRepository:            false,
+						InitializeWithEmptyCommit: false,
 					})
 				nonBareRepo := TemporaryDirectories().MustCreateEmptyTemporaryGitRepository(
 					&CreateRepositoryOptions{
