@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"time"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 type LocalGitRepository struct {
@@ -169,6 +171,70 @@ func (l *LocalGitRepository) GetAsGoGitRepository() (goGitRepository *git.Reposi
 	return goGitRepository, nil
 }
 
+func (l *LocalGitRepository) GetAuthorEmailByCommitHash(hash string) (authorEmail string, err error) {
+	if hash == "" {
+		return "", TracedErrorEmptyString("hash")
+	}
+
+	goGitCommit, err := l.GetGoGitCommitByCommitHash(hash)
+	if err != nil {
+		return "", err
+	}
+
+	authorEmail = goGitCommit.Author.Email
+	if err != nil {
+		return "", err
+	}
+
+	return authorEmail, nil
+}
+
+func (l *LocalGitRepository) GetAuthorStringByCommitHash(hash string) (authorString string, err error) {
+	if hash == "" {
+		return "", TracedErrorEmptyString(hash)
+	}
+
+	goGitCommit, err := l.GetGoGitCommitByCommitHash(hash)
+	if err != nil {
+		return "", err
+	}
+
+	authorString = goGitCommit.Author.String()
+
+	return authorString, nil
+}
+
+func (l *LocalGitRepository) GetCommitAgeDurationByCommitHash(hash string) (ageDuration *time.Duration, err error) {
+	if hash == "" {
+		return nil, TracedErrorEmptyString("hash")
+	}
+
+	commitTime, err := l.GetCommitTimeByCommitHash(hash)
+	if err != nil {
+		return nil, err
+	}
+
+	ageDurationNonPtr := time.Now().Sub(*commitTime)
+	ageDuration = &ageDurationNonPtr
+
+	return ageDuration, nil
+}
+
+func (l *LocalGitRepository) GetCommitAgeSecondsByCommitHash(hash string) (ageSeconds float64, err error) {
+	if hash == "" {
+		return -1, TracedErrorEmptyString("hash")
+	}
+
+	ageDuration, err := l.GetCommitAgeDurationByCommitHash(hash)
+	if err != nil {
+		return -1, err
+	}
+
+	ageSeconds = ageDuration.Seconds()
+
+	return ageSeconds, nil
+}
+
 func (l *LocalGitRepository) GetCommitByGoGitHash(goGitHash *plumbing.Hash) (gitCommit *GitCommit, err error) {
 	if goGitHash == nil {
 		return nil, TracedErrorNil("goGitHash")
@@ -214,6 +280,36 @@ func (l *LocalGitRepository) GetCommitByGoGitReference(goGitReference *plumbing.
 	return gitCommit, nil
 }
 
+func (l *LocalGitRepository) GetCommitMessageByCommitHash(hash string) (commitMessage string, err error) {
+	if hash == "" {
+		return "", TracedErrorEmptyString("hash")
+	}
+
+	g, err := l.GetGoGitCommitByCommitHash(hash)
+	if err != nil {
+		return "", err
+	}
+
+	commitMessage = g.Message
+
+	return commitMessage, nil
+}
+
+func (l *LocalGitRepository) GetCommitTimeByCommitHash(hash string) (commitTime *time.Time, err error) {
+	if hash == "" {
+		return nil, TracedErrorEmptyString("hash")
+	}
+
+	goGitCommit, err := l.GetGoGitCommitByCommitHash(hash)
+	if err != nil {
+		return nil, err
+	}
+
+	commitTime = &(goGitCommit.Author.When)
+
+	return commitTime, nil
+}
+
 func (l *LocalGitRepository) GetCurrentCommit() (gitCommit *GitCommit, err error) {
 	head, err := l.GetGoGitHead()
 	if err != nil {
@@ -254,6 +350,26 @@ func (l *LocalGitRepository) GetGitlabCiYamlFile() (gitlabCiYamlFile *GitlabCiYa
 	}
 
 	return gitlabCiYamlFile, nil
+}
+
+func (l *LocalGitRepository) GetGoGitCommitByCommitHash(hash string) (goGitCommit *object.Commit, err error) {
+	if hash == "" {
+		return nil, TracedErrorEmptyString("hash")
+	}
+
+	goGitRepo, err := l.GetAsGoGitRepository()
+	if err != nil {
+		return nil, err
+	}
+
+	pHash := plumbing.NewHash(hash)
+
+	goGitCommit, err = goGitRepo.CommitObject(pHash)
+	if err != nil {
+		return nil, TracedErrorf("%w", err)
+	}
+
+	return goGitCommit, err
 }
 
 func (l *LocalGitRepository) GetGoGitConfig() (config *config.Config, err error) {
@@ -460,7 +576,7 @@ func (l *LocalGitRepository) Init(options *CreateRepositoryOptions) (err error) 
 
 			err = temporaryRepository.SetGitConfig(
 				&GitConfigSetOptions{
-					Name:    "asciichgolangpublic git repo initilaizer",
+					Name:    "asciichgolangpublic git repo initializer",
 					Email:   "asciichgolangpublic@example.net",
 					Verbose: options.Verbose,
 				},
@@ -568,6 +684,42 @@ func (l *LocalGitRepository) MustGetAsGoGitRepository() (goGitRepository *git.Re
 	return goGitRepository
 }
 
+func (l *LocalGitRepository) MustGetAuthorEmailByCommitHash(hash string) (authorEmail string) {
+	authorEmail, err := l.GetAuthorEmailByCommitHash(hash)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return authorEmail
+}
+
+func (l *LocalGitRepository) MustGetAuthorStringByCommitHash(hash string) (authorString string) {
+	authorString, err := l.GetAuthorStringByCommitHash(hash)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return authorString
+}
+
+func (l *LocalGitRepository) MustGetCommitAgeDurationByCommitHash(hash string) (ageDuration *time.Duration) {
+	ageDuration, err := l.GetCommitAgeDurationByCommitHash(hash)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return ageDuration
+}
+
+func (l *LocalGitRepository) MustGetCommitAgeSecondsByCommitHash(hash string) (ageSeconds float64) {
+	ageSeconds, err := l.GetCommitAgeSecondsByCommitHash(hash)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return ageSeconds
+}
+
 func (l *LocalGitRepository) MustGetCommitByGoGitHash(goGitHash *plumbing.Hash) (gitCommit *GitCommit) {
 	gitCommit, err := l.GetCommitByGoGitHash(goGitHash)
 	if err != nil {
@@ -584,6 +736,24 @@ func (l *LocalGitRepository) MustGetCommitByGoGitReference(goGitReference *plumb
 	}
 
 	return gitCommit
+}
+
+func (l *LocalGitRepository) MustGetCommitMessageByCommitHash(hash string) (commitMessage string) {
+	commitMessage, err := l.GetCommitMessageByCommitHash(hash)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return commitMessage
+}
+
+func (l *LocalGitRepository) MustGetCommitTimeByCommitHash(hash string) (commitTime *time.Time) {
+	commitTime, err := l.GetCommitTimeByCommitHash(hash)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return commitTime
 }
 
 func (l *LocalGitRepository) MustGetCurrentCommit() (gitCommit *GitCommit) {
@@ -611,6 +781,15 @@ func (l *LocalGitRepository) MustGetGitlabCiYamlFile() (gitlabCiYamlFile *Gitlab
 	}
 
 	return gitlabCiYamlFile
+}
+
+func (l *LocalGitRepository) MustGetGoGitCommitByCommitHash(hash string) (goGitCommit *object.Commit) {
+	goGitCommit, err := l.GetGoGitCommitByCommitHash(hash)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return goGitCommit
 }
 
 func (l *LocalGitRepository) MustGetGoGitConfig() (config *config.Config) {
