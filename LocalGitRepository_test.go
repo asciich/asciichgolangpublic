@@ -237,11 +237,12 @@ func TestLocalGitRepositoryGetRootDirectory(t *testing.T) {
 	}
 }
 
-func TestLocalGitRepositoryGetCommit(t *testing.T) {
+func TestLocalGitRepositoryCreateEmptyTemporarygitRepository(t *testing.T) {
 	tests := []struct {
-		testcase string
+		bareRepository bool
 	}{
-		{"testcase"},
+		{true},
+		// {false}, // TODO
 	}
 	for _, tt := range tests {
 		t.Run(
@@ -251,20 +252,19 @@ func TestLocalGitRepositoryGetCommit(t *testing.T) {
 
 				const verbose bool = true
 
-				bareRepo := TemporaryDirectories().MustCreateEmptyTemporaryGitRepository(
-					&CreateRepositoryOptions{
-						Verbose:                   verbose,
-						BareRepository:            false,
-						InitializeWithEmptyCommit: false,
-					})
 				nonBareRepo := TemporaryDirectories().MustCreateEmptyTemporaryGitRepository(
 					&CreateRepositoryOptions{
-						Verbose:        verbose,
-						BareRepository: false,
+						Verbose:                   verbose,
+						BareRepository:            tt.bareRepository,
+						InitializeWithEmptyCommit: true,
 					})
 
-				assert.EqualValues(bareRepo.MustGetLocalPath(), bareRepo.MustGetRootDirectoryPath())
-				assert.EqualValues(nonBareRepo.MustGetLocalPath(), nonBareRepo.MustGetRootDirectoryPath())
+				commit := nonBareRepo.MustGetCurrentCommit()
+				assert.EqualValues("Initial empty commit during repo initialization", commit.MustGetCommitMessage())
+				assert.EqualValues("asciichgolangpublic git repo initializer <asciichgolangpublic@example.net>", commit.MustGetAuthorString())
+				assert.EqualValues("asciichgolangpublic@example.net", commit.MustGetAuthorEmail())
+				assert.Greater(commit.MustGetAgeSeconds(), 0.)
+				assert.Less(commit.MustGetAgeSeconds(), 1.)
 			},
 		)
 	}
