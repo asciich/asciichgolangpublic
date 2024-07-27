@@ -1,9 +1,13 @@
 package asciichgolangpublic
 
 type CreateRepositoryOptions struct {
-	BareRepository            bool
-	Verbose                   bool
-	InitializeWithEmptyCommit bool
+	BareRepository              bool
+	Verbose                     bool
+	InitializeWithEmptyCommit   bool
+
+	// Set the default author for the repository to a default one.
+	// Mainly usefull for testing since the author stays everywhere the same.
+	InitializeWithDefaultAuthor bool
 }
 
 func NewCreateRepositoryOptions() (c *CreateRepositoryOptions) {

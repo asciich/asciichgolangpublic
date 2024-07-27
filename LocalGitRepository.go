@@ -565,39 +565,68 @@ func (l *LocalGitRepository) Init(options *CreateRepositoryOptions) (err error) 
 		}
 
 		if options.InitializeWithEmptyCommit {
-			temporaryRepository, err := GitRepositories().CloneGitRepositoryToTemporaryDirectory(
-				l,
-				options.Verbose,
-			)
-			if err != nil {
-				return err
-			}
-			defer temporaryRepository.Delete(options.Verbose)
+			if options.BareRepository {
+				temporaryRepository, err := GitRepositories().CloneGitRepositoryToTemporaryDirectory(
+					l,
+					options.Verbose,
+				)
+				if err != nil {
+					return err
+				}
+				defer temporaryRepository.Delete(options.Verbose)
 
-			err = temporaryRepository.SetGitConfig(
-				&GitConfigSetOptions{
-					Name:    "asciichgolangpublic git repo initializer",
-					Email:   "asciichgolangpublic@example.net",
-					Verbose: options.Verbose,
-				},
-			)
-			if err != nil {
-				return err
-			}
+				err = temporaryRepository.SetGitConfig(
+					&GitConfigSetOptions{
+						Name:    "asciichgolangpublic git repo initializer",
+						Email:   "asciichgolangpublic@example.net",
+						Verbose: options.Verbose,
+					},
+				)
+				if err != nil {
+					return err
+				}
 
-			_, err = temporaryRepository.CommitAndPush(
-				&GitCommitOptions{
-					Message:    "Initial empty commit during repo initialization",
-					AllowEmpty: true,
-					Verbose:    true,
-				},
-			)
-			if err != nil {
-				return err
-			}
+				_, err = temporaryRepository.CommitAndPush(
+					&GitCommitOptions{
+						Message:    "Initial empty commit during repo initialization",
+						AllowEmpty: true,
+						Verbose:    true,
+					},
+				)
+				if err != nil {
+					return err
+				}
 
-			if options.Verbose {
-				LogChangedf("Initialized repository '%s' with an empty commit.", repoPath)
+				if options.Verbose {
+					LogChangedf("Initialized bare repository '%s' with an empty commit.", repoPath)
+				}
+			} else {
+				if options.InitializeWithDefaultAuthor {
+					err = l.SetGitConfig(
+						&GitConfigSetOptions{
+							Name:    "asciichgolangpublic git repo initializer",
+							Email:   "asciichgolangpublic@example.net",
+							Verbose: options.Verbose,
+						},
+					)
+					if err != nil {
+						return err
+					}
+				}
+				_, err = l.Commit(
+					&GitCommitOptions{
+						Message:    "Initial empty commit during repo initialization",
+						AllowEmpty: true,
+						Verbose:    true,
+					},
+				)
+				if err != nil {
+					return err
+				}
+
+				if options.Verbose {
+					LogChangedf("Initialized local repository '%s' with an empty commit.", repoPath)
+				}
 			}
 		}
 	}
