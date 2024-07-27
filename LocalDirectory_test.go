@@ -313,11 +313,10 @@ func TestLocalDirectoryGetGitRepositories(t *testing.T) {
 				gitRepos := testDirectory.MustGetGitRepositoriesAsLocalGitRepositories(verbose)
 
 				assert.Len(gitRepos, 2)
-				assert.EqualValues(gitRepos[0].MustGetBaseName(), "test1")
-				assert.EqualValues(gitRepos[1].MustGetBaseName(), "c")
-				assert.EqualValues(gitRepos[0].MustGetDirName(), testDirectory.MustGetLocalPath())
-				assert.EqualValues(gitRepos[1].MustGetDirName(), filepath.Join(testDirectory.MustGetLocalPath(), "test2"))
-
+				assert.EqualValues("test1", gitRepos[0].MustGetBaseName(), "test1")
+				assert.EqualValues("c", gitRepos[1].MustGetBaseName(), "c")
+				assert.EqualValues(testDirectory.MustGetLocalPath(), gitRepos[0].MustGetDirName())
+				assert.EqualValues(filepath.Join(testDirectory.MustGetLocalPath(), "test2"), gitRepos[1].MustGetDirName())
 			},
 		)
 	}

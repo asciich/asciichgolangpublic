@@ -322,6 +322,8 @@ func (l *LocalGitRepository) GetRootDirectoryPath() (rootDirectoryPath string, e
 		return "", nil
 	}
 
+	searchedFromPath := pathToCheck
+
 	isGitRepo, err := l.IsGitRepository()
 	if err != nil {
 		return "", err
@@ -337,6 +339,16 @@ func (l *LocalGitRepository) GetRootDirectoryPath() (rootDirectoryPath string, e
 			return "", nil
 		}
 
+		localPathToCheck, err := localDirToCheck.GetLocalPath()
+		if err != nil {
+			return "", nil
+		}
+
+		if localPathToCheck == "" || localPathToCheck == "/" {
+			return "", TracedErrorf("Not inside a git repository. Searched from '%s'", searchedFromPath)
+		}
+
+		// local git repository
 		dotGitExists, err := localDirToCheck.SubDirectoryExists(".git", false)
 		if err != nil {
 			return "", nil
@@ -344,6 +356,23 @@ func (l *LocalGitRepository) GetRootDirectoryPath() (rootDirectoryPath string, e
 
 		if dotGitExists {
 			return pathToCheck, nil
+		}
+
+		// bare git repository
+		if filepath.Base(localPathToCheck) != ".git" {
+			refsExists, err := localDirToCheck.SubDirectoryExists("refs", false)
+			if err != nil {
+				return "", nil
+			}
+
+			objectsExists, err := localDirToCheck.SubDirectoryExists("objects", false)
+			if err != nil {
+				return "", nil
+			}
+
+			if refsExists && objectsExists {
+				return pathToCheck, nil
+			}
 		}
 
 		pathToCheck = filepath.Dir(pathToCheck)
