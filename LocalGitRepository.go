@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"errors"
 	"fmt"
+	"io"
 	"path/filepath"
 	"time"
 
@@ -153,6 +154,18 @@ func (l *LocalGitRepository) CommitAndPush(commitOptions *GitCommitOptions) (cre
 	return createdCommit, nil
 }
 
+func (l *LocalGitRepository) CommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool, err error) {
+	if hash == "" {
+		return false, TracedErrorEmptyString("hash")
+	}
+
+	goGitCommit, err := l.GetGoGitCommitByCommitHash(hash)
+
+	hasParentCommit = goGitCommit.NumParents() > 0
+
+	return hasParentCommit, nil
+}
+
 func (l *LocalGitRepository) GetAsGoGitRepository() (goGitRepository *git.Repository, err error) {
 	repoPath, err := l.GetLocalPath()
 	if err != nil {
@@ -235,6 +248,21 @@ func (l *LocalGitRepository) GetCommitAgeSecondsByCommitHash(hash string) (ageSe
 	return ageSeconds, nil
 }
 
+func (l *LocalGitRepository) GetCommitByGoGitCommit(goGitCommit *object.Commit) (gitCommit *GitCommit, err error) {
+	if goGitCommit == nil {
+		return nil, TracedErrorNil("goGitCommit")
+	}
+
+	hash := goGitCommit.Hash
+
+	gitCommit, err = l.GetCommitByGoGitHash(&hash)
+	if err != nil {
+		return nil, err
+	}
+
+	return gitCommit, nil
+}
+
 func (l *LocalGitRepository) GetCommitByGoGitHash(goGitHash *plumbing.Hash) (gitCommit *GitCommit, err error) {
 	if goGitHash == nil {
 		return nil, TracedErrorNil("goGitHash")
@@ -293,6 +321,56 @@ func (l *LocalGitRepository) GetCommitMessageByCommitHash(hash string) (commitMe
 	commitMessage = g.Message
 
 	return commitMessage, nil
+}
+
+func (l *LocalGitRepository) GetCommitParentsByCommitHash(hash string, options *GitCommitGetParentsOptions) (commitParents []*GitCommit, err error) {
+	if hash == "" {
+		return nil, TracedErrorEmptyString("hash")
+	}
+
+	if options == nil {
+		return nil, TracedErrorNil("options")
+	}
+
+	goGitCommit, err := l.GetGoGitCommitByCommitHash(hash)
+	if err != nil {
+		return nil, err
+	}
+
+	parents := goGitCommit.Parents()
+	for {
+		parentToAdd, err := parents.Next()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return nil, TracedErrorf("Unable to get next parent: %w", err)
+		}
+
+		toAdd, err := l.GetCommitByGoGitCommit(parentToAdd)
+		if err != nil {
+			return nil, err
+		}
+
+		commitParents = append(commitParents, toAdd)
+
+		if options.IncludeParentsOfParents {
+			additionalParents, err := toAdd.GetParentCommits(&GitCommitGetParentsOptions{
+				IncludeParentsOfParents: true,
+			})
+			if err != nil {
+				return nil, err
+			}
+
+			commitParents = append(commitParents, additionalParents...)
+		}
+	}
+
+	if options.Verbose {
+		LogInfof("Collected '%d' parent commits for commit '%s'.", len(commitParents), hash)
+	}
+
+	return commitParents, nil
 }
 
 func (l *LocalGitRepository) GetCommitTimeByCommitHash(hash string) (commitTime *time.Time, err error) {
@@ -629,6 +707,22 @@ func (l *LocalGitRepository) Init(options *CreateRepositoryOptions) (err error) 
 				}
 			}
 		}
+
+		if !options.BareRepository {
+			if options.InitializeWithDefaultAuthor {
+				err = l.SetGitConfig(
+					&GitConfigSetOptions{
+						Name:    "asciichgolangpublic git repo initializer",
+						Email:   "asciichgolangpublic@example.net",
+						Verbose: options.Verbose,
+					},
+				)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
 	}
 
 	return nil
@@ -704,6 +798,15 @@ func (l *LocalGitRepository) MustCommitAndPush(commitOptions *GitCommitOptions) 
 	return createdCommit
 }
 
+func (l *LocalGitRepository) MustCommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool) {
+	hasParentCommit, err := l.CommitHasParentCommitByCommitHash(hash)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hasParentCommit
+}
+
 func (l *LocalGitRepository) MustGetAsGoGitRepository() (goGitRepository *git.Repository) {
 	goGitRepository, err := l.GetAsGoGitRepository()
 	if err != nil {
@@ -749,6 +852,15 @@ func (l *LocalGitRepository) MustGetCommitAgeSecondsByCommitHash(hash string) (a
 	return ageSeconds
 }
 
+func (l *LocalGitRepository) MustGetCommitByGoGitCommit(goGitCommit *object.Commit) (gitCommit *GitCommit) {
+	gitCommit, err := l.GetCommitByGoGitCommit(goGitCommit)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitCommit
+}
+
 func (l *LocalGitRepository) MustGetCommitByGoGitHash(goGitHash *plumbing.Hash) (gitCommit *GitCommit) {
 	gitCommit, err := l.GetCommitByGoGitHash(goGitHash)
 	if err != nil {
@@ -774,6 +886,15 @@ func (l *LocalGitRepository) MustGetCommitMessageByCommitHash(hash string) (comm
 	}
 
 	return commitMessage
+}
+
+func (l *LocalGitRepository) MustGetCommitParentsByCommitHash(hash string, options *GitCommitGetParentsOptions) (commitParents []*GitCommit) {
+	commitParents, err := l.GetCommitParentsByCommitHash(hash, options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return commitParents
 }
 
 func (l *LocalGitRepository) MustGetCommitTimeByCommitHash(hash string) (commitTime *time.Time) {

@@ -100,6 +100,45 @@ func (g *GitCommit) GetHash() (hash string, err error) {
 	return g.hash, nil
 }
 
+func (g *GitCommit) GetParentCommits(options *GitCommitGetParentsOptions) (parentCommit []*GitCommit, err error) {
+	hash, err := g.GetHash()
+	if err != nil {
+		return nil, err
+	}
+
+	repo, err := g.GetGitRepo()
+	if err != nil {
+		return nil, err
+	}
+
+	parentCommit, err = repo.GetCommitParentsByCommitHash(hash, options)
+	if err != nil {
+		return
+	}
+
+	return parentCommit, nil
+}
+
+
+func (g *GitCommit) HasParentCommit() (hasParentCommit bool, err error) {
+	hash, err := g.GetHash()
+	if err != nil {
+		return false, err
+	}
+
+	repo, err := g.GetGitRepo()
+	if err != nil {
+		return false, err
+	}
+
+	hasParentCommit, err = repo.CommitHasParentCommitByCommitHash(hash)
+	if err != nil {
+		return false, err
+	}
+
+	return hasParentCommit, nil
+}
+
 func (g *GitCommit) MustGetAgeSeconds() (age float64) {
 	age, err := g.GetAgeSeconds()
 	if err != nil {
@@ -152,6 +191,24 @@ func (g *GitCommit) MustGetHash() (hash string) {
 	}
 
 	return hash
+}
+
+func (g *GitCommit) MustGetParentCommits(options *GitCommitGetParentsOptions) (parentCommit []*GitCommit) {
+	parentCommit, err := g.GetParentCommits(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return parentCommit
+}
+
+func (g *GitCommit) MustHasParentCommit() (hasParentCommit bool) {
+	hasParentCommit, err := g.HasParentCommit()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hasParentCommit
 }
 
 func (g *GitCommit) MustSetGitRepo(gitRepo GitRepository) {
