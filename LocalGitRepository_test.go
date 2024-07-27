@@ -242,7 +242,7 @@ func TestLocalGitRepositoryCreateEmptyTemporarygitRepository(t *testing.T) {
 		bareRepository bool
 	}{
 		{true},
-		// {false}, // TODO
+		{false},
 	}
 	for _, tt := range tests {
 		t.Run(
@@ -254,9 +254,10 @@ func TestLocalGitRepositoryCreateEmptyTemporarygitRepository(t *testing.T) {
 
 				nonBareRepo := TemporaryDirectories().MustCreateEmptyTemporaryGitRepository(
 					&CreateRepositoryOptions{
-						Verbose:                   verbose,
-						BareRepository:            tt.bareRepository,
-						InitializeWithEmptyCommit: true,
+						Verbose:                     verbose,
+						BareRepository:              tt.bareRepository,
+						InitializeWithEmptyCommit:   true,
+						InitializeWithDefaultAuthor: true,
 					})
 
 				commit := nonBareRepo.MustGetCurrentCommit()
