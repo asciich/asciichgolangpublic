@@ -1274,5 +1274,19 @@ func (l *LocalGitRepository) SetRemote(remoteName string, remotUrl string, verbo
 		return nil, err
 	}
 
+	if verbose {
+		localPath, err := l.GetLocalPath()
+		if err != nil {
+			return nil, err
+		}
+
+		LogInfof(
+			"Set remote '%s' with remote URL '%s' to local Git repository '%s'.",
+			remoteName,
+			remotUrl,
+			localPath,
+		)
+	}
+
 	return remote, err
 }
