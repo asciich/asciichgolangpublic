@@ -573,6 +573,25 @@ func (l *LocalGitRepository) GetRootDirectoryPath() (rootDirectoryPath string, e
 	}
 }
 
+func (l *LocalGitRepository) GetTagByHash(hash string) (gitTag *GitTag, err error) {
+	if hash == "" {
+		return nil, TracedErrorEmptyString("hash")
+	}
+
+	gitTag = NewGitTag()
+	err = gitTag.SetGitRepository(l)
+	if err != nil {
+		return nil, err
+	}
+
+	err = gitTag.SetHash(hash)
+	if err != nil {
+		return nil, err
+	}
+
+	return gitTag, nil
+}
+
 func (l *LocalGitRepository) GitlabCiYamlFileExists() (gitlabCiYamlFileExists bool, err error) {
 	gitlabCiYamlFile, err := l.GetGitlabCiYamlFile()
 	if err != nil {
@@ -985,6 +1004,15 @@ func (l *LocalGitRepository) MustGetRootDirectoryPath() (rootDirectoryPath strin
 	}
 
 	return rootDirectoryPath
+}
+
+func (l *LocalGitRepository) MustGetTagByHash(hash string) (gitTag *GitTag) {
+	gitTag, err := l.GetTagByHash(hash)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitTag
 }
 
 func (l *LocalGitRepository) MustGitlabCiYamlFileExists() (gitlabCiYamlFileExists bool) {
