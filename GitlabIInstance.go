@@ -49,6 +49,10 @@ func NewGitlab() (gitlab *GitlabInstance) {
 	return new(GitlabInstance)
 }
 
+func NewGitlabInstance() (g *GitlabInstance) {
+	return new(GitlabInstance)
+}
+
 func (g *GitlabInstance) AddRunner(newRunnerOptions *GitlabAddRunnerOptions) (createdRunner *GitlabRunner, err error) {
 	if newRunnerOptions == nil {
 		return nil, TracedError("newRunnerOptions is nil")
@@ -315,9 +319,9 @@ func (g *GitlabInstance) GetGitlabGroups() (gitlabGroups *GitlabGroups, err erro
 	return gitlabGroups, nil
 }
 
-func (g *GitlabInstance) GetGitlabProjectByPath(projectPath string, verbose bool) (gitlabProject *GitlabProject, err error) {
-	if len(projectPath) <= 0 {
-		return nil, TracedError("projectPath is empty string")
+func (g *GitlabInstance) GetGitlabProjectById(projectId int, verbose bool) (gitlabProject *GitlabProject, err error) {
+	if projectId <= 0 {
+		return nil, TracedErrorf("projectId '%d' <= 0 is invalid", projectId)
 	}
 
 	gitlabProject = NewGitlabProject()
@@ -326,12 +330,25 @@ func (g *GitlabInstance) GetGitlabProjectByPath(projectPath string, verbose bool
 		return nil, err
 	}
 
+	err = gitlabProject.SetId(projectId)
+	if err != nil {
+		return nil, err
+	}
+
+	return gitlabProject, nil
+}
+
+func (g *GitlabInstance) GetGitlabProjectByPath(projectPath string, verbose bool) (gitlabProject *GitlabProject, err error) {
+	if len(projectPath) <= 0 {
+		return nil, TracedError("projectPath is empty string")
+	}
+
 	projectId, err := g.GetProjectIdByPath(projectPath, verbose)
 	if err != nil {
 		return nil, err
 	}
 
-	err = gitlabProject.SetId(projectId)
+	gitlabProject, err = g.GetGitlabProjectById(projectId, verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -670,6 +687,15 @@ func (g *GitlabInstance) MustGetGitlabGroups() (gitlabGroups *GitlabGroups) {
 	return gitlabGroups
 }
 
+func (g *GitlabInstance) MustGetGitlabProjectById(projectId int, verbose bool) (gitlabProject *GitlabProject) {
+	gitlabProject, err := g.GetGitlabProjectById(projectId, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitlabProject
+}
+
 func (g *GitlabInstance) MustGetGitlabProjectByPath(projectPath string, verbose bool) (gitlabProject *GitlabProject) {
 	gitlabProject, err := g.GetGitlabProjectByPath(projectPath, verbose)
 	if err != nil {
@@ -821,6 +847,15 @@ func (g *GitlabInstance) MustGroupByGroupPathExists(groupPath string) (groupExis
 	}
 
 	return groupExists
+}
+
+func (g *GitlabInstance) MustProjectByProjectIdExists(projectId int, verbose bool) (projectExists bool) {
+	projectExists, err := g.ProjectByProjectIdExists(projectId, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return projectExists
 }
 
 func (g *GitlabInstance) MustProjectByProjectPathExists(projectPath string, verbose bool) (projectExists bool) {
