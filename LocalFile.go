@@ -13,8 +13,30 @@ type LocalFile struct {
 	path string
 }
 
+func GetLocalFileByFile(inputFile File) (localFile *LocalFile, err error) {
+	if inputFile == nil {
+		return nil, TracedErrorNil("inputFile")
+	}
+
+	localFile, ok := inputFile.(*LocalFile)
+	if !ok {
+		return nil, TracedError("inputFile is not a LocalFile")
+	}
+
+	return localFile, nil
+}
+
 func GetLocalFileByPath(localPath string) (l *LocalFile, err error) {
 	return NewLocalFileByPath(localPath)
+}
+
+func MustGetLocalFileByFile(inputFile File) (localFile *LocalFile) {
+	localFile, err := GetLocalFileByFile(inputFile)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return localFile
 }
 
 func MustGetLocalFileByPath(localPath string) (l *LocalFile) {
@@ -195,6 +217,15 @@ func (l *LocalFile) GetBaseName() (baseName string, err error) {
 	return baseName, nil
 }
 
+func (l *LocalFile) GetDeepCopy() (deepCopy File) {
+	deepCopyLocalFile := NewLocalFile()
+	deepCopyLocalFile.path = l.path
+
+	deepCopy = deepCopyLocalFile
+
+	return deepCopy
+}
+
 func (l *LocalFile) GetLocalPath() (path string, err error) {
 	return l.GetPath()
 }
@@ -213,6 +244,20 @@ func (l *LocalFile) GetParentDirectory() (parentDirectory Directory, err error) 
 	}
 
 	return parentDirectory, nil
+}
+
+func (l *LocalFile) GetParentFileForBaseClassAsLocalFile() (parentAsLocalFile *LocalFile, err error) {
+	parent, err := l.GetParentFileForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	parentAsLocalFile, err = GetLocalFileByFile(parent)
+	if err != nil {
+		return nil, err
+	}
+
+	return parentAsLocalFile, nil
 }
 
 func (l *LocalFile) GetPath() (path string, err error) {
@@ -304,6 +349,15 @@ func (l *LocalFile) MustGetParentDirectory() (parentDirectory Directory) {
 	}
 
 	return parentDirectory
+}
+
+func (l *LocalFile) MustGetParentFileForBaseClassAsLocalFile() (parentAsLocalFile *LocalFile) {
+	parentAsLocalFile, err := l.GetParentFileForBaseClassAsLocalFile()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return parentAsLocalFile
 }
 
 func (l *LocalFile) MustGetPath() (path string) {

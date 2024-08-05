@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -27,6 +28,64 @@ func TestPointersIsPointer(t *testing.T) {
 				assert.EqualValues(
 					tt.expectedIsPointer,
 					Pointers().IsPointer(tt.pointerToCheck),
+				)
+			},
+		)
+	}
+}
+
+var testVal1 = 5
+var testVal2 = 5
+
+func TestPointersGetMemoryAddressAsHexString(t *testing.T) {
+	tests := []struct {
+		pointer interface{}
+	}{
+		{&testVal1},
+		{&testVal2},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				expectedPointerAddress := fmt.Sprintf("%p", tt.pointer)
+
+				assert.EqualValues(
+					expectedPointerAddress,
+					Pointers().MustGetMemoryAddressAsHexString(tt.pointer),
+				)
+			},
+		)
+	}
+}
+
+func TestPointersPointersEqual(t *testing.T) {
+	tests := []struct {
+		pointer1        interface{}
+		pointer2        interface{}
+		expectedIsEqual bool
+	}{
+		{nil, nil, true},
+		{nil, &testVal1, false},
+		{&testVal1, nil, false},
+		{&testVal1, &testVal1, true},
+		{&testVal2, &testVal2, true},
+		{&testVal1, &testVal2, false},
+		{&testVal2, &testVal1, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(
+					tt.expectedIsEqual,
+					Pointers().MustPointersEqual(tt.pointer1, tt.pointer2),
 				)
 			},
 		)
