@@ -206,3 +206,37 @@ func TestSlicesRemoveDuplicatedEntries(t *testing.T) {
 		)
 	}
 }
+
+func TestSlicesStringSlicesEqual(t *testing.T) {
+	tests := []struct {
+		input1        []string
+		input2        []string
+		expectedEqual bool
+	}{
+		{nil, nil, false},
+		{nil, []string{}, false},
+		{[]string{}, nil, false},
+		{[]string{}, []string{}, true},
+		{[]string{}, []string{"a"}, false},
+		{[]string{"a"}, []string{}, false},
+		{[]string{"a"}, []string{"A"}, false},
+		{[]string{"a"}, []string{"a"}, true},
+		{[]string{"a", "b"}, []string{"a"}, false},
+		{[]string{"a"}, []string{"a", "b"}, false},
+		{[]string{"a", "b"}, []string{"a", "b"}, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(
+					tt.expectedEqual,
+					Slices().StringSlicesEqual(tt.input1, tt.input2),
+				)
+			},
+		)
+	}
+}
