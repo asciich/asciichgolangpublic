@@ -1,6 +1,8 @@
 package asciichgolangpublic
 
 import (
+	"fmt"
+
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -108,6 +110,62 @@ func (g *GitlabProject) Exists(verbose bool) (projectExists bool, err error) {
 	return projectExists, nil
 }
 
+func (g *GitlabProject) GetDefaultBranchName() (defaultBranchName string, err error) {
+	nativeProject, err := g.GetNativeGitlabProject()
+	if err != nil {
+		return "", err
+	}
+
+	defaultBranchName = nativeProject.DefaultBranch
+	if defaultBranchName == "" {
+		return "", TracedError("defaultBranchName is empty string after evaluation")
+	}
+
+	return defaultBranchName, nil
+}
+
+func (g *GitlabProject) GetGitlabFqdn() (fqdn string, err error) {
+	gitlab, err := g.GetGitlab()
+	if err != nil {
+		return "", err
+	}
+
+	fqdn, err = gitlab.GetFqdn()
+	if err != nil {
+		return "", err
+	}
+
+	return fqdn, nil
+}
+
+func (g *GitlabProject) GetNativeGitlabProject() (nativeGitlabProject *gitlab.Project, err error) {
+	gitlabProjects, err := g.GetGitlabProjects()
+	if err != nil {
+		return nil, err
+	}
+
+	projectsService, err := gitlabProjects.GetNativeProjectsService()
+	if err != nil {
+		return nil, err
+	}
+
+	projectId, err := g.GetId()
+	if err != nil {
+		return nil, err
+	}
+
+	nativeProject, _, err := projectsService.GetProject(projectId, nil, nil)
+	if err != nil {
+		return nil, TracedErrorf("Unable to get native project: '%w'", err)
+	}
+
+	if nativeProject == nil {
+		return nil, TracedError("nativeProject is nil after evaluation")
+	}
+
+	return nativeProject, nil
+}
+
 func (g *GitlabProject) GetNewestVersion(verbose bool) (newestVersion Version, err error) {
 	availableVersions, err := g.GetVersions(verbose)
 	if err != nil {
@@ -141,24 +199,9 @@ func (g *GitlabProject) GetNewestVersionAsString(verbose bool) (newestVersionStr
 }
 
 func (g *GitlabProject) GetPath() (projectPath string, err error) {
-	gitlabProjects, err := g.GetGitlabProjects()
+	nativeProject, err := g.GetNativeGitlabProject()
 	if err != nil {
 		return "", err
-	}
-
-	projectsService, err := gitlabProjects.GetNativeProjectsService()
-	if err != nil {
-		return "", err
-	}
-
-	projectId, err := g.GetId()
-	if err != nil {
-		return "", err
-	}
-
-	nativeProject, _, err := projectsService.GetProject(projectId, nil, nil)
-	if err != nil {
-		return "", TracedErrorf("Unable to get native project: '%w'", err)
 	}
 
 	projectPath = nativeProject.PathWithNamespace
@@ -172,6 +215,33 @@ func (g *GitlabProject) GetPath() (projectPath string, err error) {
 	}
 
 	return projectPath, nil
+}
+
+func (g *GitlabProject) GetProjectUrl() (projectUrl string, err error) {
+	fqdn, err := g.GetGitlabFqdn()
+	if err != nil {
+		return "", err
+	}
+
+	projectPath, err := g.GetPath()
+	if err != nil {
+		return "", err
+	}
+
+	projectUrl = fmt.Sprintf("https://%s/%s", fqdn, projectPath)
+
+	return projectUrl, nil
+}
+
+func (g *GitlabProject) GetRepositoryFiles() (repositoryFiles *GitlabRepositoryFiles, err error) {
+	repositoryFiles = NewGitlabRepositoryFiles()
+
+	err = repositoryFiles.SetGitlabProject(g)
+	if err != nil {
+		return nil, err
+	}
+
+	return repositoryFiles, nil
 }
 
 func (g *GitlabProject) GetTags() (gitlabTags *GitlabTags, err error) {
@@ -269,6 +339,15 @@ func (g *GitlabProject) MustGetCachedPath() (path string) {
 	return path
 }
 
+func (g *GitlabProject) MustGetDefaultBranchName() (defaultBranchName string) {
+	defaultBranchName, err := g.GetDefaultBranchName()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return defaultBranchName
+}
+
 func (g *GitlabProject) MustGetDeployKeyByName(keyName string) (projectDeployKey *GitlabProjectDeployKey) {
 	projectDeployKey, err := g.GetDeployKeyByName(keyName)
 	if err != nil {
@@ -296,6 +375,15 @@ func (g *GitlabProject) MustGetGitlab() (gitlab *GitlabInstance) {
 	return gitlab
 }
 
+func (g *GitlabProject) MustGetGitlabFqdn() (fqdn string) {
+	fqdn, err := g.GetGitlabFqdn()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return fqdn
+}
+
 func (g *GitlabProject) MustGetGitlabProjectDeployKeys() (projectDeployKeys *GitlabProjectDeployKeys) {
 	projectDeployKeys, err := g.GetGitlabProjectDeployKeys()
 	if err != nil {
@@ -321,6 +409,15 @@ func (g *GitlabProject) MustGetId() (id int) {
 	}
 
 	return id
+}
+
+func (g *GitlabProject) MustGetNativeGitlabProject() (nativeGitlabProject *gitlab.Project) {
+	nativeGitlabProject, err := g.GetNativeGitlabProject()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return nativeGitlabProject
 }
 
 func (g *GitlabProject) MustGetNativeProjectsService() (nativeGitlabProject *gitlab.ProjectsService) {
@@ -357,6 +454,24 @@ func (g *GitlabProject) MustGetPath() (projectPath string) {
 	}
 
 	return projectPath
+}
+
+func (g *GitlabProject) MustGetProjectUrl() (projectUrl string) {
+	projectUrl, err := g.GetProjectUrl()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return projectUrl
+}
+
+func (g *GitlabProject) MustGetRepositoryFiles() (repositoryFiles *GitlabRepositoryFiles) {
+	repositoryFiles, err := g.GetRepositoryFiles()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return repositoryFiles
 }
 
 func (g *GitlabProject) MustGetTags() (gitlabTags *GitlabTags) {
@@ -409,6 +524,15 @@ func (g *GitlabProject) MustMakePublic(verbose bool) {
 	}
 }
 
+func (g *GitlabProject) MustReadFileContentAsString(options *GitlabReadFileOptions) (content string) {
+	content, err := g.ReadFileContentAsString(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return content
+}
+
 func (g *GitlabProject) MustRecreateDeployKey(keyOptions *GitlabCreateDeployKeyOptions) {
 	err := g.RecreateDeployKey(keyOptions)
 	if err != nil {
@@ -435,6 +559,51 @@ func (g *GitlabProject) MustSetId(id int) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (g *GitlabProject) MustWriteFileContent(options *GitlabWriteFileOptions) (gitlabRepsoitoryFile *GitlabRepositoryFile) {
+	gitlabRepsoitoryFile, err := g.WriteFileContent(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitlabRepsoitoryFile
+}
+
+func (g *GitlabProject) ReadFileContentAsString(options *GitlabReadFileOptions) (content string, err error) {
+	if options == nil {
+		return "", TracedErrorNil("options")
+	}
+
+	repositoryFiles, err := g.GetRepositoryFiles()
+	if err != nil {
+		return "", err
+	}
+
+	content, err = repositoryFiles.ReadFileContentAsString(options)
+	if err != nil {
+		return "", err
+	}
+
+	return content, nil
+}
+
+func (g *GitlabProject) WriteFileContent(options *GitlabWriteFileOptions) (gitlabRepsoitoryFile *GitlabRepositoryFile, err error) {
+	if options == nil {
+		return nil, TracedErrorNil("options")
+	}
+
+	repositoryFiles, err := g.GetRepositoryFiles()
+	if err != nil {
+		return nil, err
+	}
+
+	gitlabRepsoitoryFile, err = repositoryFiles.WriteFileContent(options)
+	if err != nil {
+		return nil, err
+	}
+
+	return gitlabRepsoitoryFile, nil
 }
 
 func (p *GitlabProject) DeployKeyByNameExists(keyName string) (exists bool, err error) {

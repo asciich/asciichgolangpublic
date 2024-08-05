@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"runtime/debug"
 	"strings"
-
 )
 
 const SOFTWARE_NAME_UNDEFINED = "[software name not defined]"

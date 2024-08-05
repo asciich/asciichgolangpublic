@@ -1,6 +1,5 @@
 package asciichgolangpublic
 
-
 type GitlabResetPasswordOptions struct {
 	Username                        string
 	GitlabContainerNameOnGitlabHost string

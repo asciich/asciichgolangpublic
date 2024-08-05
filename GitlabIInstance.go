@@ -419,6 +419,20 @@ func (g *GitlabInstance) GetNativeClient() (nativeClient *gitlab.Client, err err
 	return g.nativeClient, nil
 }
 
+func (g *GitlabInstance) GetNativeRepositoryFilesClient() (nativeRepositoryFilesClient *gitlab.RepositoryFilesService, err error) {
+	client, err := g.GetNativeClient()
+	if err != nil {
+		return nil, err
+	}
+
+	nativeRepositoryFilesClient = client.RepositoryFiles
+	if nativeRepositoryFilesClient == nil {
+		return nil, TracedError("nativeRepositoryFilesClient is nil after evaluation")
+	}
+
+	return nativeRepositoryFilesClient, nil
+}
+
 func (g *GitlabInstance) GetNativeTagsService() (nativeTagsService *gitlab.TagsService, err error) {
 	nativeClient, err := g.GetNativeClient()
 	if err != nil {
@@ -757,6 +771,15 @@ func (g *GitlabInstance) MustGetNativeClient() (nativeClient *gitlab.Client) {
 	}
 
 	return nativeClient
+}
+
+func (g *GitlabInstance) MustGetNativeRepositoryFilesClient() (nativeRepositoryFilesClient *gitlab.RepositoryFilesService) {
+	nativeRepositoryFilesClient, err := g.GetNativeRepositoryFilesClient()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return nativeRepositoryFilesClient
 }
 
 func (g *GitlabInstance) MustGetNativeTagsService() (nativeTagsService *gitlab.TagsService) {

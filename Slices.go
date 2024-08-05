@@ -17,6 +17,28 @@ func Slices() (slices *SlicesService) {
 	return new(SlicesService)
 }
 
+func (o *SlicesService) ByteSlicesEqual(input1 []byte, input2 []byte) (slicesEqual bool) {
+	if input1 == nil {
+		return false
+	}
+
+	if input2 == nil {
+		return false
+	}
+
+	if len(input1) != len(input2) {
+		return false
+	}
+
+	for i, toCeck := range input1 {
+		if toCeck != input2[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (o *SlicesService) StringSlicesEqual(input1 []string, input2 []string) (slicesEqual bool) {
 	if input1 == nil {
 		return false

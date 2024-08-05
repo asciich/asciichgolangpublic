@@ -78,7 +78,7 @@ func (g *GitlabProjects) GetProjectByProjectPath(projectPath string) (gitlabProj
 
 	nativeProject, _, err := nativeProjectsClient.GetProject(projectPath, &gitlab.GetProjectOptions{})
 	if err != nil {
-		if Strings().ContainsAtLeastOneSubstring(err.Error(), []string{"404 {message: 404 Project Not Found}"}) {
+		if Strings().ContainsAtLeastOneSubstring(err.Error(), []string{"404 {message: 404 Project Not Found}", "404 Not Found"}) {
 			return nil, TracedErrorf("%w: %s", ErrGitlabProjectNotFound, projectPath)
 		}
 		return nil, err
@@ -489,7 +489,7 @@ func (p *GitlabProjects) ProjectByProjectPathExists(projectPath string, verbose 
 
 	_, err = p.GetProjectByProjectPath(projectPath)
 	if err != nil {
-		if errors.Is(err, ErrGitlabGroupNotFoundError) {
+		if errors.Is(err, ErrGitlabProjectNotFound) {
 			if verbose {
 				LogInfof("Gitlab project '%s' does not exist.", projectPath)
 			}
