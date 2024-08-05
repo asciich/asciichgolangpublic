@@ -2,7 +2,6 @@ package asciichgolangpublic
 
 import (
 	"fmt"
-
 )
 
 type GitlabResetAccessTokenOptions struct {
