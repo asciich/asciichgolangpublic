@@ -140,6 +140,40 @@ func (g *GitlabProject) GetNewestVersionAsString(verbose bool) (newestVersionStr
 	return newestVersionString, nil
 }
 
+func (g *GitlabProject) GetPath() (projectPath string, err error) {
+	gitlabProjects, err := g.GetGitlabProjects()
+	if err != nil {
+		return "", err
+	}
+
+	projectsService, err := gitlabProjects.GetNativeProjectsService()
+	if err != nil {
+		return "", err
+	}
+
+	projectId, err := g.GetId()
+	if err != nil {
+		return "", err
+	}
+
+	nativeProject, _, err := projectsService.GetProject(projectId, nil, nil)
+	if err != nil {
+		return "", TracedErrorf("Unable to get native project: '%w'", err)
+	}
+
+	projectPath = nativeProject.PathWithNamespace
+	if projectPath == "" {
+		return "", TracedError("projectPath is empty string after evaluation")
+	}
+
+	err = g.SetCachedPath(projectPath)
+	if err != nil {
+		return "", err
+	}
+
+	return projectPath, nil
+}
+
 func (g *GitlabProject) GetTags() (gitlabTags *GitlabTags, err error) {
 	gitlabTags = NewGitlabTags()
 
@@ -310,6 +344,15 @@ func (g *GitlabProject) MustGetNewestVersionAsString(verbose bool) (newestVersio
 	}
 
 	return newestVersionString
+}
+
+func (g *GitlabProject) MustGetPath() (projectPath string) {
+	projectPath, err := g.GetPath()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return projectPath
 }
 
 func (g *GitlabProject) MustGetTags() (gitlabTags *GitlabTags) {
