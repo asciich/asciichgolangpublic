@@ -1,7 +1,6 @@
 package asciichgolangpublic
 
 import (
-
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -88,6 +87,25 @@ func MustGetGitlabProjectByUrlFromString(urlString string, authOptions []Authent
 
 func NewGitlabProject() (gitlabProject *GitlabProject) {
 	return new(GitlabProject)
+}
+
+func (g *GitlabProject) Exists(verbose bool) (projectExists bool, err error) {
+	gitlab, err := g.GetGitlab()
+	if err != nil {
+		return false, err
+	}
+
+	projectId, err := g.GetId()
+	if err != nil {
+		return false, err
+	}
+
+	projectExists, err = gitlab.ProjectByProjectIdExists(projectId, verbose)
+	if err != nil {
+		return false, err
+	}
+
+	return projectExists, nil
 }
 
 func (g *GitlabProject) GetNewestVersion(verbose bool) (newestVersion Version, err error) {
@@ -193,6 +211,15 @@ func (g *GitlabProject) MustDeployKeyByNameExists(keyName string) (exists bool) 
 	}
 
 	return exists
+}
+
+func (g *GitlabProject) MustExists(verbose bool) (projectExists bool) {
+	projectExists, err := g.Exists(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return projectExists
 }
 
 func (g *GitlabProject) MustGetCachedPath() (path string) {
