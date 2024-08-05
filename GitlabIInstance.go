@@ -890,6 +890,24 @@ func (g *GitlabInstance) MustUseUnauthenticatedClient(verbose bool) {
 	}
 }
 
+func (g *GitlabInstance) ProjectByProjectIdExists(projectId int, verbose bool) (projectExists bool, err error) {
+	if projectId <= 0 {
+		return false, TracedErrorf("projectId '%d' <= 0 is invalid", projectId)
+	}
+
+	gitlabProjects, err := g.GetGitlabProjects()
+	if err != nil {
+		return false, err
+	}
+
+	projectExists, err = gitlabProjects.ProjectByProjectIdExists(projectId, verbose)
+	if err != nil {
+		return false, err
+	}
+
+	return projectExists, nil
+}
+
 func (g *GitlabInstance) ProjectByProjectPathExists(projectPath string, verbose bool) (projectExists bool, err error) {
 	if len(projectPath) <= 0 {
 		return false, TracedError("projectPath is empty string")

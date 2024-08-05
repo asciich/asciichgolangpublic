@@ -15,10 +15,6 @@ func NewGitlabAuthenticationOptions() (g *GitlabAuthenticationOptions) {
 	return new(GitlabAuthenticationOptions)
 }
 
-func (g *GitlabAuthenticationOptions) IsAccessTokenSet() (isSet bool) {
-	return g.AccessToken != ""
-}
-
 func (g *GitlabAuthenticationOptions) GetAccessToken() (accessToken string, err error) {
 	if g.AccessToken == "" {
 		return "", TracedErrorf("AccessToken not set")
@@ -50,6 +46,10 @@ func (g *GitlabAuthenticationOptions) GetGitlabUrl() (gitlabUrl string, err erro
 func (g *GitlabAuthenticationOptions) GetVerbose() (verbose bool, err error) {
 
 	return g.Verbose, nil
+}
+
+func (g *GitlabAuthenticationOptions) IsAccessTokenSet() (isSet bool) {
+	return g.AccessToken != ""
 }
 
 func (g *GitlabAuthenticationOptions) IsAuthenticatingAgainst(serviceName string) (isAuthenticatingAgainst bool, err error) {

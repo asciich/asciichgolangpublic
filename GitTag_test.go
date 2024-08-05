@@ -8,11 +8,11 @@ import (
 )
 
 
-func TestGitlabProjectsProjectDoesNotExist(t *testing.T) {
+func TestGitTagGetTagByHash(t *testing.T) {
 	tests := []struct {
 		testcase string
 	}{
-		{"thisProjectDoesNotExist"},
+		{"testcase"},
 	}
 
 	for _, tt := range tests {
