@@ -12,6 +12,7 @@ type File interface {
 	Delete(verbose bool) (err error)
 	Exists() (exists bool, err error)
 	GetBaseName() (baseName string, err error)
+	GetDeepCopy() (deepCopy File)
 	GetLocalPath() (localPath string, err error)
 	GetParentDirectory() (parentDirectory Directory, err error)
 	GetUriAsString() (uri string, err error)

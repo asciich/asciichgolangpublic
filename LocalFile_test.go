@@ -407,3 +407,40 @@ func TestFileGetTextBlocksYamlWithLeadingThreeMinuses(t *testing.T) {
 		)
 	}
 }
+
+func TestLocalFileGetDeepCopy(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				var testFile File = TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)
+				localTestFile := MustGetLocalFileByFile(testFile)
+
+				copy := testFile.GetDeepCopy()
+				assert.EqualValues(
+					testFile.MustGetLocalPath(),
+					copy.MustGetLocalPath(),
+				)
+				localCopy := MustGetLocalFileByFile(copy)
+
+				assert.False(Pointers().MustPointersEqual(
+					localTestFile.MustGetParentFileForBaseClassAsLocalFile(),
+					localCopy.MustGetParentFileForBaseClassAsLocalFile(),
+				))
+
+				assert.True(testFile.MustExists())
+				assert.True(copy.MustExists())
+			},
+		)
+	}
+}
