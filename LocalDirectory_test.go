@@ -217,6 +217,63 @@ func TestLocalDirectoryGetLocalPathIsAbsolute(t *testing.T) {
 	}
 }
 
+func TestLocalDirectoryGetSubDirectories_RelativePaths(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+
+				testDirectory := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
+
+				testDirectory.MustCreateSubDirectory("test1", verbose)
+				test2 := testDirectory.MustCreateSubDirectory("test2", verbose)
+
+				test2.MustCreateSubDirectory("a", verbose)
+				test2.MustCreateSubDirectory("b", verbose)
+				test2.MustCreateSubDirectory("c", verbose)
+
+				subDirectoryList := testDirectory.MustGetSubDirectoryPaths(
+					&ListDirectoryOptions{
+						Recursive:           false,
+						ReturnRelativePaths: true,
+						Verbose:             verbose,
+					},
+				)
+
+				assert.Len(subDirectoryList, 2)
+				assert.EqualValues(subDirectoryList[0], "test1")
+				assert.EqualValues(subDirectoryList[1], "test2")
+
+				subDirectoryList = testDirectory.MustGetSubDirectoryPaths(
+					&ListDirectoryOptions{
+						Recursive:           true,
+						ReturnRelativePaths: true,
+						Verbose:             verbose,
+					},
+				)
+
+				assert.Len(subDirectoryList, 5)
+				assert.EqualValues(subDirectoryList[0], "test1")
+				assert.EqualValues(subDirectoryList[1], "test2")
+				assert.EqualValues(subDirectoryList[2], "test2/a")
+				assert.EqualValues(subDirectoryList[3], "test2/b")
+				assert.EqualValues(subDirectoryList[4], "test2/c")
+
+			},
+		)
+	}
+
+}
+
 func TestLocalDirectoryGetSubDirectories(t *testing.T) {
 	tests := []struct {
 		testcase string

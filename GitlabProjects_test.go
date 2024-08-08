@@ -1,6 +1,6 @@
 package asciichgolangpublic
 
-/*
+
 import (
 	"testing"
 
@@ -8,6 +8,11 @@ import (
 )
 
 func TestGitlabProjectsProjectDoesNotExist(t *testing.T) {
+	if ContinuousIntegration().IsRunningInContinuousIntegration() {
+		LogInfo("Unavailable in CI")
+		return
+	}
+	
 	tests := []struct {
 		testcase string
 	}{
@@ -32,6 +37,11 @@ func TestGitlabProjectsProjectDoesNotExist(t *testing.T) {
 }
 
 func TestGitlabProjectsGetProjectIdAndPath(t *testing.T) {
+	if ContinuousIntegration().IsRunningInContinuousIntegration() {
+		LogInfo("Unavailable in CI")
+		return
+	}
+	
 	tests := []struct {
 		testcase string
 	}{
@@ -93,6 +103,11 @@ func TestGitlabProjectsGetProjectIdAndPath(t *testing.T) {
 }
 
 func TestGitlabProjectsGetFileContentAsString(t *testing.T) {
+	if ContinuousIntegration().IsRunningInContinuousIntegration() {
+		LogInfo("Unavailable in CI")
+		return
+	}
+	
 	tests := []struct {
 		testcase string
 	}{
@@ -141,4 +156,3 @@ func TestGitlabProjectsGetFileContentAsString(t *testing.T) {
 		)
 	}
 }
-*/
