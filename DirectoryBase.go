@@ -51,7 +51,12 @@ func (d *DirectoryBase) FileInDirectoryExists(path ...string) (fileExists bool, 
 		return false, err
 	}
 
-	fileExists, err = parent.Exists()
+	fileToCheck, err := parent.GetFileInDirectory(path...)
+	if err != nil {
+		return false, err
+	}
+
+	fileExists, err = fileToCheck.Exists()
 	if err != nil {
 		return false, err
 	}

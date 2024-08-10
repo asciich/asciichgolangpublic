@@ -214,6 +214,24 @@ func (l *LocalDirectory) GetFileInDirectory(path ...string) (file File, err erro
 	return file, nil
 }
 
+func (l *LocalDirectory) GetFileInDirectoryAsLocalFile(filePath ...string) (localFile *LocalFile, err error) {
+	if len(filePath) <= 0 {
+		return nil, TracedErrorNil("filePath")
+	}
+
+	fileInDir, err := l.GetFileInDirectory(filePath...)
+	if err != nil {
+		return nil, err
+	}
+
+	localFile, ok := fileInDir.(*LocalFile)
+	if !ok {
+		return nil, TracedError("Internal error: unable get as LocalFile")
+	}
+
+	return localFile, nil
+}
+
 func (l *LocalDirectory) GetGitRepositories(verbose bool) (gitRepos []GitRepository, err error) {
 	localRepositories, err := l.GetGitRepositoriesAsLocalGitRepositories(verbose)
 	if err != nil {
@@ -504,6 +522,15 @@ func (l *LocalDirectory) MustGetFileInDirectory(path ...string) (file File) {
 	return file
 }
 
+func (l *LocalDirectory) MustGetFileInDirectoryAsLocalFile(filePath ...string) (localFile *LocalFile) {
+	localFile, err := l.GetFileInDirectoryAsLocalFile(filePath...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return localFile
+}
+
 func (l *LocalDirectory) MustGetGitRepositories(verbose bool) (gitRepos []GitRepository) {
 	gitRepos, err := l.GetGitRepositories(verbose)
 	if err != nil {
@@ -592,6 +619,15 @@ func (l *LocalDirectory) MustSubDirectoryExists(subDirName string, verbose bool)
 	return subDirExists
 }
 
+func (l *LocalDirectory) MustWriteStringToFileInDirectory(content string, verbose bool, filePath ...string) (writtenFile *LocalFile) {
+	writtenFile, err := l.WriteStringToFileInDirectory(content, verbose, filePath...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return writtenFile
+}
+
 func (l *LocalDirectory) SetLocalPath(localPath string) (err error) {
 	if localPath == "" {
 		return TracedErrorf("localPath is empty string")
@@ -630,4 +666,22 @@ func (l *LocalDirectory) SubDirectoryExists(subDirName string, verbose bool) (su
 	}
 
 	return subDirExists, nil
+}
+
+func (l *LocalDirectory) WriteStringToFileInDirectory(content string, verbose bool, filePath ...string) (writtenFile *LocalFile, err error) {
+	if len(filePath) <= 0 {
+		return nil, TracedErrorNil("filePath")
+	}
+
+	writtenFile, err = l.GetFileInDirectoryAsLocalFile(filePath...)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writtenFile.WriteString(content, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return writtenFile, nil
 }
