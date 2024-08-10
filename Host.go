@@ -6,8 +6,9 @@ import (
 	"time"
 )
 
+// Host represents a classical host like a VM, Laptop, Desktop, Server.
 type Host struct {
-	CommandExecutor
+	CommandExecutorBase
 	hostname    string
 	sshUsername string
 	Comment     string
@@ -39,7 +40,28 @@ func MustGetHostByHostname(hostname string) (host *Host) {
 
 func NewHost() (host *Host) {
 	host = new(Host)
+
+	host.MustSetParentCommandExecutorForBaseClass(host)
+
 	return host
+}
+
+func (h *Host) RunCommand(options *RunCommandOptions) (commandOutput *CommandOutput, err error) {
+	if options == nil {
+		return nil, TracedErrorNil("options")
+	}
+
+	sshClient, err := h.GetSSHClient()
+	if err != nil {
+		return nil, err
+	}
+
+	commandOutput, err = sshClient.RunCommand(options)
+	if err != nil {
+		return nil, err
+	}
+
+	return commandOutput, nil
 }
 
 func (h *Host) AddSshHostKeyToKnownHosts(verbose bool) (err error) {
@@ -340,7 +362,6 @@ func (h *Host) GetSshUsername() (sshUsername string, err error) {
 	return h.sshUsername, nil
 }
 
-
 func (h *Host) InstallBinary(installOptions *InstallOptions) (err error) {
 	return TracedErrorNotImplemented()
 	/* TODO enable again
@@ -502,7 +523,6 @@ func (h *Host) MustAddSshHostKeyToKnownHosts(verbose bool) {
 	}
 }
 
-
 func (h *Host) MustCheckIsKubernetesControlplane(verbose bool) (isKubernetesControlplane bool) {
 	isKubernetesControlplane, err := h.CheckIsKubernetesControlplane(verbose)
 	if err != nil {
@@ -660,7 +680,6 @@ func (h *Host) MustInstallBinary(installOptions *InstallOptions) {
 		LogGoErrorFatal(err)
 	}
 }
-
 
 func (h *Host) MustIsPingable(verbose bool) (isPingable bool) {
 	isPingable, err := h.IsPingable(verbose)
@@ -946,4 +965,13 @@ func (h *Host) WaitUntilReachableBySsh(renewHostKey bool, verbose bool) (err err
 			)
 		}
 	}
+}
+
+func (h *Host) MustRunCommand(options *RunCommandOptions) (commandOutput *CommandOutput) {
+	commandOutput, err := h.RunCommand(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return commandOutput
 }
