@@ -46,7 +46,6 @@ func (d *DockerService) GetHost() (host *Host, err error) {
 	return d.host, nil
 }
 
-
 func (d *DockerService) IsHostSet() (isSet bool) {
 	return d.host != nil
 }
