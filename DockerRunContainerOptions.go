@@ -1,6 +1,5 @@
 package asciichgolangpublic
 
-
 type DockerRunContainerOptions struct {
 	ImageName               string
 	Name                    string

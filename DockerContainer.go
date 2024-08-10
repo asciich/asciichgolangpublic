@@ -33,7 +33,6 @@ func (c *DockerContainer) GetName() (name string, err error) {
 	return c.name, nil
 }
 
-
 func (c *DockerContainer) IsRunning(verbose bool) (isRunning bool, err error) {
 	containerName, err := c.GetName()
 	if err != nil {
