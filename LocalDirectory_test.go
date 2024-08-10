@@ -378,3 +378,37 @@ func TestLocalDirectoryGetGitRepositories(t *testing.T) {
 		)
 	}
 }
+
+func TestLocalDirectoryWriteStringToFile(t *testing.T) {
+	tests := []struct {
+		fileName string
+		content  string
+	}{
+		{"a.txt", "testcase"},
+		{"b.txt", "testcase\nmultiline"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+
+				testDirectory := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
+				defer testDirectory.Delete(verbose)
+
+				assert.False(testDirectory.MustFileInDirectoryExists(tt.fileName))
+
+				testFile := testDirectory.MustWriteStringToFileInDirectory(tt.content, verbose, tt.fileName)
+
+				assert.True(testDirectory.MustFileInDirectoryExists(tt.fileName))
+				assert.EqualValues(
+					tt.content,
+					testFile.MustReadAsString(),
+				)
+			},
+		)
+	}
+}
