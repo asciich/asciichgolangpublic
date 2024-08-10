@@ -119,7 +119,6 @@ func (g *GitCommit) GetParentCommits(options *GitCommitGetParentsOptions) (paren
 	return parentCommit, nil
 }
 
-
 func (g *GitCommit) HasParentCommit() (hasParentCommit bool, err error) {
 	hash, err := g.GetHash()
 	if err != nil {
