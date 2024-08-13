@@ -8,8 +8,8 @@ import (
 )
 
 func TestGitlabProjectsProjectDoesNotExist(t *testing.T) {
-	if ContinuousIntegration().IsRunningInContinuousIntegration() {
-		LogInfo("Unavailable in CI")
+	if ContinuousIntegration().IsRunningInGithub() {
+		LogInfo("Unavailable in Github CI")
 		return
 	}
 	
@@ -37,15 +37,15 @@ func TestGitlabProjectsProjectDoesNotExist(t *testing.T) {
 }
 
 func TestGitlabProjectsGetProjectIdAndPath(t *testing.T) {
-	if ContinuousIntegration().IsRunningInContinuousIntegration() {
-		LogInfo("Unavailable in CI")
+	if ContinuousIntegration().IsRunningInGithub() {
+		LogInfo("Unavailable in Github CI")
 		return
 	}
 	
 	tests := []struct {
 		testcase string
 	}{
-		{"thisProjectDoesNotExist"},
+		{"testcase"},
 	}
 
 	for _, tt := range tests {
@@ -103,15 +103,15 @@ func TestGitlabProjectsGetProjectIdAndPath(t *testing.T) {
 }
 
 func TestGitlabProjectsGetFileContentAsString(t *testing.T) {
-	if ContinuousIntegration().IsRunningInContinuousIntegration() {
-		LogInfo("Unavailable in CI")
+	if ContinuousIntegration().IsRunningInGithub() {
+		LogInfo("Unavailable in Github CI")
 		return
 	}
 	
 	tests := []struct {
 		testcase string
 	}{
-		{"thisProjectDoesNotExist"},
+		{"testcase"},
 	}
 
 	for _, tt := range tests {

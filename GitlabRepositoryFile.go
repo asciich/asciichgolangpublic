@@ -18,6 +18,75 @@ func NewGitlabRepositoryFile() (g *GitlabRepositoryFile) {
 	return new(GitlabRepositoryFile)
 }
 
+func (g *GitlabRepositoryFile) Delete(commitMessage string, verbose bool) (err error) {
+	if commitMessage == "" {
+		return TracedErrorEmptyString("commitMessage")
+	}
+
+	nativeClient, projectId, err := g.GetNativeRepositoryFilesClientAndProjectId()
+	if err != nil {
+		return err
+	}
+
+	projectUrl, err := g.GetProjectUrl()
+	if err != nil {
+		return err
+	}
+
+	fileName, err := g.GetPath()
+	if err != nil {
+		return err
+	}
+
+	branchName, err := g.GetBranchName()
+	if err != nil {
+		return err
+	}
+
+	exits, err := g.Exists()
+	if err != nil {
+		return err
+	}
+
+	if exits {
+		_, err = nativeClient.DeleteFile(
+			projectId,
+			fileName,
+			&gitlab.DeleteFileOptions{
+				Branch:        &branchName,
+				CommitMessage: &commitMessage,
+			},
+		)
+		if err != nil {
+			return TracedErrorf(
+				"Failed to delete '%s' in branch '%s' on '%s': '%w'",
+				fileName,
+				branchName,
+				projectUrl,
+				err,
+			)
+		}
+
+		if verbose {
+			LogChangedf(
+				"File '%s' in branch '%s' of gitlab project '%s' deleted.",
+				fileName,
+				branchName,
+				projectUrl,
+			)
+		}
+	} else {
+		LogInfof(
+			"File '%s' in branch '%s' of gitlab project '%s' is already absent.",
+			fileName,
+			branchName,
+			projectUrl,
+		)
+	}
+
+	return err
+}
+
 func (g *GitlabRepositoryFile) Exists() (fileExists bool, err error) {
 	_, err = g.GetNativeRepositoryFile()
 	if err != nil {
@@ -154,6 +223,20 @@ func (g *GitlabRepositoryFile) GetNativeRepositoryFilesClient() (nativeRepositor
 	return nativeRepositoryFilesClient, nil
 }
 
+func (g *GitlabRepositoryFile) GetNativeRepositoryFilesClientAndProjectId() (nativeRepositoryFilesClient *gitlab.RepositoryFilesService, projectId int, err error) {
+	nativeRepositoryFilesClient, err = g.GetNativeRepositoryFilesClient()
+	if err != nil {
+		return nil, -1, err
+	}
+
+	projectId, err = g.GetProjectId()
+	if err != nil {
+		return nil, -1, err
+	}
+
+	return nativeRepositoryFilesClient, projectId, nil
+}
+
 func (g *GitlabRepositoryFile) GetPath() (path string, err error) {
 	if g.Path == "" {
 		return "", TracedErrorf("Path not set")
@@ -206,6 +289,13 @@ func (g *GitlabRepositoryFile) GetRepositoryFiles() (repositoryFiles *GitlabRepo
 
 func (g *GitlabRepositoryFile) IsBranchNameSet() (isSet bool) {
 	return g.BranchName != ""
+}
+
+func (g *GitlabRepositoryFile) MustDelete(commitMessage string, verbose bool) {
+	err := g.Delete(commitMessage, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (g *GitlabRepositoryFile) MustExists() (fileExists bool) {
@@ -278,6 +368,15 @@ func (g *GitlabRepositoryFile) MustGetNativeRepositoryFilesClient() (nativeRepos
 	}
 
 	return nativeRepositoryFilesClient
+}
+
+func (g *GitlabRepositoryFile) MustGetNativeRepositoryFilesClientAndProjectId() (nativeRepositoryFilesClient *gitlab.RepositoryFilesService, projectId int) {
+	nativeRepositoryFilesClient, projectId, err := g.GetNativeRepositoryFilesClientAndProjectId()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return nativeRepositoryFilesClient, projectId
 }
 
 func (g *GitlabRepositoryFile) MustGetPath() (path string) {
