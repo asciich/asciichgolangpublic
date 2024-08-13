@@ -16,6 +16,50 @@ func NewGitlabProjects() (gitlabProject *GitlabProjects) {
 	return new(GitlabProjects)
 }
 
+func (g *GitlabProject) DeleteAllRepositoryFiles(branchName string, verbose bool) (err error) {
+	repositoryFiles, err := g.GetRepositoryFiles()
+	if err != nil {
+		return err
+	}
+
+	err = repositoryFiles.DeleteAllRepositoryFiles(branchName, verbose)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *GitlabProject) HasNoRepositoryFiles(branchName string, verbose bool) (hasNoRepositoryFiles bool, err error) {
+	repositoryFiles, err := g.GetRepositoryFiles()
+	if err != nil {
+		return false, err
+	}
+
+	hasNoRepositoryFiles, err = repositoryFiles.HasNoRepositoryFiles(branchName, verbose)
+	if err != nil {
+		return false, err
+	}
+
+	return hasNoRepositoryFiles, nil
+}
+
+func (g *GitlabProject) MustDeleteAllRepositoryFiles(branchName string, verbose bool) {
+	err := g.DeleteAllRepositoryFiles(branchName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (g *GitlabProject) MustHasNoRepositoryFiles(branchName string, verbose bool) (hasNoRepositoryFiles bool) {
+	hasNoRepositoryFiles, err := g.HasNoRepositoryFiles(branchName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hasNoRepositoryFiles
+}
+
 func (g *GitlabProjects) GetProjectById(projectId int) (gitlabProject *GitlabProject, err error) {
 	if projectId <= 0 {
 		return nil, TracedErrorf("projectId '%d' <= 0 is invalid", projectId)

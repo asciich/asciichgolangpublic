@@ -17,6 +17,16 @@ func Slices() (slices *SlicesService) {
 	return new(SlicesService)
 }
 
+func (s *SlicesService) AtLeastOneElementStartsWith(elements []string, toCheck string) (atLeastOneElementStartsWith bool) {
+	for _, e := range elements {
+		if strings.HasPrefix(e, toCheck) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (o *SlicesService) ByteSlicesEqual(input1 []byte, input2 []byte) (slicesEqual bool) {
 	if input1 == nil {
 		return false

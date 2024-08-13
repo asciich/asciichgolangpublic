@@ -91,6 +91,20 @@ func NewGitlabProject() (gitlabProject *GitlabProject) {
 	return new(GitlabProject)
 }
 
+func (g *GitlabProject) CreateEmptyFile(fileName string, ref string, verbose bool) (createdFile *GitlabRepositoryFile, err error) {
+	repositoryFiles, err := g.GetRepositoryFiles()
+	if err != nil {
+		return nil, err
+	}
+
+	createdFile, err = repositoryFiles.CreateEmptyFile(fileName, ref, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdFile, nil
+}
+
 func (g *GitlabProject) Exists(verbose bool) (projectExists bool, err error) {
 	gitlab, err := g.GetGitlab()
 	if err != nil {
@@ -122,6 +136,34 @@ func (g *GitlabProject) GetDefaultBranchName() (defaultBranchName string, err er
 	}
 
 	return defaultBranchName, nil
+}
+
+func (g *GitlabProject) GetDirectoryNames(ref string, verbose bool) (directoryNames []string, err error) {
+	repositoryFiles, err := g.GetRepositoryFiles()
+	if err != nil {
+		return nil, err
+	}
+
+	directoryNames, err = repositoryFiles.GetDirectoryNames(ref, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return directoryNames, nil
+}
+
+func (g *GitlabProject) GetFilesNames(ref string, verbose bool) (fileNames []string, err error) {
+	repositoryFiles, err := g.GetRepositoryFiles()
+	if err != nil {
+		return nil, err
+	}
+
+	fileNames, err = repositoryFiles.GetFileNames(ref, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return fileNames, nil
 }
 
 func (g *GitlabProject) GetGitlabFqdn() (fqdn string, err error) {
@@ -312,6 +354,15 @@ func (g *GitlabProject) IsCachedPathSet() (isSet bool) {
 	return g.cachedPath != ""
 }
 
+func (g *GitlabProject) MustCreateEmptyFile(fileName string, ref string, verbose bool) (createdFile *GitlabRepositoryFile) {
+	createdFile, err := g.CreateEmptyFile(fileName, ref, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdFile
+}
+
 func (g *GitlabProject) MustDeployKeyByNameExists(keyName string) (exists bool) {
 	exists, err := g.DeployKeyByNameExists(keyName)
 	if err != nil {
@@ -364,6 +415,24 @@ func (g *GitlabProject) MustGetDeployKeys() (deployKeys *GitlabProjectDeployKeys
 	}
 
 	return deployKeys
+}
+
+func (g *GitlabProject) MustGetDirectoryNames(ref string, verbose bool) (directoryNames []string) {
+	directoryNames, err := g.GetDirectoryNames(ref, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return directoryNames
+}
+
+func (g *GitlabProject) MustGetFilesNames(ref string, verbose bool) (fileNames []string) {
+	fileNames, err := g.GetFilesNames(ref, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return fileNames
 }
 
 func (g *GitlabProject) MustGetGitlab() (gitlab *GitlabInstance) {
@@ -586,6 +655,16 @@ func (g *GitlabProject) ReadFileContentAsString(options *GitlabReadFileOptions) 
 	}
 
 	return content, nil
+}
+
+func (g *GitlabProject) SetId(id int) (err error) {
+	if id <= 0 {
+		return TracedErrorf("invalid id = '%d'", id)
+	}
+
+	g.id = id
+
+	return nil
 }
 
 func (g *GitlabProject) WriteFileContent(options *GitlabWriteFileOptions) (gitlabRepsoitoryFile *GitlabRepositoryFile, err error) {
@@ -816,16 +895,6 @@ func (p *GitlabProject) SetGitlab(gitlab *GitlabInstance) (err error) {
 	}
 
 	p.gitlab = gitlab
-
-	return nil
-}
-
-func (p *GitlabProject) SetId(id int) (err error) {
-	if id <= 0 {
-		return TracedErrorf("invalid id = '%d'", id)
-	}
-
-	p.id = id
 
 	return nil
 }

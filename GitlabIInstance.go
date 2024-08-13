@@ -419,6 +419,20 @@ func (g *GitlabInstance) GetNativeClient() (nativeClient *gitlab.Client, err err
 	return g.nativeClient, nil
 }
 
+func (g *GitlabInstance) GetNativeRepositoriesClient() (nativeRepositoriesClient *gitlab.RepositoriesService, err error) {
+	client, err := g.GetNativeClient()
+	if err != nil {
+		return nil, err
+	}
+
+	nativeRepositoriesClient = client.Repositories
+	if nativeRepositoriesClient == nil {
+		return nil, TracedError("Repositories is nil after evaluation")
+	}
+
+	return nativeRepositoriesClient, nil
+}
+
 func (g *GitlabInstance) GetNativeRepositoryFilesClient() (nativeRepositoryFilesClient *gitlab.RepositoryFilesService, err error) {
 	client, err := g.GetNativeClient()
 	if err != nil {
