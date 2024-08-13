@@ -91,6 +91,20 @@ func NewGitlabProject() (gitlabProject *GitlabProject) {
 	return new(GitlabProject)
 }
 
+func (g *GitlabProject) CreateBranchFromDefaultBranch(branchName string, verbose bool) (createdBranch *GitlabBranch, err error) {
+	branches, err := g.GetBranches()
+	if err != nil {
+		return nil, err
+	}
+
+	createdBranch, err = branches.CreateBranchFromDefaultBranch(branchName, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdBranch, nil
+}
+
 func (g *GitlabProject) CreateEmptyFile(fileName string, ref string, verbose bool) (createdFile *GitlabRepositoryFile, err error) {
 	repositoryFiles, err := g.GetRepositoryFiles()
 	if err != nil {
@@ -103,6 +117,20 @@ func (g *GitlabProject) CreateEmptyFile(fileName string, ref string, verbose boo
 	}
 
 	return createdFile, nil
+}
+
+func (g *GitlabProject) DeleteAllBranchesExceptDefaultBranch(verbose bool) (err error) {
+	branches, err := g.GetBranches()
+	if err != nil {
+		return err
+	}
+
+	err = branches.DeleteAllBranchesExceptDefaultBranch(verbose)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (g *GitlabProject) Exists(verbose bool) (projectExists bool, err error) {
@@ -122,6 +150,49 @@ func (g *GitlabProject) Exists(verbose bool) (projectExists bool, err error) {
 	}
 
 	return projectExists, nil
+}
+
+func (g *GitlabProject) GetBranchByName(branchName string) (branch *GitlabBranch, err error) {
+	if branchName == "" {
+		return nil, TracedErrorEmptyString("branchName")
+	}
+
+	branches, err := g.GetBranches()
+	if err != nil {
+		return nil, err
+	}
+
+	branch, err = branches.GetBranchByName(branchName)
+	if err != nil {
+		return nil, err
+	}
+
+	return branch, nil
+}
+
+func (g *GitlabProject) GetBranchNames(verbose bool) (branchNames []string, err error) {
+	branches, err := g.GetBranches()
+	if err != nil {
+		return nil, err
+	}
+
+	branchNames, err = branches.GetBranchNames(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return branchNames, nil
+}
+
+func (g *GitlabProject) GetBranches() (branches *GitlabBranches, err error) {
+	branches = NewGitlabBranches()
+
+	err = branches.SetGitlabProject(g)
+	if err != nil {
+		return nil, err
+	}
+
+	return branches, nil
 }
 
 func (g *GitlabProject) GetDefaultBranchName() (defaultBranchName string, err error) {
@@ -354,6 +425,15 @@ func (g *GitlabProject) IsCachedPathSet() (isSet bool) {
 	return g.cachedPath != ""
 }
 
+func (g *GitlabProject) MustCreateBranchFromDefaultBranch(branchName string, verbose bool) (createdBranch *GitlabBranch) {
+	createdBranch, err := g.CreateBranchFromDefaultBranch(branchName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdBranch
+}
+
 func (g *GitlabProject) MustCreateEmptyFile(fileName string, ref string, verbose bool) (createdFile *GitlabRepositoryFile) {
 	createdFile, err := g.CreateEmptyFile(fileName, ref, verbose)
 	if err != nil {
@@ -361,6 +441,13 @@ func (g *GitlabProject) MustCreateEmptyFile(fileName string, ref string, verbose
 	}
 
 	return createdFile
+}
+
+func (g *GitlabProject) MustDeleteAllBranchesExceptDefaultBranch(verbose bool) {
+	err := g.DeleteAllBranchesExceptDefaultBranch(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (g *GitlabProject) MustDeployKeyByNameExists(keyName string) (exists bool) {
@@ -379,6 +466,33 @@ func (g *GitlabProject) MustExists(verbose bool) (projectExists bool) {
 	}
 
 	return projectExists
+}
+
+func (g *GitlabProject) MustGetBranchByName(branchName string) (branch *GitlabBranch) {
+	branch, err := g.GetBranchByName(branchName)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return branch
+}
+
+func (g *GitlabProject) MustGetBranchNames(verbose bool) (branchNames []string) {
+	branchNames, err := g.GetBranchNames(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return branchNames
+}
+
+func (g *GitlabProject) MustGetBranches() (branches *GitlabBranches) {
+	branches, err := g.GetBranches()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return branches
 }
 
 func (g *GitlabProject) MustGetCachedPath() (path string) {

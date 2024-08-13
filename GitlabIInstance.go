@@ -411,6 +411,20 @@ func (g *GitlabInstance) GetHost() (gitlabHost *Host, err error) {
 	return gitlabHost, nil
 }
 
+func (g *GitlabInstance) GetNativeBranchesClient() (nativeClient *gitlab.BranchesService, err error) {
+	client, err := g.GetNativeClient()
+	if err != nil {
+		return nil, err
+	}
+
+	nativeClient = client.Branches
+	if nativeClient == nil {
+		return nil, TracedError("nativeClient is nil after evaluation")
+	}
+
+	return nativeClient, nil
+}
+
 func (g *GitlabInstance) GetNativeClient() (nativeClient *gitlab.Client, err error) {
 	if g.nativeClient == nil {
 		return nil, TracedError("nativeClient not set")
@@ -778,6 +792,15 @@ func (g *GitlabInstance) MustGetHost() (gitlabHost *Host) {
 	return gitlabHost
 }
 
+func (g *GitlabInstance) MustGetNativeBranchesClient() (nativeClient *gitlab.BranchesService) {
+	nativeClient, err := g.GetNativeBranchesClient()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return nativeClient
+}
+
 func (g *GitlabInstance) MustGetNativeClient() (nativeClient *gitlab.Client) {
 	nativeClient, err := g.GetNativeClient()
 	if err != nil {
@@ -785,6 +808,15 @@ func (g *GitlabInstance) MustGetNativeClient() (nativeClient *gitlab.Client) {
 	}
 
 	return nativeClient
+}
+
+func (g *GitlabInstance) MustGetNativeRepositoriesClient() (nativeRepositoriesClient *gitlab.RepositoriesService) {
+	nativeRepositoriesClient, err := g.GetNativeRepositoriesClient()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return nativeRepositoriesClient
 }
 
 func (g *GitlabInstance) MustGetNativeRepositoryFilesClient() (nativeRepositoryFilesClient *gitlab.RepositoryFilesService) {

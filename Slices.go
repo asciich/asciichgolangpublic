@@ -17,6 +17,20 @@ func Slices() (slices *SlicesService) {
 	return new(SlicesService)
 }
 
+func (s *SlicesService) RemoveString(elements []string, toRemove string) (cleanedUpElements []string) {
+	cleanedUpElements =[]string{}
+
+	for _, e := range elements {
+		if e == toRemove {
+			continue
+		}
+
+		cleanedUpElements = append(cleanedUpElements, e)
+	}
+
+	return cleanedUpElements
+}
+
 func (s *SlicesService) AtLeastOneElementStartsWith(elements []string, toCheck string) (atLeastOneElementStartsWith bool) {
 	for _, e := range elements {
 		if strings.HasPrefix(e, toCheck) {
