@@ -378,6 +378,13 @@ func (l *LocalFile) MustGetUriAsString() (uri string) {
 	return uri
 }
 
+func (l *LocalFile) MustPrintContentOnStdout() {
+	err := l.PrintContentOnStdout()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (l *LocalFile) MustReadAsBytes() (content []byte) {
 	content, err := l.ReadAsBytes()
 	if err != nil {
@@ -399,6 +406,17 @@ func (l *LocalFile) MustWriteBytes(toWrite []byte, verbose bool) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (l *LocalFile) PrintContentOnStdout() (err error) {
+	content, err := l.ReadAsString()
+	if err != nil {
+		return err
+	}
+
+	fmt.Print(content)
+
+	return nil
 }
 
 func (l *LocalFile) ReadAsBytes() (content []byte, err error) {
