@@ -25,8 +25,10 @@ type File interface {
 	MustGetLocalPath() (localPath string)
 	MustGetParentDirectory() (parentDirectory Directory)
 	MustGetUriAsString() (uri string)
+	MustPrintContentOnStdout()
 	MustReadAsBytes() (content []byte)
 	MustWriteBytes(toWrite []byte, verbose bool)
+	PrintContentOnStdout() (err error)
 	ReadAsBytes() (content []byte, err error)
 	WriteBytes(toWrite []byte, verbose bool) (err error)
 
