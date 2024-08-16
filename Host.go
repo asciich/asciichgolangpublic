@@ -88,7 +88,6 @@ func (h *Host) AddSshHostKeyToKnownHosts(verbose bool) (err error) {
 	return nil
 }
 
-/* TODO enable again
 func (h *Host) CheckFtpPortOpen(verbose bool) (err error) {
 	isOpen, err := h.IsFtpPortOpen(verbose)
 	if err != nil {
@@ -115,7 +114,6 @@ func (h *Host) CheckFtpPortOpen(verbose bool) (err error) {
 
 	return nil
 }
-*/
 
 func (h *Host) CheckIsKubernetesControlplane(verbose bool) (isKubernetesControlplane bool, err error) {
 	kubernetesControlplane, err := h.GetAsKubernetesControlplaneHost()
@@ -442,8 +440,6 @@ func (h *Host) InstallBinary(installOptions *InstallOptions) (err error) {
 	return nil
 	*/
 }
-
-/* TODO enable again
 func (h *Host) IsFtpPortOpen(verbose bool) (isOpen bool, err error) {
 	isOpen, err = h.IsTcpPortOpen(FTP().GetDefaultPort(), verbose)
 	if err != nil {
@@ -452,7 +448,6 @@ func (h *Host) IsFtpPortOpen(verbose bool) (isOpen bool, err error) {
 
 	return isOpen, nil
 }
-*/
 
 func (h *Host) IsPingable(verbose bool) (isPingable bool, err error) {
 	hostname, err := h.GetHostname()
