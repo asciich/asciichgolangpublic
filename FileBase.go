@@ -308,8 +308,6 @@ func (f *FileBase) WriteString(toWrite string, verbose bool) (err error) {
 }
 
 func (f *FileBase) WriteTextBlocks(textBlocks []string, verbose bool) (err error) {
-	const useSystemCalls bool = true
-
 	textToWrite := ""
 
 	for i, blockToWrite := range textBlocks {
