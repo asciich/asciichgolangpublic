@@ -2,6 +2,8 @@ package asciichgolangpublic
 
 import (
 	"errors"
+	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -184,6 +186,15 @@ func (f *FileBase) MustIsMatchingSha256Sum(sha256sum string) (isMatching bool) {
 	return isMatching
 }
 
+func (f *FileBase) MustReadAsInt64() (readValue int64) {
+	readValue, err := f.ReadAsInt64()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return readValue
+}
+
 func (f *FileBase) MustReadAsLines() (contentLines []string) {
 	contentLines, err := f.ReadAsLines()
 	if err != nil {
@@ -225,6 +236,13 @@ func (f *FileBase) MustSortBlocksInFile(verbose bool) {
 	}
 }
 
+func (f *FileBase) MustWriteInt64(toWrite int64, verbose bool) {
+	err := f.WriteInt64(toWrite, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (f *FileBase) MustWriteString(toWrite string, verbose bool) {
 	err := f.WriteString(toWrite, verbose)
 	if err != nil {
@@ -237,6 +255,34 @@ func (f *FileBase) MustWriteTextBlocks(textBlocks []string, verbose bool) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (f *FileBase) ReadAsInt64() (readValue int64, err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return 0, err
+	}
+
+	contentString, err := parent.ReadAsString()
+	if err != nil {
+		return 0, err
+	}
+
+	localPath, err := parent.GetLocalPath()
+	if err != nil {
+		return 0, err
+	}
+
+	readValue, err = strconv.ParseInt(contentString, 10, 64)
+	if err != nil {
+		return 0, TracedErrorf(
+			"Unable to parse file '%s' as int64: '%w'",
+			localPath,
+			err,
+		)
+	}
+
+	return readValue, nil
 }
 
 func (f *FileBase) ReadAsLines() (contentLines []string, err error) {
@@ -291,6 +337,17 @@ func (f *FileBase) SortBlocksInFile(verbose bool) (err error) {
 	blocks = Slices().SortStringSlice(blocks)
 
 	err = f.WriteTextBlocks(blocks, verbose)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *FileBase) WriteInt64(toWrite int64, verbose bool) (err error) {
+	stringRepresentation := fmt.Sprintf("%d", toWrite)
+
+	err = f.WriteString(stringRepresentation, verbose)
 	if err != nil {
 		return err
 	}

@@ -114,6 +114,35 @@ func TestLocalFileReadAndWriteAsBytes(t *testing.T) {
 	}
 }
 
+func TestLocalFileReadAndWriteAsInt64(t *testing.T) {
+	tests := []struct {
+		content int64
+	}{
+		{1},
+		{2},
+		{3},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = false
+
+				var file File = TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)
+
+				for i := 0; i < 2; i++ {
+					file.MustWriteInt64(tt.content, verbose)
+
+					assert.EqualValues(tt.content, file.MustReadAsInt64())
+				}
+			},
+		)
+	}
+}
+
 func TestLocalFileReadAndWriteAsString(t *testing.T) {
 	tests := []struct {
 		content string
