@@ -230,6 +230,10 @@ func (l *LocalFile) GetLocalPath() (path string, err error) {
 	return l.GetPath()
 }
 
+func (l *LocalFile) GetLocalPathOrEmptyStringIfUnset() (localPath string) {
+	return l.path
+}
+
 func (l *LocalFile) GetParentDirectory() (parentDirectory Directory, err error) {
 	localPath, err := l.GetLocalPath()
 	if err != nil {
@@ -394,6 +398,13 @@ func (l *LocalFile) MustReadAsBytes() (content []byte) {
 	return content
 }
 
+func (l *LocalFile) MustSecurelyDelete(verbose bool) {
+	err := l.SecurelyDelete(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (l *LocalFile) MustSetPath(path string) {
 	err := l.SetPath(path)
 	if err != nil {
@@ -431,6 +442,32 @@ func (l *LocalFile) ReadAsBytes() (content []byte, err error) {
 	}
 
 	return content, err
+}
+
+func (l *LocalFile) SecurelyDelete(verbose bool) (err error) {
+	pathToDelete, err := l.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	if !Paths().IsAbsolutePath(pathToDelete) {
+		return TracedErrorf("pathToDelete='%v' is not absolute", pathToDelete)
+	}
+
+	deleteCommand := []string{"shred", "-u", pathToDelete}
+	_, err = Bash().RunCommand(&RunCommandOptions{
+		Command: deleteCommand,
+		Verbose: verbose,
+	})
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		LogInfof("Securely deleted file '%s'.", pathToDelete)
+	}
+
+	return nil
 }
 
 func (l *LocalFile) SetPath(path string) (err error) {
