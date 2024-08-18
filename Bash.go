@@ -32,6 +32,15 @@ func (b *BashService) MustRunOneLiner(oneLiner string, verbose bool) (output *Co
 	return output
 }
 
+func (b *BashService) MustRunOneLinerAndGetStdoutAsLines(oneLiner string, verbose bool) (stdoutLines []string) {
+	stdoutLines, err := b.RunOneLinerAndGetStdoutAsLines(oneLiner, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return stdoutLines
+}
+
 func (b *BashService) MustRunOneLinerAndGetStdoutAsString(oneLiner string, verbose bool) (stdout string) {
 	stdout, err := b.RunOneLinerAndGetStdoutAsString(oneLiner, verbose)
 	if err != nil {
@@ -85,6 +94,20 @@ func (b *BashService) RunOneLiner(oneLiner string, verbose bool) (output *Comman
 	}
 
 	return output, nil
+}
+
+func (b *BashService) RunOneLinerAndGetStdoutAsLines(oneLiner string, verbose bool) (stdoutLines []string, err error) {
+	output, err := b.RunOneLiner(oneLiner, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	stdoutLines, err = output.GetStdoutAsLines()
+	if err != nil {
+		return nil, err
+	}
+
+	return stdoutLines, nil
 }
 
 func (b *BashService) RunOneLinerAndGetStdoutAsString(oneLiner string, verbose bool) (stdout string, err error) {

@@ -186,6 +186,15 @@ func (f *FileBase) MustIsMatchingSha256Sum(sha256sum string) (isMatching bool) {
 	return isMatching
 }
 
+func (f *FileBase) MustReadAsBool() (boolValue bool) {
+	boolValue, err := f.ReadAsBool()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return boolValue
+}
+
 func (f *FileBase) MustReadAsInt64() (readValue int64) {
 	readValue, err := f.ReadAsInt64()
 	if err != nil {
@@ -222,6 +231,24 @@ func (f *FileBase) MustReadAsString() (content string) {
 	return content
 }
 
+func (f *FileBase) MustReadFirstLine() (firstLine string) {
+	firstLine, err := f.ReadFirstLine()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return firstLine
+}
+
+func (f *FileBase) MustReadFirstLineAndTrimSpace() (firstLine string) {
+	firstLine, err := f.ReadFirstLineAndTrimSpace()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return firstLine
+}
+
 func (f *FileBase) MustSetParentFileForBaseClass(parentFileForBaseClass File) {
 	err := f.SetParentFileForBaseClass(parentFileForBaseClass)
 	if err != nil {
@@ -255,6 +282,22 @@ func (f *FileBase) MustWriteTextBlocks(textBlocks []string, verbose bool) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (f *FileBase) ReadAsBool() (boolValue bool, err error) {
+	contentString, err := f.ReadAsString()
+	if err != nil {
+		return false, err
+	}
+
+	contentString = strings.TrimSpace(contentString)
+
+	boolValue, err = strconv.ParseBool(contentString)
+	if err != nil {
+		return false, err
+	}
+
+	return boolValue, nil
 }
 
 func (f *FileBase) ReadAsInt64() (readValue int64, err error) {
@@ -320,6 +363,28 @@ func (f *FileBase) ReadAsString() (content string, err error) {
 	}
 
 	return string(contentBytes), nil
+}
+
+func (f *FileBase) ReadFirstLine() (firstLine string, err error) {
+	content, err := f.ReadAsString()
+	if err != nil {
+		return "", err
+	}
+
+	firstLine = Strings().GetFirstLine(content)
+
+	return firstLine, nil
+}
+
+func (f *FileBase) ReadFirstLineAndTrimSpace() (firstLine string, err error) {
+	firstLine, err = f.ReadFirstLine()
+	if err != nil {
+		return "", err
+	}
+
+	firstLine = strings.TrimSpace(firstLine)
+
+	return firstLine, nil
 }
 
 func (f *FileBase) SetParentFileForBaseClass(parentFileForBaseClass File) (err error) {
