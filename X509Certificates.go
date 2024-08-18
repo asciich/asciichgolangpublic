@@ -1,0 +1,924 @@
+package asciichgolangpublic
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+)
+
+type X509CertificatesService struct {
+}
+
+func NewX509CertificatesService() (x *X509CertificatesService) {
+	return new(X509CertificatesService)
+}
+
+func X509Certificates() (x509Certificaets *X509CertificatesService) {
+	return new(X509CertificatesService)
+}
+
+func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey Directory, err error) {
+	if createOptions == nil {
+		return nil, TracedError("createOptions is nil")
+	}
+
+	if !createOptions.GetUseTemporaryDirectory() {
+		return nil, TracedError("Only implemented for temporary directory")
+	}
+
+	directoryToUse, err := TemporaryDirectories().CreateEmptyTemporaryDirectory(createOptions.Verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	directoryPathToUse, err := directoryToUse.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
+	subjectString, err := createOptions.GetSubjectStringForOpenssl()
+	if err != nil {
+		return nil, err
+	}
+
+	if createOptions.Verbose {
+		LogInfof("Going to create new intermediate certificate for '%v'", subjectString)
+	}
+
+	sslCommand := []string{
+		"openssl",
+		"genrsa",
+		"-out",
+		filepath.Join(directoryPathToUse, "intermediateCertificate.key"),
+		"4096",
+	}
+
+	_, err = Bash().RunCommand(&RunCommandOptions{
+		Command: sslCommand,
+		Verbose: createOptions.Verbose,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if createOptions.Verbose {
+		LogInfof("Created intermediate certificate in temporary directory: '%v'", directoryPathToUse)
+	}
+
+	return directoryToUse, nil
+}
+
+func (c *X509CertificatesService) CreateRootCaAndaddToGopass(createOptions *X509CreateCertificateOptions, gopassOptions *GopassSecretOptions) (err error) {
+
+	if createOptions == nil {
+		return TracedError("createOptions is nil")
+	}
+
+	if gopassOptions == nil {
+		return TracedError("gopassOptions is nil")
+	}
+
+	if createOptions.Verbose {
+		LogInfo("Create root CA and add to gopass started.")
+	}
+
+	createOptionsToUse := createOptions.GetDeepCopy()
+	createOptionsToUse.UseTemporaryDirectory = true
+
+	certificateDir, err := c.CreateRootCaIntoDirectory(createOptionsToUse)
+	if err != nil {
+		return err
+	}
+
+	certFile, err := certificateDir.GetFileInDirectory("rootCA.crt")
+	if err != nil {
+		return err
+	}
+
+	keyFile, err := certificateDir.GetFileInDirectory("rootCA.key")
+	if err != nil {
+		return err
+	}
+
+	certFileExists, err := certFile.Exists()
+	if err != nil {
+		return err
+	}
+
+	if !certFileExists {
+		return TracedErrorf("Internal error: certFile '%v' does not exist", certFile.GetLocalPathOrEmptyStringIfUnset())
+	}
+
+	keyFileExists, err := keyFile.Exists()
+	if err != nil {
+		return err
+	}
+
+	if !keyFileExists {
+		return TracedErrorf("Internal error: keyFileExists '%v' does not exist", keyFile.GetLocalPathOrEmptyStringIfUnset())
+	}
+
+	certOptions := gopassOptions.GetDeepCopy()
+	certOptions.SecretBasename = "rootCa.crt"
+	err = Gopass().InsertFile(certFile, certOptions)
+	if err != nil {
+		return err
+	}
+
+	keyOptions := gopassOptions.GetDeepCopy()
+	keyOptions.SecretBasename = "rootCa.key"
+	err = Gopass().InsertFile(keyFile, keyOptions)
+	if err != nil {
+		return err
+	}
+
+	err = certFile.SecurelyDelete(gopassOptions.Verbose)
+	if err != nil {
+		return err
+	}
+
+	err = keyFile.SecurelyDelete(gopassOptions.Verbose)
+	if err != nil {
+		return err
+	}
+
+	if createOptions.Verbose {
+		LogInfo("Create root CA and add to gopass finished.")
+	}
+
+	return nil
+}
+
+func (c *X509CertificatesService) CreateRootCaIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey Directory, err error) {
+	if createOptions == nil {
+		return nil, TracedError("createOptions is nil")
+	}
+
+	if !createOptions.GetUseTemporaryDirectory() {
+		return nil, TracedError("Only implemented for temporary directory")
+	}
+
+	directoryToUse, err := TemporaryDirectories().CreateEmptyTemporaryDirectory(createOptions.Verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	directoryPathToUse, err := directoryToUse.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
+	subjectString, err := createOptions.GetSubjectStringForOpenssl()
+	if err != nil {
+		return nil, err
+	}
+
+	if createOptions.Verbose {
+		LogInfof("Going to create new RootCA for '%v'", subjectString)
+	}
+
+	sslCommand := []string{
+		"openssl",
+		"req",
+		"-x509",
+		"-sha256",
+		"-days",
+		"356",
+		"-nodes",
+		"-newkey",
+		"rsa:4096",
+		"-subj",
+		subjectString,
+		"-keyout",
+		"rootCA.key",
+		"-out",
+		"rootCA.crt",
+	}
+
+	joinedSslCommand, err := ShellLineHandler().Join(sslCommand)
+	if err != nil {
+		return nil, err
+	}
+
+	createCommand := []string{
+		"bash",
+		"-c",
+		fmt.Sprintf("cd '%v' && %v", directoryPathToUse, joinedSslCommand),
+	}
+
+	_, err = Bash().RunCommand(
+		&RunCommandOptions{
+			Command: createCommand,
+			Verbose: createOptions.Verbose,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if createOptions.Verbose {
+		LogInfof("Created root ca in temporary directory: '%v'", directoryPathToUse)
+	}
+
+	return directoryToUse, nil
+}
+
+func (c *X509CertificatesService) CreateSignedCertificate(createOptions *X509CreateCertificateOptions) (err error) {
+	if createOptions == nil {
+		return TracedError("createOptions is nil")
+	}
+
+	outputKeyOnStdout := false
+
+	keyPath, err := createOptions.GetKeyOutputFilePath()
+	if err != nil {
+		return err
+	}
+
+	if keyPath == "-" {
+		outputKeyOnStdout = true
+		tempKeyFile, err := TemporaryFiles().CreateEmptyTemporaryFile(createOptions.Verbose)
+		if err != nil {
+			return err
+		}
+
+		defer tempKeyFile.SecurelyDelete(createOptions.Verbose)
+
+		keyPath, err = tempKeyFile.GetLocalPath()
+		if err != nil {
+			return err
+		}
+	}
+
+	var certPath string = ""
+	if createOptions.IsCertificateOutputFilePathSet() {
+		certPath, err = createOptions.GetCertificateOutputFilePath()
+		if err != nil {
+			return err
+		}
+	} else {
+		tempCertFile, err := TemporaryFiles().CreateEmptyTemporaryFile(createOptions.Verbose)
+		if err != nil {
+			return err
+		}
+
+		defer tempCertFile.SecurelyDelete(createOptions.Verbose)
+
+		certPath, err = tempCertFile.GetLocalPath()
+		if err != nil {
+			return err
+		}
+	}
+
+	csrPath, err := TemporaryFiles().CreateEmptyTemporaryFileAndGetPath(createOptions.Verbose)
+	if err != nil {
+		return err
+	}
+
+	commonName, err := createOptions.GetCommonName()
+	if err != nil {
+		return err
+	}
+
+	subjectString, err := createOptions.GetSubjectStringForOpenssl()
+	if err != nil {
+		return err
+	}
+
+	createKeyCommand := []string{
+		"openssl",
+		"req",
+		"-nodes",
+		"-newkey",
+		"rsa:4096",
+		"-keyout",
+		keyPath,
+		"-out",
+		csrPath,
+		"-subj",
+		subjectString,
+		"-addext",
+		fmt.Sprintf("subjectAltName = DNS:%s", commonName),
+	}
+
+	_, err = Bash().RunCommand(
+		&RunCommandOptions{
+			Command: createKeyCommand,
+			Verbose: createOptions.Verbose,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if createOptions.Verbose {
+		LogInfof("Created key file '%v' and CSR '%v' for '%v'", keyPath, csrPath, commonName)
+	}
+
+	if createOptions.Verbose {
+		opensslCsrInfoCmd := []string{
+			"openssl",
+			"req",
+			"-noout",
+			"-text",
+			"-in",
+			csrPath,
+		}
+
+		csrInfo, err := Bash().RunCommandAndGetStdoutAsString(
+			&RunCommandOptions{
+				Command: opensslCsrInfoCmd,
+			},
+		)
+		if err != nil {
+			return err
+		}
+
+		LogInfof("Created CSR info:\n'%s'", csrInfo)
+	}
+
+	signingKey, err := createOptions.GetIntermediateCertificateKeyGopassCredential()
+	if err != nil {
+		return err
+	}
+
+	signingKeyFile, err := signingKey.WriteIntoTemporaryFile(createOptions.Verbose)
+	if err != nil {
+		return err
+	}
+	defer signingKeyFile.SecurelyDelete(createOptions.Verbose)
+
+	signingKeyFilePath, err := signingKeyFile.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	signingCert, err := createOptions.GetIntermediateCertificateGopassCredential()
+	if err != nil {
+		return err
+	}
+
+	signingCertFile, err := signingCert.WriteIntoTemporaryFile(createOptions.Verbose)
+	if err != nil {
+		return err
+	}
+	defer signingCertFile.SecurelyDelete(createOptions.Verbose)
+
+	signingCertFilePath, err := signingCertFile.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	signingConfig := ""
+	signingConfig += "[req]\n"
+	signingConfig += "req_extensions = req_ext\n"
+	signingConfig += "prompt = no\n"
+	signingConfig += "\n"
+	signingConfig += "[req_ext]\n"
+	signingConfig += "subjectAltName = @alt_names\n"
+	signingConfig += "\n"
+	signingConfig += "[alt_names]\n"
+	signingConfig += "DNS.1 = " + commonName + "\n"
+	for i, san := range createOptions.AdditionalSans {
+		signingConfig += fmt.Sprintf("DNS.%d = %s\n", i+2, san)
+		if createOptions.Verbose {
+			LogInfof("Added additional SAN '%s' for commonName '%s'.", san, commonName)
+		}
+	}
+	if createOptions.Verbose {
+		LogInfof("Added '%d' SAN's to sing with '%s'.", len(createOptions.AdditionalSans), commonName)
+	}
+
+	signingConfigFile, err := TemporaryFiles().CreateFromString(signingConfig, createOptions.Verbose)
+	if err != nil {
+		return err
+	}
+	defer signingConfigFile.SecurelyDelete(createOptions.Verbose)
+
+	signingConfigFilePath, err := signingConfigFile.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	serial, err := c.GetNextCaSerialNumberAsStringFromGopass(createOptions.Verbose)
+	if err != nil {
+		return err
+	}
+
+	signCommand := []string{
+		"openssl",
+		"x509",
+		"-req",
+		"-days",
+		"45",
+		"-in",
+		csrPath,
+		"-CA",
+		signingCertFilePath,
+		"-CAkey",
+		signingKeyFilePath,
+		"-set_serial",
+		serial,
+		"-out",
+		certPath,
+		"-extensions",
+		"req_ext",
+		"-extfile",
+		signingConfigFilePath,
+	}
+	_, err = Bash().RunCommand(
+		&RunCommandOptions{
+			Command: signCommand,
+			Verbose: createOptions.Verbose,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if createOptions.Verbose {
+		LogInfof("Created certificate file: '%v'", certPath)
+	}
+
+	if createOptions.Verbose {
+		certInfoCommand := []string{
+			"openssl",
+			"x509",
+			"-noout",
+			"-text",
+			"-in",
+			certPath,
+		}
+
+		certificateInfo, err := Bash().RunCommandAndGetStdoutAsString(
+			&RunCommandOptions{
+				Command: certInfoCommand,
+			},
+		)
+		if err != nil {
+			return err
+		}
+
+		LogInfof("Created certificate info:\n%s", certificateInfo)
+	}
+
+	certFile, err := GetLocalFileByPath(certPath)
+	if err != nil {
+		return err
+	}
+
+	err = Gopass().InsertFile(certFile, &GopassSecretOptions{
+		SecretRootDirectoryPath: "internal_ca/created_certificates/" + commonName,
+		SecretBasename:          commonName + ".crt",
+		Verbose:                 createOptions.Verbose,
+		Overwrite:               createOptions.OverwriteExistingCertificateInGopass,
+	})
+	if err != nil {
+		return err
+	}
+
+	if outputKeyOnStdout {
+		keyFile, err := GetLocalFileByPath(keyPath)
+		if err != nil {
+			return err
+		}
+
+		err = keyFile.PrintContentOnStdout()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *X509CertificatesService) CreateSignedIntermediateCertificateAndAddToGopass(createOptions *X509CreateCertificateOptions, rootCaInGopass *GopassSecretOptions, intermediateGopassOptions *GopassSecretOptions) (err error) {
+	if createOptions == nil {
+		return TracedError("createOptions is nil")
+	}
+
+	if rootCaInGopass == nil {
+		return TracedError("rootCaInGopass is nil")
+	}
+
+	if intermediateGopassOptions == nil {
+		return TracedError("intermediateGopassOptions is nil")
+	}
+
+	rootCertOptions := rootCaInGopass.GetDeepCopy()
+	rootCertOptions.SecretBasename = "rootCa.crt"
+	rootCertFile, err := Gopass().WriteSecretIntoTemporaryFile(rootCertOptions)
+	if err != nil {
+		return err
+	}
+	defer rootCertFile.SecurelyDelete(createOptions.Verbose)
+
+	rootKeyOptions := rootCaInGopass.GetDeepCopy()
+	rootKeyOptions.SecretBasename = "rootCa.key"
+	rootKeyFile, err := Gopass().WriteSecretIntoTemporaryFile(rootKeyOptions)
+	if err != nil {
+		return err
+	}
+	defer rootKeyFile.SecurelyDelete(createOptions.Verbose)
+
+	createOptionsToUse := createOptions.GetDeepCopy()
+	createOptionsToUse.UseTemporaryDirectory = true
+	intermediateDirectory, err := c.CreateIntermediateCertificateIntoDirectory(createOptionsToUse)
+	if err != nil {
+		return err
+	}
+
+	intermediateCertFile, err := intermediateDirectory.GetFileInDirectory("intermediateCertificate.crt")
+	if err != nil {
+		return err
+	}
+	defer intermediateCertFile.SecurelyDelete(createOptions.Verbose)
+
+	intermediateKeyFile, err := intermediateDirectory.GetFileInDirectory("intermediateCertificate.key")
+	if err != nil {
+		return err
+	}
+	defer intermediateKeyFile.SecurelyDelete(createOptions.Verbose)
+
+	signingRequestFile, err := TemporaryFiles().CreateEmptyTemporaryFile(createOptions.Verbose)
+	if err != nil {
+		return err
+	}
+	defer signingRequestFile.SecurelyDelete(createOptions.Verbose)
+
+	signingOptions := NewX509SignCertificateOptions()
+	signingOptions.CertFileUsedForSigning = rootCertFile
+	signingOptions.KeyFileUsedForSigning = rootKeyFile
+	signingOptions.KeyFileToSign = intermediateKeyFile
+	signingOptions.OutputCertificateFile = intermediateCertFile
+	signingOptions.SigningRequestFile = signingRequestFile
+	signingOptions.CommonName = createOptions.CommonName
+	signingOptions.CountryName = createOptions.CountryName
+	signingOptions.Locality = createOptions.Locality
+	signingOptions.Verbose = createOptions.Verbose
+
+	err = c.SignIntermediateCertificate(signingOptions)
+	if err != nil {
+		return err
+	}
+
+	gopassInsertOptions := intermediateGopassOptions.GetDeepCopy()
+	gopassInsertOptions.SecretBasename = "intermediateCertificate.key"
+	err = Gopass().InsertFile(intermediateKeyFile, gopassInsertOptions)
+	if err != nil {
+		return err
+	}
+
+	gopassInsertOptions = intermediateGopassOptions.GetDeepCopy()
+	gopassInsertOptions.SecretBasename = "intermediateCertificate.crt"
+	err = Gopass().InsertFile(intermediateCertFile, gopassInsertOptions)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *X509CertificatesService) CreateSigningRequestFile(signOptions *X509SignCertificateOptions) (err error) {
+	if signOptions == nil {
+		return TracedError("signOptions is nil")
+	}
+
+	keyFileToSignPath, err := signOptions.GetKeyFileToSignPath()
+	if err != nil {
+		return err
+	}
+
+	signingRequestFilePath, err := signOptions.GetSigningRequestFilePath()
+	if err != nil {
+		return err
+	}
+
+	subjectToSign, err := signOptions.GetSubjectToSign()
+	if err != nil {
+		return err
+	}
+
+	openSslConfigFile, err := TemporaryFiles().CreateEmptyTemporaryFile(signOptions.Verbose)
+	if err != nil {
+		return err
+	}
+
+	const extensionName = "v3_req"
+
+	err = openSslConfigFile.WriteString(
+		" [ req ]\n"+
+			"req_extensions = "+extensionName+"\n"+
+			"x509_extensions = "+extensionName+"\n"+
+			"\n"+
+			"[ "+extensionName+" ]\n"+
+			"basicConstraints = CA:TRUE\n",
+		signOptions.Verbose,
+	)
+	if err != nil {
+		return err
+	}
+
+	openSslConfigFilePath, err := openSslConfigFile.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	if signOptions.Verbose {
+		LogInfof("Generated openssl configuration for signing request: '%v'.", openSslConfigFilePath)
+	}
+
+	signCommand := []string{
+		"openssl",
+		"req",
+		"-new",
+		"-sha256",
+		"-config",
+		openSslConfigFilePath,
+		"-extensions",
+		extensionName,
+		"-subj",
+		subjectToSign,
+		"-key",
+		keyFileToSignPath,
+		"-out",
+		signingRequestFilePath,
+	}
+
+	_, err = Bash().RunCommand(
+		&RunCommandOptions{
+			Command: signCommand,
+			Verbose: signOptions.Verbose,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if signOptions.Verbose {
+		LogInfof("Created signing request file '%v' for '%v' with key located at '%v'.", signingRequestFilePath, subjectToSign, keyFileToSignPath)
+	}
+
+	return nil
+}
+
+func (c *X509CertificatesService) GetNextCaSerialNumberAsStringFromGopass(verbose bool) (serial string, err error) {
+	nextFreeNumberFromEnvVar := os.Getenv("OVERRIDE_NEXT_CA_SERIAL_NUMBER_FROM_GOPASS")
+	if len(nextFreeNumberFromEnvVar) > 0 {
+		if verbose {
+			LogInfof("GetNextCaSerialNumberAsStringFromGopass: OVERRIDE_NEXT_CA_SERIAL_NUMBER_FROM_GOPASS is set to '%s'", nextFreeNumberFromEnvVar)
+		}
+
+		return nextFreeNumberFromEnvVar, nil
+	}
+
+	serialCredential, err := Gopass().GetCredential(
+		&GopassSecretOptions{
+			SecretRootDirectoryPath: "internal_ca/root_ca",
+			SecretBasename:          "serial_counter",
+		},
+	)
+	if err != nil {
+		return "", err
+	}
+
+	err = serialCredential.IncrementIntValue()
+	if err != nil {
+		return "", err
+	}
+
+	serial, err = serialCredential.GetAsString()
+	if err != nil {
+		return "", err
+	}
+
+	serial = strings.TrimSpace(serial)
+
+	return serial, nil
+}
+
+func (c *X509CertificatesService) IsCertificateFileSignedByCertificateFile(thisCertificateFile *X509CertificateFile, isSignedByThisCertificateFile File, verbose bool) (isSignedBy bool, err error) {
+	if thisCertificateFile == nil {
+		return false, TracedError("thisCertificateFile is nil")
+	}
+
+	if isSignedByThisCertificateFile == nil {
+		return false, TracedError("isSignedByThisCertificateFile is nil")
+	}
+
+	toCheckCert, err := thisCertificateFile.GetAsX509Certificate()
+	if err != nil {
+		return false, err
+	}
+
+	isSignedBy, err = toCheckCert.IsSignedByCertificateFile(isSignedByThisCertificateFile, verbose)
+	if err != nil {
+		return false, err
+	}
+
+	return isSignedBy, err
+}
+
+func (c *X509CertificatesService) MustCreateIntermediateCertificateIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey Directory) {
+	directoryContianingCreatedCertAndKey, err := c.CreateIntermediateCertificateIntoDirectory(createOptions)
+	if err != nil {
+		LogFatalf("X509Certificates.CreateIntermediateCertificateInto: failed: '%v'", err)
+	}
+
+	return directoryContianingCreatedCertAndKey
+}
+
+func (c *X509CertificatesService) MustCreateRootCAAndAddToGopass(createOptions *X509CreateCertificateOptions, gopassOptions *GopassSecretOptions) {
+	err := c.CreateRootCaAndaddToGopass(createOptions, gopassOptions)
+	if err != nil {
+		LogFatalf("X509Certificates.CreateRootCaAndaddToGopass: failed: '%v'", err)
+	}
+}
+
+func (c *X509CertificatesService) MustCreateRootCaIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey Directory) {
+	directoryContianingCreatedCertAndKey, err := c.CreateRootCaIntoDirectory(createOptions)
+	if err != nil {
+		LogFatalf("X509Certificates.CreateRootCaIntoDirectory: failed: '%v'", err)
+	}
+
+	return directoryContianingCreatedCertAndKey
+}
+
+func (c *X509CertificatesService) MustCreateSignedCertificate(createOptions *X509CreateCertificateOptions) {
+	err := c.CreateSignedCertificate(createOptions)
+	if err != nil {
+		LogFatalf("X509Certificates.CreateSignedCertificate failed: '%v'", err)
+	}
+}
+
+func (c *X509CertificatesService) MustCreateSignedIntermediateCertificateAndAddToGopass(createOptions *X509CreateCertificateOptions, rootCaInGopass *GopassSecretOptions, intermediateGopassOptions *GopassSecretOptions) {
+	err := c.CreateSignedIntermediateCertificateAndAddToGopass(createOptions, rootCaInGopass, intermediateGopassOptions)
+	if err != nil {
+		LogFatalf("X509Certificates.CreateSignedIntermediateCertificateAndAddToGopass failed: '%v'", err)
+	}
+}
+
+func (c *X509CertificatesService) MustSignIntermediateCertificate(signOptions *X509SignCertificateOptions) {
+	err := c.SignIntermediateCertificate(signOptions)
+	if err != nil {
+		LogFatalf("X509CertificatesService.SignIntermediateCertificate: '%v'", err)
+	}
+}
+
+func (c *X509CertificatesService) SignIntermediateCertificate(signOptions *X509SignCertificateOptions) (err error) {
+	if signOptions == nil {
+		return TracedError("signOptions is nil")
+	}
+
+	keyFileToUseForSigning, err := signOptions.GetKeyFileUsedForSigning()
+	if err != nil {
+		return err
+	}
+
+	keyFileToUseForSigningPath, err := keyFileToUseForSigning.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	certFileToUseForSigning, err := signOptions.GetCertFileUsedForSigning()
+	if err != nil {
+		return err
+	}
+
+	certFileToUseForSigningPath, err := certFileToUseForSigning.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	outputCertificateFile, err := signOptions.GetOutputCertificateFile()
+	if err != nil {
+		return err
+	}
+
+	outputCertificateFilePath, err := outputCertificateFile.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	singingRequestFile, err := TemporaryFiles().CreateEmptyTemporaryFile(signOptions.Verbose)
+	if err != nil {
+		return err
+	}
+
+	signOptionsToUse := signOptions.GetDeepCopy()
+	signOptionsToUse.SigningRequestFile = singingRequestFile
+	err = c.CreateSigningRequestFile(signOptionsToUse)
+	if err != nil {
+		return err
+	}
+
+	signingRequestFilePath, err := singingRequestFile.GetLocalPath()
+	if err != nil {
+		return nil
+	}
+
+	openSslConfigFile, err := TemporaryFiles().CreateEmptyTemporaryFile(signOptions.Verbose)
+	if err != nil {
+		return err
+	}
+
+	const extensionName = "v3_req"
+
+	err = openSslConfigFile.WriteString(
+		" [ req ]\n"+
+			"req_extensions = "+extensionName+"\n"+
+			"x509_extensions = "+extensionName+"\n"+
+			"\n"+
+			"[ "+extensionName+" ]\n"+
+			"basicConstraints = CA:TRUE\n",
+		signOptions.Verbose,
+	)
+	if err != nil {
+		return err
+	}
+
+	openSslConfigFilePath, err := openSslConfigFile.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	if signOptions.Verbose {
+		LogInfof("Generated openssl configuration for signing: '%v'.", openSslConfigFilePath)
+	}
+
+	serial, err := c.GetNextCaSerialNumberAsStringFromGopass(signOptions.Verbose)
+	if err != nil {
+		return err
+	}
+
+	signCommand := []string{
+		"openssl",
+		"x509",
+		"-req",
+		"-days",
+		"90",
+		"-extfile",
+		openSslConfigFilePath,
+		"-extensions",
+		extensionName,
+		"-in",
+		signingRequestFilePath,
+		"-CA",
+		certFileToUseForSigningPath,
+		"-CAkey",
+		keyFileToUseForSigningPath,
+		"-set_serial",
+		serial,
+		"-out",
+		outputCertificateFilePath,
+	}
+
+	_, err = Bash().RunCommand(
+		&RunCommandOptions{
+			Command: signCommand,
+			Verbose: signOptions.Verbose,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if signOptions.Verbose {
+		LogInfof("Signed intermediate certificate. Certificate stored as '%v'", outputCertificateFilePath)
+	}
+
+	return nil
+}
+
+func (x *X509CertificatesService) MustCreateRootCaAndaddToGopass(createOptions *X509CreateCertificateOptions, gopassOptions *GopassSecretOptions) {
+	err := x.CreateRootCaAndaddToGopass(createOptions, gopassOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (x *X509CertificatesService) MustCreateSigningRequestFile(signOptions *X509SignCertificateOptions) {
+	err := x.CreateSigningRequestFile(signOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (x *X509CertificatesService) MustGetNextCaSerialNumberAsStringFromGopass(verbose bool) (serial string) {
+	serial, err := x.GetNextCaSerialNumberAsStringFromGopass(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return serial
+}
+
+func (x *X509CertificatesService) MustIsCertificateFileSignedByCertificateFile(thisCertificateFile *X509CertificateFile, isSignedByThisCertificateFile File, verbose bool) (isSignedBy bool) {
+	isSignedBy, err := x.IsCertificateFileSignedByCertificateFile(thisCertificateFile, isSignedByThisCertificateFile, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isSignedBy
+}

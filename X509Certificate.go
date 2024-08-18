@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"strings"
+	"time"
 
 	"crypto/x509"
 	"encoding/pem"
@@ -45,6 +46,15 @@ func GetX509CertificateFromFilePath(certFilePath string) (cert *X509Certificate,
 	}
 
 	return cert, nil
+}
+
+func MustGetX509CertificateFromFile(certFile File) (cert *X509Certificate) {
+	cert, err := GetX509CertificateFromFile(certFile)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return cert
 }
 
 func MustGetX509CertificateFromFilePath(certFilePath string) (cert *X509Certificate) {
@@ -429,12 +439,35 @@ func (c *X509Certificate) WritePemToFilePath(filePath string, verbose bool) (err
 	return nil
 }
 
+func (x *X509Certificate) GetExpiryDate() (expiryDate *time.Time, err error) {
+	nativeCert, err := x.GetNativeCertificate()
+	if err != nil {
+		return nil, err
+	}
+
+	expiryDate = new(time.Time)
+	*expiryDate = nativeCert.NotAfter
+
+	return expiryDate, nil
+}
+
 func (x *X509Certificate) GetNativeX509Certificate() (nativeX509Certificate *x509.Certificate, err error) {
 	if x.nativeX509Certificate == nil {
 		return nil, TracedErrorf("nativeX509Certificate not set")
 	}
 
 	return x.nativeX509Certificate, nil
+}
+
+func (x *X509Certificate) IsExpired() (isExpired bool, err error) {
+	expiryDate, err := x.GetExpiryDate()
+	if err != nil {
+		return false, err
+	}
+
+	isExpired = time.Now().After(*expiryDate)
+
+	return isExpired, nil
 }
 
 func (x *X509Certificate) MustGetAsPemBytes() (pemBytes []byte) {
@@ -453,6 +486,15 @@ func (x *X509Certificate) MustGetAsPemString() (pemString string) {
 	}
 
 	return pemString
+}
+
+func (x *X509Certificate) MustGetExpiryDate() (expiryDate *time.Time) {
+	expiryDate, err := x.GetExpiryDate()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return expiryDate
 }
 
 func (x *X509Certificate) MustGetIssuerString() (issuerString string) {
@@ -498,6 +540,15 @@ func (x *X509Certificate) MustGetVersion() (version int) {
 	}
 
 	return version
+}
+
+func (x *X509Certificate) MustIsExpired() (isExpired bool) {
+	isExpired, err := x.IsExpired()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isExpired
 }
 
 func (x *X509Certificate) MustIsIntermediateCertificate() (isIntermediateCertificate bool) {
