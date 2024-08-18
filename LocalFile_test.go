@@ -473,3 +473,38 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 		)
 	}
 }
+
+
+
+func TestFileReplaceLineAfterLine(t *testing.T) {
+	tests := []struct {
+		input                     string
+		lineToSearch              string
+		replaceLineAfterFoundWith string
+		expectedContent           string
+		expectedChanged           bool
+	}{
+		{"a\nb\nc\n", "a", "d", "a\nd\nc\n", true},
+		{"a\nb\nc\n", "x", "d", "a\nb\nc\n", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				testFile := TemporaryFiles().MustCreateFromString(tt.input, verbose)
+				defer testFile.Delete(verbose)
+
+				changeSummary := testFile.MustReplaceLineAfterLine(tt.lineToSearch, tt.replaceLineAfterFoundWith, verbose)
+
+				content := testFile.MustReadAsString()
+				assert.EqualValues(tt.expectedContent, content)
+				assert.EqualValues(tt.expectedChanged, changeSummary.IsChanged())
+			},
+		)
+	}
+}

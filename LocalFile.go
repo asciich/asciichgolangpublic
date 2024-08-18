@@ -152,6 +152,38 @@ func (l *LocalFile) AppendString(toWrite string, verbose bool) (err error) {
 	return nil
 }
 
+func (l *LocalFile) CopyToFile(destFile File, verbose bool) (err error) {
+	if destFile == nil {
+		return TracedErrorNil("destFile")
+	}
+
+	content, err := l.ReadAsBytes()
+	if err != nil {
+		return err
+	}
+
+	err = destFile.WriteBytes(content, verbose)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		srcPath, err := l.GetLocalPath()
+		if err != nil {
+			return err
+		}
+
+		destPath, err := destFile.GetLocalPath()
+		if err != nil {
+			return err
+		}
+
+		LogChangedf("Copied '%s' to '%s'", srcPath, destPath)
+	}
+
+	return nil
+}
+
 func (l *LocalFile) Create(verbose bool) (err error) {
 	exists, err := l.Exists()
 	if err != nil {
@@ -300,6 +332,13 @@ func (l *LocalFile) MustAppendBytes(toWrite []byte, verbose bool) {
 
 func (l *LocalFile) MustAppendString(toWrite string, verbose bool) {
 	err := l.AppendString(toWrite, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (l *LocalFile) MustCopyToFile(destFile File, verbose bool) {
+	err := l.CopyToFile(destFile, verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
