@@ -184,6 +184,34 @@ func (l *LocalGitRepository) GetAsGoGitRepository() (goGitRepository *git.Reposi
 	return goGitRepository, nil
 }
 
+func (l *LocalGitRepository) GetAsLocalDirectory() (localDirectory *LocalDirectory, err error) {
+	localPath, err := l.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
+	localDirectory, err = GetLocalDirectoryByPath(localPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return localDirectory, nil
+}
+
+func (l *LocalGitRepository) GetAsLocalGitRepository() (localGitRepository *LocalGitRepository, err error) {
+	localPath, err := l.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
+	localGitRepository, err = GetLocalGitRepositoryByPath(localPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return localGitRepository, nil
+}
+
 func (l *LocalGitRepository) GetAuthorEmailByCommitHash(hash string) (authorEmail string, err error) {
 	if hash == "" {
 		return "", TracedErrorEmptyString("hash")
@@ -414,6 +442,15 @@ func (l *LocalGitRepository) GetCurrentCommitHash() (commitHash string, err erro
 	}
 
 	return commitHash, nil
+}
+
+func (l *LocalGitRepository) GetGitStatusOutput(verbose bool) (output string, err error) {
+	output, err = l.RunGitCommandAndGetStdout([]string{"status"}, verbose)
+	if err != nil {
+		return "", err
+	}
+
+	return output, nil
 }
 
 func (l *LocalGitRepository) GetGitlabCiYamlFile() (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
@@ -835,6 +872,24 @@ func (l *LocalGitRepository) MustGetAsGoGitRepository() (goGitRepository *git.Re
 	return goGitRepository
 }
 
+func (l *LocalGitRepository) MustGetAsLocalDirectory() (localDirectory *LocalDirectory) {
+	localDirectory, err := l.GetAsLocalDirectory()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return localDirectory
+}
+
+func (l *LocalGitRepository) MustGetAsLocalGitRepository() (localGitRepository *LocalGitRepository) {
+	localGitRepository, err := l.GetAsLocalGitRepository()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return localGitRepository
+}
+
 func (l *LocalGitRepository) MustGetAuthorEmailByCommitHash(hash string) (authorEmail string) {
 	authorEmail, err := l.GetAuthorEmailByCommitHash(hash)
 	if err != nil {
@@ -941,6 +996,15 @@ func (l *LocalGitRepository) MustGetCurrentCommitHash() (commitHash string) {
 	}
 
 	return commitHash
+}
+
+func (l *LocalGitRepository) MustGetGitStatusOutput(verbose bool) (output string) {
+	output, err := l.GetGitStatusOutput(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return output
 }
 
 func (l *LocalGitRepository) MustGetGitlabCiYamlFile() (gitlabCiYamlFile *GitlabCiYamlFile) {
@@ -1097,8 +1161,17 @@ func (l *LocalGitRepository) MustPush(verbose bool) {
 	}
 }
 
-func (l *LocalGitRepository) MustRunGitCommand(gitCommand string, verbose bool) (commandOutput *CommandOutput) {
+func (l *LocalGitRepository) MustRunGitCommand(gitCommand []string, verbose bool) (commandOutput *CommandOutput) {
 	commandOutput, err := l.RunGitCommand(gitCommand, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return commandOutput
+}
+
+func (l *LocalGitRepository) MustRunGitCommandAndGetStdout(gitCommand []string, verbose bool) (commandOutput string) {
+	commandOutput, err := l.RunGitCommandAndGetStdout(gitCommand, verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -1144,7 +1217,7 @@ func (l *LocalGitRepository) Pull(verbose bool) (err error) {
 }
 
 func (l *LocalGitRepository) PullUsingGitCli(verbose bool) (err error) {
-	_, err = l.RunGitCommand("pull", verbose)
+	_, err = l.RunGitCommand([]string{"pull"}, verbose)
 	if err != nil {
 		return err
 	}
@@ -1166,8 +1239,8 @@ func (l *LocalGitRepository) Push(verbose bool) (err error) {
 	return nil
 }
 
-func (l *LocalGitRepository) RunGitCommand(gitCommand string, verbose bool) (commandOutput *CommandOutput, err error) {
-	if gitCommand == "" {
+func (l *LocalGitRepository) RunGitCommand(gitCommand []string, verbose bool) (commandOutput *CommandOutput, err error) {
+	if gitCommand == nil {
 		return nil, TracedErrorEmptyString("gitCommand")
 	}
 
@@ -1176,11 +1249,38 @@ func (l *LocalGitRepository) RunGitCommand(gitCommand string, verbose bool) (com
 		return nil, err
 	}
 
-	command := fmt.Sprintf("git -C '%s' %s", repoRootPath, gitCommand)
+	gitCommandString, err := ShellLineHandler().Join(gitCommand)
+	if err != nil {
+		return nil, err
+	}
+
+	command := fmt.Sprintf(
+		"git -C '%s' %s",
+		repoRootPath,
+		gitCommandString,
+	)
 
 	commandOutput, err = Bash().RunOneLiner(command, verbose)
 	if err != nil {
 		return nil, err
+	}
+
+	return commandOutput, nil
+}
+
+func (l *LocalGitRepository) RunGitCommandAndGetStdout(gitCommand []string, verbose bool) (commandOutput string, err error) {
+	if len(gitCommand) <= 0 {
+		return "", TracedError("gitCommand is empty")
+	}
+
+	output, err := l.RunGitCommand(gitCommand, verbose)
+	if err != nil {
+		return "", err
+	}
+
+	commandOutput, err = output.GetStdoutAsString()
+	if err != nil {
+		return "", err
 	}
 
 	return commandOutput, nil

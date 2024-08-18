@@ -82,6 +82,26 @@ func LogBold(logmessage string) {
 	Log(logmessage)
 }
 
+func LogByChangeSummary(changeSummary *ChangeSummary, message string) {
+	isChanged := false
+
+	if changeSummary != nil {
+		isChanged = changeSummary.IsChanged()
+	}
+
+	if isChanged {
+		LogChanged(message)
+	} else {
+		LogInfo(message)
+	}
+}
+
+func LogByChangeSummaryf(changeSummary *ChangeSummary, message string, args ...interface{}) {
+	formattedMessage := fmt.Sprintf(message, args...)
+
+	LogByChangeSummary(changeSummary, formattedMessage)
+}
+
 func LogChanged(logmessage string) {
 	if globalLogSettings.IsColorEnabled() {
 		logmessage = TerminalColors().GetCodeMangenta() + logmessage + TerminalColors().GetCodeNoColor()

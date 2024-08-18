@@ -1,0 +1,30 @@
+---
+# This is the default pre-commit config
+# included in asciichgolangpersonal:
+# - https://gitlab.asciich.ch/tools/asciichgolangpersonal
+
+repos:
+- repo: https://gitlab.asciich.ch/gitlab_management/pre-commit
+  rev: "v0.10.0"
+  hooks:
+    - id: end-of-file-fixer
+      exclude: "^testdata/"
+    - id: golang-add-boilerplate
+      exclude: "^testdata/"
+    - id: golang-build
+      exclude: "^testdata/"
+    - id: golang-fmt
+      exclude: "^testdata/"
+    - id: golang-test
+      exclude: "^testdata/"
+
+# -   repo: https://github.com/pre-commit/pre-commit-hooks
+#     rev: v2.3.0
+#     hooks:
+#     -   id: check-yaml
+#     -   id: end-of-file-fixer
+#     -   id: trailing-whitespace
+# -   repo: https://github.com/psf/black
+#     rev: 22.10.0
+#    hooks:
+#    -   id: black

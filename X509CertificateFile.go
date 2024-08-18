@@ -94,10 +94,10 @@ func (x *X509CertificateFile) IsX509Certificate() (isX509Certificate bool, err e
 	}
 
 	checkCommand := []string{
-		"bash", 
-		"-c", 
+		"bash",
+		"-c",
 		fmt.Sprintf(
-			"openssl x509 -in '%v' -text &>/dev/null && echo yes || echo no", 
+			"openssl x509 -in '%v' -text &>/dev/null && echo yes || echo no",
 			pathString,
 		),
 	}

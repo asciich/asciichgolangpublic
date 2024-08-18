@@ -249,6 +249,15 @@ func (f *FileBase) MustReadFirstLineAndTrimSpace() (firstLine string) {
 	return firstLine
 }
 
+func (f *FileBase) MustReplaceLineAfterLine(lineToFind string, replaceLineAfterWith string, verbose bool) (changeSummary *ChangeSummary) {
+	changeSummary, err := f.ReplaceLineAfterLine(lineToFind, replaceLineAfterWith, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return changeSummary
+}
+
 func (f *FileBase) MustSetParentFileForBaseClass(parentFileForBaseClass File) {
 	err := f.SetParentFileForBaseClass(parentFileForBaseClass)
 	if err != nil {
@@ -265,6 +274,13 @@ func (f *FileBase) MustSortBlocksInFile(verbose bool) {
 
 func (f *FileBase) MustWriteInt64(toWrite int64, verbose bool) {
 	err := f.WriteInt64(toWrite, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (f *FileBase) MustWriteLines(linesToWrite []string, verbose bool) {
+	err := f.WriteLines(linesToWrite, verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -387,6 +403,104 @@ func (f *FileBase) ReadFirstLineAndTrimSpace() (firstLine string, err error) {
 	return firstLine, nil
 }
 
+func (f *FileBase) ReplaceLineAfterLine(lineToFind string, replaceLineAfterWith string, verbose bool) (changeSummary *ChangeSummary, err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	lines, err := parent.ReadAsLines()
+	if err != nil {
+		return nil, err
+	}
+
+	path, err := parent.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
+	matchFound := false
+	linesToWrite := []string{}
+
+	numberOfReplaces := 0
+
+	for i, line := range lines {
+
+		if matchFound {
+			lineNumber := i + 1
+
+			if verbose {
+				if line == replaceLineAfterWith {
+					LogInfof(
+						"ReplaceLineAfterLine: No need to replace line '%d' in '%s' as already '%s'",
+						lineNumber,
+						path,
+						replaceLineAfterWith,
+					)
+				} else {
+					LogChangedf(
+						"ReplaceLineAfterLine: Replace line '%d' in '%s' by '%s' (was '%s')",
+						lineNumber,
+						path,
+						replaceLineAfterWith,
+						line,
+					)
+					numberOfReplaces += 1
+				}
+			}
+
+			linesToWrite = append(linesToWrite, replaceLineAfterWith)
+
+			matchFound = false
+		} else {
+			if line == lineToFind {
+				matchFound = true
+			}
+			linesToWrite = append(linesToWrite, line)
+		}
+	}
+
+	if matchFound {
+		linesToWrite = append(linesToWrite, replaceLineAfterWith)
+		LogChangedf(
+			"ReplaceLineAfterLine: Appended line '%s' in '%s' since last read line was a match.",
+			replaceLineAfterWith,
+			path,
+		)
+		numberOfReplaces += 1
+	}
+
+	changeSummary = NewChangeSummary()
+	err = changeSummary.SetNumberOfChanges(numberOfReplaces)
+	if err != nil {
+		return nil, err
+	}
+
+	if changeSummary.IsChanged() {
+		err = parent.WriteLines(linesToWrite, verbose)
+		if err != nil {
+			return nil, err
+		}
+
+		if verbose {
+			LogChangedf(
+				"ReplaceLineAfterLine: Replaced '%d' lines in '%s'.",
+				numberOfReplaces,
+				path,
+			)
+		}
+	} else {
+		if verbose {
+			LogInfof(
+				"ReplaceLineAfterLine: No replaces in '%s' made since no matches were found.",
+				path,
+			)
+		}
+	}
+
+	return changeSummary, nil
+}
+
 func (f *FileBase) SetParentFileForBaseClass(parentFileForBaseClass File) (err error) {
 	f.parentFileForBaseClass = parentFileForBaseClass
 
@@ -413,6 +527,21 @@ func (f *FileBase) WriteInt64(toWrite int64, verbose bool) (err error) {
 	stringRepresentation := fmt.Sprintf("%d", toWrite)
 
 	err = f.WriteString(stringRepresentation, verbose)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *FileBase) WriteLines(linesToWrite []string, verbose bool) (err error) {
+	if linesToWrite == nil {
+		return TracedErrorNil("linesToWrite")
+	}
+
+	contentToWrite := strings.Join(linesToWrite, "\n")
+
+	err = f.WriteString(contentToWrite, verbose)
 	if err != nil {
 		return err
 	}
