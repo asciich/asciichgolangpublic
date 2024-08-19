@@ -240,3 +240,44 @@ func TestSlicesStringSlicesEqual(t *testing.T) {
 		)
 	}
 }
+
+func TestSlicesDiffStringSlices(t *testing.T) {
+	tests := []struct {
+		input1          []string
+		input2          []string
+		expectedANotInB []string
+		expectedBNotInA []string
+	}{
+		{nil, nil, []string{}, []string{}},
+		{[]string{}, nil, []string{}, []string{}},
+		{nil, []string{}, []string{}, []string{}},
+		{[]string{}, []string{}, []string{}, []string{}},
+		{[]string{"a"}, []string{}, []string{"a"}, []string{}},
+		{[]string{"a"}, []string{"b"}, []string{"a"}, []string{"b"}},
+		{[]string{""}, []string{"b"}, []string{""}, []string{"b"}},
+		{[]string{""}, []string{"b", "a"}, []string{""}, []string{"a", "b"}},
+		{[]string{"c"}, []string{"b", "a"}, []string{"c"}, []string{"a", "b"}},
+		{[]string{"a", "c"}, []string{"b", "a"}, []string{"c"}, []string{"b"}},
+		{[]string{"a", "c"}, []string{"a"}, []string{"c"}, []string{}},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				aNotInB, bNotInA := Slices().DiffStringSlices(tt.input1, tt.input2)
+
+				assert.EqualValues(
+					tt.expectedANotInB,
+					aNotInB,
+				)
+				assert.EqualValues(
+					tt.expectedBNotInA,
+					bNotInA,
+				)
+			},
+		)
+	}
+}
