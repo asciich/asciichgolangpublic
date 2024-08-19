@@ -17,8 +17,34 @@ func Slices() (slices *SlicesService) {
 	return new(SlicesService)
 }
 
+func (s *SlicesService) DiffStringSlices(a []string, b []string) (aNotInB []string, bNotInA []string) {
+	aNotInB = []string{}
+	bNotInA = []string{}
+
+	for _, toCheck := range a {
+		if s.ContainsString(b, toCheck) {
+			continue
+		}
+
+		aNotInB = append(aNotInB, toCheck)
+	}
+
+	for _, toCheck := range b {
+		if s.ContainsString(a, toCheck) {
+			continue
+		}
+
+		bNotInA = append(bNotInA, toCheck)
+	}
+
+	aNotInB = s.SortStringSlice(aNotInB)
+	bNotInA = s.SortStringSlice(bNotInA)
+
+	return aNotInB, bNotInA
+}
+
 func (s *SlicesService) RemoveString(elements []string, toRemove string) (cleanedUpElements []string) {
-	cleanedUpElements =[]string{}
+	cleanedUpElements = []string{}
 
 	for _, e := range elements {
 		if e == toRemove {
