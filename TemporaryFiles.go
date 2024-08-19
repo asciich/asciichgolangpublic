@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	"os"
+	"strings"
 )
 
 type TemporaryFilesService struct {
@@ -36,6 +37,24 @@ func (t *TemporaryFilesService) CreateEmptyTemporaryFileAndGetPath(verbose bool)
 	}
 
 	return temporaryFilePath, nil
+}
+
+func (t *TemporaryFilesService) CreateFromBytes(content []byte, verbose bool) (temporaryFile File, err error) {
+	if content == nil {
+		return nil, TracedErrorNil("content")
+	}
+
+	temporaryFile, err = t.CreateEmptyTemporaryFile(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	err = temporaryFile.WriteBytes(content, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return temporaryFile, nil
 }
 
 func (t *TemporaryFilesService) CreateFromString(content string, verbose bool) (temporaryFile File, err error) {
@@ -101,6 +120,26 @@ func (t *TemporaryFilesService) CreateTemporaryFileFromFile(fileToCopyAsTemporar
 	return temporaryFile, nil
 }
 
+func (t *TemporaryFilesService) CreateTemporaryFileFromPath(verbose bool, filePathToCopyAsTemporaryFile ...string) (temporaryFile File, err error) {
+	if len(filePathToCopyAsTemporaryFile) <= 0 {
+		return nil, TracedError("filePathToCopyAsTemporaryFile")
+	}
+
+	pathToUse := strings.Join(filePathToCopyAsTemporaryFile, "/")
+
+	fileToCopy, err := GetLocalFileByPath(pathToUse)
+	if err != nil {
+		return nil, err
+	}
+
+	temporaryFile, err = t.CreateTemporaryFileFromFile(fileToCopy, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return temporaryFile, nil
+}
+
 func (t *TemporaryFilesService) CreateTemporaryFileFromString(content string, verbose bool) (temporaryFile File, err error) {
 	temporaryFile, err = t.CreateNamedTemporaryFile("tempFile", verbose)
 	if err != nil {
@@ -132,6 +171,15 @@ func (t *TemporaryFilesService) MustCreateEmptyTemporaryFileAndGetPath(verbose b
 	return temporaryFilePath
 }
 
+func (t *TemporaryFilesService) MustCreateFromBytes(content []byte, verbose bool) (temporaryFile File) {
+	temporaryFile, err := t.CreateFromBytes(content, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return temporaryFile
+}
+
 func (t *TemporaryFilesService) MustCreateFromString(content string, verbose bool) (temporaryFile File) {
 	file, err := t.CreateFromString(content, verbose)
 	if err != nil {
@@ -161,6 +209,15 @@ func (t *TemporaryFilesService) MustCreateTemporaryFileFromBytes(content []byte,
 
 func (t *TemporaryFilesService) MustCreateTemporaryFileFromFile(fileToCopyAsTemporaryFile File, verbose bool) (temporaryFile File) {
 	temporaryFile, err := t.CreateTemporaryFileFromFile(fileToCopyAsTemporaryFile, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return temporaryFile
+}
+
+func (t *TemporaryFilesService) MustCreateTemporaryFileFromPath(verbose bool, filePathToCopyAsTemporaryFile ...string) (temporaryFile File) {
+	temporaryFile, err := t.CreateTemporaryFileFromPath(verbose, filePathToCopyAsTemporaryFile...)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

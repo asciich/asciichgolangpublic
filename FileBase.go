@@ -3,8 +3,10 @@ package asciichgolangpublic
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var ErrFileBaseParentNotSet = errors.New("parent is not set")
@@ -16,6 +18,172 @@ type FileBase struct {
 
 func NewFileBase() (f *FileBase) {
 	return new(FileBase)
+}
+
+func (f *FileBase) EnsureEndsWithLineBreak(verbose bool) (err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	filePath, err := parent.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	err = parent.Create(verbose)
+	if err != nil {
+		return err
+	}
+
+	isEmptyFile, err := parent.IsEmptyFile()
+	if err != nil {
+		return err
+	}
+
+	if isEmptyFile {
+		err = parent.WriteString("\n", verbose)
+		if err != nil {
+			return err
+		}
+
+		if verbose {
+			LogChangedf("Added newline to empty file '%s' to ensure ends with line break.", filePath)
+		}
+
+		return nil
+	}
+
+	lastChar, err := parent.ReadLastCharAsString()
+	if err != nil {
+		return err
+	}
+
+	if lastChar == "\n" {
+		if verbose {
+			LogInfof("File '%s' already ends with a line break.", filePath)
+		}
+	} else {
+		err = parent.AppendString("\n", verbose)
+		if err != nil {
+			return err
+		}
+
+		if verbose {
+			LogChangedf("Added line break at end of '%s'.", filePath)
+		}
+	}
+
+	return nil
+}
+
+func (f *FileBase) GetFileTypeDescription(verbose bool) (fileTypeDescription string, err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return "", err
+	}
+
+	path, err := parent.GetLocalPath()
+	if err != nil {
+		return "", err
+	}
+
+	stdoutLines, err := Bash().RunCommandAndGetStdoutAsLines(
+		&RunCommandOptions{
+			Command: []string{"file", path},
+			Verbose: verbose,
+		},
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	stdoutLines = Slices().RemoveEmptyStrings(stdoutLines)
+	if len(stdoutLines) != 1 {
+		return "", TracedErrorf("Expected exactly one line left bug got: '%v'", stdoutLines)
+	}
+
+	line := stdoutLines[0]
+	splitted := strings.Split(line, ":")
+	if len(splitted) != 2 {
+		return "", TracedErrorf("Unexpected amount of splitted: '%v'", splitted)
+	}
+
+	fileTypeDescription = strings.TrimSpace(splitted[1])
+	return fileTypeDescription, nil
+}
+
+func (f *FileBase) GetMimeType(verbose bool) (mimeType string, err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return "", err
+	}
+
+	const atMostConsideredBytesByHttpDetectContentType int = 512
+	beginningOfFile, err := parent.ReadFirstNBytes(atMostConsideredBytesByHttpDetectContentType)
+	if err != nil {
+		return "", err
+	}
+
+	mimeType = http.DetectContentType(beginningOfFile)
+	if mimeType == "" {
+		return "", TracedError("Mimetype is empty string after evaluation")
+	}
+
+	path, err := parent.GetLocalPath()
+	if err != nil {
+		return "", err
+	}
+
+	if strings.HasPrefix(mimeType, "text/plain;") {
+		const beginPgpMessage string = "-----BEGIN PGP MESSAGE-----\n"
+		if len(beginningOfFile) > len(beginPgpMessage) {
+			if strings.HasPrefix(string(beginningOfFile), beginPgpMessage) {
+				mimeType = "application/pgp-encrypted"
+
+				if verbose {
+					LogInfof(
+						"Adjusted mimeType of '%s' to '%s' to make it compliant to output of unix 'file' command.",
+						path,
+						mimeType,
+					)
+				}
+			}
+		} else if len(beginningOfFile) <= 0 {
+			mimeType = "inode/x-empty"
+
+			if verbose {
+				LogInfof(
+					"Adjusted mimeType of '%s' to '%s' to make it compliant to output of unix 'file' command.",
+					path,
+					mimeType,
+				)
+			}
+
+		}
+	}
+
+	return mimeType, nil
+}
+
+func (f *FileBase) GetParentDirectoryPath() (parentDirectoryPath string, err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return "", err
+	}
+
+	parentDir, err := parent.GetParentDirectory()
+	if err != nil {
+		return "", err
+	}
+
+	parentDirectoryPath, err = parentDir.GetLocalPath()
+	if err != nil {
+		return "", err
+	}
+
+	return parentDirectoryPath, nil
 }
 
 func (f *FileBase) GetParentFileForBaseClass() (parentFileForBaseClass File, err error) {
@@ -131,6 +299,22 @@ func (f *FileBase) IsContentEqualByComparingSha256Sum(otherFile File, verbose bo
 	return isEqual, nil
 }
 
+func (f *FileBase) IsEmptyFile() (isEmtpyFile bool, err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	size, err := parent.GetSizeBytes()
+	if err != nil {
+		return false, err
+	}
+
+	isEmtpyFile = size == 0
+
+	return isEmtpyFile, nil
+}
+
 func (f *FileBase) IsMatchingSha256Sum(sha256sum string) (isMatching bool, err error) {
 	currentSum, err := f.GetSha256Sum()
 	if err != nil {
@@ -139,6 +323,108 @@ func (f *FileBase) IsMatchingSha256Sum(sha256sum string) (isMatching bool, err e
 
 	isMatching = currentSum == sha256sum
 	return isMatching, nil
+}
+
+func (f *FileBase) IsPgpEncrypted(verbose bool) (isEncrypted bool, err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	mimeType, err := parent.GetMimeType(verbose)
+	if err != nil {
+		return false, err
+	}
+
+	if mimeType == "application/pgp-encrypted" {
+		return true, nil
+	}
+
+	fileDescription, err := parent.GetFileTypeDescription(verbose)
+	if err != nil {
+		return false, err
+	}
+
+	if Strings().ContainsAtLeastOneSubstringIgnoreCase(
+		fileDescription,
+		[]string{"gpg", "pgp"},
+	) {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (f *FileBase) IsYYYYmmdd_HHMMSSPrefix() (hasDatePrefix bool, err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	basename, err := parent.GetBaseName()
+	if err != nil {
+		return false, err
+	}
+
+	layoutString := Dates().LayoutStringYYYYmmdd_HHMMSS()
+
+	if len(basename) < len(layoutString) {
+		return false, nil
+	}
+
+	toParse := basename[:len(layoutString)]
+	_, err = Dates().ParseStringWithGivenLayout(toParse, layoutString)
+	if err != nil {
+		if strings.Contains(err.Error(), "Unable to parse as date") {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (f *FileBase) MustEnsureEndsWithLineBreak(verbose bool) {
+	err := f.EnsureEndsWithLineBreak(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (f *FileBase) MustGetCreationDateByFileName(verbose bool) (creationDate *time.Time) {
+	creationDate, err := f.GetCreationDateByFileName(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return creationDate
+}
+
+func (f *FileBase) MustGetFileTypeDescription(verbose bool) (fileTypeDescription string) {
+	fileTypeDescription, err := f.GetFileTypeDescription(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return fileTypeDescription
+}
+
+func (f *FileBase) MustGetMimeType(verbose bool) (mimeType string) {
+	mimeType, err := f.GetMimeType(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return mimeType
+}
+
+func (f *FileBase) MustGetParentDirectoryPath() (parentDirectoryPath string) {
+	parentDirectoryPath, err := f.GetParentDirectoryPath()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return parentDirectoryPath
 }
 
 func (f *FileBase) MustGetParentFileForBaseClass() (parentFileForBaseClass File) {
@@ -177,6 +463,15 @@ func (f *FileBase) MustIsContentEqualByComparingSha256Sum(otherFile File, verbos
 	return isEqual
 }
 
+func (f *FileBase) MustIsEmptyFile() (isEmtpyFile bool) {
+	isEmtpyFile, err := f.IsEmptyFile()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isEmtpyFile
+}
+
 func (f *FileBase) MustIsMatchingSha256Sum(sha256sum string) (isMatching bool) {
 	isMatching, err := f.IsMatchingSha256Sum(sha256sum)
 	if err != nil {
@@ -186,6 +481,24 @@ func (f *FileBase) MustIsMatchingSha256Sum(sha256sum string) (isMatching bool) {
 	return isMatching
 }
 
+func (f *FileBase) MustIsPgpEncrypted(verbose bool) (isEncrypted bool) {
+	isEncrypted, err := f.IsPgpEncrypted(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isEncrypted
+}
+
+func (f *FileBase) MustIsYYYYmmdd_HHMMSSPrefix() (hasDatePrefix bool) {
+	hasDatePrefix, err := f.IsYYYYmmdd_HHMMSSPrefix()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hasDatePrefix
+}
+
 func (f *FileBase) MustReadAsBool() (boolValue bool) {
 	boolValue, err := f.ReadAsBool()
 	if err != nil {
@@ -193,6 +506,15 @@ func (f *FileBase) MustReadAsBool() (boolValue bool) {
 	}
 
 	return boolValue
+}
+
+func (f *FileBase) MustReadAsFloat64() (content float64) {
+	content, err := f.ReadAsFloat64()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return content
 }
 
 func (f *FileBase) MustReadAsInt64() (readValue int64) {
@@ -249,6 +571,22 @@ func (f *FileBase) MustReadFirstLineAndTrimSpace() (firstLine string) {
 	return firstLine
 }
 
+func (f *FileBase) MustReadLastCharAsString() (lastChar string) {
+	lastChar, err := f.ReadLastCharAsString()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return lastChar
+}
+
+func (f *FileBase) MustReplaceBetweenMarkers(verbose bool) {
+	err := f.ReplaceBetweenMarkers(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (f *FileBase) MustReplaceLineAfterLine(lineToFind string, replaceLineAfterWith string, verbose bool) (changeSummary *ChangeSummary) {
 	changeSummary, err := f.ReplaceLineAfterLine(lineToFind, replaceLineAfterWith, verbose)
 	if err != nil {
@@ -267,6 +605,13 @@ func (f *FileBase) MustSetParentFileForBaseClass(parentFileForBaseClass File) {
 
 func (f *FileBase) MustSortBlocksInFile(verbose bool) {
 	err := f.SortBlocksInFile(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (f *FileBase) MustTrimSpacesAtBeginningOfFile(verbose bool) {
+	err := f.TrimSpacesAtBeginningOfFile(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -316,6 +661,25 @@ func (f *FileBase) ReadAsBool() (boolValue bool, err error) {
 	return boolValue, nil
 }
 
+func (f *FileBase) ReadAsFloat64() (content float64, err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return -1, err
+	}
+
+	contentString, err := parent.ReadAsString()
+	if err != nil {
+		return -1, err
+	}
+
+	content, err = strconv.ParseFloat(contentString, 64)
+	if err != nil {
+		return -1, err
+	}
+
+	return content, nil
+}
+
 func (f *FileBase) ReadAsInt64() (readValue int64, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
@@ -331,6 +695,8 @@ func (f *FileBase) ReadAsInt64() (readValue int64, err error) {
 	if err != nil {
 		return 0, err
 	}
+
+	contentString = strings.TrimSpace(contentString)
 
 	readValue, err = strconv.ParseInt(contentString, 10, 64)
 	if err != nil {
@@ -401,6 +767,75 @@ func (f *FileBase) ReadFirstLineAndTrimSpace() (firstLine string, err error) {
 	firstLine = strings.TrimSpace(firstLine)
 
 	return firstLine, nil
+}
+
+func (f *FileBase) ReadLastCharAsString() (lastChar string, err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return "", err
+	}
+
+	content, err := parent.ReadAsString()
+	if err != nil {
+		return "", err
+	}
+
+	localPath, err := parent.GetLocalPath()
+	if err != nil {
+		return "", err
+	}
+
+	if len(content) <= 0 {
+		return "", TracedErrorf("Get last char failed, '%s' is empty file", localPath)
+	}
+
+	lastChar = content[len(content)-1:]
+
+	return lastChar, nil
+}
+
+func (f *FileBase) ReplaceBetweenMarkers(verbose bool) (err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	content, err := parent.ReadAsString()
+	if err != nil {
+		return err
+	}
+
+	workingDirPath, err := parent.GetParentDirectoryPath()
+	if err != nil {
+		return err
+	}
+
+	content, err = ReplaceBetweenMarkers().ReplaceBySourcesInString(
+		content,
+		&ReplaceBetweenMarkersOptions{
+			WorkingDirPath: workingDirPath,
+			Verbose:        verbose,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	err = parent.WriteString(content, verbose)
+	if err != nil {
+		return err
+	}
+
+	path, err := parent.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		LogInfof("Replace between markers finished in '%s'.", path)
+	}
+
+	return nil
 }
 
 func (f *FileBase) ReplaceLineAfterLine(lineToFind string, replaceLineAfterWith string, verbose bool) (changeSummary *ChangeSummary, err error) {
@@ -523,6 +958,30 @@ func (f *FileBase) SortBlocksInFile(verbose bool) (err error) {
 	return nil
 }
 
+func (f *FileBase) TrimSpacesAtBeginningOfFile(verbose bool) (err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	content, err := parent.ReadAsString()
+	if err != nil {
+		return err
+	}
+
+	content = Strings().TrimSpacesLeft(content)
+	if err != nil {
+		return err
+	}
+
+	err = f.WriteString(content, verbose)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (f *FileBase) WriteInt64(toWrite int64, verbose bool) (err error) {
 	stringRepresentation := fmt.Sprintf("%d", toWrite)
 
@@ -577,4 +1036,49 @@ func (f *FileBase) WriteTextBlocks(textBlocks []string, verbose bool) (err error
 
 	return nil
 
+}
+
+func (xxx *FileBase) GetCreationDateByFileName(verbose bool) (creationDate *time.Time, err error) {
+	parent, err := xxx.GetParentFileForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	basename, err := parent.GetBaseName()
+	if err != nil {
+		return nil, err
+	}
+
+	creationDate = nil
+	if creationDate == nil {
+		creationDate, err = Dates().ParseStringPrefixAsDate(basename)
+		if err != nil {
+			if strings.Contains(err.Error(), "Unable to parse prefix ") {
+				err = nil
+			} else if strings.Contains(err.Error(), "Unable to parse date ") {
+				err = nil
+			} else {
+				return nil, err
+			}
+		}
+	}
+
+	if creationDate == nil {
+		creationDate, err = SignalMessengers().ParseCreationDateFromSignalPictureBaseName(basename)
+		if err != nil {
+			if strings.Contains(err.Error(), "Unable to parse date ") {
+				err = nil
+			} else if strings.Contains(err.Error(), "is not a singal picture base name") {
+				err = nil
+			} else {
+				return nil, err
+			}
+		}
+	}
+
+	if creationDate == nil {
+		return nil, TracedError("All attempts failed to extract creationDate")
+	}
+
+	return creationDate, nil
 }
