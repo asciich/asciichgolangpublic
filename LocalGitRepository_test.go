@@ -63,7 +63,7 @@ func TestLocalGitRepositoryHasUncommittedChanges(t *testing.T) {
 				assert.False(repo.MustHasUncommittedChanges())
 				assert.True(repo.MustHasNoUncommittedChanges())
 
-				repo.CreateFileInDirectory("hello.txt")
+				repo.CreateFileInDirectory(verbose, "hello.txt")
 				assert.True(repo.MustHasUncommittedChanges())
 				assert.False(repo.MustHasNoUncommittedChanges())
 			},
@@ -162,7 +162,7 @@ func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 				)
 
 				fileName := "abc.txt"
-				clonedRepo2.MustCreateFileInDirectory(fileName)
+				clonedRepo2.MustCreateFileInDirectory(verbose, fileName)
 				clonedRepo2.MustAdd(fileName)
 				clonedRepo2.MustCommit(
 					&GitCommitOptions{
@@ -289,9 +289,9 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 
 				repo := TemporaryDirectories().MustCreateEmptyTemporaryGitRepository(
 					&CreateRepositoryOptions{
-						Verbose:                   verbose,
-						BareRepository:            tt.bareRepository,
-						InitializeWithEmptyCommit: false,
+						Verbose:                     verbose,
+						BareRepository:              tt.bareRepository,
+						InitializeWithEmptyCommit:   false,
 						InitializeWithDefaultAuthor: true,
 					})
 				defer repo.Delete(verbose)

@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"regexp"
 	"strings"
 	"unicode"
 )
@@ -254,6 +255,24 @@ func (s *StringsService) IsFirstCharUpperCase(input string) (isFirstCharUpperCas
 	}
 
 	return unicode.IsUpper(firstChar)
+}
+
+func (s *StringsService) MatchesRegex(input string, regex string) (matches bool, err error) {
+	matches, err = regexp.Match(regex, []byte(input))
+	if err != nil {
+		return false, TracedErrorf("match regex failed: '%w'", err)
+	}
+
+	return matches, nil
+}
+
+func (s *StringsService) MustMatchesRegex(input string, regex string) (matches bool) {
+	matches, err := s.MatchesRegex(input, regex)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return matches
 }
 
 func (s *StringsService) RemoveCommentMarkers(input string) (commentContent string) {

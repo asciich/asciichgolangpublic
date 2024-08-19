@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 )
@@ -304,6 +305,21 @@ func (l *LocalFile) GetPath() (path string, err error) {
 	return l.path, nil
 }
 
+func (l *LocalFile) GetSizeBytes() (fileSizeBytes int64, err error) {
+	path, err := l.GetPath()
+	if err != nil {
+		return -1, err
+	}
+
+	fi, err := os.Stat(path)
+	if err != nil {
+		return -1, TracedError(err)
+	}
+	fileSizeBytes = fi.Size()
+
+	return fileSizeBytes, nil
+}
+
 func (l *LocalFile) GetUriAsString() (uri string, err error) {
 	path, err := l.GetPath()
 	if err != nil {
@@ -412,6 +428,15 @@ func (l *LocalFile) MustGetPath() (path string) {
 	return path
 }
 
+func (l *LocalFile) MustGetSizeBytes() (fileSizeBytes int64) {
+	fileSizeBytes, err := l.GetSizeBytes()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return fileSizeBytes
+}
+
 func (l *LocalFile) MustGetUriAsString() (uri string) {
 	uri, err := l.GetUriAsString()
 	if err != nil {
@@ -435,6 +460,15 @@ func (l *LocalFile) MustReadAsBytes() (content []byte) {
 	}
 
 	return content
+}
+
+func (l *LocalFile) MustReadFirstNBytes(numberOfBytesToRead int) (firstBytes []byte) {
+	firstBytes, err := l.ReadFirstNBytes(numberOfBytesToRead)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return firstBytes
 }
 
 func (l *LocalFile) MustSecurelyDelete(verbose bool) {
@@ -481,6 +515,36 @@ func (l *LocalFile) ReadAsBytes() (content []byte, err error) {
 	}
 
 	return content, err
+}
+
+func (l *LocalFile) ReadFirstNBytes(numberOfBytesToRead int) (firstBytes []byte, err error) {
+	if numberOfBytesToRead <= 0 {
+		return nil, TracedErrorf("Invalid numberOfBytesToRead: '%d'", numberOfBytesToRead)
+	}
+
+	path, err := l.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
+	fd, err := os.Open(path)
+	if err != nil {
+		return nil, TracedError(err.Error())
+	}
+
+	defer fd.Close()
+
+	firstBytes = make([]byte, numberOfBytesToRead)
+	readBytes, err := fd.Read(firstBytes)
+	if err != nil {
+		if !errors.Is(err, io.EOF) {
+			return nil, TracedError(err.Error())
+		}
+	}
+
+	firstBytes = firstBytes[:readBytes]
+
+	return firstBytes, nil
 }
 
 func (l *LocalFile) SecurelyDelete(verbose bool) (err error) {

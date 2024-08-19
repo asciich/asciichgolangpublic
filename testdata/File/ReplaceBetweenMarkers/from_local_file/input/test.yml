@@ -1,0 +1,8 @@
+---
+
+defined: before
+
+# REPLACE_BETWEEN_MARKERS START source=./stages.txt
+# REPLACE_BETWEEN_MARKERS END
+
+defined_again: after

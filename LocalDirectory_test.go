@@ -412,3 +412,39 @@ func TestLocalDirectoryWriteStringToFile(t *testing.T) {
 		)
 	}
 }
+
+func TestDirectoryListFilesInDirectory(t *testing.T) {
+	tests := []struct {
+		fileNames     []string
+		listOptions   ListFileOptions
+		expectedPaths []string
+	}{
+		{[]string{"a.go", "b.go"}, ListFileOptions{ReturnRelativePaths: true}, []string{"a.go", "b.go"}},
+		{[]string{"a.go", "a/b.go"}, ListFileOptions{ReturnRelativePaths: true}, []string{"a.go", "a/b.go"}},
+		{[]string{"a.go", "a/b.go", "b.go"}, ListFileOptions{ReturnRelativePaths: true, ExcludeBasenamePattern: []string{"a.*"}}, []string{"a/b.go", "b.go"}},
+		{[]string{"a.go", "a/b.go", "b.go"}, ListFileOptions{ReturnRelativePaths: true, ExcludeBasenamePattern: []string{"a.*"}}, []string{"a/b.go", "b.go"}},
+		{[]string{"a.go", "a/b.go", "b.go"}, ListFileOptions{ReturnRelativePaths: true, ExcludeBasenamePattern: []string{"b.*"}}, []string{"a.go"}},
+		{[]string{"b.go", "a.go"}, ListFileOptions{ReturnRelativePaths: true}, []string{"a.go", "b.go"}},
+		{[]string{"b.go", "a.go", "go.mod", "go.sum"}, ListFileOptions{ReturnRelativePaths: true}, []string{"a.go", "b.go", "go.mod", "go.sum"}},
+		{[]string{"b.go", "a.go", "go.mod", "go.sum"}, ListFileOptions{ReturnRelativePaths: true, MatchBasenamePattern: []string{".*.go"}}, []string{"a.go", "b.go"}},
+		{[]string{"b.go", "a.go", "go.mod", "go.sum"}, ListFileOptions{ReturnRelativePaths: true, ExcludeBasenamePattern: []string{".*.go"}}, []string{"go.mod", "go.sum"}},
+		{[]string{"b.go", "a.go", "go.go", "go.mod", "go.sum"}, ListFileOptions{ReturnRelativePaths: true, MatchBasenamePattern: []string{"go.*"}, ExcludeBasenamePattern: []string{".*.go", ".*.mod"}}, []string{"go.sum"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+				tt.listOptions.Verbose = verbose
+
+				temporaryDirectory := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
+				temporaryDirectory.MustCreateFilesInDirectory(tt.fileNames, verbose)
+				listedFiles := temporaryDirectory.MustGetFilePathsInDirectory(&tt.listOptions)
+				assert.EqualValues(tt.expectedPaths, listedFiles)
+			},
+		)
+	}
+}

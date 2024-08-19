@@ -1,8 +1,13 @@
 package asciichgolangpublic
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -277,7 +282,7 @@ func TestLocalFileGetParentDirectory(t *testing.T) {
 				temporaryDir := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
 				defer temporaryDir.Delete(verbose)
 
-				temporaryFile := temporaryDir.MustCreateFileInDirectory("test.txt")
+				temporaryFile := temporaryDir.MustCreateFileInDirectory(verbose, "test.txt")
 				parentDir := temporaryFile.MustGetParentDirectory()
 
 				assert.EqualValues(
@@ -474,8 +479,6 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 	}
 }
 
-
-
 func TestFileReplaceLineAfterLine(t *testing.T) {
 	tests := []struct {
 		input                     string
@@ -504,6 +507,602 @@ func TestFileReplaceLineAfterLine(t *testing.T) {
 				content := testFile.MustReadAsString()
 				assert.EqualValues(tt.expectedContent, content)
 				assert.EqualValues(tt.expectedChanged, changeSummary.IsChanged())
+			},
+		)
+	}
+}
+
+// Test if GetPath always returns an absolute value which stays the same even if the current working directory is changed.
+func TestLocalFileGetPathReturnsAbsoluteValue(t *testing.T) {
+	tests := []struct {
+		path string
+	}{
+		{"test.txt"},
+		{"./test.txt"},
+		{"../test.txt"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				startPath, err := os.Getwd()
+				if err != nil {
+					LogFatalWithTrace(err)
+				}
+
+				var path1 string
+				var path2 string
+
+				var waitGroup sync.WaitGroup
+
+				testFunction := func() {
+					defer os.Chdir(startPath)
+					defer waitGroup.Done()
+
+					file := MustGetLocalFileByPath(tt.path)
+					path1 = file.MustGetPath()
+					os.Chdir("..")
+					path2 = file.MustGetPath()
+				}
+
+				waitGroup.Add(1)
+				go testFunction()
+				waitGroup.Wait()
+
+				assert.True(Paths().IsAbsolutePath(path1))
+				assert.True(Paths().IsAbsolutePath(path2))
+
+				assert.EqualValues(path1, path2)
+
+				currentPath, err := os.Getwd()
+				if err != nil {
+					t.Fatalf("%v", err)
+				}
+
+				assert.EqualValues(startPath, currentPath)
+			},
+		)
+	}
+}
+
+func TestLocalFileSortBlocksInFile(t *testing.T) {
+	type TestCase struct {
+		testDataDir string
+	}
+
+	tests := []TestCase{}
+
+	testDataDirectory := MustGetLocalGitRepositoryByPath(".").MustGetSubDirectory("testdata", "File", "SortBlocksInFile")
+	for _, testDirectory := range testDataDirectory.MustGetSubDirectories(&ListDirectoryOptions{Recursive: false}) {
+		tests = append(tests, TestCase{testDirectory.MustGetLocalPath()})
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+
+				testDataDir := MustGetLocalDirectoryByPath(tt.testDataDir)
+				testFile := testDataDir.MustCopyFileToTemporaryFile(verbose, "input")
+				expectedFile := testDataDir.MustGetFileInDirectory("expectedOutput")
+				testFile.MustSortBlocksInFile(verbose)
+
+				sortedChecksum := testFile.MustGetSha256Sum()
+				expectedChecksum := expectedFile.MustGetSha256Sum()
+
+				if os.Getenv("UPDATE_EXPECTED") == "1" {
+					testFile.MustCopyToFile(expectedFile, verbose)
+				}
+
+				assert.EqualValues(expectedChecksum, sortedChecksum)
+			},
+		)
+	}
+}
+
+func TestLocalFileGetLastCharAsString(t *testing.T) {
+	tests := []struct {
+		content  string
+		lastChar string
+	}{
+		{" ", " "},
+		{"a", "a"},
+		{" \n", "\n"},
+		{" \nb", "b"},
+		{" \nb\n", "\n"},
+		{"a\n", "\n"},
+		{"\n", "\n"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+
+				testFile := TemporaryFiles().MustCreateFromString(tt.content, verbose)
+				defer testFile.Delete(verbose)
+
+				lastChar := testFile.MustReadLastCharAsString()
+
+				assert.EqualValues(tt.lastChar, lastChar)
+			},
+		)
+	}
+}
+
+func TestLocalFileGetAsFloat64(t *testing.T) {
+	tests := []struct {
+		content       string
+		expectedFloat float64
+	}{
+		{"0", 0.0},
+		{"0.", 0.0},
+		{"0.0", 0.0},
+		{"0.1", 0.1},
+		{"0.10", 0.1},
+		{"-3", -3.0},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+
+				testFile := TemporaryFiles().MustCreateFromString(tt.content, verbose)
+				defer testFile.Delete(verbose)
+
+				readFloat := testFile.MustReadAsFloat64()
+
+				assert.EqualValues(tt.expectedFloat, readFloat)
+			},
+		)
+	}
+}
+
+func TestFileGetAsInt64(t *testing.T) {
+	tests := []struct {
+		content     string
+		expectedInt int64
+	}{
+		{"0", 0},
+		{"1", 1},
+		{"1\n", 1},
+		{"10\n", 10},
+		{" 10\n", 10},
+		{" -110\n", -110},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+
+				testFile := TemporaryFiles().MustCreateFromString(tt.content, verbose)
+				defer testFile.Delete(verbose)
+
+				readInt64 := testFile.MustReadAsInt64()
+
+				assert.EqualValues(tt.expectedInt, readInt64)
+			},
+		)
+	}
+}
+
+func TestFileGetParentDirectoryPath(t *testing.T) {
+	tests := []struct {
+		inputPath          string
+		expectedParentPath string
+	}{
+		{"/abc", "/"},
+		{"/abc/d", "/abc"},
+		{"/abc/d.go", "/abc"},
+		{"/abc/d.txt", "/abc"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				testFile := MustGetLocalFileByPath(tt.inputPath)
+				parentPath := testFile.MustGetParentDirectoryPath()
+				assert.EqualValues(tt.expectedParentPath, parentPath)
+			},
+		)
+	}
+}
+
+func TestFileIsPgpEncrypted_Case1_unencrypted(t *testing.T) {
+	tests := []struct {
+		unencrypted string
+	}{
+		{""},
+		{"\n"},
+		{"---"},
+		{"testcase"},
+		{"testcase\n"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				temporaryFile := TemporaryFiles().MustCreateFromString(tt.unencrypted, verbose)
+				defer temporaryFile.Delete(verbose)
+
+				assert.False(temporaryFile.MustIsPgpEncrypted(verbose))
+			},
+		)
+	}
+}
+
+func TestFileIsPgpEncrypted_Case2_encryptedBinary(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase\n"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				temporaryFile := TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)
+				defer temporaryFile.Delete(verbose)
+
+				createCommand := []string{
+					"bash",
+					"-c",
+					fmt.Sprintf(
+						"exec 3<<<$(echo hallo) ; echo test | gpg --batch --symmetric --passphrase-fd=3 > '%s'",
+						temporaryFile.MustGetLocalPath(),
+					),
+				}
+				Bash().MustRunCommand(
+					&RunCommandOptions{
+						Command: createCommand,
+						Verbose: verbose,
+					},
+				)
+
+				assert.True(temporaryFile.MustIsPgpEncrypted(verbose))
+			},
+		)
+	}
+}
+
+func TestFileIsPgpEncrypted_Case3_encryptedAsciiArmor(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase\n"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				temporaryFile := TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)
+				defer temporaryFile.Delete(verbose)
+
+				createCommand := []string{
+					"bash",
+					"-c",
+					fmt.Sprintf(
+						"exec 3<<<$(echo hallo) ; echo test | gpg --batch --symmetric --passphrase-fd=3 -a > '%s'",
+						temporaryFile.MustGetLocalPath(),
+					),
+				}
+				Bash().MustRunCommand(
+					&RunCommandOptions{
+						Command: createCommand,
+						Verbose: verbose,
+					},
+				)
+
+				assert.True(temporaryFile.MustIsPgpEncrypted(verbose))
+			},
+		)
+	}
+}
+
+func TestFileGetMimeTypeOfEmptyFile(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase\n"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				temporaryFile := TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)
+				expectedMimeType := "inode/x-empty"
+
+				mimeType := temporaryFile.MustGetMimeType(verbose)
+
+				assert.EqualValues(expectedMimeType, mimeType)
+			},
+		)
+	}
+}
+
+func TestFileGetCreationDateByFileName(t *testing.T) {
+	tests := []struct {
+		filename string
+		expected time.Time
+	}{
+		{"20231121_140424", time.Date(2023, 11, 21, 14, 04, 24, 0, time.UTC)},
+		{"20231121-140424", time.Date(2023, 11, 21, 14, 04, 24, 0, time.UTC)},
+		{"20231121-140424thisisignored", time.Date(2023, 11, 21, 14, 04, 24, 0, time.UTC)},
+		{"20231121_140424.jpg", time.Date(2023, 11, 21, 14, 04, 24, 0, time.UTC)},
+		{"20231121-140424.jpg", time.Date(2023, 11, 21, 14, 04, 24, 0, time.UTC)},
+		{"20231121-140424thisisignored.jpg", time.Date(2023, 11, 21, 14, 04, 24, 0, time.UTC)},
+		{"signal-2023-04-05-19-47-40-414-1.jpg", time.Date(2023, 04, 05, 19, 47, 40, 0, time.UTC)},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				temporaryDir := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
+				defer temporaryDir.Delete(verbose)
+
+				file := temporaryDir.MustWriteStringToFileInDirectory("content", verbose, tt.filename)
+				readDate := file.MustGetCreationDateByFileName(verbose)
+
+				assert.EqualValues(
+					tt.expected,
+					*readDate,
+				)
+			},
+		)
+	}
+}
+
+func TestFileHasYYYYmmdd_HHMMSSPrefix(t *testing.T) {
+	tests := []struct {
+		filename          string
+		expectedHasPrefix bool
+	}{
+		{"20231121_140424", true},
+		{"20231121_140424.jpg", true},
+		{"20231121_140424_test.jpg", true},
+		{"a20231121_140424_test.jpg", false},
+		{"a.jpg", false},
+		{"a", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				temporaryDir := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
+				defer temporaryDir.Delete(verbose)
+
+				file := temporaryDir.MustWriteStringToFileInDirectory("content", verbose, tt.filename)
+				assert.EqualValues(tt.expectedHasPrefix, file.MustIsYYYYmmdd_HHMMSSPrefix())
+			},
+		)
+	}
+}
+
+func TestFileGetSizeBytes(t *testing.T) {
+	tests := []struct {
+		content      []byte
+		expectedSize int64
+	}{
+		{[]byte{}, 0},
+		{[]byte("helloWorld"), 10},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				testFile := TemporaryFiles().MustCreateFromBytes(tt.content, verbose)
+				sizeBytes := testFile.MustGetSizeBytes()
+
+				assert.EqualValues(tt.expectedSize, sizeBytes)
+			},
+		)
+	}
+}
+
+func TestFileEnsureEndsWithLineBreakOnEmptyFile(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				emptyFile := TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)
+				emptyFile.MustEnsureEndsWithLineBreak(verbose)
+
+				assert.EqualValues("\n", emptyFile.MustReadLastCharAsString())
+			},
+		)
+	}
+}
+
+func TestFileEnsureEndsWithLineBreakOnNonExitistingFile(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				nonExistingFile := TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)
+				nonExistingFile.MustDelete(verbose)
+
+				assert.False(nonExistingFile.MustExists())
+
+				nonExistingFile.MustEnsureEndsWithLineBreak(verbose)
+
+				assert.EqualValues("\n", nonExistingFile.MustReadLastCharAsString())
+			},
+		)
+	}
+}
+
+func TestFileTrimSpacesAtBeginningOfFile(t *testing.T) {
+	tests := []struct {
+		input           string
+		expectedContent string
+	}{
+		{"testcase", "testcase"},
+		{" testcase", "testcase"},
+		{"\ntestcase", "testcase"},
+		{"\ttestcase", "testcase"},
+		{"  testcase", "testcase"},
+		{"\n testcase", "testcase"},
+		{"\t testcase", "testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				testFile := TemporaryFiles().MustCreateFromString(tt.input, verbose)
+				defer testFile.Delete(verbose)
+
+				testFile.MustTrimSpacesAtBeginningOfFile(verbose)
+
+				content := testFile.MustReadAsString()
+				assert.EqualValues(tt.expectedContent, content)
+			},
+		)
+	}
+}
+
+func TestFileReplaceBetweenMarkers(t *testing.T) {
+	type TestCase struct {
+		testDataDir string
+	}
+
+	tests := []TestCase{}
+
+	testDataDirectory := MustGetLocalGitRepositoryByPath(".").MustGetSubDirectory("testdata", "File", "ReplaceBetweenMarkers")
+	for _, testDirectory := range testDataDirectory.MustGetSubDirectories(&ListDirectoryOptions{Recursive: false}) {
+		tests = append(tests, TestCase{testDirectory.MustGetLocalPath()})
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				sourceDir := MustGetLocalDirectoryByPath(filepath.Join(tt.testDataDir, "input"))
+				expectedDir := MustGetLocalDirectoryByPath(filepath.Join(tt.testDataDir, "expectedOutput"))
+
+				tempDir := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
+
+				sourceDir.MustCopyContentToLocalDirectory(
+					tempDir,
+					verbose,
+				)
+
+				tempDir.MustReplaceBetweenMarkers(verbose)
+
+				listOptions := NewListFileOptions()
+				listOptions.NonRecursive = false
+				listOptions.ReturnRelativePaths = true
+				expectedFilePaths := expectedDir.MustGetFilePathsInDirectory(listOptions)
+				currentFilePaths := tempDir.MustGetFilePathsInDirectory(listOptions)
+
+				assert.EqualValues(expectedFilePaths, currentFilePaths)
+
+				for _, toCheck := range currentFilePaths {
+					currentFile := tempDir.MustGetFileInDirectory(toCheck)
+					expectedFile := expectedDir.MustGetFileInDirectory(toCheck)
+
+					currentChecksum := currentFile.MustGetSha256Sum()
+					expectedChecksum := expectedFile.MustGetSha256Sum()
+
+					if currentChecksum != expectedChecksum {
+
+						if os.Getenv("UPDATE_EXPECTED") == "1" {
+							currentFile.CopyToFile(expectedFile, verbose)
+						}
+					}
+
+					assert.EqualValuesf(
+						expectedChecksum,
+						currentChecksum,
+						"File '%s' missmatch: '%s' '%s'",
+						toCheck,
+						currentFile.MustGetLocalPath(),
+						expectedFile.MustGetLocalPath(),
+					)
+				}
 			},
 		)
 	}
