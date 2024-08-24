@@ -35,7 +35,21 @@ func (g *GitlabBranch) CreateFromDefaultBranch(verbose bool) (err error) {
 	return nil
 }
 
-func (g *GitlabBranch) Delete(verbose bool) (err error) {
+func (g *GitlabBranch) GetGitlabBranches() (branches *GitlabBranches, err error) {
+	gitlabProject, err := g.GetGitlabProject()
+	if err != nil {
+		return nil, err
+	}
+
+	branches, err = gitlabProject.GetBranches()
+	if err != nil {
+		return nil, err
+	}
+
+	return branches, nil
+}
+
+func (g *GitlabBranch) Delete(skipWaitForDeletion bool, verbose bool) (err error) {
 	nativeClient, projectId, err := g.GetNativeBranchesClientAndId()
 	if err != nil {
 		return err
@@ -70,23 +84,37 @@ func (g *GitlabBranch) Delete(verbose bool) (err error) {
 			)
 		}
 
-		// Deleting is not instantaneous so lets check if deleted branch is really absent:
-		for i := 0; i < 10; i++ {
-			exists, err = g.Exists()
-			if err != nil {
-				return err
-			}
+		if skipWaitForDeletion {
+			exists = false
+		} else {
+			// Deleting is not instantaneous so lets check if deleted branch is really absent.
+			// Especially the branch listing on gitlab side tends to race conditions.
+			for i := 0; i < 30; i++ {
+				gitlabBranches, err := g.GetGitlabBranches()
+				if err != nil {
+					return err
+				}
 
-			if exists {
-				time.Sleep(500 * time.Millisecond)
-				if verbose {
-					LogInfof("Wait for branch '%s' to be deleted in %s .", branchName, projectUrl)
+				const verboseBranchListing = false
+				branchNames, err := gitlabBranches.GetBranchNames(verboseBranchListing)
+				if err != nil {
+					return err
+				}
+
+				exists = Slices().ContainsString(branchNames, branchName)
+				if exists {
+					time.Sleep(1000 * time.Millisecond)
+					if verbose {
+						LogInfof("Wait for branch '%s' to be deleted in %s .", branchName, projectUrl)
+					}
+				} else {
+					break
 				}
 			}
 		}
 
 		if exists {
-			return TracedErrorf("Internal error: failed to dete '%s' in %s", branchName, projectUrl)
+			return TracedErrorf("Internal error: failed to delete '%s' in %s", branchName, projectUrl)
 		}
 
 		if verbose {
@@ -235,8 +263,8 @@ func (g *GitlabBranch) MustCreateFromDefaultBranch(verbose bool) {
 	}
 }
 
-func (g *GitlabBranch) MustDelete(verbose bool) {
-	err := g.Delete(verbose)
+func (g *GitlabBranch) MustDelete(skipWaitForDeletion bool, verbose bool) {
+	err := g.Delete(skipWaitForDeletion, verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

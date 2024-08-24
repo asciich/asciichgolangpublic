@@ -1,6 +1,10 @@
 package asciichgolangpublic
 
-import "github.com/xanzy/go-gitlab"
+import (
+	"time"
+
+	"github.com/xanzy/go-gitlab"
+)
 
 type GitlabBranches struct {
 	gitlabProject *GitlabProject
@@ -121,11 +125,51 @@ func (g *GitlabBranches) DeleteAllBranchesExceptDefaultBranch(verbose bool) (err
 		return err
 	}
 
+	deletedBranchNames := []string{}
 	for _, toDelete := range branches {
-		err = toDelete.Delete(verbose)
+		const skipWaitForDeletion bool = true
+		err = toDelete.Delete(skipWaitForDeletion, verbose)
 		if err != nil {
 			return err
 		}
+
+		branchName, err := toDelete.GetName()
+		if err != nil {
+			return err
+		}
+
+		deletedBranchNames = append(deletedBranchNames, branchName)
+	}
+
+	branchNotDeletedYetFound := false
+	for i := 0; i < 30; i++ {
+		branchNotDeletedYetFound = false
+
+		const verboseList bool = false
+		currentBranchNames, err := g.GetBranchNames(verboseList)
+		if err != nil {
+			return err
+		}
+
+		for _, deleted := range deletedBranchNames {
+			if Slices().ContainsString(currentBranchNames, deleted) {
+				branchNotDeletedYetFound = true
+				break
+			}
+		}
+
+		if branchNotDeletedYetFound {
+			if verbose {
+				LogInfof("Wait for all non default branches to be deleted.")
+				time.Sleep(1 * time.Second)
+			}
+		} else {
+			break
+		}
+	}
+
+	if branchNotDeletedYetFound {
+		return TracedError("Unable to delete all branches except default branch")
 	}
 
 	if len(branches) > 0 {

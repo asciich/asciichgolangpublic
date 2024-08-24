@@ -104,6 +104,14 @@ func (s *StringsService) EnsureFirstCharUppercase(input string) (firstCharUpperc
 	return firstCharUppercase
 }
 
+func (s *StringsService) EnsurePrefix(input string, prefix string) (ensuredPrefix string) {
+	if strings.HasPrefix(input, prefix) {
+		return input
+	} else {
+		return prefix + input
+	}
+}
+
 func (s *StringsService) EnsureSuffix(input string, suffix string) (ensuredSuffix string) {
 	if strings.HasSuffix(input, suffix) {
 		return input
