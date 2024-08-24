@@ -53,6 +53,18 @@ func NewGitlabInstance() (g *GitlabInstance) {
 	return new(GitlabInstance)
 }
 
+// Get the path to the personal projects which is "users/USERNAME/projects".
+func (g *GitlabInstance) GetPersonalProjectsPath(verbose bool) (personalProjetsPath string, err error) {
+	userName, err := g.GetCurrentUserName(verbose)
+	if err != nil {
+		return "", err
+	}
+
+	personalProjetsPath = fmt.Sprintf("users/%s/projects", userName)
+
+	return personalProjetsPath, nil
+}
+
 func (g *GitlabInstance) AddRunner(newRunnerOptions *GitlabAddRunnerOptions) (createdRunner *GitlabRunner, err error) {
 	if newRunnerOptions == nil {
 		return nil, TracedError("newRunnerOptions is nil")
@@ -267,6 +279,34 @@ func (g *GitlabInstance) GetApiV4Url() (v4ApiUrl string, err error) {
 	return v4ApiUrl, nil
 }
 
+func (g *GitlabInstance) GetCurrentUser(verbose bool) (currentUser *GitlabUser, err error) {
+	users, err := g.GetGitlabUsers()
+	if err != nil {
+		return nil, err
+	}
+
+	currentUser, err = users.GetUser()
+	if err != nil {
+		return nil, err
+	}
+
+	return currentUser, nil
+}
+
+func (g *GitlabInstance) GetCurrentUserName(verbose bool) (currentUserName string, err error) {
+	user, err := g.GetCurrentUser(verbose)
+	if err != nil {
+		return "", err
+	}
+
+	currentUserName, err = user.GetCachedName()
+	if err != nil {
+		return "", err
+	}
+
+	return currentUserName, nil
+}
+
 func (g *GitlabInstance) GetCurrentlyUsedAccessToken() (gitlabAccessToken string, err error) {
 	if g.currentlyUsedAccessToken == nil {
 		return "", TracedError("currentlyUsedAccessToken not set")
@@ -343,14 +383,37 @@ func (g *GitlabInstance) GetGitlabProjectByPath(projectPath string, verbose bool
 		return nil, TracedError("projectPath is empty string")
 	}
 
-	projectId, err := g.GetProjectIdByPath(projectPath, verbose)
+	exists, err := g.ProjectByProjectPathExists(projectPath, verbose)
 	if err != nil {
 		return nil, err
 	}
 
-	gitlabProject, err = g.GetGitlabProjectById(projectId, verbose)
-	if err != nil {
-		return nil, err
+	if exists {
+		projectId, err := g.GetProjectIdByPath(projectPath, verbose)
+		if err != nil {
+			return nil, err
+		}
+
+		gitlabProject, err = g.GetGitlabProjectById(projectId, verbose)
+		if err != nil {
+			return nil, err
+		}
+
+		err = gitlabProject.SetCachedPath(projectPath)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		gitlabProject = NewGitlabProject()
+		err = gitlabProject.SetCachedPath(projectPath)
+		if err != nil {
+			return nil, err
+		}
+
+		err = gitlabProject.SetGitlab(g)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return gitlabProject, nil
@@ -500,40 +563,57 @@ func (g *GitlabInstance) GetPersonalAccessTokens() (tokens *GitlabPersonalAccess
 	return tokens, nil
 }
 
+func (g *GitlabInstance) GetPersonalProjectByName(projectName string, verbose bool) (project *GitlabProject, err error) {
+	if projectName == "" {
+		return nil, TracedErrorEmptyString("projectName")
+	}
+
+	personalProjectsPath, err := g.GetPersonalProjectsPath(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	personalProjectsPath = Strings().EnsureSuffix(personalProjectsPath, "/")
+
+	projectPath := Strings().EnsurePrefix(projectName, personalProjectsPath)
+
+	project, err = g.GetGitlabProjectByPath(projectPath, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return project, nil
+}
+
 func (g *GitlabInstance) GetProjectIdByPath(projectPath string, verbose bool) (projectId int, err error) {
 	if len(projectPath) <= 0 {
 		return -1, TracedError("projectPath is empty string")
 	}
 
-	nativeClient, err := g.GetNativeClient()
+	projects, err := g.GetGitlabProjects()
 	if err != nil {
 		return -1, err
 	}
 
-	nativeProject, _, err := nativeClient.Projects.GetProject(projectPath, &gitlab.GetProjectOptions{})
+	projectId, err = projects.GetProjectIdByProjectPath(projectPath, verbose)
 	if err != nil {
-		return -1, TracedError(err.Error())
-	}
-
-	projectId = nativeProject.ID
-	if projectId <= 0 {
-		return -1, TracedErrorf("Invalid project id returned by nativeProject: '%d'", projectId)
-	}
-
-	if verbose {
-		LogInfof("Gitlab project '%s' has id '%d'", projectPath, projectId)
+		return -1, err
 	}
 
 	return projectId, nil
 }
 
-func (g *GitlabInstance) GetProjectPathList(verbose bool) (projectPaths []string, err error) {
+func (g *GitlabInstance) GetProjectPathList(options *GitlabgetProjectListOptions) (projectPaths []string, err error) {
+	if options == nil {
+		return nil, TracedErrorNil("options")
+	}
+
 	project, err := g.GetGitlabProjects()
 	if err != nil {
 		return nil, err
 	}
 
-	projectPaths, err = project.GetProjectPathList(verbose)
+	projectPaths, err = project.GetProjectPathList(options)
 	if err != nil {
 		return nil, err
 	}
@@ -557,6 +637,24 @@ func (g *GitlabInstance) GetRunnerByName(name string) (runner *GitlabRunner, err
 	}
 
 	return runner, nil
+}
+
+func (g *GitlabInstance) GetUserById(id int) (gitlabUser *GitlabUser, err error) {
+	if id <= 0 {
+		return nil, TracedErrorf("id '%d' is invalid", id)
+	}
+
+	gitlabUsers, err := g.GetGitlabUsers()
+	if err != nil {
+		return nil, err
+	}
+
+	gitlabUser, err = gitlabUsers.GetUserById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return gitlabUser, nil
 }
 
 func (g *GitlabInstance) GetUserByUsername(username string) (gitlabUser *GitlabUser, err error) {
@@ -691,6 +789,24 @@ func (g *GitlabInstance) MustGetApiV4Url() (v4ApiUrl string) {
 	}
 
 	return v4ApiUrl
+}
+
+func (g *GitlabInstance) MustGetCurrentUser(verbose bool) (currentUser *GitlabUser) {
+	currentUser, err := g.GetCurrentUser(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return currentUser
+}
+
+func (g *GitlabInstance) MustGetCurrentUserName(verbose bool) (currentUserName string) {
+	currentUserName, err := g.GetCurrentUserName(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return currentUserName
 }
 
 func (g *GitlabInstance) MustGetCurrentlyUsedAccessToken() (gitlabAccessToken string) {
@@ -855,6 +971,24 @@ func (g *GitlabInstance) MustGetPersonalAccessTokens() (tokens *GitlabPersonalAc
 	return tokens
 }
 
+func (g *GitlabInstance) MustGetPersonalProjectByName(projectName string, verbose bool) (project *GitlabProject) {
+	project, err := g.GetPersonalProjectByName(projectName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return project
+}
+
+func (g *GitlabInstance) MustGetPersonalProjectsPath(verbose bool) (personalProjetsPath string) {
+	personalProjetsPath, err := g.GetPersonalProjectsPath(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return personalProjetsPath
+}
+
 func (g *GitlabInstance) MustGetProjectIdByPath(projectPath string, verbose bool) (projectId int) {
 	projectId, err := g.GetProjectIdByPath(projectPath, verbose)
 	if err != nil {
@@ -864,8 +998,8 @@ func (g *GitlabInstance) MustGetProjectIdByPath(projectPath string, verbose bool
 	return projectId
 }
 
-func (g *GitlabInstance) MustGetProjectPathList(verbose bool) (projectPaths []string) {
-	projectPaths, err := g.GetProjectPathList(verbose)
+func (g *GitlabInstance) MustGetProjectPathList(options *GitlabgetProjectListOptions) (projectPaths []string) {
+	projectPaths, err := g.GetProjectPathList(options)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -880,6 +1014,15 @@ func (g *GitlabInstance) MustGetRunnerByName(name string) (runner *GitlabRunner)
 	}
 
 	return runner
+}
+
+func (g *GitlabInstance) MustGetUserById(id int) (gitlabUser *GitlabUser) {
+	gitlabUser, err := g.GetUserById(id)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitlabUser
 }
 
 func (g *GitlabInstance) MustGetUserByUsername(username string) (gitlabUser *GitlabUser) {

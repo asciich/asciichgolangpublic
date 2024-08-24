@@ -91,6 +91,40 @@ func NewGitlabProject() (gitlabProject *GitlabProject) {
 	return new(GitlabProject)
 }
 
+func (g *GitlabProject) Create(verbose bool) (err error) {
+	gitlabProjects, err := g.GetGitlabProjects()
+	if err != nil {
+		return err
+	}
+
+	projectPath, err := g.GetCachedPath()
+	if err != nil {
+		return err
+	}
+
+	createdProject, err := gitlabProjects.CreateProject(
+		&GitlabCreateProjectOptions{
+			ProjectPath: projectPath,
+			Verbose:     verbose,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	createdProjectId, err := createdProject.GetId()
+	if err != nil {
+		return err
+	}
+
+	err = g.SetId(createdProjectId)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
 func (g *GitlabProject) CreateBranchFromDefaultBranch(branchName string, verbose bool) (createdBranch *GitlabBranch, err error) {
 	branches, err := g.GetBranches()
 	if err != nil {
@@ -119,6 +153,32 @@ func (g *GitlabProject) CreateEmptyFile(fileName string, ref string, verbose boo
 	return createdFile, nil
 }
 
+func (g *GitlabProject) Delete(verbose bool) (err error) {
+	gitlabProjects, err := g.GetGitlabProjects()
+	if err != nil {
+		return err
+	}
+
+	projectPath, err := g.GetCachedPath()
+	if err != nil {
+		return err
+	}
+
+	err = gitlabProjects.DeleteProject(
+		&GitlabDeleteProjectOptions{
+			ProjectPath: projectPath,
+			Verbose:     verbose,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	g.id = 0
+
+	return nil
+}
+
 func (g *GitlabProject) DeleteAllBranchesExceptDefaultBranch(verbose bool) (err error) {
 	branches, err := g.GetBranches()
 	if err != nil {
@@ -139,14 +199,30 @@ func (g *GitlabProject) Exists(verbose bool) (projectExists bool, err error) {
 		return false, err
 	}
 
-	projectId, err := g.GetId()
+	idSet, err := g.IsIdSet()
 	if err != nil {
 		return false, err
 	}
+	if idSet {
+		projectId, err := g.GetId()
+		if err != nil {
+			return false, err
+		}
 
-	projectExists, err = gitlab.ProjectByProjectIdExists(projectId, verbose)
-	if err != nil {
-		return false, err
+		projectExists, err = gitlab.ProjectByProjectIdExists(projectId, verbose)
+		if err != nil {
+			return false, err
+		}
+	} else {
+		projectPath, err := g.GetCachedPath()
+		if err != nil {
+			return false, err
+		}
+
+		projectExists, err = gitlab.ProjectByProjectPathExists(projectPath, verbose)
+		if err != nil {
+			return false, err
+		}
 	}
 
 	return projectExists, nil
@@ -425,6 +501,36 @@ func (g *GitlabProject) IsCachedPathSet() (isSet bool) {
 	return g.cachedPath != ""
 }
 
+func (g *GitlabProject) IsIdSet() (isSet bool, err error) {
+	return g.id > 0, nil
+}
+
+func (g *GitlabProject) IsPersonalProject() (isPersonalProject bool, err error) {
+	gitlabProjects, err := g.GetGitlabProjects()
+	if err != nil {
+		return false, err
+	}
+
+	projectPath, err := g.GetCachedPath()
+	if err != nil {
+		return false, err
+	}
+
+	isPersonalProject, err = gitlabProjects.IsProjectPathPersonalProject(projectPath)
+	if err != nil {
+		return false, err
+	}
+
+	return isPersonalProject, nil
+}
+
+func (g *GitlabProject) MustCreate(verbose bool) {
+	err := g.Create(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (g *GitlabProject) MustCreateBranchFromDefaultBranch(branchName string, verbose bool) (createdBranch *GitlabBranch) {
 	createdBranch, err := g.CreateBranchFromDefaultBranch(branchName, verbose)
 	if err != nil {
@@ -441,6 +547,13 @@ func (g *GitlabProject) MustCreateEmptyFile(fileName string, ref string, verbose
 	}
 
 	return createdFile
+}
+
+func (g *GitlabProject) MustDelete(verbose bool) {
+	err := g.Delete(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (g *GitlabProject) MustDeleteAllBranchesExceptDefaultBranch(verbose bool) {
@@ -691,6 +804,24 @@ func (g *GitlabProject) MustGetVersions(verbose bool) (versions []Version) {
 	}
 
 	return versions
+}
+
+func (g *GitlabProject) MustIsIdSet() (isSet bool) {
+	isSet, err := g.IsIdSet()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isSet
+}
+
+func (g *GitlabProject) MustIsPersonalProject() (isPersonalProject bool) {
+	isPersonalProject, err := g.IsPersonalProject()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isPersonalProject
 }
 
 func (g *GitlabProject) MustMakePrivate(verbose bool) {
