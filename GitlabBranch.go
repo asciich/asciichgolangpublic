@@ -225,7 +225,7 @@ func (g *GitlabBranch) GetGitlabProject() (gitlabProject *GitlabProject, err err
 	return g.gitlabProject, nil
 }
 
-func (g *GitlabBranch) GetMergeRequests() (mergeRequests *GitlabMergeRequests, err error) {
+func (g *GitlabBranch) GetMergeRequests() (mergeRequests *GitlabProjectMergeRequests, err error) {
 	project, err := g.GetGitlabProject()
 	if err != nil {
 		return nil, err
@@ -371,7 +371,7 @@ func (g *GitlabBranch) MustGetGitlabProject() (gitlabProject *GitlabProject) {
 	return gitlabProject
 }
 
-func (g *GitlabBranch) MustGetMergeRequests() (mergeRequests *GitlabMergeRequests) {
+func (g *GitlabBranch) MustGetMergeRequests() (mergeRequests *GitlabProjectMergeRequests) {
 	mergeRequests, err := g.GetMergeRequests()
 	if err != nil {
 		LogGoErrorFatal(err)

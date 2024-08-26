@@ -395,7 +395,7 @@ func (g *GitlabProject) GetGitlabFqdn() (fqdn string, err error) {
 	return fqdn, nil
 }
 
-func (g *GitlabProject) GetMergeRequests() (mergeRequestes *GitlabMergeRequests, err error) {
+func (g *GitlabProject) GetMergeRequests() (mergeRequestes *GitlabProjectMergeRequests, err error) {
 	mergeRequestes = NewGitlabMergeRequests()
 
 	err = mergeRequestes.SetGitlabProject(g)
@@ -864,7 +864,7 @@ func (g *GitlabProject) MustGetId() (id int) {
 	return id
 }
 
-func (g *GitlabProject) MustGetMergeRequests() (mergeRequestes *GitlabMergeRequests) {
+func (g *GitlabProject) MustGetMergeRequests() (mergeRequestes *GitlabProjectMergeRequests) {
 	mergeRequestes, err := g.GetMergeRequests()
 	if err != nil {
 		LogGoErrorFatal(err)

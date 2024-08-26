@@ -8,15 +8,20 @@ import (
 
 var ErrNoMergeRequestWithTitleFound = errors.New("No merge request with given title found")
 
-type GitlabMergeRequests struct {
+// Handle Gitlab merge requests related to a project.
+type GitlabProjectMergeRequests struct {
 	gitlabProject *GitlabProject
 }
 
-func NewGitlabMergeRequests() (g *GitlabMergeRequests) {
-	return new(GitlabMergeRequests)
+func NewGitlabMergeRequests() (g *GitlabProjectMergeRequests) {
+	return new(GitlabProjectMergeRequests)
 }
 
-func (g *GitlabMergeRequests) CreateMergeRequest(options *GitlabCreateMergeRequestOptions) (createdMergeRequest *GitlabMergeRequest, err error) {
+func NewGitlabProjectMergeRequests() (g *GitlabProjectMergeRequests) {
+	return new(GitlabProjectMergeRequests)
+}
+
+func (g *GitlabProjectMergeRequests) CreateMergeRequest(options *GitlabCreateMergeRequestOptions) (createdMergeRequest *GitlabMergeRequest, err error) {
 	if options == nil {
 		return nil, TracedErrorNil("options")
 	}
@@ -119,7 +124,7 @@ func (g *GitlabMergeRequests) CreateMergeRequest(options *GitlabCreateMergeReque
 	return createdMergeRequest, nil
 }
 
-func (g *GitlabMergeRequests) GetDefaultBranchName() (defaultBranchName string, err error) {
+func (g *GitlabProjectMergeRequests) GetDefaultBranchName() (defaultBranchName string, err error) {
 	gitlabProject, err := g.GetGitlabProject()
 	if err != nil {
 		return "", err
@@ -133,7 +138,7 @@ func (g *GitlabMergeRequests) GetDefaultBranchName() (defaultBranchName string, 
 	return defaultBranchName, nil
 }
 
-func (g *GitlabMergeRequests) GetGitlab() (gitlab *GitlabInstance, err error) {
+func (g *GitlabProjectMergeRequests) GetGitlab() (gitlab *GitlabInstance, err error) {
 	gitlabProject, err := g.GetGitlabProject()
 	if err != nil {
 		return nil, err
@@ -147,7 +152,7 @@ func (g *GitlabMergeRequests) GetGitlab() (gitlab *GitlabInstance, err error) {
 	return gitlab, nil
 }
 
-func (g *GitlabMergeRequests) GetGitlabProject() (gitlabProject *GitlabProject, err error) {
+func (g *GitlabProjectMergeRequests) GetGitlabProject() (gitlabProject *GitlabProject, err error) {
 	if g.gitlabProject == nil {
 		return nil, TracedErrorf("gitlabProject not set")
 	}
@@ -155,13 +160,13 @@ func (g *GitlabMergeRequests) GetGitlabProject() (gitlabProject *GitlabProject, 
 	return g.gitlabProject, nil
 }
 
-func (g *GitlabMergeRequests) GetMergeRequestByNativeMergeRequest(nativeMergeRequest *gitlab.MergeRequest) (mergeRequest *GitlabMergeRequest, err error) {
+func (g *GitlabProjectMergeRequests) GetMergeRequestByNativeMergeRequest(nativeMergeRequest *gitlab.MergeRequest) (mergeRequest *GitlabMergeRequest, err error) {
 	if nativeMergeRequest == nil {
 		return nil, TracedErrorNil("nativeMergeRequest")
 	}
 
 	mergeRequest = NewGitlabMergeRequest()
-	err = mergeRequest.SetGitlabMergeRequests(g)
+	err = mergeRequest.SetGitlabProjectMergeRequests(g)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +184,7 @@ func (g *GitlabMergeRequests) GetMergeRequestByNativeMergeRequest(nativeMergeReq
 	return mergeRequest, nil
 }
 
-func (g *GitlabMergeRequests) GetNativeMergeRequestsService() (nativeService *gitlab.MergeRequestsService, err error) {
+func (g *GitlabProjectMergeRequests) GetNativeMergeRequestsService() (nativeService *gitlab.MergeRequestsService, err error) {
 	gitlab, err := g.GetGitlab()
 	if err != nil {
 		return nil, err
@@ -193,7 +198,7 @@ func (g *GitlabMergeRequests) GetNativeMergeRequestsService() (nativeService *gi
 	return nativeService, nil
 }
 
-func (g *GitlabMergeRequests) GetOpenMergeRequestByTitle(title string, verbose bool) (mergeRequest *GitlabMergeRequest, err error) {
+func (g *GitlabProjectMergeRequests) GetOpenMergeRequestByTitle(title string, verbose bool) (mergeRequest *GitlabMergeRequest, err error) {
 	if title == "" {
 		return nil, TracedErrorEmptyString("title")
 	}
@@ -239,7 +244,7 @@ func (g *GitlabMergeRequests) GetOpenMergeRequestByTitle(title string, verbose b
 	return mergeRequest, nil
 }
 
-func (g *GitlabMergeRequests) GetOpenMergeRequestByTitleOrNilIfNotPresent(title string, verbose bool) (mergeRequest *GitlabMergeRequest, err error) {
+func (g *GitlabProjectMergeRequests) GetOpenMergeRequestByTitleOrNilIfNotPresent(title string, verbose bool) (mergeRequest *GitlabMergeRequest, err error) {
 	mergeRequest, err = g.GetOpenMergeRequestByTitle(title, verbose)
 	if err != nil {
 		if errors.Is(err, ErrNoMergeRequestWithTitleFound) {
@@ -251,7 +256,7 @@ func (g *GitlabMergeRequests) GetOpenMergeRequestByTitleOrNilIfNotPresent(title 
 	return mergeRequest, nil
 }
 
-func (g *GitlabMergeRequests) GetOpenMergeRequests(verbose bool) (openMergeRequest []*GitlabMergeRequest, err error) {
+func (g *GitlabProjectMergeRequests) GetOpenMergeRequests(verbose bool) (openMergeRequest []*GitlabMergeRequest, err error) {
 	var stateStringOpen string = "opened"
 
 	rawMergeRequest, err := g.GetRawMergeRequests(&gitlab.ListProjectMergeRequestsOptions{
@@ -274,7 +279,7 @@ func (g *GitlabMergeRequests) GetOpenMergeRequests(verbose bool) (openMergeReque
 	return openMergeRequest, nil
 }
 
-func (g *GitlabMergeRequests) GetProjectId() (projectId int, err error) {
+func (g *GitlabProjectMergeRequests) GetProjectId() (projectId int, err error) {
 	project, err := g.GetGitlabProject()
 	if err != nil {
 		return -1, err
@@ -288,7 +293,7 @@ func (g *GitlabMergeRequests) GetProjectId() (projectId int, err error) {
 	return projectId, nil
 }
 
-func (g *GitlabMergeRequests) GetProjectUrlAsString() (projectUrl string, err error) {
+func (g *GitlabProjectMergeRequests) GetProjectUrlAsString() (projectUrl string, err error) {
 	project, err := g.GetGitlabProject()
 	if err != nil {
 		return "", err
@@ -302,7 +307,7 @@ func (g *GitlabMergeRequests) GetProjectUrlAsString() (projectUrl string, err er
 	return projectUrl, nil
 }
 
-func (g *GitlabMergeRequests) GetRawMergeRequests(options *gitlab.ListProjectMergeRequestsOptions) (rawMergeRequests []*gitlab.MergeRequest, err error) {
+func (g *GitlabProjectMergeRequests) GetRawMergeRequests(options *gitlab.ListProjectMergeRequestsOptions) (rawMergeRequests []*gitlab.MergeRequest, err error) {
 	if options == nil {
 		return nil, TracedErrorNil("options")
 	}
@@ -327,7 +332,7 @@ func (g *GitlabMergeRequests) GetRawMergeRequests(options *gitlab.ListProjectMer
 	return rawMergeRequests, nil
 }
 
-func (g *GitlabMergeRequests) MustCreateMergeRequest(options *GitlabCreateMergeRequestOptions) (createdMergeRequest *GitlabMergeRequest) {
+func (g *GitlabProjectMergeRequests) MustCreateMergeRequest(options *GitlabCreateMergeRequestOptions) (createdMergeRequest *GitlabMergeRequest) {
 	createdMergeRequest, err := g.CreateMergeRequest(options)
 	if err != nil {
 		LogGoErrorFatal(err)
@@ -336,7 +341,7 @@ func (g *GitlabMergeRequests) MustCreateMergeRequest(options *GitlabCreateMergeR
 	return createdMergeRequest
 }
 
-func (g *GitlabMergeRequests) MustGetDefaultBranchName() (defaultBranchName string) {
+func (g *GitlabProjectMergeRequests) MustGetDefaultBranchName() (defaultBranchName string) {
 	defaultBranchName, err := g.GetDefaultBranchName()
 	if err != nil {
 		LogGoErrorFatal(err)
@@ -345,7 +350,7 @@ func (g *GitlabMergeRequests) MustGetDefaultBranchName() (defaultBranchName stri
 	return defaultBranchName
 }
 
-func (g *GitlabMergeRequests) MustGetGitlab() (gitlab *GitlabInstance) {
+func (g *GitlabProjectMergeRequests) MustGetGitlab() (gitlab *GitlabInstance) {
 	gitlab, err := g.GetGitlab()
 	if err != nil {
 		LogGoErrorFatal(err)
@@ -354,7 +359,7 @@ func (g *GitlabMergeRequests) MustGetGitlab() (gitlab *GitlabInstance) {
 	return gitlab
 }
 
-func (g *GitlabMergeRequests) MustGetGitlabProject() (gitlabProject *GitlabProject) {
+func (g *GitlabProjectMergeRequests) MustGetGitlabProject() (gitlabProject *GitlabProject) {
 	gitlabProject, err := g.GetGitlabProject()
 	if err != nil {
 		LogGoErrorFatal(err)
@@ -363,7 +368,7 @@ func (g *GitlabMergeRequests) MustGetGitlabProject() (gitlabProject *GitlabProje
 	return gitlabProject
 }
 
-func (g *GitlabMergeRequests) MustGetMergeRequestByNativeMergeRequest(nativeMergeRequest *gitlab.MergeRequest) (mergeRequest *GitlabMergeRequest) {
+func (g *GitlabProjectMergeRequests) MustGetMergeRequestByNativeMergeRequest(nativeMergeRequest *gitlab.MergeRequest) (mergeRequest *GitlabMergeRequest) {
 	mergeRequest, err := g.GetMergeRequestByNativeMergeRequest(nativeMergeRequest)
 	if err != nil {
 		LogGoErrorFatal(err)
@@ -372,7 +377,7 @@ func (g *GitlabMergeRequests) MustGetMergeRequestByNativeMergeRequest(nativeMerg
 	return mergeRequest
 }
 
-func (g *GitlabMergeRequests) MustGetNativeMergeRequestsService() (nativeService *gitlab.MergeRequestsService) {
+func (g *GitlabProjectMergeRequests) MustGetNativeMergeRequestsService() (nativeService *gitlab.MergeRequestsService) {
 	nativeService, err := g.GetNativeMergeRequestsService()
 	if err != nil {
 		LogGoErrorFatal(err)
@@ -381,7 +386,7 @@ func (g *GitlabMergeRequests) MustGetNativeMergeRequestsService() (nativeService
 	return nativeService
 }
 
-func (g *GitlabMergeRequests) MustGetOpenMergeRequestByTitle(title string, verbose bool) (mergeRequest *GitlabMergeRequest) {
+func (g *GitlabProjectMergeRequests) MustGetOpenMergeRequestByTitle(title string, verbose bool) (mergeRequest *GitlabMergeRequest) {
 	mergeRequest, err := g.GetOpenMergeRequestByTitle(title, verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
@@ -390,7 +395,7 @@ func (g *GitlabMergeRequests) MustGetOpenMergeRequestByTitle(title string, verbo
 	return mergeRequest
 }
 
-func (g *GitlabMergeRequests) MustGetOpenMergeRequestByTitleOrNilIfNotPresent(title string, verbose bool) (mergeRequest *GitlabMergeRequest) {
+func (g *GitlabProjectMergeRequests) MustGetOpenMergeRequestByTitleOrNilIfNotPresent(title string, verbose bool) (mergeRequest *GitlabMergeRequest) {
 	mergeRequest, err := g.GetOpenMergeRequestByTitleOrNilIfNotPresent(title, verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
@@ -399,7 +404,7 @@ func (g *GitlabMergeRequests) MustGetOpenMergeRequestByTitleOrNilIfNotPresent(ti
 	return mergeRequest
 }
 
-func (g *GitlabMergeRequests) MustGetOpenMergeRequests(verbose bool) (openMergeRequest []*GitlabMergeRequest) {
+func (g *GitlabProjectMergeRequests) MustGetOpenMergeRequests(verbose bool) (openMergeRequest []*GitlabMergeRequest) {
 	openMergeRequest, err := g.GetOpenMergeRequests(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
@@ -408,7 +413,7 @@ func (g *GitlabMergeRequests) MustGetOpenMergeRequests(verbose bool) (openMergeR
 	return openMergeRequest
 }
 
-func (g *GitlabMergeRequests) MustGetProjectId() (projectId int) {
+func (g *GitlabProjectMergeRequests) MustGetProjectId() (projectId int) {
 	projectId, err := g.GetProjectId()
 	if err != nil {
 		LogGoErrorFatal(err)
@@ -417,7 +422,7 @@ func (g *GitlabMergeRequests) MustGetProjectId() (projectId int) {
 	return projectId
 }
 
-func (g *GitlabMergeRequests) MustGetProjectUrlAsString() (projectUrl string) {
+func (g *GitlabProjectMergeRequests) MustGetProjectUrlAsString() (projectUrl string) {
 	projectUrl, err := g.GetProjectUrlAsString()
 	if err != nil {
 		LogGoErrorFatal(err)
@@ -426,7 +431,7 @@ func (g *GitlabMergeRequests) MustGetProjectUrlAsString() (projectUrl string) {
 	return projectUrl
 }
 
-func (g *GitlabMergeRequests) MustGetRawMergeRequests(options *gitlab.ListProjectMergeRequestsOptions) (rawMergeRequests []*gitlab.MergeRequest) {
+func (g *GitlabProjectMergeRequests) MustGetRawMergeRequests(options *gitlab.ListProjectMergeRequestsOptions) (rawMergeRequests []*gitlab.MergeRequest) {
 	rawMergeRequests, err := g.GetRawMergeRequests(options)
 	if err != nil {
 		LogGoErrorFatal(err)
@@ -435,14 +440,14 @@ func (g *GitlabMergeRequests) MustGetRawMergeRequests(options *gitlab.ListProjec
 	return rawMergeRequests
 }
 
-func (g *GitlabMergeRequests) MustSetGitlabProject(gitlabProject *GitlabProject) {
+func (g *GitlabProjectMergeRequests) MustSetGitlabProject(gitlabProject *GitlabProject) {
 	err := g.SetGitlabProject(gitlabProject)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
 }
 
-func (g *GitlabMergeRequests) SetGitlabProject(gitlabProject *GitlabProject) (err error) {
+func (g *GitlabProjectMergeRequests) SetGitlabProject(gitlabProject *GitlabProject) (err error) {
 	if gitlabProject == nil {
 		return TracedErrorf("gitlabProject is nil")
 	}
