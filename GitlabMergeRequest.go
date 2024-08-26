@@ -3,9 +3,9 @@ package asciichgolangpublic
 import "github.com/xanzy/go-gitlab"
 
 type GitlabMergeRequest struct {
-	gitlabMergeRequests *GitlabMergeRequests
-	cachedTitle         string
-	id                  int
+	gitlabProjectMergeRequests *GitlabProjectMergeRequests
+	cachedTitle                string
+	id                         int
 }
 
 func NewGitlabMergeRequest() (g *GitlabMergeRequest) {
@@ -20,12 +20,12 @@ func (g *GitlabMergeRequest) GetCachedTitle() (cachedTitle string, err error) {
 	return g.cachedTitle, nil
 }
 
-func (g *GitlabMergeRequest) GetGitlabMergeRequests() (gitlabMergeRequests *GitlabMergeRequests, err error) {
-	if g.gitlabMergeRequests == nil {
-		return nil, TracedErrorf("gitlabMergeRequests not set")
+func (g *GitlabMergeRequest) GetGitlabProjectMergeRequests() (gitlabProjectMergeRequests *GitlabProjectMergeRequests, err error) {
+	if g.gitlabProjectMergeRequests == nil {
+		return nil, TracedErrorf("gitlabProjectMergeRequests not set")
 	}
 
-	return g.gitlabMergeRequests, nil
+	return g.gitlabProjectMergeRequests, nil
 }
 
 func (g *GitlabMergeRequest) GetId() (id int, err error) {
@@ -37,7 +37,7 @@ func (g *GitlabMergeRequest) GetId() (id int, err error) {
 }
 
 func (g *GitlabMergeRequest) GetNativeMergeRequestsService() (nativeService *gitlab.MergeRequestsService, err error) {
-	mergeRequests, err := g.GetGitlabMergeRequests()
+	mergeRequests, err := g.GetGitlabProjectMergeRequests()
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (g *GitlabMergeRequest) GetNativeMergeRequestsService() (nativeService *git
 }
 
 func (g *GitlabMergeRequest) GetProject() (project *GitlabProject, err error) {
-	mergeRequests, err := g.GetGitlabMergeRequests()
+	mergeRequests, err := g.GetGitlabProjectMergeRequests()
 	if err != nil {
 		return nil, err
 	}
@@ -247,13 +247,22 @@ func (g *GitlabMergeRequest) MustGetCachedTitle() (cachedTitle string) {
 	return cachedTitle
 }
 
-func (g *GitlabMergeRequest) MustGetGitlabMergeRequests() (gitlabMergeRequests *GitlabMergeRequests) {
-	gitlabMergeRequests, err := g.GetGitlabMergeRequests()
+func (g *GitlabMergeRequest) MustGetGitlabMergeRequests() (gitlabMergeRequests *GitlabProjectMergeRequests) {
+	gitlabMergeRequests, err := g.GetGitlabProjectMergeRequests()
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
 
 	return gitlabMergeRequests
+}
+
+func (g *GitlabMergeRequest) MustGetGitlabProjectMergeRequests() (gitlabProjectMergeRequests *GitlabProjectMergeRequests) {
+	gitlabProjectMergeRequests, err := g.GetGitlabProjectMergeRequests()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitlabProjectMergeRequests
 }
 
 func (g *GitlabMergeRequest) MustGetId() (id int) {
@@ -353,8 +362,8 @@ func (g *GitlabMergeRequest) MustSetCachedTitle(cachedTitle string) {
 	}
 }
 
-func (g *GitlabMergeRequest) MustSetGitlabMergeRequests(gitlabMergeRequests *GitlabMergeRequests) {
-	err := g.SetGitlabMergeRequests(gitlabMergeRequests)
+func (g *GitlabMergeRequest) MustSetGitlabProjectMergeRequests(gitlabProjectMergeRequests *GitlabProjectMergeRequests) {
+	err := g.SetGitlabProjectMergeRequests(gitlabProjectMergeRequests)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -377,12 +386,12 @@ func (g *GitlabMergeRequest) SetCachedTitle(cachedTitle string) (err error) {
 	return nil
 }
 
-func (g *GitlabMergeRequest) SetGitlabMergeRequests(gitlabMergeRequests *GitlabMergeRequests) (err error) {
-	if gitlabMergeRequests == nil {
-		return TracedErrorf("gitlabMergeRequests is nil")
+func (g *GitlabMergeRequest) SetGitlabProjectMergeRequests(gitlabProjectMergeRequests *GitlabProjectMergeRequests) (err error) {
+	if gitlabProjectMergeRequests == nil {
+		return TracedErrorf("gitlabProjectMergeRequests is nil")
 	}
 
-	g.gitlabMergeRequests = gitlabMergeRequests
+	g.gitlabProjectMergeRequests = gitlabProjectMergeRequests
 
 	return nil
 }
