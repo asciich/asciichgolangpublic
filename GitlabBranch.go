@@ -35,21 +35,40 @@ func (g *GitlabBranch) CreateFromDefaultBranch(verbose bool) (err error) {
 	return nil
 }
 
-func (g *GitlabBranch) GetGitlabBranches() (branches *GitlabBranches, err error) {
-	gitlabProject, err := g.GetGitlabProject()
+func (g *GitlabBranch) CreateMergeRequest(options *GitlabCreateMergeRequestOptions) (mergeRequest *GitlabMergeRequest, err error) {
+	if options == nil {
+		return nil, TracedErrorNil("options")
+	}
+
+	mergeRequests, err := g.GetMergeRequests()
 	if err != nil {
 		return nil, err
 	}
 
-	branches, err = gitlabProject.GetBranches()
+	branchName, err := g.GetName()
 	if err != nil {
 		return nil, err
 	}
 
-	return branches, nil
+	optionsToUse := options.GetDeepCopy()
+	err = optionsToUse.SetSourceBranchName(branchName)
+	if err != nil {
+		return nil, err
+	}
+
+	mergeRequest, err = mergeRequests.CreateMergeRequest(optionsToUse)
+	if err != nil {
+		return nil, err
+	}
+
+	return mergeRequest, nil
 }
 
-func (g *GitlabBranch) Delete(skipWaitForDeletion bool, verbose bool) (err error) {
+func (g *GitlabBranch) Delete(options *GitlabDeleteBranchOptions) (err error) {
+	if options == nil {
+		return TracedErrorNil("options")
+	}
+
 	nativeClient, projectId, err := g.GetNativeBranchesClientAndId()
 	if err != nil {
 		return err
@@ -84,7 +103,7 @@ func (g *GitlabBranch) Delete(skipWaitForDeletion bool, verbose bool) (err error
 			)
 		}
 
-		if skipWaitForDeletion {
+		if options.SkipWaitForDeletion {
 			exists = false
 		} else {
 			// Deleting is not instantaneous so lets check if deleted branch is really absent.
@@ -104,7 +123,7 @@ func (g *GitlabBranch) Delete(skipWaitForDeletion bool, verbose bool) (err error
 				exists = Slices().ContainsString(branchNames, branchName)
 				if exists {
 					time.Sleep(1000 * time.Millisecond)
-					if verbose {
+					if options.Verbose {
 						LogInfof("Wait for branch '%s' to be deleted in %s .", branchName, projectUrl)
 					}
 				} else {
@@ -117,11 +136,11 @@ func (g *GitlabBranch) Delete(skipWaitForDeletion bool, verbose bool) (err error
 			return TracedErrorf("Internal error: failed to delete '%s' in %s", branchName, projectUrl)
 		}
 
-		if verbose {
+		if options.Verbose {
 			LogChangedf("Deleted branch '%s' in gitlab project %s .", branchName, projectUrl)
 		}
 	} else {
-		if verbose {
+		if options.Verbose {
 			LogInfof("Branch '%s' is already absent on %s .", branchName, projectUrl)
 		}
 	}
@@ -184,12 +203,40 @@ func (g *GitlabBranch) GetGitlab() (gitlab *GitlabInstance, err error) {
 	return gitlab, nil
 }
 
+func (g *GitlabBranch) GetGitlabBranches() (branches *GitlabBranches, err error) {
+	gitlabProject, err := g.GetGitlabProject()
+	if err != nil {
+		return nil, err
+	}
+
+	branches, err = gitlabProject.GetBranches()
+	if err != nil {
+		return nil, err
+	}
+
+	return branches, nil
+}
+
 func (g *GitlabBranch) GetGitlabProject() (gitlabProject *GitlabProject, err error) {
 	if g.gitlabProject == nil {
 		return nil, TracedErrorf("gitlabProject not set")
 	}
 
 	return g.gitlabProject, nil
+}
+
+func (g *GitlabBranch) GetMergeRequests() (mergeRequests *GitlabMergeRequests, err error) {
+	project, err := g.GetGitlabProject()
+	if err != nil {
+		return nil, err
+	}
+
+	mergeRequests, err = project.GetMergeRequests()
+	if err != nil {
+		return nil, err
+	}
+
+	return mergeRequests, nil
 }
 
 func (g *GitlabBranch) GetName() (name string, err error) {
@@ -263,8 +310,17 @@ func (g *GitlabBranch) MustCreateFromDefaultBranch(verbose bool) {
 	}
 }
 
-func (g *GitlabBranch) MustDelete(skipWaitForDeletion bool, verbose bool) {
-	err := g.Delete(skipWaitForDeletion, verbose)
+func (g *GitlabBranch) MustCreateMergeRequest(options *GitlabCreateMergeRequestOptions) (mergeRequest *GitlabMergeRequest) {
+	mergeRequest, err := g.CreateMergeRequest(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return mergeRequest
+}
+
+func (g *GitlabBranch) MustDelete(options *GitlabDeleteBranchOptions) {
+	err := g.Delete(options)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -297,6 +353,15 @@ func (g *GitlabBranch) MustGetGitlab() (gitlab *GitlabInstance) {
 	return gitlab
 }
 
+func (g *GitlabBranch) MustGetGitlabBranches() (branches *GitlabBranches) {
+	branches, err := g.GetGitlabBranches()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return branches
+}
+
 func (g *GitlabBranch) MustGetGitlabProject() (gitlabProject *GitlabProject) {
 	gitlabProject, err := g.GetGitlabProject()
 	if err != nil {
@@ -304,6 +369,15 @@ func (g *GitlabBranch) MustGetGitlabProject() (gitlabProject *GitlabProject) {
 	}
 
 	return gitlabProject
+}
+
+func (g *GitlabBranch) MustGetMergeRequests() (mergeRequests *GitlabMergeRequests) {
+	mergeRequests, err := g.GetMergeRequests()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return mergeRequests
 }
 
 func (g *GitlabBranch) MustGetName() (name string) {

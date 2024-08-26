@@ -2,7 +2,6 @@ package asciichgolangpublic
 
 import (
 	"time"
-
 )
 
 type GitlabCreateAccessTokenOptions struct {

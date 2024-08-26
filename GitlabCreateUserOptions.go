@@ -1,6 +1,5 @@
 package asciichgolangpublic
 
-
 type GitlabCreateUserOptions struct {
 	Name     string
 	Username string
