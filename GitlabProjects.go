@@ -18,24 +18,6 @@ func NewGitlabProjects() (gitlabProject *GitlabProjects) {
 	return new(GitlabProjects)
 }
 
-func (g *GitlabProjects) GetProjectIdByProjectPath(projectPath string, verbose bool) (projectId int, err error) {
-	if projectPath == "" {
-		return -1, TracedErrorEmptyString("projectPath")
-	}
-
-	project, err := g.GetProjectByProjectPath(projectPath, verbose)
-	if err != nil {
-		return -1, err
-	}
-
-	projectId, err = project.GetId()
-	if err != nil {
-		return -1, err
-	}
-
-	return projectId, nil
-}
-
 func (g *GitlabProject) DeleteAllRepositoryFiles(branchName string, verbose bool) (err error) {
 	repositoryFiles, err := g.GetRepositoryFiles()
 	if err != nil {
@@ -153,6 +135,34 @@ func (g *GitlabProjects) DeleteProject(deleteProjectOptions *GitlabDeleteProject
 	return nil
 }
 
+func (g *GitlabProjects) GetCurrentUserName(verbose bool) (userName string, err error) {
+	gitlab, err := g.GetGitlab()
+	if err != nil {
+		return "", err
+	}
+
+	userName, err = gitlab.GetCurrentUserName(verbose)
+	if err != nil {
+		return "", err
+	}
+
+	return userName, nil
+}
+
+func (g *GitlabProjects) GetPersonalProjectsPath(verbose bool) (personalProjectPath string, err error) {
+	gitlab, err := g.GetGitlab()
+	if err != nil {
+		return "", err
+	}
+
+	personalProjectPath, err = gitlab.GetPersonalProjectsPath(verbose)
+	if err != nil {
+		return "", err
+	}
+
+	return personalProjectPath, nil
+}
+
 func (g *GitlabProjects) GetProjectById(projectId int) (gitlabProject *GitlabProject, err error) {
 	if projectId <= 0 {
 		return nil, TracedErrorf("projectId '%d' <= 0 is invalid", projectId)
@@ -201,34 +211,6 @@ func (g *GitlabProjects) GetProjectByNativeProject(nativeProject *gitlab.Project
 	}
 
 	return gitlabProject, nil
-}
-
-func (g *GitlabProjects) GetCurrentUserName(verbose bool) (userName string, err error) {
-	gitlab, err := g.GetGitlab()
-	if err != nil {
-		return "", err
-	}
-
-	userName, err = gitlab.GetCurrentUserName(verbose)
-	if err != nil {
-		return "", err
-	}
-
-	return userName, nil
-}
-
-func (g *GitlabProjects) GetPersonalProjectsPath(verbose bool) (personalProjectPath string, err error) {
-	gitlab, err := g.GetGitlab()
-	if err != nil {
-		return "", err
-	}
-
-	personalProjectPath, err = gitlab.GetPersonalProjectsPath(verbose)
-	if err != nil {
-		return "", err
-	}
-
-	return personalProjectPath, nil
 }
 
 func (g *GitlabProjects) GetProjectByProjectPath(projectPath string, verbose bool) (gitlabProject *GitlabProject, err error) {
@@ -310,6 +292,24 @@ func (g *GitlabProjects) GetProjectByProjectPath(projectPath string, verbose boo
 	return gitlabProject, nil
 }
 
+func (g *GitlabProjects) GetProjectIdByProjectPath(projectPath string, verbose bool) (projectId int, err error) {
+	if projectPath == "" {
+		return -1, TracedErrorEmptyString("projectPath")
+	}
+
+	project, err := g.GetProjectByProjectPath(projectPath, verbose)
+	if err != nil {
+		return -1, err
+	}
+
+	projectId, err = project.GetId()
+	if err != nil {
+		return -1, err
+	}
+
+	return projectId, nil
+}
+
 func (g *GitlabProjects) MustCreateProject(createOptions *GitlabCreateProjectOptions) (createdGitlabProject *GitlabProject) {
 	createdGitlabProject, err := g.CreateProject(createOptions)
 	if err != nil {
@@ -324,6 +324,15 @@ func (g *GitlabProjects) MustDeleteProject(deleteProjectOptions *GitlabDeletePro
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (g *GitlabProjects) MustGetCurrentUserName(verbose bool) (userName string) {
+	userName, err := g.GetCurrentUserName(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return userName
 }
 
 func (g *GitlabProjects) MustGetFqdn() (fqdn string) {
@@ -362,6 +371,15 @@ func (g *GitlabProjects) MustGetNativeProjectsService() (nativeGitlabProject *gi
 	return nativeGitlabProject
 }
 
+func (g *GitlabProjects) MustGetPersonalProjectsPath(verbose bool) (personalProjectPath string) {
+	personalProjectPath, err := g.GetPersonalProjectsPath(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return personalProjectPath
+}
+
 func (g *GitlabProjects) MustGetProjectById(projectId int) (gitlabProject *GitlabProject) {
 	gitlabProject, err := g.GetProjectById(projectId)
 	if err != nil {
@@ -387,6 +405,15 @@ func (g *GitlabProjects) MustGetProjectByProjectPath(projectPath string, verbose
 	}
 
 	return gitlabProject
+}
+
+func (g *GitlabProjects) MustGetProjectIdByProjectPath(projectPath string, verbose bool) (projectId int) {
+	projectId, err := g.GetProjectIdByProjectPath(projectPath, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return projectId
 }
 
 func (g *GitlabProjects) MustGetProjectList(options *GitlabgetProjectListOptions) (gitlabProjects []*GitlabProject) {

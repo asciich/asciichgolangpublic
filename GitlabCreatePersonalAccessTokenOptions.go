@@ -1,6 +1,5 @@
 package asciichgolangpublic
 
-
 type GitlabCreatePersonalAccessTokenOptions struct {
 	Name    string
 	Verbose bool

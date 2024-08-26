@@ -1,7 +1,6 @@
 package asciichgolangpublic
 
 import (
-
 	"github.com/xanzy/go-gitlab"
 )
 
