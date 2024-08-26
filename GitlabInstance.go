@@ -250,6 +250,24 @@ func (g *GitlabInstance) CreateGroup(createOptions *GitlabCreateGroupOptions) (c
 	return createdGroup, nil
 }
 
+func (g *GitlabInstance) CreatePersonalProject(projectName string, verbose bool) (personalProject *GitlabProject, err error) {
+	if projectName == "" {
+		return nil, TracedErrorEmptyString("projectName")
+	}
+
+	personalProject, err = g.GetPersonalProjectByName(projectName, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	err = personalProject.Create(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return personalProject, nil
+}
+
 func (g *GitlabInstance) CreateProject(createOptions *GitlabCreateProjectOptions) (gitlabProject *GitlabProject, err error) {
 	if createOptions == nil {
 		return nil, TracedError("createOptions is nil")
@@ -494,6 +512,20 @@ func (g *GitlabInstance) GetNativeClient() (nativeClient *gitlab.Client, err err
 	}
 
 	return g.nativeClient, nil
+}
+
+func (g *GitlabInstance) GetNativeMergeRequestsService() (nativeClient *gitlab.MergeRequestsService, err error) {
+	client, err := g.GetNativeClient()
+	if err != nil {
+		return nil, err
+	}
+
+	nativeClient = client.MergeRequests
+	if nativeClient == nil {
+		return nil, TracedError("nativeClient is nil after evaluation")
+	}
+
+	return nativeClient, nil
 }
 
 func (g *GitlabInstance) GetNativeRepositoriesClient() (nativeRepositoriesClient *gitlab.RepositoriesService, err error) {
@@ -773,6 +805,15 @@ func (g *GitlabInstance) MustCreateGroup(createOptions *GitlabCreateGroupOptions
 	return createdGroup
 }
 
+func (g *GitlabInstance) MustCreatePersonalProject(projectName string, verbose bool) (personalProject *GitlabProject) {
+	personalProject, err := g.CreatePersonalProject(projectName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return personalProject
+}
+
 func (g *GitlabInstance) MustCreateProject(createOptions *GitlabCreateProjectOptions) (gitlabProject *GitlabProject) {
 	gitlabProject, err := g.CreateProject(createOptions)
 	if err != nil {
@@ -919,6 +960,15 @@ func (g *GitlabInstance) MustGetNativeBranchesClient() (nativeClient *gitlab.Bra
 
 func (g *GitlabInstance) MustGetNativeClient() (nativeClient *gitlab.Client) {
 	nativeClient, err := g.GetNativeClient()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return nativeClient
+}
+
+func (g *GitlabInstance) MustGetNativeMergeRequestsService() (nativeClient *gitlab.MergeRequestsService) {
+	nativeClient, err := g.GetNativeMergeRequestsService()
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

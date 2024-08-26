@@ -37,8 +37,10 @@ func TestGitlabProjectBranchCreateAndDelete(t *testing.T) {
 
 				branch := gitlabProject.MustGetBranchByName(tt.branchName)
 
-				const skipWaitForDeletion = false
-				branch.MustDelete(skipWaitForDeletion, verbose)
+				branch.MustDelete(&GitlabDeleteBranchOptions{
+					SkipWaitForDeletion: false,
+					Verbose: verbose,
+				})
 				assert.False(branch.MustExists())
 
 				for i := 0; i < 2; i++ {
@@ -47,7 +49,10 @@ func TestGitlabProjectBranchCreateAndDelete(t *testing.T) {
 				}
 
 				for i := 0; i < 2; i++ {
-					branch.MustDelete(skipWaitForDeletion, verbose)
+					branch.MustDelete(&GitlabDeleteBranchOptions{
+						SkipWaitForDeletion: false,
+						Verbose: verbose,
+					})
 					assert.False(branch.MustExists())
 				}
 			},

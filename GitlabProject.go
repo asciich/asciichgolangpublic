@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/xanzy/go-gitlab"
 )
@@ -193,6 +194,28 @@ func (g *GitlabProject) DeleteAllBranchesExceptDefaultBranch(verbose bool) (err 
 	return nil
 }
 
+func (g *GitlabProject) DeleteBranch(branchName string, deleteOptions *GitlabDeleteBranchOptions) (err error) {
+	if branchName == "" {
+		return TracedErrorEmptyString("branchNAme")
+	}
+
+	if deleteOptions == nil {
+		return TracedErrorNil("deleteOptons")
+	}
+
+	branch, err := g.GetBranchByName(branchName)
+	if err != nil {
+		return err
+	}
+
+	err = branch.Delete(deleteOptions)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (g *GitlabProject) Exists(verbose bool) (projectExists bool, err error) {
 	gitlab, err := g.GetGitlab()
 	if err != nil {
@@ -271,8 +294,53 @@ func (g *GitlabProject) GetBranches() (branches *GitlabBranches, err error) {
 	return branches, nil
 }
 
+func (g *GitlabProject) GetCachedPathForPersonalProject() (cachedPath string, err error) {
+	projectName, err := g.GetCachedProjectName()
+	if err != nil {
+		return "", err
+	}
+
+	const verbose = false
+	userName, err := g.GetCurrentUserName(verbose)
+	if err != nil {
+		return "", err
+	}
+
+	cachedPath = fmt.Sprintf("%s/%s", userName, projectName)
+
+	return cachedPath, nil
+}
+
+func (g *GitlabProject) GetCachedProjectName() (projectName string, err error) {
+	cachedPath, err := g.GetCachedPath()
+	if err != nil {
+		return "", err
+	}
+
+	projectName = filepath.Base(cachedPath)
+	if projectName == "" {
+		return "", TracedErrorf("Unable to extract project name from cachedPath = '%s'", cachedPath)
+	}
+
+	return projectName, nil
+}
+
+func (g *GitlabProject) GetCurrentUserName(verbose bool) (userName string, err error) {
+	gitlab, err := g.GetGitlab()
+	if err != nil {
+		return "", err
+	}
+
+	userName, err = gitlab.GetCurrentUserName(verbose)
+	if err != nil {
+		return "", err
+	}
+
+	return userName, nil
+}
+
 func (g *GitlabProject) GetDefaultBranchName() (defaultBranchName string, err error) {
-	nativeProject, err := g.GetNativeGitlabProject()
+	nativeProject, err := g.GetRawResponse()
 	if err != nil {
 		return "", err
 	}
@@ -327,32 +395,15 @@ func (g *GitlabProject) GetGitlabFqdn() (fqdn string, err error) {
 	return fqdn, nil
 }
 
-func (g *GitlabProject) GetNativeGitlabProject() (nativeGitlabProject *gitlab.Project, err error) {
-	gitlabProjects, err := g.GetGitlabProjects()
+func (g *GitlabProject) GetMergeRequests() (mergeRequestes *GitlabMergeRequests, err error) {
+	mergeRequestes = NewGitlabMergeRequests()
+
+	err = mergeRequestes.SetGitlabProject(g)
 	if err != nil {
 		return nil, err
 	}
 
-	projectsService, err := gitlabProjects.GetNativeProjectsService()
-	if err != nil {
-		return nil, err
-	}
-
-	projectId, err := g.GetId()
-	if err != nil {
-		return nil, err
-	}
-
-	nativeProject, _, err := projectsService.GetProject(projectId, nil, nil)
-	if err != nil {
-		return nil, TracedErrorf("Unable to get native project: '%w'", err)
-	}
-
-	if nativeProject == nil {
-		return nil, TracedError("nativeProject is nil after evaluation")
-	}
-
-	return nativeProject, nil
+	return mergeRequestes, nil
 }
 
 func (g *GitlabProject) GetNewestVersion(verbose bool) (newestVersion Version, err error) {
@@ -387,8 +438,22 @@ func (g *GitlabProject) GetNewestVersionAsString(verbose bool) (newestVersionStr
 	return newestVersionString, nil
 }
 
+func (g *GitlabProject) GetOpenMergeRequestByTitle(title string, verbose bool) (mergeRequest *GitlabMergeRequest, err error) {
+	mergeRequests, err := g.GetMergeRequests()
+	if err != nil {
+		return nil, err
+	}
+
+	mergeRequest, err = mergeRequests.GetOpenMergeRequestByTitle(title, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return mergeRequest, nil
+}
+
 func (g *GitlabProject) GetPath() (projectPath string, err error) {
-	nativeProject, err := g.GetNativeGitlabProject()
+	nativeProject, err := g.GetRawResponse()
 	if err != nil {
 		return "", err
 	}
@@ -420,6 +485,64 @@ func (g *GitlabProject) GetProjectUrl() (projectUrl string, err error) {
 	projectUrl = fmt.Sprintf("https://%s/%s", fqdn, projectPath)
 
 	return projectUrl, nil
+}
+
+func (g *GitlabProject) GetRawResponse() (nativeGitlabProject *gitlab.Project, err error) {
+	gitlabProjects, err := g.GetGitlabProjects()
+	if err != nil {
+		return nil, err
+	}
+
+	projectsService, err := gitlabProjects.GetNativeProjectsService()
+	if err != nil {
+		return nil, err
+	}
+
+	isIdSet, err := g.IsIdSet()
+	if err != nil {
+		return nil, err
+	}
+
+	var pid interface{} = nil
+	if isIdSet {
+		pid, err = g.GetId()
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		if g.IsCachedPathSet() {
+			isPersonalProject, err := g.IsPersonalProject()
+			if err != nil {
+				return nil, err
+			}
+			if isPersonalProject {
+				pid, err = g.GetCachedPathForPersonalProject()
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				pid, err = g.GetCachedPath()
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+
+	if pid == nil {
+		return nil, TracedErrorf("Unable to evaluate pid to get native gitlab project: '%w'", err)
+	}
+
+	nativeProject, _, err := projectsService.GetProject(pid, nil, nil)
+	if err != nil {
+		return nil, TracedErrorf("Unable to get native project: '%w'", err)
+	}
+
+	if nativeProject == nil {
+		return nil, TracedError("nativeProject is nil after evaluation")
+	}
+
+	return nativeProject, nil
 }
 
 func (g *GitlabProject) GetRepositoryFiles() (repositoryFiles *GitlabRepositoryFiles, err error) {
@@ -563,6 +686,13 @@ func (g *GitlabProject) MustDeleteAllBranchesExceptDefaultBranch(verbose bool) {
 	}
 }
 
+func (g *GitlabProject) MustDeleteBranch(branchName string, deleteOptions *GitlabDeleteBranchOptions) {
+	err := g.DeleteBranch(branchName, deleteOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (g *GitlabProject) MustDeployKeyByNameExists(keyName string) (exists bool) {
 	exists, err := g.DeployKeyByNameExists(keyName)
 	if err != nil {
@@ -615,6 +745,33 @@ func (g *GitlabProject) MustGetCachedPath() (path string) {
 	}
 
 	return path
+}
+
+func (g *GitlabProject) MustGetCachedPathForPersonalProject() (cachedPath string) {
+	cachedPath, err := g.GetCachedPathForPersonalProject()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return cachedPath
+}
+
+func (g *GitlabProject) MustGetCachedProjectName() (projectName string) {
+	projectName, err := g.GetCachedProjectName()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return projectName
+}
+
+func (g *GitlabProject) MustGetCurrentUserName(verbose bool) (userName string) {
+	userName, err := g.GetCurrentUserName(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return userName
 }
 
 func (g *GitlabProject) MustGetDefaultBranchName() (defaultBranchName string) {
@@ -707,8 +864,17 @@ func (g *GitlabProject) MustGetId() (id int) {
 	return id
 }
 
+func (g *GitlabProject) MustGetMergeRequests() (mergeRequestes *GitlabMergeRequests) {
+	mergeRequestes, err := g.GetMergeRequests()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return mergeRequestes
+}
+
 func (g *GitlabProject) MustGetNativeGitlabProject() (nativeGitlabProject *gitlab.Project) {
-	nativeGitlabProject, err := g.GetNativeGitlabProject()
+	nativeGitlabProject, err := g.GetRawResponse()
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -743,6 +909,15 @@ func (g *GitlabProject) MustGetNewestVersionAsString(verbose bool) (newestVersio
 	return newestVersionString
 }
 
+func (g *GitlabProject) MustGetOpenMergeRequestByTitle(title string, verbose bool) (mergeRequest *GitlabMergeRequest) {
+	mergeRequest, err := g.GetOpenMergeRequestByTitle(title, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return mergeRequest
+}
+
 func (g *GitlabProject) MustGetPath() (projectPath string) {
 	projectPath, err := g.GetPath()
 	if err != nil {
@@ -759,6 +934,15 @@ func (g *GitlabProject) MustGetProjectUrl() (projectUrl string) {
 	}
 
 	return projectUrl
+}
+
+func (g *GitlabProject) MustGetRawResponse() (nativeGitlabProject *gitlab.Project) {
+	nativeGitlabProject, err := g.GetRawResponse()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return nativeGitlabProject
 }
 
 func (g *GitlabProject) MustGetRepositoryFiles() (repositoryFiles *GitlabRepositoryFiles) {
@@ -1025,8 +1209,20 @@ func (p *GitlabProject) GetGitlabProjects() (projects *GitlabProjects, err error
 }
 
 func (p *GitlabProject) GetId() (id int, err error) {
-	if p.id <= 0 {
-		return -1, TracedError("id not set")
+	if p.id < 0 {
+		return -1, TracedErrorf("id is set to invalid value of '%d'", p.id)
+	}
+
+	if p.id == 0 {
+		rawResponse, err := p.GetRawResponse()
+		if err != nil {
+			return -1, err
+		}
+
+		id = rawResponse.ID
+		if id <= 0 {
+			return -1, TracedErrorf("GetId failed for GitlabProject: id is '%d' after evaluation", id)
+		}
 	}
 
 	return p.id, nil

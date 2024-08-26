@@ -3,7 +3,6 @@ package asciichgolangpublic
 import (
 	"path/filepath"
 	"strings"
-
 )
 
 type GitlabCreateProjectOptions struct {
