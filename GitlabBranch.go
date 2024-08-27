@@ -225,6 +225,34 @@ func (g *GitlabBranch) GetGitlabProject() (gitlabProject *GitlabProject, err err
 	return g.gitlabProject, nil
 }
 
+func (g *GitlabBranch) GetLatestCommitHashAsString(verbose bool) (commitHash string, err error) {
+	rawResponse, err := g.GetRawResponse()
+	if err != nil {
+		return "", err
+	}
+
+	rawCommit := rawResponse.Commit
+	if rawCommit == nil {
+		return "", TracedError("rawCommit is nil in get latest commit hash as string")
+	}
+
+	commitHash = rawCommit.ID
+	if commitHash == "" {
+		return "", TracedError("commitHash is empty string after evaluation")
+	}
+
+	branchName, err := g.GetName()
+	if err != nil {
+		return "", err
+	}
+
+	if verbose {
+		LogInfof("Latest commit of branch '%s' is '%s'", branchName, commitHash)
+	}
+
+	return commitHash, nil
+}
+
 func (g *GitlabBranch) GetMergeRequests() (mergeRequests *GitlabProjectMergeRequests, err error) {
 	project, err := g.GetGitlabProject()
 	if err != nil {
@@ -303,6 +331,33 @@ func (g *GitlabBranch) GetProjectUrl() (projectUrl string, err error) {
 	return projectUrl, nil
 }
 
+func (g *GitlabBranch) GetRawResponse() (rawResponse *gitlab.Branch, err error) {
+	nativeClient, projectId, err := g.GetNativeBranchesClientAndId()
+	if err != nil {
+		return nil, err
+	}
+
+	branchName, err := g.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	rawResponse, _, err = nativeClient.GetBranch(
+		projectId,
+		branchName,
+		nil,
+	)
+	if err != nil {
+		return nil, TracedErrorf("Unable to get branch: '%w'", err)
+	}
+
+	if rawResponse == nil {
+		return nil, TracedError("rawResponse for GitlabBranch is nil after evaluation")
+	}
+
+	return rawResponse, nil
+}
+
 func (g *GitlabBranch) MustCreateFromDefaultBranch(verbose bool) {
 	err := g.CreateFromDefaultBranch(verbose)
 	if err != nil {
@@ -371,6 +426,15 @@ func (g *GitlabBranch) MustGetGitlabProject() (gitlabProject *GitlabProject) {
 	return gitlabProject
 }
 
+func (g *GitlabBranch) MustGetLatestCommitHashAsString(verbose bool) (commitHash string) {
+	commitHash, err := g.GetLatestCommitHashAsString(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return commitHash
+}
+
 func (g *GitlabBranch) MustGetMergeRequests() (mergeRequests *GitlabProjectMergeRequests) {
 	mergeRequests, err := g.GetMergeRequests()
 	if err != nil {
@@ -423,6 +487,15 @@ func (g *GitlabBranch) MustGetProjectUrl() (projectUrl string) {
 	}
 
 	return projectUrl
+}
+
+func (g *GitlabBranch) MustGetRawResponse() (rawResponse *gitlab.Branch) {
+	rawResponse, err := g.GetRawResponse()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return rawResponse
 }
 
 func (g *GitlabBranch) MustSetGitlabProject(gitlabProject *GitlabProject) {
