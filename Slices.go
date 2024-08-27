@@ -17,79 +17,7 @@ func Slices() (slices *SlicesService) {
 	return new(SlicesService)
 }
 
-func (s *SlicesService) DiffStringSlices(a []string, b []string) (aNotInB []string, bNotInA []string) {
-	aNotInB = []string{}
-	bNotInA = []string{}
-
-	for _, toCheck := range a {
-		if s.ContainsString(b, toCheck) {
-			continue
-		}
-
-		aNotInB = append(aNotInB, toCheck)
-	}
-
-	for _, toCheck := range b {
-		if s.ContainsString(a, toCheck) {
-			continue
-		}
-
-		bNotInA = append(bNotInA, toCheck)
-	}
-
-	aNotInB = s.SortStringSlice(aNotInB)
-	bNotInA = s.SortStringSlice(bNotInA)
-
-	return aNotInB, bNotInA
-}
-
-func (s *SlicesService) RemoveString(elements []string, toRemove string) (cleanedUpElements []string) {
-	cleanedUpElements = []string{}
-
-	for _, e := range elements {
-		if e == toRemove {
-			continue
-		}
-
-		cleanedUpElements = append(cleanedUpElements, e)
-	}
-
-	return cleanedUpElements
-}
-
-func (s *SlicesService) AtLeastOneElementStartsWith(elements []string, toCheck string) (atLeastOneElementStartsWith bool) {
-	for _, e := range elements {
-		if strings.HasPrefix(e, toCheck) {
-			return true
-		}
-	}
-
-	return false
-}
-
 func (o *SlicesService) ByteSlicesEqual(input1 []byte, input2 []byte) (slicesEqual bool) {
-	if input1 == nil {
-		return false
-	}
-
-	if input2 == nil {
-		return false
-	}
-
-	if len(input1) != len(input2) {
-		return false
-	}
-
-	for i, toCeck := range input1 {
-		if toCeck != input2[i] {
-			return false
-		}
-	}
-
-	return true
-}
-
-func (o *SlicesService) StringSlicesEqual(input1 []string, input2 []string) (slicesEqual bool) {
 	if input1 == nil {
 		return false
 	}
@@ -151,6 +79,28 @@ func (o *SlicesService) RemoveLastElementIfEmptyString(sliceOfStrings []string) 
 	return sliceOfStrings
 }
 
+func (o *SlicesService) StringSlicesEqual(input1 []string, input2 []string) (slicesEqual bool) {
+	if input1 == nil {
+		return false
+	}
+
+	if input2 == nil {
+		return false
+	}
+
+	if len(input1) != len(input2) {
+		return false
+	}
+
+	for i, toCeck := range input1 {
+		if toCeck != input2[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (o *SlicesService) TrimAllPrefix(sliceOfStrings []string, prefixToRemove string) (sliceOfStringsWithPrefixRemoved []string) {
 	if len(sliceOfStrings) <= 0 {
 		return []string{}
@@ -196,6 +146,26 @@ func (s *SlicesService) AddSuffixToEachString(stringSlices []string, suffix stri
 	return output
 }
 
+func (s *SlicesService) AtLeastOneElementStartsWith(elements []string, toCheck string) (atLeastOneElementStartsWith bool) {
+	for _, e := range elements {
+		if strings.HasPrefix(e, toCheck) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (s *SlicesService) ContainsEmptyString(input []string) (containsEmptyString bool) {
+	for _, i := range input {
+		if i == "" {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (s *SlicesService) ContainsInt(intSlice []int, intToSearch int) (containsInt bool) {
 	if len(intSlice) <= 0 {
 		return false
@@ -203,6 +173,48 @@ func (s *SlicesService) ContainsInt(intSlice []int, intToSearch int) (containsIn
 
 	for _, i := range intSlice {
 		if i == intToSearch {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (s *SlicesService) ContainsNoEmptyStrings(input []string) (containsNoEmptyString bool) {
+	return !s.ContainsEmptyString(input)
+}
+
+func (s *SlicesService) ContainsOnlyUniqeStrings(input []string) (containsOnlyUniqeStrings bool) {
+	for _, i := range input {
+		if s.CountStrings(input, i) > 1 {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (s *SlicesService) ContainsSshPublicKeyWithSameKeyMaterial(sshKeys []*SSHPublicKey, keyToSearch *SSHPublicKey) (contains bool) {
+	if len(sshKeys) <= 0 {
+		return false
+	}
+
+	if keyToSearch == nil {
+		return false
+	}
+
+	keyMaterialToSearch, err := keyToSearch.GetKeyMaterialAsString()
+	if err != nil {
+		return false
+	}
+
+	for _, toCheck := range sshKeys {
+		keyMaterialToCheck, err := toCheck.GetKeyMaterialAsString()
+		if err != nil {
+			continue
+		}
+
+		if keyMaterialToCheck == keyMaterialToSearch {
 			return true
 		}
 	}
@@ -222,6 +234,43 @@ func (s *SlicesService) ContainsString(sliceOfStrings []string, toCheck string) 
 	}
 
 	return false
+}
+
+func (s *SlicesService) CountStrings(input []string, toSearch string) (count int) {
+	count = 0
+	for _, i := range input {
+		if i == toSearch {
+			count += 1
+		}
+	}
+
+	return count
+}
+
+func (s *SlicesService) DiffStringSlices(a []string, b []string) (aNotInB []string, bNotInA []string) {
+	aNotInB = []string{}
+	bNotInA = []string{}
+
+	for _, toCheck := range a {
+		if s.ContainsString(b, toCheck) {
+			continue
+		}
+
+		aNotInB = append(aNotInB, toCheck)
+	}
+
+	for _, toCheck := range b {
+		if s.ContainsString(a, toCheck) {
+			continue
+		}
+
+		bNotInA = append(bNotInA, toCheck)
+	}
+
+	aNotInB = s.SortStringSlice(aNotInB)
+	bNotInA = s.SortStringSlice(bNotInA)
+
+	return aNotInB, bNotInA
 }
 
 func (s *SlicesService) GetDeepCopyOfStringsSlice(sliceOfStrings []string) (deepCopy []string) {
@@ -331,6 +380,20 @@ func (s *SlicesService) RemoveMatchingStrings(sliceToRemoveMatching []string, ma
 	}
 
 	return cleanedUpSlice
+}
+
+func (s *SlicesService) RemoveString(elements []string, toRemove string) (cleanedUpElements []string) {
+	cleanedUpElements = []string{}
+
+	for _, e := range elements {
+		if e == toRemove {
+			continue
+		}
+
+		cleanedUpElements = append(cleanedUpElements, e)
+	}
+
+	return cleanedUpElements
 }
 
 func (s *SlicesService) RemoveStringEntryAtIndex(elements []string, indexToRemove int) (elementsWithIndexRemoved []string) {
@@ -454,32 +517,4 @@ func (s *SlicesService) TrimSpace(toTrim []string) (trimmed []string) {
 	}
 
 	return trimmed
-}
-
-func (s *SlicesService) ContainsSshPublicKeyWithSameKeyMaterial(sshKeys []*SSHPublicKey, keyToSearch *SSHPublicKey) (contains bool) {
-	if len(sshKeys) <= 0 {
-		return false
-	}
-
-	if keyToSearch == nil {
-		return false
-	}
-
-	keyMaterialToSearch, err := keyToSearch.GetKeyMaterialAsString()
-	if err != nil {
-		return false
-	}
-
-	for _, toCheck := range sshKeys {
-		keyMaterialToCheck, err := toCheck.GetKeyMaterialAsString()
-		if err != nil {
-			continue
-		}
-
-		if keyMaterialToCheck == keyMaterialToSearch {
-			return true
-		}
-	}
-
-	return false
 }

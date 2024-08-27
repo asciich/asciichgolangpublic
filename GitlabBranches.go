@@ -128,7 +128,7 @@ func (g *GitlabBranches) DeleteAllBranchesExceptDefaultBranch(verbose bool) (err
 	deletedBranchNames := []string{}
 	for _, toDelete := range branches {
 		err = toDelete.Delete(&GitlabDeleteBranchOptions{
-			SkipWaitForDeletion: false,
+			SkipWaitForDeletion: true,
 			Verbose:             verbose,
 		})
 		if err != nil {
