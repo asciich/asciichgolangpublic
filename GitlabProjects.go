@@ -141,7 +141,7 @@ func (g *GitlabProjects) GetCurrentUserName(verbose bool) (userName string, err 
 		return "", err
 	}
 
-	userName, err = gitlab.GetCurrentUserName(verbose)
+	userName, err = gitlab.GetCurrentUsersName(verbose)
 	if err != nil {
 		return "", err
 	}
