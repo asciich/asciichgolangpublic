@@ -55,7 +55,7 @@ func NewGitlabInstance() (g *GitlabInstance) {
 
 // Get the path to the personal projects which is "users/USERNAME/projects".
 func (g *GitlabInstance) GetPersonalProjectsPath(verbose bool) (personalProjetsPath string, err error) {
-	userName, err := g.GetCurrentUserName(verbose)
+	userName, err := g.GetCurrentUsersName(verbose)
 	if err != nil {
 		return "", err
 	}
@@ -63,6 +63,41 @@ func (g *GitlabInstance) GetPersonalProjectsPath(verbose bool) (personalProjetsP
 	personalProjetsPath = fmt.Sprintf("users/%s/projects", userName)
 
 	return personalProjetsPath, nil
+}
+
+// Return the gitlab user name.
+// This is the technical user name used by Gitlab.
+//
+// To get the human readable user name use `GetCurrentUsersName`.
+func (g *GitlabInstance) GetCurrentUsersUsername(verbose bool) (currentUserName string, err error) {
+	user, err := g.GetCurrentUser(verbose)
+	if err != nil {
+		return "", err
+	}
+
+	currentUserName, err = user.GetCachedUsername()
+	if err != nil {
+		return "", err
+	}
+
+	return currentUserName, nil
+}
+
+// Returns the human readable gitlab user name also known as display name.
+//
+// For the technical user name use `GetCurrentUsersUsername`.
+func (g *GitlabInstance) GetCurrentUsersName(verbose bool) (currentUserName string, err error) {
+	user, err := g.GetCurrentUser(verbose)
+	if err != nil {
+		return "", err
+	}
+
+	currentUserName, err = user.GetCachedName()
+	if err != nil {
+		return "", err
+	}
+
+	return currentUserName, nil
 }
 
 func (g *GitlabInstance) AddRunner(newRunnerOptions *GitlabAddRunnerOptions) (createdRunner *GitlabRunner, err error) {
@@ -309,20 +344,6 @@ func (g *GitlabInstance) GetCurrentUser(verbose bool) (currentUser *GitlabUser, 
 	}
 
 	return currentUser, nil
-}
-
-func (g *GitlabInstance) GetCurrentUserName(verbose bool) (currentUserName string, err error) {
-	user, err := g.GetCurrentUser(verbose)
-	if err != nil {
-		return "", err
-	}
-
-	currentUserName, err = user.GetCachedName()
-	if err != nil {
-		return "", err
-	}
-
-	return currentUserName, nil
 }
 
 func (g *GitlabInstance) GetCurrentlyUsedAccessToken() (gitlabAccessToken string, err error) {
@@ -842,7 +863,25 @@ func (g *GitlabInstance) MustGetCurrentUser(verbose bool) (currentUser *GitlabUs
 }
 
 func (g *GitlabInstance) MustGetCurrentUserName(verbose bool) (currentUserName string) {
-	currentUserName, err := g.GetCurrentUserName(verbose)
+	currentUserName, err := g.GetCurrentUsersName(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return currentUserName
+}
+
+func (g *GitlabInstance) MustGetCurrentUsersName(verbose bool) (currentUserName string) {
+	currentUserName, err := g.GetCurrentUsersName(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return currentUserName
+}
+
+func (g *GitlabInstance) MustGetCurrentUsersUsername(verbose bool) (currentUserName string) {
+	currentUserName, err := g.GetCurrentUsersUsername(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
