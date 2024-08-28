@@ -6,7 +6,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-var ErrNoMergeRequestWithTitleFound = errors.New("No merge request with given title found")
+var ErrNoMergeRequestWithTitleFound = errors.New("no merge request with given title found")
 
 // Handle Gitlab merge requests related to a project.
 type GitlabProjectMergeRequests struct {
@@ -69,6 +69,9 @@ func (g *GitlabProjectMergeRequests) CreateMergeRequest(options *GitlabCreateMer
 		return nil, err
 	}
 
+	labels := options.GetLabelsOrEmptySliceIfUnset()
+	labelOptions := gitlab.LabelOptions(labels)
+
 	if createdMergeRequest != nil {
 		url, err := createdMergeRequest.GetUrlAsString()
 		if err != nil {
@@ -89,6 +92,7 @@ func (g *GitlabProjectMergeRequests) CreateMergeRequest(options *GitlabCreateMer
 				Title:        &title,
 				TargetBranch: &targetBranch,
 				SourceBranch: &sourceBranch,
+				Labels:       &labelOptions,
 			},
 		)
 		if err != nil {
