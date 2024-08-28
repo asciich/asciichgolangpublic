@@ -36,6 +36,22 @@ func (g *GitlabMergeRequest) GetId() (id int, err error) {
 	return g.id, nil
 }
 
+func (g *GitlabMergeRequest) GetLabels() (labels []string, err error) {
+	rawResponse, err := g.GetRawResponse()
+	if err != nil {
+		return nil, err
+	}
+
+	labels = rawResponse.Labels
+	if err != nil {
+		return nil, err
+	}
+
+	labels = Slices().SortStringSlice(labels)
+
+	return labels, nil
+}
+
 func (g *GitlabMergeRequest) GetNativeMergeRequestsService() (nativeService *gitlab.MergeRequestsService, err error) {
 	mergeRequests, err := g.GetGitlabProjectMergeRequests()
 	if err != nil {
@@ -272,6 +288,15 @@ func (g *GitlabMergeRequest) MustGetId() (id int) {
 	}
 
 	return id
+}
+
+func (g *GitlabMergeRequest) MustGetLabels() (labels []string) {
+	labels, err := g.GetLabels()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return labels
 }
 
 func (g *GitlabMergeRequest) MustGetNativeMergeRequestsService() (nativeService *gitlab.MergeRequestsService) {

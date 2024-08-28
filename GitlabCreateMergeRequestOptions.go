@@ -4,6 +4,7 @@ type GitlabCreateMergeRequestOptions struct {
 	SourceBranchName string
 	TargetBranchName string
 	Title            string
+	Labels           []string
 	Verbose          bool
 }
 
@@ -15,6 +16,28 @@ func (g *GitlabCreateMergeRequestOptions) GetDeepCopy() (copy *GitlabCreateMerge
 	copy = NewGitlabCreateMergeRequestOptions()
 	*copy = *g
 	return copy
+}
+
+func (g *GitlabCreateMergeRequestOptions) GetLabels() (labels []string, err error) {
+	if g.Labels == nil {
+		return nil, TracedErrorf("Labels not set")
+	}
+
+	if len(g.Labels) <= 0 {
+		return nil, TracedErrorf("Labels has no elements")
+	}
+
+	return g.Labels, nil
+}
+
+func (g *GitlabCreateMergeRequestOptions) GetLabelsOrEmptySliceIfUnset() (lables []string) {
+	if g.Labels == nil {
+		return []string{}
+	}
+
+	lables = Slices().SortStringSlice(g.Labels)
+
+	return lables
 }
 
 func (g *GitlabCreateMergeRequestOptions) GetSourceBranchName() (sourceBranchName string, err error) {
@@ -50,6 +73,15 @@ func (g *GitlabCreateMergeRequestOptions) IsTargetBranchSet() (isSet bool) {
 	return g.TargetBranchName != ""
 }
 
+func (g *GitlabCreateMergeRequestOptions) MustGetLabels() (labels []string) {
+	labels, err := g.GetLabels()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return labels
+}
+
 func (g *GitlabCreateMergeRequestOptions) MustGetSourceBranchName() (sourceBranchName string) {
 	sourceBranchName, err := g.GetSourceBranchName()
 	if err != nil {
@@ -77,6 +109,13 @@ func (g *GitlabCreateMergeRequestOptions) MustGetTitle() (title string) {
 	return title
 }
 
+func (g *GitlabCreateMergeRequestOptions) MustSetLabels(labels []string) {
+	err := g.SetLabels(labels)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (g *GitlabCreateMergeRequestOptions) MustSetSourceBranchName(sourceBranchName string) {
 	err := g.SetSourceBranchName(sourceBranchName)
 	if err != nil {
@@ -96,6 +135,20 @@ func (g *GitlabCreateMergeRequestOptions) MustSetTitle(title string) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (g *GitlabCreateMergeRequestOptions) SetLabels(labels []string) (err error) {
+	if labels == nil {
+		return TracedErrorf("labels is nil")
+	}
+
+	if len(labels) <= 0 {
+		return TracedErrorf("labels has no elements")
+	}
+
+	g.Labels = labels
+
+	return nil
 }
 
 func (g *GitlabCreateMergeRequestOptions) SetSourceBranchName(sourceBranchName string) (err error) {
