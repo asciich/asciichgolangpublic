@@ -20,6 +20,20 @@ func (g *GitlabMergeRequest) GetCachedTitle() (cachedTitle string, err error) {
 	return g.cachedTitle, nil
 }
 
+func (g *GitlabMergeRequest) GetDescription() (description string, err error) {
+	rawResponse, err := g.GetRawResponse()
+	if err != nil {
+		return "", err
+	}
+
+	description = rawResponse.Description
+	if err != nil {
+		return "", err
+	}
+
+	return description, nil
+}
+
 func (g *GitlabMergeRequest) GetGitlabProjectMergeRequests() (gitlabProjectMergeRequests *GitlabProjectMergeRequests, err error) {
 	if g.gitlabProjectMergeRequests == nil {
 		return nil, TracedErrorf("gitlabProjectMergeRequests not set")
@@ -261,6 +275,15 @@ func (g *GitlabMergeRequest) MustGetCachedTitle() (cachedTitle string) {
 	}
 
 	return cachedTitle
+}
+
+func (g *GitlabMergeRequest) MustGetDescription() (description string) {
+	description, err := g.GetDescription()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return description
 }
 
 func (g *GitlabMergeRequest) MustGetGitlabMergeRequests() (gitlabMergeRequests *GitlabProjectMergeRequests) {

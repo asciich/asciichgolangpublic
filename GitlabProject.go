@@ -154,6 +154,29 @@ func (g *GitlabProject) CreateEmptyFile(fileName string, ref string, verbose boo
 	return createdFile, nil
 }
 
+func (g *GitlabProject) CreateMergeRequest(options *GitlabCreateMergeRequestOptions) (createdMergeRequest *GitlabMergeRequest, err error) {
+	if options == nil {
+		return nil, TracedErrorNil("options")
+	}
+
+	sourceBranchName, err := options.GetSourceBranchName()
+	if err != nil {
+		return nil, err
+	}
+
+	sourceBranch, err := g.GetBranchByName(sourceBranchName)
+	if err != nil {
+		return nil, err
+	}
+
+	createdMergeRequest, err = sourceBranch.CreateMergeRequest(options)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdMergeRequest, nil
+}
+
 func (g *GitlabProject) Delete(verbose bool) (err error) {
 	gitlabProjects, err := g.GetGitlabProjects()
 	if err != nil {
@@ -699,6 +722,15 @@ func (g *GitlabProject) MustCreateEmptyFile(fileName string, ref string, verbose
 	}
 
 	return createdFile
+}
+
+func (g *GitlabProject) MustCreateMergeRequest(options *GitlabCreateMergeRequestOptions) (createdMergeRequest *GitlabMergeRequest) {
+	createdMergeRequest, err := g.CreateMergeRequest(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdMergeRequest
 }
 
 func (g *GitlabProject) MustDelete(verbose bool) {

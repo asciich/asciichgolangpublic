@@ -41,6 +41,8 @@ func (g *GitlabProjectMergeRequests) CreateMergeRequest(options *GitlabCreateMer
 		return nil, err
 	}
 
+	description := options.GetDescriptionOrEmptyStringIfUnset()
+
 	sourceBranch, err := options.GetSourceBranchName()
 	if err != nil {
 		return nil, err
@@ -90,6 +92,7 @@ func (g *GitlabProjectMergeRequests) CreateMergeRequest(options *GitlabCreateMer
 			projectId,
 			&gitlab.CreateMergeRequestOptions{
 				Title:        &title,
+				Description:  &description,
 				TargetBranch: &targetBranch,
 				SourceBranch: &sourceBranch,
 				Labels:       &labelOptions,
