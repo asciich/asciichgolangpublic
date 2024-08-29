@@ -4,6 +4,7 @@ type GitlabCreateMergeRequestOptions struct {
 	SourceBranchName string
 	TargetBranchName string
 	Title            string
+	Description      string
 	Labels           []string
 	Verbose          bool
 }
@@ -16,6 +17,18 @@ func (g *GitlabCreateMergeRequestOptions) GetDeepCopy() (copy *GitlabCreateMerge
 	copy = NewGitlabCreateMergeRequestOptions()
 	*copy = *g
 	return copy
+}
+
+func (g *GitlabCreateMergeRequestOptions) GetDescription() (description string, err error) {
+	if g.Description == "" {
+		return "", TracedErrorf("Description not set")
+	}
+
+	return g.Description, nil
+}
+
+func (g *GitlabCreateMergeRequestOptions) GetDescriptionOrEmptyStringIfUnset() (description string) {
+	return g.Description
 }
 
 func (g *GitlabCreateMergeRequestOptions) GetLabels() (labels []string, err error) {
@@ -73,6 +86,15 @@ func (g *GitlabCreateMergeRequestOptions) IsTargetBranchSet() (isSet bool) {
 	return g.TargetBranchName != ""
 }
 
+func (g *GitlabCreateMergeRequestOptions) MustGetDescription() (description string) {
+	description, err := g.GetDescription()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return description
+}
+
 func (g *GitlabCreateMergeRequestOptions) MustGetLabels() (labels []string) {
 	labels, err := g.GetLabels()
 	if err != nil {
@@ -109,6 +131,13 @@ func (g *GitlabCreateMergeRequestOptions) MustGetTitle() (title string) {
 	return title
 }
 
+func (g *GitlabCreateMergeRequestOptions) MustSetDescription(description string) {
+	err := g.SetDescription(description)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (g *GitlabCreateMergeRequestOptions) MustSetLabels(labels []string) {
 	err := g.SetLabels(labels)
 	if err != nil {
@@ -135,6 +164,16 @@ func (g *GitlabCreateMergeRequestOptions) MustSetTitle(title string) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (g *GitlabCreateMergeRequestOptions) SetDescription(description string) (err error) {
+	if description == "" {
+		return TracedErrorf("description is empty string")
+	}
+
+	g.Description = description
+
+	return nil
 }
 
 func (g *GitlabCreateMergeRequestOptions) SetLabels(labels []string) (err error) {

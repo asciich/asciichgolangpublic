@@ -78,9 +78,18 @@ func TestMergeRequestCreateAndClose_withLabels(t *testing.T) {
 	tests := []struct {
 		mergeRequestTitle string
 		labels            []string
+		description       string
 	}{
-		{"merge request title 1", []string{"label_a"}},
-		{"merge request title 2", []string{"label_a", "label_b"}},
+		{
+			"merge request title 1",
+			[]string{"label_a"},
+			"MR description",
+		},
+		{
+			"merge request title 2",
+			[]string{"label_a", "label_b"},
+			"MR description\nmultiline",
+		},
 	}
 
 	for _, tt := range tests {
@@ -106,11 +115,13 @@ func TestMergeRequestCreateAndClose_withLabels(t *testing.T) {
 				branch := testProject.MustCreateBranchFromDefaultBranch(testBranchName, verbose)
 
 				for i := 0; i < 2; i++ {
-					mergeRequest := branch.MustCreateMergeRequest(
+					mergeRequest := testProject.MustCreateMergeRequest(
 						&GitlabCreateMergeRequestOptions{
-							Title:   tt.mergeRequestTitle,
-							Labels:  tt.labels,
-							Verbose: verbose,
+							SourceBranchName: branch.MustGetName(),
+							Title:            tt.mergeRequestTitle,
+							Labels:           tt.labels,
+							Description:      tt.description,
+							Verbose:          verbose,
 						},
 					)
 					assert.True(mergeRequest.MustIsOpen())
@@ -126,6 +137,11 @@ func TestMergeRequestCreateAndClose_withLabels(t *testing.T) {
 					assert.EqualValues(
 						tt.labels,
 						mergeRequest.MustGetLabels(),
+					)
+
+					assert.EqualValues(
+						tt.description,
+						mergeRequest.MustGetDescription(),
 					)
 				}
 
