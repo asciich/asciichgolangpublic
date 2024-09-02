@@ -45,6 +45,10 @@ func (o *OsService) GetCurrentWorkingDirectoryAsString() (workingDirPath string,
 	return workingDirPath, nil
 }
 
+func (o *OsService) IsRunningOnLinux() (isRunningOnLinux bool) {
+	return runtime.GOOS == "linux"
+}
+
 func (o *OsService) IsRunningOnWindows() (isRunningOnWindows bool) {
 	return runtime.GOOS == "windows"
 }
