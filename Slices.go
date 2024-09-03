@@ -222,6 +222,20 @@ func (s *SlicesService) ContainsSshPublicKeyWithSameKeyMaterial(sshKeys []*SSHPu
 	return false
 }
 
+func (s *SlicesService) ContainsString(sliceOfStrings []string, toCheck string) (contains bool) {
+	if len(sliceOfStrings) <= 0 {
+		return false
+	}
+
+	for _, stringToCheck := range sliceOfStrings {
+		if stringToCheck == toCheck {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (s *SlicesService) ContainsStringIgnoreCase(sliceOfStrings []string, toCheck string) (contains bool) {
 	if len(sliceOfStrings) <= 0 {
 		return false
@@ -230,20 +244,6 @@ func (s *SlicesService) ContainsStringIgnoreCase(sliceOfStrings []string, toChec
 	toCheckLower := strings.ToLower(toCheck)
 	for _, stringToCheck := range sliceOfStrings {
 		if strings.ToLower(stringToCheck) == toCheckLower {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (s *SlicesService) ContainsString(sliceOfStrings []string, toCheck string) (contains bool) {
-	if len(sliceOfStrings) <= 0 {
-		return false
-	}
-
-	for _, stringToCheck := range sliceOfStrings {
-		if stringToCheck == toCheck {
 			return true
 		}
 	}
