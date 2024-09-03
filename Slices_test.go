@@ -34,6 +34,68 @@ func TestSlicesContainsInt(t *testing.T) {
 	}
 }
 
+func TestSlicesContainsString(t *testing.T) {
+	tests := []struct {
+		stringToSearch   string
+		inputSlice       []string
+		expectedContains bool
+	}{
+		{"0", []string{}, false},
+		{"0", []string{"1"}, false},
+		{"0", []string{"1", "2"}, false},
+		{"0", []string{"0", "1", "2"}, true},
+		{"0", []string{"0", "1", "2", "0"}, true},
+		{"0", []string{"1", "2", "0"}, true},
+		{"1", []string{"1", "2", "0"}, true},
+		{"2", []string{"1", "2", "0"}, true},
+		{"hello", []string{"hello", "Hello", "world", "World"}, true},
+		{"Hello", []string{"hello", "Hello", "world", "World"}, true},
+		{"HellO", []string{"hello", "Hello", "world", "World"}, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(tt.expectedContains, Slices().ContainsString(tt.inputSlice, tt.stringToSearch))
+			},
+		)
+	}
+}
+
+func TestSlicesContainsStringIgnoreCase(t *testing.T) {
+	tests := []struct {
+		stringToSearch   string
+		inputSlice       []string
+		expectedContains bool
+	}{
+		{"0", []string{}, false},
+		{"0", []string{"1"}, false},
+		{"0", []string{"1", "2"}, false},
+		{"0", []string{"0", "1", "2"}, true},
+		{"0", []string{"0", "1", "2", "0"}, true},
+		{"0", []string{"1", "2", "0"}, true},
+		{"1", []string{"1", "2", "0"}, true},
+		{"2", []string{"1", "2", "0"}, true},
+		{"hello", []string{"hello", "Hello", "world", "World"}, true},
+		{"Hello", []string{"hello", "Hello", "world", "World"}, true},
+		{"HellO", []string{"hello", "Hello", "world", "World"}, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(tt.expectedContains, Slices().ContainsStringIgnoreCase(tt.inputSlice, tt.stringToSearch))
+			},
+		)
+	}
+}
+
 func TestSlicesTrimSpace(t *testing.T) {
 	tests := []struct {
 		input          []string
