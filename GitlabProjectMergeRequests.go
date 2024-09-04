@@ -188,6 +188,16 @@ func (g *GitlabProjectMergeRequests) GetMergeRequestByNativeMergeRequest(nativeM
 		return nil, err
 	}
 
+	err = mergeRequest.SetCachedSourceBranchName(nativeMergeRequest.SourceBranch)
+	if err != nil {
+		return nil, err
+	}
+
+	err = mergeRequest.SetCachedTargetBranchName(nativeMergeRequest.TargetBranch)
+	if err != nil {
+		return nil, err
+	}
+
 	return mergeRequest, nil
 }
 
@@ -203,6 +213,81 @@ func (g *GitlabProjectMergeRequests) GetNativeMergeRequestsService() (nativeServ
 	}
 
 	return nativeService, nil
+}
+
+func (g *GitlabProjectMergeRequests) GetOpenMergeRequestBySourceAndTargetBranch(sourceBranchName string, targetBranchName string, verbose bool) (mergeRequest *GitlabMergeRequest, err error) {
+	if sourceBranchName == "" {
+		return nil, TracedErrorEmptyString("sourceBranchName")
+	}
+
+	if targetBranchName == "" {
+		return nil, TracedErrorEmptyString("targetBranchName")
+	}
+
+	openMergeRequests, err := g.GetOpenMergeRequests(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	foundCounter := 0
+	for _, request := range openMergeRequests {
+		currentSourceBranchName, err := request.GetCachedSourceBranchName()
+		if err != nil {
+			return nil, err
+		}
+
+		currentTargetBranchName, err := request.GetCachedTargetBranchName()
+		if err != nil {
+			return nil, err
+		}
+
+		if currentSourceBranchName == sourceBranchName {
+			if currentTargetBranchName == targetBranchName {
+				mergeRequest = request
+				foundCounter += 1
+			}
+		}
+	}
+
+	projectUrl, err := g.GetProjectUrlAsString()
+	if err != nil {
+		return nil, err
+	}
+
+	if foundCounter <= 0 {
+		return nil, TracedErrorf(
+			"%w: sourceBranch '%s' and targetBranch '%s' in project %s .",
+			ErrNoMergeRequestWithTitleFound,
+			sourceBranchName,
+			targetBranchName,
+			projectUrl,
+		)
+	} else if foundCounter > 1 {
+		return nil, TracedErrorf(
+			"Found '%d' merge requests matching sourceBranch '%s' and targetBranch '%s' in project %s but only 1 is supported.",
+			foundCounter,
+			sourceBranchName,
+			targetBranchName,
+			projectUrl,
+		)
+	} else {
+		if verbose {
+			title, err := mergeRequest.GetCachedTitle()
+			if err != nil {
+				return nil, err
+			}
+
+			LogInfof(
+				"Found merge request by sourceBranch  '%s' and targetBranch '%s': '%s' in %s",
+				sourceBranchName,
+				targetBranchName,
+				title,
+				projectUrl,
+			)
+		}
+	}
+
+	return mergeRequest, nil
 }
 
 func (g *GitlabProjectMergeRequests) GetOpenMergeRequestByTitle(title string, verbose bool) (mergeRequest *GitlabMergeRequest, err error) {
@@ -391,6 +476,15 @@ func (g *GitlabProjectMergeRequests) MustGetNativeMergeRequestsService() (native
 	}
 
 	return nativeService
+}
+
+func (g *GitlabProjectMergeRequests) MustGetOpenMergeRequestBySourceAndTargetBranch(sourceBranchName string, targetBranchName string, verbose bool) (mergeRequest *GitlabMergeRequest) {
+	mergeRequest, err := g.GetOpenMergeRequestBySourceAndTargetBranch(sourceBranchName, targetBranchName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return mergeRequest
 }
 
 func (g *GitlabProjectMergeRequests) MustGetOpenMergeRequestByTitle(title string, verbose bool) (mergeRequest *GitlabMergeRequest) {

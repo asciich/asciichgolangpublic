@@ -145,7 +145,11 @@ func TestMergeRequestCreateAndClose_withLabels(t *testing.T) {
 					)
 				}
 
-				mergeRequest := testProject.MustGetOpenMergeRequestByTitle(tt.mergeRequestTitle, verbose)
+				mergeRequest := testProject.MustGetOpenMergeRequestBySourceAndTargetBranch(
+					branch.MustGetName(), 
+					testProject.MustGetDefaultBranchName(),
+					verbose,
+				)
 				for i := 0; i < 2; i++ {
 					mergeRequest.MustClose("closed for testing", verbose)
 					assert.True(mergeRequest.MustIsClosed())
