@@ -479,6 +479,20 @@ func (g *GitlabProject) GetNewestVersionAsString(verbose bool) (newestVersionStr
 	return newestVersionString, nil
 }
 
+func (g *GitlabProject) GetOpenMergeRequestBySourceAndTargetBranch(sourceBranchName string, targetBranchName string, verbose bool) (mergeRequest *GitlabMergeRequest, err error) {
+	mergeRequests, err := g.GetMergeRequests()
+	if err != nil {
+		return nil, err
+	}
+
+	mergeRequest, err = mergeRequests.GetOpenMergeRequestBySourceAndTargetBranch(sourceBranchName, targetBranchName, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return mergeRequest, nil
+}
+
 func (g *GitlabProject) GetOpenMergeRequestByTitle(title string, verbose bool) (mergeRequest *GitlabMergeRequest, err error) {
 	mergeRequests, err := g.GetMergeRequests()
 	if err != nil {
@@ -977,6 +991,15 @@ func (g *GitlabProject) MustGetNewestVersionAsString(verbose bool) (newestVersio
 	}
 
 	return newestVersionString
+}
+
+func (g *GitlabProject) MustGetOpenMergeRequestBySourceAndTargetBranch(sourceBranchName string, targetBranchName string, verbose bool) (mergeRequest *GitlabMergeRequest) {
+	mergeRequest, err := g.GetOpenMergeRequestBySourceAndTargetBranch(sourceBranchName, targetBranchName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return mergeRequest
 }
 
 func (g *GitlabProject) MustGetOpenMergeRequestByTitle(title string, verbose bool) (mergeRequest *GitlabMergeRequest) {

@@ -5,11 +5,29 @@ import "github.com/xanzy/go-gitlab"
 type GitlabMergeRequest struct {
 	gitlabProjectMergeRequests *GitlabProjectMergeRequests
 	cachedTitle                string
+	cachedSourceBranchName     string
+	cachedTargetBranchName     string
 	id                         int
 }
 
 func NewGitlabMergeRequest() (g *GitlabMergeRequest) {
 	return new(GitlabMergeRequest)
+}
+
+func (g *GitlabMergeRequest) GetCachedSourceBranchName() (cachedSourceBranchName string, err error) {
+	if g.cachedSourceBranchName == "" {
+		return "", TracedErrorf("cachedSourceBranchName not set")
+	}
+
+	return g.cachedSourceBranchName, nil
+}
+
+func (g *GitlabMergeRequest) GetCachedTargetBranchName() (cachedTargetBranchName string, err error) {
+	if g.cachedTargetBranchName == "" {
+		return "", TracedErrorf("cachedTargetBranchName not set")
+	}
+
+	return g.cachedTargetBranchName, nil
 }
 
 func (g *GitlabMergeRequest) GetCachedTitle() (cachedTitle string, err error) {
@@ -268,6 +286,24 @@ func (g *GitlabMergeRequest) MustClose(closeMessage string, verbose bool) (err e
 	return nil
 }
 
+func (g *GitlabMergeRequest) MustGetCachedSourceBranchName() (cachedSourceBranchName string) {
+	cachedSourceBranchName, err := g.GetCachedSourceBranchName()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return cachedSourceBranchName
+}
+
+func (g *GitlabMergeRequest) MustGetCachedTargetBranchName() (cachedTargetBranchName string) {
+	cachedTargetBranchName, err := g.GetCachedTargetBranchName()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return cachedTargetBranchName
+}
+
 func (g *GitlabMergeRequest) MustGetCachedTitle() (cachedTitle string) {
 	cachedTitle, err := g.GetCachedTitle()
 	if err != nil {
@@ -403,6 +439,20 @@ func (g *GitlabMergeRequest) MustIsOpen() (isOpen bool) {
 	return isOpen
 }
 
+func (g *GitlabMergeRequest) MustSetCachedSourceBranchName(cachedSourceBranchName string) {
+	err := g.SetCachedSourceBranchName(cachedSourceBranchName)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (g *GitlabMergeRequest) MustSetCachedTargetBranchName(cachedTargetBranchName string) {
+	err := g.SetCachedTargetBranchName(cachedTargetBranchName)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (g *GitlabMergeRequest) MustSetCachedTitle(cachedTitle string) {
 	err := g.SetCachedTitle(cachedTitle)
 	if err != nil {
@@ -422,6 +472,26 @@ func (g *GitlabMergeRequest) MustSetId(id int) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (g *GitlabMergeRequest) SetCachedSourceBranchName(cachedSourceBranchName string) (err error) {
+	if cachedSourceBranchName == "" {
+		return TracedErrorf("cachedSourceBranchName is empty string")
+	}
+
+	g.cachedSourceBranchName = cachedSourceBranchName
+
+	return nil
+}
+
+func (g *GitlabMergeRequest) SetCachedTargetBranchName(cachedTargetBranchName string) (err error) {
+	if cachedTargetBranchName == "" {
+		return TracedErrorf("cachedTargetBranchName is empty string")
+	}
+
+	g.cachedTargetBranchName = cachedTargetBranchName
+
+	return nil
 }
 
 func (g *GitlabMergeRequest) SetCachedTitle(cachedTitle string) (err error) {
