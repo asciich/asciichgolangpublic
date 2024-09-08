@@ -2,7 +2,6 @@ package asciichgolangpublic
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/xanzy/go-gitlab"
 )
@@ -17,8 +16,76 @@ func NewGitlabGroups() (gitlabGroups *GitlabGroups) {
 	return new(GitlabGroups)
 }
 
-func (g *GitlabGroups) MustCreateGroup(createOptions *GitlabCreateGroupOptions) (createdGroup *GitlabGroup) {
-	createdGroup, err := g.CreateGroup(createOptions)
+func (g *GitlabGroups) CreateGroup(groupPath string, createOptions *GitlabCreateGroupOptions) (createdGroup *GitlabGroup, err error) {
+	if groupPath == "" {
+		return nil, TracedErrorEmptyString("groupPath")
+	}
+
+	if createOptions == nil {
+		return nil, TracedError("createOptions is nil")
+	}
+
+	group, err := g.GetGroupByPath(groupPath, createOptions.Verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	err = group.Create(createOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	return group, nil
+}
+
+func (g *GitlabGroups) GetGroupById(id int, verbose bool) (gitlabGroup *GitlabGroup, err error) {
+	if id <= 0 {
+		return nil, TracedErrorf("Invalid group id '%d'", id)
+	}
+
+	gitlabGroup = NewGitlabGroup()
+
+	err = gitlabGroup.SetId(id)
+	if err != nil {
+		return nil, err
+	}
+
+	gitlab, err := g.GetGitlab()
+	if err != nil {
+		return nil, err
+	}
+
+	err = gitlabGroup.SetGitlab(gitlab)
+	if err != nil {
+		return nil, err
+	}
+
+	return gitlabGroup, nil
+}
+
+func (g *GitlabGroups) GetGroupByPath(groupPath string, verbose bool) (gitlabGroup *GitlabGroup, err error) {
+	gitlabGroup = NewGitlabGroup()
+
+	gitlab, err := g.GetGitlab()
+	if err != nil {
+		return nil, err
+	}
+
+	err = gitlabGroup.SetGitlab(gitlab)
+	if err != nil {
+		return nil, err
+	}
+
+	err = gitlabGroup.SetGroupPath(groupPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return gitlabGroup, nil
+}
+
+func (g *GitlabGroups) MustCreateGroup(groupPath string, createOptions *GitlabCreateGroupOptions) (createdGroup *GitlabGroup) {
+	createdGroup, err := g.CreateGroup(groupPath, createOptions)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -44,8 +111,17 @@ func (g *GitlabGroups) MustGetGitlab() (gitlab *GitlabInstance) {
 	return gitlab
 }
 
-func (g *GitlabGroups) MustGetGroupByGroupPath(groupPath string) (gitlabGroup *GitlabGroup) {
-	gitlabGroup, err := g.GetGroupByGroupPath(groupPath)
+func (g *GitlabGroups) MustGetGroupById(id int, verbose bool) (gitlabGroup *GitlabGroup) {
+	gitlabGroup, err := g.GetGroupById(id, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitlabGroup
+}
+
+func (g *GitlabGroups) MustGetGroupByPath(groupPath string, verbose bool) (gitlabGroup *GitlabGroup) {
+	gitlabGroup, err := g.GetGroupByPath(groupPath, verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -71,8 +147,8 @@ func (g *GitlabGroups) MustGetNativeGroupsService() (nativeGroupsService *gitlab
 	return nativeGroupsService
 }
 
-func (g *GitlabGroups) MustGroupByGroupPathExists(groupPath string) (groupExists bool) {
-	groupExists, err := g.GroupByGroupPathExists(groupPath)
+func (g *GitlabGroups) MustGroupByGroupPathExists(groupPath string, verbose bool) (groupExists bool) {
+	groupExists, err := g.GroupByGroupPathExists(groupPath, verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -85,120 +161,6 @@ func (g *GitlabGroups) MustSetGitlab(gitlab *GitlabInstance) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
-}
-
-func (p *GitlabGroups) CreateGroup(createOptions *GitlabCreateGroupOptions) (createdGroup *GitlabGroup, err error) {
-	if createOptions == nil {
-		return nil, TracedError("createOptions is nil")
-	}
-
-	groupPath, err := createOptions.GetGroupPath()
-	if err != nil {
-		return nil, err
-	}
-
-	fqdn, err := p.GetFqdn()
-	if err != nil {
-		return nil, err
-	}
-
-	if createOptions.Verbose {
-		LogInfof("Create group '%s' in gitlab '%s' started.", groupPath, fqdn)
-	}
-
-	groupExists, err := p.GroupByGroupPathExists(groupPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if groupExists {
-		if createOptions.Verbose {
-			LogInfof("Group '%s' already exists on gitlab '%s'.", groupPath, fqdn)
-		}
-	} else {
-		if createOptions.Verbose {
-			LogInfof("Going to create group '%s' on gitlab '%s'.", groupPath, fqdn)
-		}
-		isSubgroup, err := createOptions.IsSubgroup()
-		if err != nil {
-			return nil, err
-		}
-
-		var parentGroup *GitlabGroup = nil
-
-		if isSubgroup {
-			parentGroupPath, err := createOptions.GetParentGroupPath()
-			if err != nil {
-				return nil, err
-			}
-
-			optionsToUse := createOptions.GetDeepCopy()
-			optionsToUse.GroupPath = parentGroupPath
-
-			parentGroup, err = p.CreateGroup(optionsToUse)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		nativeGroupsService, err := p.GetNativeGroupsService()
-		if err != nil {
-			return nil, err
-		}
-
-		groupName, err := createOptions.GetGroupName()
-		if err != nil {
-			return nil, err
-		}
-
-		if len(groupName) < 2 {
-			return nil, TracedErrorf("Group names with len < 2 not allowed. But got '%s'", groupName)
-		}
-
-		var namespaceId *int = nil
-		if parentGroup != nil {
-			idToUse, err := parentGroup.GetId()
-			if err != nil {
-				return nil, err
-			}
-			namespaceId = &idToUse
-		}
-
-		groupPath, err := createOptions.GetGroupPath()
-		if err != nil {
-			return nil,
-				err
-		}
-
-		defautVisibility := gitlab.PublicVisibility
-		_, _, err = nativeGroupsService.CreateGroup(&gitlab.CreateGroupOptions{
-			Name:       &groupName,
-			ParentID:   namespaceId,
-			Path:       &groupName,
-			Visibility: &defautVisibility,
-		})
-		if err != nil {
-			if createOptions.Verbose {
-				LogErrorf("Creating group '%s' failed", groupPath)
-			}
-			return nil, err
-		}
-
-		if createOptions.Verbose {
-			LogChangedf("Group '%s' on gitlab '%s' created.", groupPath, fqdn)
-		}
-	}
-
-	createdGroup, err = p.GetGroupByGroupPath(groupPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if createOptions.Verbose {
-		LogInfof("Create group '%s' in gitlab '%s' finished.", groupPath, fqdn)
-	}
-
-	return createdGroup, nil
 }
 
 func (p *GitlabGroups) GetFqdn() (fqdn string, err error) {
@@ -221,44 +183,6 @@ func (p *GitlabGroups) GetGitlab() (gitlab *GitlabInstance, err error) {
 	}
 
 	return p.gitlab, nil
-}
-
-func (p *GitlabGroups) GetGroupByGroupPath(groupPath string) (gitlabGroup *GitlabGroup, err error) {
-	if len(groupPath) <= 0 {
-		return nil, TracedError("groupPath is empty string")
-	}
-
-	nativeGroupsService, err := p.GetNativeGroupsService()
-	if err != nil {
-		return nil, err
-	}
-
-	nativeGroup, _, err := nativeGroupsService.GetGroup(groupPath, &gitlab.GetGroupOptions{})
-	if err != nil {
-		if strings.Contains(err.Error(), "404 {message: 404 Group Not Found}") {
-			return nil, TracedErrorf("%w: %s", ErrGitlabGroupNotFoundError, groupPath)
-		}
-		return nil, err
-	}
-
-	gitlabGroup = NewGitlabGroup()
-
-	gitlab, err := p.GetGitlab()
-	if err != nil {
-		return nil, err
-	}
-
-	err = gitlabGroup.SetGitlab(gitlab)
-	if err != nil {
-		return nil, err
-	}
-
-	err = gitlabGroup.SetId(nativeGroup.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	return gitlabGroup, nil
 }
 
 func (p *GitlabGroups) GetNativeClient() (nativeClient *gitlab.Client, err error) {
@@ -289,21 +213,22 @@ func (p *GitlabGroups) GetNativeGroupsService() (nativeGroupsService *gitlab.Gro
 	return nativeGroupsService, nil
 }
 
-func (p *GitlabGroups) GroupByGroupPathExists(groupPath string) (groupExists bool, err error) {
+func (g *GitlabGroups) GroupByGroupPathExists(groupPath string, verbose bool) (groupExists bool, err error) {
 	if len(groupPath) <= 0 {
 		return false, TracedError("groupPath is empty string")
 	}
 
-	_, err = p.GetGroupByGroupPath(groupPath)
+	group, err := g.GetGroupByPath(groupPath, verbose)
 	if err != nil {
-		if errors.Is(err, ErrGitlabGroupNotFoundError) {
-			return false, nil
-		}
-
 		return false, err
 	}
 
-	return true, nil
+	groupExists, err = group.Exists(verbose)
+	if err != nil {
+		return false, err
+	}
+
+	return groupExists, nil
 }
 
 func (p *GitlabGroups) SetGitlab(gitlab *GitlabInstance) (err error) {
