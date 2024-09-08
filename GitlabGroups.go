@@ -84,6 +84,24 @@ func (g *GitlabGroups) GetGroupByPath(groupPath string, verbose bool) (gitlabGro
 	return gitlabGroup, nil
 }
 
+func (g *GitlabGroups) GroupByGroupPathExists(groupPath string, verbose bool) (groupExists bool, err error) {
+	if len(groupPath) <= 0 {
+		return false, TracedError("groupPath is empty string")
+	}
+
+	group, err := g.GetGroupByPath(groupPath, verbose)
+	if err != nil {
+		return false, err
+	}
+
+	groupExists, err = group.Exists(verbose)
+	if err != nil {
+		return false, err
+	}
+
+	return groupExists, nil
+}
+
 func (g *GitlabGroups) MustCreateGroup(groupPath string, createOptions *GitlabCreateGroupOptions) (createdGroup *GitlabGroup) {
 	createdGroup, err := g.CreateGroup(groupPath, createOptions)
 	if err != nil {
@@ -211,24 +229,6 @@ func (p *GitlabGroups) GetNativeGroupsService() (nativeGroupsService *gitlab.Gro
 	}
 
 	return nativeGroupsService, nil
-}
-
-func (g *GitlabGroups) GroupByGroupPathExists(groupPath string, verbose bool) (groupExists bool, err error) {
-	if len(groupPath) <= 0 {
-		return false, TracedError("groupPath is empty string")
-	}
-
-	group, err := g.GetGroupByPath(groupPath, verbose)
-	if err != nil {
-		return false, err
-	}
-
-	groupExists, err = group.Exists(verbose)
-	if err != nil {
-		return false, err
-	}
-
-	return groupExists, nil
 }
 
 func (p *GitlabGroups) SetGitlab(gitlab *GitlabInstance) (err error) {
