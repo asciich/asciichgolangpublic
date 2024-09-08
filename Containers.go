@@ -4,10 +4,6 @@ import "strings"
 
 type ContainersService struct{}
 
-func Contaners() (c *ContainersService) {
-	return NewContainersService()
-}
-
 // Returns true if running in a container like docker container.
 func IsRunningInsideContainer(verbose bool) (isRunningInContainer bool, err error) {
 	isRunningInContainer, err = Contaners().IsRunningInsideContainer(verbose)
@@ -26,6 +22,10 @@ func MustIsRunningInsideContainer(verbose bool) (isRunningInContainer bool) {
 	}
 
 	return isRunningInContainer
+}
+
+func Contaners() (c *ContainersService) {
+	return NewContainersService()
 }
 
 func NewContainersService() (c *ContainersService) {

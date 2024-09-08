@@ -1,7 +1,9 @@
 package asciichgolangpublic
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -161,7 +163,7 @@ func TestGitlabGroupGetParentGroupPath(t *testing.T) {
 // Validate if getting the gitlab group by path and by id works.
 func TestGitlabGroupByPathAndId(t *testing.T) {
 	if ContinuousIntegration().IsRunningInGithub() {
-		LogInfo("Not available in gitlab CI")
+		LogInfo("Not available in Github CI")
 		return
 	}
 
@@ -189,11 +191,11 @@ func TestGitlabGroupByPathAndId(t *testing.T) {
 
 				testGroup := gitlab.MustGetGroupByPath(tt.groupPath, verbose)
 
-				partenGroup := testGroup.MustGetParentGroup(verbose)
+				parentGroup := testGroup.MustGetParentGroup(verbose)
 
-				partenGroup.MustDelete(verbose)
+				parentGroup.MustDelete(verbose)
 				assert.False(testGroup.MustExists(verbose))
-				assert.False(partenGroup.MustExists(verbose))
+				assert.False(parentGroup.MustExists(verbose))
 
 				testGroup.MustCreate(
 					&GitlabCreateGroupOptions{
@@ -202,7 +204,7 @@ func TestGitlabGroupByPathAndId(t *testing.T) {
 				)
 
 				assert.True(testGroup.MustExists(verbose))
-				assert.True(partenGroup.MustExists(verbose))
+				assert.True(parentGroup.MustExists(verbose))
 
 				testGroupId := testGroup.MustGetId(verbose)
 				testGroupById := gitlab.MustGetGroupById(testGroupId, verbose)
@@ -217,15 +219,88 @@ func TestGitlabGroupByPathAndId(t *testing.T) {
 					testGroupById.MustGetGroupName(),
 				)
 				assert.EqualValues(
-					partenGroup.MustGetGroupPath(),
+					parentGroup.MustGetGroupPath(),
 					testGroupById.MustGetParentGroupPath(verbose),
 				)
 
-				partenGroup.MustDelete(verbose)
+				parentGroup.MustDelete(verbose)
 				assert.False(testGroup.MustExists(verbose))
 				assert.False(testGroupById.MustExists(verbose))
-				assert.False(partenGroup.MustExists(verbose))
+				assert.False(parentGroup.MustExists(verbose))
 
+			},
+		)
+	}
+}
+
+func TestGitlabGroupListProjects(t *testing.T) {
+	if ContinuousIntegration().IsRunningInGithub() {
+		LogInfo("Not available in Github CI")
+		return
+	}
+
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
+				gitlab.MustAuthenticate(
+					&GitlabAuthenticationOptions{
+						AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
+						Verbose:                verbose,
+					},
+				)
+
+				const testGroupName string = "test_projects_in_group"
+				testGroup := gitlab.MustGetGroupByPath(testGroupName, verbose)
+
+				testGroup.MustDelete(verbose)
+				assert.False(testGroup.MustExists(verbose))
+
+				nProjects := 25
+				projectPaths := []string{}
+				for i := 0; i < nProjects; i++ {
+					projectPath := fmt.Sprintf("%s/project_%d", testGroupName, i)
+					projectPaths = append(projectPaths, projectPath)
+
+					gitlab.MustCreateProject(
+						&GitlabCreateProjectOptions{
+							ProjectPath: projectPath,
+							Verbose: verbose,
+						},
+					)
+				}
+
+				time.Sleep(3 * time.Second)
+				listedProjectPaths := testGroup.MustListProjectPaths(
+					&GitlabListProjectsOptions{
+						Verbose: verbose,
+					},
+				)
+
+				assert.Len(listedProjectPaths, nProjects)
+
+				for _, toCheck := range projectPaths {
+					assert.True(
+						Slices().ContainsString(
+							listedProjectPaths,
+							toCheck,
+						),
+					)
+				}
+
+				testGroup.MustDelete(verbose)
+				assert.False(testGroup.MustExists(verbose))
 			},
 		)
 	}

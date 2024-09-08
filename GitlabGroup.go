@@ -154,7 +154,7 @@ func (g *GitlabGroup) Delete(verbose bool) (err error) {
 
 			if exists {
 				if verbose {
-					LogInfof("Wait until delete of gitlab group '%v' is finished (%d, %d).", gid, i+1, maxRetry)
+					LogInfof("Wait until delete of gitlab group '%v' is finished (%d/%d).", gid, i+1, maxRetry)
 				}
 				time.Sleep(time.Millisecond * 500)
 				continue
@@ -414,6 +414,64 @@ func (g *GitlabGroup) IsSubgroup() (isSubgroup bool, err error) {
 	return isSubgroup, nil
 }
 
+func (g *GitlabGroup) ListProjectPaths(options *GitlabListProjectsOptions) (projectPaths []string, err error) {
+	if options == nil {
+		return nil, TracedErrorNil("options")
+	}
+
+	nativeService, err := g.GetNativeGroupsService()
+	if err != nil {
+		return nil, err
+	}
+
+	gid, err := g.GetId()
+	if err != nil {
+		return nil, err
+	}
+
+	groupPath, err := g.GetGroupPath()
+	if err != nil {
+		return nil, err
+	}
+
+	nextPage := 1
+	falseBoolean := false
+
+	projectPaths = []string{}
+
+	for {
+		if nextPage <= 0 {
+			break
+		}
+
+		nativeProjects, response, err := nativeService.ListGroupProjects(
+			gid,
+			&gitlab.ListGroupProjectsOptions{
+				Archived: &falseBoolean,
+				ListOptions: gitlab.ListOptions{
+					Page: nextPage,
+				},
+			},
+		)
+		if err != nil {
+			return nil, TracedErrorf("Failed to get project paths of group '%s', groupId='%d': %w", groupPath, gid, err)
+		}
+
+		for _, toAdd := range nativeProjects {
+			pathToAdd := toAdd.PathWithNamespace
+			projectPaths = append(projectPaths, pathToAdd)
+		}
+
+		nextPage = response.NextPage
+	}
+
+	if options.Verbose {
+		LogInfof("Collected '%d' project paths in gitlab group '%s'.", len(projectPaths), groupPath)
+	}
+
+	return projectPaths, nil
+}
+
 func (g *GitlabGroup) MustCreate(createOptions *GitlabCreateGroupOptions) {
 	err := g.Create(createOptions)
 	if err != nil {
@@ -579,6 +637,15 @@ func (g *GitlabGroup) MustIsSubgroup() (isSubgroup bool) {
 	}
 
 	return isSubgroup
+}
+
+func (g *GitlabGroup) MustListProjectPaths(options *GitlabListProjectsOptions) (projectPaths []string) {
+	projectPaths, err := g.ListProjectPaths(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return projectPaths
 }
 
 func (g *GitlabGroup) MustSetGitlab(gitlab *GitlabInstance) {
