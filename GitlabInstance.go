@@ -267,9 +267,13 @@ func (g *GitlabInstance) CreateAccessToken(options *GitlabCreateAccessTokenOptio
 	return newToken, nil
 }
 
-func (g *GitlabInstance) CreateGroup(createOptions *GitlabCreateGroupOptions) (createdGroup *GitlabGroup, err error) {
+func (g *GitlabInstance) CreateGroupByPath(groupPath string, createOptions *GitlabCreateGroupOptions) (createdGroup *GitlabGroup, err error) {
+	if groupPath == "" {
+		return nil, TracedErrorEmptyString("groupPath")
+	}
+
 	if createOptions == nil {
-		return nil, TracedError("createOptions is nil")
+		return nil, TracedErrorNil("createOptions")
 	}
 
 	gitlabGroups, err := g.GetGitlabGroups()
@@ -277,7 +281,7 @@ func (g *GitlabInstance) CreateGroup(createOptions *GitlabCreateGroupOptions) (c
 		return nil, err
 	}
 
-	createdGroup, err = gitlabGroups.CreateGroup(createOptions)
+	createdGroup, err = gitlabGroups.CreateGroup(groupPath, createOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -319,6 +323,24 @@ func (g *GitlabInstance) CreateProject(createOptions *GitlabCreateProjectOptions
 	}
 
 	return gitlabProject, err
+}
+
+func (g *GitlabInstance) DeleteGroupByPath(groupPath string, verbose bool) (err error) {
+	if groupPath == "" {
+		return TracedErrorEmptyString("groupPath")
+	}
+
+	group, err := g.GetGroupByPath(groupPath, verbose)
+	if err != nil {
+		return err
+	}
+
+	err = group.Delete(verbose)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (g *GitlabInstance) GetApiV4Url() (v4ApiUrl string, err error) {
@@ -497,6 +519,34 @@ func (g *GitlabInstance) GetGitlabUsers() (gitlabUsers *GitlabUsers, err error) 
 	}
 
 	return gitlabUsers, nil
+}
+
+func (g *GitlabInstance) GetGroupById(id int, verbose bool) (gitlabGroup *GitlabGroup, err error) {
+	groups, err := g.GetGitlabGroups()
+	if err != nil {
+		return nil, err
+	}
+
+	gitlabGroup, err = groups.GetGroupById(id, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return gitlabGroup, nil
+}
+
+func (g *GitlabInstance) GetGroupByPath(groupPath string, verbose bool) (gitlabGroup *GitlabGroup, err error) {
+	groups, err := g.GetGitlabGroups()
+	if err != nil {
+		return nil, err
+	}
+
+	gitlabGroup, err = groups.GetGroupByPath(groupPath, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return gitlabGroup, nil
 }
 
 func (g *GitlabInstance) GetHost() (gitlabHost *Host, err error) {
@@ -756,7 +806,7 @@ func (g *GitlabInstance) GetUserNameList(verbose bool) (userNames []string, err 
 	return userNames, nil
 }
 
-func (g *GitlabInstance) GroupByGroupPathExists(groupPath string) (groupExists bool, err error) {
+func (g *GitlabInstance) GroupByGroupPathExists(groupPath string, verbose bool) (groupExists bool, err error) {
 	if len(groupPath) <= 0 {
 		return false, TracedError("groupPath is empty string")
 	}
@@ -766,7 +816,7 @@ func (g *GitlabInstance) GroupByGroupPathExists(groupPath string) (groupExists b
 		return false, err
 	}
 
-	groupExists, err = gitlabGroups.GroupByGroupPathExists(groupPath)
+	groupExists, err = gitlabGroups.GroupByGroupPathExists(groupPath, verbose)
 	if err != nil {
 		return false, err
 	}
@@ -817,8 +867,8 @@ func (g *GitlabInstance) MustCreateAccessToken(options *GitlabCreateAccessTokenO
 	return newToken
 }
 
-func (g *GitlabInstance) MustCreateGroup(createOptions *GitlabCreateGroupOptions) (createdGroup *GitlabGroup) {
-	createdGroup, err := g.CreateGroup(createOptions)
+func (g *GitlabInstance) MustCreateGroupByPath(groupPath string, createOptions *GitlabCreateGroupOptions) (createdGroup *GitlabGroup) {
+	createdGroup, err := g.CreateGroupByPath(groupPath, createOptions)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -842,6 +892,13 @@ func (g *GitlabInstance) MustCreateProject(createOptions *GitlabCreateProjectOpt
 	}
 
 	return gitlabProject
+}
+
+func (g *GitlabInstance) MustDeleteGroupByPath(groupPath string, verbose bool) {
+	err := g.DeleteGroupByPath(groupPath, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (g *GitlabInstance) MustGetApiV4Url() (v4ApiUrl string) {
@@ -977,6 +1034,24 @@ func (g *GitlabInstance) MustGetGitlabUsers() (gitlabUsers *GitlabUsers) {
 	}
 
 	return gitlabUsers
+}
+
+func (g *GitlabInstance) MustGetGroupById(id int, verbose bool) (gitlabGroup *GitlabGroup) {
+	gitlabGroup, err := g.GetGroupById(id, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitlabGroup
+}
+
+func (g *GitlabInstance) MustGetGroupByPath(groupPath string, verbose bool) (gitlabGroup *GitlabGroup) {
+	gitlabGroup, err := g.GetGroupByPath(groupPath, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitlabGroup
 }
 
 func (g *GitlabInstance) MustGetHost() (gitlabHost *Host) {
@@ -1141,8 +1216,8 @@ func (g *GitlabInstance) MustGetUserNameList(verbose bool) (userNames []string) 
 	return userNames
 }
 
-func (g *GitlabInstance) MustGroupByGroupPathExists(groupPath string) (groupExists bool) {
-	groupExists, err := g.GroupByGroupPathExists(groupPath)
+func (g *GitlabInstance) MustGroupByGroupPathExists(groupPath string, verbose bool) (groupExists bool) {
+	groupExists, err := g.GroupByGroupPathExists(groupPath, verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

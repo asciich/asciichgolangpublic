@@ -1,16 +1,13 @@
 package asciichgolangpublic
 
-/* TODO enable again
 import (
 	"testing"
-
 
 	"github.com/stretchr/testify/assert"
 )
 
-
 func TestGitlabGroupsGroupByGroupPathExists(t *testing.T) {
-	if ContinuousIntegration().IsRunningInContinuousIntegration() {
+	if ContinuousIntegration().IsRunningInGithub() {
 		LogWarn("Unavailable in continuous integration pipeline")
 		return
 	}
@@ -38,7 +35,7 @@ func TestGitlabGroupsGroupByGroupPathExists(t *testing.T) {
 					},
 				)
 
-				exists := gitlab.MustGroupByGroupPathExists(tt.groupPath)
+				exists := gitlab.MustGroupByGroupPathExists(tt.groupPath, verbose)
 
 				assert.EqualValues(tt.expectedExists, exists)
 			},
@@ -46,17 +43,17 @@ func TestGitlabGroupsGroupByGroupPathExists(t *testing.T) {
 	}
 }
 
-func TestGitlabGroupsCreateGroup(t *testing.T) {
+func TestGitlabGroupsCreateAndDeleteGroup(t *testing.T) {
 
-	if ContinuousIntegration().IsRunningInContinuousIntegration() {
+	if ContinuousIntegration().IsRunningInGithub() {
 		LogWarn("Unavailable in continuous integration pipeline")
 		return
 	}
 
 	tests := []struct {
-		testcase string
+		groupName string
 	}{
-		{"testcase"},
+		{"test_group_create_and_delete"},
 	}
 
 	for _, tt := range tests {
@@ -75,16 +72,36 @@ func TestGitlabGroupsCreateGroup(t *testing.T) {
 					},
 				)
 
-				createdGroup := gitlab.MustCreateGroup(
-					&GitlabCreateGroupOptions{
-						GroupPath: "test_group",
-						Verbose:   verbose,
-					},
-				)
+				groupUnderTest := gitlab.MustGetGroupByPath(tt.groupName, verbose)
 
-				assert.Greater(createdGroup.MustGetId(), 0)
+				for i := 0; i < 2; i++ {
+					gitlab.MustDeleteGroupByPath(
+						tt.groupName,
+						verbose,
+					)
+					assert.False(groupUnderTest.MustExists(verbose))
+				}
+
+				for i := 0; i < 2; i++ {
+					createdGroup := gitlab.MustCreateGroupByPath(
+						tt.groupName,
+						&GitlabCreateGroupOptions{
+							Verbose: verbose,
+						},
+					)
+					assert.True(createdGroup.MustExists(verbose))
+					assert.True(groupUnderTest.MustExists(verbose))
+				}
+				assert.Greater(groupUnderTest.MustGetId(verbose), 0)
+
+				for i := 0; i < 2; i++ {
+					gitlab.MustDeleteGroupByPath(
+						tt.groupName,
+						verbose,
+					)
+					assert.False(groupUnderTest.MustExists(verbose))
+				}
 			},
 		)
 	}
 }
-*/

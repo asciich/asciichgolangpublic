@@ -555,10 +555,10 @@ func (p *GitlabProjects) CreateProject(createOptions *GitlabCreateProjectOptions
 			}
 
 			if groupPath != "" {
-				createdGroup, err := asciichgolangGitlab.CreateGroup(
+				createdGroup, err := asciichgolangGitlab.CreateGroupByPath(
+					groupPath,
 					&GitlabCreateGroupOptions{
-						GroupPath: groupPath,
-						Verbose:   createOptions.Verbose,
+						Verbose: createOptions.Verbose,
 					},
 				)
 				if err != nil {

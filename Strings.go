@@ -16,6 +16,12 @@ func Strings() (stringsService *StringsService) {
 	return new(StringsService)
 }
 
+func (s *StringsService) TrimPrefixAndSuffix(input string, prefix string, suffix string) (output string) {
+	output = strings.TrimPrefix(input, prefix)
+	output = strings.TrimSuffix(output, suffix)
+	return output
+}
+
 func (s *StringsService) ContainsAtLeastOneSubstring(input string, substrings []string) (atLeastOneSubstringFound bool) {
 	for _, substring := range substrings {
 		if strings.Contains(input, substring) {
