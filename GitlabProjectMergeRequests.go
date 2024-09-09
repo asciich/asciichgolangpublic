@@ -6,7 +6,6 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-
 var ErrNoMergeRequestWithTitleFound = errors.New("no merge request with given title found")
 var ErrNoMergeRequestWithSourceAndTargetBranchFound = errors.New("no merge request with given source and target branch found")
 
@@ -411,18 +410,31 @@ func (g *GitlabProjectMergeRequests) GetRawMergeRequests(options *gitlab.ListPro
 		return nil, err
 	}
 
-	nativeService, err := g.GetNativeMergeRequestsService()
-	if err != nil {
-		return nil, err
-	}
-	rawMergeRequests, _, err = nativeService.ListProjectMergeRequests(
-		projectId,
-		options,
-	)
-	if err != nil {
-		return nil, TracedErrorf("Get raw merge requests failed: '%s'", err)
-	}
+	rawMergeRequests = []*gitlab.MergeRequest{}
+	nextPage := 1
 
+	for {
+		if nextPage <= 0 {
+			break
+		}
+
+		nativeService, err := g.GetNativeMergeRequestsService()
+		if err != nil {
+			return nil, err
+		}
+		rawMergeRequestsToAdd, response, err := nativeService.ListProjectMergeRequests(
+			projectId,
+			options,
+		)
+		if err != nil {
+			return nil, TracedErrorf("Get raw merge requests failed: '%s'", err)
+		}
+
+		rawMergeRequests = append(rawMergeRequests, rawMergeRequestsToAdd...)
+
+		nextPage = response.NextPage
+
+	}
 	return rawMergeRequests, nil
 }
 
