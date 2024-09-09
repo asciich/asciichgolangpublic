@@ -6,7 +6,9 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
+
 var ErrNoMergeRequestWithTitleFound = errors.New("no merge request with given title found")
+var ErrNoMergeRequestWithSourceAndTargetBranchFound = errors.New("no merge request with given source and target branch found")
 
 // Handle Gitlab merge requests related to a project.
 type GitlabProjectMergeRequests struct {
@@ -257,7 +259,7 @@ func (g *GitlabProjectMergeRequests) GetOpenMergeRequestBySourceAndTargetBranch(
 	if foundCounter <= 0 {
 		return nil, TracedErrorf(
 			"%w: sourceBranch '%s' and targetBranch '%s' in project %s .",
-			ErrNoMergeRequestWithTitleFound,
+			ErrNoMergeRequestWithSourceAndTargetBranchFound,
 			sourceBranchName,
 			targetBranchName,
 			projectUrl,
