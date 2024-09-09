@@ -148,7 +148,12 @@ func (g *GitlabMergeRequest) GetRawResponse() (rawResponse *gitlab.MergeRequest,
 		&gitlab.GetMergeRequestsOptions{},
 	)
 	if err != nil {
-		return nil, TracedErrorf("Failed to get raw resopnse for gitlab project: '%w'", err)
+		return nil, TracedErrorf(
+			"Failed to get raw response for merge request id='%d' of gitlab projectId='%d': '%w'",
+			id,
+			projectId,
+			err,
+		)
 	}
 
 	if rawResponse == nil {
