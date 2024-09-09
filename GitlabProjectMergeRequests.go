@@ -179,7 +179,7 @@ func (g *GitlabProjectMergeRequests) GetMergeRequestByNativeMergeRequest(nativeM
 		return nil, err
 	}
 
-	err = mergeRequest.SetId(nativeMergeRequest.ID)
+	err = mergeRequest.SetId(nativeMergeRequest.IID)
 	if err != nil {
 		return nil, err
 	}
