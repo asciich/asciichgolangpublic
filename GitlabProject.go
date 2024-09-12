@@ -348,6 +348,24 @@ func (g *GitlabProject) GetCachedProjectName() (projectName string, err error) {
 	return projectName, nil
 }
 
+func (g *GitlabProject) GetCommitByHashString(hashString string, verbose bool) (commit *GitlabCommit, err error) {
+	if hashString == "" {
+		return nil, TracedErrorNil("hashString")
+	}
+
+	projectCommits, err := g.GetProjectCommits()
+	if err != nil {
+		return nil, err
+	}
+
+	commit, err = projectCommits.GetCommitByHashString(hashString, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return commit, nil
+}
+
 func (g *GitlabProject) GetCurrentUserName(verbose bool) (userName string, err error) {
 	gitlab, err := g.GetGitlab()
 	if err != nil {
@@ -418,6 +436,30 @@ func (g *GitlabProject) GetGitlabFqdn() (fqdn string, err error) {
 	return fqdn, nil
 }
 
+func (g *GitlabProject) GetLatestCommit(branchName string, verbose bool) (latestCommit *GitlabCommit, err error) {
+	if branchName == "" {
+		return nil, TracedErrorNil("branchName")
+	}
+
+	latestHash, err := g.GetLatestCommitHashAsString(branchName, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	latestCommit, err = g.GetCommitByHashString(latestHash, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	LogInfof(
+		"Latest commit of branch '%s' has hash '%s'.",
+		branchName,
+		latestHash,
+	)
+
+	return latestCommit, nil
+}
+
 func (g *GitlabProject) GetLatestCommitHashAsString(branchName string, verbose bool) (commitHash string, err error) {
 	if branchName == "" {
 		return "", TracedErrorEmptyString("branchName")
@@ -434,6 +476,33 @@ func (g *GitlabProject) GetLatestCommitHashAsString(branchName string, verbose b
 	}
 
 	return commitHash, nil
+}
+
+func (g *GitlabProject) GetLatestCommitOfDefaultBranch(verbose bool) (latestCommit *GitlabCommit, err error) {
+	defaultBranch, err := g.GetDefaultBranchName()
+	if err != nil {
+		return nil, err
+	}
+
+	latestCommit, err = g.GetLatestCommit(defaultBranch, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	if verbose {
+		latestHash, err := latestCommit.GetCommitHash()
+		if err != nil {
+			return nil, err
+		}
+
+		LogInfof(
+			"Latest commit of default branch '%s' has hash '%s'.",
+			defaultBranch,
+			latestHash,
+		)
+	}
+
+	return latestCommit, nil
 }
 
 func (g *GitlabProject) GetMergeRequests() (mergeRequestes *GitlabProjectMergeRequests, err error) {
@@ -840,6 +909,15 @@ func (g *GitlabProject) MustGetCachedProjectName() (projectName string) {
 	return projectName
 }
 
+func (g *GitlabProject) MustGetCommitByHashString(hashString string, verbose bool) (commit *GitlabCommit) {
+	commit, err := g.GetCommitByHashString(hashString, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return commit
+}
+
 func (g *GitlabProject) MustGetCurrentUserName(verbose bool) (userName string) {
 	userName, err := g.GetCurrentUserName(verbose)
 	if err != nil {
@@ -939,6 +1017,15 @@ func (g *GitlabProject) MustGetId() (id int) {
 	return id
 }
 
+func (g *GitlabProject) MustGetLatestCommit(branchName string, verbose bool) (latestCommit *GitlabCommit) {
+	latestCommit, err := g.GetLatestCommit(branchName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return latestCommit
+}
+
 func (g *GitlabProject) MustGetLatestCommitHashAsString(branchName string, verbose bool) (commitHash string) {
 	commitHash, err := g.GetLatestCommitHashAsString(branchName, verbose)
 	if err != nil {
@@ -946,6 +1033,15 @@ func (g *GitlabProject) MustGetLatestCommitHashAsString(branchName string, verbo
 	}
 
 	return commitHash
+}
+
+func (g *GitlabProject) MustGetLatestCommitOfDefaultBranch(verbose bool) (latestCommit *GitlabCommit) {
+	latestCommit, err := g.GetLatestCommitOfDefaultBranch(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return latestCommit
 }
 
 func (g *GitlabProject) MustGetMergeRequests() (mergeRequestes *GitlabProjectMergeRequests) {
