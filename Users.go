@@ -8,6 +8,24 @@ import (
 type UsersService struct {
 }
 
+func GetDirectoryInHomeDirectory(path ...string) (directoryInHome Directory, err error) {
+	directoryInHome, err = Users().GetDirectoryInHomeDirectory(path...)
+	if err != nil {
+		return nil, err
+	}
+
+	return directoryInHome, nil
+}
+
+func GetFileInHomeDirectory(path ...string) (fileInHome File, err error) {
+	fileInHome, err = Users().GetFileInHomeDirectory(path...)
+	if err != nil {
+		return nil, err
+	}
+
+	return fileInHome, nil
+}
+
 func IsRunningAsRoot(verbose bool) (isRunningAsRoot bool, err error) {
 	isRunningAsRoot, err = Users().IsRunningAsRoot(verbose)
 	if err != nil {
@@ -15,6 +33,24 @@ func IsRunningAsRoot(verbose bool) (isRunningAsRoot bool, err error) {
 	}
 
 	return isRunningAsRoot, nil
+}
+
+func MustGetDirectoryInHomeDirectory(path ...string) (directoryInHome Directory) {
+	directoryInHome, err := GetDirectoryInHomeDirectory(path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return directoryInHome
+}
+
+func MustGetFileInHomeDirectory(path ...string) (fileInHome File) {
+	fileInHome, err := Users().GetFileInHomeDirectory(path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return fileInHome
 }
 
 func MustIsRunningAsRoot(verbose bool) (isRunningAsRoot bool) {
