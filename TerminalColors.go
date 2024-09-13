@@ -71,6 +71,7 @@ func (t *TerminalColorsService) GetCodeMangenta() (code string) {
 	return "\033[0;35m"
 }
 
+// This color code resets all color settings back default.
 func (t *TerminalColorsService) GetCodeNoColor() (code string) {
 	return "\033[0m"
 }
