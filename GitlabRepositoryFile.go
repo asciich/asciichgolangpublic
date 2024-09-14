@@ -38,9 +38,21 @@ func (g *GitlabRepositoryFile) Delete(commitMessage string, verbose bool) (err e
 		return err
 	}
 
-	branchName, err := g.GetBranchName()
-	if err != nil {
-		return err
+	var branchName = ""
+	if g.IsBranchNameSet() {
+		branchName, err = g.GetBranchName()
+		if err != nil {
+			return err
+		}
+	} else {
+		branchName, err = g.GetDefaultBranchName()
+		if err != nil {
+			return err
+		}
+	}
+
+	if branchName == "" {
+		return TracedError("branchName is empty string after evaluation")
 	}
 
 	exits, err := g.Exists()
@@ -101,7 +113,7 @@ func (g *GitlabRepositoryFile) Exists() (fileExists bool, err error) {
 
 func (g *GitlabRepositoryFile) GetBranchName() (branchName string, err error) {
 	if g.BranchName == "" {
-		return "", TracedErrorf("BranchName not set")
+		return "", TracedError("BranchName not set")
 	}
 
 	return g.BranchName, nil

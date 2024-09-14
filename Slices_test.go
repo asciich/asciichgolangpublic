@@ -343,3 +343,34 @@ func TestSlicesDiffStringSlices(t *testing.T) {
 		)
 	}
 }
+
+func TestSlicesGetDeepCopyOfByteSlice(t *testing.T) {
+	tests := []struct {
+		input          []byte
+		expected_output          []byte
+	}{
+		{[]byte{}, []byte{}},
+		{nil, nil},
+		{[]byte("a"), []byte("a")},
+		{[]byte("ab"), []byte("ab")},
+		{[]byte("abc"), []byte("abc")},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				copy := Slices().GetDeepCopyOfByteSlice(tt.input)
+				assert.EqualValues(tt.expected_output, copy)
+
+				for i := 0 ; i < len(tt.input) ; i++ {
+					tt.input[i] = 0x00
+				}
+
+				assert.EqualValues(tt.expected_output, copy)
+			},
+		)
+	}
+}

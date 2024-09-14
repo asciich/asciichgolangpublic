@@ -225,6 +225,25 @@ func (g *GitlabBranch) GetGitlabProject() (gitlabProject *GitlabProject, err err
 	return g.gitlabProject, nil
 }
 
+func (g *GitlabBranch) GetLatestCommit(verbose bool) (latestCommit *GitlabCommit, err error) {
+	gitlabProject, err := g.GetGitlabProject()
+	if err != nil {
+		return nil, err
+	}
+
+	branchName, err := g.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	latestCommit, err = gitlabProject.GetLatestCommit(branchName, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return latestCommit, err
+}
+
 func (g *GitlabBranch) GetLatestCommitHashAsString(verbose bool) (commitHash string, err error) {
 	rawResponse, err := g.GetRawResponse()
 	if err != nil {
@@ -426,6 +445,15 @@ func (g *GitlabBranch) MustGetGitlabProject() (gitlabProject *GitlabProject) {
 	return gitlabProject
 }
 
+func (g *GitlabBranch) MustGetLatestCommit(verbose bool) (latestCommit *GitlabCommit) {
+	latestCommit, err := g.GetLatestCommit(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return latestCommit
+}
+
 func (g *GitlabBranch) MustGetLatestCommitHashAsString(verbose bool) (commitHash string) {
 	commitHash, err := g.GetLatestCommitHashAsString(verbose)
 	if err != nil {
@@ -512,6 +540,15 @@ func (g *GitlabBranch) MustSetName(name string) {
 	}
 }
 
+func (g *GitlabBranch) MustWriteFileContent(options *GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile) {
+	gitlabRepositoryFile, err := g.WriteFileContent(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitlabRepositoryFile
+}
+
 func (g *GitlabBranch) SetGitlabProject(gitlabProject *GitlabProject) (err error) {
 	if gitlabProject == nil {
 		return TracedErrorf("gitlabProject is nil")
@@ -530,4 +567,30 @@ func (g *GitlabBranch) SetName(name string) (err error) {
 	g.name = name
 
 	return nil
+}
+
+func (g *GitlabBranch) WriteFileContent(options *GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile, err error) {
+	if options == nil {
+		return nil, TracedErrorNil("options")
+	}
+
+	gitlabProject, err := g.GetGitlabProject()
+	if err != nil {
+		return nil, err
+	}
+
+	branchName, err := g.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	optionsToUse := options.GetDeepCopy()
+	optionsToUse.BranchName = branchName
+
+	gitlabRepositoryFile, err = gitlabProject.WriteFileContent(optionsToUse)
+	if err != nil {
+		return nil, err
+	}
+
+	return gitlabRepositoryFile, nil
 }
