@@ -239,6 +239,31 @@ func (g *GitlabProject) DeleteBranch(branchName string, deleteOptions *GitlabDel
 	return nil
 }
 
+func (g *GitlabProject) DeleteFileInDefaultBranch(fileName string, commitMessage string, verbose bool) (err error) {
+	if fileName == "" {
+		return TracedErrorEmptyString("fileName")
+	}
+
+	if commitMessage == "" {
+		return TracedErrorEmptyString("commitMessage")
+	}
+
+	fileInRepo, err := g.GetFileInDefaultBranch(
+		fileName,
+		verbose,
+	)
+	if err != nil {
+		return err
+	}
+
+	err = fileInRepo.Delete(commitMessage, verbose)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (g *GitlabProject) Exists(verbose bool) (projectExists bool, err error) {
 	gitlab, err := g.GetGitlab()
 	if err != nil {
@@ -406,6 +431,24 @@ func (g *GitlabProject) GetDirectoryNames(ref string, verbose bool) (directoryNa
 	}
 
 	return directoryNames, nil
+}
+
+func (g *GitlabProject) GetFileInDefaultBranch(fileName string, verbose bool) (repositoryFile *GitlabRepositoryFile, err error) {
+	if fileName == "" {
+		return nil, TracedErrorEmptyString("fileName")
+	}
+
+	repositoryFile, err = g.GetRepositoryFile(
+		&GitlabGetRepositoryFileOptions{
+			Path:    fileName,
+			Verbose: verbose,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return repositoryFile, nil
 }
 
 func (g *GitlabProject) GetFilesNames(ref string, verbose bool) (fileNames []string, err error) {
@@ -680,6 +723,24 @@ func (g *GitlabProject) GetRawResponse() (nativeGitlabProject *gitlab.Project, e
 	return nativeProject, nil
 }
 
+func (g *GitlabProject) GetRepositoryFile(options *GitlabGetRepositoryFileOptions) (repositoryFile *GitlabRepositoryFile, err error) {
+	if options == nil {
+		return nil, TracedErrorNil("options")
+	}
+
+	repositoryFiles, err := g.GetRepositoryFiles()
+	if err != nil {
+		return nil, err
+	}
+
+	repositoryFile, err = repositoryFiles.GetRepositoryFile(options)
+	if err != nil {
+		return nil, err
+	}
+
+	return repositoryFile, nil
+}
+
 func (g *GitlabProject) GetRepositoryFiles() (repositoryFiles *GitlabRepositoryFiles, err error) {
 	repositoryFiles = NewGitlabRepositoryFiles()
 
@@ -837,6 +898,13 @@ func (g *GitlabProject) MustDeleteBranch(branchName string, deleteOptions *Gitla
 	}
 }
 
+func (g *GitlabProject) MustDeleteFileInDefaultBranch(fileName string, commitMessage string, verbose bool) {
+	err := g.DeleteFileInDefaultBranch(fileName, commitMessage, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (g *GitlabProject) MustDeployKeyByNameExists(keyName string) (exists bool) {
 	exists, err := g.DeployKeyByNameExists(keyName)
 	if err != nil {
@@ -961,6 +1029,15 @@ func (g *GitlabProject) MustGetDirectoryNames(ref string, verbose bool) (directo
 	}
 
 	return directoryNames
+}
+
+func (g *GitlabProject) MustGetFileInDefaultBranch(fileName string, verbose bool) (repositoryFile *GitlabRepositoryFile) {
+	repositoryFile, err := g.GetFileInDefaultBranch(fileName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return repositoryFile
 }
 
 func (g *GitlabProject) MustGetFilesNames(ref string, verbose bool) (fileNames []string) {
@@ -1141,6 +1218,15 @@ func (g *GitlabProject) MustGetRawResponse() (nativeGitlabProject *gitlab.Projec
 	}
 
 	return nativeGitlabProject
+}
+
+func (g *GitlabProject) MustGetRepositoryFile(options *GitlabGetRepositoryFileOptions) (repositoryFile *GitlabRepositoryFile) {
+	repositoryFile, err := g.GetRepositoryFile(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return repositoryFile
 }
 
 func (g *GitlabProject) MustGetRepositoryFiles() (repositoryFiles *GitlabRepositoryFiles) {

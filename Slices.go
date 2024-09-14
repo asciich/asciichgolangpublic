@@ -17,28 +17,6 @@ func Slices() (slices *SlicesService) {
 	return new(SlicesService)
 }
 
-func (o *SlicesService) ByteSlicesEqual(input1 []byte, input2 []byte) (slicesEqual bool) {
-	if input1 == nil {
-		return false
-	}
-
-	if input2 == nil {
-		return false
-	}
-
-	if len(input1) != len(input2) {
-		return false
-	}
-
-	for i, toCeck := range input1 {
-		if toCeck != input2[i] {
-			return false
-		}
-	}
-
-	return true
-}
-
 func (o *SlicesService) RemoveDuplicatedStrings(sliceOfStrings []string) (cleaned []string) {
 	if sliceOfStrings == nil {
 		return []string{}
@@ -154,6 +132,28 @@ func (s *SlicesService) AtLeastOneElementStartsWith(elements []string, toCheck s
 	}
 
 	return false
+}
+
+func (s *SlicesService) ByteSlicesEqual(input1 []byte, input2 []byte) (slicesEqual bool) {
+	if input1 == nil {
+		return false
+	}
+
+	if input2 == nil {
+		return false
+	}
+
+	if len(input1) != len(input2) {
+		return false
+	}
+
+	for i, toCeck := range input1 {
+		if toCeck != input2[i] {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (s *SlicesService) ContainsEmptyString(input []string) (containsEmptyString bool) {
@@ -286,6 +286,17 @@ func (s *SlicesService) DiffStringSlices(a []string, b []string) (aNotInB []stri
 	bNotInA = s.SortStringSlice(bNotInA)
 
 	return aNotInB, bNotInA
+}
+
+func (s *SlicesService) GetDeepCopyOfByteSlice(input []byte) (deepCopy []byte) {
+	if input == nil {
+		return nil
+	}
+
+	deepCopy = make([]byte, len(input))
+	copy(deepCopy, input)
+
+	return deepCopy
 }
 
 func (s *SlicesService) GetDeepCopyOfStringsSlice(sliceOfStrings []string) (deepCopy []string) {

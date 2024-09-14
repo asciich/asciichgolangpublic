@@ -40,6 +40,17 @@ func (g *GitlabWriteFileOptions) GetContent() (content []byte, err error) {
 	return g.Content, nil
 }
 
+func (g *GitlabWriteFileOptions) GetDeepCopy() (copy *GitlabWriteFileOptions) {
+	copy = NewGitlabWriteFileOptions()
+	*copy = *g
+
+	if len(g.Content) > 0 {
+		copy.Content = Slices().GetDeepCopyOfByteSlice(g.Content)
+	}
+
+	return copy
+}
+
 func (g *GitlabWriteFileOptions) GetGitlabGetRepositoryFileOptions() (getOptions *GitlabGetRepositoryFileOptions, err error) {
 	getOptions = NewGitlabGetRepositoryFileOptions()
 	getOptions.Path = g.Path

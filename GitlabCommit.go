@@ -1,6 +1,8 @@
 package asciichgolangpublic
 
-import "github.com/xanzy/go-gitlab"
+import (
+	"github.com/xanzy/go-gitlab"
+)
 
 type GitlabCommit struct {
 	gitlabProjectsCommits *GitlabProjectCommits
@@ -45,6 +47,20 @@ func (g *GitlabCommit) GetGitlabProject() (gitlabProject *GitlabProject, err err
 	}
 
 	return gitlabProject, nil
+}
+
+func (g *GitlabCommit) GetGitlabProjectUrlAsString() (projectUrl string, err error) {
+	project, err := g.GetGitlabProject()
+	if err != nil {
+		return "", err
+	}
+
+	projectUrl, err = project.GetProjectUrl()
+	if err != nil {
+		return "", err
+	}
+
+	return projectUrl, nil
 }
 
 func (g *GitlabCommit) GetGitlabProjectsCommits() (gitlabProjectsCommit *GitlabProjectCommits, err error) {
@@ -151,6 +167,87 @@ func (g *GitlabCommit) GetRawResponse() (rawResponse *gitlab.Commit, err error) 
 	return rawResponse, nil
 }
 
+func (g *GitlabCommit) IsMergeCommit(verbose bool) (isMergeCommit bool, err error) {
+	parentCommits, err := g.GetParentCommits(verbose)
+	if err != nil {
+		return false, err
+	}
+
+	isMergeCommit = len(parentCommits) > 1
+	if verbose {
+		projectUrl, err := g.GetGitlabProjectUrlAsString()
+		if err != nil {
+			return false, err
+		}
+
+		commitSha, err := g.GetCommitHash()
+		if err != nil {
+			return false, err
+		}
+
+		if isMergeCommit {
+			LogInfof(
+				"Commit '%s' of gitlab project %s is a merge commit",
+				projectUrl,
+				commitSha,
+			)
+		}
+	}
+
+	return isMergeCommit, nil
+}
+
+func (g *GitlabCommit) IsParentCommitOf(childCommit *GitlabCommit, verbose bool) (isParent bool, err error) {
+	if childCommit == nil {
+		return false, TracedErrorNil("childCommit")
+	}
+
+	parentHashes, err := childCommit.GetParentCommitHashesAsString(verbose)
+	if err != nil {
+		return false, err
+	}
+
+	hash, err := g.GetCommitHash()
+	if err != nil {
+		return false, err
+	}
+
+	isParent = Slices().ContainsStringIgnoreCase(
+		parentHashes,
+		hash,
+	)
+
+	if verbose {
+		projectUrl, err := g.GetGitlabProjectUrlAsString()
+		if err != nil {
+			return false, err
+		}
+
+		childHash, err := childCommit.GetCommitHash()
+		if err != nil {
+			return false, err
+		}
+
+		if isParent {
+			LogInfof(
+				"Commit '%s' is parent of '%s' in gitlab project %s .",
+				hash,
+				childHash,
+				projectUrl,
+			)
+		} else {
+			LogInfof(
+				"Commit '%s' is not parent of '%s' in gitlab project %s .",
+				hash,
+				childHash,
+				projectUrl,
+			)
+		}
+	}
+
+	return isParent, nil
+}
+
 func (g *GitlabCommit) MustGetCommitHash() (commitHash string) {
 	commitHash, err := g.GetCommitHash()
 	if err != nil {
@@ -176,6 +273,15 @@ func (g *GitlabCommit) MustGetGitlabProject() (gitlabProject *GitlabProject) {
 	}
 
 	return gitlabProject
+}
+
+func (g *GitlabCommit) MustGetGitlabProjectUrlAsString() (projectUrl string) {
+	projectUrl, err := g.GetGitlabProjectUrlAsString()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return projectUrl
 }
 
 func (g *GitlabCommit) MustGetGitlabProjectsCommits() (gitlabProjectsCommit *GitlabProjectCommits) {
@@ -230,6 +336,24 @@ func (g *GitlabCommit) MustGetRawResponse() (rawResponse *gitlab.Commit) {
 	}
 
 	return rawResponse
+}
+
+func (g *GitlabCommit) MustIsMergeCommit(verbose bool) (isMergeCommit bool) {
+	isMergeCommit, err := g.IsMergeCommit(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isMergeCommit
+}
+
+func (g *GitlabCommit) MustIsParentCommitOf(childCommit *GitlabCommit, verbose bool) (isParent bool) {
+	isParent, err := g.IsParentCommitOf(childCommit, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isParent
 }
 
 func (g *GitlabCommit) MustSetCommitHash(commitHash string) {
