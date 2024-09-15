@@ -584,6 +584,15 @@ func (f *FileBase) MustReadAsFloat64() (content float64) {
 	return content
 }
 
+func (f *FileBase) MustReadAsInt() (readValue int) {
+	readValue, err := f.ReadAsInt()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return readValue
+}
+
 func (f *FileBase) MustReadAsInt64() (readValue int64) {
 	readValue, err := f.ReadAsInt64()
 	if err != nil {
@@ -745,6 +754,36 @@ func (f *FileBase) ReadAsFloat64() (content float64, err error) {
 	}
 
 	return content, nil
+}
+
+func (f *FileBase) ReadAsInt() (readValue int, err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return 0, err
+	}
+
+	contentString, err := parent.ReadAsString()
+	if err != nil {
+		return 0, err
+	}
+
+	localPath, err := parent.GetLocalPath()
+	if err != nil {
+		return 0, err
+	}
+
+	contentString = strings.TrimSpace(contentString)
+
+	readValue, err = strconv.Atoi(contentString)
+	if err != nil {
+		return 0, TracedErrorf(
+			"Unable to parse file '%s' as int: '%w'",
+			localPath,
+			err,
+		)
+	}
+
+	return readValue, nil
 }
 
 func (f *FileBase) ReadAsInt64() (readValue int64, err error) {
