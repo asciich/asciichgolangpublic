@@ -20,6 +20,28 @@ func NewFileBase() (f *FileBase) {
 	return new(FileBase)
 }
 
+func (f *FileBase) AppendLine(line string, verbose bool) (err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	toWrite := Strings().TrimAllLeadingAndTailingNewLines(line)
+	toWrite = Strings().EnsureEndsWithExactlyOneLineBreak(toWrite)
+
+	err = parent.EnsureEndsWithLineBreak(verbose)
+	if err != nil {
+		return err
+	}
+
+	err = parent.AppendString(toWrite, verbose)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (f *FileBase) EnsureEndsWithLineBreak(verbose bool) (err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
@@ -72,6 +94,37 @@ func (f *FileBase) EnsureEndsWithLineBreak(verbose bool) (err error) {
 		if verbose {
 			LogChangedf("Added line break at end of '%s'.", filePath)
 		}
+	}
+
+	return nil
+}
+
+func (f *FileBase) EnsureLineInFile(line string, verbose bool) (err error) {
+	line = Strings().TrimAllLeadingAndTailingNewLines(line)
+
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	lines, err := parent.ReadAsLines()
+	if err != nil {
+		return err
+	}
+
+	localPath, err := parent.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	if Slices().ContainsString(lines, line) {
+		LogInfof("Line '%s' already present in '%s'.", line, localPath)
+	} else {
+		err := parent.AppendLine(line, verbose)
+		if err != nil {
+			return err
+		}
+		LogChangedf("Wrote line '%s' into '%s'.", line, localPath)
 	}
 
 	return nil
@@ -384,8 +437,22 @@ func (f *FileBase) IsYYYYmmdd_HHMMSSPrefix() (hasDatePrefix bool, err error) {
 	return true, nil
 }
 
+func (f *FileBase) MustAppendLine(line string, verbose bool) {
+	err := f.AppendLine(line, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (f *FileBase) MustEnsureEndsWithLineBreak(verbose bool) {
 	err := f.EnsureEndsWithLineBreak(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (f *FileBase) MustEnsureLineInFile(line string, verbose bool) {
+	err := f.EnsureLineInFile(line, verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

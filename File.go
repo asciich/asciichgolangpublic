@@ -41,6 +41,8 @@ type File interface {
 	WriteBytes(toWrite []byte, verbose bool) (err error)
 
 	// All methods below this line can be implemented by embedding the `FileBase` struct:
+	AppendLine(line string, verbose bool) (err error)
+	EnsureLineInFile(line string, verbose bool) (err error)
 	EnsureEndsWithLineBreak(verbose bool) (err error)
 	GetCreationDateByFileName(verbose bool) (creationDate *time.Time, err error)
 	GetFileTypeDescription(verbose bool) (fileTypeDescription string, err error)
@@ -53,7 +55,9 @@ type File interface {
 	IsMatchingSha256Sum(sha256sum string) (isMatching bool, err error)
 	IsPgpEncrypted(verbose bool) (isPgpEncrypted bool, err error)
 	IsYYYYmmdd_HHMMSSPrefix() (hasDatePrefix bool, err error)
+	MustAppendLine(line string, verbose bool)
 	MustEnsureEndsWithLineBreak(verbose bool)
+	MustEnsureLineInFile(line string, verbose bool)
 	MustGetCreationDateByFileName(verbose bool) (creationDate *time.Time)
 	MustGetFileTypeDescription(verbose bool) (fileTypeDescription string)
 	MustGetMimeType(verbose bool) (mimeType string)

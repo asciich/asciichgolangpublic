@@ -562,3 +562,30 @@ func TestStringsContainsIgnoreCase(t *testing.T) {
 		)
 	}
 }
+
+func TestStringsTrimAllLeadingAndTailingNewLines(t *testing.T) {
+	tests := []struct {
+		input          string
+		expectedOutput string
+	}{
+		{"", ""},
+		{"testcase", "testcase"},
+		{"testcase\n", "testcase"},
+		{"\ntestcase", "testcase"},
+		{"\ntestcase\n", "testcase"},
+		{"\ntestcase\n\n", "testcase"},
+		{"\n\ntestcase\n\n", "testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				output := Strings().TrimAllLeadingAndTailingNewLines(tt.input)
+				assert.EqualValues(tt.expectedOutput, output)
+			},
+		)
+	}
+}

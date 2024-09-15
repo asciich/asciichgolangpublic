@@ -16,6 +16,20 @@ func Strings() (stringsService *StringsService) {
 	return new(StringsService)
 }
 
+func (s *StringsService) TrimAllLeadingNewLines(input string) (output string) {
+	return s.TrimAllPrefix(input, "\n")
+}
+
+func (s *StringsService) TrimAllTailingNewLines(input string) (output string) {
+	return s.TrimAllSuffix(input, "\n")
+}
+
+func (s *StringsService) TrimAllLeadingAndTailingNewLines(input string) (output string) {
+	output = s.TrimAllLeadingNewLines(input)
+	output = s.TrimAllTailingNewLines(output)
+	return output
+}
+
 func (s *StringsService) TrimPrefixAndSuffix(input string, prefix string, suffix string) (output string) {
 	output = strings.TrimPrefix(input, prefix)
 	output = strings.TrimSuffix(output, suffix)
