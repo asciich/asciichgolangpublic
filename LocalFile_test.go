@@ -703,6 +703,39 @@ func TestFileGetAsInt64(t *testing.T) {
 	}
 }
 
+
+func TestFileGetAsInt(t *testing.T) {
+	tests := []struct {
+		content     string
+		expectedInt int
+	}{
+		{"0", 0},
+		{"1", 1},
+		{"1\n", 1},
+		{"10\n", 10},
+		{" 10\n", 10},
+		{" -110\n", -110},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+
+				testFile := TemporaryFiles().MustCreateFromString(tt.content, verbose)
+				defer testFile.Delete(verbose)
+
+				readInt64 := testFile.MustReadAsInt()
+
+				assert.EqualValues(tt.expectedInt, readInt64)
+			},
+		)
+	}
+}
+
 func TestFileGetParentDirectoryPath(t *testing.T) {
 	tests := []struct {
 		inputPath          string
