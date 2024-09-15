@@ -220,6 +220,17 @@ func (f *FileBase) GetMimeType(verbose bool) (mimeType string, err error) {
 	return mimeType, nil
 }
 
+func (f *FileBase) GetNumberOfLinesWithPrefix(prefix string) (nLines int, err error) {
+	contentString, err := f.ReadAsString()
+	if err != nil {
+		return -1, err
+	}
+
+	nLines = Strings().GetNumberOfLinesWithPrefix(contentString, prefix, false)
+
+	return nLines, nil
+}
+
 func (f *FileBase) GetParentDirectoryPath() (parentDirectoryPath string, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
@@ -483,6 +494,15 @@ func (f *FileBase) MustGetMimeType(verbose bool) (mimeType string) {
 	}
 
 	return mimeType
+}
+
+func (f *FileBase) MustGetNumberOfLinesWithPrefix(prefix string) (nLines int) {
+	nLines, err := f.GetNumberOfLinesWithPrefix(prefix)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return nLines
 }
 
 func (f *FileBase) MustGetParentDirectoryPath() (parentDirectoryPath string) {
