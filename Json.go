@@ -186,7 +186,16 @@ func (j *JsonService) RunJqAgainstJsonStringAsString(jsonString string, query st
 		if err, ok := v.(error); ok {
 			return "", TracedError(err.Error())
 		}
-		result += fmt.Sprintf("%#v\n", v)
+		switch v := v.(type) {
+		case int:
+			result += strconv.Itoa(v) + "\n"
+		case int64:
+			result += strconv.FormatInt(v, 10) + "\n"
+		case string:
+			result += v + "\n"
+		default:
+			result += fmt.Sprintf("%#v\n", v)
+		}
 	}
 
 	result = strings.TrimSpace(result)
