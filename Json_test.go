@@ -13,8 +13,10 @@ func TestJsonRunJqAgainstJsonStringAsString(t *testing.T) {
 		expectedResult string
 	}{
 		{"{\"a\": 15}", ".a", "15"},
+		{"{\"a\": 15, \"b\": 16}", ".", "{\n    \"a\": 15,\n    \"b\": 16\n}"},
 		{"{\"a\": 15, \"b\": 16}", ".a", "15"},
 		{"{\"a\": 15, \"b\": 16}", ".b", "16"},
+		{"{\"a\": 15, \"b\": 16}", "del(.b)", "{\n    \"a\": 15\n}"},
 		{"{\"a\": 15, \"hello\": \"world\"}", ".hello", "world"},
 		{"{\"a\": 15, \"b\": {\"c\": 13, \"d\": \"efg\"} }", ".b", "{\n    \"c\": 13,\n    \"d\": \"efg\"\n}"},
 	}
