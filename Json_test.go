@@ -3,7 +3,6 @@ package asciichgolangpublic
 import (
 	"testing"
 
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,6 +15,7 @@ func TestJsonRunJqAgainstJsonStringAsString(t *testing.T) {
 		{"{\"a\": 15}", ".a", "15"},
 		{"{\"a\": 15, \"b\": 16}", ".a", "15"},
 		{"{\"a\": 15, \"b\": 16}", ".b", "16"},
+		{"{\"a\": 15, \"hello\": \"world\"}", ".hello", "world"},
 	}
 
 	for _, tt := range tests {
