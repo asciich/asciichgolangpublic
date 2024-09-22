@@ -448,3 +448,29 @@ func TestDirectoryListFilesInDirectory(t *testing.T) {
 		)
 	}
 }
+
+func TestLocalDirectoryCreate(t *testing.T) {
+	tests := []struct {
+		subDirPath     []string
+	}{
+		{[]string{"a"}},
+		{[]string{"a", "b"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+				
+				tempDir := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
+				subDir := tempDir.MustGetSubDirectory(tt.subDirPath...)
+				assert.False(subDir.MustExists())
+				subDir.MustCreate(verbose)
+				assert.True(subDir.MustExists())
+			},
+		)
+	}
+}

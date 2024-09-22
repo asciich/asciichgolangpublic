@@ -123,6 +123,20 @@ func (l *LocalDirectory) CopyFileToTemporaryFileAsLocalFile(verbose bool, filePa
 	return copy, nil
 }
 
+func (l *LocalDirectory) GetParentDirectory() (parentDirectory *LocalDirectory, err error) {
+	parentPath, err := l.GetDirName()
+	if err != nil {
+		return nil, err
+	}
+
+	parentDirectory, err = GetLocalDirectoryByPath(parentPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return parentDirectory, err
+}
+
 func (l *LocalDirectory) Create(verbose bool) (err error) {
 	exists, err := l.Exists()
 	if err != nil {
@@ -141,7 +155,33 @@ func (l *LocalDirectory) Create(verbose bool) (err error) {
 	} else {
 		err = os.Mkdir(path, os.ModePerm)
 		if err != nil {
-			return TracedErrorf("Create directory '%s' failed: '%w'", path, err)
+			if strings.Contains(err.Error(), "no such file or directory") {
+				parentDirectoy, err := l.GetParentDirectory()
+				if err != nil {
+					return err
+				}
+
+				err = parentDirectoy.Create(verbose)
+				if err != nil {
+					return err
+				}
+
+				err = os.Mkdir(path, os.ModePerm)
+				if err != nil {
+					return err
+				}
+			} else {
+				return err
+			}
+		}
+
+		existsAfterCreate, err := l.Exists()
+		if err != nil {
+			return err
+		}
+
+		if !existsAfterCreate {
+			return TracedErrorf("Local directory '%s' does not exist after creation.", path)
 		}
 
 		if verbose {
