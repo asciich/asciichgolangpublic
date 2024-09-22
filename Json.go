@@ -157,6 +157,26 @@ func (j *JsonService) RunJqAgainstJsonStringAsInt(jsonString string, query strin
 	return result, nil
 }
 
+func (j *JsonService) DataToJsonBytes(data interface{}) (jsonBytes []byte, err error) {
+	jsonBytes, err = json.MarshalIndent(data, "", "    ")
+	if err != nil {
+		return nil, TracedErrorf("Marshal as json failed: '%w', data='%v'", err, data)
+	}
+
+	return jsonBytes, nil
+}
+
+func (j *JsonService) DataToJsonString(data interface{}) (jsonString string, err error) {
+	jsonBytes, err := j.DataToJsonBytes(data)
+	if err != nil {
+		return "", err
+	}
+
+	jsonString = string(jsonBytes)
+
+	return jsonString, nil
+}
+
 func (j *JsonService) RunJqAgainstJsonStringAsString(jsonString string, query string) (result string, err error) {
 	if len(jsonString) <= 0 {
 		return "", TracedError("json is empty string")
@@ -193,6 +213,13 @@ func (j *JsonService) RunJqAgainstJsonStringAsString(jsonString string, query st
 			result += strconv.FormatInt(v, 10) + "\n"
 		case string:
 			result += v + "\n"
+		case map[string]interface{}:
+			toAdd, err := Json().DataToJsonString(v)
+			if err != nil {
+				return "", TracedErrorf("Failed to marshal map[string]interface{}")
+			}
+
+			result += toAdd + "\n"
 		default:
 			result += fmt.Sprintf("%#v\n", v)
 		}
