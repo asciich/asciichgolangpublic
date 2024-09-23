@@ -58,3 +58,61 @@ func TestJsonLoadKeyValueDict(t *testing.T) {
 		)
 	}
 }
+
+func TestJsonStringToYamlString(t *testing.T) {
+	tests := []struct {
+		jsonString     string
+		expectedResult string
+	}{
+		{"{\"a\": 15}", "---\na: 15\n"},
+		{"{\"a\": 15, \"hello\": \"world\"}", "---\na: 15\nhello: world\n"},
+		{"{\"a\": 15, \"b\" : {\"hello\": \"world\"} }", "---\na: 15\nb:\n    hello: world\n"},
+		{"[1,2,3]", "---\n- 1\n- 2\n- 3\n"},
+		{"{\"a\": [1,2,3]}", "---\na:\n    - 1\n    - 2\n    - 3\n"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				result := Json().MustJsonStringToYamlString(tt.jsonString)
+
+				assert.EqualValues(tt.expectedResult, result)
+			},
+		)
+	}
+}
+
+
+func TestJsonStringToYamlFileByPath(t *testing.T) {
+	tests := []struct {
+		jsonString     string
+		expectedResult string
+	}{
+		{"{\"a\": 15}", "---\na: 15\n"},
+		{"{\"a\": 15, \"hello\": \"world\"}", "---\na: 15\nhello: world\n"},
+		{"{\"a\": 15, \"b\" : {\"hello\": \"world\"} }", "---\na: 15\nb:\n    hello: world\n"},
+		{"[1,2,3]", "---\n- 1\n- 2\n- 3\n"},
+		{"{\"a\": [1,2,3]}", "---\na:\n    - 1\n    - 2\n    - 3\n"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				emptyFile := TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)
+				defer emptyFile.MustDelete(verbose)
+
+				createdFile := Json().MustJsonStringToYamlFileByPath(tt.jsonString, emptyFile.MustGetLocalPath(), verbose)
+
+				assert.EqualValues(tt.expectedResult, createdFile.MustReadAsString())
+			},
+		)
+	}
+}

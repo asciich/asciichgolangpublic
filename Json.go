@@ -20,6 +20,76 @@ func NewJsonService() (jsonService *JsonService) {
 	return new(JsonService)
 }
 
+func (j *JsonService) DataToJsonBytes(data interface{}) (jsonBytes []byte, err error) {
+	jsonBytes, err = json.MarshalIndent(data, "", "    ")
+	if err != nil {
+		return nil, TracedErrorf("Marshal as json failed: '%w', data='%v'", err, data)
+	}
+
+	return jsonBytes, nil
+}
+
+func (j *JsonService) DataToJsonString(data interface{}) (jsonString string, err error) {
+	jsonBytes, err := j.DataToJsonBytes(data)
+	if err != nil {
+		return "", err
+	}
+
+	jsonString = string(jsonBytes)
+
+	return jsonString, nil
+}
+
+func (j *JsonService) JsonStringToYamlFile(jsonString string, outputFile File, verbose bool) (err error) {
+	if outputFile == nil {
+		return TracedErrorNil("outputFile")
+	}
+
+	jsonData, err := j.ParseJsonString(jsonString)
+	if err != nil {
+		return err
+	}
+
+	err = Yaml().DataToYamlFile(jsonData, outputFile, verbose)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (j *JsonService) JsonStringToYamlFileByPath(jsonString string, outputFilePath string, verbose bool) (outputFile File, err error) {
+	if outputFilePath == "" {
+		return nil, TracedErrorEmptyString("outputFilePath")
+	}
+
+	outputFile, err = GetLocalFileByPath(outputFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	err = j.JsonStringToYamlFile(jsonString, outputFile, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return outputFile, nil
+}
+
+func (j *JsonService) JsonStringToYamlString(jsonString string) (yamlString string, err error) {
+	jsonData, err := j.ParseJsonString(jsonString)
+	if err != nil {
+		return "", err
+	}
+
+	yamlString, err = Yaml().DataToYamlString(jsonData)
+	if err != nil {
+		return "", err
+	}
+
+	return yamlString, nil
+}
+
 func (j *JsonService) LoadKeyValueInterfaceDictFromJsonFile(jsonFile File) (keyValues map[string]interface{}, err error) {
 	if jsonFile == nil {
 		return nil, TracedError("jsonFile is nil")
@@ -68,6 +138,49 @@ func (j *JsonService) LoadKeyValueStringDictFromJsonString(jsonString string) (k
 	}
 
 	return keyValues, nil
+}
+
+func (j *JsonService) MustDataToJsonBytes(data interface{}) (jsonBytes []byte) {
+	jsonBytes, err := j.DataToJsonBytes(data)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return jsonBytes
+}
+
+func (j *JsonService) MustDataToJsonString(data interface{}) (jsonString string) {
+	jsonString, err := j.DataToJsonString(data)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return jsonString
+}
+
+func (j *JsonService) MustJsonStringToYamlFile(jsonString string, outputFile File, verbose bool) {
+	err := j.JsonStringToYamlFile(jsonString, outputFile, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (j *JsonService) MustJsonStringToYamlFileByPath(jsonString string, outputFilePath string, verbose bool) (outputFile File) {
+	outputFile, err := j.JsonStringToYamlFileByPath(jsonString, outputFilePath, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return outputFile
+}
+
+func (j *JsonService) MustJsonStringToYamlString(jsonString string) (yamlString string) {
+	yamlString, err := j.JsonStringToYamlString(jsonString)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return yamlString
 }
 
 func (j *JsonService) MustLoadKeyValueInterfaceDictFromJsonFile(jsonFile File) (keyValues map[string]interface{}) {
@@ -155,26 +268,6 @@ func (j *JsonService) RunJqAgainstJsonStringAsInt(jsonString string, query strin
 	}
 
 	return result, nil
-}
-
-func (j *JsonService) DataToJsonBytes(data interface{}) (jsonBytes []byte, err error) {
-	jsonBytes, err = json.MarshalIndent(data, "", "    ")
-	if err != nil {
-		return nil, TracedErrorf("Marshal as json failed: '%w', data='%v'", err, data)
-	}
-
-	return jsonBytes, nil
-}
-
-func (j *JsonService) DataToJsonString(data interface{}) (jsonString string, err error) {
-	jsonBytes, err := j.DataToJsonBytes(data)
-	if err != nil {
-		return "", err
-	}
-
-	jsonString = string(jsonBytes)
-
-	return jsonString, nil
 }
 
 func (j *JsonService) RunJqAgainstJsonStringAsString(jsonString string, query string) (result string, err error) {
