@@ -19,6 +19,7 @@ func TestJsonRunJqAgainstJsonStringAsString(t *testing.T) {
 		{"{\"a\": 15, \"b\": 16}", "del(.b)", "{\n    \"a\": 15\n}"},
 		{"{\"a\": 15, \"hello\": \"world\"}", ".hello", "world"},
 		{"{\"a\": 15, \"b\": {\"c\": 13, \"d\": \"efg\"} }", ".b", "{\n    \"c\": 13,\n    \"d\": \"efg\"\n}"},
+		{"{\"a\": 15, \"b\": [\"c\", \"d\", \"efg\"] }", ".b", "[\n    \"c\",\n    \"d\",\n    \"efg\"\n]"},
 	}
 
 	for _, tt := range tests {

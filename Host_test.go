@@ -52,8 +52,6 @@ func TestHostGetHostname(t *testing.T) {
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				const verbose = true
-
 				host := MustGetHostByHostname(tt.hostname)
 				assert.EqualValues(
 					tt.hostname,
