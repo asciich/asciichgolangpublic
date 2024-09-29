@@ -313,6 +313,13 @@ func (j *JsonService) RunJqAgainstJsonStringAsString(jsonString string, query st
 			}
 
 			result += toAdd + "\n"
+		case []interface{}:
+			toAdd, err := Json().DataToJsonString(v)
+			if err != nil {
+				return "", TracedErrorf("Failed to marshal []interface{}")
+			}
+
+			result += toAdd + "\n"
 		default:
 			result += fmt.Sprintf("%#v\n", v)
 		}
