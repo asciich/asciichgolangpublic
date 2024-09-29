@@ -60,6 +60,30 @@ func TestJsonLoadKeyValueDict(t *testing.T) {
 	}
 }
 
+func TestJsonPrettyFormatJsonString(t *testing.T) {
+	tests := []struct {
+		jsonString     string
+		expectedResult string
+	}{
+		{"{}", "{}\n"},
+		{"{\"a\": 15}", "{\n    \"a\": 15\n}\n"},
+		{"{\"a\": 15, \"hello\": \"world\"}", "{\n    \"a\": 15,\n    \"hello\": \"world\"\n}\n"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				result := Json().MustPrettyFormatJsonString(tt.jsonString)
+
+				assert.EqualValues(tt.expectedResult, result)
+			},
+		)
+	}
+}
+
 func TestJsonStringToYamlString(t *testing.T) {
 	tests := []struct {
 		jsonString     string
@@ -85,7 +109,6 @@ func TestJsonStringToYamlString(t *testing.T) {
 		)
 	}
 }
-
 
 func TestJsonStringToYamlFileByPath(t *testing.T) {
 	tests := []struct {

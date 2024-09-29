@@ -219,6 +219,15 @@ func (j *JsonService) MustParseJsonString(jsonString string) (data interface{}) 
 	return data
 }
 
+func (j *JsonService) MustPrettyFormatJsonString(jsonString string) (formatted string) {
+	formatted, err := j.PrettyFormatJsonString(jsonString)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return formatted
+}
+
 func (j *JsonService) MustRunJqAgainstJsonStringAsInt(jsonString string, query string) (result int) {
 	result, err := j.RunJqAgainstJsonStringAsInt(jsonString, query)
 	if err != nil {
@@ -244,6 +253,22 @@ func (j *JsonService) ParseJsonString(jsonString string) (data interface{}, err 
 	}
 
 	return data, err
+}
+
+func (j *JsonService) PrettyFormatJsonString(jsonString string) (formatted string, err error) {
+	data, err := j.ParseJsonString(jsonString)
+	if err != nil {
+		return "", err
+	}
+
+	formatted, err = j.DataToJsonString(data)
+	if err != nil {
+		return "", err
+	}
+
+	formatted = Strings().EnsureEndsWithExactlyOneLineBreak(formatted)
+
+	return formatted, nil
 }
 
 func (j *JsonService) RunJqAgainstJsonStringAsInt(jsonString string, query string) (result int, err error) {
