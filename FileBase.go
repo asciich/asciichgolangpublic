@@ -231,6 +231,27 @@ func (f *FileBase) GetNumberOfLinesWithPrefix(prefix string) (nLines int, err er
 	return nLines, nil
 }
 
+func (f *FileBase) GetNumberOfNonEmptyLines() (nLines int, err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return -1, err
+	}
+
+	lines, err := parent.ReadAsLines()
+	if err != nil {
+		return -1, err
+	}
+
+	nLines = 0
+	for _, l := range lines {
+		if l != "" {
+			nLines += 1
+		}
+	}
+
+	return nLines, nil
+}
+
 func (f *FileBase) GetParentDirectoryPath() (parentDirectoryPath string, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
@@ -498,6 +519,15 @@ func (f *FileBase) MustGetMimeType(verbose bool) (mimeType string) {
 
 func (f *FileBase) MustGetNumberOfLinesWithPrefix(prefix string) (nLines int) {
 	nLines, err := f.GetNumberOfLinesWithPrefix(prefix)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return nLines
+}
+
+func (f *FileBase) MustGetNumberOfNonEmptyLines() (nLines int) {
+	nLines, err := f.GetNumberOfNonEmptyLines()
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
