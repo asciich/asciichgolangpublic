@@ -703,7 +703,6 @@ func TestFileGetAsInt64(t *testing.T) {
 	}
 }
 
-
 func TestFileGetAsInt(t *testing.T) {
 	tests := []struct {
 		content     string
@@ -1192,6 +1191,34 @@ func TestFileEnsureLineInFile(t *testing.T) {
 					testContent+"abc\n",
 					tempFile.MustReadAsString(),
 				)
+			},
+		)
+	}
+}
+
+func TestLocalFileGetNumberOfNonEmptyLines(t *testing.T) {
+	tests := []struct {
+		content               string
+		expectedNonEmptyLines int
+	}{
+		{"", 0},
+		{"testcase", 1},
+		{"testcase\n", 1},
+		{"testcase\n\n", 1},
+		{"testcase\n\na", 2},
+	}
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				localFile := TemporaryFiles().MustCreateFromString(tt.content, verbose)
+				assert.EqualValues(
+					tt.expectedNonEmptyLines,
+					localFile.MustGetNumberOfNonEmptyLines())
 			},
 		)
 	}
