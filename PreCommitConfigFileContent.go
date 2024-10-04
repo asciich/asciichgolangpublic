@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var ErrorPreCommitConfigFileContentLoad = errors.New("Failed to load preCommitConfigFileContent")
+var ErrorPreCommitConfigFileContentLoad = errors.New("failed to load preCommitConfigFileContent")
 
 type PreCommitConfigFileContent struct {
 	config *PreCommitConfigFileConfig
