@@ -1,7 +1,9 @@
 package asciichgolangpublic
 
 import (
+	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -451,7 +453,7 @@ func TestDirectoryListFilesInDirectory(t *testing.T) {
 
 func TestLocalDirectoryCreate(t *testing.T) {
 	tests := []struct {
-		subDirPath     []string
+		subDirPath []string
 	}{
 		{[]string{"a"}},
 		{[]string{"a", "b"}},
@@ -464,12 +466,121 @@ func TestLocalDirectoryCreate(t *testing.T) {
 				assert := assert.New(t)
 
 				const verbose = true
-				
+
 				tempDir := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
 				subDir := tempDir.MustGetSubDirectory(tt.subDirPath...)
 				assert.False(subDir.MustExists())
 				subDir.MustCreate(verbose)
 				assert.True(subDir.MustExists())
+			},
+		)
+	}
+}
+
+// Test if GetPath always returns an absolute value which stays the same even if the current working directory is changed.
+func TestDirectoryGetPathReturnsAbsoluteValue(t *testing.T) {
+	tests := []struct {
+		path string
+	}{
+		{"."},
+		{".."},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				startPath, err := os.Getwd()
+				if err != nil {
+					t.Fatalf("%v", err)
+				}
+
+				var path1 string
+				var path2 string
+
+				var waitGroup sync.WaitGroup
+
+				testFunction := func() {
+					defer os.Chdir(startPath)
+					defer waitGroup.Done()
+
+					directory := MustGetLocalDirectoryByPath(tt.path)
+					path1 = directory.MustGetLocalPath()
+					os.Chdir("..")
+					path2 = directory.MustGetLocalPath()
+				}
+
+				waitGroup.Add(1)
+				go testFunction()
+				waitGroup.Wait()
+
+				assert.True(Paths().IsAbsolutePath(path1))
+				assert.True(Paths().IsAbsolutePath(path2))
+
+				assert.EqualValues(path1, path2)
+
+				currentPath, err := os.Getwd()
+				if err != nil {
+					t.Fatalf("%v", err)
+				}
+
+				assert.EqualValues(startPath, currentPath)
+			},
+		)
+	}
+}
+
+func TestDirectoryGetSubDirectoryList(t *testing.T) {
+	tests := []struct {
+		directoryNames []string
+		listOptions    ListDirectoryOptions
+		expectedPaths  []string
+	}{
+		{[]string{"a", "b"}, ListDirectoryOptions{ReturnRelativePaths: true}, []string{"a", "b"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+				tt.listOptions.Verbose = verbose
+
+				temporaryDirectory := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
+
+				for _, toCreate := range tt.directoryNames {
+					temporaryDirectory.MustCreateSubDirectory(toCreate, verbose)
+				}
+				listedDirectories := temporaryDirectory.MustGetSubDirectoryPaths(&tt.listOptions)
+				assert.EqualValues(tt.expectedPaths, listedDirectories)
+			},
+		)
+	}
+}
+
+func TestDirectoryIsEmptyDirectory(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+
+				temporaryDirectory := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
+				defer temporaryDirectory.Delete(verbose)
+
+				assert.True(temporaryDirectory.MustIsEmptyDirectory(verbose))
 			},
 		)
 	}
