@@ -123,20 +123,6 @@ func (l *LocalDirectory) CopyFileToTemporaryFileAsLocalFile(verbose bool, filePa
 	return copy, nil
 }
 
-func (l *LocalDirectory) GetParentDirectory() (parentDirectory *LocalDirectory, err error) {
-	parentPath, err := l.GetDirName()
-	if err != nil {
-		return nil, err
-	}
-
-	parentDirectory, err = GetLocalDirectoryByPath(parentPath)
-	if err != nil {
-		return nil, err
-	}
-
-	return parentDirectory, err
-}
-
 func (l *LocalDirectory) Create(verbose bool) (err error) {
 	exists, err := l.Exists()
 	if err != nil {
@@ -564,6 +550,20 @@ func (l *LocalDirectory) GetLocalPath() (localPath string, err error) {
 	return l.localPath, nil
 }
 
+func (l *LocalDirectory) GetParentDirectory() (parentDirectory *LocalDirectory, err error) {
+	parentPath, err := l.GetDirName()
+	if err != nil {
+		return nil, err
+	}
+
+	parentDirectory, err = GetLocalDirectoryByPath(parentPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return parentDirectory, err
+}
+
 func (l *LocalDirectory) GetSubDirectories(listDirectoryOptions *ListDirectoryOptions) (subDirectories []Directory, err error) {
 	if listDirectoryOptions == nil {
 		return nil, TracedErrorNil("listDirectoryOptions")
@@ -704,6 +704,37 @@ func (l *LocalDirectory) GetSubDirectoryPaths(listOptions *ListDirectoryOptions)
 	}
 
 	return paths, err
+}
+
+func (l *LocalDirectory) IsEmptyDirectory(verbose bool) (isEmpty bool, err error) {
+	subDirs, err := l.GetSubDirectories(
+		&ListDirectoryOptions{
+			Verbose: verbose,
+		},
+	)
+	if err != nil {
+		return false, err
+	}
+
+	if len(subDirs) > 0 {
+		return false, nil
+	}
+
+	files, err := l.GetFilesInDirectory(
+		&ListFileOptions{
+			Verbose:                       verbose,
+			AllowEmptyListIfNoFileIsFound: true,
+		},
+	)
+	if err != nil {
+		return false, err
+	}
+
+	if len(files) > 0 {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func (l *LocalDirectory) IsLocalDirectory() (isLocalDirectory bool) {
@@ -866,6 +897,15 @@ func (l *LocalDirectory) MustGetLocalPath() (localPath string) {
 	return localPath
 }
 
+func (l *LocalDirectory) MustGetParentDirectory() (parentDirectory *LocalDirectory) {
+	parentDirectory, err := l.GetParentDirectory()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return parentDirectory
+}
+
 func (l *LocalDirectory) MustGetSubDirectories(listDirectoryOptions *ListDirectoryOptions) (subDirectories []Directory) {
 	subDirectories, err := l.GetSubDirectories(listDirectoryOptions)
 	if err != nil {
@@ -909,6 +949,15 @@ func (l *LocalDirectory) MustGetSubDirectoryPaths(listOptions *ListDirectoryOpti
 	}
 
 	return paths
+}
+
+func (l *LocalDirectory) MustIsEmptyDirectory(verbose bool) (isEmpty bool) {
+	isEmpty, err := l.IsEmptyDirectory(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isEmpty
 }
 
 func (l *LocalDirectory) MustReplaceBetweenMarkers(verbose bool) {
