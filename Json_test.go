@@ -140,3 +140,74 @@ func TestJsonStringToYamlFileByPath(t *testing.T) {
 		)
 	}
 }
+
+func TestJsonStringHas(t *testing.T) {
+	tests := []struct {
+		jsonString     string
+		query          string
+		keyToCheck     string
+		expectedResult bool
+	}{
+		{"{\"a\": 15}", ".", "a", true},
+		{"{\"a\": 15}", ".", "b", false},
+		{"{\"b\": 15}", ".", "a", false},
+		{"{\"b\": 15}", ".", "b", true},
+		{"{\"b\": { \"c\": 123 }}", ".", "a", false},
+		{"{\"b\": { \"c\": 123 }}", ".", "b", true},
+		{"{\"b\": { \"c\": 123 }}", ".b", "a", false},
+		{"{\"b\": { \"c\": 123 }}", ".b", "b", false},
+		{"{\"b\": { \"c\": 123 }}", ".b", "c", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(
+					tt.expectedResult,
+					Json().MustJsonStringHas(tt.jsonString, tt.query, tt.keyToCheck),
+				)
+			},
+		)
+	}
+}
+
+func TestJsonFileHas(t *testing.T) {
+	tests := []struct {
+		jsonString     string
+		query          string
+		keyToCheck     string
+		expectedResult bool
+	}{
+		{"{\"a\": 15}", ".", "a", true},
+		{"{\"a\": 15}", ".", "b", false},
+		{"{\"b\": 15}", ".", "a", false},
+		{"{\"b\": 15}", ".", "b", true},
+		{"{\"b\": { \"c\": 123 }}", ".", "a", false},
+		{"{\"b\": { \"c\": 123 }}", ".", "b", true},
+		{"{\"b\": { \"c\": 123 }}", ".b", "a", false},
+		{"{\"b\": { \"c\": 123 }}", ".b", "b", false},
+		{"{\"b\": { \"c\": 123 }}", ".b", "c", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				tempFile := TemporaryFiles().MustCreateFromString(tt.jsonString, verbose)
+				defer tempFile.Delete(verbose)
+
+				assert.EqualValues(
+					tt.expectedResult,
+					Json().MustJsonFileByPathHas(tempFile.MustGetLocalPath(), tt.query, tt.keyToCheck),
+				)
+			},
+		)
+	}
+}
