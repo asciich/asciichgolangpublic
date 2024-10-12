@@ -679,6 +679,15 @@ func (f *FileBase) MustReadAsString() (content string) {
 	return content
 }
 
+func (f *FileBase) MustReadAsTimeTime() (date *time.Time) {
+	date, err := f.ReadAsTimeTime()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return date
+}
+
 func (f *FileBase) MustReadFirstLine() (firstLine string) {
 	firstLine, err := f.ReadFirstLine()
 	if err != nil {
@@ -901,6 +910,20 @@ func (f *FileBase) ReadAsString() (content string, err error) {
 	}
 
 	return string(contentBytes), nil
+}
+
+func (f *FileBase) ReadAsTimeTime() (date *time.Time, err error) {
+	contentString, err := f.ReadAsString()
+	if err != nil {
+		return nil, err
+	}
+
+	date, err = Dates().ParseString(contentString)
+	if err != nil {
+		return nil, err
+	}
+
+	return date, nil
 }
 
 func (f *FileBase) ReadFirstLine() (firstLine string, err error) {
