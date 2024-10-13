@@ -990,7 +990,7 @@ func (g *GitlabBranch) SyncFilesToBranchUsingMergeRequest(options *GitlabSyncBra
 
 		syncBranch, err := branches.CreateBranch(
 			&GitlabCreateBranchOptions{
-				SourceBranchName:    sourceBranchName,
+				SourceBranchName:    targetBranchName,
 				BranchName:          syncBranchName,
 				Verbose:             options.Verbose,
 				FailIfAlreadyExists: true,
