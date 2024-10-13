@@ -18,6 +18,31 @@ func NewGitlabRepositoryFile() (g *GitlabRepositoryFile) {
 	return new(GitlabRepositoryFile)
 }
 
+func (g *GitlabRepositoryFile) GetSha256CheckSum() (checkSum string, err error) {
+	rawResponse, err := g.GetNativeRepositoryFile()
+	if err != nil {
+		return "", err
+	}
+
+	filePath, err := g.GetPath()
+	if err != nil {
+		return "", err
+	}
+
+	branchName, err := g.GetBranchName()
+	if err != nil {
+		return "", err
+	}
+
+	checkSum = rawResponse.SHA256
+
+	if checkSum == "" {
+		return "", TracedErrorf("SHA256 checksum is empty string after evalutaion for repository file '%s' in branch '%s'.", filePath, branchName)
+	}
+
+	return checkSum, nil
+}
+
 func (g *GitlabRepositoryFile) Delete(commitMessage string, verbose bool) (err error) {
 	if commitMessage == "" {
 		return TracedErrorEmptyString("commitMessage")
@@ -119,15 +144,30 @@ func (g *GitlabRepositoryFile) GetBranchName() (branchName string, err error) {
 	return g.BranchName, nil
 }
 
-func (g *GitlabRepositoryFile) GetContentAsBytes(verbose bool) (content []byte, err error) {
+func (g *GitlabRepositoryFile) GetContentAsBytesAndCommitHash(verbose bool) (content []byte, sha256sum string, err error) {
 	nativeRepoFile, err := g.GetNativeRepositoryFile()
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	contentBase64 := nativeRepoFile.Content
 
 	content, err = Base64().DecodeStringAsBytes(contentBase64)
+	if err != nil {
+		return nil, "", err
+	}
+
+	sha256sum = nativeRepoFile.SHA256
+
+	if sha256sum == "" {
+		return nil, "", TracedError("sha256sum is empty string after evaluation.")
+	}
+
+	return content, sha256sum, nil
+}
+
+func (g *GitlabRepositoryFile) GetContentAsBytes(verbose bool) (content []byte, err error) {
+	content, _, err = g.GetContentAsBytesAndCommitHash(verbose)
 	if err != nil {
 		return nil, err
 	}

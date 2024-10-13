@@ -13,6 +13,18 @@ type GitlabInstance struct {
 	currentlyUsedAccessToken *string
 }
 
+func (g *GitlabInstance) GetDeepCopy() (copy *GitlabInstance) {
+	copy = NewGitlab()
+
+	*copy = *g
+
+	if g.currentlyUsedAccessToken != nil {
+		copy.currentlyUsedAccessToken = g.currentlyUsedAccessToken
+	}
+
+	return copy
+}
+
 func GetGitlabByFQDN(fqdn string) (gitlab *GitlabInstance, err error) {
 	if len(fqdn) <= 0 {
 		return nil, TracedError("fqdn is empty string")
@@ -778,6 +790,7 @@ func (g *GitlabInstance) GetUserByUsername(username string) (gitlabUser *GitlabU
 	return gitlabUser, nil
 }
 
+// Returns the `userId` of the currently logged in user.
 func (g *GitlabInstance) GetUserId() (userId int, err error) {
 	users, err := g.GetGitlabUsers()
 	if err != nil {

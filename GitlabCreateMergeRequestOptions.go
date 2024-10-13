@@ -1,22 +1,36 @@
 package asciichgolangpublic
 
 type GitlabCreateMergeRequestOptions struct {
-	SourceBranchName string
-	TargetBranchName string
-	Title            string
-	Description      string
-	Labels           []string
-	Verbose          bool
+	SourceBranchName                string
+	TargetBranchName                string
+	Title                           string
+	Description                     string
+	Labels                          []string
+	SquashEnabled                   bool
+	DeleteSourceBranchOnMerge       bool
+	Verbose                         bool
+	FailIfMergeRequestAlreadyExists bool
+	AssignToSelf                    bool
 }
 
 func NewGitlabCreateMergeRequestOptions() (g *GitlabCreateMergeRequestOptions) {
 	return new(GitlabCreateMergeRequestOptions)
 }
 
+func (g *GitlabCreateMergeRequestOptions) GetAssignToSelf() (assignToSelf bool) {
+
+	return g.AssignToSelf
+}
+
 func (g *GitlabCreateMergeRequestOptions) GetDeepCopy() (copy *GitlabCreateMergeRequestOptions) {
 	copy = NewGitlabCreateMergeRequestOptions()
 	*copy = *g
 	return copy
+}
+
+func (g *GitlabCreateMergeRequestOptions) GetDeleteSourceBranchOnMerge() (deleteSourceBranchOnMerge bool) {
+
+	return g.DeleteSourceBranchOnMerge
 }
 
 func (g *GitlabCreateMergeRequestOptions) GetDescription() (description string, err error) {
@@ -29,6 +43,11 @@ func (g *GitlabCreateMergeRequestOptions) GetDescription() (description string, 
 
 func (g *GitlabCreateMergeRequestOptions) GetDescriptionOrEmptyStringIfUnset() (description string) {
 	return g.Description
+}
+
+func (g *GitlabCreateMergeRequestOptions) GetFailIfMergeRequestAlreadyExists() (failIfMergeRequestAlreadyExists bool) {
+
+	return g.FailIfMergeRequestAlreadyExists
 }
 
 func (g *GitlabCreateMergeRequestOptions) GetLabels() (labels []string, err error) {
@@ -59,6 +78,11 @@ func (g *GitlabCreateMergeRequestOptions) GetSourceBranchName() (sourceBranchNam
 	}
 
 	return g.SourceBranchName, nil
+}
+
+func (g *GitlabCreateMergeRequestOptions) GetSquashEnabled() (squashEnabled bool) {
+
+	return g.SquashEnabled
 }
 
 func (g *GitlabCreateMergeRequestOptions) GetTargetBranchName() (targetBranchName string, err error) {
@@ -166,6 +190,14 @@ func (g *GitlabCreateMergeRequestOptions) MustSetTitle(title string) {
 	}
 }
 
+func (g *GitlabCreateMergeRequestOptions) SetAssignToSelf(assignToSelf bool) {
+	g.AssignToSelf = assignToSelf
+}
+
+func (g *GitlabCreateMergeRequestOptions) SetDeleteSourceBranchOnMerge(deleteSourceBranchOnMerge bool) {
+	g.DeleteSourceBranchOnMerge = deleteSourceBranchOnMerge
+}
+
 func (g *GitlabCreateMergeRequestOptions) SetDescription(description string) (err error) {
 	if description == "" {
 		return TracedErrorf("description is empty string")
@@ -174,6 +206,10 @@ func (g *GitlabCreateMergeRequestOptions) SetDescription(description string) (er
 	g.Description = description
 
 	return nil
+}
+
+func (g *GitlabCreateMergeRequestOptions) SetFailIfMergeRequestAlreadyExists(failIfMergeRequestAlreadyExists bool) {
+	g.FailIfMergeRequestAlreadyExists = failIfMergeRequestAlreadyExists
 }
 
 func (g *GitlabCreateMergeRequestOptions) SetLabels(labels []string) (err error) {
@@ -198,6 +234,10 @@ func (g *GitlabCreateMergeRequestOptions) SetSourceBranchName(sourceBranchName s
 	g.SourceBranchName = sourceBranchName
 
 	return nil
+}
+
+func (g *GitlabCreateMergeRequestOptions) SetSquashEnabled(squashEnabled bool) {
+	g.SquashEnabled = squashEnabled
 }
 
 func (g *GitlabCreateMergeRequestOptions) SetTargetBranchName(targetBranchName string) (err error) {

@@ -22,6 +22,21 @@ func NewGitlabProjectMergeRequests() (g *GitlabProjectMergeRequests) {
 	return new(GitlabProjectMergeRequests)
 }
 
+// Returns the `userId` of the currently logged in user.
+func (g *GitlabProjectMergeRequests) GetUserId() (userId int, err error) {
+	gitlabInstance, err := g.GetGitlab()
+	if err != nil {
+		return -1, err
+	}
+
+	userId, err = gitlabInstance.GetUserId()
+	if err != nil {
+		return -1, err
+	}
+
+	return userId, nil
+}
+
 func (g *GitlabProjectMergeRequests) CreateMergeRequest(options *GitlabCreateMergeRequestOptions) (createdMergeRequest *GitlabMergeRequest, err error) {
 	if options == nil {
 		return nil, TracedErrorNil("options")
@@ -72,8 +87,20 @@ func (g *GitlabProjectMergeRequests) CreateMergeRequest(options *GitlabCreateMer
 		return nil, err
 	}
 
+	if createdMergeRequest != nil {
+		if options.GetFailIfMergeRequestAlreadyExists() {
+			return nil, TracedErrorf(
+				"Failed to create merge request: merge request with title '%s' already exists.",
+				title,
+			)
+		}
+	}
+
 	labels := options.GetLabelsOrEmptySliceIfUnset()
 	labelOptions := gitlab.LabelOptions(labels)
+
+	squashEnabled := options.GetSquashEnabled()
+	deleteSourceBranch := options.GetDeleteSourceBranchOnMerge()
 
 	if createdMergeRequest != nil {
 		url, err := createdMergeRequest.GetUrlAsString()
@@ -89,14 +116,28 @@ func (g *GitlabProjectMergeRequests) CreateMergeRequest(options *GitlabCreateMer
 			)
 		}
 	} else {
+		assigneIds := []int{}
+
+		if options.GetAssignToSelf() {
+			userId, err := g.GetUserId()
+			if err != nil {
+				return nil, err
+			}
+
+			assigneIds = append(assigneIds, userId)
+		}
+
 		nativeMergeRequest, _, err := nativeMergeRequests.CreateMergeRequest(
 			projectId,
 			&gitlab.CreateMergeRequestOptions{
-				Title:        &title,
-				Description:  &description,
-				TargetBranch: &targetBranch,
-				SourceBranch: &sourceBranch,
-				Labels:       &labelOptions,
+				Title:              &title,
+				Description:        &description,
+				TargetBranch:       &targetBranch,
+				SourceBranch:       &sourceBranch,
+				Labels:             &labelOptions,
+				Squash:             &squashEnabled,
+				RemoveSourceBranch: &deleteSourceBranch,
+				AssigneeIDs:        &assigneIds,
 			},
 		)
 		if err != nil {

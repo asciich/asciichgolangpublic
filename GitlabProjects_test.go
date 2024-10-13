@@ -65,7 +65,7 @@ func TestGitlabProjectsGetProjectIdAndPath(t *testing.T) {
 
 				const projectPath string = "test_group/testproject"
 
-				gitlabProject := gitlab.MustGetGitlabProjectByPath("test_group/testproject", verbose)
+				gitlabProject := gitlab.MustGetGitlabProjectByPath(projectPath, verbose)
 				assert.True(gitlabProject.MustExists(verbose))
 
 				projectId := gitlabProject.MustGetId()
