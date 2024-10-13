@@ -103,3 +103,11 @@ func (g *GitlabReadFileOptions) SetPath(path string) (err error) {
 func (g *GitlabReadFileOptions) SetVerbose(verbose bool) {
 	g.Verbose = verbose
 }
+
+func (g *GitlabReadFileOptions) GetDeepCopy() (deepCopy *GitlabReadFileOptions) {
+	deepCopy = NewGitlabReadFileOptions()
+
+	*deepCopy = *g
+
+	return deepCopy
+}

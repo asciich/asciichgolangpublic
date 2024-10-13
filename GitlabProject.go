@@ -405,6 +405,32 @@ func (g *GitlabProject) GetCurrentUserName(verbose bool) (userName string, err e
 	return userName, nil
 }
 
+func (g *GitlabProject) GetDeepCopy() (copy *GitlabProject) {
+	copy = NewGitlabProject()
+
+	*copy = *g
+
+	if g.gitlab != nil {
+		copy.gitlab = g.gitlab.GetDeepCopy()
+	}
+
+	return copy
+}
+
+func (g *GitlabProject) GetDefaultBranch() (defaultBranch *GitlabBranch, err error) {
+	defaultBranchName, err := g.GetDefaultBranchName()
+	if err != nil {
+		return nil, err
+	}
+
+	defaultBranch, err = g.GetBranchByName(defaultBranchName)
+	if err != nil {
+		return nil, err
+	}
+
+	return defaultBranch, nil
+}
+
 func (g *GitlabProject) GetDefaultBranchName() (defaultBranchName string, err error) {
 	nativeProject, err := g.GetRawResponse()
 	if err != nil {
@@ -993,6 +1019,15 @@ func (g *GitlabProject) MustGetCurrentUserName(verbose bool) (userName string) {
 	}
 
 	return userName
+}
+
+func (g *GitlabProject) MustGetDefaultBranch() (defaultBranch *GitlabBranch) {
+	defaultBranch, err := g.GetDefaultBranch()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return defaultBranch
 }
 
 func (g *GitlabProject) MustGetDefaultBranchName() (defaultBranchName string) {

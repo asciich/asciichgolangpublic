@@ -32,13 +32,9 @@ func (g *GitlabBranches) BranchByNameExists(branchName string) (exists bool, err
 	return exists, nil
 }
 
-func (g *GitlabBranches) CreateBranch(sourceBranch string, branchName string, verbose bool) (createdBranch *GitlabBranch, err error) {
-	if sourceBranch == "" {
-		return nil, TracedErrorEmptyString("sourceBranch")
-	}
-
-	if branchName == "" {
-		return nil, TracedErrorEmptyString("branchName")
+func (g *GitlabBranches) CreateBranch(options *GitlabCreateBranchOptions) (createdBranch *GitlabBranch, err error) {
+	if options == nil {
+		return nil, TracedErrorNil("options")
 	}
 
 	nativeClient, projectId, err := g.GetNativeBranchesClientAndId()
@@ -51,13 +47,29 @@ func (g *GitlabBranches) CreateBranch(sourceBranch string, branchName string, ve
 		return nil, err
 	}
 
+	branchName, err := options.GetBranchName()
+	if err != nil {
+		return nil, err
+	}
+
 	exists, err := g.BranchByNameExists(branchName)
 	if err != nil {
 		return nil, err
 	}
 
+	sourceBranchName, err := options.GetSourceBranchName()
+	if err != nil {
+		return nil, err
+	}
+
 	if exists {
-		if verbose {
+		if options.FailIfAlreadyExists {
+			return nil, TracedErrorf(
+				"Branch '%s' already exists in gitlab project %s .", branchName, projectUrl,
+			)
+		}
+
+		if options.Verbose {
 			LogInfof("Branch '%s' already exists in gitlab project %s .", branchName, projectUrl)
 		}
 	} else {
@@ -65,24 +77,24 @@ func (g *GitlabBranches) CreateBranch(sourceBranch string, branchName string, ve
 			projectId,
 			&gitlab.CreateBranchOptions{
 				Branch: &branchName,
-				Ref:    &sourceBranch,
+				Ref:    &sourceBranchName,
 			},
 		)
 		if err != nil {
 			return nil, TracedErrorf(
 				"Unable to create branch '%s' from branch '%s' in gitlab project %s : '%w'",
 				branchName,
-				sourceBranch,
+				sourceBranchName,
 				projectUrl,
 				err,
 			)
 		}
 
-		if verbose {
+		if options.Verbose {
 			LogChangedf(
 				"Created branch '%s' from '%s' in gitlab project %s .",
 				branchName,
-				sourceBranch,
+				sourceBranchName,
 				projectUrl,
 			)
 		}
@@ -106,7 +118,13 @@ func (g *GitlabBranches) CreateBranchFromDefaultBranch(branchName string, verbos
 		return nil, err
 	}
 
-	createdBranch, err = g.CreateBranch(sourceBranch, branchName, verbose)
+	createdBranch, err = g.CreateBranch(
+		&GitlabCreateBranchOptions{
+			SourceBranchName: sourceBranch,
+			BranchName:       branchName,
+			Verbose:          verbose,
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -306,6 +324,108 @@ func (g *GitlabBranches) GetDefaultBranchName() (defaultBranchName string, err e
 	return defaultBranchName, nil
 }
 
+func (g *GitlabBranches) GetFilesFromListWithDiffBetweenBranches(branchA *GitlabBranch, branchB *GitlabBranch, filesToCheck []string, verbose bool) (filesWithDiffBetweenBranches []string, err error) {
+	if branchA == nil {
+		return nil, TracedErrorNil("branchA")
+	}
+
+	if branchB == nil {
+		return nil, TracedErrorNil("branchB")
+	}
+
+	if len(filesToCheck) <= 0 {
+		return nil, TracedError("filesToCkeck has no elements")
+	}
+
+	branchAName, err := branchA.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	branchBName, err := branchB.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, toCheck := range filesToCheck {
+		checksumA, err := branchA.GetRepositoryFileSha256Sum(toCheck, verbose)
+		if err != nil {
+			return nil, err
+		}
+
+		checksumB := ""
+
+		targetFileExists, err := branchB.RepositoryFileExists(toCheck, verbose)
+		if err != nil {
+			return nil, err
+		}
+
+		if targetFileExists {
+			checksumB, err = branchB.GetRepositoryFileSha256Sum(toCheck, verbose)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if checksumA == checksumB {
+			if verbose {
+				LogInfof(
+					"File '%s' in branch '%s' and '%s' is equal with sha256sum '%s'.",
+					toCheck,
+					branchAName,
+					branchBName,
+					checksumA,
+				)
+			}
+			continue
+		}
+
+		if verbose {
+			if targetFileExists {
+				LogInfof(
+					"File '%s' in branch '%s' has sha256sum '%s' and does not exist in branchB '%s'. This is considered a difference.",
+					toCheck,
+					branchAName,
+					checksumA,
+					branchBName,
+				)
+			} else {
+				LogInfof(
+					"File '%s in branch '%s' has sha256sum '%s' and is not equal to branch '%s' where sha256sum is '%s'.",
+					toCheck,
+					branchAName,
+					checksumA,
+					branchBName,
+					checksumB,
+				)
+			}
+		}
+
+		filesWithDiffBetweenBranches = append(filesWithDiffBetweenBranches, toCheck)
+	}
+
+	if verbose {
+		if len(filesWithDiffBetweenBranches) > 0 {
+			LogInfof(
+				"Found '%d' out of '%d' files with different content between branch '%s' and '%s'.",
+				len(filesWithDiffBetweenBranches),
+				len(filesToCheck),
+				branchAName,
+				branchBName,
+			)
+		} else {
+			LogInfof(
+				"All '%d' files of branch '%s' and '%s' have equal content.",
+				len(filesToCheck),
+				branchAName,
+				branchBName,
+			)
+		}
+	}
+
+	return filesWithDiffBetweenBranches, nil
+}
+
 func (g *GitlabBranches) GetGitlab() (gitlab *GitlabInstance, err error) {
 	gitlabProject, err := g.GetGitlabProject()
 	if err != nil {
@@ -393,8 +513,8 @@ func (g *GitlabBranches) MustBranchByNameExists(branchName string) (exists bool)
 	return exists
 }
 
-func (g *GitlabBranches) MustCreateBranch(sourceBranch string, branchName string, verbose bool) (createdBranch *GitlabBranch) {
-	createdBranch, err := g.CreateBranch(sourceBranch, branchName, verbose)
+func (g *GitlabBranches) MustCreateBranch(options *GitlabCreateBranchOptions) (createdBranch *GitlabBranch) {
+	createdBranch, err := g.CreateBranch(options)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -461,6 +581,15 @@ func (g *GitlabBranches) MustGetDefaultBranchName() (defaultBranchName string) {
 	}
 
 	return defaultBranchName
+}
+
+func (g *GitlabBranches) MustGetFilesFromListWithDiffBetweenBranches(branchA *GitlabBranch, branchB *GitlabBranch, filesToCheck []string, verbose bool) (filesWithDiffBetweenBranches []string) {
+	filesWithDiffBetweenBranches, err := g.GetFilesFromListWithDiffBetweenBranches(branchA, branchB, filesToCheck, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return filesWithDiffBetweenBranches
 }
 
 func (g *GitlabBranches) MustGetGitlab() (gitlab *GitlabInstance) {
