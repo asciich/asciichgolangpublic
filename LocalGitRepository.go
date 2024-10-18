@@ -39,6 +39,24 @@ func GetLocalGitReposioryFromDirectory(directory Directory) (l *LocalGitReposito
 	return l, nil
 }
 
+func GetLocalGitReposioryFromLocalDirectory(localDirectory *LocalDirectory) (l *LocalGitRepository, err error) {
+	if localDirectory == nil {
+		return nil, TracedErrorNil("directory")
+	}
+
+	localPath, err := localDirectory.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
+	l, err = GetLocalGitRepositoryByPath(localPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return l, nil
+}
+
 func GetLocalGitRepositoryByPath(path string) (l *LocalGitRepository, err error) {
 	if path == "" {
 		return nil, TracedErrorEmptyString("path")
@@ -56,6 +74,15 @@ func GetLocalGitRepositoryByPath(path string) (l *LocalGitRepository, err error)
 
 func MustGetLocalGitReposioryFromDirectory(directory Directory) (l *LocalGitRepository) {
 	l, err := GetLocalGitReposioryFromDirectory(directory)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return l
+}
+
+func MustGetLocalGitReposioryFromLocalDirectory(localDirectory *LocalDirectory) (l *LocalGitRepository) {
+	l, err := GetLocalGitReposioryFromLocalDirectory(localDirectory)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
