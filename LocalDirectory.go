@@ -45,6 +45,51 @@ func NewLocalDirectory() (l *LocalDirectory) {
 	return l
 }
 
+func (l *LocalDirectory) CopyContentToDirectory(destinationDir Directory, verbose bool) (err error) {
+	if destinationDir == nil {
+		return TracedError("destinationDir is empty string")
+	}
+
+	srcPath, err := l.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	destPath, err := destinationDir.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	copyCommand := []string{
+		"cp",
+		"-rv",
+		srcPath + "/.",
+		destPath + "/.",
+	}
+
+	stdout, err := Bash().RunCommandAndGetStdoutAsString(
+		&RunCommandOptions{
+			Command:            copyCommand,
+			Verbose:            verbose,
+			LiveOutputOnStdout: verbose,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		LogInfof(
+			"Copied files from '%s' to '%s':\n%s",
+			srcPath,
+			destPath,
+			stdout,
+		)
+	}
+
+	return nil
+}
+
 func (l *LocalDirectory) CopyContentToLocalDirectory(destDirectory *LocalDirectory, verbose bool) (err error) {
 	if destDirectory == nil {
 		return TracedErrorNil("destDirectory")
@@ -739,6 +784,13 @@ func (l *LocalDirectory) IsEmptyDirectory(verbose bool) (isEmpty bool, err error
 
 func (l *LocalDirectory) IsLocalDirectory() (isLocalDirectory bool) {
 	return true
+}
+
+func (l *LocalDirectory) MustCopyContentToDirectory(destinationDir Directory, verbose bool) {
+	err := l.CopyContentToDirectory(destinationDir, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (l *LocalDirectory) MustCopyContentToLocalDirectory(destDirectory *LocalDirectory, verbose bool) {

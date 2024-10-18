@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 type Directory interface {
+	CopyContentToDirectory(destinationDir Directory, verbose bool) (err error)
 	Create(verbose bool) (err error)
 	CreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory Directory, err error)
 	Delete(verbose bool) (err error)
@@ -12,6 +13,7 @@ type Directory interface {
 	GetSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory, err error)
 	GetSubDirectory(path ...string) (subDirectory Directory, err error)
 	IsLocalDirectory() (isLocalDirectory bool)
+	MustCopyContentToDirectory(destinationDir Directory, verbose bool)
 	MustCreate(verbose bool)
 	MustCreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory Directory)
 	MustDelete(verbose bool)
