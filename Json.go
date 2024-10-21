@@ -324,6 +324,15 @@ func (j *JsonService) MustPrettyFormatJsonString(jsonString string) (formatted s
 	return formatted
 }
 
+func (j *JsonService) MustRunJqAgainstJsonFileAsString(jsonFile File, query string) (result string) {
+	result, err := j.RunJqAgainstJsonFileAsString(jsonFile, query)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return result
+}
+
 func (j *JsonService) MustRunJqAgainstJsonStringAsBool(jsonString string, query string) (result bool) {
 	result, err := j.RunJqAgainstJsonStringAsBool(jsonString, query)
 	if err != nil {
@@ -374,6 +383,24 @@ func (j *JsonService) PrettyFormatJsonString(jsonString string) (formatted strin
 	formatted = Strings().EnsureEndsWithExactlyOneLineBreak(formatted)
 
 	return formatted, nil
+}
+
+func (j *JsonService) RunJqAgainstJsonFileAsString(jsonFile File, query string) (result string, err error) {
+	if jsonFile == nil {
+		return "", TracedErrorNil("jsonFile")
+	}
+
+	jsonString, err := jsonFile.ReadAsString()
+	if err != nil {
+		return "", err
+	}
+
+	result, err = j.RunJqAgainstJsonStringAsString(jsonString, query)
+	if err != nil {
+		return "", err
+	}
+
+	return result, nil
 }
 
 func (j *JsonService) RunJqAgainstJsonStringAsBool(jsonString string, query string) (result bool, err error) {
