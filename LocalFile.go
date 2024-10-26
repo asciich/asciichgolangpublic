@@ -174,6 +174,9 @@ func (l *LocalFile) Chmod(chmodOptions *ChmodOptions) (err error) {
 			Verbose: chmodOptions.Verbose,
 		},
 	)
+	if err != nil {
+		return err
+	}
 
 	if chmodOptions.Verbose {
 		LogChangedf("Chmod '%s' for local file '%s'.", chmodString, localPath)

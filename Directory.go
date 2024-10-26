@@ -34,6 +34,8 @@ type Directory interface {
 	MustFileInDirectoryExists(path ...string) (exists bool)
 	MustReadFileInDirectoryAsLines(path ...string) (content []string)
 	MustReadFileInDirectoryAsString(path ...string) (content string)
+	MustWriteStringToFileInDirectory(content string, verbose bool, path ...string) (writtenFile File)
 	ReadFileInDirectoryAsLines(path ...string) (content []string, err error)
 	ReadFileInDirectoryAsString(path ...string) (content string, err error)
+	WriteStringToFileInDirectory(content string, verbose bool, path ...string) (writtenFile File, err error)
 }
