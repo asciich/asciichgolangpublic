@@ -9,6 +9,7 @@ import (
 type File interface {
 	AppendBytes(toWrite []byte, verbose bool) (err error)
 	AppendString(toWrite string, verbose bool) (err error)
+	Chmod(options *ChmodOptions) (err error)
 	CopyToFile(destFile File, verbose bool) (err error)
 	Create(verbose bool) (err error)
 	Delete(verbose bool) (err error)
@@ -22,6 +23,7 @@ type File interface {
 	GetUriAsString() (uri string, err error)
 	MustAppendBytes(toWrtie []byte, verbose bool)
 	MustAppendString(toWrtie string, verbose bool)
+	MustChmod(options *ChmodOptions)
 	MustCopyToFile(destFile File, verbose bool)
 	MustCreate(verbose bool)
 	MustDelete(verbose bool)

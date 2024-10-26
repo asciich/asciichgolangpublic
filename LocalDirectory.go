@@ -45,6 +45,35 @@ func NewLocalDirectory() (l *LocalDirectory) {
 	return l
 }
 
+func (l *LocalDirectory) Chmod(chmodOptions *ChmodOptions) (err error) {
+	if chmodOptions == nil {
+		return TracedErrorNil("chmodOptions")
+	}
+
+	chmodString, err := chmodOptions.GetPermissionsString()
+	if err != nil {
+		return err
+	}
+
+	localPath, err := l.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	_, err = Bash().RunCommand(
+		&RunCommandOptions{
+			Command: []string{"chmod", chmodString, localPath},
+			Verbose: chmodOptions.Verbose,
+		},
+	)
+
+	if chmodOptions.Verbose {
+		LogChangedf("Chmod '%s' for local directory '%s'.", chmodString, localPath)
+	}
+
+	return nil
+}
+
 func (l *LocalDirectory) CopyContentToDirectory(destinationDir Directory, verbose bool) (err error) {
 	if destinationDir == nil {
 		return TracedError("destinationDir is empty string")
@@ -784,6 +813,13 @@ func (l *LocalDirectory) IsEmptyDirectory(verbose bool) (isEmpty bool, err error
 
 func (l *LocalDirectory) IsLocalDirectory() (isLocalDirectory bool) {
 	return true
+}
+
+func (l *LocalDirectory) MustChmod(chmodOptions *ChmodOptions) {
+	err := l.Chmod(chmodOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (l *LocalDirectory) MustCopyContentToDirectory(destinationDir Directory, verbose bool) {
