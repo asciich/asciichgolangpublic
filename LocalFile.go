@@ -153,6 +153,35 @@ func (l *LocalFile) AppendString(toWrite string, verbose bool) (err error) {
 	return nil
 }
 
+func (l *LocalFile) Chmod(chmodOptions *ChmodOptions) (err error) {
+	if chmodOptions == nil {
+		return TracedErrorNil("chmodOptions")
+	}
+
+	chmodString, err := chmodOptions.GetPermissionsString()
+	if err != nil {
+		return err
+	}
+
+	localPath, err := l.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	_, err = Bash().RunCommand(
+		&RunCommandOptions{
+			Command: []string{"chmod", chmodString, localPath},
+			Verbose: chmodOptions.Verbose,
+		},
+	)
+
+	if chmodOptions.Verbose {
+		LogChangedf("Chmod '%s' for local file '%s'.", chmodString, localPath)
+	}
+
+	return nil
+}
+
 func (l *LocalFile) CopyToFile(destFile File, verbose bool) (err error) {
 	if destFile == nil {
 		return TracedErrorNil("destFile")
@@ -348,6 +377,13 @@ func (l *LocalFile) MustAppendBytes(toWrite []byte, verbose bool) {
 
 func (l *LocalFile) MustAppendString(toWrite string, verbose bool) {
 	err := l.AppendString(toWrite, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (l *LocalFile) MustChmod(chmodOptions *ChmodOptions) {
+	err := l.Chmod(chmodOptions)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
