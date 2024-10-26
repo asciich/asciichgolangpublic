@@ -1,6 +1,6 @@
 package asciichgolangpublic
 
-// A CommandExecutor is able to run a command like Exec or bash.
+// A CommandExecutor is able to run a command like Exec or bash does.
 type CommandExecutor interface {
 	RunCommand(options *RunCommandOptions) (commandOutput *CommandOutput, err error)
 	MustRunCommand(options *RunCommandOptions) (commandOutput *CommandOutput)

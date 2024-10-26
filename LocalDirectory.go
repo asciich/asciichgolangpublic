@@ -66,6 +66,9 @@ func (l *LocalDirectory) Chmod(chmodOptions *ChmodOptions) (err error) {
 			Verbose: chmodOptions.Verbose,
 		},
 	)
+	if err != nil {
+		return err
+	}
 
 	if chmodOptions.Verbose {
 		LogChangedf("Chmod '%s' for local directory '%s'.", chmodString, localPath)
@@ -1071,15 +1074,6 @@ func (l *LocalDirectory) MustSubDirectoryExists(subDirName string, verbose bool)
 	return subDirExists
 }
 
-func (l *LocalDirectory) MustWriteStringToFileInDirectory(content string, verbose bool, filePath ...string) (writtenFile *LocalFile) {
-	writtenFile, err := l.WriteStringToFileInDirectory(content, verbose, filePath...)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-
-	return writtenFile
-}
-
 func (l *LocalDirectory) ReplaceBetweenMarkers(verbose bool) (err error) {
 	files, err := l.GetFilesInDirectory(
 		&ListFileOptions{
@@ -1153,20 +1147,3 @@ func (l *LocalDirectory) SubDirectoryExists(subDirName string, verbose bool) (su
 	return subDirExists, nil
 }
 
-func (l *LocalDirectory) WriteStringToFileInDirectory(content string, verbose bool, filePath ...string) (writtenFile *LocalFile, err error) {
-	if len(filePath) <= 0 {
-		return nil, TracedErrorNil("filePath")
-	}
-
-	writtenFile, err = l.GetFileInDirectoryAsLocalFile(filePath...)
-	if err != nil {
-		return nil, err
-	}
-
-	err = writtenFile.WriteString(content, verbose)
-	if err != nil {
-		return nil, err
-	}
-
-	return writtenFile, nil
-}

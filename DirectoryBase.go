@@ -155,6 +155,15 @@ func (d *DirectoryBase) MustSetParentDirectoryForBaseClass(parentDirectoryForBas
 	}
 }
 
+func (d *DirectoryBase) MustWriteStringToFileInDirectory(content string, verbose bool, path ...string) (writtenFile File) {
+	writtenFile, err := d.WriteStringToFileInDirectory(content, verbose, path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return writtenFile
+}
+
 func (d *DirectoryBase) ReadFileInDirectoryAsLines(path ...string) (content []string, err error) {
 	if len(path) == 0 {
 		return nil, TracedError("path is empty")
@@ -205,4 +214,27 @@ func (d *DirectoryBase) SetParentDirectoryForBaseClass(parentDirectoryForBaseCla
 	d.parentDirectoryForBaseClass = parentDirectoryForBaseClass
 
 	return nil
+}
+
+func (d *DirectoryBase) WriteStringToFileInDirectory(content string, verbose bool, path ...string) (writtenFile File, err error) {
+	if len(path) <= 0 {
+		return nil, TracedErrorf("Invalid path='%v'", path)
+	}
+
+	parent, err := d.GetParentDirectoryForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	writtenFile, err = parent.GetFileInDirectory(path...)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writtenFile.WriteString(content, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return writtenFile, nil
 }
