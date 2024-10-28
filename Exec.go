@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"os/exec"
 )
 
@@ -23,6 +24,29 @@ func NewExec() (e *ExecService) {
 
 func NewExecService() (e *ExecService) {
 	return new(ExecService)
+}
+
+func (e *ExecService) GetDeepCopy() (deepCopy CommandExecutor) {
+	d := NewExec()
+
+	*d = *e
+
+	deepCopy = d
+
+	return deepCopy
+}
+
+func (e *ExecService) GetHostDescription() (hostDescription string, err error) {
+	return "localhost", nil
+}
+
+func (e *ExecService) MustGetHostDescription() (hostDescription string) {
+	hostDescription, err := e.GetHostDescription()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hostDescription
 }
 
 func (e *ExecService) MustRunCommand(options *RunCommandOptions) (commandOutput *CommandOutput) {
@@ -63,16 +87,69 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 
 	commandOutput = new(CommandOutput)
 
+	writeStdin := options.IsStdinStringSet()
+
+	var stdin io.WriteCloser
+
+	if writeStdin {
+		stdin, err = cmd.StdinPipe()
+		if err != nil {
+			return nil, err
+		}
+		defer stdin.Close()
+	}
+
 	cmd.Start()
 
+	if writeStdin {
+		bytesToWrite := []byte(options.StdinString)
+		nBytesToWrite := len(bytesToWrite)
+
+		nWrittenBytes, err := stdin.Write([]byte(options.StdinString))
+		if err != nil {
+			return nil, err
+		}
+
+		if nBytesToWrite != nWrittenBytes {
+			return nil, TracedErrorf(
+				"Writing to stdin of command '%v' failed. Expected '%d' bytes to write but '%d' got written",
+				command,
+				nBytesToWrite,
+				nWrittenBytes,
+			)
+		}
+
+		stdin.Close()
+	}
+
 	scanner := bufio.NewScanner(stdoutPipe)
-	scanner.Split(bufio.ScanLines)
+
+	scanner.Split(bufio.ScanBytes)
 	stdoutBytes := []byte{}
-	for scanner.Scan() {
-		m := scanner.Text()
+	goOn := true
+	lastProcessedByteWasNewLine := false
+	for {
+		lastProcessedByteWasNewLine = false
+		line := ""
+		for {
+			goOn = scanner.Scan()
+			if !goOn {
+				break
+			}
+
+			b := scanner.Text()
+			if b == "\n" {
+				lastProcessedByteWasNewLine = true
+				break
+			} else {
+				lastProcessedByteWasNewLine = false
+			}
+
+			line += b
+		}
 
 		if options.LiveOutputOnStdout {
-			mOutput := m
+			mOutput := line
 
 			if OS().IsRunningOnWindows() {
 				if len(mOutput) > 0 {
@@ -90,17 +167,20 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 			fmt.Println(mOutput)
 		}
 
-		stdoutBytes = append(stdoutBytes, []byte(m)...)
-		stdoutBytes = append(stdoutBytes, byte('\n'))
+		stdoutBytes = append(stdoutBytes, []byte(line)...)
+		if lastProcessedByteWasNewLine {
+			stdoutBytes = append(stdoutBytes, byte('\n'))
+		}
+
+		if !goOn {
+			break
+		}
 	}
+
 	err = cmd.Wait()
 	if err != nil {
 		commandOutput.SetCmdRunError(err)
 	}
-
-	unprocessedBytes := scanner.Bytes()
-
-	stdoutBytes = append(stdoutBytes, unprocessedBytes...)
 
 	err = commandOutput.SetStdout(stdoutBytes)
 	if err != nil {

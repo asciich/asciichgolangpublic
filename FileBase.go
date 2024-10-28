@@ -616,6 +616,13 @@ func (f *FileBase) MustIsYYYYmmdd_HHMMSSPrefix() (hasDatePrefix bool) {
 	return hasDatePrefix
 }
 
+func (f *FileBase) MustPrintContentOnStdout() {
+	err := f.PrintContentOnStdout()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (f *FileBase) MustReadAsBool() (boolValue bool) {
 	boolValue, err := f.ReadAsBool()
 	if err != nil {
@@ -778,6 +785,22 @@ func (f *FileBase) MustWriteTextBlocks(textBlocks []string, verbose bool) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (f *FileBase) PrintContentOnStdout() (err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	content, err := parent.ReadAsString()
+	if err != nil {
+		return err
+	}
+
+	fmt.Print(content)
+
+	return nil
 }
 
 func (f *FileBase) ReadAsBool() (boolValue bool, err error) {

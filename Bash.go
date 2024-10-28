@@ -4,6 +4,7 @@ type BashService struct {
 	CommandExecutorBase
 }
 
+// Can be used to run commands in bash on localhost.
 func Bash() (b *BashService) {
 	return NewBashService()
 }
@@ -12,6 +13,29 @@ func NewBashService() (b *BashService) {
 	b = new(BashService)
 	b.SetParentCommandExecutorForBaseClass(b)
 	return b
+}
+
+func (b *BashService) GetDeepCopy() (deepCopy CommandExecutor) {
+	d := NewBashService()
+
+	*d = *b
+
+	deepCopy = d
+
+	return deepCopy
+}
+
+func (b *BashService) GetHostDescription() (hostDescription string, err error) {
+	return "localhost", err
+}
+
+func (b *BashService) MustGetHostDescription() (hostDescription string) {
+	hostDescription, err := b.GetHostDescription()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hostDescription
 }
 
 func (b *BashService) MustRunCommand(options *RunCommandOptions) (commandOutput *CommandOutput) {

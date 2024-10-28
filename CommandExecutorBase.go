@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"strconv"
+	"strings"
+)
+
 type CommandExecutorBase struct {
 	parentCommandExecutorForBaseClass CommandExecutor
 }
@@ -33,6 +38,15 @@ func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsBytes(options *RunComm
 
 func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsFloat64(options *RunCommandOptions) (stdout float64) {
 	stdout, err := c.RunCommandAndGetStdoutAsFloat64(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return stdout
+}
+
+func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsInt64(options *RunCommandOptions) (stdout int64) {
+	stdout, err := c.RunCommandAndGetStdoutAsInt64(options)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -104,6 +118,22 @@ func (c *CommandExecutorBase) RunCommandAndGetStdoutAsFloat64(options *RunComman
 	}
 
 	stdout, err = output.GetStdoutAsFloat64()
+	if err != nil {
+		return -1, err
+	}
+
+	return stdout, nil
+}
+
+func (c *CommandExecutorBase) RunCommandAndGetStdoutAsInt64(options *RunCommandOptions) (stdout int64, err error) {
+	stdoutString, err := c.RunCommandAndGetStdoutAsString(options)
+	if err != nil {
+		return -1, err
+	}
+
+	stdoutString = strings.TrimSpace(stdoutString)
+
+	stdout, err = strconv.ParseInt(stdoutString, 10, 64)
 	if err != nil {
 		return -1, err
 	}

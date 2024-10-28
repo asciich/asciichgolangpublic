@@ -295,8 +295,8 @@ func (l *LocalFile) GetLocalPath() (path string, err error) {
 	return l.GetPath()
 }
 
-func (l *LocalFile) GetLocalPathOrEmptyStringIfUnset() (localPath string) {
-	return l.path
+func (l *LocalFile) GetLocalPathOrEmptyStringIfUnset() (localPath string, err error) {
+	return l.path, nil
 }
 
 func (l *LocalFile) GetParentDirectory() (parentDirectory Directory, err error) {
@@ -440,6 +440,15 @@ func (l *LocalFile) MustGetLocalPath() (path string) {
 	return path
 }
 
+func (l *LocalFile) MustGetLocalPathOrEmptyStringIfUnset() (localPath string) {
+	localPath, err := l.GetLocalPathOrEmptyStringIfUnset()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return localPath
+}
+
 func (l *LocalFile) MustGetParentDirectory() (parentDirectory Directory) {
 	parentDirectory, err := l.GetParentDirectory()
 	if err != nil {
@@ -485,13 +494,6 @@ func (l *LocalFile) MustGetUriAsString() (uri string) {
 	return uri
 }
 
-func (l *LocalFile) MustPrintContentOnStdout() {
-	err := l.PrintContentOnStdout()
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-}
-
 func (l *LocalFile) MustReadAsBytes() (content []byte) {
 	content, err := l.ReadAsBytes()
 	if err != nil {
@@ -529,17 +531,6 @@ func (l *LocalFile) MustWriteBytes(toWrite []byte, verbose bool) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
-}
-
-func (l *LocalFile) PrintContentOnStdout() (err error) {
-	content, err := l.ReadAsString()
-	if err != nil {
-		return err
-	}
-
-	fmt.Print(content)
-
-	return nil
 }
 
 func (l *LocalFile) ReadAsBytes() (content []byte, err error) {
