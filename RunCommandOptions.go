@@ -7,6 +7,9 @@ type RunCommandOptions struct {
 	AllowAllExitCodes  bool
 	LiveOutputOnStdout bool
 
+	// If set this will be send to stdin of the command:
+	StdinString string
+
 	// Run as "root" user (or Administrator on Windows):
 	RunAsRoot bool
 }
@@ -67,6 +70,10 @@ func (o *RunCommandOptions) GetTimeoutSecondsAsString() (timeoutSeconds string, 
 	return timeoutSeconds, nil
 }
 
+func (o *RunCommandOptions) IsStdinStringSet() (isSet bool) {
+	return o.StdinString != ""
+}
+
 func (o *RunCommandOptions) IsTimeoutSet() (isSet bool) {
 	return len(o.TimeoutString) > 0
 }
@@ -84,6 +91,14 @@ func (r *RunCommandOptions) GetLiveOutputOnStdout() (liveOutputOnStdout bool, er
 func (r *RunCommandOptions) GetRunAsRoot() (runAsRoot bool) {
 
 	return r.RunAsRoot
+}
+
+func (r *RunCommandOptions) GetStdinString() (stdinString string, err error) {
+	if r.StdinString == "" {
+		return "", TracedErrorf("StdinString not set")
+	}
+
+	return r.StdinString, nil
 }
 
 func (r *RunCommandOptions) GetTimeoutString() (timeoutString string, err error) {
@@ -135,6 +150,15 @@ func (r *RunCommandOptions) MustGetLiveOutputOnStdout() (liveOutputOnStdout bool
 	return liveOutputOnStdout
 }
 
+func (r *RunCommandOptions) MustGetStdinString() (stdinString string) {
+	stdinString, err := r.GetStdinString()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return stdinString
+}
+
 func (r *RunCommandOptions) MustGetTimeoutSecondsAsString() (timeoutSeconds string) {
 	timeoutSeconds, err := r.GetTimeoutSecondsAsString()
 	if err != nil {
@@ -183,6 +207,13 @@ func (r *RunCommandOptions) MustSetLiveOutputOnStdout(liveOutputOnStdout bool) {
 	}
 }
 
+func (r *RunCommandOptions) MustSetStdinString(stdinString string) {
+	err := r.SetStdinString(stdinString)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (r *RunCommandOptions) MustSetTimeoutString(timeoutString string) {
 	err := r.SetTimeoutString(timeoutString)
 	if err != nil {
@@ -225,6 +256,16 @@ func (r *RunCommandOptions) SetLiveOutputOnStdout(liveOutputOnStdout bool) (err 
 
 func (r *RunCommandOptions) SetRunAsRoot(runAsRoot bool) {
 	r.RunAsRoot = runAsRoot
+}
+
+func (r *RunCommandOptions) SetStdinString(stdinString string) (err error) {
+	if stdinString == "" {
+		return TracedErrorf("stdinString is empty string")
+	}
+
+	r.StdinString = stdinString
+
+	return nil
 }
 
 func (r *RunCommandOptions) SetTimeoutString(timeoutString string) (err error) {

@@ -46,24 +46,6 @@ func NewHost() (host *Host) {
 	return host
 }
 
-func (h *Host) RunCommand(options *RunCommandOptions) (commandOutput *CommandOutput, err error) {
-	if options == nil {
-		return nil, TracedErrorNil("options")
-	}
-
-	sshClient, err := h.GetSSHClient()
-	if err != nil {
-		return nil, err
-	}
-
-	commandOutput, err = sshClient.RunCommand(options)
-	if err != nil {
-		return nil, err
-	}
-
-	return commandOutput, nil
-}
-
 func (h *Host) AddSshHostKeyToKnownHosts(verbose bool) (err error) {
 	hostname, err := h.GetHostname()
 	if err != nil {
@@ -234,6 +216,16 @@ func (h *Host) GetComment() (comment string, err error) {
 	return h.Comment, nil
 }
 
+func (h *Host) GetDeepCopy() (deepCopy CommandExecutor) {
+	d := NewHost()
+
+	*d = *h
+
+	deepCopy = d
+
+	return deepCopy
+}
+
 func (h *Host) GetDockerContainerByName(containerName string) (dockerContainer *DockerContainer, err error) {
 	if len(containerName) <= 0 {
 		return nil, TracedError("containerName is empty string")
@@ -261,6 +253,15 @@ func (h *Host) GetDockerService() (dockerService *DockerService, err error) {
 	}
 
 	return dockerService, nil
+}
+
+func (h *Host) GetHostDescription() (hostDescription string, err error) {
+	hostDescription, err = h.GetHostname()
+	if err != nil {
+		return "", err
+	}
+
+	return hostDescription, nil
 }
 
 func (h *Host) GetHostname() (hostname string, err error) {
@@ -440,6 +441,7 @@ func (h *Host) InstallBinary(installOptions *InstallOptions) (err error) {
 	return nil
 	*/
 }
+
 func (h *Host) IsFtpPortOpen(verbose bool) (isOpen bool, err error) {
 	isOpen, err = h.IsTcpPortOpen(FTP().GetDefaultPort(), verbose)
 	if err != nil {
@@ -518,6 +520,13 @@ func (h *Host) MustAddSshHostKeyToKnownHosts(verbose bool) {
 	}
 }
 
+func (h *Host) MustCheckFtpPortOpen(verbose bool) {
+	err := h.CheckFtpPortOpen(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (h *Host) MustCheckIsKubernetesControlplane(verbose bool) (isKubernetesControlplane bool) {
 	isKubernetesControlplane, err := h.CheckIsKubernetesControlplane(verbose)
 	if err != nil {
@@ -586,6 +595,15 @@ func (h *Host) MustGetDockerService() (dockerService *DockerService) {
 	}
 
 	return dockerService
+}
+
+func (h *Host) MustGetHostDescription() (hostDescription string) {
+	hostDescription, err := h.GetHostDescription()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hostDescription
 }
 
 func (h *Host) MustGetHostname() (hostname string) {
@@ -676,6 +694,15 @@ func (h *Host) MustInstallBinary(installOptions *InstallOptions) {
 	}
 }
 
+func (h *Host) MustIsFtpPortOpen(verbose bool) (isOpen bool) {
+	isOpen, err := h.IsFtpPortOpen(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isOpen
+}
+
 func (h *Host) MustIsPingable(verbose bool) (isPingable bool) {
 	isPingable, err := h.IsPingable(verbose)
 	if err != nil {
@@ -722,6 +749,15 @@ func (h *Host) MustRenewSshHostKey(verbose bool) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (h *Host) MustRunCommand(options *RunCommandOptions) (commandOutput *CommandOutput) {
+	commandOutput, err := h.RunCommand(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return commandOutput
 }
 
 func (h *Host) MustSetComment(comment string) {
@@ -822,6 +858,24 @@ func (h *Host) RenewSshHostKey(verbose bool) (err error) {
 	}
 
 	return nil
+}
+
+func (h *Host) RunCommand(options *RunCommandOptions) (commandOutput *CommandOutput, err error) {
+	if options == nil {
+		return nil, TracedErrorNil("options")
+	}
+
+	sshClient, err := h.GetSSHClient()
+	if err != nil {
+		return nil, err
+	}
+
+	commandOutput, err = sshClient.RunCommand(options)
+	if err != nil {
+		return nil, err
+	}
+
+	return commandOutput, nil
 }
 
 func (h *Host) SetComment(comment string) (err error) {
@@ -960,13 +1014,4 @@ func (h *Host) WaitUntilReachableBySsh(renewHostKey bool, verbose bool) (err err
 			)
 		}
 	}
-}
-
-func (h *Host) MustRunCommand(options *RunCommandOptions) (commandOutput *CommandOutput) {
-	commandOutput, err := h.RunCommand(options)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-
-	return commandOutput
 }

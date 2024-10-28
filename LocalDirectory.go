@@ -619,6 +619,10 @@ func (l *LocalDirectory) GetGitRepositoriesAsLocalGitRepositories(verbose bool) 
 	return gitRepos, nil
 }
 
+func (l *LocalDirectory) GetHostDescription() (hostDescription string, err error) {
+	return "localhost", err
+}
+
 func (l *LocalDirectory) GetLocalPath() (localPath string, err error) {
 	if l.localPath == "" {
 		return "", TracedErrorf("localPath not set")
@@ -639,6 +643,15 @@ func (l *LocalDirectory) GetParentDirectory() (parentDirectory *LocalDirectory, 
 	}
 
 	return parentDirectory, err
+}
+
+func (l *LocalDirectory) GetPath() (dirPath string, err error) {
+	dirPath, err = l.GetLocalPath()
+	if err != nil {
+		return "", err
+	}
+
+	return dirPath, nil
 }
 
 func (l *LocalDirectory) GetSubDirectories(listDirectoryOptions *ListDirectoryOptions) (subDirectories []Directory, err error) {
@@ -814,8 +827,8 @@ func (l *LocalDirectory) IsEmptyDirectory(verbose bool) (isEmpty bool, err error
 	return true, nil
 }
 
-func (l *LocalDirectory) IsLocalDirectory() (isLocalDirectory bool) {
-	return true
+func (l *LocalDirectory) IsLocalDirectory() (isLocalDirectory bool, err error) {
+	return true, nil
 }
 
 func (l *LocalDirectory) MustChmod(chmodOptions *ChmodOptions) {
@@ -979,6 +992,15 @@ func (l *LocalDirectory) MustGetGitRepositoriesAsLocalGitRepositories(verbose bo
 	return gitRepos
 }
 
+func (l *LocalDirectory) MustGetHostDescription() (hostDescription string) {
+	hostDescription, err := l.GetHostDescription()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hostDescription
+}
+
 func (l *LocalDirectory) MustGetLocalPath() (localPath string) {
 	localPath, err := l.GetLocalPath()
 	if err != nil {
@@ -995,6 +1017,15 @@ func (l *LocalDirectory) MustGetParentDirectory() (parentDirectory *LocalDirecto
 	}
 
 	return parentDirectory
+}
+
+func (l *LocalDirectory) MustGetPath() (dirPath string) {
+	dirPath, err := l.GetPath()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return dirPath
 }
 
 func (l *LocalDirectory) MustGetSubDirectories(listDirectoryOptions *ListDirectoryOptions) (subDirectories []Directory) {
@@ -1049,6 +1080,15 @@ func (l *LocalDirectory) MustIsEmptyDirectory(verbose bool) (isEmpty bool) {
 	}
 
 	return isEmpty
+}
+
+func (l *LocalDirectory) MustIsLocalDirectory() (isLocalDirectory bool) {
+	isLocalDirectory, err := l.IsLocalDirectory()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isLocalDirectory
 }
 
 func (l *LocalDirectory) MustReplaceBetweenMarkers(verbose bool) {
@@ -1146,4 +1186,3 @@ func (l *LocalDirectory) SubDirectoryExists(subDirName string, verbose bool) (su
 
 	return subDirExists, nil
 }
-

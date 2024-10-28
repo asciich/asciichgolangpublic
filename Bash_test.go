@@ -265,3 +265,78 @@ func TestBashCommandAndGetFirstLineOfStdoutAsString(t *testing.T) {
 		)
 	}
 }
+
+func TestBashGetHostDescription(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(
+					"localhost",
+					Bash().MustGetHostDescription(),
+				)
+			},
+		)
+	}
+}
+
+func TestBashRunCommandStdin(t *testing.T) {
+	tests := []struct {
+		stdin          string
+		command        []string
+		expectedOutput string
+	}{
+		{"abc", []string{"cat"}, "abc"},
+		{"abc\n", []string{"cat"}, "abc\n"},
+		{"abc \n", []string{"cat"}, "abc \n"},
+		{"abc \n ", []string{"cat"}, "abc \n "},
+		{" abc \n ", []string{"cat"}, " abc \n "},
+		{"\n abc \n ", []string{"cat"}, "\n abc \n "},
+		{"\n\n abc \n ", []string{"cat"}, "\n\n abc \n "},
+		{"\n\n abc \n x", []string{"cat"}, "\n\n abc \n x"},
+		{"x\n\n abc \n ", []string{"cat"}, "x\n\n abc \n "},
+		{"\na\nb\nc\n", []string{"cat"}, "\na\nb\nc\n"},
+		{"a\nb\nc\n", []string{"cat"}, "a\nb\nc\n"},
+		{"a\nb\nc", []string{"cat"}, "a\nb\nc"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				var bash CommandExecutor = Bash()
+				output := bash.MustRunCommandAndGetStdoutAsBytes(
+					&RunCommandOptions{
+						Command:     tt.command,
+						Verbose:     verbose,
+						StdinString: tt.stdin,
+					},
+				)
+
+				output2 := bash.MustRunCommandAndGetStdoutAsString(
+					&RunCommandOptions{
+						Command:            tt.command,
+						Verbose:            verbose,
+						LiveOutputOnStdout: true,
+						StdinString:        tt.stdin,
+					},
+				)
+
+				assert.EqualValues([]byte(tt.expectedOutput), output)
+				assert.EqualValues(tt.expectedOutput, output2)
+			},
+		)
+	}
+}

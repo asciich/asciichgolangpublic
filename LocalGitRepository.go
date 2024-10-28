@@ -22,7 +22,12 @@ func GetLocalGitReposioryFromDirectory(directory Directory) (l *LocalGitReposito
 		return nil, TracedErrorNil("directory")
 	}
 
-	if !directory.IsLocalDirectory() {
+	isLocalDirectory, err := directory.IsLocalDirectory()
+	if err != nil {
+		return nil, err
+	}
+
+	if !isLocalDirectory {
 		return nil, TracedError("Only local directories are supported.")
 	}
 

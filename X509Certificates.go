@@ -107,7 +107,12 @@ func (c *X509CertificatesService) CreateRootCaAndaddToGopass(createOptions *X509
 	}
 
 	if !certFileExists {
-		return TracedErrorf("Internal error: certFile '%v' does not exist", certFile.GetLocalPathOrEmptyStringIfUnset())
+		certFileLocalPath, err := certFile.GetLocalPathOrEmptyStringIfUnset()
+		if err != nil {
+			return err
+		}
+
+		return TracedErrorf("Internal error: certFile '%v' does not exist", certFileLocalPath)
 	}
 
 	keyFileExists, err := keyFile.Exists()
@@ -116,7 +121,12 @@ func (c *X509CertificatesService) CreateRootCaAndaddToGopass(createOptions *X509
 	}
 
 	if !keyFileExists {
-		return TracedErrorf("Internal error: keyFileExists '%v' does not exist", keyFile.GetLocalPathOrEmptyStringIfUnset())
+		keyFileLocalPath, err := keyFile.GetLocalPathOrEmptyStringIfUnset()
+		if err != nil {
+			return err
+		}
+
+		return TracedErrorf("Internal error: keyFileExists '%v' does not exist", keyFileLocalPath)
 	}
 
 	certOptions := gopassOptions.GetDeepCopy()
