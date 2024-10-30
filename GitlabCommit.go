@@ -13,6 +13,36 @@ func NewGitlabCommit() (g *GitlabCommit) {
 	return new(GitlabCommit)
 }
 
+func (g *GitlabCommit) GetAuthorEmail(verbose bool) (authorEmail string, err error) {
+	rawResponse, err := g.GetRawResponse()
+	if err != nil {
+		return "", err
+	}
+
+	authorEmail = rawResponse.AuthorEmail
+
+	if verbose {
+		commitHash, err := g.GetCommitHash()
+		if err != nil {
+			return "", err
+		}
+
+		projectUrl, err := g.GetGitlabProjectUrlAsString()
+		if err != nil {
+			return "", err
+		}
+
+		LogInfof(
+			"Gitlab commit '%s' in %s has author email '%s'.",
+			commitHash,
+			projectUrl,
+			authorEmail,
+		)
+	}
+
+	return authorEmail, nil
+}
+
 func (g *GitlabCommit) GetCommitHash() (commitHash string, err error) {
 	if g.commitHash == "" {
 		return "", TracedErrorf("commitHash not set")
@@ -246,6 +276,15 @@ func (g *GitlabCommit) IsParentCommitOf(childCommit *GitlabCommit, verbose bool)
 	}
 
 	return isParent, nil
+}
+
+func (g *GitlabCommit) MustGetAuthorEmail(verbose bool) (authorEmail string) {
+	authorEmail, err := g.GetAuthorEmail(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return authorEmail
 }
 
 func (g *GitlabCommit) MustGetCommitHash() (commitHash string) {
