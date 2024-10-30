@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"errors"
 	"reflect"
-	
+
 	"gopkg.in/yaml.v3"
 )
 

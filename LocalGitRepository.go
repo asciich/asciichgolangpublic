@@ -105,7 +105,14 @@ func MustGetLocalGitRepositoryByPath(path string) (l *LocalGitRepository) {
 }
 
 func NewLocalGitRepository() (l *LocalGitRepository) {
-	return new(LocalGitRepository)
+	l = new(LocalGitRepository)
+
+	err := l.SetParentDirectoryForBaseClass(l)
+	if err != nil {
+		panic(err)
+	}
+
+	return l
 }
 
 func (l *LocalGitRepository) Add(path string) (err error) {
