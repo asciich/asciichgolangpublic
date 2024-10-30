@@ -10,8 +10,8 @@ require (
 	github.com/prometheus/client_model v0.6.1
 	github.com/prometheus/common v0.60.1
 	github.com/stretchr/testify v1.9.0
-	github.com/xanzy/go-gitlab v0.107.0
-	golang.org/x/text v0.18.0
+	github.com/xanzy/go-gitlab v0.112.0
+	golang.org/x/text v0.19.0
 	gopkg.in/yaml.v3 v3.0.1
 	libvirt.org/libvirt-go-xml v7.4.0+incompatible
 )

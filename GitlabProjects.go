@@ -112,7 +112,7 @@ func (g *GitlabProjects) DeleteProject(deleteProjectOptions *GitlabDeleteProject
 			projectPath = strings.ReplaceAll(projectPath, "//", "/")
 		}
 
-		_, err = nativeProjectsService.DeleteProject(projectPath)
+		_, err = nativeProjectsService.DeleteProject(projectPath, &gitlab.DeleteProjectOptions{})
 		if err != nil {
 			return TracedErrorf(
 				"Failed to delete gitlab project '%s' on instance '%s': '%w'",
