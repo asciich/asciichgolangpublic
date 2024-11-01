@@ -15,6 +15,11 @@ func TerminalColors() (terminalColors *TerminalColorsService) {
 	return new(TerminalColorsService)
 }
 
+// This color code resets all color settings back default.
+func (t *TerminalColorsService) GetCodeNoColor() (code string) {
+	return "\033[0m"
+}
+
 func (t *TerminalColorsService) GetCodeBlack() (code string) {
 	return "\033[0;30m"
 }
@@ -69,11 +74,6 @@ func (t *TerminalColorsService) GetCodeGreen() (code string) {
 
 func (t *TerminalColorsService) GetCodeMangenta() (code string) {
 	return "\033[0;35m"
-}
-
-// This color code resets all color settings back default.
-func (t *TerminalColorsService) GetCodeNoColor() (code string) {
-	return "\033[0m"
 }
 
 func (t *TerminalColorsService) GetCodeRed() (code string) {
