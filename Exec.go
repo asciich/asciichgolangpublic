@@ -148,23 +148,25 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 			line += b
 		}
 
-		if options.LiveOutputOnStdout {
-			mOutput := line
+		if goOn {
+			if options.LiveOutputOnStdout {
+				mOutput := line
 
-			if OS().IsRunningOnWindows() {
-				if len(mOutput) > 0 {
-					if []byte(mOutput)[0] == 0x00 {
-						mOutput = string([]byte(mOutput)[1:])
+				if OS().IsRunningOnWindows() {
+					if len(mOutput) > 0 {
+						if []byte(mOutput)[0] == 0x00 {
+							mOutput = string([]byte(mOutput)[1:])
+						}
+					}
+
+					mOutput, err = Windows().DecodeStringAsString(mOutput)
+					if err != nil {
+						return nil, err
 					}
 				}
 
-				mOutput, err = Windows().DecodeStringAsString(mOutput)
-				if err != nil {
-					return nil, err
-				}
+				fmt.Println(mOutput)
 			}
-
-			fmt.Println(mOutput)
 		}
 
 		stdoutBytes = append(stdoutBytes, []byte(line)...)
