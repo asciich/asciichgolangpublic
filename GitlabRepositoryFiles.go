@@ -185,6 +185,9 @@ func (g *GitlabRepositoryFiles) GetFiles(ref string, verbose bool) (files []*Git
 	}
 
 	fileNames, err := g.GetFileNames(ref, verbose)
+	if err != nil {
+		return nil, err
+	}
 
 	files = []*GitlabRepositoryFile{}
 	for _, name := range fileNames {
