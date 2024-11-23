@@ -596,6 +596,15 @@ func (g *GitlabProjectMergeRequests) MustGetRawMergeRequests(options *gitlab.Lis
 	return rawMergeRequests
 }
 
+func (g *GitlabProjectMergeRequests) MustGetUserId() (userId int) {
+	userId, err := g.GetUserId()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return userId
+}
+
 func (g *GitlabProjectMergeRequests) MustSetGitlabProject(gitlabProject *GitlabProject) {
 	err := g.SetGitlabProject(gitlabProject)
 	if err != nil {

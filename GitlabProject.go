@@ -778,6 +778,24 @@ func (g *GitlabProject) GetRepositoryFiles() (repositoryFiles *GitlabRepositoryF
 	return repositoryFiles, nil
 }
 
+func (g *GitlabProject) GetTagByName(tagName string) (tag *GitlabTag, err error) {
+	if tagName == "" {
+		return nil, TracedErrorEmptyString("tagName")
+	}
+
+	tags, err := g.GetTags()
+	if err != nil {
+		return nil, err
+	}
+
+	tag, err = tags.GetTagByName(tagName)
+	if err != nil {
+		return nil, err
+	}
+
+	return tag, nil
+}
+
 func (g *GitlabProject) GetTags() (gitlabTags *GitlabTags, err error) {
 	gitlabTags = NewGitlabTags()
 
@@ -787,20 +805,6 @@ func (g *GitlabProject) GetTags() (gitlabTags *GitlabTags, err error) {
 	}
 
 	return gitlabTags, err
-}
-
-func (g *GitlabProject) GetVersionTagNames(verbose bool) (versionTagNames []string, err error) {
-	tags, err := g.GetTags()
-	if err != nil {
-		return nil, err
-	}
-
-	versionTagNames, err = tags.GetVersionTagNames(verbose)
-	if err != nil {
-		return nil, err
-	}
-
-	return versionTagNames, nil
 }
 
 func (g *GitlabProject) GetVersionTags(verbose bool) (versionTags []*GitlabTag, err error) {
@@ -869,6 +873,20 @@ func (g *GitlabProject) IsPersonalProject() (isPersonalProject bool, err error) 
 	return isPersonalProject, nil
 }
 
+func (g *GitlabProject) ListVersionTagNames(verbose bool) (versionTagNames []string, err error) {
+	tags, err := g.GetTags()
+	if err != nil {
+		return nil, err
+	}
+
+	versionTagNames, err = tags.ListVersionTagNames(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return versionTagNames, nil
+}
+
 func (g *GitlabProject) MustCreate(verbose bool) {
 	err := g.Create(verbose)
 	if err != nil {
@@ -901,6 +919,15 @@ func (g *GitlabProject) MustCreateMergeRequest(options *GitlabCreateMergeRequest
 	}
 
 	return createdMergeRequest
+}
+
+func (g *GitlabProject) MustCreateReleaseFromLatestCommitInDefaultBranch(createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease) {
+	createdRelease, err := g.CreateReleaseFromLatestCommitInDefaultBranch(createReleaseOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdRelease
 }
 
 func (g *GitlabProject) MustDelete(verbose bool) {
@@ -1120,6 +1147,15 @@ func (g *GitlabProject) MustGetGitlabProjects() (projects *GitlabProjects) {
 	return projects
 }
 
+func (g *GitlabProject) MustGetGitlabReleases() (gitlabReleases *GitlabReleases) {
+	gitlabReleases, err := g.GetGitlabReleases()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitlabReleases
+}
+
 func (g *GitlabProject) MustGetId() (id int) {
 	id, err := g.GetId()
 	if err != nil {
@@ -1255,6 +1291,15 @@ func (g *GitlabProject) MustGetRawResponse() (nativeGitlabProject *gitlab.Projec
 	return nativeGitlabProject
 }
 
+func (g *GitlabProject) MustGetReleaseByName(releaseName string) (gitlabRelease *GitlabRelease) {
+	gitlabRelease, err := g.GetReleaseByName(releaseName)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitlabRelease
+}
+
 func (g *GitlabProject) MustGetRepositoryFile(options *GitlabGetRepositoryFileOptions) (repositoryFile *GitlabRepositoryFile) {
 	repositoryFile, err := g.GetRepositoryFile(options)
 	if err != nil {
@@ -1273,6 +1318,15 @@ func (g *GitlabProject) MustGetRepositoryFiles() (repositoryFiles *GitlabReposit
 	return repositoryFiles
 }
 
+func (g *GitlabProject) MustGetTagByName(tagName string) (tag *GitlabTag) {
+	tag, err := g.GetTagByName(tagName)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return tag
+}
+
 func (g *GitlabProject) MustGetTags() (gitlabTags *GitlabTags) {
 	gitlabTags, err := g.GetTags()
 	if err != nil {
@@ -1280,15 +1334,6 @@ func (g *GitlabProject) MustGetTags() (gitlabTags *GitlabTags) {
 	}
 
 	return gitlabTags
-}
-
-func (g *GitlabProject) MustGetVersionTagNames(verbose bool) (versionTagNames []string) {
-	versionTagNames, err := g.GetVersionTagNames(verbose)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-
-	return versionTagNames
 }
 
 func (g *GitlabProject) MustGetVersionTags(verbose bool) (versionTags []*GitlabTag) {
@@ -1325,6 +1370,15 @@ func (g *GitlabProject) MustIsPersonalProject() (isPersonalProject bool) {
 	}
 
 	return isPersonalProject
+}
+
+func (g *GitlabProject) MustListVersionTagNames(verbose bool) (versionTagNames []string) {
+	versionTagNames, err := g.ListVersionTagNames(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return versionTagNames
 }
 
 func (g *GitlabProject) MustMakePrivate(verbose bool) {
@@ -1433,6 +1487,24 @@ func (g *GitlabProject) WriteFileContent(options *GitlabWriteFileOptions) (gitla
 	return gitlabRepositoryFile, nil
 }
 
+func (p *GitlabProject) CreateReleaseFromLatestCommitInDefaultBranch(createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease, err error) {
+	if createReleaseOptions == nil {
+		return nil, TracedErrorNil("createReleaseOptions")
+	}
+
+	latestCommit, err := p.GetLatestCommitOfDefaultBranch(createReleaseOptions.Verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	createdRelease, err = latestCommit.CreateRelease(createReleaseOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdRelease, nil
+}
+
 func (p *GitlabProject) DeployKeyByNameExists(keyName string) (exists bool, err error) {
 	if len(keyName) <= 0 {
 		return false, TracedError("keyName is empty string")
@@ -1527,6 +1599,17 @@ func (p *GitlabProject) GetGitlabProjects() (projects *GitlabProjects, err error
 	return projects, nil
 }
 
+func (p *GitlabProject) GetGitlabReleases() (gitlabReleases *GitlabReleases, err error) {
+	gitlabReleases = NewGitlabReleases()
+
+	err = gitlabReleases.SetGitlabProject(p)
+	if err != nil {
+		return nil, err
+	}
+
+	return gitlabReleases, nil
+}
+
 func (p *GitlabProject) GetId() (id int, err error) {
 	if p.id < 0 {
 		return -1, TracedErrorf("id is set to invalid value of '%d'", p.id)
@@ -1559,6 +1642,24 @@ func (p *GitlabProject) GetNativeProjectsService() (nativeGitlabProject *gitlab.
 	}
 
 	return nativeGitlabProject, nil
+}
+
+func (p *GitlabProject) GetReleaseByName(releaseName string) (gitlabRelease *GitlabRelease, err error) {
+	if releaseName == "" {
+		return nil, TracedErrorEmptyString("releaseName")
+	}
+
+	gitlabReleases, err := p.GetGitlabReleases()
+	if err != nil {
+		return nil, err
+	}
+
+	gitlabRelease, err = gitlabReleases.GetGitlabReleaseByName(releaseName)
+	if err != nil {
+		return nil, err
+	}
+
+	return gitlabRelease, nil
 }
 
 func (p *GitlabProject) MakePrivate(verbose bool) (err error) {
