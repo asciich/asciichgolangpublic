@@ -177,6 +177,78 @@ func (g *GitlabProject) CreateMergeRequest(options *GitlabCreateMergeRequestOpti
 	return createdMergeRequest, nil
 }
 
+func (g *GitlabProject) CreateNextMajorReleaseFromLatestCommitInDefaultBranch(description string, verbose bool) (createdRelease *GitlabRelease, err error) {
+	if description == "" {
+		return nil, TracedErrorEmptyString("description")
+	}
+
+	nextPatchVersionString, err := g.GetNextMajorReleaseVersionString(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	createdRelease, err = g.CreateReleaseFromLatestCommitInDefaultBranch(
+		&GitlabCreateReleaseOptions{
+			Name:        nextPatchVersionString,
+			Description: description,
+			Verbose:     verbose,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdRelease, nil
+}
+
+func (g *GitlabProject) CreateNextMinorReleaseFromLatestCommitInDefaultBranch(description string, verbose bool) (createdRelease *GitlabRelease, err error) {
+	if description == "" {
+		return nil, TracedErrorEmptyString("description")
+	}
+
+	nextPatchVersionString, err := g.GetNextMinorReleaseVersionString(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	createdRelease, err = g.CreateReleaseFromLatestCommitInDefaultBranch(
+		&GitlabCreateReleaseOptions{
+			Name:        nextPatchVersionString,
+			Description: description,
+			Verbose:     verbose,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdRelease, nil
+}
+
+func (g *GitlabProject) CreateNextPatchReleaseFromLatestCommitInDefaultBranch(description string, verbose bool) (createdRelease *GitlabRelease, err error) {
+	if description == "" {
+		return nil, TracedErrorEmptyString("description")
+	}
+
+	nextPatchVersionString, err := g.GetNextPatchReleaseVersionString(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	createdRelease, err = g.CreateReleaseFromLatestCommitInDefaultBranch(
+		&GitlabCreateReleaseOptions{
+			Name:        nextPatchVersionString,
+			Description: description,
+			Verbose:     verbose,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdRelease, nil
+}
+
 func (g *GitlabProject) Delete(verbose bool) (err error) {
 	gitlabProjects, err := g.GetGitlabProjects()
 	if err != nil {
@@ -210,6 +282,20 @@ func (g *GitlabProject) DeleteAllBranchesExceptDefaultBranch(verbose bool) (err 
 	}
 
 	err = branches.DeleteAllBranchesExceptDefaultBranch(verbose)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *GitlabProject) DeleteAllReleases(deleteOptions *GitlabDeleteReleaseOptions) (err error) {
+	releases, err := g.GetGitlabReleases()
+	if err != nil {
+		return err
+	}
+
+	err = releases.DeleteAllReleases(deleteOptions)
 	if err != nil {
 		return err
 	}
@@ -585,6 +671,28 @@ func (g *GitlabProject) GetMergeRequests() (mergeRequestes *GitlabProjectMergeRe
 	return mergeRequestes, nil
 }
 
+func (g *GitlabProject) GetNewestSemanticVersion(verbose bool) (newestSemanticVersion *VersionSemanticVersion, err error) {
+	semanticVersions, err := g.GetSemanticVersions(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	newestVersion, err := Versions().GetLatestVersionFromSlice(semanticVersions)
+	if err != nil {
+		return nil, err
+	}
+
+	newestSemanticVersion, ok := newestVersion.(*VersionSemanticVersion)
+	if !ok {
+		return nil, TracedErrorf(
+			"Unable to get newest semantiv version from '%v'",
+			newestVersion,
+		)
+	}
+
+	return newestSemanticVersion, nil
+}
+
 func (g *GitlabProject) GetNewestVersion(verbose bool) (newestVersion Version, err error) {
 	availableVersions, err := g.GetVersions(verbose)
 	if err != nil {
@@ -615,6 +723,63 @@ func (g *GitlabProject) GetNewestVersionAsString(verbose bool) (newestVersionStr
 	}
 
 	return newestVersionString, nil
+}
+
+func (g *GitlabProject) GetNextMajorReleaseVersionString(verbose bool) (nextVersionString string, err error) {
+	newestVersion, err := g.GetNewestSemanticVersion(verbose)
+	if err != nil {
+		return "", err
+	}
+
+	nextVersion, err := newestVersion.GetNextVersion("major")
+	if err != nil {
+		return "", err
+	}
+
+	nextVersionString, err = nextVersion.GetAsString()
+	if err != nil {
+		return "", err
+	}
+
+	return nextVersionString, nil
+}
+
+func (g *GitlabProject) GetNextMinorReleaseVersionString(verbose bool) (nextVersionString string, err error) {
+	newestVersion, err := g.GetNewestSemanticVersion(verbose)
+	if err != nil {
+		return "", err
+	}
+
+	nextVersion, err := newestVersion.GetNextVersion("minor")
+	if err != nil {
+		return "", err
+	}
+
+	nextVersionString, err = nextVersion.GetAsString()
+	if err != nil {
+		return "", err
+	}
+
+	return nextVersionString, nil
+}
+
+func (g *GitlabProject) GetNextPatchReleaseVersionString(verbose bool) (nextVersionString string, err error) {
+	newestVersion, err := g.GetNewestSemanticVersion(verbose)
+	if err != nil {
+		return "", err
+	}
+
+	nextVersion, err := newestVersion.GetNextVersion("patch")
+	if err != nil {
+		return "", err
+	}
+
+	nextVersionString, err = nextVersion.GetAsString()
+	if err != nil {
+		return "", err
+	}
+
+	return nextVersionString, nil
 }
 
 func (g *GitlabProject) GetOpenMergeRequestBySourceAndTargetBranch(sourceBranchName string, targetBranchName string, verbose bool) (mergeRequest *GitlabMergeRequest, err error) {
@@ -778,6 +943,22 @@ func (g *GitlabProject) GetRepositoryFiles() (repositoryFiles *GitlabRepositoryF
 	return repositoryFiles, nil
 }
 
+func (g *GitlabProject) GetSemanticVersions(verbose bool) (semanticVersions []Version, err error) {
+	versions, err := g.GetVersions(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	semanticVersions = []Version{}
+	for _, toAdd := range versions {
+		if toAdd.IsSemanticVersion() {
+			semanticVersions = append(semanticVersions, toAdd)
+		}
+	}
+
+	return semanticVersions, nil
+}
+
 func (g *GitlabProject) GetTagByName(tagName string) (tag *GitlabTag, err error) {
 	if tagName == "" {
 		return nil, TracedErrorEmptyString("tagName")
@@ -921,6 +1102,33 @@ func (g *GitlabProject) MustCreateMergeRequest(options *GitlabCreateMergeRequest
 	return createdMergeRequest
 }
 
+func (g *GitlabProject) MustCreateNextMajorReleaseFromLatestCommitInDefaultBranch(description string, verbose bool) (createdRelease *GitlabRelease) {
+	createdRelease, err := g.CreateNextMajorReleaseFromLatestCommitInDefaultBranch(description, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdRelease
+}
+
+func (g *GitlabProject) MustCreateNextMinorReleaseFromLatestCommitInDefaultBranch(description string, verbose bool) (createdRelease *GitlabRelease) {
+	createdRelease, err := g.CreateNextMinorReleaseFromLatestCommitInDefaultBranch(description, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdRelease
+}
+
+func (g *GitlabProject) MustCreateNextPatchReleaseFromLatestCommitInDefaultBranch(description string, verbose bool) (createdRelease *GitlabRelease) {
+	createdRelease, err := g.CreateNextPatchReleaseFromLatestCommitInDefaultBranch(description, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdRelease
+}
+
 func (g *GitlabProject) MustCreateReleaseFromLatestCommitInDefaultBranch(createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease) {
 	createdRelease, err := g.CreateReleaseFromLatestCommitInDefaultBranch(createReleaseOptions)
 	if err != nil {
@@ -939,6 +1147,13 @@ func (g *GitlabProject) MustDelete(verbose bool) {
 
 func (g *GitlabProject) MustDeleteAllBranchesExceptDefaultBranch(verbose bool) {
 	err := g.DeleteAllBranchesExceptDefaultBranch(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (g *GitlabProject) MustDeleteAllReleases(deleteOptions *GitlabDeleteReleaseOptions) {
+	err := g.DeleteAllReleases(deleteOptions)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -1219,6 +1434,15 @@ func (g *GitlabProject) MustGetNativeProjectsService() (nativeGitlabProject *git
 	return nativeGitlabProject
 }
 
+func (g *GitlabProject) MustGetNewestSemanticVersion(verbose bool) (newestSemanticVersion *VersionSemanticVersion) {
+	newestSemanticVersion, err := g.GetNewestSemanticVersion(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return newestSemanticVersion
+}
+
 func (g *GitlabProject) MustGetNewestVersion(verbose bool) (newestVersion Version) {
 	newestVersion, err := g.GetNewestVersion(verbose)
 	if err != nil {
@@ -1235,6 +1459,33 @@ func (g *GitlabProject) MustGetNewestVersionAsString(verbose bool) (newestVersio
 	}
 
 	return newestVersionString
+}
+
+func (g *GitlabProject) MustGetNextMajorReleaseVersionString(verbose bool) (nextVersionString string) {
+	nextVersionString, err := g.GetNextMajorReleaseVersionString(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return nextVersionString
+}
+
+func (g *GitlabProject) MustGetNextMinorReleaseVersionString(verbose bool) (nextVersionString string) {
+	nextVersionString, err := g.GetNextMinorReleaseVersionString(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return nextVersionString
+}
+
+func (g *GitlabProject) MustGetNextPatchReleaseVersionString(verbose bool) (nextVersionString string) {
+	nextVersionString, err := g.GetNextPatchReleaseVersionString(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return nextVersionString
 }
 
 func (g *GitlabProject) MustGetOpenMergeRequestBySourceAndTargetBranch(sourceBranchName string, targetBranchName string, verbose bool) (mergeRequest *GitlabMergeRequest) {
@@ -1316,6 +1567,15 @@ func (g *GitlabProject) MustGetRepositoryFiles() (repositoryFiles *GitlabReposit
 	}
 
 	return repositoryFiles
+}
+
+func (g *GitlabProject) MustGetSemanticVersions(verbose bool) (semanticVersions []Version) {
+	semanticVersions, err := g.GetSemanticVersions(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return semanticVersions
 }
 
 func (g *GitlabProject) MustGetTagByName(tagName string) (tag *GitlabTag) {
@@ -1441,6 +1701,15 @@ func (g *GitlabProject) MustWriteFileContent(options *GitlabWriteFileOptions) (g
 	return gitlabRepositoryFile
 }
 
+func (g *GitlabProject) MustWriteFileContentInDefaultBranch(writeOptions *GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile) {
+	gitlabRepositoryFile, err := g.WriteFileContentInDefaultBranch(writeOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitlabRepositoryFile
+}
+
 func (g *GitlabProject) ReadFileContentAsString(options *GitlabReadFileOptions) (content string, err error) {
 	if options == nil {
 		return "", TracedErrorNil("options")
@@ -1480,6 +1749,24 @@ func (g *GitlabProject) WriteFileContent(options *GitlabWriteFileOptions) (gitla
 	}
 
 	gitlabRepositoryFile, err = repositoryFiles.WriteFileContent(options)
+	if err != nil {
+		return nil, err
+	}
+
+	return gitlabRepositoryFile, nil
+}
+
+func (g *GitlabProject) WriteFileContentInDefaultBranch(writeOptions *GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile, err error) {
+	if writeOptions == nil {
+		return nil, TracedErrorNil("writeOptions")
+	}
+
+	defaultBranch, err := g.GetDefaultBranch()
+	if err != nil {
+		return nil, err
+	}
+
+	gitlabRepositoryFile, err = defaultBranch.WriteFileContent(writeOptions)
 	if err != nil {
 		return nil, err
 	}

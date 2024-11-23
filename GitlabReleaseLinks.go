@@ -10,40 +10,6 @@ func NewGitlabReleaseLinks() (g *GitlabReleaseLinks) {
 	return new(GitlabReleaseLinks)
 }
 
-func (g *GitlabReleaseLinks) ListReleaseLinkNames(verbose bool) (releaseLinkNames []string, err error) {
-	releaseLinks, err := g.ListReleaseLinks(verbose)
-	if err != nil {
-		return nil, err
-	}
-
-	releaseLinkNames = []string{}
-	for _, link := range releaseLinks {
-		toAdd, err := link.GetName()
-		if err != nil {
-			return nil, err
-		}
-
-		releaseLinkNames = append(releaseLinkNames, toAdd)
-	}
-
-	return releaseLinkNames, nil
-}
-
-func (g *GitlabReleaseLinks) ReleaseLinkByNameExists(linkName string, verbose bool) (exists bool, err error) {
-	if linkName == "" {
-		return false, TracedErrorEmptyString("linkName")
-	}
-
-	releaseNames, err := g.ListReleaseLinkNames(verbose)
-	if err != nil {
-		return false, err
-	}
-
-	exists = Slices().ContainsString(releaseNames, linkName)
-
-	return exists, nil
-}
-
 func (g *GitlabReleaseLinks) CreateReleaseLink(createOptions *GitlabCreateReleaseLinkOptions) (createdReleaseLink *GitlabReleaseLink, err error) {
 	if createOptions == nil {
 		return nil, TracedErrorNil("createOptions")
@@ -241,6 +207,25 @@ func (g *GitlabReleaseLinks) HasReleaseLinks(verbose bool) (hasReleaseLinks bool
 	return hasReleaseLinks, nil
 }
 
+func (g *GitlabReleaseLinks) ListReleaseLinkNames(verbose bool) (releaseLinkNames []string, err error) {
+	releaseLinks, err := g.ListReleaseLinks(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	releaseLinkNames = []string{}
+	for _, link := range releaseLinks {
+		toAdd, err := link.GetName()
+		if err != nil {
+			return nil, err
+		}
+
+		releaseLinkNames = append(releaseLinkNames, toAdd)
+	}
+
+	return releaseLinkNames, nil
+}
+
 func (g *GitlabReleaseLinks) ListReleaseLinkUrls(verbose bool) (releaseLinkUrls []string, err error) {
 	releaseLinks, err := g.ListReleaseLinks(verbose)
 	if err != nil {
@@ -394,6 +379,15 @@ func (g *GitlabReleaseLinks) MustHasReleaseLinks(verbose bool) (hasReleaseLinks 
 	return hasReleaseLinks
 }
 
+func (g *GitlabReleaseLinks) MustListReleaseLinkNames(verbose bool) (releaseLinkNames []string) {
+	releaseLinkNames, err := g.ListReleaseLinkNames(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return releaseLinkNames
+}
+
 func (g *GitlabReleaseLinks) MustListReleaseLinkUrls(verbose bool) (releaseLinkUrls []string) {
 	releaseLinkUrls, err := g.ListReleaseLinkUrls(verbose)
 	if err != nil {
@@ -412,11 +406,35 @@ func (g *GitlabReleaseLinks) MustListReleaseLinks(verbose bool) (releaseLinks []
 	return releaseLinks
 }
 
+func (g *GitlabReleaseLinks) MustReleaseLinkByNameExists(linkName string, verbose bool) (exists bool) {
+	exists, err := g.ReleaseLinkByNameExists(linkName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return exists
+}
+
 func (g *GitlabReleaseLinks) MustSetGitlabRelease(gitlabRelease *GitlabRelease) {
 	err := g.SetGitlabRelease(gitlabRelease)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (g *GitlabReleaseLinks) ReleaseLinkByNameExists(linkName string, verbose bool) (exists bool, err error) {
+	if linkName == "" {
+		return false, TracedErrorEmptyString("linkName")
+	}
+
+	releaseNames, err := g.ListReleaseLinkNames(verbose)
+	if err != nil {
+		return false, err
+	}
+
+	exists = Slices().ContainsString(releaseNames, linkName)
+
+	return exists, nil
 }
 
 func (g *GitlabReleaseLinks) SetGitlabRelease(gitlabRelease *GitlabRelease) (err error) {
