@@ -626,6 +626,21 @@ func (g *GitlabInstance) GetNativeMergeRequestsService() (nativeClient *gitlab.M
 	return nativeClient, nil
 }
 
+func (g *GitlabInstance) GetNativeReleaseLinksClient() (nativeClient *gitlab.ReleaseLinksService, err error) {
+	client, err := g.GetNativeClient()
+	if err != nil {
+		return nil, err
+	}
+
+	nativeClient = client.ReleaseLinks
+
+	if nativeClient == nil {
+		return nil, TracedError("native client is nil after evaluation.")
+	}
+
+	return nativeClient, nil
+}
+
 func (g *GitlabInstance) GetNativeReleasesClient() (nativeReleasesClient *gitlab.ReleasesService, err error) {
 	gitlabClient, err := g.GetNativeClient()
 	if err != nil {
@@ -1113,6 +1128,15 @@ func (g *GitlabInstance) MustGetNativeClient() (nativeClient *gitlab.Client) {
 
 func (g *GitlabInstance) MustGetNativeMergeRequestsService() (nativeClient *gitlab.MergeRequestsService) {
 	nativeClient, err := g.GetNativeMergeRequestsService()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return nativeClient
+}
+
+func (g *GitlabInstance) MustGetNativeReleaseLinksClient() (nativeClient *gitlab.ReleaseLinksService) {
+	nativeClient, err := g.GetNativeReleaseLinksClient()
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

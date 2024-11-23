@@ -35,34 +35,49 @@ func (g *GitlabReleases) CreateRelease(createReleaseOptions *GitlabCreateRelease
 		return nil, err
 	}
 
-	_, _, err = nativeClient.CreateRelease(
-		projectId,
-		&gitlab.CreateReleaseOptions{
-			Name:        &releaseName,
-			TagName:     &releaseName,
-			Description: &description,
-		},
-	)
+	exists, err := g.ReleaseByNameExists(releaseName, createReleaseOptions.Verbose)
 	if err != nil {
-		return nil, TracedErrorf(
-			"Create release '%s' in gitlab project %s failed: %w",
-			releaseName,
-			projectUrl,
-			err,
+		return nil, err
+	}
+
+	if exists {
+		if createReleaseOptions.Verbose {
+			LogInfof(
+				"Release '%s' already exists in gitlab project %s . Skip creation.",
+				releaseName,
+				projectUrl,
+			)
+		}
+	} else {
+		_, _, err = nativeClient.CreateRelease(
+			projectId,
+			&gitlab.CreateReleaseOptions{
+				Name:        &releaseName,
+				TagName:     &releaseName,
+				Description: &description,
+			},
 		)
+		if err != nil {
+			return nil, TracedErrorf(
+				"Create release '%s' in gitlab project %s failed: %w",
+				releaseName,
+				projectUrl,
+				err,
+			)
+		}
+
+		if createReleaseOptions.Verbose {
+			LogChangedf(
+				"Created release '%s' in gitlab project %s",
+				releaseName,
+				projectUrl,
+			)
+		}
 	}
 
 	createdRelease, err = g.GetGitlabReleaseByName(releaseName)
 	if err != nil {
 		return nil, err
-	}
-
-	if createReleaseOptions.Verbose {
-		LogChangedf(
-			"Created release '%s' in gitlab project %s",
-			releaseName,
-			projectUrl,
-		)
 	}
 
 	return createdRelease, nil
@@ -238,11 +253,38 @@ func (g *GitlabReleases) MustGetProjectUrl() (projectUrl string) {
 	return projectUrl
 }
 
+func (g *GitlabReleases) MustReleaseByNameExists(releaseName string, verbose bool) (exists bool) {
+	exists, err := g.ReleaseByNameExists(releaseName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return exists
+}
+
 func (g *GitlabReleases) MustSetGitlabProject(gitlabProject *GitlabProject) {
 	err := g.SetGitlabProject(gitlabProject)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (g *GitlabReleases) ReleaseByNameExists(releaseName string, verbose bool) (exists bool, err error) {
+	if releaseName == "" {
+		return false, TracedErrorEmptyString("releaseName")
+	}
+
+	release, err := g.GetGitlabReleaseByName(releaseName)
+	if err != nil {
+		return false, err
+	}
+
+	exists, err = release.Exists(verbose)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
 }
 
 func (g *GitlabReleases) SetGitlabProject(gitlabProject *GitlabProject) (err error) {
