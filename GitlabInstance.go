@@ -13,18 +13,6 @@ type GitlabInstance struct {
 	currentlyUsedAccessToken *string
 }
 
-func (g *GitlabInstance) GetDeepCopy() (copy *GitlabInstance) {
-	copy = NewGitlab()
-
-	*copy = *g
-
-	if g.currentlyUsedAccessToken != nil {
-		copy.currentlyUsedAccessToken = g.currentlyUsedAccessToken
-	}
-
-	return copy
-}
-
 func GetGitlabByFQDN(fqdn string) (gitlab *GitlabInstance, err error) {
 	if len(fqdn) <= 0 {
 		return nil, TracedError("fqdn is empty string")
@@ -93,6 +81,21 @@ func (g *GitlabInstance) GetCurrentUsersUsername(verbose bool) (currentUserName 
 	}
 
 	return currentUserName, nil
+}
+
+// Returns the `userId` of the currently logged in user.
+func (g *GitlabInstance) GetUserId() (userId int, err error) {
+	users, err := g.GetGitlabUsers()
+	if err != nil {
+		return -1, err
+	}
+
+	userId, err = users.GetUserId()
+	if err != nil {
+		return -1, err
+	}
+
+	return userId, nil
 }
 
 // Returns the human readable gitlab user name also known as display name.
@@ -388,6 +391,18 @@ func (g *GitlabInstance) GetCurrentlyUsedAccessToken() (gitlabAccessToken string
 	return *g.currentlyUsedAccessToken, nil
 }
 
+func (g *GitlabInstance) GetDeepCopy() (copy *GitlabInstance) {
+	copy = NewGitlab()
+
+	*copy = *g
+
+	if g.currentlyUsedAccessToken != nil {
+		copy.currentlyUsedAccessToken = g.currentlyUsedAccessToken
+	}
+
+	return copy
+}
+
 func (g *GitlabInstance) GetDockerContainerOnGitlabHost(containerName string, sshUserName string) (dockerContainer *DockerContainer, err error) {
 	if len(containerName) <= 0 {
 		return nil, TracedError("containerName is empty string")
@@ -611,6 +626,23 @@ func (g *GitlabInstance) GetNativeMergeRequestsService() (nativeClient *gitlab.M
 	return nativeClient, nil
 }
 
+func (g *GitlabInstance) GetNativeReleasesClient() (nativeReleasesClient *gitlab.ReleasesService, err error) {
+	gitlabClient, err := g.GetNativeClient()
+	if err != nil {
+		return nil, err
+	}
+
+	nativeReleasesClient = gitlabClient.Releases
+
+	if nativeReleasesClient == nil {
+		return nil, TracedError(
+			"Native releases client is empty string after evaluation.",
+		)
+	}
+
+	return nativeReleasesClient, nil
+}
+
 func (g *GitlabInstance) GetNativeRepositoriesClient() (nativeRepositoriesClient *gitlab.RepositoriesService, err error) {
 	client, err := g.GetNativeClient()
 	if err != nil {
@@ -788,21 +820,6 @@ func (g *GitlabInstance) GetUserByUsername(username string) (gitlabUser *GitlabU
 	}
 
 	return gitlabUser, nil
-}
-
-// Returns the `userId` of the currently logged in user.
-func (g *GitlabInstance) GetUserId() (userId int, err error) {
-	users, err := g.GetGitlabUsers()
-	if err != nil {
-		return -1, err
-	}
-
-	userId, err = users.GetUserId()
-	if err != nil {
-		return -1, err
-	}
-
-	return userId, nil
 }
 
 func (g *GitlabInstance) GetUserNameList(verbose bool) (userNames []string, err error) {
@@ -1101,6 +1118,15 @@ func (g *GitlabInstance) MustGetNativeMergeRequestsService() (nativeClient *gitl
 	}
 
 	return nativeClient
+}
+
+func (g *GitlabInstance) MustGetNativeReleasesClient() (nativeReleasesClient *gitlab.ReleasesService) {
+	nativeReleasesClient, err := g.GetNativeReleasesClient()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return nativeReleasesClient
 }
 
 func (g *GitlabInstance) MustGetNativeRepositoriesClient() (nativeRepositoriesClient *gitlab.RepositoriesService) {

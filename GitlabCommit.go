@@ -13,6 +13,64 @@ func NewGitlabCommit() (g *GitlabCommit) {
 	return new(GitlabCommit)
 }
 
+func (g *GitlabCommit) CreateRelease(createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease, err error) {
+	if createReleaseOptions == nil {
+		return nil, TracedErrorNil("createReleaseOptions")
+	}
+
+	releaseName, err := createReleaseOptions.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	createTagOptions := &GitlabCreateTagOptions{
+		Name:    releaseName,
+		Verbose: createReleaseOptions.Verbose,
+	}
+
+	createdTag, err := g.CreateTag(createTagOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	createdRelease, err = createdTag.CreateRelease(createReleaseOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdRelease, nil
+}
+
+func (g *GitlabCommit) CreateTag(createTagOptions *GitlabCreateTagOptions) (createdTag *GitlabTag, err error) {
+	if createTagOptions == nil {
+		return nil, TracedErrorNil("createTagOptions")
+	}
+
+	tags, err := g.GetGitlabTags()
+	if err != nil {
+		return nil, err
+	}
+
+	optionsToUse := createTagOptions.GetDeepCopy()
+
+	commitHash, err := g.GetCommitHash()
+	if err != nil {
+		return nil, err
+	}
+
+	err = optionsToUse.SetRef(commitHash)
+	if err != nil {
+		return nil, err
+	}
+
+	createdTag, err = tags.CreateTag(optionsToUse)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdTag, nil
+}
+
 func (g *GitlabCommit) GetAuthorEmail(verbose bool) (authorEmail string, err error) {
 	rawResponse, err := g.GetRawResponse()
 	if err != nil {
@@ -99,6 +157,20 @@ func (g *GitlabCommit) GetGitlabProjectsCommits() (gitlabProjectsCommit *GitlabP
 	}
 
 	return g.gitlabProjectsCommits, nil
+}
+
+func (g *GitlabCommit) GetGitlabTags() (gitlabTags *GitlabTags, err error) {
+	gitlabProject, err := g.GetGitlabProject()
+	if err != nil {
+		return nil, err
+	}
+
+	gitlabTags, err = gitlabProject.GetTags()
+	if err != nil {
+		return nil, err
+	}
+
+	return gitlabTags, nil
 }
 
 func (g *GitlabCommit) GetNativeCommitsService() (nativeCommitsService *gitlab.CommitsService, err error) {
@@ -278,6 +350,24 @@ func (g *GitlabCommit) IsParentCommitOf(childCommit *GitlabCommit, verbose bool)
 	return isParent, nil
 }
 
+func (g *GitlabCommit) MustCreateRelease(createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease) {
+	createdRelease, err := g.CreateRelease(createReleaseOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdRelease
+}
+
+func (g *GitlabCommit) MustCreateTag(createTagOptions *GitlabCreateTagOptions) (createdTag *GitlabTag) {
+	createdTag, err := g.CreateTag(createTagOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdTag
+}
+
 func (g *GitlabCommit) MustGetAuthorEmail(verbose bool) (authorEmail string) {
 	authorEmail, err := g.GetAuthorEmail(verbose)
 	if err != nil {
@@ -330,6 +420,15 @@ func (g *GitlabCommit) MustGetGitlabProjectsCommits() (gitlabProjectsCommit *Git
 	}
 
 	return gitlabProjectsCommit
+}
+
+func (g *GitlabCommit) MustGetGitlabTags() (gitlabTags *GitlabTags) {
+	gitlabTags, err := g.GetGitlabTags()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitlabTags
 }
 
 func (g *GitlabCommit) MustGetNativeCommitsService() (nativeCommitsService *gitlab.CommitsService) {

@@ -18,6 +18,14 @@ func (g *GitlabReadFileOptions) GetBranchName() (branchName string, err error) {
 	return g.BranchName, nil
 }
 
+func (g *GitlabReadFileOptions) GetDeepCopy() (deepCopy *GitlabReadFileOptions) {
+	deepCopy = NewGitlabReadFileOptions()
+
+	*deepCopy = *g
+
+	return deepCopy
+}
+
 func (g *GitlabReadFileOptions) GetGitlabGetRepositoryFileOptions() (getOptions *GitlabGetRepositoryFileOptions, err error) {
 	getOptions = NewGitlabGetRepositoryFileOptions()
 	getOptions.Path = g.Path
@@ -102,12 +110,4 @@ func (g *GitlabReadFileOptions) SetPath(path string) (err error) {
 
 func (g *GitlabReadFileOptions) SetVerbose(verbose bool) {
 	g.Verbose = verbose
-}
-
-func (g *GitlabReadFileOptions) GetDeepCopy() (deepCopy *GitlabReadFileOptions) {
-	deepCopy = NewGitlabReadFileOptions()
-
-	*deepCopy = *g
-
-	return deepCopy
 }
