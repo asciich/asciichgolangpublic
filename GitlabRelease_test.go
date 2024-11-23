@@ -167,3 +167,86 @@ func TestGitlabRelease_ReleaseLinks(t *testing.T) {
 		)
 	}
 }
+
+func TestGitlabRelease_CreateNewPatchRelease(t *testing.T) {
+	if ContinuousIntegration().IsRunningInGithub() {
+		LogInfo("Unavailable in Github CI")
+		return
+	}
+
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitlabFQDN := "gitlab.asciich.ch"
+
+				gitlab := MustGetGitlabByFqdn(gitlabFQDN)
+				gitlab.MustAuthenticate(&GitlabAuthenticationOptions{
+					AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
+				})
+
+				const projectPath string = "test_group/testproject"
+
+				const releaseDescription string = "Release description."
+
+				project := gitlab.MustGetGitlabProjectByPath(projectPath, verbose)
+
+				project.MustDeleteAllReleases(
+					&GitlabDeleteReleaseOptions{
+						Verbose:                verbose,
+						DeleteCorrespondingTag: true,
+					},
+				)
+
+				release := project.MustCreateReleaseFromLatestCommitInDefaultBranch(
+					&GitlabCreateReleaseOptions{
+						Name:        "v1.2.3",
+						Description: releaseDescription,
+						Verbose:     verbose,
+					},
+				)
+				assert.True(release.MustExists(verbose))
+
+				project.MustWriteFileContentInDefaultBranch(
+					&GitlabWriteFileOptions{
+						Path:          "random.txt",
+						Content:       []byte(RandomGenerator().MustGetRandomString(50)),
+						CommitMessage: "Dummy change to test release.",
+						Verbose:       verbose,
+					},
+				)
+
+				nextPatchRelease := project.MustCreateNextPatchReleaseFromLatestCommitInDefaultBranch("next patch release", verbose)
+
+				assert.EqualValues(
+					"v1.2.4",
+					nextPatchRelease.MustGetName(),
+				)
+
+				nextMinorRelease := project.MustCreateNextMinorReleaseFromLatestCommitInDefaultBranch("next minor release", verbose)
+
+				assert.EqualValues(
+					"v1.3.0",
+					nextMinorRelease.MustGetName(),
+				)
+
+				nextMajorRelease := project.MustCreateNextMajorReleaseFromLatestCommitInDefaultBranch("next minor release", verbose)
+
+				assert.EqualValues(
+					"v2.0.0",
+					nextMajorRelease.MustGetName(),
+				)
+			},
+		)
+	}
+}

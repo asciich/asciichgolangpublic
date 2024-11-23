@@ -83,6 +83,39 @@ func (g *GitlabReleases) CreateRelease(createReleaseOptions *GitlabCreateRelease
 	return createdRelease, nil
 }
 
+func (g *GitlabReleases) DeleteAllReleases(options *GitlabDeleteReleaseOptions) (err error) {
+	if options == nil {
+		return TracedErrorNil("options")
+	}
+
+	releaseList, err := g.ListReleases(options.Verbose)
+	if err != nil {
+		return err
+	}
+
+	for _, toDelete := range releaseList {
+		err = toDelete.Delete(options)
+		if err != nil {
+			return err
+		}
+	}
+
+	if options.Verbose {
+		projectUrl, err := g.GetProjectUrl()
+		if err != nil {
+			return err
+		}
+
+		LogChangedf(
+			"Deleted '%d' releases from gitlab project %s .",
+			len(releaseList),
+			projectUrl,
+		)
+	}
+
+	return err
+}
+
 func (g *GitlabReleases) GetGitlab() (gitlab *GitlabInstance, err error) {
 	project, err := g.GetGitlabProject()
 	if err != nil {
@@ -181,6 +214,43 @@ func (g *GitlabReleases) GetProjectUrl() (projectUrl string, err error) {
 	return projectUrl, nil
 }
 
+func (g *GitlabReleases) ListReleases(verbose bool) (releaseList []*GitlabRelease, err error) {
+	projectId, projectUrl, err := g.GetProjectIdAndUrl()
+	if err != nil {
+		return nil, err
+	}
+
+	nativeClient, err := g.GetNativeReleasesClient()
+	if err != nil {
+		return nil, err
+	}
+
+	rawReleases, _, err := nativeClient.ListReleases(
+		projectId,
+		&gitlab.ListReleasesOptions{},
+		nil,
+	)
+	if err != nil {
+		return nil, TracedErrorf(
+			"Unable to list releases of gitlab project %s : %w",
+			projectUrl,
+			err,
+		)
+	}
+
+	releaseList = []*GitlabRelease{}
+	for _, raw := range rawReleases {
+		toAdd, err := g.GetGitlabReleaseByName(raw.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		releaseList = append(releaseList, toAdd)
+	}
+
+	return releaseList, nil
+}
+
 func (g *GitlabReleases) MustCreateRelease(createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease) {
 	createdRelease, err := g.CreateRelease(createReleaseOptions)
 	if err != nil {
@@ -188,6 +258,13 @@ func (g *GitlabReleases) MustCreateRelease(createReleaseOptions *GitlabCreateRel
 	}
 
 	return createdRelease
+}
+
+func (g *GitlabReleases) MustDeleteAllReleases(options *GitlabDeleteReleaseOptions) {
+	err := g.DeleteAllReleases(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (g *GitlabReleases) MustGetGitlab() (gitlab *GitlabInstance) {
@@ -251,6 +328,15 @@ func (g *GitlabReleases) MustGetProjectUrl() (projectUrl string) {
 	}
 
 	return projectUrl
+}
+
+func (g *GitlabReleases) MustListReleases(verbose bool) (releaseList []*GitlabRelease) {
+	releaseList, err := g.ListReleases(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return releaseList
 }
 
 func (g *GitlabReleases) MustReleaseByNameExists(releaseName string, verbose bool) (exists bool) {
