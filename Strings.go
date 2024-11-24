@@ -449,7 +449,13 @@ func (s *StringsService) SplitLines(input string) (splittedLines []string) {
 		return []string{}
 	}
 
-	splittedLines = strings.Split(input, "\n")
+	toSplit := strings.ReplaceAll(input, "\r\n", "\n")
+	splittedLines = strings.Split(toSplit, "\n")
+
+	if len(splittedLines) > 1 {
+		splittedLines = Slices().RemoveLastElementIfEmptyString(splittedLines)
+	}
+
 	return splittedLines
 }
 

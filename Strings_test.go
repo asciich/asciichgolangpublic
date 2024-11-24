@@ -364,6 +364,41 @@ func TestStringsIsFirstCharUpperCase(t *testing.T) {
 	}
 }
 
+func TestStringsSplitLines(t *testing.T) {
+	tests := []struct {
+		input         string
+		expectedLines []string
+	}{
+		{"", []string{}},
+		{"hello", []string{"hello"}},
+		{"hello\nworld", []string{"hello", "world"}},
+		{"hello\r\nworld", []string{"hello", "world"}},
+		{"hello\nworld\n", []string{"hello", "world"}},
+		{"hello\nworld\n\n", []string{"hello", "world", ""}},
+		{"hello\nworld\n\nabc", []string{"hello", "world", "", "abc"}},
+		{"hello\r\nworld\r\n", []string{"hello", "world"}},
+		{"hello\r\nworld\r\n\r\n", []string{"hello", "world", ""}},
+		{"hello\nworld\nworld2", []string{"hello", "world", "world2"}},
+		{"hello\r\nworld\r\nworld2", []string{"hello", "world", "world2"}},
+		{"hello\nworld\nworld2\n", []string{"hello", "world", "world2"}},
+		{"hello\r\nworld\r\nworld2\r\n", []string{"hello", "world", "world2"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(
+					tt.expectedLines,
+					Strings().SplitLines(tt.input),
+				)
+			},
+		)
+	}
+}
+
 func TestStringsSplitWords(t *testing.T) {
 	tests := []struct {
 		input         string
