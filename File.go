@@ -43,6 +43,7 @@ type File interface {
 
 	// All methods below this line can be implemented by embedding the `FileBase` struct:
 	AppendLine(line string, verbose bool) (err error)
+	CreateParentDirectory(verbose bool) (err error)
 	EnsureLineInFile(line string, verbose bool) (err error)
 	EnsureEndsWithLineBreak(verbose bool) (err error)
 	GetCreationDateByFileName(verbose bool) (creationDate *time.Time, err error)
@@ -59,6 +60,7 @@ type File interface {
 	IsPgpEncrypted(verbose bool) (isPgpEncrypted bool, err error)
 	IsYYYYmmdd_HHMMSSPrefix() (hasDatePrefix bool, err error)
 	MustAppendLine(line string, verbose bool)
+	MustCreateParentDirectory(verbose bool)
 	MustEnsureEndsWithLineBreak(verbose bool)
 	MustEnsureLineInFile(line string, verbose bool)
 	MustGetCreationDateByFileName(verbose bool) (creationDate *time.Time)

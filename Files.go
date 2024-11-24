@@ -7,10 +7,6 @@ func Files() (f *FilesService) {
 	return NewFilesService()
 }
 
-func ReadFileAsString(path string) (content string, err error) {
-	return Files().ReadAsString(path)
-}
-
 func MustReadFileAsString(path string) (content string) {
 	content, err := ReadFileAsString(path)
 	if err != nil {
@@ -29,6 +25,10 @@ func MustWriteStringToFile(path string, content string, verbose bool) {
 
 func NewFilesService() (f *FilesService) {
 	return new(FilesService)
+}
+
+func ReadFileAsString(path string) (content string, err error) {
+	return Files().ReadAsString(path)
 }
 
 func WriteStringToFile(path string, content string, verbose bool) (err error) {

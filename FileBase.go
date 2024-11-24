@@ -42,6 +42,25 @@ func (f *FileBase) AppendLine(line string, verbose bool) (err error) {
 	return nil
 }
 
+func (f *FileBase) CreateParentDirectory(verbose bool) (err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	parentDir, err := parent.GetParentDirectory()
+	if err != nil {
+		return err
+	}
+
+	err = parentDir.Create(verbose)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (f *FileBase) EnsureEndsWithLineBreak(verbose bool) (err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
@@ -471,6 +490,13 @@ func (f *FileBase) IsYYYYmmdd_HHMMSSPrefix() (hasDatePrefix bool, err error) {
 
 func (f *FileBase) MustAppendLine(line string, verbose bool) {
 	err := f.AppendLine(line, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (f *FileBase) MustCreateParentDirectory(verbose bool) {
+	err := f.CreateParentDirectory(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
