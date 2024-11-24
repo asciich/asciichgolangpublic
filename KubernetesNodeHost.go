@@ -92,7 +92,7 @@ func (n *KubernetesNodeHost) IsKubernetesNode(verbose bool) (isKubernetesNode bo
 
 	isKubernetesNode = true
 
-	if len(Strings().SplitLines(stdout)) <= 5 {
+	if len(Strings().SplitLines(stdout, false)) <= 5 {
 		isKubernetesNode = false
 	}
 

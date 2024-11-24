@@ -219,7 +219,7 @@ func (k *KVMHypervisor) GetStoragePools(verbose bool) (storagePools []*KvmStorag
 	}
 
 	storagePools = []*KvmStoragePool{}
-	for _, line := range Strings().SplitLines(unparsedOutput) {
+	for _, line := range Strings().SplitLines(unparsedOutput, true) {
 		line = strings.TrimSpace(line)
 		if len(line) <= 0 {
 			continue
@@ -338,7 +338,7 @@ func (k *KVMHypervisor) GetVmList(verbose bool) (vms []*KvmVm, err error) {
 	}
 
 	vms = []*KvmVm{}
-	for _, line := range Strings().SplitLines(unparsedOutput) {
+	for _, line := range Strings().SplitLines(unparsedOutput, true) {
 		if len(strings.TrimSpace(line)) <= 0 {
 			continue
 		}
