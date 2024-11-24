@@ -126,6 +126,11 @@ func (f *FileBase) EnsureLineInFile(line string, verbose bool) (err error) {
 		return err
 	}
 
+	err = parent.Create(verbose) // ensure the file is created if not existent.
+	if err != nil {
+		return err
+	}
+
 	lines, err := parent.ReadAsLines()
 	if err != nil {
 		return err
