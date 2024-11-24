@@ -375,6 +375,7 @@ func TestStringsSplitLines(t *testing.T) {
 		{"hello\r\nworld", []string{"hello", "world"}},
 		{"hello\nworld\n", []string{"hello", "world"}},
 		{"hello\nworld\n\n", []string{"hello", "world", ""}},
+		{"hello\nworld\n\n\n", []string{"hello", "world", "", ""}},
 		{"hello\nworld\n\nabc", []string{"hello", "world", "", "abc"}},
 		{"hello\r\nworld\r\n", []string{"hello", "world"}},
 		{"hello\r\nworld\r\n\r\n", []string{"hello", "world", ""}},
