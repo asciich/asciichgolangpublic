@@ -162,7 +162,7 @@ func (s *StringsService) GetFirstLine(input string) (firstLine string) {
 		return ""
 	}
 
-	lines := s.SplitLines(input)
+	lines := s.SplitLines(input, false)
 	if len(lines) <= 0 {
 		return ""
 	}
@@ -195,7 +195,7 @@ func (s *StringsService) GetNumberOfLinesWithPrefix(content string, prefix strin
 
 	numberOfLinesWithPrefix = 0
 
-	for _, line := range s.SplitLines(content) {
+	for _, line := range s.SplitLines(content, false) {
 		lineToUse := line
 
 		if trimLines {
@@ -240,7 +240,7 @@ func (s *StringsService) IsComment(input string) (isComment bool) {
 		return false
 	}
 
-	for _, line := range s.SplitLines(s.RemoveTailingNewline(input)) {
+	for _, line := range s.SplitLines(input, true) {
 		trimmedLine := strings.TrimSpace(line)
 
 		if strings.HasPrefix(trimmedLine, "#") {
@@ -309,7 +309,7 @@ func (s *StringsService) RemoveCommentMarkers(input string) (commentContent stri
 	}
 
 	commentContent = ""
-	for i, line := range s.SplitLines(input) {
+	for i, line := range s.SplitLines(input, false) {
 		if i > 0 {
 			commentContent += "\n"
 		}
@@ -341,7 +341,7 @@ func (s *StringsService) RemoveComments(input string) (contentWithoutComments st
 	}
 
 	contentWithoutComments = ""
-	for _, line := range Strings().SplitLines(input) {
+	for _, line := range Strings().SplitLines(input, false) {
 		trimmed := strings.TrimSpace(line)
 		if strings.HasPrefix(trimmed, "#") {
 			continue
@@ -444,7 +444,7 @@ func (s *StringsService) SplitFirstLineAndContent(input string) (firstLine strin
 	}
 }
 
-func (s *StringsService) SplitLines(input string) (splittedLines []string) {
+func (s *StringsService) SplitLines(input string, removeLastLineIfEmpty bool) (splittedLines []string) {
 	if len(input) <= 0 {
 		return []string{}
 	}
@@ -452,8 +452,10 @@ func (s *StringsService) SplitLines(input string) (splittedLines []string) {
 	toSplit := strings.ReplaceAll(input, "\r\n", "\n")
 	splittedLines = strings.Split(toSplit, "\n")
 
-	if len(splittedLines) > 1 {
-		splittedLines = Slices().RemoveLastElementIfEmptyString(splittedLines)
+	if removeLastLineIfEmpty {
+		if len(splittedLines) > 1 {
+			splittedLines = Slices().RemoveLastElementIfEmptyString(splittedLines)
+		}
 	}
 
 	return splittedLines
@@ -534,7 +536,7 @@ func (s *StringsService) TrimPrefixIgnoreCase(input string, prefix string) (trim
 }
 
 func (s *StringsService) TrimSpaceForEveryLine(input string) (trimmedForEveryLine string) {
-	lines := s.SplitLines(input)
+	lines := s.SplitLines(input, false)
 	toJoin := Slices().TrimSpace(lines)
 	return strings.Join(toJoin, "\n")
 }

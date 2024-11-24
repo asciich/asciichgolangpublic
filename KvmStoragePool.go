@@ -81,7 +81,7 @@ func (k *KvmStoragePool) GetVolumes(verbose bool) (volumes []*KvmVolume, err err
 	}
 
 	volumes = []*KvmVolume{}
-	for _, line := range Strings().SplitLines(unparsedOutput) {
+	for _, line := range Strings().SplitLines(unparsedOutput, true) {
 		line = strings.TrimSpace(line)
 		if len(line) <= 0 {
 			continue

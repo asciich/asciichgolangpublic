@@ -935,7 +935,7 @@ func (f *FileBase) ReadAsLines() (contentLines []string, err error) {
 		return nil, err
 	}
 
-	contentLines = Strings().SplitLines(content)
+	contentLines = Strings().SplitLines(content, true)
 
 	return contentLines, nil
 }
@@ -947,7 +947,7 @@ func (f *FileBase) ReadAsLinesWithoutComments() (contentLines []string, err erro
 	}
 
 	contentString = Strings().RemoveComments(contentString)
-	contentLines = Strings().SplitLines(contentString)
+	contentLines = Strings().SplitLines(contentString, true)
 
 	return contentLines, nil
 }

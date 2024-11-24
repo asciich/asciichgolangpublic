@@ -266,7 +266,7 @@ func (o *CommandOutput) GetStdoutAsLines() (stdoutLines []string, err error) {
 		return nil, err
 	}
 
-	stdoutLines = Strings().SplitLines(stdoutString)
+	stdoutLines = Strings().SplitLines(stdoutString, false)
 
 	stdoutLines = Slices().RemoveLastElementIfEmptyString(stdoutLines)
 	return stdoutLines, nil

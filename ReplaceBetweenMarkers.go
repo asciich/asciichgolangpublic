@@ -161,7 +161,7 @@ func (r *ReplaceBetweenMarkersService) ReplaceBySourcesInString(input string, op
 	outLines := []string{}
 
 	var startMarkerFound bool = false
-	for _, line := range Strings().SplitLines(input) {
+	for _, line := range Strings().SplitLines(input, false) {
 		if Strings().IsComment(line) {
 			if r.IsReplaceBetweenMarkerStart(line) {
 				startMarkerFound = true
