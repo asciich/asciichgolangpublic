@@ -166,7 +166,7 @@ func (n *KubernetesControlplaneHost) IsKubernetesControlplane(verbose bool) (isK
 
 	isKubernetesControlplane = true
 
-	if len(Strings().SplitLines(stdout)) <= 5 {
+	if len(Strings().SplitLines(stdout, false)) <= 5 {
 		isKubernetesControlplane = false
 	}
 
