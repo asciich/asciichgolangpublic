@@ -314,7 +314,7 @@ func (c *CommandExecutorFile) GetLocalPath() (localPath string, err error) {
 		)
 	}
 
-	if !Paths().IsAbsolutePath(localPath) {
+	if !Paths().IsAbsolutePath(filePath) {
 		return "", TracedErrorf(
 			"File path '%s' is not absolute.",
 			filePath,
@@ -374,7 +374,7 @@ func (c *CommandExecutorFile) GetSizeBytes() (fileSize int64, err error) {
 	fileSize, err = commandExecutor.RunCommandAndGetStdoutAsInt64(
 		&RunCommandOptions{
 			Command: []string{
-				"stat", "--printf='%s", filePath,
+				"stat", "--printf=%s", filePath,
 			},
 			Verbose: false,
 		},

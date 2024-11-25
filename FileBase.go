@@ -20,6 +20,33 @@ func NewFileBase() (f *FileBase) {
 	return new(FileBase)
 }
 
+// Returns true if the file is a file on the local host.
+//
+// If a file can return a local path the assumption is it is a local file.
+func (f *FileBase) IsLocalFile(verbose bool) (isLocalFile bool, err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	localPath, err := parent.GetLocalPath()
+	if err != nil {
+		return false, TracedErrorf(
+			"Not implemented for %w",
+			err,
+		)
+	}
+
+	if verbose {
+		LogInfof(
+			"'%s' is a local file.",
+			localPath,
+		)
+	}
+
+	return true, nil
+}
+
 func (f *FileBase) AppendLine(line string, verbose bool) (err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
@@ -37,6 +64,24 @@ func (f *FileBase) AppendLine(line string, verbose bool) (err error) {
 	err = parent.AppendString(toWrite, verbose)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (f *FileBase) CheckIsLocalFile(verbose bool) (err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	isLocalFile, err := parent.IsLocalFile(verbose)
+	if err != nil {
+		return err
+	}
+
+	if !isLocalFile {
+		return TracedError("Not a local file")
 	}
 
 	return nil
@@ -500,6 +545,13 @@ func (f *FileBase) MustAppendLine(line string, verbose bool) {
 	}
 }
 
+func (f *FileBase) MustCheckIsLocalFile(verbose bool) {
+	err := f.CheckIsLocalFile(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (f *FileBase) MustCreateParentDirectory(verbose bool) {
 	err := f.CreateParentDirectory(verbose)
 	if err != nil {
@@ -618,6 +670,15 @@ func (f *FileBase) MustIsEmptyFile() (isEmtpyFile bool) {
 	}
 
 	return isEmtpyFile
+}
+
+func (f *FileBase) MustIsLocalFile(verbose bool) (isLocalFile bool) {
+	isLocalFile, err := f.IsLocalFile(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isLocalFile
 }
 
 func (f *FileBase) MustIsMatchingSha256Sum(sha256sum string) (isMatching bool) {
