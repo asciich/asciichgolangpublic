@@ -91,3 +91,59 @@ func TestFileBaseEnsureLineInFile_testcase1(t *testing.T) {
 		)
 	}
 }
+
+func TestFileBaseEnsureLineInFile_testcaseWriteToNonexstingString(t *testing.T) {
+	const verbose bool = true
+
+	tests := []struct {
+		fileToTest File
+		line       string
+		expected   string
+	}{
+		{
+			MustGetLocalFileByFile(TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)),
+			"hello",
+			"hello\n",
+		},
+		{
+			MustGetLocalFileByFile(TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)),
+			"hello world",
+			"hello world\n",
+		},
+		{
+			MustGetLocalCommandExecutorFileByFile(TemporaryFiles().MustCreateEmptyTemporaryFile(verbose), verbose),
+			"hello",
+			"hello\n",
+		},
+		{
+			MustGetLocalCommandExecutorFileByFile(TemporaryFiles().MustCreateEmptyTemporaryFile(verbose), verbose),
+			"hello world",
+			"hello world\n",
+		},
+	}
+
+	defer func() {
+		for _, t := range tests {
+			t.fileToTest.Delete(verbose)
+		}
+	}()
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				tt.fileToTest.MustDelete(verbose)
+
+				for i := 0; i < 2; i++ {
+					tt.fileToTest.MustEnsureLineInFile(tt.line, verbose)
+					assert.EqualValues(
+						tt.expected,
+						tt.fileToTest.MustReadAsString(),
+					)
+				}
+			},
+		)
+	}
+}
