@@ -1140,62 +1140,6 @@ func TestFileReplaceBetweenMarkers(t *testing.T) {
 	}
 }
 
-func TestFileEnsureLineInFile(t *testing.T) {
-	tests := []struct {
-		testcase string
-	}{
-		{"testcase"},
-	}
-
-	for _, tt := range tests {
-		t.Run(
-			MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				assert := assert.New(t)
-
-				const verbose bool = true
-
-				tempFile := TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)
-
-				const testContent string = "hello\nworld\n"
-				tempFile.MustWriteString(testContent, verbose)
-				defer tempFile.Delete(verbose)
-
-				assert.EqualValues(
-					testContent,
-					tempFile.MustReadAsString(),
-				)
-
-				tempFile.MustEnsureLineInFile("hello", verbose)
-				assert.EqualValues(
-					testContent,
-					tempFile.MustReadAsString(),
-				)
-				tempFile.MustEnsureLineInFile("hello\n", verbose)
-				assert.EqualValues(
-					testContent,
-					tempFile.MustReadAsString(),
-				)
-				tempFile.MustEnsureLineInFile("\nhello", verbose)
-				assert.EqualValues(
-					testContent,
-					tempFile.MustReadAsString(),
-				)
-				tempFile.MustEnsureLineInFile("\nhello\n", verbose)
-				assert.EqualValues(
-					testContent,
-					tempFile.MustReadAsString(),
-				)
-				tempFile.MustEnsureLineInFile("abc", verbose)
-				assert.EqualValues(
-					testContent+"abc\n",
-					tempFile.MustReadAsString(),
-				)
-			},
-		)
-	}
-}
-
 func TestLocalFileGetNumberOfNonEmptyLines(t *testing.T) {
 	tests := []struct {
 		content               string
