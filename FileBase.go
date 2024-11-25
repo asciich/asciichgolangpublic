@@ -56,9 +56,16 @@ func (f *FileBase) AppendLine(line string, verbose bool) (err error) {
 	toWrite := Strings().TrimAllLeadingAndTailingNewLines(line)
 	toWrite = Strings().EnsureEndsWithExactlyOneLineBreak(toWrite)
 
-	err = parent.EnsureEndsWithLineBreak(verbose)
+	isEmptyFile, err := f.IsEmptyFile()
 	if err != nil {
 		return err
+	}
+
+	if !isEmptyFile {
+		err = parent.EnsureEndsWithLineBreak(verbose)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = parent.AppendString(toWrite, verbose)
