@@ -12,6 +12,8 @@ type RunCommandOptions struct {
 
 	// Run as "root" user (or Administrator on Windows):
 	RunAsRoot bool
+
+	RemoveLastLineIfEmpty bool
 }
 
 func NewRunCommandOptions() (runCommandOptions *RunCommandOptions) {

@@ -1,5 +1,7 @@
 package asciichgolangpublic
 
+import "strings"
+
 type TmuxSession struct {
 	name string
 	tmux *TmuxService
@@ -177,6 +179,76 @@ func (t *TmuxSession) GetTmux() (tmux *TmuxService, err error) {
 	return t.tmux, nil
 }
 
+func (t *TmuxSession) GetWindowByName(windowName string) (window *TmuxWindow, err error) {
+	if windowName == "" {
+		return nil, TracedErrorEmptyString("windowName")
+	}
+
+	window = NewTmuxWindow()
+
+	err = window.SetName(windowName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = window.SetSession(t)
+	if err != nil {
+		return nil, err
+	}
+
+	return window, nil
+}
+
+func (t *TmuxSession) ListWindowNames(verbose bool) (windowsNames []string, err error) {
+	name, err := t.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	commandExecutor, err := t.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	lines, err := commandExecutor.RunCommandAndGetStdoutAsLines(
+		&RunCommandOptions{
+			Command: []string{"tmux", "list-windows", "-a"},
+			Verbose: verbose,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	windowsNames = []string{}
+
+	for _, l := range lines {
+		if strings.HasPrefix(l, name+":") {
+			splitted := strings.Split(l, ":")
+			if len(splitted) < 3 {
+				return nil, TracedErrorf("Unable to get window name out of line='%s'", l)
+			}
+
+			windowInfoString := strings.TrimSpace(splitted[2])
+
+			toAdd := strings.Split(windowInfoString, " ")[0]
+			toAdd = strings.TrimSuffix(toAdd, "*")
+
+			windowsNames = append(windowsNames, toAdd)
+		}
+	}
+
+	if verbose {
+		LogInfof(
+			"Found '%d' windows in tmux session '%s'.",
+			len(windowsNames),
+			name,
+		)
+	}
+
+	return windowsNames, nil
+}
+
 func (t *TmuxSession) MustCreate(verbose bool) {
 	err := t.Create(verbose)
 	if err != nil {
@@ -227,6 +299,31 @@ func (t *TmuxSession) MustGetTmux() (tmux *TmuxService) {
 	return tmux
 }
 
+func (t *TmuxSession) MustGetWindowByName(windowName string) (window *TmuxWindow) {
+	window, err := t.GetWindowByName(windowName)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return window
+}
+
+func (t *TmuxSession) MustListWindowNames(verbose bool) (windowsNames []string) {
+	windowsNames, err := t.ListWindowNames(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return windowsNames
+}
+
+func (t *TmuxSession) MustRecreate(verbose bool) {
+	err := t.Recreate(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (t *TmuxSession) MustSetName(name string) {
 	err := t.SetName(name)
 	if err != nil {
@@ -239,6 +336,33 @@ func (t *TmuxSession) MustSetTmux(tmux *TmuxService) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (t *TmuxSession) Recreate(verbose bool) (err error) {
+	name, err := t.GetName()
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		LogInfof("Recreate tmux session '%s' started.", name)
+	}
+
+	err = t.Delete(verbose)
+	if err != nil {
+		return err
+	}
+
+	err = t.Create(verbose)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		LogInfof("Recreate tmux session '%s' finished.", name)
+	}
+
+	return nil
 }
 
 func (t *TmuxSession) SetName(name string) (err error) {
