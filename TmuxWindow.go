@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-var ErrTmuxWindowCliPromptNotReady = errors.New("Tmux window CLI promptnot ready")
+var ErrTmuxWindowCliPromptNotReady = errors.New("tmux window CLI promptnot ready")
 
 type TmuxWindow struct {
 	name    string

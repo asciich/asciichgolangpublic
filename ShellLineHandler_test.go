@@ -37,6 +37,8 @@ func TestShellLineHandlerJoin(t *testing.T) {
 		{[]string{"echo"}, "echo"},
 		{[]string{"echo", ""}, "echo ''"},
 		{[]string{"echo", " "}, "echo ' '"},
+		{[]string{"echo", "abc\"abc"} , "echo 'abc\"abc'"}, // evalated using python -c "import shlex; print(shlex.join(['echo', 'abc\"abc']))"
+		{[]string{"echo", "abc'abc"} , "echo 'abc'\"'\"'abc'"}, // evalated using python -c "import shlex; print(shlex.join(['echo', 'abc\'abc']))"
 		{[]string{"echo", "hello"}, "echo hello"},
 		{[]string{"echo", "hello world"}, "echo 'hello world'"},
 		{[]string{"echo", "hello\nworld"}, "echo 'hello\nworld'"},
