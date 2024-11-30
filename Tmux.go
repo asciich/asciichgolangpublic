@@ -55,6 +55,28 @@ func (t *TmuxService) GetSessionByName(name string) (tmuxSession *TmuxSession, e
 	return tmuxSession, err
 }
 
+func (t *TmuxService) GetWindowByNames(sessionName string, windowName string) (window *TmuxWindow, err error) {
+	if sessionName == "" {
+		return nil, TracedErrorEmptyString("sessionName")
+	}
+
+	if windowName == "" {
+		return nil, TracedErrorEmptyString("windowName")
+	}
+
+	session, err := t.GetSessionByName(sessionName)
+	if err != nil {
+		return nil, err
+	}
+
+	window, err = session.GetWindowByName(windowName)
+	if err != nil {
+		return nil, err
+	}
+
+	return window, nil
+}
+
 func (t *TmuxService) ListSessionNames(verbose bool) (sessionNames []string, err error) {
 	commandExecutor, err := t.GetCommandExecutor()
 	if err != nil {
@@ -113,6 +135,15 @@ func (t *TmuxService) MustGetSessionByName(name string) (tmuxSession *TmuxSessio
 	}
 
 	return tmuxSession
+}
+
+func (t *TmuxService) MustGetWindowByNames(sessionName string, windowName string) (window *TmuxWindow) {
+	window, err := t.GetWindowByNames(sessionName, windowName)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return window
 }
 
 func (t *TmuxService) MustListSessionNames(verbose bool) (sessionNames []string) {

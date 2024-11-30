@@ -78,6 +78,13 @@ func (c *CommandOutput) LogStdoutAsInfo() (err error) {
 	return nil
 }
 
+func (c *CommandOutput) MustCheckExitSuccess(verbose bool) {
+	err := c.CheckExitSuccess(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (c *CommandOutput) MustGetCmdRunError() (cmdRunError *error) {
 	cmdRunError, err := c.GetCmdRunError()
 	if err != nil {
@@ -198,10 +205,34 @@ func (c *CommandOutput) MustSetStderr(stderr []byte) {
 	}
 }
 
+func (c *CommandOutput) MustSetStderrByString(stderr string) {
+	err := c.SetStderrByString(stderr)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (c *CommandOutput) MustSetStdout(stdout []byte) {
 	err := c.SetStdout(stdout)
 	if err != nil {
 		LogGoErrorFatal(err)
+	}
+}
+
+func (c *CommandOutput) MustSetStdoutByString(stdout string) {
+	err := c.SetStdoutByString(stdout)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (o *CommandOutput) CheckExitSuccess(verbose bool) (err error) {
+	if o.IsExitSuccess() {
+		return nil
+	} else {
+		return TracedError(
+			"Return code is not exit success",
+		)
 	}
 }
 
@@ -326,8 +357,26 @@ func (o *CommandOutput) SetStderr(stderr []byte) (err error) {
 	return nil
 }
 
+func (o *CommandOutput) SetStderrByString(stderr string) (err error) {
+	err = o.SetStderr([]byte(stderr))
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
 func (o *CommandOutput) SetStdout(stdout []byte) (err error) {
 	stdoutToAdd := stdout
 	o.stdout = &stdoutToAdd
 	return nil
+}
+
+func (o *CommandOutput) SetStdoutByString(stdout string) (err error) {
+	err = o.SetStdout([]byte(stdout))
+	if err != nil {
+		return err
+	}
+
+	return err
 }
