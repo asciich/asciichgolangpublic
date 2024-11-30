@@ -36,8 +36,12 @@ func TestShellLineHandlerJoin(t *testing.T) {
 	}{
 		{[]string{"echo"}, "echo"},
 		{[]string{"echo", ""}, "echo ''"},
+		{[]string{"echo", " "}, "echo ' '"},
 		{[]string{"echo", "hello"}, "echo hello"},
 		{[]string{"echo", "hello world"}, "echo 'hello world'"},
+		{[]string{"echo", "hello\nworld"}, "echo 'hello\nworld'"},
+		{[]string{"echo", "hello\nworld\n"}, "echo 'hello\nworld\n'"},
+		{[]string{"echo", "hello\\nworld\\n"}, "echo 'hello\\nworld\\n'"},
 		{[]string{"echo", "hello \"world"}, "echo 'hello \"world'"},
 		{[]string{"echo", "hello 'world"}, "echo 'hello '\"'\"'world'"},
 	}

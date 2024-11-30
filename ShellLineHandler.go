@@ -30,7 +30,7 @@ func (s *ShellLineHandlerService) Join(command []string) (joinedCommand string, 
 			c = "''"
 		}
 
-		if strings.Contains(c, " ") {
+		if Strings().ContainsAtLeastOneSubstring(c, []string{" ", "\n", "\\n"}) {
 			c = "'" + c + "'"
 		}
 
