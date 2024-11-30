@@ -156,7 +156,7 @@ func (c *CommandExecutorBase) RunCommandAndGetStdoutAsLines(options *RunCommandO
 		return nil, err
 	}
 
-	stdoutLines, err = output.GetStdoutAsLines()
+	stdoutLines, err = output.GetStdoutAsLines(options.RemoveLastLineIfEmpty)
 	if err != nil {
 		return nil, err
 	}

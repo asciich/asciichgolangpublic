@@ -1,6 +1,5 @@
 package asciichgolangpublic
 
-
 type ChownOptions struct {
 	UserName  string
 	GroupName string

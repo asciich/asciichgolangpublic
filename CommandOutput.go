@@ -26,7 +26,7 @@ func (c *CommandOutput) GetCmdRunError() (cmdRunError *error, err error) {
 }
 
 func (c *CommandOutput) GetFirstLineOfStdoutAsString() (firstLine string, err error) {
-	lines, err := c.GetStdoutAsLines()
+	lines, err := c.GetStdoutAsLines(false)
 	if err != nil {
 		return "", err
 	}
@@ -150,8 +150,8 @@ func (c *CommandOutput) MustGetStdoutAsFloat64() (stdout float64) {
 	return stdout
 }
 
-func (c *CommandOutput) MustGetStdoutAsLines() (stdoutLines []string) {
-	stdoutLines, err := c.GetStdoutAsLines()
+func (c *CommandOutput) MustGetStdoutAsLines(removeLastLineIfEmpty bool) (stdoutLines []string) {
+	stdoutLines, err := c.GetStdoutAsLines(removeLastLineIfEmpty)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -260,13 +260,13 @@ func (o *CommandOutput) GetStdoutAsBytes() (stdout []byte, err error) {
 	return *o.stdout, nil
 }
 
-func (o *CommandOutput) GetStdoutAsLines() (stdoutLines []string, err error) {
+func (o *CommandOutput) GetStdoutAsLines(removeLastLineIfEmpty bool) (stdoutLines []string, err error) {
 	stdoutString, err := o.GetStdoutAsString()
 	if err != nil {
 		return nil, err
 	}
 
-	stdoutLines = Strings().SplitLines(stdoutString, false)
+	stdoutLines = Strings().SplitLines(stdoutString, removeLastLineIfEmpty)
 
 	stdoutLines = Slices().RemoveLastElementIfEmptyString(stdoutLines)
 	return stdoutLines, nil

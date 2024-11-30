@@ -126,7 +126,7 @@ func (b *BashService) RunOneLinerAndGetStdoutAsLines(oneLiner string, verbose bo
 		return nil, err
 	}
 
-	stdoutLines, err = output.GetStdoutAsLines()
+	stdoutLines, err = output.GetStdoutAsLines(false)
 	if err != nil {
 		return nil, err
 	}
