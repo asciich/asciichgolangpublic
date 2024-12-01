@@ -381,6 +381,14 @@ func (s *StringsService) RemoveSurroundingQuotationMarks(input string) (output s
 		}
 	}
 
+	if strings.HasPrefix(output, "'") {
+		if strings.HasSuffix(output, "'") {
+			output = strings.TrimPrefix(output, "'")
+			output = strings.TrimSuffix(output, "'")
+			return output
+		}
+	}
+
 	return output
 }
 
