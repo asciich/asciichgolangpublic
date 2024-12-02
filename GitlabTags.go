@@ -300,7 +300,7 @@ func (g *GitlabTags) ListTags(verbose bool) (gitlabTags []*GitlabTag, err error)
 
 		nativeList = append(nativeList, tags...)
 
-		if response.NextPage > 0 {
+		if response.NextPage <= 0 {
 			break
 		}
 
