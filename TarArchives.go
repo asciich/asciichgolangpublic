@@ -159,6 +159,37 @@ func (t *TarArchivesService) CreateTarArchiveFromFileContentStringIntoWriter(fil
 	return nil
 }
 
+func (t *TarArchivesService) ListFileNamesFromTarArchiveBytes(archiveBytes []byte) (fileNames []string, err error) {
+	if archiveBytes == nil {
+		return nil, TracedErrorNil("archiveBytes")
+	}
+
+	bytesReader := bytes.NewReader(archiveBytes)
+
+	fileNames = []string{}
+	tarReader := tar.NewReader(bytesReader)
+	for {
+		header, err := tarReader.Next()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+
+			return nil, TracedErrorf(
+				"Reading next header in tar archive failed: %w",
+				err,
+			)
+		}
+
+		fileNames = append(fileNames, header.Name)
+	}
+
+	fileNames = Slices().RemoveEmptyStrings(fileNames)
+	fileNames = Slices().SortStringSlice(fileNames)
+
+	return fileNames, nil
+}
+
 func (t *TarArchivesService) MustAddFileFromFileContentBytesToTarArchiveBytes(archiveToExtend []byte, fileName string, content []byte) (tarBytes []byte) {
 	tarBytes, err := t.AddFileFromFileContentBytesToTarArchiveBytes(archiveToExtend, fileName, content)
 	if err != nil {
@@ -198,6 +229,15 @@ func (t *TarArchivesService) MustCreateTarArchiveFromFileContentStringIntoWriter
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (t *TarArchivesService) MustListFileNamesFromTarArchiveBytes(archiveBytes []byte) (fileNames []string) {
+	fileNames, err := t.ListFileNamesFromTarArchiveBytes(archiveBytes)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return fileNames
 }
 
 func (t *TarArchivesService) MustReadFileFromTarArchiveBytesAsBytes(archiveBytes []byte, fileNameToRead string) (content []byte) {
