@@ -85,6 +85,13 @@ func TestTarArchiveAddAndGetFileOnTarBytes_multipleFiles(t *testing.T) {
 						fileName2,
 					),
 				)
+
+				fileList := TarArchives().MustListFileNamesFromTarArchiveBytes(tarArchiveBytes)
+				assert.EqualValues(
+					[]string{"file_name.txt","file_name2.txt"},
+					fileList,
+				)
+
 			},
 		)
 	}
