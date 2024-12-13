@@ -1,6 +1,5 @@
 package asciichgolangpublic
 
-
 // Represents a dependency to (another) git repository.
 type DependencyGitRepository struct {
 	url           string

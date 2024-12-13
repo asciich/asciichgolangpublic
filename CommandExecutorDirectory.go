@@ -121,7 +121,7 @@ func (c *CommandExecutorDirectory) CopyContentToDirectory(destinationDir Directo
 }
 
 func (c *CommandExecutorDirectory) Create(verbose bool) (err error) {
-	exists, err := c.Exists()
+	exists, err := c.Exists(verbose)
 	if err != nil {
 		return err
 	}
@@ -189,7 +189,7 @@ func (c *CommandExecutorDirectory) Delete(verbose bool) (err error) {
 		)
 	}
 
-	exists, err := c.Exists()
+	exists, err := c.Exists(verbose)
 	if err != nil {
 		return err
 	}
@@ -221,7 +221,7 @@ func (c *CommandExecutorDirectory) Delete(verbose bool) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorDirectory) Exists() (exists bool, err error) {
+func (c *CommandExecutorDirectory) Exists(verbose bool) (exists bool, err error) {
 	commandExecutor, dirPath, hostDescription, err := c.GetCommandExecutorAndDirPathAndHostDescription()
 	if err != nil {
 		return false, err
@@ -246,18 +246,34 @@ func (c *CommandExecutorDirectory) Exists() (exists bool, err error) {
 	output = strings.TrimSpace(output)
 
 	if output == "yes" {
-		return true, nil
+		exists = true
+	} else if output == "no" {
+		exists = false
+	} else {
+		return false, TracedErrorf(
+			"Unexpected output when evalution directory '%s' exists on '%s'",
+			dirPath,
+			hostDescription,
+		)
 	}
 
-	if output == "no" {
-		return false, nil
+	if verbose {
+		if exists {
+			LogInfof(
+				"Directory '%s' exists on host '%s'.",
+				dirPath,
+				hostDescription,
+			)
+		} else {
+			LogInfof(
+				"Directory '%s' exists on host '%s'.",
+				dirPath,
+				hostDescription,
+			)
+		}
 	}
 
-	return false, TracedErrorf(
-		"Unexpected output when evalution directory '%s' exists on '%s'",
-		dirPath,
-		hostDescription,
-	)
+	return exists, nil
 }
 
 func (c *CommandExecutorDirectory) GetBaseName() (baseName string, err error) {
@@ -516,8 +532,8 @@ func (c *CommandExecutorDirectory) MustDelete(verbose bool) {
 	}
 }
 
-func (c *CommandExecutorDirectory) MustExists() (exists bool) {
-	exists, err := c.Exists()
+func (c *CommandExecutorDirectory) MustExists(verbose bool) (exists bool) {
+	exists, err := c.Exists(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

@@ -89,7 +89,7 @@ func (k *SSHPublicKey) LoadFromSshDir(sshDirectory Directory, verbose bool) (err
 		return err
 	}
 
-	exists, err := sshDirectory.Exists()
+	exists, err := sshDirectory.Exists(verbose)
 	if err != nil {
 		return err
 	}

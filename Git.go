@@ -36,7 +36,7 @@ func (g *GitService) GetRepositoryRootPathByPath(path string, verbose bool) (rep
 		return "", err
 	}
 
-	exists, err := repoRootDir.Exists()
+	exists, err := repoRootDir.Exists(verbose)
 	if err != nil {
 		return "", err
 	}

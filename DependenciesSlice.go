@@ -1,6 +1,5 @@
 package asciichgolangpublic
 
-
 type DependenciesSliceService struct{}
 
 func DependenciesSlice() (d *DependenciesSliceService) {

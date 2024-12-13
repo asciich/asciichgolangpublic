@@ -28,21 +28,21 @@ func TestLocalDirectoryExists(t *testing.T) {
 				var directory Directory = TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
 				defer directory.Delete(verbose)
 
-				assert.True(directory.MustExists())
+				assert.True(directory.MustExists(verbose))
 
 				for i := 0; i < 2; i++ {
 					directory.MustDelete(verbose)
-					assert.False(directory.MustExists())
+					assert.False(directory.MustExists(verbose))
 				}
 
 				for i := 0; i < 2; i++ {
 					directory.MustCreate(verbose)
-					assert.True(directory.MustExists())
+					assert.True(directory.MustExists(verbose))
 				}
 
 				for i := 0; i < 2; i++ {
 					directory.MustDelete(verbose)
-					assert.False(directory.MustExists())
+					assert.False(directory.MustExists(verbose))
 				}
 
 			},
@@ -469,9 +469,9 @@ func TestLocalDirectoryCreate(t *testing.T) {
 
 				tempDir := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
 				subDir := tempDir.MustGetSubDirectory(tt.subDirPath...)
-				assert.False(subDir.MustExists())
+				assert.False(subDir.MustExists(verbose))
 				subDir.MustCreate(verbose)
-				assert.True(subDir.MustExists())
+				assert.True(subDir.MustExists(verbose))
 			},
 		)
 	}
@@ -581,6 +581,34 @@ func TestDirectoryIsEmptyDirectory(t *testing.T) {
 				defer temporaryDirectory.Delete(verbose)
 
 				assert.True(temporaryDirectory.MustIsEmptyDirectory(verbose))
+			},
+		)
+	}
+}
+
+func TestDirectory_CheckExists(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+
+				temporaryDirectory := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
+				defer temporaryDirectory.Delete(verbose)
+
+				assert.Nil(temporaryDirectory.CheckExists(verbose))
+
+				temporaryDirectory.MustDelete(verbose)
+
+				assert.NotNil(temporaryDirectory.CheckExists(verbose))
 			},
 		)
 	}

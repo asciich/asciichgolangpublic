@@ -146,7 +146,7 @@ func TestHost_GetDirectoryByPath(t *testing.T) {
 
 				assert.EqualValues(
 					tt.expectedExists,
-					directory.MustExists(),
+					directory.MustExists(verbose),
 				)
 			},
 		)
