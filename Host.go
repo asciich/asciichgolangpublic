@@ -226,6 +226,26 @@ func (h *Host) GetDeepCopy() (deepCopy CommandExecutor) {
 	return deepCopy
 }
 
+func (h *Host) GetDirectoryByPath(path string) (directory Directory, err error) {
+	if path == "" {
+		return nil, TracedErrorEmptyString("path")
+	}
+
+	commandExecutorDir := NewCommandExecutorDirectory()
+
+	err = commandExecutorDir.SetCommandExecutor(h)
+	if err != nil {
+		return nil, err
+	}
+
+	err = commandExecutorDir.SetDirPath(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return commandExecutorDir, nil
+}
+
 func (h *Host) GetDockerContainerByName(containerName string) (dockerContainer *DockerContainer, err error) {
 	if len(containerName) <= 0 {
 		return nil, TracedError("containerName is empty string")
@@ -577,6 +597,15 @@ func (h *Host) MustGetComment() (comment string) {
 	}
 
 	return comment
+}
+
+func (h *Host) MustGetDirectoryByPath(path string) (directory Directory) {
+	directory, err := h.GetDirectoryByPath(path)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return directory
 }
 
 func (h *Host) MustGetDockerContainerByName(containerName string) (dockerContainer *DockerContainer) {
