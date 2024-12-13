@@ -576,7 +576,7 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 	tests := []TestCase{}
 
 	testDataDirectory := MustGetLocalGitRepositoryByPath(".").MustGetSubDirectory("testdata", "File", "SortBlocksInFile")
-	for _, testDirectory := range testDataDirectory.MustGetSubDirectories(&ListDirectoryOptions{Recursive: false}) {
+	for _, testDirectory := range testDataDirectory.MustListSubDirectories(&ListDirectoryOptions{Recursive: false}) {
 		tests = append(tests, TestCase{testDirectory.MustGetLocalPath()})
 	}
 
@@ -1080,7 +1080,7 @@ func TestFileReplaceBetweenMarkers(t *testing.T) {
 	tests := []TestCase{}
 
 	testDataDirectory := MustGetLocalGitRepositoryByPath(".").MustGetSubDirectory("testdata", "File", "ReplaceBetweenMarkers")
-	for _, testDirectory := range testDataDirectory.MustGetSubDirectories(&ListDirectoryOptions{Recursive: false}) {
+	for _, testDirectory := range testDataDirectory.MustListSubDirectories(&ListDirectoryOptions{Recursive: false}) {
 		tests = append(tests, TestCase{testDirectory.MustGetLocalPath()})
 	}
 

@@ -565,7 +565,7 @@ func (l *LocalDirectory) GetGitRepositories(verbose bool) (gitRepos []GitReposit
 }
 
 func (l *LocalDirectory) GetGitRepositoriesAsLocalGitRepositories(verbose bool) (gitRepos []*LocalGitRepository, err error) {
-	subDirectories, err := l.GetSubDirectories(&ListDirectoryOptions{
+	subDirectories, err := l.ListSubDirectories(&ListDirectoryOptions{
 		Recursive: true,
 	})
 	if err != nil {
@@ -654,12 +654,12 @@ func (l *LocalDirectory) GetPath() (dirPath string, err error) {
 	return dirPath, nil
 }
 
-func (l *LocalDirectory) GetSubDirectories(listDirectoryOptions *ListDirectoryOptions) (subDirectories []Directory, err error) {
+func (l *LocalDirectory) ListSubDirectories(listDirectoryOptions *ListDirectoryOptions) (subDirectories []Directory, err error) {
 	if listDirectoryOptions == nil {
 		return nil, TracedErrorNil("listDirectoryOptions")
 	}
 
-	pathsToAdd, err := l.GetSubDirectoriesAsAbsolutePaths(listDirectoryOptions)
+	pathsToAdd, err := l.ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -676,7 +676,7 @@ func (l *LocalDirectory) GetSubDirectories(listDirectoryOptions *ListDirectoryOp
 	return subDirectories, nil
 }
 
-func (l *LocalDirectory) GetSubDirectoriesAsAbsolutePaths(listDirectoryOptions *ListDirectoryOptions) (subDirectoryPaths []string, err error) {
+func (l *LocalDirectory) ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions *ListDirectoryOptions) (subDirectoryPaths []string, err error) {
 	if listDirectoryOptions == nil {
 		return nil, TracedErrorNil("listDirectoryOptions")
 	}
@@ -706,7 +706,7 @@ func (l *LocalDirectory) GetSubDirectoriesAsAbsolutePaths(listDirectoryOptions *
 					return nil, err
 				}
 
-				subDirectoriesToAdd, err := subDirectory.GetSubDirectoriesAsAbsolutePaths(
+				subDirectoriesToAdd, err := subDirectory.ListSubDirectoriesAsAbsolutePaths(
 					&ListDirectoryOptions{
 						Recursive: true,
 					},
@@ -772,7 +772,7 @@ func (l *LocalDirectory) GetSubDirectoryPaths(listOptions *ListDirectoryOptions)
 		Verbose:   listOptions.Verbose,
 	}
 
-	absoultePaths, err := l.GetSubDirectoriesAsAbsolutePaths(optionsToUse)
+	absoultePaths, err := l.ListSubDirectoriesAsAbsolutePaths(optionsToUse)
 	if err != nil {
 		return nil, err
 	}
@@ -797,7 +797,7 @@ func (l *LocalDirectory) GetSubDirectoryPaths(listOptions *ListDirectoryOptions)
 }
 
 func (l *LocalDirectory) IsEmptyDirectory(verbose bool) (isEmpty bool, err error) {
-	subDirs, err := l.GetSubDirectories(
+	subDirs, err := l.ListSubDirectories(
 		&ListDirectoryOptions{
 			Verbose: verbose,
 		},
@@ -1028,8 +1028,8 @@ func (l *LocalDirectory) MustGetPath() (dirPath string) {
 	return dirPath
 }
 
-func (l *LocalDirectory) MustGetSubDirectories(listDirectoryOptions *ListDirectoryOptions) (subDirectories []Directory) {
-	subDirectories, err := l.GetSubDirectories(listDirectoryOptions)
+func (l *LocalDirectory) MustListSubDirectories(listDirectoryOptions *ListDirectoryOptions) (subDirectories []Directory) {
+	subDirectories, err := l.ListSubDirectories(listDirectoryOptions)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -1037,8 +1037,8 @@ func (l *LocalDirectory) MustGetSubDirectories(listDirectoryOptions *ListDirecto
 	return subDirectories
 }
 
-func (l *LocalDirectory) MustGetSubDirectoriesAsAbsolutePaths(listDirectoryOptions *ListDirectoryOptions) (subDirectoryPaths []string) {
-	subDirectoryPaths, err := l.GetSubDirectoriesAsAbsolutePaths(listDirectoryOptions)
+func (l *LocalDirectory) MustListSubDirectoriesAsAbsolutePaths(listDirectoryOptions *ListDirectoryOptions) (subDirectoryPaths []string) {
+	subDirectoryPaths, err := l.ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

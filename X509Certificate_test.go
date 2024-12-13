@@ -15,7 +15,7 @@ func TestX509CertificateLoadFromFilePath(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range testDir.MustGetSubDirectories(&ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
+	for _, testCaseDir := range testDir.MustListSubDirectories(&ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
@@ -52,7 +52,7 @@ func TestX509CertificateGetAsPemString(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range testDir.MustGetSubDirectories(&ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
+	for _, testCaseDir := range testDir.MustListSubDirectories(&ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
@@ -85,7 +85,7 @@ func TestX509CertificateIsRootCa(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range testDir.MustGetSubDirectories(&ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
+	for _, testCaseDir := range testDir.MustListSubDirectories(&ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
@@ -120,7 +120,7 @@ func TestX509CertificateIsV1(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range testDir.MustGetSubDirectories(&ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
+	for _, testCaseDir := range testDir.MustListSubDirectories(&ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
@@ -153,7 +153,7 @@ func TestX509CertificateIsV3(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range testDir.MustGetSubDirectories(&ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
+	for _, testCaseDir := range testDir.MustListSubDirectories(&ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
