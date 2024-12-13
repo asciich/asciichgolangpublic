@@ -365,6 +365,28 @@ func (c *CommandExecutorFile) GetParentDirectory() (parentDirectory Directory, e
 	return parentDirectory, nil
 }
 
+func (c *CommandExecutorFile) GetPath() (path string, err error) {
+	isRunningOnLocalhost, err := c.IsRunningOnLocalhost()
+	if err != nil {
+		return "", err
+	}
+
+	if isRunningOnLocalhost {
+		path, err := c.GetLocalPath()
+		if err != nil {
+			return path, nil
+		}
+	} else {
+		return "", TracedErrorNotImplemented()
+	}
+
+	if path == "" {
+		return "", TracedError("path is empty string after evaluation.")
+	}
+
+	return path, nil
+}
+
 func (c *CommandExecutorFile) GetSizeBytes() (fileSize int64, err error) {
 	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
 	if err != nil {
@@ -556,6 +578,15 @@ func (c *CommandExecutorFile) MustGetParentDirectory() (parentDirectory Director
 	}
 
 	return parentDirectory
+}
+
+func (c *CommandExecutorFile) MustGetPath() (path string) {
+	path, err := c.GetPath()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return path
 }
 
 func (c *CommandExecutorFile) MustGetSizeBytes() (fileSize int64) {
