@@ -219,7 +219,7 @@ func TestLocalDirectoryGetLocalPathIsAbsolute(t *testing.T) {
 	}
 }
 
-func TestLocalDirectoryGetSubDirectories_RelativePaths(t *testing.T) {
+func TestLocalDirectory_ListSubDirectories_RelativePaths(t *testing.T) {
 	tests := []struct {
 		testcase string
 	}{
@@ -276,7 +276,7 @@ func TestLocalDirectoryGetSubDirectories_RelativePaths(t *testing.T) {
 
 }
 
-func TestLocalDirectoryGetSubDirectories(t *testing.T) {
+func TestLocalDirectory_ListSubDirectories(t *testing.T) {
 	tests := []struct {
 		testcase string
 	}{
@@ -300,7 +300,7 @@ func TestLocalDirectoryGetSubDirectories(t *testing.T) {
 				test2.MustCreateSubDirectory("b", verbose)
 				test2.MustCreateSubDirectory("c", verbose)
 
-				subDirectoryList := testDirectory.MustGetSubDirectories(
+				subDirectoryList := testDirectory.MustListSubDirectories(
 					&ListDirectoryOptions{
 						Recursive: false,
 					},
@@ -312,7 +312,7 @@ func TestLocalDirectoryGetSubDirectories(t *testing.T) {
 				assert.EqualValues(subDirectoryList[0].MustGetDirName(), testDirectory.MustGetLocalPath())
 				assert.EqualValues(subDirectoryList[1].MustGetDirName(), testDirectory.MustGetLocalPath())
 
-				subDirectoryList = testDirectory.MustGetSubDirectories(
+				subDirectoryList = testDirectory.MustListSubDirectories(
 					&ListDirectoryOptions{
 						Recursive: true,
 					},

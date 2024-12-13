@@ -15,9 +15,9 @@ type Directory interface {
 	GetLocalPath() (localPath string, err error)
 	// Returns the absolute path to the file without any indication of the host.
 	GetPath() (dirPath string, err error)
-	GetSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory, err error)
 	GetSubDirectory(path ...string) (subDirectory Directory, err error)
 	IsLocalDirectory() (isLocalDirectory bool, err error)
+	ListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory, err error)
 	MustChmod(chmodOptions *ChmodOptions)
 	MustCopyContentToDirectory(destinationDir Directory, verbose bool)
 	MustCreate(verbose bool)
@@ -33,8 +33,8 @@ type Directory interface {
 	// Returns the absolute path to the file without any indication of the host.
 	MustGetPath() (dirPath string)
 	MustGetSubDirectory(path ...string) (subDirectory Directory)
-	MustGetSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory)
 	MustIsLocalDirectory() (isLocalDirectory bool)
+	MustListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory)
 
 	// All methods below this line can be implemented by embedding the `DirectoryBase` struct:
 	GetFilePathInDirectory(path ...string) (filePath string, err error)

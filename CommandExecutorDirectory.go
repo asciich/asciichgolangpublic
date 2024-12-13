@@ -421,7 +421,7 @@ func (c *CommandExecutorDirectory) GetPath() (path string, err error) {
 	return path, nil
 }
 
-func (c *CommandExecutorDirectory) GetSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory, err error) {
+func (c *CommandExecutorDirectory) ListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory, err error) {
 	if options == nil {
 		return nil, TracedErrorNil("options")
 	}
@@ -615,8 +615,8 @@ func (c *CommandExecutorDirectory) MustGetPath() (path string) {
 	return path
 }
 
-func (c *CommandExecutorDirectory) MustGetSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory) {
-	subDirectories, err := c.GetSubDirectories(options)
+func (c *CommandExecutorDirectory) MustListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory) {
+	subDirectories, err := c.ListSubDirectories(options)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
