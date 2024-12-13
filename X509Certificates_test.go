@@ -31,7 +31,7 @@ func TestX509CertificatesCreateRootCaIntoTemporaryDirectory(t *testing.T) {
 					Locality:              "Zurich",
 				})
 
-				assert.True(tempDirectory.MustExists())
+				assert.True(tempDirectory.MustExists(verbose))
 				crtFile := tempDirectory.MustGetFileInDirectory("rootCA.crt")
 				crtCertFile := MustGetX509CertificateFileFromFile(crtFile)
 				assert.True(crtFile.MustExists())
@@ -69,7 +69,7 @@ func TestX509CertificatesCreateIntermediateCertificateIntoTemporaryDirectory(t *
 					Locality:              "Zurich",
 				})
 
-				assert.True(tempDirectory.MustExists())
+				assert.True(tempDirectory.MustExists(verbose))
 
 				keyFile := tempDirectory.MustGetFileInDirectory("intermediateCertificate.key")
 				assert.True(keyFile.MustExists())
@@ -108,7 +108,7 @@ func TestX509CertificateCreateAndSignIntermediateCertificate(t *testing.T) {
 					Locality:              "Zurich",
 				})
 
-				assert.True(rootTempDirectory.MustExists())
+				assert.True(rootTempDirectory.MustExists(verbose))
 				rootCrtFile := MustGetX509CertificateFileFromFile(
 					rootTempDirectory.MustGetFileInDirectory("rootCA.crt"),
 				)
@@ -131,7 +131,7 @@ func TestX509CertificateCreateAndSignIntermediateCertificate(t *testing.T) {
 					Locality:              "Zurich",
 				})
 
-				assert.True(intermediateTempDirectory.MustExists())
+				assert.True(intermediateTempDirectory.MustExists(verbose))
 
 				intermediateKeyFile := intermediateTempDirectory.MustGetFileInDirectory("intermediateCertificate.key")
 				assert.True(intermediateKeyFile.MustExists())

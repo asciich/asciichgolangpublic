@@ -8,6 +8,31 @@ func NewDirectoryBase() (d *DirectoryBase) {
 	return new(DirectoryBase)
 }
 
+func (d *DirectoryBase) CheckExists(verbose bool) (err error) {
+	parent, err := d.GetParentDirectoryForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	exists, err := parent.Exists(verbose)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		return
+	}
+
+	path, err := parent.GetPath()
+	if err != nil {
+		return err
+	}
+
+	return TracedErrorf(
+		"directory '%s' does not exist", path,
+	)
+}
+
 func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose bool, pathToCreate ...string) (createdFile File, err error) {
 	if len(pathToCreate) <= 0 {
 		return nil, TracedErrorf("Invalid pathToCreate='%v'", pathToCreate)
@@ -92,6 +117,13 @@ func (d *DirectoryBase) GetParentDirectoryForBaseClass() (parentDirectoryForBase
 		return nil, TracedError("parentDirectoryForBaseClass not set")
 	}
 	return d.parentDirectoryForBaseClass, nil
+}
+
+func (d *DirectoryBase) MustCheckExists(verbose bool) {
+	err := d.CheckExists(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (d *DirectoryBase) MustCreateFileInDirectoryFromString(content string, verbose bool, pathToCreate ...string) (createdFile File) {

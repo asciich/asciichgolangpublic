@@ -1,6 +1,5 @@
 package asciichgolangpublic
 
-
 // A Dependency is used to implement software and other dependencies like container images...
 type Dependency interface {
 	AddSourceFile(File) (err error)

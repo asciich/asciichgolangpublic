@@ -6,7 +6,7 @@ type Directory interface {
 	Create(verbose bool) (err error)
 	CreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory Directory, err error)
 	Delete(verbose bool) (err error)
-	Exists() (exists bool, err error)
+	Exists(verbose bool) (exists bool, err error)
 	GetBaseName() (baseName string, err error)
 	GetDirName() (dirName string, err error)
 	GetFileInDirectory(pathToFile ...string) (file File, err error)
@@ -23,7 +23,7 @@ type Directory interface {
 	MustCreate(verbose bool)
 	MustCreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory Directory)
 	MustDelete(verbose bool)
-	MustExists() (exists bool)
+	MustExists(verbose bool) (exists bool)
 	MustGetBaseName() (baseName string)
 	MustGetDirName() (dirName string)
 	MustGetFileInDirectory(pathToFile ...string) (file File)
@@ -37,8 +37,10 @@ type Directory interface {
 	MustListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory)
 
 	// All methods below this line can be implemented by embedding the `DirectoryBase` struct:
+	CheckExists(verbose bool) (err error)
 	GetFilePathInDirectory(path ...string) (filePath string, err error)
 	FileInDirectoryExists(path ...string) (exists bool, err error)
+	MustCheckExists(verbose bool)
 	MustGetFilePathInDirectory(path ...string) (filePath string)
 	MustFileInDirectoryExists(path ...string) (exists bool)
 	MustReadFileInDirectoryAsLines(path ...string) (content []string)

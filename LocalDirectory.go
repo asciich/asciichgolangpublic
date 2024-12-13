@@ -137,7 +137,7 @@ func (l *LocalDirectory) CopyContentToLocalDirectory(destDirectory *LocalDirecto
 		return err
 	}
 
-	exists, err := l.Exists()
+	exists, err := l.Exists(verbose)
 	if err != nil {
 		return err
 	}
@@ -201,7 +201,7 @@ func (l *LocalDirectory) CopyFileToTemporaryFileAsLocalFile(verbose bool, filePa
 }
 
 func (l *LocalDirectory) Create(verbose bool) (err error) {
-	exists, err := l.Exists()
+	exists, err := l.Exists(verbose)
 	if err != nil {
 		return nil
 	}
@@ -238,7 +238,7 @@ func (l *LocalDirectory) Create(verbose bool) (err error) {
 			}
 		}
 
-		existsAfterCreate, err := l.Exists()
+		existsAfterCreate, err := l.Exists(verbose)
 		if err != nil {
 			return err
 		}
@@ -316,7 +316,7 @@ func (l *LocalDirectory) CreateSubDirectory(subDirName string, verbose bool) (cr
 		return nil, err
 	}
 
-	subDirExists, err := subDirectory.Exists()
+	subDirExists, err := subDirectory.Exists(verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -340,7 +340,7 @@ func (l *LocalDirectory) CreateSubDirectory(subDirName string, verbose bool) (cr
 }
 
 func (l *LocalDirectory) Delete(verbose bool) (err error) {
-	exists, err := l.Exists()
+	exists, err := l.Exists(verbose)
 	if err != nil {
 		return nil
 	}
@@ -368,7 +368,7 @@ func (l *LocalDirectory) Delete(verbose bool) (err error) {
 	return nil
 }
 
-func (l *LocalDirectory) Exists() (exists bool, err error) {
+func (l *LocalDirectory) Exists(verbose bool) (exists bool, err error) {
 	localPath, err := l.GetLocalPath()
 	if err != nil {
 		return false, nil
@@ -383,7 +383,23 @@ func (l *LocalDirectory) Exists() (exists bool, err error) {
 		return false, TracedErrorf("Unable to evaluate if local directory exists: '%w'", err)
 	}
 
-	return dirInfo.IsDir(), nil
+	exists = dirInfo.IsDir()
+
+	if verbose {
+		if exists {
+			LogInfof(
+				"Local directory '%s' exists.",
+				localPath,
+			)
+		} else {
+			LogInfof(
+				"Local directory '%s' does not exists.",
+				localPath,
+			)
+		}
+	}
+
+	return exists, nil
 }
 
 func (l *LocalDirectory) GetBaseName() (baseName string, err error) {
@@ -911,8 +927,8 @@ func (l *LocalDirectory) MustDelete(verbose bool) {
 	}
 }
 
-func (l *LocalDirectory) MustExists() (exists bool) {
-	exists, err := l.Exists()
+func (l *LocalDirectory) MustExists(verbose bool) (exists bool) {
+	exists, err := l.Exists(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -1179,7 +1195,7 @@ func (l *LocalDirectory) SubDirectoryExists(subDirName string, verbose bool) (su
 		return false, err
 	}
 
-	subDirExists, err = subDir.Exists()
+	subDirExists, err = subDir.Exists(verbose)
 	if err != nil {
 		return false, err
 	}
