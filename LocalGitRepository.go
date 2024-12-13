@@ -572,6 +572,20 @@ func (l *LocalGitRepository) GetGoGitWorktree() (worktree *git.Worktree, err err
 	return worktree, nil
 }
 
+func (l *LocalGitRepository) GetPath() (path string, err error) {
+	localDir, err := l.GetAsLocalDirectory()
+	if err != nil {
+		return "", err
+	}
+
+	path, err = localDir.GetPath()
+	if err != nil {
+		return "", err
+	}
+
+	return "", err
+}
+
 func (l *LocalGitRepository) GetRootDirectory() (rootDirectory Directory, err error) {
 	rootDirectoryPath, err := l.GetRootDirectoryPath()
 	if err != nil {
@@ -1089,6 +1103,15 @@ func (l *LocalGitRepository) MustGetGoGitWorktree() (worktree *git.Worktree) {
 	}
 
 	return worktree
+}
+
+func (l *LocalGitRepository) MustGetPath() (path string) {
+	path, err := l.GetPath()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return path
 }
 
 func (l *LocalGitRepository) MustGetRootDirectory() (rootDirectory Directory) {
