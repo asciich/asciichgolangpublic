@@ -101,3 +101,54 @@ func TestHostRunCommand(t *testing.T) {
 		)
 	}
 }
+
+func TestHostIsACommandExecutor(t *testing.T) {
+	assert := assert.New(t)
+
+	const hostName = "hostname"
+
+	var host CommandExecutor = MustGetHostByHostname(hostName)
+
+	assert.EqualValues(
+		hostName,
+		host.MustGetHostDescription(),
+	)
+}
+
+func TestHost_GetDirectoryByPath(t *testing.T) {
+	if ContinuousIntegration().IsRunningInContinuousIntegration() {
+		LogInfo("Currently not available in CI/CD pipeline")
+		return
+	}
+
+	tests := []struct {
+		hostname       string
+		dirPath        string
+		expectedExists bool
+	}{
+		{"localhost", "/home/", true},
+		{"localhost", "/home/does_not_exist", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+
+				host := MustGetHostByHostname(tt.hostname)
+				directory := host.MustGetDirectoryByPath(tt.dirPath)
+
+				_, ok := directory.(*CommandExecutorDirectory)
+				assert.True(ok)
+
+				assert.EqualValues(
+					tt.expectedExists,
+					directory.MustExists(),
+				)
+			},
+		)
+	}
+}
