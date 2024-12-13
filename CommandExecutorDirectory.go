@@ -437,14 +437,6 @@ func (c *CommandExecutorDirectory) GetPath() (path string, err error) {
 	return path, nil
 }
 
-func (c *CommandExecutorDirectory) ListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory, err error) {
-	if options == nil {
-		return nil, TracedErrorNil("options")
-	}
-
-	return nil, TracedErrorNotImplemented()
-}
-
 func (c *CommandExecutorDirectory) GetSubDirectory(path ...string) (subDirectory Directory, err error) {
 	if len(path) <= 0 {
 		return nil, TracedErrorNil("path")
@@ -493,6 +485,14 @@ func (c *CommandExecutorDirectory) IsLocalDirectory() (isLocalDirectory bool, er
 	isLocalDirectory = hostDescription == "localhost"
 
 	return isLocalDirectory, nil
+}
+
+func (c *CommandExecutorDirectory) ListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory, err error) {
+	if options == nil {
+		return nil, TracedErrorNil("options")
+	}
+
+	return nil, TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorDirectory) MustChmod(chmodOptions *ChmodOptions) {
@@ -631,15 +631,6 @@ func (c *CommandExecutorDirectory) MustGetPath() (path string) {
 	return path
 }
 
-func (c *CommandExecutorDirectory) MustListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory) {
-	subDirectories, err := c.ListSubDirectories(options)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-
-	return subDirectories
-}
-
 func (c *CommandExecutorDirectory) MustGetSubDirectory(path ...string) (subDirectory Directory) {
 	subDirectory, err := c.GetSubDirectory(path...)
 	if err != nil {
@@ -656,6 +647,15 @@ func (c *CommandExecutorDirectory) MustIsLocalDirectory() (isLocalDirectory bool
 	}
 
 	return isLocalDirectory
+}
+
+func (c *CommandExecutorDirectory) MustListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory) {
+	subDirectories, err := c.ListSubDirectories(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return subDirectories
 }
 
 func (c *CommandExecutorDirectory) MustSetCommandExecutor(commandExecutor CommandExecutor) {
