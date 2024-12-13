@@ -16,6 +16,7 @@ type GitRepository interface {
 	GetCommitParentsByCommitHash(hash string, options *GitCommitGetParentsOptions) (commitParents []*GitCommit, err error)
 	GetCommitTimeByCommitHash(hash string) (commitTime *time.Time, err error)
 	GetGitStatusOutput(verbose bool) (output string, err error)
+	GetPath() (path string, err error)
 
 	MustCommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool)
 	MustGetAsLocalDirectory() (localDirectory *LocalDirectory)
@@ -28,4 +29,5 @@ type GitRepository interface {
 	MustGetCommitParentsByCommitHash(hash string, options *GitCommitGetParentsOptions) (commitParents []*GitCommit)
 	MustGetCommitTimeByCommitHash(hash string) (commitTime *time.Time)
 	MustGetGitStatusOutput(verbose bool) (output string)
+	MustGetPath() (path string)
 }
