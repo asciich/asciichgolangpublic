@@ -57,7 +57,7 @@ func (t *TypesServices) GetTypeName(input interface{}) (typeName string, err err
 		if errorTypeName == "" {
 			errorTypeName = "error"
 		}
-		
+
 		typeName = ptrPrefix + fmt.Sprintf(
 			"%s{message='%s'}",
 			errorTypeName,
