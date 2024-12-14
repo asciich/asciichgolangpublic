@@ -34,7 +34,7 @@ func TestPreCommitConfigFileUpdateDependency(t *testing.T) {
 
 				expectedOutput := MustGetPreCommitConfigByLocalPath(filepath.Join(tt.testDataDir, "expected_output"))
 
-				if !expectedOutput.MustExists() {
+				if !expectedOutput.MustExists(verbose) {
 					if os.Getenv("UPDATE_EXPECTED") == "1" {
 						expectedOutput.MustCreate(verbose)
 					}

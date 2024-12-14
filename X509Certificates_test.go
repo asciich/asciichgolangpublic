@@ -34,12 +34,12 @@ func TestX509CertificatesCreateRootCaIntoTemporaryDirectory(t *testing.T) {
 				assert.True(tempDirectory.MustExists(verbose))
 				crtFile := tempDirectory.MustGetFileInDirectory("rootCA.crt")
 				crtCertFile := MustGetX509CertificateFileFromFile(crtFile)
-				assert.True(crtFile.MustExists())
-				assert.True(crtCertFile.MustIsX509Certificate())
+				assert.True(crtFile.MustExists(verbose))
+				assert.True(crtCertFile.MustIsX509Certificate(verbose))
 				assert.True(crtCertFile.MustIsX509RootCertificate(verbose))
 
 				keyFile := tempDirectory.MustGetFileInDirectory("rootCA.key")
-				assert.True(keyFile.MustExists())
+				assert.True(keyFile.MustExists(verbose))
 			},
 		)
 	}
@@ -72,7 +72,7 @@ func TestX509CertificatesCreateIntermediateCertificateIntoTemporaryDirectory(t *
 				assert.True(tempDirectory.MustExists(verbose))
 
 				keyFile := tempDirectory.MustGetFileInDirectory("intermediateCertificate.key")
-				assert.True(keyFile.MustExists())
+				assert.True(keyFile.MustExists(verbose))
 			},
 		)
 	}
@@ -113,14 +113,14 @@ func TestX509CertificateCreateAndSignIntermediateCertificate(t *testing.T) {
 					rootTempDirectory.MustGetFileInDirectory("rootCA.crt"),
 				)
 
-				assert.True(rootCrtFile.MustExists())
-				assert.True(rootCrtFile.MustIsX509Certificate())
+				assert.True(rootCrtFile.MustExists(verbose))
+				assert.True(rootCrtFile.MustIsX509Certificate(verbose))
 				assert.True(rootCrtFile.MustIsX509RootCertificate(verbose))
 				assert.False(rootCrtFile.MustIsX509IntermediateCertificate())
 				assert.True(rootCrtFile.MustIsX509v3())
 
 				rootKeyFile := rootTempDirectory.MustGetFileInDirectory("rootCA.key")
-				assert.True(rootKeyFile.MustExists())
+				assert.True(rootKeyFile.MustExists(verbose))
 
 				// Create intermediate certificate
 				intermediateTempDirectory := certificates.MustCreateIntermediateCertificateIntoDirectory(&X509CreateCertificateOptions{
@@ -134,12 +134,12 @@ func TestX509CertificateCreateAndSignIntermediateCertificate(t *testing.T) {
 				assert.True(intermediateTempDirectory.MustExists(verbose))
 
 				intermediateKeyFile := intermediateTempDirectory.MustGetFileInDirectory("intermediateCertificate.key")
-				assert.True(intermediateKeyFile.MustExists())
+				assert.True(intermediateKeyFile.MustExists(verbose))
 
 				intermediateCertFile := MustGetX509CertificateFileFromFile(
 					intermediateTempDirectory.MustGetFileInDirectory("intermediateCertificate.crt"),
 				)
-				assert.False(intermediateCertFile.MustExists())
+				assert.False(intermediateCertFile.MustExists(verbose))
 
 				// Sign intermediate certificate
 				certificates.MustSignIntermediateCertificate(&X509SignCertificateOptions{
@@ -153,7 +153,7 @@ func TestX509CertificateCreateAndSignIntermediateCertificate(t *testing.T) {
 					Verbose:                verbose,
 				})
 
-				assert.True(intermediateCertFile.MustExists())
+				assert.True(intermediateCertFile.MustExists(verbose))
 				assert.False(intermediateCertFile.MustIsX509RootCertificate(verbose))
 				assert.True(intermediateCertFile.MustIsX509IntermediateCertificate())
 				assert.True(intermediateCertFile.MustIsX509v3())
@@ -194,7 +194,7 @@ func TestX509Certificates_NoTestdataCertificateUnexpired(t *testing.T) {
 
 				toCheck := MustGetX509CertificateFileFromPath(tt.pathToCheck)
 
-				assert.True(toCheck.MustIsX509Certificate())
+				assert.True(toCheck.MustIsX509Certificate(verbose))
 				assert.True(toCheck.MustIsExpired(verbose))
 			},
 		)

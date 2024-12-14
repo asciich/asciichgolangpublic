@@ -101,7 +101,7 @@ func (c *CommandExecutorFile) Create(verbose bool) (err error) {
 		return err
 	}
 
-	exists, err := c.Exists()
+	exists, err := c.Exists(verbose)
 	if err != nil {
 		return err
 	}
@@ -146,7 +146,7 @@ func (c *CommandExecutorFile) Delete(verbose bool) (err error) {
 		)
 	}
 
-	exists, err := c.Exists()
+	exists, err := c.Exists(verbose)
 	if err != nil {
 		return err
 	}
@@ -178,7 +178,7 @@ func (c *CommandExecutorFile) Delete(verbose bool) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorFile) Exists() (exist bool, err error) {
+func (c *CommandExecutorFile) Exists(verbose bool) (exists bool, err error) {
 	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
 	if err != nil {
 		return false, err
@@ -202,17 +202,38 @@ func (c *CommandExecutorFile) Exists() (exist bool, err error) {
 
 	output = strings.TrimSpace(output)
 	if output == "yes" {
-		return true, nil
+		exists = true
+	} else if output == "no" {
+		exists = false
+	} else {
+		return false, TracedErrorf(
+			"Unexpected output when checking for file to exist: '%s'",
+			output,
+		)
 	}
 
-	if output == "no" {
-		return false, nil
+	if verbose {
+		hostDescription, err := c.GetHostDescription()
+		if err != nil {
+			return false, err
+		}
+
+		if exists {
+			LogInfof(
+				"File '%s' on host '%s' exists.",
+				filePath,
+				hostDescription,
+			)
+		} else {
+			LogInfof(
+				"File '%s' on host '%s' does not exist.",
+				filePath,
+				hostDescription,
+			)
+		}
 	}
 
-	return false, TracedErrorf(
-		"Unexpected output when checking for file to exist: '%s'",
-		output,
-	)
+	return exists, nil
 }
 
 func (c *CommandExecutorFile) GetBaseName() (baseName string, err error) {
@@ -343,9 +364,7 @@ func (c *CommandExecutorFile) GetParentDirectory() (parentDirectory Directory, e
 		return nil, err
 	}
 
-	p := NewCommandExecutorDirectory()
-
-	err = p.SetCommandExecutor(commandExecutor)
+	p, err := NewCommandExecutorDirectory(commandExecutor)
 	if err != nil {
 		return nil, err
 	}
@@ -490,8 +509,8 @@ func (c *CommandExecutorFile) MustDelete(verbose bool) {
 	}
 }
 
-func (c *CommandExecutorFile) MustExists() (exist bool) {
-	exist, err := c.Exists()
+func (c *CommandExecutorFile) MustExists(verbose bool) (exist bool) {
+	exist, err := c.Exists(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -716,7 +735,7 @@ func (c *CommandExecutorFile) SecurelyDelete(verbose bool) (err error) {
 		return err
 	}
 
-	exits, err := c.Exists()
+	exits, err := c.Exists(verbose)
 	if err != nil {
 		return err
 	}

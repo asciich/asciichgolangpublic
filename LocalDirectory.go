@@ -465,7 +465,7 @@ func (l *LocalDirectory) GetFileInDirectoryAsLocalFile(filePath ...string) (loca
 	return localFile, nil
 }
 
-func (l *LocalDirectory) GetFilePathsInDirectory(listOptions *ListFileOptions) (filePathList []string, err error) {
+func (l *LocalDirectory) ListFilePaths(listOptions *ListFileOptions) (filePathList []string, err error) {
 	if listOptions == nil {
 		return nil, TracedError("listOptions is nil")
 	}
@@ -479,8 +479,6 @@ func (l *LocalDirectory) GetFilePathsInDirectory(listOptions *ListFileOptions) (
 	}
 
 	filePathList = []string{}
-	basenamesToExclude := listOptions.GetExcludeBasenamePatternOrEmptySliceIfUnset()
-	basenamesToMatch := listOptions.GetMatchBasenamePatternOrEmptySliceIfUnset()
 	err = filepath.Walk(
 		directoryPath,
 		func(path string, info os.FileInfo, err error) error {
@@ -490,29 +488,6 @@ func (l *LocalDirectory) GetFilePathsInDirectory(listOptions *ListFileOptions) (
 
 			if info.IsDir() {
 				return nil
-			}
-
-			baseName := filepath.Base(path)
-			for _, toCheck := range basenamesToExclude {
-				matches, err := Strings().MatchesRegex(baseName, toCheck)
-				if err != nil {
-					return err
-				}
-
-				if matches {
-					return nil
-				}
-			}
-
-			for _, toCheck := range basenamesToMatch {
-				matches, err := Strings().MatchesRegex(baseName, toCheck)
-				if err != nil {
-					return err
-				}
-
-				if !matches {
-					return nil
-				}
 			}
 
 			filePathList = append(filePathList, path)
@@ -525,9 +500,16 @@ func (l *LocalDirectory) GetFilePathsInDirectory(listOptions *ListFileOptions) (
 
 	filePathList = Slices().RemoveEmptyStrings(filePathList)
 
+	filePathList, err  = Paths().FilterPaths(filePathList, listOptions)
+	if err != nil {
+		return nil, err
+	}
+
 	if listOptions.ReturnRelativePaths {
-		filePathList = Slices().TrimPrefix(filePathList, directoryPath)
-		filePathList = Slices().TrimAllPrefix(filePathList, "/")
+		filePathList, err = Paths().GetRelativePathsTo(filePathList, directoryPath)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	filePathList = Slices().SortStringSliceAndRemoveEmpty(filePathList)
@@ -541,7 +523,7 @@ func (l *LocalDirectory) GetFilePathsInDirectory(listOptions *ListFileOptions) (
 	return filePathList, nil
 }
 
-func (l *LocalDirectory) GetFilesInDirectory(options *ListFileOptions) (files []File, err error) {
+func (l *LocalDirectory) ListFiles(options *ListFileOptions) (files []File, err error) {
 	if options == nil {
 		return nil, TracedError("options is nil")
 	}
@@ -549,7 +531,7 @@ func (l *LocalDirectory) GetFilesInDirectory(options *ListFileOptions) (files []
 	optionsToUse := options.GetDeepCopy()
 	optionsToUse.ReturnRelativePaths = true
 
-	filePathList, err := l.GetFilePathsInDirectory(optionsToUse)
+	filePathList, err := l.ListFilePaths(optionsToUse)
 	if err != nil {
 		return nil, err
 	}
@@ -755,7 +737,7 @@ func (l *LocalDirectory) IsEmptyDirectory(verbose bool) (isEmpty bool, err error
 		return false, nil
 	}
 
-	files, err := l.GetFilesInDirectory(
+	files, err := l.ListFiles(
 		&ListFileOptions{
 			Verbose:                       verbose,
 			AllowEmptyListIfNoFileIsFound: true,
@@ -972,8 +954,8 @@ func (l *LocalDirectory) MustGetFileInDirectoryAsLocalFile(filePath ...string) (
 	return localFile
 }
 
-func (l *LocalDirectory) MustGetFilePathsInDirectory(listOptions *ListFileOptions) (filePathList []string) {
-	filePathList, err := l.GetFilePathsInDirectory(listOptions)
+func (l *LocalDirectory) MustListFilePathsns(listOptions *ListFileOptions) (filePathList []string) {
+	filePathList, err := l.ListFilePaths(listOptions)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -981,8 +963,8 @@ func (l *LocalDirectory) MustGetFilePathsInDirectory(listOptions *ListFileOption
 	return filePathList
 }
 
-func (l *LocalDirectory) MustGetFilesInDirectory(options *ListFileOptions) (files []File) {
-	files, err := l.GetFilesInDirectory(options)
+func (l *LocalDirectory) MustListFiles(options *ListFileOptions) (files []File) {
+	files, err := l.ListFiles(options)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -1131,7 +1113,7 @@ func (l *LocalDirectory) MustSubDirectoryExists(subDirName string, verbose bool)
 }
 
 func (l *LocalDirectory) ReplaceBetweenMarkers(verbose bool) (err error) {
-	files, err := l.GetFilesInDirectory(
+	files, err := l.ListFiles(
 		&ListFileOptions{
 			Verbose: verbose,
 		},

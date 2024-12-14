@@ -78,8 +78,8 @@ func (x *X509CertificateFile) GetAsX509Certificate() (cert *X509Certificate, err
 	return cert, nil
 }
 
-func (x *X509CertificateFile) IsX509Certificate() (isX509Certificate bool, err error) {
-	exists, err := x.Exists()
+func (x *X509CertificateFile) IsX509Certificate(verbose bool) (isX509Certificate bool, err error) {
+	exists, err := x.Exists(verbose)
 	if err != nil {
 		return false, err
 	}
@@ -219,8 +219,8 @@ func (x *X509CertificateFile) MustIsExpired(verbose bool) (isExpired bool, err e
 	return isExpired, nil
 }
 
-func (x *X509CertificateFile) MustIsX509Certificate() (isX509Certificate bool) {
-	isX509Certificate, err := x.IsX509Certificate()
+func (x *X509CertificateFile) MustIsX509Certificate(verbose bool) (isX509Certificate bool) {
+	isX509Certificate, err := x.IsX509Certificate(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

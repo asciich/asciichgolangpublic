@@ -231,9 +231,7 @@ func (h *Host) GetDirectoryByPath(path string) (directory Directory, err error) 
 		return nil, TracedErrorEmptyString("path")
 	}
 
-	commandExecutorDir := NewCommandExecutorDirectory()
-
-	err = commandExecutorDir.SetCommandExecutor(h)
+	commandExecutorDir, err := NewCommandExecutorDirectory(h)
 	if err != nil {
 		return nil, err
 	}

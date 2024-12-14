@@ -428,6 +428,38 @@ func TestStringsSplitWords(t *testing.T) {
 	}
 }
 
+func TestStrings_MatchesRegex(t *testing.T) {
+	tests := []struct {
+		input         string
+		regex         string
+		expectedMatch bool
+	}{
+		{"abc", "abc", true},
+		{"abc", "^abc", true},
+		{"abc", "^abc$", true},
+		{"abc", "^abcd$", false},
+		{"a.log", "a.log", true},
+		{"ablog", "a.log", true},
+		{"ablog", "a\\.log", false},
+		{"a.log", ".*.log", true},
+		{"a.log", ".*\\.log", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(
+					tt.expectedMatch,
+					Strings().MustMatchesRegex(tt.input, tt.regex),
+				)
+			},
+		)
+	}
+}
+
 func TestStringsIsComment(t *testing.T) {
 	tests := []struct {
 		input             string

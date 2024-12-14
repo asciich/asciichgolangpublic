@@ -53,11 +53,11 @@ func TestLocalFileExists(t *testing.T) {
 				file := TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)
 				defer file.Delete(verbose)
 
-				assert.True(file.MustExists())
+				assert.True(file.MustExists(verbose))
 
 				file.MustDelete(verbose)
 
-				assert.False(file.MustExists())
+				assert.False(file.MustExists(verbose))
 			},
 		)
 	}
@@ -472,8 +472,8 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 					localCopy.MustGetParentFileForBaseClassAsLocalFile(),
 				))
 
-				assert.True(testFile.MustExists())
-				assert.True(copy.MustExists())
+				assert.True(testFile.MustExists(verbose))
+				assert.True(copy.MustExists(verbose))
 			},
 		)
 	}
@@ -1028,7 +1028,7 @@ func TestFileEnsureEndsWithLineBreakOnNonExitistingFile(t *testing.T) {
 				nonExistingFile := TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)
 				nonExistingFile.MustDelete(verbose)
 
-				assert.False(nonExistingFile.MustExists())
+				assert.False(nonExistingFile.MustExists(verbose))
 
 				nonExistingFile.MustEnsureEndsWithLineBreak(verbose)
 
@@ -1107,8 +1107,8 @@ func TestFileReplaceBetweenMarkers(t *testing.T) {
 				listOptions := NewListFileOptions()
 				listOptions.NonRecursive = false
 				listOptions.ReturnRelativePaths = true
-				expectedFilePaths := expectedDir.MustGetFilePathsInDirectory(listOptions)
-				currentFilePaths := tempDir.MustGetFilePathsInDirectory(listOptions)
+				expectedFilePaths := expectedDir.MustListFilePaths(listOptions)
+				currentFilePaths := tempDir.MustListFilePaths(listOptions)
 
 				assert.EqualValues(expectedFilePaths, currentFilePaths)
 
