@@ -71,6 +71,20 @@ func (t *TemporaryFilesService) CreateFromString(content string, verbose bool) (
 	return temporaryFile, nil
 }
 
+func (t *TemporaryFilesService) CreateFromStringAndGetPath(content string, verbose bool) (temporaryFilePath string, err error) {
+	temporaryFile, err := t.CreateFromString(content, verbose)
+	if err != nil {
+		return "", err
+	}
+
+	temporaryFilePath, err = temporaryFile.GetPath()
+	if err != nil {
+		return "", err
+	}
+
+	return temporaryFilePath, nil
+}
+
 func (t *TemporaryFilesService) CreateNamedTemporaryFile(fileName string, verbose bool) (temporaryfile File, err error) {
 	if fileName == "" {
 		return nil, TracedErrorEmptyString("fileName")
@@ -187,6 +201,15 @@ func (t *TemporaryFilesService) MustCreateFromString(content string, verbose boo
 	}
 
 	return file
+}
+
+func (t *TemporaryFilesService) MustCreateFromStringAndGetPath(content string, verbose bool) (temporaryFilePath string) {
+	temporaryFilePath, err := t.CreateFromStringAndGetPath(content, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return temporaryFilePath
 }
 
 func (t *TemporaryFilesService) MustCreateNamedTemporaryFile(fileName string, verbose bool) (temporaryfile File) {
