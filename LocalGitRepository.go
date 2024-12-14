@@ -682,13 +682,13 @@ func (l *LocalGitRepository) GetTagByHash(hash string) (gitTag *GitTag, err erro
 	return gitTag, nil
 }
 
-func (l *LocalGitRepository) GitlabCiYamlFileExists() (gitlabCiYamlFileExists bool, err error) {
+func (l *LocalGitRepository) GitlabCiYamlFileExists(verbose bool) (gitlabCiYamlFileExists bool, err error) {
 	gitlabCiYamlFile, err := l.GetGitlabCiYamlFile()
 	if err != nil {
 		return false, err
 	}
 
-	gitlabCiYamlFileExists, err = gitlabCiYamlFile.Exists()
+	gitlabCiYamlFileExists, err = gitlabCiYamlFile.Exists(verbose)
 	if err != nil {
 		return false, err
 	}
@@ -1141,8 +1141,8 @@ func (l *LocalGitRepository) MustGetTagByHash(hash string) (gitTag *GitTag) {
 	return gitTag
 }
 
-func (l *LocalGitRepository) MustGitlabCiYamlFileExists() (gitlabCiYamlFileExists bool) {
-	gitlabCiYamlFileExists, err := l.GitlabCiYamlFileExists()
+func (l *LocalGitRepository) MustGitlabCiYamlFileExists(verbose bool) (gitlabCiYamlFileExists bool) {
+	gitlabCiYamlFileExists, err := l.GitlabCiYamlFileExists(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

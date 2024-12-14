@@ -27,7 +27,7 @@ func TestCreateTemporaryFile(t *testing.T) {
 				file := TemporaryFiles().MustCreateFromString(tt.content, verbose)
 				defer file.Delete(verbose)
 
-				assert.True(file.MustExists())
+				assert.True(file.MustExists(verbose))
 				assert.EqualValues(tt.content, file.MustReadAsString())
 			},
 		)
@@ -52,7 +52,7 @@ func TestCreateEmptyTemporaryFile(t *testing.T) {
 				file := TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)
 				defer file.Delete(verbose)
 
-				assert.True(file.MustExists())
+				assert.True(file.MustExists(verbose))
 				assert.EqualValues("", file.MustReadAsString())
 				assert.True(strings.HasPrefix(file.MustGetLocalPath(), "/tmp/"))
 			},
@@ -79,7 +79,7 @@ func TestCreateEmptyTemporaryFileAndGetPath(t *testing.T) {
 				file := MustNewLocalFileByPath(filePath)
 				defer file.Delete(verbose)
 
-				assert.True(file.MustExists())
+				assert.True(file.MustExists(verbose))
 				assert.EqualValues("", file.MustReadAsString())
 				assert.True(strings.HasPrefix(filePath, "/tmp/"))
 				assert.True(strings.HasPrefix(file.MustGetPath(), "/tmp/"))

@@ -52,6 +52,18 @@ func (l *ListFileOptions) GetExcludePatternWholepath() (excludePatternWholepath 
 	return l.ExcludePatternWholepath, nil
 }
 
+func (l *ListFileOptions) IsExcludePatternWholepathSet() (isSet bool) {
+	return len(l.ExcludePatternWholepath) > 0
+}
+
+func (l *ListFileOptions) IsExcludeBasenamePatternSet() (isSet bool) {
+	return len(l.ExcludeBasenamePattern) > 0
+}
+
+func (l *ListFileOptions) IsMatchBasenamePatternSet() (isSet bool) {
+	return len(l.MatchBasenamePattern) > 0
+}
+
 func (l *ListFileOptions) GetMatchBasenamePattern() (matchPattern []string, err error) {
 	if l.MatchBasenamePattern == nil {
 		return nil, TracedErrorf("MatchPattern not set")

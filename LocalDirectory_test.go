@@ -401,11 +401,11 @@ func TestLocalDirectoryWriteStringToFile(t *testing.T) {
 				testDirectory := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
 				defer testDirectory.Delete(verbose)
 
-				assert.False(testDirectory.MustFileInDirectoryExists(tt.fileName))
+				assert.False(testDirectory.MustFileInDirectoryExists(verbose, tt.fileName))
 
 				testFile := testDirectory.MustWriteStringToFileInDirectory(tt.content, verbose, tt.fileName)
 
-				assert.True(testDirectory.MustFileInDirectoryExists(tt.fileName))
+				assert.True(testDirectory.MustFileInDirectoryExists(verbose, tt.fileName))
 				assert.EqualValues(
 					tt.content,
 					testFile.MustReadAsString(),
@@ -444,7 +444,7 @@ func TestDirectoryListFilesInDirectory(t *testing.T) {
 
 				temporaryDirectory := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
 				temporaryDirectory.MustCreateFilesInDirectory(tt.fileNames, verbose)
-				listedFiles := temporaryDirectory.MustGetFilePathsInDirectory(&tt.listOptions)
+				listedFiles := temporaryDirectory.MustListFilePaths(&tt.listOptions)
 				assert.EqualValues(tt.expectedPaths, listedFiles)
 			},
 		)

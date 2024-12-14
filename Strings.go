@@ -567,3 +567,4 @@ func (s *StringsService) TrimSuffixUntilAbsent(input string, suffixToRemove stri
 	}
 	return withoutSuffix
 }
+

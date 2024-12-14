@@ -550,8 +550,8 @@ func (s *SlicesService) RemoveEmptyStringsAtEnd(input []string) (withoutEmptyStr
 		return []string{}
 	}
 
-	lastIndex := len(input)-1
-	for i := len(input)-1 ; i >= 0; i-- {
+	lastIndex := len(input) - 1
+	for i := len(input) - 1; i >= 0; i-- {
 		if input[i] == "" {
 			lastIndex = i
 		} else {
@@ -562,4 +562,13 @@ func (s *SlicesService) RemoveEmptyStringsAtEnd(input []string) (withoutEmptyStr
 	withoutEmptyStringsAtEnd = input[:lastIndex]
 
 	return withoutEmptyStringsAtEnd
+}
+
+func (s *SlicesService) SortStringSliceAndRemoveDuplicates(input []string) (output []string) {
+	if len(input) <= 0 {
+		return []string{}
+	}
+
+	sorted := s.SortStringSlice(input)
+	return s.RemoveDuplicatedStrings(sorted)
 }

@@ -235,7 +235,7 @@ func (g *GopassService) InsertFile(fileToInsert File, gopassOptions *GopassSecre
 		return err
 	}
 
-	fileExists, err := fileToInsert.Exists()
+	fileExists, err := fileToInsert.Exists(gopassOptions.Verbose)
 	if err != nil {
 		return err
 	}

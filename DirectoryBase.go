@@ -1,5 +1,7 @@
 package asciichgolangpublic
 
+import "strings"
+
 type DirectoryBase struct {
 	parentDirectoryForBaseClass Directory
 }
@@ -31,6 +33,29 @@ func (d *DirectoryBase) CheckExists(verbose bool) (err error) {
 	return TracedErrorf(
 		"directory '%s' does not exist", path,
 	)
+}
+
+func (d *DirectoryBase) CreateFileInDirectory(verbose bool, path ...string) (createdFile File, err error) {
+	if len(path) <= 0 {
+		return nil, TracedError("path has no elements")
+	}
+
+	parent, err := d.GetParentDirectoryForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	createdFile, err = parent.GetFileInDirectory(path...)
+	if err != nil {
+		return nil, err
+	}
+
+	err = createdFile.Create(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdFile, nil
 }
 
 func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose bool, pathToCreate ...string) (createdFile File, err error) {
@@ -66,7 +91,51 @@ func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose 
 	return createdFile, nil
 }
 
-func (d *DirectoryBase) FileInDirectoryExists(path ...string) (fileExists bool, err error) {
+func (d *DirectoryBase) DeleteFilesMatching(listFileOptions *ListFileOptions) (err error) {
+	if listFileOptions == nil {
+		return TracedErrorNil("listFileOptions")
+	}
+
+	parent, err := d.GetParentDirectoryForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	toDelete, err := parent.ListFiles(listFileOptions)
+	if err != nil {
+		return err
+	}
+
+	for _, d := range toDelete {
+		err = d.Delete(listFileOptions.Verbose)
+		if err != nil {
+			return err
+		}
+	}
+
+	path, err := parent.GetPath()
+	if err != nil {
+		return err
+	}
+
+	hostDescription, err := parent.GetHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if listFileOptions.Verbose {
+		LogInfof(
+			"Deleted '%d' in directoy '%s' on '%s'",
+			len(toDelete),
+			path,
+			hostDescription,
+		)
+	}
+
+	return err
+}
+
+func (d *DirectoryBase) FileInDirectoryExists(verbose bool, path ...string) (fileExists bool, err error) {
 	if len(path) <= 0 {
 		return false, TracedError("path has no elements")
 	}
@@ -81,7 +150,7 @@ func (d *DirectoryBase) FileInDirectoryExists(path ...string) (fileExists bool, 
 		return false, err
 	}
 
-	fileExists, err = fileToCheck.Exists()
+	fileExists, err = fileToCheck.Exists(verbose)
 	if err != nil {
 		return false, err
 	}
@@ -119,11 +188,59 @@ func (d *DirectoryBase) GetParentDirectoryForBaseClass() (parentDirectoryForBase
 	return d.parentDirectoryForBaseClass, nil
 }
 
+func (d *DirectoryBase) ListFilePaths(listFileOptions *ListFileOptions) (filePaths []string, err error) {
+	if listFileOptions == nil {
+		return nil, TracedErrorNil("listFileOptions")
+	}
+
+	parent, err := d.GetParentDirectoryForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	files, err := parent.ListFiles(listFileOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	directoryPath, err := parent.GetPath()
+	if err != nil {
+		return nil, err
+	}
+
+	filePaths = []string{}
+	for _, f := range files {
+		toAdd, err := f.GetPath()
+		if err != nil {
+			return nil, err
+		}
+
+		if listFileOptions.ReturnRelativePaths {
+			toAdd = strings.TrimPrefix(toAdd, directoryPath+"/")
+		}
+
+		filePaths = append(filePaths, toAdd)
+	}
+
+	filePaths = Slices().SortStringSlice(filePaths)
+
+	return filePaths, nil
+}
+
 func (d *DirectoryBase) MustCheckExists(verbose bool) {
 	err := d.CheckExists(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (d *DirectoryBase) MustCreateFileInDirectory(verbose bool, path ...string) (createdFile File) {
+	createdFile, err := d.CreateFileInDirectory(verbose, path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdFile
 }
 
 func (d *DirectoryBase) MustCreateFileInDirectoryFromString(content string, verbose bool, pathToCreate ...string) (createdFile File) {
@@ -135,8 +252,15 @@ func (d *DirectoryBase) MustCreateFileInDirectoryFromString(content string, verb
 	return createdFile
 }
 
-func (d *DirectoryBase) MustFileInDirectoryExists(path ...string) (fileExists bool) {
-	fileExists, err := d.FileInDirectoryExists(path...)
+func (d *DirectoryBase) MustDeleteFilesMatching(listFileOptions *ListFileOptions) {
+	err := d.DeleteFilesMatching(listFileOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (d *DirectoryBase) MustFileInDirectoryExists(verbose bool, path ...string) (fileExists bool) {
+	fileExists, err := d.FileInDirectoryExists(verbose, path...)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -160,6 +284,15 @@ func (d *DirectoryBase) MustGetParentDirectoryForBaseClass() (parentDirectoryFor
 	}
 
 	return parentDirectoryForBaseClass
+}
+
+func (d *DirectoryBase) MustListFilePaths(listFileOptions *ListFileOptions) (filePaths []string) {
+	filePaths, err := d.ListFilePaths(listFileOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return filePaths
 }
 
 func (d *DirectoryBase) MustReadFileInDirectoryAsLines(path ...string) (content []string) {

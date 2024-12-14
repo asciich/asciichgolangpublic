@@ -21,8 +21,56 @@ type CommandExecutorDirectory struct {
 	dirPath         string
 }
 
-func NewCommandExecutorDirectory() (c *CommandExecutorDirectory) {
-	return new(CommandExecutorDirectory)
+func GetLocalCommandExecutorDirectoryByPath(path string) (c *CommandExecutorDirectory, err error) {
+	if path == "" {
+		return nil, TracedErrorEmptyString("path")
+	}
+
+	c, err = NewCommandExecutorDirectory(Bash())
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.SetDirPath(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return c, nil
+}
+
+func MustGetLocalCommandExecutorDirectoryByPath(path string) (c *CommandExecutorDirectory) {
+	c, err := GetLocalCommandExecutorDirectoryByPath(path)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return c
+}
+
+func MustNewCommandExecutorDirectory(commandExecutor CommandExecutor) (c *CommandExecutorDirectory) {
+	c, err := NewCommandExecutorDirectory(commandExecutor)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return c
+}
+
+func NewCommandExecutorDirectory(commandExecutor CommandExecutor) (c *CommandExecutorDirectory, err error) {
+	if commandExecutor == nil {
+		return nil, TracedErrorNil("commandExecutor")
+	}
+
+	c = new(CommandExecutorDirectory)
+	c.MustSetParentDirectoryForBaseClass(c)
+
+	err = c.SetCommandExecutor(commandExecutor)
+	if err != nil {
+		return nil, err
+	}
+
+	return c, nil
 }
 
 func (c *CommandExecutorDirectory) Chmod(chmodOptions *ChmodOptions) (err error) {
@@ -362,7 +410,7 @@ func (c *CommandExecutorDirectory) GetFileInDirectory(pathToFile ...string) (fil
 
 	filePath := filepath.Join(append([]string{dirPath}, pathToFile...)...)
 
-	toCheck := Strings().EnsureSuffix(filePath, "/")
+	toCheck := Strings().EnsureSuffix(dirPath, "/")
 
 	if !strings.HasPrefix(filePath, toCheck) {
 		return nil, TracedErrorf(
@@ -447,9 +495,7 @@ func (c *CommandExecutorDirectory) GetSubDirectory(path ...string) (subDirectory
 		return nil, err
 	}
 
-	subdir := NewCommandExecutorDirectory()
-
-	err = subdir.SetCommandExecutor(commandExecutor)
+	subdir, err := NewCommandExecutorDirectory(commandExecutor)
 	if err != nil {
 		return nil, err
 	}
@@ -485,6 +531,79 @@ func (c *CommandExecutorDirectory) IsLocalDirectory() (isLocalDirectory bool, er
 	isLocalDirectory = hostDescription == "localhost"
 
 	return isLocalDirectory, nil
+}
+
+func (c *CommandExecutorDirectory) ListFilePaths(listFileOptions *ListFileOptions) (filePaths []string, err error) {
+	if listFileOptions == nil {
+		return nil, TracedErrorNil("listFileOptions")
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	dirPath, err := c.GetPath()
+	if err != nil {
+		return nil, err
+	}
+
+	commandToUse := []string{"find", dirPath, "-type", "f"}
+	if listFileOptions.NonRecursive {
+		commandToUse = []string{"find", dirPath, "-type", "f", "-maxdepth", "1"}
+	}
+
+	foundPaths, err := commandExecutor.RunCommandAndGetStdoutAsLines(
+		&RunCommandOptions{
+			Command: commandToUse,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	filePaths, err = Paths().FilterPaths(foundPaths, listFileOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	if listFileOptions.ReturnRelativePaths {
+		filePaths, err = Paths().GetRelativePathsTo(filePaths, dirPath)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	filePaths = Slices().SortStringSlice(filePaths)
+
+	return filePaths, nil
+}
+
+func (c *CommandExecutorDirectory) ListFiles(listFileOptions *ListFileOptions) (files []File, err error) {
+	if listFileOptions == nil {
+		return nil, TracedErrorNil("listFileOptions")
+	}
+
+	optionsToUse := listFileOptions.GetDeepCopy()
+
+	optionsToUse.ReturnRelativePaths = true
+
+	paths, err := c.ListFilePaths(optionsToUse)
+	if err != nil {
+		return nil, err
+	}
+
+	files = []File{}
+	for _, path := range paths {
+		toAdd, err := c.GetFileInDirectory(path)
+		if err != nil {
+			return nil, err
+		}
+
+		files = append(files, toAdd)
+	}
+
+	return files, nil
 }
 
 func (c *CommandExecutorDirectory) ListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory, err error) {
@@ -647,6 +766,24 @@ func (c *CommandExecutorDirectory) MustIsLocalDirectory() (isLocalDirectory bool
 	}
 
 	return isLocalDirectory
+}
+
+func (c *CommandExecutorDirectory) MustListFilePaths(listFileOptions *ListFileOptions) (filePaths []string) {
+	filePaths, err := c.ListFilePaths(listFileOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return filePaths
+}
+
+func (c *CommandExecutorDirectory) MustListFiles(listFileOptions *ListFileOptions) (files []File) {
+	files, err := c.ListFiles(listFileOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return files
 }
 
 func (c *CommandExecutorDirectory) MustListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory) {

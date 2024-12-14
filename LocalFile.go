@@ -90,7 +90,7 @@ func (l *LocalFile) Delete(verbose bool) (err error) {
 		return err
 	}
 
-	exists, err := l.Exists()
+	exists, err := l.Exists(verbose)
 	if err != nil {
 		return err
 	}
@@ -218,7 +218,7 @@ func (l *LocalFile) CopyToFile(destFile File, verbose bool) (err error) {
 }
 
 func (l *LocalFile) Create(verbose bool) (err error) {
-	exists, err := l.Exists()
+	exists, err := l.Exists(verbose)
 	if err != nil {
 		return err
 	}
@@ -246,7 +246,7 @@ func (l *LocalFile) Create(verbose bool) (err error) {
 	return nil
 }
 
-func (l *LocalFile) Exists() (exists bool, err error) {
+func (l *LocalFile) Exists(verbose bool) (exists bool, err error) {
 	localPath, err := l.GetLocalPath()
 	if err != nil {
 		return false, err
@@ -413,8 +413,8 @@ func (l *LocalFile) MustDelete(verbose bool) {
 	}
 }
 
-func (l *LocalFile) MustExists() (exists bool) {
-	exists, err := l.Exists()
+func (l *LocalFile) MustExists(verbose bool) (exists bool) {
+	exists, err := l.Exists(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
