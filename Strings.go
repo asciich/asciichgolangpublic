@@ -303,6 +303,23 @@ func (s *StringsService) MustMatchesRegex(input string, regex string) (matches b
 	return matches
 }
 
+func (s *StringsService) RemoveLinesWithPrefix(input string, prefixToRemove string) (output string) {
+	lines := s.SplitLines(input, false)
+
+	outputLines := []string{}
+	for _, l := range lines {
+		if strings.HasPrefix(l, prefixToRemove) {
+			continue
+		}
+
+		outputLines = append(outputLines, l)
+	}
+
+	output = strings.Join(outputLines, "\n")
+
+	return output
+}
+
 func (s *StringsService) RemoveCommentMarkers(input string) (commentContent string) {
 	if input == "" {
 		return ""
@@ -567,4 +584,3 @@ func (s *StringsService) TrimSuffixUntilAbsent(input string, suffixToRemove stri
 	}
 	return withoutSuffix
 }
-

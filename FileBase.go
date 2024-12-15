@@ -821,6 +821,13 @@ func (f *FileBase) MustReadLastCharAsString() (lastChar string) {
 	return lastChar
 }
 
+func (f *FileBase) MustRemoveLinesWithPrefix(prefix string) {
+	err := f.RemoveLinesWithPrefix(prefix)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (f *FileBase) MustReplaceBetweenMarkers(verbose bool) {
 	err := f.ReplaceBetweenMarkers(verbose)
 	if err != nil {
@@ -1093,6 +1100,28 @@ func (f *FileBase) ReadLastCharAsString() (lastChar string, err error) {
 	lastChar = content[len(content)-1:]
 
 	return lastChar, nil
+}
+
+func (f *FileBase) RemoveLinesWithPrefix(prefix string) (err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return nil
+	}
+
+	content, err := parent.ReadAsString()
+	if err != nil {
+		return nil
+	}
+
+	err = parent.WriteString(
+		Strings().RemoveLinesWithPrefix(content, prefix),
+		false,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (f *FileBase) ReplaceBetweenMarkers(verbose bool) (err error) {
