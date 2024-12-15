@@ -657,3 +657,46 @@ func TestStringsTrimAllLeadingAndTailingNewLines(t *testing.T) {
 		)
 	}
 }
+
+func TestStrings_RemoveLinesWithPrefix(t *testing.T) {
+	tests := []struct {
+		input          string
+		prefix         string
+		expectedOutput string
+	}{
+		{"", "abc", ""},
+		{"\n", "abc", "\n"},
+		{"abc\n", "abc", ""},
+		{"1: a\n2: b\n3: c\n", "1", "2: b\n3: c\n"},
+		{"1: a\n2: b\n3: c", "1", "2: b\n3: c"},
+		{"1: a\n2: b\n3: c\n", "2", "1: a\n3: c\n"},
+		{"1: a\n2: b\n3: c", "2", "1: a\n3: c"},
+		{"1: a\n2: b\n3: c\n", "2:", "1: a\n3: c\n"},
+		{"1: a\n2: b\n3: c", "2:", "1: a\n3: c"},
+		{"1: a\n2: b\n3: c\n", "2: ", "1: a\n3: c\n"},
+		{"1: a\n2: b\n3: c", "2: ", "1: a\n3: c"},
+		{"1: a\n2: b\n3: c\n", "3", "1: a\n2: b\n"},
+		{"1: a\n2: b\n3: c", "3", "1: a\n2: b"},
+		{"1: a\n2: b\n3: c\n", "3:", "1: a\n2: b\n"},
+		{"1: a\n2: b\n3: c", "3:", "1: a\n2: b"},
+		{"1: a\n2: b\n3: c\n", "3: ", "1: a\n2: b\n"},
+		{"1: a\n2: b\n3: c", "3: ", "1: a\n2: b"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(
+					tt.expectedOutput,
+					Strings().RemoveLinesWithPrefix(
+						tt.input,
+						tt.prefix,
+					),
+				)
+			},
+		)
+	}
+}

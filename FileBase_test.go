@@ -8,11 +8,9 @@ import (
 
 func TestFileBase(t *testing.T) {
 	tests := []struct {
-		command        []string
-		expectedOutput string
+		testcase string
 	}{
-		{[]string{"echo", "hello"}, "hello\n"},
-		{[]string{"echo", "hello world"}, "hello world\n"},
+		{"testcase"},
 	}
 
 	for _, tt := range tests {
@@ -92,7 +90,7 @@ func TestFileBaseEnsureLineInFile_testcase1(t *testing.T) {
 	}
 }
 
-func TestFileBaseEnsureLineInFile_testcaseWriteToNonexstingString(t *testing.T) {
+func TestFileBase_EnsureLineInFile_testcaseWriteToNonexstingString(t *testing.T) {
 	const verbose bool = true
 
 	tests := []struct {
@@ -143,6 +141,89 @@ func TestFileBaseEnsureLineInFile_testcaseWriteToNonexstingString(t *testing.T) 
 						tt.fileToTest.MustReadAsString(),
 					)
 				}
+			},
+		)
+	}
+}
+
+func getTemporaryFileToTest(implementationName string) (file File) {
+	const verbose = true
+
+	if implementationName == "localFile" {
+		return MustGetLocalFileByFile(TemporaryFiles().MustCreateEmptyTemporaryFile(verbose))
+	} else if implementationName == "commandExecutorFile" {
+		return MustGetLocalCommandExecutorFileByFile(TemporaryFiles().MustCreateEmptyTemporaryFile(verbose), verbose)
+	}
+
+	LogFatalWithTracef("Unknown implementation name '%s'", implementationName)
+
+	return nil
+}
+
+func TestFileBase_RemoveLinesWithPrefix(t *testing.T) {
+	tests := []struct {
+		implementationName string
+		input              string
+		prefix             string
+		expectedOutput     string
+	}{
+		// Test LocalFile implementatin
+		{"localFile", "", "abc", ""},
+		{"localFile", "\n", "abc", "\n"},
+		{"localFile", "abc\n", "abc", ""},
+		{"localFile", "1: a\n2: b\n3: c\n", "1", "2: b\n3: c\n"},
+		{"localFile", "1: a\n2: b\n3: c", "1", "2: b\n3: c"},
+		{"localFile", "1: a\n2: b\n3: c\n", "2", "1: a\n3: c\n"},
+		{"localFile", "1: a\n2: b\n3: c", "2", "1: a\n3: c"},
+		{"localFile", "1: a\n2: b\n3: c\n", "2:", "1: a\n3: c\n"},
+		{"localFile", "1: a\n2: b\n3: c", "2:", "1: a\n3: c"},
+		{"localFile", "1: a\n2: b\n3: c\n", "2: ", "1: a\n3: c\n"},
+		{"localFile", "1: a\n2: b\n3: c", "2: ", "1: a\n3: c"},
+		{"localFile", "1: a\n2: b\n3: c\n", "3", "1: a\n2: b\n"},
+		{"localFile", "1: a\n2: b\n3: c", "3", "1: a\n2: b"},
+		{"localFile", "1: a\n2: b\n3: c\n", "3:", "1: a\n2: b\n"},
+		{"localFile", "1: a\n2: b\n3: c", "3:", "1: a\n2: b"},
+		{"localFile", "1: a\n2: b\n3: c\n", "3: ", "1: a\n2: b\n"},
+		{"localFile", "1: a\n2: b\n3: c", "3: ", "1: a\n2: b"},
+
+		// Test CommandExecutorFile implementatin
+		{"commandExecutorFile", "", "abc", ""},
+		{"commandExecutorFile", "\n", "abc", "\n"},
+		{"commandExecutorFile", "abc\n", "abc", ""},
+		{"commandExecutorFile", "1: a\n2: b\n3: c\n", "1", "2: b\n3: c\n"},
+		{"commandExecutorFile", "1: a\n2: b\n3: c", "1", "2: b\n3: c"},
+		{"commandExecutorFile", "1: a\n2: b\n3: c\n", "2", "1: a\n3: c\n"},
+		{"commandExecutorFile", "1: a\n2: b\n3: c", "2", "1: a\n3: c"},
+		{"commandExecutorFile", "1: a\n2: b\n3: c\n", "2:", "1: a\n3: c\n"},
+		{"commandExecutorFile", "1: a\n2: b\n3: c", "2:", "1: a\n3: c"},
+		{"commandExecutorFile", "1: a\n2: b\n3: c\n", "2: ", "1: a\n3: c\n"},
+		{"commandExecutorFile", "1: a\n2: b\n3: c", "2: ", "1: a\n3: c"},
+		{"commandExecutorFile", "1: a\n2: b\n3: c\n", "3", "1: a\n2: b\n"},
+		{"commandExecutorFile", "1: a\n2: b\n3: c", "3", "1: a\n2: b"},
+		{"commandExecutorFile", "1: a\n2: b\n3: c\n", "3:", "1: a\n2: b\n"},
+		{"commandExecutorFile", "1: a\n2: b\n3: c", "3:", "1: a\n2: b"},
+		{"commandExecutorFile", "1: a\n2: b\n3: c\n", "3: ", "1: a\n2: b\n"},
+		{"commandExecutorFile", "1: a\n2: b\n3: c", "3: ", "1: a\n2: b"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+
+				toTest := getTemporaryFileToTest(tt.implementationName)
+				defer toTest.Delete(verbose)
+
+				toTest.MustWriteString(tt.input, verbose)
+				toTest.MustRemoveLinesWithPrefix(tt.prefix)
+
+				assert.EqualValues(
+					tt.expectedOutput,
+					toTest.MustReadAsString(),
+				)
 			},
 		)
 	}
