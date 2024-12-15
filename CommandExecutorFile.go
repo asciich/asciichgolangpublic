@@ -392,7 +392,7 @@ func (c *CommandExecutorFile) GetPath() (path string, err error) {
 
 	if isRunningOnLocalhost {
 		path, err := c.GetLocalPath()
-		if err != nil {
+		if err == nil {
 			return path, nil
 		}
 	} else {

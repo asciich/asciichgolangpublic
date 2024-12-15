@@ -167,7 +167,7 @@ func TestFileBase_RemoveLinesWithPrefix(t *testing.T) {
 		prefix             string
 		expectedOutput     string
 	}{
-		// Test LocalFile implementatin
+		// Test LocalFile implementation
 		{"localFile", "", "abc", ""},
 		{"localFile", "\n", "abc", "\n"},
 		{"localFile", "abc\n", "abc", ""},
@@ -186,7 +186,7 @@ func TestFileBase_RemoveLinesWithPrefix(t *testing.T) {
 		{"localFile", "1: a\n2: b\n3: c\n", "3: ", "1: a\n2: b\n"},
 		{"localFile", "1: a\n2: b\n3: c", "3: ", "1: a\n2: b"},
 
-		// Test CommandExecutorFile implementatin
+		// Test CommandExecutorFile implementation
 		{"commandExecutorFile", "", "abc", ""},
 		{"commandExecutorFile", "\n", "abc", "\n"},
 		{"commandExecutorFile", "abc\n", "abc", ""},
@@ -218,7 +218,7 @@ func TestFileBase_RemoveLinesWithPrefix(t *testing.T) {
 				defer toTest.Delete(verbose)
 
 				toTest.MustWriteString(tt.input, verbose)
-				toTest.MustRemoveLinesWithPrefix(tt.prefix)
+				toTest.MustRemoveLinesWithPrefix(tt.prefix, verbose)
 
 				assert.EqualValues(
 					tt.expectedOutput,
