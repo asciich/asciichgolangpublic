@@ -821,8 +821,8 @@ func (f *FileBase) MustReadLastCharAsString() (lastChar string) {
 	return lastChar
 }
 
-func (f *FileBase) MustRemoveLinesWithPrefix(prefix string) {
-	err := f.RemoveLinesWithPrefix(prefix)
+func (f *FileBase) MustRemoveLinesWithPrefix(prefix string, verbose bool) {
+	err := f.RemoveLinesWithPrefix(prefix, verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -1102,23 +1102,48 @@ func (f *FileBase) ReadLastCharAsString() (lastChar string, err error) {
 	return lastChar, nil
 }
 
-func (f *FileBase) RemoveLinesWithPrefix(prefix string) (err error) {
+func (f *FileBase) RemoveLinesWithPrefix(prefix string, verbose bool) (err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
-		return nil
+		return err
 	}
 
 	content, err := parent.ReadAsString()
 	if err != nil {
-		return nil
+		return err
 	}
 
-	err = parent.WriteString(
-		Strings().RemoveLinesWithPrefix(content, prefix),
-		false,
-	)
+	replaced := Strings().RemoveLinesWithPrefix(content, prefix)
+
+	path, err := parent.GetPath()
 	if err != nil {
 		return err
+	}
+
+	if content == replaced {
+		if verbose {
+			LogInfof(
+				"No lines with prefix '%s' to remove in '%s'.",
+				prefix,
+				path,
+			)
+		}
+	} else {
+		err = parent.WriteString(
+			replaced,
+			false,
+		)
+		if err != nil {
+			return err
+		}
+
+		if verbose {
+			LogChangedf(
+				"Replaced all lines with prefix '%s' in '%s'.",
+				prefix,
+				path,
+			)
+		}
 	}
 
 	return nil
