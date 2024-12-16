@@ -27,11 +27,11 @@ func TestLocalGitRepositoryInit(t *testing.T) {
 
 				repo := MustGetLocalGitReposioryFromDirectory(emptyDir)
 
-				assert.False(repo.MustIsInitialized())
+				assert.False(repo.MustIsInitialized(verbose))
 
 				for i := 0; i < 3; i++ {
 					repo.MustInit(&CreateRepositoryOptions{Verbose: verbose})
-					assert.True(repo.MustIsInitialized())
+					assert.True(repo.MustIsInitialized(verbose))
 				}
 			},
 		)
@@ -230,8 +230,14 @@ func TestLocalGitRepositoryGetRootDirectory(t *testing.T) {
 						BareRepository: false,
 					})
 
-				assert.EqualValues(bareRepo.MustGetLocalPath(), bareRepo.MustGetRootDirectoryPath())
-				assert.EqualValues(nonBareRepo.MustGetLocalPath(), nonBareRepo.MustGetRootDirectoryPath())
+				assert.EqualValues(
+					bareRepo.MustGetLocalPath(),
+					bareRepo.MustGetRootDirectoryPath(verbose),
+				)
+				assert.EqualValues(
+					nonBareRepo.MustGetLocalPath(),
+					nonBareRepo.MustGetRootDirectoryPath(verbose),
+				)
 			},
 		)
 	}
