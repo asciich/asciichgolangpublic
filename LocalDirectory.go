@@ -465,90 +465,6 @@ func (l *LocalDirectory) GetFileInDirectoryAsLocalFile(filePath ...string) (loca
 	return localFile, nil
 }
 
-func (l *LocalDirectory) ListFilePaths(listOptions *ListFileOptions) (filePathList []string, err error) {
-	if listOptions == nil {
-		return nil, TracedError("listOptions is nil")
-	}
-
-	listOptions = listOptions.GetDeepCopy()
-	listOptions.OnlyFiles = true
-
-	directoryPath, err := l.GetLocalPath()
-	if err != nil {
-		return nil, err
-	}
-
-	filePathList = []string{}
-	err = filepath.Walk(
-		directoryPath,
-		func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-
-			if info.IsDir() {
-				return nil
-			}
-
-			filePathList = append(filePathList, path)
-			return nil
-		},
-	)
-	if err != nil {
-		return nil, TracedErrorf("Unable to filepath.Walk: '%w'", err)
-	}
-
-	filePathList = Slices().RemoveEmptyStrings(filePathList)
-
-	filePathList, err  = Paths().FilterPaths(filePathList, listOptions)
-	if err != nil {
-		return nil, err
-	}
-
-	if listOptions.ReturnRelativePaths {
-		filePathList, err = Paths().GetRelativePathsTo(filePathList, directoryPath)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	filePathList = Slices().SortStringSliceAndRemoveEmpty(filePathList)
-
-	if len(filePathList) <= 0 {
-		if !listOptions.AllowEmptyListIfNoFileIsFound {
-			return nil, TracedErrorf("No files in '%s' found", directoryPath)
-		}
-	}
-
-	return filePathList, nil
-}
-
-func (l *LocalDirectory) ListFiles(options *ListFileOptions) (files []File, err error) {
-	if options == nil {
-		return nil, TracedError("options is nil")
-	}
-
-	optionsToUse := options.GetDeepCopy()
-	optionsToUse.ReturnRelativePaths = true
-
-	filePathList, err := l.ListFilePaths(optionsToUse)
-	if err != nil {
-		return nil, err
-	}
-
-	files = []File{}
-	for _, name := range filePathList {
-		fileToAdd, err := l.GetFileInDirectory(name)
-		if err != nil {
-			return nil, err
-		}
-
-		files = append(files, fileToAdd)
-	}
-
-	return files, nil
-}
-
 func (l *LocalDirectory) GetGitRepositories(verbose bool) (gitRepos []GitRepository, err error) {
 	localRepositories, err := l.GetGitRepositoriesAsLocalGitRepositories(verbose)
 	if err != nil {
@@ -577,7 +493,7 @@ func (l *LocalDirectory) GetGitRepositoriesAsLocalGitRepositories(verbose bool) 
 			return nil, err
 		}
 
-		isGitRepo, err := gitRepo.IsGitRepository()
+		isGitRepo, err := gitRepo.IsGitRepository(verbose)
 		if err != nil {
 			return nil, err
 		}
@@ -586,7 +502,7 @@ func (l *LocalDirectory) GetGitRepositoriesAsLocalGitRepositories(verbose bool) 
 			continue
 		}
 
-		rootDirectoryPath, err := gitRepo.GetRootDirectoryPath()
+		rootDirectoryPath, err := gitRepo.GetRootDirectoryPath(verbose)
 		if err != nil {
 			return nil, err
 		}
@@ -756,6 +672,90 @@ func (l *LocalDirectory) IsEmptyDirectory(verbose bool) (isEmpty bool, err error
 
 func (l *LocalDirectory) IsLocalDirectory() (isLocalDirectory bool, err error) {
 	return true, nil
+}
+
+func (l *LocalDirectory) ListFilePaths(listOptions *ListFileOptions) (filePathList []string, err error) {
+	if listOptions == nil {
+		return nil, TracedError("listOptions is nil")
+	}
+
+	listOptions = listOptions.GetDeepCopy()
+	listOptions.OnlyFiles = true
+
+	directoryPath, err := l.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
+	filePathList = []string{}
+	err = filepath.Walk(
+		directoryPath,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if info.IsDir() {
+				return nil
+			}
+
+			filePathList = append(filePathList, path)
+			return nil
+		},
+	)
+	if err != nil {
+		return nil, TracedErrorf("Unable to filepath.Walk: '%w'", err)
+	}
+
+	filePathList = Slices().RemoveEmptyStrings(filePathList)
+
+	filePathList, err = Paths().FilterPaths(filePathList, listOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	if listOptions.ReturnRelativePaths {
+		filePathList, err = Paths().GetRelativePathsTo(filePathList, directoryPath)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	filePathList = Slices().SortStringSliceAndRemoveEmpty(filePathList)
+
+	if len(filePathList) <= 0 {
+		if !listOptions.AllowEmptyListIfNoFileIsFound {
+			return nil, TracedErrorf("No files in '%s' found", directoryPath)
+		}
+	}
+
+	return filePathList, nil
+}
+
+func (l *LocalDirectory) ListFiles(options *ListFileOptions) (files []File, err error) {
+	if options == nil {
+		return nil, TracedError("options is nil")
+	}
+
+	optionsToUse := options.GetDeepCopy()
+	optionsToUse.ReturnRelativePaths = true
+
+	filePathList, err := l.ListFilePaths(optionsToUse)
+	if err != nil {
+		return nil, err
+	}
+
+	files = []File{}
+	for _, name := range filePathList {
+		fileToAdd, err := l.GetFileInDirectory(name)
+		if err != nil {
+			return nil, err
+		}
+
+		files = append(files, fileToAdd)
+	}
+
+	return files, nil
 }
 
 func (l *LocalDirectory) ListSubDirectories(listDirectoryOptions *ListDirectoryOptions) (subDirectories []Directory, err error) {
@@ -954,24 +954,6 @@ func (l *LocalDirectory) MustGetFileInDirectoryAsLocalFile(filePath ...string) (
 	return localFile
 }
 
-func (l *LocalDirectory) MustListFilePathsns(listOptions *ListFileOptions) (filePathList []string) {
-	filePathList, err := l.ListFilePaths(listOptions)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-
-	return filePathList
-}
-
-func (l *LocalDirectory) MustListFiles(options *ListFileOptions) (files []File) {
-	files, err := l.ListFiles(options)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-
-	return files
-}
-
 func (l *LocalDirectory) MustGetGitRepositories(verbose bool) (gitRepos []GitRepository) {
 	gitRepos, err := l.GetGitRepositories(verbose)
 	if err != nil {
@@ -1069,6 +1051,33 @@ func (l *LocalDirectory) MustIsLocalDirectory() (isLocalDirectory bool) {
 	}
 
 	return isLocalDirectory
+}
+
+func (l *LocalDirectory) MustListFilePaths(listOptions *ListFileOptions) (filePathList []string) {
+	filePathList, err := l.ListFilePaths(listOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return filePathList
+}
+
+func (l *LocalDirectory) MustListFilePathsns(listOptions *ListFileOptions) (filePathList []string) {
+	filePathList, err := l.ListFilePaths(listOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return filePathList
+}
+
+func (l *LocalDirectory) MustListFiles(options *ListFileOptions) (files []File) {
+	files, err := l.ListFiles(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return files
 }
 
 func (l *LocalDirectory) MustListSubDirectories(listDirectoryOptions *ListDirectoryOptions) (subDirectories []Directory) {

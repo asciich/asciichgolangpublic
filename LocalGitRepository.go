@@ -205,6 +205,24 @@ func (l *LocalGitRepository) CommitHasParentCommitByCommitHash(hash string) (has
 	return hasParentCommit, nil
 }
 
+func (l *LocalGitRepository) CreateAndInit(createOptions *CreateRepositoryOptions) (err error) {
+	if createOptions == nil {
+		return TracedErrorNil("createOptions")
+	}
+
+	err = l.LocalDirectory.Create(createOptions.Verbose)
+	if err != nil {
+		return err
+	}
+
+	err = l.Init(createOptions)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (l *LocalGitRepository) GetAsGoGitRepository() (goGitRepository *git.Repository, err error) {
 	repoPath, err := l.GetLocalPath()
 	if err != nil {
@@ -586,8 +604,8 @@ func (l *LocalGitRepository) GetPath() (path string, err error) {
 	return "", err
 }
 
-func (l *LocalGitRepository) GetRootDirectory() (rootDirectory Directory, err error) {
-	rootDirectoryPath, err := l.GetRootDirectoryPath()
+func (l *LocalGitRepository) GetRootDirectory(verbose bool) (rootDirectory Directory, err error) {
+	rootDirectoryPath, err := l.GetRootDirectoryPath(verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -600,7 +618,7 @@ func (l *LocalGitRepository) GetRootDirectory() (rootDirectory Directory, err er
 	return rootDirectory, nil
 }
 
-func (l *LocalGitRepository) GetRootDirectoryPath() (rootDirectoryPath string, err error) {
+func (l *LocalGitRepository) GetRootDirectoryPath(verbose bool) (rootDirectoryPath string, err error) {
 	pathToCheck, err := l.GetLocalPath()
 	if err != nil {
 		return "", nil
@@ -608,7 +626,7 @@ func (l *LocalGitRepository) GetRootDirectoryPath() (rootDirectoryPath string, e
 
 	searchedFromPath := pathToCheck
 
-	isGitRepo, err := l.IsGitRepository()
+	isGitRepo, err := l.IsGitRepository(verbose)
 	if err != nil {
 		return "", err
 	}
@@ -733,7 +751,7 @@ func (l *LocalGitRepository) Init(options *CreateRepositoryOptions) (err error) 
 		return err
 	}
 
-	isInitialized, err := l.IsInitialized()
+	isInitialized, err := l.IsInitialized(options.Verbose)
 	if err != nil {
 		return err
 	}
@@ -861,8 +879,8 @@ func (l *LocalGitRepository) IsBareRepository(verbose bool) (isBareRepository bo
 	return isBareRepository, nil
 }
 
-func (l *LocalGitRepository) IsGitRepository() (isGitRepository bool, err error) {
-	isInitialited, err := l.IsInitialized()
+func (l *LocalGitRepository) IsGitRepository(verbose bool) (isGitRepository bool, err error) {
+	isInitialited, err := l.IsInitialized(verbose)
 	if err != nil {
 		return false, nil
 	}
@@ -870,16 +888,38 @@ func (l *LocalGitRepository) IsGitRepository() (isGitRepository bool, err error)
 	return isInitialited, nil
 }
 
-func (l *LocalGitRepository) IsInitialized() (isInitialized bool, err error) {
+func (l *LocalGitRepository) IsInitialized(verbose bool) (isInitialized bool, err error) {
+	isInitialized = true
+
 	_, err = l.GetAsGoGitRepository()
 	if err != nil {
 		if errors.Is(err, git.ErrRepositoryNotExists) {
-			return false, nil
+			isInitialized = false
+		} else {
+			return false, err
 		}
-		return false, err
 	}
 
-	return true, nil
+	if verbose {
+		path, err := l.GetPath()
+		if err != nil {
+			return false, err
+		}
+
+		if isInitialized {
+			LogInfof(
+				"Directory '%s' is an initialized git repository.",
+				path,
+			)
+		} else {
+			LogInfof(
+				"Directory '%s' is not an initialized git repository.",
+				path,
+			)
+		}
+	}
+
+	return isInitialized, nil
 }
 
 func (l *LocalGitRepository) MustAdd(path string) {
@@ -914,6 +954,13 @@ func (l *LocalGitRepository) MustCommitHasParentCommitByCommitHash(hash string) 
 	}
 
 	return hasParentCommit
+}
+
+func (l *LocalGitRepository) MustCreateAndInit(createOptions *CreateRepositoryOptions) {
+	err := l.CreateAndInit(createOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (l *LocalGitRepository) MustGetAsGoGitRepository() (goGitRepository *git.Repository) {
@@ -1114,8 +1161,8 @@ func (l *LocalGitRepository) MustGetPath() (path string) {
 	return path
 }
 
-func (l *LocalGitRepository) MustGetRootDirectory() (rootDirectory Directory) {
-	rootDirectory, err := l.GetRootDirectory()
+func (l *LocalGitRepository) MustGetRootDirectory(verbose bool) (rootDirectory Directory) {
+	rootDirectory, err := l.GetRootDirectory(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -1123,8 +1170,8 @@ func (l *LocalGitRepository) MustGetRootDirectory() (rootDirectory Directory) {
 	return rootDirectory
 }
 
-func (l *LocalGitRepository) MustGetRootDirectoryPath() (rootDirectoryPath string) {
-	rootDirectoryPath, err := l.GetRootDirectoryPath()
+func (l *LocalGitRepository) MustGetRootDirectoryPath(verbose bool) (rootDirectoryPath string) {
+	rootDirectoryPath, err := l.GetRootDirectoryPath(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -1184,8 +1231,8 @@ func (l *LocalGitRepository) MustIsBareRepository(verbose bool) (isBareRepositor
 	return isBareRepository
 }
 
-func (l *LocalGitRepository) MustIsGitRepository() (isGitRepository bool) {
-	isGitRepository, err := l.IsGitRepository()
+func (l *LocalGitRepository) MustIsGitRepository(verbose bool) (isGitRepository bool) {
+	isGitRepository, err := l.IsGitRepository(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -1193,8 +1240,8 @@ func (l *LocalGitRepository) MustIsGitRepository() (isGitRepository bool) {
 	return isGitRepository
 }
 
-func (l *LocalGitRepository) MustIsInitialized() (isInitialized bool) {
-	isInitialized, err := l.IsInitialized()
+func (l *LocalGitRepository) MustIsInitialized(verbose bool) (isInitialized bool) {
+	isInitialized, err := l.IsInitialized(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -1306,7 +1353,7 @@ func (l *LocalGitRepository) RunGitCommand(gitCommand []string, verbose bool) (c
 		return nil, TracedErrorEmptyString("gitCommand")
 	}
 
-	repoRootPath, err := l.GetRootDirectoryPath()
+	repoRootPath, err := l.GetRootDirectoryPath(verbose)
 	if err != nil {
 		return nil, err
 	}

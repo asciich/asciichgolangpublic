@@ -6,6 +6,10 @@ import "time"
 // remote repositories like Gitlab or Github.
 type GitRepository interface {
 	CommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool, err error)
+	Create(verbose bool) (err error)
+	CreateAndInit(options *CreateRepositoryOptions) (err error)
+	Exists(verbose bool) (exists bool, err error)
+	Delete(verbose bool) (err error)
 	GetAsLocalDirectory() (localDirectory *LocalDirectory, err error)
 	GetAsLocalGitRepository() (localGitRepository *LocalGitRepository, err error)
 	GetAuthorEmailByCommitHash(hash string) (authorEmail string, err error)
@@ -17,8 +21,14 @@ type GitRepository interface {
 	GetCommitTimeByCommitHash(hash string) (commitTime *time.Time, err error)
 	GetGitStatusOutput(verbose bool) (output string, err error)
 	GetPath() (path string, err error)
+	Init(options *CreateRepositoryOptions) (err error)
+	IsInitialized(verbose bool) (isInitialited bool, err error)
 
 	MustCommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool)
+	MustCreate(verbose bool)
+	MustCreateAndInit(options *CreateRepositoryOptions)
+	MustDelete(verbose bool)
+	MustExists(verbose bool) (exists bool)
 	MustGetAsLocalDirectory() (localDirectory *LocalDirectory)
 	MustGetAsLocalGitRepository() (localGitRepository *LocalGitRepository)
 	MustGetAuthorEmailByCommitHash(hash string) (authorEmail string)
@@ -30,4 +40,6 @@ type GitRepository interface {
 	MustGetCommitTimeByCommitHash(hash string) (commitTime *time.Time)
 	MustGetGitStatusOutput(verbose bool) (output string)
 	MustGetPath() (path string)
+	MustInit(options *CreateRepositoryOptions)
+	MustIsInitialized(verbose bool) (isInitialited bool)
 }
