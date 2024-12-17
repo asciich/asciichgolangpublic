@@ -250,6 +250,19 @@ func (t TracedErrorType) Error() (errorMessage string) {
 		errorMessage += "\n"
 	}
 
+	allErrors := Errors().UnwrapRecursive(t)
+	for _, unwrapped := range allErrors {
+		unwrapType, err := Types().GetTypeName(unwrapped)
+		if err != nil {
+			continue
+		}
+		errorMessage += fmt.Sprintf(
+			"This error unwraps to type '%s'\n",
+			unwrapType,
+		)
+	}
+	errorMessage += "\n"
+
 	errorMessage += t.formattedError.Error()
 
 	return errorMessage

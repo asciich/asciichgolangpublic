@@ -188,6 +188,25 @@ func (d *DirectoryBase) GetParentDirectoryForBaseClass() (parentDirectoryForBase
 	return d.parentDirectoryForBaseClass, nil
 }
 
+func (d *DirectoryBase) GetPathAndHostDescription() (path string, hostDescription string, err error) {
+	parent, err := d.GetParentDirectoryForBaseClass()
+	if err != nil {
+		return "", "", err
+	}
+
+	path, err = parent.GetPath()
+	if err != nil {
+		return "", "", err
+	}
+
+	hostDescription, err = parent.GetHostDescription()
+	if err != nil {
+		return "", "", err
+	}
+
+	return path, hostDescription, nil
+}
+
 func (d *DirectoryBase) ListFilePaths(listFileOptions *ListFileOptions) (filePaths []string, err error) {
 	if listFileOptions == nil {
 		return nil, TracedErrorNil("listFileOptions")
@@ -284,6 +303,15 @@ func (d *DirectoryBase) MustGetParentDirectoryForBaseClass() (parentDirectoryFor
 	}
 
 	return parentDirectoryForBaseClass
+}
+
+func (d *DirectoryBase) MustGetPathAndHostDescription() (path string, hostDescription string) {
+	path, hostDescription, err := d.GetPathAndHostDescription()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return path, hostDescription
 }
 
 func (d *DirectoryBase) MustListFilePaths(listFileOptions *ListFileOptions) (filePaths []string) {

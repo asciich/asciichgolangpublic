@@ -57,12 +57,12 @@ func (c *GopassCredential) Exists() (exists bool, err error) {
 		},
 	)
 	if err != nil {
-		return false, nil
+		return false, err
 	}
 
 	stderr, err := output.GetStderrAsString()
 	if err != nil {
-		return false, nil
+		return false, err
 	}
 
 	return stderr == "", nil
