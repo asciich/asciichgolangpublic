@@ -825,7 +825,7 @@ func (c *X509CertificatesService) SignIntermediateCertificate(signOptions *X509S
 
 	signingRequestFilePath, err := singingRequestFile.GetLocalPath()
 	if err != nil {
-		return nil
+		return err
 	}
 
 	openSslConfigFile, err := TemporaryFiles().CreateEmptyTemporaryFile(signOptions.Verbose)

@@ -284,17 +284,17 @@ func (k *GitlabProjectDeployKey) GetId() (id int, err error) {
 
 	name, err := k.GetName()
 	if err != nil {
-		return -1, nil
+		return -1, err
 	}
 
 	deployKeys, err := k.GetGitlabProjectDeployKeys()
 	if err != nil {
-		return -1, nil
+		return -1, err
 	}
 
 	id, err = deployKeys.GetKeyIdByKeyName(name)
 	if err != nil {
-		return -1, nil
+		return -1, err
 	}
 
 	return id, nil

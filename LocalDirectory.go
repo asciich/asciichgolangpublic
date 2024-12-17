@@ -203,12 +203,12 @@ func (l *LocalDirectory) CopyFileToTemporaryFileAsLocalFile(verbose bool, filePa
 func (l *LocalDirectory) Create(verbose bool) (err error) {
 	exists, err := l.Exists(verbose)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	path, err := l.GetLocalPath()
 	if err != nil {
-		return nil
+		return err
 	}
 
 	if exists {
@@ -342,12 +342,12 @@ func (l *LocalDirectory) CreateSubDirectory(subDirName string, verbose bool) (cr
 func (l *LocalDirectory) Delete(verbose bool) (err error) {
 	exists, err := l.Exists(verbose)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	path, err := l.GetLocalPath()
 	if err != nil {
-		return nil
+		return err
 	}
 
 	if exists {
@@ -371,7 +371,7 @@ func (l *LocalDirectory) Delete(verbose bool) (err error) {
 func (l *LocalDirectory) Exists(verbose bool) (exists bool, err error) {
 	localPath, err := l.GetLocalPath()
 	if err != nil {
-		return false, nil
+		return false, err
 	}
 
 	dirInfo, err := os.Stat(localPath)

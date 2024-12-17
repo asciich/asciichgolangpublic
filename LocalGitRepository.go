@@ -15,6 +15,7 @@ import (
 
 type LocalGitRepository struct {
 	LocalDirectory
+	GitRepositoryBase
 }
 
 func GetLocalGitReposioryFromDirectory(directory Directory) (l *LocalGitRepository, err error) {
@@ -112,7 +113,29 @@ func NewLocalGitRepository() (l *LocalGitRepository) {
 		panic(err)
 	}
 
+	err = l.SetParentRepositoryForBaseClass(l)
+	if err != nil {
+		panic(err)
+	}
+
 	return l
+}
+
+func (c *LocalGitRepository) HasInitialCommit(verbose bool) (hasInitialCommit bool, err error) {
+	_, err = c.GetCurrentCommit()
+	if err != nil {
+		if errors.Is(err, ErrGitRepositoryDoesNotExist) { // The repository does not even exist.
+			return false, nil
+		}
+
+		if errors.Is(err, ErrGitRepositoryHeadNotFound) { // The repository exists but has no initial commit and therefore no head is found.
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (l *LocalGitRepository) Add(path string) (err error) {
@@ -199,28 +222,13 @@ func (l *LocalGitRepository) CommitHasParentCommitByCommitHash(hash string) (has
 	}
 
 	goGitCommit, err := l.GetGoGitCommitByCommitHash(hash)
+	if err != nil {
+		return false, err
+	}
 
 	hasParentCommit = goGitCommit.NumParents() > 0
 
 	return hasParentCommit, nil
-}
-
-func (l *LocalGitRepository) CreateAndInit(createOptions *CreateRepositoryOptions) (err error) {
-	if createOptions == nil {
-		return TracedErrorNil("createOptions")
-	}
-
-	err = l.LocalDirectory.Create(createOptions.Verbose)
-	if err != nil {
-		return err
-	}
-
-	err = l.Init(createOptions)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (l *LocalGitRepository) GetAsGoGitRepository() (goGitRepository *git.Repository, err error) {
@@ -231,6 +239,10 @@ func (l *LocalGitRepository) GetAsGoGitRepository() (goGitRepository *git.Reposi
 
 	goGitRepository, err = git.PlainOpen(repoPath)
 	if err != nil {
+		if errors.Is(err, git.ErrRepositoryNotExists) {
+			toReturn := TracedErrorf("%w: repoPath='%s'", ErrGitRepositoryDoesNotExist, repoPath)
+			return nil, Errors().AddErrorToUnwrapToTracedError(toReturn, err)
+		}
 		return nil, TracedErrorf("%w: repoPath='%s'", err, repoPath)
 	}
 
@@ -312,7 +324,7 @@ func (l *LocalGitRepository) GetCommitAgeDurationByCommitHash(hash string) (ageD
 		return nil, err
 	}
 
-	ageDurationNonPtr := time.Now().Sub(*commitTime)
+	ageDurationNonPtr := time.Since(*commitTime)
 	ageDuration = &ageDurationNonPtr
 
 	return ageDuration, nil
@@ -570,6 +582,10 @@ func (l *LocalGitRepository) GetGoGitHead() (head *plumbing.Reference, err error
 
 	head, err = goGitRepo.Head()
 	if err != nil {
+		if errors.Is(err, plumbing.ErrReferenceNotFound) {
+			toReturn := TracedErrorf("%w", ErrGitRepositoryHeadNotFound)
+			return nil, Errors().AddErrorToUnwrapToTracedError(toReturn, err)
+		}
 		return nil, TracedErrorf("%w", err)
 	}
 
@@ -590,20 +606,6 @@ func (l *LocalGitRepository) GetGoGitWorktree() (worktree *git.Worktree, err err
 	return worktree, nil
 }
 
-func (l *LocalGitRepository) GetPath() (path string, err error) {
-	localDir, err := l.GetAsLocalDirectory()
-	if err != nil {
-		return "", err
-	}
-
-	path, err = localDir.GetPath()
-	if err != nil {
-		return "", err
-	}
-
-	return "", err
-}
-
 func (l *LocalGitRepository) GetRootDirectory(verbose bool) (rootDirectory Directory, err error) {
 	rootDirectoryPath, err := l.GetRootDirectoryPath(verbose)
 	if err != nil {
@@ -621,7 +623,7 @@ func (l *LocalGitRepository) GetRootDirectory(verbose bool) (rootDirectory Direc
 func (l *LocalGitRepository) GetRootDirectoryPath(verbose bool) (rootDirectoryPath string, err error) {
 	pathToCheck, err := l.GetLocalPath()
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	searchedFromPath := pathToCheck
@@ -768,8 +770,15 @@ func (l *LocalGitRepository) Init(options *CreateRepositoryOptions) (err error) 
 		if options.Verbose {
 			LogChangedf("Local git repository '%s' is initialized.", repoPath)
 		}
+	}
 
-		if options.InitializeWithEmptyCommit {
+	if options.InitializeWithEmptyCommit {
+		hasInitialCommit, err := l.HasInitialCommit(options.Verbose)
+		if err != nil {
+			return err
+		}
+
+		if !hasInitialCommit {
 			if options.BareRepository {
 				temporaryRepository, err := GitRepositories().CloneGitRepositoryToTemporaryDirectory(
 					l,
@@ -818,44 +827,50 @@ func (l *LocalGitRepository) Init(options *CreateRepositoryOptions) (err error) 
 						return err
 					}
 				}
-				_, err = l.Commit(
-					&GitCommitOptions{
-						Message:    "Initial empty commit during repo initialization",
-						AllowEmpty: true,
-						Verbose:    true,
-					},
-				)
-				if err != nil {
-					return err
+
+				if options.InitializeWithEmptyCommit {
+					_, err = l.Commit(
+						&GitCommitOptions{
+							Message:    GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit(),
+							AllowEmpty: true,
+							Verbose:    true,
+						},
+					)
+					if err != nil {
+						return err
+					}
 				}
 
 				if options.Verbose {
-					LogChangedf("Initialized local repository '%s' with an empty commit.", repoPath)
+					LogChangedf(
+						"Initialized local repository '%s' with an empty commit.",
+						repoPath,
+					)
 				}
 			}
 		}
+	}
 
-		if !options.BareRepository {
-			if options.InitializeWithDefaultAuthor {
-				err = l.SetGitConfig(
-					&GitConfigSetOptions{
-						Name:    "asciichgolangpublic git repo initializer",
-						Email:   "asciichgolangpublic@example.net",
-						Verbose: options.Verbose,
-					},
-				)
-				if err != nil {
-					return err
-				}
+	if !options.BareRepository {
+		if options.InitializeWithDefaultAuthor {
+			err = l.SetGitConfig(
+				&GitConfigSetOptions{
+					Name:    "asciichgolangpublic git repo initializer",
+					Email:   "asciichgolangpublic@example.net",
+					Verbose: options.Verbose,
+				},
+			)
+			if err != nil {
+				return err
 			}
 		}
-
 	}
 
 	return nil
 }
 
 func (l *LocalGitRepository) IsBareRepository(verbose bool) (isBareRepository bool, err error) {
+
 	config, err := l.GetGoGitConfig()
 	if err != nil {
 		return false, err
@@ -864,7 +879,7 @@ func (l *LocalGitRepository) IsBareRepository(verbose bool) (isBareRepository bo
 	isBareRepository = config.Core.IsBare
 
 	if verbose {
-		repoRoot, err := l.GetLocalPath()
+		repoRoot, err := l.GetPath()
 		if err != nil {
 			return false, err
 		}
@@ -882,7 +897,7 @@ func (l *LocalGitRepository) IsBareRepository(verbose bool) (isBareRepository bo
 func (l *LocalGitRepository) IsGitRepository(verbose bool) (isGitRepository bool, err error) {
 	isInitialited, err := l.IsInitialized(verbose)
 	if err != nil {
-		return false, nil
+		return false, err
 	}
 
 	return isInitialited, nil
@@ -893,7 +908,7 @@ func (l *LocalGitRepository) IsInitialized(verbose bool) (isInitialized bool, er
 
 	_, err = l.GetAsGoGitRepository()
 	if err != nil {
-		if errors.Is(err, git.ErrRepositoryNotExists) {
+		if errors.Is(err, ErrGitRepositoryDoesNotExist) {
 			isInitialized = false
 		} else {
 			return false, err
@@ -954,13 +969,6 @@ func (l *LocalGitRepository) MustCommitHasParentCommitByCommitHash(hash string) 
 	}
 
 	return hasParentCommit
-}
-
-func (l *LocalGitRepository) MustCreateAndInit(createOptions *CreateRepositoryOptions) {
-	err := l.CreateAndInit(createOptions)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
 }
 
 func (l *LocalGitRepository) MustGetAsGoGitRepository() (goGitRepository *git.Repository) {
@@ -1152,15 +1160,6 @@ func (l *LocalGitRepository) MustGetGoGitWorktree() (worktree *git.Worktree) {
 	return worktree
 }
 
-func (l *LocalGitRepository) MustGetPath() (path string) {
-	path, err := l.GetPath()
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-
-	return path
-}
-
 func (l *LocalGitRepository) MustGetRootDirectory(verbose bool) (rootDirectory Directory) {
 	rootDirectory, err := l.GetRootDirectory(verbose)
 	if err != nil {
@@ -1195,6 +1194,15 @@ func (l *LocalGitRepository) MustGitlabCiYamlFileExists(verbose bool) (gitlabCiY
 	}
 
 	return gitlabCiYamlFileExists
+}
+
+func (l *LocalGitRepository) MustHasInitialCommit(verbose bool) (hasInitialCommit bool) {
+	hasInitialCommit, err := l.HasInitialCommit(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hasInitialCommit
 }
 
 func (l *LocalGitRepository) MustHasNoUncommittedChanges() (hasUncommittedChanges bool) {
