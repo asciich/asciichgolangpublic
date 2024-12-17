@@ -17,6 +17,25 @@ func (e ErrorsService) IsTracedError(err error) (isTracedError bool) {
 	return errors.Is(err, ErrTracedError)
 }
 
+func (e *ErrorsService) AddErrorToUnwrapToTracedError(tracedError error, errorToAdd error) error {
+	if tracedError == nil {
+		return nil
+	}
+
+	if errorToAdd == nil {
+		return nil
+	}
+
+	resultingError, ok := tracedError.(*TracedErrorType)
+	if !ok {
+		return tracedError
+	}
+
+	resultingError.errorsToUnwrap = append(resultingError.errorsToUnwrap, errorToAdd)
+
+	return resultingError
+}
+
 func (e *ErrorsService) GetAsTracedError(errorToConvert error) (tracedError *TracedErrorType, err error) {
 	if errorToConvert == nil {
 		return nil, TracedErrorNil("errorToConvert")
@@ -54,4 +73,29 @@ func (e ErrorsService) IsNilError(err error) (IsNilError bool) {
 
 func (e ErrorsService) IsNotImplementedError(err error) (isNotImplementedError bool) {
 	return errors.Is(err, ErrTracedErrorNotImplemented)
+}
+
+func (e ErrorsService) UnwrapRecursive(errorToUnwrap error) (errors []error) {
+	errors = []error{}
+
+	if errorToUnwrap == nil {
+		return errors
+	}
+
+	switch x := errorToUnwrap.(type) {
+	case interface{ Unwrap() error }:
+		toAdd := x.Unwrap()
+		if toAdd == nil {
+			errors = append(errors, toAdd)
+			errors = append(errors, e.UnwrapRecursive(toAdd)...)
+		}
+
+	case interface{ Unwrap() []error }:
+		for _, toAdd := range x.Unwrap() {
+			errors = append(errors, toAdd)
+			errors = append(errors, e.UnwrapRecursive(toAdd)...)
+		}
+	}
+
+	return errors
 }
