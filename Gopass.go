@@ -184,7 +184,7 @@ func (g *GopassService) GetCredentialValueOrEmptyIfUnsetAsStringByPath(secretPat
 
 	credentialValue, err = credential.GetAsString()
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	return credentialValue, nil
