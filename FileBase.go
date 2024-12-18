@@ -1386,7 +1386,7 @@ func (f *FileBase) WriteTextBlocks(textBlocks []string, verbose bool) (err error
 
 	err = f.WriteString(textToWrite, verbose)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	return nil
