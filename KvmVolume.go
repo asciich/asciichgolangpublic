@@ -78,12 +78,12 @@ func (k *KvmVolume) MustSetStoragePool(storagePool *KvmStoragePool) {
 func (v *KvmVolume) GetHostName() (hostname string, err error) {
 	pool, err := v.GetStoragePool()
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	hostname, err = pool.GetHostName()
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	return hostname, nil
