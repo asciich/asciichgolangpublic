@@ -270,6 +270,62 @@ func (c *CommandExecutorGitRepository) HasInitialCommit(verbose bool) (hasInitia
 	return hasInitialCommit, nil
 }
 
+func (c *CommandExecutorGitRepository) HasUncommittedChanges(verbose bool) (hasUncommitedChanges bool, err error) {
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return false, err
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return false, err
+	}
+
+	commandOutput, err := commandExecutor.RunCommand(
+		&RunCommandOptions{
+			Command: []string{
+				"bash",
+				"-c",
+				fmt.Sprintf(
+					"cd '%s' && git diff && git diff --cached && git status --porcelain",
+					path,
+				),
+			},
+			Verbose: verbose,
+		},
+	)
+	if err != nil {
+		return false, err
+	}
+
+	isEmpty, err := commandOutput.IsStdoutAndStderrEmpty()
+	if err != nil {
+		return false, err
+	}
+
+	if !isEmpty {
+		hasUncommitedChanges = true
+	}
+
+	if verbose {
+		if hasUncommitedChanges {
+			LogInfof(
+				"Git repository '%s' on '%s' has uncommited changes.",
+				path,
+				hostDescription,
+			)
+		} else {
+			LogInfof(
+				"Git repository '%s' on '%s' has no uncommited changes.",
+				path,
+				hostDescription,
+			)
+		}
+	}
+
+	return hasUncommitedChanges, nil
+}
+
 func (c *CommandExecutorGitRepository) Init(options *CreateRepositoryOptions) (err error) {
 	if options == nil {
 		return TracedErrorNil("options")
@@ -654,6 +710,15 @@ func (c *CommandExecutorGitRepository) MustHasInitialCommit(verbose bool) (hasIn
 	}
 
 	return hasInitialCommit
+}
+
+func (c *CommandExecutorGitRepository) MustHasUncommittedChanges(verbose bool) (hasUncommitedChanges bool) {
+	hasUncommitedChanges, err := c.HasUncommittedChanges(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hasUncommitedChanges
 }
 
 func (c *CommandExecutorGitRepository) MustInit(options *CreateRepositoryOptions) {

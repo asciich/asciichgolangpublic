@@ -14,6 +14,7 @@ type GitRepository interface {
 	Commit(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error)
 	CommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool, err error)
 	Create(verbose bool) (err error)
+	CreateFileInDirectory(verbose bool, filePath ...string) (createdFile File, err error)
 	Exists(verbose bool) (exists bool, err error)
 	Delete(verbose bool) (err error)
 	GetAsLocalDirectory() (localDirectory *LocalDirectory, err error)
@@ -30,6 +31,7 @@ type GitRepository interface {
 	GetGitStatusOutput(verbose bool) (output string, err error)
 	GetPath() (path string, err error)
 	HasInitialCommit(verbose bool) (hasInitialCommit bool, err error)
+	HasUncommittedChanges(verbose bool) (hasUncommitedChanges bool, err error)
 	Init(options *CreateRepositoryOptions) (err error)
 	IsBareRepository(verbose bool) (isBareRepository bool, err error)
 	IsInitialized(verbose bool) (isInitialited bool, err error)
@@ -37,6 +39,7 @@ type GitRepository interface {
 	MustCommit(commitOptions *GitCommitOptions) (createdCommit *GitCommit)
 	MustCommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool)
 	MustCreate(verbose bool)
+	MustCreateFileInDirectory(verbose bool, filePath ...string) (createdFile File)
 	MustDelete(verbose bool)
 	MustExists(verbose bool) (exists bool)
 	MustGetAsLocalDirectory() (localDirectory *LocalDirectory)
@@ -53,6 +56,7 @@ type GitRepository interface {
 	MustGetGitStatusOutput(verbose bool) (output string)
 	MustGetPath() (path string)
 	MustHasInitialCommit(verbose bool) (hasInitialCommit bool)
+	MustHasUncommittedChanges(verbose bool) (hasUncommitedChanges bool)
 	MustInit(options *CreateRepositoryOptions)
 	MustIsBareRepository(verbose bool) (isBareRepository bool)
 	MustIsInitialized(verbose bool) (isInitialited bool)
@@ -66,10 +70,10 @@ func GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit() (msg string
 	return "Initial empty commit during repo initialization"
 }
 
-func GitRepositryDefualtAuthorName() (name string) {
-	return "asciichgolangpublic git repo initializer"
-}
-
 func GitRepositryDefualtAuthorEmail() (email string) {
 	return "asciichgolangpublic@example.net"
+}
+
+func GitRepositryDefualtAuthorName() (name string) {
+	return "asciichgolangpublic git repo initializer"
 }
