@@ -6,71 +6,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLocalGitRepositoryInit(t *testing.T) {
 
-	tests := []struct {
-		testcase string
-	}{
-		{"testcase"},
-	}
 
-	for _, tt := range tests {
-		t.Run(
-			MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				assert := assert.New(t)
-
-				const verbose bool = true
-
-				emptyDir := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
-				defer emptyDir.MustDelete(verbose)
-
-				repo := MustGetLocalGitReposioryFromDirectory(emptyDir)
-
-				assert.False(repo.MustIsInitialized(verbose))
-
-				for i := 0; i < 3; i++ {
-					repo.MustInit(&CreateRepositoryOptions{Verbose: verbose})
-					assert.True(repo.MustIsInitialized(verbose))
-				}
-			},
-		)
-	}
-}
-
-func TestLocalGitRepositoryHasUncommittedChanges(t *testing.T) {
-	tests := []struct {
-		testcase string
-	}{
-		{"testcase"},
-	}
-
-	for _, tt := range tests {
-		t.Run(
-			MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				assert := assert.New(t)
-
-				const verbose bool = true
-
-				repo := GitRepositories().MustCreateTemporaryInitializedRepository(
-					&CreateRepositoryOptions{
-						Verbose: verbose,
-					},
-				)
-				defer repo.MustDelete(verbose)
-
-				assert.False(repo.MustHasUncommittedChanges())
-				assert.True(repo.MustHasNoUncommittedChanges())
-
-				repo.CreateFileInDirectory(verbose, "hello.txt")
-				assert.True(repo.MustHasUncommittedChanges())
-				assert.False(repo.MustHasNoUncommittedChanges())
-			},
-		)
-	}
-}
-
+// TODO move to GitRepository_test.go and run for all implementations
 func TestLocalGitRepositoryIsBareRepository(t *testing.T) {
 	tests := []struct {
 		testcase string
@@ -110,6 +48,7 @@ func TestLocalGitRepositoryIsBareRepository(t *testing.T) {
 	}
 }
 
+// TODO move to GitRepository_test.go and run for all implementations
 func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 	tests := []struct {
 		testcase string
@@ -205,6 +144,7 @@ func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 	}
 }
 
+// TODO move to GitRepository_test.go and run for all implementations
 func TestLocalGitRepositoryGetRootDirectory(t *testing.T) {
 	tests := []struct {
 		testcase string
@@ -243,6 +183,7 @@ func TestLocalGitRepositoryGetRootDirectory(t *testing.T) {
 	}
 }
 
+// TODO move to GitRepository_test.go and run for all implementations
 func TestLocalGitRepositoryCreateEmptyTemporaryGitRepository(t *testing.T) {
 	tests := []struct {
 		bareRepository bool
@@ -279,6 +220,7 @@ func TestLocalGitRepositoryCreateEmptyTemporaryGitRepository(t *testing.T) {
 	}
 }
 
+// TODO move to GitRepository_test.go and run for all implementations
 func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 	tests := []struct {
 		bareRepository bool

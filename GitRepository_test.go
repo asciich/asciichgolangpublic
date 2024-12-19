@@ -193,3 +193,31 @@ func TestGitRepository_CreateAndDeleteRepository(t *testing.T) {
 		)
 	}
 }
+
+func TestGitRepository_HasUncommittedChanges(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				repo := getGitRepositoryToTest(tt.implementationName)
+				defer repo.Delete(verbose)
+
+				assert.False(repo.MustHasUncommittedChanges(verbose))
+
+				repo.MustCreateFileInDirectory(verbose, "hello.txt")
+				assert.True(repo.MustHasUncommittedChanges(verbose))
+			},
+		)
+	}
+}

@@ -716,8 +716,8 @@ func (l *LocalGitRepository) GitlabCiYamlFileExists(verbose bool) (gitlabCiYamlF
 	return gitlabCiYamlFileExists, nil
 }
 
-func (l *LocalGitRepository) HasNoUncommittedChanges() (hasUncommittedChanges bool, err error) {
-	hasUncommittedChanges, err = l.HasUncommittedChanges()
+func (l *LocalGitRepository) HasNoUncommittedChanges(verbose bool) (hasUncommittedChanges bool, err error) {
+	hasUncommittedChanges, err = l.HasUncommittedChanges(verbose)
 	if err != nil {
 		return false, err
 	}
@@ -725,7 +725,7 @@ func (l *LocalGitRepository) HasNoUncommittedChanges() (hasUncommittedChanges bo
 	return !hasUncommittedChanges, nil
 }
 
-func (l *LocalGitRepository) HasUncommittedChanges() (hasUncommittedChanges bool, err error) {
+func (l *LocalGitRepository) HasUncommittedChanges(verbose bool) (hasUncommittedChanges bool, err error) {
 	worktree, err := l.GetGoGitWorktree()
 	if err != nil {
 		return false, err
@@ -736,11 +736,30 @@ func (l *LocalGitRepository) HasUncommittedChanges() (hasUncommittedChanges bool
 		return false, err
 	}
 
-	if gitStatus.IsClean() {
-		return false, nil
+	if !gitStatus.IsClean() {
+		hasUncommittedChanges = true
 	}
 
-	return true, nil
+	if verbose {
+		path, err := l.GetPath()
+		if err != nil {
+			return false, err
+		}
+
+		if hasUncommittedChanges {
+			LogInfof(
+				"Local git repository '%s' has uncommited changes.",
+				path,
+			)
+		} else {
+			LogInfof(
+				"Local git repository '%s' has no uncommited changes.",
+				path,
+			)
+		}
+	}
+
+	return hasUncommittedChanges, nil
 }
 
 func (l *LocalGitRepository) Init(options *CreateRepositoryOptions) (err error) {
@@ -1205,8 +1224,8 @@ func (l *LocalGitRepository) MustHasInitialCommit(verbose bool) (hasInitialCommi
 	return hasInitialCommit
 }
 
-func (l *LocalGitRepository) MustHasNoUncommittedChanges() (hasUncommittedChanges bool) {
-	hasUncommittedChanges, err := l.HasNoUncommittedChanges()
+func (l *LocalGitRepository) MustHasNoUncommittedChanges(verbose bool) (hasUncommittedChanges bool) {
+	hasUncommittedChanges, err := l.HasNoUncommittedChanges(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -1214,8 +1233,8 @@ func (l *LocalGitRepository) MustHasNoUncommittedChanges() (hasUncommittedChange
 	return hasUncommittedChanges
 }
 
-func (l *LocalGitRepository) MustHasUncommittedChanges() (hasUncommittedChanges bool) {
-	hasUncommittedChanges, err := l.HasUncommittedChanges()
+func (l *LocalGitRepository) MustHasUncommittedChanges(verbose bool) (hasUncommittedChanges bool) {
+	hasUncommittedChanges, err := l.HasUncommittedChanges(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

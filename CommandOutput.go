@@ -67,6 +67,37 @@ func (c *CommandOutput) GetStdoutAsFloat64() (stdout float64, err error) {
 	return stdout, err
 }
 
+func (c *CommandOutput) IsStderrEmpty() (isEmpty bool, err error) {
+	stderr, err := c.GetStderrAsString()
+	if err != nil {
+		return false, err
+	}
+
+	return stderr == "", nil
+}
+
+func (c *CommandOutput) IsStdoutAndStderrEmpty() (isEmpty bool, err error) {
+	isEmpty, err = c.IsStdoutEmpty()
+	if err != nil {
+		return false, err
+	}
+
+	if !isEmpty {
+		return false, err
+	}
+
+	return c.IsStderrEmpty()
+}
+
+func (c *CommandOutput) IsStdoutEmpty() (isEmpty bool, err error) {
+	stdout, err := c.GetStdoutAsString()
+	if err != nil {
+		return false, err
+	}
+
+	return stdout == "", nil
+}
+
 func (c *CommandOutput) LogStdoutAsInfo() (err error) {
 	stdout, err := c.GetStdoutAsString()
 	if err != nil {
@@ -173,6 +204,33 @@ func (c *CommandOutput) MustGetStdoutAsString() (stdout string) {
 	}
 
 	return stdout
+}
+
+func (c *CommandOutput) MustIsStderrEmpty() (isEmpty bool) {
+	isEmpty, err := c.IsStderrEmpty()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isEmpty
+}
+
+func (c *CommandOutput) MustIsStdoutAndStderrEmpty() (isEmpty bool) {
+	isEmpty, err := c.IsStdoutAndStderrEmpty()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isEmpty
+}
+
+func (c *CommandOutput) MustIsStdoutEmpty() (isEmpty bool) {
+	isEmpty, err := c.IsStdoutEmpty()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isEmpty
 }
 
 func (c *CommandOutput) MustIsTimedOut() (IsTimedOut bool) {
