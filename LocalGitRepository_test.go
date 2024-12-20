@@ -6,48 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
-
-// TODO move to GitRepository_test.go and run for all implementations
-func TestLocalGitRepositoryIsBareRepository(t *testing.T) {
-	tests := []struct {
-		testcase string
-	}{
-		{"testcase"},
-	}
-
-	for _, tt := range tests {
-		t.Run(
-			MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				assert := assert.New(t)
-
-				const verbose bool = true
-
-				repo := GitRepositories().MustCreateTemporaryInitializedRepository(
-					&CreateRepositoryOptions{
-						Verbose:        verbose,
-						BareRepository: false,
-					},
-				)
-				defer repo.MustDelete(verbose)
-
-				assert.False(repo.MustIsBareRepository(verbose))
-
-				repo_bare := GitRepositories().MustCreateTemporaryInitializedRepository(
-					&CreateRepositoryOptions{
-						Verbose:        verbose,
-						BareRepository: true,
-					},
-				)
-				defer repo.MustDelete(verbose)
-
-				assert.True(repo_bare.MustIsBareRepository(verbose))
-			},
-		)
-	}
-}
-
 // TODO move to GitRepository_test.go and run for all implementations
 func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 	tests := []struct {
@@ -144,44 +102,7 @@ func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 	}
 }
 
-// TODO move to GitRepository_test.go and run for all implementations
-func TestLocalGitRepositoryGetRootDirectory(t *testing.T) {
-	tests := []struct {
-		testcase string
-	}{
-		{"testcase"},
-	}
-	for _, tt := range tests {
-		t.Run(
-			MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				assert := assert.New(t)
 
-				const verbose bool = true
-
-				bareRepo := TemporaryDirectories().MustCreateEmptyTemporaryGitRepository(
-					&CreateRepositoryOptions{
-						Verbose:        verbose,
-						BareRepository: true,
-					})
-				nonBareRepo := TemporaryDirectories().MustCreateEmptyTemporaryGitRepository(
-					&CreateRepositoryOptions{
-						Verbose:        verbose,
-						BareRepository: false,
-					})
-
-				assert.EqualValues(
-					bareRepo.MustGetLocalPath(),
-					bareRepo.MustGetRootDirectoryPath(verbose),
-				)
-				assert.EqualValues(
-					nonBareRepo.MustGetLocalPath(),
-					nonBareRepo.MustGetRootDirectoryPath(verbose),
-				)
-			},
-		)
-	}
-}
 
 // TODO move to GitRepository_test.go and run for all implementations
 func TestLocalGitRepositoryCreateEmptyTemporaryGitRepository(t *testing.T) {

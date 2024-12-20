@@ -1,10 +1,13 @@
 package asciichgolangpublic
 
 import (
+	"errors"
 	"path/filepath"
 	"regexp"
 	"strings"
 )
+
+var ErrPathHasNoParentDirectory = errors.New("path has no parent directory")
 
 type PathsService struct{}
 
@@ -177,6 +180,18 @@ func (p *PathsService) GetAbsolutePath(path string) (absolutePath string, err er
 	return path, nil
 }
 
+func (p *PathsService) GetDirPath(inputPath string) (dirPath string, err error) {
+	if inputPath == "" {
+		return "", TracedErrorEmptyString("inputPath")
+	}
+
+	if inputPath == "/" {
+		return "", TracedErrorf("%w: '%s'", ErrPathHasNoParentDirectory, err)
+	}
+
+	return filepath.Dir(inputPath), nil
+}
+
 func (p *PathsService) GetRelativePathTo(absolutePath string, relativeTo string) (relativePath string, err error) {
 	if absolutePath == "" {
 		return "", TracedErrorEmptyString("absolutePath")
@@ -272,6 +287,15 @@ func (p *PathsService) MustGetAbsolutePath(path string) (absolutePath string) {
 	}
 
 	return absolutePath
+}
+
+func (p *PathsService) MustGetDirPath(inputPath string) (dirPath string) {
+	dirPath, err := p.GetDirPath(inputPath)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return dirPath
 }
 
 func (p *PathsService) MustGetRelativePathTo(absolutePath string, relativeTo string) (relativePath string) {

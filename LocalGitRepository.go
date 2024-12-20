@@ -628,15 +628,6 @@ func (l *LocalGitRepository) GetRootDirectoryPath(verbose bool) (rootDirectoryPa
 
 	searchedFromPath := pathToCheck
 
-	isGitRepo, err := l.IsGitRepository(verbose)
-	if err != nil {
-		return "", err
-	}
-
-	if !isGitRepo {
-		return "", TracedErrorf("'%s' is not a git repository.", pathToCheck)
-	}
-
 	for {
 		localDirToCheck, err := GetLocalDirectoryByPath(pathToCheck)
 		if err != nil {

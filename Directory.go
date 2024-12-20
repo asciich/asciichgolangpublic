@@ -13,6 +13,7 @@ type Directory interface {
 	GetHostDescription() (hostDescription string, err error)
 	// Returns the path on the local machine. If the path is not available locally an error is returned.
 	GetLocalPath() (localPath string, err error)
+	GetParentDirectory() (parentDirectory Directory, err error)
 	// Returns the absolute path to the file without any indication of the host.
 	GetPath() (dirPath string, err error)
 	GetSubDirectory(path ...string) (subDirectory Directory, err error)
@@ -31,6 +32,7 @@ type Directory interface {
 	MustGetHostDescription() (hostDescription string)
 	// Returns the path on the local machine. If the path is not available locally an error is returned.
 	MustGetLocalPath() (localPath string)
+	MustGetParentDirectory() (parentDirectory Directory)
 	// Returns the absolute path to the file without any indication of the host.
 	MustGetPath() (dirPath string)
 	MustGetSubDirectory(path ...string) (subDirectory Directory)
