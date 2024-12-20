@@ -413,15 +413,13 @@ func (l *LocalDirectory) GetBaseName() (baseName string, err error) {
 	return baseName, nil
 }
 
-func (l *LocalDirectory) GetDirName() (dirName string, err error) {
-	localPath, err := l.GetLocalPath()
+func (l *LocalDirectory) GetDirName() (parentPath string, err error) {
+	path, err := l.GetPath()
 	if err != nil {
 		return "", err
 	}
 
-	dirName = filepath.Dir(localPath)
-
-	return dirName, nil
+	return Paths().GetDirPath(path)
 }
 
 func (l *LocalDirectory) GetFileInDirectory(path ...string) (file File, err error) {
@@ -545,7 +543,7 @@ func (l *LocalDirectory) GetLocalPath() (localPath string, err error) {
 	return l.localPath, nil
 }
 
-func (l *LocalDirectory) GetParentDirectory() (parentDirectory *LocalDirectory, err error) {
+func (l *LocalDirectory) GetParentDirectory() (parentDirectory Directory, err error) {
 	parentPath, err := l.GetDirName()
 	if err != nil {
 		return nil, err
@@ -990,7 +988,7 @@ func (l *LocalDirectory) MustGetLocalPath() (localPath string) {
 	return localPath
 }
 
-func (l *LocalDirectory) MustGetParentDirectory() (parentDirectory *LocalDirectory) {
+func (l *LocalDirectory) MustGetParentDirectory() (parentDirectory Directory) {
 	parentDirectory, err := l.GetParentDirectory()
 	if err != nil {
 		LogGoErrorFatal(err)

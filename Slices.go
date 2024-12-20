@@ -572,3 +572,21 @@ func (s *SlicesService) SortStringSliceAndRemoveDuplicates(input []string) (outp
 	sorted := s.SortStringSlice(input)
 	return s.RemoveDuplicatedStrings(sorted)
 }
+
+func (s *SlicesService) ContainsAllStrings(input []string, toCheck []string) bool {
+	if len(input) <= 0 {
+		return false
+	}
+
+	if len(toCheck) <= 0 {
+		return false
+	}
+
+	for _, c := range toCheck {
+		if !s.ContainsString(input, c) {
+			return false
+		}
+	}
+
+	return true
+}

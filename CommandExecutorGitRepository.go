@@ -18,6 +18,51 @@ type CommandExecutorGitRepository struct {
 	GitRepositoryBase
 }
 
+func GetCommandExecutorGitRepositoryFromDirectory(directory Directory) (c *CommandExecutorGitRepository, err error) {
+	if directory == nil {
+		return nil, TracedErrorNil("directory")
+	}
+
+	commandExecutoryDirectory, ok := directory.(*CommandExecutorDirectory)
+	if ok {
+		commandExecutor, path, err := commandExecutoryDirectory.GetCommandExecutorAndDirPath()
+		if err != nil {
+			return nil, err
+		}
+
+		return GetCommandExecutorGitRepositoryByPath(commandExecutor, path)
+	}
+
+	localDirectory, ok := directory.(*LocalDirectory)
+	if ok {
+		path, err := localDirectory.GetPath()
+		if err != nil {
+			return nil, err
+		}
+
+		return GetLocalCommandExecutorGitRepositoryByPath(path)
+	}
+
+	unknownTypeName, err := Types().GetTypeName(directory)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, TracedErrorf(
+		"Not implemented for directory type = '%s'",
+		unknownTypeName,
+	)
+}
+
+func MustGetCommandExecutorGitRepositoryFromDirectory(directory Directory) (c *CommandExecutorGitRepository) {
+	c, err := GetCommandExecutorGitRepositoryFromDirectory(directory)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return c
+}
+
 func MustNewCommandExecutorGitRepository(commandExecutor CommandExecutor) (c *CommandExecutorGitRepository) {
 	c, err := NewCommandExecutorGitRepository(commandExecutor)
 	if err != nil {
@@ -194,6 +239,87 @@ func (c *CommandExecutorGitRepository) GetCurrentCommitHash() (currentCommitHash
 
 func (c *CommandExecutorGitRepository) GetGitStatusOutput(verbose bool) (output string, err error) {
 	return "", TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootDirectoryPath string, err error) {
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return "", err
+	}
+
+	isBareRepository, err := c.IsBareRepository(verbose)
+	if err != nil {
+		return "", err
+	}
+
+	if isBareRepository {
+		var cwd Directory
+
+		cwd, err = GetCommandExecutorDirectoryByPath(
+			c.commandExecutor,
+			c.dirPath,
+		)
+		if err != nil {
+			return "", err
+		}
+
+		for {
+			filePaths, err := cwd.ListFilePaths(
+				&ListFileOptions{
+					NonRecursive:        true,
+					Verbose:             verbose,
+					ReturnRelativePaths: true,
+				},
+			)
+			if err != nil {
+				return "", err
+			}
+
+			if Slices().ContainsAllStrings(filePaths, []string{"config","HEAD"}) {
+				rootDirectoryPath, err = cwd.GetPath()
+				if err != nil {
+					return "", err
+				}
+			}
+
+			if rootDirectoryPath != "" {
+				break
+			}
+
+			cwd, err = cwd.GetParentDirectory()
+			if err != nil {
+				return "", err
+			}
+		}
+	} else {
+		stdout, err := c.RunGitCommandAndGetStdoutAsString(
+			[]string{"rev-parse", "--show-toplevel"},
+			verbose,
+		)
+		if err != nil {
+			return "", err
+		}
+
+		rootDirectoryPath = strings.TrimSpace(stdout)
+	}
+
+	if rootDirectoryPath == "" {
+		return "", TracedErrorf(
+			"rootDirectoryPath is empty string after evaluating root directory of git repository '%s' on host '%s'",
+			path,
+			hostDescription,
+		)
+	}
+
+	if verbose {
+		LogInfof(
+			"Git repo root directory is '%s' on host '%s'.",
+			rootDirectoryPath,
+			hostDescription,
+		)
+	}
+
+	return rootDirectoryPath, nil
 }
 
 func (c *CommandExecutorGitRepository) HasInitialCommit(verbose bool) (hasInitialCommit bool, err error) {
@@ -701,6 +827,15 @@ func (c *CommandExecutorGitRepository) MustGetGitStatusOutput(verbose bool) (out
 	}
 
 	return output
+}
+
+func (c *CommandExecutorGitRepository) MustGetRootDirectoryPath(verbose bool) (rootDirectoryPath string) {
+	rootDirectoryPath, err := c.GetRootDirectoryPath(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return rootDirectoryPath
 }
 
 func (c *CommandExecutorGitRepository) MustHasInitialCommit(verbose bool) (hasInitialCommit bool) {

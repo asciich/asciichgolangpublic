@@ -21,12 +21,16 @@ type CommandExecutorDirectory struct {
 	dirPath         string
 }
 
-func GetLocalCommandExecutorDirectoryByPath(path string) (c *CommandExecutorDirectory, err error) {
+func GetCommandExecutorDirectoryByPath(commandExecutor CommandExecutor, path string) (c *CommandExecutorDirectory, err error) {
+	if commandExecutor == nil {
+		return nil, TracedErrorNil("commandExecutor")
+	}
+
 	if path == "" {
 		return nil, TracedErrorEmptyString("path")
 	}
 
-	c, err = NewCommandExecutorDirectory(Bash())
+	c, err = NewCommandExecutorDirectory(commandExecutor)
 	if err != nil {
 		return nil, err
 	}
@@ -37,6 +41,23 @@ func GetLocalCommandExecutorDirectoryByPath(path string) (c *CommandExecutorDire
 	}
 
 	return c, nil
+}
+
+func GetLocalCommandExecutorDirectoryByPath(path string) (c *CommandExecutorDirectory, err error) {
+	if path == "" {
+		return nil, TracedErrorEmptyString("path")
+	}
+
+	return GetCommandExecutorDirectoryByPath(Bash(), path)
+}
+
+func MustGetCommandExecutorDirectoryByPath(commandExecutor CommandExecutor, path string) (c *CommandExecutorDirectory) {
+	c, err := GetCommandExecutorDirectoryByPath(commandExecutor, path)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return c
 }
 
 func MustGetLocalCommandExecutorDirectoryByPath(path string) (c *CommandExecutorDirectory) {
@@ -372,22 +393,13 @@ func (c *CommandExecutorDirectory) GetCommandExecutorAndDirPathAndHostDescriptio
 	return commandExecutor, dirPath, hostDescription, nil
 }
 
-func (c *CommandExecutorDirectory) GetDirName() (dirName string, err error) {
-	dirPath, err := c.GetDirPath()
+func (c *CommandExecutorDirectory) GetDirName() (parentPath string, err error) {
+	path, err := c.GetPath()
 	if err != nil {
 		return "", err
 	}
 
-	dirName = filepath.Dir(dirPath)
-
-	if dirName == "" {
-		return "", TracedErrorf(
-			"dirName is empty string after evalution of dirPath='%s'",
-			dirPath,
-		)
-	}
-
-	return dirName, nil
+	return Paths().GetDirPath(path)
 }
 
 func (c *CommandExecutorDirectory) GetDirPath() (dirPath string, err error) {
@@ -470,6 +482,23 @@ func (c *CommandExecutorDirectory) GetLocalPath() (localPath string, err error) 
 
 		return "", TracedErrorf("Directory is on '%s', not on localhost", hostDescription)
 	}
+}
+
+func (c *CommandExecutorDirectory) GetParentDirectory() (parent Directory, err error) {
+	parentPath, err := c.GetDirName()
+	if err != nil {
+		return nil, err
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	return GetCommandExecutorDirectoryByPath(
+		commandExecutor,
+		parentPath,
+	)
 }
 
 func (c *CommandExecutorDirectory) GetPath() (path string, err error) {
@@ -739,6 +768,15 @@ func (c *CommandExecutorDirectory) MustGetLocalPath() (localPath string) {
 	}
 
 	return localPath
+}
+
+func (c *CommandExecutorDirectory) MustGetParentDirectory() (parent Directory) {
+	parent, err := c.GetParentDirectory()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return parent
 }
 
 func (c *CommandExecutorDirectory) MustGetPath() (path string) {
