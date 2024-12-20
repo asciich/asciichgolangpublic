@@ -156,6 +156,102 @@ func (l *LocalGitRepository) Add(path string) (err error) {
 	return nil
 }
 
+func (l *LocalGitRepository) CloneRepository(repository GitRepository, verbose bool) (err error) {
+	if repository == nil {
+		return TracedErrorNil("repository")
+	}
+
+	repositoryHostDescription, err := repository.GetHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if repositoryHostDescription != "localhost" {
+		return TracedErrorf(
+			"Only cloning from local repositories is implemented at the moment but got '%s'",
+			repositoryHostDescription,
+		)
+	}
+
+	pathToClone, err := repository.GetPath()
+	if err != nil {
+		return err
+	}
+
+	return l.CloneRepositoryByPathOrUrl(pathToClone, verbose)
+}
+
+func (l *LocalGitRepository) CloneRepositoryByPathOrUrl(urlOrPathToClone string, verbose bool) (err error) {
+	if urlOrPathToClone == "" {
+		return TracedErrorEmptyString("pathToClone")
+	}
+
+	path, hostDescription, err := l.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		LogInfof(
+			"Cloning git repository '%s' to '%s' on host '%s' started.",
+			urlOrPathToClone,
+			path,
+			hostDescription,
+		)
+	}
+
+	const isBare = false
+	_, err = git.PlainClone(
+		path,
+		isBare,
+		&git.CloneOptions{
+			URL: urlOrPathToClone,
+		},
+	)
+	if err != nil {
+		if err.Error() == "remote repository is empty" {
+			if verbose {
+				LogInfof(
+					"Remote repository '%s' is empty. Going to add remote for empty repository.",
+					urlOrPathToClone,
+				)
+			}
+
+			err = l.Init(
+				&CreateRepositoryOptions{
+					Verbose:                   verbose,
+					BareRepository:            isBare,
+					InitializeWithEmptyCommit: false,
+				})
+			if err != nil {
+				return err
+			}
+
+			_, err = l.SetRemote("origin", urlOrPathToClone, verbose)
+			if err != nil {
+				return err
+			}
+		} else {
+			return TracedErrorf(
+				"Clone '%s' failed: '%w'",
+				urlOrPathToClone,
+				err,
+			)
+		}
+	}
+
+	if verbose {
+		LogInfof(
+			"Cloning git repository '%s' to '%s' on host '%s' finished.",
+			urlOrPathToClone,
+			path,
+			hostDescription,
+		)
+	}
+
+	return nil
+}
+
 func (l *LocalGitRepository) Commit(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
 	if commitOptions == nil {
 		return nil, TracedErrorNil("commitOptions")
@@ -193,24 +289,6 @@ func (l *LocalGitRepository) Commit(commitOptions *GitCommitOptions) (createdCom
 
 	if commitOptions.Verbose {
 		LogChangedf("Created commit '%s' in git repository '%s'.", commitMessage, path)
-	}
-
-	return createdCommit, nil
-}
-
-func (l *LocalGitRepository) CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
-	if commitOptions == nil {
-		return nil, TracedErrorNil("commitOptions")
-	}
-
-	createdCommit, err = l.Commit(commitOptions)
-	if err != nil {
-		return nil, err
-	}
-
-	err = l.Push(commitOptions.Verbose)
-	if err != nil {
-		return nil, err
 	}
 
 	return createdCommit, nil
@@ -954,17 +1032,22 @@ func (l *LocalGitRepository) MustAdd(path string) {
 	}
 }
 
-func (l *LocalGitRepository) MustCommit(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
-	createdCommit, err := l.Commit(commitOptions)
+func (l *LocalGitRepository) MustCloneRepository(repository GitRepository, verbose bool) {
+	err := l.CloneRepository(repository, verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
-
-	return createdCommit
 }
 
-func (l *LocalGitRepository) MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
-	createdCommit, err := l.CommitAndPush(commitOptions)
+func (l *LocalGitRepository) MustCloneRepositoryByPathOrUrl(pathToClone string, verbose bool) {
+	err := l.CloneRepositoryByPathOrUrl(pathToClone, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (l *LocalGitRepository) MustCommit(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
+	createdCommit, err := l.Commit(commitOptions)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
