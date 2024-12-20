@@ -109,6 +109,98 @@ func (c *CommandExecutorGitRepository) GetAsLocalGitRepository() (l *LocalGitRep
 	return nil, TracedErrorNotImplemented()
 }
 
+func (c *CommandExecutorGitRepository) CloneRepository(repository GitRepository, verbose bool) (err error) {
+	if repository == nil {
+		return TracedErrorNil("repository")
+	}
+
+	repoHostDescription, err := repository.GetHostDescription()
+	if err != nil {
+		return err
+	}
+
+	hostDescription, err := c.GetHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if hostDescription != repoHostDescription {
+		return TracedErrorf(
+			"Only implemented for two repositories on the same host. But repository from host '%s' should be cloned to host '%s'",
+			repoHostDescription,
+			hostDescription,
+		)
+	}
+
+	pathToClone, err := repository.GetPath()
+	if err != nil {
+		return err
+	}
+
+	return c.CloneRepositoryByPathOrUrl(pathToClone, verbose)
+}
+
+func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClone string, verbose bool) (err error) {
+	if pathOrUrlToClone == "" {
+		return TracedErrorEmptyString("pathToClone")
+	}
+
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		LogInfof(
+			"Cloning git repository '%s' to '%s' on '%s' started.",
+			pathOrUrlToClone,
+			path,
+			hostDescription,
+		)
+	}
+
+	isInitialized, err := c.IsInitialized(verbose)
+	if err != nil {
+		return err
+	}
+
+	if isInitialized {
+		return TracedErrorf(
+			"'%s' on host '%s' is already an initialized git repository. Clone of '%s' aborted.",
+			path,
+			hostDescription,
+			pathOrUrlToClone,
+		)
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return err
+	}
+
+	_, err = commandExecutor.RunCommand(
+		&RunCommandOptions{
+			Command:            []string{"git", "clone", pathOrUrlToClone, path},
+			Verbose:            verbose,
+			LiveOutputOnStdout: verbose,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		LogInfof(
+			"Cloning git repository '%s' to '%s' on host '%s' finished.",
+			pathOrUrlToClone,
+			path,
+			hostDescription,
+		)
+	}
+
+	return nil
+}
+
 func (c *CommandExecutorGitRepository) Commit(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
 	if commitOptions == nil {
 		return nil, TracedErrorNil("commitOptions")
@@ -275,7 +367,7 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootD
 				return "", err
 			}
 
-			if Slices().ContainsAllStrings(filePaths, []string{"config","HEAD"}) {
+			if Slices().ContainsAllStrings(filePaths, []string{"config", "HEAD"}) {
 				rootDirectoryPath, err = cwd.GetPath()
 				if err != nil {
 					return "", err
@@ -513,18 +605,12 @@ func (c *CommandExecutorGitRepository) Init(options *CreateRepositoryOptions) (e
 	}
 
 	if options.InitializeWithDefaultAuthor {
-		_, err = c.RunGitCommand(
-			[]string{"config", "user.name", GitRepositryDefualtAuthorName()},
-			options.Verbose,
-		)
+		err = c.SetUserName(GitRepositryDefualtAuthorName(), options.Verbose)
 		if err != nil {
 			return err
 		}
 
-		_, err = c.RunGitCommand(
-			[]string{"config", "user.email", GitRepositryDefualtAuthorEmail()},
-			options.Verbose,
-		)
+		err = c.SetUserEmail(GitRepositryDefualtAuthorEmail(), options.Verbose)
 		if err != nil {
 			return err
 		}
@@ -692,6 +778,20 @@ func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialite
 	}
 
 	return isInitialited, nil
+}
+
+func (c *CommandExecutorGitRepository) MustCloneRepository(repository GitRepository, verbose bool) {
+	err := c.CloneRepository(repository, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (c *CommandExecutorGitRepository) MustCloneRepositoryByPathOrUrl(pathOrUrlToClone string, verbose bool) {
+	err := c.CloneRepositoryByPathOrUrl(pathOrUrlToClone, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (c *CommandExecutorGitRepository) MustCommit(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
@@ -881,6 +981,13 @@ func (c *CommandExecutorGitRepository) MustIsInitialized(verbose bool) (isInitia
 	return isInitialited
 }
 
+func (c *CommandExecutorGitRepository) MustPush(verbose bool) {
+	err := c.Push(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (c *CommandExecutorGitRepository) MustRunGitCommand(gitCommand []string, verbose bool) (commandOutput *CommandOutput) {
 	commandOutput, err := c.RunGitCommand(gitCommand, verbose)
 	if err != nil {
@@ -897,6 +1004,60 @@ func (c *CommandExecutorGitRepository) MustRunGitCommandAndGetStdoutAsString(com
 	}
 
 	return stdout
+}
+
+func (c *CommandExecutorGitRepository) MustSetGitConfig(options *GitConfigSetOptions) {
+	err := c.SetGitConfig(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (c *CommandExecutorGitRepository) MustSetUserEmail(email string, verbose bool) {
+	err := c.SetUserEmail(email, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (c *CommandExecutorGitRepository) MustSetUserName(name string, verbose bool) {
+	err := c.SetUserName(name, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (c *CommandExecutorGitRepository) Push(verbose bool) (err error) {
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		LogInfof(
+			"Push git repository '%s' on '%s' started.",
+			path,
+			hostDescription,
+		)
+	}
+
+	_, err = c.RunGitCommand(
+		[]string{"push"},
+		verbose,
+	)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		LogInfof(
+			"Push git repository '%s' on '%s' finished.",
+			path,
+			hostDescription,
+		)
+	}
+
+	return
 }
 
 func (c *CommandExecutorGitRepository) RunGitCommand(gitCommand []string, verbose bool) (commandOutput *CommandOutput, err error) {
@@ -932,4 +1093,86 @@ func (c *CommandExecutorGitRepository) RunGitCommandAndGetStdoutAsString(command
 	}
 
 	return commandOutput.GetStdoutAsString()
+}
+
+func (c *CommandExecutorGitRepository) SetGitConfig(options *GitConfigSetOptions) (err error) {
+	if options == nil {
+		return TracedErrorNil("options")
+	}
+
+	if options.Email != "" {
+		err = c.SetUserEmail(options.Email, options.Verbose)
+		if err != nil {
+			return err
+		}
+	}
+
+	if options.Name != "" {
+		err = c.SetUserName(options.Name, options.Verbose)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *CommandExecutorGitRepository) SetUserEmail(email string, verbose bool) (err error) {
+	if email == "" {
+		return TracedErrorEmptyString(email)
+	}
+
+	_, err = c.RunGitCommand(
+		[]string{"config", "user.email", email},
+		verbose,
+	)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		path, hostDescription, err := c.GetPathAndHostDescription()
+		if err != nil {
+			return err
+		}
+
+		LogInfof(
+			"Set git user email to '%s' for git repository '%s' on host '%s'.",
+			email,
+			path,
+			hostDescription,
+		)
+	}
+
+	return nil
+}
+
+func (c *CommandExecutorGitRepository) SetUserName(name string, verbose bool) (err error) {
+	if name == "" {
+		return TracedErrorEmptyString(name)
+	}
+
+	_, err = c.RunGitCommand(
+		[]string{"config", "user.name", name},
+		verbose,
+	)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		path, hostDescription, err := c.GetPathAndHostDescription()
+		if err != nil {
+			return err
+		}
+
+		LogInfof(
+			"Set git user name to '%s' for git repository '%s' on host '%s'.",
+			name,
+			path,
+			hostDescription,
+		)
+	}
+
+	return nil
 }

@@ -8,6 +8,29 @@ func NewGitRepositoryBase() (g *GitRepositoryBase) {
 	return new(GitRepositoryBase)
 }
 
+func (g *GitRepositoryBase) CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
+	if commitOptions == nil {
+		return nil, TracedErrorNil("commitOptions")
+	}
+
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	createdCommit, err = parent.Commit(commitOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	err = parent.Push(commitOptions.Verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdCommit, nil
+}
+
 func (g *GitRepositoryBase) CreateAndInit(createOptions *CreateRepositoryOptions) (err error) {
 	if createOptions == nil {
 		return TracedErrorNil("createOptions")
@@ -37,6 +60,15 @@ func (g *GitRepositoryBase) GetParentRepositoryForBaseClass() (parentRepositoryF
 	}
 
 	return g.parentRepositoryForBaseClass, nil
+}
+
+func (g *GitRepositoryBase) MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
+	createdCommit, err := g.CommitAndPush(commitOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdCommit
 }
 
 func (g *GitRepositoryBase) MustCreateAndInit(createOptions *CreateRepositoryOptions) {

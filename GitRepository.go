@@ -11,6 +11,8 @@ var ErrGitRepositoryHeadNotFound = errors.New("gitRepository head not found")
 // A git repository can be a LocalGitRepository or
 // remote repositories like Gitlab or Github.
 type GitRepository interface {
+	CloneRepository(repository GitRepository, verbose bool) (err error)
+	CloneRepositoryByPathOrUrl(pathOrUrl string, verbose bool) (err error)
 	Commit(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error)
 	CommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool, err error)
 	Create(verbose bool) (err error)
@@ -30,6 +32,7 @@ type GitRepository interface {
 	GetCurrentCommit() (commit *GitCommit, err error)
 	GetCurrentCommitHash() (currentCommitHash string, err error)
 	GetGitStatusOutput(verbose bool) (output string, err error)
+	GetHostDescription() (hostDescription string, err error)
 	GetPath() (path string, err error)
 	GetRootDirectoryPath(verbose bool) (path string, err error)
 	HasInitialCommit(verbose bool) (hasInitialCommit bool, err error)
@@ -38,6 +41,8 @@ type GitRepository interface {
 	IsBareRepository(verbose bool) (isBareRepository bool, err error)
 	IsInitialized(verbose bool) (isInitialited bool, err error)
 
+	MustCloneRepository(repository GitRepository, verbose bool)
+	MustCloneRepositoryByPathOrUrl(pathOrUrl string, verbose bool)
 	MustCommit(commitOptions *GitCommitOptions) (createdCommit *GitCommit)
 	MustCommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool)
 	MustCreate(verbose bool)
@@ -57,6 +62,7 @@ type GitRepository interface {
 	MustGetCurrentCommit() (commit *GitCommit)
 	MustGetCurrentCommitHash() (currentCommitHash string)
 	MustGetGitStatusOutput(verbose bool) (output string)
+	MustGetHostDescription() (hostDescription string)
 	MustGetPath() (path string)
 	MustGetRootDirectoryPath(verbose bool) (path string)
 	MustHasInitialCommit(verbose bool) (hasInitialCommit bool)
@@ -64,9 +70,15 @@ type GitRepository interface {
 	MustInit(options *CreateRepositoryOptions)
 	MustIsBareRepository(verbose bool) (isBareRepository bool)
 	MustIsInitialized(verbose bool) (isInitialited bool)
+	MustPush(verbose bool)
+	MustSetGitConfig(options *GitConfigSetOptions)
+	Push(verbose bool) (err error)
+	SetGitConfig(options *GitConfigSetOptions) (err error)
 
 	// All methods below this line can be implemented by embedding the `GitRepositoryBase` struct:
+	CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error)
 	CreateAndInit(options *CreateRepositoryOptions) (err error)
+	MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit)
 	MustCreateAndInit(options *CreateRepositoryOptions)
 }
 
