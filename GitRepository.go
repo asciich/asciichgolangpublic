@@ -11,6 +11,7 @@ var ErrGitRepositoryHeadNotFound = errors.New("gitRepository head not found")
 // A git repository can be a LocalGitRepository or
 // remote repositories like Gitlab or Github.
 type GitRepository interface {
+	AddFileByPath(pathToAdd string, verbose bool) (err error)
 	CloneRepository(repository GitRepository, verbose bool) (err error)
 	CloneRepositoryByPathOrUrl(pathOrUrl string, verbose bool) (err error)
 	Commit(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error)
@@ -41,6 +42,7 @@ type GitRepository interface {
 	IsBareRepository(verbose bool) (isBareRepository bool, err error)
 	IsInitialized(verbose bool) (isInitialited bool, err error)
 
+	MustAddFileByPath(pathToAdd string, verbose bool)
 	MustCloneRepository(repository GitRepository, verbose bool)
 	MustCloneRepositoryByPathOrUrl(pathOrUrl string, verbose bool)
 	MustCommit(commitOptions *GitCommitOptions) (createdCommit *GitCommit)
