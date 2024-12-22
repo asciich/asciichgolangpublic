@@ -138,8 +138,8 @@ func (c *LocalGitRepository) HasInitialCommit(verbose bool) (hasInitialCommit bo
 	return true, nil
 }
 
-func (l *LocalGitRepository) Add(path string) (err error) {
-	if path == "" {
+func (l *LocalGitRepository) AddFileByPath(pathToAdd string, verbose bool) (err error) {
+	if pathToAdd == "" {
 		return TracedErrorNil("path")
 	}
 
@@ -148,9 +148,22 @@ func (l *LocalGitRepository) Add(path string) (err error) {
 		return err
 	}
 
-	_, err = worktree.Add(path)
+	_, err = worktree.Add(pathToAdd)
 	if err != nil {
 		return TracedErrorf("%w", err)
+	}
+
+	if verbose {
+		path, err := l.GetPath()
+		if err != nil {
+			return err
+		}
+
+		LogChangedf(
+			"Added file '%s' to git repository '%s' on localhost",
+			pathToAdd,
+			path,
+		)
 	}
 
 	return nil
@@ -1025,8 +1038,8 @@ func (l *LocalGitRepository) IsInitialized(verbose bool) (isInitialized bool, er
 	return isInitialized, nil
 }
 
-func (l *LocalGitRepository) MustAdd(path string) {
-	err := l.Add(path)
+func (l *LocalGitRepository) MustAddFileByPath(pathToAdd string, verbose bool) {
+	err := l.AddFileByPath(pathToAdd, verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

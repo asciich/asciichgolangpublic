@@ -109,6 +109,36 @@ func (c *CommandExecutorGitRepository) GetAsLocalGitRepository() (l *LocalGitRep
 	return nil, TracedErrorNotImplemented()
 }
 
+func (c *CommandExecutorGitRepository) AddFileByPath(pathToAdd string, verbose bool) (err error) {
+	if pathToAdd == "" {
+		return TracedErrorEmptyString("pathToAdd")
+	}
+
+	_, err = c.RunGitCommand(
+		[]string{"add", pathToAdd},
+		verbose,
+	)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		path, hostDescription, err := c.GetPathAndHostDescription()
+		if err != nil {
+			return err
+		}
+
+		LogChangedf(
+			"Added '%s' to git repository '%s' on host '%s'.",
+			pathToAdd,
+			path,
+			hostDescription,
+		)
+	}
+
+	return nil
+}
+
 func (c *CommandExecutorGitRepository) CloneRepository(repository GitRepository, verbose bool) (err error) {
 	if repository == nil {
 		return TracedErrorNil("repository")
@@ -780,6 +810,13 @@ func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialite
 	return isInitialited, nil
 }
 
+func (c *CommandExecutorGitRepository) MustAddFileByPath(pathToAdd string, verbose bool) {
+	err := c.AddFileByPath(pathToAdd, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (c *CommandExecutorGitRepository) MustCloneRepository(repository GitRepository, verbose bool) {
 	err := c.CloneRepository(repository, verbose)
 	if err != nil {
@@ -1119,7 +1156,7 @@ func (c *CommandExecutorGitRepository) SetGitConfig(options *GitConfigSetOptions
 
 func (c *CommandExecutorGitRepository) SetUserEmail(email string, verbose bool) (err error) {
 	if email == "" {
-		return TracedErrorEmptyString(email)
+		return TracedErrorEmptyString("email")
 	}
 
 	_, err = c.RunGitCommand(
@@ -1149,7 +1186,7 @@ func (c *CommandExecutorGitRepository) SetUserEmail(email string, verbose bool) 
 
 func (c *CommandExecutorGitRepository) SetUserName(name string, verbose bool) (err error) {
 	if name == "" {
-		return TracedErrorEmptyString(name)
+		return TracedErrorEmptyString("name")
 	}
 
 	_, err = c.RunGitCommand(
