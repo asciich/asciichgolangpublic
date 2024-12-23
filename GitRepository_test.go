@@ -315,7 +315,7 @@ func TestGitRepository_HasUncommittedChanges(t *testing.T) {
 	}
 }
 
-func TestGitRepository_GetRootDirectory(t *testing.T) {
+func TestGitRepository_GetRootDirectoryPath(t *testing.T) {
 	tests := []struct {
 		implementationName string
 		bareRepository     bool
@@ -349,6 +349,46 @@ func TestGitRepository_GetRootDirectory(t *testing.T) {
 				assert.EqualValues(
 					repo.MustGetPath(),
 					repo.MustGetRootDirectoryPath(verbose),
+				)
+			},
+		)
+	}
+}
+
+func TestGitRepository_GetRootDirectory(t *testing.T) {
+	tests := []struct {
+		implementationName string
+		bareRepository     bool
+	}{
+		{"localGitRepository", false},
+		{"localGitRepository", true},
+		{"localCommandExecutorRepository", false},
+		{"localCommandExecutorRepository", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				repo := getGitRepositoryToTest(tt.implementationName)
+				defer repo.Delete(verbose)
+
+				repo.MustDelete(verbose)
+
+				repo.MustInit(
+					&CreateRepositoryOptions{
+						Verbose:        verbose,
+						BareRepository: tt.bareRepository,
+					},
+				)
+
+				assert.EqualValues(
+					repo.MustGetPath(),
+					repo.MustGetRootDirectory(verbose).MustGetPath(),
 				)
 			},
 		)

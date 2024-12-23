@@ -363,6 +363,25 @@ func (c *CommandExecutorGitRepository) GetGitStatusOutput(verbose bool) (output 
 	return "", TracedErrorNotImplemented()
 }
 
+func (c *CommandExecutorGitRepository) GetRootDirectory(verbose bool) (rootDirectory Directory, err error) {
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	rootDirPath, err := c.GetRootDirectoryPath(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	rootDirectory, err = GetCommandExecutorDirectoryByPath(
+		commandExecutor,
+		rootDirPath,
+	)
+
+	return rootDirectory, nil
+}
+
 func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootDirectoryPath string, err error) {
 	path, hostDescription, err := c.GetPathAndHostDescription()
 	if err != nil {
@@ -1029,6 +1048,15 @@ func (c *CommandExecutorGitRepository) MustGetGitStatusOutput(verbose bool) (out
 	}
 
 	return output
+}
+
+func (c *CommandExecutorGitRepository) MustGetRootDirectory(verbose bool) (rootDirectory Directory) {
+	rootDirectory, err := c.GetRootDirectory(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return rootDirectory
 }
 
 func (c *CommandExecutorGitRepository) MustGetRootDirectoryPath(verbose bool) (rootDirectoryPath string) {
