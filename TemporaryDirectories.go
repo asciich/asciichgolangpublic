@@ -41,7 +41,7 @@ func (t *TemporaryDirectoriesService) CreateEmptyTemporaryDirectoryAndGetPath(ve
 	return TemporaryDirectoryPath, nil
 }
 
-func (t *TemporaryDirectoriesService) CreateEmptyTemporaryGitRepository(createRepoOptions *CreateRepositoryOptions) (temporaryGitRepository *LocalGitRepository, err error) {
+func (t *TemporaryDirectoriesService) CreateEmptyTemporaryGitRepository(createRepoOptions *CreateRepositoryOptions) (temporaryGitRepository GitRepository, err error) {
 	if createRepoOptions == nil {
 		return nil, TracedErrorNil("createRepoOptions")
 	}
@@ -90,7 +90,7 @@ func (t *TemporaryDirectoriesService) MustCreateEmptyTemporaryDirectoryAndGetPat
 	return TemporaryDirectoryPath
 }
 
-func (t *TemporaryDirectoriesService) MustCreateEmptyTemporaryGitRepository(createRepoOptions *CreateRepositoryOptions) (temporaryGitRepository *LocalGitRepository) {
+func (t *TemporaryDirectoriesService) MustCreateEmptyTemporaryGitRepository(createRepoOptions *CreateRepositoryOptions) (temporaryGitRepository GitRepository) {
 	temporaryGitRepository, err := t.CreateEmptyTemporaryGitRepository(createRepoOptions)
 	if err != nil {
 		LogGoErrorFatal(err)
