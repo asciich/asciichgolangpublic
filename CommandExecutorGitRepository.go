@@ -635,22 +635,9 @@ func (c *CommandExecutorGitRepository) Init(options *CreateRepositoryOptions) (e
 	}
 
 	if options.InitializeWithDefaultAuthor {
-		err = c.SetUserName(GitRepositryDefualtAuthorName(), options.Verbose)
+		err = c.SetDefaultAuthor(options.Verbose)
 		if err != nil {
 			return err
-		}
-
-		err = c.SetUserEmail(GitRepositryDefualtAuthorEmail(), options.Verbose)
-		if err != nil {
-			return err
-		}
-
-		if options.Verbose {
-			LogChangedf(
-				"Initialized git repository '%s' on '%s' with default author and email.",
-				path,
-				hostDescription,
-			)
 		}
 	}
 
@@ -660,16 +647,51 @@ func (c *CommandExecutorGitRepository) Init(options *CreateRepositoryOptions) (e
 			return err
 		}
 
-		if !hasInitialCommit {
-			_, err = c.Commit(
-				&GitCommitOptions{
-					Message:    GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit(),
-					AllowEmpty: true,
-					Verbose:    true,
-				},
+		if hasInitialCommit {
+			LogInfof(
+				"Repository '%s' on host '%s' has already an initial commit.",
+				path,
+				hostDescription,
 			)
-			if err != nil {
-				return err
+		} else {
+			if options.BareRepository {
+				temporaryClone, err := GitRepositories().CloneGitRepositoryToTemporaryDirectory(c, options.Verbose)
+				if err != nil {
+					return err
+				}
+				defer temporaryClone.Delete(options.Verbose)
+
+				if options.InitializeWithDefaultAuthor {
+					temporaryClone.SetGitConfig(
+						&GitConfigSetOptions{
+							Name:    GitRepositryDefualtAuthorName(),
+							Email:   GitRepositryDefualtAuthorEmail(),
+							Verbose: options.Verbose,
+						},
+					)
+				}
+
+				_, err = temporaryClone.CommitAndPush(
+					&GitCommitOptions{
+						Message:    GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit(),
+						AllowEmpty: true,
+						Verbose:    true,
+					},
+				)
+				if err != nil {
+					return err
+				}
+			} else {
+				_, err = c.Commit(
+					&GitCommitOptions{
+						Message:    GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit(),
+						AllowEmpty: true,
+						Verbose:    true,
+					},
+				)
+				if err != nil {
+					return err
+				}
 			}
 
 			if options.Verbose {
@@ -1018,6 +1040,13 @@ func (c *CommandExecutorGitRepository) MustIsInitialized(verbose bool) (isInitia
 	return isInitialited
 }
 
+func (c *CommandExecutorGitRepository) MustPull(verbose bool) {
+	err := c.Pull(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (c *CommandExecutorGitRepository) MustPush(verbose bool) {
 	err := c.Push(verbose)
 	if err != nil {
@@ -1043,6 +1072,13 @@ func (c *CommandExecutorGitRepository) MustRunGitCommandAndGetStdoutAsString(com
 	return stdout
 }
 
+func (c *CommandExecutorGitRepository) MustSetDefaultAuthor(verbose bool) {
+	err := c.SetDefaultAuthor(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (c *CommandExecutorGitRepository) MustSetGitConfig(options *GitConfigSetOptions) {
 	err := c.SetGitConfig(options)
 	if err != nil {
@@ -1062,6 +1098,39 @@ func (c *CommandExecutorGitRepository) MustSetUserName(name string, verbose bool
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (c *CommandExecutorGitRepository) Pull(verbose bool) (err error) {
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		LogInfof(
+			"Pull git repository '%s' on '%s' started.",
+			path,
+			hostDescription,
+		)
+	}
+
+	_, err = c.RunGitCommand(
+		[]string{"pull"},
+		verbose,
+	)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		LogInfof(
+			"Pull git repository '%s' on '%s' finished.",
+			path,
+			hostDescription,
+		)
+	}
+
+	return
 }
 
 func (c *CommandExecutorGitRepository) Push(verbose bool) (err error) {
@@ -1130,6 +1199,33 @@ func (c *CommandExecutorGitRepository) RunGitCommandAndGetStdoutAsString(command
 	}
 
 	return commandOutput.GetStdoutAsString()
+}
+
+func (c *CommandExecutorGitRepository) SetDefaultAuthor(verbose bool) (err error) {
+	err = c.SetUserName(GitRepositryDefualtAuthorName(), verbose)
+	if err != nil {
+		return err
+	}
+
+	err = c.SetUserEmail(GitRepositryDefualtAuthorEmail(), verbose)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		path, hostDescription, err := c.GetPathAndHostDescription()
+		if err != nil {
+			return err
+		}
+
+		LogChangedf(
+			"Initialized git repository '%s' on '%s' with default author and email.",
+			path,
+			hostDescription,
+		)
+	}
+
+	return nil
 }
 
 func (c *CommandExecutorGitRepository) SetGitConfig(options *GitConfigSetOptions) (err error) {

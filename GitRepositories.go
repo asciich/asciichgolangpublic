@@ -52,18 +52,65 @@ func (g *GitRepositoriesService) CloneGitRepositoryToTemporaryDirectory(toClone 
 	}
 
 	localRepository, ok := toClone.(*LocalGitRepository)
-	if !ok {
-		return nil, TracedError("Only implemented for LocalGitRepository")
+	if ok {
+		localPath, err := localRepository.GetLocalPath()
+		if err != nil {
+			return nil, err
+		}
+
+		repo, err = g.CloneToTemporaryDirectory(localPath, verbose)
+		if err != nil {
+			return nil, err
+		}
+
+		if verbose {
+			clonedPath, err := repo.GetPath()
+			if err != nil {
+				return nil, err
+			}
+
+			LogChangedf(
+				"Cloned local git repository '%s' into temporary directory '%s'",
+				localPath,
+				clonedPath,
+			)
+		}
 	}
 
-	localPath, err := localRepository.GetLocalPath()
-	if err != nil {
-		return nil, err
-	}
+	if repo == nil {
+		commandExecutorRepository, ok := toClone.(*CommandExecutorGitRepository)
+		if ok {
+			localPath, hostDescription, err := commandExecutorRepository.GetPathAndHostDescription()
+			if err != nil {
+				return nil, err
+			}
 
-	repo, err = g.CloneToTemporaryDirectory(localPath, verbose)
-	if err != nil {
-		return nil, err
+			if hostDescription != "localhost" {
+				return nil, TracedErrorf(
+					"Only implemented for CommandExecutorGitRepository on localhost, but hostDescription is '%s'",
+					hostDescription,
+				)
+			}
+
+			repo, err = g.CloneToTemporaryDirectory(localPath, verbose)
+			if err != nil {
+				return nil, err
+			}
+
+			if verbose {
+				clonedPath, err := repo.GetPath()
+				if err != nil {
+					return nil, err
+				}
+
+				LogChangedf(
+					"Cloned git repository '%s' from host '%s' into temporary directory '%s'",
+					localPath,
+					hostDescription,
+					clonedPath,
+				)
+			}
+		}
 	}
 
 	return repo, nil
