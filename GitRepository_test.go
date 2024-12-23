@@ -148,6 +148,51 @@ func TestGitRepository_Init(t *testing.T) {
 	}
 }
 
+func TestGitRepository_Init_fullInOneStep(t *testing.T) {
+	tests := []struct {
+		implementationName string
+		bare               bool
+	}{
+		{"localGitRepository", false},
+		{"localCommandExecutorRepository", false},
+		{"localGitRepository", true},
+		{"localCommandExecutorRepository", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				repo := getGitRepositoryToTest(tt.implementationName)
+				defer repo.Delete(verbose)
+				repo.Delete(verbose)
+
+				for i := 0; i < 2; i++ {
+					repo.MustInit(
+						&CreateRepositoryOptions{
+							Verbose:                     verbose,
+							InitializeWithDefaultAuthor: true,
+							InitializeWithEmptyCommit:   true,
+							BareRepository:              tt.bare,
+						},
+					)
+					assert.True(repo.MustExists(verbose))
+					assert.True(repo.MustIsInitialized(verbose))
+					assert.True(repo.MustHasInitialCommit(verbose))
+					assert.EqualValues(
+						tt.bare,
+						repo.MustIsBareRepository(verbose),
+					)
+				}
+			},
+		)
+	}
+}
+
 func TestGitRepository_CreateAndDeleteRepository(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -336,6 +381,15 @@ func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 
 				upstreamRepo := getGitRepositoryToTest(tt.implementationUpstream)
 				defer upstreamRepo.MustDelete(verbose)
+				upstreamRepo.MustDelete(verbose)
+				upstreamRepo.MustInit(
+					&CreateRepositoryOptions{
+						BareRepository:              true,
+						InitializeWithEmptyCommit:   true,
+						InitializeWithDefaultAuthor: true,
+						Verbose:                     verbose,
+					},
+				)
 
 				clonedRepo := getGitRepositoryToTest(tt.implementationCloned)
 				defer clonedRepo.MustDelete(verbose)
@@ -391,27 +445,25 @@ func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 					clonedRepo2.MustGetCurrentCommitHash(),
 				)
 
-				/*
-					clonedRepo2.MustPush(verbose)
-					assert.EqualValues(
-						upstreamRepo.MustGetCurrentCommitHash(),
-						clonedRepo2.MustGetCurrentCommitHash(),
-					)
-					assert.NotEqualValues(
-						upstreamRepo.MustGetCurrentCommitHash(),
-						clonedRepo.MustGetCurrentCommitHash(),
-					)
+				clonedRepo2.MustPush(verbose)
+				assert.EqualValues(
+					upstreamRepo.MustGetCurrentCommitHash(),
+					clonedRepo2.MustGetCurrentCommitHash(),
+				)
+				assert.NotEqualValues(
+					upstreamRepo.MustGetCurrentCommitHash(),
+					clonedRepo.MustGetCurrentCommitHash(),
+				)
 
-					clonedRepo.MustPull(verbose)
-					assert.EqualValues(
-						upstreamRepo.MustGetCurrentCommitHash(),
-						clonedRepo2.MustGetCurrentCommitHash(),
-					)
-					assert.EqualValues(
-						upstreamRepo.MustGetCurrentCommitHash(),
-						clonedRepo.MustGetCurrentCommitHash(),
-					)
-				*/
+				clonedRepo.MustPull(verbose)
+				assert.EqualValues(
+					upstreamRepo.MustGetCurrentCommitHash(),
+					clonedRepo2.MustGetCurrentCommitHash(),
+				)
+				assert.EqualValues(
+					upstreamRepo.MustGetCurrentCommitHash(),
+					clonedRepo.MustGetCurrentCommitHash(),
+				)
 			},
 		)
 	}
