@@ -1,5 +1,29 @@
 package asciichgolangpublic
 
+func GetCommandExecutorFileByPath(commandExector CommandExecutor, path string) (commandExecutorFile *CommandExecutorFile, err error) {
+	if commandExector == nil {
+		return nil, TracedErrorNil("commandExecutor")
+	}
+
+	if path == "" {
+		return nil, TracedErrorEmptyString("path")
+	}
+
+	commandExecutorFile = NewCommandExecutorFile()
+
+	err = commandExecutorFile.SetCommandExecutor(commandExector)
+	if err != nil {
+		return nil, err
+	}
+
+	err = commandExecutorFile.SetFilePath(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return commandExecutorFile, nil
+}
+
 func GetLocalCommandExecutorFileByFile(file File, verbose bool) (commandExecutorFile *CommandExecutorFile, err error) {
 	if file == nil {
 		return nil, TracedErrorEmptyString("file")
@@ -28,19 +52,16 @@ func GetLocalCommandExecutorFileByPath(localPath string) (commandExecutorFile *C
 		return nil, TracedErrorEmptyString(localPath)
 	}
 
-	commandExecutorFile = NewCommandExecutorFile()
+	return GetCommandExecutorFileByPath(Bash(), localPath)
+}
 
-	err = commandExecutorFile.SetCommandExecutor(Bash())
+func MustGetCommandExecutorFileByPath(commandExector CommandExecutor, path string) (commandExecutorFile *CommandExecutorFile) {
+	commandExecutorFile, err := GetCommandExecutorFileByPath(commandExector, path)
 	if err != nil {
-		return nil, err
+		LogGoErrorFatal(err)
 	}
 
-	err = commandExecutorFile.SetFilePath(localPath)
-	if err != nil {
-		return nil, err
-	}
-
-	return commandExecutorFile, nil
+	return commandExecutorFile
 }
 
 func MustGetLocalCommandExecutorFileByFile(file File, verbose bool) (commandExecutorFile *CommandExecutorFile) {
