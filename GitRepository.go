@@ -72,8 +72,10 @@ type GitRepository interface {
 	MustInit(options *CreateRepositoryOptions)
 	MustIsBareRepository(verbose bool) (isBareRepository bool)
 	MustIsInitialized(verbose bool) (isInitialited bool)
+	MustPull(verbose bool)
 	MustPush(verbose bool)
 	MustSetGitConfig(options *GitConfigSetOptions)
+	Pull(verbose bool) (err error)
 	Push(verbose bool) (err error)
 	SetGitConfig(options *GitConfigSetOptions) (err error)
 
