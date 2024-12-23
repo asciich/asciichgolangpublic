@@ -109,17 +109,6 @@ func (c *CommandExecutorGitRepository) GetAsLocalGitRepository() (l *LocalGitRep
 	return nil, TracedErrorNotImplemented()
 }
 
-func (c *CommandExecutorGitRepository) GetTagByHash(hash string) (tag *GitTag, err error) {
-	if hash == "" {
-		return nil, TracedErrorEmptyString("hash")
-	}
-
-	return &GitTag{
-		gitRepository: c,
-		hash:          hash,
-	}, nil
-}
-
 func (c *CommandExecutorGitRepository) AddFileByPath(pathToAdd string, verbose bool) (err error) {
 	if pathToAdd == "" {
 		return TracedErrorEmptyString("pathToAdd")
@@ -453,6 +442,17 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootD
 	}
 
 	return rootDirectoryPath, nil
+}
+
+func (c *CommandExecutorGitRepository) GetTagByHash(hash string) (tag *GitTag, err error) {
+	if hash == "" {
+		return nil, TracedErrorEmptyString("hash")
+	}
+
+	return &GitTag{
+		gitRepository: c,
+		hash:          hash,
+	}, nil
 }
 
 func (c *CommandExecutorGitRepository) HasInitialCommit(verbose bool) (hasInitialCommit bool, err error) {

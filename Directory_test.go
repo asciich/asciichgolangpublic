@@ -60,3 +60,63 @@ func TestDirectory_GetParentDirectory(t *testing.T) {
 		)
 	}
 }
+
+func TestDirectory_ReadFileInDirectoryAsString(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localDirectory"},
+		{"localCommandExecutorDirectory"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				dir := getDirectoryToTest(tt.implementationName)
+				defer dir.Delete(verbose)
+
+				dir.MustWriteStringToFileInDirectory("hello_world", verbose, "test.txt")
+
+				assert.EqualValues(
+					"hello_world",
+					dir.MustReadFileInDirectoryAsString("test.txt"),
+				)
+			},
+		)
+	}
+}
+
+func TestDirectory_ReadFileInDirectoryAsInt64(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localDirectory"},
+		{"localCommandExecutorDirectory"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				dir := getDirectoryToTest(tt.implementationName)
+				defer dir.Delete(verbose)
+
+				dir.MustWriteStringToFileInDirectory("1234", verbose, "test.txt")
+
+				assert.EqualValues(
+					1234,
+					dir.MustReadFileInDirectoryAsInt64("test.txt"),
+				)
+			},
+		)
+	}
+}
