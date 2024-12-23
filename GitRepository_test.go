@@ -80,6 +80,54 @@ func TestGitRepository_Init_minimal(t *testing.T) {
 	}
 }
 
+
+func TestGitRepository_IsGitRepository(t *testing.T) {
+	tests := []struct {
+		implementationName string
+		bareRepository     bool
+	}{
+		{"localGitRepository", false},
+		{"localGitRepository", true},
+		{"localCommandExecutorRepository", false},
+		{"localCommandExecutorRepository", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				repo := getGitRepositoryToTest(tt.implementationName)
+				defer repo.Delete(verbose)
+
+				repo.MustDelete(verbose)
+
+				// An non existing directory is not a git repository:
+				assert.False(repo.MustIsGitRepository(verbose))
+
+				Directories().MustCreateLocalDirectoryByPath(repo.MustGetPath(), verbose)
+
+				// The directory exists but is empty which is not a git directory:
+				assert.False(repo.MustIsGitRepository(verbose))
+
+				for i := 0; i < 2; i++ {
+					repo.MustInit(
+						&CreateRepositoryOptions{
+							Verbose:        verbose,
+							BareRepository: tt.bareRepository,
+						},
+					)
+					assert.True(repo.MustIsGitRepository(verbose))
+				}
+			},
+		)
+	}
+}
+
+
 func TestGitRepository_Init(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -468,3 +516,34 @@ func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 		)
 	}
 }
+
+func TestGitRepsitory_GetGitTagByHash(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				repo := getGitRepositoryToTest(tt.implementationName)
+				defer repo.Delete(verbose)
+
+				currentCommitHash := repo.MustGetCurrentCommitHash()
+				gitTag := repo.MustGetTagByHash(currentCommitHash)
+				assert.EqualValues(
+					currentCommitHash,
+					gitTag.MustGetHash(),
+				)
+			},
+		)
+	}
+}
+
