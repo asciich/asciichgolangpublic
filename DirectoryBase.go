@@ -1,6 +1,9 @@
 package asciichgolangpublic
 
-import "strings"
+import (
+	"strconv"
+	"strings"
+)
 
 type DirectoryBase struct {
 	parentDirectoryForBaseClass Directory
@@ -323,6 +326,15 @@ func (d *DirectoryBase) MustListFilePaths(listFileOptions *ListFileOptions) (fil
 	return filePaths
 }
 
+func (d *DirectoryBase) MustReadFileInDirectoryAsInt64(path ...string) (value int64) {
+	value, err := d.ReadFileInDirectoryAsInt64(path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return value
+}
+
 func (d *DirectoryBase) MustReadFileInDirectoryAsLines(path ...string) (content []string) {
 	content, err := d.ReadFileInDirectoryAsLines(path...)
 	if err != nil {
@@ -355,6 +367,32 @@ func (d *DirectoryBase) MustWriteStringToFileInDirectory(content string, verbose
 	}
 
 	return writtenFile
+}
+
+func (d *DirectoryBase) ReadFileInDirectoryAsInt64(path ...string) (value int64, err error) {
+	if len(path) <= 0 {
+		return -1, TracedError("path has no elements")
+	}
+
+	parent, err := d.GetParentDirectoryForBaseClass()
+	if err != nil {
+		return -1, err
+	}
+
+	content, err := parent.ReadFileInDirectoryAsString(path...)
+	if err != nil {
+		return -1, err
+	}
+
+	value, err = strconv.ParseInt(content, 10, 64)
+	if err != nil {
+		return -1, TracedErrorf(
+			"Failed to parse file content as int64: %w",
+			err,
+		)
+	}
+
+	return value, nil
 }
 
 func (d *DirectoryBase) ReadFileInDirectoryAsLines(path ...string) (content []string, err error) {
