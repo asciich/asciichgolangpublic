@@ -753,6 +753,38 @@ func (c *CommandExecutorGitRepository) IsBareRepository(verbose bool) (isBare bo
 	return isBare, nil
 }
 
+func (c *CommandExecutorGitRepository) IsGitRepository(verbose bool) (isRepository bool, err error) {
+	isInitalized, err := c.IsInitialized(verbose)
+	if err != nil {
+		return false, err
+	}
+
+	isRepository = isInitalized
+
+	if verbose {
+		path, hostDescription, err := c.GetPathAndHostDescription()
+		if err != nil {
+			return false, err
+		}
+
+		if isRepository {
+			LogInfof(
+				"'%s' on host '%s' is a git repository",
+				path,
+				hostDescription,
+			)
+		} else {
+			LogInfof(
+				"'%s' on host '%s' is not a git repository",
+				path,
+				hostDescription,
+			)
+		}
+	}
+
+	return isRepository, nil
+}
+
 func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialited bool, err error) {
 	path, hostDescription, err := c.GetPathAndHostDescription()
 	if err != nil {
@@ -1029,6 +1061,15 @@ func (c *CommandExecutorGitRepository) MustIsBareRepository(verbose bool) (isBar
 	}
 
 	return isBare
+}
+
+func (c *CommandExecutorGitRepository) MustIsGitRepository(verbose bool) (isRepository bool) {
+	isRepository, err := c.IsGitRepository(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isRepository
 }
 
 func (c *CommandExecutorGitRepository) MustIsInitialized(verbose bool) (isInitialited bool) {

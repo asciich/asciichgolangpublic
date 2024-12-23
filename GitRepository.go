@@ -40,6 +40,8 @@ type GitRepository interface {
 	HasUncommittedChanges(verbose bool) (hasUncommitedChanges bool, err error)
 	Init(options *CreateRepositoryOptions) (err error)
 	IsBareRepository(verbose bool) (isBareRepository bool, err error)
+	// Returns true if pointing to an existing git repository, false otherwise
+	IsGitRepository(verbose bool) (isRepository bool, err error)
 	IsInitialized(verbose bool) (isInitialited bool, err error)
 
 	MustAddFileByPath(pathToAdd string, verbose bool)
@@ -71,6 +73,7 @@ type GitRepository interface {
 	MustHasUncommittedChanges(verbose bool) (hasUncommitedChanges bool)
 	MustInit(options *CreateRepositoryOptions)
 	MustIsBareRepository(verbose bool) (isBareRepository bool)
+	MustIsGitRepository(verbose bool) (isRepository bool)
 	MustIsInitialized(verbose bool) (isInitialited bool)
 	MustPull(verbose bool)
 	MustPush(verbose bool)
