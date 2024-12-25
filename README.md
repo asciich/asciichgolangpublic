@@ -7,6 +7,15 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 ## Design choices
 
 * Use `Set` and `Get` functions which allows to validate input and output on every access.
+* Short cuts and code hacks are not nice but still better than doing things by hand. They are at least a good starting point of what functionality is needed and can be improved over time.
+* Releasing:
+	* Release often: Every (small) improvement is an improvemnt and will be released as soon as possible.
+	* This repository will never reach v1: There will be always be breaking changes if needed to improve the code.
+* Readability:
+	* An end user of this repository should be able to write readable code.
+* Some background information:
+	* Currently this is a one man show.
+	* It bases purely on some code I use for automating my homelab.
 
 ## Logging
 

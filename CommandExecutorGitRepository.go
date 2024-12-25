@@ -463,17 +463,6 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootD
 	return rootDirectoryPath, nil
 }
 
-func (c *CommandExecutorGitRepository) GetTagByHash(hash string) (tag *GitTag, err error) {
-	if hash == "" {
-		return nil, TracedErrorEmptyString("hash")
-	}
-
-	return &GitTag{
-		gitRepository: c,
-		hash:          hash,
-	}, nil
-}
-
 func (c *CommandExecutorGitRepository) HasInitialCommit(verbose bool) (hasInitialCommit bool, err error) {
 	path, hostDescription, err := c.GetPathAndHostDescription()
 	if err != nil {
@@ -1066,15 +1055,6 @@ func (c *CommandExecutorGitRepository) MustGetRootDirectoryPath(verbose bool) (r
 	}
 
 	return rootDirectoryPath
-}
-
-func (c *CommandExecutorGitRepository) MustGetTagByHash(hash string) (tag *GitTag) {
-	tag, err := c.GetTagByHash(hash)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-
-	return tag
 }
 
 func (c *CommandExecutorGitRepository) MustHasInitialCommit(verbose bool) (hasInitialCommit bool) {
