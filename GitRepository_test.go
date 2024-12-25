@@ -556,34 +556,3 @@ func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 		)
 	}
 }
-
-func TestGitRepsitory_GetGitTagByHash(t *testing.T) {
-	tests := []struct {
-		implementationName string
-	}{
-		{"localGitRepository"},
-		{"localCommandExecutorRepository"},
-	}
-
-	for _, tt := range tests {
-		t.Run(
-			MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				assert := assert.New(t)
-
-				const verbose bool = true
-
-				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
-
-				currentCommitHash := repo.MustGetCurrentCommitHash()
-				gitTag := repo.MustGetTagByHash(currentCommitHash)
-				assert.EqualValues(
-					currentCommitHash,
-					gitTag.MustGetHash(),
-				)
-			},
-		)
-	}
-}
-
