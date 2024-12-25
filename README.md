@@ -22,7 +22,7 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 	* An end user of this repository should be able to write readable code.
 * Background information:
 	* Currently this is a one man show.
-	* It bases purely on some code I use for automating my homelab.
+	* It bases purely on some code I wrote at home in my free time used for automating my personal homelab.
 
 ## Logging
 
