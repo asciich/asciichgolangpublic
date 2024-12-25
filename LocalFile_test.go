@@ -34,35 +34,8 @@ func TestLocalFileSetAndGetPath(t *testing.T) {
 	assert.True(strings.HasSuffix(receivedPath, "/testpath"))
 }
 
-func TestLocalFileExists(t *testing.T) {
 
-	tests := []struct {
-		testcase string
-	}{
-		{"testcase"},
-	}
-
-	for _, tt := range tests {
-		t.Run(
-			MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				assert := assert.New(t)
-
-				const verbose bool = true
-
-				file := TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)
-				defer file.Delete(verbose)
-
-				assert.True(file.MustExists(verbose))
-
-				file.MustDelete(verbose)
-
-				assert.False(file.MustExists(verbose))
-			},
-		)
-	}
-}
-
+// TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileGetUriAsString(t *testing.T) {
 
 	tests := []struct {
@@ -88,6 +61,7 @@ func TestLocalFileGetUriAsString(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileReadAndWriteAsBytes(t *testing.T) {
 	tests := []struct {
 		content []byte
@@ -119,6 +93,7 @@ func TestLocalFileReadAndWriteAsBytes(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileReadAndWriteAsInt64(t *testing.T) {
 	tests := []struct {
 		content int64
@@ -148,6 +123,7 @@ func TestLocalFileReadAndWriteAsInt64(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileReadAndWriteAsString(t *testing.T) {
 	tests := []struct {
 		content string
@@ -179,6 +155,7 @@ func TestLocalFileReadAndWriteAsString(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileGetBaseName(t *testing.T) {
 	tests := []struct {
 		path             string
@@ -203,6 +180,7 @@ func TestLocalFileGetBaseName(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileGetSha256Sum(t *testing.T) {
 	tests := []struct {
 		input            string
@@ -232,6 +210,7 @@ func TestLocalFileGetSha256Sum(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileIsMatchingSha256Sum(t *testing.T) {
 	tests := []struct {
 		input              string
@@ -264,6 +243,7 @@ func TestLocalFileIsMatchingSha256Sum(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileGetParentDirectory(t *testing.T) {
 	tests := []struct {
 		testcase string
@@ -294,6 +274,7 @@ func TestLocalFileGetParentDirectory(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileIsContentEqualByComparingSha256Sum(t *testing.T) {
 	tests := []struct {
 		contentFile1    string
@@ -328,6 +309,7 @@ func TestLocalFileIsContentEqualByComparingSha256Sum(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileGetLocalPathIsAbsolute(t *testing.T) {
 	tests := []struct {
 		pathToTest string
@@ -353,6 +335,7 @@ func TestLocalFileGetLocalPathIsAbsolute(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileGetTextBlocksGolangWithCommentAboveFunction(t *testing.T) {
 	tests := []struct {
 		testcase string
@@ -385,6 +368,7 @@ func TestFileGetTextBlocksGolangWithCommentAboveFunction(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileGetTextBlocksYamlWithoutLeadingThreeMinuses(t *testing.T) {
 	tests := []struct {
 		testcase string
@@ -413,6 +397,7 @@ func TestFileGetTextBlocksYamlWithoutLeadingThreeMinuses(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileGetTextBlocksYamlWithLeadingThreeMinuses(t *testing.T) {
 	tests := []struct {
 		testcase string
@@ -442,6 +427,7 @@ func TestFileGetTextBlocksYamlWithLeadingThreeMinuses(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileGetDeepCopy(t *testing.T) {
 	tests := []struct {
 		testcase string
@@ -479,6 +465,7 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileReplaceLineAfterLine(t *testing.T) {
 	tests := []struct {
 		input                     string
@@ -512,6 +499,7 @@ func TestFileReplaceLineAfterLine(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 // Test if GetPath always returns an absolute value which stays the same even if the current working directory is changed.
 func TestLocalFileGetPathReturnsAbsoluteValue(t *testing.T) {
 	tests := []struct {
@@ -568,6 +556,7 @@ func TestLocalFileGetPathReturnsAbsoluteValue(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileSortBlocksInFile(t *testing.T) {
 	type TestCase struct {
 		testDataDir string
@@ -606,6 +595,7 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileGetLastCharAsString(t *testing.T) {
 	tests := []struct {
 		content  string
@@ -639,6 +629,7 @@ func TestLocalFileGetLastCharAsString(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileGetAsFloat64(t *testing.T) {
 	tests := []struct {
 		content       string
@@ -671,6 +662,7 @@ func TestLocalFileGetAsFloat64(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileGetAsInt64(t *testing.T) {
 	tests := []struct {
 		content     string
@@ -703,6 +695,7 @@ func TestFileGetAsInt64(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileGetAsInt(t *testing.T) {
 	tests := []struct {
 		content     string
@@ -735,6 +728,7 @@ func TestFileGetAsInt(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileGetParentDirectoryPath(t *testing.T) {
 	tests := []struct {
 		inputPath          string
@@ -760,6 +754,7 @@ func TestFileGetParentDirectoryPath(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileIsPgpEncrypted_Case1_unencrypted(t *testing.T) {
 	tests := []struct {
 		unencrypted string
@@ -788,6 +783,7 @@ func TestFileIsPgpEncrypted_Case1_unencrypted(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileIsPgpEncrypted_Case2_encryptedBinary(t *testing.T) {
 	tests := []struct {
 		testcase string
@@ -827,6 +823,7 @@ func TestFileIsPgpEncrypted_Case2_encryptedBinary(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileIsPgpEncrypted_Case3_encryptedAsciiArmor(t *testing.T) {
 	tests := []struct {
 		testcase string
@@ -866,6 +863,7 @@ func TestFileIsPgpEncrypted_Case3_encryptedAsciiArmor(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileGetMimeTypeOfEmptyFile(t *testing.T) {
 	tests := []struct {
 		testcase string
@@ -892,6 +890,7 @@ func TestFileGetMimeTypeOfEmptyFile(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileGetCreationDateByFileName(t *testing.T) {
 	tests := []struct {
 		filename string
@@ -929,6 +928,7 @@ func TestFileGetCreationDateByFileName(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileHasYYYYmmdd_HHMMSSPrefix(t *testing.T) {
 	tests := []struct {
 		filename          string
@@ -960,6 +960,7 @@ func TestFileHasYYYYmmdd_HHMMSSPrefix(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileGetSizeBytes(t *testing.T) {
 	tests := []struct {
 		content      []byte
@@ -986,6 +987,7 @@ func TestFileGetSizeBytes(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileEnsureEndsWithLineBreakOnEmptyFile(t *testing.T) {
 	tests := []struct {
 		testcase string
@@ -1010,6 +1012,7 @@ func TestFileEnsureEndsWithLineBreakOnEmptyFile(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileEnsureEndsWithLineBreakOnNonExitistingFile(t *testing.T) {
 	tests := []struct {
 		testcase string
@@ -1038,6 +1041,7 @@ func TestFileEnsureEndsWithLineBreakOnNonExitistingFile(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileTrimSpacesAtBeginningOfFile(t *testing.T) {
 	tests := []struct {
 		input           string
@@ -1072,6 +1076,7 @@ func TestFileTrimSpacesAtBeginningOfFile(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestFileReplaceBetweenMarkers(t *testing.T) {
 	type TestCase struct {
 		testDataDir string
@@ -1140,6 +1145,7 @@ func TestFileReplaceBetweenMarkers(t *testing.T) {
 	}
 }
 
+// TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileGetNumberOfNonEmptyLines(t *testing.T) {
 	tests := []struct {
 		content               string

@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TODO move to File_test.go and run against all implementations.
 func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 	tests := []struct {
 		testContent string

@@ -38,9 +38,11 @@ type File interface {
 	MustGetUriAsString() (uri string)
 	MustReadAsBytes() (content []byte)
 	MustSecurelyDelete(verbose bool)
+	MustTruncate(newSizeBytes int64, verbose bool)
 	MustWriteBytes(toWrite []byte, verbose bool)
 	ReadAsBytes() (content []byte, err error)
 	SecurelyDelete(verbose bool) (err error)
+	Truncate(newSizeBytes int64, verbose bool) (err error)
 	WriteBytes(toWrite []byte, verbose bool) (err error)
 
 	// All methods below this line can be implemented by embedding the `FileBase` struct:

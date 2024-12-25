@@ -406,6 +406,20 @@ func (c *CommandExecutorFile) GetPath() (path string, err error) {
 	return path, nil
 }
 
+func (c *CommandExecutorFile) GetPathAndHostDescription() (path string, hostDescription string, err error) {
+	path, err = c.GetPath()
+	if err != nil {
+		return "", "", err
+	}
+
+	hostDescription, err = c.GetHostDescription()
+	if err != nil {
+		return "", "", err
+	}
+
+	return path, hostDescription, nil
+}
+
 func (c *CommandExecutorFile) GetSizeBytes() (fileSize int64, err error) {
 	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
 	if err != nil {
@@ -608,6 +622,15 @@ func (c *CommandExecutorFile) MustGetPath() (path string) {
 	return path
 }
 
+func (c *CommandExecutorFile) MustGetPathAndHostDescription() (path string, hostDescription string) {
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return path, hostDescription
+}
+
 func (c *CommandExecutorFile) MustGetSizeBytes() (fileSize int64) {
 	fileSize, err := c.GetSizeBytes()
 	if err != nil {
@@ -669,6 +692,13 @@ func (c *CommandExecutorFile) MustSetCommandExecutor(commandExecutor CommandExec
 
 func (c *CommandExecutorFile) MustSetFilePath(filePath string) {
 	err := c.SetFilePath(filePath)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (c *CommandExecutorFile) MustTruncate(newSizeBytes int64, verbose bool) {
+	err := c.Truncate(newSizeBytes, verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -783,6 +813,63 @@ func (c *CommandExecutorFile) SetFilePath(filePath string) (err error) {
 	}
 
 	c.filePath = filePath
+
+	return nil
+}
+
+func (c *CommandExecutorFile) Truncate(newSizeBytes int64, verbose bool) (err error) {
+	if newSizeBytes < 0 {
+		return TracedErrorf(
+			"Invalid size for truncating: newSizeBytes='%d'",
+			newSizeBytes,
+		)
+	}
+
+	currentSize, err := c.GetSizeBytes()
+	if err != nil {
+		return err
+	}
+
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if currentSize == newSizeBytes {
+		LogInfof(
+			"File '%s' on host '%s' is already of size '%d' bytes. Skip truncate.",
+			path,
+			hostDescription,
+			newSizeBytes,
+		)
+	} else {
+		commandExecutor, err := c.GetCommandExecutor()
+		if err != nil {
+			return err
+		}
+
+		_, err = commandExecutor.RunCommand(
+			&RunCommandOptions{
+				Command: []string{
+					"truncate",
+					fmt.Sprintf("-s%d", newSizeBytes),
+					path,
+				},
+				Verbose:            verbose,
+				LiveOutputOnStdout: verbose,
+			},
+		)
+		if err != nil {
+			return err
+		}
+
+		LogChangedf(
+			"File '%s' on host '%s' is truncated to '%d' bytes.",
+			path,
+			hostDescription,
+			newSizeBytes,
+		)
+	}
 
 	return nil
 }
