@@ -4,16 +4,23 @@ This module helps to write infrastructure and/or automation related microservice
 By providing a lot of convenience functions, sanity checks during runtime and detailed error messages it can be used to write easy to understand software to automate repeatable work.
 The focus is on ease of use and developer speed instead of algorithm speed and computer resource efficiency. 
 
-## Design choices
+## Design choices, principles and background information
 
-* Use `Set` and `Get` functions which allows to validate input and output on every access.
-* Short cuts and code hacks are not nice but still better than doing things by hand. They are at least a good starting point of what functionality is needed and can be improved over time.
+* Design choices:
+	* Function which return an error must not panic.
+	* Use `Set` and `Get` functions which allows to validate input and output on every access:
+		* Especially when using the provided functions to quickly automatize some stuff validating all inputs and outputs over and over again helps to avoid unwanted side effects.
+	* Provide `MustAbc` functions which call `Abc` but exit fatal if `Abc` is not sucessfull. This allows to write every line a new instruction what to do without dealing with errors which is useful for CLI's:
+		* For CLI's most of the time he only option in case of an error is to abort the execution.
+		* In case you want/ can handle the error on your own just use the `Abc` function directly and you get the error returned.
+	* Silent/ no log output by default but provide `verbose` boolean to most functions to change this behavior. Silent CLI's are easier to handle if glued together e.g. in Bash scripts.
+	* Short cuts and code hacks are not nice but still better than doing things by hand. They are at least a good starting point of what functionality is needed and can be improved over time.
 * Releasing:
 	* Release often: Every (small) improvement is an improvemnt and will be released as soon as possible.
 	* This repository will never reach v1: There will be always be breaking changes if needed to improve the code.
 * Readability:
 	* An end user of this repository should be able to write readable code.
-* Some background information:
+* Background information:
 	* Currently this is a one man show.
 	* It bases purely on some code I use for automating my homelab.
 

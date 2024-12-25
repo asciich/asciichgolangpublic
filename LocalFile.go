@@ -125,7 +125,11 @@ func (l *LocalFile) AppendBytes(toWrite []byte, verbose bool) (err error) {
 
 	fileToWrite, err := os.OpenFile(localPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		return TracedErrorf("Unable to open file to append: '%w'", err)
+		return TracedErrorf(
+			"Unable to open file '%s' to append: '%w'",
+			localPath,
+			err,
+		)
 	}
 	_, err = fileToWrite.Write(toWrite)
 	if err != nil {
@@ -526,6 +530,13 @@ func (l *LocalFile) MustSetPath(path string) {
 	}
 }
 
+func (l *LocalFile) MustTruncate(newSizeBytes int64, verbose bool) {
+	err := l.Truncate(newSizeBytes, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (l *LocalFile) MustWriteBytes(toWrite []byte, verbose bool) {
 	err := l.WriteBytes(toWrite, verbose)
 	if err != nil {
@@ -621,6 +632,59 @@ func (l *LocalFile) SetPath(path string) (err error) {
 	}
 
 	l.path = path
+
+	return nil
+}
+
+func (l *LocalFile) Truncate(newSizeBytes int64, verbose bool) (err error) {
+	if newSizeBytes < 0 {
+		return TracedErrorf("Invalid newSizeBytes='%d'", newSizeBytes)
+	}
+
+	localPath, err := l.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	currentSize, err := l.GetSizeBytes()
+	if err != nil {
+		return err
+	}
+
+	if currentSize == newSizeBytes {
+		LogInfof(
+			"Local file '%s' is already of size '%d' bytes. Skip truncate.",
+			localPath,
+			newSizeBytes,
+		)
+	} else {
+		fileToTruncate, err := os.OpenFile(localPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			return TracedErrorf(
+				"Unable to open file '%s' to truncate: '%w'",
+				localPath,
+				err,
+			)
+		}
+		defer fileToTruncate.Close()
+
+		err = fileToTruncate.Truncate(newSizeBytes)
+		if err != nil {
+			return TracedErrorf(
+				"Unable to truncate file '%s': '%w'",
+				localPath,
+				err,
+			)
+		}
+
+		if verbose {
+			LogChangedf(
+				"Truncated local file '%s' to new size '%d'.",
+				localPath,
+				newSizeBytes,
+			)
+		}
+	}
 
 	return nil
 }
