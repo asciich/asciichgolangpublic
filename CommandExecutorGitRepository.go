@@ -288,6 +288,14 @@ func (c *CommandExecutorGitRepository) CommitHasParentCommitByCommitHash(hash st
 	return false, TracedErrorNotImplemented()
 }
 
+func (c *CommandExecutorGitRepository) FileByPathExists(path string, verbose bool) (exists bool, err error) {
+	if path == "" {
+		return false, TracedErrorEmptyString(path)
+	}
+
+	return c.FileInDirectoryExists(verbose, path)
+}
+
 func (c *CommandExecutorGitRepository) GetAuthorEmailByCommitHash(hash string) (authorEmail string, err error) {
 	return "", TracedErrorNotImplemented()
 }
@@ -920,6 +928,15 @@ func (c *CommandExecutorGitRepository) MustCommitHasParentCommitByCommitHash(has
 	}
 
 	return hasParentCommit
+}
+
+func (c *CommandExecutorGitRepository) MustFileByPathExists(path string, verbose bool) (exists bool) {
+	exists, err := c.FileByPathExists(path, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return exists
 }
 
 func (c *CommandExecutorGitRepository) MustGetAsLocalDirectory() (l *LocalDirectory) {

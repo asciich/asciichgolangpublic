@@ -556,3 +556,33 @@ func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 		)
 	}
 }
+
+func TestGitRepository_FileByPathExists(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				repo := getGitRepositoryToTest(tt.implementationName)
+				defer repo.Delete(verbose)
+
+				assert.False(repo.MustHasUncommittedChanges(verbose))
+
+				assert.False(repo.MustFileByPathExists("hello.txt", verbose))
+
+				repo.MustCreateFileInDirectory(verbose, "hello.txt")
+				assert.True(repo.MustFileByPathExists("hello.txt", verbose))
+			},
+		)
+	}
+}

@@ -322,6 +322,14 @@ func (l *LocalGitRepository) CommitHasParentCommitByCommitHash(hash string) (has
 	return hasParentCommit, nil
 }
 
+func (l *LocalGitRepository) FileByPathExists(path string, verbose bool) (exists bool, err error) {
+	if path == "" {
+		return false, TracedErrorEmptyString(path)
+	}
+
+	return l.FileInDirectoryExists(verbose, path)
+}
+
 func (l *LocalGitRepository) GetAsGoGitRepository() (goGitRepository *git.Repository, err error) {
 	repoPath, err := l.GetLocalPath()
 	if err != nil {
@@ -1056,6 +1064,15 @@ func (l *LocalGitRepository) MustCommitHasParentCommitByCommitHash(hash string) 
 	}
 
 	return hasParentCommit
+}
+
+func (l *LocalGitRepository) MustFileByPathExists(path string, verbose bool) (exists bool) {
+	exists, err := l.FileByPathExists(path, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return exists
 }
 
 func (l *LocalGitRepository) MustGetAsGoGitRepository() (goGitRepository *git.Repository) {
