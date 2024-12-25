@@ -243,7 +243,7 @@ func (l *LocalFile) Create(verbose bool) (err error) {
 		}
 
 		if verbose {
-			LogInfof("Local file '%s' created", path)
+			LogChangedf("Local file '%s' created", path)
 		}
 	}
 
