@@ -45,6 +45,7 @@ type GitRepository interface {
 	// Returns true if pointing to an existing git repository, false otherwise
 	IsGitRepository(verbose bool) (isRepository bool, err error)
 	IsInitialized(verbose bool) (isInitialited bool, err error)
+	ListFiles(listFileOptions *ListFileOptions) (files []File, err error)
 
 	MustAddFileByPath(pathToAdd string, verbose bool)
 	MustCloneRepository(repository GitRepository, verbose bool)
@@ -79,6 +80,7 @@ type GitRepository interface {
 	MustIsBareRepository(verbose bool) (isBareRepository bool)
 	MustIsGitRepository(verbose bool) (isRepository bool)
 	MustIsInitialized(verbose bool) (isInitialited bool)
+	MustListFiles(listFileOptions *ListFileOptions) (files []File)
 	MustPull(verbose bool)
 	MustPush(verbose bool)
 	MustSetGitConfig(options *GitConfigSetOptions)

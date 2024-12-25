@@ -586,3 +586,54 @@ func TestGitRepository_FileByPathExists(t *testing.T) {
 		)
 	}
 }
+
+
+func TestGitRepository_ListFiles(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				repo := getGitRepositoryToTest(tt.implementationName)
+				defer repo.Delete(verbose)
+
+				assert.False(repo.MustHasUncommittedChanges(verbose))
+
+				repo.MustCreateFileInDirectory(verbose, "a.txt")
+				repo.MustCreateFileInDirectory(verbose, "b.txt")
+				repo.MustCreateFileInDirectory(verbose, "c.txt")
+				repo.MustCreateFileInDirectory(verbose, "cb.txt")
+			
+				files := repo.MustListFiles(
+					&ListFileOptions{
+						MatchBasenamePattern: []string{"^b\\.txt$"},
+						Verbose: verbose,
+					},
+				)
+				assert.Len(files, 1)
+				assert.EqualValues(
+					"b.txt",
+					files[0].MustGetBaseName(),
+				)
+
+				files = repo.MustListFiles(
+					&ListFileOptions{
+						MatchBasenamePattern: []string{"^.*b\\.txt$"},
+						Verbose: verbose,
+					},
+				)
+				assert.Len(files, 2)
+			},
+		)
+	}
+}
