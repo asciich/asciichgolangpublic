@@ -94,6 +94,20 @@ func (f *FileBase) CheckIsLocalFile(verbose bool) (err error) {
 	return nil
 }
 
+func (f *FileBase) ContainsLine(line string) (containsLine bool, err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	content, err := parent.ReadAsString()
+	if err != nil {
+		return false, err
+	}
+
+	return Strings().ContainsLine(content, line), nil
+}
+
 func (f *FileBase) CreateParentDirectory(verbose bool) (err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
@@ -557,6 +571,15 @@ func (f *FileBase) MustCheckIsLocalFile(verbose bool) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (f *FileBase) MustContainsLine(line string) (containsLine bool) {
+	containsLine, err := f.ContainsLine(line)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return containsLine
 }
 
 func (f *FileBase) MustCreateParentDirectory(verbose bool) {

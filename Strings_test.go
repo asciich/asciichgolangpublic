@@ -700,3 +700,37 @@ func TestStrings_RemoveLinesWithPrefix(t *testing.T) {
 		)
 	}
 }
+
+func TestStrings_ContainsLine(t *testing.T) {
+	tests := []struct {
+		input            string
+		line             string
+		expectedContains bool
+	}{
+		{"", "", false},
+		{"a\nb", "", false},
+		{"a\n\nb", "", true},
+		{"a\nb\nc", "a", true},
+		{"a\nb\nc", "b", true},
+		{"a\nb\nc", "c", true},
+		{"a\nb\nc", "bc", false},
+		{"a\nhello world\nc", "hello world", true},
+		{"a\nhello world\nc", "hello world ", false},
+		{"a\nhello world\nc", " hello world ", false},
+		{"a\nhello world\nc", "hello", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(
+					tt.expectedContains,
+					Strings().ContainsLine(tt.input, tt.line),
+				)
+			},
+		)
+	}
+}
