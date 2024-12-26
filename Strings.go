@@ -16,6 +16,17 @@ func Strings() (stringsService *StringsService) {
 	return new(StringsService)
 }
 
+func (s *StringsService) ContainsLine(input string, line string) (containsLine bool) {
+	if input == "" {
+		return false
+	}
+
+	return Slices().ContainsString(
+		s.SplitLines(input, false),
+		line,
+	)
+}
+
 func (s *StringsService) TrimAllLeadingNewLines(input string) (output string) {
 	return s.TrimAllPrefix(input, "\n")
 }

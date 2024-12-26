@@ -47,8 +47,9 @@ type File interface {
 
 	// All methods below this line can be implemented by embedding the `FileBase` struct:
 	AppendLine(line string, verbose bool) (err error)
-	CreateParentDirectory(verbose bool) (err error)
 	CheckIsLocalFile(verbose bool) (err error)
+	ContainsLine(line string) (containsLine bool, err error)
+	CreateParentDirectory(verbose bool) (err error)
 	EnsureLineInFile(line string, verbose bool) (err error)
 	EnsureEndsWithLineBreak(verbose bool) (err error)
 	GetCreationDateByFileName(verbose bool) (creationDate *time.Time, err error)
@@ -67,6 +68,7 @@ type File interface {
 	IsYYYYmmdd_HHMMSSPrefix() (hasDatePrefix bool, err error)
 	MustAppendLine(line string, verbose bool)
 	MustCheckIsLocalFile(verbose bool)
+	MustContainsLine(line string) (containsLine bool)
 	MustCreateParentDirectory(verbose bool)
 	MustEnsureEndsWithLineBreak(verbose bool)
 	MustEnsureLineInFile(line string, verbose bool)

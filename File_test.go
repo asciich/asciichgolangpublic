@@ -85,9 +85,7 @@ func TestFile_Exists(t *testing.T) {
 	}
 }
 
-
 func TestFile_Truncate(t *testing.T) {
-
 	tests := []struct {
 		implementationName string
 	}{
@@ -106,7 +104,7 @@ func TestFile_Truncate(t *testing.T) {
 				fileToTest := getFileToTest(tt.implementationName)
 				defer fileToTest.Delete(verbose)
 
-				for i := 0 ; i < 10; i++ {
+				for i := 0; i < 10; i++ {
 					fileToTest.MustTruncate(int64(i), verbose)
 					assert.EqualValues(
 						fileToTest.MustGetSizeBytes(),
@@ -119,6 +117,45 @@ func TestFile_Truncate(t *testing.T) {
 				assert.EqualValues(
 					fileToTest.MustGetSizeBytes(),
 					0,
+				)
+			},
+		)
+	}
+}
+
+func TestFile_ContainsLine(t *testing.T) {
+	tests := []struct {
+		implementationName string
+		line               string
+		expectedContains   bool
+	}{
+		{"localFile", "hello", false},
+		{"localFile", "hello world", true},
+		{"localCommandExecutorFile", "hello", false},
+		{"localCommandExecutorFile", "hello world", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				fileToTest := getFileToTest(tt.implementationName)
+				defer fileToTest.Delete(verbose)
+
+				fileToTest.MustWriteString(
+					"this is a\nhello world\nexample text.\n",
+					verbose,
+				)
+
+				assert.EqualValues(
+					tt.expectedContains,
+					fileToTest.MustContainsLine(
+						tt.line,
+					),
 				)
 			},
 		)
