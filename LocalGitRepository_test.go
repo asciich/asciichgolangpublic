@@ -6,10 +6,41 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TODO move to GitRepository_test.go and run for all implementations
+func TestGetCurrentCommitGoGitHash(t *testing.T) {
+	tests := []struct {
+		bareRepository bool
+	}{
+		{false},
+	}
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
 
+				const verbose bool = true
 
-// TODO move to GitRepository_test.go and run for all implementations
+				repo := TemporaryDirectories().MustCreateEmptyTemporaryGitRepository(
+					&CreateRepositoryOptions{
+						Verbose:                     verbose,
+						BareRepository:              tt.bareRepository,
+						InitializeWithEmptyCommit:   true,
+						InitializeWithDefaultAuthor: true,
+					})
+				defer repo.Delete(verbose)
+
+				localGitRepo, ok := repo.(*LocalGitRepository)
+				assert.True(ok)
+
+				assert.EqualValues(
+					repo.MustGetCurrentCommitHash(),
+					localGitRepo.MustGetCurrentCommitGoGitHash().String(),
+				)
+			},
+		)
+	}
+}
+
 // TODO move to GitRepository_test.go and run for all implementations
 func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 	tests := []struct {

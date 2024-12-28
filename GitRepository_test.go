@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -80,7 +81,6 @@ func TestGitRepository_Init_minimal(t *testing.T) {
 	}
 }
 
-
 func TestGitRepository_IsGitRepository(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -126,7 +126,6 @@ func TestGitRepository_IsGitRepository(t *testing.T) {
 		)
 	}
 }
-
 
 func TestGitRepository_Init(t *testing.T) {
 	tests := []struct {
@@ -587,7 +586,6 @@ func TestGitRepository_FileByPathExists(t *testing.T) {
 	}
 }
 
-
 func TestGitRepository_ListFiles(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -613,11 +611,11 @@ func TestGitRepository_ListFiles(t *testing.T) {
 				repo.MustCreateFileInDirectory(verbose, "b.txt")
 				repo.MustCreateFileInDirectory(verbose, "c.txt")
 				repo.MustCreateFileInDirectory(verbose, "cb.txt")
-			
+
 				files := repo.MustListFiles(
 					&ListFileOptions{
 						MatchBasenamePattern: []string{"^b\\.txt$"},
-						Verbose: verbose,
+						Verbose:              verbose,
 					},
 				)
 				assert.Len(files, 1)
@@ -629,10 +627,62 @@ func TestGitRepository_ListFiles(t *testing.T) {
 				files = repo.MustListFiles(
 					&ListFileOptions{
 						MatchBasenamePattern: []string{"^.*b\\.txt$"},
-						Verbose: verbose,
+						Verbose:              verbose,
 					},
 				)
 				assert.Len(files, 2)
+			},
+		)
+	}
+}
+
+func TestGitRepositoryCreateTag(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				gitRepo.MustCommit(
+					&GitCommitOptions{
+						Message:    "initial empty commit",
+						AllowEmpty: true,
+						Verbose:    verbose,
+					},
+				)
+
+				tagList := gitRepo.MustListTagNames(verbose)
+				assert.Len(tagList, 0)
+
+				expectedTags := []string{}
+				for i := 0; i < 5; i++ {
+
+					tagNameToAdd := "ExampleTag" + strconv.Itoa(i)
+
+					gitRepo.MustCreateTag(
+						&GitRepositoryCreateTagOptions{
+							TagName: tagNameToAdd,
+							Verbose: verbose,
+						},
+					)
+					expectedTags = append(expectedTags, tagNameToAdd)
+
+					tagList := gitRepo.MustListTagNames(verbose)
+
+					assert.EqualValues(expectedTags, tagList)
+				}
 			},
 		)
 	}

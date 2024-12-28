@@ -156,6 +156,24 @@ func (s *SlicesService) ByteSlicesEqual(input1 []byte, input2 []byte) (slicesEqu
 	return true
 }
 
+func (s *SlicesService) ContainsAllStrings(input []string, toCheck []string) (containsAllStrings bool) {
+	if len(input) <= 0 {
+		return false
+	}
+
+	if len(toCheck) <= 0 {
+		return false
+	}
+
+	for _, c := range toCheck {
+		if !s.ContainsString(input, c) {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (s *SlicesService) ContainsEmptyString(input []string) (containsEmptyString bool) {
 	for _, i := range input {
 		if i == "" {
@@ -391,6 +409,25 @@ func (s *SlicesService) RemoveEmptyStrings(sliceOfStrings []string) (sliceOfStri
 	return sliceOfStringsWithoutEmptyStrings
 }
 
+func (s *SlicesService) RemoveEmptyStringsAtEnd(input []string) (withoutEmptyStringsAtEnd []string) {
+	if len(input) <= 0 {
+		return []string{}
+	}
+
+	lastIndex := len(input) - 1
+	for i := len(input) - 1; i >= 0; i-- {
+		if input[i] == "" {
+			lastIndex = i
+		} else {
+			break
+		}
+	}
+
+	withoutEmptyStringsAtEnd = input[:lastIndex]
+
+	return withoutEmptyStringsAtEnd
+}
+
 func (s *SlicesService) RemoveMatchingStrings(sliceToRemoveMatching []string, matchingStringToRemove string) (cleanedUpSlice []string) {
 	if len(sliceToRemoveMatching) <= 0 {
 		return []string{}
@@ -468,6 +505,15 @@ func (s *SlicesService) SortStringSlice(sliceOfStrings []string) (sorted []strin
 	return sorted
 }
 
+func (s *SlicesService) SortStringSliceAndRemoveDuplicates(input []string) (output []string) {
+	if len(input) <= 0 {
+		return []string{}
+	}
+
+	sorted := s.SortStringSlice(input)
+	return s.RemoveDuplicatedStrings(sorted)
+}
+
 func (s *SlicesService) SortStringSliceAndRemoveEmpty(input []string) (sortedAndWithoutEmptyStrings []string) {
 	if len(input) <= 0 {
 		return []string{}
@@ -543,50 +589,4 @@ func (s *SlicesService) TrimSpace(toTrim []string) (trimmed []string) {
 	}
 
 	return trimmed
-}
-
-func (s *SlicesService) RemoveEmptyStringsAtEnd(input []string) (withoutEmptyStringsAtEnd []string) {
-	if len(input) <= 0 {
-		return []string{}
-	}
-
-	lastIndex := len(input) - 1
-	for i := len(input) - 1; i >= 0; i-- {
-		if input[i] == "" {
-			lastIndex = i
-		} else {
-			break
-		}
-	}
-
-	withoutEmptyStringsAtEnd = input[:lastIndex]
-
-	return withoutEmptyStringsAtEnd
-}
-
-func (s *SlicesService) SortStringSliceAndRemoveDuplicates(input []string) (output []string) {
-	if len(input) <= 0 {
-		return []string{}
-	}
-
-	sorted := s.SortStringSlice(input)
-	return s.RemoveDuplicatedStrings(sorted)
-}
-
-func (s *SlicesService) ContainsAllStrings(input []string, toCheck []string) bool {
-	if len(input) <= 0 {
-		return false
-	}
-
-	if len(toCheck) <= 0 {
-		return false
-	}
-
-	for _, c := range toCheck {
-		if !s.ContainsString(input, c) {
-			return false
-		}
-	}
-
-	return true
 }
