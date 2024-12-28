@@ -701,6 +701,51 @@ func TestStrings_RemoveLinesWithPrefix(t *testing.T) {
 	}
 }
 
+func TestStrings_HexStringToBytes(t *testing.T) {
+	tests := []struct {
+		hexString string
+		hexBytes  []byte
+	}{
+		{"", []byte{}},
+		{"0", []byte{0}},
+		{"00", []byte{0}},
+		{"0x00", []byte{0}},
+		{"0X00", []byte{0}},
+		{"1", []byte{1}},
+		{"01", []byte{1}},
+		{"0x01", []byte{1}},
+		{"0X01", []byte{1}},
+		{"a", []byte{10}},
+		{"0a", []byte{10}},
+		{"0x0a", []byte{10}},
+		{"0X0a", []byte{10}},
+		{"A", []byte{10}},
+		{"0A", []byte{10}},
+		{"0x0A", []byte{10}},
+		{"0X0A", []byte{10}},
+		{"0a00", []byte{10, 0}},
+		{"0x0a00", []byte{10, 0}},
+		{"0X0a00", []byte{10, 0}},
+		{"0A00", []byte{10, 0}},
+		{"0x0A00", []byte{10, 0}},
+		{"0X0A00", []byte{10, 0}},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(
+					tt.hexBytes,
+					Strings().MustHexStringToBytes(tt.hexString),
+				)
+			},
+		)
+	}
+}
+
 func TestStrings_ContainsLine(t *testing.T) {
 	tests := []struct {
 		input            string

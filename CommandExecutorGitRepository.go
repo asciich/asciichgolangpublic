@@ -288,6 +288,51 @@ func (c *CommandExecutorGitRepository) CommitHasParentCommitByCommitHash(hash st
 	return false, TracedErrorNotImplemented()
 }
 
+func (c *CommandExecutorGitRepository) CreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
+	if options == nil {
+		return nil, TracedErrorNil("options")
+	}
+
+	tagName, err := options.GetTagName()
+	if err != nil {
+		return nil, err
+	}
+
+	tagMessage := tagName
+	if options.IsTagCommentSet() {
+		tagMessage, err = options.GetTagComment()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	_, err = c.RunGitCommand(
+		[]string{"tag", "-a", tagName, "-m", tagMessage},
+		options.Verbose,
+	)
+
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return nil, err
+	}
+
+	createdTag, err = c.GetTagByName(tagName)
+	if err != nil {
+		return nil, err
+	}
+
+	if options.Verbose {
+		LogChangedf(
+			"Created tag '%s' in git repository '%s' on host '%s'.",
+			tagName,
+			path,
+			hostDescription,
+		)
+	}
+
+	return createdTag, nil
+}
+
 func (c *CommandExecutorGitRepository) FileByPathExists(path string, verbose bool) (exists bool, err error) {
 	if path == "" {
 		return false, TracedErrorEmptyString(path)
@@ -469,6 +514,31 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootD
 	}
 
 	return rootDirectoryPath, nil
+}
+
+func (c *CommandExecutorGitRepository) GetTagByName(name string) (tag GitTag, err error) {
+	if name == "" {
+		return nil, TracedErrorEmptyString("name")
+	}
+
+	toReturn := NewGitRepositoryTag()
+
+	err = toReturn.SetName(name)
+	if err != nil {
+		return nil, err
+	}
+
+	err = toReturn.SetName(name)
+	if err != nil {
+		return nil, err
+	}
+
+	err = toReturn.SetGitRepository(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return toReturn, nil
 }
 
 func (c *CommandExecutorGitRepository) HasInitialCommit(verbose bool) (hasInitialCommit bool, err error) {
@@ -891,6 +961,13 @@ func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialite
 	return isInitialited, nil
 }
 
+func (c *CommandExecutorGitRepository) ListTagNames(verbose bool) (tagNames []string, err error) {
+	return c.RunGitCommandAndGetStdoutAsLines(
+		[]string{"tag"},
+		false, // Do not clutter output by pritning all tags.
+	)
+}
+
 func (c *CommandExecutorGitRepository) MustAddFileByPath(pathToAdd string, verbose bool) {
 	err := c.AddFileByPath(pathToAdd, verbose)
 	if err != nil {
@@ -928,6 +1005,15 @@ func (c *CommandExecutorGitRepository) MustCommitHasParentCommitByCommitHash(has
 	}
 
 	return hasParentCommit
+}
+
+func (c *CommandExecutorGitRepository) MustCreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag) {
+	createdTag, err := c.CreateTag(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdTag
 }
 
 func (c *CommandExecutorGitRepository) MustFileByPathExists(path string, verbose bool) (exists bool) {
@@ -1074,6 +1160,15 @@ func (c *CommandExecutorGitRepository) MustGetRootDirectoryPath(verbose bool) (r
 	return rootDirectoryPath
 }
 
+func (c *CommandExecutorGitRepository) MustGetTagByName(name string) (tag GitTag) {
+	tag, err := c.GetTagByName(name)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return tag
+}
+
 func (c *CommandExecutorGitRepository) MustHasInitialCommit(verbose bool) (hasInitialCommit bool) {
 	hasInitialCommit, err := c.HasInitialCommit(verbose)
 	if err != nil {
@@ -1126,6 +1221,15 @@ func (c *CommandExecutorGitRepository) MustIsInitialized(verbose bool) (isInitia
 	return isInitialited
 }
 
+func (c *CommandExecutorGitRepository) MustListTagNames(verbose bool) (tagNames []string) {
+	tagNames, err := c.ListTagNames(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return tagNames
+}
+
 func (c *CommandExecutorGitRepository) MustPull(verbose bool) {
 	err := c.Pull(verbose)
 	if err != nil {
@@ -1147,6 +1251,15 @@ func (c *CommandExecutorGitRepository) MustRunGitCommand(gitCommand []string, ve
 	}
 
 	return commandOutput
+}
+
+func (c *CommandExecutorGitRepository) MustRunGitCommandAndGetStdoutAsLines(command []string, verbose bool) (lines []string) {
+	lines, err := c.RunGitCommandAndGetStdoutAsLines(command, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return lines
 }
 
 func (c *CommandExecutorGitRepository) MustRunGitCommandAndGetStdoutAsString(command []string, verbose bool) (stdout string) {
@@ -1276,6 +1389,24 @@ func (c *CommandExecutorGitRepository) RunGitCommand(gitCommand []string, verbos
 			LiveOutputOnStdout: verbose,
 		},
 	)
+}
+
+func (c *CommandExecutorGitRepository) RunGitCommandAndGetStdoutAsLines(command []string, verbose bool) (lines []string, err error) {
+	if command == nil {
+		return nil, TracedErrorNil("command")
+	}
+
+	output, err := c.RunGitCommand(command, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	lines, err = output.GetStdoutAsLines(true)
+	if err != nil {
+		return nil, err
+	}
+
+	return lines, nil
 }
 
 func (c *CommandExecutorGitRepository) RunGitCommandAndGetStdoutAsString(command []string, verbose bool) (stdout string, err error) {

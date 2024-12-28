@@ -2,7 +2,6 @@ package asciichgolangpublic
 
 import (
 	"strings"
-
 )
 
 type SSHPublicKeysService struct{}

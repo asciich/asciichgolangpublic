@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"encoding/hex"
 	"regexp"
 	"strings"
 	"unicode"
@@ -14,37 +15,6 @@ func NewStringsService() (s *StringsService) {
 
 func Strings() (stringsService *StringsService) {
 	return new(StringsService)
-}
-
-func (s *StringsService) ContainsLine(input string, line string) (containsLine bool) {
-	if input == "" {
-		return false
-	}
-
-	return Slices().ContainsString(
-		s.SplitLines(input, false),
-		line,
-	)
-}
-
-func (s *StringsService) TrimAllLeadingNewLines(input string) (output string) {
-	return s.TrimAllPrefix(input, "\n")
-}
-
-func (s *StringsService) TrimAllTailingNewLines(input string) (output string) {
-	return s.TrimAllSuffix(input, "\n")
-}
-
-func (s *StringsService) TrimAllLeadingAndTailingNewLines(input string) (output string) {
-	output = s.TrimAllLeadingNewLines(input)
-	output = s.TrimAllTailingNewLines(output)
-	return output
-}
-
-func (s *StringsService) TrimPrefixAndSuffix(input string, prefix string, suffix string) (output string) {
-	output = strings.TrimPrefix(input, prefix)
-	output = strings.TrimSuffix(output, suffix)
-	return output
 }
 
 func (s *StringsService) ContainsAtLeastOneSubstring(input string, substrings []string) (atLeastOneSubstringFound bool) {
@@ -77,6 +47,17 @@ func (s *StringsService) ContainsIgnoreCase(input string, substring string) (con
 	return strings.Contains(
 		strings.ToLower(input),
 		strings.ToLower(substring),
+	)
+}
+
+func (s *StringsService) ContainsLine(input string, line string) (containsLine bool) {
+	if input == "" {
+		return false
+	}
+
+	return Slices().ContainsString(
+		s.SplitLines(input, false),
+		line,
 	)
 }
 
@@ -246,6 +227,29 @@ func (s *StringsService) HasPrefixIgnoreCase(input string, prefix string) (hasPr
 	return strings.HasPrefix(inputLower, prefixLower)
 }
 
+func (s *StringsService) HexStringToBytes(hexString string) (output []byte, err error) {
+	if hexString == "" {
+		return []byte{}, nil
+	}
+
+	hexStringToParse := strings.TrimPrefix(hexString, "0x")
+	hexStringToParse = strings.TrimPrefix(hexStringToParse, "0X")
+
+	if len(hexString) == 1 {
+		hexStringToParse = "0" + hexStringToParse
+	}
+
+	output, err = hex.DecodeString(hexStringToParse)
+	if err != nil {
+		return nil, TracedErrorf(
+			"Unable to convert hexString to bytes: %w",
+			err,
+		)
+	}
+
+	return output, nil
+}
+
 func (s *StringsService) IsComment(input string) (isComment bool) {
 	if input == "" {
 		return false
@@ -305,6 +309,15 @@ func (s *StringsService) MatchesRegex(input string, regex string) (matches bool,
 	return matches, nil
 }
 
+func (s *StringsService) MustHexStringToBytes(hexString string) (output []byte) {
+	output, err := s.HexStringToBytes(hexString)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return output
+}
+
 func (s *StringsService) MustMatchesRegex(input string, regex string) (matches bool) {
 	matches, err := s.MatchesRegex(input, regex)
 	if err != nil {
@@ -312,23 +325,6 @@ func (s *StringsService) MustMatchesRegex(input string, regex string) (matches b
 	}
 
 	return matches
-}
-
-func (s *StringsService) RemoveLinesWithPrefix(input string, prefixToRemove string) (output string) {
-	lines := s.SplitLines(input, false)
-
-	outputLines := []string{}
-	for _, l := range lines {
-		if strings.HasPrefix(l, prefixToRemove) {
-			continue
-		}
-
-		outputLines = append(outputLines, l)
-	}
-
-	output = strings.Join(outputLines, "\n")
-
-	return output
 }
 
 func (s *StringsService) RemoveCommentMarkers(input string) (commentContent string) {
@@ -392,6 +388,23 @@ func (s *StringsService) RemoveComments(input string) (contentWithoutComments st
 func (s *StringsService) RemoveCommentsAndTrimSpace(input string) (output string) {
 	output = s.RemoveComments(input)
 	output = strings.TrimSpace(output)
+	return output
+}
+
+func (s *StringsService) RemoveLinesWithPrefix(input string, prefixToRemove string) (output string) {
+	lines := s.SplitLines(input, false)
+
+	outputLines := []string{}
+	for _, l := range lines {
+		if strings.HasPrefix(l, prefixToRemove) {
+			continue
+		}
+
+		outputLines = append(outputLines, l)
+	}
+
+	output = strings.Join(outputLines, "\n")
+
 	return output
 }
 
@@ -526,6 +539,16 @@ func (s *StringsService) ToSnakeCase(input string) (snakeCase string) {
 	return snakeCase
 }
 
+func (s *StringsService) TrimAllLeadingAndTailingNewLines(input string) (output string) {
+	output = s.TrimAllLeadingNewLines(input)
+	output = s.TrimAllTailingNewLines(output)
+	return output
+}
+
+func (s *StringsService) TrimAllLeadingNewLines(input string) (output string) {
+	return s.TrimAllPrefix(input, "\n")
+}
+
 func (s *StringsService) TrimAllPrefix(stringToCheck string, prefixToRemove string) (trimmedString string) {
 	if len(stringToCheck) <= 0 {
 		return ""
@@ -558,6 +581,16 @@ func (s *StringsService) TrimAllSuffix(stringToCheck string, suffixToRemove stri
 	}
 
 	return trimmedString
+}
+
+func (s *StringsService) TrimAllTailingNewLines(input string) (output string) {
+	return s.TrimAllSuffix(input, "\n")
+}
+
+func (s *StringsService) TrimPrefixAndSuffix(input string, prefix string, suffix string) (output string) {
+	output = strings.TrimPrefix(input, prefix)
+	output = strings.TrimSuffix(output, suffix)
+	return output
 }
 
 func (s *StringsService) TrimPrefixIgnoreCase(input string, prefix string) (trimmed string) {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/go-git/go-git/v5"
@@ -301,7 +302,12 @@ func (l *LocalGitRepository) Commit(commitOptions *GitCommitOptions) (createdCom
 	}
 
 	if commitOptions.Verbose {
-		LogChangedf("Created commit '%s' in git repository '%s'.", commitMessage, path)
+		LogChangedf(
+			"Created commit '%s' with hash '%s' in git repository '%s'.",
+			commitMessage,
+			hash.String(),
+			path,
+		)
 	}
 
 	return createdCommit, nil
@@ -320,6 +326,81 @@ func (l *LocalGitRepository) CommitHasParentCommitByCommitHash(hash string) (has
 	hasParentCommit = goGitCommit.NumParents() > 0
 
 	return hasParentCommit, nil
+}
+
+func (l *LocalGitRepository) CreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
+	if options == nil {
+		return nil, TracedErrorNil("options")
+	}
+
+	tagName, err := options.GetTagName()
+	if err != nil {
+		return nil, err
+	}
+
+	goRepo, err := l.GetAsGoGitRepository()
+	if err != nil {
+		return nil, err
+	}
+
+	currentHash, err := l.GetCurrentCommitGoGitHash()
+	if err != nil {
+		return nil, err
+	}
+
+	path, err := l.GetPath()
+	if err != nil {
+		return nil, err
+	}
+
+	createTagOptions := &git.CreateTagOptions{}
+
+	if options.IsTagCommentSet() {
+		tagComment, err := options.GetTagComment()
+		if err != nil {
+			return nil, err
+		}
+		createTagOptions.Message = tagComment
+	} else {
+		createTagOptions.Message = tagName
+	}
+
+	if options.Verbose {
+		LogInfof(
+			"Going to create tag '%s' on commit '%s' in local git repository '%s'.",
+			tagName,
+			currentHash.String(),
+			path,
+		)
+	}
+
+	_, err = goRepo.CreateTag(
+		tagName,
+		*currentHash,
+		createTagOptions,
+	)
+	if err != nil {
+		return nil, TracedErrorf(
+			"Creating tag failed: %w",
+			err,
+		)
+	}
+
+	if options.Verbose {
+
+		LogChangedf(
+			"Created tag '%s' in local git repository '%s'.",
+			tagName,
+			path,
+		)
+	}
+
+	createdTag, err = l.GetTagByName(tagName)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdTag, nil
 }
 
 func (l *LocalGitRepository) FileByPathExists(path string, verbose bool) (exists bool, err error) {
@@ -598,6 +679,17 @@ func (l *LocalGitRepository) GetCurrentCommit() (gitCommit *GitCommit, err error
 	return gitCommit, nil
 }
 
+func (l *LocalGitRepository) GetCurrentCommitGoGitHash() (hash *plumbing.Hash, err error) {
+	currentHashBytes, err := l.GetCurrentCommitHashAsBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	hashValue := plumbing.Hash(currentHashBytes)
+
+	return &hashValue, nil
+}
+
 func (l *LocalGitRepository) GetCurrentCommitHash() (commitHash string, err error) {
 	commit, err := l.GetCurrentCommit()
 	if err != nil {
@@ -610,6 +702,15 @@ func (l *LocalGitRepository) GetCurrentCommitHash() (commitHash string, err erro
 	}
 
 	return commitHash, nil
+}
+
+func (l *LocalGitRepository) GetCurrentCommitHashAsBytes() (hash []byte, err error) {
+	currentHash, err := l.GetCurrentCommitHash()
+	if err != nil {
+		return nil, err
+	}
+
+	return Strings().HexStringToBytes(currentHash)
 }
 
 func (l *LocalGitRepository) GetGitStatusOutput(verbose bool) (output string, err error) {
@@ -771,6 +872,26 @@ func (l *LocalGitRepository) GetRootDirectoryPath(verbose bool) (rootDirectoryPa
 
 		pathToCheck = filepath.Dir(pathToCheck)
 	}
+}
+
+func (l *LocalGitRepository) GetTagByName(tagName string) (tag GitTag, err error) {
+	if tagName == "" {
+		return nil, TracedErrorEmptyString("tagName")
+	}
+
+	tagToReturn := NewGitRepositoryTag()
+
+	err = tagToReturn.SetName(tagName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = tagToReturn.SetGitRepository(l)
+	if err != nil {
+		return nil, err
+	}
+
+	return tagToReturn, nil
 }
 
 func (l *LocalGitRepository) GitlabCiYamlFileExists(verbose bool) (gitlabCiYamlFileExists bool, err error) {
@@ -1027,6 +1148,45 @@ func (l *LocalGitRepository) IsInitialized(verbose bool) (isInitialized bool, er
 	return isInitialized, nil
 }
 
+func (l *LocalGitRepository) ListTagNames(verbose bool) (tagNames []string, err error) {
+	nativeRepo, err := l.GetAsGoGitRepository()
+	if err != nil {
+		return nil, err
+	}
+
+	tags, err := nativeRepo.Tags()
+	if err != nil {
+		return nil, TracedErrorf(
+			"Unable to get native tags: %w",
+			err,
+		)
+	}
+	defer tags.Close()
+
+	tagNames = []string{}
+	for {
+		tag, err := tags.Next()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+
+			return nil, TracedErrorf(
+				"Unable to get next tag: '%w'",
+				err,
+			)
+		}
+
+		toAdd := tag.Name().String()
+
+		toAdd = strings.TrimPrefix(toAdd, "refs/tags/")
+
+		tagNames = append(tagNames, toAdd)
+	}
+
+	return tagNames, nil
+}
+
 func (l *LocalGitRepository) MustAddFileByPath(pathToAdd string, verbose bool) {
 	err := l.AddFileByPath(pathToAdd, verbose)
 	if err != nil {
@@ -1064,6 +1224,15 @@ func (l *LocalGitRepository) MustCommitHasParentCommitByCommitHash(hash string) 
 	}
 
 	return hasParentCommit
+}
+
+func (l *LocalGitRepository) MustCreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag) {
+	createdTag, err := l.CreateTag(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdTag
 }
 
 func (l *LocalGitRepository) MustFileByPathExists(path string, verbose bool) (exists bool) {
@@ -1201,6 +1370,15 @@ func (l *LocalGitRepository) MustGetCurrentCommit() (gitCommit *GitCommit) {
 	return gitCommit
 }
 
+func (l *LocalGitRepository) MustGetCurrentCommitGoGitHash() (hash *plumbing.Hash) {
+	hash, err := l.GetCurrentCommitGoGitHash()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hash
+}
+
 func (l *LocalGitRepository) MustGetCurrentCommitHash() (commitHash string) {
 	commitHash, err := l.GetCurrentCommitHash()
 	if err != nil {
@@ -1208,6 +1386,15 @@ func (l *LocalGitRepository) MustGetCurrentCommitHash() (commitHash string) {
 	}
 
 	return commitHash
+}
+
+func (l *LocalGitRepository) MustGetCurrentCommitHashAsBytes() (hash []byte) {
+	hash, err := l.GetCurrentCommitHashAsBytes()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hash
 }
 
 func (l *LocalGitRepository) MustGetGitStatusOutput(verbose bool) (output string) {
@@ -1282,6 +1469,15 @@ func (l *LocalGitRepository) MustGetRootDirectoryPath(verbose bool) (rootDirecto
 	return rootDirectoryPath
 }
 
+func (l *LocalGitRepository) MustGetTagByName(tagName string) (tag GitTag) {
+	tag, err := l.GetTagByName(tagName)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return tag
+}
+
 func (l *LocalGitRepository) MustGitlabCiYamlFileExists(verbose bool) (gitlabCiYamlFileExists bool) {
 	gitlabCiYamlFileExists, err := l.GitlabCiYamlFileExists(verbose)
 	if err != nil {
@@ -1350,6 +1546,15 @@ func (l *LocalGitRepository) MustIsInitialized(verbose bool) (isInitialized bool
 	}
 
 	return isInitialized
+}
+
+func (l *LocalGitRepository) MustListTagNames(verbose bool) (tagNames []string) {
+	tagNames, err := l.ListTagNames(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return tagNames
 }
 
 func (l *LocalGitRepository) MustPull(verbose bool) {
