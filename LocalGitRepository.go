@@ -1187,6 +1187,25 @@ func (l *LocalGitRepository) ListTagNames(verbose bool) (tagNames []string, err 
 	return tagNames, nil
 }
 
+func (l *LocalGitRepository) ListTags(verbose bool) (tags []GitTag, err error) {
+	tagNames, err := l.ListTagNames(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	tags = []GitTag{}
+	for _, name := range tagNames {
+		toAdd, err := l.GetTagByName(name)
+		if err != nil {
+			return nil, err
+		}
+
+		tags = append(tags, toAdd)
+	}
+
+	return tags, nil
+}
+
 func (l *LocalGitRepository) MustAddFileByPath(pathToAdd string, verbose bool) {
 	err := l.AddFileByPath(pathToAdd, verbose)
 	if err != nil {
@@ -1555,6 +1574,15 @@ func (l *LocalGitRepository) MustListTagNames(verbose bool) (tagNames []string) 
 	}
 
 	return tagNames
+}
+
+func (l *LocalGitRepository) MustListTags(verbose bool) (tags []GitTag) {
+	tags, err := l.ListTags(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return tags
 }
 
 func (l *LocalGitRepository) MustPull(verbose bool) {

@@ -968,6 +968,25 @@ func (c *CommandExecutorGitRepository) ListTagNames(verbose bool) (tagNames []st
 	)
 }
 
+func (c *CommandExecutorGitRepository) ListTags(verbose bool) (tags []GitTag, err error) {
+	tagNames, err := c.ListTagNames(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	tags = []GitTag{}
+	for _, name := range tagNames {
+		toAdd, err := c.GetTagByName(name)
+		if err != nil {
+			return nil, err
+		}
+
+		tags = append(tags, toAdd)
+	}
+
+	return tags, nil
+}
+
 func (c *CommandExecutorGitRepository) MustAddFileByPath(pathToAdd string, verbose bool) {
 	err := c.AddFileByPath(pathToAdd, verbose)
 	if err != nil {
@@ -1228,6 +1247,15 @@ func (c *CommandExecutorGitRepository) MustListTagNames(verbose bool) (tagNames 
 	}
 
 	return tagNames
+}
+
+func (c *CommandExecutorGitRepository) MustListTags(verbose bool) (tags []GitTag) {
+	tags, err := c.ListTags(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return tags
 }
 
 func (c *CommandExecutorGitRepository) MustPull(verbose bool) {

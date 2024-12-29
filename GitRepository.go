@@ -48,6 +48,7 @@ type GitRepository interface {
 	IsInitialized(verbose bool) (isInitialited bool, err error)
 	ListFiles(listFileOptions *ListFileOptions) (files []File, err error)
 	ListTagNames(verbose bool) (tagNames []string, err error)
+	ListTags(verbose bool) (tags []GitTag, err error)
 
 	MustAddFileByPath(pathToAdd string, verbose bool)
 	MustCloneRepository(repository GitRepository, verbose bool)
@@ -85,6 +86,7 @@ type GitRepository interface {
 	MustIsInitialized(verbose bool) (isInitialited bool)
 	MustListFiles(listFileOptions *ListFileOptions) (files []File)
 	MustListTagNames(verbose bool) (tagNames []string)
+	MustListTags(verbose bool) (tags []GitTag)
 	MustPull(verbose bool)
 	MustPush(verbose bool)
 	MustSetGitConfig(options *GitConfigSetOptions)
