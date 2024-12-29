@@ -688,7 +688,6 @@ func TestGitRepository_CreateTag(t *testing.T) {
 	}
 }
 
-
 func TestGitRepository_ListTags(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -739,6 +738,58 @@ func TestGitRepository_ListTags(t *testing.T) {
 				assert.EqualValues(
 					"abcd",
 					tags[1].MustGetName(),
+				)
+			},
+		)
+	}
+}
+
+func TestGitRepository_GetLatestTagVersion(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				gitRepo.MustCommit(
+					&GitCommitOptions{
+						Message:    "initial empty commit",
+						AllowEmpty: true,
+						Verbose:    verbose,
+					},
+				)
+
+				gitRepo.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "v1.0.0",
+						Verbose: verbose,
+					},
+				)
+
+				gitRepo.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "v0.1.2",
+						Verbose: verbose,
+					},
+				)
+				
+				latestVersion := gitRepo.MustGetLatestTagVersion(verbose)
+
+				assert.EqualValues(
+					"v1.0.0",
+					latestVersion.MustGetAsString(),
 				)
 			},
 		)

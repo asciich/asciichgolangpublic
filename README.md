@@ -27,24 +27,30 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 		1. Knowledge in the head of the develpers (worst case):
 			- In worst case not even documented at all.
 			- Very error prone and a huge truck factor.
-			- This library is no help here!
+			- **This library is no help here!**
 		1. Documented instructions:
 			- Idealy step-by-step instructions.
 			- This approach is also called Wiki-Ops.
-			- This library is no help here!
+			- **This library is no help here!**
 		1. Scripting (Bash, Python, Ansible...):
 			- Better than any documentation since the steps are reproducible and complete (otherwise it would not run successfully).
 			- Often hard to (unit-)test.
 			- While Python is a fully fledged programming language able to handle complex things the amount of complexity and reuseabilty is in Bash is limited.
 			- Bash scripting reflects the way system administrators work interactively with the systems and is therefore often easy to understand for other team members.
 			- External interpreters and tools are needed.
-		1. Object oriented high level programming languages enriched with a lot of convenince functions:
+		1. High level programming languages enriched with convenince functions and shortcuts allowed:
 			- A lot of boilerplate code.
-			- TODO: add description.
 			- Unit- and integration tests possible and useful.
+			- Reusable code.
+			- Still some external dependencies, especially when calling other binaries to achive a shortcut.
+			- Easy to automated new task by combining existing convenience functions.
+			- Checking of inputs at every function call already detects malformed input at an early state.
+			- Putting convenience functions together often leads to inefficient algorithms (e.g. more API requests than needed.).
 		1. Idomatic Golang code (best case):
-			- TODO: add description.
 			- Unit- and integration tests possible and useful.
+			- Reusable code.
+			- No external dependencies since everything is natively implemneted.
+			- Fastest execution time.
 
 ## Logging
 

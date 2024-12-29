@@ -9,4 +9,8 @@ type GitTag interface {
 	MustGetGitRepository() (repo GitRepository)
 	MustIsVersionTag() (isVersionTag bool)
 	MustSetName(name string)
+
+	// These function can be implemented by embedding the GitTagBase struct:
+	GetVersion() (version Version, err error)
+	MustGetVersion() (version Version)
 }
