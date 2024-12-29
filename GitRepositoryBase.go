@@ -103,3 +103,31 @@ func (g *GitRepositoryBase) SetParentRepositoryForBaseClass(parentRepositoryForB
 
 	return nil
 }
+
+/*
+func (g *GitRepositoryBase) ListVersionTags(verbose bool) (versionTags []*GitRepositoryTag, err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	allTags, err := parent.ListTags(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	versionTags = []*GitRepositoryTag{}
+	for _, tag := range allTags {
+		isVersionTag, err := tag.IsVersionTag()
+		if err != nil {
+			return nil, err
+		}
+
+		if isVersionTag {
+			versionTags = append(versionTags, tag)
+		}
+	}
+
+	return versionTags, nil
+}
+*/

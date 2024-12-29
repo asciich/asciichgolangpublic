@@ -636,7 +636,7 @@ func TestGitRepository_ListFiles(t *testing.T) {
 	}
 }
 
-func TestGitRepositoryCreateTag(t *testing.T) {
+func TestGitRepository_CreateTag(t *testing.T) {
 	tests := []struct {
 		implementationName string
 	}{
@@ -683,6 +683,63 @@ func TestGitRepositoryCreateTag(t *testing.T) {
 
 					assert.EqualValues(expectedTags, tagList)
 				}
+			},
+		)
+	}
+}
+
+
+func TestGitRepository_ListTags(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				gitRepo.MustCommit(
+					&GitCommitOptions{
+						Message:    "initial empty commit",
+						AllowEmpty: true,
+						Verbose:    verbose,
+					},
+				)
+
+				gitRepo.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "abc",
+						Verbose: verbose,
+					},
+				)
+
+				gitRepo.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "abcd",
+						Verbose: verbose,
+					},
+				)
+				
+				tags := gitRepo.MustListTags(verbose)
+
+				assert.EqualValues(
+					"abc",
+					tags[0].MustGetName(),
+				)
+				assert.EqualValues(
+					"abcd",
+					tags[1].MustGetName(),
+				)
 			},
 		)
 	}
