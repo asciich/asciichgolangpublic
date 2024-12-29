@@ -79,6 +79,20 @@ func (g *GitRepositoryBase) GetLatestTagVersion(verbose bool) (latestTagVersion 
 	return latestTagVersion, nil
 }
 
+func (g *GitRepositoryBase) GetLatestTagVersionAsString(verbose bool) (latestTagVersion string, err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return "", err
+	}
+
+	version, err := parent.GetLatestTagVersion(verbose)
+	if err != nil {
+		return "", err
+	}
+
+	return version.GetAsString()
+}
+
 func (g *GitRepositoryBase) GetParentRepositoryForBaseClass() (parentRepositoryForBaseClass GitRepository, err error) {
 	if g.parentRepositoryForBaseClass == nil {
 		return nil, TracedErrorf("parentRepositoryForBaseClass not set")
@@ -131,6 +145,15 @@ func (g *GitRepositoryBase) MustCreateAndInit(createOptions *CreateRepositoryOpt
 
 func (g *GitRepositoryBase) MustGetLatestTagVersion(verbose bool) (latestTagVersion Version) {
 	latestTagVersion, err := g.GetLatestTagVersion(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return latestTagVersion
+}
+
+func (g *GitRepositoryBase) MustGetLatestTagVersionAsString(verbose bool) (latestTagVersion string) {
+	latestTagVersion, err := g.GetLatestTagVersionAsString(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
