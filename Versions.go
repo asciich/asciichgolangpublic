@@ -186,8 +186,12 @@ func (v *VersionsService) GetVersionsFromStringSlice(stringSlice []string) (vers
 
 func (v *VersionsService) IsDateVersionString(versionString string) (isVersionString bool) {
 	regex := regexp.MustCompile("^[0-9]{8}_[0-9]{6}$")
-	isVersionString = regex.Match([]byte(versionString))
-	return isVersionString
+	if regex.Match([]byte(versionString)) {
+		return true
+	}
+
+	regex = regexp.MustCompile("^v[0-9]{8}_[0-9]{6}$")
+	return regex.Match([]byte(versionString))
 }
 
 func (v *VersionsService) IsSemanticVersionString(versionString string) (isSemanticVersionString bool) {

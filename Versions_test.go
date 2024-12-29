@@ -58,6 +58,10 @@ func TestVersionsIsDateVersionString(t *testing.T) {
 		{"20231112_12345", false},
 		{"20231112_1234566", false},
 		{"20231112_a23456", false},
+		{"v20231112_123456", true},
+		{"v20231112_12345", false},
+		{"v20231112_1234566", false},
+		{"v20231112_a23456", false},
 	}
 
 	for _, tt := range tests {
