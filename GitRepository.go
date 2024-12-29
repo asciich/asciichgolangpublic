@@ -97,8 +97,10 @@ type GitRepository interface {
 	// All methods below this line can be implemented by embedding the `GitRepositoryBase` struct:
 	CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error)
 	CreateAndInit(options *CreateRepositoryOptions) (err error)
+	GetLatestTagVersion(verbose bool) (latestTagVersion Version, err error)
 	MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit)
 	MustCreateAndInit(options *CreateRepositoryOptions)
+	MustGetLatestTagVersion(verbose bool) (latestTagVersion Version)
 }
 
 func GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit() (msg string) {

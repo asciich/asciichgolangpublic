@@ -54,6 +54,31 @@ func (g *GitRepositoryBase) CreateAndInit(createOptions *CreateRepositoryOptions
 	return nil
 }
 
+func (g *GitRepositoryBase) GetLatestTagVersion(verbose bool) (latestTagVersion Version, err error) {
+	versionTags, err := g.ListVersionTags(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, tag := range versionTags {
+		toCheck, err := tag.GetVersion()
+		if err != nil {
+			return nil, err
+		}
+
+		if latestTagVersion == nil {
+			latestTagVersion = toCheck
+		}
+
+		latestTagVersion, err = Versions().ReturnNewerVersion(latestTagVersion, toCheck)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return latestTagVersion, nil
+}
+
 func (g *GitRepositoryBase) GetParentRepositoryForBaseClass() (parentRepositoryForBaseClass GitRepository, err error) {
 	if g.parentRepositoryForBaseClass == nil {
 		return nil, TracedErrorf("parentRepositoryForBaseClass not set")
@@ -61,49 +86,6 @@ func (g *GitRepositoryBase) GetParentRepositoryForBaseClass() (parentRepositoryF
 
 	return g.parentRepositoryForBaseClass, nil
 }
-
-func (g *GitRepositoryBase) MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
-	createdCommit, err := g.CommitAndPush(commitOptions)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-
-	return createdCommit
-}
-
-func (g *GitRepositoryBase) MustCreateAndInit(createOptions *CreateRepositoryOptions) {
-	err := g.CreateAndInit(createOptions)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitRepositoryBase) MustGetParentRepositoryForBaseClass() (parentRepositoryForBaseClass GitRepository) {
-	parentRepositoryForBaseClass, err := g.GetParentRepositoryForBaseClass()
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-
-	return parentRepositoryForBaseClass
-}
-
-func (g *GitRepositoryBase) MustSetParentRepositoryForBaseClass(parentRepositoryForBaseClass GitRepository) {
-	err := g.SetParentRepositoryForBaseClass(parentRepositoryForBaseClass)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitRepositoryBase) SetParentRepositoryForBaseClass(parentRepositoryForBaseClass GitRepository) (err error) {
-	if parentRepositoryForBaseClass == nil {
-		return TracedErrorf("parentRepositoryForBaseClass is nil")
-	}
-
-	g.parentRepositoryForBaseClass = parentRepositoryForBaseClass
-
-	return nil
-}
-
 
 func (g *GitRepositoryBase) ListVersionTags(verbose bool) (versionTags []GitTag, err error) {
 	parent, err := g.GetParentRepositoryForBaseClass()
@@ -131,3 +113,62 @@ func (g *GitRepositoryBase) ListVersionTags(verbose bool) (versionTags []GitTag,
 	return versionTags, nil
 }
 
+func (g *GitRepositoryBase) MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
+	createdCommit, err := g.CommitAndPush(commitOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdCommit
+}
+
+func (g *GitRepositoryBase) MustCreateAndInit(createOptions *CreateRepositoryOptions) {
+	err := g.CreateAndInit(createOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (g *GitRepositoryBase) MustGetLatestTagVersion(verbose bool) (latestTagVersion Version) {
+	latestTagVersion, err := g.GetLatestTagVersion(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return latestTagVersion
+}
+
+func (g *GitRepositoryBase) MustGetParentRepositoryForBaseClass() (parentRepositoryForBaseClass GitRepository) {
+	parentRepositoryForBaseClass, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return parentRepositoryForBaseClass
+}
+
+func (g *GitRepositoryBase) MustListVersionTags(verbose bool) (versionTags []GitTag) {
+	versionTags, err := g.ListVersionTags(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return versionTags
+}
+
+func (g *GitRepositoryBase) MustSetParentRepositoryForBaseClass(parentRepositoryForBaseClass GitRepository) {
+	err := g.SetParentRepositoryForBaseClass(parentRepositoryForBaseClass)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (g *GitRepositoryBase) SetParentRepositoryForBaseClass(parentRepositoryForBaseClass GitRepository) (err error) {
+	if parentRepositoryForBaseClass == nil {
+		return TracedErrorf("parentRepositoryForBaseClass is nil")
+	}
+
+	g.parentRepositoryForBaseClass = parentRepositoryForBaseClass
+
+	return nil
+}

@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 type GitRepositoryTag struct {
+	GitTagBase
 	name          string
 	gitRepository GitRepository
 }
@@ -61,7 +62,11 @@ func MustGetGitRepositoryTagByNameAndRepository(tagName string, gitRepository Gi
 }
 
 func NewGitRepositoryTag() (g *GitRepositoryTag) {
-	return new(GitRepositoryTag)
+	g = new(GitRepositoryTag)
+
+	g.MustSetParentGitTagForBaseClass(g)
+
+	return g
 }
 
 func (g *GitRepositoryTag) GetGitRepository() (gitRepository GitRepository, err error) {

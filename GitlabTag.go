@@ -9,12 +9,17 @@ import (
 var ErrGitlabTagNotFound = errors.New("gitlab tag not found")
 
 type GitlabTag struct {
+	GitTagBase
 	gitlabTags *GitlabTags
 	name       string
 }
 
 func NewGitlabTag() (g *GitlabTag) {
-	return new(GitlabTag)
+	g = new(GitlabTag)
+
+	g.MustSetParentGitTagForBaseClass(g)
+
+	return g
 }
 
 func (g *GitlabTag) Delete(verbose bool) (err error) {

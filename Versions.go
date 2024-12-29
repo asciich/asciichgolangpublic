@@ -40,6 +40,27 @@ func Versions() (v *VersionsService) {
 	return NewVersionsService()
 }
 
+func (v *VersionsService) ReturnNewerVersion(v1 Version, v2 Version) (newerVersion Version, err error) {
+	if v1 == nil {
+		return nil, TracedErrorNil("v1")
+	}
+
+	if v2 == nil {
+		return nil, TracedErrorNil("v2")
+	}
+
+	isNewer, err := v1.IsNewerThan(v2)
+	if err != nil {
+		return nil, err
+	}
+
+	if isNewer {
+		return v1, nil
+	}
+
+	return v2, nil
+}
+
 func (v *VersionsService) CheckDateVersionString(versionString string) (isVersionString bool, err error) {
 	isVersionString = v.IsVersionString(versionString)
 
