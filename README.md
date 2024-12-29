@@ -23,6 +23,28 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 * Background information:
 	* Currently this is a one man show.
 	* It bases purely on some code I wrote at home in my free time used for automating my personal homelab.
+	* Multiple levels of automation implementation and where this library can help:
+		1. Knowledge in the head of the develpers (worst case):
+			- In worst case not even documented at all.
+			- Very error prone and a huge truck factor.
+			- This library is no help here!
+		1. Documented instructions:
+			- Idealy step-by-step instructions.
+			- This approach is also called Wiki-Ops.
+			- This library is no help here!
+		1. Scripting (Bash, Python, Ansible...):
+			- Better than any documentation since the steps are reproducible and complete (otherwise it would not run successfully).
+			- Often hard to (unit-)test.
+			- While Python is a fully fledged programming language able to handle complex things the amount of complexity and reuseabilty is in Bash is limited.
+			- Bash scripting reflects the way system administrators work interactively with the systems and is therefore often easy to understand for other team members.
+			- External interpreters and tools are needed.
+		1. Object oriented high level programming languages enriched with a lot of convenince functions:
+			- A lot of boilerplate code.
+			- TODO: add description.
+			- Unit- and integration tests possible and useful.
+		1. Idomatic Golang code (best case):
+			- TODO: add description.
+			- Unit- and integration tests possible and useful.
 
 ## Logging
 

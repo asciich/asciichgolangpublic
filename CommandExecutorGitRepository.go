@@ -310,6 +310,9 @@ func (c *CommandExecutorGitRepository) CreateTag(options *GitRepositoryCreateTag
 		[]string{"tag", "-a", tagName, "-m", tagMessage},
 		options.Verbose,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	path, hostDescription, err := c.GetPathAndHostDescription()
 	if err != nil {

@@ -113,6 +113,13 @@ func (g *GitlabTag) Exists(verbose bool) (exists bool, err error) {
 	return exists, nil
 }
 
+func (g *GitlabTag) GetGitRepository() (gitRepo GitRepository, err error) {
+	// TODO: This should return the gitlab project which
+	// should implement everything a git repsository does so it
+	// fullfils the GitRepository interface:
+	return nil, TracedErrorNotImplemented()
+}
+
 func (g *GitlabTag) GetGitlabProject() (gitlabProject *GitlabProject, err error) {
 	gitlabTags, err := g.GetGitlabTags()
 	if err != nil {
@@ -269,6 +276,15 @@ func (g *GitlabTag) MustExists(verbose bool) (exists bool) {
 	}
 
 	return exists
+}
+
+func (g *GitlabTag) MustGetGitRepository() (gitRepo GitRepository) {
+	gitRepo, err := g.GetGitRepository()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitRepo
 }
 
 func (g *GitlabTag) MustGetGitlabProject() (gitlabProject *GitlabProject) {
