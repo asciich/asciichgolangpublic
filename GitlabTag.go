@@ -147,6 +147,30 @@ func (g *GitlabTag) GetGitlabTags() (gitlabTags *GitlabTags, err error) {
 	return g.gitlabTags, nil
 }
 
+func (g *GitlabTag) GetHash() (hash string, err error) {
+	raw, err := g.GetRawResponse()
+	if err != nil {
+		return "", err
+	}
+
+	commit := raw.Commit
+	if commit == nil {
+		return "", TracedErrorf(
+			"raw.Commit is nil after evaluation.",
+		)
+	}
+
+	hash = commit.ID
+
+	if hash == "" {
+		return "", TracedErrorf(
+			"hash is empty string after evaluation.",
+		)
+	}
+
+	return hash, nil
+}
+
 func (g *GitlabTag) GetName() (name string, err error) {
 	if g.name == "" {
 		return "", TracedErrorf("name not set")
@@ -308,6 +332,15 @@ func (g *GitlabTag) MustGetGitlabTags() (gitlabTags *GitlabTags) {
 	}
 
 	return gitlabTags
+}
+
+func (g *GitlabTag) MustGetHash() (hash string) {
+	hash, err := g.GetHash()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hash
 }
 
 func (g *GitlabTag) MustGetName() (name string) {

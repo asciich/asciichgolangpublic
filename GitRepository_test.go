@@ -796,7 +796,6 @@ func TestGitRepository_GetLatestTagVersion(t *testing.T) {
 	}
 }
 
-
 func TestGitRepository_GetLatestTagVersionAsString(t *testing.T) {
 	tests := []struct {
 		implementationName string

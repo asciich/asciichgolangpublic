@@ -343,9 +343,17 @@ func (l *LocalGitRepository) CreateTag(options *GitRepositoryCreateTagOptions) (
 		return nil, err
 	}
 
-	currentHash, err := l.GetCurrentCommitGoGitHash()
-	if err != nil {
-		return nil, err
+	hashToTag := ""
+	if options.IsCommitHashSet() {
+		hashToTag, err = options.GetCommitHash()
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		hashToTag, err = l.GetCurrentCommitHash()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	path, err := l.GetPath()
@@ -369,14 +377,19 @@ func (l *LocalGitRepository) CreateTag(options *GitRepositoryCreateTagOptions) (
 		LogInfof(
 			"Going to create tag '%s' on commit '%s' in local git repository '%s'.",
 			tagName,
-			currentHash.String(),
+			hashToTag,
 			path,
 		)
 	}
 
+	goHash, err := l.GetGoGitHashFromHashString(hashToTag)
+	if err != nil {
+		return nil, err
+	}
+
 	_, err = goRepo.CreateTag(
 		tagName,
-		*currentHash,
+		*goHash,
 		createTagOptions,
 	)
 	if err != nil {
@@ -679,6 +692,21 @@ func (l *LocalGitRepository) GetCurrentCommit() (gitCommit *GitCommit, err error
 	return gitCommit, nil
 }
 
+func (l *LocalGitRepository) GetGoGitHashFromHashString(hashString string) (hash *plumbing.Hash, err error) {
+	if hashString == "" {
+		return nil, TracedErrorNil("hashString")
+	}
+
+	hashBytes, err := Strings().HexStringToBytes(hashString)
+	if err != nil {
+		return nil, err
+	}
+
+	hashValue := plumbing.Hash(hashBytes)
+
+	return &hashValue, err
+}
+
 func (l *LocalGitRepository) GetCurrentCommitGoGitHash() (hash *plumbing.Hash, err error) {
 	currentHashBytes, err := l.GetCurrentCommitHashAsBytes()
 	if err != nil {
@@ -804,6 +832,66 @@ func (l *LocalGitRepository) GetGoGitWorktree() (worktree *git.Worktree, err err
 	}
 
 	return worktree, nil
+}
+
+func (l *LocalGitRepository) GetHashByTagName(tagName string) (hash string, err error) {
+	if tagName == "" {
+		return "", err
+	}
+
+	nativeRepo, err := l.GetAsGoGitRepository()
+	if err != nil {
+		return "", err
+	}
+
+	nativeTagObjects, err := nativeRepo.TagObjects()
+	if err != nil {
+		return "", TracedErrorf(
+			"Unable to get native tags: %w",
+			err,
+		)
+	}
+	defer nativeTagObjects.Close()
+
+	for {
+		tag, err := nativeTagObjects.Next()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+
+			return "", TracedErrorf(
+				"Unable to get next tag: '%w'",
+				err,
+			)
+		}
+
+		name := tag.Name
+		name = strings.TrimPrefix(name, "refs/tags/")
+
+		if tagName == name {
+			hash = string(tag.Target.String())
+
+			if hash == "" {
+				return "", TracedError(
+					"hash is empty string after evaluation.",
+				)
+			}
+
+			return hash, nil
+		}
+	}
+
+	path, err := l.GetPath()
+	if err != nil {
+		return "", err
+	}
+
+	return "", TracedErrorf(
+		"Unable to get hash for tag '%s' in local git repository '%s'.",
+		tagName,
+		path,
+	)
 }
 
 func (l *LocalGitRepository) GetRootDirectory(verbose bool) (rootDirectory Directory, err error) {
@@ -1206,6 +1294,54 @@ func (l *LocalGitRepository) ListTags(verbose bool) (tags []GitTag, err error) {
 	return tags, nil
 }
 
+func (l *LocalGitRepository) ListTagsForCommitHash(hash string, verbose bool) (tags []GitTag, err error) {
+	if hash == "" {
+		return nil, TracedErrorEmptyString("hash")
+	}
+
+	nativeRepo, err := l.GetAsGoGitRepository()
+	if err != nil {
+		return nil, err
+	}
+
+	nativeTagObjects, err := nativeRepo.TagObjects()
+	if err != nil {
+		return nil, TracedErrorf(
+			"Unable to get native tags: %w",
+			err,
+		)
+	}
+	defer nativeTagObjects.Close()
+
+	tags = []GitTag{}
+	for {
+		tag, err := nativeTagObjects.Next()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+
+			return nil, TracedErrorf(
+				"Unable to get next tag: '%w'",
+				err,
+			)
+		}
+	
+		if tag.Target.String() == hash {
+			nameToAdd := strings.TrimPrefix(tag.Name, "refs/tags/")
+
+			toAdd, err := l.GetTagByName(nameToAdd)
+			if err != nil {
+				return nil, err
+			}
+
+			tags = append(tags, toAdd)
+		}
+	}
+
+	return tags, nil
+}
+
 func (l *LocalGitRepository) MustAddFileByPath(pathToAdd string, verbose bool) {
 	err := l.AddFileByPath(pathToAdd, verbose)
 	if err != nil {
@@ -1470,6 +1606,15 @@ func (l *LocalGitRepository) MustGetGoGitWorktree() (worktree *git.Worktree) {
 	return worktree
 }
 
+func (l *LocalGitRepository) MustGetHashByTagName(tagName string) (hash string) {
+	hash, err := l.GetHashByTagName(tagName)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hash
+}
+
 func (l *LocalGitRepository) MustGetRootDirectory(verbose bool) (rootDirectory Directory) {
 	rootDirectory, err := l.GetRootDirectory(verbose)
 	if err != nil {
@@ -1578,6 +1723,15 @@ func (l *LocalGitRepository) MustListTagNames(verbose bool) (tagNames []string) 
 
 func (l *LocalGitRepository) MustListTags(verbose bool) (tags []GitTag) {
 	tags, err := l.ListTags(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return tags
+}
+
+func (l *LocalGitRepository) MustListTagsForCommitHash(hash string, verbose bool) (tags []GitTag) {
+	tags, err := l.ListTagsForCommitHash(hash, verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

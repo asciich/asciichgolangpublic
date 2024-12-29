@@ -306,8 +306,21 @@ func (c *CommandExecutorGitRepository) CreateTag(options *GitRepositoryCreateTag
 		}
 	}
 
+	hashToTag := ""
+	if options.IsCommitHashSet() {
+		hashToTag, err = options.GetCommitHash()
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		hashToTag, err = c.GetCurrentCommitHash()
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	_, err = c.RunGitCommand(
-		[]string{"tag", "-a", tagName, "-m", tagMessage},
+		[]string{"tag", "-a", tagName, hashToTag, "-m", tagMessage},
 		options.Verbose,
 	)
 	if err != nil {
@@ -326,8 +339,9 @@ func (c *CommandExecutorGitRepository) CreateTag(options *GitRepositoryCreateTag
 
 	if options.Verbose {
 		LogChangedf(
-			"Created tag '%s' in git repository '%s' on host '%s'.",
+			"Created tag '%s' for commit '%s' in git repository '%s' on host '%s'.",
 			tagName,
+			hashToTag,
 			path,
 			hostDescription,
 		)
@@ -419,6 +433,35 @@ func (c *CommandExecutorGitRepository) GetGitStatusOutput(verbose bool) (output 
 	return "", TracedErrorNotImplemented()
 }
 
+func (c *CommandExecutorGitRepository) GetHashByTagName(tagName string) (hash string, err error) {
+	if tagName == "" {
+		return "", TracedErrorEmptyString("tagName")
+	}
+
+	stdoutLines, err := c.RunGitCommandAndGetStdoutAsLines(
+		[]string{"show-ref", "--dereference", tagName},
+		false,
+	)
+	if err != nil {
+		return "", err
+	}
+
+	for _, line := range stdoutLines {
+		if strings.HasSuffix(line, "{}") {
+			hash = strings.Split(line, " ")[0]
+			break
+		}
+	}
+
+	hash = strings.TrimSpace(hash)
+
+	if hash == "" {
+		return "", TracedError("hash is empty string after evaluation")
+	}
+
+	return hash, nil
+}
+
 func (c *CommandExecutorGitRepository) GetRootDirectory(verbose bool) (rootDirectory Directory, err error) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
@@ -434,6 +477,9 @@ func (c *CommandExecutorGitRepository) GetRootDirectory(verbose bool) (rootDirec
 		commandExecutor,
 		rootDirPath,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	return rootDirectory, nil
 }
@@ -990,6 +1036,32 @@ func (c *CommandExecutorGitRepository) ListTags(verbose bool) (tags []GitTag, er
 	return tags, nil
 }
 
+func (c *CommandExecutorGitRepository) ListTagsForCommitHash(hash string, verbose bool) (tags []GitTag, err error) {
+	if hash == "" {
+		return nil, TracedErrorEmptyString("hash")
+	}
+
+	tagNames, err := c.RunGitCommandAndGetStdoutAsLines(
+		[]string{"tag", "--points-at", "HEAD"},
+		false,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	tags = []GitTag{}
+	for _, name := range tagNames {
+		toAdd, err := c.GetTagByName(name)
+		if err != nil {
+			return nil, err
+		}
+
+		tags = append(tags, toAdd)
+	}
+
+	return tags, nil
+}
+
 func (c *CommandExecutorGitRepository) MustAddFileByPath(pathToAdd string, verbose bool) {
 	err := c.AddFileByPath(pathToAdd, verbose)
 	if err != nil {
@@ -1164,6 +1236,15 @@ func (c *CommandExecutorGitRepository) MustGetGitStatusOutput(verbose bool) (out
 	return output
 }
 
+func (c *CommandExecutorGitRepository) MustGetHashByTagName(tagName string) (hash string) {
+	hash, err := c.GetHashByTagName(tagName)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hash
+}
+
 func (c *CommandExecutorGitRepository) MustGetRootDirectory(verbose bool) (rootDirectory Directory) {
 	rootDirectory, err := c.GetRootDirectory(verbose)
 	if err != nil {
@@ -1254,6 +1335,15 @@ func (c *CommandExecutorGitRepository) MustListTagNames(verbose bool) (tagNames 
 
 func (c *CommandExecutorGitRepository) MustListTags(verbose bool) (tags []GitTag) {
 	tags, err := c.ListTags(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return tags
+}
+
+func (c *CommandExecutorGitRepository) MustListTagsForCommitHash(hash string, verbose bool) (tags []GitTag) {
+	tags, err := c.ListTagsForCommitHash(hash, verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
