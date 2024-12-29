@@ -228,3 +228,75 @@ func TestFileBase_RemoveLinesWithPrefix(t *testing.T) {
 		)
 	}
 }
+
+func TestFileBase_GetValueAsString(t *testing.T) {
+	tests := []struct {
+		implementationName string
+		input              string
+		key                string
+		expectedValue      string
+	}{
+		{"localFile", "a=b\nc=hello world", "a", "b"},
+		{"localFile", "a=c\nc=hello world", "c", "hello world"},
+		{"commandExecutorFile", "a=b\nc=hello world", "a", "b"},
+		{"commandExecutorFile", "a=c\nc=hello world", "c", "hello world"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+
+				toTest := getTemporaryFileToTest(tt.implementationName)
+				defer toTest.Delete(verbose)
+
+				toTest.MustWriteString(tt.input, verbose)
+
+				assert.EqualValues(
+					tt.expectedValue,
+					toTest.MustGetValueAsString(tt.key),
+				)
+			},
+		)
+	}
+}
+
+func TestFileBase_GetValueAsInt(t *testing.T) {
+	tests := []struct {
+		implementationName string
+		input              string
+		key                string
+		expectedValue      int
+	}{
+		{"localFile", "a=1\nb=0\nc=-5\n", "a", 1},
+		{"localFile", "a=1\nb=0\nc=-5\n", "b", 0},
+		{"localFile", "a=1\nb=0\nc=-5\n", "c", -5},
+		{"commandExecutorFile", "a=1\nb=0\nc=-5\n", "a", 1},
+		{"commandExecutorFile", "a=1\nb=0\nc=-5\n", "b", 0},
+		{"commandExecutorFile", "a=1\nb=0\nc=-5\n", "c", -5},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+
+				toTest := getTemporaryFileToTest(tt.implementationName)
+				defer toTest.Delete(verbose)
+
+				toTest.MustWriteString(tt.input, verbose)
+
+				assert.EqualValues(
+					tt.expectedValue,
+					toTest.MustGetValueAsInt(tt.key),
+				)
+			},
+		)
+	}
+}

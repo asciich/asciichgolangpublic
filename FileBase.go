@@ -454,6 +454,42 @@ func (f *FileBase) GetTextBlocks(verbose bool) (textBlocks []string, err error) 
 	return textBlocks, nil
 }
 
+func (f *FileBase) GetValueAsInt(key string) (value int, err error) {
+	if key == "" {
+		return -1, TracedErrorEmptyString("key")
+	}
+
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return -1, err
+	}
+
+	content, err := parent.ReadAsString()
+	if err != nil {
+		return -1, err
+	}
+
+	return Strings().GetValueAsInt(content, key)
+}
+
+func (f *FileBase) GetValueAsString(key string) (value string, err error) {
+	if key == "" {
+		return "", TracedErrorEmptyString("key")
+	}
+
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return "", err
+	}
+
+	content, err := parent.ReadAsString()
+	if err != nil {
+		return "", err
+	}
+
+	return Strings().GetValueAsString(content, key)
+}
+
 func (f *FileBase) IsContentEqualByComparingSha256Sum(otherFile File, verbose bool) (isEqual bool, err error) {
 	if otherFile == nil {
 		return false, TracedErrorNil("otherFile")
@@ -682,6 +718,24 @@ func (f *FileBase) MustGetTextBlocks(verbose bool) (textBlocks []string) {
 	}
 
 	return textBlocks
+}
+
+func (f *FileBase) MustGetValueAsInt(key string) (value int) {
+	value, err := f.GetValueAsInt(key)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return value
+}
+
+func (f *FileBase) MustGetValueAsString(key string) (value string) {
+	value, err := f.GetValueAsString(key)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return value
 }
 
 func (f *FileBase) MustIsContentEqualByComparingSha256Sum(otherFile File, verbose bool) (isEqual bool) {
