@@ -98,9 +98,11 @@ type GitRepository interface {
 	CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error)
 	CreateAndInit(options *CreateRepositoryOptions) (err error)
 	GetLatestTagVersion(verbose bool) (latestTagVersion Version, err error)
+	GetLatestTagVersionAsString(verbose bool) (latestTagVersion string, err error)
 	MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit)
 	MustCreateAndInit(options *CreateRepositoryOptions)
 	MustGetLatestTagVersion(verbose bool) (latestTagVersion Version)
+	MustGetLatestTagVersionAsString(verbose bool) (latestTagVersion string)
 }
 
 func GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit() (msg string) {

@@ -46,11 +46,14 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 			- Easy to automated new task by combining existing convenience functions.
 			- Checking of inputs at every function call already detects malformed input at an early state.
 			- Putting convenience functions together often leads to inefficient algorithms (e.g. more API requests than needed.).
-		1. Idomatic Golang code (best case):
+			- The programming style gives some guard rails which can make it easier for other system administrators to start implementing their own stuff.
+			- Easier to debug crashes since full stack trace is provided in errors (see [section errors](#errors)) but can also lead to security issues by exposing internal information.
+		1. Idiomatic Golang code (best case):
 			- Unit- and integration tests possible and useful.
 			- Reusable code.
 			- No external dependencies since everything is natively implemneted.
 			- Fastest execution time.
+			- **While this library is currently far away from idiomatic go the aim is to move towards idiomatic code in the implementation.**
 
 ## Logging
 
