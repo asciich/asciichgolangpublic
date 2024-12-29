@@ -9,7 +9,7 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 * Design choices:
 	* Function which return an error must not panic.
 	* Use `Set` and `Get` functions which allows to validate input and output on every access:
-		* Especially when using the provided functions to quickly automatize some stuff validating all inputs and outputs over and over again helps to avoid unwanted side effects.
+		* Especially when using the provided functions to quickly automatize some stuff validating all inputs as a first step in every function helps to avoid unwanted side effects.
 	* Provide `MustAbc` functions which call `Abc` but exit fatal if `Abc` is not sucessfull. This allows to write every line a new instruction what to do without dealing with errors which is useful for CLI's:
 		* For CLI's most of the time he only option in case of an error is to abort the execution.
 		* In case you want/ can handle the error on your own just use the `Abc` function directly and you get the error returned.

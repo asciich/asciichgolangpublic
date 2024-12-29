@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"encoding/hex"
 	"regexp"
+	"strconv"
 	"strings"
 	"unicode"
 )
@@ -149,6 +150,58 @@ func (s *StringsService) FirstCharToUpper(input string) (output string) {
 	return output
 }
 
+func (s *StringsService) GetAsKeyValues(input string) (output map[string]string, err error) {
+	if len(strings.TrimSpace(input)) <= 0 {
+		return map[string]string{}, nil
+	}
+
+	output = map[string]string{}
+
+	delimiter := ""
+
+	for _, line := range s.SplitLines(input, true) {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+
+		if delimiter == "" {
+			if strings.Contains(line, "=") {
+				delimiter = "="
+			} else if strings.Contains(line, ":") {
+				delimiter = ":"
+			} else {
+				return nil, TracedErrorf(
+					"Unable to find delimiter for getting key values in line: '%s'",
+					line,
+				)
+			}
+		}
+
+		splitted := strings.SplitN(line, delimiter, 2)
+
+		if len(splitted) != 2 {
+			return nil, TracedErrorf(
+				"Unable to split line '%s' into key values.",
+				line,
+			)
+		}
+
+		key := strings.TrimSpace(splitted[0])
+		if key == "" {
+			return nil, TracedErrorf(
+				"Key is empty string after evaluation of line '%s' for key values.",
+				line,
+			)
+		}
+
+		value := strings.TrimSpace(splitted[1])
+
+		output[key] = value
+	}
+
+	return output, nil
+}
+
 func (s *StringsService) GetFirstLine(input string) (firstLine string) {
 	if len(input) <= 0 {
 		return ""
@@ -200,6 +253,49 @@ func (s *StringsService) GetNumberOfLinesWithPrefix(content string, prefix strin
 	}
 
 	return numberOfLinesWithPrefix
+}
+
+func (s *StringsService) GetValueAsInt(input string, key string) (value int, err error) {
+	if key == "" {
+		return -1, TracedErrorEmptyString("key")
+	}
+
+	valueString, err := s.GetValueAsString(input, key)
+	if err != nil {
+		return -1, err
+	}
+
+	value, err = strconv.Atoi(valueString)
+	if err != nil {
+		return -1, TracedErrorf(
+			"Unalbe to parse '%s' as string",
+			valueString,
+		)
+	}
+
+	return value, nil
+}
+
+func (s *StringsService) GetValueAsString(input string, key string) (value string, err error) {
+	if key == "" {
+		return "", TracedErrorEmptyString("key")
+	}
+
+	keyValues, err := s.GetAsKeyValues(input)
+	if err != nil {
+		return "", err
+	}
+
+	value, ok := keyValues[key]
+	if !ok {
+		return "", TracedErrorf(
+			"%w: %s",
+			ErrKeyNotFound,
+			key,
+		)
+	}
+
+	return value, nil
 }
 
 func (s *StringsService) HasAtLeastOnePrefix(toCheck string, prefixes []string) (hasPrefix bool) {
@@ -307,6 +403,33 @@ func (s *StringsService) MatchesRegex(input string, regex string) (matches bool,
 	}
 
 	return matches, nil
+}
+
+func (s *StringsService) MustGetAsKeyValues(input string) (output map[string]string) {
+	output, err := s.GetAsKeyValues(input)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return output
+}
+
+func (s *StringsService) MustGetValueAsInt(input string, key string) (value int) {
+	value, err := s.GetValueAsInt(input, key)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return value
+}
+
+func (s *StringsService) MustGetValueAsString(input string, key string) (value string) {
+	value, err := s.GetValueAsString(input, key)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return value
 }
 
 func (s *StringsService) MustHexStringToBytes(hexString string) (output []byte) {

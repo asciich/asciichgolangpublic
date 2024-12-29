@@ -779,3 +779,110 @@ func TestStrings_ContainsLine(t *testing.T) {
 		)
 	}
 }
+
+func TestStrings_GetAsKeyValues(t *testing.T) {
+	tests := []struct {
+		input             string
+		expectedKeyValues map[string]string
+	}{
+		{"", map[string]string{}},
+		{"\n", map[string]string{}},
+		{"a=b", map[string]string{"a": "b"}},
+		{"a=b\n", map[string]string{"a": "b"}},
+		{"a:b", map[string]string{"a": "b"}},
+		{"a:b\n", map[string]string{"a": "b"}},
+		{" a=b", map[string]string{"a": "b"}},
+		{" a=b\n", map[string]string{"a": "b"}},
+		{" a:b", map[string]string{"a": "b"}},
+		{" a:b\n", map[string]string{"a": "b"}},
+		{"a =b", map[string]string{"a": "b"}},
+		{"a =b\n", map[string]string{"a": "b"}},
+		{"a :b", map[string]string{"a": "b"}},
+		{"a :b\n", map[string]string{"a": "b"}},
+		{"a = b", map[string]string{"a": "b"}},
+		{"a = b\n", map[string]string{"a": "b"}},
+		{"a : b", map[string]string{"a": "b"}},
+		{"a : b\n", map[string]string{"a": "b"}},
+		{"a = b ", map[string]string{"a": "b"}},
+		{"a = b \n", map[string]string{"a": "b"}},
+		{"a : b ", map[string]string{"a": "b"}},
+		{"a : b \n", map[string]string{"a": "b"}},
+		{"\na=b", map[string]string{"a": "b"}},
+		{"\na=b\nc=d", map[string]string{"a": "b", "c": "d"}},
+		{"\na:b", map[string]string{"a": "b"}},
+		{"\na:b\nc:d", map[string]string{"a": "b", "c": "d"}},
+		{"\na=b\n", map[string]string{"a": "b"}},
+		{"\na=b\nc=d\n", map[string]string{"a": "b", "c": "d"}},
+		{"\na:b\n", map[string]string{"a": "b"}},
+		{"\na:b\nc:d\n", map[string]string{"a": "b", "c": "d"}},
+		{"\na=b\n\n\n\n", map[string]string{"a": "b"}},
+		{"\na=b\n\n\n\nc=d\n", map[string]string{"a": "b", "c": "d"}},
+		{"\na:b\n\n\n\n", map[string]string{"a": "b"}},
+		{"\na:b\n\n\n\nc:d\n", map[string]string{"a": "b", "c": "d"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(
+					tt.expectedKeyValues,
+					Strings().MustGetAsKeyValues(tt.input),
+				)
+			},
+		)
+	}
+}
+
+func TestStrings_GetValueAsString(t *testing.T) {
+	tests := []struct {
+		input         string
+		key           string
+		expectedValue string
+	}{
+		{"a=b\nc=hello world\n", "a", "b"},
+		{"a=b\nc=hello world\n", "c", "hello world"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(
+					tt.expectedValue,
+					Strings().MustGetValueAsString(tt.input, tt.key),
+				)
+			},
+		)
+	}
+}
+
+func TestStrings_GetValueAsInt(t *testing.T) {
+	tests := []struct {
+		input         string
+		key           string
+		expectedValue int
+	}{
+		{"a=15\nb=0\nc=-3\n", "a", 15},
+		{"a=15\nb=0\nc=-3\n", "b", 0},
+		{"a=15\nb=0\nc=-3\n", "c", -3},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(
+					tt.expectedValue,
+					Strings().MustGetValueAsInt(tt.input, tt.key),
+				)
+			},
+		)
+	}
+}
