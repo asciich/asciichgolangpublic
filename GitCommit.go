@@ -9,6 +9,33 @@ func NewGitCommit() (g *GitCommit) {
 	return new(GitCommit)
 }
 
+func (g *GitCommit) CreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
+	if options == nil {
+		return nil, TracedErrorNil("options")
+	}
+
+	repo, err := g.GetGitRepo()
+	if err != nil {
+		return nil, err
+	}
+
+	hash, err := g.GetHash()
+	if err != nil {
+		return nil, err
+	}
+
+	optionsToUse := options.GetDeepCopy()
+
+	err = optionsToUse.SetCommitHash(hash)
+	if err != nil {
+		return nil, err
+	}
+
+	return repo.CreateTag(
+		optionsToUse,
+	)
+}
+
 func (g *GitCommit) GetAgeSeconds() (age float64, err error) {
 	hash, err := g.GetHash()
 	if err != nil {
@@ -138,6 +165,29 @@ func (g *GitCommit) HasParentCommit() (hasParentCommit bool, err error) {
 	return hasParentCommit, nil
 }
 
+func (g *GitCommit) ListTags(verbose bool) (tags []GitTag, err error) {
+	repository, err := g.GetGitRepo()
+	if err != nil {
+		return nil, err
+	}
+
+	hash, err := g.GetHash()
+	if err != nil {
+		return nil, err
+	}
+
+	return repository.ListTagsForCommitHash(hash, verbose)
+}
+
+func (g *GitCommit) MustCreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag) {
+	createdTag, err := g.CreateTag(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdTag
+}
+
 func (g *GitCommit) MustGetAgeSeconds() (age float64) {
 	age, err := g.GetAgeSeconds()
 	if err != nil {
@@ -208,6 +258,15 @@ func (g *GitCommit) MustHasParentCommit() (hasParentCommit bool) {
 	}
 
 	return hasParentCommit
+}
+
+func (g *GitCommit) MustListTags(verbose bool) (tags []GitTag) {
+	tags, err := g.ListTags(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return tags
 }
 
 func (g *GitCommit) MustSetGitRepo(gitRepo GitRepository) {

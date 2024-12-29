@@ -5,14 +5,40 @@ import (
 )
 
 type GitRepositoryCreateTagOptions struct {
-	TagName              string
-	TagComment           string
+	// Commit hash to tag.
+	// If not set the currently checked out commit is tagged (depends on the implementation if supported)
+	CommitHash string
+
+	// Name and comment/ message of the tag:
+	TagName    string
+	TagComment string
+
 	Verbose              bool
 	PushTagsToAllRemotes bool
 }
 
 func NewGitRepositoryCreateTagOptions() (g *GitRepositoryCreateTagOptions) {
 	return new(GitRepositoryCreateTagOptions)
+}
+
+func (g *GitRepositoryCreateTagOptions) IsCommitHashSet() (isSet bool) {
+	return g.CommitHash != ""
+}
+
+func (g *GitRepositoryCreateTagOptions) GetCommitHash() (commitHash string, err error) {
+	if g.CommitHash == "" {
+		return "", TracedErrorf("CommitHash not set")
+	}
+
+	return g.CommitHash, nil
+}
+
+func (g *GitRepositoryCreateTagOptions) GetDeepCopy() (copy *GitRepositoryCreateTagOptions) {
+	copy = NewGitRepositoryCreateTagOptions()
+
+	*copy = *g
+
+	return copy
 }
 
 func (g *GitRepositoryCreateTagOptions) GetPushTagsToAllRemotes() (pushTagsToAllRemotes bool, err error) {
@@ -62,6 +88,15 @@ func (g *GitRepositoryCreateTagOptions) IsTagCommentSet() (isSet bool) {
 	return g.TagComment != ""
 }
 
+func (g *GitRepositoryCreateTagOptions) MustGetCommitHash() (commitHash string) {
+	commitHash, err := g.GetCommitHash()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return commitHash
+}
+
 func (g *GitRepositoryCreateTagOptions) MustGetPushTagsToAllRemotes() (pushTagsToAllRemotes bool) {
 	pushTagsToAllRemotes, err := g.GetPushTagsToAllRemotes()
 	if err != nil {
@@ -98,6 +133,13 @@ func (g *GitRepositoryCreateTagOptions) MustGetVerbose() (verbose bool) {
 	return verbose
 }
 
+func (g *GitRepositoryCreateTagOptions) MustSetCommitHash(commitHash string) {
+	err := g.SetCommitHash(commitHash)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (g *GitRepositoryCreateTagOptions) MustSetPushTagsToAllRemotes(pushTagsToAllRemotes bool) {
 	err := g.SetPushTagsToAllRemotes(pushTagsToAllRemotes)
 	if err != nil {
@@ -124,6 +166,16 @@ func (g *GitRepositoryCreateTagOptions) MustSetVerbose(verbose bool) {
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (g *GitRepositoryCreateTagOptions) SetCommitHash(commitHash string) (err error) {
+	if commitHash == "" {
+		return TracedErrorf("commitHash is empty string")
+	}
+
+	g.CommitHash = commitHash
+
+	return nil
 }
 
 func (g *GitRepositoryCreateTagOptions) SetPushTagsToAllRemotes(pushTagsToAllRemotes bool) (err error) {

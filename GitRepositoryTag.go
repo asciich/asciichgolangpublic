@@ -77,6 +77,20 @@ func (g *GitRepositoryTag) GetGitRepository() (gitRepository GitRepository, err 
 	return g.gitRepository, nil
 }
 
+func (g *GitRepositoryTag) GetHash() (hash string, err error) {
+	repo, err := g.GetGitRepository()
+	if err != nil {
+		return "", err
+	}
+
+	name, err := g.GetName()
+	if err != nil {
+		return "", err
+	}
+
+	return repo.GetHashByTagName(name)
+}
+
 func (g *GitRepositoryTag) GetName() (name string, err error) {
 	if g.name == "" {
 		return "", TracedErrorf("name not set")
@@ -115,6 +129,15 @@ func (g *GitRepositoryTag) MustGetGitRepository() (gitRepository GitRepository) 
 	}
 
 	return gitRepository
+}
+
+func (g *GitRepositoryTag) MustGetHash() (hash string) {
+	hash, err := g.GetHash()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hash
 }
 
 func (g *GitRepositoryTag) MustGetName() (name string) {
