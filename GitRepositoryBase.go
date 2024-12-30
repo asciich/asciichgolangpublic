@@ -54,6 +54,34 @@ func (g *GitRepositoryBase) CreateAndInit(createOptions *CreateRepositoryOptions
 	return nil
 }
 
+func (g *GitRepositoryBase) GetCurrentCommitsNewestVersion(verbose bool) (newestVersion Version, err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	currentCommit, err := parent.GetCurrentCommit()
+	if err != nil {
+		return nil, err
+	}
+
+	return currentCommit.GetNewestTagVersion(verbose)
+}
+
+func (g *GitRepositoryBase) GetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose bool) (newestVersion Version, err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	currentCommit, err := parent.GetCurrentCommit()
+	if err != nil {
+		return nil, err
+	}
+
+	return currentCommit.GetNewestTagVersionOrNilIfUnset(verbose)
+}
+
 func (g *GitRepositoryBase) GetLatestTagVersion(verbose bool) (latestTagVersion Version, err error) {
 	versionTags, err := g.ListVersionTags(verbose)
 	if err != nil {
@@ -141,6 +169,24 @@ func (g *GitRepositoryBase) MustCreateAndInit(createOptions *CreateRepositoryOpt
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (g *GitRepositoryBase) MustGetCurrentCommitsNewestVersion(verbose bool) (newestVersion Version) {
+	newestVersion, err := g.GetCurrentCommitsNewestVersion(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return newestVersion
+}
+
+func (g *GitRepositoryBase) MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose bool) (newestVersion Version) {
+	newestVersion, err := g.GetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return newestVersion
 }
 
 func (g *GitRepositoryBase) MustGetLatestTagVersion(verbose bool) (latestTagVersion Version) {

@@ -101,10 +101,14 @@ type GitRepository interface {
 	// All methods below this line can be implemented by embedding the `GitRepositoryBase` struct:
 	CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error)
 	CreateAndInit(options *CreateRepositoryOptions) (err error)
+	GetCurrentCommitsNewestVersion(verbose bool) (newestVersion Version, err error)
+	GetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose bool) (newestVersion Version, err error)
 	GetLatestTagVersion(verbose bool) (latestTagVersion Version, err error)
 	GetLatestTagVersionAsString(verbose bool) (latestTagVersion string, err error)
 	MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit)
 	MustCreateAndInit(options *CreateRepositoryOptions)
+	MustGetCurrentCommitsNewestVersion(verbose bool) (newestVersion Version)
+	MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose bool) (newestVersion Version)
 	MustGetLatestTagVersion(verbose bool) (latestTagVersion Version)
 	MustGetLatestTagVersionAsString(verbose bool) (latestTagVersion string)
 }
