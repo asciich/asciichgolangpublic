@@ -692,21 +692,6 @@ func (l *LocalGitRepository) GetCurrentCommit() (gitCommit *GitCommit, err error
 	return gitCommit, nil
 }
 
-func (l *LocalGitRepository) GetGoGitHashFromHashString(hashString string) (hash *plumbing.Hash, err error) {
-	if hashString == "" {
-		return nil, TracedErrorNil("hashString")
-	}
-
-	hashBytes, err := Strings().HexStringToBytes(hashString)
-	if err != nil {
-		return nil, err
-	}
-
-	hashValue := plumbing.Hash(hashBytes)
-
-	return &hashValue, err
-}
-
 func (l *LocalGitRepository) GetCurrentCommitGoGitHash() (hash *plumbing.Hash, err error) {
 	currentHashBytes, err := l.GetCurrentCommitHashAsBytes()
 	if err != nil {
@@ -800,6 +785,21 @@ func (l *LocalGitRepository) GetGoGitConfig() (config *config.Config, err error)
 	}
 
 	return config, nil
+}
+
+func (l *LocalGitRepository) GetGoGitHashFromHashString(hashString string) (hash *plumbing.Hash, err error) {
+	if hashString == "" {
+		return nil, TracedErrorNil("hashString")
+	}
+
+	hashBytes, err := Strings().HexStringToBytes(hashString)
+	if err != nil {
+		return nil, err
+	}
+
+	hashValue := plumbing.Hash(hashBytes)
+
+	return &hashValue, err
 }
 
 func (l *LocalGitRepository) GetGoGitHead() (head *plumbing.Reference, err error) {
@@ -1326,7 +1326,7 @@ func (l *LocalGitRepository) ListTagsForCommitHash(hash string, verbose bool) (t
 				err,
 			)
 		}
-	
+
 		if tag.Target.String() == hash {
 			nameToAdd := strings.TrimPrefix(tag.Name, "refs/tags/")
 
@@ -1586,6 +1586,15 @@ func (l *LocalGitRepository) MustGetGoGitConfig() (config *config.Config) {
 	}
 
 	return config
+}
+
+func (l *LocalGitRepository) MustGetGoGitHashFromHashString(hashString string) (hash *plumbing.Hash) {
+	hash, err := l.GetGoGitHashFromHashString(hashString)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hash
 }
 
 func (l *LocalGitRepository) MustGetGoGitHead() (head *plumbing.Reference) {

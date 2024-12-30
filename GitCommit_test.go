@@ -143,3 +143,82 @@ func TestGitCommit_ListTags(t *testing.T) {
 		)
 	}
 }
+
+func TestGitCommit_ListVersionTagNames(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				repo := getGitRepositoryToTest(tt.implementationName)
+				defer repo.Delete(verbose)
+
+				repo.MustInit(
+					&CreateRepositoryOptions{
+						Verbose:                     verbose,
+						InitializeWithEmptyCommit:   true,
+						InitializeWithDefaultAuthor: true,
+					},
+				)
+
+				currentCommit := repo.MustGetCurrentCommit()
+
+				assert.EqualValues(
+					[]GitTag{},
+					currentCommit.MustListTags(verbose),
+				)
+
+				currentCommit.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "first_tag",
+						Verbose: verbose,
+					},
+				)
+
+				currentCommit.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "v1.0.0",
+						Verbose: verbose,
+					},
+				)
+
+				currentCommit.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "v0.1.2",
+						Verbose: verbose,
+					},
+				)
+
+				currentCommit.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "another_tag",
+						Verbose: verbose,
+					},
+				)
+
+				assert.EqualValues(
+					"v0.1.2",
+					currentCommit.MustListVersionTagNames(verbose)[0],
+				)
+				assert.EqualValues(
+					"v1.0.0",
+					currentCommit.MustListVersionTagNames(verbose)[1],
+				)
+				assert.Len(
+					currentCommit.MustListVersionTagNames(verbose),
+					2,
+				)
+			},
+		)
+	}
+}
