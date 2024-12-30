@@ -128,8 +128,40 @@ func (g *GitCommit) GetHash() (hash string, err error) {
 }
 
 func (g *GitCommit) GetNewestTagVersion(verbose bool) (newestVersion Version, err error) {
+	newestVersion, err = g.GetNewestTagVersionOrNilIfUnset(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	if newestVersion == nil {
+		hash, err := g.GetHash()
+		if err != nil {
+			return nil, err
+		}
+
+		path, hostDescription, err := g.GetRepoRootPathAndHostDescription()
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, TracedErrorf(
+			"no version tag found for commit '%s' in repository '%s' on host '%s'",
+			hash,
+			path,
+			hostDescription,
+		)
+	}
+
+	return newestVersion, nil
+}
+
+func (g *GitCommit) GetNewestTagVersionOrNilIfUnset(verbose bool) (newestVersion Version, err error) {
 	versions, err := g.ListVersionTagVersions(verbose)
 	if err != nil {
+		return nil, err
+	}
+
+	if len(versions) <= 0 {
 		return nil, err
 	}
 
@@ -153,6 +185,25 @@ func (g *GitCommit) GetParentCommits(options *GitCommitGetParentsOptions) (paren
 	}
 
 	return parentCommit, nil
+}
+
+func (g *GitCommit) GetRepoRootPathAndHostDescription() (repoRootPath string, hostDescription string, err error) {
+	repo, err := g.GetGitRepo()
+	if err != nil {
+		return "", "", err
+	}
+
+	repoRootPath, err = repo.GetRootDirectoryPath(false)
+	if err != nil {
+		return "", "", err
+	}
+
+	hostDescription, err = repo.GetHostDescription()
+	if err != nil {
+		return "", "", err
+	}
+
+	return repoRootPath, hostDescription, nil
 }
 
 func (g *GitCommit) HasParentCommit() (hasParentCommit bool, err error) {
@@ -345,6 +396,15 @@ func (g *GitCommit) MustGetNewestTagVersion(verbose bool) (newestVersion Version
 	return newestVersion
 }
 
+func (g *GitCommit) MustGetNewestTagVersionOrNilIfUnset(verbose bool) (newestVersion Version) {
+	newestVersion, err := g.GetNewestTagVersionOrNilIfUnset(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return newestVersion
+}
+
 func (g *GitCommit) MustGetParentCommits(options *GitCommitGetParentsOptions) (parentCommit []*GitCommit) {
 	parentCommit, err := g.GetParentCommits(options)
 	if err != nil {
@@ -352,6 +412,15 @@ func (g *GitCommit) MustGetParentCommits(options *GitCommitGetParentsOptions) (p
 	}
 
 	return parentCommit
+}
+
+func (g *GitCommit) MustGetRepoRootPathAndHostDescription() (repoRootPath string, hostDescription string) {
+	repoRootPath, hostDescription, err := g.GetRepoRootPathAndHostDescription()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return repoRootPath, hostDescription
 }
 
 func (g *GitCommit) MustHasParentCommit() (hasParentCommit bool) {
