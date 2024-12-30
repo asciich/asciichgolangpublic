@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 )
@@ -281,4 +282,61 @@ func (v *VersionsService) MustGetVersionsFromStringSlice(stringSlice []string) (
 	}
 
 	return versions
+}
+
+func (v *VersionsService) SortVersionSlice(versions []Version) (sorted []Version, err error) {
+	if versions == nil {
+		return nil, TracedErrorNil("versions")
+	}
+
+	var errDuringSort error
+	sort.Slice(
+		versions,
+		func(i int, j int) bool {
+			isNewer, err := versions[i].IsNewerThan(versions[j])
+			if err != nil {
+				errDuringSort = err
+				return false
+			}
+
+			return !isNewer
+		},
+	)
+
+	if errDuringSort != nil {
+		return nil, errDuringSort
+	}
+
+	return versions, nil
+}
+
+func (v *VersionsService) GetVersionStringsFromVersionSlice(versions []Version) (versionStrings []string, err error) {
+	if versions == nil {
+		return nil, TracedErrorNil("versions")
+	}
+
+	versionStrings = []string{}
+	for _, v := range versions {
+		toAdd, err := v.GetAsString()
+		if err != nil {
+			return nil, err
+		}
+
+		versionStrings = append(versionStrings, toAdd)
+	}
+
+	return versionStrings, nil
+}
+
+func (v *VersionsService) SortStringSlice(versionStrings []string) (sorted []string, err error) {
+	if versionStrings == nil {
+		return nil, TracedErrorNil("versionStrings")
+	}
+
+	versions, err := v.GetVersionsFromStringSlice(versionStrings)
+	if err != nil {
+		return nil, err
+	}
+
+	return v.GetVersionStringsFromVersionSlice(versions)
 }
