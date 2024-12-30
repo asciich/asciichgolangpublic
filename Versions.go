@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 )
@@ -38,27 +39,6 @@ func NewVersionsService() (v *VersionsService) {
 
 func Versions() (v *VersionsService) {
 	return NewVersionsService()
-}
-
-func (v *VersionsService) ReturnNewerVersion(v1 Version, v2 Version) (newerVersion Version, err error) {
-	if v1 == nil {
-		return nil, TracedErrorNil("v1")
-	}
-
-	if v2 == nil {
-		return nil, TracedErrorNil("v2")
-	}
-
-	isNewer, err := v1.IsNewerThan(v2)
-	if err != nil {
-		return nil, err
-	}
-
-	if isNewer {
-		return v1, nil
-	}
-
-	return v2, nil
 }
 
 func (v *VersionsService) CheckDateVersionString(versionString string) (isVersionString bool, err error) {
@@ -187,6 +167,24 @@ func (v *VersionsService) GetVersionStringsFromStringSlice(input []string) (vers
 	return versionStrings
 }
 
+func (v *VersionsService) GetVersionStringsFromVersionSlice(versions []Version) (versionStrings []string, err error) {
+	if versions == nil {
+		return nil, TracedErrorNil("versions")
+	}
+
+	versionStrings = []string{}
+	for _, v := range versions {
+		toAdd, err := v.GetAsString()
+		if err != nil {
+			return nil, err
+		}
+
+		versionStrings = append(versionStrings, toAdd)
+	}
+
+	return versionStrings, nil
+}
+
 func (v *VersionsService) GetVersionsFromStringSlice(stringSlice []string) (versions []Version, err error) {
 	if stringSlice == nil {
 		return nil, TracedErrorNil("stringSlice")
@@ -274,6 +272,15 @@ func (v *VersionsService) MustGetNewVersionByString(versionString string) (versi
 	return version
 }
 
+func (v *VersionsService) MustGetVersionStringsFromVersionSlice(versions []Version) (versionStrings []string) {
+	versionStrings, err := v.GetVersionStringsFromVersionSlice(versions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return versionStrings
+}
+
 func (v *VersionsService) MustGetVersionsFromStringSlice(stringSlice []string) (versions []Version) {
 	versions, err := v.GetVersionsFromStringSlice(stringSlice)
 	if err != nil {
@@ -281,4 +288,96 @@ func (v *VersionsService) MustGetVersionsFromStringSlice(stringSlice []string) (
 	}
 
 	return versions
+}
+
+func (v *VersionsService) MustReturnNewerVersion(v1 Version, v2 Version) (newerVersion Version) {
+	newerVersion, err := v.ReturnNewerVersion(v1, v2)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return newerVersion
+}
+
+func (v *VersionsService) MustSortStringSlice(versionStrings []string) (sorted []string) {
+	sorted, err := v.SortStringSlice(versionStrings)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return sorted
+}
+
+func (v *VersionsService) MustSortVersionSlice(versions []Version) (sorted []Version) {
+	sorted, err := v.SortVersionSlice(versions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return sorted
+}
+
+func (v *VersionsService) ReturnNewerVersion(v1 Version, v2 Version) (newerVersion Version, err error) {
+	if v1 == nil {
+		return nil, TracedErrorNil("v1")
+	}
+
+	if v2 == nil {
+		return nil, TracedErrorNil("v2")
+	}
+
+	isNewer, err := v1.IsNewerThan(v2)
+	if err != nil {
+		return nil, err
+	}
+
+	if isNewer {
+		return v1, nil
+	}
+
+	return v2, nil
+}
+
+func (v *VersionsService) SortStringSlice(versionStrings []string) (sorted []string, err error) {
+	if versionStrings == nil {
+		return nil, TracedErrorNil("versionStrings")
+	}
+
+	versions, err := v.GetVersionsFromStringSlice(versionStrings)
+	if err != nil {
+		return nil, err
+	}
+
+	versions, err = v.SortVersionSlice(versions)
+	if err != nil {
+		return nil, err
+	}
+
+	return v.GetVersionStringsFromVersionSlice(versions)
+}
+
+func (v *VersionsService) SortVersionSlice(versions []Version) (sorted []Version, err error) {
+	if versions == nil {
+		return nil, TracedErrorNil("versions")
+	}
+
+	var errDuringSort error
+	sort.Slice(
+		versions,
+		func(i int, j int) bool {
+			isNewer, err := versions[i].IsNewerThan(versions[j])
+			if err != nil {
+				errDuringSort = err
+				return false
+			}
+
+			return !isNewer
+		},
+	)
+
+	if errDuringSort != nil {
+		return nil, errDuringSort
+	}
+
+	return versions, nil
 }
