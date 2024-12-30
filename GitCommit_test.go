@@ -223,7 +223,6 @@ func TestGitCommit_ListVersionTagNames(t *testing.T) {
 	}
 }
 
-
 func TestGitCommit_GetNewestTagVersion(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -289,6 +288,94 @@ func TestGitCommit_GetNewestTagVersion(t *testing.T) {
 				assert.EqualValues(
 					"v1.0.0",
 					currentCommit.MustGetNewestTagVersion(verbose).MustGetAsString(),
+				)
+			},
+		)
+	}
+}
+
+func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				repo := getGitRepositoryToTest(tt.implementationName)
+				defer repo.Delete(verbose)
+
+				repo.MustInit(
+					&CreateRepositoryOptions{
+						Verbose:                     verbose,
+						InitializeWithEmptyCommit:   true,
+						InitializeWithDefaultAuthor: true,
+					},
+				)
+
+				currentCommit := repo.MustGetCurrentCommit()
+
+				assert.EqualValues(
+					[]GitTag{},
+					currentCommit.MustListTags(verbose),
+				)
+				assert.Nil(
+					currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose),
+				)
+
+				currentCommit.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "first_tag",
+						Verbose: verbose,
+					},
+				)
+
+				assert.Nil(
+					currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose),
+				)
+
+				currentCommit.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "v1.0.0",
+						Verbose: verbose,
+					},
+				)
+
+				assert.EqualValues(
+					"v1.0.0",
+					currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).MustGetAsString(),
+				)
+
+				currentCommit.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "v0.1.2",
+						Verbose: verbose,
+					},
+				)
+
+				assert.EqualValues(
+					"v1.0.0",
+					currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).MustGetAsString(),
+				)
+
+				currentCommit.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "another_tag",
+						Verbose: verbose,
+					},
+				)
+
+				assert.EqualValues(
+					"v1.0.0",
+					currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).MustGetAsString(),
 				)
 			},
 		)
