@@ -728,7 +728,7 @@ func TestGitRepository_ListTags(t *testing.T) {
 						Verbose: verbose,
 					},
 				)
-				
+
 				tags := gitRepo.MustListTags(verbose)
 
 				assert.EqualValues(
@@ -784,7 +784,7 @@ func TestGitRepository_GetLatestTagVersion(t *testing.T) {
 						Verbose: verbose,
 					},
 				)
-				
+
 				latestVersion := gitRepo.MustGetLatestTagVersion(verbose)
 
 				assert.EqualValues(
@@ -836,10 +836,126 @@ func TestGitRepository_GetLatestTagVersionAsString(t *testing.T) {
 						Verbose: verbose,
 					},
 				)
-				
+
 				assert.EqualValues(
 					"v1.0.0",
 					gitRepo.MustGetLatestTagVersionAsString(verbose),
+				)
+			},
+		)
+	}
+}
+
+func TestGitRepository_GetCurrentCommitsNewestVersion(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				gitRepo.MustCommit(
+					&GitCommitOptions{
+						Message:    "initial empty commit",
+						AllowEmpty: true,
+						Verbose:    verbose,
+					},
+				)
+
+				gitRepo.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "v0.1.2",
+						Verbose: verbose,
+					},
+				)
+
+				assert.EqualValues(
+					"v0.1.2",
+					gitRepo.MustGetCurrentCommitsNewestVersion(verbose).MustGetAsString(),
+				)
+
+				gitRepo.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "v1.0.0",
+						Verbose: verbose,
+					},
+				)
+
+				assert.EqualValues(
+					"v1.0.0",
+					gitRepo.MustGetCurrentCommitsNewestVersion(verbose).MustGetAsString(),
+				)
+			},
+		)
+	}
+}
+
+
+func TestGitRepository_GetCurrentCommitsNewestVersionOrNilIfUnset(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				gitRepo.MustCommit(
+					&GitCommitOptions{
+						Message:    "initial empty commit",
+						AllowEmpty: true,
+						Verbose:    verbose,
+					},
+				)
+
+				assert.EqualValues(
+					nil,
+					gitRepo.MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose),
+				)
+
+				gitRepo.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "v0.1.2",
+						Verbose: verbose,
+					},
+				)
+
+				assert.EqualValues(
+					"v0.1.2",
+					gitRepo.MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose).MustGetAsString(),
+				)
+
+				gitRepo.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "v1.0.0",
+						Verbose: verbose,
+					},
+				)
+
+				assert.EqualValues(
+					"v1.0.0",
+					gitRepo.MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose).MustGetAsString(),
 				)
 			},
 		)
