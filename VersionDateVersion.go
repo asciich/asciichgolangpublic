@@ -1,6 +1,5 @@
 package asciichgolangpublic
 
-
 type VersionDateVersion struct {
 	version string
 }

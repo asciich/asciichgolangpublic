@@ -21,10 +21,6 @@ func NewGitRepositoryCreateTagOptions() (g *GitRepositoryCreateTagOptions) {
 	return new(GitRepositoryCreateTagOptions)
 }
 
-func (g *GitRepositoryCreateTagOptions) IsCommitHashSet() (isSet bool) {
-	return g.CommitHash != ""
-}
-
 func (g *GitRepositoryCreateTagOptions) GetCommitHash() (commitHash string, err error) {
 	if g.CommitHash == "" {
 		return "", TracedErrorf("CommitHash not set")
@@ -82,6 +78,10 @@ func (g *GitRepositoryCreateTagOptions) GetTagNameOrEmptyStringIfUnset() (tagNam
 func (g *GitRepositoryCreateTagOptions) GetVerbose() (verbose bool, err error) {
 
 	return g.Verbose, nil
+}
+
+func (g *GitRepositoryCreateTagOptions) IsCommitHashSet() (isSet bool) {
+	return g.CommitHash != ""
 }
 
 func (g *GitRepositoryCreateTagOptions) IsTagCommentSet() (isSet bool) {

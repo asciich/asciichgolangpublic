@@ -3,11 +3,10 @@ package asciichgolangpublic
 import (
 	"testing"
 
-
 	"github.com/stretchr/testify/assert"
 )
 
-func TestVersionsGetDateVersionString(t *testing.T) {
+func TestVersions_GetDateVersionString(t *testing.T) {
 	tests := []struct {
 		testmessage string
 	}{
@@ -29,7 +28,7 @@ func TestVersionsGetDateVersionString(t *testing.T) {
 	}
 }
 
-func TestVersionsGetSoftwareVersionEnvVarName(t *testing.T) {
+func TestVersions_GetSoftwareVersionEnvVarName(t *testing.T) {
 	tests := []struct {
 		testmessage string
 	}{
@@ -48,7 +47,7 @@ func TestVersionsGetSoftwareVersionEnvVarName(t *testing.T) {
 	}
 }
 
-func TestVersionsIsDateVersionString(t *testing.T) {
+func TestVersions_IsDateVersionString(t *testing.T) {
 	tests := []struct {
 		versionString           string
 		expectedIsVersionString bool
@@ -79,7 +78,7 @@ func TestVersionsIsDateVersionString(t *testing.T) {
 	}
 }
 
-func TestVersionsIsVersionString(t *testing.T) {
+func TestVersions_IsVersionString(t *testing.T) {
 	tests := []struct {
 		versionString           string
 		expectedIsVersionString bool
@@ -142,7 +141,7 @@ func TestVersionsIsVersionString(t *testing.T) {
 	}
 }
 
-func TestVersionsIsSemanticVersion(t *testing.T) {
+func TestVersions_IsSemanticVersion(t *testing.T) {
 	tests := []struct {
 		versionString             string
 		expectedIsSemanticVersion bool
@@ -203,7 +202,7 @@ func TestVersionsIsSemanticVersion(t *testing.T) {
 	}
 }
 
-func TestVersionsGetLatestVersionFromSlice(t *testing.T) {
+func TestVersions_GetLatestVersionFromSlice(t *testing.T) {
 	tests := []struct {
 		versionStrings []string
 		expectedNewest string
@@ -237,6 +236,30 @@ func TestVersionsGetLatestVersionFromSlice(t *testing.T) {
 				expectedNewestVersion := MustGetVersionByString(tt.expectedNewest)
 
 				assert.True(latestVersion.Equals(expectedNewestVersion))
+			},
+		)
+	}
+}
+
+func TestVersions_SortStringSlice(t *testing.T) {
+	tests := []struct {
+		versionStrings []string
+		expectedSorted []string
+	}{
+		{[]string{"v0.0.0"}, []string{"v0.0.0"}},
+		{[]string{"v0.0.0", "v0.1.2"}, []string{"v0.0.0", "v0.1.2"}},
+		{[]string{"v0.1.2", "v0.0.0"}, []string{"v0.0.0", "v0.1.2"}},
+	}
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				assert.EqualValues(
+					tt.expectedSorted,
+					Versions().MustSortStringSlice(tt.versionStrings),
+				)
 			},
 		)
 	}

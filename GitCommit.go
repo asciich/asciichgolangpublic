@@ -165,6 +165,27 @@ func (g *GitCommit) HasParentCommit() (hasParentCommit bool, err error) {
 	return hasParentCommit, nil
 }
 
+func (g *GitCommit) ListTagNames(verbose bool) (tagNames []string, err error) {
+	tags, err := g.ListTags(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	tagNames = []string{}
+	for _, t := range tags {
+		toAdd, err := t.GetName()
+		if err != nil {
+			return nil, err
+		}
+
+		tagNames = append(tagNames, toAdd)
+	}
+
+	tagNames = Slices().SortStringSlice(tagNames)
+
+	return tagNames, nil
+}
+
 func (g *GitCommit) ListTags(verbose bool) (tags []GitTag, err error) {
 	repository, err := g.GetGitRepo()
 	if err != nil {
@@ -177,6 +198,51 @@ func (g *GitCommit) ListTags(verbose bool) (tags []GitTag, err error) {
 	}
 
 	return repository.ListTagsForCommitHash(hash, verbose)
+}
+
+func (g *GitCommit) ListVersionTagNames(verbose bool) (tagNames []string, err error) {
+	tags, err := g.ListVersionTags(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	tagNames = []string{}
+	for _, t := range tags {
+		toAdd, err := t.GetName()
+		if err != nil {
+			return nil, err
+		}
+
+		tagNames = append(tagNames, toAdd)
+	}
+
+	tagNames, err = Versions().SortStringSlice(tagNames)
+	if err != nil {
+		return nil, err
+	}
+
+	return tagNames, nil
+}
+
+func (g *GitCommit) ListVersionTags(verbose bool) (tags []GitTag, err error) {
+	allTags, err := g.ListTags(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	tags = []GitTag{}
+	for _, t := range allTags {
+		isVersionTag, err := t.IsVersionTag()
+		if err != nil {
+			return nil, err
+		}
+
+		if isVersionTag {
+			tags = append(tags, t)
+		}
+	}
+
+	return tags, nil
 }
 
 func (g *GitCommit) MustCreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag) {
@@ -260,8 +326,35 @@ func (g *GitCommit) MustHasParentCommit() (hasParentCommit bool) {
 	return hasParentCommit
 }
 
+func (g *GitCommit) MustListTagNames(verbose bool) (tagNames []string) {
+	tagNames, err := g.ListTagNames(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return tagNames
+}
+
 func (g *GitCommit) MustListTags(verbose bool) (tags []GitTag) {
 	tags, err := g.ListTags(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return tags
+}
+
+func (g *GitCommit) MustListVersionTagNames(verbose bool) (tagNames []string) {
+	tagNames, err := g.ListVersionTagNames(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return tagNames
+}
+
+func (g *GitCommit) MustListVersionTags(verbose bool) (tags []GitTag) {
+	tags, err := g.ListVersionTags(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
