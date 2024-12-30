@@ -18,42 +18,46 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 * Releasing:
 	* Release often: Every (small) improvement is an improvemnt and will be released as soon as possible.
 	* This repository will never reach v1: There will be always be breaking changes if needed to improve the code.
+	* Everytime the code base is touched it should look better than before.
 * Readability:
 	* An end user of this repository should be able to write readable code.
 * Background information:
 	* Currently this is a one man show.
 	* It bases purely on some code I wrote at home in my free time used for automating my personal homelab.
-	* Multiple levels of automation implementation and where this library can help:
-		1. Knowledge in the head of the develpers (worst case):
-			- In worst case not even documented at all.
-			- Very error prone and a huge truck factor.
-			- **This library is no help here!**
-		1. Documented instructions:
-			- Idealy step-by-step instructions.
-			- This approach is also called Wiki-Ops.
-			- **This library is no help here!**
-		1. Scripting (Bash, Python, Ansible...):
-			- Better than any documentation since the steps are reproducible and complete (otherwise it would not run successfully).
-			- Often hard to (unit-)test.
-			- While Python is a fully fledged programming language able to handle complex things the amount of complexity and reuseabilty is in Bash is limited.
-			- Bash scripting reflects the way system administrators work interactively with the systems and is therefore often easy to understand for other team members.
-			- External interpreters and tools are needed.
-		1. High level programming languages enriched with convenince functions and shortcuts allowed:
-			- A lot of boilerplate code.
-			- Unit- and integration tests possible and useful.
-			- Reusable code.
-			- Still some external dependencies, especially when calling other binaries to achive a shortcut.
-			- Easy to automated new task by combining existing convenience functions.
-			- Checking of inputs at every function call already detects malformed input at an early state.
-			- Putting convenience functions together often leads to inefficient algorithms (e.g. more API requests than needed.).
-			- The programming style gives some guard rails which can make it easier for other system administrators to start implementing their own stuff.
-			- Easier to debug crashes since full stack trace is provided in errors (see [section errors](#errors)) but can also lead to security issues by exposing internal information.
-		1. Idiomatic Golang code (best case):
-			- Unit- and integration tests possible and useful.
-			- Reusable code.
-			- No external dependencies since everything is natively implemneted.
-			- Fastest execution time.
-			- **While this library is currently far away from idiomatic go the aim is to move towards idiomatic code in the implementation.**
+* Multiple levels of automation implementation and where this library can help:
+	1. Knowledge in the head of the develpers (worst case):
+		- In worst case not even documented at all.
+		- Very error prone and a huge truck factor.
+		- **This library is no help here!**
+	1. Documented instructions:
+		- Idealy step-by-step instructions.
+		- This approach is also called Wiki-Ops.
+		- **This library is no help here!**
+	1. Scripting (Bash, Python, Ansible...):
+		- Better than any documentation since the steps are reproducible and complete (otherwise it would not run successfully).
+		- Often hard to (unit-)test.
+		- While Python is a fully fledged programming language able to handle complex things the amount of complexity and reuseabilty is in Bash is limited.
+		- Bash scripting reflects the way system administrators work interactively with the systems and is therefore often easy to understand for other team members.
+		- External interpreters and tools are needed.
+		- Interpreted languages are error prone and often easy to exploid using code injection
+		- **While orchestrating Bash commands or python one liners is not how programming works it is often the first starting point and still way better than wiki-ops. This library offers an easy to use interaction with the CLI using Bash() or CommandExecutors in general. But keep in mind: It's a starting point and sometimes needed to get things up and running in time but must be migrated towards native implementations on the long run.**
+	1. High level programming languages enriched with convenince functions and shortcuts allowed:
+		- Reusable code.
+		- Easy to automated new task by combining existing convenience functions.
+		- Checking of inputs at every function call already detects malformed input at an early state.
+		- A lot of boilerplate code.
+		- Unit- and integration tests possible and useful.
+		- Still some external dependencies, especially when calling other binaries to achive a shortcut.
+		- Putting convenience functions together often leads to inefficient algorithms (e.g. more API requests than needed.).
+		- The programming style gives some guard rails which can make it easier for other system administrators to start implementing their own stuff.
+		- Easier to debug crashes since full stack trace is provided in errors (see [section errors](#errors)) but can also lead to security issues by exposing internal information.
+		- **Most of this library is written this way. Not bad as a starting point and usable on a high level so implementing new tasks is easy but still a lot of improvmentes towards an idiomatic golang codebase.**
+	1. Idiomatic Golang code (best case):
+		- Reusable code.
+		- Unit- and integration tests possible and useful.
+		- No external dependencies since everything is natively implemneted.
+		- Fastest execution time.
+		- **While this library is currently far away from idiomatic go the aim is to move towards idiomatic code in the implementation.**
 
 ## Logging
 

@@ -127,6 +127,15 @@ func (g *GitCommit) GetHash() (hash string, err error) {
 	return g.hash, nil
 }
 
+func (g *GitCommit) GetNewestTagVersion(verbose bool) (newestVersion Version, err error) {
+	versions, err := g.ListVersionTagVersions(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return Versions().GetLatestVersionFromSlice(versions)
+}
+
 func (g *GitCommit) GetParentCommits(options *GitCommitGetParentsOptions) (parentCommit []*GitCommit, err error) {
 	hash, err := g.GetHash()
 	if err != nil {
@@ -224,6 +233,25 @@ func (g *GitCommit) ListVersionTagNames(verbose bool) (tagNames []string, err er
 	return tagNames, nil
 }
 
+func (g *GitCommit) ListVersionTagVersions(verbose bool) (versions []Version, err error) {
+	versionTags, err := g.ListVersionTags(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	versions = []Version{}
+	for _, v := range versionTags {
+		toAdd, err := v.GetVersion()
+		if err != nil {
+			return nil, err
+		}
+
+		versions = append(versions, toAdd)
+	}
+
+	return versions, nil
+}
+
 func (g *GitCommit) ListVersionTags(verbose bool) (tags []GitTag, err error) {
 	allTags, err := g.ListTags(verbose)
 	if err != nil {
@@ -308,6 +336,15 @@ func (g *GitCommit) MustGetHash() (hash string) {
 	return hash
 }
 
+func (g *GitCommit) MustGetNewestTagVersion(verbose bool) (newestVersion Version) {
+	newestVersion, err := g.GetNewestTagVersion(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return newestVersion
+}
+
 func (g *GitCommit) MustGetParentCommits(options *GitCommitGetParentsOptions) (parentCommit []*GitCommit) {
 	parentCommit, err := g.GetParentCommits(options)
 	if err != nil {
@@ -351,6 +388,15 @@ func (g *GitCommit) MustListVersionTagNames(verbose bool) (tagNames []string) {
 	}
 
 	return tagNames
+}
+
+func (g *GitCommit) MustListVersionTagVersions(verbose bool) (versions []Version) {
+	versions, err := g.ListVersionTagVersions(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return versions
 }
 
 func (g *GitCommit) MustListVersionTags(verbose bool) (tags []GitTag) {
