@@ -58,9 +58,11 @@ type Directory interface {
 	MustReadFileInDirectoryAsInt64(path ...string) (content int64)
 	MustReadFileInDirectoryAsLines(path ...string) (content []string)
 	MustReadFileInDirectoryAsString(path ...string) (content string)
+	MustReadFirstLineOfFileInDirectoryAsString(path ...string) (firstLine string)
 	MustWriteStringToFileInDirectory(content string, verbose bool, path ...string) (writtenFile File)
 	ReadFileInDirectoryAsInt64(path ...string) (content int64, err error)
 	ReadFileInDirectoryAsLines(path ...string) (content []string, err error)
 	ReadFileInDirectoryAsString(path ...string) (content string, err error)
+	ReadFirstLineOfFileInDirectoryAsString(path ...string) (firstLine string, err error)
 	WriteStringToFileInDirectory(content string, verbose bool, path ...string) (writtenFile File, err error)
 }
