@@ -901,7 +901,6 @@ func TestGitRepository_GetCurrentCommitsNewestVersion(t *testing.T) {
 	}
 }
 
-
 func TestGitRepository_GetCurrentCommitsNewestVersionOrNilIfUnset(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -957,6 +956,114 @@ func TestGitRepository_GetCurrentCommitsNewestVersionOrNilIfUnset(t *testing.T) 
 					"v1.0.0",
 					gitRepo.MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose).MustGetAsString(),
 				)
+			},
+		)
+	}
+}
+
+func TestGitRepository_IsGolangApplication_emptyRepo(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				assert.False(gitRepo.MustIsGolangApplication(verbose))
+			},
+		)
+	}
+}
+
+func TestGitRepository_IsGolangApplication_onlyGoMod(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				gitRepo.MustWriteStringToFile("module example\n", verbose, "go.mod")
+
+				assert.False(gitRepo.MustIsGolangApplication(verbose))
+			},
+		)
+	}
+}
+
+func TestGitRepository_IsGolangApplication_NoMainFunction(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				gitRepo.MustWriteStringToFile("module example\n", verbose, "go.mod")
+				gitRepo.MustWriteStringToFile("package main\nfunc abc() bool {\n\treturn true\n}\n", verbose, "main.go")
+
+				assert.False(gitRepo.MustIsGolangApplication(verbose))
+			},
+		)
+	}
+}
+
+func TestGitRepository_IsGolangApplication(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				gitRepo.MustWriteStringToFile("module example\n", verbose, "go.mod")
+				gitRepo.MustWriteStringToFile("package main\nfunc main() {\n\treturn\n}\n", verbose, "main.go")
+
+				assert.True(gitRepo.MustIsGolangApplication(verbose))
 			},
 		)
 	}
