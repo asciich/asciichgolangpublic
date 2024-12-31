@@ -393,6 +393,8 @@ func (d *DirectoryBase) ReadFileInDirectoryAsInt64(path ...string) (value int64,
 		return -1, err
 	}
 
+	content = strings.TrimSpace(content)
+
 	value, err = strconv.ParseInt(content, 10, 64)
 	if err != nil {
 		return -1, TracedErrorf(

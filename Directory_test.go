@@ -94,9 +94,21 @@ func TestDirectory_ReadFileInDirectoryAsString(t *testing.T) {
 func TestDirectory_ReadFileInDirectoryAsInt64(t *testing.T) {
 	tests := []struct {
 		implementationName string
+		content            string
+		expectedInt64      int64
 	}{
-		{"localDirectory"},
-		{"localCommandExecutorDirectory"},
+		{"localDirectory", "1234", 1234},
+		{"localDirectory", "1234\n", 1234},
+		{"localDirectory", "1234 ", 1234},
+		{"localDirectory", " 1234", 1234},
+		{"localDirectory", "\n1234\n", 1234},
+		{"localDirectory", "\n1234", 1234},
+		{"localCommandExecutorDirectory", "1234", 1234},
+		{"localCommandExecutorDirectory", "1234\n", 1234},
+		{"localCommandExecutorDirectory", "1234 ", 1234},
+		{"localCommandExecutorDirectory", " 1234", 1234},
+		{"localCommandExecutorDirectory", "\n1234\n", 1234},
+		{"localCommandExecutorDirectory", "\n1234", 1234},
 	}
 
 	for _, tt := range tests {
@@ -110,10 +122,10 @@ func TestDirectory_ReadFileInDirectoryAsInt64(t *testing.T) {
 				dir := getDirectoryToTest(tt.implementationName)
 				defer dir.Delete(verbose)
 
-				dir.MustWriteStringToFileInDirectory("1234", verbose, "test.txt")
+				dir.MustWriteStringToFileInDirectory(tt.content, verbose, "test.txt")
 
 				assert.EqualValues(
-					1234,
+					tt.expectedInt64,
 					dir.MustReadFileInDirectoryAsInt64("test.txt"),
 				)
 			},
