@@ -60,7 +60,7 @@ func (g *GitRepositoryBase) GetCurrentCommitsNewestVersion(verbose bool) (newest
 		return nil, err
 	}
 
-	currentCommit, err := parent.GetCurrentCommit()
+	currentCommit, err := parent.GetCurrentCommit(verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (g *GitRepositoryBase) GetCurrentCommitsNewestVersionOrNilIfNotPresent(verb
 		return nil, err
 	}
 
-	currentCommit, err := parent.GetCurrentCommit()
+	currentCommit, err := parent.GetCurrentCommit(verbose)
 	if err != nil {
 		return nil, err
 	}

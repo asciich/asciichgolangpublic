@@ -257,7 +257,7 @@ func (c *CommandExecutorGitRepository) Commit(commitOptions *GitCommitOptions) (
 		return nil, err
 	}
 
-	createdCommit, err = c.GetCurrentCommit()
+	createdCommit, err = c.GetCurrentCommit(commitOptions.Verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -313,7 +313,7 @@ func (c *CommandExecutorGitRepository) CreateTag(options *GitRepositoryCreateTag
 			return nil, err
 		}
 	} else {
-		hashToTag, err = c.GetCurrentCommitHash()
+		hashToTag, err = c.GetCurrentCommitHash(options.Verbose)
 		if err != nil {
 			return nil, err
 		}
@@ -406,16 +406,35 @@ func (c *CommandExecutorGitRepository) GetCommitTimeByCommitHash(hash string) (c
 	return nil, TracedErrorNotImplemented()
 }
 
-func (c *CommandExecutorGitRepository) GetCurrentCommit() (currentCommit *GitCommit, err error) {
-	currentCommitHash, err := c.GetCurrentCommitHash()
+func (c *CommandExecutorGitRepository) GetCurrentCommit(verbose bool) (currentCommit *GitCommit, err error) {
+	currentCommitHash, err := c.GetCurrentCommitHash(verbose)
 	if err != nil {
 		return nil, err
 	}
 
-	return c.GetCommitByHash(currentCommitHash)
+	currentCommit, err = c.GetCommitByHash(currentCommitHash)
+	if err != nil {
+		return nil, err
+	}
+
+	if verbose {
+		path, hostDescription, err := c.GetPathAndHostDescription()
+		if err != nil {
+			return nil, err
+		}
+
+		LogInfof(
+			"Current commit of git repository '%s' on host '%s' has hash '%s'.",
+			path,
+			hostDescription,
+			currentCommitHash,
+		)
+	}
+
+	return currentCommit, nil
 }
 
-func (c *CommandExecutorGitRepository) GetCurrentCommitHash() (currentCommitHash string, err error) {
+func (c *CommandExecutorGitRepository) GetCurrentCommitHash(verbose bool) (currentCommitHash string, err error) {
 	currentCommitHash, err = c.RunGitCommandAndGetStdoutAsString(
 		[]string{"rev-parse", "HEAD"},
 		false,
@@ -1209,8 +1228,8 @@ func (c *CommandExecutorGitRepository) MustGetCommitTimeByCommitHash(hash string
 	return commitTime
 }
 
-func (c *CommandExecutorGitRepository) MustGetCurrentCommit() (currentCommit *GitCommit) {
-	currentCommit, err := c.GetCurrentCommit()
+func (c *CommandExecutorGitRepository) MustGetCurrentCommit(verbose bool) (currentCommit *GitCommit) {
+	currentCommit, err := c.GetCurrentCommit(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -1218,8 +1237,8 @@ func (c *CommandExecutorGitRepository) MustGetCurrentCommit() (currentCommit *Gi
 	return currentCommit
 }
 
-func (c *CommandExecutorGitRepository) MustGetCurrentCommitHash() (currentCommitHash string) {
-	currentCommitHash, err := c.GetCurrentCommitHash()
+func (c *CommandExecutorGitRepository) MustGetCurrentCommitHash(verbose bool) (currentCommitHash string) {
+	currentCommitHash, err := c.GetCurrentCommitHash(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

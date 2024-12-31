@@ -503,13 +503,13 @@ func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 				)
 
 				assert.EqualValues(
-					upstreamRepo.MustGetCurrentCommitHash(),
-					clonedRepo.MustGetCurrentCommitHash(),
+					upstreamRepo.MustGetCurrentCommitHash(verbose),
+					clonedRepo.MustGetCurrentCommitHash(verbose),
 				)
 
 				assert.EqualValues(
-					upstreamRepo.MustGetCurrentCommitHash(),
-					clonedRepo2.MustGetCurrentCommitHash(),
+					upstreamRepo.MustGetCurrentCommitHash(verbose),
+					clonedRepo2.MustGetCurrentCommitHash(verbose),
 				)
 
 				fileName := "abc.txt"
@@ -523,33 +523,33 @@ func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 				)
 
 				assert.NotEqualValues(
-					upstreamRepo.MustGetCurrentCommitHash(),
-					clonedRepo2.MustGetCurrentCommitHash(),
+					upstreamRepo.MustGetCurrentCommitHash(verbose),
+					clonedRepo2.MustGetCurrentCommitHash(verbose),
 				)
 
 				assert.NotEqualValues(
-					clonedRepo.MustGetCurrentCommitHash(),
-					clonedRepo2.MustGetCurrentCommitHash(),
+					clonedRepo.MustGetCurrentCommitHash(verbose),
+					clonedRepo2.MustGetCurrentCommitHash(verbose),
 				)
 
 				clonedRepo2.MustPush(verbose)
 				assert.EqualValues(
-					upstreamRepo.MustGetCurrentCommitHash(),
-					clonedRepo2.MustGetCurrentCommitHash(),
+					upstreamRepo.MustGetCurrentCommitHash(verbose),
+					clonedRepo2.MustGetCurrentCommitHash(verbose),
 				)
 				assert.NotEqualValues(
-					upstreamRepo.MustGetCurrentCommitHash(),
-					clonedRepo.MustGetCurrentCommitHash(),
+					upstreamRepo.MustGetCurrentCommitHash(verbose),
+					clonedRepo.MustGetCurrentCommitHash(verbose),
 				)
 
 				clonedRepo.MustPull(verbose)
 				assert.EqualValues(
-					upstreamRepo.MustGetCurrentCommitHash(),
-					clonedRepo2.MustGetCurrentCommitHash(),
+					upstreamRepo.MustGetCurrentCommitHash(verbose),
+					clonedRepo2.MustGetCurrentCommitHash(verbose),
 				)
 				assert.EqualValues(
-					upstreamRepo.MustGetCurrentCommitHash(),
-					clonedRepo.MustGetCurrentCommitHash(),
+					upstreamRepo.MustGetCurrentCommitHash(verbose),
+					clonedRepo.MustGetCurrentCommitHash(verbose),
 				)
 			},
 		)

@@ -123,7 +123,7 @@ func NewLocalGitRepository() (l *LocalGitRepository) {
 }
 
 func (c *LocalGitRepository) HasInitialCommit(verbose bool) (hasInitialCommit bool, err error) {
-	_, err = c.GetCurrentCommit()
+	_, err = c.GetCurrentCommit(verbose)
 	if err != nil {
 		if errors.Is(err, ErrGitRepositoryDoesNotExist) { // The repository does not even exist.
 			return false, nil
@@ -350,7 +350,7 @@ func (l *LocalGitRepository) CreateTag(options *GitRepositoryCreateTagOptions) (
 			return nil, err
 		}
 	} else {
-		hashToTag, err = l.GetCurrentCommitHash()
+		hashToTag, err = l.GetCurrentCommitHash(options.Verbose)
 		if err != nil {
 			return nil, err
 		}
@@ -678,7 +678,7 @@ func (l *LocalGitRepository) GetCommitTimeByCommitHash(hash string) (commitTime 
 	return commitTime, nil
 }
 
-func (l *LocalGitRepository) GetCurrentCommit() (gitCommit *GitCommit, err error) {
+func (l *LocalGitRepository) GetCurrentCommit(verbose bool) (gitCommit *GitCommit, err error) {
 	head, err := l.GetGoGitHead()
 	if err != nil {
 		return nil, err
@@ -689,11 +689,29 @@ func (l *LocalGitRepository) GetCurrentCommit() (gitCommit *GitCommit, err error
 		return nil, err
 	}
 
+	if verbose {
+		hash, err := gitCommit.GetHash()
+		if err != nil {
+			return nil, err
+		}
+
+		path, err := l.GetPath()
+		if err != nil {
+			return nil, err
+		}
+
+		LogInfof(
+			"Current commit in local git repository '%s' has hash '%s'.",
+			path,
+			hash,
+		)
+	}
+
 	return gitCommit, nil
 }
 
-func (l *LocalGitRepository) GetCurrentCommitGoGitHash() (hash *plumbing.Hash, err error) {
-	currentHashBytes, err := l.GetCurrentCommitHashAsBytes()
+func (l *LocalGitRepository) GetCurrentCommitGoGitHash(verbose bool) (hash *plumbing.Hash, err error) {
+	currentHashBytes, err := l.GetCurrentCommitHashAsBytes(verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -703,8 +721,8 @@ func (l *LocalGitRepository) GetCurrentCommitGoGitHash() (hash *plumbing.Hash, e
 	return &hashValue, nil
 }
 
-func (l *LocalGitRepository) GetCurrentCommitHash() (commitHash string, err error) {
-	commit, err := l.GetCurrentCommit()
+func (l *LocalGitRepository) GetCurrentCommitHash(verbose bool) (commitHash string, err error) {
+	commit, err := l.GetCurrentCommit(verbose)
 	if err != nil {
 		return "", err
 	}
@@ -717,8 +735,8 @@ func (l *LocalGitRepository) GetCurrentCommitHash() (commitHash string, err erro
 	return commitHash, nil
 }
 
-func (l *LocalGitRepository) GetCurrentCommitHashAsBytes() (hash []byte, err error) {
-	currentHash, err := l.GetCurrentCommitHash()
+func (l *LocalGitRepository) GetCurrentCommitHashAsBytes(verbose bool) (hash []byte, err error) {
+	currentHash, err := l.GetCurrentCommitHash(verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -1516,8 +1534,8 @@ func (l *LocalGitRepository) MustGetCommitTimeByCommitHash(hash string) (commitT
 	return commitTime
 }
 
-func (l *LocalGitRepository) MustGetCurrentCommit() (gitCommit *GitCommit) {
-	gitCommit, err := l.GetCurrentCommit()
+func (l *LocalGitRepository) MustGetCurrentCommit(verbose bool) (gitCommit *GitCommit) {
+	gitCommit, err := l.GetCurrentCommit(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -1525,8 +1543,8 @@ func (l *LocalGitRepository) MustGetCurrentCommit() (gitCommit *GitCommit) {
 	return gitCommit
 }
 
-func (l *LocalGitRepository) MustGetCurrentCommitGoGitHash() (hash *plumbing.Hash) {
-	hash, err := l.GetCurrentCommitGoGitHash()
+func (l *LocalGitRepository) MustGetCurrentCommitGoGitHash(verbose bool) (hash *plumbing.Hash) {
+	hash, err := l.GetCurrentCommitGoGitHash(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -1534,8 +1552,8 @@ func (l *LocalGitRepository) MustGetCurrentCommitGoGitHash() (hash *plumbing.Has
 	return hash
 }
 
-func (l *LocalGitRepository) MustGetCurrentCommitHash() (commitHash string) {
-	commitHash, err := l.GetCurrentCommitHash()
+func (l *LocalGitRepository) MustGetCurrentCommitHash(verbose bool) (commitHash string) {
+	commitHash, err := l.GetCurrentCommitHash(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -1543,8 +1561,8 @@ func (l *LocalGitRepository) MustGetCurrentCommitHash() (commitHash string) {
 	return commitHash
 }
 
-func (l *LocalGitRepository) MustGetCurrentCommitHashAsBytes() (hash []byte) {
-	hash, err := l.GetCurrentCommitHashAsBytes()
+func (l *LocalGitRepository) MustGetCurrentCommitHashAsBytes(verbose bool) (hash []byte) {
+	hash, err := l.GetCurrentCommitHashAsBytes(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

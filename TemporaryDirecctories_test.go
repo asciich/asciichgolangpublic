@@ -29,7 +29,7 @@ func TestLocalGitRepositoryCreateEmptyTemporaryGitRepository(t *testing.T) {
 						InitializeWithDefaultAuthor: true,
 					})
 
-				commit := repo.MustGetCurrentCommit()
+				commit := repo.MustGetCurrentCommit(verbose)
 				assert.EqualValues("Initial empty commit during repo initialization", commit.MustGetCommitMessage())
 				assert.EqualValues("asciichgolangpublic git repo initializer <asciichgolangpublic@example.net>", commit.MustGetAuthorString())
 				assert.EqualValues("asciichgolangpublic@example.net", commit.MustGetAuthorEmail())
