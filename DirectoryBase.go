@@ -353,6 +353,15 @@ func (d *DirectoryBase) MustReadFileInDirectoryAsString(path ...string) (content
 	return content
 }
 
+func (d *DirectoryBase) MustReadFirstLineOfFileInDirectoryAsString(path ...string) (firstLine string) {
+	firstLine, err := d.ReadFirstLineOfFileInDirectoryAsString(path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return firstLine
+}
+
 func (d *DirectoryBase) MustSetParentDirectoryForBaseClass(parentDirectoryForBaseClass Directory) {
 	err := d.SetParentDirectoryForBaseClass(parentDirectoryForBaseClass)
 	if err != nil {
@@ -435,6 +444,24 @@ func (d *DirectoryBase) ReadFileInDirectoryAsString(path ...string) (content str
 	}
 
 	return content, nil
+}
+
+func (d *DirectoryBase) ReadFirstLineOfFileInDirectoryAsString(path ...string) (firstLine string, err error) {
+	if len(path) <= 0 {
+		return "", TracedError("No path given")
+	}
+
+	parent, err := d.GetParentDirectoryForBaseClass()
+	if err != nil {
+		return "", err
+	}
+
+	f, err := parent.GetFileInDirectory(path...)
+	if err != nil {
+		return "", err
+	}
+
+	return f.ReadFirstLine()
 }
 
 func (d *DirectoryBase) SetParentDirectoryForBaseClass(parentDirectoryForBaseClass Directory) (err error) {
