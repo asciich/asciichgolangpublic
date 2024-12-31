@@ -31,6 +31,77 @@ func (g *GitRepositoryBase) CommitAndPush(commitOptions *GitCommitOptions) (crea
 	return createdCommit, nil
 }
 
+func (g *GitRepositoryBase) ContainsGoSourceFileOfMainPackageWithMainFunction(verbose bool) (mainFound bool, err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	goFiles, err := parent.ListFiles(
+		&ListFileOptions{
+			NonRecursive:                  true,
+			MatchBasenamePattern:          []string{".*.go"},
+			AllowEmptyListIfNoFileIsFound: true,
+		},
+	)
+	if err != nil {
+		return false, err
+	}
+
+	path, err := parent.GetPath()
+	if err != nil {
+		return false, err
+	}
+
+	const packageMainString string = "package main"
+	const funcMainString string = "func main() {"
+
+	for _, goFile := range goFiles {
+		firstLine, err := goFile.ReadFirstLineAndTrimSpace()
+		if err != nil {
+			return false, err
+		}
+
+		if firstLine != packageMainString {
+			continue
+		}
+
+		containsLine, err := goFile.ContainsLine(funcMainString)
+		if err != nil {
+			return false, err
+		}
+
+		filePath, err := goFile.GetLocalPath()
+		if err != nil {
+			return false, err
+		}
+
+		if containsLine {
+			if verbose {
+				LogInfof(
+					"Found '%s' and '%s' in '%s'",
+					packageMainString,
+					funcMainString,
+					filePath,
+				)
+			}
+
+			return true, nil
+		}
+	}
+
+	if verbose {
+		LogInfof(
+			"No file containing '%s' and '%s' found in '%s'.",
+			packageMainString,
+			funcMainString,
+			path,
+		)
+	}
+
+	return false, nil
+}
+
 func (g *GitRepositoryBase) CreateAndInit(createOptions *CreateRepositoryOptions) (err error) {
 	if createOptions == nil {
 		return TracedErrorNil("createOptions")
@@ -129,6 +200,69 @@ func (g *GitRepositoryBase) GetParentRepositoryForBaseClass() (parentRepositoryF
 	return g.parentRepositoryForBaseClass, nil
 }
 
+func (g *GitRepositoryBase) IsGolangApplication(verbose bool) (isGolangApplication bool, err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	repoPath, err := parent.GetPath()
+	if err != nil {
+		return false, err
+	}
+
+	goModExists, err := parent.FileByPathExists("go.mod", verbose)
+	if err != nil {
+		return false, err
+	}
+
+	if !goModExists {
+		if verbose {
+			LogInfof(
+				"'%s' has no 'go.mod' present and is therefore not a golang application.",
+				repoPath,
+			)
+		}
+		return false, nil
+	}
+
+	mainGoExists, err := parent.FileByPathExists("main.go", verbose)
+	if err != nil {
+		return false, err
+	}
+
+	if mainGoExists {
+		if verbose {
+			LogInfof("'%s' contains a go application since 'main.go' was found.", repoPath)
+		}
+	}
+
+	isMainFuncPresent, err := g.ContainsGoSourceFileOfMainPackageWithMainFunction(verbose)
+	if err != nil {
+		return false, err
+	}
+
+	if isMainFuncPresent {
+		if verbose {
+			LogInfof(
+				"'%s' contains a go application since 'main' function was found.",
+				repoPath,
+			)
+		}
+
+		return true, nil
+	}
+
+	if verbose {
+		LogInfof(
+			"'%s' does not contain a go application.",
+			repoPath,
+		)
+	}
+
+	return false, nil
+}
+
 func (g *GitRepositoryBase) ListVersionTags(verbose bool) (versionTags []GitTag, err error) {
 	parent, err := g.GetParentRepositoryForBaseClass()
 	if err != nil {
@@ -162,6 +296,15 @@ func (g *GitRepositoryBase) MustCommitAndPush(commitOptions *GitCommitOptions) (
 	}
 
 	return createdCommit
+}
+
+func (g *GitRepositoryBase) MustContainsGoSourceFileOfMainPackageWithMainFunction(verbose bool) (mainFound bool) {
+	mainFound, err := g.ContainsGoSourceFileOfMainPackageWithMainFunction(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return mainFound
 }
 
 func (g *GitRepositoryBase) MustCreateAndInit(createOptions *CreateRepositoryOptions) {
@@ -216,6 +359,15 @@ func (g *GitRepositoryBase) MustGetParentRepositoryForBaseClass() (parentReposit
 	return parentRepositoryForBaseClass
 }
 
+func (g *GitRepositoryBase) MustIsGolangApplication(verbose bool) (isGolangApplication bool) {
+	isGolangApplication, err := g.IsGolangApplication(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isGolangApplication
+}
+
 func (g *GitRepositoryBase) MustListVersionTags(verbose bool) (versionTags []GitTag) {
 	versionTags, err := g.ListVersionTags(verbose)
 	if err != nil {
@@ -232,6 +384,15 @@ func (g *GitRepositoryBase) MustSetParentRepositoryForBaseClass(parentRepository
 	}
 }
 
+func (g *GitRepositoryBase) MustWriteStringToFile(content string, verbose bool, path ...string) (writtenFile File) {
+	writtenFile, err := g.WriteStringToFile(content, verbose, path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return writtenFile
+}
+
 func (g *GitRepositoryBase) SetParentRepositoryForBaseClass(parentRepositoryForBaseClass GitRepository) (err error) {
 	if parentRepositoryForBaseClass == nil {
 		return TracedErrorf("parentRepositoryForBaseClass is nil")
@@ -240,4 +401,17 @@ func (g *GitRepositoryBase) SetParentRepositoryForBaseClass(parentRepositoryForB
 	g.parentRepositoryForBaseClass = parentRepositoryForBaseClass
 
 	return nil
+}
+
+func (g *GitRepositoryBase) WriteStringToFile(content string, verbose bool, path ...string) (writtenFile File, err error) {
+	if len(path) <= 0 {
+		return nil, TracedError("path has no elements")
+	}
+
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	return parent.WriteBytesToFile([]byte(content), verbose, path...)
 }

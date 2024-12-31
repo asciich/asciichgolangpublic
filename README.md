@@ -13,6 +13,7 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 	* Provide `MustAbc` functions which call `Abc` but exit fatal if `Abc` is not sucessfull. This allows to write every line a new instruction what to do without dealing with errors which is useful for CLI's:
 		* For CLI's most of the time he only option in case of an error is to abort the execution.
 		* In case you want/ can handle the error on your own just use the `Abc` function directly and you get the error returned.
+	* `CheckAbc` functions evaluate if `Abc` is given. If given `nil`, otherwise an error is returned.
 	* Silent/ no log output by default but provide `verbose` boolean to most functions to change this behavior. Silent CLI's are easier to handle if glued together e.g. in Bash scripts.
 	* Short cuts and code hacks are not nice but still better than doing things by hand. They are at least a good starting point of what functionality is needed and can be improved over time.
 * Releasing:

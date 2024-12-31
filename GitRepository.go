@@ -105,12 +105,18 @@ type GitRepository interface {
 	GetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose bool) (newestVersion Version, err error)
 	GetLatestTagVersion(verbose bool) (latestTagVersion Version, err error)
 	GetLatestTagVersionAsString(verbose bool) (latestTagVersion string, err error)
+	IsGolangApplication(verbose bool) (isGolangApplication bool, err error)
 	MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit)
 	MustCreateAndInit(options *CreateRepositoryOptions)
 	MustGetCurrentCommitsNewestVersion(verbose bool) (newestVersion Version)
 	MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose bool) (newestVersion Version)
 	MustGetLatestTagVersion(verbose bool) (latestTagVersion Version)
 	MustGetLatestTagVersionAsString(verbose bool) (latestTagVersion string)
+	MustIsGolangApplication(verbose bool) (isGolangApplication bool)
+	MustWriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile File)
+	MustWriteStringToFile(content string, verbose bool, path ...string) (writtenFile File)
+	WriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile File, err error)
+	WriteStringToFile(content string, verbose bool, path ...string) (writtenFile File, err error)
 }
 
 func GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit() (msg string) {
