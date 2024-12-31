@@ -33,7 +33,7 @@ func TestGitCommit_CreateTag(t *testing.T) {
 					},
 				)
 
-				commitToTag := repo.MustGetCurrentCommit()
+				commitToTag := repo.MustGetCurrentCommit(verbose)
 
 				assert.EqualValues(
 					[]GitTag{},
@@ -97,7 +97,7 @@ func TestGitCommit_ListTagsNames(t *testing.T) {
 					},
 				)
 
-				currentCommit := repo.MustGetCurrentCommit()
+				currentCommit := repo.MustGetCurrentCommit(verbose)
 
 				assert.EqualValues(
 					[]GitTag{},
@@ -171,7 +171,7 @@ func TestGitCommit_ListVersionTagNames(t *testing.T) {
 					},
 				)
 
-				currentCommit := repo.MustGetCurrentCommit()
+				currentCommit := repo.MustGetCurrentCommit(verbose)
 
 				assert.EqualValues(
 					[]GitTag{},
@@ -250,7 +250,7 @@ func TestGitCommit_GetNewestTagVersion(t *testing.T) {
 					},
 				)
 
-				currentCommit := repo.MustGetCurrentCommit()
+				currentCommit := repo.MustGetCurrentCommit(verbose)
 
 				assert.EqualValues(
 					[]GitTag{},
@@ -321,7 +321,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 					},
 				)
 
-				currentCommit := repo.MustGetCurrentCommit()
+				currentCommit := repo.MustGetCurrentCommit(verbose)
 
 				assert.EqualValues(
 					[]GitTag{},

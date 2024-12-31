@@ -33,8 +33,8 @@ func TestGetCurrentCommitGoGitHash(t *testing.T) {
 				assert.True(ok)
 
 				assert.EqualValues(
-					repo.MustGetCurrentCommitHash(),
-					localGitRepo.MustGetCurrentCommitGoGitHash().String(),
+					repo.MustGetCurrentCommitHash(verbose),
+					localGitRepo.MustGetCurrentCommitGoGitHash(verbose).String(),
 				)
 			},
 		)
@@ -81,7 +81,7 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 					},
 				)
 
-				firstCommit := repo.MustGetCurrentCommit()
+				firstCommit := repo.MustGetCurrentCommit(verbose)
 				assert.EqualValues("message 1", firstCommit.MustGetCommitMessage())
 				assert.False(firstCommit.MustHasParentCommit())
 
@@ -98,7 +98,7 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 						AllowEmpty: true,
 					},
 				)
-				secondCommit := repo.MustGetCurrentCommit()
+				secondCommit := repo.MustGetCurrentCommit(verbose)
 				assert.EqualValues("message 2", secondCommit.MustGetCommitMessage())
 				assert.True(secondCommit.MustHasParentCommit())
 
@@ -117,7 +117,7 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 						AllowEmpty: true,
 					},
 				)
-				thirdCommit := repo.MustGetCurrentCommit()
+				thirdCommit := repo.MustGetCurrentCommit(verbose)
 				assert.EqualValues("message 3", thirdCommit.MustGetCommitMessage())
 				assert.True(thirdCommit.MustHasParentCommit())
 
