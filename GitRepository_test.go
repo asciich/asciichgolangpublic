@@ -1179,3 +1179,35 @@ func TestGitRepository_CheckIsGolangApplication(t *testing.T) {
 		)
 	}
 }
+
+func TestGitRepository_GetFileByPath(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				gitRepo.MustWriteStringToFile("hello world\n", verbose, "test.txt")
+				
+				testTxtFile := gitRepo.MustGetFileByPath("test.txt")
+
+				assert.EqualValues(
+					"hello world\n",
+					testTxtFile.MustReadAsString(),
+				)
+			},
+		)
+	}
+}
