@@ -286,6 +286,34 @@ func TestGitRepository_CreateAndDeleteRepository(t *testing.T) {
 	}
 }
 
+func TestGitRepository_HasNoUncommittedChanges(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				repo := getGitRepositoryToTest(tt.implementationName)
+				defer repo.Delete(verbose)
+
+				assert.True(repo.MustHasNoUncommittedChanges(verbose))
+
+				repo.MustCreateFileInDirectory(verbose, "hello.txt")
+				assert.False(repo.MustHasNoUncommittedChanges(verbose))
+			},
+		)
+	}
+}
+
 func TestGitRepository_HasUncommittedChanges(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -986,7 +1014,6 @@ func TestGitRepository_IsGolangApplication_emptyRepo(t *testing.T) {
 	}
 }
 
-
 func TestGitRepository_CheckIsGolangApplication_emptyRepo(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -1094,7 +1121,6 @@ func TestGitRepository_CheckIsGolangApplication_NoMainFunction(t *testing.T) {
 	}
 }
 
-
 func TestGitRepository_IsGolangApplication_NoMainFunction(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -1151,7 +1177,6 @@ func TestGitRepository_IsGolangApplication(t *testing.T) {
 	}
 }
 
-
 func TestGitRepository_CheckIsGolangApplication(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -1200,7 +1225,7 @@ func TestGitRepository_GetFileByPath(t *testing.T) {
 				defer gitRepo.Delete(verbose)
 
 				gitRepo.MustWriteStringToFile("hello world\n", verbose, "test.txt")
-				
+
 				testTxtFile := gitRepo.MustGetFileByPath("test.txt")
 
 				assert.EqualValues(

@@ -264,6 +264,43 @@ func (g *GitRepositoryBase) GetPathAndHostDescription() (path string, hostDescri
 	return path, hostDescription, nil
 }
 
+func (g *GitRepositoryBase) HasNoUncommittedChanges(verbose bool) (hasNoUncommittedChanges bool, err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	hasUncommittedChanges, err := parent.HasUncommittedChanges(false)
+	if err != nil {
+		return false, err
+	}
+
+	path, hostDescription, err := parent.GetPathAndHostDescription()
+	if err != nil {
+		return false, err
+	}
+
+	hasNoUncommittedChanges = !hasUncommittedChanges
+
+	if verbose {
+		if hasNoUncommittedChanges {
+			LogInfof(
+				"Git repository '%s' on host '%s' has no uncommitted changes.",
+				path,
+				hostDescription,
+			)
+		} else {
+			LogInfof(
+				"Git repository '%s' on host '%s' has uncommitted changes.",
+				path,
+				hostDescription,
+			)
+		}
+	}
+
+	return hasNoUncommittedChanges, nil
+}
+
 func (g *GitRepositoryBase) IsGolangApplication(verbose bool) (isGolangApplication bool, err error) {
 	parent, err := g.GetParentRepositoryForBaseClass()
 	if err != nil {
@@ -446,6 +483,15 @@ func (g *GitRepositoryBase) MustGetPathAndHostDescription() (path string, hostDe
 	}
 
 	return path, hostDescription
+}
+
+func (g *GitRepositoryBase) MustHasNoUncommittedChanges(verbose bool) (hasNoUncommittedChanges bool) {
+	hasNoUncommittedChanges, err := g.HasNoUncommittedChanges(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hasNoUncommittedChanges
 }
 
 func (g *GitRepositoryBase) MustIsGolangApplication(verbose bool) (isGolangApplication bool) {
