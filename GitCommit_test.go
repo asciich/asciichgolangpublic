@@ -381,3 +381,74 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 		)
 	}
 }
+
+
+func TestGitCommit_HasVersionTag(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				repo := getGitRepositoryToTest(tt.implementationName)
+				defer repo.Delete(verbose)
+
+				repo.MustInit(
+					&CreateRepositoryOptions{
+						Verbose:                     verbose,
+						InitializeWithEmptyCommit:   true,
+						InitializeWithDefaultAuthor: true,
+					},
+				)
+
+				currentCommit := repo.MustGetCurrentCommit(verbose)
+
+				assert.False(
+					currentCommit.MustHasVersionTag(verbose),
+				)
+
+				currentCommit.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "first_tag",
+						Verbose: verbose,
+					},
+				)
+
+				assert.False(
+					currentCommit.MustHasVersionTag(verbose),
+				)
+
+				currentCommit.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "v1.0.0",
+						Verbose: verbose,
+					},
+				)
+
+				assert.True(
+					currentCommit.MustHasVersionTag(verbose),
+				)
+
+				currentCommit.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "v0.1.2",
+						Verbose: verbose,
+					},
+				)
+
+				assert.True(
+					currentCommit.MustHasVersionTag(verbose),
+				)
+			},
+		)
+	}
+}

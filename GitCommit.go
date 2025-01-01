@@ -225,6 +225,15 @@ func (g *GitCommit) HasParentCommit() (hasParentCommit bool, err error) {
 	return hasParentCommit, nil
 }
 
+func (g *GitCommit) HasVersionTag(verbose bool) (hasVersionTag bool, err error) {
+	tags, err := g.ListVersionTags(verbose)
+	if err != nil {
+		return false, err
+	}
+
+	return len(tags) > 0, nil
+}
+
 func (g *GitCommit) ListTagNames(verbose bool) (tagNames []string, err error) {
 	tags, err := g.ListTags(verbose)
 	if err != nil {
@@ -430,6 +439,15 @@ func (g *GitCommit) MustHasParentCommit() (hasParentCommit bool) {
 	}
 
 	return hasParentCommit
+}
+
+func (g *GitCommit) MustHasVersionTag(verbose bool) (hasVersionTag bool) {
+	hasVersionTag, err := g.HasVersionTag(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hasVersionTag
 }
 
 func (g *GitCommit) MustListTagNames(verbose bool) (tagNames []string) {
