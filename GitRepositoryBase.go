@@ -8,6 +8,33 @@ func NewGitRepositoryBase() (g *GitRepositoryBase) {
 	return new(GitRepositoryBase)
 }
 
+func (g *GitRepositoryBase) CheckIsGolangApplication(verbose bool) (err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	ok, err := parent.IsGolangApplication(verbose)
+	if err != nil {
+		return err
+	}
+
+	if ok {
+		return nil
+	}
+
+	path, hostDescription, err := g.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	return TracedErrorf(
+		"git repository '%s' on host '%s' is not a golang application",
+		path,
+		hostDescription,
+	)
+}
+
 func (g *GitRepositoryBase) CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
 	if commitOptions == nil {
 		return nil, TracedErrorNil("commitOptions")
@@ -200,6 +227,25 @@ func (g *GitRepositoryBase) GetParentRepositoryForBaseClass() (parentRepositoryF
 	return g.parentRepositoryForBaseClass, nil
 }
 
+func (g *GitRepositoryBase) GetPathAndHostDescription() (path string, hostDescription string, err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return "", "", err
+	}
+
+	path, err = parent.GetPath()
+	if err != nil {
+		return "", "", err
+	}
+
+	hostDescription, err = parent.GetHostDescription()
+	if err != nil {
+		return "", "", err
+	}
+
+	return path, hostDescription, nil
+}
+
 func (g *GitRepositoryBase) IsGolangApplication(verbose bool) (isGolangApplication bool, err error) {
 	parent, err := g.GetParentRepositoryForBaseClass()
 	if err != nil {
@@ -289,6 +335,13 @@ func (g *GitRepositoryBase) ListVersionTags(verbose bool) (versionTags []GitTag,
 	return versionTags, nil
 }
 
+func (g *GitRepositoryBase) MustCheckIsGolangApplication(verbose bool) {
+	err := g.CheckIsGolangApplication(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (g *GitRepositoryBase) MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
 	createdCommit, err := g.CommitAndPush(commitOptions)
 	if err != nil {
@@ -357,6 +410,15 @@ func (g *GitRepositoryBase) MustGetParentRepositoryForBaseClass() (parentReposit
 	}
 
 	return parentRepositoryForBaseClass
+}
+
+func (g *GitRepositoryBase) MustGetPathAndHostDescription() (path string, hostDescription string) {
+	path, hostDescription, err := g.GetPathAndHostDescription()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return path, hostDescription
 }
 
 func (g *GitRepositoryBase) MustIsGolangApplication(verbose bool) (isGolangApplication bool) {
