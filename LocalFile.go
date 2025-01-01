@@ -295,6 +295,10 @@ func (l *LocalFile) GetDeepCopy() (deepCopy File) {
 	return deepCopy
 }
 
+func (l *LocalFile) GetHostDescription() (hostDescription string, err error) {
+	return "localhost", nil
+}
+
 func (l *LocalFile) GetLocalPath() (path string, err error) {
 	return l.GetPath()
 }
@@ -433,6 +437,15 @@ func (l *LocalFile) MustGetBaseName() (baseName string) {
 	}
 
 	return baseName
+}
+
+func (l *LocalFile) MustGetHostDescription() (hostDescription string) {
+	hostDescription, err := l.GetHostDescription()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return hostDescription
 }
 
 func (l *LocalFile) MustGetLocalPath() (path string) {

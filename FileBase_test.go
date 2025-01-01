@@ -300,3 +300,4 @@ func TestFileBase_GetValueAsInt(t *testing.T) {
 		)
 	}
 }
+

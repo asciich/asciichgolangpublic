@@ -368,6 +368,25 @@ func (f *FileBase) GetParentFileForBaseClass() (parentFileForBaseClass File, err
 	return f.parentFileForBaseClass, nil
 }
 
+func (f *FileBase) GetPathAndHostDescription() (path string, hostDescription string, err error) {
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return "", "", err
+	}
+
+	path, err = parent.GetPath()
+	if err != nil {
+		return "", "", err
+	}
+
+	hostDescription, err = parent.GetHostDescription()
+	if err != nil {
+		return "", "", err
+	}
+
+	return path, hostDescription, nil
+}
+
 func (f *FileBase) GetSha256Sum() (sha256sum string, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
@@ -700,6 +719,15 @@ func (f *FileBase) MustGetParentFileForBaseClass() (parentFileForBaseClass File)
 	}
 
 	return parentFileForBaseClass
+}
+
+func (f *FileBase) MustGetPathAndHostDescription() (path string, hostDescription string) {
+	path, hostDescription, err := f.GetPathAndHostDescription()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return path, hostDescription
 }
 
 func (f *FileBase) MustGetSha256Sum() (sha256sum string) {

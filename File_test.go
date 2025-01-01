@@ -6,6 +6,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Return a temporary file of the given 'implementationName'.
+//
+// Use defer file.Delete(verbose) to after calling this function to ensure
+// the file is deleted after the test is over.
 func getFileToTest(implementationName string) (file File) {
 	const verbose = true
 
