@@ -8,6 +8,33 @@ func NewGitRepositoryBase() (g *GitRepositoryBase) {
 	return new(GitRepositoryBase)
 }
 
+func (g *GitRepositoryBase) CheckHasNoUncommittedChanges(verbose bool) (err error) {
+	hasNoUncommitedChanges, err := g.HasNoUncommittedChanges(verbose)
+	if err != nil {
+		return err
+	}
+
+	if !hasNoUncommitedChanges {
+		parent, err := g.GetParentRepositoryForBaseClass()
+		if err != nil {
+			return err
+		}
+
+		path, hostDescription, err := parent.GetPathAndHostDescription()
+		if err != nil {
+			return err
+		}
+
+		return TracedErrorf(
+			"There are uncommited changes in git repository '%s' on host '%s'",
+			path,
+			hostDescription,
+		)
+	}
+
+	return nil
+}
+
 func (g *GitRepositoryBase) CheckIsGolangApplication(verbose bool) (err error) {
 	parent, err := g.GetParentRepositoryForBaseClass()
 	if err != nil {
@@ -388,6 +415,13 @@ func (g *GitRepositoryBase) ListVersionTags(verbose bool) (versionTags []GitTag,
 	}
 
 	return versionTags, nil
+}
+
+func (g *GitRepositoryBase) MustCheckHasNoUncommittedChanges(verbose bool) {
+	err := g.CheckHasNoUncommittedChanges(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (g *GitRepositoryBase) MustCheckIsGolangApplication(verbose bool) {

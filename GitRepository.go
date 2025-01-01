@@ -99,6 +99,7 @@ type GitRepository interface {
 	SetGitConfig(options *GitConfigSetOptions) (err error)
 
 	// All methods below this line can be implemented by embedding the `GitRepositoryBase` struct:
+	CheckHasNoUncommittedChanges(verbose bool) (err error)
 	CheckIsGolangApplication(verbose bool) (err error)
 	CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error)
 	CreateAndInit(options *CreateRepositoryOptions) (err error)
@@ -110,6 +111,7 @@ type GitRepository interface {
 	GetPathAndHostDescription() (path string, hostDescription string, err error)
 	HasNoUncommittedChanges(verbose bool) (noUncommitedChnages bool, err error)
 	IsGolangApplication(verbose bool) (isGolangApplication bool, err error)
+	MustCheckHasNoUncommittedChanges(verbose bool)
 	MustCheckIsGolangApplication(verbose bool)
 	MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit)
 	MustCreateAndInit(options *CreateRepositoryOptions)

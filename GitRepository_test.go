@@ -342,6 +342,34 @@ func TestGitRepository_HasUncommittedChanges(t *testing.T) {
 	}
 }
 
+func TestGitRepository_CheckHasNoUncommittedChanges(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				repo := getGitRepositoryToTest(tt.implementationName)
+				defer repo.Delete(verbose)
+
+				assert.Nil(repo.CheckHasNoUncommittedChanges(verbose))
+
+				repo.MustCreateFileInDirectory(verbose, "hello.txt")
+				assert.NotNil(repo.CheckHasNoUncommittedChanges(verbose))
+			},
+		)
+	}
+}
+
 func TestGitRepository_GetRootDirectoryPath(t *testing.T) {
 	tests := []struct {
 		implementationName string
