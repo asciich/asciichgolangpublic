@@ -180,6 +180,24 @@ func (g *GitRepositoryBase) GetCurrentCommitsNewestVersionOrNilIfNotPresent(verb
 	return currentCommit.GetNewestTagVersionOrNilIfUnset(verbose)
 }
 
+func (g *GitRepositoryBase) GetFileByPath(path ...string) (file File, err error) {
+	if len(path) <= 0 {
+		return nil, TracedError("path has no elements")
+	}
+
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	rootDir, err := parent.GetRootDirectory(false)
+	if err != nil {
+		return nil, err
+	}
+
+	return rootDir.GetFileInDirectory(path...)
+}
+
 func (g *GitRepositoryBase) GetLatestTagVersion(verbose bool) (latestTagVersion Version, err error) {
 	versionTags, err := g.ListVersionTags(verbose)
 	if err != nil {
@@ -383,6 +401,15 @@ func (g *GitRepositoryBase) MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(
 	}
 
 	return newestVersion
+}
+
+func (g *GitRepositoryBase) MustGetFileByPath(path ...string) (file File) {
+	file, err := g.GetFileByPath(path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return file
 }
 
 func (g *GitRepositoryBase) MustGetLatestTagVersion(verbose bool) (latestTagVersion Version) {

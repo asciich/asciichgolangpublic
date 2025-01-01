@@ -47,6 +47,19 @@ func GetPreCommitConfigByLocalPath(localPath string) (preCommitConfigFile *PreCo
 	return preCommitConfigFile, nil
 }
 
+func GetPreCommitConfigInGitRepository(gitRepository GitRepository) (preCommitConfigFile *PreCommitConfigFile, err error) {
+	if gitRepository == nil {
+		return nil, TracedErrorNil("gitRepository")
+	}
+
+	fileInRepo, err := gitRepository.GetFileByPath(PreCommit().GetDefaultConfigFileName())
+	if err != nil {
+		return nil, err
+	}
+
+	return GetPreCommitConfigByFile(fileInRepo)
+}
+
 func MustGetPreCommitConfigByFile(file File) (preCommitConfigFile *PreCommitConfigFile) {
 	preCommitConfigFile, err := GetPreCommitConfigByFile(file)
 	if err != nil {
@@ -58,6 +71,15 @@ func MustGetPreCommitConfigByFile(file File) (preCommitConfigFile *PreCommitConf
 
 func MustGetPreCommitConfigByLocalPath(localPath string) (preCommitConfigFile *PreCommitConfigFile) {
 	preCommitConfigFile, err := GetPreCommitConfigByLocalPath(localPath)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return preCommitConfigFile
+}
+
+func MustGetPreCommitConfigInGitRepository(gitRepository GitRepository) (preCommitConfigFile *PreCommitConfigFile) {
+	preCommitConfigFile, err := GetPreCommitConfigInGitRepository(gitRepository)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

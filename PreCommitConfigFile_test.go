@@ -3,12 +3,13 @@ package asciichgolangpublic
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPreCommitConfigFileUpdateDependency(t *testing.T) {
+func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 	type TestCase struct {
 		testDataDir string
 	}
@@ -65,6 +66,35 @@ func TestPreCommitConfigFileUpdateDependency(t *testing.T) {
 				}
 
 				assert.EqualValues(expectedOutputSha, updatedSha)
+			},
+		)
+	}
+}
+
+func TestPreCommitConfigFile_GetPreCommitConfigInGitRepository(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				gitRepo.MustWriteStringToFile("# placeholder", verbose, ".pre-commit-config.yaml")
+
+				preCommitConfigFile := MustGetPreCommitConfigInGitRepository(gitRepo)
+				assert.True(preCommitConfigFile.MustExists(verbose))
+				assert.True(strings.HasSuffix(preCommitConfigFile.MustGetPath(), "/.pre-commit-config.yaml"))
 			},
 		)
 	}
