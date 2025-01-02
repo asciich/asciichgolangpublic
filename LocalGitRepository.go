@@ -122,6 +122,36 @@ func NewLocalGitRepository() (l *LocalGitRepository) {
 	return l
 }
 
+// TODO remove: LocalGitRepository should purely base on goGit, not by calling the git binary.
+func (l *LocalGitRepository) RunGitCommand(gitCommand []string, verbose bool) (commandOutput *CommandOutput, err error) {
+	if gitCommand == nil {
+		return nil, TracedErrorEmptyString("gitCommand")
+	}
+
+	repoRootPath, err := l.GetRootDirectoryPath(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	gitCommandString, err := ShellLineHandler().Join(gitCommand)
+	if err != nil {
+		return nil, err
+	}
+
+	command := fmt.Sprintf(
+		"git -C '%s' %s",
+		repoRootPath,
+		gitCommandString,
+	)
+
+	commandOutput, err = Bash().RunOneLiner(command, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return commandOutput, nil
+}
+
 func (c *LocalGitRepository) HasInitialCommit(verbose bool) (hasInitialCommit bool, err error) {
 	_, err = c.GetCurrentCommit(verbose)
 	if err != nil {
@@ -165,6 +195,52 @@ func (l *LocalGitRepository) AddFileByPath(pathToAdd string, verbose bool) (err 
 			pathToAdd,
 			path,
 		)
+	}
+
+	return nil
+}
+
+func (l *LocalGitRepository) CheckoutBranchByName(name string, verbose bool) (err error) {
+	if name == "" {
+		return TracedErrorEmptyString("name")
+	}
+
+	currentBranchName, err := l.GetCurrentBranchName(verbose)
+	if err != nil {
+		return err
+	}
+
+	path, hostDescription, err := l.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if currentBranchName == name {
+		if verbose {
+			LogInfof(
+				"Git repository '%s' on host '%s' is already checked out on branch '%s'.",
+				path,
+				hostDescription,
+				name,
+			)
+		}
+	} else {
+		_, err := l.RunGitCommand(
+			[]string{"checkout", name},
+			verbose,
+		)
+		if err != nil {
+			return err
+		}
+
+		if verbose {
+			LogChangedf(
+				"Git repository '%s' on host '%s' checked out on branch '%s'.",
+				path,
+				hostDescription,
+				name,
+			)
+		}
 	}
 
 	return nil
@@ -328,6 +404,75 @@ func (l *LocalGitRepository) CommitHasParentCommitByCommitHash(hash string) (has
 	return hasParentCommit, nil
 }
 
+func (l *LocalGitRepository) CreateBranch(createOptions *CreateBranchOptions) (err error) {
+	if createOptions == nil {
+		return TracedErrorNil("createOptions")
+	}
+
+	name, err := createOptions.GetName()
+	if err != nil {
+		return err
+	}
+
+	branchExists, err := l.BranchByNameExists(name, createOptions.Verbose)
+	if err != nil {
+		return err
+	}
+
+	path, hostDescription, err := l.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if branchExists {
+		if createOptions.Verbose {
+			LogInfof(
+				"Branch '%s' already exists in git repository '%s' on host '%s'.",
+				name,
+				path,
+				hostDescription,
+			)
+		}
+	} else {
+		/* TODO implement using native GoGit
+		worktree, err := l.GetGoGitWorktree()
+		if err != nil {
+			return err
+		}
+
+		err = worktree.Checkout(&git.CheckoutOptions{
+			Create: true,
+			Branch: plumbing.ReferenceName("ref/branch/" + name),
+		})
+
+		if err != nil {
+			return TracedErrorf(
+				"Unable to create branch '%s' in git repository '%s' on host '%s': '%w'",
+				name,
+				path,
+				hostDescription,
+				err,
+			)
+		}
+		*/
+		l.RunGitCommand(
+			[]string{"checkout", "-b", name},
+			createOptions.Verbose,
+		)
+
+		if createOptions.Verbose {
+			LogChangedf(
+				"Branch '%s' in git repository '%s' on host '%s' created.",
+				name,
+				path,
+				hostDescription,
+			)
+		}
+	}
+
+	return nil
+}
+
 func (l *LocalGitRepository) CreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
 	if options == nil {
 		return nil, TracedErrorNil("options")
@@ -414,6 +559,71 @@ func (l *LocalGitRepository) CreateTag(options *GitRepositoryCreateTagOptions) (
 	}
 
 	return createdTag, nil
+}
+
+func (l *LocalGitRepository) DeleteBranchByName(name string, verbose bool) (err error) {
+	if name == "" {
+		return TracedErrorEmptyString("name")
+	}
+
+	branchExists, err := l.BranchByNameExists(name, verbose)
+	if err != nil {
+		return err
+	}
+
+	path, hostDescription, err := l.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if branchExists {
+		_, err := l.RunGitCommand(
+			[]string{"branch", "-D", name},
+			verbose,
+		)
+		if err != nil {
+			return err
+		}
+
+		/* TODO implement using native go git
+		goGitRepo, err := l.GetAsGoGitRepository()
+		if err != nil {
+			return err
+		}
+
+		err = goGitRepo.DeleteBranch("refs/heads/" + name)
+		if err != nil {
+			return TracedErrorf(
+				"Delete branch '%s' in git repository '%s' on host '%s' failed: '%w'",
+				name,
+				path,
+				hostDescription,
+				err,
+			)
+		}
+		*/
+
+		if verbose {
+			LogChangedf(
+				"Branch '%s' in git repository '%s' on host '%s' deleted.",
+				name,
+				path,
+				hostDescription,
+			)
+		}
+
+	} else {
+		if verbose {
+			LogInfof(
+				"Branch '%s' in git repository '%s' on host '%s' is already absent. Skip delete.",
+				name,
+				path,
+				hostDescription,
+			)
+		}
+	}
+
+	return nil
 }
 
 func (l *LocalGitRepository) FileByPathExists(path string, verbose bool) (exists bool, err error) {
@@ -628,6 +838,8 @@ func (l *LocalGitRepository) GetCommitParentsByCommitHash(hash string, options *
 	}
 
 	parents := goGitCommit.Parents()
+	defer parents.Close()
+
 	for {
 		parentToAdd, err := parents.Next()
 		if err != nil {
@@ -676,6 +888,46 @@ func (l *LocalGitRepository) GetCommitTimeByCommitHash(hash string) (commitTime 
 	commitTime = &(goGitCommit.Author.When)
 
 	return commitTime, nil
+}
+
+func (l *LocalGitRepository) GetCurrentBranchName(verbose bool) (branchName string, err error) {
+	goGitRepo, err := l.GetAsGoGitRepository()
+	if err != nil {
+		return "", err
+	}
+
+	head, err := goGitRepo.Head()
+	if err != nil {
+		return "", TracedErrorf("Unable to get head: '%w'", err)
+	}
+	branchName = head.String()
+	branchName = Strings().SplitAndGetLastElement(branchName, " ")
+	branchName = Strings().SplitAndGetLastElement(branchName, "/")
+	branchName = strings.TrimSpace(branchName)
+
+	path, hostDescription, err := l.GetPathAndHostDescription()
+	if err != nil {
+		return "", err
+	}
+
+	if branchName == "" {
+		return "", TracedErrorf(
+			"Unable to get branch name for git repository '%s' on host '%s'. branchName is empty string after evaluation.",
+			path,
+			hostDescription,
+		)
+	}
+
+	if verbose {
+		LogInfof(
+			"Branch '%s' is currently checked out in git repository '%s' on host '%s'.",
+			branchName,
+			path,
+			hostDescription,
+		)
+	}
+
+	return branchName, nil
 }
 
 func (l *LocalGitRepository) GetCurrentCommit(verbose bool) (gitCommit *GitCommit, err error) {
@@ -1254,6 +1506,53 @@ func (l *LocalGitRepository) IsInitialized(verbose bool) (isInitialized bool, er
 	return isInitialized, nil
 }
 
+func (l *LocalGitRepository) ListBranchNames(verbose bool) (branchNames []string, err error) {
+	goRepo, err := l.GetAsGoGitRepository()
+	if err != nil {
+		return nil, err
+	}
+
+	branches, err := goRepo.Branches()
+	if err != nil {
+		return nil, err
+	}
+	defer branches.Close()
+
+	branchNames = []string{}
+	for {
+		branch, err := branches.Next()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return nil, TracedErrorf("Unable to get next parent: %w", err)
+		}
+
+		nameToAdd := branch.Name().String()
+		nameToAdd = strings.TrimPrefix(nameToAdd, "refs/heads/")
+
+		branchNames = append(branchNames, nameToAdd)
+	}
+
+	branchNames = Slices().SortStringSlice(branchNames)
+
+	if verbose {
+		path, hostDescripton, err := l.GetPathAndHostDescription()
+		if err != nil {
+			return nil, err
+		}
+
+		LogInfof(
+			"Found '%d' branches in git repository '%s' on host '%s'.",
+			len(branchNames),
+			path,
+			hostDescripton,
+		)
+	}
+
+	return branchNames, nil
+}
+
 func (l *LocalGitRepository) ListTagNames(verbose bool) (tagNames []string, err error) {
 	nativeRepo, err := l.GetAsGoGitRepository()
 	if err != nil {
@@ -1367,6 +1666,13 @@ func (l *LocalGitRepository) MustAddFileByPath(pathToAdd string, verbose bool) {
 	}
 }
 
+func (l *LocalGitRepository) MustCheckoutBranchByName(name string, verbose bool) {
+	err := l.CheckoutBranchByName(name, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (l *LocalGitRepository) MustCloneRepository(repository GitRepository, verbose bool) {
 	err := l.CloneRepository(repository, verbose)
 	if err != nil {
@@ -1399,6 +1705,13 @@ func (l *LocalGitRepository) MustCommitHasParentCommitByCommitHash(hash string) 
 	return hasParentCommit
 }
 
+func (l *LocalGitRepository) MustCreateBranch(createOptions *CreateBranchOptions) {
+	err := l.CreateBranch(createOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (l *LocalGitRepository) MustCreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag) {
 	createdTag, err := l.CreateTag(options)
 	if err != nil {
@@ -1406,6 +1719,13 @@ func (l *LocalGitRepository) MustCreateTag(options *GitRepositoryCreateTagOption
 	}
 
 	return createdTag
+}
+
+func (l *LocalGitRepository) MustDeleteBranchByName(name string, verbose bool) {
+	err := l.DeleteBranchByName(name, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (l *LocalGitRepository) MustFileByPathExists(path string, verbose bool) (exists bool) {
@@ -1532,6 +1852,15 @@ func (l *LocalGitRepository) MustGetCommitTimeByCommitHash(hash string) (commitT
 	}
 
 	return commitTime
+}
+
+func (l *LocalGitRepository) MustGetCurrentBranchName(verbose bool) (branchName string) {
+	branchName, err := l.GetCurrentBranchName(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return branchName
 }
 
 func (l *LocalGitRepository) MustGetCurrentCommit(verbose bool) (gitCommit *GitCommit) {
@@ -1739,6 +2068,15 @@ func (l *LocalGitRepository) MustIsInitialized(verbose bool) (isInitialized bool
 	return isInitialized
 }
 
+func (l *LocalGitRepository) MustListBranchNames(verbose bool) (branchNames []string) {
+	branchNames, err := l.ListBranchNames(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return branchNames
+}
+
 func (l *LocalGitRepository) MustListTagNames(verbose bool) (tagNames []string) {
 	tagNames, err := l.ListTagNames(verbose)
 	if err != nil {
@@ -1863,35 +2201,6 @@ func (l *LocalGitRepository) Push(verbose bool) (err error) {
 	}
 
 	return nil
-}
-
-func (l *LocalGitRepository) RunGitCommand(gitCommand []string, verbose bool) (commandOutput *CommandOutput, err error) {
-	if gitCommand == nil {
-		return nil, TracedErrorEmptyString("gitCommand")
-	}
-
-	repoRootPath, err := l.GetRootDirectoryPath(verbose)
-	if err != nil {
-		return nil, err
-	}
-
-	gitCommandString, err := ShellLineHandler().Join(gitCommand)
-	if err != nil {
-		return nil, err
-	}
-
-	command := fmt.Sprintf(
-		"git -C '%s' %s",
-		repoRootPath,
-		gitCommandString,
-	)
-
-	commandOutput, err = Bash().RunOneLiner(command, verbose)
-	if err != nil {
-		return nil, err
-	}
-
-	return commandOutput, nil
 }
 
 func (l *LocalGitRepository) RunGitCommandAndGetStdout(gitCommand []string, verbose bool) (commandOutput string, err error) {

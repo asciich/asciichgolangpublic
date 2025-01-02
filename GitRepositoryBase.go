@@ -42,6 +42,49 @@ func (g *GitRepositoryBase) AddFilesByPath(pathsToAdd []string, verbose bool) (e
 	return nil
 }
 
+func (g *GitRepositoryBase) BranchByNameExists(branchName string, verbose bool) (branchExists bool, err error) {
+	if branchName == "" {
+		return false, TracedErrorEmptyString("branchName")
+	}
+
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	branchNames, err := parent.ListBranchNames(false)
+	if err != nil {
+		return false, err
+	}
+
+	branchExists = Slices().ContainsString(branchNames, branchName)
+
+	if verbose {
+		path, hostDescription, err := parent.GetPathAndHostDescription()
+		if err != nil {
+			return false, err
+		}
+
+		if branchExists {
+			LogInfof(
+				"Branch '%s' in git repository '%s' on host '%s' exists.",
+				branchName,
+				path,
+				hostDescription,
+			)
+		} else {
+			LogInfof(
+				"Branch '%s' in git repository '%s' on host '%s' does not exist.",
+				branchName,
+				path,
+				hostDescription,
+			)
+		}
+	}
+
+	return branchExists, nil
+}
+
 func (g *GitRepositoryBase) CheckHasNoUncommittedChanges(verbose bool) (err error) {
 	hasNoUncommitedChanges, err := g.HasNoUncommittedChanges(verbose)
 	if err != nil {
@@ -621,6 +664,15 @@ func (g *GitRepositoryBase) MustAddFilesByPath(pathsToAdd []string, verbose bool
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (g *GitRepositoryBase) MustBranchByNameExists(branchName string, verbose bool) (branchExists bool) {
+	branchExists, err := g.BranchByNameExists(branchName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return branchExists
 }
 
 func (g *GitRepositoryBase) MustCheckHasNoUncommittedChanges(verbose bool) {
