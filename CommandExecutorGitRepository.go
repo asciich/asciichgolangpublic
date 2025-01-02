@@ -139,6 +139,52 @@ func (c *CommandExecutorGitRepository) AddFileByPath(pathToAdd string, verbose b
 	return nil
 }
 
+func (c *CommandExecutorGitRepository) CheckoutBranchByName(name string, verbose bool) (err error) {
+	if name == "" {
+		return TracedErrorEmptyString("name")
+	}
+
+	currentBranchName, err := c.GetCurrentBranchName(verbose)
+	if err != nil {
+		return err
+	}
+
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if currentBranchName == name {
+		if verbose {
+			LogInfof(
+				"Git repository '%s' on host '%s' is already checked out on branch '%s'.",
+				path,
+				hostDescription,
+				name,
+			)
+		}
+	} else {
+		_, err := c.RunGitCommand(
+			[]string{"checkout", name},
+			verbose,
+		)
+		if err != nil {
+			return err
+		}
+
+		if verbose {
+			LogChangedf(
+				"Git repository '%s' on host '%s' checked out on branch '%s'.",
+				path,
+				hostDescription,
+				name,
+			)
+		}
+	}
+
+	return nil
+}
+
 func (c *CommandExecutorGitRepository) CloneRepository(repository GitRepository, verbose bool) (err error) {
 	if repository == nil {
 		return TracedErrorNil("repository")
@@ -288,6 +334,53 @@ func (c *CommandExecutorGitRepository) CommitHasParentCommitByCommitHash(hash st
 	return false, TracedErrorNotImplemented()
 }
 
+func (c *CommandExecutorGitRepository) CreateBranch(createOptions *CreateBranchOptions) (err error) {
+	if createOptions == nil {
+		return TracedErrorNil("createOptions")
+	}
+
+	name, err := createOptions.GetName()
+	if err != nil {
+		return err
+	}
+
+	branchExists, err := c.BranchByNameExists(name, createOptions.Verbose)
+	if err != nil {
+		return err
+	}
+
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if branchExists {
+		LogInfof(
+			"Branch '%s' already exists in git repository '%s' on host '%s'.",
+			name,
+			path,
+			hostDescription,
+		)
+	} else {
+		_, err = c.RunGitCommand(
+			[]string{"checkout", "-b", name},
+			createOptions.Verbose,
+		)
+		if err != nil {
+			return err
+		}
+
+		LogChangedf(
+			"Branch '%s' in git repository '%s' on host '%s' created.",
+			name,
+			path,
+			hostDescription,
+		)
+	}
+
+	return nil
+}
+
 func (c *CommandExecutorGitRepository) CreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
 	if options == nil {
 		return nil, TracedErrorNil("options")
@@ -350,6 +443,53 @@ func (c *CommandExecutorGitRepository) CreateTag(options *GitRepositoryCreateTag
 	return createdTag, nil
 }
 
+func (c *CommandExecutorGitRepository) DeleteBranchByName(name string, verbose bool) (err error) {
+	if name == "" {
+		return TracedErrorEmptyString("name")
+	}
+
+	branchExists, err := c.BranchByNameExists(name, verbose)
+	if err != nil {
+		return err
+	}
+
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if branchExists {
+		_, err := c.RunGitCommand(
+			[]string{"branch", "-D", name},
+			verbose,
+		)
+		if err != nil {
+			return err
+		}
+
+		if verbose {
+			LogChangedf(
+				"Branch '%s' in git repository '%s' on host '%s' deleted.",
+				name,
+				path,
+				hostDescription,
+			)
+		}
+
+	} else {
+		if verbose {
+			LogInfof(
+				"Branch '%s' in git repository '%s' on host '%s' is already absent. Skip delete.",
+				name,
+				path,
+				hostDescription,
+			)
+		}
+	}
+
+	return nil
+}
+
 func (c *CommandExecutorGitRepository) FileByPathExists(path string, verbose bool) (exists bool, err error) {
 	if path == "" {
 		return false, TracedErrorEmptyString(path)
@@ -404,6 +544,42 @@ func (c *CommandExecutorGitRepository) GetCommitParentsByCommitHash(hash string,
 
 func (c *CommandExecutorGitRepository) GetCommitTimeByCommitHash(hash string) (commitTime *time.Time, err error) {
 	return nil, TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorGitRepository) GetCurrentBranchName(verbose bool) (branchName string, err error) {
+	stdout, err := c.RunGitCommandAndGetStdoutAsString(
+		[]string{"rev-parse", "--abbrev-ref", "HEAD"},
+		verbose,
+	)
+	if err != nil {
+		return "", err
+	}
+
+	branchName = strings.TrimSpace(stdout)
+
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return "", err
+	}
+
+	if branchName == "" {
+		return "", TracedErrorf(
+			"Unable to get branch name for git repository '%s' on host '%s'. branchName is empty string after evaluation.",
+			path,
+			hostDescription,
+		)
+	}
+
+	if verbose {
+		LogInfof(
+			"Branch '%s' is currently checked out in git repository '%s' on host '%s'.",
+			branchName,
+			path,
+			hostDescription,
+		)
+	}
+
+	return branchName, nil
 }
 
 func (c *CommandExecutorGitRepository) GetCurrentCommit(verbose bool) (currentCommit *GitCommit, err error) {
@@ -1029,6 +1205,43 @@ func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialite
 	return isInitialited, nil
 }
 
+func (c *CommandExecutorGitRepository) ListBranchNames(verbose bool) (branchNames []string, err error) {
+	lines, err := c.RunGitCommandAndGetStdoutAsLines(
+		[]string{"branch"},
+		false,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	branchNames = []string{}
+
+	for _, line := range lines {
+		line = strings.TrimPrefix(line, "* ")
+		line = strings.TrimSpace(line)
+
+		branchNames = append(branchNames, line)
+	}
+
+	branchNames = Slices().SortStringSlice(branchNames)
+
+	if verbose {
+		path, hostDescripton, err := c.GetPathAndHostDescription()
+		if err != nil {
+			return nil, err
+		}
+
+		LogInfof(
+			"Found '%d' branches in git repository '%s' on host '%s'.",
+			len(branchNames),
+			path,
+			hostDescripton,
+		)
+	}
+
+	return branchNames, nil
+}
+
 func (c *CommandExecutorGitRepository) ListTagNames(verbose bool) (tagNames []string, err error) {
 	return c.RunGitCommandAndGetStdoutAsLines(
 		[]string{"tag"},
@@ -1088,6 +1301,13 @@ func (c *CommandExecutorGitRepository) MustAddFileByPath(pathToAdd string, verbo
 	}
 }
 
+func (c *CommandExecutorGitRepository) MustCheckoutBranchByName(name string, verbose bool) {
+	err := c.CheckoutBranchByName(name, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (c *CommandExecutorGitRepository) MustCloneRepository(repository GitRepository, verbose bool) {
 	err := c.CloneRepository(repository, verbose)
 	if err != nil {
@@ -1120,6 +1340,13 @@ func (c *CommandExecutorGitRepository) MustCommitHasParentCommitByCommitHash(has
 	return hasParentCommit
 }
 
+func (c *CommandExecutorGitRepository) MustCreateBranch(createOptions *CreateBranchOptions) {
+	err := c.CreateBranch(createOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (c *CommandExecutorGitRepository) MustCreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag) {
 	createdTag, err := c.CreateTag(options)
 	if err != nil {
@@ -1127,6 +1354,13 @@ func (c *CommandExecutorGitRepository) MustCreateTag(options *GitRepositoryCreat
 	}
 
 	return createdTag
+}
+
+func (c *CommandExecutorGitRepository) MustDeleteBranchByName(name string, verbose bool) {
+	err := c.DeleteBranchByName(name, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (c *CommandExecutorGitRepository) MustFileByPathExists(path string, verbose bool) (exists bool) {
@@ -1226,6 +1460,15 @@ func (c *CommandExecutorGitRepository) MustGetCommitTimeByCommitHash(hash string
 	}
 
 	return commitTime
+}
+
+func (c *CommandExecutorGitRepository) MustGetCurrentBranchName(verbose bool) (branchName string) {
+	branchName, err := c.GetCurrentBranchName(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return branchName
 }
 
 func (c *CommandExecutorGitRepository) MustGetCurrentCommit(verbose bool) (currentCommit *GitCommit) {
@@ -1341,6 +1584,15 @@ func (c *CommandExecutorGitRepository) MustIsInitialized(verbose bool) (isInitia
 	}
 
 	return isInitialited
+}
+
+func (c *CommandExecutorGitRepository) MustListBranchNames(verbose bool) (branchNames []string) {
+	branchNames, err := c.ListBranchNames(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return branchNames
 }
 
 func (c *CommandExecutorGitRepository) MustListTagNames(verbose bool) (tagNames []string) {

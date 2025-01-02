@@ -1664,3 +1664,48 @@ func TestGitRepository_GetGitRepositoryByDirectory(t *testing.T) {
 		)
 	}
 }
+
+
+func TestGitRepository_CreateAndDeleteBranch(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				defaultBranchName := gitRepo.MustGetCurrentBranchName(verbose)
+
+				assert.False(gitRepo.MustBranchByNameExists("testbranch", verbose))
+
+				for i := 0 ; i < 2; i++ {
+					gitRepo.MustCreateBranch(
+						&CreateBranchOptions{
+							Name: "testbranch",
+							Verbose: verbose,
+						},
+					)
+					assert.True(gitRepo.MustBranchByNameExists("testbranch", verbose))
+				}
+
+				gitRepo.MustCheckoutBranchByName(defaultBranchName, verbose)
+
+				for i := 0 ; i < 2; i++ {
+					gitRepo.MustDeleteBranchByName("testbranch", verbose)
+					assert.False(gitRepo.MustBranchByNameExists("testbranch", verbose))
+				}
+			},
+		)
+	}
+}

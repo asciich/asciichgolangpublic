@@ -18,6 +18,16 @@ func Strings() (stringsService *StringsService) {
 	return new(StringsService)
 }
 
+func (s *StringsService)SplitAndGetLastElement(input string, token string) (lastElement string) {
+	splitted := strings.Split(input, token)
+
+	if len(splitted) <= 0 {
+		return ""
+	}
+
+	return splitted[len(splitted) - 1]
+}
+
 func (s *StringsService) ContainsAtLeastOneSubstring(input string, substrings []string) (atLeastOneSubstringFound bool) {
 	for _, substring := range substrings {
 		if strings.Contains(input, substring) {
