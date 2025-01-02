@@ -149,14 +149,49 @@ type GitRepository interface {
 	WriteStringToFile(content string, verbose bool, path ...string) (writtenFile File, err error)
 }
 
+func GetGitRepositoryByDirectory(directory Directory) (repository GitRepository, err error) {
+	if directory == nil {
+		return nil, TracedErrorNil("directory")
+	}
+
+	localDirectory, ok := directory.(*LocalDirectory)
+	if ok {
+		return GetLocalGitReposioryFromDirectory(localDirectory)
+	}
+
+	commandExecutorDirectory, ok := directory.(*CommandExecutorDirectory)
+	if ok {
+		return GetCommandExecutorGitRepositoryFromDirectory(commandExecutorDirectory)
+	}
+
+	unknownTypeName, err := Types().GetTypeName(directory)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, TracedErrorf(
+		"Unknown directory implementation '%s'. Unable to get GitRepository",
+		unknownTypeName,
+	)
+}
+
 func GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit() (msg string) {
 	return "Initial empty commit during repo initialization"
 }
 
-func GitRepositryDefualtAuthorEmail() (email string) {
+func GitRepositryDefaultAuthorEmail() (email string) {
 	return "asciichgolangpublic@example.net"
 }
 
-func GitRepositryDefualtAuthorName() (name string) {
+func GitRepositryDefaultAuthorName() (name string) {
 	return "asciichgolangpublic git repo initializer"
+}
+
+func MustGetGitRepositoryByDirectory(directory Directory) (repository GitRepository) {
+	repository, err := GetGitRepositoryByDirectory(directory)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return repository
 }

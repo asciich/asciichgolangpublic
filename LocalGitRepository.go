@@ -1135,8 +1135,8 @@ func (l *LocalGitRepository) Init(options *CreateRepositoryOptions) (err error) 
 				if options.InitializeWithDefaultAuthor {
 					err = l.SetGitConfig(
 						&GitConfigSetOptions{
-							Name:    GitRepositryDefualtAuthorName(),
-							Email:   GitRepositryDefualtAuthorEmail(),
+							Name:    GitRepositryDefaultAuthorName(),
+							Email:   GitRepositryDefaultAuthorEmail(),
 							Verbose: options.Verbose,
 						},
 					)

@@ -829,8 +829,8 @@ func (c *CommandExecutorGitRepository) Init(options *CreateRepositoryOptions) (e
 				if options.InitializeWithDefaultAuthor {
 					temporaryClone.SetGitConfig(
 						&GitConfigSetOptions{
-							Name:    GitRepositryDefualtAuthorName(),
-							Email:   GitRepositryDefualtAuthorEmail(),
+							Name:    GitRepositryDefaultAuthorName(),
+							Email:   GitRepositryDefaultAuthorEmail(),
 							Verbose: options.Verbose,
 						},
 					)
@@ -1559,12 +1559,12 @@ func (c *CommandExecutorGitRepository) RunGitCommandAndGetStdoutAsString(command
 }
 
 func (c *CommandExecutorGitRepository) SetDefaultAuthor(verbose bool) (err error) {
-	err = c.SetUserName(GitRepositryDefualtAuthorName(), verbose)
+	err = c.SetUserName(GitRepositryDefaultAuthorName(), verbose)
 	if err != nil {
 		return err
 	}
 
-	err = c.SetUserEmail(GitRepositryDefualtAuthorEmail(), verbose)
+	err = c.SetUserEmail(GitRepositryDefaultAuthorEmail(), verbose)
 	if err != nil {
 		return err
 	}

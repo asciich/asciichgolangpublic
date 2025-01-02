@@ -1623,3 +1623,44 @@ func TestGitRepository_CheckIsGolangPackage_mainFunctionIsNotAPackage(t *testing
 		)
 	}
 }
+
+
+func TestGitRepository_GetGitRepositoryByDirectory(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				repoRootDirectory := gitRepo.MustGetRootDirectory(verbose)
+				
+				gitRepo2 := MustGetGitRepositoryByDirectory(repoRootDirectory)
+
+				assert.EqualValues(
+					gitRepo.MustGetRootDirectoryPath(verbose),
+					gitRepo2.MustGetRootDirectoryPath(verbose),
+				)
+
+				assert.Nil(
+					gitRepo.CheckHasNoUncommittedChanges(verbose),
+				)
+				
+				assert.Nil(
+					gitRepo2.CheckHasNoUncommittedChanges(verbose),
+				)
+			},
+		)
+	}
+}
