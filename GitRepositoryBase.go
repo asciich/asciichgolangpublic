@@ -89,6 +89,33 @@ func (g *GitRepositoryBase) CheckIsGolangPackage(verbose bool) (err error) {
 	return nil
 }
 
+func (g *GitRepositoryBase) CheckIsOnLocalhost(verbose bool) (err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	isOnLocalhost, err := parent.IsOnLocalhost(verbose)
+	if err != nil {
+		return err
+	}
+
+	if !isOnLocalhost {
+		path, hostDescription, err := g.GetPathAndHostDescription()
+		if err != nil {
+			return err
+		}
+
+		return TracedErrorf(
+			"git repository '%s' is not on localhost. Host is '%s'",
+			path,
+			hostDescription,
+		)
+	}
+
+	return nil
+}
+
 func (g *GitRepositoryBase) CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
 	if commitOptions == nil {
 		return nil, TracedErrorNil("commitOptions")
@@ -461,6 +488,42 @@ func (g *GitRepositoryBase) IsGolangPackage(verbose bool) (isGolangPackage bool,
 	return true, nil
 }
 
+func (g *GitRepositoryBase) IsOnLocalhost(verbose bool) (isOnLocalhost bool, err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	hostDescription, err := parent.GetHostDescription()
+	if err != nil {
+		return false, err
+	}
+
+	isOnLocalhost = hostDescription == "localhost"
+
+	if verbose {
+		path, hostDescription, err := g.GetPathAndHostDescription()
+		if err != nil {
+			return false, err
+		}
+
+		if isOnLocalhost {
+			LogInfof(
+				"Git repository '%s' is on localhost",
+				path,
+			)
+		} else {
+			LogInfof(
+				"Git repository '%s' is not on localhost. Gost is '%s'.",
+				path,
+				hostDescription,
+			)
+		}
+	}
+
+	return isOnLocalhost, nil
+}
+
 func (g *GitRepositoryBase) ListVersionTags(verbose bool) (versionTags []GitTag, err error) {
 	parent, err := g.GetParentRepositoryForBaseClass()
 	if err != nil {
@@ -503,6 +566,13 @@ func (g *GitRepositoryBase) MustCheckIsGolangApplication(verbose bool) {
 
 func (g *GitRepositoryBase) MustCheckIsGolangPackage(verbose bool) {
 	err := g.CheckIsGolangPackage(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (g *GitRepositoryBase) MustCheckIsOnLocalhost(verbose bool) {
+	err := g.CheckIsOnLocalhost(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -621,6 +691,15 @@ func (g *GitRepositoryBase) MustIsGolangPackage(verbose bool) (isGolangPackage b
 	}
 
 	return isGolangPackage
+}
+
+func (g *GitRepositoryBase) MustIsOnLocalhost(verbose bool) (isOnLocalhost bool) {
+	isOnLocalhost, err := g.IsOnLocalhost(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isOnLocalhost
 }
 
 func (g *GitRepositoryBase) MustListVersionTags(verbose bool) (versionTags []GitTag) {
