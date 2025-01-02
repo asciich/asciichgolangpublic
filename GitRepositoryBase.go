@@ -8,6 +8,40 @@ func NewGitRepositoryBase() (g *GitRepositoryBase) {
 	return new(GitRepositoryBase)
 }
 
+func (g *GitRepositoryBase) AddFilesByPath(pathsToAdd []string, verbose bool) (err error) {
+	if len(pathsToAdd) <= 0 {
+		return TracedError("pathToAdd has no elements")
+	}
+
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	for _, p := range pathsToAdd {
+		err = parent.AddFileByPath(p, verbose)
+		if err != nil {
+			return err
+		}
+	}
+
+	if verbose {
+		path, hostDescription, err := parent.GetPathAndHostDescription()
+		if err != nil {
+			return err
+		}
+
+		LogChangedf(
+			"Added '%d' files to git repository '%s' on host '%s'.",
+			len(pathsToAdd),
+			path,
+			hostDescription,
+		)
+	}
+
+	return nil
+}
+
 func (g *GitRepositoryBase) CheckHasNoUncommittedChanges(verbose bool) (err error) {
 	hasNoUncommitedChanges, err := g.HasNoUncommittedChanges(verbose)
 	if err != nil {
@@ -580,6 +614,13 @@ func (g *GitRepositoryBase) ListVersionTags(verbose bool) (versionTags []GitTag,
 	}
 
 	return versionTags, nil
+}
+
+func (g *GitRepositoryBase) MustAddFilesByPath(pathsToAdd []string, verbose bool) {
+	err := g.AddFilesByPath(pathsToAdd, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
 }
 
 func (g *GitRepositoryBase) MustCheckHasNoUncommittedChanges(verbose bool) {

@@ -103,6 +103,7 @@ type GitRepository interface {
 	SetGitConfig(options *GitConfigSetOptions) (err error)
 
 	// All methods below this line can be implemented by embedding the `GitRepositoryBase` struct:
+	AddFilesByPath(pathsToAdd []string, verbose bool) (err error)
 	CheckHasNoUncommittedChanges(verbose bool) (err error)
 	CheckIsGolangApplication(verbose bool) (err error)
 	CheckIsGolangPackage(verbose bool) (err error)
@@ -121,6 +122,7 @@ type GitRepository interface {
 	IsGolangPackage(verbose bool) (isGolangPackage bool, err error)
 	IsOnLocalhost(verbose bool) (isOnLocalhost bool, err error)
 	ListVersionTags(verbose bool) (versionTags []GitTag, err error)
+	MustAddFilesByPath(pathsToAdd []string, verbose bool)
 	MustCheckHasNoUncommittedChanges(verbose bool)
 	MustCheckIsGolangApplication(verbose bool)
 	MustCheckIsGolangPackage(verbose bool)
