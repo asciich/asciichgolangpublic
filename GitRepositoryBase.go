@@ -391,6 +391,49 @@ func (g *GitRepositoryBase) IsGolangApplication(verbose bool) (isGolangApplicati
 	return false, nil
 }
 
+func (g *GitRepositoryBase) IsGolangPackage(verbose bool) (isGolangPackage bool, err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	repoPath, err := parent.GetPath()
+	if err != nil {
+		return false, err
+	}
+
+	goModExists, err := parent.FileByPathExists("go.mod", verbose)
+	if err != nil {
+		return false, err
+	}
+
+	if !goModExists {
+		if verbose {
+			LogInfof("'%s' has no 'go.mod' present is not a golang package.", repoPath)
+		}
+		return false, nil
+	}
+
+	isMainFuncPresent, err := g.ContainsGoSourceFileOfMainPackageWithMainFunction(verbose)
+	if err != nil {
+		return false, err
+	}
+
+	if isMainFuncPresent {
+		if verbose {
+			LogInfof("'%s' contains not a go package since 'main' function was found.", repoPath)
+		}
+
+		return false, nil
+	}
+
+	if verbose {
+		LogInfof("'%s' contains a go package.", repoPath)
+	}
+
+	return true, nil
+}
+
 func (g *GitRepositoryBase) ListVersionTags(verbose bool) (versionTags []GitTag, err error) {
 	parent, err := g.GetParentRepositoryForBaseClass()
 	if err != nil {
@@ -535,6 +578,15 @@ func (g *GitRepositoryBase) MustIsGolangApplication(verbose bool) (isGolangAppli
 	}
 
 	return isGolangApplication
+}
+
+func (g *GitRepositoryBase) MustIsGolangPackage(verbose bool) (isGolangPackage bool) {
+	isGolangPackage, err := g.IsGolangPackage(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isGolangPackage
 }
 
 func (g *GitRepositoryBase) MustListVersionTags(verbose bool) (versionTags []GitTag) {
