@@ -23,7 +23,9 @@ type GitRepository interface {
 	Delete(verbose bool) (err error)
 	Exists(verbose bool) (exists bool, err error)
 	FileByPathExists(path string, verbose bool) (exists bool, err error)
+	// TODO: Will be removed as there should be no need to explitly get as local Directory:
 	GetAsLocalDirectory() (localDirectory *LocalDirectory, err error)
+	// TODO: Will be removed as there should be no need to explitly get as local GitRepository:
 	GetAsLocalGitRepository() (localGitRepository *LocalGitRepository, err error)
 	GetAuthorEmailByCommitHash(hash string) (authorEmail string, err error)
 	GetAuthorStringByCommitHash(hash string) (authorString string, err error)
@@ -64,7 +66,9 @@ type GitRepository interface {
 	MustDelete(verbose bool)
 	MustExists(verbose bool) (exists bool)
 	MustFileByPathExists(path string, verbose bool) (exists bool)
+	// TODO: Will be removed as there should be no need to explitly get a local Directory:
 	MustGetAsLocalDirectory() (localDirectory *LocalDirectory)
+	// TODO: Will be removed as there should be no need to explitly get as local GitRepository:
 	MustGetAsLocalGitRepository() (localGitRepository *LocalGitRepository)
 	MustGetAuthorEmailByCommitHash(hash string) (authorEmail string)
 	MustGetAuthorStringByCommitHash(hash string) (authorString string)
@@ -102,6 +106,7 @@ type GitRepository interface {
 	CheckHasNoUncommittedChanges(verbose bool) (err error)
 	CheckIsGolangApplication(verbose bool) (err error)
 	CheckIsGolangPackage(verbose bool) (err error)
+	CheckIsOnLocalhost(verbose bool) (err error)
 	CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error)
 	CreateAndInit(options *CreateRepositoryOptions) (err error)
 	GetCurrentCommitsNewestVersion(verbose bool) (newestVersion Version, err error)
@@ -113,9 +118,11 @@ type GitRepository interface {
 	HasNoUncommittedChanges(verbose bool) (noUncommitedChnages bool, err error)
 	IsGolangApplication(verbose bool) (isGolangApplication bool, err error)
 	IsGolangPackage(verbose bool) (isGolangPackage bool, err error)
+	IsOnLocalhost(verbose bool) (isOnLocalhost bool, err error)
 	MustCheckHasNoUncommittedChanges(verbose bool)
 	MustCheckIsGolangApplication(verbose bool)
 	MustCheckIsGolangPackage(verbose bool)
+	MustCheckIsOnLocalhost(verbose bool)
 	MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit)
 	MustCreateAndInit(options *CreateRepositoryOptions)
 	MustGetCurrentCommitsNewestVersion(verbose bool) (newestVersion Version)
@@ -127,6 +134,7 @@ type GitRepository interface {
 	MustHasNoUncommittedChanges(verbose bool) (noUncommitedChnages bool)
 	MustIsGolangApplication(verbose bool) (isGolangApplication bool)
 	MustIsGolangPackage(verbose bool) (isGolangPackage bool)
+	MustIsOnLocalhost(verbose bool) (isOnLocalhost bool)
 	MustWriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile File)
 	MustWriteStringToFile(content string, verbose bool, path ...string) (writtenFile File)
 	WriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile File, err error)
