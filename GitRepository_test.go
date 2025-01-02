@@ -800,6 +800,59 @@ func TestGitRepository_ListTags(t *testing.T) {
 	}
 }
 
+
+func TestGitRepository_GetLatestTagVersionOrNilIfNotFound(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				gitRepo.MustCommit(
+					&GitCommitOptions{
+						Message:    "initial empty commit",
+						AllowEmpty: true,
+						Verbose:    verbose,
+					},
+				)
+
+				assert.Nil(gitRepo.MustGetLatestTagVersionOrNilIfNotFound(verbose))
+
+				gitRepo.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "v1.0.0",
+						Verbose: verbose,
+					},
+				)
+
+				assert.NotNil(gitRepo.MustGetLatestTagVersionOrNilIfNotFound(verbose))
+
+				gitRepo.MustCreateTag(
+					&GitRepositoryCreateTagOptions{
+						TagName: "v0.1.2",
+						Verbose: verbose,
+					},
+				)
+
+				assert.NotNil(gitRepo.MustGetLatestTagVersionOrNilIfNotFound(verbose))
+			},
+		)
+	}
+}
+
+
 func TestGitRepository_GetLatestTagVersion(t *testing.T) {
 	tests := []struct {
 		implementationName string

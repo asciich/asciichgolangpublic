@@ -280,7 +280,53 @@ func (g *GitRepositoryBase) GetFileByPath(path ...string) (file File, err error)
 }
 
 func (g *GitRepositoryBase) GetLatestTagVersion(verbose bool) (latestTagVersion Version, err error) {
-	versionTags, err := g.ListVersionTags(verbose)
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	latestTagVersion, err = parent.GetLatestTagVersionOrNilIfNotFound(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	if latestTagVersion == nil {
+		path, hostDescription, err := parent.GetPathAndHostDescription()
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, TracedErrorf(
+			"No version tag in git repository '%s' on host '%s' found.",
+			path,
+			hostDescription,
+		)
+	}
+
+	return latestTagVersion, nil
+}
+
+func (g *GitRepositoryBase) GetLatestTagVersionAsString(verbose bool) (latestTagVersion string, err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return "", err
+	}
+
+	version, err := parent.GetLatestTagVersion(verbose)
+	if err != nil {
+		return "", err
+	}
+
+	return version.GetAsString()
+}
+
+func (g *GitRepositoryBase) GetLatestTagVersionOrNilIfNotFound(verbose bool) (latestTagVersion Version, err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	versionTags, err := parent.ListVersionTags(verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -302,20 +348,6 @@ func (g *GitRepositoryBase) GetLatestTagVersion(verbose bool) (latestTagVersion 
 	}
 
 	return latestTagVersion, nil
-}
-
-func (g *GitRepositoryBase) GetLatestTagVersionAsString(verbose bool) (latestTagVersion string, err error) {
-	parent, err := g.GetParentRepositoryForBaseClass()
-	if err != nil {
-		return "", err
-	}
-
-	version, err := parent.GetLatestTagVersion(verbose)
-	if err != nil {
-		return "", err
-	}
-
-	return version.GetAsString()
 }
 
 func (g *GitRepositoryBase) GetParentRepositoryForBaseClass() (parentRepositoryForBaseClass GitRepository, err error) {
@@ -641,6 +673,15 @@ func (g *GitRepositoryBase) MustGetLatestTagVersion(verbose bool) (latestTagVers
 
 func (g *GitRepositoryBase) MustGetLatestTagVersionAsString(verbose bool) (latestTagVersion string) {
 	latestTagVersion, err := g.GetLatestTagVersionAsString(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return latestTagVersion
+}
+
+func (g *GitRepositoryBase) MustGetLatestTagVersionOrNilIfNotFound(verbose bool) (latestTagVersion Version) {
+	latestTagVersion, err := g.GetLatestTagVersionOrNilIfNotFound(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
