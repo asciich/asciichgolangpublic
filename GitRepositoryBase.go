@@ -62,6 +62,33 @@ func (g *GitRepositoryBase) CheckIsGolangApplication(verbose bool) (err error) {
 	)
 }
 
+func (g *GitRepositoryBase) CheckIsGolangPackage(verbose bool) (err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	isGolangPackage, err := parent.IsGolangPackage(verbose)
+	if err != nil {
+		return err
+	}
+
+	if !isGolangPackage {
+		path, hostDescription, err := g.GetPathAndHostDescription()
+		if err != nil {
+			return err
+		}
+
+		return TracedErrorf(
+			"git repository '%s' on host '%s' is not a golang package",
+			path,
+			hostDescription,
+		)
+	}
+
+	return nil
+}
+
 func (g *GitRepositoryBase) CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
 	if commitOptions == nil {
 		return nil, TracedErrorNil("commitOptions")
@@ -469,6 +496,13 @@ func (g *GitRepositoryBase) MustCheckHasNoUncommittedChanges(verbose bool) {
 
 func (g *GitRepositoryBase) MustCheckIsGolangApplication(verbose bool) {
 	err := g.CheckIsGolangApplication(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (g *GitRepositoryBase) MustCheckIsGolangPackage(verbose bool) {
+	err := g.CheckIsGolangPackage(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

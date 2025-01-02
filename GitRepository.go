@@ -101,6 +101,7 @@ type GitRepository interface {
 	// All methods below this line can be implemented by embedding the `GitRepositoryBase` struct:
 	CheckHasNoUncommittedChanges(verbose bool) (err error)
 	CheckIsGolangApplication(verbose bool) (err error)
+	CheckIsGolangPackage(verbose bool) (err error)
 	CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error)
 	CreateAndInit(options *CreateRepositoryOptions) (err error)
 	GetCurrentCommitsNewestVersion(verbose bool) (newestVersion Version, err error)
@@ -114,6 +115,7 @@ type GitRepository interface {
 	IsGolangPackage(verbose bool) (isGolangPackage bool, err error)
 	MustCheckHasNoUncommittedChanges(verbose bool)
 	MustCheckIsGolangApplication(verbose bool)
+	MustCheckIsGolangPackage(verbose bool)
 	MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit)
 	MustCreateAndInit(options *CreateRepositoryOptions)
 	MustGetCurrentCommitsNewestVersion(verbose bool) (newestVersion Version)
