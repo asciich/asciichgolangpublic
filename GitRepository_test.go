@@ -503,7 +503,7 @@ func TestGitRepository_GetRootDirectory_from_subdirectory(t *testing.T) {
 	}
 }
 
-func TestLocalGitRepositoryPullAndPush(t *testing.T) {
+func TestGitRepository_PullAndPush(t *testing.T) {
 	tests := []struct {
 		implementationUpstream string
 		implementationCloned   string
@@ -607,6 +607,86 @@ func TestLocalGitRepositoryPullAndPush(t *testing.T) {
 					upstreamRepo.MustGetCurrentCommitHash(verbose),
 					clonedRepo.MustGetCurrentCommitHash(verbose),
 				)
+			},
+		)
+	}
+}
+
+func TestGitRepository_AddFilesByPath(t *testing.T) {
+	tests := []struct {
+		implementationUpstream string
+		implementationCloned   string
+	}{
+		{"localGitRepository", "localGitRepository"},
+		{"localCommandExecutorRepository", "localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				upstreamRepo := getGitRepositoryToTest(tt.implementationUpstream)
+				defer upstreamRepo.MustDelete(verbose)
+				upstreamRepo.MustDelete(verbose)
+				upstreamRepo.MustInit(
+					&CreateRepositoryOptions{
+						BareRepository:              true,
+						InitializeWithEmptyCommit:   true,
+						InitializeWithDefaultAuthor: true,
+						Verbose:                     verbose,
+					},
+				)
+
+				clonedRepo := getGitRepositoryToTest(tt.implementationCloned)
+				defer clonedRepo.MustDelete(verbose)
+				clonedRepo.MustDelete(verbose)
+				clonedRepo.MustCloneRepository(upstreamRepo, verbose)
+
+				clonedRepo.MustSetGitConfig(
+					&GitConfigSetOptions{
+						Name:  "Test User",
+						Email: "user@example.com",
+					},
+				)
+
+				clonedRepo2 := getGitRepositoryToTest(tt.implementationCloned)
+				defer clonedRepo2.MustDelete(verbose)
+				clonedRepo2.MustDelete(verbose)
+				clonedRepo2.MustCloneRepository(upstreamRepo, verbose)
+
+				clonedRepo2.MustSetGitConfig(
+					&GitConfigSetOptions{
+						Name:  "Test User2",
+						Email: "user2@example.com",
+					},
+				)
+
+				fileName := "abc.txt"
+				fileName2 := "abc.txt"
+				clonedRepo.MustCreateFileInDirectory(verbose, fileName)
+				clonedRepo.MustCreateFileInDirectory(verbose, fileName2)
+				clonedRepo.MustAddFilesByPath(
+					[]string{fileName, fileName2},
+					verbose,
+				)
+				clonedRepo.MustCommit(
+					&GitCommitOptions{
+						Message: "another commit",
+						Verbose: verbose,
+					},
+				)
+				clonedRepo.MustPush(verbose)
+				
+				assert.False(clonedRepo2.MustFileByPathExists(fileName, verbose))
+				assert.False(clonedRepo2.MustFileByPathExists(fileName2, verbose))
+				
+				clonedRepo2.MustPull(verbose)
+				assert.True(clonedRepo2.MustFileByPathExists(fileName, verbose))
+				assert.True(clonedRepo2.MustFileByPathExists(fileName2, verbose))				
 			},
 		)
 	}
@@ -800,7 +880,6 @@ func TestGitRepository_ListTags(t *testing.T) {
 	}
 }
 
-
 func TestGitRepository_GetLatestTagVersionOrNilIfNotFound(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -851,7 +930,6 @@ func TestGitRepository_GetLatestTagVersionOrNilIfNotFound(t *testing.T) {
 		)
 	}
 }
-
 
 func TestGitRepository_GetLatestTagVersion(t *testing.T) {
 	tests := []struct {
@@ -1403,7 +1481,6 @@ func TestGitRepository_IsGolangPackage_mainFunctionIsNotAPackage(t *testing.T) {
 		)
 	}
 }
-
 
 func TestGitRepository_CheckIsGolangPackage_emptyRepo(t *testing.T) {
 	tests := []struct {
