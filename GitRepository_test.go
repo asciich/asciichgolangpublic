@@ -680,13 +680,13 @@ func TestGitRepository_AddFilesByPath(t *testing.T) {
 					},
 				)
 				clonedRepo.MustPush(verbose)
-				
+
 				assert.False(clonedRepo2.MustFileByPathExists(fileName, verbose))
 				assert.False(clonedRepo2.MustFileByPathExists(fileName2, verbose))
-				
+
 				clonedRepo2.MustPull(verbose)
 				assert.True(clonedRepo2.MustFileByPathExists(fileName, verbose))
-				assert.True(clonedRepo2.MustFileByPathExists(fileName2, verbose))				
+				assert.True(clonedRepo2.MustFileByPathExists(fileName2, verbose))
 			},
 		)
 	}
@@ -767,6 +767,62 @@ func TestGitRepository_ListFiles(t *testing.T) {
 					},
 				)
 				assert.Len(files, 2)
+			},
+		)
+	}
+}
+
+func TestGitRepository_ListFilePaths(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				repo := getGitRepositoryToTest(tt.implementationName)
+				defer repo.Delete(verbose)
+
+				assert.False(repo.MustHasUncommittedChanges(verbose))
+
+				repo.MustCreateFileInDirectory(verbose, "a.txt")
+				repo.MustCreateFileInDirectory(verbose, "b.txt")
+				repo.MustCreateFileInDirectory(verbose, "c.txt")
+				repo.MustCreateFileInDirectory(verbose, "cb.txt")
+
+				files := repo.MustListFilePaths(
+					&ListFileOptions{
+						MatchBasenamePattern: []string{"^b\\.txt$"},
+						Verbose:              verbose,
+						ReturnRelativePaths:  true,
+					},
+				)
+				assert.Len(files, 1)
+				assert.EqualValues(
+					"b.txt",
+					files[0],
+				)
+
+				files = repo.MustListFilePaths(
+					&ListFileOptions{
+						MatchBasenamePattern: []string{"^.*b\\.txt$"},
+						Verbose:              verbose,
+						ReturnRelativePaths:  true,
+					},
+				)
+				assert.Len(files, 2)
+				assert.EqualValues(
+					[]string{"b.txt", "cb.txt"},
+					files,
+				)
 			},
 		)
 	}
