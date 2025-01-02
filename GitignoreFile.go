@@ -1,7 +1,11 @@
 package asciichgolangpublic
 
 type GitignoreFile struct {
-	LocalFile
+	File
+}
+
+func GetGitignoreDefaultBaseName() (defaultBaseName string) {
+	return ".gitignore"
 }
 
 func GetGitignoreFileByFile(fileToUse File) (gitignoreFile *GitignoreFile, err error) {
@@ -9,34 +13,37 @@ func GetGitignoreFileByFile(fileToUse File) (gitignoreFile *GitignoreFile, err e
 		return nil, TracedErrorEmptyString("fileToUse")
 	}
 
-	pathToUse, err := fileToUse.GetLocalPath()
-	if err != nil {
-		return nil, err
-	}
-
 	gitignoreFile = NewGitignoreFile()
 
-	err = gitignoreFile.SetPath(pathToUse)
-	if err != nil {
-		return nil, err
-	}
+	gitignoreFile.File = fileToUse
 
 	return gitignoreFile, nil
 }
 
 func GetGitignoreFileByPath(filePath string) (gitignoreFile *GitignoreFile, err error) {
 	if filePath == "" {
-		return nil, TracedError("filePath is empty string")
+		return nil, TracedErrorEmptyString("filePath")
 	}
 
-	gitignoreFile = NewGitignoreFile()
-
-	err = gitignoreFile.SetPath(filePath)
+	fileToUse, err := GetLocalFileByPath(filePath)
 	if err != nil {
 		return nil, err
 	}
 
-	return gitignoreFile, nil
+	return GetGitignoreFileByFile(fileToUse)
+}
+
+func GetGitignoreFileInGitRepository(gitRepository GitRepository) (gitignoreFile *GitignoreFile, err error) {
+	if gitRepository == nil {
+		return nil, TracedErrorNil("gitRepository")
+	}
+
+	fileToUse, err := gitRepository.GetFileByPath(GetGitignoreDefaultBaseName())
+	if err != nil {
+		return nil, err
+	}
+
+	return GetGitignoreFileByFile(fileToUse)
 }
 
 func MustGetGitignoreFileByFile(fileToUse File) (gitignoreFile *GitignoreFile) {
@@ -57,10 +64,17 @@ func MustGetGitignoreFileByPath(filePath string) (gitignoreFile *GitignoreFile) 
 	return gitignoreFile
 }
 
+func MustGetGitignoreFileInGitRepository(gitRepository GitRepository) (gitignoreFile *GitignoreFile) {
+	gitignoreFile, err := GetGitignoreFileInGitRepository(gitRepository)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitignoreFile
+}
+
 func NewGitignoreFile() (g *GitignoreFile) {
-	g = new(GitignoreFile)
-	g.MustSetParentFileForBaseClass(g)
-	return g
+	return new(GitignoreFile)
 }
 
 func (g *GitignoreFile) AddDirToIgnore(pathToIgnore string, comment string, verbose bool) (err error) {
