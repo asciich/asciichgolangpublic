@@ -47,7 +47,7 @@ func GetPreCommitConfigByLocalPath(localPath string) (preCommitConfigFile *PreCo
 	return preCommitConfigFile, nil
 }
 
-func GetPreCommitConfigInGitRepository(gitRepository GitRepository) (preCommitConfigFile *PreCommitConfigFile, err error) {
+func GetPreCommitConfigFileInGitRepository(gitRepository GitRepository) (preCommitConfigFile *PreCommitConfigFile, err error) {
 	if gitRepository == nil {
 		return nil, TracedErrorNil("gitRepository")
 	}
@@ -78,8 +78,8 @@ func MustGetPreCommitConfigByLocalPath(localPath string) (preCommitConfigFile *P
 	return preCommitConfigFile
 }
 
-func MustGetPreCommitConfigInGitRepository(gitRepository GitRepository) (preCommitConfigFile *PreCommitConfigFile) {
-	preCommitConfigFile, err := GetPreCommitConfigInGitRepository(gitRepository)
+func MustGetPreCommitConfigFileInGitRepository(gitRepository GitRepository) (preCommitConfigFile *PreCommitConfigFile) {
+	preCommitConfigFile, err := GetPreCommitConfigFileInGitRepository(gitRepository)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

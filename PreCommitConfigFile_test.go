@@ -92,7 +92,7 @@ func TestPreCommitConfigFile_GetPreCommitConfigInGitRepository(t *testing.T) {
 
 				gitRepo.MustWriteStringToFile("# placeholder", verbose, ".pre-commit-config.yaml")
 
-				preCommitConfigFile := MustGetPreCommitConfigInGitRepository(gitRepo)
+				preCommitConfigFile := MustGetPreCommitConfigFileInGitRepository(gitRepo)
 				assert.True(preCommitConfigFile.MustExists(verbose))
 				assert.True(strings.HasSuffix(preCommitConfigFile.MustGetPath(), "/.pre-commit-config.yaml"))
 			},
