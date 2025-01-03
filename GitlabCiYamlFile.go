@@ -7,7 +7,24 @@ import (
 )
 
 type GitlabCiYamlFile struct {
-	LocalFile
+	File
+}
+
+func GetGitlabCiYamlDefaultBaseName() (defaultBaseName string) {
+	return ".gitlab-ci.yml"
+}
+
+func GetGitlabCiYamlFileInGitRepository(gitRepository GitRepository) (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
+	if gitRepository == nil {
+		return nil, TracedErrorNil("gitRepository")
+	}
+
+	fileToUse, err := gitRepository.GetFileByPath(GetGitlabCiYamlDefaultBaseName())
+	if err != nil {
+		return nil, err
+	}
+
+	return GetGitlabCiYamlFileByFile(fileToUse)
 }
 
 func GetGitlabCiYamlFileByFile(file File) (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
@@ -15,33 +32,8 @@ func GetGitlabCiYamlFileByFile(file File) (gitlabCiYamlFile *GitlabCiYamlFile, e
 		return nil, TracedErrorNil("file")
 	}
 
-	path, err := file.GetLocalPath()
-	if err != nil {
-		return nil, err
-	}
-
-	gitlabCiYamlFile, err = GetGitlabCiYamlFileByPath(path)
-	if err != nil {
-		return nil, err
-	}
-
-	return gitlabCiYamlFile, nil
-}
-
-func GetGitlabCiYamlFileByLocalFile(localFile *LocalFile) (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
-	if localFile == nil {
-		return nil, TracedErrorNil("localFile")
-	}
-
-	path, err := localFile.GetLocalPath()
-	if err != nil {
-		return nil, err
-	}
-
-	gitlabCiYamlFile, err = GetGitlabCiYamlFileByPath(path)
-	if err != nil {
-		return nil, err
-	}
+	gitlabCiYamlFile = NewGitlabCiYamlFile()
+	gitlabCiYamlFile.File = file
 
 	return gitlabCiYamlFile, nil
 }
@@ -51,31 +43,16 @@ func GetGitlabCiYamlFileByPath(filePath string) (gitlabCiYamlFile *GitlabCiYamlF
 		return nil, TracedError("filePath is empty string")
 	}
 
-	gitlabCiYamlFile = NewGitlabCiYamlFile()
-	err = gitlabCiYamlFile.SetPath(filePath)
+	localFile, err := GetLocalFileByPath(filePath)
 	if err != nil {
 		return nil, err
 	}
 
-	err = gitlabCiYamlFile.SetParentFileForBaseClass(gitlabCiYamlFile)
-	if err != nil {
-		return nil, err
-	}
-
-	return gitlabCiYamlFile, nil
+	return GetGitlabCiYamlFileByFile(localFile)
 }
 
 func MustGetGitlabCiYamlFileByFile(file File) (gitlabCiYamlFile *GitlabCiYamlFile) {
 	gitlabCiYamlFile, err := GetGitlabCiYamlFileByFile(file)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-
-	return gitlabCiYamlFile
-}
-
-func MustGetGitlabCiYamlFileByLocalFile(localFile *LocalFile) (gitlabCiYamlFile *GitlabCiYamlFile) {
-	gitlabCiYamlFile, err := GetGitlabCiYamlFileByLocalFile(localFile)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
