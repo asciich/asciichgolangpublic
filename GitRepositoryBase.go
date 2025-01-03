@@ -310,6 +310,20 @@ func (g *GitRepositoryBase) CreateAndInit(createOptions *CreateRepositoryOptions
 	return nil
 }
 
+func (g *GitRepositoryBase) GetCurrentCommitMessage(verbose bool) (currentCommitMessage string, err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return "", err
+	}
+
+	currentCommit, err := parent.GetCurrentCommit(verbose)
+	if err != nil {
+		return "", err
+	}
+
+	return currentCommit.GetCommitMessage()
+}
+
 func (g *GitRepositoryBase) GetCurrentCommitsNewestVersion(verbose bool) (newestVersion Version, err error) {
 	parent, err := g.GetParentRepositoryForBaseClass()
 	if err != nil {
@@ -726,6 +740,15 @@ func (g *GitRepositoryBase) MustCreateAndInit(createOptions *CreateRepositoryOpt
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (g *GitRepositoryBase) MustGetCurrentCommitMessage(verbose bool) (currentCommitMessage string) {
+	currentCommitMessage, err := g.GetCurrentCommitMessage(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return currentCommitMessage
 }
 
 func (g *GitRepositoryBase) MustGetCurrentCommitsNewestVersion(verbose bool) (newestVersion Version) {
