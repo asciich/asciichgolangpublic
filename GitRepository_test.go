@@ -1782,3 +1782,83 @@ func TestGitRepository_GetCurrentCommitMessage(t *testing.T) {
 		)
 	}
 }
+
+
+func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				gitRepo.MustCommit(
+					&GitCommitOptions{
+						AllowEmpty: true,
+						Message:    "commit before testing",
+						Verbose:    verbose,
+					},
+				)
+
+				assert.EqualValues(
+					"commit before testing",
+					gitRepo.MustGetCurrentCommitMessage(verbose),
+				)
+
+				gitRepo.MustCommitIfUncommittedChanges(
+					&GitCommitOptions{
+						Message:    "This should not trigger a commit",
+						Verbose:    verbose,
+					},
+				)
+
+				assert.EqualValues(
+					"commit before testing",
+					gitRepo.MustGetCurrentCommitMessage(verbose),
+				)
+
+				gitRepo.MustWriteStringToFile("hello", verbose, "world.txt")
+				gitRepo.MustAddFileByPath("world.txt", verbose)
+
+				gitRepo.MustCommitIfUncommittedChanges(
+					&GitCommitOptions{
+						Message:    "This should trigger a commit",
+						Verbose:    verbose,
+					},
+				)
+
+				assert.EqualValues(
+					"This should trigger a commit",
+					gitRepo.MustGetCurrentCommitMessage(verbose),
+				)
+
+				gitRepo.MustWriteStringToFile("world", verbose, "world.txt")
+				// world.txt is already known in the git repo.
+				// No need to explicitly add world.txt again.
+
+				gitRepo.MustCommitIfUncommittedChanges(
+					&GitCommitOptions{
+						Message:    "This should trigger again a commit",
+						Verbose:    verbose,
+					},
+				)
+
+				assert.EqualValues(
+					"This should trigger again a commit",
+					gitRepo.MustGetCurrentCommitMessage(verbose),
+				)
+			},
+		)
+	}
+}
