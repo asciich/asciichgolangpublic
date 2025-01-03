@@ -14,19 +14,6 @@ func GetGitlabCiYamlDefaultBaseName() (defaultBaseName string) {
 	return ".gitlab-ci.yml"
 }
 
-func GetGitlabCiYamlFileInGitRepository(gitRepository GitRepository) (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
-	if gitRepository == nil {
-		return nil, TracedErrorNil("gitRepository")
-	}
-
-	fileToUse, err := gitRepository.GetFileByPath(GetGitlabCiYamlDefaultBaseName())
-	if err != nil {
-		return nil, err
-	}
-
-	return GetGitlabCiYamlFileByFile(fileToUse)
-}
-
 func GetGitlabCiYamlFileByFile(file File) (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
 	if file == nil {
 		return nil, TracedErrorNil("file")
@@ -51,6 +38,19 @@ func GetGitlabCiYamlFileByPath(filePath string) (gitlabCiYamlFile *GitlabCiYamlF
 	return GetGitlabCiYamlFileByFile(localFile)
 }
 
+func GetGitlabCiYamlFileInGitRepository(gitRepository GitRepository) (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
+	if gitRepository == nil {
+		return nil, TracedErrorNil("gitRepository")
+	}
+
+	fileToUse, err := gitRepository.GetFileByPath(GetGitlabCiYamlDefaultBaseName())
+	if err != nil {
+		return nil, err
+	}
+
+	return GetGitlabCiYamlFileByFile(fileToUse)
+}
+
 func MustGetGitlabCiYamlFileByFile(file File) (gitlabCiYamlFile *GitlabCiYamlFile) {
 	gitlabCiYamlFile, err := GetGitlabCiYamlFileByFile(file)
 	if err != nil {
@@ -62,6 +62,15 @@ func MustGetGitlabCiYamlFileByFile(file File) (gitlabCiYamlFile *GitlabCiYamlFil
 
 func MustGetGitlabCiYamlFileByPath(filePath string) (gitlabCiYamlFile *GitlabCiYamlFile) {
 	gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(filePath)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return gitlabCiYamlFile
+}
+
+func MustGetGitlabCiYamlFileInGitRepository(gitRepository GitRepository) (gitlabCiYamlFile *GitlabCiYamlFile) {
+	gitlabCiYamlFile, err := GetGitlabCiYamlFileInGitRepository(gitRepository)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

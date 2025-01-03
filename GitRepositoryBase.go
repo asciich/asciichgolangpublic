@@ -370,6 +370,27 @@ func (g *GitRepositoryBase) CreateAndInit(createOptions *CreateRepositoryOptions
 	return nil
 }
 
+func (g *GitRepositoryBase) EnsureMainReadmeMdExists(verbose bool) (err error) {
+	const fileName string = "README.md"
+
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	_, err = parent.CreateFileInDirectory(verbose, "README.md")
+	if err != nil {
+		return err
+	}
+
+	err = parent.AddFileByPath(fileName, verbose)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (g *GitRepositoryBase) GetCurrentCommitMessage(verbose bool) (currentCommitMessage string, err error) {
 	parent, err := g.GetParentRepositoryForBaseClass()
 	if err != nil {
@@ -806,6 +827,13 @@ func (g *GitRepositoryBase) MustContainsGoSourceFileOfMainPackageWithMainFunctio
 
 func (g *GitRepositoryBase) MustCreateAndInit(createOptions *CreateRepositoryOptions) {
 	err := g.CreateAndInit(createOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (g *GitRepositoryBase) MustEnsureMainReadmeMdExists(verbose bool) {
+	err := g.EnsureMainReadmeMdExists(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
