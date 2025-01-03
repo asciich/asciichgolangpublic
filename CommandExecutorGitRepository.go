@@ -557,7 +557,35 @@ func (c *CommandExecutorGitRepository) GetCommitByHash(hash string) (gitCommit *
 }
 
 func (c *CommandExecutorGitRepository) GetCommitMessageByCommitHash(hash string) (commitMessage string, err error) {
-	return "", TracedErrorNotImplemented()
+	if hash == "" {
+		return "", TracedErrorEmptyString("hash")
+	}
+
+	stdout, err := c.RunGitCommandAndGetStdoutAsString(
+		[]string{"log", "-n", "1", "--pretty=format:%s", hash},
+		false,
+	)
+	if err != nil {
+		return "", err
+	}
+
+	commitMessage = strings.TrimSpace(stdout)
+
+	if commitMessage == "" {
+		path, hostDescription, err := c.GetPathAndHostDescription()
+		if err != nil {
+			return "", err
+		}
+
+		return "", TracedErrorf(
+			"Unable to get commit message for hash '%s' in git repository '%s' on host '%s'. commitMessage is empty string after evaluation.",
+			hash,
+			path,
+			hostDescription,
+		)
+	}
+
+	return commitMessage, nil
 }
 
 func (c *CommandExecutorGitRepository) GetCommitParentsByCommitHash(hash string, options *GitCommitGetParentsOptions) (commitParents []*GitCommit, err error) {

@@ -1735,13 +1735,49 @@ func TestGitRepository_CheckoutBranch(t *testing.T) {
 						},
 					)
 					assert.True(gitRepo.MustBranchByNameExists(branchName, verbose))
-					
+
 					gitRepo.MustCheckoutBranchByName(branchName, verbose)
 					assert.EqualValues(
 						branchName,
 						gitRepo.MustGetCurrentBranchName(verbose),
 					)
 				}
+			},
+		)
+	}
+}
+
+func TestGitRepository_GetCurrentCommitMessage(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				gitRepo.MustCommit(
+					&GitCommitOptions{
+						AllowEmpty: true,
+						Message:    "commit message",
+						Verbose:    verbose,
+					},
+				)
+
+				assert.EqualValues(
+					"commit message",
+					gitRepo.MustGetCurrentCommitMessage(verbose),
+				)
 			},
 		)
 	}
