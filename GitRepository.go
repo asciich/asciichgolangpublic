@@ -118,12 +118,14 @@ type GitRepository interface {
 	MustPull(verbose bool)
 	MustPush(verbose bool)
 	MustSetGitConfig(options *GitConfigSetOptions)
+	MustSetRemoteUrl(remoteUrl string, verbose bool)
 	RemoteByNameExists(remoteName string, verbose bool) (remoteExists bool, err error)
 	RemoteConfigurationExists(config *GitRemoteConfig, verbose bool) (exists bool, err error)
 	RemoveRemoteByName(remoteName string, verbose bool) (err error)
 	Pull(verbose bool) (err error)
 	Push(verbose bool) (err error)
 	SetGitConfig(options *GitConfigSetOptions) (err error)
+	SetRemoteUrl(remoteUrl string, verbose bool) (err error)
 
 	// All methods below this line can be implemented by embedding the `GitRepositoryBase` struct:
 	AddFilesByPath(pathsToAdd []string, verbose bool) (err error)

@@ -2348,6 +2348,13 @@ func (l *LocalGitRepository) MustSetRemote(remoteName string, remotUrl string, v
 	return remote
 }
 
+func (l *LocalGitRepository) MustSetRemoteUrl(remoteUrl string, verbose bool) {
+	err := l.SetRemoteUrl(remoteUrl, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (l *LocalGitRepository) Pull(verbose bool) (err error) {
 	worktree, err := l.GetGoGitWorktree()
 	if err != nil {
@@ -2609,4 +2616,36 @@ func (l *LocalGitRepository) SetRemote(remoteName string, remotUrl string, verbo
 	}
 
 	return remote, err
+}
+
+func (l *LocalGitRepository) SetRemoteUrl(remoteUrl string, verbose bool) (err error) {
+	remoteUrl = strings.TrimSpace(remoteUrl)
+	if len(remoteUrl) <= 0 {
+		return TracedError("remoteUrl is empty string")
+	}
+
+	name := "origin"
+
+	// TODO: Implement without calling the git binary
+	_, err = l.RunGitCommand([]string{"remote", "set-url", name, remoteUrl}, verbose)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		path, hostDescription, err := l.GetPathAndHostDescription()
+		if err != nil {
+			return err
+		}
+
+		LogChangedf(
+			"Set remote Url for '%v' in git repository '%v' on host '%s' to '%v'.",
+			name,
+			path,
+			hostDescription,
+			remoteUrl,
+		)
+	}
+
+	return nil
 }
