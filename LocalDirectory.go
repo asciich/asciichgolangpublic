@@ -603,40 +603,6 @@ func (l *LocalDirectory) GetSubDirectoryAndLocalPath(path ...string) (subDirecto
 	return subDirectory, subDirectoryPath, nil
 }
 
-func (l *LocalDirectory) GetSubDirectoryPaths(listOptions *ListDirectoryOptions) (paths []string, err error) {
-	if listOptions == nil {
-		return nil, TracedErrorNil("listOptions")
-	}
-
-	optionsToUse := &ListDirectoryOptions{
-		Recursive: listOptions.Recursive,
-		Verbose:   listOptions.Verbose,
-	}
-
-	absoultePaths, err := l.ListSubDirectoriesAsAbsolutePaths(optionsToUse)
-	if err != nil {
-		return nil, err
-	}
-
-	localPath, err := l.GetLocalPath()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, absolutePath := range absoultePaths {
-		toAdd := strings.TrimPrefix(absolutePath, localPath)
-		toAdd = Strings().TrimAllPrefix(toAdd, "/")
-
-		if toAdd == "" {
-			return nil, TracedError("Internal error: toAdd is empty string after evaluation")
-		}
-
-		paths = append(paths, toAdd)
-	}
-
-	return paths, err
-}
-
 func (l *LocalDirectory) IsEmptyDirectory(verbose bool) (isEmpty bool, err error) {
 	subDirs, err := l.ListSubDirectories(
 		&ListDirectoryOptions{
@@ -1022,15 +988,6 @@ func (l *LocalDirectory) MustGetSubDirectoryAndLocalPath(path ...string) (subDir
 	}
 
 	return subDirectory, subDirectoryPath
-}
-
-func (l *LocalDirectory) MustGetSubDirectoryPaths(listOptions *ListDirectoryOptions) (paths []string) {
-	paths, err := l.GetSubDirectoryPaths(listOptions)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-
-	return paths
 }
 
 func (l *LocalDirectory) MustIsEmptyDirectory(verbose bool) (isEmpty bool) {

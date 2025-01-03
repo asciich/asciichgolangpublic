@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -158,6 +159,125 @@ func TestDirectory_ReadFirstLineOfFileInDirectoryAsString(t *testing.T) {
 					"1234",
 					dir.MustReadFirstLineOfFileInDirectoryAsString("test.txt"),
 				)
+			},
+		)
+	}
+}
+
+func TestDirectory_ListSubDirectories_RelativePaths(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localDirectory"},
+		{"localCommandExecutorDirectory"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+
+				testDirectory := getDirectoryToTest(tt.implementationName)
+				defer testDirectory.Delete(verbose)
+
+				testDirectory.MustCreateSubDirectory("test1", verbose)
+				test2 := testDirectory.MustCreateSubDirectory("test2", verbose)
+
+				test2.MustCreateSubDirectory("a", verbose)
+				test2.MustCreateSubDirectory("b", verbose)
+				test2.MustCreateSubDirectory("c", verbose)
+
+				subDirectoryList := testDirectory.MustListSubDirectoryPaths(
+					&ListDirectoryOptions{
+						Recursive:           false,
+						ReturnRelativePaths: true,
+						Verbose:             verbose,
+					},
+				)
+
+				assert.Len(subDirectoryList, 2)
+				assert.EqualValues("test1", subDirectoryList[0])
+				assert.EqualValues("test2", subDirectoryList[1])
+
+				subDirectoryList = testDirectory.MustListSubDirectoryPaths(
+					&ListDirectoryOptions{
+						Recursive:           true,
+						ReturnRelativePaths: true,
+						Verbose:             verbose,
+					},
+				)
+
+				assert.Len(subDirectoryList, 5)
+				assert.EqualValues("test1", subDirectoryList[0])
+				assert.EqualValues("test2", subDirectoryList[1])
+				assert.EqualValues("test2/a", subDirectoryList[2])
+				assert.EqualValues("test2/b", subDirectoryList[3])
+				assert.EqualValues("test2/c", subDirectoryList[4])
+
+			},
+		)
+	}
+
+}
+
+func TestDirectory_ListSubDirectories(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localDirectory"},
+		{"localCommandExecutorDirectory"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose = true
+
+				testDirectory := getDirectoryToTest(tt.implementationName)
+				defer testDirectory.Delete(verbose)
+
+				testDirectory.MustCreateSubDirectory("test1", verbose)
+				test2 := testDirectory.MustCreateSubDirectory("test2", verbose)
+
+				test2.MustCreateSubDirectory("a", verbose)
+				test2.MustCreateSubDirectory("b", verbose)
+				test2.MustCreateSubDirectory("c", verbose)
+
+				subDirectoryList := testDirectory.MustListSubDirectories(
+					&ListDirectoryOptions{
+						Recursive: false,
+					},
+				)
+
+				assert.Len(subDirectoryList, 2)
+				assert.EqualValues("test1", subDirectoryList[0].MustGetBaseName())
+				assert.EqualValues("test2", subDirectoryList[1].MustGetBaseName())
+				assert.EqualValues(testDirectory.MustGetLocalPath(), subDirectoryList[0].MustGetDirName())
+				assert.EqualValues(testDirectory.MustGetLocalPath(), subDirectoryList[1].MustGetDirName())
+
+				subDirectoryList = testDirectory.MustListSubDirectories(
+					&ListDirectoryOptions{
+						Recursive: true,
+					},
+				)
+
+				assert.Len(subDirectoryList, 5)
+				assert.EqualValues(subDirectoryList[0].MustGetBaseName(), "test1")
+				assert.EqualValues(subDirectoryList[1].MustGetBaseName(), "test2")
+				assert.EqualValues(subDirectoryList[2].MustGetBaseName(), "a")
+				assert.EqualValues(subDirectoryList[3].MustGetBaseName(), "b")
+				assert.EqualValues(subDirectoryList[4].MustGetBaseName(), "c")
+				assert.EqualValues(subDirectoryList[0].MustGetDirName(), testDirectory.MustGetLocalPath())
+				assert.EqualValues(subDirectoryList[1].MustGetDirName(), testDirectory.MustGetLocalPath())
+				assert.EqualValues(subDirectoryList[2].MustGetDirName(), filepath.Join(testDirectory.MustGetLocalPath(), "test2"))
+				assert.EqualValues(subDirectoryList[3].MustGetDirName(), filepath.Join(testDirectory.MustGetLocalPath(), "test2"))
+				assert.EqualValues(subDirectoryList[4].MustGetDirName(), filepath.Join(testDirectory.MustGetLocalPath(), "test2"))
 			},
 		)
 	}
