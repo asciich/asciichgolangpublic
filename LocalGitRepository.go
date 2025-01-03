@@ -2289,6 +2289,13 @@ func (l *LocalGitRepository) MustPush(verbose bool) {
 	}
 }
 
+func (l *LocalGitRepository) MustPushTagsToRemote(remoteName string, verbose bool) {
+	err := l.PushTagsToRemote(remoteName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (l *LocalGitRepository) MustPushToRemote(remoteName string, verbose bool) {
 	err := l.PushToRemote(remoteName, verbose)
 	if err != nil {
@@ -2443,6 +2450,34 @@ func (l *LocalGitRepository) Push(verbose bool) (err error) {
 	err = goGitRepo.Push(&git.PushOptions{})
 	if err != nil {
 		return TracedErrorf("%w", err)
+	}
+
+	return nil
+}
+
+func (l *LocalGitRepository) PushTagsToRemote(remoteName string, verbose bool) (err error) {
+	if len(remoteName) <= 0 {
+		return TracedError("remoteName is empty string")
+	}
+
+	path, hostDescription, err := l.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	// TODO: Implemnet without calling git binary
+	_, err = l.RunGitCommand([]string{"push", remoteName, "--tags"}, verbose)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		LogInfof(
+			"Pushed tags of git repository '%s' on host '%s' to remote '%s'.",
+			path,
+			hostDescription,
+			remoteName,
+		)
 	}
 
 	return nil
