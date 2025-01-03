@@ -490,6 +490,28 @@ func (c *CommandExecutorGitRepository) DeleteBranchByName(name string, verbose b
 	return nil
 }
 
+func (c *CommandExecutorGitRepository) Fetch(verbose bool) (err error) {
+	_, err = c.RunGitCommand(
+		[]string{"fetch"},
+		verbose,
+	)
+
+	if verbose {
+		path, hostDescription, err := c.GetPathAndHostDescription()
+		if err != nil {
+			return err
+		}
+
+		LogChangedf(
+			"Fetched git repository '%s' on host '%s'",
+			path,
+			hostDescription,
+		)
+	}
+
+	return nil
+}
+
 func (c *CommandExecutorGitRepository) FileByPathExists(path string, verbose bool) (exists bool, err error) {
 	if path == "" {
 		return false, TracedErrorEmptyString(path)
@@ -1358,6 +1380,13 @@ func (c *CommandExecutorGitRepository) MustCreateTag(options *GitRepositoryCreat
 
 func (c *CommandExecutorGitRepository) MustDeleteBranchByName(name string, verbose bool) {
 	err := c.DeleteBranchByName(name, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (c *CommandExecutorGitRepository) MustFetch(verbose bool) {
+	err := c.Fetch(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

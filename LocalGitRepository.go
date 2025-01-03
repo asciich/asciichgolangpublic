@@ -626,6 +626,28 @@ func (l *LocalGitRepository) DeleteBranchByName(name string, verbose bool) (err 
 	return nil
 }
 
+func (l *LocalGitRepository) Fetch(verbose bool) (err error) {
+	_, err = l.RunGitCommand(
+		[]string{"fetch"},
+		verbose,
+	)
+
+	if verbose {
+		path, hostDescription, err := l.GetPathAndHostDescription()
+		if err != nil {
+			return err
+		}
+
+		LogChangedf(
+			"Fetched git repository '%s' on host '%s'",
+			path,
+			hostDescription,
+		)
+	}
+
+	return nil
+}
+
 func (l *LocalGitRepository) FileByPathExists(path string, verbose bool) (exists bool, err error) {
 	if path == "" {
 		return false, TracedErrorEmptyString(path)
@@ -1723,6 +1745,13 @@ func (l *LocalGitRepository) MustCreateTag(options *GitRepositoryCreateTagOption
 
 func (l *LocalGitRepository) MustDeleteBranchByName(name string, verbose bool) {
 	err := l.DeleteBranchByName(name, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (l *LocalGitRepository) MustFetch(verbose bool) {
+	err := l.Fetch(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

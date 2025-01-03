@@ -25,6 +25,7 @@ type GitRepository interface {
 	Delete(verbose bool) (err error)
 	DeleteBranchByName(name string, verbose bool) (err error)
 	Exists(verbose bool) (exists bool, err error)
+	Fetch(verbose bool) (err error)
 	FileByPathExists(path string, verbose bool) (exists bool, err error)
 	// TODO: Will be removed as there should be no need to explitly get as local Directory:
 	GetAsLocalDirectory() (localDirectory *LocalDirectory, err error)
@@ -73,6 +74,7 @@ type GitRepository interface {
 	MustDelete(verbose bool)
 	MustDeleteBranchByName(name string, verbose bool)
 	MustExists(verbose bool) (exists bool)
+	MustFetch(verbose bool)
 	MustFileByPathExists(path string, verbose bool) (exists bool)
 	// TODO: Will be removed as there should be no need to explitly get a local Directory:
 	MustGetAsLocalDirectory() (localDirectory *LocalDirectory)
