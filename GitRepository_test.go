@@ -1783,7 +1783,6 @@ func TestGitRepository_GetCurrentCommitMessage(t *testing.T) {
 	}
 }
 
-
 func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -1818,8 +1817,8 @@ func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
 
 				gitRepo.MustCommitIfUncommittedChanges(
 					&GitCommitOptions{
-						Message:    "This should not trigger a commit",
-						Verbose:    verbose,
+						Message: "This should not trigger a commit",
+						Verbose: verbose,
 					},
 				)
 
@@ -1833,8 +1832,8 @@ func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
 
 				gitRepo.MustCommitIfUncommittedChanges(
 					&GitCommitOptions{
-						Message:    "This should trigger a commit",
-						Verbose:    verbose,
+						Message: "This should trigger a commit",
+						Verbose: verbose,
 					},
 				)
 
@@ -1849,8 +1848,8 @@ func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
 
 				gitRepo.MustCommitIfUncommittedChanges(
 					&GitCommitOptions{
-						Message:    "This should trigger again a commit",
-						Verbose:    verbose,
+						Message: "This should trigger again a commit",
+						Verbose: verbose,
 					},
 				)
 
@@ -1858,6 +1857,54 @@ func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
 					"This should trigger again a commit",
 					gitRepo.MustGetCurrentCommitMessage(verbose),
 				)
+			},
+		)
+	}
+}
+
+func TestGitRepository_AddAndRemoveRemote(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				assert.False(
+					gitRepo.MustRemoteByNameExists("example", verbose),
+				)
+
+				for i := 0; i < 2; i++ {
+					gitRepo.MustAddRemote(
+						&GitRemoteAddOptions{
+							RemoteName: "example",
+							RemoteUrl:  "https://remote.url.example.com",
+							Verbose:    verbose,
+						},
+					)
+
+					assert.True(
+						gitRepo.MustRemoteByNameExists("example", verbose),
+					)
+				}
+
+				for i := 0; i < 2; i++ {
+					gitRepo.MustRemoveRemoteByName("example", verbose)
+					assert.False(
+						gitRepo.MustRemoteByNameExists("example", verbose),
+					)
+				}
 			},
 		)
 	}
