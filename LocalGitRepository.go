@@ -2268,6 +2268,13 @@ func (l *LocalGitRepository) MustPull(verbose bool) {
 	}
 }
 
+func (l *LocalGitRepository) MustPullFromRemote(pullOptions *GitPullFromRemoteOptions) {
+	err := l.PullFromRemote(pullOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (l *LocalGitRepository) MustPullUsingGitCli(verbose bool) {
 	err := l.PullUsingGitCli(verbose)
 	if err != nil {
@@ -2371,6 +2378,48 @@ func (l *LocalGitRepository) Pull(verbose bool) (err error) {
 	err = worktree.Pull(&git.PullOptions{})
 	if err != nil {
 		return TracedErrorf("%w", err)
+	}
+
+	return nil
+}
+
+func (l *LocalGitRepository) PullFromRemote(pullOptions *GitPullFromRemoteOptions) (err error) {
+	if pullOptions == nil {
+		return TracedError("pullOptions not set")
+	}
+
+	remoteName, err := pullOptions.GetRemoteName()
+	if err != nil {
+		return err
+	}
+
+	branchName, err := pullOptions.GetBranchName()
+	if err != nil {
+		return err
+	}
+
+	if len(remoteName) <= 0 {
+		return TracedError("remoteName is empty string")
+	}
+
+	path, hostDescription, err := l.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	// TODO implement without calling the git binary.
+	_, err = l.RunGitCommand([]string{"pull", remoteName, branchName}, pullOptions.Verbose)
+	if err != nil {
+		return err
+	}
+
+	if pullOptions.Verbose {
+		LogInfof(
+			"Pulled git repository '%s' on host '%s' from remote '%s'.",
+			path,
+			hostDescription,
+			remoteName,
+		)
 	}
 
 	return nil

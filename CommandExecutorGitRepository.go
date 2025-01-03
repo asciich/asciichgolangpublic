@@ -554,6 +554,9 @@ func (c *CommandExecutorGitRepository) Fetch(verbose bool) (err error) {
 		[]string{"fetch"},
 		verbose,
 	)
+	if err != nil {
+		return err
+	}
 
 	if verbose {
 		path, hostDescription, err := c.GetPathAndHostDescription()
@@ -1816,6 +1819,13 @@ func (c *CommandExecutorGitRepository) MustPull(verbose bool) {
 	}
 }
 
+func (c *CommandExecutorGitRepository) MustPullFromRemote(pullOptions *GitPullFromRemoteOptions) {
+	err := c.PullFromRemote(pullOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (c *CommandExecutorGitRepository) MustPush(verbose bool) {
 	err := c.Push(verbose)
 	if err != nil {
@@ -1948,6 +1958,47 @@ func (c *CommandExecutorGitRepository) Pull(verbose bool) (err error) {
 	}
 
 	return
+}
+
+func (c *CommandExecutorGitRepository) PullFromRemote(pullOptions *GitPullFromRemoteOptions) (err error) {
+	if pullOptions == nil {
+		return TracedError("pullOptions not set")
+	}
+
+	remoteName, err := pullOptions.GetRemoteName()
+	if err != nil {
+		return err
+	}
+
+	branchName, err := pullOptions.GetBranchName()
+	if err != nil {
+		return err
+	}
+
+	if len(remoteName) <= 0 {
+		return TracedError("remoteName is empty string")
+	}
+
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	_, err = c.RunGitCommand([]string{"pull", remoteName, branchName}, pullOptions.Verbose)
+	if err != nil {
+		return err
+	}
+
+	if pullOptions.Verbose {
+		LogInfof(
+			"Pulled git repository '%s' on host '%s' from remote '%s'.",
+			path,
+			hostDescription,
+			remoteName,
+		)
+	}
+
+	return nil
 }
 
 func (c *CommandExecutorGitRepository) Push(verbose bool) (err error) {
