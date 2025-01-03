@@ -216,6 +216,66 @@ func (g *GitRepositoryBase) CommitAndPush(commitOptions *GitCommitOptions) (crea
 	return createdCommit, nil
 }
 
+func (g *GitRepositoryBase) CommitIfUncommittedChanges(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
+	if commitOptions == nil {
+		return nil, TracedErrorNil("commitOptions")
+	}
+
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	hasUncommitedChanges, err := parent.HasUncommittedChanges(commitOptions.Verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	path, hostDescription, err := parent.GetPathAndHostDescription()
+	if err != nil {
+		return nil, err
+	}
+
+	if hasUncommitedChanges {
+		optionsToUse := commitOptions.GetDeepCopy()
+		optionsToUse.CommitAllChanges = true
+
+		createdCommit, err = parent.Commit(optionsToUse)
+		if err != nil {
+			return nil, err
+		}
+
+		createdHash, err := createdCommit.GetHash()
+		if err != nil {
+			return nil, err
+		}
+
+		if commitOptions.Verbose {
+			LogInfof(
+				"Commited all uncommited changes in git repository '%s' on host '%s' as commit '%s'.",
+				path,
+				hostDescription,
+				createdHash,
+			)
+		}
+	} else {
+		createdCommit, err = parent.GetCurrentCommit(false)
+		if err != nil {
+			return nil, err
+		}
+
+		if commitOptions.Verbose {
+			LogInfof(
+				"No uncommited changes to commit in git repository '%s' on host '%s'.",
+				path,
+				hostDescription,
+			)
+		}
+	}
+
+	return createdCommit, nil
+}
+
 func (g *GitRepositoryBase) ContainsGoSourceFileOfMainPackageWithMainFunction(verbose bool) (mainFound bool, err error) {
 	parent, err := g.GetParentRepositoryForBaseClass()
 	if err != nil {
@@ -719,6 +779,15 @@ func (g *GitRepositoryBase) MustCheckIsOnLocalhost(verbose bool) {
 
 func (g *GitRepositoryBase) MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
 	createdCommit, err := g.CommitAndPush(commitOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return createdCommit
+}
+
+func (g *GitRepositoryBase) MustCommitIfUncommittedChanges(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
+	createdCommit, err := g.CommitIfUncommittedChanges(commitOptions)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}

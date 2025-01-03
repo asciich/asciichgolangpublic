@@ -288,6 +288,10 @@ func (c *CommandExecutorGitRepository) Commit(commitOptions *GitCommitOptions) (
 		commitCommand = append(commitCommand, "--allow-empty")
 	}
 
+	if commitOptions.CommitAllChanges {
+		commitCommand = append(commitCommand, "--all")
+	}
+
 	message, err := commitOptions.GetMessage()
 	if err != nil {
 		return nil, err
