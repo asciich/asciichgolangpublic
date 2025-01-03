@@ -200,6 +200,62 @@ func (l *LocalGitRepository) AddFileByPath(pathToAdd string, verbose bool) (err 
 	return nil
 }
 
+func (l *LocalGitRepository) AddRemote(remoteOptions *GitRemoteAddOptions) (err error) {
+	if remoteOptions == nil {
+		return TracedError("remoteOptions is nil")
+	}
+
+	remoteName, err := remoteOptions.GetRemoteName()
+	if err != nil {
+		return err
+	}
+
+	remoteUrl, err := remoteOptions.GetRemoteUrl()
+	if err != nil {
+		return err
+	}
+
+	repoPath, err := l.GetPath()
+	if err != nil {
+		return err
+	}
+
+	remoteExists, err := l.RemoteConfigurationExists(
+		&GitRemoteConfig{
+			RemoteName: remoteName,
+			UrlFetch:   remoteUrl,
+			UrlPush:    remoteUrl,
+		},
+		remoteOptions.Verbose,
+	)
+	if err != nil {
+		return err
+	}
+
+	if remoteExists {
+		if remoteOptions.Verbose {
+			LogInfof("Remote '%s' as '%s' to repository '%s' already exists.", remoteUrl, remoteName, repoPath)
+		}
+	} else {
+		err = l.RemoveRemoteByName(remoteName, remoteOptions.Verbose)
+		if err != nil {
+			return err
+		}
+
+		// TODO reimplement without calling the git command.
+		_, err = l.RunGitCommand([]string{"remote", "add", remoteName, remoteUrl}, remoteOptions.Verbose)
+		if err != nil {
+			return err
+		}
+
+		if remoteOptions.Verbose {
+			LogChangedf("Added remote '%s' as '%s' to repository '%s'.", remoteUrl, remoteName, repoPath)
+		}
+	}
+
+	return nil
+}
+
 func (l *LocalGitRepository) CheckoutBranchByName(name string, verbose bool) (err error) {
 	if name == "" {
 		return TracedErrorEmptyString("name")
@@ -1186,6 +1242,62 @@ func (l *LocalGitRepository) GetHashByTagName(tagName string) (hash string, err 
 	)
 }
 
+func (l *LocalGitRepository) GetRemoteConfigs(verbose bool) (remoteConfigs []*GitRemoteConfig, err error) {
+	// TODO reimplement without calling the git binary.
+	output, err := l.RunGitCommand([]string{"remote", "-v"}, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	outputLines, err := output.GetStdoutAsLines(false)
+	if err != nil {
+		return nil, err
+	}
+
+	remoteConfigs = []*GitRemoteConfig{}
+	for _, line := range outputLines {
+		line = strings.TrimSpace(line)
+		if len(line) <= 0 {
+			continue
+		}
+
+		lineCleaned := strings.ReplaceAll(line, "\t", " ")
+
+		splitted := Strings().SplitAtSpacesAndRemoveEmptyStrings(lineCleaned)
+		if len(splitted) != 3 {
+			return nil, TracedErrorf("Unable to parse '%s' as remote. splitted is '%v'", line, splitted)
+		}
+
+		remoteName := splitted[0]
+		remoteUrl := splitted[1]
+		remoteDirection := splitted[2]
+
+		var remoteToModify *GitRemoteConfig = nil
+		for _, existingRemote := range remoteConfigs {
+			if existingRemote.RemoteName == remoteName {
+				remoteToModify = existingRemote
+			}
+		}
+
+		if remoteToModify == nil {
+			remoteToAdd := NewGitRemoteConfig()
+			remoteToAdd.RemoteName = remoteName
+			remoteConfigs = append(remoteConfigs, remoteToAdd)
+			remoteToModify = remoteToAdd
+		}
+
+		if remoteDirection == "(fetch)" {
+			remoteToModify.UrlFetch = remoteUrl
+		} else if remoteDirection == "(push)" {
+			remoteToModify.UrlPush = remoteUrl
+		} else {
+			return nil, TracedErrorf("Unknown remoteDirection='%s'", remoteDirection)
+		}
+	}
+
+	return remoteConfigs, nil
+}
+
 func (l *LocalGitRepository) GetRootDirectory(verbose bool) (rootDirectory Directory, err error) {
 	rootDirectoryPath, err := l.GetRootDirectoryPath(verbose)
 	if err != nil {
@@ -1688,6 +1800,13 @@ func (l *LocalGitRepository) MustAddFileByPath(pathToAdd string, verbose bool) {
 	}
 }
 
+func (l *LocalGitRepository) MustAddRemote(remoteOptions *GitRemoteAddOptions) {
+	err := l.AddRemote(remoteOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (l *LocalGitRepository) MustCheckoutBranchByName(name string, verbose bool) {
 	err := l.CheckoutBranchByName(name, verbose)
 	if err != nil {
@@ -2000,6 +2119,15 @@ func (l *LocalGitRepository) MustGetHashByTagName(tagName string) (hash string) 
 	return hash
 }
 
+func (l *LocalGitRepository) MustGetRemoteConfigs(verbose bool) (remoteConfigs []*GitRemoteConfig) {
+	remoteConfigs, err := l.GetRemoteConfigs(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return remoteConfigs
+}
+
 func (l *LocalGitRepository) MustGetRootDirectory(verbose bool) (rootDirectory Directory) {
 	rootDirectory, err := l.GetRootDirectory(verbose)
 	if err != nil {
@@ -2154,6 +2282,31 @@ func (l *LocalGitRepository) MustPush(verbose bool) {
 	}
 }
 
+func (l *LocalGitRepository) MustRemoteByNameExists(remoteName string, verbose bool) (remoteExists bool) {
+	remoteExists, err := l.RemoteByNameExists(remoteName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return remoteExists
+}
+
+func (l *LocalGitRepository) MustRemoteConfigurationExists(config *GitRemoteConfig, verbose bool) (exists bool) {
+	exists, err := l.RemoteConfigurationExists(config, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return exists
+}
+
+func (l *LocalGitRepository) MustRemoveRemoteByName(remoteNameToRemove string, verbose bool) {
+	err := l.RemoveRemoteByName(remoteNameToRemove, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (l *LocalGitRepository) MustRunGitCommand(gitCommand []string, verbose bool) (commandOutput *CommandOutput) {
 	commandOutput, err := l.RunGitCommand(gitCommand, verbose)
 	if err != nil {
@@ -2227,6 +2380,81 @@ func (l *LocalGitRepository) Push(verbose bool) (err error) {
 	err = goGitRepo.Push(&git.PushOptions{})
 	if err != nil {
 		return TracedErrorf("%w", err)
+	}
+
+	return nil
+}
+
+func (l *LocalGitRepository) RemoteByNameExists(remoteName string, verbose bool) (remoteExists bool, err error) {
+	if len(remoteName) <= 0 {
+		return false, fmt.Errorf("remoteName is empty string")
+	}
+
+	remoteConfigs, err := l.GetRemoteConfigs(verbose)
+	if err != nil {
+		return false, err
+	}
+
+	for _, toCheck := range remoteConfigs {
+		if toCheck.RemoteName == remoteName {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (l *LocalGitRepository) RemoteConfigurationExists(config *GitRemoteConfig, verbose bool) (exists bool, err error) {
+	if config == nil {
+		return false, TracedError("config is nil")
+	}
+
+	remoteConfigs, err := l.GetRemoteConfigs(verbose)
+	if err != nil {
+		return false, err
+	}
+
+	for _, toCheck := range remoteConfigs {
+		if config.Equals(toCheck) {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (l *LocalGitRepository) RemoveRemoteByName(remoteNameToRemove string, verbose bool) (err error) {
+	if len(remoteNameToRemove) <= 0 {
+		return TracedError("remoteNameToRemove is empty string")
+	}
+
+	remoteExists, err := l.RemoteByNameExists(remoteNameToRemove, verbose)
+	if err != nil {
+		return err
+	}
+
+	repoDirPath, err := l.GetPath()
+	if err != nil {
+		return err
+	}
+
+	if remoteExists {
+		// TODO: reimplement without calling the git binary.
+		_, err := l.RunGitCommand(
+			[]string{"remote", "remove", remoteNameToRemove},
+			verbose,
+		)
+		if err != nil {
+			return err
+		}
+
+		if verbose {
+			LogChangedf("Remote '%s' for repository '%s' removed.", remoteNameToRemove, repoDirPath)
+		}
+	} else {
+		if verbose {
+			LogInfof("Remote '%s' for repository '%s' already deleted.", remoteNameToRemove, repoDirPath)
+		}
 	}
 
 	return nil
