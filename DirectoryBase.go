@@ -301,6 +301,62 @@ func (d *DirectoryBase) ListFilePaths(listFileOptions *ListFileOptions) (filePat
 	return filePaths, nil
 }
 
+func (d *DirectoryBase) ListSubDirectoryPaths(options *ListDirectoryOptions) (subDirectoryPaths []string, err error) {
+	if options == nil {
+		return nil, TracedErrorNil("options")
+	}
+
+	parent, err := d.GetParentDirectoryForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	subDirs, err := parent.ListSubDirectories(options)
+	if err != nil {
+		return nil, err
+	}
+
+	dirPath, hostDescription, err := parent.GetPathAndHostDescription()
+	if err != nil {
+		return nil, err
+	}
+
+	subDirectoryPaths = []string{}
+
+	for _, subDir := range subDirs {
+		path, err := subDir.GetPath()
+		if err != nil {
+			return nil, err
+		}
+
+		toAdd := path
+		if options.ReturnRelativePaths {
+			toAdd, err = Paths().GetRelativePathTo(
+				toAdd,
+				dirPath,
+			)
+			if err != nil {
+				return nil, err
+			}
+
+			subDirectoryPaths = append(subDirectoryPaths, toAdd)
+		}
+	}
+
+	subDirectoryPaths = Slices().SortStringSlice(subDirectoryPaths)
+
+	if options.Verbose {
+		LogInfof(
+			"Listed '%d' sub directory of directory '%s' on host '%s'.",
+			len(subDirectoryPaths),
+			dirPath,
+			hostDescription,
+		)
+	}
+
+	return subDirectoryPaths, nil
+}
+
 func (d *DirectoryBase) MustCheckExists(verbose bool) {
 	err := d.CheckExists(verbose)
 	if err != nil {
@@ -376,6 +432,15 @@ func (d *DirectoryBase) MustListFilePaths(listFileOptions *ListFileOptions) (fil
 	}
 
 	return filePaths
+}
+
+func (d *DirectoryBase) MustListSubDirectoryPaths(options *ListDirectoryOptions) (subDirectoryPaths []string) {
+	subDirectoryPaths, err := d.ListSubDirectoryPaths(options)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return subDirectoryPaths
 }
 
 func (d *DirectoryBase) MustReadFileInDirectoryAsInt64(path ...string) (value int64) {

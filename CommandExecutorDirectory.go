@@ -640,7 +640,59 @@ func (c *CommandExecutorDirectory) ListSubDirectories(options *ListDirectoryOpti
 		return nil, TracedErrorNil("options")
 	}
 
-	return nil, TracedErrorNotImplemented()
+	path, err := c.GetPath()
+	if err != nil {
+		return nil, err
+	}
+
+	findCommand := []string{"find", path, "-type", "d"}
+	findCommand = append(findCommand, "-mindepth", "1") // do not list the current directory itself.
+
+	if !options.Recursive {
+		findCommand = append(findCommand, "-maxdepth", "1")
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	stdoutLines, err := commandExecutor.RunCommandAndGetStdoutAsLines(
+		&RunCommandOptions{
+			Command: findCommand,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	subDirectories = []Directory{}
+	for _, line := range stdoutLines {
+		if line == "" {
+			continue
+		}
+
+		pathToAdd := strings.TrimPrefix(line, "./")
+		if Paths().IsAbsolutePath(pathToAdd) {
+			pathToAdd, err = Paths().GetRelativePathTo(
+				pathToAdd,
+				path,
+			)
+
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		toAdd, err := c.GetSubDirectory(pathToAdd)
+		if err != nil {
+			return nil, err
+		}
+
+		subDirectories = append(subDirectories, toAdd)
+	}
+
+	return subDirectories, nil
 }
 
 func (c *CommandExecutorDirectory) MustChmod(chmodOptions *ChmodOptions) {
