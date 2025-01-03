@@ -1624,7 +1624,6 @@ func TestGitRepository_CheckIsGolangPackage_mainFunctionIsNotAPackage(t *testing
 	}
 }
 
-
 func TestGitRepository_GetGitRepositoryByDirectory(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -1645,7 +1644,7 @@ func TestGitRepository_GetGitRepositoryByDirectory(t *testing.T) {
 				defer gitRepo.Delete(verbose)
 
 				repoRootDirectory := gitRepo.MustGetRootDirectory(verbose)
-				
+
 				gitRepo2 := MustGetGitRepositoryByDirectory(repoRootDirectory)
 
 				assert.EqualValues(
@@ -1656,7 +1655,7 @@ func TestGitRepository_GetGitRepositoryByDirectory(t *testing.T) {
 				assert.Nil(
 					gitRepo.CheckHasNoUncommittedChanges(verbose),
 				)
-				
+
 				assert.Nil(
 					gitRepo2.CheckHasNoUncommittedChanges(verbose),
 				)
@@ -1664,7 +1663,6 @@ func TestGitRepository_GetGitRepositoryByDirectory(t *testing.T) {
 		)
 	}
 }
-
 
 func TestGitRepository_CreateAndDeleteBranch(t *testing.T) {
 	tests := []struct {
@@ -1689,10 +1687,10 @@ func TestGitRepository_CreateAndDeleteBranch(t *testing.T) {
 
 				assert.False(gitRepo.MustBranchByNameExists("testbranch", verbose))
 
-				for i := 0 ; i < 2; i++ {
+				for i := 0; i < 2; i++ {
 					gitRepo.MustCreateBranch(
 						&CreateBranchOptions{
-							Name: "testbranch",
+							Name:    "testbranch",
 							Verbose: verbose,
 						},
 					)
@@ -1701,9 +1699,48 @@ func TestGitRepository_CreateAndDeleteBranch(t *testing.T) {
 
 				gitRepo.MustCheckoutBranchByName(defaultBranchName, verbose)
 
-				for i := 0 ; i < 2; i++ {
+				for i := 0; i < 2; i++ {
 					gitRepo.MustDeleteBranchByName("testbranch", verbose)
 					assert.False(gitRepo.MustBranchByNameExists("testbranch", verbose))
+				}
+			},
+		)
+	}
+}
+
+func TestGitRepository_CheckoutBranch(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				for _, branchName := range []string{"testbranch1", "testbranch2"} {
+					gitRepo.MustCreateBranch(
+						&CreateBranchOptions{
+							Name:    branchName,
+							Verbose: verbose,
+						},
+					)
+					assert.True(gitRepo.MustBranchByNameExists(branchName, verbose))
+					
+					gitRepo.MustCheckoutBranchByName(branchName, verbose)
+					assert.EqualValues(
+						branchName,
+						gitRepo.MustGetCurrentBranchName(verbose),
+					)
 				}
 			},
 		)
