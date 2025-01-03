@@ -1889,6 +1889,13 @@ func (c *CommandExecutorGitRepository) MustSetGitConfig(options *GitConfigSetOpt
 	}
 }
 
+func (c *CommandExecutorGitRepository) MustSetRemoteUrl(remoteUrl string, verbose bool) {
+	err := c.SetRemoteUrl(remoteUrl, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (c *CommandExecutorGitRepository) MustSetUserEmail(email string, verbose bool) {
 	err := c.SetUserEmail(email, verbose)
 	if err != nil {
@@ -2140,6 +2147,37 @@ func (c *CommandExecutorGitRepository) SetGitConfig(options *GitConfigSetOptions
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (c *CommandExecutorGitRepository) SetRemoteUrl(remoteUrl string, verbose bool) (err error) {
+	remoteUrl = strings.TrimSpace(remoteUrl)
+	if len(remoteUrl) <= 0 {
+		return TracedError("remoteUrl is empty string")
+	}
+
+	name := "origin"
+
+	_, err = c.RunGitCommand([]string{"remote", "set-url", name, remoteUrl}, verbose)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		path, hostDescription, err := c.GetPathAndHostDescription()
+		if err != nil {
+			return err
+		}
+
+		LogChangedf(
+			"Set remote Url for '%v' in git repository '%v' on host '%s' to '%v'.",
+			name,
+			path,
+			hostDescription,
+			remoteUrl,
+		)
 	}
 
 	return nil
