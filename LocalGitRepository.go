@@ -2282,6 +2282,13 @@ func (l *LocalGitRepository) MustPush(verbose bool) {
 	}
 }
 
+func (l *LocalGitRepository) MustPushToRemote(remoteName string, verbose bool) {
+	err := l.PushToRemote(remoteName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (l *LocalGitRepository) MustRemoteByNameExists(remoteName string, verbose bool) (remoteExists bool) {
 	remoteExists, err := l.RemoteByNameExists(remoteName, verbose)
 	if err != nil {
@@ -2387,6 +2394,34 @@ func (l *LocalGitRepository) Push(verbose bool) (err error) {
 	err = goGitRepo.Push(&git.PushOptions{})
 	if err != nil {
 		return TracedErrorf("%w", err)
+	}
+
+	return nil
+}
+
+func (l *LocalGitRepository) PushToRemote(remoteName string, verbose bool) (err error) {
+	if len(remoteName) <= 0 {
+		return TracedError("remoteName is empty string")
+	}
+
+	// TODO: Implement without calling git binary
+	_, err = l.RunGitCommand([]string{"push", remoteName}, verbose)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		path, hostDescription, err := l.GetPathAndHostDescription()
+		if err != nil {
+			return err
+		}
+
+		LogInfof(
+			"Pushed git repository '%s' on host '%s' to remote '%s'.",
+			path,
+			hostDescription,
+			remoteName,
+		)
 	}
 
 	return nil

@@ -117,6 +117,7 @@ type GitRepository interface {
 	MustRemoveRemoteByName(remoteName string, verbose bool)
 	MustPull(verbose bool)
 	MustPush(verbose bool)
+	MustPushToRemote(remoteName string, verbose bool)
 	MustSetGitConfig(options *GitConfigSetOptions)
 	MustSetRemoteUrl(remoteUrl string, verbose bool)
 	RemoteByNameExists(remoteName string, verbose bool) (remoteExists bool, err error)
@@ -124,6 +125,7 @@ type GitRepository interface {
 	RemoveRemoteByName(remoteName string, verbose bool) (err error)
 	Pull(verbose bool) (err error)
 	Push(verbose bool) (err error)
+	PushToRemote(remoteName string, verbose bool) (err error)
 	SetGitConfig(options *GitConfigSetOptions) (err error)
 	SetRemoteUrl(remoteUrl string, verbose bool) (err error)
 

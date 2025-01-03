@@ -1823,6 +1823,13 @@ func (c *CommandExecutorGitRepository) MustPush(verbose bool) {
 	}
 }
 
+func (c *CommandExecutorGitRepository) MustPushToRemote(remoteName string, verbose bool) {
+	err := c.PushToRemote(remoteName, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
 func (c *CommandExecutorGitRepository) MustRemoteByNameExists(remoteName string, verbose bool) (remoteExists bool) {
 	remoteExists, err := c.RemoteByNameExists(remoteName, verbose)
 	if err != nil {
@@ -1974,6 +1981,33 @@ func (c *CommandExecutorGitRepository) Push(verbose bool) (err error) {
 	}
 
 	return
+}
+
+func (c *CommandExecutorGitRepository) PushToRemote(remoteName string, verbose bool) (err error) {
+	if len(remoteName) <= 0 {
+		return TracedError("remoteName is empty string")
+	}
+
+	_, err = c.RunGitCommand([]string{"push", remoteName}, verbose)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		path, hostDescription, err := c.GetPathAndHostDescription()
+		if err != nil {
+			return err
+		}
+
+		LogInfof(
+			"Pushed git repository '%s' on host '%s' to remote '%s'.",
+			path,
+			hostDescription,
+			remoteName,
+		)
+	}
+
+	return nil
 }
 
 func (c *CommandExecutorGitRepository) RemoteByNameExists(remoteName string, verbose bool) (remoteExists bool, err error) {
