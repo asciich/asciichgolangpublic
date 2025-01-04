@@ -16,6 +16,7 @@ type Directory interface {
 	GetParentDirectory() (parentDirectory Directory, err error)
 	// Returns the absolute path to the file without any indication of the host.
 	GetPath() (dirPath string, err error)
+	// TODO rename GetSubDirectory with GetDirectoryByPath to make it consistent.
 	GetSubDirectory(path ...string) (subDirectory Directory, err error)
 	IsLocalDirectory() (isLocalDirectory bool, err error)
 	ListFiles(listFileOptions *ListFileOptions) (files []File, err error)

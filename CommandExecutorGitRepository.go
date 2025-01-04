@@ -736,6 +736,14 @@ func (c *CommandExecutorGitRepository) GetCurrentCommitHash(verbose bool) (curre
 	return currentCommitHash, nil
 }
 
+func (c *CommandExecutorGitRepository) GetDirectoryByPath(pathToSubDir ...string) (subDir Directory, err error) {
+	if len(pathToSubDir) <= 0 {
+		return nil, TracedError("pathToSubdir has no elements")
+	}
+
+	return c.GetSubDirectory(pathToSubDir...)
+}
+
 func (c *CommandExecutorGitRepository) GetGitStatusOutput(verbose bool) (output string, err error) {
 	return "", TracedErrorNotImplemented()
 }
@@ -1668,6 +1676,15 @@ func (c *CommandExecutorGitRepository) MustGetCurrentCommitHash(verbose bool) (c
 	}
 
 	return currentCommitHash
+}
+
+func (c *CommandExecutorGitRepository) MustGetDirectoryByPath(pathToSubDir ...string) (subDir Directory) {
+	subDir, err := c.GetDirectoryByPath(pathToSubDir...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return subDir
 }
 
 func (c *CommandExecutorGitRepository) MustGetGitStatusOutput(verbose bool) (output string) {
