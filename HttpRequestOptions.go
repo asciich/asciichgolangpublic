@@ -1,5 +1,6 @@
 package asciichgolangpublic
 
+// Obsolete: Use https.RequestOptions instead
 type HttpRequestOptions struct {
 	URL               string
 	Verbose           bool
@@ -7,6 +8,7 @@ type HttpRequestOptions struct {
 	OverwriteExisting bool
 }
 
+// Obsolete: Use https.RequestOptions instead
 func NewHttpRequestOptions() (h *HttpRequestOptions) {
 	return new(HttpRequestOptions)
 }
