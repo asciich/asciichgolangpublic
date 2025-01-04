@@ -1074,6 +1074,14 @@ func (l *LocalGitRepository) GetCurrentCommitHashAsBytes(verbose bool) (hash []b
 	return Strings().HexStringToBytes(currentHash)
 }
 
+func (l *LocalGitRepository) GetDirectoryByPath(pathToSubDir ...string) (subDir Directory, err error) {
+	if len(pathToSubDir) <= 0 {
+		return nil, TracedError("pathToSubdir has no elements")
+	}
+
+	return l.GetSubDirectory(pathToSubDir...)
+}
+
 func (l *LocalGitRepository) GetGitStatusOutput(verbose bool) (output string, err error) {
 	output, err = l.RunGitCommandAndGetStdout([]string{"status"}, verbose)
 	if err != nil {
@@ -2045,6 +2053,15 @@ func (l *LocalGitRepository) MustGetCurrentCommitHashAsBytes(verbose bool) (hash
 	}
 
 	return hash
+}
+
+func (l *LocalGitRepository) MustGetDirectoryByPath(pathToSubDir ...string) (subDir Directory) {
+	subDir, err := l.GetDirectoryByPath(pathToSubDir...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return subDir
 }
 
 func (l *LocalGitRepository) MustGetGitStatusOutput(verbose bool) (output string) {

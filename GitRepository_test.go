@@ -1909,3 +1909,36 @@ func TestGitRepository_AddAndRemoveRemote(t *testing.T) {
 		)
 	}
 }
+
+func TestGitRepository_IsPreCommitRepository(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				assert.False(
+					gitRepo.MustIsPreCommitRepository(verbose),
+				)
+
+				gitRepo.MustCreateSubDirectory("pre_commit_hooks", verbose)
+
+				assert.True(
+					gitRepo.MustIsPreCommitRepository(verbose),
+				)
+			},
+		)
+	}
+}

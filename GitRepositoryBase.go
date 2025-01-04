@@ -370,6 +370,62 @@ func (g *GitRepositoryBase) CreateAndInit(createOptions *CreateRepositoryOptions
 	return nil
 }
 
+func (g *GitRepositoryBase) DirectoryByPathExists(verbose bool, path ...string) (exists bool, err error) {
+	if len(path) <= 0 {
+		return false, TracedError("path has no elements")
+	}
+
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	subDir, err := parent.GetDirectoryByPath(path...)
+	if err != nil {
+		return false, err
+	}
+
+	exists, err = subDir.Exists(false)
+	if err != nil {
+		return false, err
+	}
+
+	if verbose {
+		path, hostDescription, err := g.GetPathAndHostDescription()
+		if err != nil {
+			return false, err
+		}
+
+		subDirPath, err := subDir.GetPath()
+		if err != nil {
+			return false, err
+		}
+
+		relativeSubDirPath, err := Paths().GetRelativePathTo(subDirPath, path)
+		if err != nil {
+			return false, err
+		}
+
+		if exists {
+			LogInfof(
+				"Directory '%s' in git repository '%s' on host '%s' exists.",
+				relativeSubDirPath,
+				path,
+				hostDescription,
+			)
+		} else {
+			LogInfof(
+				"Directory '%s' in git repository '%s' on host '%s' does not exist.",
+				relativeSubDirPath,
+				path,
+				hostDescription,
+			)
+		}
+	}
+
+	return exists, err
+}
+
 func (g *GitRepositoryBase) EnsureMainReadmeMdExists(verbose bool) (err error) {
 	const fileName string = "README.md"
 
@@ -728,6 +784,41 @@ func (g *GitRepositoryBase) IsOnLocalhost(verbose bool) (isOnLocalhost bool, err
 	return isOnLocalhost, nil
 }
 
+func (g *GitRepositoryBase) IsPreCommitRepository(verbose bool) (isPreCommitRepository bool, err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	isPreCommitRepository, err = parent.DirectoryByPathExists(false, "pre_commit_hooks")
+	if err != nil {
+		return false, err
+	}
+
+	if verbose {
+		path, hostDescription, err := g.GetPathAndHostDescription()
+		if err != nil {
+			return false, err
+		}
+
+		if isPreCommitRepository {
+			LogInfof(
+				"Git reposiotry '%s' on host '%s' is a pre-commit repository.",
+				path,
+				hostDescription,
+			)
+		} else {
+			LogInfof(
+				"Git reposiotry '%s' on host '%s' is not a pre-commit repository.",
+				path,
+				hostDescription,
+			)
+		}
+	}
+
+	return isPreCommitRepository, nil
+}
+
 func (g *GitRepositoryBase) ListVersionTags(verbose bool) (versionTags []GitTag, err error) {
 	parent, err := g.GetParentRepositoryForBaseClass()
 	if err != nil {
@@ -830,6 +921,15 @@ func (g *GitRepositoryBase) MustCreateAndInit(createOptions *CreateRepositoryOpt
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+}
+
+func (g *GitRepositoryBase) MustDirectoryByPathExists(verbose bool, path ...string) (exists bool) {
+	exists, err := g.DirectoryByPathExists(verbose, path...)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return exists
 }
 
 func (g *GitRepositoryBase) MustEnsureMainReadmeMdExists(verbose bool) {
@@ -954,6 +1054,15 @@ func (g *GitRepositoryBase) MustIsOnLocalhost(verbose bool) (isOnLocalhost bool)
 	}
 
 	return isOnLocalhost
+}
+
+func (g *GitRepositoryBase) MustIsPreCommitRepository(verbose bool) (isPreCommitRepository bool) {
+	isPreCommitRepository, err := g.IsPreCommitRepository(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isPreCommitRepository
 }
 
 func (g *GitRepositoryBase) MustListVersionTags(verbose bool) (versionTags []GitTag) {
