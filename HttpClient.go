@@ -7,10 +7,12 @@ import (
 
 type HttpClientService struct{}
 
+// Obsolete: use http.NativeClient() instead:
 func HttpClient() (httpClient *HttpClientService) {
 	return new(HttpClientService)
 }
 
+// Obsolete: use http.NativeClient() instead:
 func NewHttpClientService() (h *HttpClientService) {
 	return new(HttpClientService)
 }
