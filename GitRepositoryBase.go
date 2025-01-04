@@ -193,6 +193,33 @@ func (g *GitRepositoryBase) CheckIsOnLocalhost(verbose bool) (err error) {
 	return nil
 }
 
+func (g *GitRepositoryBase) CheckIsPreCommitRepository(verbose bool) (err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	isPreCommitRepository, err := parent.IsPreCommitRepository(verbose)
+	if err != nil {
+		return err
+	}
+
+	path, hostDescription, err := parent.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if !isPreCommitRepository {
+		return TracedErrorf(
+			"Repository '%s' on host '%s' is not a pre-commit repository.",
+			path,
+			hostDescription,
+		)
+	}
+
+	return nil
+}
+
 func (g *GitRepositoryBase) CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
 	if commitOptions == nil {
 		return nil, TracedErrorNil("commitOptions")
@@ -884,6 +911,13 @@ func (g *GitRepositoryBase) MustCheckIsGolangPackage(verbose bool) {
 
 func (g *GitRepositoryBase) MustCheckIsOnLocalhost(verbose bool) {
 	err := g.CheckIsOnLocalhost(verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (g *GitRepositoryBase) MustCheckIsPreCommitRepository(verbose bool) {
+	err := g.CheckIsPreCommitRepository(verbose)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
