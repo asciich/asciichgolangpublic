@@ -1942,3 +1942,36 @@ func TestGitRepository_IsPreCommitRepository(t *testing.T) {
 		)
 	}
 }
+
+func TestGitRepository_CheckIsPreCommitRepository(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				gitRepo := getGitRepositoryToTest(tt.implementationName)
+				defer gitRepo.Delete(verbose)
+
+				assert.NotNil(
+					gitRepo.CheckIsPreCommitRepository(verbose),
+				)
+
+				gitRepo.MustCreateSubDirectory("pre_commit_hooks", verbose)
+
+				assert.Nil(
+					gitRepo.CheckIsPreCommitRepository(verbose),
+				)
+			},
+		)
+	}
+}
