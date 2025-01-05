@@ -86,7 +86,7 @@ func (c *CommandExecutorKind) ClusterByNameExists(clusterName string, verbose bo
 	return exists, nil
 }
 
-func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bool) (cluster kubernetes.Cluster, err error) {
+func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bool) (cluster kubernetes.KubernetesCluster, err error) {
 	if clusterName == "" {
 		return nil, asciichgolangpublic.TracedErrorEmptyString("clusterName")
 	}
@@ -199,7 +199,7 @@ func (c *CommandExecutorKind) DeleteClusterByName(clusterName string, verbose bo
 	return nil
 }
 
-func (c *CommandExecutorKind) GetClusterByName(clusterName string) (cluster kubernetes.Cluster, err error) {
+func (c *CommandExecutorKind) GetClusterByName(clusterName string) (cluster kubernetes.KubernetesCluster, err error) {
 	if clusterName == "" {
 		return nil, asciichgolangpublic.TracedErrorEmptyString("clusterName")
 	}
@@ -251,7 +251,7 @@ func (c *CommandExecutorKind) MustClusterByNameExists(clusterName string, verbos
 	return exists
 }
 
-func (c *CommandExecutorKind) MustCreateClusterByName(clusterName string, verbose bool) (cluster kubernetes.Cluster) {
+func (c *CommandExecutorKind) MustCreateClusterByName(clusterName string, verbose bool) (cluster kubernetes.KubernetesCluster) {
 	cluster, err := c.CreateClusterByName(clusterName, verbose)
 	if err != nil {
 		asciichgolangpublic.LogGoErrorFatal(err)
@@ -267,7 +267,7 @@ func (c *CommandExecutorKind) MustDeleteClusterByName(clusterName string, verbos
 	}
 }
 
-func (c *CommandExecutorKind) MustGetClusterByName(clusterName string) (cluster kubernetes.Cluster) {
+func (c *CommandExecutorKind) MustGetClusterByName(clusterName string) (cluster kubernetes.KubernetesCluster) {
 	cluster, err := c.GetClusterByName(clusterName)
 	if err != nil {
 		asciichgolangpublic.LogGoErrorFatal(err)
