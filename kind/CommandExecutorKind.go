@@ -1,6 +1,9 @@
 package kind
 
-import "github.com/asciich/asciichgolangpublic"
+import (
+	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/kubernetes"
+)
 
 type CommandExecutorKind struct {
 	commandExecutor asciichgolangpublic.CommandExecutor
@@ -83,7 +86,7 @@ func (c *CommandExecutorKind) ClusterByNameExists(clusterName string, verbose bo
 	return exists, nil
 }
 
-func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bool) (cluster Cluster, err error) {
+func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bool) (cluster kubernetes.Cluster, err error) {
 	if clusterName == "" {
 		return nil, asciichgolangpublic.TracedErrorEmptyString("clusterName")
 	}
@@ -115,7 +118,7 @@ func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bo
 
 		if verbose {
 			asciichgolangpublic.LogInfof(
-				"Going to create kind cluster '%s'. This can take a while...",
+				"Going to create kind cluster '%s'. This may take a while...",
 				clusterName,
 			)
 		}
@@ -196,12 +199,12 @@ func (c *CommandExecutorKind) DeleteClusterByName(clusterName string, verbose bo
 	return nil
 }
 
-func (c *CommandExecutorKind) GetClusterByName(clusterName string) (cluster Cluster, err error) {
+func (c *CommandExecutorKind) GetClusterByName(clusterName string) (cluster kubernetes.Cluster, err error) {
 	if clusterName == "" {
 		return nil, asciichgolangpublic.TracedErrorEmptyString("clusterName")
 	}
 
-	toReturn := NewGenericCluster()
+	toReturn := NewKindCluster()
 
 	err = toReturn.SetName(clusterName)
 	if err != nil {
@@ -248,7 +251,7 @@ func (c *CommandExecutorKind) MustClusterByNameExists(clusterName string, verbos
 	return exists
 }
 
-func (c *CommandExecutorKind) MustCreateClusterByName(clusterName string, verbose bool) (cluster Cluster) {
+func (c *CommandExecutorKind) MustCreateClusterByName(clusterName string, verbose bool) (cluster kubernetes.Cluster) {
 	cluster, err := c.CreateClusterByName(clusterName, verbose)
 	if err != nil {
 		asciichgolangpublic.LogGoErrorFatal(err)
@@ -264,7 +267,7 @@ func (c *CommandExecutorKind) MustDeleteClusterByName(clusterName string, verbos
 	}
 }
 
-func (c *CommandExecutorKind) MustGetClusterByName(clusterName string) (cluster Cluster) {
+func (c *CommandExecutorKind) MustGetClusterByName(clusterName string) (cluster kubernetes.Cluster) {
 	cluster, err := c.GetClusterByName(clusterName)
 	if err != nil {
 		asciichgolangpublic.LogGoErrorFatal(err)

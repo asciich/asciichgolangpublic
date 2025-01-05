@@ -1,4 +1,4 @@
-package kind
+package kubernetes
 
 type Cluster interface {
 }
