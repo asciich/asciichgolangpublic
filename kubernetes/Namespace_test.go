@@ -26,7 +26,7 @@ func getKubernetesByImplementationName(implementationName string) (kubernetes Ku
 	return nil
 }
 
-func TestKubernetes_CreateAndDeleteNamespace(t *testing.T) {
+func TestNamespace_CreateAndDeleteNamespace(t *testing.T) {
 	tests := []struct {
 		implementationName string
 	}{
