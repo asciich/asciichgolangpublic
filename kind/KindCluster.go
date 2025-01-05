@@ -2,21 +2,21 @@ package kind
 
 import "github.com/asciich/asciichgolangpublic"
 
-type GenericCluster struct {
+type KindCluster struct {
 	name string
 	kind Kind
 }
 
-func NewGenericCluster() (g *GenericCluster) {
-	return new(GenericCluster)
+func NewKindCluster() (g *KindCluster) {
+	return new(KindCluster)
 }
 
-func (g *GenericCluster) GetKind() (kind Kind, err error) {
+func (g *KindCluster) GetKind() (kind Kind, err error) {
 
 	return g.kind, nil
 }
 
-func (g *GenericCluster) GetName() (name string, err error) {
+func (g *KindCluster) GetName() (name string, err error) {
 	if g.name == "" {
 		return "", asciichgolangpublic.TracedErrorf("name not set")
 	}
@@ -24,7 +24,7 @@ func (g *GenericCluster) GetName() (name string, err error) {
 	return g.name, nil
 }
 
-func (g *GenericCluster) MustGetKind() (kind Kind) {
+func (g *KindCluster) MustGetKind() (kind Kind) {
 	kind, err := g.GetKind()
 	if err != nil {
 		asciichgolangpublic.LogGoErrorFatal(err)
@@ -33,7 +33,7 @@ func (g *GenericCluster) MustGetKind() (kind Kind) {
 	return kind
 }
 
-func (g *GenericCluster) MustGetName() (name string) {
+func (g *KindCluster) MustGetName() (name string) {
 	name, err := g.GetName()
 	if err != nil {
 		asciichgolangpublic.LogGoErrorFatal(err)
@@ -42,27 +42,27 @@ func (g *GenericCluster) MustGetName() (name string) {
 	return name
 }
 
-func (g *GenericCluster) MustSetKind(kind Kind) {
+func (g *KindCluster) MustSetKind(kind Kind) {
 	err := g.SetKind(kind)
 	if err != nil {
 		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 }
 
-func (g *GenericCluster) MustSetName(name string) {
+func (g *KindCluster) MustSetName(name string) {
 	err := g.SetName(name)
 	if err != nil {
 		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 }
 
-func (g *GenericCluster) SetKind(kind Kind) (err error) {
+func (g *KindCluster) SetKind(kind Kind) (err error) {
 	g.kind = kind
 
 	return nil
 }
 
-func (g *GenericCluster) SetName(name string) (err error) {
+func (g *KindCluster) SetName(name string) (err error) {
 	if name == "" {
 		return asciichgolangpublic.TracedErrorf("name is empty string")
 	}
