@@ -14,7 +14,7 @@ func getClientByImplementationName(implementationName string) (client Client) {
 	}
 
 	asciichgolangpublic.LogFatalWithTracef(
-		"Unknwon implmentatio name '%s'",
+		"Unknwon implmentation name '%s'",
 		implementationName,
 	)
 
