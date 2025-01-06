@@ -87,6 +87,62 @@ func (c *CommandExecutorFile) Chmod(chmodOptions *ChmodOptions) (err error) {
 	return nil
 }
 
+func (c *CommandExecutorFile) Chown(options *ChownOptions) (err error) {
+	if options == nil {
+		return TracedErrorNil("options")
+	}
+
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	userAndGroupForCommand, err := options.GetUserName()
+	if err != nil {
+		return err
+	}
+
+	if options.IsGroupNameSet() {
+		groupName, err := options.GetGroupName()
+		if err != nil {
+			return err
+		}
+
+		userAndGroupForCommand += ":" + groupName
+	}
+
+	command := []string{"chown", userAndGroupForCommand, path}
+
+	if options.UseSudo {
+		command = append([]string{"sudo"}, command...)
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return err
+	}
+
+	_, err = commandExecutor.RunCommand(
+		&RunCommandOptions{
+			Command: command,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if options.Verbose {
+		LogChangedf(
+			"Changed ownership of file '%s' to '%s' on host '%s'",
+			path,
+			userAndGroupForCommand,
+			hostDescription,
+		)
+	}
+
+	return nil
+}
+
 func (c *CommandExecutorFile) CopyToFile(destFile File, verbose bool) (err error) {
 	if destFile == nil {
 		return TracedErrorNil("destFile")
@@ -481,6 +537,47 @@ func (c *CommandExecutorFile) IsRunningOnLocalhost() (isRunningOnLocalhost bool,
 	return isRunningOnLocalhost, nil
 }
 
+func (c *CommandExecutorFile) MoveToPath(path string, useSudo bool, verbose bool) (movedFile File, err error) {
+	if path == "" {
+		return nil, TracedErrorEmptyString("path")
+	}
+
+	srcPath, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return nil, err
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	commandToUse := []string{"mv", srcPath, path}
+	if useSudo {
+		commandToUse = append([]string{"sudo"}, commandToUse...)
+	}
+
+	_, err = commandExecutor.RunCommand(
+		&RunCommandOptions{
+			Command: commandToUse,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if verbose {
+		LogChangedf(
+			"Moved file '%s' to '%s' on host '%s'.",
+			srcPath,
+			path,
+			hostDescription,
+		)
+	}
+
+	return GetCommandExecutorFileByPath(commandExecutor, path)
+}
+
 func (c *CommandExecutorFile) MustAppendBytes(toWrite []byte, verbose bool) {
 	err := c.AppendBytes(toWrite, verbose)
 	if err != nil {
@@ -497,6 +594,13 @@ func (c *CommandExecutorFile) MustAppendString(toWrite string, verbose bool) {
 
 func (c *CommandExecutorFile) MustChmod(chmodOptions *ChmodOptions) {
 	err := c.Chmod(chmodOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (c *CommandExecutorFile) MustChown(options *ChownOptions) {
+	err := c.Chown(options)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -656,6 +760,15 @@ func (c *CommandExecutorFile) MustIsRunningOnLocalhost() (isRunningOnLocalhost b
 	}
 
 	return isRunningOnLocalhost
+}
+
+func (c *CommandExecutorFile) MustMoveToPath(path string, useSudo bool, verbose bool) (movedFile File) {
+	movedFile, err := c.MoveToPath(path, useSudo, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return movedFile
 }
 
 func (c *CommandExecutorFile) MustReadAsBytes() (content []byte) {

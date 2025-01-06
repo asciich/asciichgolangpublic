@@ -55,6 +55,10 @@ func (c *ChownOptions) GetVerbose() (verbose bool) {
 	return c.Verbose
 }
 
+func (c *ChownOptions) IsGroupNameSet() (isSet bool) {
+	return c.GroupName != ""
+}
+
 func (c *ChownOptions) MustGetGroupName() (GroupName string) {
 	GroupName, err := c.GetGroupName()
 	if err != nil {

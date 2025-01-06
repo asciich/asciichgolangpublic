@@ -189,6 +189,57 @@ func (l *LocalFile) Chmod(chmodOptions *ChmodOptions) (err error) {
 	return nil
 }
 
+func (l *LocalFile) Chown(options *ChownOptions) (err error) {
+	if options == nil {
+		return TracedErrorNil("options")
+	}
+
+	path, hostDescription, err := l.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	userAndGroupForCommand, err := options.GetUserName()
+	if err != nil {
+		return err
+	}
+
+	if options.IsGroupNameSet() {
+		groupName, err := options.GetGroupName()
+		if err != nil {
+			return err
+		}
+
+		userAndGroupForCommand += ":" + groupName
+	}
+
+	command := []string{"chown", userAndGroupForCommand, path}
+
+	if options.UseSudo {
+		command = append([]string{"sudo"}, command...)
+	}
+
+	_, err = Bash().RunCommand(
+		&RunCommandOptions{
+			Command: command,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if options.Verbose {
+		LogChangedf(
+			"Changed ownership of file '%s' to '%s' on host '%s'",
+			path,
+			userAndGroupForCommand,
+			hostDescription,
+		)
+	}
+
+	return nil
+}
+
 func (l *LocalFile) CopyToFile(destFile File, verbose bool) (err error) {
 	if destFile == nil {
 		return TracedErrorNil("destFile")
@@ -379,6 +430,50 @@ func (l *LocalFile) IsPathSet() (isSet bool) {
 	return false
 }
 
+func (l *LocalFile) MoveToPath(path string, useSudo bool, verbose bool) (movedFile File, err error) {
+	if path == "" {
+		return nil, TracedErrorEmptyString(path)
+	}
+
+	srcPath, hostDescription, err := l.GetPathAndHostDescription()
+	if err != nil {
+		return nil, err
+	}
+
+	if useSudo {
+		_, err = Bash().RunCommand(
+			&RunCommandOptions{
+				Command: []string{"sudo", "mv", srcPath, path},
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err = os.Rename(srcPath, path)
+		if err != nil {
+			return nil, TracedErrorf(
+				"Move '%s' to '%s' on host '%s' failed: %w",
+				srcPath,
+				path,
+				hostDescription,
+				err,
+			)
+		}
+	}
+
+	if verbose {
+		LogChangedf(
+			"Moved '%s' to '%s' on host '%s'.",
+			srcPath,
+			path,
+			hostDescription,
+		)
+	}
+
+	return GetLocalFileByPath(path)
+}
+
 func (l *LocalFile) MustAppendBytes(toWrite []byte, verbose bool) {
 	err := l.AppendBytes(toWrite, verbose)
 	if err != nil {
@@ -395,6 +490,13 @@ func (l *LocalFile) MustAppendString(toWrite string, verbose bool) {
 
 func (l *LocalFile) MustChmod(chmodOptions *ChmodOptions) {
 	err := l.Chmod(chmodOptions)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+}
+
+func (l *LocalFile) MustChown(options *ChownOptions) {
+	err := l.Chown(options)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -509,6 +611,15 @@ func (l *LocalFile) MustGetUriAsString() (uri string) {
 	}
 
 	return uri
+}
+
+func (l *LocalFile) MustMoveToPath(path string, useSudo bool, verbose bool) (movedFile File) {
+	movedFile, err := l.MoveToPath(path, useSudo, verbose)
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return movedFile
 }
 
 func (l *LocalFile) MustReadAsBytes() (content []byte) {
