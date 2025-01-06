@@ -503,6 +503,51 @@ func TestGitRepository_GetRootDirectory_from_subdirectory(t *testing.T) {
 	}
 }
 
+func TestGitRepository_CloneRepository_idempotence(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localGitRepository"},
+		{"localCommandExecutorRepository"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				upstreamRepo := getGitRepositoryToTest(tt.implementationName)
+				defer upstreamRepo.MustDelete(verbose)
+				upstreamRepo.MustDelete(verbose)
+				upstreamRepo.MustInit(
+					&CreateRepositoryOptions{
+						BareRepository:              true,
+						InitializeWithEmptyCommit:   true,
+						InitializeWithDefaultAuthor: true,
+						Verbose:                     verbose,
+					},
+				)
+
+				clonedRepo := getGitRepositoryToTest(tt.implementationName)
+				defer clonedRepo.MustDelete(verbose)
+				clonedRepo.MustDelete(verbose)
+
+				for i := 0; i < 2; i++ {
+					clonedRepo.MustCloneRepository(upstreamRepo, verbose)
+				}
+
+				assert.EqualValues(
+					upstreamRepo.MustGetCurrentCommitHash(verbose),
+					clonedRepo.MustGetCurrentCommitHash(verbose),
+				)
+			},
+		)
+	}
+}
+
 func TestGitRepository_PullAndPush(t *testing.T) {
 	tests := []struct {
 		implementationUpstream string

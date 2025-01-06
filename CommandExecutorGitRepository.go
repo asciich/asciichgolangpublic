@@ -296,28 +296,27 @@ func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClo
 	}
 
 	if isInitialized {
-		return TracedErrorf(
-			"'%s' on host '%s' is already an initialized git repository. Clone of '%s' aborted.",
+		LogInfof(
+			"'%s' is already an initialized git repository on host '%s'. Skip clone.",
 			path,
 			hostDescription,
-			pathOrUrlToClone,
 		)
-	}
+	} else {
+		commandExecutor, err := c.GetCommandExecutor()
+		if err != nil {
+			return err
+		}
 
-	commandExecutor, err := c.GetCommandExecutor()
-	if err != nil {
-		return err
-	}
-
-	_, err = commandExecutor.RunCommand(
-		&RunCommandOptions{
-			Command:            []string{"git", "clone", pathOrUrlToClone, path},
-			Verbose:            verbose,
-			LiveOutputOnStdout: verbose,
-		},
-	)
-	if err != nil {
-		return err
+		_, err = commandExecutor.RunCommand(
+			&RunCommandOptions{
+				Command:            []string{"git", "clone", pathOrUrlToClone, path},
+				Verbose:            verbose,
+				LiveOutputOnStdout: verbose,
+			},
+		)
+		if err != nil {
+			return err
+		}
 	}
 
 	if verbose {
