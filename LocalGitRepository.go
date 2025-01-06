@@ -687,6 +687,9 @@ func (l *LocalGitRepository) Fetch(verbose bool) (err error) {
 		[]string{"fetch"},
 		verbose,
 	)
+	if err != nil {
+		return err
+	}
 
 	if verbose {
 		path, hostDescription, err := l.GetPathAndHostDescription()

@@ -41,6 +41,44 @@ func TestGetCurrentCommitGoGitHash(t *testing.T) {
 	}
 }
 
+func TestLocalGitRepository_GetLocalGitReposioryFromDirectory(t *testing.T) {
+	tests := []struct {
+		bareRepository bool
+	}{
+		{false},
+	}
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				directory := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
+				defer directory.Delete(verbose)
+
+				assert.EqualValues(
+					"localhost",
+					directory.MustGetHostDescription(),
+				)
+				
+				repo := MustGetLocalGitReposioryFromDirectory(directory)
+				
+				assert.EqualValues(
+					directory.MustGetPath(),
+					repo.MustGetPath(),
+				)
+
+				assert.EqualValues(
+					"localhost",
+					repo.MustGetHostDescription(),
+				)
+			},
+		)
+	}
+}
+
 // TODO move to GitRepository_test.go and run for all implementations
 func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 	tests := []struct {
