@@ -380,8 +380,6 @@ func (h *Host) GetSshUsername() (sshUsername string, err error) {
 }
 
 func (h *Host) InstallBinary(installOptions *InstallOptions) (err error) {
-	return TracedErrorNotImplemented()
-	/* TODO enable again
 	if installOptions == nil {
 		return TracedErrorNil("installOptions")
 	}
@@ -415,7 +413,7 @@ func (h *Host) InstallBinary(installOptions *InstallOptions) (err error) {
 		)
 	}
 
-	tempCopy, err := sourceFile.CopyToTemporaryFile(installOptions.Verbose)
+	tempCopy, err := TemporaryFiles().CreateTemporaryFileFromFile(sourceFile, installOptions.Verbose)
 	if err != nil {
 		return err
 	}
@@ -425,12 +423,18 @@ func (h *Host) InstallBinary(installOptions *InstallOptions) (err error) {
 		return err
 	}
 
-	installedFile, err := tempCopy.MoveToStringPath(destPath, installOptions.UseSudoToInstall, installOptions.Verbose)
+	installedFile, err := tempCopy.MoveToPath(destPath, installOptions.UseSudoToInstall, installOptions.Verbose)
 	if err != nil {
 		return err
 	}
 
-	err = installedFile.Chmod("u=rwx,g=rx,o=rx", installOptions.UseSudoToInstall, installOptions.Verbose)
+	err = installedFile.Chmod(
+		&ChmodOptions{
+			PermissionsString: "u=rwx,g=rx,o=rx",
+			UseSudo: installOptions.UseSudoToInstall,
+			Verbose: installOptions.Verbose,
+		},
+	)
 	if err != nil {
 		return err
 	}
@@ -457,7 +461,6 @@ func (h *Host) InstallBinary(installOptions *InstallOptions) (err error) {
 	}
 
 	return nil
-	*/
 }
 
 func (h *Host) IsFtpPortOpen(verbose bool) (isOpen bool, err error) {
