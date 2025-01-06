@@ -40,6 +40,9 @@ func (g *GnuPGService) CheckSignatureValid(signatureFile File, verbose bool) (er
 			Verbose: verbose,
 		},
 	)
+	if err != nil {
+		return err
+	}
 
 	if verbose {
 		LogInfof(

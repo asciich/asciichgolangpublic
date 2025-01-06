@@ -165,3 +165,48 @@ func TestFile_ContainsLine(t *testing.T) {
 		)
 	}
 }
+
+func TestFile_MoveToPath(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localFile"},
+		{"localCommandExecutorFile"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				fileToTest := getFileToTest(tt.implementationName)
+				defer fileToTest.Delete(verbose)
+
+				destFile := getFileToTest(tt.implementationName)
+				defer destFile.Delete(verbose)
+				destFile.Delete(verbose)
+
+				assert.True(fileToTest.MustExists(verbose))
+				assert.False(destFile.MustExists(verbose))
+
+				movedFile := fileToTest.MustMoveToPath(destFile.MustGetPath(), false, verbose)
+
+				assert.EqualValues(
+					movedFile.MustGetPath(),
+					destFile.MustGetPath(),
+				)
+
+				assert.EqualValues(
+					movedFile.MustGetHostDescription(),
+					destFile.MustGetHostDescription(),
+				)
+
+				assert.False(fileToTest.MustExists(verbose))
+				assert.True(destFile.MustExists(verbose))
+			},
+		)
+	}
+}
