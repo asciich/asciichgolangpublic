@@ -346,43 +346,56 @@ func (l *LocalGitRepository) CloneRepositoryByPathOrUrl(urlOrPathToClone string,
 		)
 	}
 
-	const isBare = false
-	_, err = git.PlainClone(
-		path,
-		isBare,
-		&git.CloneOptions{
-			URL: urlOrPathToClone,
-		},
-	)
+	isInitialzed, err := l.IsInitialized(verbose)
 	if err != nil {
-		if err.Error() == "remote repository is empty" {
-			if verbose {
-				LogInfof(
-					"Remote repository '%s' is empty. Going to add remote for empty repository.",
+		return err
+	}
+
+	if isInitialzed {
+		LogInfof(
+			"'%s' is already an initialized git repository on host '%s'. Skip clone.",
+			path,
+			hostDescription,
+		)
+	} else {
+		const isBare = false
+		_, err = git.PlainClone(
+			path,
+			isBare,
+			&git.CloneOptions{
+				URL: urlOrPathToClone,
+			},
+		)
+		if err != nil {
+			if err.Error() == "remote repository is empty" {
+				if verbose {
+					LogInfof(
+						"Remote repository '%s' is empty. Going to add remote for empty repository.",
+						urlOrPathToClone,
+					)
+				}
+
+				err = l.Init(
+					&CreateRepositoryOptions{
+						Verbose:                   verbose,
+						BareRepository:            isBare,
+						InitializeWithEmptyCommit: false,
+					})
+				if err != nil {
+					return err
+				}
+
+				_, err = l.SetRemote("origin", urlOrPathToClone, verbose)
+				if err != nil {
+					return err
+				}
+			} else {
+				return TracedErrorf(
+					"Clone '%s' failed: '%w'",
 					urlOrPathToClone,
+					err,
 				)
 			}
-
-			err = l.Init(
-				&CreateRepositoryOptions{
-					Verbose:                   verbose,
-					BareRepository:            isBare,
-					InitializeWithEmptyCommit: false,
-				})
-			if err != nil {
-				return err
-			}
-
-			_, err = l.SetRemote("origin", urlOrPathToClone, verbose)
-			if err != nil {
-				return err
-			}
-		} else {
-			return TracedErrorf(
-				"Clone '%s' failed: '%w'",
-				urlOrPathToClone,
-				err,
-			)
 		}
 	}
 
