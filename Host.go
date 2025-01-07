@@ -379,29 +379,29 @@ func (h *Host) GetSshUsername() (sshUsername string, err error) {
 	return h.sshUsername, nil
 }
 
-func (h *Host) InstallBinary(installOptions *InstallOptions) (err error) {
+func (h *Host) InstallBinary(installOptions *InstallOptions) (installedFile File, err error) {
 	if installOptions == nil {
-		return TracedErrorNil("installOptions")
+		return nil, TracedErrorNil("installOptions")
 	}
 
 	hostName, err := h.GetHostname()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	sourceFile, err := installOptions.GetSourceFile()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	sourceFilePath, err := sourceFile.GetLocalPath()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	binaryName, err := installOptions.GetBinaryName()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if installOptions.Verbose {
@@ -415,28 +415,28 @@ func (h *Host) InstallBinary(installOptions *InstallOptions) (err error) {
 
 	tempCopy, err := TemporaryFiles().CreateTemporaryFileFromFile(sourceFile, installOptions.Verbose)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	destPath, err := installOptions.GetInstallationPathOrDefaultIfUnset()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	installedFile, err := tempCopy.MoveToPath(destPath, installOptions.UseSudoToInstall, installOptions.Verbose)
+	installedFile, err = tempCopy.MoveToPath(destPath, installOptions.UseSudoToInstall, installOptions.Verbose)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = installedFile.Chmod(
 		&ChmodOptions{
 			PermissionsString: "u=rwx,g=rx,o=rx",
-			UseSudo: installOptions.UseSudoToInstall,
-			Verbose: installOptions.Verbose,
+			UseSudo:           installOptions.UseSudoToInstall,
+			Verbose:           installOptions.Verbose,
 		},
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = installedFile.Chown(
@@ -448,7 +448,7 @@ func (h *Host) InstallBinary(installOptions *InstallOptions) (err error) {
 		},
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if installOptions.Verbose {
@@ -460,7 +460,7 @@ func (h *Host) InstallBinary(installOptions *InstallOptions) (err error) {
 		)
 	}
 
-	return nil
+	return installedFile, nil
 }
 
 func (h *Host) IsFtpPortOpen(verbose bool) (isOpen bool, err error) {
@@ -717,11 +717,13 @@ func (h *Host) MustGetSshUsername() (sshUsername string) {
 	return sshUsername
 }
 
-func (h *Host) MustInstallBinary(installOptions *InstallOptions) {
-	err := h.InstallBinary(installOptions)
+func (h *Host) MustInstallBinary(installOptions *InstallOptions) (installedFile File) {
+	installedFile, err := h.InstallBinary(installOptions)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
+
+	return installedFile
 }
 
 func (h *Host) MustIsFtpPortOpen(verbose bool) (isOpen bool) {
