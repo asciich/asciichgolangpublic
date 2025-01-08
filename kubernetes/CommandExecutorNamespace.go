@@ -36,7 +36,7 @@ func (c *CommandExecutorNamespace) CreateRole(createOptions *CreateRoleOptions) 
 		return nil, err
 	}
 
-	context, err := c.GetKubectlContext(createOptions.Verbose)
+	context, err := c.GetCachedKubectlContext(createOptions.Verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func (c *CommandExecutorNamespace) DeleteRoleByName(name string, verbose bool) (
 	}
 
 	if exists {
-		context, err := c.GetKubectlContext(verbose)
+		context, err := c.GetCachedKubectlContext(verbose)
 		if err != nil {
 			return err
 		}
@@ -166,6 +166,28 @@ func (c *CommandExecutorNamespace) DeleteRoleByName(name string, verbose bool) (
 	return nil
 }
 
+func (c *CommandExecutorNamespace) GetCachedKubectlContext(verbose bool) (context string, err error) {
+	kubernetes, err := c.GetKubernetesCluster()
+	if err != nil {
+		return "", err
+	}
+
+	commandExecutorKubernetes, ok := kubernetes.(*CommandExecutorKubernetes)
+	if !ok {
+		typeName, err := asciichgolangpublic.Types().GetTypeName(kubernetes)
+		if err != nil {
+			return "", err
+		}
+
+		return "", asciichgolangpublic.TracedErrorNilf(
+			"Unable to get kubectl context. unexpected kubernetes type '%s'",
+			typeName,
+		)
+	}
+
+	return commandExecutorKubernetes.GetCachedKubectlContext(verbose)
+}
+
 func (c *CommandExecutorNamespace) GetClusterName() (clusterName string, err error) {
 	kubernetesCluster, err := c.GetKubernetesCluster()
 	if err != nil {
@@ -195,28 +217,6 @@ func (c *CommandExecutorNamespace) GetCommandExecutor() (commandExecutor asciich
 	}
 
 	return commandExecutorKubernetes.GetCommandExecutor()
-}
-
-func (c *CommandExecutorNamespace) GetKubectlContext(verbose bool) (context string, err error) {
-	kubernetes, err := c.GetKubernetesCluster()
-	if err != nil {
-		return "", err
-	}
-
-	commandExecutorKubernetes, ok := kubernetes.(*CommandExecutorKubernetes)
-	if !ok {
-		typeName, err := asciichgolangpublic.Types().GetTypeName(kubernetes)
-		if err != nil {
-			return "", err
-		}
-
-		return "", asciichgolangpublic.TracedErrorNilf(
-			"Unable to get kubectl context. unexpected kubernetes type '%s'",
-			typeName,
-		)
-	}
-
-	return commandExecutorKubernetes.GetKubectlContext(verbose)
 }
 
 func (c *CommandExecutorNamespace) GetKubernetesCluster() (kubernetesCluster KubernetesCluster, err error) {
@@ -253,7 +253,7 @@ func (c *CommandExecutorNamespace) GetRoleByName(name string) (role Role, err er
 }
 
 func (c *CommandExecutorNamespace) ListRoleNames(verbose bool) (roleNames []string, err error) {
-	context, err := c.GetKubectlContext(verbose)
+	context, err := c.GetCachedKubectlContext(verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -327,6 +327,15 @@ func (c *CommandExecutorNamespace) MustDeleteRoleByName(name string, verbose boo
 	}
 }
 
+func (c *CommandExecutorNamespace) MustGetCachedKubectlContext(verbose bool) (context string) {
+	context, err := c.GetCachedKubectlContext(verbose)
+	if err != nil {
+		asciichgolangpublic.LogGoErrorFatal(err)
+	}
+
+	return context
+}
+
 func (c *CommandExecutorNamespace) MustGetClusterName() (clusterName string) {
 	clusterName, err := c.GetClusterName()
 	if err != nil {
@@ -343,15 +352,6 @@ func (c *CommandExecutorNamespace) MustGetCommandExecutor() (commandExecutor asc
 	}
 
 	return commandExecutor
-}
-
-func (c *CommandExecutorNamespace) MustGetKubectlContext(verbose bool) (context string) {
-	context, err := c.GetKubectlContext(verbose)
-	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
-	}
-
-	return context
 }
 
 func (c *CommandExecutorNamespace) MustGetKubernetesCluster() (kubernetesCluster KubernetesCluster) {

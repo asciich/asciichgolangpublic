@@ -7,8 +7,9 @@ import (
 )
 
 type CommandExecutorKubernetes struct {
-	name            string
-	commandExecutor asciichgolangpublic.CommandExecutor
+	name              string
+	commandExecutor   asciichgolangpublic.CommandExecutor
+	cachedContextName string
 }
 
 func GetCommandExecutorKubernetsByName(commandExecutor asciichgolangpublic.CommandExecutor, clusterName string) (kubernetes KubernetesCluster, err error) {
@@ -98,7 +99,7 @@ func (c *CommandExecutorKubernetes) CreateNamespaceByName(name string, verbose b
 			)
 		}
 	} else {
-		context, err := c.GetKubectlContext(verbose)
+		context, err := c.GetCachedKubectlContext(verbose)
 		if err != nil {
 			return nil, err
 		}
@@ -148,7 +149,7 @@ func (c *CommandExecutorKubernetes) DeleteNamespaceByName(name string, verbose b
 
 	if exists {
 
-		context, err := c.GetKubectlContext(verbose)
+		context, err := c.GetCachedKubectlContext(verbose)
 		if err != nil {
 			return err
 		}
@@ -187,6 +188,35 @@ func (c *CommandExecutorKubernetes) DeleteNamespaceByName(name string, verbose b
 	}
 
 	return nil
+}
+
+func (c *CommandExecutorKubernetes) GetCachedContextName() (cachedContextName string, err error) {
+	if c.cachedContextName == "" {
+		return "", asciichgolangpublic.TracedErrorf("cachedContextName not set")
+	}
+
+	return c.cachedContextName, nil
+}
+
+func (c *CommandExecutorKubernetes) GetCachedKubectlContext(verbose bool) (context string, err error) {
+	if c.cachedContextName == "" {
+		return c.GetKubectlContext(verbose)
+	}
+
+	context = c.cachedContextName
+
+	clusterName, err := c.GetName()
+	if err != nil {
+		return "", err
+	}
+
+	asciichgolangpublic.LogInfof(
+		"Kubectl context for cluster '%s' is '%s'.",
+		clusterName,
+		context,
+	)
+
+	return
 }
 
 func (c *CommandExecutorKubernetes) GetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor, err error) {
@@ -322,7 +352,7 @@ func (c *CommandExecutorKubernetes) ListNamespaceNames(verbose bool) (namespaceN
 }
 
 func (c *CommandExecutorKubernetes) ListNamespaces(verbose bool) (namespaces []Namespace, err error) {
-	context, err := c.GetKubectlContext(verbose)
+	context, err := c.GetCachedKubectlContext(verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -379,6 +409,24 @@ func (c *CommandExecutorKubernetes) MustDeleteNamespaceByName(name string, verbo
 	if err != nil {
 		asciichgolangpublic.LogGoErrorFatal(err)
 	}
+}
+
+func (c *CommandExecutorKubernetes) MustGetCachedContextName() (cachedContextName string) {
+	cachedContextName, err := c.GetCachedContextName()
+	if err != nil {
+		asciichgolangpublic.LogGoErrorFatal(err)
+	}
+
+	return cachedContextName
+}
+
+func (c *CommandExecutorKubernetes) MustGetCachedKubectlContext(verbose bool) (context string) {
+	context, err := c.GetCachedKubectlContext(verbose)
+	if err != nil {
+		asciichgolangpublic.LogGoErrorFatal(err)
+	}
+
+	return context
 }
 
 func (c *CommandExecutorKubernetes) MustGetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor) {
@@ -471,6 +519,13 @@ func (c *CommandExecutorKubernetes) MustRunCommandAndGetStdoutAsLines(runCommand
 	return lines
 }
 
+func (c *CommandExecutorKubernetes) MustSetCachedContextName(cachedContextName string) {
+	err := c.SetCachedContextName(cachedContextName)
+	if err != nil {
+		asciichgolangpublic.LogGoErrorFatal(err)
+	}
+}
+
 func (c *CommandExecutorKubernetes) MustSetCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) {
 	err := c.SetCommandExecutor(commandExecutor)
 	if err != nil {
@@ -545,6 +600,16 @@ func (c *CommandExecutorKubernetes) RunCommandAndGetStdoutAsLines(runCommandOpti
 	}
 
 	return output.GetStdoutAsLines(false)
+}
+
+func (c *CommandExecutorKubernetes) SetCachedContextName(cachedContextName string) (err error) {
+	if cachedContextName == "" {
+		return asciichgolangpublic.TracedErrorf("cachedContextName is empty string")
+	}
+
+	c.cachedContextName = cachedContextName
+
+	return nil
 }
 
 func (c *CommandExecutorKubernetes) SetCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) (err error) {
