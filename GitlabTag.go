@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"errors"
 
-	"github.com/xanzy/go-gitlab"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
 var ErrGitlabTagNotFound = errors.New("gitlab tag not found")

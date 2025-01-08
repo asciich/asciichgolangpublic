@@ -1,6 +1,8 @@
 module github.com/asciich/asciichgolangpublic
 
-go 1.21.1
+go 1.22
+
+toolchain go1.23.4
 
 require (
 	cloud.google.com/go/storage v1.39.0
@@ -9,8 +11,8 @@ require (
 	github.com/itchyny/gojq v0.12.16
 	github.com/prometheus/client_model v0.6.1
 	github.com/prometheus/common v0.60.1
-	github.com/stretchr/testify v1.9.0
-	github.com/xanzy/go-gitlab v0.112.0
+	github.com/stretchr/testify v1.10.0
+	gitlab.com/gitlab-org/api/client-go v0.119.0
 	golang.org/x/text v0.19.0
 	gopkg.in/yaml.v3 v3.0.1
 	libvirt.org/libvirt-go-xml v7.4.0+incompatible
@@ -59,10 +61,10 @@ require (
 	golang.org/x/crypto v0.27.0 // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.29.0 // indirect
-	golang.org/x/oauth2 v0.23.0 // indirect
+	golang.org/x/oauth2 v0.24.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.25.0 // indirect
-	golang.org/x/time v0.5.0 // indirect
+	golang.org/x/time v0.8.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	google.golang.org/api v0.166.0 // indirect
 	google.golang.org/genproto v0.0.0-20240213162025-012b6fc9bca9 // indirect

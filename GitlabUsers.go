@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"strings"
 
-	"github.com/xanzy/go-gitlab"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
 type GitlabUsers struct {
