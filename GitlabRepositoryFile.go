@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"errors"
 
-	"github.com/xanzy/go-gitlab"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
 var ErrGitlabRepositoryFileDoesNotExist = errors.New("Gitlab repository file does not exist")

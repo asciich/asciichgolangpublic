@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/xanzy/go-gitlab"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
 var ErrGitlabProjectNotFound = errors.New("Gitlab project not found")

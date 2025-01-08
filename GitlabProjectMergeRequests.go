@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"errors"
 
-	"github.com/xanzy/go-gitlab"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
 var ErrNoMergeRequestWithTitleFound = errors.New("no merge request with given title found")

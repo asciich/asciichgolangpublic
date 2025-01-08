@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"errors"
 
-	"github.com/xanzy/go-gitlab"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
 var ErrGitlabReleaseNotFound = errors.New("gitlab release not found")
