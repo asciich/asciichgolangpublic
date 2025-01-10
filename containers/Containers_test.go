@@ -1,9 +1,10 @@
-package asciichgolangpublic
+package containers
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic"
 )
 
 func TestContainersIsRunningInsideContainer(t *testing.T) {
@@ -16,13 +17,13 @@ func TestContainersIsRunningInsideContainer(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			asciichgolangpublic.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				const verbose bool = true
 
-				assert.False(Contaners().MustIsRunningInsideContainer(verbose))
+				assert.False(MustIsRunningInsideContainer(verbose))
 			},
 		)
 	}

@@ -1,4 +1,6 @@
-package asciichgolangpublic
+package kvm
+
+import "github.com/asciich/asciichgolangpublic"
 
 type KvmRemoveVmOptions struct {
 	VmName              string
@@ -23,7 +25,7 @@ func (k *KvmRemoveVmOptions) GetVerbose() (verbose bool, err error) {
 
 func (k *KvmRemoveVmOptions) GetVmName() (vmName string, err error) {
 	if k.VmName == "" {
-		return "", TracedErrorf("VmName not set")
+		return "", asciichgolangpublic.TracedErrorf("VmName not set")
 	}
 
 	return k.VmName, nil
@@ -31,11 +33,11 @@ func (k *KvmRemoveVmOptions) GetVmName() (vmName string, err error) {
 
 func (k *KvmRemoveVmOptions) GetVolumeNamesToRemove() (volumeNamesToRemove []string, err error) {
 	if k.VolumeNamesToRemove == nil {
-		return nil, TracedErrorf("VolumeNamesToRemove not set")
+		return nil, asciichgolangpublic.TracedErrorf("VolumeNamesToRemove not set")
 	}
 
 	if len(k.VolumeNamesToRemove) <= 0 {
-		return nil, TracedErrorf("VolumeNamesToRemove has no elements")
+		return nil, asciichgolangpublic.TracedErrorf("VolumeNamesToRemove has no elements")
 	}
 
 	return k.VolumeNamesToRemove, nil
@@ -44,7 +46,7 @@ func (k *KvmRemoveVmOptions) GetVolumeNamesToRemove() (volumeNamesToRemove []str
 func (k *KvmRemoveVmOptions) MustGetRemoveVolumes() (removeVolumes bool) {
 	removeVolumes, err := k.GetRemoveVolumes()
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return removeVolumes
@@ -53,7 +55,7 @@ func (k *KvmRemoveVmOptions) MustGetRemoveVolumes() (removeVolumes bool) {
 func (k *KvmRemoveVmOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := k.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -62,7 +64,7 @@ func (k *KvmRemoveVmOptions) MustGetVerbose() (verbose bool) {
 func (k *KvmRemoveVmOptions) MustGetVmName() (vmName string) {
 	vmName, err := k.GetVmName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return vmName
@@ -71,7 +73,7 @@ func (k *KvmRemoveVmOptions) MustGetVmName() (vmName string) {
 func (k *KvmRemoveVmOptions) MustGetVolumeNamesToRemove() (volumeNamesToRemove []string) {
 	volumeNamesToRemove, err := k.GetVolumeNamesToRemove()
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return volumeNamesToRemove
@@ -80,28 +82,28 @@ func (k *KvmRemoveVmOptions) MustGetVolumeNamesToRemove() (volumeNamesToRemove [
 func (k *KvmRemoveVmOptions) MustSetRemoveVolumes(removeVolumes bool) {
 	err := k.SetRemoveVolumes(removeVolumes)
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KvmRemoveVmOptions) MustSetVerbose(verbose bool) {
 	err := k.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KvmRemoveVmOptions) MustSetVmName(vmName string) {
 	err := k.SetVmName(vmName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KvmRemoveVmOptions) MustSetVolumeNamesToRemove(volumeNamesToRemove []string) {
 	err := k.SetVolumeNamesToRemove(volumeNamesToRemove)
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 }
 
@@ -119,7 +121,7 @@ func (k *KvmRemoveVmOptions) SetVerbose(verbose bool) (err error) {
 
 func (k *KvmRemoveVmOptions) SetVmName(vmName string) (err error) {
 	if vmName == "" {
-		return TracedErrorf("vmName is empty string")
+		return asciichgolangpublic.TracedErrorf("vmName is empty string")
 	}
 
 	k.VmName = vmName
@@ -129,11 +131,11 @@ func (k *KvmRemoveVmOptions) SetVmName(vmName string) (err error) {
 
 func (k *KvmRemoveVmOptions) SetVolumeNamesToRemove(volumeNamesToRemove []string) (err error) {
 	if volumeNamesToRemove == nil {
-		return TracedErrorf("volumeNamesToRemove is nil")
+		return asciichgolangpublic.TracedErrorf("volumeNamesToRemove is nil")
 	}
 
 	if len(volumeNamesToRemove) <= 0 {
-		return TracedErrorf("volumeNamesToRemove has no elements")
+		return asciichgolangpublic.TracedErrorf("volumeNamesToRemove has no elements")
 	}
 
 	k.VolumeNamesToRemove = volumeNamesToRemove

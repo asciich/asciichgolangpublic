@@ -1,13 +1,13 @@
-package asciichgolangpublic
+package kvm
 
 import (
 	"testing"
 
-
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic"
 )
 
-func TestKvmHypervisorGetHostnameWhenUsingLocalhost(t *testing.T) {
+func TestKvmHypervisorGetHostNameWhenUsingLocalhost(t *testing.T) {
 	tests := []struct {
 		testcase string
 	}{
@@ -16,7 +16,7 @@ func TestKvmHypervisorGetHostnameWhenUsingLocalhost(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			asciichgolangpublic.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 

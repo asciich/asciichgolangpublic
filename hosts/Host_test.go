@@ -1,15 +1,16 @@
-package asciichgolangpublic
+package hosts
 
 import (
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic"
 )
 
 func TestHostCheckReachableBySsh(t *testing.T) {
-	if ContinuousIntegration().IsRunningInContinuousIntegration() {
-		LogInfo("Currently not available in CI/CD pipeline")
+	if asciichgolangpublic.ContinuousIntegration().IsRunningInContinuousIntegration() {
+		asciichgolangpublic.LogInfo("Currently not available in CI/CD pipeline")
 		return
 	}
 
@@ -22,7 +23,7 @@ func TestHostCheckReachableBySsh(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			asciichgolangpublic.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose = true
 
@@ -33,9 +34,9 @@ func TestHostCheckReachableBySsh(t *testing.T) {
 	}
 }
 
-func TestHostGetHostname(t *testing.T) {
-	if ContinuousIntegration().IsRunningInContinuousIntegration() {
-		LogInfo("Currently not available in CI/CD pipeline")
+func TestHostGetHostName(t *testing.T) {
+	if asciichgolangpublic.ContinuousIntegration().IsRunningInContinuousIntegration() {
+		asciichgolangpublic.LogInfo("Currently not available in CI/CD pipeline")
 		return
 	}
 
@@ -48,14 +49,43 @@ func TestHostGetHostname(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			asciichgolangpublic.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				host := MustGetHostByHostname(tt.hostname)
 				assert.EqualValues(
 					tt.hostname,
-					host.MustGetHostname(),
+					host.MustGetHostName(),
+				)
+			},
+		)
+	}
+}
+
+func TestHostGetHostDescripion(t *testing.T) {
+	if asciichgolangpublic.ContinuousIntegration().IsRunningInContinuousIntegration() {
+		asciichgolangpublic.LogInfo("Currently not available in CI/CD pipeline")
+		return
+	}
+
+	tests := []struct {
+		hostname          string
+		expectedReachable bool
+	}{
+		{"cerberus3.asciich.ch", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			asciichgolangpublic.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				host := MustGetHostByHostname(tt.hostname)
+				assert.EqualValues(
+					tt.hostname,
+					host.MustGetHostDescription(),
 				)
 			},
 		)
@@ -63,8 +93,8 @@ func TestHostGetHostname(t *testing.T) {
 }
 
 func TestHostRunCommand(t *testing.T) {
-	if ContinuousIntegration().IsRunningInContinuousIntegration() {
-		LogInfo("Currently not available in CI/CD pipeline")
+	if asciichgolangpublic.ContinuousIntegration().IsRunningInContinuousIntegration() {
+		asciichgolangpublic.LogInfo("Currently not available in CI/CD pipeline")
 		return
 	}
 
@@ -77,7 +107,7 @@ func TestHostRunCommand(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			asciichgolangpublic.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -85,7 +115,7 @@ func TestHostRunCommand(t *testing.T) {
 
 				host := MustGetHostByHostname(tt.hostname)
 				ipsString := host.MustRunCommandAndGetStdoutAsString(
-					&RunCommandOptions{
+					&asciichgolangpublic.RunCommandOptions{
 						Command: []string{"hostname", "-i"},
 						Verbose: verbose,
 					},
@@ -107,7 +137,7 @@ func TestHostIsACommandExecutor(t *testing.T) {
 
 	const hostName = "hostname"
 
-	var host CommandExecutor = MustGetHostByHostname(hostName)
+	var host asciichgolangpublic.CommandExecutor = MustGetHostByHostname(hostName)
 
 	assert.EqualValues(
 		hostName,
@@ -116,8 +146,8 @@ func TestHostIsACommandExecutor(t *testing.T) {
 }
 
 func TestHost_GetDirectoryByPath(t *testing.T) {
-	if ContinuousIntegration().IsRunningInContinuousIntegration() {
-		LogInfo("Currently not available in CI/CD pipeline")
+	if asciichgolangpublic.ContinuousIntegration().IsRunningInContinuousIntegration() {
+		asciichgolangpublic.LogInfo("Currently not available in CI/CD pipeline")
 		return
 	}
 
@@ -132,7 +162,7 @@ func TestHost_GetDirectoryByPath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			asciichgolangpublic.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -141,7 +171,7 @@ func TestHost_GetDirectoryByPath(t *testing.T) {
 				host := MustGetHostByHostname(tt.hostname)
 				directory := host.MustGetDirectoryByPath(tt.dirPath)
 
-				_, ok := directory.(*CommandExecutorDirectory)
+				_, ok := directory.(*asciichgolangpublic.CommandExecutorDirectory)
 				assert.True(ok)
 
 				assert.EqualValues(

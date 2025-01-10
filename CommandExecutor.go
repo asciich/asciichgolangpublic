@@ -9,6 +9,8 @@ type CommandExecutor interface {
 	MustRunCommand(options *RunCommandOptions) (commandOutput *CommandOutput)
 
 	// These Commands can be implemented by embedding the `CommandExecutorBase` struct:
+	IsRunningOnLocalhost() (isRunningOnLocalhost bool, err error)
+	MustIsRunningOnLocalhost() (isRunningOnLocalhost bool)
 	MustRunCommandAndGetStdoutAsBytes(options *RunCommandOptions) (stdout []byte)
 	MustRunCommandAndGetStdoutAsFloat64(options *RunCommandOptions) (stdout float64)
 	MustRunCommandAndGetStdoutAsInt64(options *RunCommandOptions) (stdout int64)
