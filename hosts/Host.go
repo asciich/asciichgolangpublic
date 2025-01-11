@@ -13,10 +13,12 @@ type Host interface {
 	GetDirectoryByPath(path string) (directory asciichgolangpublic.Directory, err error)
 	GetHostDescription() (hostDescription string, err error)
 	GetHostName() (hostName string, err error)
+	InstallBinary(installOptions *asciichgolangpublic.InstallOptions) (installedFile asciichgolangpublic.File, err error)
 	MustCheckReachable(verbose bool)
 	MustGetDirectoryByPath(path string) (directory asciichgolangpublic.Directory)
 	MustGetHostDescription() (hostDescription string)
 	MustGetHostName() (hostName string)
+	MustInstallBinary(installOptions *asciichgolangpublic.InstallOptions) (installedFile asciichgolangpublic.File)
 	MustRunCommand(runCommandOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput)
 	RunCommand(runCommandOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error)
 
