@@ -14,8 +14,25 @@ func NewCommandExecutorBase() (c *CommandExecutorBase) {
 }
 
 func (c *CommandExecutorBase) GetParentCommandExecutorForBaseClass() (parentCommandExecutorForBaseClass CommandExecutor, err error) {
+	if c.parentCommandExecutorForBaseClass == nil {
+		return nil, TracedError("parent for CommandExecutorBase not set")
+	}
 
 	return c.parentCommandExecutorForBaseClass, nil
+}
+
+func (c *CommandExecutorBase) IsRunningOnLocalhost() (isRunningOnLocalhost bool, err error) {
+	parent, err := c.GetParentCommandExecutorForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	hostDescriotion, err := parent.GetHostDescription()
+	if err != nil {
+		return false, err
+	}
+
+	return hostDescriotion == "localhost", nil
 }
 
 func (c *CommandExecutorBase) MustGetParentCommandExecutorForBaseClass() (parentCommandExecutorForBaseClass CommandExecutor) {
@@ -25,6 +42,15 @@ func (c *CommandExecutorBase) MustGetParentCommandExecutorForBaseClass() (parent
 	}
 
 	return parentCommandExecutorForBaseClass
+}
+
+func (c *CommandExecutorBase) MustIsRunningOnLocalhost() (isRunningOnLocalhost bool) {
+	isRunningOnLocalhost, err := c.IsRunningOnLocalhost()
+	if err != nil {
+		LogGoErrorFatal(err)
+	}
+
+	return isRunningOnLocalhost
 }
 
 func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsBytes(options *RunCommandOptions) (stdout []byte) {

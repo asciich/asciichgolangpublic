@@ -1,61 +1,81 @@
 package asciichgolangpublic
 
 import (
-	"fmt"
 	"strings"
 )
 
 type SSHClient struct {
-	host        *Host
+	CommandExecutorBase
+	hostName    string
 	sshUserName string
 }
 
-func NewSSHClient() (s *SSHClient) {
-	return new(SSHClient)
-}
+func GetSshClientByHostName(hostName string) (sshClient *SSHClient, err error) {
+	sshClient = NewSSHClient()
 
-func (s *SSHClient) CheckReachable(verbose bool) (isReachable bool, err error) {
-	hostname, err := s.GetHostName()
+	err = sshClient.SetHostName(hostName)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	isReachable, err = s.IsReachable(verbose)
+	return sshClient, err
+}
+
+func MustGetSshClientByHostName(hostName string) (sshClient *SSHClient) {
+	sshClient, err := GetSshClientByHostName(hostName)
 	if err != nil {
-		return false, err
+		LogGoErrorFatal(err)
+	}
+
+	return sshClient
+}
+
+func NewSSHClient() (s *SSHClient) {
+	s = new(SSHClient)
+
+	s.SetParentCommandExecutorForBaseClass(s)
+
+	return s
+}
+
+func (s *SSHClient) CheckReachable(verbose bool) (err error) {
+	hostname, err := s.GetHostName()
+	if err != nil {
+		return err
+	}
+
+	isReachable, err := s.IsReachable(verbose)
+	if err != nil {
+		return err
 	}
 
 	if isReachable {
-		return true, nil
+		return nil
 	}
 
-	errorMessage := fmt.Sprintf("host '%v' is not reachable", hostname)
-	if verbose {
-		LogError(errorMessage)
-	}
-	return false, TracedError(errorMessage)
+	return TracedErrorf("host '%v' is not reachable", hostname)
 }
 
-func (s *SSHClient) GetHost() (host *Host, err error) {
-	if s.host == nil {
-		return nil, TracedError("host not set")
-	}
+func (s *SSHClient) GetDeepCopy() (copy CommandExecutor) {
+	toReturn := NewSSHClient()
 
-	return s.host, nil
+	*toReturn = *s
+
+	toReturn.MustSetParentCommandExecutorForBaseClass(toReturn)
+
+	return toReturn
 }
 
-func (s *SSHClient) GetHostName() (hostname string, err error) {
-	host, err := s.GetHost()
-	if err != nil {
-		return "", err
+func (s *SSHClient) GetHostDescription() (hostDescription string, err error) {
+	return s.GetHostName()
+}
+
+func (s *SSHClient) GetHostName() (hostName string, err error) {
+	if s.hostName == "" {
+		return "", TracedErrorf("hostName not set")
 	}
 
-	hostname, err = host.GetHostname()
-	if err != nil {
-		return "", err
-	}
-
-	return hostname, nil
+	return s.hostName, nil
 }
 
 func (s *SSHClient) GetSshUserName() (sshUserName string, err error) {
@@ -135,31 +155,29 @@ func (s *SSHClient) IsSshUserNameSet() (isSet bool) {
 	return len(s.sshUserName) > 0
 }
 
-func (s *SSHClient) MustCheckReachable(verbose bool) (isReachable bool) {
-	isReachable, err := s.CheckReachable(verbose)
+func (s *SSHClient) MustCheckReachable(verbose bool) {
+	err := s.CheckReachable(verbose)
 	if err != nil {
 		LogFatalf("SshClient.CheckReachableBySsh failed: '%v'", err)
 	}
-
-	return isReachable
 }
 
-func (s *SSHClient) MustGetHost() (host *Host) {
-	host, err := s.GetHost()
+func (s *SSHClient) MustGetHostDescription() (hostDescription string) {
+	hostDescription, err := s.GetHostDescription()
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
 
-	return host
+	return hostDescription
 }
 
-func (s *SSHClient) MustGetHostName() (hostname string) {
-	hostname, err := s.GetHostName()
+func (s *SSHClient) MustGetHostName() (hostName string) {
+	hostName, err := s.GetHostName()
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
 
-	return hostname
+	return hostName
 }
 
 func (s *SSHClient) MustGetSshUserName() (sshUserName string) {
@@ -189,8 +207,8 @@ func (s *SSHClient) MustRunCommand(options *RunCommandOptions) (commandOutput *C
 	return commandOutput
 }
 
-func (s *SSHClient) MustSetHost(host *Host) {
-	err := s.SetHost(host)
+func (s *SSHClient) MustSetHostName(hostName string) {
+	err := s.SetHostName(hostName)
 	if err != nil {
 		LogGoErrorFatal(err)
 	}
@@ -238,12 +256,12 @@ func (s *SSHClient) RunCommand(options *RunCommandOptions) (commandOutput *Comma
 	return commandOutput, nil
 }
 
-func (s *SSHClient) SetHost(host *Host) (err error) {
-	if host == nil {
-		return TracedError("host is nil")
+func (s *SSHClient) SetHostName(hostName string) (err error) {
+	if hostName == "" {
+		return TracedErrorf("hostName is empty string")
 	}
 
-	s.host = host
+	s.hostName = hostName
 
 	return nil
 }
