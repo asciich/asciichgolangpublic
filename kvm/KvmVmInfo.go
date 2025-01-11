@@ -1,5 +1,6 @@
-package asciichgolangpublic
+package kvm
 
+import "github.com/asciich/asciichgolangpublic"
 
 type KvmVmInfo struct {
 	Name       string `json:"name"`
@@ -12,7 +13,7 @@ func NewKvmVmInfo() (k *KvmVmInfo) {
 
 func (k *KvmVmInfo) GetMacAddress() (macAddress string, err error) {
 	if k.MacAddress == "" {
-		return "", TracedErrorf("MacAddress not set")
+		return "", asciichgolangpublic.TracedErrorf("MacAddress not set")
 	}
 
 	return k.MacAddress, nil
@@ -20,7 +21,7 @@ func (k *KvmVmInfo) GetMacAddress() (macAddress string, err error) {
 
 func (k *KvmVmInfo) GetName() (name string, err error) {
 	if k.Name == "" {
-		return "", TracedErrorf("Name not set")
+		return "", asciichgolangpublic.TracedErrorf("Name not set")
 	}
 
 	return k.Name, nil
@@ -43,7 +44,7 @@ func (k *KvmVmInfo) GetNameAndMacAddress() (name string, macAddress string, err 
 func (k *KvmVmInfo) MustGetMacAddress() (macAddress string) {
 	macAddress, err := k.GetMacAddress()
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return macAddress
@@ -52,7 +53,7 @@ func (k *KvmVmInfo) MustGetMacAddress() (macAddress string) {
 func (k *KvmVmInfo) MustGetName() (name string) {
 	name, err := k.GetName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -61,7 +62,7 @@ func (k *KvmVmInfo) MustGetName() (name string) {
 func (k *KvmVmInfo) MustGetNameAndMacAddress() (name string, macAddress string) {
 	name, macAddress, err := k.GetNameAndMacAddress()
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return name, macAddress
@@ -70,20 +71,20 @@ func (k *KvmVmInfo) MustGetNameAndMacAddress() (name string, macAddress string) 
 func (k *KvmVmInfo) MustSetMacAddress(macAddress string) {
 	err := k.SetMacAddress(macAddress)
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KvmVmInfo) MustSetName(name string) {
 	err := k.SetName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KvmVmInfo) SetMacAddress(macAddress string) (err error) {
 	if macAddress == "" {
-		return TracedErrorf("macAddress is empty string")
+		return asciichgolangpublic.TracedErrorf("macAddress is empty string")
 	}
 
 	k.MacAddress = macAddress
@@ -93,7 +94,7 @@ func (k *KvmVmInfo) SetMacAddress(macAddress string) (err error) {
 
 func (k *KvmVmInfo) SetName(name string) (err error) {
 	if name == "" {
-		return TracedErrorf("name is empty string")
+		return asciichgolangpublic.TracedErrorf("name is empty string")
 	}
 
 	k.Name = name

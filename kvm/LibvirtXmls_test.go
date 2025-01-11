@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package kvm
 /* TODO enable again
 import (
 	"testing"

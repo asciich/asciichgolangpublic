@@ -342,12 +342,10 @@ func (c *CommandExecutorFile) GetDeepCopy() (deepCopy File) {
 	*d = *c
 
 	if c.commandExecutor != nil {
-		d.commandExecutor = c.commandExecutor.GetDeepCopy()
+		d.commandExecutor = MustGetDeepCopyOfCommandExecutor(c.commandExecutor)
 	}
 
-	deepCopy = d
-
-	return deepCopy
+	return d
 }
 
 func (c *CommandExecutorFile) GetFilePath() (filePath string, err error) {

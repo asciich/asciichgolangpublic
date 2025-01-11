@@ -2,7 +2,6 @@ package asciichgolangpublic
 
 import (
 	"fmt"
-	"time"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
@@ -403,31 +402,6 @@ func (g *GitlabInstance) GetDeepCopy() (copy *GitlabInstance) {
 	return copy
 }
 
-func (g *GitlabInstance) GetDockerContainerOnGitlabHost(containerName string, sshUserName string) (dockerContainer *DockerContainer, err error) {
-	if len(containerName) <= 0 {
-		return nil, TracedError("containerName is empty string")
-	}
-
-	gitlabHost, err := g.GetHost()
-	if err != nil {
-		return nil, err
-	}
-
-	if len(sshUserName) > 0 {
-		err = gitlabHost.SetSshUserName(sshUserName)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	dockerContainer, err = gitlabHost.GetDockerContainerByName(containerName)
-	if err != nil {
-		return nil, err
-	}
-
-	return dockerContainer, nil
-}
-
 func (g *GitlabInstance) GetFqdn() (fqdn string, err error) {
 	if len(g.fqdn) <= 0 {
 		return "", TracedError("fqdn not set")
@@ -574,20 +548,6 @@ func (g *GitlabInstance) GetGroupByPath(groupPath string, verbose bool) (gitlabG
 	}
 
 	return gitlabGroup, nil
-}
-
-func (g *GitlabInstance) GetHost() (gitlabHost *Host, err error) {
-	fqdn, err := g.GetFqdn()
-	if err != nil {
-		return nil, err
-	}
-
-	gitlabHost, err = GetHostByHostname(fqdn)
-	if err != nil {
-		return
-	}
-
-	return gitlabHost, nil
 }
 
 func (g *GitlabInstance) GetNativeBranchesClient() (nativeClient *gitlab.BranchesService, err error) {
@@ -903,15 +863,6 @@ func (g *GitlabInstance) MustCheckRunnerStatusOk(runnerName string, verbose bool
 	return isStatusOk
 }
 
-func (g *GitlabInstance) MustCreateAccessToken(options *GitlabCreateAccessTokenOptions) (newToken string) {
-	newToken, err := g.CreateAccessToken(options)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-
-	return newToken
-}
-
 func (g *GitlabInstance) MustCreateGroupByPath(groupPath string, createOptions *GitlabCreateGroupOptions) (createdGroup *GitlabGroup) {
 	createdGroup, err := g.CreateGroupByPath(groupPath, createOptions)
 	if err != nil {
@@ -998,15 +949,6 @@ func (g *GitlabInstance) MustGetCurrentlyUsedAccessToken() (gitlabAccessToken st
 	}
 
 	return gitlabAccessToken
-}
-
-func (g *GitlabInstance) MustGetDockerContainerOnGitlabHost(containerName string, sshUserName string) (dockerContainer *DockerContainer) {
-	dockerContainer, err := g.GetDockerContainerOnGitlabHost(containerName, sshUserName)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-
-	return dockerContainer
 }
 
 func (g *GitlabInstance) MustGetFqdn() (fqdn string) {
@@ -1097,15 +1039,6 @@ func (g *GitlabInstance) MustGetGroupByPath(groupPath string, verbose bool) (git
 	}
 
 	return gitlabGroup
-}
-
-func (g *GitlabInstance) MustGetHost() (gitlabHost *Host) {
-	gitlabHost, err := g.GetHost()
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
-
-	return gitlabHost
 }
 
 func (g *GitlabInstance) MustGetNativeBranchesClient() (nativeClient *gitlab.BranchesService) {
@@ -1453,52 +1386,55 @@ func (g *GitlabInstance) ResetAccessToken(options *GitlabResetAccessTokenOptions
 		LogInfof("Reset access token '%s' for user '%s' on gitlab '%s' started.", accessTokenName, username, fqdn)
 	}
 
-	gitlabContainer, err := g.GetDockerContainerOnGitlabHost(
-		options.GitlabContainerNameOnGitlabHost,
-		options.SshUserNameForGitlabHost,
-	)
-	if err != nil {
-		return err
-	}
+	return TracedErrorNotImplemented()
+	/*
 
-	newToken, err := RandomGenerator().GetRandomString(30)
-	if err != nil {
-		return err
-	}
+		gitlabContainer, err := docker.GetDockerContainerOnHost(
+			g,
+			options.GitlabContainerNameOnGitlabHost,
+		)
+		if err != nil {
+			return err
+		}
+		newToken, err := RandomGenerator().GetRandomString(30)
+		if err != nil {
+			return err
+		}
 
-	if options.Verbose {
-		LogInfo("Going to create new token using gitlab-rails. Can take up to 30 seconds.")
-	}
+		if options.Verbose {
+			LogInfo("Going to create new token using gitlab-rails. Can take up to 30 seconds.")
+		}
 
-	expirationDate := time.Now().Add(time.Hour * 24 * 30)
-	expirationDateString := expirationDate.Format("2006-01-02")
-	_, err = gitlabContainer.RunCommand(
-		&RunCommandOptions{
-			Command: []string{
-				"gitlab-rails",
-				"runner",
-				"token = User.find_by_username('" + username + "').personal_access_tokens.create(scopes: [:api], name: '" + accessTokenName + "', expires_at: '" + expirationDateString + "'); token.set_token('" + newToken + "'); token.save!",
+		expirationDate := time.Now().Add(time.Hour * 24 * 30)
+		expirationDateString := expirationDate.Format("2006-01-02")
+		_, err = gitlabContainer.RunCommand(
+			&RunCommandOptions{
+				Command: []string{
+					"gitlab-rails",
+					"runner",
+					"token = User.find_by_username('" + username + "').personal_access_tokens.create(scopes: [:api], name: '" + accessTokenName + "', expires_at: '" + expirationDateString + "'); token.set_token('" + newToken + "'); token.save!",
+				},
 			},
-		},
-	)
-	if err != nil {
-		return err
-	}
+		)
+		if err != nil {
+			return err
+		}
 
-	gopassOptions := NewGopassSecretOptions()
-	gopassOptions.Verbose = options.Verbose
-	gopassOptions.Overwrite = true
-	gopassOptions.SetGopassPath(options.GopassPathToStoreNewToken)
-	err = Gopass().InsertSecret(newToken, gopassOptions)
-	if err != nil {
-		return err
-	}
+		gopassOptions := NewGopassSecretOptions()
+		gopassOptions.Verbose = options.Verbose
+		gopassOptions.Overwrite = true
+		gopassOptions.SetGopassPath(options.GopassPathToStoreNewToken)
+		err = Gopass().InsertSecret(newToken, gopassOptions)
+		if err != nil {
+			return err
+		}
 
-	if options.Verbose {
-		LogInfof("Reset access token '%s' for user '%s' on gitlab '%s' finished.", accessTokenName, username, fqdn)
-	}
+		if options.Verbose {
+			LogInfof("Reset access token '%s' for user '%s' on gitlab '%s' finished.", accessTokenName, username, fqdn)
+		}
 
-	return nil
+		return nil
+	*/
 }
 
 func (g *GitlabInstance) ResetUserPassword(resetOptions *GitlabResetPasswordOptions) (err error) {
@@ -1521,61 +1457,65 @@ func (g *GitlabInstance) ResetUserPassword(resetOptions *GitlabResetPasswordOpti
 		LogInfof("Reset password for user '%s' on  gitlab '%s' started.", username, fqdn)
 	}
 
-	gitlabContainer, err := g.GetDockerContainerOnGitlabHost(
-		resetOptions.GitlabContainerNameOnGitlabHost,
-		resetOptions.SshUserNameForGitlabHost,
-	)
-	if err != nil {
-		return err
-	}
+	return TracedErrorNotImplemented()
+	/*
 
-	newRootPassword, err := RandomGenerator().GetRandomString(12)
-	if err != nil {
-		return err
-	}
+		gitlabContainer, err := docker.GetDockerContainerOnHost(
+			g,
+			resetOptions.GitlabContainerNameOnGitlabHost,
+		)
+		if err != nil {
+			return err
+		}
 
-	if resetOptions.Verbose {
-		LogInfo("Going to reset password with gitlab-rake which usually takes several seconds.")
-	}
-	_, err = gitlabContainer.RunCommandAndGetStdoutAsString(
-		&RunCommandOptions{
-			Command: []string{
-				"bash",
-				"-c",
-				fmt.Sprintf(
-					"echo -ne '%s\n%s\n%s\n' | gitlab-rake \"gitlab:password:reset\"",
-					username,
-					newRootPassword,
-					newRootPassword,
-				),
+		newRootPassword, err := RandomGenerator().GetRandomString(12)
+		if err != nil {
+			return err
+		}
+
+		if resetOptions.Verbose {
+			LogInfo("Going to reset password with gitlab-rake which usually takes several seconds.")
+		}
+		_, err = gitlabContainer.RunCommandAndGetStdoutAsString(
+			&RunCommandOptions{
+				Command: []string{
+					"bash",
+					"-c",
+					fmt.Sprintf(
+						"echo -ne '%s\n%s\n%s\n' | gitlab-rake \"gitlab:password:reset\"",
+						username,
+						newRootPassword,
+						newRootPassword,
+					),
+				},
+				Verbose: true,
 			},
-			Verbose: true,
-		},
-	)
-	if err != nil {
-		return err
-	}
+		)
+		if err != nil {
+			return err
+		}
 
-	gopassOptions := NewGopassSecretOptions()
-	gopassOptions.Verbose = resetOptions.Verbose
-	gopassOptions.Overwrite = true
-	gopassOptions.SetGopassPath(resetOptions.GopassPathToStoreNewPassword)
-	err = Gopass().InsertSecret(newRootPassword, gopassOptions)
-	if err != nil {
-		return err
-	}
-	gopassOptions.SecretBasename = "username"
-	err = Gopass().InsertSecret(username, gopassOptions)
-	if err != nil {
-		return err
-	}
+		gopassOptions := NewGopassSecretOptions()
+		gopassOptions.Verbose = resetOptions.Verbose
+		gopassOptions.Overwrite = true
+		gopassOptions.SetGopassPath(resetOptions.GopassPathToStoreNewPassword)
+		err = Gopass().InsertSecret(newRootPassword, gopassOptions)
+		if err != nil {
+			return err
+		}
+		gopassOptions.SecretBasename = "username"
+		err = Gopass().InsertSecret(username, gopassOptions)
+		if err != nil {
+			return err
+		}
 
-	if resetOptions.Verbose {
-		LogInfof("Reset password for user '%s' on  gitlab '%s' finished.", username, fqdn)
-	}
+		if resetOptions.Verbose {
+			LogInfof("Reset password for user '%s' on  gitlab '%s' finished.", username, fqdn)
+		}
 
-	return nil
+		return nil
 
+	*/
 }
 
 func (g *GitlabInstance) SetCurrentlyUsedAccessToken(currentlyUsedAccessToken *string) (err error) {

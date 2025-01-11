@@ -1,5 +1,6 @@
-package asciichgolangpublic
+package kvm
 
+import "github.com/asciich/asciichgolangpublic"
 
 type KvmVm struct {
 	vmId       *int
@@ -20,7 +21,7 @@ func (k *KvmVm) GetCachedName() (cachedName string, err error) {
 	}
 
 	if len(k.cachedName) <= 0 {
-		return "", TracedError("Unable to load cached name")
+		return "", asciichgolangpublic.TracedError("Unable to load cached name")
 	}
 
 	return k.cachedName, nil
@@ -50,7 +51,7 @@ func (k *KvmVm) GetDomainXmlAsString(verbose bool) (domainXml string, err error)
 
 func (k *KvmVm) GetHypervisor() (hypervisor *KVMHypervisor, err error) {
 	if k.hypervisor == nil {
-		return nil, TracedErrorf("hypervisor not set")
+		return nil, asciichgolangpublic.TracedErrorf("hypervisor not set")
 	}
 
 	return k.hypervisor, nil
@@ -58,7 +59,7 @@ func (k *KvmVm) GetHypervisor() (hypervisor *KVMHypervisor, err error) {
 
 func (k *KvmVm) GetId() (id int, err error) {
 	if k.vmId == nil {
-		return -1, TracedError("name is not set")
+		return -1, asciichgolangpublic.TracedError("name is not set")
 	}
 
 	return *(k.vmId), nil
@@ -105,12 +106,12 @@ func (k *KvmVm) GetMacAddress(verbose bool) (macAddress string, err error) {
 }
 
 func (k *KvmVm) GetName() (name string, err error) {
-	return "", TracedError("Not implemented")
+	return "", asciichgolangpublic.TracedError("Not implemented")
 }
 
 func (k *KvmVm) GetVmId() (vmId *int, err error) {
 	if k.vmId == nil {
-		return nil, TracedErrorf("vmId not set")
+		return nil, asciichgolangpublic.TracedErrorf("vmId not set")
 	}
 
 	return k.vmId, nil
@@ -119,7 +120,7 @@ func (k *KvmVm) GetVmId() (vmId *int, err error) {
 func (k *KvmVm) MustGetCachedName() (cachedName string) {
 	cachedName, err := k.GetCachedName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return cachedName
@@ -128,7 +129,7 @@ func (k *KvmVm) MustGetCachedName() (cachedName string) {
 func (k *KvmVm) MustGetDomainXmlAsString(verbose bool) (domainXml string) {
 	domainXml, err := k.GetDomainXmlAsString(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return domainXml
@@ -137,7 +138,7 @@ func (k *KvmVm) MustGetDomainXmlAsString(verbose bool) (domainXml string) {
 func (k *KvmVm) MustGetHypervisor() (hypervisor *KVMHypervisor) {
 	hypervisor, err := k.GetHypervisor()
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return hypervisor
@@ -146,7 +147,7 @@ func (k *KvmVm) MustGetHypervisor() (hypervisor *KVMHypervisor) {
 func (k *KvmVm) MustGetId() (id int) {
 	id, err := k.GetId()
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return id
@@ -155,7 +156,7 @@ func (k *KvmVm) MustGetId() (id int) {
 func (k *KvmVm) MustGetInfo(verbose bool) (vmInfo *KvmVmInfo) {
 	vmInfo, err := k.GetInfo(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return vmInfo
@@ -164,7 +165,7 @@ func (k *KvmVm) MustGetInfo(verbose bool) (vmInfo *KvmVmInfo) {
 func (k *KvmVm) MustGetMacAddress(verbose bool) (macAddress string) {
 	macAddress, err := k.GetMacAddress(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return macAddress
@@ -173,7 +174,7 @@ func (k *KvmVm) MustGetMacAddress(verbose bool) (macAddress string) {
 func (k *KvmVm) MustGetName() (name string) {
 	name, err := k.GetName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -182,7 +183,7 @@ func (k *KvmVm) MustGetName() (name string) {
 func (k *KvmVm) MustGetVmId() (vmId *int) {
 	vmId, err := k.GetVmId()
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return vmId
@@ -191,34 +192,34 @@ func (k *KvmVm) MustGetVmId() (vmId *int) {
 func (k *KvmVm) MustSetCachedName(cachedName string) {
 	err := k.SetCachedName(cachedName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KvmVm) MustSetHypervisor(hypervisor *KVMHypervisor) {
 	err := k.SetHypervisor(hypervisor)
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KvmVm) MustSetId(id int) {
 	err := k.SetId(id)
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KvmVm) MustSetVmId(vmId *int) {
 	err := k.SetVmId(vmId)
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KvmVm) SetCachedName(cachedName string) (err error) {
 	if len(cachedName) <= 0 {
-		return TracedError("cachedName is empty string")
+		return asciichgolangpublic.TracedError("cachedName is empty string")
 	}
 
 	k.cachedName = cachedName
@@ -228,7 +229,7 @@ func (k *KvmVm) SetCachedName(cachedName string) (err error) {
 
 func (k *KvmVm) SetHypervisor(hypervisor *KVMHypervisor) (err error) {
 	if hypervisor == nil {
-		return TracedErrorf("hypervisor is nil")
+		return asciichgolangpublic.TracedErrorf("hypervisor is nil")
 	}
 
 	k.hypervisor = hypervisor
@@ -238,7 +239,7 @@ func (k *KvmVm) SetHypervisor(hypervisor *KVMHypervisor) (err error) {
 
 func (k *KvmVm) SetId(id int) (err error) {
 	if id < 0 {
-		return TracedErrorf("invalid id '%d'", id)
+		return asciichgolangpublic.TracedErrorf("invalid id '%d'", id)
 	}
 
 	idToAdd := id
@@ -250,7 +251,7 @@ func (k *KvmVm) SetId(id int) (err error) {
 
 func (k *KvmVm) SetVmId(vmId *int) (err error) {
 	if vmId == nil {
-		return TracedErrorf("vmId is nil")
+		return asciichgolangpublic.TracedErrorf("vmId is nil")
 	}
 
 	k.vmId = vmId

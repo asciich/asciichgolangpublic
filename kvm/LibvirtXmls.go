@@ -1,8 +1,9 @@
-package asciichgolangpublic
+package kvm
 
 import (
 	_ "embed"
 
+	"github.com/asciich/asciichgolangpublic"
 	libvirtxml "libvirt.org/libvirt-go-xml"
 )
 
@@ -20,7 +21,7 @@ func NewLibvirtXmlsService() (libvirtXmls *LibvirtXmlsService) {
 }
 
 func (l *LibvirtXmlsService) CreateXmlForVmOnLatopAsString(createOptions *KvmCreateVmOptions) (libvirtXml string, err error) {
-	return "", TracedErrorNotImplemented()
+	return "", asciichgolangpublic.TracedErrorNotImplemented()
 	/* TODO enable again
 	if createOptions == nil {
 		return "", TracedError("createOptions is nil")
@@ -64,19 +65,19 @@ func (l *LibvirtXmlsService) CreateXmlForVmOnLatopAsString(createOptions *KvmCre
 
 func (l *LibvirtXmlsService) GetMacAddressFromXmlString(libvirtXml string) (macAddress string, err error) {
 	if libvirtXml == "" {
-		return "", TracedError("libvirtXml is empty string")
+		return "", asciichgolangpublic.TracedError("libvirtXml is empty string")
 	}
 
 	domcfg := &libvirtxml.Domain{}
 	err = domcfg.Unmarshal(libvirtXml)
 	if err != nil {
-		return "", TracedError(err.Error())
+		return "", asciichgolangpublic.TracedError(err.Error())
 	}
 
 	networkInterfaces := domcfg.Devices.Interfaces
 	nInterfaces := len(networkInterfaces)
 	if nInterfaces != 1 {
-		return "", TracedErrorf(
+		return "", asciichgolangpublic.TracedErrorf(
 			"Only exactly one network interface is supported at the moment but got '%d'",
 			nInterfaces,
 		)
@@ -84,12 +85,12 @@ func (l *LibvirtXmlsService) GetMacAddressFromXmlString(libvirtXml string) (macA
 
 	nativeMac := networkInterfaces[0].MAC
 	if nativeMac == nil {
-		return "", TracedError("nativeMac is nil after evaluation")
+		return "", asciichgolangpublic.TracedError("nativeMac is nil after evaluation")
 	}
 
 	macAddress = nativeMac.Address
 	if macAddress == "" {
-		return "", TracedError("macAddress is empty string after evaluation")
+		return "", asciichgolangpublic.TracedError("macAddress is empty string after evaluation")
 	}
 
 	return macAddress, nil
@@ -98,7 +99,7 @@ func (l *LibvirtXmlsService) GetMacAddressFromXmlString(libvirtXml string) (macA
 func (l *LibvirtXmlsService) MustCreateXmlForVmOnLatopAsString(createOptions *KvmCreateVmOptions) (libvirtXml string) {
 	libvirtXml, err := l.CreateXmlForVmOnLatopAsString(createOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return libvirtXml
@@ -107,26 +108,26 @@ func (l *LibvirtXmlsService) MustCreateXmlForVmOnLatopAsString(createOptions *Kv
 func (l *LibvirtXmlsService) MustGetMacAddressFromXmlString(libvirtXml string) (macAddress string) {
 	macAddress, err := l.GetMacAddressFromXmlString(libvirtXml)
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 
 	return macAddress
 }
 
-func (l *LibvirtXmlsService) MustWriteXmlForVmOnLatopToFile(createOptions *KvmCreateVmOptions, outputFile File) {
+func (l *LibvirtXmlsService) MustWriteXmlForVmOnLatopToFile(createOptions *KvmCreateVmOptions, outputFile asciichgolangpublic.File) {
 	err := l.WriteXmlForVmOnLatopToFile(createOptions, outputFile)
 	if err != nil {
-		LogGoErrorFatal(err)
+		asciichgolangpublic.LogGoErrorFatal(err)
 	}
 }
 
-func (l *LibvirtXmlsService) WriteXmlForVmOnLatopToFile(createOptions *KvmCreateVmOptions, outputFile File) (err error) {
+func (l *LibvirtXmlsService) WriteXmlForVmOnLatopToFile(createOptions *KvmCreateVmOptions, outputFile asciichgolangpublic.File) (err error) {
 	if createOptions == nil {
-		return TracedError("createOptions is nil")
+		return asciichgolangpublic.TracedError("createOptions is nil")
 	}
 
 	if outputFile == nil {
-		return TracedError("outputFile is nil")
+		return asciichgolangpublic.TracedError("outputFile is nil")
 	}
 
 	xmlString, err := l.CreateXmlForVmOnLatopAsString(createOptions)
@@ -145,7 +146,7 @@ func (l *LibvirtXmlsService) WriteXmlForVmOnLatopToFile(createOptions *KvmCreate
 	}
 
 	if createOptions.Verbose {
-		LogInfof("Created xml for laptop on VM to: '%s'", outputPath)
+		asciichgolangpublic.LogInfof("Created xml for laptop on VM to: '%s'", outputPath)
 	}
 
 	return nil
