@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 var ErrPathHasNoParentDirectory = errors.New("path has no parent directory")
@@ -42,7 +44,7 @@ func (p *PathsService) FilterPaths(pathList []string, pathFilterOptions PathFilt
 		for _, f := range filtered {
 			match := false
 			for _, pattern := range excludePatterns {
-				match, err = Strings().MatchesRegex(f, pattern)
+				match, err = astrings.MatchesRegex(f, pattern)
 				if err != nil {
 					return nil, err
 				}
@@ -71,7 +73,7 @@ func (p *PathsService) FilterPaths(pathList []string, pathFilterOptions PathFilt
 		for _, f := range filtered {
 			match := false
 			for _, pattern := range excludePatterns {
-				match, err = Strings().MatchesRegex(filepath.Base(f), pattern)
+				match, err = astrings.MatchesRegex(filepath.Base(f), pattern)
 				if err != nil {
 					return nil, err
 				}
@@ -99,7 +101,7 @@ func (p *PathsService) FilterPaths(pathList []string, pathFilterOptions PathFilt
 
 		for _, pattern := range matchBaseNamePatterns {
 			for _, f := range filtered {
-				match, err := Strings().MatchesRegex(filepath.Base(f), pattern)
+				match, err := astrings.MatchesRegex(filepath.Base(f), pattern)
 				if err != nil {
 					return nil, err
 				}
@@ -211,7 +213,7 @@ func (p *PathsService) GetRelativePathTo(absolutePath string, relativeTo string)
 		return "", err
 	}
 
-	relativeToDirPath := Strings().EnsureSuffix(relativeTo, "/")
+	relativeToDirPath := astrings.EnsureSuffix(relativeTo, "/")
 
 	if !strings.HasPrefix(absolutePath, relativeToDirPath) {
 		return "", TracedErrorf(

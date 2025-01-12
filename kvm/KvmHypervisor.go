@@ -6,6 +6,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/hosts"
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 type KVMHypervisor struct {
@@ -208,26 +209,26 @@ func (k *KVMHypervisor) GetStoragePools(verbose bool) (storagePools []*KvmStorag
 		return nil, err
 	}
 
-	firstLine, unparsedOutput := asciichgolangpublic.Strings().SplitFirstLineAndContent(listPoolOutput)
+	firstLine, unparsedOutput := astrings.SplitFirstLineAndContent(listPoolOutput)
 	firstLine = strings.TrimSpace(firstLine)
 	if !strings.HasPrefix(firstLine, "Name") {
 		return nil, asciichgolangpublic.TracedErrorf("Unexpected first line of list pool output: '%s'", firstLine)
 	}
 
-	secondLine, unparsedOutput := asciichgolangpublic.Strings().SplitFirstLineAndContent(unparsedOutput)
+	secondLine, unparsedOutput := astrings.SplitFirstLineAndContent(unparsedOutput)
 	secondLine = strings.TrimSpace(secondLine)
 	if strings.Count(secondLine, "-") < 5 {
 		return nil, asciichgolangpublic.TracedErrorf("Unexpected second line of list pool output: '%s'", secondLine)
 	}
 
 	storagePools = []*KvmStoragePool{}
-	for _, line := range asciichgolangpublic.Strings().SplitLines(unparsedOutput, true) {
+	for _, line := range astrings.SplitLines(unparsedOutput, true) {
 		line = strings.TrimSpace(line)
 		if len(line) <= 0 {
 			continue
 		}
 
-		splitted := asciichgolangpublic.Strings().SplitAtSpacesAndRemoveEmptyStrings(line)
+		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(line)
 		if len(splitted) != 3 {
 			return nil, asciichgolangpublic.TracedErrorf("Unable to splitt list pool line '%v' : '%v'", line, splitted)
 		}
@@ -328,26 +329,26 @@ func (k *KVMHypervisor) GetVmList(verbose bool) (vms []*KvmVm, err error) {
 		return nil, err
 	}
 
-	firstLine, unparsedOutput := asciichgolangpublic.Strings().SplitFirstLineAndContent(listOutput)
+	firstLine, unparsedOutput := astrings.SplitFirstLineAndContent(listOutput)
 	firstLine = strings.TrimSpace(firstLine)
 	if !strings.HasPrefix(firstLine, "Id ") {
 		return nil, asciichgolangpublic.TracedErrorf("Unexpected first line '%s'. Full output is '%s'.", firstLine, listOutput)
 	}
 
-	secondLine, unparsedOutput := asciichgolangpublic.Strings().SplitFirstLineAndContent(unparsedOutput)
+	secondLine, unparsedOutput := astrings.SplitFirstLineAndContent(unparsedOutput)
 	if !strings.Contains(secondLine, "-----") {
 		return nil, asciichgolangpublic.TracedErrorf("Unexpected second line '%s'. Full output is '%s'.", secondLine, listOutput)
 	}
 
 	vms = []*KvmVm{}
-	for _, line := range asciichgolangpublic.Strings().SplitLines(unparsedOutput, true) {
+	for _, line := range astrings.SplitLines(unparsedOutput, true) {
 		if len(strings.TrimSpace(line)) <= 0 {
 			continue
 		}
 
 		lineToProcess := strings.ReplaceAll(line, "shut off", "shut_off")
 
-		splitted := asciichgolangpublic.Strings().SplitAtSpacesAndRemoveEmptyStrings(lineToProcess)
+		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(lineToProcess)
 		if len(splitted) != 3 {
 			return nil, asciichgolangpublic.TracedErrorf("Failed to split line '%s'", line)
 		}

@@ -1,5 +1,9 @@
 package asciichgolangpublic
 
+import (
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+)
+
 type GitignoreFile struct {
 	File
 }
@@ -86,7 +90,7 @@ func (g *GitignoreFile) AddDirToIgnore(pathToIgnore string, comment string, verb
 		return TracedError("comment is empty string")
 	}
 
-	pathToIgnore = Strings().EnsureSuffix(pathToIgnore, "/")
+	pathToIgnore = astrings.EnsureSuffix(pathToIgnore, "/")
 
 	err = g.Create(verbose)
 	if err != nil {

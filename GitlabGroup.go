@@ -8,6 +8,8 @@ import (
 	"time"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 type GitlabGroup struct {
@@ -674,7 +676,7 @@ func (g *GitlabGroup) SetGroupPath(groupPath string) (err error) {
 		return TracedErrorf("groupPath is empty string")
 	}
 
-	trimmed := Strings().TrimPrefixAndSuffix(groupPath, "/", "/")
+	trimmed := astrings.TrimPrefixAndSuffix(groupPath, "/", "/")
 	trimmed = strings.TrimSpace(trimmed)
 
 	if trimmed == "" {

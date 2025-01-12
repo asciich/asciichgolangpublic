@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -222,7 +223,7 @@ func (p *GitlabPersonalAccessTokenService) CreateToken(tokenOptions *GitlabCreat
 	}
 
 	newToken = strings.TrimSpace(newToken)
-	newToken = Strings().RemoveSurroundingQuotationMarks(newToken)
+	newToken = astrings.RemoveSurroundingQuotationMarks(newToken)
 	if len(newToken) <= 0 {
 		return "", TracedError("Unable to get newToken. newToken is empty string.")
 	}
