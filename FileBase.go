@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/asciich/asciichgolangpublic/checksums"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
@@ -400,7 +401,7 @@ func (f *FileBase) GetSha256Sum() (sha256sum string, err error) {
 		return "", err
 	}
 
-	sha256sum = Checksums().GetSha256SumFromString(content)
+	sha256sum = checksums.GetSha256SumFromString(content)
 
 	return sha256sum, nil
 }
