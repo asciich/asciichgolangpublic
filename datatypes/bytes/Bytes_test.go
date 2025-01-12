@@ -1,6 +1,7 @@
-package asciichgolangpublic
+package bytes
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,12 +29,13 @@ func TestBytesParseSizeStringAsInt64(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				sizeBytes := Bytes().MustParseSizeStringAsInt64(tt.stringToParse)
+				sizeBytes := MustParseSizeStringAsInt64(tt.stringToParse)
 				assert.EqualValues(tt.expectedSizeBytes, sizeBytes)
 			},
 		)
@@ -57,12 +59,13 @@ func TestGetSizeAsHumanReadableString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				sizeString := Bytes().MustGetSizeAsHumanReadableString(tt.sizeToConvert)
+				sizeString := MustGetSizeAsHumanReadableString(tt.sizeToConvert)
 				assert.EqualValues(tt.expectedSizeString, sizeString)
 			},
 		)
