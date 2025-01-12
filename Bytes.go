@@ -3,6 +3,8 @@ package asciichgolangpublic
 import (
 	"strconv"
 	"strings"
+
+	"github.com/asciich/asciichgolangpublic/datatypes/float"
 )
 
 type BytesService struct{}
@@ -29,7 +31,7 @@ func (b *BytesService) GetSizeAsHumanReadableString(sizeBytes int64) (readableSi
 		}
 		if sizeBytes >= v {
 			const maxDigits int = 2
-			readableValue, err := Float().ToString(float64(sizeBytes)/float64(v), maxDigits)
+			readableValue, err := float.ToString(float64(sizeBytes)/float64(v), maxDigits)
 			if err != nil {
 				return "", err
 			}
