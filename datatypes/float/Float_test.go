@@ -1,6 +1,7 @@
-package asciichgolangpublic
+package float
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,11 +29,11 @@ func TestFloatToString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				floatAsString := Float().MustToString(tt.input, tt.maxDigits)
+				floatAsString := MustToString(tt.input, tt.maxDigits)
 				assert.EqualValues(tt.expectedOutput, floatAsString)
 			},
 		)
@@ -69,11 +70,11 @@ func TestFloatRound(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				rounded := Float().MustRound(tt.input, tt.digits)
+				rounded := MustRound(tt.input, tt.digits)
 				assert.EqualValues(tt.expectedOutput, rounded)
 			},
 		)
