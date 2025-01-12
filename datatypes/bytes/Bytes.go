@@ -1,23 +1,15 @@
-package asciichgolangpublic
+package bytes
 
 import (
+	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/float"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/float"
 )
 
-type BytesService struct{}
-
-func Bytes() (bytesService *BytesService) {
-	return NewBytesService()
-}
-
-func NewBytesService() (bytesService *BytesService) {
-	return new(BytesService)
-}
-
-func (b *BytesService) GetSizeAsHumanReadableString(sizeBytes int64) (readableSize string, err error) {
+func GetSizeAsHumanReadableString(sizeBytes int64) (readableSize string, err error) {
 	multipliers := map[string]int64{
 		"TiB": 1024 * 1024 * 1024 * 1024,
 		"GiB": 1024 * 1024 * 1024,
@@ -27,13 +19,13 @@ func (b *BytesService) GetSizeAsHumanReadableString(sizeBytes int64) (readableSi
 	for _, k := range []string{"TiB", "GiB", "MiB", "KiB"} {
 		v, ok := multipliers[k]
 		if !ok {
-			return "", TracedErrorf("Unable to get size of '%s'", k)
+			return "", fmt.Errorf("unable to get size of '%s'", k)
 		}
 		if sizeBytes >= v {
 			const maxDigits int = 2
 			readableValue, err := float.ToString(float64(sizeBytes)/float64(v), maxDigits)
 			if err != nil {
-				return "", TracedErrorf("failed to format float as string: %w", err)
+				return "", fmt.Errorf("failed to format float as string: %w", err)
 			}
 			readableSize = readableValue + k
 
@@ -44,29 +36,29 @@ func (b *BytesService) GetSizeAsHumanReadableString(sizeBytes int64) (readableSi
 	return strconv.Itoa(int(sizeBytes)), nil
 }
 
-func (b *BytesService) MustGetSizeAsHumanReadableString(sizeBytes int64) (readableSize string) {
-	readableSize, err := b.GetSizeAsHumanReadableString(sizeBytes)
+func MustGetSizeAsHumanReadableString(sizeBytes int64) (readableSize string) {
+	readableSize, err := GetSizeAsHumanReadableString(sizeBytes)
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 
 	return readableSize
 }
 
-func (b *BytesService) MustParseSizeStringAsInt64(sizeString string) (sizeBytes int64) {
-	sizeBytes, err := b.ParseSizeStringAsInt64(sizeString)
+func MustParseSizeStringAsInt64(sizeString string) (sizeBytes int64) {
+	sizeBytes, err := ParseSizeStringAsInt64(sizeString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 
 	return sizeBytes
 }
 
-func (b *BytesService) ParseSizeStringAsInt64(sizeString string) (sizeBytes int64, err error) {
+func ParseSizeStringAsInt64(sizeString string) (sizeBytes int64, err error) {
 	sizeString = strings.TrimSpace(sizeString)
 
 	if len(sizeString) <= 0 {
-		return -1, TracedError("sizeString is empty string")
+		return -1, fmt.Errorf("sizeString is empty string")
 	}
 
 	var multiplier int64 = 1
@@ -92,7 +84,7 @@ func (b *BytesService) ParseSizeStringAsInt64(sizeString string) (sizeBytes int6
 
 	sizeBytesFloat, err := strconv.ParseFloat(sizeString, 64)
 	if err != nil {
-		return -1, TracedError(err.Error())
+		return -1, err
 	}
 
 	sizeBytes = int64(sizeBytesFloat * float64(multiplier))
