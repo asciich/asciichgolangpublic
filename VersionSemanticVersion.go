@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 type VersionSemanticVersion struct {
@@ -376,7 +378,7 @@ func (v *VersionSemanticVersion) SetVersionByString(version string) (err error) 
 		return TracedErrorEmptyString("version")
 	}
 
-	version = Strings().TrimPrefixIgnoreCase(version, "v")
+	version = astrings.TrimPrefixIgnoreCase(version, "v")
 
 	splitted := strings.Split(version, ".")
 	if len(splitted) != 3 {

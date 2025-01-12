@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 // A CommandExecutorDirectory implements the functionality of a `Directory` by
@@ -422,7 +424,7 @@ func (c *CommandExecutorDirectory) GetFileInDirectory(pathToFile ...string) (fil
 
 	filePath := filepath.Join(append([]string{dirPath}, pathToFile...)...)
 
-	toCheck := Strings().EnsureSuffix(dirPath, "/")
+	toCheck := astrings.EnsureSuffix(dirPath, "/")
 
 	if !strings.HasPrefix(filePath, toCheck) {
 		return nil, TracedErrorf(
@@ -531,7 +533,7 @@ func (c *CommandExecutorDirectory) GetSubDirectory(path ...string) (subDirectory
 
 	subDirPath := filepath.Join(append([]string{dirPath}, path...)...)
 
-	toCheck := Strings().EnsureSuffix(dirPath, "/")
+	toCheck := astrings.EnsureSuffix(dirPath, "/")
 	if !strings.HasPrefix(
 		subDirPath,
 		toCheck,

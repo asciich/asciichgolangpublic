@@ -1,6 +1,7 @@
-package asciichgolangpublic
+package strings
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,11 +20,11 @@ func TestStringsGetFirstLine(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				firstLine := Strings().GetFirstLine(tt.input)
+				firstLine := GetFirstLine(tt.input)
 				assert.EqualValues(tt.expectedOutput, firstLine)
 			},
 		)
@@ -59,11 +60,11 @@ func TestStringsGetFirstLineAndTrimSpace(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				firstLine := Strings().GetFirstLineAndTrimSpace(tt.input)
+				firstLine := GetFirstLineAndTrimSpace(tt.input)
 				assert.EqualValues(tt.expectedOutput, firstLine)
 			},
 		)
@@ -91,11 +92,11 @@ func TestStringsEnsureEndsWithExactlyOneLine(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				ensuredLineBreak := Strings().EnsureEndsWithExactlyOneLineBreak(tt.input)
+				ensuredLineBreak := EnsureEndsWithExactlyOneLineBreak(tt.input)
 				assert.EqualValues(tt.expectedOutput, ensuredLineBreak)
 			},
 		)
@@ -119,11 +120,11 @@ func TestStringsRemoveTailingNewline(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				ensuredLineBreak := Strings().RemoveTailingNewline(tt.input)
+				ensuredLineBreak := RemoveTailingNewline(tt.input)
 				assert.EqualValues(tt.expectedOutput, ensuredLineBreak)
 			},
 		)
@@ -145,11 +146,11 @@ func TestStringsEnsureFirstCharUppercase(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				firstCharUppercased := Strings().EnsureFirstCharUppercase(tt.input)
+				firstCharUppercased := EnsureFirstCharUppercase(tt.input)
 				assert.EqualValues(tt.expectedOutput, firstCharUppercased)
 			},
 		)
@@ -171,11 +172,11 @@ func TestStringsEnsureFirstCharLowercase(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				firstCharUppercased := Strings().EnsureFirstCharLowercase(tt.input)
+				firstCharUppercased := EnsureFirstCharLowercase(tt.input)
 				assert.EqualValues(tt.expectedOutput, firstCharUppercased)
 			},
 		)
@@ -202,11 +203,11 @@ func TestStringsRemoveComments(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				commentsRemoved := Strings().RemoveComments(tt.input)
+				commentsRemoved := RemoveComments(tt.input)
 				assert.EqualValues(tt.expectedOutput, commentsRemoved)
 			},
 		)
@@ -235,11 +236,11 @@ func TestStringsRightFillWithSpaces(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				filled := Strings().RightFillWithSpaces(tt.input, tt.fillLenght)
+				filled := RightFillWithSpaces(tt.input, tt.fillLenght)
 				assert.EqualValues(tt.expectedOutput, filled)
 			},
 		)
@@ -262,13 +263,13 @@ func TestStringsHasPrefixIgnoreCase(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedHasPrefix,
-					Strings().HasPrefixIgnoreCase(tt.input, tt.prefix),
+					HasPrefixIgnoreCase(tt.input, tt.prefix),
 				)
 			},
 		)
@@ -293,13 +294,13 @@ func TestStringsTrimPrefixIgnoreCase(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedTrimmed,
-					Strings().TrimPrefixIgnoreCase(tt.input, tt.prefix),
+					TrimPrefixIgnoreCase(tt.input, tt.prefix),
 				)
 			},
 		)
@@ -322,13 +323,13 @@ func TestStringsIsFirstCharLowerCase(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedFirstCharLowerCase,
-					Strings().IsFirstCharLowerCase(tt.input),
+					IsFirstCharLowerCase(tt.input),
 				)
 			},
 		)
@@ -351,13 +352,13 @@ func TestStringsIsFirstCharUpperCase(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedFirstCharLowerCase,
-					Strings().IsFirstCharUpperCase(tt.input),
+					IsFirstCharUpperCase(tt.input),
 				)
 			},
 		)
@@ -370,6 +371,8 @@ func TestStringsSplitLines(t *testing.T) {
 		expectedLines []string
 	}{
 		{"", []string{}},
+		{"\n", []string{}},
+		{"\n\n", []string{""}},
 		{"hello", []string{"hello"}},
 		{"hello\nworld", []string{"hello", "world"}},
 		{"hello\r\nworld", []string{"hello", "world"}},
@@ -387,18 +390,19 @@ func TestStringsSplitLines(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedLines,
-					Strings().SplitLines(tt.input, true),
+					SplitLines(tt.input, true),
 				)
 			},
 		)
 	}
 }
+
 
 func TestStringsSplitWords(t *testing.T) {
 	tests := []struct {
@@ -415,13 +419,13 @@ func TestStringsSplitWords(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedWords,
-					Strings().SplitWords(tt.input),
+					SplitWords(tt.input),
 				)
 			},
 		)
@@ -447,13 +451,13 @@ func TestStrings_MatchesRegex(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedMatch,
-					Strings().MustMatchesRegex(tt.input, tt.regex),
+					MustMatchesRegex(tt.input, tt.regex),
 				)
 			},
 		)
@@ -477,13 +481,13 @@ func TestStringsIsComment(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedIsComment,
-					Strings().IsComment(tt.input),
+					IsComment(tt.input),
 				)
 			},
 		)
@@ -507,13 +511,13 @@ func TestStringsTrimSpacesLeft(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedOutput,
-					Strings().TrimSpacesLeft(tt.input),
+					TrimSpacesLeft(tt.input),
 				)
 			},
 		)
@@ -549,13 +553,13 @@ func TestStringsContainsAtLeastOneSubstring(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedContains,
-					Strings().ContainsAtLeastOneSubstring(tt.input, tt.subsrings),
+					ContainsAtLeastOneSubstring(tt.input, tt.subsrings),
 				)
 			},
 		)
@@ -591,13 +595,13 @@ func TestContainsAtLeastOneSubstringIngoreCase(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedContains,
-					Strings().ContainsAtLeastOneSubstringIgnoreCase(tt.input, tt.subsrings),
+					ContainsAtLeastOneSubstringIgnoreCase(tt.input, tt.subsrings),
 				)
 			},
 		)
@@ -618,13 +622,13 @@ func TestStringsContainsIgnoreCase(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedContains,
-					Strings().ContainsIgnoreCase(tt.input, tt.subsring),
+					ContainsIgnoreCase(tt.input, tt.subsring),
 				)
 			},
 		)
@@ -647,11 +651,11 @@ func TestStringsTrimAllLeadingAndTailingNewLines(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				output := Strings().TrimAllLeadingAndTailingNewLines(tt.input)
+				output := TrimAllLeadingAndTailingNewLines(tt.input)
 				assert.EqualValues(tt.expectedOutput, output)
 			},
 		)
@@ -685,13 +689,13 @@ func TestStrings_RemoveLinesWithPrefix(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedOutput,
-					Strings().RemoveLinesWithPrefix(
+					RemoveLinesWithPrefix(
 						tt.input,
 						tt.prefix,
 					),
@@ -733,13 +737,13 @@ func TestStrings_HexStringToBytes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.hexBytes,
-					Strings().MustHexStringToBytes(tt.hexString),
+					MustHexStringToBytes(tt.hexString),
 				)
 			},
 		)
@@ -767,13 +771,13 @@ func TestStrings_ContainsLine(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedContains,
-					Strings().ContainsLine(tt.input, tt.line),
+					ContainsLine(tt.input, tt.line),
 				)
 			},
 		)
@@ -823,13 +827,13 @@ func TestStrings_GetAsKeyValues(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedKeyValues,
-					Strings().MustGetAsKeyValues(tt.input),
+					MustGetAsKeyValues(tt.input),
 				)
 			},
 		)
@@ -848,13 +852,13 @@ func TestStrings_GetValueAsString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedValue,
-					Strings().MustGetValueAsString(tt.input, tt.key),
+					MustGetValueAsString(tt.input, tt.key),
 				)
 			},
 		)
@@ -874,13 +878,13 @@ func TestStrings_GetValueAsInt(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedValue,
-					Strings().MustGetValueAsInt(tt.input, tt.key),
+					MustGetValueAsInt(tt.input, tt.key),
 				)
 			},
 		)

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 	"github.com/asciich/asciichgolangpublic/hosts"
 )
 
@@ -151,7 +152,7 @@ func (k *KubernetesControlplaneHost) IsKubernetesControlplane(verbose bool) (isK
 
 	isKubernetesControlplane = true
 
-	if len(asciichgolangpublic.Strings().SplitLines(stdout, false)) <= 5 {
+	if len(astrings.SplitLines(stdout, false)) <= 5 {
 		isKubernetesControlplane = false
 	}
 

@@ -1,8 +1,11 @@
-package asciichgolangpublic
+package strings
 
 import (
 	"encoding/hex"
+	"fmt"
+	"log"
 	"regexp"
+
 	"strconv"
 	"strings"
 	"unicode"
@@ -18,7 +21,7 @@ func Strings() (stringsService *StringsService) {
 	return new(StringsService)
 }
 
-func (s *StringsService) ContainsAtLeastOneSubstring(input string, substrings []string) (atLeastOneSubstringFound bool) {
+func ContainsAtLeastOneSubstring(input string, substrings []string) (atLeastOneSubstringFound bool) {
 	for _, substring := range substrings {
 		if strings.Contains(input, substring) {
 			return true
@@ -28,41 +31,49 @@ func (s *StringsService) ContainsAtLeastOneSubstring(input string, substrings []
 	return false
 }
 
-func (s *StringsService) ContainsAtLeastOneSubstringIgnoreCase(input string, substring []string) (atLeastOneSubstringFound bool) {
-	return s.ContainsAtLeastOneSubstring(
-		strings.ToLower(input),
-		Slices().ToLower(substring),
-	)
+func ContainsAtLeastOneSubstringIgnoreCase(input string, substring []string) (atLeastOneSubstringFound bool) {
+	lowerInput := strings.ToLower(input)
+
+	for _, s := range substring {
+		if strings.Contains(lowerInput, strings.ToLower(s)) {
+			return true
+		}
+	}
+
+	return false
 }
 
-func (s *StringsService) ContainsCommentOnly(input string) (containsCommentOnly bool) {
+func ContainsCommentOnly(input string) (containsCommentOnly bool) {
 	if strings.TrimSpace(input) == "" {
 		return false
 	}
 
-	withoutComment := s.RemoveCommentsAndTrimSpace(input)
+	withoutComment := RemoveCommentsAndTrimSpace(input)
 	return withoutComment == ""
 }
 
-func (s *StringsService) ContainsIgnoreCase(input string, substring string) (contains bool) {
+func ContainsIgnoreCase(input string, substring string) (contains bool) {
 	return strings.Contains(
 		strings.ToLower(input),
 		strings.ToLower(substring),
 	)
 }
 
-func (s *StringsService) ContainsLine(input string, line string) (containsLine bool) {
+func ContainsLine(input string, line string) (containsLine bool) {
 	if input == "" {
 		return false
 	}
 
-	return Slices().ContainsString(
-		s.SplitLines(input, false),
-		line,
-	)
+	for _, l := range SplitLines(input, false) {
+		if l == line {
+			return true
+		}
+	}
+
+	return false
 }
 
-func (s *StringsService) CountLines(input string) (nLines int) {
+func CountLines(input string) (nLines int) {
 	if len(input) <= 0 {
 		return 0
 	}
@@ -71,23 +82,23 @@ func (s *StringsService) CountLines(input string) (nLines int) {
 	return nLines
 }
 
-func (s *StringsService) EnsureEndsWithExactlyOneLineBreak(input string) (ensuredLineBreak string) {
+func EnsureEndsWithExactlyOneLineBreak(input string) (ensuredLineBreak string) {
 	if len(input) <= 0 {
 		return "\n"
 	}
 
-	ensuredLineBreak = Strings().TrimSuffixUntilAbsent(input, "\n")
-	ensuredLineBreak = Strings().EnsureEndsWithLineBreak(ensuredLineBreak)
+	ensuredLineBreak = TrimSuffixUntilAbsent(input, "\n")
+	ensuredLineBreak = EnsureEndsWithLineBreak(ensuredLineBreak)
 
 	return ensuredLineBreak
 }
 
-func (s *StringsService) EnsureEndsWithLineBreak(input string) (ensuredLineBreak string) {
-	ensuredLineBreak = Strings().EnsureSuffix(input, "\n")
+func EnsureEndsWithLineBreak(input string) (ensuredLineBreak string) {
+	ensuredLineBreak = EnsureSuffix(input, "\n")
 	return ensuredLineBreak
 }
 
-func (s *StringsService) EnsureFirstCharLowercase(input string) (firstCharUppercase string) {
+func EnsureFirstCharLowercase(input string) (firstCharUppercase string) {
 	if input == "" {
 		return ""
 	}
@@ -102,7 +113,7 @@ func (s *StringsService) EnsureFirstCharLowercase(input string) (firstCharUpperc
 	return firstCharUppercase
 }
 
-func (s *StringsService) EnsureFirstCharUppercase(input string) (firstCharUppercase string) {
+func EnsureFirstCharUppercase(input string) (firstCharUppercase string) {
 	if input == "" {
 		return ""
 	}
@@ -117,7 +128,7 @@ func (s *StringsService) EnsureFirstCharUppercase(input string) (firstCharUpperc
 	return firstCharUppercase
 }
 
-func (s *StringsService) EnsurePrefix(input string, prefix string) (ensuredPrefix string) {
+func EnsurePrefix(input string, prefix string) (ensuredPrefix string) {
 	if strings.HasPrefix(input, prefix) {
 		return input
 	} else {
@@ -125,7 +136,7 @@ func (s *StringsService) EnsurePrefix(input string, prefix string) (ensuredPrefi
 	}
 }
 
-func (s *StringsService) EnsureSuffix(input string, suffix string) (ensuredSuffix string) {
+func EnsureSuffix(input string, suffix string) (ensuredSuffix string) {
 	if strings.HasSuffix(input, suffix) {
 		return input
 	} else {
@@ -133,7 +144,7 @@ func (s *StringsService) EnsureSuffix(input string, suffix string) (ensuredSuffi
 	}
 }
 
-func (s *StringsService) FirstCharToUpper(input string) (output string) {
+func FirstCharToUpper(input string) (output string) {
 	if len(input) <= 0 {
 		return ""
 	}
@@ -150,7 +161,7 @@ func (s *StringsService) FirstCharToUpper(input string) (output string) {
 	return output
 }
 
-func (s *StringsService) GetAsKeyValues(input string) (output map[string]string, err error) {
+func GetAsKeyValues(input string) (output map[string]string, err error) {
 	if len(strings.TrimSpace(input)) <= 0 {
 		return map[string]string{}, nil
 	}
@@ -159,7 +170,7 @@ func (s *StringsService) GetAsKeyValues(input string) (output map[string]string,
 
 	delimiter := ""
 
-	for _, line := range s.SplitLines(input, true) {
+	for _, line := range SplitLines(input, true) {
 		if strings.TrimSpace(line) == "" {
 			continue
 		}
@@ -170,8 +181,8 @@ func (s *StringsService) GetAsKeyValues(input string) (output map[string]string,
 			} else if strings.Contains(line, ":") {
 				delimiter = ":"
 			} else {
-				return nil, TracedErrorf(
-					"Unable to find delimiter for getting key values in line: '%s'",
+				return nil, fmt.Errorf(
+					"unable to find delimiter for getting key values in line: '%s'",
 					line,
 				)
 			}
@@ -180,16 +191,16 @@ func (s *StringsService) GetAsKeyValues(input string) (output map[string]string,
 		splitted := strings.SplitN(line, delimiter, 2)
 
 		if len(splitted) != 2 {
-			return nil, TracedErrorf(
-				"Unable to split line '%s' into key values.",
+			return nil, fmt.Errorf(
+				"unable to split line '%s' into key values",
 				line,
 			)
 		}
 
 		key := strings.TrimSpace(splitted[0])
 		if key == "" {
-			return nil, TracedErrorf(
-				"Key is empty string after evaluation of line '%s' for key values.",
+			return nil, fmt.Errorf(
+				"key is empty string after evaluation of line '%s' for key values",
 				line,
 			)
 		}
@@ -202,12 +213,12 @@ func (s *StringsService) GetAsKeyValues(input string) (output map[string]string,
 	return output, nil
 }
 
-func (s *StringsService) GetFirstLine(input string) (firstLine string) {
+func GetFirstLine(input string) (firstLine string) {
 	if len(input) <= 0 {
 		return ""
 	}
 
-	lines := s.SplitLines(input, false)
+	lines := SplitLines(input, false)
 	if len(lines) <= 0 {
 		return ""
 	}
@@ -215,32 +226,32 @@ func (s *StringsService) GetFirstLine(input string) (firstLine string) {
 	return lines[0]
 }
 
-func (s *StringsService) GetFirstLineAndTrimSpace(input string) (firstLine string) {
+func GetFirstLineAndTrimSpace(input string) (firstLine string) {
 	if len(input) <= 0 {
 		return ""
 	}
 
-	firstLine = s.GetFirstLine(input)
+	firstLine = GetFirstLine(input)
 	firstLine = strings.TrimSpace(firstLine)
 
 	return firstLine
 }
 
-func (s *StringsService) GetFirstLineWithoutCommentAndTrimSpace(input string) (firstLine string) {
-	withoutComment := s.RemoveComments(input)
-	firstLine = s.GetFirstLineAndTrimSpace(withoutComment)
+func GetFirstLineWithoutCommentAndTrimSpace(input string) (firstLine string) {
+	withoutComment := RemoveComments(input)
+	firstLine = GetFirstLineAndTrimSpace(withoutComment)
 
 	return firstLine
 }
 
-func (s *StringsService) GetNumberOfLinesWithPrefix(content string, prefix string, trimLines bool) (numberOfLinesWithPrefix int) {
+func GetNumberOfLinesWithPrefix(content string, prefix string, trimLines bool) (numberOfLinesWithPrefix int) {
 	if content == "" {
 		return 0
 	}
 
 	numberOfLinesWithPrefix = 0
 
-	for _, line := range s.SplitLines(content, false) {
+	for _, line := range SplitLines(content, false) {
 		lineToUse := line
 
 		if trimLines {
@@ -255,20 +266,20 @@ func (s *StringsService) GetNumberOfLinesWithPrefix(content string, prefix strin
 	return numberOfLinesWithPrefix
 }
 
-func (s *StringsService) GetValueAsInt(input string, key string) (value int, err error) {
+func GetValueAsInt(input string, key string) (value int, err error) {
 	if key == "" {
-		return -1, TracedErrorEmptyString("key")
+		return -1, fmt.Errorf("key is empty string")
 	}
 
-	valueString, err := s.GetValueAsString(input, key)
+	valueString, err := GetValueAsString(input, key)
 	if err != nil {
 		return -1, err
 	}
 
 	value, err = strconv.Atoi(valueString)
 	if err != nil {
-		return -1, TracedErrorf(
-			"Unalbe to parse '%s' as string",
+		return -1, fmt.Errorf(
+			"unalbe to parse '%s' as string",
 			valueString,
 		)
 	}
@@ -276,21 +287,20 @@ func (s *StringsService) GetValueAsInt(input string, key string) (value int, err
 	return value, nil
 }
 
-func (s *StringsService) GetValueAsString(input string, key string) (value string, err error) {
+func GetValueAsString(input string, key string) (value string, err error) {
 	if key == "" {
-		return "", TracedErrorEmptyString("key")
+		return "", fmt.Errorf("key is empty string")
 	}
 
-	keyValues, err := s.GetAsKeyValues(input)
+	keyValues, err := GetAsKeyValues(input)
 	if err != nil {
 		return "", err
 	}
 
 	value, ok := keyValues[key]
 	if !ok {
-		return "", TracedErrorf(
-			"%w: %s",
-			ErrKeyNotFound,
+		return "", fmt.Errorf(
+			"key not found: %s",
 			key,
 		)
 	}
@@ -298,7 +308,7 @@ func (s *StringsService) GetValueAsString(input string, key string) (value strin
 	return value, nil
 }
 
-func (s *StringsService) HasAtLeastOnePrefix(toCheck string, prefixes []string) (hasPrefix bool) {
+func HasAtLeastOnePrefix(toCheck string, prefixes []string) (hasPrefix bool) {
 	if toCheck == "" {
 		return false
 	}
@@ -312,7 +322,7 @@ func (s *StringsService) HasAtLeastOnePrefix(toCheck string, prefixes []string) 
 	return false
 }
 
-func (s *StringsService) HasPrefixIgnoreCase(input string, prefix string) (hasPrefix bool) {
+func HasPrefixIgnoreCase(input string, prefix string) (hasPrefix bool) {
 	if prefix == "" {
 		return true
 	}
@@ -323,7 +333,7 @@ func (s *StringsService) HasPrefixIgnoreCase(input string, prefix string) (hasPr
 	return strings.HasPrefix(inputLower, prefixLower)
 }
 
-func (s *StringsService) HexStringToBytes(hexString string) (output []byte, err error) {
+func HexStringToBytes(hexString string) (output []byte, err error) {
 	if hexString == "" {
 		return []byte{}, nil
 	}
@@ -337,8 +347,8 @@ func (s *StringsService) HexStringToBytes(hexString string) (output []byte, err 
 
 	output, err = hex.DecodeString(hexStringToParse)
 	if err != nil {
-		return nil, TracedErrorf(
-			"Unable to convert hexString to bytes: %w",
+		return nil, fmt.Errorf(
+			"unable to convert hexString to bytes: %w",
 			err,
 		)
 	}
@@ -346,12 +356,12 @@ func (s *StringsService) HexStringToBytes(hexString string) (output []byte, err 
 	return output, nil
 }
 
-func (s *StringsService) IsComment(input string) (isComment bool) {
+func IsComment(input string) (isComment bool) {
 	if input == "" {
 		return false
 	}
 
-	for _, line := range s.SplitLines(input, true) {
+	for _, line := range SplitLines(input, true) {
 		trimmedLine := strings.TrimSpace(line)
 
 		if strings.HasPrefix(trimmedLine, "#") {
@@ -368,7 +378,7 @@ func (s *StringsService) IsComment(input string) (isComment bool) {
 	return true
 }
 
-func (s *StringsService) IsFirstCharLowerCase(input string) (isFirstCharLowerCase bool) {
+func IsFirstCharLowerCase(input string) (isFirstCharLowerCase bool) {
 	if input == "" {
 		return false
 	}
@@ -382,7 +392,7 @@ func (s *StringsService) IsFirstCharLowerCase(input string) (isFirstCharLowerCas
 	return unicode.IsLower(firstChar)
 }
 
-func (s *StringsService) IsFirstCharUpperCase(input string) (isFirstCharUpperCase bool) {
+func IsFirstCharUpperCase(input string) (isFirstCharUpperCase bool) {
 	if input == "" {
 		return false
 	}
@@ -396,72 +406,72 @@ func (s *StringsService) IsFirstCharUpperCase(input string) (isFirstCharUpperCas
 	return unicode.IsUpper(firstChar)
 }
 
-func (s *StringsService) MatchesRegex(input string, regex string) (matches bool, err error) {
+func MatchesRegex(input string, regex string) (matches bool, err error) {
 	matches, err = regexp.Match(regex, []byte(input))
 	if err != nil {
-		return false, TracedErrorf("match regex failed: '%w'", err)
+		return false, fmt.Errorf("match regex failed: '%w'", err)
 	}
 
 	return matches, nil
 }
 
-func (s *StringsService) MustGetAsKeyValues(input string) (output map[string]string) {
-	output, err := s.GetAsKeyValues(input)
+func MustGetAsKeyValues(input string) (output map[string]string) {
+	output, err := GetAsKeyValues(input)
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 
 	return output
 }
 
-func (s *StringsService) MustGetValueAsInt(input string, key string) (value int) {
-	value, err := s.GetValueAsInt(input, key)
+func MustGetValueAsInt(input string, key string) (value int) {
+	value, err := GetValueAsInt(input, key)
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 
 	return value
 }
 
-func (s *StringsService) MustGetValueAsString(input string, key string) (value string) {
-	value, err := s.GetValueAsString(input, key)
+func MustGetValueAsString(input string, key string) (value string) {
+	value, err := GetValueAsString(input, key)
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 
 	return value
 }
 
-func (s *StringsService) MustHexStringToBytes(hexString string) (output []byte) {
-	output, err := s.HexStringToBytes(hexString)
+func MustHexStringToBytes(hexString string) (output []byte) {
+	output, err := HexStringToBytes(hexString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 
 	return output
 }
 
-func (s *StringsService) MustMatchesRegex(input string, regex string) (matches bool) {
-	matches, err := s.MatchesRegex(input, regex)
+func MustMatchesRegex(input string, regex string) (matches bool) {
+	matches, err := MatchesRegex(input, regex)
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 
 	return matches
 }
 
-func (s *StringsService) RemoveCommentMarkers(input string) (commentContent string) {
+func RemoveCommentMarkers(input string) (commentContent string) {
 	if input == "" {
 		return ""
 	}
 
 	commentContent = ""
-	for i, line := range s.SplitLines(input, false) {
+	for i, line := range SplitLines(input, false) {
 		if i > 0 {
 			commentContent += "\n"
 		}
 
-		if s.IsComment(line) {
+		if IsComment(line) {
 			trimmedLine := strings.TrimSpace(line)
 			commentContentLine := strings.TrimPrefix(trimmedLine, "#")
 			commentContentLine = strings.TrimPrefix(commentContentLine, "//")
@@ -476,19 +486,19 @@ func (s *StringsService) RemoveCommentMarkers(input string) (commentContent stri
 	return commentContent
 }
 
-func (s *StringsService) RemoveCommentMarkersAndTrimSpace(input string) (commentContent string) {
-	commentContent = s.RemoveCommentMarkers(input)
-	commentContent = s.TrimSpaceForEveryLine(commentContent)
+func RemoveCommentMarkersAndTrimSpace(input string) (commentContent string) {
+	commentContent = RemoveCommentMarkers(input)
+	commentContent = TrimSpaceForEveryLine(commentContent)
 	return commentContent
 }
 
-func (s *StringsService) RemoveComments(input string) (contentWithoutComments string) {
+func RemoveComments(input string) (contentWithoutComments string) {
 	if len(input) <= 0 {
 		return ""
 	}
 
 	contentWithoutComments = ""
-	for _, line := range Strings().SplitLines(input, false) {
+	for _, line := range SplitLines(input, false) {
 		trimmed := strings.TrimSpace(line)
 		if strings.HasPrefix(trimmed, "#") {
 			continue
@@ -508,14 +518,14 @@ func (s *StringsService) RemoveComments(input string) (contentWithoutComments st
 	return contentWithoutComments
 }
 
-func (s *StringsService) RemoveCommentsAndTrimSpace(input string) (output string) {
-	output = s.RemoveComments(input)
+func RemoveCommentsAndTrimSpace(input string) (output string) {
+	output = RemoveComments(input)
 	output = strings.TrimSpace(output)
 	return output
 }
 
-func (s *StringsService) RemoveLinesWithPrefix(input string, prefixToRemove string) (output string) {
-	lines := s.SplitLines(input, false)
+func RemoveLinesWithPrefix(input string, prefixToRemove string) (output string) {
+	lines := SplitLines(input, false)
 
 	outputLines := []string{}
 	for _, l := range lines {
@@ -531,7 +541,7 @@ func (s *StringsService) RemoveLinesWithPrefix(input string, prefixToRemove stri
 	return output
 }
 
-func (s *StringsService) RemoveSurroundingQuotationMarks(input string) (output string) {
+func RemoveSurroundingQuotationMarks(input string) (output string) {
 	if len(input) <= 0 {
 		return ""
 	}
@@ -556,7 +566,7 @@ func (s *StringsService) RemoveSurroundingQuotationMarks(input string) (output s
 	return output
 }
 
-func (s *StringsService) RemoveTailingNewline(input string) (cleaned string) {
+func RemoveTailingNewline(input string) (cleaned string) {
 	if len(input) == 0 {
 		return ""
 	}
@@ -564,7 +574,7 @@ func (s *StringsService) RemoveTailingNewline(input string) (cleaned string) {
 	return strings.TrimSuffix(input, "\n")
 }
 
-func (s *StringsService) RepeatReplaceAll(input string, search string, replaceWith string) (replaced string) {
+func RepeatReplaceAll(input string, search string, replaceWith string) (replaced string) {
 	if len(input) <= 0 {
 		return input
 	}
@@ -581,7 +591,7 @@ func (s *StringsService) RepeatReplaceAll(input string, search string, replaceWi
 	return replaced
 }
 
-func (s *StringsService) RightFillWithSpaces(input string, fillLength int) (filled string) {
+func RightFillWithSpaces(input string, fillLength int) (filled string) {
 	if fillLength <= 0 {
 		return input
 	}
@@ -595,7 +605,7 @@ func (s *StringsService) RightFillWithSpaces(input string, fillLength int) (fill
 	return filled
 }
 
-func (s *StringsService) SplitAndGetLastElement(input string, token string) (lastElement string) {
+func SplitAndGetLastElement(input string, token string) (lastElement string) {
 	splitted := strings.Split(input, token)
 
 	if len(splitted) <= 0 {
@@ -605,13 +615,20 @@ func (s *StringsService) SplitAndGetLastElement(input string, token string) (las
 	return splitted[len(splitted)-1]
 }
 
-func (s *StringsService) SplitAtSpacesAndRemoveEmptyStrings(input string) (splitted []string) {
-	splitted = strings.Split(input, " ")
-	splitted = Slices().RemoveEmptyStrings(splitted)
+func SplitAtSpacesAndRemoveEmptyStrings(input string) (splitted []string) {
+	splitted = []string{}
+	for _, s := range strings.Split(input, " ") {
+		if s == "" {
+			continue
+		}
+
+		splitted = append(splitted, s)
+	}
+
 	return splitted
 }
 
-func (s *StringsService) SplitFirstLineAndContent(input string) (firstLine string, contentWithoutFirstLine string) {
+func SplitFirstLineAndContent(input string) (firstLine string, contentWithoutFirstLine string) {
 	if len(input) <= 0 {
 		return "", ""
 	}
@@ -626,7 +643,7 @@ func (s *StringsService) SplitFirstLineAndContent(input string) (firstLine strin
 	}
 }
 
-func (s *StringsService) SplitLines(input string, removeLastLineIfEmpty bool) (splittedLines []string) {
+func SplitLines(input string, removeLastLineIfEmpty bool) (splittedLines []string) {
 	if len(input) <= 0 {
 		return []string{}
 	}
@@ -636,28 +653,40 @@ func (s *StringsService) SplitLines(input string, removeLastLineIfEmpty bool) (s
 
 	if removeLastLineIfEmpty {
 		if len(splittedLines) > 1 {
-			splittedLines = Slices().RemoveLastElementIfEmptyString(splittedLines)
+			if splittedLines[len(splittedLines)-1] == "" {
+				splittedLines = splittedLines[:len(splittedLines)-2]
+			}
 		}
 	}
 
 	return splittedLines
 }
 
-func (s *StringsService) SplitWords(input string) (words []string) {
+func SplitWords(input string) (words []string) {
 	words = []string{input}
 	for _, splitChar := range []string{",", ".", "{", "}", "(", ")", "[", "]", "\t", "\n", " "} {
-		words = Slices().SplitStringsAndRemoveEmpty(words, splitChar)
+		nextWords := []string{}
+		for _, w := range words {
+			splitted := strings.Split(w, splitChar)
+			for _, s := range splitted {
+				if s != "" {
+					nextWords = append(nextWords, s)
+				}
+			}
+		}
+
+		words = nextWords
 	}
 
 	return words
 }
 
-func (s *StringsService) ToPascalCase(input string) (pascalCase string) {
+func ToPascalCase(input string) (pascalCase string) {
 	splitted := strings.Split(input, " ")
 	toJoin := []string{}
 
 	for _, part := range splitted {
-		toJoin = append(toJoin, s.FirstCharToUpper(part))
+		toJoin = append(toJoin, FirstCharToUpper(part))
 	}
 
 	pascalCase = strings.Join(toJoin, "")
@@ -665,24 +694,24 @@ func (s *StringsService) ToPascalCase(input string) (pascalCase string) {
 	return pascalCase
 }
 
-func (s *StringsService) ToSnakeCase(input string) (snakeCase string) {
+func ToSnakeCase(input string) (snakeCase string) {
 	splitted := strings.Split(input, " ")
 	snakeCase = strings.Join(splitted, "_")
 	snakeCase = strings.ToLower(snakeCase)
 	return snakeCase
 }
 
-func (s *StringsService) TrimAllLeadingAndTailingNewLines(input string) (output string) {
-	output = s.TrimAllLeadingNewLines(input)
-	output = s.TrimAllTailingNewLines(output)
+func TrimAllLeadingAndTailingNewLines(input string) (output string) {
+	output = TrimAllLeadingNewLines(input)
+	output = TrimAllTailingNewLines(output)
 	return output
 }
 
-func (s *StringsService) TrimAllLeadingNewLines(input string) (output string) {
-	return s.TrimAllPrefix(input, "\n")
+func TrimAllLeadingNewLines(input string) (output string) {
+	return TrimAllPrefix(input, "\n")
 }
 
-func (s *StringsService) TrimAllPrefix(stringToCheck string, prefixToRemove string) (trimmedString string) {
+func TrimAllPrefix(stringToCheck string, prefixToRemove string) (trimmedString string) {
 	if len(stringToCheck) <= 0 {
 		return ""
 	}
@@ -699,7 +728,7 @@ func (s *StringsService) TrimAllPrefix(stringToCheck string, prefixToRemove stri
 	return trimmedString
 }
 
-func (s *StringsService) TrimAllSuffix(stringToCheck string, suffixToRemove string) (trimmedString string) {
+func TrimAllSuffix(stringToCheck string, suffixToRemove string) (trimmedString string) {
 	if len(stringToCheck) <= 0 {
 		return ""
 	}
@@ -716,18 +745,18 @@ func (s *StringsService) TrimAllSuffix(stringToCheck string, suffixToRemove stri
 	return trimmedString
 }
 
-func (s *StringsService) TrimAllTailingNewLines(input string) (output string) {
-	return s.TrimAllSuffix(input, "\n")
+func TrimAllTailingNewLines(input string) (output string) {
+	return TrimAllSuffix(input, "\n")
 }
 
-func (s *StringsService) TrimPrefixAndSuffix(input string, prefix string, suffix string) (output string) {
+func TrimPrefixAndSuffix(input string, prefix string, suffix string) (output string) {
 	output = strings.TrimPrefix(input, prefix)
 	output = strings.TrimSuffix(output, suffix)
 	return output
 }
 
-func (s *StringsService) TrimPrefixIgnoreCase(input string, prefix string) (trimmed string) {
-	hasPrefix := s.HasPrefixIgnoreCase(input, prefix)
+func TrimPrefixIgnoreCase(input string, prefix string) (trimmed string) {
+	hasPrefix := HasPrefixIgnoreCase(input, prefix)
 
 	if !hasPrefix {
 		return input
@@ -737,24 +766,29 @@ func (s *StringsService) TrimPrefixIgnoreCase(input string, prefix string) (trim
 	return trimmed
 }
 
-func (s *StringsService) TrimSpaceForEveryLine(input string) (trimmedForEveryLine string) {
-	lines := s.SplitLines(input, false)
-	toJoin := Slices().TrimSpace(lines)
-	return strings.Join(toJoin, "\n")
+func TrimSpaceForEveryLine(input string) (trimmedForEveryLine string) {
+	for i, l := range SplitLines(input, false) {
+		if i > 0 {
+			trimmedForEveryLine += "\n"
+		}
+		trimmedForEveryLine += l
+	}
+
+	return trimmedForEveryLine
 }
 
-func (s *StringsService) TrimSpacesLeft(input string) (trimmedLeft string) {
+func TrimSpacesLeft(input string) (trimmedLeft string) {
 	return strings.TrimLeft(input, "\t \n")
 }
 
-func (s *StringsService) TrimSuffixAndSpace(input string, suffix string) (output string) {
+func TrimSuffixAndSpace(input string, suffix string) (output string) {
 	output = strings.TrimSuffix(input, suffix)
 	output = strings.TrimSpace(output)
 
 	return output
 }
 
-func (s *StringsService) TrimSuffixUntilAbsent(input string, suffixToRemove string) (withoutSuffix string) {
+func TrimSuffixUntilAbsent(input string, suffixToRemove string) (withoutSuffix string) {
 	withoutSuffix = input
 	for strings.HasSuffix(withoutSuffix, suffixToRemove) {
 		withoutSuffix = strings.TrimSuffix(withoutSuffix, suffixToRemove)

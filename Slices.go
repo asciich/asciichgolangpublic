@@ -4,6 +4,8 @@ import (
 	"math"
 	"sort"
 	"strings"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 type SlicesService struct {
@@ -90,7 +92,7 @@ func (o *SlicesService) TrimAllPrefix(sliceOfStrings []string, prefixToRemove st
 
 	sliceOfStringsWithPrefixRemoved = []string{}
 	for _, sliceToCheck := range sliceOfStrings {
-		sliceToCheck = Strings().TrimAllPrefix(sliceToCheck, prefixToRemove)
+		sliceToCheck = astrings.TrimAllPrefix(sliceToCheck, prefixToRemove)
 
 		sliceOfStringsWithPrefixRemoved = append(sliceOfStringsWithPrefixRemoved, sliceToCheck)
 	}

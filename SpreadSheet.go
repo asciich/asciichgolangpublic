@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 type SpreadSheet struct {
@@ -603,7 +605,7 @@ func (s *SpreadSheet) RenderToStdout(options *SpreadSheetRenderOptions) (err err
 		return err
 	}
 
-	rendered = Strings().EnsureEndsWithLineBreak(rendered)
+	rendered = astrings.EnsureEndsWithLineBreak(rendered)
 
 	fmt.Print(rendered)
 

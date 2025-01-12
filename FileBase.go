@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 var ErrFileBaseParentNotSet = errors.New("parent is not set")
@@ -53,8 +55,8 @@ func (f *FileBase) AppendLine(line string, verbose bool) (err error) {
 		return err
 	}
 
-	toWrite := Strings().TrimAllLeadingAndTailingNewLines(line)
-	toWrite = Strings().EnsureEndsWithExactlyOneLineBreak(toWrite)
+	toWrite := astrings.TrimAllLeadingAndTailingNewLines(line)
+	toWrite = astrings.EnsureEndsWithExactlyOneLineBreak(toWrite)
 
 	isEmptyFile, err := f.IsEmptyFile()
 	if err != nil {
@@ -105,7 +107,7 @@ func (f *FileBase) ContainsLine(line string) (containsLine bool, err error) {
 		return false, err
 	}
 
-	return Strings().ContainsLine(content, line), nil
+	return astrings.ContainsLine(content, line), nil
 }
 
 func (f *FileBase) CreateParentDirectory(verbose bool) (err error) {
@@ -185,7 +187,7 @@ func (f *FileBase) EnsureEndsWithLineBreak(verbose bool) (err error) {
 }
 
 func (f *FileBase) EnsureLineInFile(line string, verbose bool) (err error) {
-	line = Strings().TrimAllLeadingAndTailingNewLines(line)
+	line = astrings.TrimAllLeadingAndTailingNewLines(line)
 
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
@@ -316,7 +318,7 @@ func (f *FileBase) GetNumberOfLinesWithPrefix(prefix string, trimLines bool) (nL
 		return -1, err
 	}
 
-	nLines = Strings().GetNumberOfLinesWithPrefix(contentString, prefix, trimLines)
+	nLines = astrings.GetNumberOfLinesWithPrefix(contentString, prefix, trimLines)
 
 	return nLines, nil
 }
@@ -433,7 +435,7 @@ func (f *FileBase) GetTextBlocks(verbose bool) (textBlocks []string, err error) 
 				braceEndMarker = ""
 			} else {
 				if !strings.HasPrefix(trimmedLine, "//") {
-					currentBlockWithoutComments := Strings().RemoveCommentsAndTrimSpace(blockToAdd)
+					currentBlockWithoutComments := astrings.RemoveCommentsAndTrimSpace(blockToAdd)
 					if currentBlockWithoutComments == "" {
 						if strings.HasSuffix(trimmedLine, "(") {
 							braceEndMarker = ")"
@@ -488,7 +490,7 @@ func (f *FileBase) GetValueAsInt(key string) (value int, err error) {
 		return -1, err
 	}
 
-	return Strings().GetValueAsInt(content, key)
+	return astrings.GetValueAsInt(content, key)
 }
 
 func (f *FileBase) GetValueAsString(key string) (value string, err error) {
@@ -506,7 +508,7 @@ func (f *FileBase) GetValueAsString(key string) (value string, err error) {
 		return "", err
 	}
 
-	return Strings().GetValueAsString(content, key)
+	return astrings.GetValueAsString(content, key)
 }
 
 func (f *FileBase) IsContentEqualByComparingSha256Sum(otherFile File, verbose bool) (isEqual bool, err error) {
@@ -575,7 +577,7 @@ func (f *FileBase) IsPgpEncrypted(verbose bool) (isEncrypted bool, err error) {
 		return false, err
 	}
 
-	if Strings().ContainsAtLeastOneSubstringIgnoreCase(
+	if astrings.ContainsAtLeastOneSubstringIgnoreCase(
 		fileDescription,
 		[]string{"gpg", "pgp"},
 	) {
@@ -1115,7 +1117,7 @@ func (f *FileBase) ReadAsLines() (contentLines []string, err error) {
 		return nil, err
 	}
 
-	contentLines = Strings().SplitLines(content, false)
+	contentLines = astrings.SplitLines(content, false)
 
 	return contentLines, nil
 }
@@ -1126,8 +1128,8 @@ func (f *FileBase) ReadAsLinesWithoutComments() (contentLines []string, err erro
 		return nil, err
 	}
 
-	contentString = Strings().RemoveComments(contentString)
-	contentLines = Strings().SplitLines(contentString, false)
+	contentString = astrings.RemoveComments(contentString)
+	contentLines = astrings.SplitLines(contentString, false)
 
 	return contentLines, nil
 }
@@ -1166,7 +1168,7 @@ func (f *FileBase) ReadFirstLine() (firstLine string, err error) {
 		return "", err
 	}
 
-	firstLine = Strings().GetFirstLine(content)
+	firstLine = astrings.GetFirstLine(content)
 
 	return firstLine, nil
 }
@@ -1218,7 +1220,7 @@ func (f *FileBase) RemoveLinesWithPrefix(prefix string, verbose bool) (err error
 		return err
 	}
 
-	replaced := Strings().RemoveLinesWithPrefix(content, prefix)
+	replaced := astrings.RemoveLinesWithPrefix(content, prefix)
 
 	path, err := parent.GetPath()
 	if err != nil {
@@ -1429,7 +1431,7 @@ func (f *FileBase) TrimSpacesAtBeginningOfFile(verbose bool) (err error) {
 		return err
 	}
 
-	content = Strings().TrimSpacesLeft(content)
+	content = astrings.TrimSpacesLeft(content)
 	if err != nil {
 		return err
 	}
@@ -1484,7 +1486,7 @@ func (f *FileBase) WriteTextBlocks(textBlocks []string, verbose bool) (err error
 		if i > 0 {
 			blockToWrite = "\n" + blockToWrite
 		}
-		blockToWrite = Strings().EnsureEndsWithExactlyOneLineBreak(blockToWrite)
+		blockToWrite = astrings.EnsureEndsWithExactlyOneLineBreak(blockToWrite)
 
 		textToWrite += blockToWrite
 	}

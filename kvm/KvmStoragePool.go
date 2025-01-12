@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 type KvmStoragePool struct {
@@ -70,26 +71,26 @@ func (k *KvmStoragePool) GetVolumes(verbose bool) (volumes []*KvmVolume, err err
 		return nil, err
 	}
 
-	firstLine, unparsedOutput := asciichgolangpublic.Strings().SplitFirstLineAndContent(listPoolOutput)
+	firstLine, unparsedOutput := astrings.SplitFirstLineAndContent(listPoolOutput)
 	firstLine = strings.TrimSpace(firstLine)
 	if !strings.HasPrefix(firstLine, "Name") {
 		return nil, asciichgolangpublic.TracedErrorf("Unexpected first line of list volumes output: '%s'", firstLine)
 	}
 
-	secondLine, unparsedOutput := asciichgolangpublic.Strings().SplitFirstLineAndContent(unparsedOutput)
+	secondLine, unparsedOutput := astrings.SplitFirstLineAndContent(unparsedOutput)
 	secondLine = strings.TrimSpace(secondLine)
 	if strings.Count(secondLine, "-") < 5 {
 		return nil, asciichgolangpublic.TracedErrorf("Unexpected second line of list volumes output: '%s'", secondLine)
 	}
 
 	volumes = []*KvmVolume{}
-	for _, line := range asciichgolangpublic.Strings().SplitLines(unparsedOutput, true) {
+	for _, line := range astrings.SplitLines(unparsedOutput, true) {
 		line = strings.TrimSpace(line)
 		if len(line) <= 0 {
 			continue
 		}
 
-		splitted := asciichgolangpublic.Strings().SplitAtSpacesAndRemoveEmptyStrings(line)
+		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(line)
 		if len(splitted) != 2 {
 			return nil, asciichgolangpublic.TracedErrorf("Unable to splitt list volume line '%v' : '%v'", line, splitted)
 		}

@@ -4,6 +4,8 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 type CommandExecutorKubernetes struct {
@@ -278,7 +280,7 @@ func (c *CommandExecutorKubernetes) GetKubectlContexts() (contexts []KubectlCont
 	contexts = []KubectlContext{}
 	for _, line := range lines {
 		line = strings.ReplaceAll(line, "\t", " ")
-		line = asciichgolangpublic.Strings().RepeatReplaceAll(line, "  ", " ")
+		line = astrings.RepeatReplaceAll(line, "  ", " ")
 		line = strings.TrimSpace(line)
 		line = strings.TrimPrefix(line, "*")
 		line = strings.TrimSpace(line)

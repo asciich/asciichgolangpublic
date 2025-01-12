@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/itchyny/gojq"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 type JsonService struct {
@@ -380,7 +382,7 @@ func (j *JsonService) PrettyFormatJsonString(jsonString string) (formatted strin
 		return "", err
 	}
 
-	formatted = Strings().EnsureEndsWithExactlyOneLineBreak(formatted)
+	formatted = astrings.EnsureEndsWithExactlyOneLineBreak(formatted)
 
 	return formatted, nil
 }
