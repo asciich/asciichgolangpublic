@@ -33,7 +33,7 @@ func (b *BytesService) GetSizeAsHumanReadableString(sizeBytes int64) (readableSi
 			const maxDigits int = 2
 			readableValue, err := float.ToString(float64(sizeBytes)/float64(v), maxDigits)
 			if err != nil {
-				return "", err
+				return "", TracedErrorf("failed to format float as string: %w", err)
 			}
 			readableSize = readableValue + k
 
