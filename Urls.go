@@ -1,5 +1,9 @@
 package asciichgolangpublic
 
+import (
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+)
+
 type UrlsService struct{}
 
 func NewUrlsService() (service *UrlsService) {
@@ -24,7 +28,7 @@ func (u *UrlsService) IsUrl(url string) (isUrl bool) {
 		return false
 	}
 
-	return Strings().HasAtLeastOnePrefix(url, []string{
+	return astrings.HasAtLeastOnePrefix(url, []string{
 		"https://",
 		"http://",
 	})

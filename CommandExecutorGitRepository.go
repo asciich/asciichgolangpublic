@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 // This is the GitRepository implementation based on a CommandExecutor (e.g. Bash, SSH...).
@@ -796,7 +798,7 @@ func (c *CommandExecutorGitRepository) GetRemoteConfigs(verbose bool) (remoteCon
 
 		lineCleaned := strings.ReplaceAll(line, "\t", " ")
 
-		splitted := Strings().SplitAtSpacesAndRemoveEmptyStrings(lineCleaned)
+		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(lineCleaned)
 		if len(splitted) != 3 {
 			return nil, TracedErrorf("Unable to parse '%s' as remote. splitted is '%v'", line, splitted)
 		}

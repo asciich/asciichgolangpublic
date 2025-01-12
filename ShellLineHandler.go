@@ -4,6 +4,8 @@ import (
 	"strings"
 
 	"github.com/google/shlex"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 type ShellLineHandlerService struct {
@@ -30,7 +32,7 @@ func (s *ShellLineHandlerService) Join(command []string) (joinedCommand string, 
 			c = "''"
 		}
 
-		if Strings().ContainsAtLeastOneSubstring(c, []string{" ", "\n", "\\n", "\""}) {
+		if astrings.ContainsAtLeastOneSubstring(c, []string{" ", "\n", "\\n", "\""}) {
 			c = "'" + c + "'"
 		}
 

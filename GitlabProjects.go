@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 var ErrGitlabProjectNotFound = errors.New("Gitlab project not found")
@@ -175,7 +177,7 @@ func (g *GitlabProjects) GetProjectById(projectId int) (gitlabProject *GitlabPro
 
 	nativeProject, _, err := nativeProjectsClient.GetProject(projectId, &gitlab.GetProjectOptions{})
 	if err != nil {
-		if Strings().ContainsAtLeastOneSubstring(err.Error(), []string{"404 {message: 404 Project Not Found}"}) {
+		if astrings.ContainsAtLeastOneSubstring(err.Error(), []string{"404 {message: 404 Project Not Found}"}) {
 			return nil, TracedErrorf("%w: %d", ErrGitlabProjectNotFound, projectId)
 		}
 		return nil, err
@@ -276,7 +278,7 @@ func (g *GitlabProjects) GetProjectByProjectPath(projectPath string, verbose boo
 		nativeProject, _, err := nativeProjectsClient.GetProject(projectPath, &gitlab.GetProjectOptions{})
 		if err != nil {
 
-			if Strings().ContainsAtLeastOneSubstring(err.Error(), []string{"404 {message: 404 Project Not Found}", "404 Not Found"}) {
+			if astrings.ContainsAtLeastOneSubstring(err.Error(), []string{"404 {message: 404 Project Not Found}", "404 Not Found"}) {
 				errorNotFound := TracedErrorf("%w: %s", ErrGitlabProjectNotFound, projectPath)
 				return nil, errorNotFound
 			}
@@ -763,7 +765,7 @@ func (p *GitlabProjects) IsProjectPathPersonalProject(projectPath string) (isPer
 		return false, TracedErrorEmptyString("projectPath")
 	}
 
-	isPersonalProject = Strings().HasAtLeastOnePrefix(projectPath, []string{"users/", "/users/"})
+	isPersonalProject = astrings.HasAtLeastOnePrefix(projectPath, []string{"users/", "/users/"})
 
 	return isPersonalProject, nil
 }

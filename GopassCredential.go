@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 type GopassCredential struct {
@@ -107,7 +109,7 @@ func (c *GopassCredential) GetAsString() (credential string, err error) {
 		return "", err
 	}
 
-	credential = Strings().RemoveTailingNewline(string(credentialBytes))
+	credential = astrings.RemoveTailingNewline(string(credentialBytes))
 
 	return credential, nil
 }

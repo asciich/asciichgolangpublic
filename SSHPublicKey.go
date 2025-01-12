@@ -3,6 +3,8 @@ package asciichgolangpublic
 import (
 	"path/filepath"
 	"strings"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 type SSHPublicKey struct {
@@ -234,7 +236,7 @@ func (k *SSHPublicKey) WriteToFile(outputFile File, verbose bool) (err error) {
 		return err
 	}
 
-	sshKeyLine = Strings().EnsureEndsWithExactlyOneLineBreak(sshKeyLine)
+	sshKeyLine = astrings.EnsureEndsWithExactlyOneLineBreak(sshKeyLine)
 	err = outputFile.WriteString(sshKeyLine, verbose)
 	if err != nil {
 		return err

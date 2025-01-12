@@ -12,6 +12,8 @@ import (
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 type LocalGitRepository struct {
@@ -995,8 +997,8 @@ func (l *LocalGitRepository) GetCurrentBranchName(verbose bool) (branchName stri
 		return "", TracedErrorf("Unable to get head: '%w'", err)
 	}
 	branchName = head.String()
-	branchName = Strings().SplitAndGetLastElement(branchName, " ")
-	branchName = Strings().SplitAndGetLastElement(branchName, "/")
+	branchName = astrings.SplitAndGetLastElement(branchName, " ")
+	branchName = astrings.SplitAndGetLastElement(branchName, "/")
 	branchName = strings.TrimSpace(branchName)
 
 	path, hostDescription, err := l.GetPathAndHostDescription()
@@ -1087,7 +1089,7 @@ func (l *LocalGitRepository) GetCurrentCommitHashAsBytes(verbose bool) (hash []b
 		return nil, err
 	}
 
-	return Strings().HexStringToBytes(currentHash)
+	return astrings.HexStringToBytes(currentHash)
 }
 
 func (l *LocalGitRepository) GetDirectoryByPath(pathToSubDir ...string) (subDir Directory, err error) {
@@ -1164,7 +1166,7 @@ func (l *LocalGitRepository) GetGoGitHashFromHashString(hashString string) (hash
 		return nil, TracedErrorNil("hashString")
 	}
 
-	hashBytes, err := Strings().HexStringToBytes(hashString)
+	hashBytes, err := astrings.HexStringToBytes(hashString)
 	if err != nil {
 		return nil, err
 	}
@@ -1287,7 +1289,7 @@ func (l *LocalGitRepository) GetRemoteConfigs(verbose bool) (remoteConfigs []*Gi
 
 		lineCleaned := strings.ReplaceAll(line, "\t", " ")
 
-		splitted := Strings().SplitAtSpacesAndRemoveEmptyStrings(lineCleaned)
+		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(lineCleaned)
 		if len(splitted) != 3 {
 			return nil, TracedErrorf("Unable to parse '%s' as remote. splitted is '%v'", line, splitted)
 		}

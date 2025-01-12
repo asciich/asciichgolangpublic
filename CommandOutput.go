@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 type CommandOutput struct {
@@ -355,7 +357,7 @@ func (o *CommandOutput) GetStdoutAsLines(removeLastLineIfEmpty bool) (stdoutLine
 		return nil, err
 	}
 
-	stdoutLines = Strings().SplitLines(stdoutString, removeLastLineIfEmpty)
+	stdoutLines = astrings.SplitLines(stdoutString, removeLastLineIfEmpty)
 
 	stdoutLines = Slices().RemoveLastElementIfEmptyString(stdoutLines)
 	return stdoutLines, nil

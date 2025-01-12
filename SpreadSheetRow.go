@@ -2,6 +2,8 @@ package asciichgolangpublic
 
 import (
 	"strings"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 type SpreadSheetRow struct {
@@ -193,7 +195,7 @@ func (s *SpreadSheetRow) RenderAsString(options *SpreadSheetRenderRowOptions) (r
 		for i, entry := range entries {
 			entriesFilled = append(
 				entriesFilled,
-				Strings().RightFillWithSpaces(entry, minColumnWidth[i]),
+				astrings.RightFillWithSpaces(entry, minColumnWidth[i]),
 			)
 		}
 

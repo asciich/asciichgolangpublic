@@ -2,6 +2,8 @@ package asciichgolangpublic
 
 import (
 	"strings"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 // Parts of an URL
@@ -121,7 +123,7 @@ func (u *URL) GetPathAsString() (urlPath string, err error) {
 	pathParts := splitted[1:]
 	urlPath = strings.Join(pathParts, "/")
 
-	urlPath = Strings().TrimAllSuffix(urlPath, "/")
+	urlPath = astrings.TrimAllSuffix(urlPath, "/")
 
 	return urlPath, nil
 }

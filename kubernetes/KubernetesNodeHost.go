@@ -5,6 +5,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/hosts"
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 type KubernetesNodeHost struct {
@@ -95,7 +96,7 @@ func (k *KubernetesNodeHost) IsKubernetesNode(verbose bool) (isKubernetesNode bo
 
 	isKubernetesNode = true
 
-	if len(asciichgolangpublic.Strings().SplitLines(stdout, false)) <= 5 {
+	if len(astrings.SplitLines(stdout, false)) <= 5 {
 		isKubernetesNode = false
 	}
 

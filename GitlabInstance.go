@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
+
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
 type GitlabInstance struct {
@@ -695,9 +697,9 @@ func (g *GitlabInstance) GetPersonalProjectByName(projectName string, verbose bo
 		return nil, err
 	}
 
-	personalProjectsPath = Strings().EnsureSuffix(personalProjectsPath, "/")
+	personalProjectsPath = astrings.EnsureSuffix(personalProjectsPath, "/")
 
-	projectPath := Strings().EnsurePrefix(projectName, personalProjectsPath)
+	projectPath := astrings.EnsurePrefix(projectName, personalProjectsPath)
 
 	project, err = g.GetGitlabProjectByPath(projectPath, verbose)
 	if err != nil {
