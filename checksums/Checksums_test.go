@@ -1,6 +1,7 @@
-package asciichgolangpublic
+package checksums
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,12 +17,13 @@ func TestChecksumsGetSha256SumFromString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				calculatedSum := Checksums().GetSha256SumFromString(tt.input)
+				calculatedSum := GetSha256SumFromString(tt.input)
 				assert.EqualValues(tt.expectedChecksum, calculatedSum)
 			},
 		)
@@ -38,12 +40,13 @@ func TestChecksumsGetSha256SumFromBytes(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				calculatedSum := Checksums().GetSha256SumFromBytes(tt.input)
+				calculatedSum := GetSha256SumFromBytes(tt.input)
 				assert.EqualValues(tt.expectedChecksum, calculatedSum)
 			},
 		)
