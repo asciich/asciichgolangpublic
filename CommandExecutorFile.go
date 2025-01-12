@@ -424,9 +424,6 @@ func (c *CommandExecutorFile) GetParentDirectory() (parentDirectory Directory, e
 	}
 
 	dirName := filepath.Dir(filePath)
-	if err != nil {
-		return nil, err
-	}
 
 	err = p.SetDirPath(dirName)
 	if err != nil {
