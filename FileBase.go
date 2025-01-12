@@ -1433,9 +1433,6 @@ func (f *FileBase) TrimSpacesAtBeginningOfFile(verbose bool) (err error) {
 	}
 
 	content = astrings.TrimSpacesLeft(content)
-	if err != nil {
-		return err
-	}
 
 	err = f.WriteString(content, verbose)
 	if err != nil {
@@ -1512,17 +1509,14 @@ func (xxx *FileBase) GetCreationDateByFileName(verbose bool) (creationDate *time
 		return nil, err
 	}
 
-	creationDate = nil
-	if creationDate == nil {
-		creationDate, err = Dates().ParseStringPrefixAsDate(basename)
-		if err != nil {
-			if strings.Contains(err.Error(), "Unable to parse prefix ") {
-				err = nil
-			} else if strings.Contains(err.Error(), "Unable to parse date ") {
-				err = nil
-			} else {
-				return nil, err
-			}
+	creationDate, err = Dates().ParseStringPrefixAsDate(basename)
+	if err != nil {
+		if strings.Contains(err.Error(), "Unable to parse prefix ") {
+			err = nil
+		} else if strings.Contains(err.Error(), "Unable to parse date ") {
+			err = nil
+		} else {
+			return nil, err
 		}
 	}
 

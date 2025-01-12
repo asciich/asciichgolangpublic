@@ -49,9 +49,6 @@ func (g *GitlabMergeRequest) GetDescription() (description string, err error) {
 	}
 
 	description = rawResponse.Description
-	if err != nil {
-		return "", err
-	}
 
 	return description, nil
 }
@@ -116,8 +113,8 @@ func (g *GitlabMergeRequest) GetLabels() (labels []string, err error) {
 	}
 
 	labels = rawResponse.Labels
-	if err != nil {
-		return nil, err
+	if labels == nil {
+		return nil, TracedError("labels is nil after evaluation")
 	}
 
 	labels = Slices().SortStringSlice(labels)
@@ -261,8 +258,10 @@ func (g *GitlabMergeRequest) GetSourceBranchName() (sourceBranchName string, err
 	}
 
 	sourceBranchName = rawResponse.SourceBranch
-	if err != nil {
-		return "", err
+	if sourceBranchName == "" {
+		return "", TracedError(
+			"sourceBranchName is empty string after evaluation",
+		)
 	}
 
 	return sourceBranchName, nil
