@@ -3,6 +3,8 @@ package asciichgolangpublic
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/asciich/asciichgolangpublic/datatypes/pointers"
 )
 
 type StructsService struct{}
@@ -45,7 +47,7 @@ func (s *StructsService) IsPointerToStruct(objectToTest interface{}) (isStruct b
 		return false
 	}
 
-	if !Pointers().IsPointer(objectToTest) {
+	if !pointers.IsPointer(objectToTest) {
 		return false
 	}
 

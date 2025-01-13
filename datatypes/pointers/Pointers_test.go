@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package pointers
 
 import (
 	"fmt"
@@ -20,14 +20,15 @@ func TestPointersIsPointer(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedIsPointer,
-					Pointers().IsPointer(tt.pointerToCheck),
+					IsPointer(tt.pointerToCheck),
 				)
 			},
 		)
@@ -47,7 +48,7 @@ func TestPointersGetMemoryAddressAsHexString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -55,7 +56,7 @@ func TestPointersGetMemoryAddressAsHexString(t *testing.T) {
 
 				assert.EqualValues(
 					expectedPointerAddress,
-					Pointers().MustGetMemoryAddressAsHexString(tt.pointer),
+					MustGetMemoryAddressAsHexString(tt.pointer),
 				)
 			},
 		)
@@ -79,13 +80,13 @@ func TestPointersPointersEqual(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedIsEqual,
-					Pointers().MustPointersEqual(tt.pointer1, tt.pointer2),
+					MustPointersEqual(tt.pointer1, tt.pointer2),
 				)
 			},
 		)
