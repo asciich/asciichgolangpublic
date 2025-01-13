@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -755,7 +756,7 @@ func (p *GitlabProjects) GetProjectPathList(options *GitlabgetProjectListOptions
 		projectPaths = append(projectPaths, pathToAdd)
 	}
 
-	projectPaths = Slices().SortStringSlice(projectPaths)
+	sort.Strings(projectPaths)
 
 	return projectPaths, nil
 }

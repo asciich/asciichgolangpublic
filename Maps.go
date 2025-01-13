@@ -1,6 +1,9 @@
 package asciichgolangpublic
 
-import "errors"
+import (
+	"errors"
+	"sort"
+)
 
 var ErrKeyNotFound = errors.New("key not found in map")
 
@@ -29,6 +32,6 @@ func (m *MapsService) GetKeysOfStringMapAsSlice(input map[string]string) (keys [
 
 func (m *MapsService) GetKeysOfStringMapAsSliceSorted(input map[string]string) (keys []string) {
 	keys = m.GetKeysOfStringMapAsSlice(input)
-	keys = Slices().SortStringSlice(keys)
+	sort.Strings(keys)
 	return keys
 }

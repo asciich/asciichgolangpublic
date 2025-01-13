@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type SpreadSheet struct {
@@ -159,7 +160,7 @@ func (s *SpreadSheet) GetMaxColumnWidths() (columnWitdhs []int, err error) {
 		return nil, err
 	}
 
-	columnWidths := Slices().GetIntSliceInitializedWithZeros(nColumns)
+	columnWidths := aslices.GetIntSliceInitializedWithZeros(nColumns)
 
 	for _, row := range rows {
 		rowColumnWidths, err := row.GetColumnWidths()
@@ -167,7 +168,7 @@ func (s *SpreadSheet) GetMaxColumnWidths() (columnWitdhs []int, err error) {
 			return nil, err
 		}
 
-		columnWidths = Slices().MaxIntValuePerIndex(columnWidths, rowColumnWidths)
+		columnWidths = aslices.MaxIntValuePerIndex(columnWidths, rowColumnWidths)
 	}
 
 	return columnWidths, nil

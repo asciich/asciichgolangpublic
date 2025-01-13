@@ -7,6 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/hosts"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type KVMHypervisor struct {
@@ -855,7 +856,7 @@ func (k *KVMHypervisor) VmByNameExists(vmName string) (vmExists bool, err error)
 		return false, err
 	}
 
-	if asciichgolangpublic.Slices().ContainsString(vmNameList, vmName) {
+	if aslices.ContainsString(vmNameList, vmName) {
 		return true, nil
 	} else {
 		return false, nil

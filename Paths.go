@@ -4,8 +4,10 @@ import (
 	"errors"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
@@ -59,7 +61,7 @@ func (p *PathsService) FilterPaths(pathList []string, pathFilterOptions PathFilt
 			}
 		}
 
-		filtered = Slices().SortStringSliceAndRemoveDuplicates(newFiltered)
+		filtered = aslices.SortStringSliceAndRemoveDuplicates(newFiltered)
 	}
 
 	if pathFilterOptions.IsExcludeBasenamePatternSet() {
@@ -88,7 +90,7 @@ func (p *PathsService) FilterPaths(pathList []string, pathFilterOptions PathFilt
 			}
 		}
 
-		filtered = Slices().SortStringSliceAndRemoveDuplicates(newFiltered)
+		filtered = aslices.SortStringSliceAndRemoveDuplicates(newFiltered)
 	}
 
 	if pathFilterOptions.IsMatchBasenamePatternSet() {
@@ -112,10 +114,10 @@ func (p *PathsService) FilterPaths(pathList []string, pathFilterOptions PathFilt
 			}
 		}
 
-		filtered = Slices().SortStringSliceAndRemoveDuplicates(newFiltered)
+		filtered = aslices.SortStringSliceAndRemoveDuplicates(newFiltered)
 	}
 
-	filtered = Slices().SortStringSlice(filtered)
+	sort.Strings(filtered)
 
 	return filtered, nil
 }

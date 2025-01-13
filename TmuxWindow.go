@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 var ErrTmuxWindowCliPromptNotReady = errors.New("tmux window CLI promptnot ready")
@@ -217,7 +219,7 @@ func (t *TmuxWindow) Exists(verbose bool) (exists bool, err error) {
 		return false, err
 	}
 
-	exists = Slices().ContainsString(windowNames, windowName)
+	exists = aslices.ContainsString(windowNames, windowName)
 
 	sessionName, err := t.GetSessionName()
 	if err != nil {
@@ -352,7 +354,7 @@ func (t *TmuxWindow) GetShownLines() (lines []string, err error) {
 		return nil, err
 	}
 
-	lines = Slices().RemoveEmptyStringsAtEnd(lines)
+	lines = aslices.RemoveEmptyStringsAtEnd(lines)
 
 	return lines, nil
 }
@@ -683,7 +685,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 		return nil, err
 	}
 
-	allOutputLines = Slices().RemoveEmptyStringsAtEnd(allOutputLines)
+	allOutputLines = aslices.RemoveEmptyStringsAtEnd(allOutputLines)
 
 	if len(allOutputLines) < 2 {
 		return nil, TracedErrorf(

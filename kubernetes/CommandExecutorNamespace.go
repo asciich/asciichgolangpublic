@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type CommandExecutorNamespace struct {
@@ -441,7 +442,7 @@ func (c *CommandExecutorNamespace) RoleByNameExists(name string, verbose bool) (
 		return false, err
 	}
 
-	exists = asciichgolangpublic.Slices().ContainsString(roleNames, name)
+	exists = aslices.ContainsString(roleNames, name)
 
 	if verbose {
 		clusterName, err := c.GetClusterName()

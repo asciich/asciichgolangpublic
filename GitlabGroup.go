@@ -10,6 +10,7 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type GitlabGroup struct {
@@ -384,7 +385,7 @@ func (g *GitlabGroup) GetRawResponse() (rawRespoonse *gitlab.Group, err error) {
 
 	nativeGroup, _, err := nativeGroupsService.GetGroup(gid, &gitlab.GetGroupOptions{})
 	if err != nil {
-		if Slices().ContainsStringIgnoreCase([]string{"404 Not Found", "404 {message: 404 Group Not Found}"}, err.Error()) {
+		if aslices.ContainsStringIgnoreCase([]string{"404 Not Found", "404 {message: 404 Group Not Found}"}, err.Error()) {
 			return nil, TracedErrorf("%w: %v", ErrGitlabGroupNotFoundError, gid)
 		}
 		return nil, err

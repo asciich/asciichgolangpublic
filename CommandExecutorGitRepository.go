@@ -2,10 +2,12 @@ package asciichgolangpublic
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 // This is the GitRepository implementation based on a CommandExecutor (e.g. Bash, SSH...).
@@ -889,7 +891,7 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootD
 				return "", err
 			}
 
-			if Slices().ContainsAllStrings(filePaths, []string{"config", "HEAD"}) {
+			if aslices.ContainsAllStrings(filePaths, []string{"config", "HEAD"}) {
 				rootDirectoryPath, err = cwd.GetPath()
 				if err != nil {
 					return "", err
@@ -1399,7 +1401,7 @@ func (c *CommandExecutorGitRepository) ListBranchNames(verbose bool) (branchName
 		branchNames = append(branchNames, line)
 	}
 
-	branchNames = Slices().SortStringSlice(branchNames)
+	sort.Strings(branchNames)
 
 	if verbose {
 		path, hostDescripton, err := c.GetPathAndHostDescription()

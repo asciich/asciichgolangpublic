@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type GitignoreFile struct {
@@ -205,7 +206,7 @@ func (g *GitignoreFile) ContainsIgnore(pathToCheck string) (containsIgnore bool,
 		return false, err
 	}
 
-	containsIgnore = Slices().ContainsString(ignoredPaths, pathToCheck)
+	containsIgnore = aslices.ContainsString(ignoredPaths, pathToCheck)
 
 	return containsIgnore, nil
 }

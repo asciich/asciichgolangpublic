@@ -1,6 +1,11 @@
 package asciichgolangpublic
 
-import gitlab "gitlab.com/gitlab-org/api/client-go"
+import (
+	"sort"
+
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
+)
 
 type GitlabRepositoryFiles struct {
 	gitlabProject *GitlabProject
@@ -93,13 +98,14 @@ func (g *GitlabRepositoryFiles) GetDirectoryNames(ref string, verbose bool) (dir
 	directoryNames = []string{}
 	for _, toCheck := range fileAndDirectoryNames {
 		toCheckWithAppendix := toCheck + "/"
-		if Slices().AtLeastOneElementStartsWith(fileAndDirectoryNames, toCheckWithAppendix) {
+		if aslices.AtLeastOneElementStartsWith(fileAndDirectoryNames, toCheckWithAppendix) {
 			directoryNames = append(directoryNames, toCheck)
 		}
 	}
 
-	directoryNames = Slices().RemoveDuplicatedStrings(directoryNames)
-	directoryNames = Slices().SortStringSlice(directoryNames)
+	directoryNames = aslices.RemoveDuplicatedStrings(directoryNames)
+
+	sort.Strings(directoryNames)
 
 	return directoryNames, nil
 }
@@ -161,15 +167,16 @@ func (g *GitlabRepositoryFiles) GetFileNames(ref string, verbose bool) (fileName
 	fileNames = []string{}
 	for _, toCheck := range fileAndDirectoryNames {
 		toCheckWithAppendix := toCheck + "/"
-		if Slices().AtLeastOneElementStartsWith(fileAndDirectoryNames, toCheckWithAppendix) {
+		if aslices.AtLeastOneElementStartsWith(fileAndDirectoryNames, toCheckWithAppendix) {
 			continue
 		}
 
 		fileNames = append(fileNames, toCheck)
 	}
 
-	fileNames = Slices().RemoveDuplicatedStrings(fileNames)
-	fileNames = Slices().SortStringSlice(fileNames)
+	fileNames = aslices.RemoveDuplicatedStrings(fileNames)
+	
+	sort.Strings(fileNames)
 
 	return fileNames, nil
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type GitlabBranch struct {
@@ -211,7 +212,7 @@ func (g *GitlabBranch) Delete(options *GitlabDeleteBranchOptions) (err error) {
 					return err
 				}
 
-				exists = Slices().ContainsString(branchNames, branchName)
+				exists = aslices.ContainsString(branchNames, branchName)
 				if exists {
 					time.Sleep(1000 * time.Millisecond)
 					if options.Verbose {

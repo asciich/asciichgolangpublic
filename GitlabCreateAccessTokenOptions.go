@@ -2,6 +2,8 @@ package asciichgolangpublic
 
 import (
 	"time"
+
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type GitlabCreateAccessTokenOptions struct {
@@ -186,7 +188,7 @@ func (o *GitlabCreateAccessTokenOptions) GetScopes() (scopes []string, err error
 		return nil, TracedError("Scopes not set")
 	}
 
-	return Slices().GetDeepCopyOfStringsSlice(o.Scopes), nil
+	return aslices.GetDeepCopyOfStringsSlice(o.Scopes), nil
 }
 
 func (o *GitlabCreateAccessTokenOptions) GetTokenName() (tokenName string, err error) {

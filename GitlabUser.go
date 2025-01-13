@@ -578,6 +578,8 @@ func (u *GitlabUser) SetId(id int) (err error) {
 }
 
 func (u *GitlabUser) SshKeyExists(sshKey *SSHPublicKey) (keyExistsForUser bool, err error) {
+	return false, TracedErrorNotImplemented()
+	/* TODO enable again
 	if sshKey == nil {
 		return false, TracedError("sshKey is nil")
 	}
@@ -587,8 +589,9 @@ func (u *GitlabUser) SshKeyExists(sshKey *SSHPublicKey) (keyExistsForUser bool, 
 		return false, err
 	}
 
-	keyExistsForUser = Slices().ContainsSshPublicKeyWithSameKeyMaterial(existingKeys, sshKey)
+	keyExistsForUser = aslices.ContainsSshPublicKeyWithSameKeyMaterial(existingKeys, sshKey)
 	return keyExistsForUser, nil
+	*/
 }
 
 func (u *GitlabUser) UpdatePassword(newPassword string, verbose bool) (err error) {

@@ -6,6 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type CommandExecutorKubernetes struct {
@@ -552,7 +553,7 @@ func (c *CommandExecutorKubernetes) NamespaceByNameExists(name string, verbose b
 		return false, err
 	}
 
-	exists = asciichgolangpublic.Slices().ContainsString(namespaces, name)
+	exists = aslices.ContainsString(namespaces, name)
 
 	if verbose {
 		clusterName, err := c.GetName()

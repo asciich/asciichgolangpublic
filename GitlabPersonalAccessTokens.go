@@ -6,6 +6,7 @@ import (
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type GitlabPersonalAccessTokenService struct {
@@ -241,7 +242,7 @@ func (p *GitlabPersonalAccessTokenService) ExistsByName(tokenName string, verbos
 		return false, err
 	}
 
-	exists = Slices().ContainsString(tokenNames, tokenName)
+	exists = aslices.ContainsString(tokenNames, tokenName)
 
 	return exists, nil
 }

@@ -1,5 +1,7 @@
 package asciichgolangpublic
 
+import "sort"
+
 type GitCommit struct {
 	gitRepo GitRepository
 	hash    string
@@ -250,7 +252,7 @@ func (g *GitCommit) ListTagNames(verbose bool) (tagNames []string, err error) {
 		tagNames = append(tagNames, toAdd)
 	}
 
-	tagNames = Slices().SortStringSlice(tagNames)
+	sort.Strings(tagNames)
 
 	return tagNames, nil
 }

@@ -1,6 +1,7 @@
-package asciichgolangpublic
+package slices
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -24,11 +25,11 @@ func TestSlicesContainsInt(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				assert.EqualValues(tt.expectedContains, Slices().ContainsInt(tt.inputSlice, tt.intToSearch))
+				assert.EqualValues(tt.expectedContains, ContainsInt(tt.inputSlice, tt.intToSearch))
 			},
 		)
 	}
@@ -55,11 +56,11 @@ func TestSlicesContainsString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				assert.EqualValues(tt.expectedContains, Slices().ContainsString(tt.inputSlice, tt.stringToSearch))
+				assert.EqualValues(tt.expectedContains, ContainsString(tt.inputSlice, tt.stringToSearch))
 			},
 		)
 	}
@@ -86,11 +87,11 @@ func TestSlicesContainsStringIgnoreCase(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				assert.EqualValues(tt.expectedContains, Slices().ContainsStringIgnoreCase(tt.inputSlice, tt.stringToSearch))
+				assert.EqualValues(tt.expectedContains, ContainsStringIgnoreCase(tt.inputSlice, tt.stringToSearch))
 			},
 		)
 	}
@@ -119,11 +120,11 @@ func TestSlicesTrimSpace(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				trimmed := Slices().TrimSpace(tt.input)
+				trimmed := TrimSpace(tt.input)
 				assert.EqualValues(tt.expectedOutput, trimmed)
 			},
 		)
@@ -147,11 +148,11 @@ func TestSlicesRemoveMatchingStrings(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				removedMatching := Slices().RemoveMatchingStrings(tt.input, tt.removeMatching)
+				removedMatching := RemoveMatchingStrings(tt.input, tt.removeMatching)
 				assert.EqualValues(tt.expectedOutput, removedMatching)
 			},
 		)
@@ -174,11 +175,11 @@ func TestSlicesRemoveStringsWhichContains(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				removedContains := Slices().MustRemoveStringsWhichContains(tt.input, tt.searchString)
+				removedContains := MustRemoveStringsWhichContains(tt.input, tt.searchString)
 				assert.EqualValues(tt.expectedOutput, removedContains)
 			},
 		)
@@ -201,11 +202,11 @@ func TestSlicesMaxIntValuePerIndex(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				maxValues := Slices().MaxIntValuePerIndex(tt.input1, tt.input2)
+				maxValues := MaxIntValuePerIndex(tt.input1, tt.input2)
 				assert.EqualValues(tt.expectedOutput, maxValues)
 			},
 		)
@@ -228,11 +229,11 @@ func TestSlicesRemoveLastElementIfEmptyString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				output := Slices().RemoveLastElementIfEmptyString(tt.input)
+				output := RemoveLastElementIfEmptyString(tt.input)
 				assert.EqualValues(tt.expectedOutput, output)
 			},
 		)
@@ -258,11 +259,11 @@ func TestSlicesRemoveDuplicatedEntries(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				output := Slices().RemoveDuplicatedStrings(tt.input)
+				output := RemoveDuplicatedStrings(tt.input)
 				assert.EqualValues(tt.expectedOutput, output)
 			},
 		)
@@ -290,13 +291,13 @@ func TestSlicesStringSlicesEqual(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedEqual,
-					Slices().StringSlicesEqual(tt.input1, tt.input2),
+					StringSlicesEqual(tt.input1, tt.input2),
 				)
 			},
 		)
@@ -325,11 +326,11 @@ func TestSlicesDiffStringSlices(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				aNotInB, bNotInA := Slices().DiffStringSlices(tt.input1, tt.input2)
+				aNotInB, bNotInA := DiffStringSlices(tt.input1, tt.input2)
 
 				assert.EqualValues(
 					tt.expectedANotInB,
@@ -358,11 +359,11 @@ func TestSlicesGetDeepCopyOfByteSlice(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				copy := Slices().GetDeepCopyOfByteSlice(tt.input)
+				copy := GetDeepCopyOfByteSlice(tt.input)
 				assert.EqualValues(tt.expected_output, copy)
 
 				for i := 0; i < len(tt.input); i++ {
@@ -397,11 +398,11 @@ func TestSlices_RemoveEmptyStringsAtEnd(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				copy := Slices().RemoveEmptyStringsAtEnd(tt.input)
+				copy := RemoveEmptyStringsAtEnd(tt.input)
 				assert.EqualValues(tt.expectedOutput, copy)
 			},
 		)

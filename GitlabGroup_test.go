@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 func TestGitlabGroupGetGroupPath(t *testing.T) {
@@ -276,7 +278,7 @@ func TestGitlabGroupListProjects(t *testing.T) {
 					gitlab.MustCreateProject(
 						&GitlabCreateProjectOptions{
 							ProjectPath: projectPath,
-							Verbose: verbose,
+							Verbose:     verbose,
 						},
 					)
 				}
@@ -292,7 +294,7 @@ func TestGitlabGroupListProjects(t *testing.T) {
 
 				for _, toCheck := range projectPaths {
 					assert.True(
-						Slices().ContainsString(
+						aslices.ContainsString(
 							listedProjectPaths,
 							toCheck,
 						),

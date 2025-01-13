@@ -1,5 +1,7 @@
 package asciichgolangpublic
 
+import "sort"
+
 type VersionDateVersion struct {
 	version string
 }
@@ -114,7 +116,8 @@ func (v VersionDateVersion) IsNewerThan(other Version) (isNewerThan bool, err er
 		return false, nil
 	}
 
-	sorted := Slices().SortStringSlice([]string{thisVersionString, otherVersionString})
+	sorted := []string{thisVersionString, otherVersionString}
+	sort.Strings(sorted)
 	isNewerThan = sorted[1] == thisVersionString
 	return isNewerThan, nil
 }

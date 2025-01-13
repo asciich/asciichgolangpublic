@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 func TestCommitGetHash(t *testing.T) {
@@ -57,8 +59,8 @@ func TestCommitGetHash(t *testing.T) {
 					hashes = append(hashes, testProject.MustGetLatestCommitHashAsString(branchName, verbose))
 				}
 
-				assert.True(Slices().ContainsOnlyUniqeStrings(hashes))
-				assert.True(Slices().ContainsNoEmptyStrings(hashes))
+				assert.True(aslices.ContainsOnlyUniqeStrings(hashes))
+				assert.True(aslices.ContainsNoEmptyStrings(hashes))
 			},
 		)
 	}

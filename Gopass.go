@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type GopassService struct {}
@@ -29,7 +30,7 @@ func (g *GopassService) CredentialExists(fullCredentialPath string) (credentialE
 		return false, err
 	}
 
-	return Slices().ContainsString(credentailList, fullCredentialPath), nil
+	return aslices.ContainsString(credentailList, fullCredentialPath), nil
 }
 
 func (g *GopassService) Generate(credentialName string, verbose bool) (generatedCredential *GopassCredential, err error) {
@@ -495,7 +496,7 @@ func (g *GopassService) SecretNameExist(secretName string) (secretExists bool, e
 		return false, err
 	}
 
-	secretExists = Slices().ContainsString(secretNames, secretName)
+	secretExists = aslices.ContainsString(secretNames, secretName)
 	return secretExists, nil
 }
 

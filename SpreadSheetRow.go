@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type SpreadSheetRow struct {
@@ -147,7 +148,7 @@ func (s *SpreadSheetRow) RemoveElementAtIndex(index int) (err error) {
 		return err
 	}
 
-	entries = Slices().RemoveStringEntryAtIndex(entries, index)
+	entries = aslices.RemoveStringEntryAtIndex(entries, index)
 
 	err = s.SetEntries(entries)
 	if err != nil {

@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -296,7 +297,7 @@ func (d *DirectoryBase) ListFilePaths(listFileOptions *ListFileOptions) (filePat
 		filePaths = append(filePaths, toAdd)
 	}
 
-	filePaths = Slices().SortStringSlice(filePaths)
+	sort.Strings(filePaths)
 
 	return filePaths, nil
 }
@@ -343,7 +344,7 @@ func (d *DirectoryBase) ListSubDirectoryPaths(options *ListDirectoryOptions) (su
 		}
 	}
 
-	subDirectoryPaths = Slices().SortStringSlice(subDirectoryPaths)
+	sort.Strings(subDirectoryPaths)
 
 	if options.Verbose {
 		LogInfof(

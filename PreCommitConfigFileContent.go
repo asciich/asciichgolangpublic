@@ -70,11 +70,7 @@ func (p *PreCommitConfigFileContent) GetDependencies(verbose bool) (dependencies
 			return nil, err
 		}
 
-		toAdd.SetVersionString(versionString)
-		if err != nil {
-			return nil, err
-		}
-
+		err = toAdd.SetVersionString(versionString)
 		if err != nil {
 			return nil, err
 		}

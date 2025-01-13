@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type SSHPublicKey struct {
@@ -165,11 +166,11 @@ func (k *SSHPublicKey) SetFromString(keyMaterial string) (err error) {
 	numberOfSpacesInKeyMaterial := strings.Count(keyMaterial, " ")
 	if numberOfSpacesInKeyMaterial == 0 {
 		k.keyMaterial = keyMaterial
-	} else if Slices().ContainsInt([]int{1, 2, 3}, numberOfSpacesInKeyMaterial) {
+	} else if aslices.ContainsInt([]int{1, 2, 3}, numberOfSpacesInKeyMaterial) {
 		splittedAllElements := strings.Split(keyMaterial, " ")
-		splitted := Slices().TrimSpace(splittedAllElements)
-		splitted = Slices().RemoveMatchingStrings(splitted, "ssh-rsa")
-		splitted, err = Slices().RemoveStringsWhichContains(splitted, "@")
+		splitted := aslices.TrimSpace(splittedAllElements)
+		splitted = aslices.RemoveMatchingStrings(splitted, "ssh-rsa")
+		splitted, err = aslices.RemoveStringsWhichContains(splitted, "@")
 		if err != nil {
 			return err
 		}

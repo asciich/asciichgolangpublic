@@ -2,6 +2,8 @@ package asciichgolangpublic
 
 import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
+
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type GitlabCommit struct {
@@ -314,7 +316,7 @@ func (g *GitlabCommit) IsParentCommitOf(childCommit *GitlabCommit, verbose bool)
 		return false, err
 	}
 
-	isParent = Slices().ContainsStringIgnoreCase(
+	isParent = aslices.ContainsStringIgnoreCase(
 		parentHashes,
 		hash,
 	)

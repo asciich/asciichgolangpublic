@@ -1,25 +1,14 @@
-package asciichgolangpublic
+package slices
 
 import (
+	"fmt"
+	"log"
 	"math"
 	"sort"
 	"strings"
-
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 )
 
-type SlicesService struct {
-}
-
-func NewSlicesService() (s *SlicesService) {
-	return new(SlicesService)
-}
-
-func Slices() (slices *SlicesService) {
-	return new(SlicesService)
-}
-
-func (o *SlicesService) RemoveDuplicatedStrings(sliceOfStrings []string) (cleaned []string) {
+func RemoveDuplicatedStrings(sliceOfStrings []string) (cleaned []string) {
 	if sliceOfStrings == nil {
 		return []string{}
 	}
@@ -29,7 +18,7 @@ func (o *SlicesService) RemoveDuplicatedStrings(sliceOfStrings []string) (cleane
 	}
 
 	for _, entry := range sliceOfStrings {
-		if o.ContainsString(cleaned, entry) {
+		if ContainsString(cleaned, entry) {
 			continue
 		}
 
@@ -39,7 +28,7 @@ func (o *SlicesService) RemoveDuplicatedStrings(sliceOfStrings []string) (cleane
 	return cleaned
 }
 
-func (o *SlicesService) RemoveLastElementIfEmptyString(sliceOfStrings []string) (cleanedUp []string) {
+func RemoveLastElementIfEmptyString(sliceOfStrings []string) (cleanedUp []string) {
 	if len(sliceOfStrings) <= 0 {
 		return []string{}
 	}
@@ -59,7 +48,7 @@ func (o *SlicesService) RemoveLastElementIfEmptyString(sliceOfStrings []string) 
 	return sliceOfStrings
 }
 
-func (o *SlicesService) StringSlicesEqual(input1 []string, input2 []string) (slicesEqual bool) {
+func StringSlicesEqual(input1 []string, input2 []string) (slicesEqual bool) {
 	if input1 == nil {
 		return false
 	}
@@ -81,7 +70,7 @@ func (o *SlicesService) StringSlicesEqual(input1 []string, input2 []string) (sli
 	return true
 }
 
-func (o *SlicesService) TrimAllPrefix(sliceOfStrings []string, prefixToRemove string) (sliceOfStringsWithPrefixRemoved []string) {
+func TrimAllPrefix(sliceOfStrings []string, prefixToRemove string) (sliceOfStringsWithPrefixRemoved []string) {
 	if len(sliceOfStrings) <= 0 {
 		return []string{}
 	}
@@ -92,7 +81,14 @@ func (o *SlicesService) TrimAllPrefix(sliceOfStrings []string, prefixToRemove st
 
 	sliceOfStringsWithPrefixRemoved = []string{}
 	for _, sliceToCheck := range sliceOfStrings {
-		sliceToCheck = astrings.TrimAllPrefix(sliceToCheck, prefixToRemove)
+		for {
+			if strings.HasPrefix(sliceToCheck, prefixToRemove) {
+				sliceToCheck = strings.TrimPrefix(sliceToCheck, prefixToRemove)
+				continue
+			}
+
+			break
+		}
 
 		sliceOfStringsWithPrefixRemoved = append(sliceOfStringsWithPrefixRemoved, sliceToCheck)
 	}
@@ -100,7 +96,7 @@ func (o *SlicesService) TrimAllPrefix(sliceOfStrings []string, prefixToRemove st
 	return sliceOfStringsWithPrefixRemoved
 }
 
-func (s *SlicesService) AddPrefixToEachString(stringSlices []string, prefix string) (output []string) {
+func AddPrefixToEachString(stringSlices []string, prefix string) (output []string) {
 	if len(stringSlices) <= 0 {
 		return []string{}
 	}
@@ -113,7 +109,7 @@ func (s *SlicesService) AddPrefixToEachString(stringSlices []string, prefix stri
 	return output
 }
 
-func (s *SlicesService) AddSuffixToEachString(stringSlices []string, suffix string) (output []string) {
+func AddSuffixToEachString(stringSlices []string, suffix string) (output []string) {
 	if len(stringSlices) <= 0 {
 		return []string{}
 	}
@@ -126,7 +122,7 @@ func (s *SlicesService) AddSuffixToEachString(stringSlices []string, suffix stri
 	return output
 }
 
-func (s *SlicesService) AtLeastOneElementStartsWith(elements []string, toCheck string) (atLeastOneElementStartsWith bool) {
+func AtLeastOneElementStartsWith(elements []string, toCheck string) (atLeastOneElementStartsWith bool) {
 	for _, e := range elements {
 		if strings.HasPrefix(e, toCheck) {
 			return true
@@ -136,7 +132,7 @@ func (s *SlicesService) AtLeastOneElementStartsWith(elements []string, toCheck s
 	return false
 }
 
-func (s *SlicesService) ByteSlicesEqual(input1 []byte, input2 []byte) (slicesEqual bool) {
+func ByteSlicesEqual(input1 []byte, input2 []byte) (slicesEqual bool) {
 	if input1 == nil {
 		return false
 	}
@@ -158,7 +154,7 @@ func (s *SlicesService) ByteSlicesEqual(input1 []byte, input2 []byte) (slicesEqu
 	return true
 }
 
-func (s *SlicesService) ContainsAllStrings(input []string, toCheck []string) (containsAllStrings bool) {
+func ContainsAllStrings(input []string, toCheck []string) (containsAllStrings bool) {
 	if len(input) <= 0 {
 		return false
 	}
@@ -168,7 +164,7 @@ func (s *SlicesService) ContainsAllStrings(input []string, toCheck []string) (co
 	}
 
 	for _, c := range toCheck {
-		if !s.ContainsString(input, c) {
+		if !ContainsString(input, c) {
 			return false
 		}
 	}
@@ -176,7 +172,7 @@ func (s *SlicesService) ContainsAllStrings(input []string, toCheck []string) (co
 	return true
 }
 
-func (s *SlicesService) ContainsEmptyString(input []string) (containsEmptyString bool) {
+func ContainsEmptyString(input []string) (containsEmptyString bool) {
 	for _, i := range input {
 		if i == "" {
 			return true
@@ -186,7 +182,7 @@ func (s *SlicesService) ContainsEmptyString(input []string) (containsEmptyString
 	return false
 }
 
-func (s *SlicesService) ContainsInt(intSlice []int, intToSearch int) (containsInt bool) {
+func ContainsInt(intSlice []int, intToSearch int) (containsInt bool) {
 	if len(intSlice) <= 0 {
 		return false
 	}
@@ -200,13 +196,13 @@ func (s *SlicesService) ContainsInt(intSlice []int, intToSearch int) (containsIn
 	return false
 }
 
-func (s *SlicesService) ContainsNoEmptyStrings(input []string) (containsNoEmptyString bool) {
-	return !s.ContainsEmptyString(input)
+func ContainsNoEmptyStrings(input []string) (containsNoEmptyString bool) {
+	return !ContainsEmptyString(input)
 }
 
-func (s *SlicesService) ContainsOnlyUniqeStrings(input []string) (containsOnlyUniqeStrings bool) {
+func ContainsOnlyUniqeStrings(input []string) (containsOnlyUniqeStrings bool) {
 	for _, i := range input {
-		if s.CountStrings(input, i) > 1 {
+		if CountStrings(input, i) > 1 {
 			return false
 		}
 	}
@@ -214,7 +210,8 @@ func (s *SlicesService) ContainsOnlyUniqeStrings(input []string) (containsOnlyUn
 	return true
 }
 
-func (s *SlicesService) ContainsSshPublicKeyWithSameKeyMaterial(sshKeys []*SSHPublicKey, keyToSearch *SSHPublicKey) (contains bool) {
+/* TODO move to SSH
+func ContainsSshPublicKeyWithSameKeyMaterial(sshKeys []*SSHPublicKey, keyToSearch *SSHPublicKey) (contains bool) {
 	if len(sshKeys) <= 0 {
 		return false
 	}
@@ -241,8 +238,9 @@ func (s *SlicesService) ContainsSshPublicKeyWithSameKeyMaterial(sshKeys []*SSHPu
 
 	return false
 }
+*/
 
-func (s *SlicesService) ContainsString(sliceOfStrings []string, toCheck string) (contains bool) {
+func ContainsString(sliceOfStrings []string, toCheck string) (contains bool) {
 	if len(sliceOfStrings) <= 0 {
 		return false
 	}
@@ -256,7 +254,7 @@ func (s *SlicesService) ContainsString(sliceOfStrings []string, toCheck string) 
 	return false
 }
 
-func (s *SlicesService) ContainsStringIgnoreCase(sliceOfStrings []string, toCheck string) (contains bool) {
+func ContainsStringIgnoreCase(sliceOfStrings []string, toCheck string) (contains bool) {
 	if len(sliceOfStrings) <= 0 {
 		return false
 	}
@@ -271,7 +269,7 @@ func (s *SlicesService) ContainsStringIgnoreCase(sliceOfStrings []string, toChec
 	return false
 }
 
-func (s *SlicesService) CountStrings(input []string, toSearch string) (count int) {
+func CountStrings(input []string, toSearch string) (count int) {
 	count = 0
 	for _, i := range input {
 		if i == toSearch {
@@ -282,12 +280,12 @@ func (s *SlicesService) CountStrings(input []string, toSearch string) (count int
 	return count
 }
 
-func (s *SlicesService) DiffStringSlices(a []string, b []string) (aNotInB []string, bNotInA []string) {
+func DiffStringSlices(a []string, b []string) (aNotInB []string, bNotInA []string) {
 	aNotInB = []string{}
 	bNotInA = []string{}
 
 	for _, toCheck := range a {
-		if s.ContainsString(b, toCheck) {
+		if ContainsString(b, toCheck) {
 			continue
 		}
 
@@ -295,20 +293,20 @@ func (s *SlicesService) DiffStringSlices(a []string, b []string) (aNotInB []stri
 	}
 
 	for _, toCheck := range b {
-		if s.ContainsString(a, toCheck) {
+		if ContainsString(a, toCheck) {
 			continue
 		}
 
 		bNotInA = append(bNotInA, toCheck)
 	}
 
-	aNotInB = s.SortStringSlice(aNotInB)
-	bNotInA = s.SortStringSlice(bNotInA)
+	aNotInB = SortStringSlice(aNotInB)
+	bNotInA = SortStringSlice(bNotInA)
 
 	return aNotInB, bNotInA
 }
 
-func (s *SlicesService) GetDeepCopyOfByteSlice(input []byte) (deepCopy []byte) {
+func GetDeepCopyOfByteSlice(input []byte) (deepCopy []byte) {
 	if input == nil {
 		return nil
 	}
@@ -319,7 +317,7 @@ func (s *SlicesService) GetDeepCopyOfByteSlice(input []byte) (deepCopy []byte) {
 	return deepCopy
 }
 
-func (s *SlicesService) GetDeepCopyOfStringsSlice(sliceOfStrings []string) (deepCopy []string) {
+func GetDeepCopyOfStringsSlice(sliceOfStrings []string) (deepCopy []string) {
 	if len(sliceOfStrings) <= 0 {
 		return []string{}
 	}
@@ -330,7 +328,7 @@ func (s *SlicesService) GetDeepCopyOfStringsSlice(sliceOfStrings []string) (deep
 	return deepCopy
 }
 
-func (s *SlicesService) GetIntSliceInitialized(nValues int, initValue int) (initializedSlice []int) {
+func GetIntSliceInitialized(nValues int, initValue int) (initializedSlice []int) {
 	initializedSlice = []int{}
 	if nValues <= 0 {
 		return initializedSlice
@@ -343,18 +341,18 @@ func (s *SlicesService) GetIntSliceInitialized(nValues int, initValue int) (init
 	return initializedSlice
 }
 
-func (s *SlicesService) GetIntSliceInitializedWithZeros(nValues int) (initializedSlice []int) {
-	return s.GetIntSliceInitialized(nValues, 0)
+func GetIntSliceInitializedWithZeros(nValues int) (initializedSlice []int) {
+	return GetIntSliceInitialized(nValues, 0)
 }
 
-func (s *SlicesService) GetStringElementsNotInOtherSlice(toCheck []string, other []string) (elementsNotInOther []string) {
+func GetStringElementsNotInOtherSlice(toCheck []string, other []string) (elementsNotInOther []string) {
 	if len(toCheck) <= 0 {
 		return []string{}
 	}
 
 	elementsNotInOther = []string{}
 	for _, elementToCheck := range toCheck {
-		if !s.ContainsString(other, elementToCheck) {
+		if !ContainsString(other, elementToCheck) {
 			elementsNotInOther = append(elementsNotInOther, elementToCheck)
 		}
 	}
@@ -362,8 +360,16 @@ func (s *SlicesService) GetStringElementsNotInOtherSlice(toCheck []string, other
 	return elementsNotInOther
 }
 
-func (s *SlicesService) MaxIntValuePerIndex(intSlice1 []int, intSlice2 []int) (maxValues []int) {
-	maxLen := Math().MaxInt(len(intSlice1), len(intSlice2))
+func maxInt(x, y int) (res int) {
+	if x > y {
+		return x
+	}
+
+	return y
+}
+
+func MaxIntValuePerIndex(intSlice1 []int, intSlice2 []int) (maxValues []int) {
+	maxLen := maxInt(len(intSlice1), len(intSlice2))
 
 	maxValues = []int{}
 	for i := 0; i < maxLen; i++ {
@@ -378,23 +384,23 @@ func (s *SlicesService) MaxIntValuePerIndex(intSlice1 []int, intSlice2 []int) (m
 			slice2Value = intSlice2[i]
 		}
 
-		valueToAdd := Math().MaxInt(slice1Value, slice2Value)
+		valueToAdd := maxInt(slice1Value, slice2Value)
 		maxValues = append(maxValues, valueToAdd)
 	}
 
 	return maxValues
 }
 
-func (s *SlicesService) MustRemoveStringsWhichContains(sliceToRemoveStringsWhichContains []string, searchString string) (cleanedUpSlice []string) {
-	cleanedUpSlice, err := s.RemoveStringsWhichContains(sliceToRemoveStringsWhichContains, searchString)
+func MustRemoveStringsWhichContains(sliceToRemoveStringsWhichContains []string, searchString string) (cleanedUpSlice []string) {
+	cleanedUpSlice, err := RemoveStringsWhichContains(sliceToRemoveStringsWhichContains, searchString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 
 	return cleanedUpSlice
 }
 
-func (s *SlicesService) RemoveEmptyStrings(sliceOfStrings []string) (sliceOfStringsWithoutEmptyStrings []string) {
+func RemoveEmptyStrings(sliceOfStrings []string) (sliceOfStringsWithoutEmptyStrings []string) {
 	if len(sliceOfStrings) <= 0 {
 		return []string{}
 	}
@@ -411,7 +417,7 @@ func (s *SlicesService) RemoveEmptyStrings(sliceOfStrings []string) (sliceOfStri
 	return sliceOfStringsWithoutEmptyStrings
 }
 
-func (s *SlicesService) RemoveEmptyStringsAtEnd(input []string) (withoutEmptyStringsAtEnd []string) {
+func RemoveEmptyStringsAtEnd(input []string) (withoutEmptyStringsAtEnd []string) {
 	if len(input) <= 0 {
 		return []string{}
 	}
@@ -430,7 +436,7 @@ func (s *SlicesService) RemoveEmptyStringsAtEnd(input []string) (withoutEmptyStr
 	return withoutEmptyStringsAtEnd
 }
 
-func (s *SlicesService) RemoveMatchingStrings(sliceToRemoveMatching []string, matchingStringToRemove string) (cleanedUpSlice []string) {
+func RemoveMatchingStrings(sliceToRemoveMatching []string, matchingStringToRemove string) (cleanedUpSlice []string) {
 	if len(sliceToRemoveMatching) <= 0 {
 		return []string{}
 	}
@@ -447,7 +453,7 @@ func (s *SlicesService) RemoveMatchingStrings(sliceToRemoveMatching []string, ma
 	return cleanedUpSlice
 }
 
-func (s *SlicesService) RemoveString(elements []string, toRemove string) (cleanedUpElements []string) {
+func RemoveString(elements []string, toRemove string) (cleanedUpElements []string) {
 	cleanedUpElements = []string{}
 
 	for _, e := range elements {
@@ -461,7 +467,7 @@ func (s *SlicesService) RemoveString(elements []string, toRemove string) (cleane
 	return cleanedUpElements
 }
 
-func (s *SlicesService) RemoveStringEntryAtIndex(elements []string, indexToRemove int) (elementsWithIndexRemoved []string) {
+func RemoveStringEntryAtIndex(elements []string, indexToRemove int) (elementsWithIndexRemoved []string) {
 	if len(elements) <= 0 {
 		return []string{}
 	}
@@ -478,9 +484,9 @@ func (s *SlicesService) RemoveStringEntryAtIndex(elements []string, indexToRemov
 	return elementsWithIndexRemoved
 }
 
-func (s *SlicesService) RemoveStringsWhichContains(sliceToRemoveStringsWhichContains []string, searchString string) (cleanedUpSlice []string, err error) {
+func RemoveStringsWhichContains(sliceToRemoveStringsWhichContains []string, searchString string) (cleanedUpSlice []string, err error) {
 	if len(searchString) <= 0 {
-		return nil, TracedError("searchString is empty string")
+		return nil, fmt.Errorf("searchString is empty string")
 	}
 
 	if len(sliceToRemoveStringsWhichContains) <= 0 {
@@ -499,39 +505,39 @@ func (s *SlicesService) RemoveStringsWhichContains(sliceToRemoveStringsWhichCont
 	return cleanedUpSlice, nil
 }
 
-func (s *SlicesService) SortStringSlice(sliceOfStrings []string) (sorted []string) {
-	sorted = s.GetDeepCopyOfStringsSlice(sliceOfStrings)
+func SortStringSlice(sliceOfStrings []string) (sorted []string) {
+	sorted = GetDeepCopyOfStringsSlice(sliceOfStrings)
 
 	sort.Strings(sorted)
 
 	return sorted
 }
 
-func (s *SlicesService) SortStringSliceAndRemoveDuplicates(input []string) (output []string) {
+func SortStringSliceAndRemoveDuplicates(input []string) (output []string) {
 	if len(input) <= 0 {
 		return []string{}
 	}
 
-	sorted := s.SortStringSlice(input)
-	return s.RemoveDuplicatedStrings(sorted)
+	sorted := SortStringSlice(input)
+	return RemoveDuplicatedStrings(sorted)
 }
 
-func (s *SlicesService) SortStringSliceAndRemoveEmpty(input []string) (sortedAndWithoutEmptyStrings []string) {
+func SortStringSliceAndRemoveEmpty(input []string) (sortedAndWithoutEmptyStrings []string) {
 	if len(input) <= 0 {
 		return []string{}
 	}
 
-	sortedAndWithoutEmptyStrings = s.RemoveEmptyStrings(input)
-	sortedAndWithoutEmptyStrings = s.SortStringSlice(sortedAndWithoutEmptyStrings)
+	sortedAndWithoutEmptyStrings = RemoveEmptyStrings(input)
+	sortedAndWithoutEmptyStrings = SortStringSlice(sortedAndWithoutEmptyStrings)
 
 	return sortedAndWithoutEmptyStrings
 }
 
-func (s *SlicesService) SortVersionStringSlice(input []string) (sorted []string) {
-	return s.SortStringSlice(input)
+func SortVersionStringSlice(input []string) (sorted []string) {
+	return SortStringSlice(input)
 }
 
-func (s *SlicesService) SplitStrings(input []string, splitAt string) (splitted []string) {
+func SplitStrings(input []string, splitAt string) (splitted []string) {
 	if len(input) <= 0 {
 		return []string{}
 	}
@@ -545,13 +551,13 @@ func (s *SlicesService) SplitStrings(input []string, splitAt string) (splitted [
 	return splitted
 }
 
-func (s *SlicesService) SplitStringsAndRemoveEmpty(input []string, splitAt string) (splitted []string) {
-	splitted = s.SplitStrings(input, splitAt)
-	splitted = s.RemoveEmptyStrings(splitted)
+func SplitStringsAndRemoveEmpty(input []string, splitAt string) (splitted []string) {
+	splitted = SplitStrings(input, splitAt)
+	splitted = RemoveEmptyStrings(splitted)
 	return splitted
 }
 
-func (s *SlicesService) ToLower(input []string) (lower []string) {
+func ToLower(input []string) (lower []string) {
 	lower = []string{}
 
 	for _, i := range input {
@@ -561,7 +567,7 @@ func (s *SlicesService) ToLower(input []string) (lower []string) {
 	return lower
 }
 
-func (s *SlicesService) TrimPrefix(sliceOfStrings []string, prefixToRemove string) (sliceOfStringsWithPrefixRemoved []string) {
+func TrimPrefix(sliceOfStrings []string, prefixToRemove string) (sliceOfStringsWithPrefixRemoved []string) {
 	if len(sliceOfStrings) <= 0 {
 		return []string{}
 	}
@@ -580,7 +586,7 @@ func (s *SlicesService) TrimPrefix(sliceOfStrings []string, prefixToRemove strin
 	return sliceOfStringsWithPrefixRemoved
 }
 
-func (s *SlicesService) TrimSpace(toTrim []string) (trimmed []string) {
+func TrimSpace(toTrim []string) (trimmed []string) {
 	if len(toTrim) <= 0 {
 		return []string{}
 	}
