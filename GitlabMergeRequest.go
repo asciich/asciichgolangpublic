@@ -4,6 +4,7 @@ import (
 	"time"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type GitlabMergeRequest struct {
@@ -117,7 +118,7 @@ func (g *GitlabMergeRequest) GetLabels() (labels []string, err error) {
 		return nil, TracedError("labels is nil after evaluation")
 	}
 
-	labels = Slices().SortStringSlice(labels)
+	labels = aslices.SortStringSlice(labels)
 
 	return labels, nil
 }

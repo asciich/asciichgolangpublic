@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 // A CommandExecutorDirectory implements the functionality of a `Directory` by
@@ -605,7 +606,7 @@ func (c *CommandExecutorDirectory) ListFilePaths(listFileOptions *ListFileOption
 		}
 	}
 
-	filePaths = Slices().SortStringSlice(filePaths)
+	filePaths = aslices.SortStringSlice(filePaths)
 
 	return filePaths, nil
 }
@@ -689,7 +690,7 @@ func (c *CommandExecutorDirectory) ListSubDirectories(options *ListDirectoryOpti
 		}
 	}
 
-	pathsToAdd = Slices().SortStringSlice(pathsToAdd)
+	pathsToAdd = aslices.SortStringSlice(pathsToAdd)
 
 	subDirectories = []Directory{}
 	for _, pathToAdd := range pathsToAdd {

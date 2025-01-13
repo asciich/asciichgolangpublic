@@ -1,5 +1,9 @@
 package asciichgolangpublic
 
+import (
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+)
+
 type GitlabSyncBranchOptions struct {
 	// Define the target branch where the files are synced to.
 	// Can be specified by either setting the target branch as object or by string.
@@ -25,7 +29,7 @@ func (g *GitlabSyncBranchOptions) GetDeepCopy() (copy *GitlabSyncBranchOptions) 
 	}
 
 	if g.PathsToSync != nil {
-		copy.PathsToSync = Slices().GetDeepCopyOfStringsSlice(g.PathsToSync)
+		copy.PathsToSync = aslices.GetDeepCopyOfStringsSlice(g.PathsToSync)
 	}
 
 	return copy

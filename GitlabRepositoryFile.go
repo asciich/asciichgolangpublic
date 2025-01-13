@@ -4,6 +4,8 @@ import (
 	"errors"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
+
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 var ErrGitlabRepositoryFileDoesNotExist = errors.New("Gitlab repository file does not exist")
@@ -608,7 +610,7 @@ func (g *GitlabRepositoryFile) WriteFileContentByBytes(content []byte, commitMes
 			return err
 		}
 
-		if Slices().ByteSlicesEqual(currentContent, content) {
+		if aslices.ByteSlicesEqual(currentContent, content) {
 			if verbose {
 				LogInfof(
 					"Content of Gitlab repository file '%s' in project '%s' is already up to date.",

@@ -2,8 +2,11 @@ package asciichgolangpublic
 
 import (
 	"fmt"
+	"sort"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
+
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type GitlabRunnersService struct {
@@ -437,7 +440,7 @@ func (s *GitlabRunnersService) GetRunnerNamesList() (runnerNames []string, err e
 		runnerNames = append(runnerNames, nameToAdd)
 	}
 
-	runnerNames = Slices().SortStringSlice(runnerNames)
+	sort.Strings(runnerNames)
 
 	return runnerNames, err
 }
@@ -482,7 +485,7 @@ func (s *GitlabRunnersService) RunnerByNameExists(runnerName string) (exists boo
 		return false, err
 	}
 
-	exists = Slices().ContainsString(runnerNames, runnerName)
+	exists = aslices.ContainsString(runnerNames, runnerName)
 	return exists, nil
 }
 

@@ -1,6 +1,9 @@
 package asciichgolangpublic
 
-import "strings"
+import (
+	"strings"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+)
 
 type TmuxSession struct {
 	name string
@@ -128,7 +131,7 @@ func (t *TmuxSession) Exists(verbose bool) (exists bool, err error) {
 		return false, err
 	}
 
-	exists = Slices().ContainsString(sessionNames, name)
+	exists = aslices.ContainsString(sessionNames, name)
 
 	if exists {
 		if verbose {

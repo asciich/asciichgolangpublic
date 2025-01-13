@@ -6,7 +6,10 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"sort"
 	"time"
+
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type TarArchivesService struct {
@@ -184,8 +187,9 @@ func (t *TarArchivesService) ListFileNamesFromTarArchiveBytes(archiveBytes []byt
 		fileNames = append(fileNames, header.Name)
 	}
 
-	fileNames = Slices().RemoveEmptyStrings(fileNames)
-	fileNames = Slices().SortStringSlice(fileNames)
+	fileNames = aslices.RemoveEmptyStrings(fileNames)
+
+	sort.Strings(fileNames)
 
 	return fileNames, nil
 }

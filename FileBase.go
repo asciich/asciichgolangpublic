@@ -10,6 +10,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/checksums"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 var ErrFileBaseParentNotSet = errors.New("parent is not set")
@@ -210,7 +211,7 @@ func (f *FileBase) EnsureLineInFile(line string, verbose bool) (err error) {
 		return err
 	}
 
-	if Slices().ContainsString(lines, line) {
+	if aslices.ContainsString(lines, line) {
 		LogInfof("Line '%s' already present in '%s'.", line, localPath)
 	} else {
 		err := parent.AppendLine(line, verbose)
@@ -245,7 +246,7 @@ func (f *FileBase) GetFileTypeDescription(verbose bool) (fileTypeDescription str
 		return "", err
 	}
 
-	stdoutLines = Slices().RemoveEmptyStrings(stdoutLines)
+	stdoutLines = aslices.RemoveEmptyStrings(stdoutLines)
 	if len(stdoutLines) != 1 {
 		return "", TracedErrorf("Expected exactly one line left bug got: '%v'", stdoutLines)
 	}
@@ -1411,7 +1412,7 @@ func (f *FileBase) SortBlocksInFile(verbose bool) (err error) {
 		return err
 	}
 
-	blocks = Slices().SortStringSlice(blocks)
+	blocks = aslices.SortStringSlice(blocks)
 
 	err = f.WriteTextBlocks(blocks, verbose)
 	if err != nil {

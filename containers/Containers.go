@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 // Returns true if running in a container like docker container.
@@ -34,7 +35,7 @@ func IsRunningInsideContainer(verbose bool) (isRunningInContainer bool, err erro
 
 		pathToCheck := splittedLine[2]
 
-		if !asciichgolangpublic.Slices().ContainsString([]string{"/", "/init.scope"}, pathToCheck) {
+		if !aslices.ContainsString([]string{"/", "/init.scope"}, pathToCheck) {
 			if verbose {
 				asciichgolangpublic.LogInfo("Currently running in a container")
 			}

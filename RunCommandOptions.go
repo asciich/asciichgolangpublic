@@ -1,5 +1,9 @@
 package asciichgolangpublic
 
+import (
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+)
+
 type RunCommandOptions struct {
 	Command            []string
 	TimeoutString      string
@@ -25,7 +29,7 @@ func (o *RunCommandOptions) GetCommand() (command []string, err error) {
 		return nil, TracedError("command not set")
 	}
 
-	command = Slices().GetDeepCopyOfStringsSlice(o.Command)
+	command = aslices.GetDeepCopyOfStringsSlice(o.Command)
 
 	if o.IsTimeoutSet() {
 		timeout, err := o.GetTimeoutSecondsAsString()

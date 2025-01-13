@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -1694,7 +1695,7 @@ func (l *LocalGitRepository) ListBranchNames(verbose bool) (branchNames []string
 		branchNames = append(branchNames, nameToAdd)
 	}
 
-	branchNames = Slices().SortStringSlice(branchNames)
+	sort.Strings(branchNames)
 
 	if verbose {
 		path, hostDescripton, err := l.GetPathAndHostDescription()

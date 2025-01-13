@@ -3,6 +3,8 @@ package asciichgolangpublic
 import (
 	"path/filepath"
 	"strings"
+	
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type GitlabCreateProjectOptions struct {
@@ -135,8 +137,8 @@ func (o *GitlabCreateProjectOptions) GetGroupNames(verbose bool) (groupNames []s
 	}
 
 	groupNames = strings.Split(pathOnly, "/")
-	groupNames = Slices().RemoveEmptyStrings(groupNames)
-	groupNames = Slices().RemoveMatchingStrings(groupNames, ".")
+	groupNames = aslices.RemoveEmptyStrings(groupNames)
+	groupNames = aslices.RemoveMatchingStrings(groupNames, ".")
 
 	if verbose {
 		LogInfof(

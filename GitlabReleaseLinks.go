@@ -1,6 +1,10 @@
 package asciichgolangpublic
 
-import gitlab "gitlab.com/gitlab-org/api/client-go"
+import (
+	gitlab "gitlab.com/gitlab-org/api/client-go"
+
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+)
 
 type GitlabReleaseLinks struct {
 	gitlabRelease *GitlabRelease
@@ -432,7 +436,7 @@ func (g *GitlabReleaseLinks) ReleaseLinkByNameExists(linkName string, verbose bo
 		return false, err
 	}
 
-	exists = Slices().ContainsString(releaseNames, linkName)
+	exists = aslices.ContainsString(releaseNames, linkName)
 
 	return exists, nil
 }

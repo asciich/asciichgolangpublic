@@ -4,6 +4,7 @@ import (
 	"time"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type GitlabBranches struct {
@@ -172,7 +173,7 @@ func (g *GitlabBranches) DeleteAllBranchesExceptDefaultBranch(verbose bool) (err
 		}
 
 		for _, deleted := range deletedBranchNames {
-			if Slices().ContainsString(currentBranchNames, deleted) {
+			if aslices.ContainsString(currentBranchNames, deleted) {
 				branchNotDeletedYetFound = true
 				break
 			}
@@ -274,7 +275,7 @@ func (g *GitlabBranches) GetBranchNamesExceptDefaultBranch(verbose bool) (branch
 		return nil, err
 	}
 
-	branchNames = Slices().RemoveString(allBranchNames, defaultBranchName)
+	branchNames = aslices.RemoveString(allBranchNames, defaultBranchName)
 
 	return branchNames, nil
 }

@@ -1,5 +1,9 @@
 package asciichgolangpublic
 
+import (
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+)
+
 type GitlabWriteFileOptions struct {
 	Path          string
 	Content       []byte
@@ -45,7 +49,7 @@ func (g *GitlabWriteFileOptions) GetDeepCopy() (copy *GitlabWriteFileOptions) {
 	*copy = *g
 
 	if len(g.Content) > 0 {
-		copy.Content = Slices().GetDeepCopyOfByteSlice(g.Content)
+		copy.Content = aslices.GetDeepCopyOfByteSlice(g.Content)
 	}
 
 	return copy

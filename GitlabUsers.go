@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
+	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type GitlabUsers struct {
@@ -510,6 +511,6 @@ func (u *GitlabUsers) UserByUserNameExists(username string) (userExists bool, er
 		return false, err
 	}
 
-	userExists = Slices().ContainsString(userNameList, username)
+	userExists = aslices.ContainsString(userNameList, username)
 	return userExists, nil
 }

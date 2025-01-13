@@ -1,5 +1,9 @@
 package asciichgolangpublic
 
+import (
+	"sort"
+)
+
 type GitlabCreateMergeRequestOptions struct {
 	SourceBranchName                string
 	TargetBranchName                string
@@ -62,14 +66,14 @@ func (g *GitlabCreateMergeRequestOptions) GetLabels() (labels []string, err erro
 	return g.Labels, nil
 }
 
-func (g *GitlabCreateMergeRequestOptions) GetLabelsOrEmptySliceIfUnset() (lables []string) {
+func (g *GitlabCreateMergeRequestOptions) GetLabelsOrEmptySliceIfUnset() (labels []string) {
 	if g.Labels == nil {
 		return []string{}
 	}
 
-	lables = Slices().SortStringSlice(g.Labels)
+	sort.Strings(labels)
 
-	return lables
+	return labels
 }
 
 func (g *GitlabCreateMergeRequestOptions) GetSourceBranchName() (sourceBranchName string, err error) {
