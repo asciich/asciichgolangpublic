@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type GitRepositoryTag struct {
 	GitTagBase
 	name          string
@@ -8,7 +13,7 @@ type GitRepositoryTag struct {
 
 func GetGitRepositoryTagByName(tagName string) (g *GitRepositoryTag, err error) {
 	if tagName == "" {
-		return nil, TracedErrorEmptyString("tagName")
+		return nil, errors.TracedErrorEmptyString("tagName")
 	}
 
 	g = NewGitRepositoryTag()
@@ -23,11 +28,11 @@ func GetGitRepositoryTagByName(tagName string) (g *GitRepositoryTag, err error) 
 
 func GetGitRepositoryTagByNameAndRepository(tagName string, gitRepository GitRepository) (g *GitRepositoryTag, err error) {
 	if tagName == "" {
-		return nil, TracedErrorEmptyString("tagName")
+		return nil, errors.TracedErrorEmptyString("tagName")
 	}
 
 	if gitRepository == nil {
-		return nil, TracedErrorNil("gitRepository")
+		return nil, errors.TracedErrorNil("gitRepository")
 	}
 
 	g, err = GetGitRepositoryTagByName(tagName)
@@ -46,7 +51,7 @@ func GetGitRepositoryTagByNameAndRepository(tagName string, gitRepository GitRep
 func MustGetGitRepositoryTagByName(tagName string) (g *GitRepositoryTag) {
 	g, err := GetGitRepositoryTagByName(tagName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return g
@@ -55,7 +60,7 @@ func MustGetGitRepositoryTagByName(tagName string) (g *GitRepositoryTag) {
 func MustGetGitRepositoryTagByNameAndRepository(tagName string, gitRepository GitRepository) (g *GitRepositoryTag) {
 	g, err := GetGitRepositoryTagByNameAndRepository(tagName, gitRepository)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return g
@@ -71,7 +76,7 @@ func NewGitRepositoryTag() (g *GitRepositoryTag) {
 
 func (g *GitRepositoryTag) GetGitRepository() (gitRepository GitRepository, err error) {
 	if g.gitRepository == nil {
-		return nil, TracedErrorf("gitRepository not set")
+		return nil, errors.TracedErrorf("gitRepository not set")
 	}
 
 	return g.gitRepository, nil
@@ -93,7 +98,7 @@ func (g *GitRepositoryTag) GetHash() (hash string, err error) {
 
 func (g *GitRepositoryTag) GetName() (name string, err error) {
 	if g.name == "" {
-		return "", TracedErrorf("name not set")
+		return "", errors.TracedErrorf("name not set")
 	}
 
 	return g.name, nil
@@ -125,7 +130,7 @@ func (g *GitRepositoryTag) IsVersionTag() (isVersionTag bool, err error) {
 func (g *GitRepositoryTag) MustGetGitRepository() (gitRepository GitRepository) {
 	gitRepository, err := g.GetGitRepository()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitRepository
@@ -134,7 +139,7 @@ func (g *GitRepositoryTag) MustGetGitRepository() (gitRepository GitRepository) 
 func (g *GitRepositoryTag) MustGetHash() (hash string) {
 	hash, err := g.GetHash()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hash
@@ -143,7 +148,7 @@ func (g *GitRepositoryTag) MustGetHash() (hash string) {
 func (g *GitRepositoryTag) MustGetName() (name string) {
 	name, err := g.GetName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -152,7 +157,7 @@ func (g *GitRepositoryTag) MustGetName() (name string) {
 func (g *GitRepositoryTag) MustGetVersion() (version Version) {
 	version, err := g.GetVersion()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return version
@@ -161,7 +166,7 @@ func (g *GitRepositoryTag) MustGetVersion() (version Version) {
 func (g *GitRepositoryTag) MustIsVersionTag() (isVersionTag bool) {
 	isVersionTag, err := g.IsVersionTag()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isVersionTag
@@ -170,20 +175,20 @@ func (g *GitRepositoryTag) MustIsVersionTag() (isVersionTag bool) {
 func (g *GitRepositoryTag) MustSetGitRepository(gitRepository GitRepository) {
 	err := g.SetGitRepository(gitRepository)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRepositoryTag) MustSetName(name string) {
 	err := g.SetName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRepositoryTag) SetGitRepository(gitRepository GitRepository) (err error) {
 	if gitRepository == nil {
-		return TracedErrorf("gitRepository is nil")
+		return errors.TracedErrorf("gitRepository is nil")
 	}
 
 	g.gitRepository = gitRepository
@@ -193,7 +198,7 @@ func (g *GitRepositoryTag) SetGitRepository(gitRepository GitRepository) (err er
 
 func (g *GitRepositoryTag) SetName(name string) (err error) {
 	if name == "" {
-		return TracedErrorf("name is empty string")
+		return errors.TracedErrorf("name is empty string")
 	}
 
 	g.name = name

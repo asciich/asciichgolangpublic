@@ -1,6 +1,10 @@
 package asciichgolangpublic
 
-import "gopkg.in/yaml.v3"
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+	"gopkg.in/yaml.v3"
+)
 
 type YamlService struct{}
 
@@ -15,7 +19,7 @@ func Yaml() (yaml *YamlService) {
 func (y *YamlService) DataToYamlBytes(input interface{}) (yamlBytes []byte, err error) {
 	yamlBytes, err = yaml.Marshal(input)
 	if err != nil {
-		return nil, TracedErrorf("Failed to marshal data to yaml: '%w'", err)
+		return nil, errors.TracedErrorf("Failed to marshal data to yaml: '%w'", err)
 	}
 
 	yamlBytes = append([]byte("---\n"), yamlBytes...)
@@ -25,7 +29,7 @@ func (y *YamlService) DataToYamlBytes(input interface{}) (yamlBytes []byte, err 
 
 func (y *YamlService) DataToYamlFile(jsonData interface{}, outputFile File, verbose bool) (err error) {
 	if outputFile == nil {
-		return TracedErrorNil("outputFile")
+		return errors.TracedErrorNil("outputFile")
 	}
 
 	yamlString, err := y.DataToYamlString(jsonData)
@@ -55,7 +59,7 @@ func (y *YamlService) DataToYamlString(input interface{}) (yamlString string, er
 func (y *YamlService) MustDataToYamlBytes(input interface{}) (yamlBytes []byte) {
 	yamlBytes, err := y.DataToYamlBytes(input)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return yamlBytes
@@ -64,14 +68,14 @@ func (y *YamlService) MustDataToYamlBytes(input interface{}) (yamlBytes []byte) 
 func (y *YamlService) MustDataToYamlFile(jsonData interface{}, outputFile File, verbose bool) {
 	err := y.DataToYamlFile(jsonData, outputFile, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (y *YamlService) MustDataToYamlString(input interface{}) (yamlString string) {
 	yamlString, err := y.DataToYamlString(input)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return yamlString

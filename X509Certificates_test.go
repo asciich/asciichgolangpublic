@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/continuousintegration"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func TestX509CertificatesCreateRootCaIntoTemporaryDirectory(t *testing.T) {
@@ -79,8 +81,8 @@ func TestX509CertificatesCreateIntermediateCertificateIntoTemporaryDirectory(t *
 }
 
 func TestX509CertificateCreateAndSignIntermediateCertificate(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogInfo("Not implemented on Github CI")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogInfo("Not implemented on Github CI")
 		return
 	}
 

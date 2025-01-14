@@ -1,6 +1,8 @@
 package asciichgolangpublic
 
 import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -15,21 +17,21 @@ func NewGitlabSettings() (gitlabSettings *GitlabSettings) {
 func (g *GitlabSettings) MustDisableAutoDevops(verbose bool) {
 	err := g.DisableAutoDevops(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabSettings) MustDisableSignup(verbose bool) {
 	err := g.DisableSignup(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabSettings) MustGetCurrentSettingsNative() (nativeSettings *gitlab.Settings) {
 	nativeSettings, err := g.GetCurrentSettingsNative()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeSettings
@@ -38,7 +40,7 @@ func (g *GitlabSettings) MustGetCurrentSettingsNative() (nativeSettings *gitlab.
 func (g *GitlabSettings) MustGetFqdn() (fqdn string) {
 	fqdn, err := g.GetFqdn()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return fqdn
@@ -47,7 +49,7 @@ func (g *GitlabSettings) MustGetFqdn() (fqdn string) {
 func (g *GitlabSettings) MustGetGitlab() (gitlab *GitlabInstance) {
 	gitlab, err := g.GetGitlab()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlab
@@ -56,7 +58,7 @@ func (g *GitlabSettings) MustGetGitlab() (gitlab *GitlabInstance) {
 func (g *GitlabSettings) MustGetNativeClient() (nativeClient *gitlab.Client) {
 	nativeClient, err := g.GetNativeClient()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeClient
@@ -65,7 +67,7 @@ func (g *GitlabSettings) MustGetNativeClient() (nativeClient *gitlab.Client) {
 func (g *GitlabSettings) MustGetNativeSettingsService() (nativeSettingsService *gitlab.SettingsService) {
 	nativeSettingsService, err := g.GetNativeSettingsService()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeSettingsService
@@ -74,7 +76,7 @@ func (g *GitlabSettings) MustGetNativeSettingsService() (nativeSettingsService *
 func (g *GitlabSettings) MustIsAutoDevopsEnabled() (isAutoDevopsEnabled bool) {
 	isAutoDevopsEnabled, err := g.IsAutoDevopsEnabled()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isAutoDevopsEnabled
@@ -83,7 +85,7 @@ func (g *GitlabSettings) MustIsAutoDevopsEnabled() (isAutoDevopsEnabled bool) {
 func (g *GitlabSettings) MustIsSignupEnabled() (isSignupEnabled bool) {
 	isSignupEnabled, err := g.IsSignupEnabled()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isSignupEnabled
@@ -92,7 +94,7 @@ func (g *GitlabSettings) MustIsSignupEnabled() (isSignupEnabled bool) {
 func (g *GitlabSettings) MustSetGitlab(gitlab *GitlabInstance) {
 	err := g.SetGitlab(gitlab)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
@@ -109,7 +111,7 @@ func (s *GitlabSettings) DisableAutoDevops(verbose bool) (err error) {
 
 	if isAutoDevopsEnabled {
 		if verbose {
-			LogInfof("Disable AutoDevops on gitlab '%s' started.", fqdn)
+			logging.LogInfof("Disable AutoDevops on gitlab '%s' started.", fqdn)
 		}
 
 		nativeSettings, err := s.GetNativeSettingsService()
@@ -125,15 +127,15 @@ func (s *GitlabSettings) DisableAutoDevops(verbose bool) (err error) {
 			return err
 		}
 		if verbose {
-			LogChangedf("Dislabed AutoDevops on gitlab '%s'.", fqdn)
+			logging.LogChangedf("Dislabed AutoDevops on gitlab '%s'.", fqdn)
 		}
 
 		if verbose {
-			LogInfof("Disable AutoDevops on gitlab '%s' finished.", fqdn)
+			logging.LogInfof("Disable AutoDevops on gitlab '%s' finished.", fqdn)
 		}
 	} else {
 		if verbose {
-			LogInfof("Autodevops on gitlab '%s' already disabled.", fqdn)
+			logging.LogInfof("Autodevops on gitlab '%s' already disabled.", fqdn)
 		}
 	}
 
@@ -153,7 +155,7 @@ func (s *GitlabSettings) DisableSignup(verbose bool) (err error) {
 
 	if isSignupEnabled {
 		if verbose {
-			LogInfof("Disable signup to gitlab '%s' started.", fqdn)
+			logging.LogInfof("Disable signup to gitlab '%s' started.", fqdn)
 		}
 
 		nativeSettings, err := s.GetNativeSettingsService()
@@ -169,15 +171,15 @@ func (s *GitlabSettings) DisableSignup(verbose bool) (err error) {
 			return err
 		}
 		if verbose {
-			LogChangedf("Dislabed signup to gitlab '%s'.", fqdn)
+			logging.LogChangedf("Dislabed signup to gitlab '%s'.", fqdn)
 		}
 
 		if verbose {
-			LogInfof("Disable signup to gitlab '%s' finished.", fqdn)
+			logging.LogInfof("Disable signup to gitlab '%s' finished.", fqdn)
 		}
 	} else {
 		if verbose {
-			LogInfof("Signup to gitlab '%s' already disabled.", fqdn)
+			logging.LogInfof("Signup to gitlab '%s' already disabled.", fqdn)
 		}
 	}
 	return nil
@@ -213,7 +215,7 @@ func (s *GitlabSettings) GetFqdn() (fqdn string, err error) {
 
 func (s *GitlabSettings) GetGitlab() (gitlab *GitlabInstance, err error) {
 	if s.gitlab == nil {
-		return nil, TracedError("gitlab not set")
+		return nil, errors.TracedError("gitlab not set")
 	}
 
 	return s.gitlab, nil
@@ -268,13 +270,13 @@ func (s *GitlabSettings) IsSignupEnabled() (isSignupEnabled bool, err error) {
 func (s *GitlabSettings) MustDisableAutoDevos(verbose bool) {
 	err := s.DisableAutoDevops(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (s *GitlabSettings) SetGitlab(gitlab *GitlabInstance) (err error) {
 	if gitlab == nil {
-		return TracedError("gitlab is nil")
+		return errors.TracedError("gitlab is nil")
 	}
 
 	s.gitlab = gitlab

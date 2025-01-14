@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type LocalDirectory struct {
@@ -16,7 +17,7 @@ type LocalDirectory struct {
 
 func GetLocalDirectoryByPath(path string) (l *LocalDirectory, err error) {
 	if path == "" {
-		return nil, TracedErrorEmptyString("path")
+		return nil, errors.TracedErrorEmptyString("path")
 	}
 
 	localDirectory := NewLocalDirectory()
@@ -32,7 +33,7 @@ func GetLocalDirectoryByPath(path string) (l *LocalDirectory, err error) {
 func MustGetLocalDirectoryByPath(path string) (l *LocalDirectory) {
 	l, err := GetLocalDirectoryByPath(path)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return l
@@ -49,7 +50,7 @@ func NewLocalDirectory() (l *LocalDirectory) {
 
 func (l *LocalDirectory) Chmod(chmodOptions *ChmodOptions) (err error) {
 	if chmodOptions == nil {
-		return TracedErrorNil("chmodOptions")
+		return errors.TracedErrorNil("chmodOptions")
 	}
 
 	chmodString, err := chmodOptions.GetPermissionsString()
@@ -73,7 +74,7 @@ func (l *LocalDirectory) Chmod(chmodOptions *ChmodOptions) (err error) {
 	}
 
 	if chmodOptions.Verbose {
-		LogChangedf("Chmod '%s' for local directory '%s'.", chmodString, localPath)
+		logging.LogChangedf("Chmod '%s' for local directory '%s'.", chmodString, localPath)
 	}
 
 	return nil
@@ -81,7 +82,7 @@ func (l *LocalDirectory) Chmod(chmodOptions *ChmodOptions) (err error) {
 
 func (l *LocalDirectory) CopyContentToDirectory(destinationDir Directory, verbose bool) (err error) {
 	if destinationDir == nil {
-		return TracedError("destinationDir is empty string")
+		return errors.TracedError("destinationDir is empty string")
 	}
 
 	srcPath, err := l.GetLocalPath()
@@ -113,7 +114,7 @@ func (l *LocalDirectory) CopyContentToDirectory(destinationDir Directory, verbos
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Copied files from '%s' to '%s':\n%s",
 			srcPath,
 			destPath,
@@ -126,7 +127,7 @@ func (l *LocalDirectory) CopyContentToDirectory(destinationDir Directory, verbos
 
 func (l *LocalDirectory) CopyContentToLocalDirectory(destDirectory *LocalDirectory, verbose bool) (err error) {
 	if destDirectory == nil {
-		return TracedErrorNil("destDirectory")
+		return errors.TracedErrorNil("destDirectory")
 	}
 
 	destPath, err := destDirectory.GetLocalPath()
@@ -145,7 +146,7 @@ func (l *LocalDirectory) CopyContentToLocalDirectory(destDirectory *LocalDirecto
 	}
 
 	if !exists {
-		return TracedErrorf("Unable to copy content to local directory, '%s' does not exist.", srcPath)
+		return errors.TracedErrorf("Unable to copy content to local directory, '%s' does not exist.", srcPath)
 	}
 
 	_, err = Bash().RunCommand(
@@ -160,7 +161,7 @@ func (l *LocalDirectory) CopyContentToLocalDirectory(destDirectory *LocalDirecto
 	}
 
 	if verbose {
-		LogChangedf("Copied files from '%s' to '%s'.", srcPath, destPath)
+		logging.LogChangedf("Copied files from '%s' to '%s'.", srcPath, destPath)
 	}
 
 	return nil
@@ -168,7 +169,7 @@ func (l *LocalDirectory) CopyContentToLocalDirectory(destDirectory *LocalDirecto
 
 func (l *LocalDirectory) CopyFileToTemporaryFile(verbose bool, filePath ...string) (copy File, err error) {
 	if len(filePath) <= 0 {
-		return nil, TracedErrorEmptyString("filePath")
+		return nil, errors.TracedErrorEmptyString("filePath")
 	}
 
 	fileToCopy, err := l.GetFileInDirectory(filePath...)
@@ -186,7 +187,7 @@ func (l *LocalDirectory) CopyFileToTemporaryFile(verbose bool, filePath ...strin
 
 func (l *LocalDirectory) CopyFileToTemporaryFileAsLocalFile(verbose bool, filePath ...string) (copy *LocalFile, err error) {
 	if len(filePath) <= 0 {
-		return nil, TracedErrorEmptyString("filePath")
+		return nil, errors.TracedErrorEmptyString("filePath")
 	}
 
 	interfaceCopy, err := l.CopyFileToTemporaryFile(verbose, filePath...)
@@ -196,7 +197,7 @@ func (l *LocalDirectory) CopyFileToTemporaryFileAsLocalFile(verbose bool, filePa
 
 	copy, ok := interfaceCopy.(*LocalFile)
 	if !ok {
-		return nil, TracedErrorf("Internal error: Unable to convert to *LocalFile: '%v'", interfaceCopy)
+		return nil, errors.TracedErrorf("Internal error: Unable to convert to *LocalFile: '%v'", interfaceCopy)
 	}
 
 	return copy, nil
@@ -215,7 +216,7 @@ func (l *LocalDirectory) Create(verbose bool) (err error) {
 
 	if exists {
 		if verbose {
-			LogInfof("Local directory '%s' already exists. Skip create.", path)
+			logging.LogInfof("Local directory '%s' already exists. Skip create.", path)
 		}
 	} else {
 		err = os.Mkdir(path, os.ModePerm)
@@ -246,11 +247,11 @@ func (l *LocalDirectory) Create(verbose bool) (err error) {
 		}
 
 		if !existsAfterCreate {
-			return TracedErrorf("Local directory '%s' does not exist after creation.", path)
+			return errors.TracedErrorf("Local directory '%s' does not exist after creation.", path)
 		}
 
 		if verbose {
-			LogChangedf("Created local directory '%s'", path)
+			logging.LogChangedf("Created local directory '%s'", path)
 		}
 	}
 
@@ -283,7 +284,7 @@ func (l *LocalDirectory) CreateFileInDirectory(verbose bool, path ...string) (cr
 
 func (l *LocalDirectory) CreateFilesInDirectory(filesToCreate []string, verbose bool) (createdFiles []File, err error) {
 	if filesToCreate == nil {
-		return nil, TracedErrorNil("filesToCreate")
+		return nil, errors.TracedErrorNil("filesToCreate")
 	}
 
 	createdFiles = []File{}
@@ -302,7 +303,7 @@ func (l *LocalDirectory) CreateFilesInDirectory(filesToCreate []string, verbose 
 			return nil, err
 		}
 
-		LogInfof("Created '%d' files in directory '%s'.", len(createdFiles), dirPath)
+		logging.LogInfof("Created '%d' files in directory '%s'.", len(createdFiles), dirPath)
 	}
 
 	return createdFiles, nil
@@ -310,7 +311,7 @@ func (l *LocalDirectory) CreateFilesInDirectory(filesToCreate []string, verbose 
 
 func (l *LocalDirectory) CreateSubDirectory(subDirName string, verbose bool) (createdSubDir Directory, err error) {
 	if subDirName == "" {
-		return nil, TracedErrorEmptyString("subDirName")
+		return nil, errors.TracedErrorEmptyString("subDirName")
 	}
 
 	subDirectory, subDirectoryPath, err := l.GetSubDirectoryAndLocalPath(subDirName)
@@ -325,7 +326,7 @@ func (l *LocalDirectory) CreateSubDirectory(subDirName string, verbose bool) (cr
 
 	if subDirExists {
 		if verbose {
-			LogInfof("Sub directory '%s' already exists.", subDirectoryPath)
+			logging.LogInfof("Sub directory '%s' already exists.", subDirectoryPath)
 		}
 	} else {
 		err = subDirectory.Create(verbose)
@@ -334,7 +335,7 @@ func (l *LocalDirectory) CreateSubDirectory(subDirName string, verbose bool) (cr
 		}
 
 		if verbose {
-			LogChangedf("Sub directory '%s' already created.", subDirectoryPath)
+			logging.LogChangedf("Sub directory '%s' already created.", subDirectoryPath)
 		}
 	}
 
@@ -355,15 +356,15 @@ func (l *LocalDirectory) Delete(verbose bool) (err error) {
 	if exists {
 		err := os.RemoveAll(path)
 		if err != nil {
-			return TracedErrorf("Delete directory '%s' failed: '%w'", path, err)
+			return errors.TracedErrorf("Delete directory '%s' failed: '%w'", path, err)
 		}
 
 		if verbose {
-			LogChangedf("Deleted local directory '%s'", path)
+			logging.LogChangedf("Deleted local directory '%s'", path)
 		}
 	} else {
 		if verbose {
-			LogInfof("Local directory '%s' already absent. Skip delete.", path)
+			logging.LogInfof("Local directory '%s' already absent. Skip delete.", path)
 		}
 	}
 
@@ -382,19 +383,19 @@ func (l *LocalDirectory) Exists(verbose bool) (exists bool, err error) {
 			return false, nil
 		}
 
-		return false, TracedErrorf("Unable to evaluate if local directory exists: '%w'", err)
+		return false, errors.TracedErrorf("Unable to evaluate if local directory exists: '%w'", err)
 	}
 
 	exists = dirInfo.IsDir()
 
 	if verbose {
 		if exists {
-			LogInfof(
+			logging.LogInfof(
 				"Local directory '%s' exists.",
 				localPath,
 			)
 		} else {
-			LogInfof(
+			logging.LogInfof(
 				"Local directory '%s' does not exists.",
 				localPath,
 			)
@@ -426,7 +427,7 @@ func (l *LocalDirectory) GetDirName() (parentPath string, err error) {
 
 func (l *LocalDirectory) GetFileInDirectory(path ...string) (file File, err error) {
 	if len(path) <= 0 {
-		return nil, TracedError("path has no elements")
+		return nil, errors.TracedError("path has no elements")
 	}
 
 	dirPath, err := l.GetLocalPath()
@@ -449,7 +450,7 @@ func (l *LocalDirectory) GetFileInDirectory(path ...string) (file File, err erro
 
 func (l *LocalDirectory) GetFileInDirectoryAsLocalFile(filePath ...string) (localFile *LocalFile, err error) {
 	if len(filePath) <= 0 {
-		return nil, TracedErrorNil("filePath")
+		return nil, errors.TracedErrorNil("filePath")
 	}
 
 	fileInDir, err := l.GetFileInDirectory(filePath...)
@@ -459,7 +460,7 @@ func (l *LocalDirectory) GetFileInDirectoryAsLocalFile(filePath ...string) (loca
 
 	localFile, ok := fileInDir.(*LocalFile)
 	if !ok {
-		return nil, TracedError("Internal error: unable get as LocalFile")
+		return nil, errors.TracedError("Internal error: unable get as LocalFile")
 	}
 
 	return localFile, nil
@@ -527,7 +528,7 @@ func (l *LocalDirectory) GetGitRepositoriesAsLocalGitRepositories(verbose bool) 
 			return nil, err
 		}
 
-		LogInfof("Found '%d' git repositories in '%s'.", len(gitRepos), localPath)
+		logging.LogInfof("Found '%d' git repositories in '%s'.", len(gitRepos), localPath)
 	}
 
 	return gitRepos, nil
@@ -539,7 +540,7 @@ func (l *LocalDirectory) GetHostDescription() (hostDescription string, err error
 
 func (l *LocalDirectory) GetLocalPath() (localPath string, err error) {
 	if l.localPath == "" {
-		return "", TracedErrorf("localPath not set")
+		return "", errors.TracedErrorf("localPath not set")
 	}
 
 	return l.localPath, nil
@@ -570,7 +571,7 @@ func (l *LocalDirectory) GetPath() (dirPath string, err error) {
 
 func (l *LocalDirectory) GetSubDirectory(path ...string) (subDirectory Directory, err error) {
 	if len(path) <= 0 {
-		return nil, TracedError("path has no elements")
+		return nil, errors.TracedError("path has no elements")
 	}
 
 	dirPath, err := l.GetLocalPath()
@@ -642,7 +643,7 @@ func (l *LocalDirectory) IsLocalDirectory() (isLocalDirectory bool, err error) {
 
 func (l *LocalDirectory) ListFilePaths(listOptions *ListFileOptions) (filePathList []string, err error) {
 	if listOptions == nil {
-		return nil, TracedError("listOptions is nil")
+		return nil, errors.TracedError("listOptions is nil")
 	}
 
 	listOptions = listOptions.GetDeepCopy()
@@ -670,7 +671,7 @@ func (l *LocalDirectory) ListFilePaths(listOptions *ListFileOptions) (filePathLi
 		},
 	)
 	if err != nil {
-		return nil, TracedErrorf("Unable to filepath.Walk: '%w'", err)
+		return nil, errors.TracedErrorf("Unable to filepath.Walk: '%w'", err)
 	}
 
 	filePathList = aslices.RemoveEmptyStrings(filePathList)
@@ -691,7 +692,7 @@ func (l *LocalDirectory) ListFilePaths(listOptions *ListFileOptions) (filePathLi
 
 	if len(filePathList) <= 0 {
 		if !listOptions.AllowEmptyListIfNoFileIsFound {
-			return nil, TracedErrorf("No files in '%s' found", directoryPath)
+			return nil, errors.TracedErrorf("No files in '%s' found", directoryPath)
 		}
 	}
 
@@ -700,7 +701,7 @@ func (l *LocalDirectory) ListFilePaths(listOptions *ListFileOptions) (filePathLi
 
 func (l *LocalDirectory) ListFiles(options *ListFileOptions) (files []File, err error) {
 	if options == nil {
-		return nil, TracedError("options is nil")
+		return nil, errors.TracedError("options is nil")
 	}
 
 	optionsToUse := options.GetDeepCopy()
@@ -726,7 +727,7 @@ func (l *LocalDirectory) ListFiles(options *ListFileOptions) (files []File, err 
 
 func (l *LocalDirectory) ListSubDirectories(listDirectoryOptions *ListDirectoryOptions) (subDirectories []Directory, err error) {
 	if listDirectoryOptions == nil {
-		return nil, TracedErrorNil("listDirectoryOptions")
+		return nil, errors.TracedErrorNil("listDirectoryOptions")
 	}
 
 	pathsToAdd, err := l.ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions)
@@ -748,7 +749,7 @@ func (l *LocalDirectory) ListSubDirectories(listDirectoryOptions *ListDirectoryO
 
 func (l *LocalDirectory) ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions *ListDirectoryOptions) (subDirectoryPaths []string, err error) {
 	if listDirectoryOptions == nil {
-		return nil, TracedErrorNil("listDirectoryOptions")
+		return nil, errors.TracedErrorNil("listDirectoryOptions")
 	}
 
 	localPath, err := l.GetLocalPath()
@@ -798,28 +799,28 @@ func (l *LocalDirectory) ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions 
 func (l *LocalDirectory) MustChmod(chmodOptions *ChmodOptions) {
 	err := l.Chmod(chmodOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (l *LocalDirectory) MustCopyContentToDirectory(destinationDir Directory, verbose bool) {
 	err := l.CopyContentToDirectory(destinationDir, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (l *LocalDirectory) MustCopyContentToLocalDirectory(destDirectory *LocalDirectory, verbose bool) {
 	err := l.CopyContentToLocalDirectory(destDirectory, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (l *LocalDirectory) MustCopyFileToTemporaryFile(verbose bool, filePath ...string) (copy File) {
 	copy, err := l.CopyFileToTemporaryFile(verbose, filePath...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return copy
@@ -828,7 +829,7 @@ func (l *LocalDirectory) MustCopyFileToTemporaryFile(verbose bool, filePath ...s
 func (l *LocalDirectory) MustCopyFileToTemporaryFileAsLocalFile(verbose bool, filePath ...string) (copy *LocalFile) {
 	copy, err := l.CopyFileToTemporaryFileAsLocalFile(verbose, filePath...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return copy
@@ -837,14 +838,14 @@ func (l *LocalDirectory) MustCopyFileToTemporaryFileAsLocalFile(verbose bool, fi
 func (l *LocalDirectory) MustCreate(verbose bool) {
 	err := l.Create(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (l *LocalDirectory) MustCreateFileInDirectory(verbose bool, path ...string) (createdFile File) {
 	createdFile, err := l.CreateFileInDirectory(verbose, path...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdFile
@@ -853,7 +854,7 @@ func (l *LocalDirectory) MustCreateFileInDirectory(verbose bool, path ...string)
 func (l *LocalDirectory) MustCreateFilesInDirectory(filesToCreate []string, verbose bool) (createdFiles []File) {
 	createdFiles, err := l.CreateFilesInDirectory(filesToCreate, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdFiles
@@ -862,7 +863,7 @@ func (l *LocalDirectory) MustCreateFilesInDirectory(filesToCreate []string, verb
 func (l *LocalDirectory) MustCreateSubDirectory(subDirName string, verbose bool) (createdSubDir Directory) {
 	createdSubDir, err := l.CreateSubDirectory(subDirName, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdSubDir
@@ -871,14 +872,14 @@ func (l *LocalDirectory) MustCreateSubDirectory(subDirName string, verbose bool)
 func (l *LocalDirectory) MustDelete(verbose bool) {
 	err := l.Delete(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (l *LocalDirectory) MustExists(verbose bool) (exists bool) {
 	exists, err := l.Exists(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return exists
@@ -887,7 +888,7 @@ func (l *LocalDirectory) MustExists(verbose bool) (exists bool) {
 func (l *LocalDirectory) MustGetBaseName() (baseName string) {
 	baseName, err := l.GetBaseName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return baseName
@@ -896,7 +897,7 @@ func (l *LocalDirectory) MustGetBaseName() (baseName string) {
 func (l *LocalDirectory) MustGetDirName() (dirName string) {
 	dirName, err := l.GetDirName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return dirName
@@ -905,7 +906,7 @@ func (l *LocalDirectory) MustGetDirName() (dirName string) {
 func (l *LocalDirectory) MustGetFileInDirectory(path ...string) (file File) {
 	file, err := l.GetFileInDirectory(path...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return file
@@ -914,7 +915,7 @@ func (l *LocalDirectory) MustGetFileInDirectory(path ...string) (file File) {
 func (l *LocalDirectory) MustGetFileInDirectoryAsLocalFile(filePath ...string) (localFile *LocalFile) {
 	localFile, err := l.GetFileInDirectoryAsLocalFile(filePath...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return localFile
@@ -923,7 +924,7 @@ func (l *LocalDirectory) MustGetFileInDirectoryAsLocalFile(filePath ...string) (
 func (l *LocalDirectory) MustGetGitRepositories(verbose bool) (gitRepos []GitRepository) {
 	gitRepos, err := l.GetGitRepositories(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitRepos
@@ -932,7 +933,7 @@ func (l *LocalDirectory) MustGetGitRepositories(verbose bool) (gitRepos []GitRep
 func (l *LocalDirectory) MustGetGitRepositoriesAsLocalGitRepositories(verbose bool) (gitRepos []*LocalGitRepository) {
 	gitRepos, err := l.GetGitRepositoriesAsLocalGitRepositories(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitRepos
@@ -941,7 +942,7 @@ func (l *LocalDirectory) MustGetGitRepositoriesAsLocalGitRepositories(verbose bo
 func (l *LocalDirectory) MustGetHostDescription() (hostDescription string) {
 	hostDescription, err := l.GetHostDescription()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hostDescription
@@ -950,7 +951,7 @@ func (l *LocalDirectory) MustGetHostDescription() (hostDescription string) {
 func (l *LocalDirectory) MustGetLocalPath() (localPath string) {
 	localPath, err := l.GetLocalPath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return localPath
@@ -959,7 +960,7 @@ func (l *LocalDirectory) MustGetLocalPath() (localPath string) {
 func (l *LocalDirectory) MustGetParentDirectory() (parentDirectory Directory) {
 	parentDirectory, err := l.GetParentDirectory()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return parentDirectory
@@ -968,7 +969,7 @@ func (l *LocalDirectory) MustGetParentDirectory() (parentDirectory Directory) {
 func (l *LocalDirectory) MustGetPath() (dirPath string) {
 	dirPath, err := l.GetPath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return dirPath
@@ -977,7 +978,7 @@ func (l *LocalDirectory) MustGetPath() (dirPath string) {
 func (l *LocalDirectory) MustGetSubDirectory(path ...string) (subDirectory Directory) {
 	subDirectory, err := l.GetSubDirectory(path...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return subDirectory
@@ -986,7 +987,7 @@ func (l *LocalDirectory) MustGetSubDirectory(path ...string) (subDirectory Direc
 func (l *LocalDirectory) MustGetSubDirectoryAndLocalPath(path ...string) (subDirectory Directory, subDirectoryPath string) {
 	subDirectory, subDirectoryPath, err := l.GetSubDirectoryAndLocalPath(path...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return subDirectory, subDirectoryPath
@@ -995,7 +996,7 @@ func (l *LocalDirectory) MustGetSubDirectoryAndLocalPath(path ...string) (subDir
 func (l *LocalDirectory) MustIsEmptyDirectory(verbose bool) (isEmpty bool) {
 	isEmpty, err := l.IsEmptyDirectory(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isEmpty
@@ -1004,7 +1005,7 @@ func (l *LocalDirectory) MustIsEmptyDirectory(verbose bool) (isEmpty bool) {
 func (l *LocalDirectory) MustIsLocalDirectory() (isLocalDirectory bool) {
 	isLocalDirectory, err := l.IsLocalDirectory()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isLocalDirectory
@@ -1013,7 +1014,7 @@ func (l *LocalDirectory) MustIsLocalDirectory() (isLocalDirectory bool) {
 func (l *LocalDirectory) MustListFilePaths(listOptions *ListFileOptions) (filePathList []string) {
 	filePathList, err := l.ListFilePaths(listOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return filePathList
@@ -1022,7 +1023,7 @@ func (l *LocalDirectory) MustListFilePaths(listOptions *ListFileOptions) (filePa
 func (l *LocalDirectory) MustListFilePathsns(listOptions *ListFileOptions) (filePathList []string) {
 	filePathList, err := l.ListFilePaths(listOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return filePathList
@@ -1031,7 +1032,7 @@ func (l *LocalDirectory) MustListFilePathsns(listOptions *ListFileOptions) (file
 func (l *LocalDirectory) MustListFiles(options *ListFileOptions) (files []File) {
 	files, err := l.ListFiles(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return files
@@ -1040,7 +1041,7 @@ func (l *LocalDirectory) MustListFiles(options *ListFileOptions) (files []File) 
 func (l *LocalDirectory) MustListSubDirectories(listDirectoryOptions *ListDirectoryOptions) (subDirectories []Directory) {
 	subDirectories, err := l.ListSubDirectories(listDirectoryOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return subDirectories
@@ -1049,7 +1050,7 @@ func (l *LocalDirectory) MustListSubDirectories(listDirectoryOptions *ListDirect
 func (l *LocalDirectory) MustListSubDirectoriesAsAbsolutePaths(listDirectoryOptions *ListDirectoryOptions) (subDirectoryPaths []string) {
 	subDirectoryPaths, err := l.ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return subDirectoryPaths
@@ -1058,21 +1059,21 @@ func (l *LocalDirectory) MustListSubDirectoriesAsAbsolutePaths(listDirectoryOpti
 func (l *LocalDirectory) MustReplaceBetweenMarkers(verbose bool) {
 	err := l.ReplaceBetweenMarkers(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (l *LocalDirectory) MustSetLocalPath(localPath string) {
 	err := l.SetLocalPath(localPath)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (l *LocalDirectory) MustSubDirectoryExists(subDirName string, verbose bool) (subDirExists bool) {
 	subDirExists, err := l.SubDirectoryExists(subDirName, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return subDirExists
@@ -1101,7 +1102,7 @@ func (l *LocalDirectory) ReplaceBetweenMarkers(verbose bool) (err error) {
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Replaces between markers in '%d' files in '%s'.",
 			len(files),
 			path,
@@ -1113,7 +1114,7 @@ func (l *LocalDirectory) ReplaceBetweenMarkers(verbose bool) (err error) {
 
 func (l *LocalDirectory) SetLocalPath(localPath string) (err error) {
 	if localPath == "" {
-		return TracedErrorf("localPath is empty string")
+		return errors.TracedErrorf("localPath is empty string")
 	}
 
 	localPath, err = Paths().GetAbsolutePath(localPath)
@@ -1122,7 +1123,7 @@ func (l *LocalDirectory) SetLocalPath(localPath string) (err error) {
 	}
 
 	if !Paths().IsAbsolutePath(localPath) {
-		return TracedErrorf(
+		return errors.TracedErrorf(
 			"Path '%s' is not absolute. Beware this is an internal issue since the code before this line should fix that.",
 			localPath,
 		)
@@ -1135,7 +1136,7 @@ func (l *LocalDirectory) SetLocalPath(localPath string) (err error) {
 
 func (l *LocalDirectory) SubDirectoryExists(subDirName string, verbose bool) (subDirExists bool, err error) {
 	if subDirName == "" {
-		return false, TracedErrorEmptyString("subDirName")
+		return false, errors.TracedErrorEmptyString("subDirName")
 	}
 
 	subDir, err := l.GetSubDirectory(subDirName)

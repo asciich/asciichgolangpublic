@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type FilesService struct {
 }
 
@@ -10,7 +15,7 @@ func Files() (f *FilesService) {
 func MustReadFileAsString(path string) (content string) {
 	content, err := ReadFileAsString(path)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return content
@@ -19,7 +24,7 @@ func MustReadFileAsString(path string) (content string) {
 func MustWriteStringToFile(path string, content string, verbose bool) {
 	err := WriteStringToFile(path, content, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
@@ -38,7 +43,7 @@ func WriteStringToFile(path string, content string, verbose bool) (err error) {
 func (f *FilesService) MustReadAsString(path string) (content string) {
 	content, err := f.ReadAsString(path)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return content
@@ -47,13 +52,13 @@ func (f *FilesService) MustReadAsString(path string) (content string) {
 func (f *FilesService) MustWriteStringToFile(path string, content string, verbose bool) {
 	err := f.WriteStringToFile(path, content, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (f *FilesService) ReadAsString(path string) (content string, err error) {
 	if path == "" {
-		return "", TracedErrorEmptyString(path)
+		return "", errors.TracedErrorEmptyString(path)
 	}
 
 	localFile, err := GetLocalFileByPath(path)
@@ -71,7 +76,7 @@ func (f *FilesService) ReadAsString(path string) (content string, err error) {
 
 func (f *FilesService) WriteStringToFile(path string, content string, verbose bool) (err error) {
 	if path == "" {
-		return TracedErrorEmptyString(path)
+		return errors.TracedErrorEmptyString(path)
 	}
 
 	localFile, err := GetLocalFileByPath(path)

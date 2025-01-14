@@ -1,6 +1,9 @@
 package kubernetes
 
-import "github.com/asciich/asciichgolangpublic"
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
 
 type CreateRoleOptions struct {
 	Name     string
@@ -15,7 +18,7 @@ func NewCreateRoleOptions() (c *CreateRoleOptions) {
 
 func (c *CreateRoleOptions) GetName() (name string, err error) {
 	if c.Name == "" {
-		return "", asciichgolangpublic.TracedErrorf("Name not set")
+		return "", errors.TracedErrorf("Name not set")
 	}
 
 	return c.Name, nil
@@ -23,11 +26,11 @@ func (c *CreateRoleOptions) GetName() (name string, err error) {
 
 func (c *CreateRoleOptions) GetResorces() (resorces []string, err error) {
 	if c.Resorces == nil {
-		return nil, asciichgolangpublic.TracedErrorf("Resorces not set")
+		return nil, errors.TracedErrorf("Resorces not set")
 	}
 
 	if len(c.Resorces) <= 0 {
-		return nil, asciichgolangpublic.TracedErrorf("Resorces has no elements")
+		return nil, errors.TracedErrorf("Resorces has no elements")
 	}
 
 	return c.Resorces, nil
@@ -40,11 +43,11 @@ func (c *CreateRoleOptions) GetVerbose() (verbose bool) {
 
 func (c *CreateRoleOptions) GetVerbs() (verbs []string, err error) {
 	if c.Verbs == nil {
-		return nil, asciichgolangpublic.TracedErrorf("Verbs not set")
+		return nil, errors.TracedErrorf("Verbs not set")
 	}
 
 	if len(c.Verbs) <= 0 {
-		return nil, asciichgolangpublic.TracedErrorf("Verbs has no elements")
+		return nil, errors.TracedErrorf("Verbs has no elements")
 	}
 
 	return c.Verbs, nil
@@ -53,7 +56,7 @@ func (c *CreateRoleOptions) GetVerbs() (verbs []string, err error) {
 func (c *CreateRoleOptions) MustGetName() (name string) {
 	name, err := c.GetName()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -62,7 +65,7 @@ func (c *CreateRoleOptions) MustGetName() (name string) {
 func (c *CreateRoleOptions) MustGetResorces() (resorces []string) {
 	resorces, err := c.GetResorces()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return resorces
@@ -71,7 +74,7 @@ func (c *CreateRoleOptions) MustGetResorces() (resorces []string) {
 func (c *CreateRoleOptions) MustGetVerbs() (verbs []string) {
 	verbs, err := c.GetVerbs()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbs
@@ -80,27 +83,27 @@ func (c *CreateRoleOptions) MustGetVerbs() (verbs []string) {
 func (c *CreateRoleOptions) MustSetName(name string) {
 	err := c.SetName(name)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CreateRoleOptions) MustSetResorces(resorces []string) {
 	err := c.SetResorces(resorces)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CreateRoleOptions) MustSetVerbs(verbs []string) {
 	err := c.SetVerbs(verbs)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CreateRoleOptions) SetName(name string) (err error) {
 	if name == "" {
-		return asciichgolangpublic.TracedErrorf("name is empty string")
+		return errors.TracedErrorf("name is empty string")
 	}
 
 	c.Name = name
@@ -110,11 +113,11 @@ func (c *CreateRoleOptions) SetName(name string) (err error) {
 
 func (c *CreateRoleOptions) SetResorces(resorces []string) (err error) {
 	if resorces == nil {
-		return asciichgolangpublic.TracedErrorf("resorces is nil")
+		return errors.TracedErrorf("resorces is nil")
 	}
 
 	if len(resorces) <= 0 {
-		return asciichgolangpublic.TracedErrorf("resorces has no elements")
+		return errors.TracedErrorf("resorces has no elements")
 	}
 
 	c.Resorces = resorces
@@ -128,11 +131,11 @@ func (c *CreateRoleOptions) SetVerbose(verbose bool) {
 
 func (c *CreateRoleOptions) SetVerbs(verbs []string) (err error) {
 	if verbs == nil {
-		return asciichgolangpublic.TracedErrorf("verbs is nil")
+		return errors.TracedErrorf("verbs is nil")
 	}
 
 	if len(verbs) <= 0 {
-		return asciichgolangpublic.TracedErrorf("verbs has no elements")
+		return errors.TracedErrorf("verbs has no elements")
 	}
 
 	c.Verbs = verbs

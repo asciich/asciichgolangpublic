@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type SpreadSheetRenderRowOptions struct {
 	MinColumnWidths []int
 	StringDelimiter string
@@ -12,11 +17,11 @@ func NewSpreadSheetRenderRowOptions() (s *SpreadSheetRenderRowOptions) {
 
 func (s *SpreadSheetRenderRowOptions) GetMinColumnWidths() (minColumnWidths []int, err error) {
 	if s.MinColumnWidths == nil {
-		return nil, TracedErrorf("MinColumnWidths not set")
+		return nil, errors.TracedErrorf("MinColumnWidths not set")
 	}
 
 	if len(s.MinColumnWidths) <= 0 {
-		return nil, TracedErrorf("MinColumnWidths has no elements")
+		return nil, errors.TracedErrorf("MinColumnWidths has no elements")
 	}
 
 	return s.MinColumnWidths, nil
@@ -24,7 +29,7 @@ func (s *SpreadSheetRenderRowOptions) GetMinColumnWidths() (minColumnWidths []in
 
 func (s *SpreadSheetRenderRowOptions) GetStringDelimiter() (stringDelimiter string, err error) {
 	if s.StringDelimiter == "" {
-		return "", TracedErrorf("StringDelimiter not set")
+		return "", errors.TracedErrorf("StringDelimiter not set")
 	}
 
 	return s.StringDelimiter, nil
@@ -46,7 +51,7 @@ func (s *SpreadSheetRenderRowOptions) IsStringDelimiterSet() (isSet bool) {
 func (s *SpreadSheetRenderRowOptions) MustGetMinColumnWidths() (minColumnWidths []int) {
 	minColumnWidths, err := s.GetMinColumnWidths()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return minColumnWidths
@@ -55,7 +60,7 @@ func (s *SpreadSheetRenderRowOptions) MustGetMinColumnWidths() (minColumnWidths 
 func (s *SpreadSheetRenderRowOptions) MustGetStringDelimiter() (stringDelimiter string) {
 	stringDelimiter, err := s.GetStringDelimiter()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return stringDelimiter
@@ -64,7 +69,7 @@ func (s *SpreadSheetRenderRowOptions) MustGetStringDelimiter() (stringDelimiter 
 func (s *SpreadSheetRenderRowOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := s.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -73,31 +78,31 @@ func (s *SpreadSheetRenderRowOptions) MustGetVerbose() (verbose bool) {
 func (s *SpreadSheetRenderRowOptions) MustSetMinColumnWidths(minColumnWidths []int) {
 	err := s.SetMinColumnWidths(minColumnWidths)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (s *SpreadSheetRenderRowOptions) MustSetStringDelimiter(stringDelimiter string) {
 	err := s.SetStringDelimiter(stringDelimiter)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (s *SpreadSheetRenderRowOptions) MustSetVerbose(verbose bool) {
 	err := s.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (s *SpreadSheetRenderRowOptions) SetMinColumnWidths(minColumnWidths []int) (err error) {
 	if minColumnWidths == nil {
-		return TracedErrorf("minColumnWidths is nil")
+		return errors.TracedErrorf("minColumnWidths is nil")
 	}
 
 	if len(minColumnWidths) <= 0 {
-		return TracedErrorf("minColumnWidths has no elements")
+		return errors.TracedErrorf("minColumnWidths has no elements")
 	}
 
 	s.MinColumnWidths = minColumnWidths
@@ -107,7 +112,7 @@ func (s *SpreadSheetRenderRowOptions) SetMinColumnWidths(minColumnWidths []int) 
 
 func (s *SpreadSheetRenderRowOptions) SetStringDelimiter(stringDelimiter string) (err error) {
 	if stringDelimiter == "" {
-		return TracedErrorf("stringDelimiter is empty string")
+		return errors.TracedErrorf("stringDelimiter is empty string")
 	}
 
 	s.StringDelimiter = stringDelimiter

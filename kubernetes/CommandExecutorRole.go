@@ -1,6 +1,9 @@
 package kubernetes
 
-import "github.com/asciich/asciichgolangpublic"
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
 
 type CommandExecutorRole struct {
 	name      string
@@ -13,7 +16,7 @@ func NewCommandExecutorRole() (c *CommandExecutorRole) {
 
 func (c *CommandExecutorRole) GetName() (name string, err error) {
 	if c.name == "" {
-		return "", asciichgolangpublic.TracedErrorf("name not set")
+		return "", errors.TracedErrorf("name not set")
 	}
 
 	return c.name, nil
@@ -27,7 +30,7 @@ func (c *CommandExecutorRole) GetNamespace() (namespace Namespace, err error) {
 func (c *CommandExecutorRole) MustGetName() (name string) {
 	name, err := c.GetName()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -36,7 +39,7 @@ func (c *CommandExecutorRole) MustGetName() (name string) {
 func (c *CommandExecutorRole) MustGetNamespace() (namespace Namespace) {
 	namespace, err := c.GetNamespace()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return namespace
@@ -45,20 +48,20 @@ func (c *CommandExecutorRole) MustGetNamespace() (namespace Namespace) {
 func (c *CommandExecutorRole) MustSetName(name string) {
 	err := c.SetName(name)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorRole) MustSetNamespace(namespace Namespace) {
 	err := c.SetNamespace(namespace)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorRole) SetName(name string) (err error) {
 	if name == "" {
-		return asciichgolangpublic.TracedErrorf("name is empty string")
+		return errors.TracedErrorf("name is empty string")
 	}
 
 	c.name = name

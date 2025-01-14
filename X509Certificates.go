@@ -5,6 +5,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type X509CertificatesService struct {
@@ -20,11 +23,11 @@ func X509Certificates() (x509Certificaets *X509CertificatesService) {
 
 func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey Directory, err error) {
 	if createOptions == nil {
-		return nil, TracedError("createOptions is nil")
+		return nil, errors.TracedError("createOptions is nil")
 	}
 
 	if !createOptions.GetUseTemporaryDirectory() {
-		return nil, TracedError("Only implemented for temporary directory")
+		return nil, errors.TracedError("Only implemented for temporary directory")
 	}
 
 	directoryToUse, err := TemporaryDirectories().CreateEmptyTemporaryDirectory(createOptions.Verbose)
@@ -43,7 +46,7 @@ func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(cre
 	}
 
 	if createOptions.Verbose {
-		LogInfof("Going to create new intermediate certificate for '%v'", subjectString)
+		logging.LogInfof("Going to create new intermediate certificate for '%v'", subjectString)
 	}
 
 	sslCommand := []string{
@@ -63,7 +66,7 @@ func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(cre
 	}
 
 	if createOptions.Verbose {
-		LogInfof("Created intermediate certificate in temporary directory: '%v'", directoryPathToUse)
+		logging.LogInfof("Created intermediate certificate in temporary directory: '%v'", directoryPathToUse)
 	}
 
 	return directoryToUse, nil
@@ -72,15 +75,15 @@ func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(cre
 func (c *X509CertificatesService) CreateRootCaAndaddToGopass(createOptions *X509CreateCertificateOptions, gopassOptions *GopassSecretOptions) (err error) {
 
 	if createOptions == nil {
-		return TracedError("createOptions is nil")
+		return errors.TracedError("createOptions is nil")
 	}
 
 	if gopassOptions == nil {
-		return TracedError("gopassOptions is nil")
+		return errors.TracedError("gopassOptions is nil")
 	}
 
 	if createOptions.Verbose {
-		LogInfo("Create root CA and add to gopass started.")
+		logging.LogInfo("Create root CA and add to gopass started.")
 	}
 
 	createOptionsToUse := createOptions.GetDeepCopy()
@@ -112,7 +115,7 @@ func (c *X509CertificatesService) CreateRootCaAndaddToGopass(createOptions *X509
 			return err
 		}
 
-		return TracedErrorf("Internal error: certFile '%v' does not exist", certFileLocalPath)
+		return errors.TracedErrorf("Internal error: certFile '%v' does not exist", certFileLocalPath)
 	}
 
 	keyFileExists, err := keyFile.Exists(createOptions.Verbose)
@@ -126,7 +129,7 @@ func (c *X509CertificatesService) CreateRootCaAndaddToGopass(createOptions *X509
 			return err
 		}
 
-		return TracedErrorf("Internal error: keyFileExists '%v' does not exist", keyFileLocalPath)
+		return errors.TracedErrorf("Internal error: keyFileExists '%v' does not exist", keyFileLocalPath)
 	}
 
 	certOptions := gopassOptions.GetDeepCopy()
@@ -154,7 +157,7 @@ func (c *X509CertificatesService) CreateRootCaAndaddToGopass(createOptions *X509
 	}
 
 	if createOptions.Verbose {
-		LogInfo("Create root CA and add to gopass finished.")
+		logging.LogInfo("Create root CA and add to gopass finished.")
 	}
 
 	return nil
@@ -162,11 +165,11 @@ func (c *X509CertificatesService) CreateRootCaAndaddToGopass(createOptions *X509
 
 func (c *X509CertificatesService) CreateRootCaIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey Directory, err error) {
 	if createOptions == nil {
-		return nil, TracedError("createOptions is nil")
+		return nil, errors.TracedError("createOptions is nil")
 	}
 
 	if !createOptions.GetUseTemporaryDirectory() {
-		return nil, TracedError("Only implemented for temporary directory")
+		return nil, errors.TracedError("Only implemented for temporary directory")
 	}
 
 	directoryToUse, err := TemporaryDirectories().CreateEmptyTemporaryDirectory(createOptions.Verbose)
@@ -185,7 +188,7 @@ func (c *X509CertificatesService) CreateRootCaIntoDirectory(createOptions *X509C
 	}
 
 	if createOptions.Verbose {
-		LogInfof("Going to create new RootCA for '%v'", subjectString)
+		logging.LogInfof("Going to create new RootCA for '%v'", subjectString)
 	}
 
 	sslCommand := []string{
@@ -228,7 +231,7 @@ func (c *X509CertificatesService) CreateRootCaIntoDirectory(createOptions *X509C
 	}
 
 	if createOptions.Verbose {
-		LogInfof("Created root ca in temporary directory: '%v'", directoryPathToUse)
+		logging.LogInfof("Created root ca in temporary directory: '%v'", directoryPathToUse)
 	}
 
 	return directoryToUse, nil
@@ -236,7 +239,7 @@ func (c *X509CertificatesService) CreateRootCaIntoDirectory(createOptions *X509C
 
 func (c *X509CertificatesService) CreateSignedCertificate(createOptions *X509CreateCertificateOptions) (err error) {
 	if createOptions == nil {
-		return TracedError("createOptions is nil")
+		return errors.TracedError("createOptions is nil")
 	}
 
 	outputKeyOnStdout := false
@@ -323,7 +326,7 @@ func (c *X509CertificatesService) CreateSignedCertificate(createOptions *X509Cre
 	}
 
 	if createOptions.Verbose {
-		LogInfof("Created key file '%v' and CSR '%v' for '%v'", keyPath, csrPath, commonName)
+		logging.LogInfof("Created key file '%v' and CSR '%v' for '%v'", keyPath, csrPath, commonName)
 	}
 
 	if createOptions.Verbose {
@@ -345,7 +348,7 @@ func (c *X509CertificatesService) CreateSignedCertificate(createOptions *X509Cre
 			return err
 		}
 
-		LogInfof("Created CSR info:\n'%s'", csrInfo)
+		logging.LogInfof("Created CSR info:\n'%s'", csrInfo)
 	}
 
 	signingKey, err := createOptions.GetIntermediateCertificateKeyGopassCredential()
@@ -393,11 +396,11 @@ func (c *X509CertificatesService) CreateSignedCertificate(createOptions *X509Cre
 	for i, san := range createOptions.AdditionalSans {
 		signingConfig += fmt.Sprintf("DNS.%d = %s\n", i+2, san)
 		if createOptions.Verbose {
-			LogInfof("Added additional SAN '%s' for commonName '%s'.", san, commonName)
+			logging.LogInfof("Added additional SAN '%s' for commonName '%s'.", san, commonName)
 		}
 	}
 	if createOptions.Verbose {
-		LogInfof("Added '%d' SAN's to sing with '%s'.", len(createOptions.AdditionalSans), commonName)
+		logging.LogInfof("Added '%d' SAN's to sing with '%s'.", len(createOptions.AdditionalSans), commonName)
 	}
 
 	signingConfigFile, err := TemporaryFiles().CreateFromString(signingConfig, createOptions.Verbose)
@@ -448,7 +451,7 @@ func (c *X509CertificatesService) CreateSignedCertificate(createOptions *X509Cre
 	}
 
 	if createOptions.Verbose {
-		LogInfof("Created certificate file: '%v'", certPath)
+		logging.LogInfof("Created certificate file: '%v'", certPath)
 	}
 
 	if createOptions.Verbose {
@@ -470,7 +473,7 @@ func (c *X509CertificatesService) CreateSignedCertificate(createOptions *X509Cre
 			return err
 		}
 
-		LogInfof("Created certificate info:\n%s", certificateInfo)
+		logging.LogInfof("Created certificate info:\n%s", certificateInfo)
 	}
 
 	certFile, err := GetLocalFileByPath(certPath)
@@ -505,15 +508,15 @@ func (c *X509CertificatesService) CreateSignedCertificate(createOptions *X509Cre
 
 func (c *X509CertificatesService) CreateSignedIntermediateCertificateAndAddToGopass(createOptions *X509CreateCertificateOptions, rootCaInGopass *GopassSecretOptions, intermediateGopassOptions *GopassSecretOptions) (err error) {
 	if createOptions == nil {
-		return TracedError("createOptions is nil")
+		return errors.TracedError("createOptions is nil")
 	}
 
 	if rootCaInGopass == nil {
-		return TracedError("rootCaInGopass is nil")
+		return errors.TracedError("rootCaInGopass is nil")
 	}
 
 	if intermediateGopassOptions == nil {
-		return TracedError("intermediateGopassOptions is nil")
+		return errors.TracedError("intermediateGopassOptions is nil")
 	}
 
 	rootCertOptions := rootCaInGopass.GetDeepCopy()
@@ -592,7 +595,7 @@ func (c *X509CertificatesService) CreateSignedIntermediateCertificateAndAddToGop
 
 func (c *X509CertificatesService) CreateSigningRequestFile(signOptions *X509SignCertificateOptions) (err error) {
 	if signOptions == nil {
-		return TracedError("signOptions is nil")
+		return errors.TracedError("signOptions is nil")
 	}
 
 	keyFileToSignPath, err := signOptions.GetKeyFileToSignPath()
@@ -636,7 +639,7 @@ func (c *X509CertificatesService) CreateSigningRequestFile(signOptions *X509Sign
 	}
 
 	if signOptions.Verbose {
-		LogInfof("Generated openssl configuration for signing request: '%v'.", openSslConfigFilePath)
+		logging.LogInfof("Generated openssl configuration for signing request: '%v'.", openSslConfigFilePath)
 	}
 
 	signCommand := []string{
@@ -667,7 +670,7 @@ func (c *X509CertificatesService) CreateSigningRequestFile(signOptions *X509Sign
 	}
 
 	if signOptions.Verbose {
-		LogInfof("Created signing request file '%v' for '%v' with key located at '%v'.", signingRequestFilePath, subjectToSign, keyFileToSignPath)
+		logging.LogInfof("Created signing request file '%v' for '%v' with key located at '%v'.", signingRequestFilePath, subjectToSign, keyFileToSignPath)
 	}
 
 	return nil
@@ -677,7 +680,7 @@ func (c *X509CertificatesService) GetNextCaSerialNumberAsStringFromGopass(verbos
 	nextFreeNumberFromEnvVar := os.Getenv("OVERRIDE_NEXT_CA_SERIAL_NUMBER_FROM_GOPASS")
 	if len(nextFreeNumberFromEnvVar) > 0 {
 		if verbose {
-			LogInfof("GetNextCaSerialNumberAsStringFromGopass: OVERRIDE_NEXT_CA_SERIAL_NUMBER_FROM_GOPASS is set to '%s'", nextFreeNumberFromEnvVar)
+			logging.LogInfof("GetNextCaSerialNumberAsStringFromGopass: OVERRIDE_NEXT_CA_SERIAL_NUMBER_FROM_GOPASS is set to '%s'", nextFreeNumberFromEnvVar)
 		}
 
 		return nextFreeNumberFromEnvVar, nil
@@ -710,11 +713,11 @@ func (c *X509CertificatesService) GetNextCaSerialNumberAsStringFromGopass(verbos
 
 func (c *X509CertificatesService) IsCertificateFileSignedByCertificateFile(thisCertificateFile *X509CertificateFile, isSignedByThisCertificateFile File, verbose bool) (isSignedBy bool, err error) {
 	if thisCertificateFile == nil {
-		return false, TracedError("thisCertificateFile is nil")
+		return false, errors.TracedError("thisCertificateFile is nil")
 	}
 
 	if isSignedByThisCertificateFile == nil {
-		return false, TracedError("isSignedByThisCertificateFile is nil")
+		return false, errors.TracedError("isSignedByThisCertificateFile is nil")
 	}
 
 	toCheckCert, err := thisCertificateFile.GetAsX509Certificate()
@@ -733,7 +736,7 @@ func (c *X509CertificatesService) IsCertificateFileSignedByCertificateFile(thisC
 func (c *X509CertificatesService) MustCreateIntermediateCertificateIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey Directory) {
 	directoryContianingCreatedCertAndKey, err := c.CreateIntermediateCertificateIntoDirectory(createOptions)
 	if err != nil {
-		LogFatalf("X509Certificates.CreateIntermediateCertificateInto: failed: '%v'", err)
+		logging.LogFatalf("X509Certificates.CreateIntermediateCertificateInto: failed: '%v'", err)
 	}
 
 	return directoryContianingCreatedCertAndKey
@@ -742,14 +745,14 @@ func (c *X509CertificatesService) MustCreateIntermediateCertificateIntoDirectory
 func (c *X509CertificatesService) MustCreateRootCAAndAddToGopass(createOptions *X509CreateCertificateOptions, gopassOptions *GopassSecretOptions) {
 	err := c.CreateRootCaAndaddToGopass(createOptions, gopassOptions)
 	if err != nil {
-		LogFatalf("X509Certificates.CreateRootCaAndaddToGopass: failed: '%v'", err)
+		logging.LogFatalf("X509Certificates.CreateRootCaAndaddToGopass: failed: '%v'", err)
 	}
 }
 
 func (c *X509CertificatesService) MustCreateRootCaIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey Directory) {
 	directoryContianingCreatedCertAndKey, err := c.CreateRootCaIntoDirectory(createOptions)
 	if err != nil {
-		LogFatalf("X509Certificates.CreateRootCaIntoDirectory: failed: '%v'", err)
+		logging.LogFatalf("X509Certificates.CreateRootCaIntoDirectory: failed: '%v'", err)
 	}
 
 	return directoryContianingCreatedCertAndKey
@@ -758,27 +761,27 @@ func (c *X509CertificatesService) MustCreateRootCaIntoDirectory(createOptions *X
 func (c *X509CertificatesService) MustCreateSignedCertificate(createOptions *X509CreateCertificateOptions) {
 	err := c.CreateSignedCertificate(createOptions)
 	if err != nil {
-		LogFatalf("X509Certificates.CreateSignedCertificate failed: '%v'", err)
+		logging.LogFatalf("X509Certificates.CreateSignedCertificate failed: '%v'", err)
 	}
 }
 
 func (c *X509CertificatesService) MustCreateSignedIntermediateCertificateAndAddToGopass(createOptions *X509CreateCertificateOptions, rootCaInGopass *GopassSecretOptions, intermediateGopassOptions *GopassSecretOptions) {
 	err := c.CreateSignedIntermediateCertificateAndAddToGopass(createOptions, rootCaInGopass, intermediateGopassOptions)
 	if err != nil {
-		LogFatalf("X509Certificates.CreateSignedIntermediateCertificateAndAddToGopass failed: '%v'", err)
+		logging.LogFatalf("X509Certificates.CreateSignedIntermediateCertificateAndAddToGopass failed: '%v'", err)
 	}
 }
 
 func (c *X509CertificatesService) MustSignIntermediateCertificate(signOptions *X509SignCertificateOptions) {
 	err := c.SignIntermediateCertificate(signOptions)
 	if err != nil {
-		LogFatalf("X509CertificatesService.SignIntermediateCertificate: '%v'", err)
+		logging.LogFatalf("X509CertificatesService.SignIntermediateCertificate: '%v'", err)
 	}
 }
 
 func (c *X509CertificatesService) SignIntermediateCertificate(signOptions *X509SignCertificateOptions) (err error) {
 	if signOptions == nil {
-		return TracedError("signOptions is nil")
+		return errors.TracedError("signOptions is nil")
 	}
 
 	keyFileToUseForSigning, err := signOptions.GetKeyFileUsedForSigning()
@@ -854,7 +857,7 @@ func (c *X509CertificatesService) SignIntermediateCertificate(signOptions *X509S
 	}
 
 	if signOptions.Verbose {
-		LogInfof("Generated openssl configuration for signing: '%v'.", openSslConfigFilePath)
+		logging.LogInfof("Generated openssl configuration for signing: '%v'.", openSslConfigFilePath)
 	}
 
 	serial, err := c.GetNextCaSerialNumberAsStringFromGopass(signOptions.Verbose)
@@ -895,7 +898,7 @@ func (c *X509CertificatesService) SignIntermediateCertificate(signOptions *X509S
 	}
 
 	if signOptions.Verbose {
-		LogInfof("Signed intermediate certificate. Certificate stored as '%v'", outputCertificateFilePath)
+		logging.LogInfof("Signed intermediate certificate. Certificate stored as '%v'", outputCertificateFilePath)
 	}
 
 	return nil
@@ -904,21 +907,21 @@ func (c *X509CertificatesService) SignIntermediateCertificate(signOptions *X509S
 func (x *X509CertificatesService) MustCreateRootCaAndaddToGopass(createOptions *X509CreateCertificateOptions, gopassOptions *GopassSecretOptions) {
 	err := x.CreateRootCaAndaddToGopass(createOptions, gopassOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (x *X509CertificatesService) MustCreateSigningRequestFile(signOptions *X509SignCertificateOptions) {
 	err := x.CreateSigningRequestFile(signOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (x *X509CertificatesService) MustGetNextCaSerialNumberAsStringFromGopass(verbose bool) (serial string) {
 	serial, err := x.GetNextCaSerialNumberAsStringFromGopass(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return serial
@@ -927,7 +930,7 @@ func (x *X509CertificatesService) MustGetNextCaSerialNumberAsStringFromGopass(ve
 func (x *X509CertificatesService) MustIsCertificateFileSignedByCertificateFile(thisCertificateFile *X509CertificateFile, isSignedByThisCertificateFile File, verbose bool) (isSignedBy bool) {
 	isSignedBy, err := x.IsCertificateFileSignedByCertificateFile(thisCertificateFile, isSignedByThisCertificateFile, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isSignedBy

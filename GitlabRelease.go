@@ -3,6 +3,8 @@ package asciichgolangpublic
 import (
 	"errors"
 
+	aerrors "github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -33,7 +35,7 @@ func (g *GitlabRelease) CreateReleaseLink(createOptions *GitlabCreateReleaseLink
 
 func (g *GitlabRelease) Delete(deleteOptions *GitlabDeleteReleaseOptions) (err error) {
 	if deleteOptions == nil {
-		return TracedErrorNil("deleteOptions")
+		return aerrors.TracedErrorNil("deleteOptions")
 	}
 
 	exists, err := g.Exists(deleteOptions.Verbose)
@@ -66,13 +68,13 @@ func (g *GitlabRelease) Delete(deleteOptions *GitlabDeleteReleaseOptions) (err e
 			return err
 		}
 
-		LogChangedf(
+		logging.LogChangedf(
 			"Release '%s' on gitlab project '%s' deleted.",
 			projectUrl,
 			releaseName,
 		)
 	} else {
-		LogInfof(
+		logging.LogInfof(
 			"Release '%s' on gitlab project '%s' is already absent. Skip delete.",
 			projectUrl,
 			releaseName,
@@ -106,7 +108,7 @@ func (g *GitlabRelease) DeleteCorrespondingTag(verbose bool) (err error) {
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Delete tag corresonding to release '%s' in gitlab project %s started.",
 			name,
 			projectUrl,
@@ -124,7 +126,7 @@ func (g *GitlabRelease) DeleteCorrespondingTag(verbose bool) (err error) {
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Delete tag corresonding to release '%s' in gitlab project %s finished.",
 			name,
 			projectUrl,
@@ -151,13 +153,13 @@ func (g *GitlabRelease) Exists(verbose bool) (exists bool, err error) {
 	}
 
 	if exists {
-		LogInfof(
+		logging.LogInfof(
 			"Gitlab Release '%s' exists in project %s .",
 			releaseName,
 			projectUrl,
 		)
 	} else {
-		LogInfof(
+		logging.LogInfof(
 			"Gitlab Release '%s' does not exist in project %s .",
 			releaseName,
 			projectUrl,
@@ -207,7 +209,7 @@ func (g *GitlabRelease) GetGitlabReleaseLinks() (gitlabReleaseLinks *GitlabRelea
 
 func (g *GitlabRelease) GetGitlabReleases() (gitlabReleases *GitlabReleases, err error) {
 	if g.gitlabReleases == nil {
-		return nil, TracedErrorf("gitlabReleases not set")
+		return nil, aerrors.TracedErrorf("gitlabReleases not set")
 	}
 
 	return g.gitlabReleases, nil
@@ -215,7 +217,7 @@ func (g *GitlabRelease) GetGitlabReleases() (gitlabReleases *GitlabReleases, err
 
 func (g *GitlabRelease) GetName() (name string, err error) {
 	if g.name == "" {
-		return "", TracedErrorf("name not set")
+		return "", aerrors.TracedErrorf("name not set")
 	}
 
 	return g.name, nil
@@ -301,7 +303,7 @@ func (g *GitlabRelease) GetRawResponse() (rawRelease *gitlab.Release, err error)
 	rawRelease, _, err = nativeClient.GetRelease(projectId, name)
 	if err != nil {
 		if err.Error() == "404 Not Found" {
-			return nil, TracedErrorf(
+			return nil, aerrors.TracedErrorf(
 				"%w, Project %s release '%s'",
 				ErrGitlabReleaseNotFound,
 				projectUrl,
@@ -309,7 +311,7 @@ func (g *GitlabRelease) GetRawResponse() (rawRelease *gitlab.Release, err error)
 			)
 		}
 
-		return nil, TracedErrorf(
+		return nil, aerrors.TracedErrorf(
 			"Failed to GetRawResponse for gitlab release '%s' for project %s : '%w'",
 			releaseName,
 			projectUrl,
@@ -318,7 +320,7 @@ func (g *GitlabRelease) GetRawResponse() (rawRelease *gitlab.Release, err error)
 	}
 
 	if rawRelease == nil {
-		return nil, TracedError("rawRelease is empty string after evaluation")
+		return nil, aerrors.TracedError("rawRelease is empty string after evaluation")
 	}
 
 	return rawRelease, nil
@@ -374,7 +376,7 @@ func (g *GitlabRelease) ListReleaseLinkUrls(verbose bool) (releaseLinkUrls []str
 func (g *GitlabRelease) MustCreateReleaseLink(createOptions *GitlabCreateReleaseLinkOptions) (createdReleaseLink *GitlabReleaseLink) {
 	createdReleaseLink, err := g.CreateReleaseLink(createOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdReleaseLink
@@ -383,21 +385,21 @@ func (g *GitlabRelease) MustCreateReleaseLink(createOptions *GitlabCreateRelease
 func (g *GitlabRelease) MustDelete(deleteOptions *GitlabDeleteReleaseOptions) {
 	err := g.Delete(deleteOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabRelease) MustDeleteCorrespondingTag(verbose bool) {
 	err := g.DeleteCorrespondingTag(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabRelease) MustExists(verbose bool) (exists bool) {
 	exists, err := g.Exists(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return exists
@@ -406,7 +408,7 @@ func (g *GitlabRelease) MustExists(verbose bool) (exists bool) {
 func (g *GitlabRelease) MustGetGitlab() (gitlab *GitlabInstance) {
 	gitlab, err := g.GetGitlab()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlab
@@ -415,7 +417,7 @@ func (g *GitlabRelease) MustGetGitlab() (gitlab *GitlabInstance) {
 func (g *GitlabRelease) MustGetGitlabProject() (project *GitlabProject) {
 	project, err := g.GetGitlabProject()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return project
@@ -424,7 +426,7 @@ func (g *GitlabRelease) MustGetGitlabProject() (project *GitlabProject) {
 func (g *GitlabRelease) MustGetGitlabReleaseLinks() (gitlabReleaseLinks *GitlabReleaseLinks) {
 	gitlabReleaseLinks, err := g.GetGitlabReleaseLinks()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabReleaseLinks
@@ -433,7 +435,7 @@ func (g *GitlabRelease) MustGetGitlabReleaseLinks() (gitlabReleaseLinks *GitlabR
 func (g *GitlabRelease) MustGetGitlabReleases() (gitlabReleases *GitlabReleases) {
 	gitlabReleases, err := g.GetGitlabReleases()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabReleases
@@ -442,7 +444,7 @@ func (g *GitlabRelease) MustGetGitlabReleases() (gitlabReleases *GitlabReleases)
 func (g *GitlabRelease) MustGetName() (name string) {
 	name, err := g.GetName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -451,7 +453,7 @@ func (g *GitlabRelease) MustGetName() (name string) {
 func (g *GitlabRelease) MustGetNativeReleasesClient() (nativeReleasesClient *gitlab.ReleasesService) {
 	nativeReleasesClient, err := g.GetNativeReleasesClient()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeReleasesClient
@@ -460,7 +462,7 @@ func (g *GitlabRelease) MustGetNativeReleasesClient() (nativeReleasesClient *git
 func (g *GitlabRelease) MustGetProjectId() (pid int) {
 	pid, err := g.GetProjectId()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return pid
@@ -469,7 +471,7 @@ func (g *GitlabRelease) MustGetProjectId() (pid int) {
 func (g *GitlabRelease) MustGetProjectUrl() (projectUrl string) {
 	projectUrl, err := g.GetProjectUrl()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectUrl
@@ -478,7 +480,7 @@ func (g *GitlabRelease) MustGetProjectUrl() (projectUrl string) {
 func (g *GitlabRelease) MustGetProjectUrlAndReleaseName() (projectUrl string, releaseName string) {
 	projectUrl, releaseName, err := g.GetProjectUrlAndReleaseName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectUrl, releaseName
@@ -487,7 +489,7 @@ func (g *GitlabRelease) MustGetProjectUrlAndReleaseName() (projectUrl string, re
 func (g *GitlabRelease) MustGetRawResponse() (rawRelease *gitlab.Release) {
 	rawRelease, err := g.GetRawResponse()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return rawRelease
@@ -496,7 +498,7 @@ func (g *GitlabRelease) MustGetRawResponse() (rawRelease *gitlab.Release) {
 func (g *GitlabRelease) MustGetTag() (tag *GitlabTag) {
 	tag, err := g.GetTag()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tag
@@ -505,7 +507,7 @@ func (g *GitlabRelease) MustGetTag() (tag *GitlabTag) {
 func (g *GitlabRelease) MustHasReleaseLinks(verbose bool) (hasReleaseLinks bool) {
 	hasReleaseLinks, err := g.HasReleaseLinks(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hasReleaseLinks
@@ -514,7 +516,7 @@ func (g *GitlabRelease) MustHasReleaseLinks(verbose bool) (hasReleaseLinks bool)
 func (g *GitlabRelease) MustListReleaseLinkUrls(verbose bool) (releaseLinkUrls []string) {
 	releaseLinkUrls, err := g.ListReleaseLinkUrls(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return releaseLinkUrls
@@ -523,20 +525,20 @@ func (g *GitlabRelease) MustListReleaseLinkUrls(verbose bool) (releaseLinkUrls [
 func (g *GitlabRelease) MustSetGitlabReleases(gitlabReleases *GitlabReleases) {
 	err := g.SetGitlabReleases(gitlabReleases)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabRelease) MustSetName(name string) {
 	err := g.SetName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabRelease) SetGitlabReleases(gitlabReleases *GitlabReleases) (err error) {
 	if gitlabReleases == nil {
-		return TracedErrorf("gitlabReleases is nil")
+		return aerrors.TracedErrorf("gitlabReleases is nil")
 	}
 
 	g.gitlabReleases = gitlabReleases
@@ -546,7 +548,7 @@ func (g *GitlabRelease) SetGitlabReleases(gitlabReleases *GitlabReleases) (err e
 
 func (g *GitlabRelease) SetName(name string) (err error) {
 	if name == "" {
-		return TracedErrorf("name is empty string")
+		return aerrors.TracedErrorf("name is empty string")
 	}
 
 	g.name = name

@@ -3,7 +3,8 @@ package http
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type RequestOptions struct {
@@ -27,7 +28,7 @@ func NewRequestOptions() (r *RequestOptions) {
 
 func (r *RequestOptions) GetMethod() (method string, err error) {
 	if r.Method == "" {
-		return "", asciichgolangpublic.TracedErrorf("Method not set")
+		return "", errors.TracedErrorf("Method not set")
 	}
 
 	return strings.ToUpper(r.Method), nil
@@ -35,7 +36,7 @@ func (r *RequestOptions) GetMethod() (method string, err error) {
 
 func (r *RequestOptions) GetPort() (port int, err error) {
 	if r.Port <= 0 {
-		return -1, asciichgolangpublic.TracedError("Port not set")
+		return -1, errors.TracedError("Port not set")
 	}
 
 	return r.Port, nil
@@ -43,7 +44,7 @@ func (r *RequestOptions) GetPort() (port int, err error) {
 
 func (r *RequestOptions) GetUrl() (url string, err error) {
 	if r.Url == "" {
-		return "", asciichgolangpublic.TracedErrorf("Url not set")
+		return "", errors.TracedErrorf("Url not set")
 	}
 
 	return r.Url, nil
@@ -57,7 +58,7 @@ func (r *RequestOptions) GetVerbose() (verbose bool) {
 func (r *RequestOptions) MustGetMethod() (method string) {
 	method, err := r.GetMethod()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return method
@@ -66,7 +67,7 @@ func (r *RequestOptions) MustGetMethod() (method string) {
 func (r *RequestOptions) MustGetPort() (port int) {
 	port, err := r.GetPort()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return port
@@ -75,7 +76,7 @@ func (r *RequestOptions) MustGetPort() (port int) {
 func (r *RequestOptions) MustGetUrl() (url string) {
 	url, err := r.GetUrl()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return url
@@ -84,27 +85,27 @@ func (r *RequestOptions) MustGetUrl() (url string) {
 func (r *RequestOptions) MustSetMethod(method string) {
 	err := r.SetMethod(method)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (r *RequestOptions) MustSetPort(port int) {
 	err := r.SetPort(port)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (r *RequestOptions) MustSetUrl(url string) {
 	err := r.SetUrl(url)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (r *RequestOptions) SetMethod(method string) (err error) {
 	if method == "" {
-		return asciichgolangpublic.TracedErrorf("method is empty string")
+		return errors.TracedErrorf("method is empty string")
 	}
 
 	r.Method = method
@@ -114,7 +115,7 @@ func (r *RequestOptions) SetMethod(method string) (err error) {
 
 func (r *RequestOptions) SetPort(port int) (err error) {
 	if port <= 0 {
-		return asciichgolangpublic.TracedErrorf("Invalid value '%d' for port", port)
+		return errors.TracedErrorf("Invalid value '%d' for port", port)
 	}
 
 	r.Port = port
@@ -124,7 +125,7 @@ func (r *RequestOptions) SetPort(port int) (err error) {
 
 func (r *RequestOptions) SetUrl(url string) (err error) {
 	if url == "" {
-		return asciichgolangpublic.TracedErrorf("url is empty string")
+		return errors.TracedErrorf("url is empty string")
 	}
 
 	r.Url = url

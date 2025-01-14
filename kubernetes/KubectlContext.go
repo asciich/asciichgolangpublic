@@ -1,6 +1,9 @@
 package kubernetes
 
-import "github.com/asciich/asciichgolangpublic"
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
 
 type KubectlContext struct {
 	name    string
@@ -13,7 +16,7 @@ func NewKubectlContext() (k *KubectlContext) {
 
 func (k *KubectlContext) GetCluster() (cluster string, err error) {
 	if k.cluster == "" {
-		return "", asciichgolangpublic.TracedErrorf("cluster not set")
+		return "", errors.TracedErrorf("cluster not set")
 	}
 
 	return k.cluster, nil
@@ -21,7 +24,7 @@ func (k *KubectlContext) GetCluster() (cluster string, err error) {
 
 func (k *KubectlContext) GetName() (name string, err error) {
 	if k.name == "" {
-		return "", asciichgolangpublic.TracedErrorf("name not set")
+		return "", errors.TracedErrorf("name not set")
 	}
 
 	return k.name, nil
@@ -30,7 +33,7 @@ func (k *KubectlContext) GetName() (name string, err error) {
 func (k *KubectlContext) MustGetCluster() (cluster string) {
 	cluster, err := k.GetCluster()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return cluster
@@ -39,7 +42,7 @@ func (k *KubectlContext) MustGetCluster() (cluster string) {
 func (k *KubectlContext) MustGetName() (name string) {
 	name, err := k.GetName()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -48,20 +51,20 @@ func (k *KubectlContext) MustGetName() (name string) {
 func (k *KubectlContext) MustSetCluster(cluster string) {
 	err := k.SetCluster(cluster)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KubectlContext) MustSetName(name string) {
 	err := k.SetName(name)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KubectlContext) SetCluster(cluster string) (err error) {
 	if cluster == "" {
-		return asciichgolangpublic.TracedErrorf("cluster is empty string")
+		return errors.TracedErrorf("cluster is empty string")
 	}
 
 	k.cluster = cluster
@@ -71,7 +74,7 @@ func (k *KubectlContext) SetCluster(cluster string) (err error) {
 
 func (k *KubectlContext) SetName(name string) (err error) {
 	if name == "" {
-		return asciichgolangpublic.TracedErrorf("name is empty string")
+		return errors.TracedErrorf("name is empty string")
 	}
 
 	k.name = name

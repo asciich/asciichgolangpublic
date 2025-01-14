@@ -4,11 +4,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/continuousintegration"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func TestGitlabProjectBranchCreateAndDelete(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogInfo("Unavailable in Github CI")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogInfo("Unavailable in Github CI")
 		return
 	}
 
@@ -39,7 +41,7 @@ func TestGitlabProjectBranchCreateAndDelete(t *testing.T) {
 
 				branch.MustDelete(&GitlabDeleteBranchOptions{
 					SkipWaitForDeletion: false,
-					Verbose: verbose,
+					Verbose:             verbose,
 				})
 				assert.False(branch.MustExists())
 
@@ -51,7 +53,7 @@ func TestGitlabProjectBranchCreateAndDelete(t *testing.T) {
 				for i := 0; i < 2; i++ {
 					branch.MustDelete(&GitlabDeleteBranchOptions{
 						SkipWaitForDeletion: false,
-						Verbose: verbose,
+						Verbose:             verbose,
 					})
 					assert.False(branch.MustExists())
 				}

@@ -1,8 +1,8 @@
-package asciichgolangpublic
+package changesummary
 
 import (
+	"fmt"
 	"testing"
-
 
 	"github.com/stretchr/testify/assert"
 )
@@ -16,7 +16,7 @@ func TestChangeSummryIsChanged(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -51,7 +51,7 @@ func TestChangeSummryNumberOfChnages(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 

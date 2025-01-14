@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type PowerShellService struct {
 	CommandExecutorBase
 }
@@ -18,7 +23,7 @@ func PowerShell() (p *PowerShellService) {
 
 func (b *PowerShellService) RunCommand(options *RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	if options == nil {
-		return nil, TracedErrorNil("options")
+		return nil, errors.TracedErrorNil("options")
 	}
 
 	optionsToUse := options.GetDeepCopy()
@@ -59,7 +64,7 @@ func (b *PowerShellService) RunCommand(options *RunCommandOptions) (commandOutpu
 func (p *PowerShellService) MustRunCommand(options *RunCommandOptions) (commandOutput *CommandOutput) {
 	commandOutput, err := p.RunCommand(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandOutput
@@ -68,7 +73,7 @@ func (p *PowerShellService) MustRunCommand(options *RunCommandOptions) (commandO
 func (p *PowerShellService) MustRunOneLiner(oneLiner string, verbose bool) (output *CommandOutput) {
 	output, err := p.RunOneLiner(oneLiner, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return output
@@ -77,7 +82,7 @@ func (p *PowerShellService) MustRunOneLiner(oneLiner string, verbose bool) (outp
 func (p *PowerShellService) MustRunOneLinerAndGetStdoutAsString(oneLiner string, verbose bool) (stdout string) {
 	stdout, err := p.RunOneLinerAndGetStdoutAsString(oneLiner, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return stdout
@@ -85,7 +90,7 @@ func (p *PowerShellService) MustRunOneLinerAndGetStdoutAsString(oneLiner string,
 
 func (p *PowerShellService) RunOneLiner(oneLiner string, verbose bool) (output *CommandOutput, err error) {
 	if oneLiner == "" {
-		return nil, TracedErrorEmptyString("oneLiner")
+		return nil, errors.TracedErrorEmptyString("oneLiner")
 	}
 
 	output, err = p.RunCommand(

@@ -2,6 +2,8 @@ package asciichgolangpublic
 
 import (
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type GitRepositoryBase struct {
@@ -14,7 +16,7 @@ func NewGitRepositoryBase() (g *GitRepositoryBase) {
 
 func (g *GitRepositoryBase) AddFilesByPath(pathsToAdd []string, verbose bool) (err error) {
 	if len(pathsToAdd) <= 0 {
-		return TracedError("pathToAdd has no elements")
+		return errors.TracedError("pathToAdd has no elements")
 	}
 
 	parent, err := g.GetParentRepositoryForBaseClass()
@@ -35,7 +37,7 @@ func (g *GitRepositoryBase) AddFilesByPath(pathsToAdd []string, verbose bool) (e
 			return err
 		}
 
-		LogChangedf(
+		logging.LogChangedf(
 			"Added '%d' files to git repository '%s' on host '%s'.",
 			len(pathsToAdd),
 			path,
@@ -48,7 +50,7 @@ func (g *GitRepositoryBase) AddFilesByPath(pathsToAdd []string, verbose bool) (e
 
 func (g *GitRepositoryBase) BranchByNameExists(branchName string, verbose bool) (branchExists bool, err error) {
 	if branchName == "" {
-		return false, TracedErrorEmptyString("branchName")
+		return false, errors.TracedErrorEmptyString("branchName")
 	}
 
 	parent, err := g.GetParentRepositoryForBaseClass()
@@ -70,14 +72,14 @@ func (g *GitRepositoryBase) BranchByNameExists(branchName string, verbose bool) 
 		}
 
 		if branchExists {
-			LogInfof(
+			logging.LogInfof(
 				"Branch '%s' in git repository '%s' on host '%s' exists.",
 				branchName,
 				path,
 				hostDescription,
 			)
 		} else {
-			LogInfof(
+			logging.LogInfof(
 				"Branch '%s' in git repository '%s' on host '%s' does not exist.",
 				branchName,
 				path,
@@ -106,7 +108,7 @@ func (g *GitRepositoryBase) CheckHasNoUncommittedChanges(verbose bool) (err erro
 			return err
 		}
 
-		return TracedErrorf(
+		return errors.TracedErrorf(
 			"There are uncommited changes in git repository '%s' on host '%s'",
 			path,
 			hostDescription,
@@ -136,7 +138,7 @@ func (g *GitRepositoryBase) CheckIsGolangApplication(verbose bool) (err error) {
 		return err
 	}
 
-	return TracedErrorf(
+	return errors.TracedErrorf(
 		"git repository '%s' on host '%s' is not a golang application",
 		path,
 		hostDescription,
@@ -160,7 +162,7 @@ func (g *GitRepositoryBase) CheckIsGolangPackage(verbose bool) (err error) {
 			return err
 		}
 
-		return TracedErrorf(
+		return errors.TracedErrorf(
 			"git repository '%s' on host '%s' is not a golang package",
 			path,
 			hostDescription,
@@ -187,7 +189,7 @@ func (g *GitRepositoryBase) CheckIsOnLocalhost(verbose bool) (err error) {
 			return err
 		}
 
-		return TracedErrorf(
+		return errors.TracedErrorf(
 			"git repository '%s' is not on localhost. Host is '%s'",
 			path,
 			hostDescription,
@@ -214,7 +216,7 @@ func (g *GitRepositoryBase) CheckIsPreCommitRepository(verbose bool) (err error)
 	}
 
 	if !isPreCommitRepository {
-		return TracedErrorf(
+		return errors.TracedErrorf(
 			"Repository '%s' on host '%s' is not a pre-commit repository.",
 			path,
 			hostDescription,
@@ -226,7 +228,7 @@ func (g *GitRepositoryBase) CheckIsPreCommitRepository(verbose bool) (err error)
 
 func (g *GitRepositoryBase) CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
 	if commitOptions == nil {
-		return nil, TracedErrorNil("commitOptions")
+		return nil, errors.TracedErrorNil("commitOptions")
 	}
 
 	parent, err := g.GetParentRepositoryForBaseClass()
@@ -249,7 +251,7 @@ func (g *GitRepositoryBase) CommitAndPush(commitOptions *GitCommitOptions) (crea
 
 func (g *GitRepositoryBase) CommitIfUncommittedChanges(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
 	if commitOptions == nil {
-		return nil, TracedErrorNil("commitOptions")
+		return nil, errors.TracedErrorNil("commitOptions")
 	}
 
 	parent, err := g.GetParentRepositoryForBaseClass()
@@ -282,7 +284,7 @@ func (g *GitRepositoryBase) CommitIfUncommittedChanges(commitOptions *GitCommitO
 		}
 
 		if commitOptions.Verbose {
-			LogInfof(
+			logging.LogInfof(
 				"Commited all uncommited changes in git repository '%s' on host '%s' as commit '%s'.",
 				path,
 				hostDescription,
@@ -296,7 +298,7 @@ func (g *GitRepositoryBase) CommitIfUncommittedChanges(commitOptions *GitCommitO
 		}
 
 		if commitOptions.Verbose {
-			LogInfof(
+			logging.LogInfof(
 				"No uncommited changes to commit in git repository '%s' on host '%s'.",
 				path,
 				hostDescription,
@@ -354,7 +356,7 @@ func (g *GitRepositoryBase) ContainsGoSourceFileOfMainPackageWithMainFunction(ve
 
 		if containsLine {
 			if verbose {
-				LogInfof(
+				logging.LogInfof(
 					"Found '%s' and '%s' in '%s'",
 					packageMainString,
 					funcMainString,
@@ -367,7 +369,7 @@ func (g *GitRepositoryBase) ContainsGoSourceFileOfMainPackageWithMainFunction(ve
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"No file containing '%s' and '%s' found in '%s'.",
 			packageMainString,
 			funcMainString,
@@ -380,7 +382,7 @@ func (g *GitRepositoryBase) ContainsGoSourceFileOfMainPackageWithMainFunction(ve
 
 func (g *GitRepositoryBase) CreateAndInit(createOptions *CreateRepositoryOptions) (err error) {
 	if createOptions == nil {
-		return TracedErrorNil("createOptions")
+		return errors.TracedErrorNil("createOptions")
 	}
 
 	parent, err := g.GetParentRepositoryForBaseClass()
@@ -403,7 +405,7 @@ func (g *GitRepositoryBase) CreateAndInit(createOptions *CreateRepositoryOptions
 
 func (g *GitRepositoryBase) DirectoryByPathExists(verbose bool, path ...string) (exists bool, err error) {
 	if len(path) <= 0 {
-		return false, TracedError("path has no elements")
+		return false, errors.TracedError("path has no elements")
 	}
 
 	parent, err := g.GetParentRepositoryForBaseClass()
@@ -438,14 +440,14 @@ func (g *GitRepositoryBase) DirectoryByPathExists(verbose bool, path ...string) 
 		}
 
 		if exists {
-			LogInfof(
+			logging.LogInfof(
 				"Directory '%s' in git repository '%s' on host '%s' exists.",
 				relativeSubDirPath,
 				path,
 				hostDescription,
 			)
 		} else {
-			LogInfof(
+			logging.LogInfof(
 				"Directory '%s' in git repository '%s' on host '%s' does not exist.",
 				relativeSubDirPath,
 				path,
@@ -522,7 +524,7 @@ func (g *GitRepositoryBase) GetCurrentCommitsNewestVersionOrNilIfNotPresent(verb
 
 func (g *GitRepositoryBase) GetFileByPath(path ...string) (file File, err error) {
 	if len(path) <= 0 {
-		return nil, TracedError("path has no elements")
+		return nil, errors.TracedError("path has no elements")
 	}
 
 	parent, err := g.GetParentRepositoryForBaseClass()
@@ -555,7 +557,7 @@ func (g *GitRepositoryBase) GetLatestTagVersion(verbose bool) (latestTagVersion 
 			return nil, err
 		}
 
-		return nil, TracedErrorf(
+		return nil, errors.TracedErrorf(
 			"No version tag in git repository '%s' on host '%s' found.",
 			path,
 			hostDescription,
@@ -611,7 +613,7 @@ func (g *GitRepositoryBase) GetLatestTagVersionOrNilIfNotFound(verbose bool) (la
 
 func (g *GitRepositoryBase) GetParentRepositoryForBaseClass() (parentRepositoryForBaseClass GitRepository, err error) {
 	if g.parentRepositoryForBaseClass == nil {
-		return nil, TracedErrorf("parentRepositoryForBaseClass not set")
+		return nil, errors.TracedErrorf("parentRepositoryForBaseClass not set")
 	}
 
 	return g.parentRepositoryForBaseClass, nil
@@ -656,13 +658,13 @@ func (g *GitRepositoryBase) HasNoUncommittedChanges(verbose bool) (hasNoUncommit
 
 	if verbose {
 		if hasNoUncommittedChanges {
-			LogInfof(
+			logging.LogInfof(
 				"Git repository '%s' on host '%s' has no uncommitted changes.",
 				path,
 				hostDescription,
 			)
 		} else {
-			LogInfof(
+			logging.LogInfof(
 				"Git repository '%s' on host '%s' has uncommitted changes.",
 				path,
 				hostDescription,
@@ -691,7 +693,7 @@ func (g *GitRepositoryBase) IsGolangApplication(verbose bool) (isGolangApplicati
 
 	if !goModExists {
 		if verbose {
-			LogInfof(
+			logging.LogInfof(
 				"'%s' has no 'go.mod' present and is therefore not a golang application.",
 				repoPath,
 			)
@@ -706,7 +708,7 @@ func (g *GitRepositoryBase) IsGolangApplication(verbose bool) (isGolangApplicati
 
 	if mainGoExists {
 		if verbose {
-			LogInfof("'%s' contains a go application since 'main.go' was found.", repoPath)
+			logging.LogInfof("'%s' contains a go application since 'main.go' was found.", repoPath)
 		}
 	}
 
@@ -717,7 +719,7 @@ func (g *GitRepositoryBase) IsGolangApplication(verbose bool) (isGolangApplicati
 
 	if isMainFuncPresent {
 		if verbose {
-			LogInfof(
+			logging.LogInfof(
 				"'%s' contains a go application since 'main' function was found.",
 				repoPath,
 			)
@@ -727,7 +729,7 @@ func (g *GitRepositoryBase) IsGolangApplication(verbose bool) (isGolangApplicati
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"'%s' does not contain a go application.",
 			repoPath,
 		)
@@ -754,7 +756,7 @@ func (g *GitRepositoryBase) IsGolangPackage(verbose bool) (isGolangPackage bool,
 
 	if !goModExists {
 		if verbose {
-			LogInfof("'%s' has no 'go.mod' present is not a golang package.", repoPath)
+			logging.LogInfof("'%s' has no 'go.mod' present is not a golang package.", repoPath)
 		}
 		return false, nil
 	}
@@ -766,14 +768,14 @@ func (g *GitRepositoryBase) IsGolangPackage(verbose bool) (isGolangPackage bool,
 
 	if isMainFuncPresent {
 		if verbose {
-			LogInfof("'%s' contains not a go package since 'main' function was found.", repoPath)
+			logging.LogInfof("'%s' contains not a go package since 'main' function was found.", repoPath)
 		}
 
 		return false, nil
 	}
 
 	if verbose {
-		LogInfof("'%s' contains a go package.", repoPath)
+		logging.LogInfof("'%s' contains a go package.", repoPath)
 	}
 
 	return true, nil
@@ -799,12 +801,12 @@ func (g *GitRepositoryBase) IsOnLocalhost(verbose bool) (isOnLocalhost bool, err
 		}
 
 		if isOnLocalhost {
-			LogInfof(
+			logging.LogInfof(
 				"Git repository '%s' is on localhost",
 				path,
 			)
 		} else {
-			LogInfof(
+			logging.LogInfof(
 				"Git repository '%s' is not on localhost. Gost is '%s'.",
 				path,
 				hostDescription,
@@ -833,13 +835,13 @@ func (g *GitRepositoryBase) IsPreCommitRepository(verbose bool) (isPreCommitRepo
 		}
 
 		if isPreCommitRepository {
-			LogInfof(
+			logging.LogInfof(
 				"Git reposiotry '%s' on host '%s' is a pre-commit repository.",
 				path,
 				hostDescription,
 			)
 		} else {
-			LogInfof(
+			logging.LogInfof(
 				"Git reposiotry '%s' on host '%s' is not a pre-commit repository.",
 				path,
 				hostDescription,
@@ -879,14 +881,14 @@ func (g *GitRepositoryBase) ListVersionTags(verbose bool) (versionTags []GitTag,
 func (g *GitRepositoryBase) MustAddFilesByPath(pathsToAdd []string, verbose bool) {
 	err := g.AddFilesByPath(pathsToAdd, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRepositoryBase) MustBranchByNameExists(branchName string, verbose bool) (branchExists bool) {
 	branchExists, err := g.BranchByNameExists(branchName, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return branchExists
@@ -895,42 +897,42 @@ func (g *GitRepositoryBase) MustBranchByNameExists(branchName string, verbose bo
 func (g *GitRepositoryBase) MustCheckHasNoUncommittedChanges(verbose bool) {
 	err := g.CheckHasNoUncommittedChanges(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRepositoryBase) MustCheckIsGolangApplication(verbose bool) {
 	err := g.CheckIsGolangApplication(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRepositoryBase) MustCheckIsGolangPackage(verbose bool) {
 	err := g.CheckIsGolangPackage(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRepositoryBase) MustCheckIsOnLocalhost(verbose bool) {
 	err := g.CheckIsOnLocalhost(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRepositoryBase) MustCheckIsPreCommitRepository(verbose bool) {
 	err := g.CheckIsPreCommitRepository(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRepositoryBase) MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
 	createdCommit, err := g.CommitAndPush(commitOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdCommit
@@ -939,7 +941,7 @@ func (g *GitRepositoryBase) MustCommitAndPush(commitOptions *GitCommitOptions) (
 func (g *GitRepositoryBase) MustCommitIfUncommittedChanges(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
 	createdCommit, err := g.CommitIfUncommittedChanges(commitOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdCommit
@@ -948,7 +950,7 @@ func (g *GitRepositoryBase) MustCommitIfUncommittedChanges(commitOptions *GitCom
 func (g *GitRepositoryBase) MustContainsGoSourceFileOfMainPackageWithMainFunction(verbose bool) (mainFound bool) {
 	mainFound, err := g.ContainsGoSourceFileOfMainPackageWithMainFunction(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return mainFound
@@ -957,14 +959,14 @@ func (g *GitRepositoryBase) MustContainsGoSourceFileOfMainPackageWithMainFunctio
 func (g *GitRepositoryBase) MustCreateAndInit(createOptions *CreateRepositoryOptions) {
 	err := g.CreateAndInit(createOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRepositoryBase) MustDirectoryByPathExists(verbose bool, path ...string) (exists bool) {
 	exists, err := g.DirectoryByPathExists(verbose, path...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return exists
@@ -973,14 +975,14 @@ func (g *GitRepositoryBase) MustDirectoryByPathExists(verbose bool, path ...stri
 func (g *GitRepositoryBase) MustEnsureMainReadmeMdExists(verbose bool) {
 	err := g.EnsureMainReadmeMdExists(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRepositoryBase) MustGetCurrentCommitMessage(verbose bool) (currentCommitMessage string) {
 	currentCommitMessage, err := g.GetCurrentCommitMessage(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return currentCommitMessage
@@ -989,7 +991,7 @@ func (g *GitRepositoryBase) MustGetCurrentCommitMessage(verbose bool) (currentCo
 func (g *GitRepositoryBase) MustGetCurrentCommitsNewestVersion(verbose bool) (newestVersion Version) {
 	newestVersion, err := g.GetCurrentCommitsNewestVersion(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return newestVersion
@@ -998,7 +1000,7 @@ func (g *GitRepositoryBase) MustGetCurrentCommitsNewestVersion(verbose bool) (ne
 func (g *GitRepositoryBase) MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose bool) (newestVersion Version) {
 	newestVersion, err := g.GetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return newestVersion
@@ -1007,7 +1009,7 @@ func (g *GitRepositoryBase) MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(
 func (g *GitRepositoryBase) MustGetFileByPath(path ...string) (file File) {
 	file, err := g.GetFileByPath(path...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return file
@@ -1016,7 +1018,7 @@ func (g *GitRepositoryBase) MustGetFileByPath(path ...string) (file File) {
 func (g *GitRepositoryBase) MustGetLatestTagVersion(verbose bool) (latestTagVersion Version) {
 	latestTagVersion, err := g.GetLatestTagVersion(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return latestTagVersion
@@ -1025,7 +1027,7 @@ func (g *GitRepositoryBase) MustGetLatestTagVersion(verbose bool) (latestTagVers
 func (g *GitRepositoryBase) MustGetLatestTagVersionAsString(verbose bool) (latestTagVersion string) {
 	latestTagVersion, err := g.GetLatestTagVersionAsString(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return latestTagVersion
@@ -1034,7 +1036,7 @@ func (g *GitRepositoryBase) MustGetLatestTagVersionAsString(verbose bool) (lates
 func (g *GitRepositoryBase) MustGetLatestTagVersionOrNilIfNotFound(verbose bool) (latestTagVersion Version) {
 	latestTagVersion, err := g.GetLatestTagVersionOrNilIfNotFound(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return latestTagVersion
@@ -1043,7 +1045,7 @@ func (g *GitRepositoryBase) MustGetLatestTagVersionOrNilIfNotFound(verbose bool)
 func (g *GitRepositoryBase) MustGetParentRepositoryForBaseClass() (parentRepositoryForBaseClass GitRepository) {
 	parentRepositoryForBaseClass, err := g.GetParentRepositoryForBaseClass()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return parentRepositoryForBaseClass
@@ -1052,7 +1054,7 @@ func (g *GitRepositoryBase) MustGetParentRepositoryForBaseClass() (parentReposit
 func (g *GitRepositoryBase) MustGetPathAndHostDescription() (path string, hostDescription string) {
 	path, hostDescription, err := g.GetPathAndHostDescription()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return path, hostDescription
@@ -1061,7 +1063,7 @@ func (g *GitRepositoryBase) MustGetPathAndHostDescription() (path string, hostDe
 func (g *GitRepositoryBase) MustHasNoUncommittedChanges(verbose bool) (hasNoUncommittedChanges bool) {
 	hasNoUncommittedChanges, err := g.HasNoUncommittedChanges(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hasNoUncommittedChanges
@@ -1070,7 +1072,7 @@ func (g *GitRepositoryBase) MustHasNoUncommittedChanges(verbose bool) (hasNoUnco
 func (g *GitRepositoryBase) MustIsGolangApplication(verbose bool) (isGolangApplication bool) {
 	isGolangApplication, err := g.IsGolangApplication(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isGolangApplication
@@ -1079,7 +1081,7 @@ func (g *GitRepositoryBase) MustIsGolangApplication(verbose bool) (isGolangAppli
 func (g *GitRepositoryBase) MustIsGolangPackage(verbose bool) (isGolangPackage bool) {
 	isGolangPackage, err := g.IsGolangPackage(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isGolangPackage
@@ -1088,7 +1090,7 @@ func (g *GitRepositoryBase) MustIsGolangPackage(verbose bool) (isGolangPackage b
 func (g *GitRepositoryBase) MustIsOnLocalhost(verbose bool) (isOnLocalhost bool) {
 	isOnLocalhost, err := g.IsOnLocalhost(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isOnLocalhost
@@ -1097,7 +1099,7 @@ func (g *GitRepositoryBase) MustIsOnLocalhost(verbose bool) (isOnLocalhost bool)
 func (g *GitRepositoryBase) MustIsPreCommitRepository(verbose bool) (isPreCommitRepository bool) {
 	isPreCommitRepository, err := g.IsPreCommitRepository(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isPreCommitRepository
@@ -1106,7 +1108,7 @@ func (g *GitRepositoryBase) MustIsPreCommitRepository(verbose bool) (isPreCommit
 func (g *GitRepositoryBase) MustListVersionTags(verbose bool) (versionTags []GitTag) {
 	versionTags, err := g.ListVersionTags(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return versionTags
@@ -1115,14 +1117,14 @@ func (g *GitRepositoryBase) MustListVersionTags(verbose bool) (versionTags []Git
 func (g *GitRepositoryBase) MustSetParentRepositoryForBaseClass(parentRepositoryForBaseClass GitRepository) {
 	err := g.SetParentRepositoryForBaseClass(parentRepositoryForBaseClass)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRepositoryBase) MustWriteStringToFile(content string, verbose bool, path ...string) (writtenFile File) {
 	writtenFile, err := g.WriteStringToFile(content, verbose, path...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return writtenFile
@@ -1130,7 +1132,7 @@ func (g *GitRepositoryBase) MustWriteStringToFile(content string, verbose bool, 
 
 func (g *GitRepositoryBase) SetParentRepositoryForBaseClass(parentRepositoryForBaseClass GitRepository) (err error) {
 	if parentRepositoryForBaseClass == nil {
-		return TracedErrorf("parentRepositoryForBaseClass is nil")
+		return errors.TracedErrorf("parentRepositoryForBaseClass is nil")
 	}
 
 	g.parentRepositoryForBaseClass = parentRepositoryForBaseClass
@@ -1140,7 +1142,7 @@ func (g *GitRepositoryBase) SetParentRepositoryForBaseClass(parentRepositoryForB
 
 func (g *GitRepositoryBase) WriteStringToFile(content string, verbose bool, path ...string) (writtenFile File, err error) {
 	if len(path) <= 0 {
-		return nil, TracedError("path has no elements")
+		return nil, errors.TracedError("path has no elements")
 	}
 
 	parent, err := g.GetParentRepositoryForBaseClass()

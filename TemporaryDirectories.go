@@ -1,6 +1,11 @@
 package asciichgolangpublic
 
-import "os"
+import (
+	"os"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
 
 type TemporaryDirectoriesService struct {
 }
@@ -43,7 +48,7 @@ func (t *TemporaryDirectoriesService) CreateEmptyTemporaryDirectoryAndGetPath(ve
 
 func (t *TemporaryDirectoriesService) CreateEmptyTemporaryGitRepository(createRepoOptions *CreateRepositoryOptions) (temporaryGitRepository GitRepository, err error) {
 	if createRepoOptions == nil {
-		return nil, TracedErrorNil("createRepoOptions")
+		return nil, errors.TracedErrorNil("createRepoOptions")
 	}
 
 	tempDirectory, err := t.CreateEmptyTemporaryDirectory(createRepoOptions.Verbose)
@@ -67,7 +72,7 @@ func (t *TemporaryDirectoriesService) CreateEmptyTemporaryGitRepository(createRe
 	}
 
 	if createRepoOptions.Verbose {
-		LogInfof("Created temporary local git repository '%s'.", repoPath)
+		logging.LogInfof("Created temporary local git repository '%s'.", repoPath)
 	}
 
 	return temporaryGitRepository, err
@@ -76,7 +81,7 @@ func (t *TemporaryDirectoriesService) CreateEmptyTemporaryGitRepository(createRe
 func (t *TemporaryDirectoriesService) MustCreateEmptyTemporaryDirectory(verbose bool) (temporaryDirectory *LocalDirectory) {
 	temporaryDirectory, err := t.CreateEmptyTemporaryDirectory(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 	return temporaryDirectory
 }
@@ -84,7 +89,7 @@ func (t *TemporaryDirectoriesService) MustCreateEmptyTemporaryDirectory(verbose 
 func (t *TemporaryDirectoriesService) MustCreateEmptyTemporaryDirectoryAndGetPath(verbose bool) (TemporaryDirectoryPath string) {
 	TemporaryDirectoryPath, err := t.CreateEmptyTemporaryDirectoryAndGetPath(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return TemporaryDirectoryPath
@@ -93,7 +98,7 @@ func (t *TemporaryDirectoriesService) MustCreateEmptyTemporaryDirectoryAndGetPat
 func (t *TemporaryDirectoriesService) MustCreateEmptyTemporaryGitRepository(createRepoOptions *CreateRepositoryOptions) (temporaryGitRepository GitRepository) {
 	temporaryGitRepository, err := t.CreateEmptyTemporaryGitRepository(createRepoOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return temporaryGitRepository

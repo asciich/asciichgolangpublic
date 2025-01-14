@@ -1,6 +1,11 @@
 package asciichgolangpublic
 
-import "sort"
+import (
+	"sort"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
 
 type VersionDateVersion struct {
 	version string
@@ -16,7 +21,7 @@ func (v *VersionDateVersion) GetNextVersion(versionType string) (nextVersion Ver
 
 func (v *VersionDateVersion) GetVersion() (version string, err error) {
 	if v.version == "" {
-		return "", TracedErrorf("version not set")
+		return "", errors.TracedErrorf("version not set")
 	}
 
 	return v.version, nil
@@ -25,7 +30,7 @@ func (v *VersionDateVersion) GetVersion() (version string, err error) {
 func (v *VersionDateVersion) MustGetNextVersion(versionType string) (nextVersion Version) {
 	nextVersion, err := v.GetNextVersion(versionType)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nextVersion
@@ -34,7 +39,7 @@ func (v *VersionDateVersion) MustGetNextVersion(versionType string) (nextVersion
 func (v *VersionDateVersion) MustGetVersion() (version string) {
 	version, err := v.GetVersion()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return version
@@ -43,7 +48,7 @@ func (v *VersionDateVersion) MustGetVersion() (version string) {
 func (v *VersionDateVersion) MustIsNewerThan(other Version) (isNewerThan bool) {
 	isNewerThan, err := v.IsNewerThan(other)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isNewerThan
@@ -52,13 +57,13 @@ func (v *VersionDateVersion) MustIsNewerThan(other Version) (isNewerThan bool) {
 func (v *VersionDateVersion) MustSetVersion(version string) {
 	err := v.SetVersion(version)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (v *VersionDateVersion) SetVersion(version string) (err error) {
 	if version == "" {
-		return TracedErrorf("version is empty string")
+		return errors.TracedErrorf("version is empty string")
 	}
 
 	v.version = version
@@ -90,12 +95,12 @@ func (v VersionDateVersion) GetAsString() (version string, err error) {
 
 func (v VersionDateVersion) IsNewerThan(other Version) (isNewerThan bool, err error) {
 	if other == nil {
-		return false, TracedErrorNil("other")
+		return false, errors.TracedErrorNil("other")
 	}
 
 	otherDateVersion, ok := other.(*VersionDateVersion)
 	if !ok {
-		return false, TracedErrorf(
+		return false, errors.TracedErrorf(
 			"Incompatible versions to compare: '%s' and other '%s'",
 			v,
 			other,
@@ -129,7 +134,7 @@ func (v VersionDateVersion) IsSemanticVersion() (isSemanticVersion bool) {
 func (v VersionDateVersion) MustGetAsString() (version string) {
 	version, err := v.GetAsString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return version

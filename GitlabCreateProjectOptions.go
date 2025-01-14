@@ -3,8 +3,10 @@ package asciichgolangpublic
 import (
 	"path/filepath"
 	"strings"
-	
+
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type GitlabCreateProjectOptions struct {
@@ -30,7 +32,7 @@ func (g *GitlabCreateProjectOptions) GetVerbose() (verbose bool, err error) {
 func (g *GitlabCreateProjectOptions) MustGetGroupNames(verbose bool) (groupNames []string) {
 	groupNames, err := g.GetGroupNames(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return groupNames
@@ -39,7 +41,7 @@ func (g *GitlabCreateProjectOptions) MustGetGroupNames(verbose bool) (groupNames
 func (g *GitlabCreateProjectOptions) MustGetGroupPath(verbose bool) (groupPath string) {
 	groupPath, err := g.GetGroupPath(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return groupPath
@@ -48,7 +50,7 @@ func (g *GitlabCreateProjectOptions) MustGetGroupPath(verbose bool) (groupPath s
 func (g *GitlabCreateProjectOptions) MustGetIsPublic() (isPublic bool) {
 	isPublic, err := g.GetIsPublic()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isPublic
@@ -57,7 +59,7 @@ func (g *GitlabCreateProjectOptions) MustGetIsPublic() (isPublic bool) {
 func (g *GitlabCreateProjectOptions) MustGetProjectName() (projectName string) {
 	projectName, err := g.GetProjectName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectName
@@ -66,7 +68,7 @@ func (g *GitlabCreateProjectOptions) MustGetProjectName() (projectName string) {
 func (g *GitlabCreateProjectOptions) MustGetProjectPath() (projectPath string) {
 	projectPath, err := g.GetProjectPath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectPath
@@ -75,7 +77,7 @@ func (g *GitlabCreateProjectOptions) MustGetProjectPath() (projectPath string) {
 func (g *GitlabCreateProjectOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := g.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -84,21 +86,21 @@ func (g *GitlabCreateProjectOptions) MustGetVerbose() (verbose bool) {
 func (g *GitlabCreateProjectOptions) MustSetIsPublic(isPublic bool) {
 	err := g.SetIsPublic(isPublic)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCreateProjectOptions) MustSetProjectPath(projectPath string) {
 	err := g.SetProjectPath(projectPath)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCreateProjectOptions) MustSetVerbose(verbose bool) {
 	err := g.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
@@ -110,7 +112,7 @@ func (g *GitlabCreateProjectOptions) SetIsPublic(isPublic bool) (err error) {
 
 func (g *GitlabCreateProjectOptions) SetProjectPath(projectPath string) (err error) {
 	if projectPath == "" {
-		return TracedErrorf("projectPath is empty string")
+		return errors.TracedErrorf("projectPath is empty string")
 	}
 
 	g.ProjectPath = projectPath
@@ -141,7 +143,7 @@ func (o *GitlabCreateProjectOptions) GetGroupNames(verbose bool) (groupNames []s
 	groupNames = aslices.RemoveMatchingStrings(groupNames, ".")
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Gitlab create project options: Evaluated group names '%v' from project path '%s'",
 			groupNames,
 			projectPath,
@@ -174,7 +176,7 @@ func (o *GitlabCreateProjectOptions) GetProjectName() (projectName string, err e
 
 func (o *GitlabCreateProjectOptions) GetProjectPath() (projectPath string, err error) {
 	if len(o.ProjectPath) <= 0 {
-		return "", TracedError("ProjectPath is not set")
+		return "", errors.TracedError("ProjectPath is not set")
 	}
 
 	return o.ProjectPath, nil

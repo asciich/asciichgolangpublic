@@ -1,4 +1,10 @@
-package asciichgolangpublic
+package changesummary
+
+import (
+	"log"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+)
 
 // A ChangeSummary is used to return details about if/what/how much was actually changed.
 // Since a lot of functions are written idempotent the ChangeSummary should be used to inform the caller about what actually was done to reach a desired state.
@@ -13,7 +19,7 @@ func NewChangeSummary() (c *ChangeSummary) {
 
 func (c *ChangeSummary) AddChildSummary(childSummary *ChangeSummary) (err error) {
 	if childSummary == nil {
-		return TracedErrorNil("childSummary")
+		return errors.TracedErrorNil("childSummary")
 	}
 
 	c.childSummaries = append(c.childSummaries, childSummary)
@@ -23,11 +29,11 @@ func (c *ChangeSummary) AddChildSummary(childSummary *ChangeSummary) (err error)
 
 func (c *ChangeSummary) GetChildSummaries() (childSummaries []*ChangeSummary, err error) {
 	if c.childSummaries == nil {
-		return nil, TracedErrorf("childSummaries not set")
+		return nil, errors.TracedErrorf("childSummaries not set")
 	}
 
 	if len(c.childSummaries) <= 0 {
-		return nil, TracedErrorf("childSummaries has no elements")
+		return nil, errors.TracedErrorf("childSummaries has no elements")
 	}
 
 	return c.childSummaries, nil
@@ -62,14 +68,14 @@ func (c *ChangeSummary) IsChanged() (isChanged bool) {
 func (c *ChangeSummary) MustAddChildSummary(childSummary *ChangeSummary) {
 	err := c.AddChildSummary(childSummary)
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 }
 
 func (c *ChangeSummary) MustGetChildSummaries() (childSummaries []*ChangeSummary) {
 	childSummaries, err := c.GetChildSummaries()
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 
 	return childSummaries
@@ -78,14 +84,14 @@ func (c *ChangeSummary) MustGetChildSummaries() (childSummaries []*ChangeSummary
 func (c *ChangeSummary) MustSetChildSummaries(childSummaries []*ChangeSummary) {
 	err := c.SetChildSummaries(childSummaries)
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 }
 
 func (c *ChangeSummary) MustSetNumberOfChanges(numberOfChanges int) {
 	err := c.SetNumberOfChanges(numberOfChanges)
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 }
 
@@ -95,11 +101,11 @@ func (c *ChangeSummary) SetChanged(isChanged bool) {
 
 func (c *ChangeSummary) SetChildSummaries(childSummaries []*ChangeSummary) (err error) {
 	if childSummaries == nil {
-		return TracedErrorf("childSummaries is nil")
+		return errors.TracedErrorf("childSummaries is nil")
 	}
 
 	if len(childSummaries) <= 0 {
-		return TracedErrorf("childSummaries has no elements")
+		return errors.TracedErrorf("childSummaries has no elements")
 	}
 
 	c.childSummaries = childSummaries
@@ -121,7 +127,7 @@ func (c *ChangeSummary) SetIsChanged(isChanged bool) {
 
 func (c *ChangeSummary) SetNumberOfChanges(numberOfChanges int) (err error) {
 	if numberOfChanges < 0 {
-		return TracedErrorf("Invalid value '%d' for numberOfChanges", numberOfChanges)
+		return errors.TracedErrorf("Invalid value '%d' for numberOfChanges", numberOfChanges)
 	}
 
 	c.numberOfChanges = numberOfChanges

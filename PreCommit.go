@@ -2,6 +2,9 @@ package asciichgolangpublic
 
 import (
 	"fmt"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type PreCommitService struct{}
@@ -39,7 +42,7 @@ func (p *PreCommitService) GetDefaultConfigFileName() (preCommitDefaultName stri
 func (p *PreCommitService) MustGetAsPreCommitConfigFileOrNilIfContentIsInvalid(file File, verbose bool) (preCommitConfigFile *PreCommitConfigFile) {
 	preCommitConfigFile, err := p.GetAsPreCommitConfigFileOrNilIfContentIsInvalid(file, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return preCommitConfigFile
@@ -48,24 +51,24 @@ func (p *PreCommitService) MustGetAsPreCommitConfigFileOrNilIfContentIsInvalid(f
 func (p *PreCommitService) MustRunInDirectory(directoy Directory, options *PreCommitRunOptions) {
 	err := p.RunInDirectory(directoy, options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (p *PreCommitService) MustRunInGitRepository(gitRepo GitRepository, options *PreCommitRunOptions) {
 	err := p.RunInGitRepository(gitRepo, options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (p *PreCommitService) RunInDirectory(directoy Directory, options *PreCommitRunOptions) (err error) {
 	if directoy == nil {
-		return TracedErrorNil("directoy")
+		return errors.TracedErrorNil("directoy")
 	}
 
 	if options == nil {
-		return TracedErrorNil("options")
+		return errors.TracedErrorNil("options")
 	}
 
 	path, err := directoy.GetLocalPath()
@@ -94,7 +97,7 @@ func (p *PreCommitService) RunInDirectory(directoy Directory, options *PreCommit
 	}
 
 	if options.Verbose {
-		LogInfof("Pre commit successfully run in '%s'.", path)
+		logging.LogInfof("Pre commit successfully run in '%s'.", path)
 	}
 
 	return nil
@@ -102,11 +105,11 @@ func (p *PreCommitService) RunInDirectory(directoy Directory, options *PreCommit
 
 func (p *PreCommitService) RunInGitRepository(gitRepo GitRepository, options *PreCommitRunOptions) (err error) {
 	if gitRepo == nil {
-		return TracedErrorNil("gitRepo")
+		return errors.TracedErrorNil("gitRepo")
 	}
 
 	if options == nil {
-		return TracedErrorNil("options")
+		return errors.TracedErrorNil("options")
 	}
 
 	gitRepoDir, err := gitRepo.GetAsLocalGitRepository()
@@ -130,7 +133,7 @@ func (p *PreCommitService) RunInGitRepository(gitRepo GitRepository, options *Pr
 			return err
 		}
 
-		LogInfof(
+		logging.LogInfof(
 			"Git status of repository '%s' after running pre-commit:\n%s",
 			path,
 			gitStatusOutput,

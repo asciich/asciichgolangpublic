@@ -5,7 +5,10 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/datatypes"
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type CommandExecutorNamespace struct {
@@ -19,7 +22,7 @@ func NewCommandExecutorNamespace() (c *CommandExecutorNamespace) {
 
 func (c *CommandExecutorNamespace) CreateRole(createOptions *CreateRoleOptions) (createdRole Role, err error) {
 	if createOptions == nil {
-		return nil, asciichgolangpublic.TracedErrorNil("createOptions")
+		return nil, errors.TracedErrorNil("createOptions")
 	}
 
 	roleName, err := createOptions.GetName()
@@ -48,7 +51,7 @@ func (c *CommandExecutorNamespace) CreateRole(createOptions *CreateRoleOptions) 
 	}
 
 	if exists {
-		asciichgolangpublic.LogInfof(
+		logging.LogInfof(
 			"Role '%s' in namespace '%s' in kubernetes cluster '%s' already exists.",
 			roleName,
 			namespaceName,
@@ -103,7 +106,7 @@ func (c *CommandExecutorNamespace) CreateRole(createOptions *CreateRoleOptions) 
 
 func (c *CommandExecutorNamespace) DeleteRoleByName(name string, verbose bool) (err error) {
 	if name == "" {
-		return asciichgolangpublic.TracedErrorEmptyString("name")
+		return errors.TracedErrorEmptyString("name")
 	}
 
 	namespaceName, err := c.GetName()
@@ -146,7 +149,7 @@ func (c *CommandExecutorNamespace) DeleteRoleByName(name string, verbose bool) (
 		}
 
 		if verbose {
-			asciichgolangpublic.LogChangedf(
+			logging.LogChangedf(
 				"Role '%s' in namespace '%s' in kubernetes cluster '%s' deleted.",
 				name,
 				namespaceName,
@@ -155,7 +158,7 @@ func (c *CommandExecutorNamespace) DeleteRoleByName(name string, verbose bool) (
 		}
 	} else {
 		if verbose {
-			asciichgolangpublic.LogChangedf(
+			logging.LogChangedf(
 				"Role '%s' in namespace '%s' in kubernetes cluster '%s' already absent.",
 				name,
 				namespaceName,
@@ -175,12 +178,12 @@ func (c *CommandExecutorNamespace) GetCachedKubectlContext(verbose bool) (contex
 
 	commandExecutorKubernetes, ok := kubernetes.(*CommandExecutorKubernetes)
 	if !ok {
-		typeName, err := asciichgolangpublic.Types().GetTypeName(kubernetes)
+		typeName, err := datatypes.GetTypeName(kubernetes)
 		if err != nil {
 			return "", err
 		}
 
-		return "", asciichgolangpublic.TracedErrorNilf(
+		return "", errors.TracedErrorNilf(
 			"Unable to get kubectl context. unexpected kubernetes type '%s'",
 			typeName,
 		)
@@ -206,12 +209,12 @@ func (c *CommandExecutorNamespace) GetCommandExecutor() (commandExecutor asciich
 
 	commandExecutorKubernetes, ok := kubernetes.(*CommandExecutorKubernetes)
 	if !ok {
-		typeName, err := asciichgolangpublic.Types().GetTypeName(kubernetes)
+		typeName, err := datatypes.GetTypeName(kubernetes)
 		if err != nil {
 			return nil, err
 		}
 
-		return nil, asciichgolangpublic.TracedErrorNilf(
+		return nil, errors.TracedErrorNilf(
 			"Unable to get command executor. unexpected kubernetes type '%s'",
 			typeName,
 		)
@@ -227,7 +230,7 @@ func (c *CommandExecutorNamespace) GetKubernetesCluster() (kubernetesCluster Kub
 
 func (c *CommandExecutorNamespace) GetName() (name string, err error) {
 	if c.name == "" {
-		return "", asciichgolangpublic.TracedErrorf("name not set")
+		return "", errors.TracedErrorf("name not set")
 	}
 
 	return c.name, nil
@@ -235,7 +238,7 @@ func (c *CommandExecutorNamespace) GetName() (name string, err error) {
 
 func (c *CommandExecutorNamespace) GetRoleByName(name string) (role Role, err error) {
 	if name == "" {
-		return nil, asciichgolangpublic.TracedErrorEmptyString("name")
+		return nil, errors.TracedErrorEmptyString("name")
 	}
 
 	toReturn := NewCommandExecutorRole()
@@ -292,7 +295,7 @@ func (c *CommandExecutorNamespace) ListRoleNames(verbose bool) (roleNames []stri
 
 		splitted := strings.Split(line, "/")
 		if len(splitted) != 2 {
-			return nil, asciichgolangpublic.TracedErrorf(
+			return nil, errors.TracedErrorf(
 				"Unable to get role name out of line='%s'.",
 				line,
 			)
@@ -300,7 +303,7 @@ func (c *CommandExecutorNamespace) ListRoleNames(verbose bool) (roleNames []stri
 
 		roleName := splitted[1]
 		if roleName == "" {
-			return nil, asciichgolangpublic.TracedErrorf(
+			return nil, errors.TracedErrorf(
 				"roleName is empty stiring after evaluation of line '%s'",
 				line,
 			)
@@ -315,7 +318,7 @@ func (c *CommandExecutorNamespace) ListRoleNames(verbose bool) (roleNames []stri
 func (c *CommandExecutorNamespace) MustCreateRole(createOptions *CreateRoleOptions) (createdRole Role) {
 	createdRole, err := c.CreateRole(createOptions)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdRole
@@ -324,14 +327,14 @@ func (c *CommandExecutorNamespace) MustCreateRole(createOptions *CreateRoleOptio
 func (c *CommandExecutorNamespace) MustDeleteRoleByName(name string, verbose bool) {
 	err := c.DeleteRoleByName(name, verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorNamespace) MustGetCachedKubectlContext(verbose bool) (context string) {
 	context, err := c.GetCachedKubectlContext(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return context
@@ -340,7 +343,7 @@ func (c *CommandExecutorNamespace) MustGetCachedKubectlContext(verbose bool) (co
 func (c *CommandExecutorNamespace) MustGetClusterName() (clusterName string) {
 	clusterName, err := c.GetClusterName()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return clusterName
@@ -349,7 +352,7 @@ func (c *CommandExecutorNamespace) MustGetClusterName() (clusterName string) {
 func (c *CommandExecutorNamespace) MustGetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandExecutor
@@ -358,7 +361,7 @@ func (c *CommandExecutorNamespace) MustGetCommandExecutor() (commandExecutor asc
 func (c *CommandExecutorNamespace) MustGetKubernetesCluster() (kubernetesCluster KubernetesCluster) {
 	kubernetesCluster, err := c.GetKubernetesCluster()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return kubernetesCluster
@@ -367,7 +370,7 @@ func (c *CommandExecutorNamespace) MustGetKubernetesCluster() (kubernetesCluster
 func (c *CommandExecutorNamespace) MustGetName() (name string) {
 	name, err := c.GetName()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -376,7 +379,7 @@ func (c *CommandExecutorNamespace) MustGetName() (name string) {
 func (c *CommandExecutorNamespace) MustGetRoleByName(name string) (role Role) {
 	role, err := c.GetRoleByName(name)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return role
@@ -385,7 +388,7 @@ func (c *CommandExecutorNamespace) MustGetRoleByName(name string) (role Role) {
 func (c *CommandExecutorNamespace) MustListRoleNames(verbose bool) (roleNames []string) {
 	roleNames, err := c.ListRoleNames(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return roleNames
@@ -394,7 +397,7 @@ func (c *CommandExecutorNamespace) MustListRoleNames(verbose bool) (roleNames []
 func (c *CommandExecutorNamespace) MustRoleByNameExists(name string, verbose bool) (exists bool) {
 	exists, err := c.RoleByNameExists(name, verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return exists
@@ -403,7 +406,7 @@ func (c *CommandExecutorNamespace) MustRoleByNameExists(name string, verbose boo
 func (c *CommandExecutorNamespace) MustRunCommand(runCommandOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
 	commandOutput, err := c.RunCommand(runCommandOptions)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandOutput
@@ -412,7 +415,7 @@ func (c *CommandExecutorNamespace) MustRunCommand(runCommandOptions *asciichgola
 func (c *CommandExecutorNamespace) MustRunCommandAndGetStdoutAsLines(runCommandOptions *asciichgolangpublic.RunCommandOptions) (lines []string) {
 	lines, err := c.RunCommandAndGetStdoutAsLines(runCommandOptions)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return lines
@@ -421,20 +424,20 @@ func (c *CommandExecutorNamespace) MustRunCommandAndGetStdoutAsLines(runCommandO
 func (c *CommandExecutorNamespace) MustSetKubernetesCluster(kubernetesCluster KubernetesCluster) {
 	err := c.SetKubernetesCluster(kubernetesCluster)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorNamespace) MustSetName(name string) {
 	err := c.SetName(name)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorNamespace) RoleByNameExists(name string, verbose bool) (exists bool, err error) {
 	if name == "" {
-		return false, asciichgolangpublic.TracedErrorEmptyString("name")
+		return false, errors.TracedErrorEmptyString("name")
 	}
 
 	roleNames, err := c.ListRoleNames(false)
@@ -451,13 +454,13 @@ func (c *CommandExecutorNamespace) RoleByNameExists(name string, verbose bool) (
 		}
 
 		if exists {
-			asciichgolangpublic.LogInfof(
+			logging.LogInfof(
 				"Role '%s' in kubernetes cluster '%s' exists.",
 				name,
 				clusterName,
 			)
 		} else {
-			asciichgolangpublic.LogInfof(
+			logging.LogInfof(
 				"Role '%s' in kubernetes cluster '%s' does not exist.",
 				name,
 				clusterName,
@@ -470,7 +473,7 @@ func (c *CommandExecutorNamespace) RoleByNameExists(name string, verbose bool) (
 
 func (c *CommandExecutorNamespace) RunCommand(runCommandOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
 	if runCommandOptions == nil {
-		return nil, asciichgolangpublic.TracedErrorNil("runCommandOptions")
+		return nil, errors.TracedErrorNil("runCommandOptions")
 	}
 
 	commandExecutor, err := c.GetCommandExecutor()
@@ -483,7 +486,7 @@ func (c *CommandExecutorNamespace) RunCommand(runCommandOptions *asciichgolangpu
 
 func (c *CommandExecutorNamespace) RunCommandAndGetStdoutAsLines(runCommandOptions *asciichgolangpublic.RunCommandOptions) (lines []string, err error) {
 	if runCommandOptions == nil {
-		return nil, asciichgolangpublic.TracedErrorNil("runCommandOptions")
+		return nil, errors.TracedErrorNil("runCommandOptions")
 	}
 
 	commandOutput, err := c.RunCommand(runCommandOptions)
@@ -502,7 +505,7 @@ func (c *CommandExecutorNamespace) SetKubernetesCluster(kubernetesCluster Kubern
 
 func (c *CommandExecutorNamespace) SetName(name string) (err error) {
 	if name == "" {
-		return asciichgolangpublic.TracedErrorf("name is empty string")
+		return errors.TracedErrorf("name is empty string")
 	}
 
 	c.name = name

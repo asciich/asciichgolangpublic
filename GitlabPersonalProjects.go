@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type GitlabPersonalProjects struct {
 	gitlab *GitlabInstance
 }
@@ -10,7 +15,7 @@ func NewGitlabPersonalProjects() (g *GitlabPersonalProjects) {
 
 func (g *GitlabPersonalProjects) GetGitlab() (gitlab *GitlabInstance, err error) {
 	if g.gitlab == nil {
-		return nil, TracedErrorf("gitlab not set")
+		return nil, errors.TracedErrorf("gitlab not set")
 	}
 
 	return g.gitlab, nil
@@ -19,7 +24,7 @@ func (g *GitlabPersonalProjects) GetGitlab() (gitlab *GitlabInstance, err error)
 func (g *GitlabPersonalProjects) MustGetGitlab() (gitlab *GitlabInstance) {
 	gitlab, err := g.GetGitlab()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlab
@@ -28,13 +33,13 @@ func (g *GitlabPersonalProjects) MustGetGitlab() (gitlab *GitlabInstance) {
 func (g *GitlabPersonalProjects) MustSetGitlab(gitlab *GitlabInstance) {
 	err := g.SetGitlab(gitlab)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabPersonalProjects) SetGitlab(gitlab *GitlabInstance) (err error) {
 	if gitlab == nil {
-		return TracedErrorf("gitlab is nil")
+		return errors.TracedErrorf("gitlab is nil")
 	}
 
 	g.gitlab = gitlab

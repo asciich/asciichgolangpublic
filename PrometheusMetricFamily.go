@@ -1,6 +1,10 @@
 package asciichgolangpublic
 
-import dto "github.com/prometheus/client_model/go"
+import (
+	dto "github.com/prometheus/client_model/go"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
 
 type PrometheusMetricFamily struct {
 	name    string
@@ -10,7 +14,7 @@ type PrometheusMetricFamily struct {
 
 func GetPrometheusMetricFamilyFromNativeMetricFamily(metricFamily *dto.MetricFamily) (p *PrometheusMetricFamily, err error) {
 	if metricFamily == nil {
-		return nil, TracedErrorNil("metricFamily")
+		return nil, errors.TracedErrorNil("metricFamily")
 	}
 
 	p = NewPrometheusMetricFamily()
@@ -36,7 +40,7 @@ func GetPrometheusMetricFamilyFromNativeMetricFamily(metricFamily *dto.MetricFam
 				return nil, err
 			}
 		} else {
-			return nil, TracedErrorf("Not implemented for '%v'", metric)
+			return nil, errors.TracedErrorf("Not implemented for '%v'", metric)
 		}
 
 		err = p.AddMetric(toAdd)
@@ -51,7 +55,7 @@ func GetPrometheusMetricFamilyFromNativeMetricFamily(metricFamily *dto.MetricFam
 func MustGetPrometheusMetricFamilyFromNativeMetricFamily(metricFamily *dto.MetricFamily) (p *PrometheusMetricFamily) {
 	p, err := GetPrometheusMetricFamilyFromNativeMetricFamily(metricFamily)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return p
@@ -63,7 +67,7 @@ func NewPrometheusMetricFamily() (p *PrometheusMetricFamily) {
 
 func (p *PrometheusMetricFamily) AddMetric(toAdd *PrometheusMetric) (err error) {
 	if toAdd == nil {
-		return TracedErrorNil("toAdd")
+		return errors.TracedErrorNil("toAdd")
 	}
 
 	p.metrics = append(p.metrics, toAdd)
@@ -73,7 +77,7 @@ func (p *PrometheusMetricFamily) AddMetric(toAdd *PrometheusMetric) (err error) 
 
 func (p *PrometheusMetricFamily) GetHelp() (help string, err error) {
 	if p.help == "" {
-		return "", TracedErrorf("help not set")
+		return "", errors.TracedErrorf("help not set")
 	}
 
 	return p.help, nil
@@ -81,11 +85,11 @@ func (p *PrometheusMetricFamily) GetHelp() (help string, err error) {
 
 func (p *PrometheusMetricFamily) GetMetrics() (metrics []*PrometheusMetric, err error) {
 	if p.metrics == nil {
-		return nil, TracedErrorf("metrics not set")
+		return nil, errors.TracedErrorf("metrics not set")
 	}
 
 	if len(p.metrics) <= 0 {
-		return nil, TracedErrorf("metrics has no elements")
+		return nil, errors.TracedErrorf("metrics has no elements")
 	}
 
 	return p.metrics, nil
@@ -93,7 +97,7 @@ func (p *PrometheusMetricFamily) GetMetrics() (metrics []*PrometheusMetric, err 
 
 func (p *PrometheusMetricFamily) GetName() (name string, err error) {
 	if p.name == "" {
-		return "", TracedErrorf("name not set")
+		return "", errors.TracedErrorf("name not set")
 	}
 
 	return p.name, nil
@@ -111,7 +115,7 @@ func (p *PrometheusMetricFamily) GetValueAsFloat64() (value float64, err error) 
 	}
 
 	if len(metrics) != 1 {
-		return -1, TracedErrorf(
+		return -1, errors.TracedErrorf(
 			"Expected exactly 1 metric for '%s' to get the value from but got '%d'.",
 			metricName,
 			len(metrics),
@@ -129,14 +133,14 @@ func (p *PrometheusMetricFamily) GetValueAsFloat64() (value float64, err error) 
 func (p *PrometheusMetricFamily) MustAddMetric(toAdd *PrometheusMetric) {
 	err := p.AddMetric(toAdd)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (p *PrometheusMetricFamily) MustGetHelp() (help string) {
 	help, err := p.GetHelp()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return help
@@ -145,7 +149,7 @@ func (p *PrometheusMetricFamily) MustGetHelp() (help string) {
 func (p *PrometheusMetricFamily) MustGetMetrics() (metrics []*PrometheusMetric) {
 	metrics, err := p.GetMetrics()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return metrics
@@ -154,7 +158,7 @@ func (p *PrometheusMetricFamily) MustGetMetrics() (metrics []*PrometheusMetric) 
 func (p *PrometheusMetricFamily) MustGetName() (name string) {
 	name, err := p.GetName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -163,7 +167,7 @@ func (p *PrometheusMetricFamily) MustGetName() (name string) {
 func (p *PrometheusMetricFamily) MustGetValueAsFloat64() (value float64) {
 	value, err := p.GetValueAsFloat64()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return value
@@ -172,27 +176,27 @@ func (p *PrometheusMetricFamily) MustGetValueAsFloat64() (value float64) {
 func (p *PrometheusMetricFamily) MustSetHelp(help string) {
 	err := p.SetHelp(help)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (p *PrometheusMetricFamily) MustSetMetrics(metrics []*PrometheusMetric) {
 	err := p.SetMetrics(metrics)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (p *PrometheusMetricFamily) MustSetName(name string) {
 	err := p.SetName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (p *PrometheusMetricFamily) SetHelp(help string) (err error) {
 	if help == "" {
-		return TracedErrorf("help is empty string")
+		return errors.TracedErrorf("help is empty string")
 	}
 
 	p.help = help
@@ -202,11 +206,11 @@ func (p *PrometheusMetricFamily) SetHelp(help string) (err error) {
 
 func (p *PrometheusMetricFamily) SetMetrics(metrics []*PrometheusMetric) (err error) {
 	if metrics == nil {
-		return TracedErrorf("metrics is nil")
+		return errors.TracedErrorf("metrics is nil")
 	}
 
 	if len(metrics) <= 0 {
-		return TracedErrorf("metrics has no elements")
+		return errors.TracedErrorf("metrics has no elements")
 	}
 
 	p.metrics = metrics
@@ -216,7 +220,7 @@ func (p *PrometheusMetricFamily) SetMetrics(metrics []*PrometheusMetric) (err er
 
 func (p *PrometheusMetricFamily) SetName(name string) (err error) {
 	if name == "" {
-		return TracedErrorf("name is empty string")
+		return errors.TracedErrorf("name is empty string")
 	}
 
 	p.name = name

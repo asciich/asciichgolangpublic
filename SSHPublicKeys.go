@@ -2,6 +2,9 @@ package asciichgolangpublic
 
 import (
 	"strings"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type SSHPublicKeysService struct{}
@@ -16,7 +19,7 @@ func SSHPublicKeys() (sshPublicKeys *SSHPublicKeysService) {
 
 func (s *SSHPublicKeysService) LoadKeysFromFile(sshKeysFile File, verbose bool) (sshKeys []*SSHPublicKey, err error) {
 	if sshKeysFile == nil {
-		return nil, TracedError("sshKeysFile is nil")
+		return nil, errors.TracedError("sshKeysFile is nil")
 	}
 
 	filePath, err := sshKeysFile.GetLocalPath()
@@ -25,7 +28,7 @@ func (s *SSHPublicKeysService) LoadKeysFromFile(sshKeysFile File, verbose bool) 
 	}
 
 	if verbose {
-		LogInfof("Load SSH public keys from file '%s' started.", filePath)
+		logging.LogInfof("Load SSH public keys from file '%s' started.", filePath)
 	}
 
 	lines, err := sshKeysFile.ReadAsLinesWithoutComments()
@@ -50,7 +53,7 @@ func (s *SSHPublicKeysService) LoadKeysFromFile(sshKeysFile File, verbose bool) 
 	}
 
 	if verbose {
-		LogInfof("Load SSH public keys from file '%s' finished.", filePath)
+		logging.LogInfof("Load SSH public keys from file '%s' finished.", filePath)
 	}
 
 	return sshKeys, nil
@@ -59,7 +62,7 @@ func (s *SSHPublicKeysService) LoadKeysFromFile(sshKeysFile File, verbose bool) 
 func (s *SSHPublicKeysService) MustLoadKeysFromFile(sshKeysFile File, verbose bool) (sshKeys []*SSHPublicKey) {
 	sshKeys, err := s.LoadKeysFromFile(sshKeysFile, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sshKeys

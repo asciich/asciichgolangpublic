@@ -4,11 +4,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/continuousintegration"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func TestGitlabReleaseCreateAndDelete(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogInfo("Unavailable in Github CI")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogInfo("Unavailable in Github CI")
 		return
 	}
 
@@ -85,8 +87,8 @@ func TestGitlabReleaseCreateAndDelete(t *testing.T) {
 }
 
 func TestGitlabRelease_ReleaseLinks(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogInfo("Unavailable in Github CI")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogInfo("Unavailable in Github CI")
 		return
 	}
 
@@ -169,8 +171,8 @@ func TestGitlabRelease_ReleaseLinks(t *testing.T) {
 }
 
 func TestGitlabRelease_CreateNewPatchRelease(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogInfo("Unavailable in Github CI")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogInfo("Unavailable in Github CI")
 		return
 	}
 

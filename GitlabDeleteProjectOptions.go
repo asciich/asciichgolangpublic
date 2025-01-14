@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type GitlabDeleteProjectOptions struct {
 	ProjectPath string
 	Verbose     bool
@@ -11,7 +16,7 @@ func NewGitlabDeleteProjectOptions() (g *GitlabDeleteProjectOptions) {
 
 func (g *GitlabDeleteProjectOptions) GetProjectPath() (projectPath string, err error) {
 	if g.ProjectPath == "" {
-		return "", TracedErrorf("ProjectPath not set")
+		return "", errors.TracedErrorf("ProjectPath not set")
 	}
 
 	return g.ProjectPath, nil
@@ -25,7 +30,7 @@ func (g *GitlabDeleteProjectOptions) GetVerbose() (verbose bool) {
 func (g *GitlabDeleteProjectOptions) MustGetProjectPath() (projectPath string) {
 	projectPath, err := g.GetProjectPath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectPath
@@ -34,13 +39,13 @@ func (g *GitlabDeleteProjectOptions) MustGetProjectPath() (projectPath string) {
 func (g *GitlabDeleteProjectOptions) MustSetProjectPath(projectPath string) {
 	err := g.SetProjectPath(projectPath)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabDeleteProjectOptions) SetProjectPath(projectPath string) (err error) {
 	if projectPath == "" {
-		return TracedErrorf("projectPath is empty string")
+		return errors.TracedErrorf("projectPath is empty string")
 	}
 
 	g.ProjectPath = projectPath

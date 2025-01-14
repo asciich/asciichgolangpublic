@@ -1,10 +1,13 @@
-package asciichgolangpublic
+package errors
 
 import (
 	"errors"
 	"fmt"
+	"log"
 	"runtime"
 	"strings"
+
+	"github.com/asciich/asciichgolangpublic/datatypes"
 )
 
 var ErrTracedError = errors.New("asciichgolangpublic TracedError base")
@@ -153,7 +156,7 @@ func (t *TracedErrorType) GetFunctionCalls() (functionCalls []string, err error)
 func (t *TracedErrorType) MustGetErrorMessage() (errorMessage string) {
 	errorMessage, err := t.GetErrorMessage()
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 
 	return errorMessage
@@ -162,7 +165,7 @@ func (t *TracedErrorType) MustGetErrorMessage() (errorMessage string) {
 func (t *TracedErrorType) MustGetErrorsToUnwrap() (errorsToUnwrap []error) {
 	errorsToUnwrap, err := t.GetErrorsToUnwrap()
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 
 	return errorsToUnwrap
@@ -171,7 +174,7 @@ func (t *TracedErrorType) MustGetErrorsToUnwrap() (errorsToUnwrap []error) {
 func (t *TracedErrorType) MustGetFormattedError() (formattedError error) {
 	formattedError, err := t.GetFormattedError()
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 
 	return formattedError
@@ -180,7 +183,7 @@ func (t *TracedErrorType) MustGetFormattedError() (formattedError error) {
 func (t *TracedErrorType) MustGetFunctionCalls() (functionCalls []string) {
 	functionCalls, err := t.GetFunctionCalls()
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 
 	return functionCalls
@@ -189,21 +192,21 @@ func (t *TracedErrorType) MustGetFunctionCalls() (functionCalls []string) {
 func (t *TracedErrorType) MustSetErrorsToUnwrap(errorsToUnwrap []error) {
 	err := t.SetErrorsToUnwrap(errorsToUnwrap)
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 }
 
 func (t *TracedErrorType) MustSetFormattedError(formattedError error) {
 	err := t.SetFormattedError(formattedError)
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 }
 
 func (t *TracedErrorType) MustSetFunctionCalls(functionCalls []string) {
 	err := t.SetFunctionCalls(functionCalls)
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 }
 
@@ -252,7 +255,7 @@ func (t TracedErrorType) Error() (errorMessage string) {
 
 	allErrors := Errors().UnwrapRecursive(t)
 	for _, unwrapped := range allErrors {
-		unwrapType, err := Types().GetTypeName(unwrapped)
+		unwrapType, err := datatypes.GetTypeName(unwrapped)
 		if err != nil {
 			continue
 		}

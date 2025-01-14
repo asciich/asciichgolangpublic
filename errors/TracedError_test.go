@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package errors
 
 import (
 	"errors"
@@ -59,7 +59,7 @@ func TestTracedErrorStackTraceInMessage(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -83,7 +83,7 @@ func TestTracedErrorEmptyString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -109,7 +109,7 @@ func TestTracedErrorNil(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -135,7 +135,7 @@ func TestTracedErrorNotImplemented(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -163,7 +163,7 @@ func TestTracedErrorGetErrorMessage(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 				

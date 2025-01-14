@@ -5,11 +5,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/continuousintegration"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func TestGitlabProjectBranches_pagination(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogInfo("Unavailable in Github CI")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogInfo("Unavailable in Github CI")
 		return
 	}
 

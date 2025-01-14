@@ -3,8 +3,9 @@ package kvm
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type KvmStoragePool struct {
@@ -32,7 +33,7 @@ func (k *KvmStoragePool) GetHostName() (hostname string, err error) {
 
 func (k *KvmStoragePool) GetHypervisor() (hypervisor *KVMHypervisor, err error) {
 	if k.hypervisor == nil {
-		return nil, asciichgolangpublic.TracedError("hypervisor not set")
+		return nil, errors.TracedError("hypervisor not set")
 	}
 
 	return k.hypervisor, nil
@@ -40,7 +41,7 @@ func (k *KvmStoragePool) GetHypervisor() (hypervisor *KVMHypervisor, err error) 
 
 func (k *KvmStoragePool) GetName() (name string, err error) {
 	if len(k.name) <= 0 {
-		return "", asciichgolangpublic.TracedError("name not set")
+		return "", errors.TracedError("name not set")
 	}
 
 	return k.name, nil
@@ -58,7 +59,7 @@ func (k *KvmStoragePool) GetVolumes(verbose bool) (volumes []*KvmVolume, err err
 	}
 
 	if verbose {
-		asciichgolangpublic.LogInfof("Get volumes in storage pool '%s' on kvm hypervisor '%s' started.", poolName, hostname)
+		logging.LogInfof("Get volumes in storage pool '%s' on kvm hypervisor '%s' started.", poolName, hostname)
 	}
 
 	hypervisor, err := k.GetHypervisor()
@@ -74,13 +75,13 @@ func (k *KvmStoragePool) GetVolumes(verbose bool) (volumes []*KvmVolume, err err
 	firstLine, unparsedOutput := astrings.SplitFirstLineAndContent(listPoolOutput)
 	firstLine = strings.TrimSpace(firstLine)
 	if !strings.HasPrefix(firstLine, "Name") {
-		return nil, asciichgolangpublic.TracedErrorf("Unexpected first line of list volumes output: '%s'", firstLine)
+		return nil, errors.TracedErrorf("Unexpected first line of list volumes output: '%s'", firstLine)
 	}
 
 	secondLine, unparsedOutput := astrings.SplitFirstLineAndContent(unparsedOutput)
 	secondLine = strings.TrimSpace(secondLine)
 	if strings.Count(secondLine, "-") < 5 {
-		return nil, asciichgolangpublic.TracedErrorf("Unexpected second line of list volumes output: '%s'", secondLine)
+		return nil, errors.TracedErrorf("Unexpected second line of list volumes output: '%s'", secondLine)
 	}
 
 	volumes = []*KvmVolume{}
@@ -92,7 +93,7 @@ func (k *KvmStoragePool) GetVolumes(verbose bool) (volumes []*KvmVolume, err err
 
 		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(line)
 		if len(splitted) != 2 {
-			return nil, asciichgolangpublic.TracedErrorf("Unable to splitt list volume line '%v' : '%v'", line, splitted)
+			return nil, errors.TracedErrorf("Unable to splitt list volume line '%v' : '%v'", line, splitted)
 		}
 
 		nameToAdd := splitted[0]
@@ -111,11 +112,11 @@ func (k *KvmStoragePool) GetVolumes(verbose bool) (volumes []*KvmVolume, err err
 	}
 
 	if verbose {
-		asciichgolangpublic.LogInfof("Collected '%d' storage pools on kvm host '%s'", len(volumes), hostname)
+		logging.LogInfof("Collected '%d' storage pools on kvm host '%s'", len(volumes), hostname)
 	}
 
 	if verbose {
-		asciichgolangpublic.LogInfof("Get volumes in storage pool '%s' on kvm hypervisor '%s' finished.", poolName, hostname)
+		logging.LogInfof("Get volumes in storage pool '%s' on kvm hypervisor '%s' finished.", poolName, hostname)
 	}
 
 	return volumes, nil
@@ -124,7 +125,7 @@ func (k *KvmStoragePool) GetVolumes(verbose bool) (volumes []*KvmVolume, err err
 func (k *KvmStoragePool) MustGetHostName() (hostname string) {
 	hostname, err := k.GetHostName()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hostname
@@ -133,7 +134,7 @@ func (k *KvmStoragePool) MustGetHostName() (hostname string) {
 func (k *KvmStoragePool) MustGetHypervisor() (hypervisor *KVMHypervisor) {
 	hypervisor, err := k.GetHypervisor()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hypervisor
@@ -142,7 +143,7 @@ func (k *KvmStoragePool) MustGetHypervisor() (hypervisor *KVMHypervisor) {
 func (k *KvmStoragePool) MustGetName() (name string) {
 	name, err := k.GetName()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -151,7 +152,7 @@ func (k *KvmStoragePool) MustGetName() (name string) {
 func (k *KvmStoragePool) MustGetVolumes(verbose bool) (volumes []*KvmVolume) {
 	volumes, err := k.GetVolumes(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return volumes
@@ -160,20 +161,20 @@ func (k *KvmStoragePool) MustGetVolumes(verbose bool) (volumes []*KvmVolume) {
 func (k *KvmStoragePool) MustSetHypervisor(hypervisor *KVMHypervisor) {
 	err := k.SetHypervisor(hypervisor)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KvmStoragePool) MustSetName(name string) {
 	err := k.SetName(name)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KvmStoragePool) SetHypervisor(hypervisor *KVMHypervisor) (err error) {
 	if hypervisor == nil {
-		return asciichgolangpublic.TracedError("hypervisor is nil")
+		return errors.TracedError("hypervisor is nil")
 	}
 
 	k.hypervisor = hypervisor
@@ -183,7 +184,7 @@ func (k *KvmStoragePool) SetHypervisor(hypervisor *KVMHypervisor) (err error) {
 
 func (k *KvmStoragePool) SetName(name string) (err error) {
 	if len(name) <= 0 {
-		return asciichgolangpublic.TracedError("name is nil")
+		return errors.TracedError("name is nil")
 	}
 
 	k.name = name

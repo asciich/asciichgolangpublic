@@ -5,9 +5,11 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
-	"github.com/asciich/asciichgolangpublic/hosts"
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/hosts"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type KVMHypervisor struct {
@@ -19,7 +21,7 @@ type KVMHypervisor struct {
 
 func GetKvmHypervisorByHost(host hosts.Host) (kvmHypervisor *KVMHypervisor, err error) {
 	if host == nil {
-		return nil, asciichgolangpublic.TracedError("host is nil")
+		return nil, errors.TracedError("host is nil")
 	}
 
 	kvmHypervisor = NewKVMHypervisor()
@@ -44,7 +46,7 @@ func GetKvmHypervisorOnLocalhost() (kvmHypervisor *KVMHypervisor, err error) {
 func MustGetKvmHypervisorByHost(host hosts.Host) (kvmHypervisor *KVMHypervisor) {
 	kvmHypervisor, err := GetKvmHypervisorByHost(host)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return kvmHypervisor
@@ -53,7 +55,7 @@ func MustGetKvmHypervisorByHost(host hosts.Host) (kvmHypervisor *KVMHypervisor) 
 func MustGetKvmHypervisorOnLocalhost() (kvmHypervisor *KVMHypervisor) {
 	kvmHypervisor, err := GetKvmHypervisorOnLocalhost()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return kvmHypervisor
@@ -65,7 +67,7 @@ func NewKVMHypervisor() (kvmHypervisor *KVMHypervisor) {
 
 func (k *KVMHypervisor) CreateVm(createOptions *KvmCreateVmOptions) (createdVm *KvmVm, err error) {
 	if createOptions == nil {
-		return nil, asciichgolangpublic.TracedError("createOptions is nil")
+		return nil, errors.TracedError("createOptions is nil")
 	}
 
 	vmName, err := createOptions.GetVmName()
@@ -80,7 +82,7 @@ func (k *KVMHypervisor) CreateVm(createOptions *KvmCreateVmOptions) (createdVm *
 
 	if exists {
 		if createOptions.Verbose {
-			asciichgolangpublic.LogInfof("VM '%s' already exists", vmName)
+			logging.LogInfof("VM '%s' already exists", vmName)
 		}
 
 		createdVm, err = k.GetVmByName(vmName, createOptions.Verbose)
@@ -107,7 +109,7 @@ func (k *KVMHypervisor) CreateVm(createOptions *KvmCreateVmOptions) (createdVm *
 	}
 
 	if !diskImageExists {
-		return nil, asciichgolangpublic.TracedErrorf("Disk image '%s' does not exist to create VM.", diskImagePath)
+		return nil, errors.TracedErrorf("Disk image '%s' does not exist to create VM.", diskImagePath)
 	}
 
 	vmXml, err := asciichgolangpublic.TemporaryFiles().CreateEmptyTemporaryFile(createOptions.Verbose)
@@ -135,7 +137,7 @@ func (k *KVMHypervisor) CreateVm(createOptions *KvmCreateVmOptions) (createdVm *
 	}
 
 	if createOptions.Verbose {
-		asciichgolangpublic.LogInfof("Output of VM '%s' creation:\n%s", vmName, createOutput)
+		logging.LogInfof("Output of VM '%s' creation:\n%s", vmName, createOutput)
 	}
 
 	createdVm, err = k.GetVmByName(vmName, createOptions.Verbose)
@@ -144,7 +146,7 @@ func (k *KVMHypervisor) CreateVm(createOptions *KvmCreateVmOptions) (createdVm *
 	}
 
 	if createOptions.Verbose {
-		asciichgolangpublic.LogChangedf("Vm '%s' created.", vmName)
+		logging.LogChangedf("Vm '%s' created.", vmName)
 	}
 
 	return createdVm, nil
@@ -152,7 +154,7 @@ func (k *KVMHypervisor) CreateVm(createOptions *KvmCreateVmOptions) (createdVm *
 
 func (k *KVMHypervisor) GetHost() (host hosts.Host, err error) {
 	if k.host == nil {
-		return nil, asciichgolangpublic.TracedError("host not set")
+		return nil, errors.TracedError("host not set")
 	}
 
 	return k.host, nil
@@ -197,7 +199,7 @@ func (k *KVMHypervisor) GetStoragePoolNames(verbose bool) (storagePoolNames []st
 
 func (k *KVMHypervisor) GetStoragePools(verbose bool) (storagePools []*KvmStoragePool, err error) {
 	if verbose {
-		asciichgolangpublic.LogInfo("Get storage pools on kvm hypervisor started.")
+		logging.LogInfo("Get storage pools on kvm hypervisor started.")
 	}
 
 	hostname, err := k.GetHostName()
@@ -213,13 +215,13 @@ func (k *KVMHypervisor) GetStoragePools(verbose bool) (storagePools []*KvmStorag
 	firstLine, unparsedOutput := astrings.SplitFirstLineAndContent(listPoolOutput)
 	firstLine = strings.TrimSpace(firstLine)
 	if !strings.HasPrefix(firstLine, "Name") {
-		return nil, asciichgolangpublic.TracedErrorf("Unexpected first line of list pool output: '%s'", firstLine)
+		return nil, errors.TracedErrorf("Unexpected first line of list pool output: '%s'", firstLine)
 	}
 
 	secondLine, unparsedOutput := astrings.SplitFirstLineAndContent(unparsedOutput)
 	secondLine = strings.TrimSpace(secondLine)
 	if strings.Count(secondLine, "-") < 5 {
-		return nil, asciichgolangpublic.TracedErrorf("Unexpected second line of list pool output: '%s'", secondLine)
+		return nil, errors.TracedErrorf("Unexpected second line of list pool output: '%s'", secondLine)
 	}
 
 	storagePools = []*KvmStoragePool{}
@@ -231,7 +233,7 @@ func (k *KVMHypervisor) GetStoragePools(verbose bool) (storagePools []*KvmStorag
 
 		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(line)
 		if len(splitted) != 3 {
-			return nil, asciichgolangpublic.TracedErrorf("Unable to splitt list pool line '%v' : '%v'", line, splitted)
+			return nil, errors.TracedErrorf("Unable to splitt list pool line '%v' : '%v'", line, splitted)
 		}
 
 		nameToAdd := splitted[0]
@@ -250,11 +252,11 @@ func (k *KVMHypervisor) GetStoragePools(verbose bool) (storagePools []*KvmStorag
 	}
 
 	if verbose {
-		asciichgolangpublic.LogInfof("Collected '%d' storage pools on kvm host '%s'", len(storagePools), hostname)
+		logging.LogInfof("Collected '%d' storage pools on kvm host '%s'", len(storagePools), hostname)
 	}
 
 	if verbose {
-		asciichgolangpublic.LogInfo("Get storage pools on kvm hypervisor finished.")
+		logging.LogInfo("Get storage pools on kvm hypervisor finished.")
 	}
 
 	return storagePools, nil
@@ -283,7 +285,7 @@ func (k *KVMHypervisor) GetVmById(vmId int) (vm *KvmVm, err error) {
 
 func (k *KVMHypervisor) GetVmByName(vmName string, verbose bool) (vm *KvmVm, err error) {
 	if vmName == "" {
-		return nil, asciichgolangpublic.TracedError("vmName")
+		return nil, errors.TracedError("vmName")
 	}
 
 	vms, err := k.GetVmList(verbose)
@@ -302,7 +304,7 @@ func (k *KVMHypervisor) GetVmByName(vmName string, verbose bool) (vm *KvmVm, err
 		}
 	}
 
-	return nil, asciichgolangpublic.TracedErrorf("No VM named '%s' found", vmName)
+	return nil, errors.TracedErrorf("No VM named '%s' found", vmName)
 }
 
 func (k *KVMHypervisor) GetVmInfoList(verbose bool) (vmInfos []*KvmVmInfo, err error) {
@@ -333,12 +335,12 @@ func (k *KVMHypervisor) GetVmList(verbose bool) (vms []*KvmVm, err error) {
 	firstLine, unparsedOutput := astrings.SplitFirstLineAndContent(listOutput)
 	firstLine = strings.TrimSpace(firstLine)
 	if !strings.HasPrefix(firstLine, "Id ") {
-		return nil, asciichgolangpublic.TracedErrorf("Unexpected first line '%s'. Full output is '%s'.", firstLine, listOutput)
+		return nil, errors.TracedErrorf("Unexpected first line '%s'. Full output is '%s'.", firstLine, listOutput)
 	}
 
 	secondLine, unparsedOutput := astrings.SplitFirstLineAndContent(unparsedOutput)
 	if !strings.Contains(secondLine, "-----") {
-		return nil, asciichgolangpublic.TracedErrorf("Unexpected second line '%s'. Full output is '%s'.", secondLine, listOutput)
+		return nil, errors.TracedErrorf("Unexpected second line '%s'. Full output is '%s'.", secondLine, listOutput)
 	}
 
 	vms = []*KvmVm{}
@@ -351,7 +353,7 @@ func (k *KVMHypervisor) GetVmList(verbose bool) (vms []*KvmVm, err error) {
 
 		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(lineToProcess)
 		if len(splitted) != 3 {
-			return nil, asciichgolangpublic.TracedErrorf("Failed to split line '%s'", line)
+			return nil, errors.TracedErrorf("Failed to split line '%s'", line)
 		}
 
 		vmToAdd := NewKvmVm()
@@ -366,7 +368,7 @@ func (k *KVMHypervisor) GetVmList(verbose bool) (vms []*KvmVm, err error) {
 		if vmIdString != "-" {
 			vmId, err := strconv.Atoi(vmIdString)
 			if err != nil {
-				return nil, asciichgolangpublic.TracedErrorf("Unable to extract Vm id: '%s'", err.Error())
+				return nil, errors.TracedErrorf("Unable to extract Vm id: '%s'", err.Error())
 			}
 
 			vmToAdd, err = k.GetVmById(vmId)
@@ -383,7 +385,7 @@ func (k *KVMHypervisor) GetVmList(verbose bool) (vms []*KvmVm, err error) {
 	}
 
 	if verbose {
-		asciichgolangpublic.LogInfof("Collected '%d' KVM Vms", len(vms))
+		logging.LogInfof("Collected '%d' KVM Vms", len(vms))
 	}
 
 	return vms, nil
@@ -410,7 +412,7 @@ func (k *KVMHypervisor) GetVmNames(verbose bool) (vmNames []string, err error) {
 
 func (k *KVMHypervisor) GetVolumeByName(volumeName string) (volume *KvmVolume, err error) {
 	if len(volumeName) <= 0 {
-		return nil, asciichgolangpublic.TracedError("volumeName is empty string")
+		return nil, errors.TracedError("volumeName is empty string")
 	}
 
 	hostname, err := k.GetHostName()
@@ -435,7 +437,7 @@ func (k *KVMHypervisor) GetVolumeByName(volumeName string) (volume *KvmVolume, e
 		}
 	}
 
-	return nil, asciichgolangpublic.TracedErrorf("No volume '%s' found on hypervisor '%s'.", volumeName, hostname)
+	return nil, errors.TracedErrorf("No volume '%s' found on hypervisor '%s'.", volumeName, hostname)
 }
 
 func (k *KVMHypervisor) GetVolumeNames(verbose bool) (volumeNames []string, err error) {
@@ -459,7 +461,7 @@ func (k *KVMHypervisor) GetVolumeNames(verbose bool) (volumeNames []string, err 
 
 func (k *KVMHypervisor) GetVolumes(verbose bool) (volumes []*KvmVolume, err error) {
 	if verbose {
-		asciichgolangpublic.LogInfo("Get storage pools on kvm hypervisor started.")
+		logging.LogInfo("Get storage pools on kvm hypervisor started.")
 	}
 
 	hostname, err := k.GetHostName()
@@ -483,11 +485,11 @@ func (k *KVMHypervisor) GetVolumes(verbose bool) (volumes []*KvmVolume, err erro
 	}
 
 	if verbose {
-		asciichgolangpublic.LogInfof("Collected '%d' volumes from '%d' pools on kvm host '%s'", len(volumes), len(storagePools), hostname)
+		logging.LogInfof("Collected '%d' volumes from '%d' pools on kvm host '%s'", len(volumes), len(storagePools), hostname)
 	}
 
 	if verbose {
-		asciichgolangpublic.LogInfo("Get storage pools on kvm hypervisor finished.")
+		logging.LogInfo("Get storage pools on kvm hypervisor finished.")
 	}
 
 	return volumes, nil
@@ -496,7 +498,7 @@ func (k *KVMHypervisor) GetVolumes(verbose bool) (volumes []*KvmVolume, err erro
 func (k *KVMHypervisor) MustCreateVm(createOptions *KvmCreateVmOptions) (createdVm *KvmVm) {
 	createdVm, err := k.CreateVm(createOptions)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdVm
@@ -505,7 +507,7 @@ func (k *KVMHypervisor) MustCreateVm(createOptions *KvmCreateVmOptions) (created
 func (k *KVMHypervisor) MustGetHost() (host hosts.Host) {
 	host, err := k.GetHost()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return host
@@ -514,7 +516,7 @@ func (k *KVMHypervisor) MustGetHost() (host hosts.Host) {
 func (k *KVMHypervisor) MustGetHostName() (hostname string) {
 	hostname, err := k.GetHostName()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hostname
@@ -523,7 +525,7 @@ func (k *KVMHypervisor) MustGetHostName() (hostname string) {
 func (k *KVMHypervisor) MustGetStoragePoolNames(verbose bool) (storagePoolNames []string) {
 	storagePoolNames, err := k.GetStoragePoolNames(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return storagePoolNames
@@ -532,7 +534,7 @@ func (k *KVMHypervisor) MustGetStoragePoolNames(verbose bool) (storagePoolNames 
 func (k *KVMHypervisor) MustGetStoragePools(verbose bool) (storagePools []*KvmStoragePool) {
 	storagePools, err := k.GetStoragePools(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return storagePools
@@ -541,7 +543,7 @@ func (k *KVMHypervisor) MustGetStoragePools(verbose bool) (storagePools []*KvmSt
 func (k *KVMHypervisor) MustGetUseLocalhost() (useLocalhost bool) {
 	useLocalhost, err := k.GetUseLocalhost()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return useLocalhost
@@ -550,7 +552,7 @@ func (k *KVMHypervisor) MustGetUseLocalhost() (useLocalhost bool) {
 func (k *KVMHypervisor) MustGetVmById(vmId int) (vm *KvmVm) {
 	vm, err := k.GetVmById(vmId)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return vm
@@ -559,7 +561,7 @@ func (k *KVMHypervisor) MustGetVmById(vmId int) (vm *KvmVm) {
 func (k *KVMHypervisor) MustGetVmByName(vmName string, verbose bool) (vm *KvmVm) {
 	vm, err := k.GetVmByName(vmName, verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return vm
@@ -568,7 +570,7 @@ func (k *KVMHypervisor) MustGetVmByName(vmName string, verbose bool) (vm *KvmVm)
 func (k *KVMHypervisor) MustGetVmInfoList(verbose bool) (vmInfos []*KvmVmInfo) {
 	vmInfos, err := k.GetVmInfoList(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return vmInfos
@@ -577,7 +579,7 @@ func (k *KVMHypervisor) MustGetVmInfoList(verbose bool) (vmInfos []*KvmVmInfo) {
 func (k *KVMHypervisor) MustGetVmList(verbose bool) (vms []*KvmVm) {
 	vms, err := k.GetVmList(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return vms
@@ -586,7 +588,7 @@ func (k *KVMHypervisor) MustGetVmList(verbose bool) (vms []*KvmVm) {
 func (k *KVMHypervisor) MustGetVmNames(verbose bool) (vmNames []string) {
 	vmNames, err := k.GetVmNames(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return vmNames
@@ -595,7 +597,7 @@ func (k *KVMHypervisor) MustGetVmNames(verbose bool) (vmNames []string) {
 func (k *KVMHypervisor) MustGetVolumeByName(volumeName string) (volume *KvmVolume) {
 	volume, err := k.GetVolumeByName(volumeName)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return volume
@@ -604,7 +606,7 @@ func (k *KVMHypervisor) MustGetVolumeByName(volumeName string) (volume *KvmVolum
 func (k *KVMHypervisor) MustGetVolumeNames(verbose bool) (volumeNames []string) {
 	volumeNames, err := k.GetVolumeNames(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return volumeNames
@@ -613,7 +615,7 @@ func (k *KVMHypervisor) MustGetVolumeNames(verbose bool) (volumeNames []string) 
 func (k *KVMHypervisor) MustGetVolumes(verbose bool) (volumes []*KvmVolume) {
 	volumes, err := k.GetVolumes(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return volumes
@@ -622,21 +624,21 @@ func (k *KVMHypervisor) MustGetVolumes(verbose bool) (volumes []*KvmVolume) {
 func (k *KVMHypervisor) MustRemoveVm(removeOptions *KvmRemoveVmOptions) {
 	err := k.RemoveVm(removeOptions)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KVMHypervisor) MustRemoveVolumeByName(volumeName string, verbose bool) {
 	err := k.RemoveVolumeByName(volumeName, verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KVMHypervisor) MustRunKvmCommand(kvmCommand []string, verbose bool) (commandOutput *asciichgolangpublic.CommandOutput) {
 	commandOutput, err := k.RunKvmCommand(kvmCommand, verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandOutput
@@ -645,7 +647,7 @@ func (k *KVMHypervisor) MustRunKvmCommand(kvmCommand []string, verbose bool) (co
 func (k *KVMHypervisor) MustRunKvmCommandAndGetStdout(kvmCommand []string, verbose bool) (stdout string) {
 	stdout, err := k.RunKvmCommandAndGetStdout(kvmCommand, verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return stdout
@@ -654,21 +656,21 @@ func (k *KVMHypervisor) MustRunKvmCommandAndGetStdout(kvmCommand []string, verbo
 func (k *KVMHypervisor) MustSetHost(host hosts.Host) {
 	err := k.SetHost(host)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KVMHypervisor) MustSetUseLocalhost(useLocalhost bool) {
 	err := k.SetUseLocalhost(useLocalhost)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KVMHypervisor) MustVmByNameExists(vmName string) (vmExists bool) {
 	vmExists, err := k.VmByNameExists(vmName)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return vmExists
@@ -677,7 +679,7 @@ func (k *KVMHypervisor) MustVmByNameExists(vmName string) (vmExists bool) {
 func (k *KVMHypervisor) MustVolumeByNameExists(volumeName string) (volumeExists bool) {
 	volumeExists, err := k.VolumeByNameExists(volumeName)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return volumeExists
@@ -685,11 +687,11 @@ func (k *KVMHypervisor) MustVolumeByNameExists(volumeName string) (volumeExists 
 
 func (k *KVMHypervisor) RemoveVm(removeOptions *KvmRemoveVmOptions) (err error) {
 	if removeOptions == nil {
-		return asciichgolangpublic.TracedError("removeOptions is nil")
+		return errors.TracedError("removeOptions is nil")
 	}
 
 	if len(removeOptions.VmName) <= 0 {
-		return asciichgolangpublic.TracedError("vmName is empty string")
+		return errors.TracedError("vmName is empty string")
 	}
 
 	hostName, err := k.GetHostName()
@@ -698,7 +700,7 @@ func (k *KVMHypervisor) RemoveVm(removeOptions *KvmRemoveVmOptions) (err error) 
 	}
 
 	if removeOptions.Verbose {
-		asciichgolangpublic.LogInfof("Going to delete kvm VM '%s' on host '%s'.", removeOptions.VmName, hostName)
+		logging.LogInfof("Going to delete kvm VM '%s' on host '%s'.", removeOptions.VmName, hostName)
 	}
 
 	vmExists, err := k.VmByNameExists(removeOptions.VmName)
@@ -723,11 +725,11 @@ func (k *KVMHypervisor) RemoveVm(removeOptions *KvmRemoveVmOptions) (err error) 
 			}
 		}
 		if removeOptions.Verbose {
-			asciichgolangpublic.LogChangedf("Vm '%s' removed on host '%s'.", removeOptions.VmName, hostName)
+			logging.LogChangedf("Vm '%s' removed on host '%s'.", removeOptions.VmName, hostName)
 		}
 	} else {
 		if removeOptions.Verbose {
-			asciichgolangpublic.LogInfof("Vm '%s' is already removed on host '%s'.", removeOptions.VmName, hostName)
+			logging.LogInfof("Vm '%s' is already removed on host '%s'.", removeOptions.VmName, hostName)
 		}
 	}
 
@@ -742,7 +744,7 @@ func (k *KVMHypervisor) RemoveVm(removeOptions *KvmRemoveVmOptions) (err error) 
 
 func (k *KVMHypervisor) RemoveVolumeByName(volumeName string, verbose bool) (err error) {
 	if len(volumeName) <= 0 {
-		return asciichgolangpublic.TracedError("voluemName is empty string")
+		return errors.TracedError("voluemName is empty string")
 	}
 
 	hostname, err := k.GetHostName()
@@ -766,9 +768,9 @@ func (k *KVMHypervisor) RemoveVolumeByName(volumeName string, verbose bool) (err
 			return nil
 		}
 
-		asciichgolangpublic.LogChangedf("Volume '%s' on KVM hypervisor '%s' deleted.", volumeName, hostname)
+		logging.LogChangedf("Volume '%s' on KVM hypervisor '%s' deleted.", volumeName, hostname)
 	} else {
-		asciichgolangpublic.LogInfof("Volume '%s' on KVM hypervisor '%s' was already deleted.", volumeName, hostname)
+		logging.LogInfof("Volume '%s' on KVM hypervisor '%s' was already deleted.", volumeName, hostname)
 	}
 
 	return nil
@@ -776,7 +778,7 @@ func (k *KVMHypervisor) RemoveVolumeByName(volumeName string, verbose bool) (err
 
 func (k *KVMHypervisor) RunKvmCommand(kvmCommand []string, verbose bool) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
 	if kvmCommand == nil {
-		return nil, asciichgolangpublic.TracedError("kvmCommand is nil")
+		return nil, errors.TracedError("kvmCommand is nil")
 	}
 
 	command := []string{"virsh", "-c", "qemu:///system"}
@@ -810,7 +812,7 @@ func (k *KVMHypervisor) RunKvmCommand(kvmCommand []string, verbose bool) (comman
 	}
 
 	if commandOutput == nil {
-		return nil,asciichgolangpublic.TracedError("commandOutput is nil")
+		return nil, errors.TracedError("commandOutput is nil")
 	}
 
 	return commandOutput, nil
@@ -832,7 +834,7 @@ func (k *KVMHypervisor) RunKvmCommandAndGetStdout(kvmCommand []string, verbose b
 
 func (k *KVMHypervisor) SetHost(host hosts.Host) (err error) {
 	if host == nil {
-		return asciichgolangpublic.TracedError("nost is nil")
+		return errors.TracedError("nost is nil")
 	}
 
 	k.host = host
@@ -847,7 +849,7 @@ func (k *KVMHypervisor) SetUseLocalhost(useLocalhost bool) (err error) {
 
 func (k *KVMHypervisor) VmByNameExists(vmName string) (vmExists bool, err error) {
 	if len(vmName) <= 0 {
-		return false, asciichgolangpublic.TracedError("vmName is empty string")
+		return false, errors.TracedError("vmName is empty string")
 	}
 
 	const verbose = false
@@ -865,7 +867,7 @@ func (k *KVMHypervisor) VmByNameExists(vmName string) (vmExists bool, err error)
 
 func (k *KVMHypervisor) VolumeByNameExists(volumeName string) (volumeExists bool, err error) {
 	if len(volumeName) <= 0 {
-		return false, asciichgolangpublic.TracedError("volumeName is empty string")
+		return false, errors.TracedError("volumeName is empty string")
 	}
 
 	const verboseVolumeCollection = false

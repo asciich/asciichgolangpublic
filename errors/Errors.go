@@ -1,6 +1,10 @@
-package asciichgolangpublic
+package errors
 
-import "errors"
+import (
+	"errors"
+	nativeErrors "errors"
+	"log"
+)
 
 type ErrorsService struct{}
 
@@ -14,7 +18,7 @@ func NewErrorsService() (e *ErrorsService) {
 
 // Returns true if given error 'err' is a TracedError, false otherwise.
 func (e ErrorsService) IsTracedError(err error) (isTracedError bool) {
-	return errors.Is(err, ErrTracedError)
+	return nativeErrors.Is(err, ErrTracedError)
 }
 
 func (e *ErrorsService) AddErrorToUnwrapToTracedError(tracedError error, errorToAdd error) error {
@@ -57,7 +61,7 @@ func (e *ErrorsService) GetAsTracedError(errorToConvert error) (tracedError *Tra
 func (e *ErrorsService) MustGetAsTracedError(errorToConvert error) (tracedError *TracedErrorType) {
 	tracedError, err := e.GetAsTracedError(errorToConvert)
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 
 	return tracedError

@@ -4,6 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+
+	"github.com/asciich/asciichgolangpublic/changesummary"
+	aerrors "github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type PreCommitConfigFile struct {
@@ -12,7 +16,7 @@ type PreCommitConfigFile struct {
 
 func GetPreCommitConfigByFile(file File) (preCommitConfigFile *PreCommitConfigFile, err error) {
 	if file == nil {
-		return nil, TracedErrorNil("file")
+		return nil, aerrors.TracedErrorNil("file")
 	}
 
 	path, err := file.GetLocalPath()
@@ -31,7 +35,7 @@ func GetPreCommitConfigByFile(file File) (preCommitConfigFile *PreCommitConfigFi
 
 func GetPreCommitConfigByLocalPath(localPath string) (preCommitConfigFile *PreCommitConfigFile, err error) {
 	if localPath == "" {
-		return nil, TracedErrorEmptyString("localPath")
+		return nil, aerrors.TracedErrorEmptyString("localPath")
 	}
 
 	file, err := NewLocalFileByPath(localPath)
@@ -49,7 +53,7 @@ func GetPreCommitConfigByLocalPath(localPath string) (preCommitConfigFile *PreCo
 
 func GetPreCommitConfigFileInGitRepository(gitRepository GitRepository) (preCommitConfigFile *PreCommitConfigFile, err error) {
 	if gitRepository == nil {
-		return nil, TracedErrorNil("gitRepository")
+		return nil, aerrors.TracedErrorNil("gitRepository")
 	}
 
 	fileInRepo, err := gitRepository.GetFileByPath(PreCommit().GetDefaultConfigFileName())
@@ -63,7 +67,7 @@ func GetPreCommitConfigFileInGitRepository(gitRepository GitRepository) (preComm
 func MustGetPreCommitConfigByFile(file File) (preCommitConfigFile *PreCommitConfigFile) {
 	preCommitConfigFile, err := GetPreCommitConfigByFile(file)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return preCommitConfigFile
@@ -72,7 +76,7 @@ func MustGetPreCommitConfigByFile(file File) (preCommitConfigFile *PreCommitConf
 func MustGetPreCommitConfigByLocalPath(localPath string) (preCommitConfigFile *PreCommitConfigFile) {
 	preCommitConfigFile, err := GetPreCommitConfigByLocalPath(localPath)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return preCommitConfigFile
@@ -81,7 +85,7 @@ func MustGetPreCommitConfigByLocalPath(localPath string) (preCommitConfigFile *P
 func MustGetPreCommitConfigFileInGitRepository(gitRepository GitRepository) (preCommitConfigFile *PreCommitConfigFile) {
 	preCommitConfigFile, err := GetPreCommitConfigFileInGitRepository(gitRepository)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return preCommitConfigFile
@@ -92,7 +96,7 @@ func NewPreCommitConfigFile() (preCommitConfigFile *PreCommitConfigFile) {
 
 	err := preCommitConfigFile.SetParentFileForBaseClass(preCommitConfigFile)
 	if err != nil {
-		LogFatalWithTracef("internal error: '%v'", err)
+		logging.LogFatalWithTracef("internal error: '%v'", err)
 	}
 
 	return preCommitConfigFile
@@ -105,7 +109,7 @@ func (p *PreCommitConfigFile) GetAbsolutePath() (absolutePath string, err error)
 	}
 
 	if Paths().IsRelativePath(path) {
-		return "", TracedErrorf(
+		return "", aerrors.TracedErrorf(
 			"Unable to get absolute path, '%s' is relative",
 			path,
 		)
@@ -188,7 +192,7 @@ func (p *PreCommitConfigFile) IsValidPreCommitConfigFile(verbose bool) (isValidP
 func (p *PreCommitConfigFile) MustGetAbsolutePath() (absolutePath string) {
 	absolutePath, err := p.GetAbsolutePath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return absolutePath
@@ -197,7 +201,7 @@ func (p *PreCommitConfigFile) MustGetAbsolutePath() (absolutePath string) {
 func (p *PreCommitConfigFile) MustGetDependencies(verbose bool) (dependencies []Dependency) {
 	dependencies, err := p.GetDependencies(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return dependencies
@@ -206,7 +210,7 @@ func (p *PreCommitConfigFile) MustGetDependencies(verbose bool) (dependencies []
 func (p *PreCommitConfigFile) MustGetLocalPath() (localPath string) {
 	localPath, err := p.GetLocalPath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return localPath
@@ -215,7 +219,7 @@ func (p *PreCommitConfigFile) MustGetLocalPath() (localPath string) {
 func (p *PreCommitConfigFile) MustGetPreCommitConfigFileContent(verbose bool) (content *PreCommitConfigFileContent) {
 	content, err := p.GetPreCommitConfigFileContent(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return content
@@ -224,7 +228,7 @@ func (p *PreCommitConfigFile) MustGetPreCommitConfigFileContent(verbose bool) (c
 func (p *PreCommitConfigFile) MustGetUriAsString() (uri string) {
 	uri, err := p.GetUriAsString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return uri
@@ -233,25 +237,25 @@ func (p *PreCommitConfigFile) MustGetUriAsString() (uri string) {
 func (p *PreCommitConfigFile) MustIsValidPreCommitConfigFile(verbose bool) (isValidPreCommitConfigFile bool) {
 	isValidPreCommitConfigFile, err := p.IsValidPreCommitConfigFile(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isValidPreCommitConfigFile
 }
 
-func (p *PreCommitConfigFile) MustUpdateDependencies(options *UpdateDependenciesOptions) (changeSummary *ChangeSummary) {
+func (p *PreCommitConfigFile) MustUpdateDependencies(options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary) {
 	changeSummary, err := p.UpdateDependencies(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return changeSummary
 }
 
-func (p *PreCommitConfigFile) MustUpdateDependency(dependency Dependency, options *UpdateDependenciesOptions) (changeSummary *ChangeSummary) {
+func (p *PreCommitConfigFile) MustUpdateDependency(dependency Dependency, options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary) {
 	changeSummary, err := p.UpdateDependency(dependency, options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return changeSummary
@@ -260,13 +264,13 @@ func (p *PreCommitConfigFile) MustUpdateDependency(dependency Dependency, option
 func (p *PreCommitConfigFile) MustWritePreCommitConfigFileContent(content *PreCommitConfigFileContent, verbose bool) {
 	err := p.WritePreCommitConfigFileContent(content, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (p *PreCommitConfigFile) UpdateDependencies(options *UpdateDependenciesOptions) (changeSummary *ChangeSummary, err error) {
+func (p *PreCommitConfigFile) UpdateDependencies(options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if options == nil {
-		return nil, TracedErrorNil("options")
+		return nil, aerrors.TracedErrorNil("options")
 	}
 
 	dependencies, err := p.GetDependencies(options.Verbose)
@@ -274,7 +278,7 @@ func (p *PreCommitConfigFile) UpdateDependencies(options *UpdateDependenciesOpti
 		return nil, err
 	}
 
-	changeSummary = NewChangeSummary()
+	changeSummary = changesummary.NewChangeSummary()
 
 	for _, dependency := range dependencies {
 		singleUpdateSummary, err := p.UpdateDependency(dependency, options)
@@ -295,27 +299,27 @@ func (p *PreCommitConfigFile) UpdateDependencies(options *UpdateDependenciesOpti
 
 	if options.Verbose {
 		if changeSummary.IsChanged() {
-			LogChangedf("Updated dependencies in pre-commit config file '%s'.", path)
+			logging.LogChangedf("Updated dependencies in pre-commit config file '%s'.", path)
 		} else {
-			LogInfof("All dependencies in pre-commit config file '%s' were already up to date.", path)
+			logging.LogInfof("All dependencies in pre-commit config file '%s' were already up to date.", path)
 		}
 	}
 
 	return changeSummary, nil
 }
 
-func (p *PreCommitConfigFile) UpdateDependency(dependency Dependency, options *UpdateDependenciesOptions) (changeSummary *ChangeSummary, err error) {
+func (p *PreCommitConfigFile) UpdateDependency(dependency Dependency, options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if dependency == nil {
-		return nil, TracedErrorNil("dependency")
+		return nil, aerrors.TracedErrorNil("dependency")
 	}
 
 	if options == nil {
-		return nil, TracedErrorNil("options")
+		return nil, aerrors.TracedErrorNil("options")
 	}
 
 	gitRepoDependency, ok := dependency.(*DependencyGitRepository)
 	if !ok {
-		return nil, TracedErrorf("Not implemented for dependency type '%v'", reflect.TypeOf(dependency))
+		return nil, aerrors.TracedErrorf("Not implemented for dependency type '%v'", reflect.TypeOf(dependency))
 	}
 
 	url, err := gitRepoDependency.GetUrl()
@@ -350,13 +354,13 @@ func (p *PreCommitConfigFile) UpdateDependency(dependency Dependency, options *U
 	}
 
 	if changeSummary.IsChanged() {
-		LogChangedf(
+		logging.LogChangedf(
 			"Dependency '%s' updated in '%s'.",
 			dependencyName,
 			path,
 		)
 	} else {
-		LogInfof(
+		logging.LogInfof(
 			"Dependency '%s' already up to date in '%s'.",
 			dependencyName,
 			path,
@@ -383,7 +387,7 @@ func (p *PreCommitConfigFile) WritePreCommitConfigFileContent(content *PreCommit
 	}
 
 	if verbose {
-		LogChangedf("Wrote content of pre-commit config file '%s'.", path)
+		logging.LogChangedf("Wrote content of pre-commit config file '%s'.", path)
 	}
 
 	return nil

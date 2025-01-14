@@ -2,6 +2,8 @@ package asciichgolangpublic
 
 import (
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type UrlsService struct{}
@@ -17,7 +19,7 @@ func Urls() (urlService *UrlsService) {
 func (u *UrlsService) CheckIsUrl(url string) (isUrl bool, err error) {
 	isUrl = u.IsUrl(url)
 	if !isUrl {
-		return false, TracedErrorf("'%s' is not an URL.", url)
+		return false, errors.TracedErrorf("'%s' is not an URL.", url)
 	}
 
 	return isUrl, nil
@@ -37,7 +39,7 @@ func (u *UrlsService) IsUrl(url string) (isUrl bool) {
 func (u *UrlsService) MustCheckIsUrl(url string) (isUrl bool) {
 	isUrl, err := u.CheckIsUrl(url)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isUrl

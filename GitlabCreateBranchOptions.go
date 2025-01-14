@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type GitlabCreateBranchOptions struct {
 	SourceBranchName    string
 	BranchName          string
@@ -13,7 +18,7 @@ func NewGitlabCreateBranchOptions() (g *GitlabCreateBranchOptions) {
 
 func (g *GitlabCreateBranchOptions) GetBranchName() (branchName string, err error) {
 	if g.BranchName == "" {
-		return "", TracedErrorf("BranchName not set")
+		return "", errors.TracedErrorf("BranchName not set")
 	}
 
 	return g.BranchName, nil
@@ -26,7 +31,7 @@ func (g *GitlabCreateBranchOptions) GetFailIfAlreadyExists() (failIfAlreadyExist
 
 func (g *GitlabCreateBranchOptions) GetSourceBranchName() (sourceBranchName string, err error) {
 	if g.SourceBranchName == "" {
-		return "", TracedErrorf("SourceBranchName not set")
+		return "", errors.TracedErrorf("SourceBranchName not set")
 	}
 
 	return g.SourceBranchName, nil
@@ -40,7 +45,7 @@ func (g *GitlabCreateBranchOptions) GetVerbose() (verbose bool) {
 func (g *GitlabCreateBranchOptions) MustGetBranchName() (branchName string) {
 	branchName, err := g.GetBranchName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return branchName
@@ -49,7 +54,7 @@ func (g *GitlabCreateBranchOptions) MustGetBranchName() (branchName string) {
 func (g *GitlabCreateBranchOptions) MustGetSourceBranchName() (sourceBranchName string) {
 	sourceBranchName, err := g.GetSourceBranchName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sourceBranchName
@@ -58,20 +63,20 @@ func (g *GitlabCreateBranchOptions) MustGetSourceBranchName() (sourceBranchName 
 func (g *GitlabCreateBranchOptions) MustSetBranchName(branchName string) {
 	err := g.SetBranchName(branchName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCreateBranchOptions) MustSetSourceBranchName(sourceBranchName string) {
 	err := g.SetSourceBranchName(sourceBranchName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCreateBranchOptions) SetBranchName(branchName string) (err error) {
 	if branchName == "" {
-		return TracedErrorf("branchName is empty string")
+		return errors.TracedErrorf("branchName is empty string")
 	}
 
 	g.BranchName = branchName
@@ -85,7 +90,7 @@ func (g *GitlabCreateBranchOptions) SetFailIfAlreadyExists(failIfAlreadyExists b
 
 func (g *GitlabCreateBranchOptions) SetSourceBranchName(sourceBranchName string) (err error) {
 	if sourceBranchName == "" {
-		return TracedErrorf("sourceBranchName is empty string")
+		return errors.TracedErrorf("sourceBranchName is empty string")
 	}
 
 	g.SourceBranchName = sourceBranchName

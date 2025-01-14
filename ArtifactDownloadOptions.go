@@ -1,5 +1,9 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
 
 type ArtifactDownloadOptions struct {
 	ArtifactName      string
@@ -19,7 +23,7 @@ func NewAsciichArtifactDownloadOptions() (a *ArtifactDownloadOptions) {
 
 func (a *ArtifactDownloadOptions) GetArtifactName() (artifactName string, err error) {
 	if a.ArtifactName == "" {
-		return "", TracedErrorf("ArtifactName not set")
+		return "", errors.TracedErrorf("ArtifactName not set")
 	}
 
 	return a.ArtifactName, nil
@@ -27,7 +31,7 @@ func (a *ArtifactDownloadOptions) GetArtifactName() (artifactName string, err er
 
 func (a *ArtifactDownloadOptions) GetOutputPath() (outputPath string, err error) {
 	if a.OutputPath == "" {
-		return "", TracedErrorf("OutputPath not set")
+		return "", errors.TracedErrorf("OutputPath not set")
 	}
 
 	return a.OutputPath, nil
@@ -45,7 +49,7 @@ func (a *ArtifactDownloadOptions) GetVerbose() (verbose bool, err error) {
 
 func (a *ArtifactDownloadOptions) GetVersionToDownload() (versionToDownload string, err error) {
 	if a.VersionToDownload == "" {
-		return "", TracedErrorf("VersionToDownload not set")
+		return "", errors.TracedErrorf("VersionToDownload not set")
 	}
 
 	return a.VersionToDownload, nil
@@ -62,7 +66,7 @@ func (a *ArtifactDownloadOptions) IsVersionToDownloadSet() (isSet bool) {
 func (a *ArtifactDownloadOptions) MustGetArtifactName() (artifactName string) {
 	artifactName, err := a.GetArtifactName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return artifactName
@@ -71,7 +75,7 @@ func (a *ArtifactDownloadOptions) MustGetArtifactName() (artifactName string) {
 func (a *ArtifactDownloadOptions) MustGetOutputPath() (outputPath string) {
 	outputPath, err := a.GetOutputPath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return outputPath
@@ -80,7 +84,7 @@ func (a *ArtifactDownloadOptions) MustGetOutputPath() (outputPath string) {
 func (a *ArtifactDownloadOptions) MustGetOverwriteExisting() (overwriteExisting bool) {
 	overwriteExisting, err := a.GetOverwriteExisting()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return overwriteExisting
@@ -89,7 +93,7 @@ func (a *ArtifactDownloadOptions) MustGetOverwriteExisting() (overwriteExisting 
 func (a *ArtifactDownloadOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := a.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -98,7 +102,7 @@ func (a *ArtifactDownloadOptions) MustGetVerbose() (verbose bool) {
 func (a *ArtifactDownloadOptions) MustGetVersionToDownload() (versionToDownload string) {
 	versionToDownload, err := a.GetVersionToDownload()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return versionToDownload
@@ -107,41 +111,41 @@ func (a *ArtifactDownloadOptions) MustGetVersionToDownload() (versionToDownload 
 func (a *ArtifactDownloadOptions) MustSetArtifactName(artifactName string) {
 	err := a.SetArtifactName(artifactName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (a *ArtifactDownloadOptions) MustSetOutputPath(outputPath string) {
 	err := a.SetOutputPath(outputPath)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (a *ArtifactDownloadOptions) MustSetOverwriteExisting(overwriteExisting bool) {
 	err := a.SetOverwriteExisting(overwriteExisting)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (a *ArtifactDownloadOptions) MustSetVerbose(verbose bool) {
 	err := a.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (a *ArtifactDownloadOptions) MustSetVersionToDownload(versionToDownload string) {
 	err := a.SetVersionToDownload(versionToDownload)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (a *ArtifactDownloadOptions) SetArtifactName(artifactName string) (err error) {
 	if artifactName == "" {
-		return TracedErrorf("artifactName is empty string")
+		return errors.TracedErrorf("artifactName is empty string")
 	}
 
 	a.ArtifactName = artifactName
@@ -151,7 +155,7 @@ func (a *ArtifactDownloadOptions) SetArtifactName(artifactName string) (err erro
 
 func (a *ArtifactDownloadOptions) SetOutputPath(outputPath string) (err error) {
 	if outputPath == "" {
-		return TracedErrorf("outputPath is empty string")
+		return errors.TracedErrorf("outputPath is empty string")
 	}
 
 	a.OutputPath = outputPath
@@ -173,7 +177,7 @@ func (a *ArtifactDownloadOptions) SetVerbose(verbose bool) (err error) {
 
 func (a *ArtifactDownloadOptions) SetVersionToDownload(versionToDownload string) (err error) {
 	if versionToDownload == "" {
-		return TracedErrorf("versionToDownload is empty string")
+		return errors.TracedErrorf("versionToDownload is empty string")
 	}
 
 	a.VersionToDownload = versionToDownload

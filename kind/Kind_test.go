@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func getKindByImplementationName(implementationName string) (kind Kind) {
@@ -12,7 +13,7 @@ func getKindByImplementationName(implementationName string) (kind Kind) {
 		return MustGetLocalCommandExecutorKind()
 	}
 
-	asciichgolangpublic.LogFatalWithTracef(
+	logging.LogFatalWithTracef(
 		"Unknwon implmentation name '%s'",
 		implementationName,
 	)

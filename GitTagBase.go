@@ -1,5 +1,7 @@
 package asciichgolangpublic
 
+import "github.com/asciich/asciichgolangpublic/logging"
+
 type GitTagBase struct {
 	parentGitTagForBaseClass GitTag
 }
@@ -30,7 +32,7 @@ func (g *GitTagBase) GetVersion() (version Version, err error) {
 func (g *GitTagBase) MustGetParentGitTagForBaseClass() (parentGitTagForBaseClass GitTag) {
 	parentGitTagForBaseClass, err := g.GetParentGitTagForBaseClass()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return parentGitTagForBaseClass
@@ -39,7 +41,7 @@ func (g *GitTagBase) MustGetParentGitTagForBaseClass() (parentGitTagForBaseClass
 func (g *GitTagBase) MustGetVersion() (version Version) {
 	version, err := g.GetVersion()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return version
@@ -48,7 +50,7 @@ func (g *GitTagBase) MustGetVersion() (version Version) {
 func (g *GitTagBase) MustSetParentGitTagForBaseClass(parentGitTagForBaseClass GitTag) {
 	err := g.SetParentGitTagForBaseClass(parentGitTagForBaseClass)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 

@@ -6,8 +6,11 @@ import (
 	"strings"
 	"time"
 
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes"
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 // This is the GitRepository implementation based on a CommandExecutor (e.g. Bash, SSH...).
@@ -24,7 +27,7 @@ type CommandExecutorGitRepository struct {
 
 func GetCommandExecutorGitRepositoryFromDirectory(directory Directory) (c *CommandExecutorGitRepository, err error) {
 	if directory == nil {
-		return nil, TracedErrorNil("directory")
+		return nil, errors.TracedErrorNil("directory")
 	}
 
 	commandExecutoryDirectory, ok := directory.(*CommandExecutorDirectory)
@@ -47,12 +50,12 @@ func GetCommandExecutorGitRepositoryFromDirectory(directory Directory) (c *Comma
 		return GetLocalCommandExecutorGitRepositoryByPath(path)
 	}
 
-	unknownTypeName, err := Types().GetTypeName(directory)
+	unknownTypeName, err := datatypes.GetTypeName(directory)
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, TracedErrorf(
+	return nil, errors.TracedErrorf(
 		"Not implemented for directory type = '%s'",
 		unknownTypeName,
 	)
@@ -61,7 +64,7 @@ func GetCommandExecutorGitRepositoryFromDirectory(directory Directory) (c *Comma
 func MustGetCommandExecutorGitRepositoryFromDirectory(directory Directory) (c *CommandExecutorGitRepository) {
 	c, err := GetCommandExecutorGitRepositoryFromDirectory(directory)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return c
@@ -70,7 +73,7 @@ func MustGetCommandExecutorGitRepositoryFromDirectory(directory Directory) (c *C
 func MustNewCommandExecutorGitRepository(commandExecutor CommandExecutor) (c *CommandExecutorGitRepository) {
 	c, err := NewCommandExecutorGitRepository(commandExecutor)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return c
@@ -78,7 +81,7 @@ func MustNewCommandExecutorGitRepository(commandExecutor CommandExecutor) (c *Co
 
 func NewCommandExecutorGitRepository(commandExecutor CommandExecutor) (c *CommandExecutorGitRepository, err error) {
 	if commandExecutor == nil {
-		return nil, TracedErrorNil("commandExecutor")
+		return nil, errors.TracedErrorNil("commandExecutor")
 	}
 
 	c = new(CommandExecutorGitRepository)
@@ -104,18 +107,18 @@ func NewCommandExecutorGitRepository(commandExecutor CommandExecutor) (c *Comman
 // This function was only added to fulfil the current interface.
 // On the long run this method has to be removed.
 func (c *CommandExecutorGitRepository) GetAsLocalDirectory() (l *LocalDirectory, err error) {
-	return nil, TracedErrorNotImplemented()
+	return nil, errors.TracedErrorNotImplemented()
 }
 
 // This function was only added to fulfil the current interface.
 // On the long run this method has to be removed.
 func (c *CommandExecutorGitRepository) GetAsLocalGitRepository() (l *LocalGitRepository, err error) {
-	return nil, TracedErrorNotImplemented()
+	return nil, errors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) AddFileByPath(pathToAdd string, verbose bool) (err error) {
 	if pathToAdd == "" {
-		return TracedErrorEmptyString("pathToAdd")
+		return errors.TracedErrorEmptyString("pathToAdd")
 	}
 
 	_, err = c.RunGitCommand(
@@ -132,7 +135,7 @@ func (c *CommandExecutorGitRepository) AddFileByPath(pathToAdd string, verbose b
 			return err
 		}
 
-		LogChangedf(
+		logging.LogChangedf(
 			"Added '%s' to git repository '%s' on host '%s'.",
 			pathToAdd,
 			path,
@@ -145,7 +148,7 @@ func (c *CommandExecutorGitRepository) AddFileByPath(pathToAdd string, verbose b
 
 func (c *CommandExecutorGitRepository) AddRemote(remoteOptions *GitRemoteAddOptions) (err error) {
 	if remoteOptions == nil {
-		return TracedError("remoteOptions is nil")
+		return errors.TracedError("remoteOptions is nil")
 	}
 
 	remoteName, err := remoteOptions.GetRemoteName()
@@ -177,7 +180,7 @@ func (c *CommandExecutorGitRepository) AddRemote(remoteOptions *GitRemoteAddOpti
 
 	if remoteExists {
 		if remoteOptions.Verbose {
-			LogInfof("Remote '%s' as '%s' to repository '%s' already exists.", remoteUrl, remoteName, repoPath)
+			logging.LogInfof("Remote '%s' as '%s' to repository '%s' already exists.", remoteUrl, remoteName, repoPath)
 		}
 	} else {
 		err = c.RemoveRemoteByName(remoteName, remoteOptions.Verbose)
@@ -191,7 +194,7 @@ func (c *CommandExecutorGitRepository) AddRemote(remoteOptions *GitRemoteAddOpti
 		}
 
 		if remoteOptions.Verbose {
-			LogChangedf("Added remote '%s' as '%s' to repository '%s'.", remoteUrl, remoteName, repoPath)
+			logging.LogChangedf("Added remote '%s' as '%s' to repository '%s'.", remoteUrl, remoteName, repoPath)
 		}
 	}
 
@@ -200,7 +203,7 @@ func (c *CommandExecutorGitRepository) AddRemote(remoteOptions *GitRemoteAddOpti
 
 func (c *CommandExecutorGitRepository) CheckoutBranchByName(name string, verbose bool) (err error) {
 	if name == "" {
-		return TracedErrorEmptyString("name")
+		return errors.TracedErrorEmptyString("name")
 	}
 
 	currentBranchName, err := c.GetCurrentBranchName(verbose)
@@ -215,7 +218,7 @@ func (c *CommandExecutorGitRepository) CheckoutBranchByName(name string, verbose
 
 	if currentBranchName == name {
 		if verbose {
-			LogInfof(
+			logging.LogInfof(
 				"Git repository '%s' on host '%s' is already checked out on branch '%s'.",
 				path,
 				hostDescription,
@@ -232,7 +235,7 @@ func (c *CommandExecutorGitRepository) CheckoutBranchByName(name string, verbose
 		}
 
 		if verbose {
-			LogChangedf(
+			logging.LogChangedf(
 				"Git repository '%s' on host '%s' checked out on branch '%s'.",
 				path,
 				hostDescription,
@@ -246,7 +249,7 @@ func (c *CommandExecutorGitRepository) CheckoutBranchByName(name string, verbose
 
 func (c *CommandExecutorGitRepository) CloneRepository(repository GitRepository, verbose bool) (err error) {
 	if repository == nil {
-		return TracedErrorNil("repository")
+		return errors.TracedErrorNil("repository")
 	}
 
 	repoHostDescription, err := repository.GetHostDescription()
@@ -260,7 +263,7 @@ func (c *CommandExecutorGitRepository) CloneRepository(repository GitRepository,
 	}
 
 	if hostDescription != repoHostDescription {
-		return TracedErrorf(
+		return errors.TracedErrorf(
 			"Only implemented for two repositories on the same host. But repository from host '%s' should be cloned to host '%s'",
 			repoHostDescription,
 			hostDescription,
@@ -277,7 +280,7 @@ func (c *CommandExecutorGitRepository) CloneRepository(repository GitRepository,
 
 func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClone string, verbose bool) (err error) {
 	if pathOrUrlToClone == "" {
-		return TracedErrorEmptyString("pathToClone")
+		return errors.TracedErrorEmptyString("pathToClone")
 	}
 
 	path, hostDescription, err := c.GetPathAndHostDescription()
@@ -286,7 +289,7 @@ func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClo
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Cloning git repository '%s' to '%s' on '%s' started.",
 			pathOrUrlToClone,
 			path,
@@ -300,7 +303,7 @@ func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClo
 	}
 
 	if isInitialized {
-		LogInfof(
+		logging.LogInfof(
 			"'%s' is already an initialized git repository on host '%s'. Skip clone.",
 			path,
 			hostDescription,
@@ -324,7 +327,7 @@ func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClo
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Cloning git repository '%s' to '%s' on host '%s' finished.",
 			pathOrUrlToClone,
 			path,
@@ -337,7 +340,7 @@ func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClo
 
 func (c *CommandExecutorGitRepository) Commit(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
 	if commitOptions == nil {
-		return nil, TracedErrorNil("commitOptions")
+		return nil, errors.TracedErrorNil("commitOptions")
 	}
 
 	commitCommand := []string{"commit"}
@@ -381,7 +384,7 @@ func (c *CommandExecutorGitRepository) Commit(commitOptions *GitCommitOptions) (
 			return nil, err
 		}
 
-		LogChangedf(
+		logging.LogChangedf(
 			"Created commit '%s' in git repository '%s' on host '%s'.",
 			createdHash,
 			path,
@@ -393,12 +396,12 @@ func (c *CommandExecutorGitRepository) Commit(commitOptions *GitCommitOptions) (
 }
 
 func (c *CommandExecutorGitRepository) CommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool, err error) {
-	return false, TracedErrorNotImplemented()
+	return false, errors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) CreateBranch(createOptions *CreateBranchOptions) (err error) {
 	if createOptions == nil {
-		return TracedErrorNil("createOptions")
+		return errors.TracedErrorNil("createOptions")
 	}
 
 	name, err := createOptions.GetName()
@@ -417,7 +420,7 @@ func (c *CommandExecutorGitRepository) CreateBranch(createOptions *CreateBranchO
 	}
 
 	if branchExists {
-		LogInfof(
+		logging.LogInfof(
 			"Branch '%s' already exists in git repository '%s' on host '%s'.",
 			name,
 			path,
@@ -432,7 +435,7 @@ func (c *CommandExecutorGitRepository) CreateBranch(createOptions *CreateBranchO
 			return err
 		}
 
-		LogChangedf(
+		logging.LogChangedf(
 			"Branch '%s' in git repository '%s' on host '%s' created.",
 			name,
 			path,
@@ -445,7 +448,7 @@ func (c *CommandExecutorGitRepository) CreateBranch(createOptions *CreateBranchO
 
 func (c *CommandExecutorGitRepository) CreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
 	if options == nil {
-		return nil, TracedErrorNil("options")
+		return nil, errors.TracedErrorNil("options")
 	}
 
 	tagName, err := options.GetTagName()
@@ -493,7 +496,7 @@ func (c *CommandExecutorGitRepository) CreateTag(options *GitRepositoryCreateTag
 	}
 
 	if options.Verbose {
-		LogChangedf(
+		logging.LogChangedf(
 			"Created tag '%s' for commit '%s' in git repository '%s' on host '%s'.",
 			tagName,
 			hashToTag,
@@ -507,7 +510,7 @@ func (c *CommandExecutorGitRepository) CreateTag(options *GitRepositoryCreateTag
 
 func (c *CommandExecutorGitRepository) DeleteBranchByName(name string, verbose bool) (err error) {
 	if name == "" {
-		return TracedErrorEmptyString("name")
+		return errors.TracedErrorEmptyString("name")
 	}
 
 	branchExists, err := c.BranchByNameExists(name, verbose)
@@ -530,7 +533,7 @@ func (c *CommandExecutorGitRepository) DeleteBranchByName(name string, verbose b
 		}
 
 		if verbose {
-			LogChangedf(
+			logging.LogChangedf(
 				"Branch '%s' in git repository '%s' on host '%s' deleted.",
 				name,
 				path,
@@ -540,7 +543,7 @@ func (c *CommandExecutorGitRepository) DeleteBranchByName(name string, verbose b
 
 	} else {
 		if verbose {
-			LogInfof(
+			logging.LogInfof(
 				"Branch '%s' in git repository '%s' on host '%s' is already absent. Skip delete.",
 				name,
 				path,
@@ -567,7 +570,7 @@ func (c *CommandExecutorGitRepository) Fetch(verbose bool) (err error) {
 			return err
 		}
 
-		LogChangedf(
+		logging.LogChangedf(
 			"Fetched git repository '%s' on host '%s'",
 			path,
 			hostDescription,
@@ -579,31 +582,31 @@ func (c *CommandExecutorGitRepository) Fetch(verbose bool) (err error) {
 
 func (c *CommandExecutorGitRepository) FileByPathExists(path string, verbose bool) (exists bool, err error) {
 	if path == "" {
-		return false, TracedErrorEmptyString(path)
+		return false, errors.TracedErrorEmptyString(path)
 	}
 
 	return c.FileInDirectoryExists(verbose, path)
 }
 
 func (c *CommandExecutorGitRepository) GetAuthorEmailByCommitHash(hash string) (authorEmail string, err error) {
-	return "", TracedErrorNotImplemented()
+	return "", errors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) GetAuthorStringByCommitHash(hash string) (authorEmail string, err error) {
-	return "", TracedErrorNotImplemented()
+	return "", errors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) GetCommitAgeDurationByCommitHash(hash string) (ageDuration *time.Duration, err error) {
-	return nil, TracedErrorNotImplemented()
+	return nil, errors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) GetCommitAgeSecondsByCommitHash(hash string) (ageSeconds float64, err error) {
-	return -1, TracedErrorNotImplemented()
+	return -1, errors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) GetCommitByHash(hash string) (gitCommit *GitCommit, err error) {
 	if hash == "" {
-		return nil, TracedErrorEmptyString("hash")
+		return nil, errors.TracedErrorEmptyString("hash")
 	}
 
 	gitCommit = NewGitCommit()
@@ -623,7 +626,7 @@ func (c *CommandExecutorGitRepository) GetCommitByHash(hash string) (gitCommit *
 
 func (c *CommandExecutorGitRepository) GetCommitMessageByCommitHash(hash string) (commitMessage string, err error) {
 	if hash == "" {
-		return "", TracedErrorEmptyString("hash")
+		return "", errors.TracedErrorEmptyString("hash")
 	}
 
 	stdout, err := c.RunGitCommandAndGetStdoutAsString(
@@ -642,7 +645,7 @@ func (c *CommandExecutorGitRepository) GetCommitMessageByCommitHash(hash string)
 			return "", err
 		}
 
-		return "", TracedErrorf(
+		return "", errors.TracedErrorf(
 			"Unable to get commit message for hash '%s' in git repository '%s' on host '%s'. commitMessage is empty string after evaluation.",
 			hash,
 			path,
@@ -654,11 +657,11 @@ func (c *CommandExecutorGitRepository) GetCommitMessageByCommitHash(hash string)
 }
 
 func (c *CommandExecutorGitRepository) GetCommitParentsByCommitHash(hash string, options *GitCommitGetParentsOptions) (commitParents []*GitCommit, err error) {
-	return nil, TracedErrorNotImplemented()
+	return nil, errors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) GetCommitTimeByCommitHash(hash string) (commitTime *time.Time, err error) {
-	return nil, TracedErrorNotImplemented()
+	return nil, errors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) GetCurrentBranchName(verbose bool) (branchName string, err error) {
@@ -678,7 +681,7 @@ func (c *CommandExecutorGitRepository) GetCurrentBranchName(verbose bool) (branc
 	}
 
 	if branchName == "" {
-		return "", TracedErrorf(
+		return "", errors.TracedErrorf(
 			"Unable to get branch name for git repository '%s' on host '%s'. branchName is empty string after evaluation.",
 			path,
 			hostDescription,
@@ -686,7 +689,7 @@ func (c *CommandExecutorGitRepository) GetCurrentBranchName(verbose bool) (branc
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Branch '%s' is currently checked out in git repository '%s' on host '%s'.",
 			branchName,
 			path,
@@ -714,7 +717,7 @@ func (c *CommandExecutorGitRepository) GetCurrentCommit(verbose bool) (currentCo
 			return nil, err
 		}
 
-		LogInfof(
+		logging.LogInfof(
 			"Current commit of git repository '%s' on host '%s' has hash '%s'.",
 			path,
 			hostDescription,
@@ -741,19 +744,19 @@ func (c *CommandExecutorGitRepository) GetCurrentCommitHash(verbose bool) (curre
 
 func (c *CommandExecutorGitRepository) GetDirectoryByPath(pathToSubDir ...string) (subDir Directory, err error) {
 	if len(pathToSubDir) <= 0 {
-		return nil, TracedError("pathToSubdir has no elements")
+		return nil, errors.TracedError("pathToSubdir has no elements")
 	}
 
 	return c.GetSubDirectory(pathToSubDir...)
 }
 
 func (c *CommandExecutorGitRepository) GetGitStatusOutput(verbose bool) (output string, err error) {
-	return "", TracedErrorNotImplemented()
+	return "", errors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) GetHashByTagName(tagName string) (hash string, err error) {
 	if tagName == "" {
-		return "", TracedErrorEmptyString("tagName")
+		return "", errors.TracedErrorEmptyString("tagName")
 	}
 
 	stdoutLines, err := c.RunGitCommandAndGetStdoutAsLines(
@@ -774,7 +777,7 @@ func (c *CommandExecutorGitRepository) GetHashByTagName(tagName string) (hash st
 	hash = strings.TrimSpace(hash)
 
 	if hash == "" {
-		return "", TracedError("hash is empty string after evaluation")
+		return "", errors.TracedError("hash is empty string after evaluation")
 	}
 
 	return hash, nil
@@ -802,7 +805,7 @@ func (c *CommandExecutorGitRepository) GetRemoteConfigs(verbose bool) (remoteCon
 
 		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(lineCleaned)
 		if len(splitted) != 3 {
-			return nil, TracedErrorf("Unable to parse '%s' as remote. splitted is '%v'", line, splitted)
+			return nil, errors.TracedErrorf("Unable to parse '%s' as remote. splitted is '%v'", line, splitted)
 		}
 
 		remoteName := splitted[0]
@@ -828,7 +831,7 @@ func (c *CommandExecutorGitRepository) GetRemoteConfigs(verbose bool) (remoteCon
 		} else if remoteDirection == "(push)" {
 			remoteToModify.UrlPush = remoteUrl
 		} else {
-			return nil, TracedErrorf("Unknown remoteDirection='%s'", remoteDirection)
+			return nil, errors.TracedErrorf("Unknown remoteDirection='%s'", remoteDirection)
 		}
 	}
 
@@ -920,7 +923,7 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootD
 	}
 
 	if rootDirectoryPath == "" {
-		return "", TracedErrorf(
+		return "", errors.TracedErrorf(
 			"rootDirectoryPath is empty string after evaluating root directory of git repository '%s' on host '%s'",
 			path,
 			hostDescription,
@@ -928,7 +931,7 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootD
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Git repo root directory is '%s' on host '%s'.",
 			rootDirectoryPath,
 			hostDescription,
@@ -940,7 +943,7 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootD
 
 func (c *CommandExecutorGitRepository) GetTagByName(name string) (tag GitTag, err error) {
 	if name == "" {
-		return nil, TracedErrorEmptyString("name")
+		return nil, errors.TracedErrorEmptyString("name")
 	}
 
 	toReturn := NewGitRepositoryTag()
@@ -976,7 +979,7 @@ func (c *CommandExecutorGitRepository) HasInitialCommit(verbose bool) (hasInitia
 
 	if !isInitialized {
 		if verbose {
-			LogInfof(
+			logging.LogInfof(
 				"'%s' does not initialized as git repository on host '%s' and can therefore not have an initial commit.",
 				path,
 				hostDescription,
@@ -1015,18 +1018,18 @@ func (c *CommandExecutorGitRepository) HasInitialCommit(verbose bool) (hasInitia
 	} else if stdout == "no" {
 		hasInitialCommit = false
 	} else {
-		return false, TracedErrorf("Unexpected stdout='%s'", stdout)
+		return false, errors.TracedErrorf("Unexpected stdout='%s'", stdout)
 	}
 
 	if verbose {
 		if hasInitialCommit {
-			LogInfof(
+			logging.LogInfof(
 				"Git repository '%s' on host '%s' has an initial commit",
 				path,
 				hostDescription,
 			)
 		} else {
-			LogInfof(
+			logging.LogInfof(
 				"Git repository '%s' on host '%s' has no initial commit",
 				path,
 				hostDescription,
@@ -1076,13 +1079,13 @@ func (c *CommandExecutorGitRepository) HasUncommittedChanges(verbose bool) (hasU
 
 	if verbose {
 		if hasUncommitedChanges {
-			LogInfof(
+			logging.LogInfof(
 				"Git repository '%s' on '%s' has uncommited changes.",
 				path,
 				hostDescription,
 			)
 		} else {
-			LogInfof(
+			logging.LogInfof(
 				"Git repository '%s' on '%s' has no uncommited changes.",
 				path,
 				hostDescription,
@@ -1095,7 +1098,7 @@ func (c *CommandExecutorGitRepository) HasUncommittedChanges(verbose bool) (hasU
 
 func (c *CommandExecutorGitRepository) Init(options *CreateRepositoryOptions) (err error) {
 	if options == nil {
-		return TracedErrorNil("options")
+		return errors.TracedErrorNil("options")
 	}
 
 	path, hostDescription, err := c.GetPathAndHostDescription()
@@ -1110,7 +1113,7 @@ func (c *CommandExecutorGitRepository) Init(options *CreateRepositoryOptions) (e
 
 	if isInitialized {
 		if options.Verbose {
-			LogInfof(
+			logging.LogInfof(
 				"Git repository '%s' on host '%s' is already initialized.",
 				path,
 				hostDescription,
@@ -1138,13 +1141,13 @@ func (c *CommandExecutorGitRepository) Init(options *CreateRepositoryOptions) (e
 
 		if options.Verbose {
 			if options.BareRepository {
-				LogChangedf(
+				logging.LogChangedf(
 					"Git repository '%s' on host '%s' initialized as bare repository.",
 					path,
 					hostDescription,
 				)
 			} else {
-				LogChangedf(
+				logging.LogChangedf(
 					"Git repository '%s' on host '%s' initialized as non bare repository.",
 					path,
 					hostDescription,
@@ -1167,7 +1170,7 @@ func (c *CommandExecutorGitRepository) Init(options *CreateRepositoryOptions) (e
 		}
 
 		if hasInitialCommit {
-			LogInfof(
+			logging.LogInfof(
 				"Repository '%s' on host '%s' has already an initial commit.",
 				path,
 				hostDescription,
@@ -1214,7 +1217,7 @@ func (c *CommandExecutorGitRepository) Init(options *CreateRepositoryOptions) (e
 			}
 
 			if options.Verbose {
-				LogChangedf(
+				logging.LogChangedf(
 					"Initialized repository '%s' on host '%s' with an empty commit.",
 					path,
 					hostDescription,
@@ -1247,7 +1250,7 @@ func (c *CommandExecutorGitRepository) IsBareRepository(verbose bool) (isBare bo
 	} else if stdout == "true" {
 		isBare = true
 	} else {
-		return false, TracedErrorf(
+		return false, errors.TracedErrorf(
 			"Unknown is-bare-repositoy output '%s'",
 			stdout,
 		)
@@ -1255,13 +1258,13 @@ func (c *CommandExecutorGitRepository) IsBareRepository(verbose bool) (isBare bo
 
 	if verbose {
 		if isBare {
-			LogInfof(
+			logging.LogInfof(
 				"Git repository '%s' on host '%s' is a bare repository.",
 				path,
 				hostDescription,
 			)
 		} else {
-			LogInfof(
+			logging.LogInfof(
 				"Git repository '%s' on host '%s' is not a bare repository.",
 				path,
 				hostDescription,
@@ -1287,13 +1290,13 @@ func (c *CommandExecutorGitRepository) IsGitRepository(verbose bool) (isReposito
 		}
 
 		if isRepository {
-			LogInfof(
+			logging.LogInfof(
 				"'%s' on host '%s' is a git repository",
 				path,
 				hostDescription,
 			)
 		} else {
-			LogInfof(
+			logging.LogInfof(
 				"'%s' on host '%s' is not a git repository",
 				path,
 				hostDescription,
@@ -1322,7 +1325,7 @@ func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialite
 
 	if !exists {
 		if verbose {
-			LogInfof(
+			logging.LogInfof(
 				"Git repository '%s' does not exist on host '%s' and is therefore not initalized.",
 				path,
 				hostDescription,
@@ -1356,7 +1359,7 @@ func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialite
 	} else if stdout == "no" {
 		isInitialited = false
 	} else {
-		return false, TracedErrorNilf(
+		return false, errors.TracedErrorNilf(
 			"Unexpected output='%s' when checking if git repository '%s' is initialized on host '%s'",
 			stdout,
 			path,
@@ -1366,13 +1369,13 @@ func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialite
 
 	if verbose {
 		if isInitialited {
-			LogInfof(
+			logging.LogInfof(
 				"Git repository '%s' on host '%s' is initialized.",
 				path,
 				hostDescription,
 			)
 		} else {
-			LogInfof(
+			logging.LogInfof(
 				"'%s' is not an initialized git repository on host '%s'.",
 				path,
 				hostDescription,
@@ -1409,7 +1412,7 @@ func (c *CommandExecutorGitRepository) ListBranchNames(verbose bool) (branchName
 			return nil, err
 		}
 
-		LogInfof(
+		logging.LogInfof(
 			"Found '%d' branches in git repository '%s' on host '%s'.",
 			len(branchNames),
 			path,
@@ -1448,7 +1451,7 @@ func (c *CommandExecutorGitRepository) ListTags(verbose bool) (tags []GitTag, er
 
 func (c *CommandExecutorGitRepository) ListTagsForCommitHash(hash string, verbose bool) (tags []GitTag, err error) {
 	if hash == "" {
-		return nil, TracedErrorEmptyString("hash")
+		return nil, errors.TracedErrorEmptyString("hash")
 	}
 
 	tagNames, err := c.RunGitCommandAndGetStdoutAsLines(
@@ -1475,42 +1478,42 @@ func (c *CommandExecutorGitRepository) ListTagsForCommitHash(hash string, verbos
 func (c *CommandExecutorGitRepository) MustAddFileByPath(pathToAdd string, verbose bool) {
 	err := c.AddFileByPath(pathToAdd, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustAddRemote(remoteOptions *GitRemoteAddOptions) {
 	err := c.AddRemote(remoteOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustCheckoutBranchByName(name string, verbose bool) {
 	err := c.CheckoutBranchByName(name, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustCloneRepository(repository GitRepository, verbose bool) {
 	err := c.CloneRepository(repository, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustCloneRepositoryByPathOrUrl(pathOrUrlToClone string, verbose bool) {
 	err := c.CloneRepositoryByPathOrUrl(pathOrUrlToClone, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustCommit(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
 	createdCommit, err := c.Commit(commitOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdCommit
@@ -1519,7 +1522,7 @@ func (c *CommandExecutorGitRepository) MustCommit(commitOptions *GitCommitOption
 func (c *CommandExecutorGitRepository) MustCommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool) {
 	hasParentCommit, err := c.CommitHasParentCommitByCommitHash(hash)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hasParentCommit
@@ -1528,14 +1531,14 @@ func (c *CommandExecutorGitRepository) MustCommitHasParentCommitByCommitHash(has
 func (c *CommandExecutorGitRepository) MustCreateBranch(createOptions *CreateBranchOptions) {
 	err := c.CreateBranch(createOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustCreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag) {
 	createdTag, err := c.CreateTag(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdTag
@@ -1544,21 +1547,21 @@ func (c *CommandExecutorGitRepository) MustCreateTag(options *GitRepositoryCreat
 func (c *CommandExecutorGitRepository) MustDeleteBranchByName(name string, verbose bool) {
 	err := c.DeleteBranchByName(name, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustFetch(verbose bool) {
 	err := c.Fetch(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustFileByPathExists(path string, verbose bool) (exists bool) {
 	exists, err := c.FileByPathExists(path, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return exists
@@ -1567,7 +1570,7 @@ func (c *CommandExecutorGitRepository) MustFileByPathExists(path string, verbose
 func (c *CommandExecutorGitRepository) MustGetAsLocalDirectory() (l *LocalDirectory) {
 	l, err := c.GetAsLocalDirectory()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return l
@@ -1576,7 +1579,7 @@ func (c *CommandExecutorGitRepository) MustGetAsLocalDirectory() (l *LocalDirect
 func (c *CommandExecutorGitRepository) MustGetAsLocalGitRepository() (l *LocalGitRepository) {
 	l, err := c.GetAsLocalGitRepository()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return l
@@ -1585,7 +1588,7 @@ func (c *CommandExecutorGitRepository) MustGetAsLocalGitRepository() (l *LocalGi
 func (c *CommandExecutorGitRepository) MustGetAuthorEmailByCommitHash(hash string) (authorEmail string) {
 	authorEmail, err := c.GetAuthorEmailByCommitHash(hash)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return authorEmail
@@ -1594,7 +1597,7 @@ func (c *CommandExecutorGitRepository) MustGetAuthorEmailByCommitHash(hash strin
 func (c *CommandExecutorGitRepository) MustGetAuthorStringByCommitHash(hash string) (authorEmail string) {
 	authorEmail, err := c.GetAuthorStringByCommitHash(hash)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return authorEmail
@@ -1603,7 +1606,7 @@ func (c *CommandExecutorGitRepository) MustGetAuthorStringByCommitHash(hash stri
 func (c *CommandExecutorGitRepository) MustGetCommitAgeDurationByCommitHash(hash string) (ageDuration *time.Duration) {
 	ageDuration, err := c.GetCommitAgeDurationByCommitHash(hash)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return ageDuration
@@ -1612,7 +1615,7 @@ func (c *CommandExecutorGitRepository) MustGetCommitAgeDurationByCommitHash(hash
 func (c *CommandExecutorGitRepository) MustGetCommitAgeSecondsByCommitHash(hash string) (ageSeconds float64) {
 	ageSeconds, err := c.GetCommitAgeSecondsByCommitHash(hash)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return ageSeconds
@@ -1621,7 +1624,7 @@ func (c *CommandExecutorGitRepository) MustGetCommitAgeSecondsByCommitHash(hash 
 func (c *CommandExecutorGitRepository) MustGetCommitByHash(hash string) (gitCommit *GitCommit) {
 	gitCommit, err := c.GetCommitByHash(hash)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitCommit
@@ -1630,7 +1633,7 @@ func (c *CommandExecutorGitRepository) MustGetCommitByHash(hash string) (gitComm
 func (c *CommandExecutorGitRepository) MustGetCommitMessageByCommitHash(hash string) (commitMessage string) {
 	commitMessage, err := c.GetCommitMessageByCommitHash(hash)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commitMessage
@@ -1639,7 +1642,7 @@ func (c *CommandExecutorGitRepository) MustGetCommitMessageByCommitHash(hash str
 func (c *CommandExecutorGitRepository) MustGetCommitParentsByCommitHash(hash string, options *GitCommitGetParentsOptions) (commitParents []*GitCommit) {
 	commitParents, err := c.GetCommitParentsByCommitHash(hash, options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commitParents
@@ -1648,7 +1651,7 @@ func (c *CommandExecutorGitRepository) MustGetCommitParentsByCommitHash(hash str
 func (c *CommandExecutorGitRepository) MustGetCommitTimeByCommitHash(hash string) (commitTime *time.Time) {
 	commitTime, err := c.GetCommitTimeByCommitHash(hash)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commitTime
@@ -1657,7 +1660,7 @@ func (c *CommandExecutorGitRepository) MustGetCommitTimeByCommitHash(hash string
 func (c *CommandExecutorGitRepository) MustGetCurrentBranchName(verbose bool) (branchName string) {
 	branchName, err := c.GetCurrentBranchName(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return branchName
@@ -1666,7 +1669,7 @@ func (c *CommandExecutorGitRepository) MustGetCurrentBranchName(verbose bool) (b
 func (c *CommandExecutorGitRepository) MustGetCurrentCommit(verbose bool) (currentCommit *GitCommit) {
 	currentCommit, err := c.GetCurrentCommit(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return currentCommit
@@ -1675,7 +1678,7 @@ func (c *CommandExecutorGitRepository) MustGetCurrentCommit(verbose bool) (curre
 func (c *CommandExecutorGitRepository) MustGetCurrentCommitHash(verbose bool) (currentCommitHash string) {
 	currentCommitHash, err := c.GetCurrentCommitHash(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return currentCommitHash
@@ -1684,7 +1687,7 @@ func (c *CommandExecutorGitRepository) MustGetCurrentCommitHash(verbose bool) (c
 func (c *CommandExecutorGitRepository) MustGetDirectoryByPath(pathToSubDir ...string) (subDir Directory) {
 	subDir, err := c.GetDirectoryByPath(pathToSubDir...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return subDir
@@ -1693,7 +1696,7 @@ func (c *CommandExecutorGitRepository) MustGetDirectoryByPath(pathToSubDir ...st
 func (c *CommandExecutorGitRepository) MustGetGitStatusOutput(verbose bool) (output string) {
 	output, err := c.GetGitStatusOutput(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return output
@@ -1702,7 +1705,7 @@ func (c *CommandExecutorGitRepository) MustGetGitStatusOutput(verbose bool) (out
 func (c *CommandExecutorGitRepository) MustGetHashByTagName(tagName string) (hash string) {
 	hash, err := c.GetHashByTagName(tagName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hash
@@ -1711,7 +1714,7 @@ func (c *CommandExecutorGitRepository) MustGetHashByTagName(tagName string) (has
 func (c *CommandExecutorGitRepository) MustGetRemoteConfigs(verbose bool) (remoteConfigs []*GitRemoteConfig) {
 	remoteConfigs, err := c.GetRemoteConfigs(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return remoteConfigs
@@ -1720,7 +1723,7 @@ func (c *CommandExecutorGitRepository) MustGetRemoteConfigs(verbose bool) (remot
 func (c *CommandExecutorGitRepository) MustGetRootDirectory(verbose bool) (rootDirectory Directory) {
 	rootDirectory, err := c.GetRootDirectory(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return rootDirectory
@@ -1729,7 +1732,7 @@ func (c *CommandExecutorGitRepository) MustGetRootDirectory(verbose bool) (rootD
 func (c *CommandExecutorGitRepository) MustGetRootDirectoryPath(verbose bool) (rootDirectoryPath string) {
 	rootDirectoryPath, err := c.GetRootDirectoryPath(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return rootDirectoryPath
@@ -1738,7 +1741,7 @@ func (c *CommandExecutorGitRepository) MustGetRootDirectoryPath(verbose bool) (r
 func (c *CommandExecutorGitRepository) MustGetTagByName(name string) (tag GitTag) {
 	tag, err := c.GetTagByName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tag
@@ -1747,7 +1750,7 @@ func (c *CommandExecutorGitRepository) MustGetTagByName(name string) (tag GitTag
 func (c *CommandExecutorGitRepository) MustHasInitialCommit(verbose bool) (hasInitialCommit bool) {
 	hasInitialCommit, err := c.HasInitialCommit(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hasInitialCommit
@@ -1756,7 +1759,7 @@ func (c *CommandExecutorGitRepository) MustHasInitialCommit(verbose bool) (hasIn
 func (c *CommandExecutorGitRepository) MustHasUncommittedChanges(verbose bool) (hasUncommitedChanges bool) {
 	hasUncommitedChanges, err := c.HasUncommittedChanges(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hasUncommitedChanges
@@ -1765,14 +1768,14 @@ func (c *CommandExecutorGitRepository) MustHasUncommittedChanges(verbose bool) (
 func (c *CommandExecutorGitRepository) MustInit(options *CreateRepositoryOptions) {
 	err := c.Init(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustIsBareRepository(verbose bool) (isBare bool) {
 	isBare, err := c.IsBareRepository(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isBare
@@ -1781,7 +1784,7 @@ func (c *CommandExecutorGitRepository) MustIsBareRepository(verbose bool) (isBar
 func (c *CommandExecutorGitRepository) MustIsGitRepository(verbose bool) (isRepository bool) {
 	isRepository, err := c.IsGitRepository(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isRepository
@@ -1790,7 +1793,7 @@ func (c *CommandExecutorGitRepository) MustIsGitRepository(verbose bool) (isRepo
 func (c *CommandExecutorGitRepository) MustIsInitialized(verbose bool) (isInitialited bool) {
 	isInitialited, err := c.IsInitialized(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isInitialited
@@ -1799,7 +1802,7 @@ func (c *CommandExecutorGitRepository) MustIsInitialized(verbose bool) (isInitia
 func (c *CommandExecutorGitRepository) MustListBranchNames(verbose bool) (branchNames []string) {
 	branchNames, err := c.ListBranchNames(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return branchNames
@@ -1808,7 +1811,7 @@ func (c *CommandExecutorGitRepository) MustListBranchNames(verbose bool) (branch
 func (c *CommandExecutorGitRepository) MustListTagNames(verbose bool) (tagNames []string) {
 	tagNames, err := c.ListTagNames(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tagNames
@@ -1817,7 +1820,7 @@ func (c *CommandExecutorGitRepository) MustListTagNames(verbose bool) (tagNames 
 func (c *CommandExecutorGitRepository) MustListTags(verbose bool) (tags []GitTag) {
 	tags, err := c.ListTags(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tags
@@ -1826,7 +1829,7 @@ func (c *CommandExecutorGitRepository) MustListTags(verbose bool) (tags []GitTag
 func (c *CommandExecutorGitRepository) MustListTagsForCommitHash(hash string, verbose bool) (tags []GitTag) {
 	tags, err := c.ListTagsForCommitHash(hash, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tags
@@ -1835,42 +1838,42 @@ func (c *CommandExecutorGitRepository) MustListTagsForCommitHash(hash string, ve
 func (c *CommandExecutorGitRepository) MustPull(verbose bool) {
 	err := c.Pull(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustPullFromRemote(pullOptions *GitPullFromRemoteOptions) {
 	err := c.PullFromRemote(pullOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustPush(verbose bool) {
 	err := c.Push(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustPushTagsToRemote(remoteName string, verbose bool) {
 	err := c.PushTagsToRemote(remoteName, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustPushToRemote(remoteName string, verbose bool) {
 	err := c.PushToRemote(remoteName, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustRemoteByNameExists(remoteName string, verbose bool) (remoteExists bool) {
 	remoteExists, err := c.RemoteByNameExists(remoteName, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return remoteExists
@@ -1879,7 +1882,7 @@ func (c *CommandExecutorGitRepository) MustRemoteByNameExists(remoteName string,
 func (c *CommandExecutorGitRepository) MustRemoteConfigurationExists(config *GitRemoteConfig, verbose bool) (exists bool) {
 	exists, err := c.RemoteConfigurationExists(config, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return exists
@@ -1888,14 +1891,14 @@ func (c *CommandExecutorGitRepository) MustRemoteConfigurationExists(config *Git
 func (c *CommandExecutorGitRepository) MustRemoveRemoteByName(remoteNameToRemove string, verbose bool) {
 	err := c.RemoveRemoteByName(remoteNameToRemove, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustRunGitCommand(gitCommand []string, verbose bool) (commandOutput *CommandOutput) {
 	commandOutput, err := c.RunGitCommand(gitCommand, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandOutput
@@ -1904,7 +1907,7 @@ func (c *CommandExecutorGitRepository) MustRunGitCommand(gitCommand []string, ve
 func (c *CommandExecutorGitRepository) MustRunGitCommandAndGetStdoutAsLines(command []string, verbose bool) (lines []string) {
 	lines, err := c.RunGitCommandAndGetStdoutAsLines(command, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return lines
@@ -1913,7 +1916,7 @@ func (c *CommandExecutorGitRepository) MustRunGitCommandAndGetStdoutAsLines(comm
 func (c *CommandExecutorGitRepository) MustRunGitCommandAndGetStdoutAsString(command []string, verbose bool) (stdout string) {
 	stdout, err := c.RunGitCommandAndGetStdoutAsString(command, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return stdout
@@ -1922,35 +1925,35 @@ func (c *CommandExecutorGitRepository) MustRunGitCommandAndGetStdoutAsString(com
 func (c *CommandExecutorGitRepository) MustSetDefaultAuthor(verbose bool) {
 	err := c.SetDefaultAuthor(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustSetGitConfig(options *GitConfigSetOptions) {
 	err := c.SetGitConfig(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustSetRemoteUrl(remoteUrl string, verbose bool) {
 	err := c.SetRemoteUrl(remoteUrl, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustSetUserEmail(email string, verbose bool) {
 	err := c.SetUserEmail(email, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorGitRepository) MustSetUserName(name string, verbose bool) {
 	err := c.SetUserName(name, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
@@ -1961,7 +1964,7 @@ func (c *CommandExecutorGitRepository) Pull(verbose bool) (err error) {
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Pull git repository '%s' on '%s' started.",
 			path,
 			hostDescription,
@@ -1977,7 +1980,7 @@ func (c *CommandExecutorGitRepository) Pull(verbose bool) (err error) {
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Pull git repository '%s' on '%s' finished.",
 			path,
 			hostDescription,
@@ -1989,7 +1992,7 @@ func (c *CommandExecutorGitRepository) Pull(verbose bool) (err error) {
 
 func (c *CommandExecutorGitRepository) PullFromRemote(pullOptions *GitPullFromRemoteOptions) (err error) {
 	if pullOptions == nil {
-		return TracedError("pullOptions not set")
+		return errors.TracedError("pullOptions not set")
 	}
 
 	remoteName, err := pullOptions.GetRemoteName()
@@ -2003,7 +2006,7 @@ func (c *CommandExecutorGitRepository) PullFromRemote(pullOptions *GitPullFromRe
 	}
 
 	if len(remoteName) <= 0 {
-		return TracedError("remoteName is empty string")
+		return errors.TracedError("remoteName is empty string")
 	}
 
 	path, hostDescription, err := c.GetPathAndHostDescription()
@@ -2017,7 +2020,7 @@ func (c *CommandExecutorGitRepository) PullFromRemote(pullOptions *GitPullFromRe
 	}
 
 	if pullOptions.Verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Pulled git repository '%s' on host '%s' from remote '%s'.",
 			path,
 			hostDescription,
@@ -2035,7 +2038,7 @@ func (c *CommandExecutorGitRepository) Push(verbose bool) (err error) {
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Push git repository '%s' on '%s' started.",
 			path,
 			hostDescription,
@@ -2051,7 +2054,7 @@ func (c *CommandExecutorGitRepository) Push(verbose bool) (err error) {
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Push git repository '%s' on '%s' finished.",
 			path,
 			hostDescription,
@@ -2063,7 +2066,7 @@ func (c *CommandExecutorGitRepository) Push(verbose bool) (err error) {
 
 func (c *CommandExecutorGitRepository) PushTagsToRemote(remoteName string, verbose bool) (err error) {
 	if len(remoteName) <= 0 {
-		return TracedError("remoteName is empty string")
+		return errors.TracedError("remoteName is empty string")
 	}
 
 	path, hostDescription, err := c.GetPathAndHostDescription()
@@ -2077,7 +2080,7 @@ func (c *CommandExecutorGitRepository) PushTagsToRemote(remoteName string, verbo
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Pushed tags of git repository '%s' on host '%s' to remote '%s'.",
 			path,
 			hostDescription,
@@ -2090,7 +2093,7 @@ func (c *CommandExecutorGitRepository) PushTagsToRemote(remoteName string, verbo
 
 func (c *CommandExecutorGitRepository) PushToRemote(remoteName string, verbose bool) (err error) {
 	if len(remoteName) <= 0 {
-		return TracedError("remoteName is empty string")
+		return errors.TracedError("remoteName is empty string")
 	}
 
 	_, err = c.RunGitCommand([]string{"push", remoteName}, verbose)
@@ -2104,7 +2107,7 @@ func (c *CommandExecutorGitRepository) PushToRemote(remoteName string, verbose b
 			return err
 		}
 
-		LogInfof(
+		logging.LogInfof(
 			"Pushed git repository '%s' on host '%s' to remote '%s'.",
 			path,
 			hostDescription,
@@ -2136,7 +2139,7 @@ func (c *CommandExecutorGitRepository) RemoteByNameExists(remoteName string, ver
 
 func (c *CommandExecutorGitRepository) RemoteConfigurationExists(config *GitRemoteConfig, verbose bool) (exists bool, err error) {
 	if config == nil {
-		return false, TracedError("config is nil")
+		return false, errors.TracedError("config is nil")
 	}
 
 	remoteConfigs, err := c.GetRemoteConfigs(verbose)
@@ -2155,7 +2158,7 @@ func (c *CommandExecutorGitRepository) RemoteConfigurationExists(config *GitRemo
 
 func (c *CommandExecutorGitRepository) RemoveRemoteByName(remoteNameToRemove string, verbose bool) (err error) {
 	if len(remoteNameToRemove) <= 0 {
-		return TracedError("remoteNameToRemove is empty string")
+		return errors.TracedError("remoteNameToRemove is empty string")
 	}
 
 	remoteExists, err := c.RemoteByNameExists(remoteNameToRemove, verbose)
@@ -2178,11 +2181,11 @@ func (c *CommandExecutorGitRepository) RemoveRemoteByName(remoteNameToRemove str
 		}
 
 		if verbose {
-			LogChangedf("Remote '%s' for repository '%s' removed.", remoteNameToRemove, repoDirPath)
+			logging.LogChangedf("Remote '%s' for repository '%s' removed.", remoteNameToRemove, repoDirPath)
 		}
 	} else {
 		if verbose {
-			LogInfof("Remote '%s' for repository '%s' already deleted.", remoteNameToRemove, repoDirPath)
+			logging.LogInfof("Remote '%s' for repository '%s' already deleted.", remoteNameToRemove, repoDirPath)
 		}
 	}
 
@@ -2191,7 +2194,7 @@ func (c *CommandExecutorGitRepository) RemoveRemoteByName(remoteNameToRemove str
 
 func (c *CommandExecutorGitRepository) RunGitCommand(gitCommand []string, verbose bool) (commandOutput *CommandOutput, err error) {
 	if len(gitCommand) <= 0 {
-		return nil, TracedError("gitCommand has no elements")
+		return nil, errors.TracedError("gitCommand has no elements")
 	}
 
 	path, err := c.GetPath()
@@ -2217,7 +2220,7 @@ func (c *CommandExecutorGitRepository) RunGitCommand(gitCommand []string, verbos
 
 func (c *CommandExecutorGitRepository) RunGitCommandAndGetStdoutAsLines(command []string, verbose bool) (lines []string, err error) {
 	if command == nil {
-		return nil, TracedErrorNil("command")
+		return nil, errors.TracedErrorNil("command")
 	}
 
 	output, err := c.RunGitCommand(command, verbose)
@@ -2259,7 +2262,7 @@ func (c *CommandExecutorGitRepository) SetDefaultAuthor(verbose bool) (err error
 			return err
 		}
 
-		LogChangedf(
+		logging.LogChangedf(
 			"Initialized git repository '%s' on '%s' with default author and email.",
 			path,
 			hostDescription,
@@ -2271,7 +2274,7 @@ func (c *CommandExecutorGitRepository) SetDefaultAuthor(verbose bool) (err error
 
 func (c *CommandExecutorGitRepository) SetGitConfig(options *GitConfigSetOptions) (err error) {
 	if options == nil {
-		return TracedErrorNil("options")
+		return errors.TracedErrorNil("options")
 	}
 
 	if options.Email != "" {
@@ -2294,7 +2297,7 @@ func (c *CommandExecutorGitRepository) SetGitConfig(options *GitConfigSetOptions
 func (c *CommandExecutorGitRepository) SetRemoteUrl(remoteUrl string, verbose bool) (err error) {
 	remoteUrl = strings.TrimSpace(remoteUrl)
 	if len(remoteUrl) <= 0 {
-		return TracedError("remoteUrl is empty string")
+		return errors.TracedError("remoteUrl is empty string")
 	}
 
 	name := "origin"
@@ -2310,7 +2313,7 @@ func (c *CommandExecutorGitRepository) SetRemoteUrl(remoteUrl string, verbose bo
 			return err
 		}
 
-		LogChangedf(
+		logging.LogChangedf(
 			"Set remote Url for '%v' in git repository '%v' on host '%s' to '%v'.",
 			name,
 			path,
@@ -2324,7 +2327,7 @@ func (c *CommandExecutorGitRepository) SetRemoteUrl(remoteUrl string, verbose bo
 
 func (c *CommandExecutorGitRepository) SetUserEmail(email string, verbose bool) (err error) {
 	if email == "" {
-		return TracedErrorEmptyString("email")
+		return errors.TracedErrorEmptyString("email")
 	}
 
 	_, err = c.RunGitCommand(
@@ -2341,7 +2344,7 @@ func (c *CommandExecutorGitRepository) SetUserEmail(email string, verbose bool) 
 			return err
 		}
 
-		LogInfof(
+		logging.LogInfof(
 			"Set git user email to '%s' for git repository '%s' on host '%s'.",
 			email,
 			path,
@@ -2354,7 +2357,7 @@ func (c *CommandExecutorGitRepository) SetUserEmail(email string, verbose bool) 
 
 func (c *CommandExecutorGitRepository) SetUserName(name string, verbose bool) (err error) {
 	if name == "" {
-		return TracedErrorEmptyString("name")
+		return errors.TracedErrorEmptyString("name")
 	}
 
 	_, err = c.RunGitCommand(
@@ -2371,7 +2374,7 @@ func (c *CommandExecutorGitRepository) SetUserName(name string, verbose bool) (e
 			return err
 		}
 
-		LogInfof(
+		logging.LogInfof(
 			"Set git user name to '%s' for git repository '%s' on host '%s'.",
 			name,
 			path,

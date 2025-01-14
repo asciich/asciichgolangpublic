@@ -1,9 +1,8 @@
 package kind
 
-import "github.com/asciich/asciichgolangpublic"
-
 import (
 	"github.com/asciich/asciichgolangpublic/kubernetes"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type KindCluster struct {
@@ -23,7 +22,7 @@ func (k *KindCluster) GetKind() (kind Kind, err error) {
 func (k *KindCluster) MustGetKind() (kind Kind) {
 	kind, err := k.GetKind()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return kind
@@ -32,7 +31,7 @@ func (k *KindCluster) MustGetKind() (kind Kind) {
 func (k *KindCluster) MustSetKind(kind Kind) {
 	err := k.SetKind(kind)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 

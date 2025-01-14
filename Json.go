@@ -9,6 +9,8 @@ import (
 	"github.com/itchyny/gojq"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type JsonService struct {
@@ -25,7 +27,7 @@ func NewJsonService() (jsonService *JsonService) {
 func (j *JsonService) DataToJsonBytes(data interface{}) (jsonBytes []byte, err error) {
 	jsonBytes, err = json.MarshalIndent(data, "", "    ")
 	if err != nil {
-		return nil, TracedErrorf("Marshal as json failed: '%w', data='%v'", err, data)
+		return nil, errors.TracedErrorf("Marshal as json failed: '%w', data='%v'", err, data)
 	}
 
 	return jsonBytes, nil
@@ -44,15 +46,15 @@ func (j *JsonService) DataToJsonString(data interface{}) (jsonString string, err
 
 func (j *JsonService) JsonFileByPathHas(jsonFilePath string, query string, keyToCheck string) (has bool, err error) {
 	if jsonFilePath == "" {
-		return false, TracedErrorEmptyString("jsonFilePath")
+		return false, errors.TracedErrorEmptyString("jsonFilePath")
 	}
 
 	if query == "" {
-		return false, TracedErrorEmptyString("query")
+		return false, errors.TracedErrorEmptyString("query")
 	}
 
 	if keyToCheck == "" {
-		return false, TracedErrorEmptyString("keyToCheck")
+		return false, errors.TracedErrorEmptyString("keyToCheck")
 	}
 
 	jsonFile, err := GetLocalFileByPath(jsonFilePath)
@@ -70,15 +72,15 @@ func (j *JsonService) JsonFileByPathHas(jsonFilePath string, query string, keyTo
 
 func (j *JsonService) JsonFileHas(jsonFile File, query string, keyToCheck string) (has bool, err error) {
 	if jsonFile == nil {
-		return false, TracedErrorNil("jsonFile")
+		return false, errors.TracedErrorNil("jsonFile")
 	}
 
 	if query == "" {
-		return false, TracedErrorEmptyString("query")
+		return false, errors.TracedErrorEmptyString("query")
 	}
 
 	if keyToCheck == "" {
-		return false, TracedErrorEmptyString("keyToCheck")
+		return false, errors.TracedErrorEmptyString("keyToCheck")
 	}
 
 	content, err := jsonFile.ReadAsString()
@@ -96,11 +98,11 @@ func (j *JsonService) JsonFileHas(jsonFile File, query string, keyToCheck string
 
 func (j *JsonService) JsonStringHas(jsonString string, query string, keyToCheck string) (has bool, err error) {
 	if query == "" {
-		return false, TracedErrorEmptyString("query")
+		return false, errors.TracedErrorEmptyString("query")
 	}
 
 	if keyToCheck == "" {
-		return false, TracedErrorEmptyString("keyToCheck")
+		return false, errors.TracedErrorEmptyString("keyToCheck")
 	}
 
 	has, err = j.RunJqAgainstJsonStringAsBool(jsonString, query+" | has(\""+keyToCheck+"\")")
@@ -113,7 +115,7 @@ func (j *JsonService) JsonStringHas(jsonString string, query string, keyToCheck 
 
 func (j *JsonService) JsonStringToYamlFile(jsonString string, outputFile File, verbose bool) (err error) {
 	if outputFile == nil {
-		return TracedErrorNil("outputFile")
+		return errors.TracedErrorNil("outputFile")
 	}
 
 	jsonData, err := j.ParseJsonString(jsonString)
@@ -131,7 +133,7 @@ func (j *JsonService) JsonStringToYamlFile(jsonString string, outputFile File, v
 
 func (j *JsonService) JsonStringToYamlFileByPath(jsonString string, outputFilePath string, verbose bool) (outputFile File, err error) {
 	if outputFilePath == "" {
-		return nil, TracedErrorEmptyString("outputFilePath")
+		return nil, errors.TracedErrorEmptyString("outputFilePath")
 	}
 
 	outputFile, err = GetLocalFileByPath(outputFilePath)
@@ -163,7 +165,7 @@ func (j *JsonService) JsonStringToYamlString(jsonString string) (yamlString stri
 
 func (j *JsonService) LoadKeyValueInterfaceDictFromJsonFile(jsonFile File) (keyValues map[string]interface{}, err error) {
 	if jsonFile == nil {
-		return nil, TracedError("jsonFile is nil")
+		return nil, errors.TracedError("jsonFile is nil")
 	}
 
 	jsonContent, err := jsonFile.ReadAsString()
@@ -183,13 +185,13 @@ func (j *JsonService) LoadKeyValueInterfaceDictFromJsonString(jsonString string)
 	jsonString = strings.TrimSpace(jsonString)
 
 	if jsonString == "" {
-		return nil, TracedError("jsonString is empty string")
+		return nil, errors.TracedError("jsonString is empty string")
 	}
 
 	keyValues = map[string]interface{}{}
 	err = json.Unmarshal([]byte(jsonString), &keyValues)
 	if err != nil {
-		return nil, TracedError(err.Error())
+		return nil, errors.TracedError(err.Error())
 	}
 
 	return keyValues, nil
@@ -214,7 +216,7 @@ func (j *JsonService) LoadKeyValueStringDictFromJsonString(jsonString string) (k
 func (j *JsonService) MustDataToJsonBytes(data interface{}) (jsonBytes []byte) {
 	jsonBytes, err := j.DataToJsonBytes(data)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return jsonBytes
@@ -223,7 +225,7 @@ func (j *JsonService) MustDataToJsonBytes(data interface{}) (jsonBytes []byte) {
 func (j *JsonService) MustDataToJsonString(data interface{}) (jsonString string) {
 	jsonString, err := j.DataToJsonString(data)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return jsonString
@@ -232,7 +234,7 @@ func (j *JsonService) MustDataToJsonString(data interface{}) (jsonString string)
 func (j *JsonService) MustJsonFileByPathHas(jsonFilePath string, query string, keyToCheck string) (has bool) {
 	has, err := j.JsonFileByPathHas(jsonFilePath, query, keyToCheck)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return has
@@ -241,7 +243,7 @@ func (j *JsonService) MustJsonFileByPathHas(jsonFilePath string, query string, k
 func (j *JsonService) MustJsonFileHas(jsonFile File, query string, keyToCheck string) (has bool) {
 	has, err := j.JsonFileHas(jsonFile, query, keyToCheck)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return has
@@ -250,7 +252,7 @@ func (j *JsonService) MustJsonFileHas(jsonFile File, query string, keyToCheck st
 func (j *JsonService) MustJsonStringHas(jsonString string, query string, keyToCheck string) (has bool) {
 	has, err := j.JsonStringHas(jsonString, query, keyToCheck)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return has
@@ -259,14 +261,14 @@ func (j *JsonService) MustJsonStringHas(jsonString string, query string, keyToCh
 func (j *JsonService) MustJsonStringToYamlFile(jsonString string, outputFile File, verbose bool) {
 	err := j.JsonStringToYamlFile(jsonString, outputFile, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (j *JsonService) MustJsonStringToYamlFileByPath(jsonString string, outputFilePath string, verbose bool) (outputFile File) {
 	outputFile, err := j.JsonStringToYamlFileByPath(jsonString, outputFilePath, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return outputFile
@@ -275,7 +277,7 @@ func (j *JsonService) MustJsonStringToYamlFileByPath(jsonString string, outputFi
 func (j *JsonService) MustJsonStringToYamlString(jsonString string) (yamlString string) {
 	yamlString, err := j.JsonStringToYamlString(jsonString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return yamlString
@@ -284,7 +286,7 @@ func (j *JsonService) MustJsonStringToYamlString(jsonString string) (yamlString 
 func (j *JsonService) MustLoadKeyValueInterfaceDictFromJsonFile(jsonFile File) (keyValues map[string]interface{}) {
 	keyValues, err := j.LoadKeyValueInterfaceDictFromJsonFile(jsonFile)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return keyValues
@@ -293,7 +295,7 @@ func (j *JsonService) MustLoadKeyValueInterfaceDictFromJsonFile(jsonFile File) (
 func (j *JsonService) MustLoadKeyValueInterfaceDictFromJsonString(jsonString string) (keyValues map[string]interface{}) {
 	keyValues, err := j.LoadKeyValueInterfaceDictFromJsonString(jsonString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return keyValues
@@ -302,7 +304,7 @@ func (j *JsonService) MustLoadKeyValueInterfaceDictFromJsonString(jsonString str
 func (j *JsonService) MustLoadKeyValueStringDictFromJsonString(jsonString string) (keyValues map[string]string) {
 	keyValues, err := j.LoadKeyValueStringDictFromJsonString(jsonString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return keyValues
@@ -311,7 +313,7 @@ func (j *JsonService) MustLoadKeyValueStringDictFromJsonString(jsonString string
 func (j *JsonService) MustParseJsonString(jsonString string) (data interface{}) {
 	data, err := j.ParseJsonString(jsonString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return data
@@ -320,7 +322,7 @@ func (j *JsonService) MustParseJsonString(jsonString string) (data interface{}) 
 func (j *JsonService) MustPrettyFormatJsonString(jsonString string) (formatted string) {
 	formatted, err := j.PrettyFormatJsonString(jsonString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return formatted
@@ -329,7 +331,7 @@ func (j *JsonService) MustPrettyFormatJsonString(jsonString string) (formatted s
 func (j *JsonService) MustRunJqAgainstJsonFileAsString(jsonFile File, query string) (result string) {
 	result, err := j.RunJqAgainstJsonFileAsString(jsonFile, query)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return result
@@ -338,7 +340,7 @@ func (j *JsonService) MustRunJqAgainstJsonFileAsString(jsonFile File, query stri
 func (j *JsonService) MustRunJqAgainstJsonStringAsBool(jsonString string, query string) (result bool) {
 	result, err := j.RunJqAgainstJsonStringAsBool(jsonString, query)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return result
@@ -347,7 +349,7 @@ func (j *JsonService) MustRunJqAgainstJsonStringAsBool(jsonString string, query 
 func (j *JsonService) MustRunJqAgainstJsonStringAsInt(jsonString string, query string) (result int) {
 	result, err := j.RunJqAgainstJsonStringAsInt(jsonString, query)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return result
@@ -356,7 +358,7 @@ func (j *JsonService) MustRunJqAgainstJsonStringAsInt(jsonString string, query s
 func (j *JsonService) MustRunJqAgainstJsonStringAsString(jsonString string, query string) (result string) {
 	result, err := j.RunJqAgainstJsonStringAsString(jsonString, query)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return result
@@ -365,7 +367,7 @@ func (j *JsonService) MustRunJqAgainstJsonStringAsString(jsonString string, quer
 func (j *JsonService) ParseJsonString(jsonString string) (data interface{}, err error) {
 	err = json.Unmarshal([]byte(jsonString), &data)
 	if err != nil {
-		return nil, TracedError(err.Error())
+		return nil, errors.TracedError(err.Error())
 	}
 
 	return data, err
@@ -389,7 +391,7 @@ func (j *JsonService) PrettyFormatJsonString(jsonString string) (formatted strin
 
 func (j *JsonService) RunJqAgainstJsonFileAsString(jsonFile File, query string) (result string, err error) {
 	if jsonFile == nil {
-		return "", TracedErrorNil("jsonFile")
+		return "", errors.TracedErrorNil("jsonFile")
 	}
 
 	jsonString, err := jsonFile.ReadAsString()
@@ -407,11 +409,11 @@ func (j *JsonService) RunJqAgainstJsonFileAsString(jsonFile File, query string) 
 
 func (j *JsonService) RunJqAgainstJsonStringAsBool(jsonString string, query string) (result bool, err error) {
 	if len(jsonString) <= 0 {
-		return false, TracedError("jsonString is empty string")
+		return false, errors.TracedError("jsonString is empty string")
 	}
 
 	if len(query) <= 0 {
-		return false, TracedError("query is empty string")
+		return false, errors.TracedError("query is empty string")
 	}
 
 	resultString, err := j.RunJqAgainstJsonStringAsString(jsonString, query)
@@ -423,7 +425,7 @@ func (j *JsonService) RunJqAgainstJsonStringAsBool(jsonString string, query stri
 
 	result, err = strconv.ParseBool(resultString)
 	if err != nil {
-		return false, TracedError(err.Error())
+		return false, errors.TracedError(err.Error())
 	}
 
 	return result, nil
@@ -431,11 +433,11 @@ func (j *JsonService) RunJqAgainstJsonStringAsBool(jsonString string, query stri
 
 func (j *JsonService) RunJqAgainstJsonStringAsInt(jsonString string, query string) (result int, err error) {
 	if len(jsonString) <= 0 {
-		return -1, TracedError("jsonString is empty string")
+		return -1, errors.TracedError("jsonString is empty string")
 	}
 
 	if len(query) <= 0 {
-		return -1, TracedError("query is empty string")
+		return -1, errors.TracedError("query is empty string")
 	}
 
 	resultString, err := j.RunJqAgainstJsonStringAsString(jsonString, query)
@@ -447,7 +449,7 @@ func (j *JsonService) RunJqAgainstJsonStringAsInt(jsonString string, query strin
 
 	result, err = strconv.Atoi(resultString)
 	if err != nil {
-		return -1, TracedError(err.Error())
+		return -1, errors.TracedError(err.Error())
 	}
 
 	return result, nil
@@ -455,11 +457,11 @@ func (j *JsonService) RunJqAgainstJsonStringAsInt(jsonString string, query strin
 
 func (j *JsonService) RunJqAgainstJsonStringAsString(jsonString string, query string) (result string, err error) {
 	if len(jsonString) <= 0 {
-		return "", TracedError("json is empty string")
+		return "", errors.TracedError("json is empty string")
 	}
 
 	if len(query) <= 0 {
-		return "", TracedError("query is empty string")
+		return "", errors.TracedError("query is empty string")
 	}
 
 	jsonData, err := j.ParseJsonString(jsonString)
@@ -469,7 +471,7 @@ func (j *JsonService) RunJqAgainstJsonStringAsString(jsonString string, query st
 
 	jqQuery, err := gojq.Parse(query)
 	if err != nil {
-		return "", TracedError(err.Error())
+		return "", errors.TracedError(err.Error())
 	}
 	iter := jqQuery.Run(jsonData)
 
@@ -480,7 +482,7 @@ func (j *JsonService) RunJqAgainstJsonStringAsString(jsonString string, query st
 			break
 		}
 		if err, ok := v.(error); ok {
-			return "", TracedError(err.Error())
+			return "", errors.TracedError(err.Error())
 		}
 		switch v := v.(type) {
 		case int:
@@ -492,14 +494,14 @@ func (j *JsonService) RunJqAgainstJsonStringAsString(jsonString string, query st
 		case map[string]interface{}:
 			toAdd, err := Json().DataToJsonString(v)
 			if err != nil {
-				return "", TracedErrorf("Failed to marshal map[string]interface{}")
+				return "", errors.TracedErrorf("Failed to marshal map[string]interface{}")
 			}
 
 			result += toAdd + "\n"
 		case []interface{}:
 			toAdd, err := Json().DataToJsonString(v)
 			if err != nil {
-				return "", TracedErrorf("Failed to marshal []interface{}")
+				return "", errors.TracedErrorf("Failed to marshal []interface{}")
 			}
 
 			result += toAdd + "\n"

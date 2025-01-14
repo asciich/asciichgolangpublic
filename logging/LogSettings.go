@@ -1,4 +1,6 @@
-package asciichgolangpublic
+package logging
+
+import "runtime"
 
 type LogSettings struct {
 	ColorDisabled bool
@@ -14,7 +16,7 @@ func (l *LogSettings) GetColorDisabled() (colorDisabled bool) {
 }
 
 func (l *LogSettings) IsColorDisabled() (colorDisabled bool) {
-	if OS().IsRunningOnWindows() {
+	if runtime.GOOS == "windows" {
 		// Color logging currently not implemented for Windows.
 		return false
 	}
