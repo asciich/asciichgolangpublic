@@ -2,7 +2,9 @@ package kind
 
 import (
 	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/kubernetes"
+	"github.com/asciich/asciichgolangpublic/logging"
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
@@ -13,7 +15,7 @@ type CommandExecutorKind struct {
 
 func GetCommandExecutorKind(commandExecutor asciichgolangpublic.CommandExecutor) (kind Kind, err error) {
 	if commandExecutor == nil {
-		return nil, asciichgolangpublic.TracedErrorNil("commandExectuor")
+		return nil, errors.TracedErrorNil("commandExectuor")
 	}
 
 	toReturn := NewCommandExecutorKind()
@@ -33,7 +35,7 @@ func GetLocalCommandExecutorKind() (kind Kind, err error) {
 func MustGetCommandExecutorKind(commandExecutor asciichgolangpublic.CommandExecutor) (kind Kind) {
 	kind, err := GetCommandExecutorKind(commandExecutor)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return kind
@@ -42,7 +44,7 @@ func MustGetCommandExecutorKind(commandExecutor asciichgolangpublic.CommandExecu
 func MustGetLocalCommandExecutorKind() (kind Kind) {
 	kind, err := GetLocalCommandExecutorKind()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return kind
@@ -54,7 +56,7 @@ func NewCommandExecutorKind() (c *CommandExecutorKind) {
 
 func (c *CommandExecutorKind) ClusterByNameExists(clusterName string, verbose bool) (exists bool, err error) {
 	if clusterName == "" {
-		return false, asciichgolangpublic.TracedErrorEmptyString("clusterName")
+		return false, errors.TracedErrorEmptyString("clusterName")
 	}
 
 	clusterNames, err := c.ListClusterNames(false)
@@ -71,13 +73,13 @@ func (c *CommandExecutorKind) ClusterByNameExists(clusterName string, verbose bo
 		}
 
 		if exists {
-			asciichgolangpublic.LogInfof(
+			logging.LogInfof(
 				"Kind cluster '%s' on host '%s' exists.",
 				clusterName,
 				hostDescription,
 			)
 		} else {
-			asciichgolangpublic.LogInfof(
+			logging.LogInfof(
 				"Kind cluster '%s' on host '%s' does not exist.",
 				clusterName,
 				hostDescription,
@@ -90,7 +92,7 @@ func (c *CommandExecutorKind) ClusterByNameExists(clusterName string, verbose bo
 
 func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bool) (cluster kubernetes.KubernetesCluster, err error) {
 	if clusterName == "" {
-		return nil, asciichgolangpublic.TracedErrorEmptyString("clusterName")
+		return nil, errors.TracedErrorEmptyString("clusterName")
 	}
 
 	exists, err := c.ClusterByNameExists(clusterName, false)
@@ -105,7 +107,7 @@ func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bo
 
 	if exists {
 		if verbose {
-			asciichgolangpublic.LogInfof(
+			logging.LogInfof(
 				"Kind cluster '%s' on host '%s' already exists.",
 				clusterName,
 				hostDescription,
@@ -119,7 +121,7 @@ func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bo
 		}
 
 		if verbose {
-			asciichgolangpublic.LogInfof(
+			logging.LogInfof(
 				"Going to create kind cluster '%s'. This may take a while...",
 				clusterName,
 			)
@@ -137,7 +139,7 @@ func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bo
 		}
 
 		if verbose {
-			asciichgolangpublic.LogChangedf(
+			logging.LogChangedf(
 				"Kind cluster '%s' on host '%s' created.",
 				clusterName,
 				hostDescription,
@@ -150,7 +152,7 @@ func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bo
 
 func (c *CommandExecutorKind) DeleteClusterByName(clusterName string, verbose bool) (err error) {
 	if clusterName == "" {
-		return asciichgolangpublic.TracedErrorEmptyString("clusterName")
+		return errors.TracedErrorEmptyString("clusterName")
 	}
 
 	exists, err := c.ClusterByNameExists(clusterName, false)
@@ -181,7 +183,7 @@ func (c *CommandExecutorKind) DeleteClusterByName(clusterName string, verbose bo
 		}
 
 		if verbose {
-			asciichgolangpublic.LogChangedf(
+			logging.LogChangedf(
 				"Kind cluster '%s' on host '%s' deleted.",
 				clusterName,
 				hostDescription,
@@ -189,7 +191,7 @@ func (c *CommandExecutorKind) DeleteClusterByName(clusterName string, verbose bo
 		}
 	} else {
 		if verbose {
-			asciichgolangpublic.LogInfof(
+			logging.LogInfof(
 				"Kind cluster '%s' on host '%s' already absent.",
 				clusterName,
 				hostDescription,
@@ -203,7 +205,7 @@ func (c *CommandExecutorKind) DeleteClusterByName(clusterName string, verbose bo
 
 func (c *CommandExecutorKind) GetClusterByName(clusterName string) (cluster kubernetes.KubernetesCluster, err error) {
 	if clusterName == "" {
-		return nil, asciichgolangpublic.TracedErrorEmptyString("clusterName")
+		return nil, errors.TracedErrorEmptyString("clusterName")
 	}
 
 	toReturn := NewKindCluster()
@@ -247,7 +249,7 @@ func (c *CommandExecutorKind) ListClusterNames(verbose bool) (clusterNames []str
 func (c *CommandExecutorKind) MustClusterByNameExists(clusterName string, verbose bool) (exists bool) {
 	exists, err := c.ClusterByNameExists(clusterName, verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return exists
@@ -256,7 +258,7 @@ func (c *CommandExecutorKind) MustClusterByNameExists(clusterName string, verbos
 func (c *CommandExecutorKind) MustCreateClusterByName(clusterName string, verbose bool) (cluster kubernetes.KubernetesCluster) {
 	cluster, err := c.CreateClusterByName(clusterName, verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return cluster
@@ -265,14 +267,14 @@ func (c *CommandExecutorKind) MustCreateClusterByName(clusterName string, verbos
 func (c *CommandExecutorKind) MustDeleteClusterByName(clusterName string, verbose bool) {
 	err := c.DeleteClusterByName(clusterName, verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorKind) MustGetClusterByName(clusterName string) (cluster kubernetes.KubernetesCluster) {
 	cluster, err := c.GetClusterByName(clusterName)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return cluster
@@ -281,7 +283,7 @@ func (c *CommandExecutorKind) MustGetClusterByName(clusterName string) (cluster 
 func (c *CommandExecutorKind) MustGetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandExecutor
@@ -290,7 +292,7 @@ func (c *CommandExecutorKind) MustGetCommandExecutor() (commandExecutor asciichg
 func (c *CommandExecutorKind) MustGetHostDescription() (hostDescription string) {
 	hostDescription, err := c.GetHostDescription()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hostDescription
@@ -299,7 +301,7 @@ func (c *CommandExecutorKind) MustGetHostDescription() (hostDescription string) 
 func (c *CommandExecutorKind) MustListClusterNames(verbose bool) (clusterNames []string) {
 	clusterNames, err := c.ListClusterNames(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return clusterNames
@@ -308,7 +310,7 @@ func (c *CommandExecutorKind) MustListClusterNames(verbose bool) (clusterNames [
 func (c *CommandExecutorKind) MustRunCommand(runOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
 	commandOutput, err := c.RunCommand(runOptions)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandOutput
@@ -317,7 +319,7 @@ func (c *CommandExecutorKind) MustRunCommand(runOptions *asciichgolangpublic.Run
 func (c *CommandExecutorKind) MustRunCommandAndGetStdoutAsLines(runOptions *asciichgolangpublic.RunCommandOptions) (lines []string) {
 	lines, err := c.RunCommandAndGetStdoutAsLines(runOptions)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return lines
@@ -326,13 +328,13 @@ func (c *CommandExecutorKind) MustRunCommandAndGetStdoutAsLines(runOptions *asci
 func (c *CommandExecutorKind) MustSetCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) {
 	err := c.SetCommandExecutor(commandExecutor)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorKind) RunCommand(runOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
 	if runOptions == nil {
-		return nil, asciichgolangpublic.TracedErrorNil("runOptions")
+		return nil, errors.TracedErrorNil("runOptions")
 	}
 
 	commandExecutor, err := c.GetCommandExecutor()
@@ -345,7 +347,7 @@ func (c *CommandExecutorKind) RunCommand(runOptions *asciichgolangpublic.RunComm
 
 func (c *CommandExecutorKind) RunCommandAndGetStdoutAsLines(runOptions *asciichgolangpublic.RunCommandOptions) (lines []string, err error) {
 	if runOptions == nil {
-		return nil, asciichgolangpublic.TracedErrorNil("runOptions")
+		return nil, errors.TracedErrorNil("runOptions")
 	}
 
 	commandOutput, err := c.RunCommand(runOptions)

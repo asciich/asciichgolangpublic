@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func getGitRepositoryToTest(implementationName string) (repo GitRepository) {
@@ -19,7 +20,7 @@ func getGitRepositoryToTest(implementationName string) (repo GitRepository) {
 			TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose),
 		)
 	} else {
-		LogFatalWithTracef("unknown implementationName='%s'", implementationName)
+		logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)
 	}
 
 	repo.MustInit(

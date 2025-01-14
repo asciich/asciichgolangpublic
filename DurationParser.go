@@ -5,6 +5,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type DurationParserService struct{}
@@ -20,7 +23,7 @@ func NewDurationParserService() (d *DurationParserService) {
 func (d *DurationParserService) MustToSecondsAsString(durationString string) (secondsString string) {
 	secondsString, err := d.ToSecondsAsString(durationString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return secondsString
@@ -29,7 +32,7 @@ func (d *DurationParserService) MustToSecondsAsString(durationString string) (se
 func (d *DurationParserService) MustToSecondsAsTimeDuration(durationString string) (duration *time.Duration) {
 	duration, err := d.ToSecondsAsTimeDuration(durationString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return duration
@@ -38,7 +41,7 @@ func (d *DurationParserService) MustToSecondsAsTimeDuration(durationString strin
 func (d *DurationParserService) MustToSecondsFloat64(durationString string) (seconds float64) {
 	seconds, err := d.ToSecondsFloat64(durationString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return seconds
@@ -47,7 +50,7 @@ func (d *DurationParserService) MustToSecondsFloat64(durationString string) (sec
 func (d *DurationParserService) MustToSecondsInt64(durationString string) (seconds int64) {
 	seconds, err := d.ToSecondsInt64(durationString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return seconds
@@ -75,7 +78,7 @@ func (d *DurationParserService) ToSecondsAsTimeDuration(durationString string) (
 
 func (d *DurationParserService) ToSecondsFloat64(durationString string) (seconds float64, err error) {
 	if len(durationString) <= 0 {
-		return -1, TracedError("durationString is empty string")
+		return -1, errors.TracedError("durationString is empty string")
 	}
 
 	unifiedDurationString := durationString
@@ -116,7 +119,7 @@ func (d *DurationParserService) ToSecondsFloat64(durationString string) (seconds
 
 		parsedValue, err := strconv.ParseFloat(unifiedDurationString, 64)
 		if err != nil {
-			return -1, TracedError(err.Error())
+			return -1, errors.TracedError(err.Error())
 		}
 
 		seconds = parsedValue * v
@@ -125,7 +128,7 @@ func (d *DurationParserService) ToSecondsFloat64(durationString string) (seconds
 
 	seconds, err = strconv.ParseFloat(unifiedDurationString, 64)
 	if err != nil {
-		return -1, TracedError(err.Error())
+		return -1, errors.TracedError(err.Error())
 	}
 
 	return seconds, nil

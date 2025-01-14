@@ -1,6 +1,10 @@
 package asciichgolangpublic
 
-import gitlab "gitlab.com/gitlab-org/api/client-go"
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
+)
 
 type GitlabProjectCommits struct {
 	gitlabProject *GitlabProject
@@ -12,7 +16,7 @@ func NewGitlabProjectCommits() (g *GitlabProjectCommits) {
 
 func (g *GitlabProjectCommits) GetCommitByHashString(hash string, verbose bool) (commit *GitlabCommit, err error) {
 	if hash == "" {
-		return nil, TracedErrorEmptyString("hash")
+		return nil, errors.TracedErrorEmptyString("hash")
 	}
 
 	commit = NewGitlabCommit()
@@ -46,7 +50,7 @@ func (g *GitlabProjectCommits) GetGitlab() (gitlab *GitlabInstance, err error) {
 
 func (g *GitlabProjectCommits) GetGitlabProject() (gitlabProject *GitlabProject, err error) {
 	if g.gitlabProject == nil {
-		return nil, TracedErrorf("gitlabProject not set")
+		return nil, errors.TracedErrorf("gitlabProject not set")
 	}
 
 	return g.gitlabProject, nil
@@ -61,7 +65,7 @@ func (g *GitlabProjectCommits) GetNativeCommitsService() (nativeCommitsService *
 	nativeCommitsService = nativeClinet.Commits
 
 	if nativeCommitsService == nil {
-		return nil, TracedError("nativeCommitsService is nil after evaluation")
+		return nil, errors.TracedError("nativeCommitsService is nil after evaluation")
 	}
 
 	return nativeCommitsService, nil
@@ -84,7 +88,7 @@ func (g *GitlabProjectCommits) GetNativeGitlabClient() (nativeClient *gitlab.Cli
 func (g *GitlabProjectCommits) MustGetCommitByHashString(hash string, verbose bool) (commit *GitlabCommit) {
 	commit, err := g.GetCommitByHashString(hash, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commit
@@ -93,7 +97,7 @@ func (g *GitlabProjectCommits) MustGetCommitByHashString(hash string, verbose bo
 func (g *GitlabProjectCommits) MustGetGitlab() (gitlab *GitlabInstance) {
 	gitlab, err := g.GetGitlab()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlab
@@ -102,7 +106,7 @@ func (g *GitlabProjectCommits) MustGetGitlab() (gitlab *GitlabInstance) {
 func (g *GitlabProjectCommits) MustGetGitlabProject() (gitlabProject *GitlabProject) {
 	gitlabProject, err := g.GetGitlabProject()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabProject
@@ -111,7 +115,7 @@ func (g *GitlabProjectCommits) MustGetGitlabProject() (gitlabProject *GitlabProj
 func (g *GitlabProjectCommits) MustGetNativeCommitsService() (nativeCommitsService *gitlab.CommitsService) {
 	nativeCommitsService, err := g.GetNativeCommitsService()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeCommitsService
@@ -120,7 +124,7 @@ func (g *GitlabProjectCommits) MustGetNativeCommitsService() (nativeCommitsServi
 func (g *GitlabProjectCommits) MustGetNativeGitlabClient() (nativeClient *gitlab.Client) {
 	nativeClient, err := g.GetNativeGitlabClient()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeClient
@@ -129,13 +133,13 @@ func (g *GitlabProjectCommits) MustGetNativeGitlabClient() (nativeClient *gitlab
 func (g *GitlabProjectCommits) MustSetGitlabProject(gitlabProject *GitlabProject) {
 	err := g.SetGitlabProject(gitlabProject)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabProjectCommits) SetGitlabProject(gitlabProject *GitlabProject) (err error) {
 	if gitlabProject == nil {
-		return TracedErrorf("gitlabProject is nil")
+		return errors.TracedErrorf("gitlabProject is nil")
 	}
 
 	g.gitlabProject = gitlabProject

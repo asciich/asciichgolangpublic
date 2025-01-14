@@ -1,9 +1,10 @@
 package docker
 
 import (
-	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/containers"
+	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/hosts"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type Docker interface {
@@ -15,11 +16,11 @@ type Docker interface {
 
 func GetDockerContainerOnHost(host hosts.Host, containerName string) (dockerContainer containers.Container, err error) {
 	if host == nil {
-		return nil, asciichgolangpublic.TracedErrorNil("host")
+		return nil, errors.TracedErrorNil("host")
 	}
 
 	if containerName == "" {
-		return nil, asciichgolangpublic.TracedErrorEmptyString("containerName")
+		return nil, errors.TracedErrorEmptyString("containerName")
 	}
 
 	docker, err := GetDockerOnHost(host)
@@ -32,7 +33,7 @@ func GetDockerContainerOnHost(host hosts.Host, containerName string) (dockerCont
 
 func GetDockerOnHost(host hosts.Host) (docker Docker, err error) {
 	if host == nil {
-		return nil, asciichgolangpublic.TracedErrorNil("host")
+		return nil, errors.TracedErrorNil("host")
 	}
 
 	return GetCommandExecutorDockerOnHost(host)
@@ -41,7 +42,7 @@ func GetDockerOnHost(host hosts.Host) (docker Docker, err error) {
 func MustGetDockerContainerOnHost(host hosts.Host, containerName string) (dockerContainer containers.Container) {
 	dockerContainer, err := GetDockerContainerOnHost(host, containerName)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return dockerContainer
@@ -50,7 +51,7 @@ func MustGetDockerContainerOnHost(host hosts.Host, containerName string) (docker
 func MustGetDockerOnHost(host hosts.Host) (docker Docker) {
 	docker, err := GetDockerOnHost(host)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return docker

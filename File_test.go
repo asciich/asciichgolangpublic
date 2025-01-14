@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 // Return a temporary file of the given 'implementationName'.
@@ -22,7 +23,7 @@ func getFileToTest(implementationName string) (file File) {
 			TemporaryFiles().MustCreateEmptyTemporaryFileAndGetPath(verbose),
 		)
 	} else {
-		LogFatalWithTracef("unknown implementationName='%s'", implementationName)
+		logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)
 	}
 
 	return file

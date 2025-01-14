@@ -1,12 +1,17 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 func GetCommandExecutorGitRepositoryByPath(commandExecutor CommandExecutor, path string) (gitRepo *CommandExecutorGitRepository, err error) {
 	if commandExecutor == nil {
-		return nil, TracedErrorNil("commandExecturo")
+		return nil, errors.TracedErrorNil("commandExecturo")
 	}
 
 	if path == "" {
-		return nil, TracedErrorEmptyString("path")
+		return nil, errors.TracedErrorEmptyString("path")
 	}
 
 	gitRepo, err = NewCommandExecutorGitRepository(commandExecutor)
@@ -24,7 +29,7 @@ func GetCommandExecutorGitRepositoryByPath(commandExecutor CommandExecutor, path
 
 func GetLocalCommandExecutorGitRepositoryByDirectory(directory Directory) (gitRepo *CommandExecutorGitRepository, err error) {
 	if directory == nil {
-		return nil, TracedErrorNil("directory")
+		return nil, errors.TracedErrorNil("directory")
 	}
 
 	isLocalDir, err := directory.IsLocalDirectory()
@@ -38,7 +43,7 @@ func GetLocalCommandExecutorGitRepositoryByDirectory(directory Directory) (gitRe
 	}
 
 	if !isLocalDir {
-		return nil, TracedErrorf(
+		return nil, errors.TracedErrorf(
 			"Unable to get LocalCommandExecutorGitRepository for non local path '%s'",
 			path,
 		)
@@ -54,7 +59,7 @@ func GetLocalCommandExecutorGitRepositoryByDirectory(directory Directory) (gitRe
 
 func GetLocalCommandExecutorGitRepositoryByPath(path string) (gitRepo *CommandExecutorGitRepository, err error) {
 	if path == "" {
-		return nil, TracedErrorEmptyString("path")
+		return nil, errors.TracedErrorEmptyString("path")
 	}
 
 	return GetCommandExecutorGitRepositoryByPath(
@@ -66,7 +71,7 @@ func GetLocalCommandExecutorGitRepositoryByPath(path string) (gitRepo *CommandEx
 func MustGetCommandExecutorGitRepositoryByPath(commandExecutor CommandExecutor, path string) (gitRepo *CommandExecutorGitRepository) {
 	gitRepo, err := GetCommandExecutorGitRepositoryByPath(commandExecutor, path)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitRepo
@@ -75,7 +80,7 @@ func MustGetCommandExecutorGitRepositoryByPath(commandExecutor CommandExecutor, 
 func MustGetLocalCommandExecutorGitRepositoryByDirectory(directory Directory) (gitRepo *CommandExecutorGitRepository) {
 	gitRepo, err := GetLocalCommandExecutorGitRepositoryByDirectory(directory)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitRepo
@@ -84,7 +89,7 @@ func MustGetLocalCommandExecutorGitRepositoryByDirectory(directory Directory) (g
 func MustGetLocalCommandExecutorGitRepositoryByPath(path string) (gitRepo *CommandExecutorGitRepository) {
 	gitRepo, err := GetLocalCommandExecutorGitRepositoryByPath(path)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitRepo

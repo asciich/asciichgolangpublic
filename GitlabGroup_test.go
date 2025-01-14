@@ -7,7 +7,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func TestGitlabGroupGetGroupPath(t *testing.T) {
@@ -164,8 +166,8 @@ func TestGitlabGroupGetParentGroupPath(t *testing.T) {
 
 // Validate if getting the gitlab group by path and by id works.
 func TestGitlabGroupByPathAndId(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogInfo("Not available in Github CI")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogInfo("Not available in Github CI")
 		return
 	}
 
@@ -236,8 +238,8 @@ func TestGitlabGroupByPathAndId(t *testing.T) {
 }
 
 func TestGitlabGroupListProjects(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogInfo("Not available in Github CI")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogInfo("Not available in Github CI")
 		return
 	}
 

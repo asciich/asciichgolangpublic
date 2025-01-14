@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type GitRemoteAddOptions struct {
 	RemoteName string
 	RemoteUrl  string
@@ -18,7 +23,7 @@ func (g *GitRemoteAddOptions) GetVerbose() (verbose bool, err error) {
 func (g *GitRemoteAddOptions) MustGetRemoteName() (remoteName string) {
 	remoteName, err := g.GetRemoteName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return remoteName
@@ -27,7 +32,7 @@ func (g *GitRemoteAddOptions) MustGetRemoteName() (remoteName string) {
 func (g *GitRemoteAddOptions) MustGetRemoteUrl() (remoteUrl string) {
 	remoteUrl, err := g.GetRemoteUrl()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return remoteUrl
@@ -36,7 +41,7 @@ func (g *GitRemoteAddOptions) MustGetRemoteUrl() (remoteUrl string) {
 func (g *GitRemoteAddOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := g.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -45,27 +50,27 @@ func (g *GitRemoteAddOptions) MustGetVerbose() (verbose bool) {
 func (g *GitRemoteAddOptions) MustSetRemoteName(remoteName string) {
 	err := g.SetRemoteName(remoteName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRemoteAddOptions) MustSetRemoteUrl(remoteUrl string) {
 	err := g.SetRemoteUrl(remoteUrl)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRemoteAddOptions) MustSetVerbose(verbose bool) {
 	err := g.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRemoteAddOptions) SetRemoteName(remoteName string) (err error) {
 	if remoteName == "" {
-		return TracedErrorf("remoteName is empty string")
+		return errors.TracedErrorf("remoteName is empty string")
 	}
 
 	g.RemoteName = remoteName
@@ -75,7 +80,7 @@ func (g *GitRemoteAddOptions) SetRemoteName(remoteName string) (err error) {
 
 func (g *GitRemoteAddOptions) SetRemoteUrl(remoteUrl string) (err error) {
 	if remoteUrl == "" {
-		return TracedErrorf("remoteUrl is empty string")
+		return errors.TracedErrorf("remoteUrl is empty string")
 	}
 
 	g.RemoteUrl = remoteUrl
@@ -91,7 +96,7 @@ func (g *GitRemoteAddOptions) SetVerbose(verbose bool) (err error) {
 
 func (o *GitRemoteAddOptions) GetRemoteName() (remoteName string, err error) {
 	if len(o.RemoteName) <= 0 {
-		return "", TracedError("RemoteName not set")
+		return "", errors.TracedError("RemoteName not set")
 	}
 
 	return o.RemoteName, nil
@@ -99,7 +104,7 @@ func (o *GitRemoteAddOptions) GetRemoteName() (remoteName string, err error) {
 
 func (o *GitRemoteAddOptions) GetRemoteUrl() (remoteUrl string, err error) {
 	if len(o.RemoteUrl) <= 0 {
-		return "", TracedError("RemoteUrl not set")
+		return "", errors.TracedError("RemoteUrl not set")
 	}
 
 	return o.RemoteUrl, nil

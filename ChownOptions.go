@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type ChownOptions struct {
 	UserName  string
 	GroupName string
@@ -13,7 +18,7 @@ func NewChownOptions() (c *ChownOptions) {
 
 func (c *ChownOptions) GetGroupName() (GroupName string, err error) {
 	if c.GroupName == "" {
-		return "", TracedErrorf("GroupName not set")
+		return "", errors.TracedErrorf("GroupName not set")
 	}
 
 	return c.GroupName, nil
@@ -44,7 +49,7 @@ func (c *ChownOptions) GetUserAndOptionallyGroupForChownCommand() (userAndGroup 
 
 func (c *ChownOptions) GetUserName() (userName string, err error) {
 	if c.UserName == "" {
-		return "", TracedErrorf("UserName not set")
+		return "", errors.TracedErrorf("UserName not set")
 	}
 
 	return c.UserName, nil
@@ -62,7 +67,7 @@ func (c *ChownOptions) IsGroupNameSet() (isSet bool) {
 func (c *ChownOptions) MustGetGroupName() (GroupName string) {
 	GroupName, err := c.GetGroupName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return GroupName
@@ -71,7 +76,7 @@ func (c *ChownOptions) MustGetGroupName() (GroupName string) {
 func (c *ChownOptions) MustGetUserAndOptionallyGroupForChownCommand() (userAndGroup string) {
 	userAndGroup, err := c.GetUserAndOptionallyGroupForChownCommand()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return userAndGroup
@@ -80,7 +85,7 @@ func (c *ChownOptions) MustGetUserAndOptionallyGroupForChownCommand() (userAndGr
 func (c *ChownOptions) MustGetUserName() (userName string) {
 	userName, err := c.GetUserName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return userName
@@ -89,20 +94,20 @@ func (c *ChownOptions) MustGetUserName() (userName string) {
 func (c *ChownOptions) MustSetGroupName(GroupName string) {
 	err := c.SetGroupName(GroupName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *ChownOptions) MustSetUserName(userName string) {
 	err := c.SetUserName(userName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *ChownOptions) SetGroupName(GroupName string) (err error) {
 	if GroupName == "" {
-		return TracedErrorf("GroupName is empty string")
+		return errors.TracedErrorf("GroupName is empty string")
 	}
 
 	c.GroupName = GroupName
@@ -116,7 +121,7 @@ func (c *ChownOptions) SetUseSudo(useSudo bool) {
 
 func (c *ChownOptions) SetUserName(userName string) (err error) {
 	if userName == "" {
-		return TracedErrorf("userName is empty string")
+		return errors.TracedErrorf("userName is empty string")
 	}
 
 	c.UserName = userName

@@ -7,11 +7,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/continuousintegration"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func TestHost_CheckReachable(t *testing.T) {
-	if asciichgolangpublic.ContinuousIntegration().IsRunningInContinuousIntegration() {
-		asciichgolangpublic.LogInfo("Currently not available in CI/CD pipeline")
+	if continuousintegration.IsRunningInContinuousIntegration() {
+		logging.LogInfo("Currently not available in CI/CD pipeline")
 		return
 	}
 
@@ -36,8 +38,8 @@ func TestHost_CheckReachable(t *testing.T) {
 }
 
 func TestHostGetHostName(t *testing.T) {
-	if asciichgolangpublic.ContinuousIntegration().IsRunningInContinuousIntegration() {
-		asciichgolangpublic.LogInfo("Currently not available in CI/CD pipeline")
+	if continuousintegration.IsRunningInContinuousIntegration() {
+		logging.LogInfo("Currently not available in CI/CD pipeline")
 		return
 	}
 
@@ -65,8 +67,8 @@ func TestHostGetHostName(t *testing.T) {
 }
 
 func TestHostGetHostDescripion(t *testing.T) {
-	if asciichgolangpublic.ContinuousIntegration().IsRunningInContinuousIntegration() {
-		asciichgolangpublic.LogInfo("Currently not available in CI/CD pipeline")
+	if continuousintegration.IsRunningInContinuousIntegration() {
+		logging.LogInfo("Currently not available in CI/CD pipeline")
 		return
 	}
 
@@ -94,8 +96,8 @@ func TestHostGetHostDescripion(t *testing.T) {
 }
 
 func TestHostRunCommand(t *testing.T) {
-	if asciichgolangpublic.ContinuousIntegration().IsRunningInContinuousIntegration() {
-		asciichgolangpublic.LogInfo("Currently not available in CI/CD pipeline")
+	if continuousintegration.IsRunningInContinuousIntegration() {
+		logging.LogInfo("Currently not available in CI/CD pipeline")
 		return
 	}
 
@@ -134,8 +136,8 @@ func TestHostRunCommand(t *testing.T) {
 }
 
 func TestHost_GetDirectoryByPath(t *testing.T) {
-	if asciichgolangpublic.ContinuousIntegration().IsRunningInContinuousIntegration() {
-		asciichgolangpublic.LogInfo("Currently not available in CI/CD pipeline")
+	if continuousintegration.IsRunningInContinuousIntegration() {
+		logging.LogInfo("Currently not available in CI/CD pipeline")
 		return
 	}
 

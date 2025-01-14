@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"runtime/debug"
 	"strings"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 const SOFTWARE_NAME_UNDEFINED = "[software name not defined]"
@@ -41,7 +44,7 @@ func NewBinaryInfo() (b *BinaryInfo) {
 func (b *BinaryInfo) GetGitHash() (gitHash string, err error) {
 	info, ok := debug.ReadBuildInfo()
 	if !ok {
-		return "", TracedError("ReadBuildInfo failed")
+		return "", errors.TracedError("ReadBuildInfo failed")
 	}
 	for _, setting := range info.Settings {
 		if setting.Key == "vcs.revision" {
@@ -49,14 +52,14 @@ func (b *BinaryInfo) GetGitHash() (gitHash string, err error) {
 		}
 	}
 
-	return "", TracedError("Revision not found")
+	return "", errors.TracedError("Revision not found")
 }
 
 func (b *BinaryInfo) GetGitHashOrErrorMessageOnError() (gitHash string) {
 	gitHash, err := b.GetGitHash()
 	if err != nil {
 		errorMessage := fmt.Sprintf("BinaryInfo.LogInfo: '%v'", err)
-		LogError(errorMessage)
+		logging.LogError(errorMessage)
 		gitHash = errorMessage
 	}
 
@@ -100,13 +103,13 @@ func (b *BinaryInfo) IsSoftwareNameSet() (isSet bool) {
 
 func (b *BinaryInfo) LogInfo() {
 	logMessage := b.GetInfoString()
-	LogInfo(logMessage)
+	logging.LogInfo(logMessage)
 }
 
 func (b *BinaryInfo) MustGetGitHash() (gitHash string) {
 	gitHash, err := b.GetGitHash()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitHash
@@ -115,14 +118,14 @@ func (b *BinaryInfo) MustGetGitHash() (gitHash string) {
 func (b *BinaryInfo) MustSetFallbackSoftwareName(defaultName string) {
 	err := b.SetFallbackSoftwareName(defaultName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (b *BinaryInfo) SetFallbackSoftwareName(defaultName string) (err error) {
 	defaultName = strings.TrimSpace(defaultName)
 	if len(defaultName) <= 0 {
-		return TracedError("defaultName is empty string")
+		return errors.TracedError("defaultName is empty string")
 	}
 
 	globalFallbackSoftwareName = defaultName

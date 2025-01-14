@@ -1,6 +1,9 @@
 package kvm
 
-import "github.com/asciich/asciichgolangpublic"
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
 
 type KvmVolume struct {
 	name        string
@@ -14,7 +17,7 @@ func NewKvmVolume() (kvmVolume *KvmVolume) {
 func (k *KvmVolume) MustGetHostName() (hostname string) {
 	hostname, err := k.GetHostName()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hostname
@@ -23,7 +26,7 @@ func (k *KvmVolume) MustGetHostName() (hostname string) {
 func (k *KvmVolume) MustGetHypervisor() (hypervisor *KVMHypervisor) {
 	hypervisor, err := k.GetHypervisor()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hypervisor
@@ -32,7 +35,7 @@ func (k *KvmVolume) MustGetHypervisor() (hypervisor *KVMHypervisor) {
 func (k *KvmVolume) MustGetName() (name string) {
 	name, err := k.GetName()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -41,7 +44,7 @@ func (k *KvmVolume) MustGetName() (name string) {
 func (k *KvmVolume) MustGetStoragePool() (storagePool *KvmStoragePool) {
 	storagePool, err := k.GetStoragePool()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return storagePool
@@ -50,7 +53,7 @@ func (k *KvmVolume) MustGetStoragePool() (storagePool *KvmStoragePool) {
 func (k *KvmVolume) MustGetStoragePoolName() (storagePoolName string) {
 	storagePoolName, err := k.GetStoragePoolName()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return storagePoolName
@@ -59,21 +62,21 @@ func (k *KvmVolume) MustGetStoragePoolName() (storagePoolName string) {
 func (k *KvmVolume) MustRemove(verbose bool) {
 	err := k.Remove(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KvmVolume) MustSetName(name string) {
 	err := k.SetName(name)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (k *KvmVolume) MustSetStoragePool(storagePool *KvmStoragePool) {
 	err := k.SetStoragePool(storagePool)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
@@ -107,7 +110,7 @@ func (v *KvmVolume) GetHypervisor() (hypervisor *KVMHypervisor, err error) {
 
 func (v *KvmVolume) GetName() (name string, err error) {
 	if len(v.name) <= 0 {
-		return "", asciichgolangpublic.TracedError("name not set")
+		return "", errors.TracedError("name not set")
 	}
 
 	return v.name, nil
@@ -115,7 +118,7 @@ func (v *KvmVolume) GetName() (name string, err error) {
 
 func (v *KvmVolume) GetStoragePool() (storagePool *KvmStoragePool, err error) {
 	if v.storagePool == nil {
-		return nil, asciichgolangpublic.TracedError("storage pool not set")
+		return nil, errors.TracedError("storage pool not set")
 	}
 
 	return v.storagePool, nil
@@ -162,7 +165,7 @@ func (v *KvmVolume) Remove(verbose bool) (err error) {
 	}
 
 	if verbose {
-		asciichgolangpublic.LogInfof("KVM volume '%s' on storage pool '%s' on host '%v' deleted.", volumeName, poolName, hostname)
+		logging.LogInfof("KVM volume '%s' on storage pool '%s' on host '%v' deleted.", volumeName, poolName, hostname)
 	}
 
 	return nil
@@ -170,7 +173,7 @@ func (v *KvmVolume) Remove(verbose bool) (err error) {
 
 func (v *KvmVolume) SetName(name string) (err error) {
 	if len(name) <= 0 {
-		return asciichgolangpublic.TracedError("name is empty string")
+		return errors.TracedError("name is empty string")
 	}
 
 	v.name = name
@@ -180,7 +183,7 @@ func (v *KvmVolume) SetName(name string) (err error) {
 
 func (v *KvmVolume) SetStoragePool(storagePool *KvmStoragePool) (err error) {
 	if storagePool == nil {
-		return asciichgolangpublic.TracedError("storagePool is nil")
+		return errors.TracedError("storagePool is nil")
 	}
 
 	v.storagePool = storagePool

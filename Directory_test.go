@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func getDirectoryToTest(implementationName string) (directory Directory) {
@@ -19,7 +20,7 @@ func getDirectoryToTest(implementationName string) (directory Directory) {
 			TemporaryDirectories().MustCreateEmptyTemporaryDirectoryAndGetPath(verbose),
 		)
 	} else {
-		LogFatalWithTracef("unknown implementationName='%s'", implementationName)
+		logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)
 	}
 
 	return directory

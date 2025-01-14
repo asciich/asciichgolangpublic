@@ -1,8 +1,10 @@
 package asciichgolangpublic
 
 import (
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type GitignoreFile struct {
@@ -15,7 +17,7 @@ func GetGitignoreDefaultBaseName() (defaultBaseName string) {
 
 func GetGitignoreFileByFile(fileToUse File) (gitignoreFile *GitignoreFile, err error) {
 	if fileToUse == nil {
-		return nil, TracedErrorEmptyString("fileToUse")
+		return nil, errors.TracedErrorEmptyString("fileToUse")
 	}
 
 	gitignoreFile = NewGitignoreFile()
@@ -27,7 +29,7 @@ func GetGitignoreFileByFile(fileToUse File) (gitignoreFile *GitignoreFile, err e
 
 func GetGitignoreFileByPath(filePath string) (gitignoreFile *GitignoreFile, err error) {
 	if filePath == "" {
-		return nil, TracedErrorEmptyString("filePath")
+		return nil, errors.TracedErrorEmptyString("filePath")
 	}
 
 	fileToUse, err := GetLocalFileByPath(filePath)
@@ -40,7 +42,7 @@ func GetGitignoreFileByPath(filePath string) (gitignoreFile *GitignoreFile, err 
 
 func GetGitignoreFileInGitRepository(gitRepository GitRepository) (gitignoreFile *GitignoreFile, err error) {
 	if gitRepository == nil {
-		return nil, TracedErrorNil("gitRepository")
+		return nil, errors.TracedErrorNil("gitRepository")
 	}
 
 	fileToUse, err := gitRepository.GetFileByPath(GetGitignoreDefaultBaseName())
@@ -54,7 +56,7 @@ func GetGitignoreFileInGitRepository(gitRepository GitRepository) (gitignoreFile
 func MustGetGitignoreFileByFile(fileToUse File) (gitignoreFile *GitignoreFile) {
 	gitignoreFile, err := GetGitignoreFileByFile(fileToUse)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitignoreFile
@@ -63,7 +65,7 @@ func MustGetGitignoreFileByFile(fileToUse File) (gitignoreFile *GitignoreFile) {
 func MustGetGitignoreFileByPath(filePath string) (gitignoreFile *GitignoreFile) {
 	gitignoreFile, err := GetGitignoreFileByPath(filePath)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitignoreFile
@@ -72,7 +74,7 @@ func MustGetGitignoreFileByPath(filePath string) (gitignoreFile *GitignoreFile) 
 func MustGetGitignoreFileInGitRepository(gitRepository GitRepository) (gitignoreFile *GitignoreFile) {
 	gitignoreFile, err := GetGitignoreFileInGitRepository(gitRepository)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitignoreFile
@@ -84,11 +86,11 @@ func NewGitignoreFile() (g *GitignoreFile) {
 
 func (g *GitignoreFile) AddDirToIgnore(pathToIgnore string, comment string, verbose bool) (err error) {
 	if pathToIgnore == "" {
-		return TracedError("pathToIgnore is empty string")
+		return errors.TracedError("pathToIgnore is empty string")
 	}
 
 	if comment == "" {
-		return TracedError("comment is empty string")
+		return errors.TracedError("comment is empty string")
 	}
 
 	pathToIgnore = astrings.EnsureSuffix(pathToIgnore, "/")
@@ -110,7 +112,7 @@ func (g *GitignoreFile) AddDirToIgnore(pathToIgnore string, comment string, verb
 
 	if containsIgnore {
 		if verbose {
-			LogInfof(
+			logging.LogInfof(
 				"Gitignore file '%s' already contains ignore entry for '%s'.",
 				path,
 				pathToIgnore,
@@ -130,7 +132,7 @@ func (g *GitignoreFile) AddDirToIgnore(pathToIgnore string, comment string, verb
 	}
 
 	if verbose {
-		LogChangedf(
+		logging.LogChangedf(
 			"Added '%s' to gitignore file '%s'.",
 			pathToIgnore,
 			path,
@@ -142,11 +144,11 @@ func (g *GitignoreFile) AddDirToIgnore(pathToIgnore string, comment string, verb
 
 func (g *GitignoreFile) AddFileToIgnore(pathToIgnore string, comment string, verbose bool) (err error) {
 	if pathToIgnore == "" {
-		return TracedError("pathToIgnore is empty string")
+		return errors.TracedError("pathToIgnore is empty string")
 	}
 
 	if comment == "" {
-		return TracedError("comment is empty string")
+		return errors.TracedError("comment is empty string")
 	}
 
 	err = g.Create(verbose)
@@ -166,7 +168,7 @@ func (g *GitignoreFile) AddFileToIgnore(pathToIgnore string, comment string, ver
 
 	if containsIgnore {
 		if verbose {
-			LogInfof(
+			logging.LogInfof(
 				"Gitignore file '%s' already contains ignore entry for '%s'.",
 				path,
 				pathToIgnore,
@@ -186,7 +188,7 @@ func (g *GitignoreFile) AddFileToIgnore(pathToIgnore string, comment string, ver
 	}
 
 	if verbose {
-		LogChangedf(
+		logging.LogChangedf(
 			"Added '%s' to gitignore file '%s'.",
 			pathToIgnore,
 			path,
@@ -198,7 +200,7 @@ func (g *GitignoreFile) AddFileToIgnore(pathToIgnore string, comment string, ver
 
 func (g *GitignoreFile) ContainsIgnore(pathToCheck string) (containsIgnore bool, err error) {
 	if pathToCheck == "" {
-		return false, TracedError("pathToCheck is empty string")
+		return false, errors.TracedError("pathToCheck is empty string")
 	}
 
 	ignoredPaths, err := g.GetIgnoredPaths()
@@ -223,21 +225,21 @@ func (g *GitignoreFile) GetIgnoredPaths() (ignoredPaths []string, err error) {
 func (g *GitignoreFile) MustAddDirToIgnore(pathToIgnore string, comment string, verbose bool) {
 	err := g.AddDirToIgnore(pathToIgnore, comment, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitignoreFile) MustAddFileToIgnore(pathToIgnore string, comment string, verbose bool) {
 	err := g.AddFileToIgnore(pathToIgnore, comment, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitignoreFile) MustContainsIgnore(pathToCheck string) (containsIgnore bool) {
 	containsIgnore, err := g.ContainsIgnore(pathToCheck)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return containsIgnore
@@ -246,7 +248,7 @@ func (g *GitignoreFile) MustContainsIgnore(pathToCheck string) (containsIgnore b
 func (g *GitignoreFile) MustGetIgnoredPaths() (ignoredPaths []string) {
 	ignoredPaths, err := g.GetIgnoredPaths()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return ignoredPaths
@@ -255,7 +257,7 @@ func (g *GitignoreFile) MustGetIgnoredPaths() (ignoredPaths []string) {
 func (g *GitignoreFile) MustReformat(verbose bool) {
 	err := g.Reformat(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
@@ -271,7 +273,7 @@ func (g *GitignoreFile) Reformat(verbose bool) (err error) {
 	}
 
 	if verbose {
-		LogInfof("Reformat gitignore file '%s' finished.", path)
+		logging.LogInfof("Reformat gitignore file '%s' finished.", path)
 	}
 
 	return nil

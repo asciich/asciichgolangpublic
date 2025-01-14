@@ -4,11 +4,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/continuousintegration"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func TestGitlabUserGetCurrentUserName(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogInfo("Not implemented to run on github")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogInfo("Not implemented to run on github")
 		return
 	}
 

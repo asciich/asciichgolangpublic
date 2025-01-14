@@ -2,6 +2,9 @@ package asciichgolangpublic
 
 import (
 	"time"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type TicToc struct {
@@ -12,7 +15,7 @@ type TicToc struct {
 func MustTic(title string, verbose bool) (t *TicToc) {
 	t, err := Tic(title, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return t
@@ -24,7 +27,7 @@ func NewTicToc() (t *TicToc) {
 
 func Tic(title string, verbose bool) (t *TicToc, err error) {
 	if title == "" {
-		return nil, TracedError("title is empty string")
+		return nil, errors.TracedError("title is empty string")
 	}
 
 	t = NewTicToc()
@@ -46,7 +49,7 @@ func TicWithoutTitle(verbose bool) (t *TicToc) {
 
 func (t *TicToc) GetTStart() (tStart *time.Time, err error) {
 	if t.tStart == nil {
-		return nil, TracedErrorf("tStart not set")
+		return nil, errors.TracedErrorf("tStart not set")
 	}
 
 	return t.tStart, nil
@@ -54,7 +57,7 @@ func (t *TicToc) GetTStart() (tStart *time.Time, err error) {
 
 func (t *TicToc) GetTitle() (title string, err error) {
 	if t.title == "" {
-		return "", TracedErrorf("title not set")
+		return "", errors.TracedErrorf("title not set")
 	}
 
 	return t.title, nil
@@ -71,7 +74,7 @@ func (t *TicToc) GetTitleOrDefaultIfUnset() (title string) {
 func (t *TicToc) MustGetTStart() (tStart *time.Time) {
 	tStart, err := t.GetTStart()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tStart
@@ -80,7 +83,7 @@ func (t *TicToc) MustGetTStart() (tStart *time.Time) {
 func (t *TicToc) MustGetTitle() (title string) {
 	title, err := t.GetTitle()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return title
@@ -89,21 +92,21 @@ func (t *TicToc) MustGetTitle() (title string) {
 func (t *TicToc) MustSetTStart(tStart *time.Time) {
 	err := t.SetTStart(tStart)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (t *TicToc) MustSetTitle(title string) {
 	err := t.SetTitle(title)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (t *TicToc) MustToc(verbose bool) (elapsedTime *time.Duration) {
 	elapsedTime, err := t.Toc(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return elapsedTime
@@ -111,7 +114,7 @@ func (t *TicToc) MustToc(verbose bool) (elapsedTime *time.Duration) {
 
 func (t *TicToc) SetTStart(tStart *time.Time) (err error) {
 	if tStart == nil {
-		return TracedErrorf("tStart is nil")
+		return errors.TracedErrorf("tStart is nil")
 	}
 
 	t.tStart = tStart
@@ -121,7 +124,7 @@ func (t *TicToc) SetTStart(tStart *time.Time) (err error) {
 
 func (t *TicToc) SetTitle(title string) (err error) {
 	if title == "" {
-		return TracedErrorf("title is empty string")
+		return errors.TracedErrorf("title is empty string")
 	}
 
 	t.title = title
@@ -136,7 +139,7 @@ func (t *TicToc) Start(verbose bool) {
 	title := t.GetTitleOrDefaultIfUnset()
 
 	if verbose {
-		LogInfof("TicToc timer '%s': started", title)
+		logging.LogInfof("TicToc timer '%s': started", title)
 	}
 }
 
@@ -157,7 +160,7 @@ func (t *TicToc) Toc(verbose bool) (elapsedTime *time.Duration, err error) {
 			return nil, err
 		}
 
-		LogInfof("TicToc timer '%s': elapsed duration: %s", title, elapsedDurationString)
+		logging.LogInfof("TicToc timer '%s': elapsed duration: %s", title, elapsedDurationString)
 	}
 
 	return elapsedDuration, nil

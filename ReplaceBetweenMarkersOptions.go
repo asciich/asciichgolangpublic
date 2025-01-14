@@ -1,5 +1,9 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
 
 type ReplaceBetweenMarkersOptions struct {
 	WorkingDirPath string
@@ -17,7 +21,7 @@ func (r *ReplaceBetweenMarkersOptions) GetVerbose() (verbose bool, err error) {
 
 func (r *ReplaceBetweenMarkersOptions) GetWorkingDirPath() (workingDirPath string, err error) {
 	if r.WorkingDirPath == "" {
-		return "", TracedErrorf("WorkingDirPath not set")
+		return "", errors.TracedErrorf("WorkingDirPath not set")
 	}
 
 	return r.WorkingDirPath, nil
@@ -26,7 +30,7 @@ func (r *ReplaceBetweenMarkersOptions) GetWorkingDirPath() (workingDirPath strin
 func (r *ReplaceBetweenMarkersOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := r.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -35,7 +39,7 @@ func (r *ReplaceBetweenMarkersOptions) MustGetVerbose() (verbose bool) {
 func (r *ReplaceBetweenMarkersOptions) MustGetWorkingDirPath() (workingDirPath string) {
 	workingDirPath, err := r.GetWorkingDirPath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return workingDirPath
@@ -44,14 +48,14 @@ func (r *ReplaceBetweenMarkersOptions) MustGetWorkingDirPath() (workingDirPath s
 func (r *ReplaceBetweenMarkersOptions) MustSetVerbose(verbose bool) {
 	err := r.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (r *ReplaceBetweenMarkersOptions) MustSetWorkingDirPath(workingDirPath string) {
 	err := r.SetWorkingDirPath(workingDirPath)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
@@ -63,7 +67,7 @@ func (r *ReplaceBetweenMarkersOptions) SetVerbose(verbose bool) (err error) {
 
 func (r *ReplaceBetweenMarkersOptions) SetWorkingDirPath(workingDirPath string) (err error) {
 	if workingDirPath == "" {
-		return TracedErrorf("workingDirPath is empty string")
+		return errors.TracedErrorf("workingDirPath is empty string")
 	}
 
 	r.WorkingDirPath = workingDirPath

@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type GitCommitOptions struct {
 	// Message of the commit:
 	Message string
@@ -38,7 +43,7 @@ func (g *GitCommitOptions) GetDeepCopy() (deepCopy *GitCommitOptions) {
 
 func (g *GitCommitOptions) GetMessage() (message string, err error) {
 	if g.Message == "" {
-		return "", TracedErrorf("Message not set")
+		return "", errors.TracedErrorf("Message not set")
 	}
 
 	return g.Message, nil
@@ -52,7 +57,7 @@ func (g *GitCommitOptions) GetVerbose() (verbose bool) {
 func (g *GitCommitOptions) MustGetMessage() (message string) {
 	message, err := g.GetMessage()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return message
@@ -61,7 +66,7 @@ func (g *GitCommitOptions) MustGetMessage() (message string) {
 func (g *GitCommitOptions) MustSetMessage(message string) {
 	err := g.SetMessage(message)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
@@ -75,7 +80,7 @@ func (g *GitCommitOptions) SetCommitAllChanges(commitAllChanges bool) {
 
 func (g *GitCommitOptions) SetMessage(message string) (err error) {
 	if message == "" {
-		return TracedErrorf("message is empty string")
+		return errors.TracedErrorf("message is empty string")
 	}
 
 	g.Message = message

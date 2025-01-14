@@ -4,11 +4,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/continuousintegration"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func TestGnuPg_SignAndValidate(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogWarnf("Not available in Github CI.")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogWarnf("Not available in Github CI.")
 		return
 	}
 

@@ -5,8 +5,10 @@ import (
 	"strconv"
 	"strings"
 
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type CommandOutput struct {
@@ -22,7 +24,7 @@ func NewCommandOutput() (c *CommandOutput) {
 
 func (c *CommandOutput) GetCmdRunError() (cmdRunError *error, err error) {
 	if c.cmdRunError == nil {
-		return nil, TracedErrorf("cmdRunError not set")
+		return nil, errors.TracedErrorf("cmdRunError not set")
 	}
 
 	return c.cmdRunError, nil
@@ -40,7 +42,7 @@ func (c *CommandOutput) GetFirstLineOfStdoutAsString() (firstLine string, err er
 
 func (c *CommandOutput) GetStderr() (stderr *[]byte, err error) {
 	if c.stderr == nil {
-		return nil, TracedErrorf("stderr not set")
+		return nil, errors.TracedErrorf("stderr not set")
 	}
 
 	return c.stderr, nil
@@ -48,7 +50,7 @@ func (c *CommandOutput) GetStderr() (stderr *[]byte, err error) {
 
 func (c *CommandOutput) GetStdout() (stdout *[]byte, err error) {
 	if c.stdout == nil {
-		return nil, TracedErrorf("stdout not set")
+		return nil, errors.TracedErrorf("stdout not set")
 	}
 
 	return c.stdout, nil
@@ -64,7 +66,7 @@ func (c *CommandOutput) GetStdoutAsFloat64() (stdout float64, err error) {
 
 	stdout, err = strconv.ParseFloat(stdoutString, 64)
 	if err != nil {
-		return -1, TracedError(err)
+		return -1, errors.TracedError(err)
 	}
 
 	return stdout, err
@@ -107,7 +109,7 @@ func (c *CommandOutput) LogStdoutAsInfo() (err error) {
 		return err
 	}
 
-	LogInfo(stdout)
+	logging.LogInfo(stdout)
 
 	return nil
 }
@@ -115,14 +117,14 @@ func (c *CommandOutput) LogStdoutAsInfo() (err error) {
 func (c *CommandOutput) MustCheckExitSuccess(verbose bool) {
 	err := c.CheckExitSuccess(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandOutput) MustGetCmdRunError() (cmdRunError *error) {
 	cmdRunError, err := c.GetCmdRunError()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return cmdRunError
@@ -131,7 +133,7 @@ func (c *CommandOutput) MustGetCmdRunError() (cmdRunError *error) {
 func (c *CommandOutput) MustGetFirstLineOfStdoutAsString() (firstLine string) {
 	firstLine, err := c.GetFirstLineOfStdoutAsString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return firstLine
@@ -140,7 +142,7 @@ func (c *CommandOutput) MustGetFirstLineOfStdoutAsString() (firstLine string) {
 func (c *CommandOutput) MustGetReturnCode() (returnCode int) {
 	returnCode, err := c.GetReturnCode()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return returnCode
@@ -149,7 +151,7 @@ func (c *CommandOutput) MustGetReturnCode() (returnCode int) {
 func (c *CommandOutput) MustGetStderr() (stderr *[]byte) {
 	stderr, err := c.GetStderr()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return stderr
@@ -158,7 +160,7 @@ func (c *CommandOutput) MustGetStderr() (stderr *[]byte) {
 func (c *CommandOutput) MustGetStderrAsString() (stdout string) {
 	stdout, err := c.GetStderrAsString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return stdout
@@ -167,7 +169,7 @@ func (c *CommandOutput) MustGetStderrAsString() (stdout string) {
 func (c *CommandOutput) MustGetStdout() (stdout *[]byte) {
 	stdout, err := c.GetStdout()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return stdout
@@ -176,7 +178,7 @@ func (c *CommandOutput) MustGetStdout() (stdout *[]byte) {
 func (c *CommandOutput) MustGetStdoutAsBytes() (stdout []byte) {
 	stdout, err := c.GetStdoutAsBytes()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return stdout
@@ -185,7 +187,7 @@ func (c *CommandOutput) MustGetStdoutAsBytes() (stdout []byte) {
 func (c *CommandOutput) MustGetStdoutAsFloat64() (stdout float64) {
 	stdout, err := c.GetStdoutAsFloat64()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return stdout
@@ -194,7 +196,7 @@ func (c *CommandOutput) MustGetStdoutAsFloat64() (stdout float64) {
 func (c *CommandOutput) MustGetStdoutAsLines(removeLastLineIfEmpty bool) (stdoutLines []string) {
 	stdoutLines, err := c.GetStdoutAsLines(removeLastLineIfEmpty)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return stdoutLines
@@ -203,7 +205,7 @@ func (c *CommandOutput) MustGetStdoutAsLines(removeLastLineIfEmpty bool) (stdout
 func (c *CommandOutput) MustGetStdoutAsString() (stdout string) {
 	stdout, err := c.GetStdoutAsString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return stdout
@@ -212,7 +214,7 @@ func (c *CommandOutput) MustGetStdoutAsString() (stdout string) {
 func (c *CommandOutput) MustIsStderrEmpty() (isEmpty bool) {
 	isEmpty, err := c.IsStderrEmpty()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isEmpty
@@ -221,7 +223,7 @@ func (c *CommandOutput) MustIsStderrEmpty() (isEmpty bool) {
 func (c *CommandOutput) MustIsStdoutAndStderrEmpty() (isEmpty bool) {
 	isEmpty, err := c.IsStdoutAndStderrEmpty()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isEmpty
@@ -230,7 +232,7 @@ func (c *CommandOutput) MustIsStdoutAndStderrEmpty() (isEmpty bool) {
 func (c *CommandOutput) MustIsStdoutEmpty() (isEmpty bool) {
 	isEmpty, err := c.IsStdoutEmpty()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isEmpty
@@ -239,7 +241,7 @@ func (c *CommandOutput) MustIsStdoutEmpty() (isEmpty bool) {
 func (c *CommandOutput) MustIsTimedOut() (IsTimedOut bool) {
 	IsTimedOut, err := c.IsTimedOut()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return IsTimedOut
@@ -248,42 +250,42 @@ func (c *CommandOutput) MustIsTimedOut() (IsTimedOut bool) {
 func (c *CommandOutput) MustLogStdoutAsInfo() {
 	err := c.LogStdoutAsInfo()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandOutput) MustSetReturnCode(returnCode int) {
 	err := c.SetReturnCode(returnCode)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandOutput) MustSetStderr(stderr []byte) {
 	err := c.SetStderr(stderr)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandOutput) MustSetStderrByString(stderr string) {
 	err := c.SetStderrByString(stderr)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandOutput) MustSetStdout(stdout []byte) {
 	err := c.SetStdout(stdout)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandOutput) MustSetStdoutByString(stdout string) {
 	err := c.SetStdoutByString(stdout)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
@@ -291,7 +293,7 @@ func (o *CommandOutput) CheckExitSuccess(verbose bool) (err error) {
 	if o.IsExitSuccess() {
 		return nil
 	} else {
-		return TracedError(
+		return errors.TracedError(
 			"Return code is not exit success",
 		)
 	}
@@ -312,7 +314,7 @@ func (o *CommandOutput) GetCmdRunErrorStringOrEmptyStringIfUnset() (cmdRunErrorS
 
 func (o *CommandOutput) GetReturnCode() (returnCode int, err error) {
 	if o.returnCode == nil {
-		return -1, TracedError("returnCode not set")
+		return -1, errors.TracedError("returnCode not set")
 	}
 
 	return *o.returnCode, nil
@@ -320,7 +322,7 @@ func (o *CommandOutput) GetReturnCode() (returnCode int, err error) {
 
 func (o *CommandOutput) GetStderrAsString() (stderr string, err error) {
 	if o.stderr == nil {
-		return "", TracedError("stderr is not set")
+		return "", errors.TracedError("stderr is not set")
 	}
 
 	if OS().IsRunningOnWindows() {
@@ -346,7 +348,7 @@ func (o *CommandOutput) GetStderrAsStringOrEmptyIfUnset() (stderr string) {
 
 func (o *CommandOutput) GetStdoutAsBytes() (stdout []byte, err error) {
 	if o.stdout == nil {
-		return nil, TracedError("stdout is not set")
+		return nil, errors.TracedError("stdout is not set")
 	}
 
 	return *o.stdout, nil
@@ -366,7 +368,7 @@ func (o *CommandOutput) GetStdoutAsLines(removeLastLineIfEmpty bool) (stdoutLine
 
 func (o *CommandOutput) GetStdoutAsString() (stdout string, err error) {
 	if o.stdout == nil {
-		return "", TracedError("stdout is not set")
+		return "", errors.TracedError("stdout is not set")
 	}
 
 	if OS().IsRunningOnWindows() {

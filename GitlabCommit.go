@@ -4,6 +4,8 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type GitlabCommit struct {
@@ -17,7 +19,7 @@ func NewGitlabCommit() (g *GitlabCommit) {
 
 func (g *GitlabCommit) CreateRelease(createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease, err error) {
 	if createReleaseOptions == nil {
-		return nil, TracedErrorNil("createReleaseOptions")
+		return nil, errors.TracedErrorNil("createReleaseOptions")
 	}
 
 	releaseName, err := createReleaseOptions.GetName()
@@ -45,7 +47,7 @@ func (g *GitlabCommit) CreateRelease(createReleaseOptions *GitlabCreateReleaseOp
 
 func (g *GitlabCommit) CreateTag(createTagOptions *GitlabCreateTagOptions) (createdTag *GitlabTag, err error) {
 	if createTagOptions == nil {
-		return nil, TracedErrorNil("createTagOptions")
+		return nil, errors.TracedErrorNil("createTagOptions")
 	}
 
 	tags, err := g.GetGitlabTags()
@@ -92,7 +94,7 @@ func (g *GitlabCommit) GetAuthorEmail(verbose bool) (authorEmail string, err err
 			return "", err
 		}
 
-		LogInfof(
+		logging.LogInfof(
 			"Gitlab commit '%s' in %s has author email '%s'.",
 			commitHash,
 			projectUrl,
@@ -105,7 +107,7 @@ func (g *GitlabCommit) GetAuthorEmail(verbose bool) (authorEmail string, err err
 
 func (g *GitlabCommit) GetCommitHash() (commitHash string, err error) {
 	if g.commitHash == "" {
-		return "", TracedErrorf("commitHash not set")
+		return "", errors.TracedErrorf("commitHash not set")
 	}
 
 	return g.commitHash, nil
@@ -155,7 +157,7 @@ func (g *GitlabCommit) GetGitlabProjectUrlAsString() (projectUrl string, err err
 
 func (g *GitlabCommit) GetGitlabProjectsCommits() (gitlabProjectsCommit *GitlabProjectCommits, err error) {
 	if g.gitlabProjectsCommits == nil {
-		return nil, TracedErrorf("gitlabProjectsCommit not set")
+		return nil, errors.TracedErrorf("gitlabProjectsCommit not set")
 	}
 
 	return g.gitlabProjectsCommits, nil
@@ -203,7 +205,7 @@ func (g *GitlabCommit) GetParentCommitHashesAsString(verbose bool) (parentCommit
 			return nil, err
 		}
 
-		LogInfof("Commit '%s' has parent commit hashes '%v'.", hash, parentCommitHashes)
+		logging.LogInfof("Commit '%s' has parent commit hashes '%v'.", hash, parentCommitHashes)
 	}
 
 	return parentCommitHashes, nil
@@ -265,7 +267,7 @@ func (g *GitlabCommit) GetRawResponse() (rawResponse *gitlab.Commit, err error) 
 
 	rawResponse, _, err = nativeCommitsService.GetCommit(projectId, hash, &gitlab.GetCommitOptions{})
 	if err != nil {
-		return nil, TracedErrorf("Unable to get commit: %w", err)
+		return nil, errors.TracedErrorf("Unable to get commit: %w", err)
 	}
 
 	return rawResponse, nil
@@ -290,7 +292,7 @@ func (g *GitlabCommit) IsMergeCommit(verbose bool) (isMergeCommit bool, err erro
 		}
 
 		if isMergeCommit {
-			LogInfof(
+			logging.LogInfof(
 				"Commit '%s' of gitlab project %s is a merge commit",
 				projectUrl,
 				commitSha,
@@ -303,7 +305,7 @@ func (g *GitlabCommit) IsMergeCommit(verbose bool) (isMergeCommit bool, err erro
 
 func (g *GitlabCommit) IsParentCommitOf(childCommit *GitlabCommit, verbose bool) (isParent bool, err error) {
 	if childCommit == nil {
-		return false, TracedErrorNil("childCommit")
+		return false, errors.TracedErrorNil("childCommit")
 	}
 
 	parentHashes, err := childCommit.GetParentCommitHashesAsString(verbose)
@@ -333,14 +335,14 @@ func (g *GitlabCommit) IsParentCommitOf(childCommit *GitlabCommit, verbose bool)
 		}
 
 		if isParent {
-			LogInfof(
+			logging.LogInfof(
 				"Commit '%s' is parent of '%s' in gitlab project %s .",
 				hash,
 				childHash,
 				projectUrl,
 			)
 		} else {
-			LogInfof(
+			logging.LogInfof(
 				"Commit '%s' is not parent of '%s' in gitlab project %s .",
 				hash,
 				childHash,
@@ -355,7 +357,7 @@ func (g *GitlabCommit) IsParentCommitOf(childCommit *GitlabCommit, verbose bool)
 func (g *GitlabCommit) MustCreateRelease(createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease) {
 	createdRelease, err := g.CreateRelease(createReleaseOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdRelease
@@ -364,7 +366,7 @@ func (g *GitlabCommit) MustCreateRelease(createReleaseOptions *GitlabCreateRelea
 func (g *GitlabCommit) MustCreateTag(createTagOptions *GitlabCreateTagOptions) (createdTag *GitlabTag) {
 	createdTag, err := g.CreateTag(createTagOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdTag
@@ -373,7 +375,7 @@ func (g *GitlabCommit) MustCreateTag(createTagOptions *GitlabCreateTagOptions) (
 func (g *GitlabCommit) MustGetAuthorEmail(verbose bool) (authorEmail string) {
 	authorEmail, err := g.GetAuthorEmail(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return authorEmail
@@ -382,7 +384,7 @@ func (g *GitlabCommit) MustGetAuthorEmail(verbose bool) (authorEmail string) {
 func (g *GitlabCommit) MustGetCommitHash() (commitHash string) {
 	commitHash, err := g.GetCommitHash()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commitHash
@@ -391,7 +393,7 @@ func (g *GitlabCommit) MustGetCommitHash() (commitHash string) {
 func (g *GitlabCommit) MustGetGitlab() (gitlab *GitlabInstance) {
 	gitlab, err := g.GetGitlab()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlab
@@ -400,7 +402,7 @@ func (g *GitlabCommit) MustGetGitlab() (gitlab *GitlabInstance) {
 func (g *GitlabCommit) MustGetGitlabProject() (gitlabProject *GitlabProject) {
 	gitlabProject, err := g.GetGitlabProject()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabProject
@@ -409,7 +411,7 @@ func (g *GitlabCommit) MustGetGitlabProject() (gitlabProject *GitlabProject) {
 func (g *GitlabCommit) MustGetGitlabProjectUrlAsString() (projectUrl string) {
 	projectUrl, err := g.GetGitlabProjectUrlAsString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectUrl
@@ -418,7 +420,7 @@ func (g *GitlabCommit) MustGetGitlabProjectUrlAsString() (projectUrl string) {
 func (g *GitlabCommit) MustGetGitlabProjectsCommits() (gitlabProjectsCommit *GitlabProjectCommits) {
 	gitlabProjectsCommit, err := g.GetGitlabProjectsCommits()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabProjectsCommit
@@ -427,7 +429,7 @@ func (g *GitlabCommit) MustGetGitlabProjectsCommits() (gitlabProjectsCommit *Git
 func (g *GitlabCommit) MustGetGitlabTags() (gitlabTags *GitlabTags) {
 	gitlabTags, err := g.GetGitlabTags()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabTags
@@ -436,7 +438,7 @@ func (g *GitlabCommit) MustGetGitlabTags() (gitlabTags *GitlabTags) {
 func (g *GitlabCommit) MustGetNativeCommitsService() (nativeCommitsService *gitlab.CommitsService) {
 	nativeCommitsService, err := g.GetNativeCommitsService()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeCommitsService
@@ -445,7 +447,7 @@ func (g *GitlabCommit) MustGetNativeCommitsService() (nativeCommitsService *gitl
 func (g *GitlabCommit) MustGetParentCommitHashesAsString(verbose bool) (parentCommitHashes []string) {
 	parentCommitHashes, err := g.GetParentCommitHashesAsString(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return parentCommitHashes
@@ -454,7 +456,7 @@ func (g *GitlabCommit) MustGetParentCommitHashesAsString(verbose bool) (parentCo
 func (g *GitlabCommit) MustGetParentCommits(verbose bool) (parentCommits []*GitlabCommit) {
 	parentCommits, err := g.GetParentCommits(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return parentCommits
@@ -463,7 +465,7 @@ func (g *GitlabCommit) MustGetParentCommits(verbose bool) (parentCommits []*Gitl
 func (g *GitlabCommit) MustGetProjectId() (projectId int) {
 	projectId, err := g.GetProjectId()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectId
@@ -472,7 +474,7 @@ func (g *GitlabCommit) MustGetProjectId() (projectId int) {
 func (g *GitlabCommit) MustGetRawResponse() (rawResponse *gitlab.Commit) {
 	rawResponse, err := g.GetRawResponse()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return rawResponse
@@ -481,7 +483,7 @@ func (g *GitlabCommit) MustGetRawResponse() (rawResponse *gitlab.Commit) {
 func (g *GitlabCommit) MustIsMergeCommit(verbose bool) (isMergeCommit bool) {
 	isMergeCommit, err := g.IsMergeCommit(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isMergeCommit
@@ -490,7 +492,7 @@ func (g *GitlabCommit) MustIsMergeCommit(verbose bool) (isMergeCommit bool) {
 func (g *GitlabCommit) MustIsParentCommitOf(childCommit *GitlabCommit, verbose bool) (isParent bool) {
 	isParent, err := g.IsParentCommitOf(childCommit, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isParent
@@ -499,20 +501,20 @@ func (g *GitlabCommit) MustIsParentCommitOf(childCommit *GitlabCommit, verbose b
 func (g *GitlabCommit) MustSetCommitHash(commitHash string) {
 	err := g.SetCommitHash(commitHash)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCommit) MustSetGitlabProjectsCommits(gitlabProjectsCommit *GitlabProjectCommits) {
 	err := g.SetGitlabProjectsCommits(gitlabProjectsCommit)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCommit) SetCommitHash(commitHash string) (err error) {
 	if commitHash == "" {
-		return TracedErrorf("commitHash is empty string")
+		return errors.TracedErrorf("commitHash is empty string")
 	}
 
 	g.commitHash = commitHash
@@ -522,7 +524,7 @@ func (g *GitlabCommit) SetCommitHash(commitHash string) (err error) {
 
 func (g *GitlabCommit) SetGitlabProjectsCommits(gitlabProjectsCommit *GitlabProjectCommits) (err error) {
 	if gitlabProjectsCommit == nil {
-		return TracedErrorf("gitlabProjectsCommit is nil")
+		return errors.TracedErrorf("gitlabProjectsCommit is nil")
 	}
 
 	g.gitlabProjectsCommits = gitlabProjectsCommit

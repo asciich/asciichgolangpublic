@@ -6,12 +6,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func TestCommitGetHash(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogWarn("Unavailable in github")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogWarn("Unavailable in github")
 		return
 	}
 
@@ -67,8 +69,8 @@ func TestCommitGetHash(t *testing.T) {
 }
 
 func TestGitlabCommitGetParentCommit(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogWarn("Unavailable in github")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogWarn("Unavailable in github")
 		return
 	}
 
@@ -121,8 +123,8 @@ func TestGitlabCommitGetParentCommit(t *testing.T) {
 }
 
 func TestGitlabCommitGetIsMergeCommit(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogWarn("Unavailable in github")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogWarn("Unavailable in github")
 		return
 	}
 

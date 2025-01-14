@@ -3,6 +3,9 @@ package asciichgolangpublic
 import (
 	"os"
 	"runtime"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type OsService struct{}
@@ -32,11 +35,11 @@ func (o *OsService) GetCurrentWorkingDirectory() (workingDirectory *LocalDirecto
 func (o *OsService) GetCurrentWorkingDirectoryAsString() (workingDirPath string, err error) {
 	workingDirPath, err = os.Getwd()
 	if err != nil {
-		return "", TracedErrorf("Get working directory failed: %w", err)
+		return "", errors.TracedErrorf("Get working directory failed: %w", err)
 	}
 
 	if !Paths().IsAbsolutePath(workingDirPath) {
-		return "", TracedErrorf(
+		return "", errors.TracedErrorf(
 			"Evaluated working directory path '%s' is not an absolute path after evaluation.",
 			workingDirPath,
 		)
@@ -56,7 +59,7 @@ func (o *OsService) IsRunningOnWindows() (isRunningOnWindows bool) {
 func (o *OsService) MustGetCurrentWorkingDirectory() (workingDirectory *LocalDirectory) {
 	workingDirectory, err := o.GetCurrentWorkingDirectory()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return workingDirectory
@@ -65,7 +68,7 @@ func (o *OsService) MustGetCurrentWorkingDirectory() (workingDirectory *LocalDir
 func (o *OsService) MustGetCurrentWorkingDirectoryAsString() (workingDirPath string) {
 	workingDirPath, err := o.GetCurrentWorkingDirectoryAsString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return workingDirPath

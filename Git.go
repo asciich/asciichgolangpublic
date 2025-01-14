@@ -1,6 +1,11 @@
 package asciichgolangpublic
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
 
 type GitService struct {
 }
@@ -15,7 +20,7 @@ func NewGitService() (g *GitService) {
 
 func (g *GitService) GetRepositoryRootPathByPath(path string, verbose bool) (repoRootPath string, err error) {
 	if path == "" {
-		return "", TracedErrorEmptyString("path")
+		return "", errors.TracedErrorEmptyString("path")
 	}
 
 	repoRootPath, err = Bash().RunCommandAndGetStdoutAsString(
@@ -42,14 +47,14 @@ func (g *GitService) GetRepositoryRootPathByPath(path string, verbose bool) (rep
 	}
 
 	if !exists {
-		return "", TracedErrorf(
+		return "", errors.TracedErrorf(
 			"internal error: repoRootDir '%s' points to an non existent path after evaluation",
 			repoRootPath,
 		)
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Found git repository root directory '%s' for local path '%s'.",
 			repoRootPath,
 			path,
@@ -62,7 +67,7 @@ func (g *GitService) GetRepositoryRootPathByPath(path string, verbose bool) (rep
 func (g *GitService) MustGetRepositoryRootPathByPath(path string, verbose bool) (repoRootPath string) {
 	repoRootPath, err := g.GetRepositoryRootPathByPath(path, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return repoRootPath

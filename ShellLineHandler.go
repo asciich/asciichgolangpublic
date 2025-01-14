@@ -6,6 +6,7 @@ import (
 	"github.com/google/shlex"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type ShellLineHandlerService struct {
@@ -46,7 +47,7 @@ func (s *ShellLineHandlerService) Join(command []string) (joinedCommand string, 
 func (s *ShellLineHandlerService) MustJoin(command []string) (joinedCommand string) {
 	joinedCommand, err := s.Join(command)
 	if err != nil {
-		LogFatalf("shellLineHandler.Join failed: '%v'", err)
+		logging.LogFatalf("shellLineHandler.Join failed: '%v'", err)
 	}
 
 	return joinedCommand
@@ -55,7 +56,7 @@ func (s *ShellLineHandlerService) MustJoin(command []string) (joinedCommand stri
 func (s *ShellLineHandlerService) MustSplit(command string) (splittedCommand []string) {
 	splittedCommand, err := s.Split(command)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return splittedCommand

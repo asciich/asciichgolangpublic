@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type DirectoriesService struct {
 }
 
@@ -13,7 +18,7 @@ func NewDirectoriesService() (d *DirectoriesService) {
 
 func (d *DirectoriesService) CreateLocalDirectoryByPath(path string, verbose bool) (l Directory, err error) {
 	if path == "" {
-		return nil, TracedErrorEmptyString("path")
+		return nil, errors.TracedErrorEmptyString("path")
 	}
 
 	dir, err := GetLocalDirectoryByPath(path)
@@ -32,7 +37,7 @@ func (d *DirectoriesService) CreateLocalDirectoryByPath(path string, verbose boo
 func (d *DirectoriesService) MustCreateLocalDirectoryByPath(path string, verbose bool) (l Directory) {
 	l, err := d.CreateLocalDirectoryByPath(path, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return l

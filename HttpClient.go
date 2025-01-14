@@ -3,6 +3,9 @@ package asciichgolangpublic
 import (
 	"net/http"
 	"os"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type HttpClientService struct{}
@@ -19,7 +22,7 @@ func NewHttpClientService() (h *HttpClientService) {
 
 func (h *HttpClientService) DownloadAsFile(requestOptions *HttpRequestOptions) (downloadedFile File, err error) {
 	if requestOptions == nil {
-		return nil, TracedErrorNil("requestOptions")
+		return nil, errors.TracedErrorNil("requestOptions")
 	}
 
 	url, err := requestOptions.GetUrlAsString()
@@ -44,7 +47,7 @@ func (h *HttpClientService) DownloadAsFile(requestOptions *HttpRequestOptions) (
 	}
 
 	if requestOptions.OverwriteExisting {
-		LogInfof("Going to ensure '%s' is absent before download starts", outputFilePath)
+		logging.LogInfof("Going to ensure '%s' is absent before download starts", outputFilePath)
 		err = downloadedFile.Delete(requestOptions.Verbose)
 		if err != nil {
 			return nil, err
@@ -52,18 +55,18 @@ func (h *HttpClientService) DownloadAsFile(requestOptions *HttpRequestOptions) (
 	}
 
 	if requestOptions.Verbose {
-		LogInfof("Going to download: '%v' as file '%v'.", url, outputFilePath)
+		logging.LogInfof("Going to download: '%v' as file '%v'.", url, outputFilePath)
 	}
 
 	outFd, err := os.Create(outputFilePath)
 	if err != nil {
-		return nil, TracedError(err.Error())
+		return nil, errors.TracedError(err.Error())
 	}
 	defer outFd.Close()
 	outFd.ReadFrom(request.Body)
 
 	if requestOptions.Verbose {
-		LogInfof("Downloaded '%v' as file '%v'.", url, outputFilePath)
+		logging.LogInfof("Downloaded '%v' as file '%v'.", url, outputFilePath)
 	}
 
 	return downloadedFile, nil
@@ -71,7 +74,7 @@ func (h *HttpClientService) DownloadAsFile(requestOptions *HttpRequestOptions) (
 
 func (h *HttpClientService) DownloadAsTemporaryFile(requestOptions *HttpRequestOptions) (downloadedFile File, err error) {
 	if requestOptions == nil {
-		return nil, TracedErrorNil("requestOptions")
+		return nil, errors.TracedErrorNil("requestOptions")
 	}
 
 	requestOptionsToUse := requestOptions.GetDeepCopy()
@@ -102,7 +105,7 @@ func (h *HttpClientService) DownloadAsTemporaryFile(requestOptions *HttpRequestO
 func (h *HttpClientService) MustDownloadAsFile(requestOptions *HttpRequestOptions) (downloadedFile File) {
 	downloadedFile, err := h.DownloadAsFile(requestOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return downloadedFile
@@ -111,7 +114,7 @@ func (h *HttpClientService) MustDownloadAsFile(requestOptions *HttpRequestOption
 func (h *HttpClientService) MustDownloadAsTemporaryFile(requestOptions *HttpRequestOptions) (downloadedFile File) {
 	downloadedFile, err := h.DownloadAsTemporaryFile(requestOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return downloadedFile

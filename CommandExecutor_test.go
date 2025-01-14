@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func getCommandExecutorByImplementationName(implementationName string) (commandExecutor CommandExecutor) {
@@ -15,7 +16,7 @@ func getCommandExecutorByImplementationName(implementationName string) (commandE
 		return Exec()
 	}
 
-	LogFatalf("Unnown implementation name: '%s'", implementationName)
+	logging.LogFatalf("Unnown implementation name: '%s'", implementationName)
 
 	return nil
 }

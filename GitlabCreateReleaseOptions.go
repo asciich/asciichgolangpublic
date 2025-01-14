@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type GitlabCreateReleaseOptions struct {
 	Name        string
 	Description string
@@ -12,7 +17,7 @@ func NewGitlabCreateReleaseOptions() (g *GitlabCreateReleaseOptions) {
 
 func (g *GitlabCreateReleaseOptions) GetDescription() (description string, err error) {
 	if g.Description == "" {
-		return "", TracedErrorf("Description not set")
+		return "", errors.TracedErrorf("Description not set")
 	}
 
 	return g.Description, nil
@@ -20,7 +25,7 @@ func (g *GitlabCreateReleaseOptions) GetDescription() (description string, err e
 
 func (g *GitlabCreateReleaseOptions) GetName() (name string, err error) {
 	if g.Name == "" {
-		return "", TracedErrorf("Name not set")
+		return "", errors.TracedErrorf("Name not set")
 	}
 
 	return g.Name, nil
@@ -34,7 +39,7 @@ func (g *GitlabCreateReleaseOptions) GetVerbose() (verbose bool) {
 func (g *GitlabCreateReleaseOptions) MustGetDescription() (description string) {
 	description, err := g.GetDescription()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return description
@@ -43,7 +48,7 @@ func (g *GitlabCreateReleaseOptions) MustGetDescription() (description string) {
 func (g *GitlabCreateReleaseOptions) MustGetName() (name string) {
 	name, err := g.GetName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -52,20 +57,20 @@ func (g *GitlabCreateReleaseOptions) MustGetName() (name string) {
 func (g *GitlabCreateReleaseOptions) MustSetDescription(description string) {
 	err := g.SetDescription(description)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCreateReleaseOptions) MustSetName(name string) {
 	err := g.SetName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCreateReleaseOptions) SetDescription(description string) (err error) {
 	if description == "" {
-		return TracedErrorf("description is empty string")
+		return errors.TracedErrorf("description is empty string")
 	}
 
 	g.Description = description
@@ -75,7 +80,7 @@ func (g *GitlabCreateReleaseOptions) SetDescription(description string) (err err
 
 func (g *GitlabCreateReleaseOptions) SetName(name string) (err error) {
 	if name == "" {
-		return TracedErrorf("name is empty string")
+		return errors.TracedErrorf("name is empty string")
 	}
 
 	g.Name = name

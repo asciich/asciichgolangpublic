@@ -1,20 +1,25 @@
-package asciichgolangpublic
+package logging
 
 import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
+
+	"github.com/asciich/asciichgolangpublic/changesummary"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/shell/terminalcolors"
 )
 
 var globalLogSettings LogSettings
 var globalLoggers []*log.Logger
 
-func EnableLoggingToUsersHome(applicationName string, verbose bool) (logFile File, err error) {
+func EnableLoggingToUsersHome(applicationName string, verbose bool) (logFilePath string, err error) {
+	return "", errors.TracedErrorNotImplemented()
+	/* TODO enable again
 	applicationName = strings.TrimSpace(applicationName)
 
 	if applicationName == "" {
-		return nil, TracedErrorEmptyString("applicationName")
+		return nil, errors.TracedErrorEmptyString("applicationName")
 	}
 
 	homeDir, err := Users().GetHomeDirectory()
@@ -64,10 +69,11 @@ func EnableLoggingToUsersHome(applicationName string, verbose bool) (logFile Fil
 	globalLoggers = append(globalLoggers, loggerToAdd)
 
 	if verbose {
-		LogInfof("All logs are now written to the log file '%s'.", logFilePath)
+		logging.LogInfof("All logs are now written to the log file '%s'.", logFilePath)
 	}
 
 	return logFile, nil
+	*/
 }
 
 func Log(logmessage string) {
@@ -82,7 +88,7 @@ func LogBold(logmessage string) {
 	Log(logmessage)
 }
 
-func LogByChangeSummary(changeSummary *ChangeSummary, message string) {
+func LogByChangeSummary(changeSummary *changesummary.ChangeSummary, message string) {
 	isChanged := false
 
 	if changeSummary != nil {
@@ -96,7 +102,7 @@ func LogByChangeSummary(changeSummary *ChangeSummary, message string) {
 	}
 }
 
-func LogByChangeSummaryf(changeSummary *ChangeSummary, message string, args ...interface{}) {
+func LogByChangeSummaryf(changeSummary *changesummary.ChangeSummary, message string, args ...interface{}) {
 	formattedMessage := fmt.Sprintf(message, args...)
 
 	LogByChangeSummary(changeSummary, formattedMessage)
@@ -104,7 +110,7 @@ func LogByChangeSummaryf(changeSummary *ChangeSummary, message string, args ...i
 
 func LogChanged(logmessage string) {
 	if globalLogSettings.IsColorEnabled() {
-		logmessage = TerminalColors().GetCodeMangenta() + logmessage + TerminalColors().GetCodeNoColor()
+		logmessage = terminalcolors.GetCodeMangenta() + logmessage + terminalcolors.GetCodeNoColor()
 	}
 	Log(logmessage)
 }
@@ -116,7 +122,7 @@ func LogChangedf(logmessage string, args ...interface{}) {
 
 func LogError(logmessage string) {
 	if globalLogSettings.IsColorEnabled() {
-		logmessage = TerminalColors().GetCodeRed() + logmessage + TerminalColors().GetCodeNoColor()
+		logmessage = terminalcolors.GetCodeRed() + logmessage + terminalcolors.GetCodeNoColor()
 	}
 	Log(logmessage)
 }
@@ -128,14 +134,14 @@ func LogErrorf(logmessage string, args ...interface{}) {
 
 func LogFatal(logmessage string) {
 	if globalLogSettings.IsColorEnabled() {
-		logmessage = TerminalColors().GetCodeRed() + logmessage + TerminalColors().GetCodeNoColor()
+		logmessage = terminalcolors.GetCodeRed() + logmessage + terminalcolors.GetCodeNoColor()
 	}
 	Log(logmessage)
 	os.Exit(1)
 }
 
 func LogFatalWithTrace(errorMessageOrError interface{}) {
-	LogGoErrorFatal(TracedError(errorMessageOrError))
+	LogGoErrorFatal(errors.TracedError(errorMessageOrError))
 }
 
 func LogFatalWithTracef(logmessage string, args ...interface{}) {
@@ -157,12 +163,12 @@ func LogGoErrorFatal(err error) {
 }
 
 func LogGoErrorFatalWithTrace(err error) {
-	LogGoErrorFatal(TracedErrorf("%v", err))
+	LogGoErrorFatal(errors.TracedErrorf("%v", err))
 }
 
 func LogGood(logmessage string) {
 	if globalLogSettings.IsColorEnabled() {
-		logmessage = TerminalColors().GetCodeGreen() + logmessage + TerminalColors().GetCodeNoColor()
+		logmessage = terminalcolors.GetCodeGreen() + logmessage + terminalcolors.GetCodeNoColor()
 	}
 	LogInfo(logmessage)
 }
@@ -191,7 +197,7 @@ func LogTurnOnColorOutput() {
 
 func LogWarn(logmessage string) {
 	if globalLogSettings.IsColorEnabled() {
-		logmessage = TerminalColors().GetCodeYellow() + logmessage + TerminalColors().GetCodeNoColor()
+		logmessage = terminalcolors.GetCodeYellow() + logmessage + terminalcolors.GetCodeNoColor()
 	}
 	Log(logmessage)
 }
@@ -201,11 +207,15 @@ func LogWarnf(logmessage string, args ...interface{}) {
 	LogWarn(message)
 }
 
-func MustEnableLoggingToUsersHome(applicationName string, verbose bool) (logFile File) {
-	logFile, err := EnableLoggingToUsersHome(applicationName, verbose)
-	if err != nil {
-		LogGoErrorFatal(err)
-	}
+func MustEnableLoggingToUsersHome(applicationName string, verbose bool) (logFilePath string) {
+	LogFatalWithTrace("NotImplemented")
+	/*
+		logFile, err := EnableLoggingToUsersHome(applicationName, verbose)
+		if err != nil {
+			logging.LogGoErrorFatal(err)
+		}
 
-	return logFile
+		return logFile
+	*/
+	return ""
 }

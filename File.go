@@ -3,6 +3,10 @@ package asciichgolangpublic
 import (
 	"os"
 	"time"
+
+	"github.com/asciich/asciichgolangpublic/changesummary"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 // A File represents any kind of file regardless if a local file or a remote file.
@@ -113,7 +117,7 @@ type File interface {
 	MustReadFirstNBytes(numberOfBytesToRead int) (firstBytes []byte)
 	MustRemoveLinesWithPrefix(prefix string, verbose bool)
 	MustReplaceBetweenMarkers(verbose bool)
-	MustReplaceLineAfterLine(lineToFind string, replaceLineAfterWith string, verbose bool) (changeSummary *ChangeSummary)
+	MustReplaceLineAfterLine(lineToFind string, replaceLineAfterWith string, verbose bool) (changeSummary *changesummary.ChangeSummary)
 	MustSortBlocksInFile(verbose bool)
 	MustTrimSpacesAtBeginningOfFile(verbose bool)
 	MustWriteInt64(toWrite int64, verbose bool)
@@ -135,7 +139,7 @@ type File interface {
 	ReadLastCharAsString() (lastChar string, err error)
 	RemoveLinesWithPrefix(prefix string, verbose bool) (err error)
 	ReplaceBetweenMarkers(verbose bool) (err error)
-	ReplaceLineAfterLine(lineToFind string, replaceLineAfterWith string, verbose bool) (changeSummary *ChangeSummary, err error)
+	ReplaceLineAfterLine(lineToFind string, replaceLineAfterWith string, verbose bool) (changeSummary *changesummary.ChangeSummary, err error)
 	SortBlocksInFile(verbose bool) (err error)
 	TrimSpacesAtBeginningOfFile(verbose bool) (err error)
 	WriteInt64(toWrite int64, verboe bool) (err error)
@@ -146,7 +150,7 @@ type File interface {
 
 func GetFileByOsFile(osFile *os.File) (file File, err error) {
 	if osFile == nil {
-		return nil, TracedError("osFile is nil")
+		return nil, errors.TracedError("osFile is nil")
 	}
 
 	file, err = NewLocalFileByPath(osFile.Name())
@@ -160,7 +164,7 @@ func GetFileByOsFile(osFile *os.File) (file File, err error) {
 func MustGetFileByOsFile(osFile *os.File) (file File) {
 	file, err := GetFileByOsFile(osFile)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return file

@@ -3,8 +3,10 @@ package asciichgolangpublic
 import (
 	"time"
 
-	gitlab "gitlab.com/gitlab-org/api/client-go"
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
 type GitlabMergeRequest struct {
@@ -21,7 +23,7 @@ func NewGitlabMergeRequest() (g *GitlabMergeRequest) {
 
 func (g *GitlabMergeRequest) GetCachedSourceBranchName() (cachedSourceBranchName string, err error) {
 	if g.cachedSourceBranchName == "" {
-		return "", TracedErrorf("cachedSourceBranchName not set")
+		return "", errors.TracedErrorf("cachedSourceBranchName not set")
 	}
 
 	return g.cachedSourceBranchName, nil
@@ -29,7 +31,7 @@ func (g *GitlabMergeRequest) GetCachedSourceBranchName() (cachedSourceBranchName
 
 func (g *GitlabMergeRequest) GetCachedTargetBranchName() (cachedTargetBranchName string, err error) {
 	if g.cachedTargetBranchName == "" {
-		return "", TracedErrorf("cachedTargetBranchName not set")
+		return "", errors.TracedErrorf("cachedTargetBranchName not set")
 	}
 
 	return g.cachedTargetBranchName, nil
@@ -37,7 +39,7 @@ func (g *GitlabMergeRequest) GetCachedTargetBranchName() (cachedTargetBranchName
 
 func (g *GitlabMergeRequest) GetCachedTitle() (cachedTitle string, err error) {
 	if g.cachedTitle == "" {
-		return "", TracedErrorf("cachedTitle not set")
+		return "", errors.TracedErrorf("cachedTitle not set")
 	}
 
 	return g.cachedTitle, nil
@@ -64,14 +66,14 @@ func (g *GitlabMergeRequest) GetDetailedMergeStatus(verbose bool) (mergeStatus s
 	url := rawResponse.WebURL
 
 	if mergeStatus == "" {
-		return "", TracedErrorf(
+		return "", errors.TracedErrorf(
 			"mergeStatus is empty string after evaluation for merge request %s .",
 			url,
 		)
 	}
 
 	if verbose {
-		LogInfof("Merge request %s has detailed merge status '%s'", url, mergeStatus)
+		logging.LogInfof("Merge request %s has detailed merge status '%s'", url, mergeStatus)
 	}
 
 	return mergeStatus, nil
@@ -93,7 +95,7 @@ func (g *GitlabMergeRequest) GetGitlabProject() (gitlabProject *GitlabProject, e
 
 func (g *GitlabMergeRequest) GetGitlabProjectMergeRequests() (gitlabProjectMergeRequests *GitlabProjectMergeRequests, err error) {
 	if g.gitlabProjectMergeRequests == nil {
-		return nil, TracedErrorf("gitlabProjectMergeRequests not set")
+		return nil, errors.TracedErrorf("gitlabProjectMergeRequests not set")
 	}
 
 	return g.gitlabProjectMergeRequests, nil
@@ -101,7 +103,7 @@ func (g *GitlabMergeRequest) GetGitlabProjectMergeRequests() (gitlabProjectMerge
 
 func (g *GitlabMergeRequest) GetId() (id int, err error) {
 	if g.id <= 0 {
-		return -1, TracedError("Id not set")
+		return -1, errors.TracedError("Id not set")
 	}
 
 	return g.id, nil
@@ -115,7 +117,7 @@ func (g *GitlabMergeRequest) GetLabels() (labels []string, err error) {
 
 	labels = rawResponse.Labels
 	if labels == nil {
-		return nil, TracedError("labels is nil after evaluation")
+		return nil, errors.TracedError("labels is nil after evaluation")
 	}
 
 	labels = aslices.SortStringSlice(labels)
@@ -156,14 +158,14 @@ func (g *GitlabMergeRequest) GetMergeCommitSha(verbose bool) (mergeCommitSha str
 	}
 
 	if mergeCommitSha == "" {
-		return "", TracedErrorf(
+		return "", errors.TracedErrorf(
 			"No merge commit sha found for %s . Is merge request already merged?",
 			mergeRequestUrl,
 		)
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Merge request %s is merged and the merge commit is '%s'.",
 			mergeRequestUrl,
 			mergeCommitSha,
@@ -237,7 +239,7 @@ func (g *GitlabMergeRequest) GetRawResponse() (rawResponse *gitlab.MergeRequest,
 		&gitlab.GetMergeRequestsOptions{},
 	)
 	if err != nil {
-		return nil, TracedErrorf(
+		return nil, errors.TracedErrorf(
 			"Failed to get raw response for merge request id='%d' of gitlab projectId='%d': '%w'",
 			id,
 			projectId,
@@ -246,7 +248,7 @@ func (g *GitlabMergeRequest) GetRawResponse() (rawResponse *gitlab.MergeRequest,
 	}
 
 	if rawResponse == nil {
-		return nil, TracedError("rawResponse is nil after evaluation.")
+		return nil, errors.TracedError("rawResponse is nil after evaluation.")
 	}
 
 	return rawResponse, nil
@@ -260,7 +262,7 @@ func (g *GitlabMergeRequest) GetSourceBranchName() (sourceBranchName string, err
 
 	sourceBranchName = rawResponse.SourceBranch
 	if sourceBranchName == "" {
-		return "", TracedError(
+		return "", errors.TracedError(
 			"sourceBranchName is empty string after evaluation",
 		)
 	}
@@ -277,7 +279,7 @@ func (g *GitlabMergeRequest) GetTargetBranchName() (targetBranchName string, err
 	targetBranchName = rawResponse.TargetBranch
 
 	if targetBranchName == "" {
-		return "", TracedError("TargetBranchName is empty string after evaluation")
+		return "", errors.TracedError("TargetBranchName is empty string after evaluation")
 	}
 
 	return targetBranchName, nil
@@ -292,7 +294,7 @@ func (g *GitlabMergeRequest) GetUrlAsString() (url string, err error) {
 	url = rawResponse.WebURL
 
 	if url == "" {
-		return "", TracedError("url is empty string after evaluation")
+		return "", errors.TracedError("url is empty string after evaluation")
 	}
 
 	return url, nil
@@ -339,7 +341,7 @@ func (g *GitlabMergeRequest) IsOpen() (isOpen bool, err error) {
 
 func (g *GitlabMergeRequest) Merge(options *GitlabMergeOptions) (mergeCommit *GitlabCommit, err error) {
 	if options == nil {
-		return nil, TracedErrorNil("options")
+		return nil, errors.TracedErrorNil("options")
 	}
 
 	isMerged, err := g.IsMerged()
@@ -364,7 +366,7 @@ func (g *GitlabMergeRequest) Merge(options *GitlabMergeOptions) (mergeCommit *Gi
 		}
 
 		if options.Verbose {
-			LogInfof(
+			logging.LogInfof(
 				"Merge reqeuest %s is already merged. Merge Commit is '%s'.",
 				mergeRequestUrl,
 				mergeCommitHash,
@@ -395,7 +397,7 @@ func (g *GitlabMergeRequest) Merge(options *GitlabMergeOptions) (mergeCommit *Gi
 		}
 
 		if options.Verbose {
-			LogInfof("Going to merge %s .", mergeRequestUrl)
+			logging.LogInfof("Going to merge %s .", mergeRequestUrl)
 		}
 
 		nativeMergeRequest, _, err := nativeMergeRequestsService.AcceptMergeRequest(
@@ -404,12 +406,12 @@ func (g *GitlabMergeRequest) Merge(options *GitlabMergeOptions) (mergeCommit *Gi
 			&gitlab.AcceptMergeRequestOptions{},
 		)
 		if err != nil {
-			return nil, TracedErrorf("Merging merge request %s failed: %w", mergeRequestUrl, err)
+			return nil, errors.TracedErrorf("Merging merge request %s failed: %w", mergeRequestUrl, err)
 		}
 
 		mergedCommitSha := nativeMergeRequest.MergeCommitSHA
 		if mergedCommitSha == "" {
-			return nil, TracedErrorf("mergedCommitSha is empty string after merging '%s'", mergeRequestUrl)
+			return nil, errors.TracedErrorf("mergedCommitSha is empty string after merging '%s'", mergeRequestUrl)
 		}
 
 		gitlabProject, err := g.GetProject()
@@ -423,7 +425,7 @@ func (g *GitlabMergeRequest) Merge(options *GitlabMergeOptions) (mergeCommit *Gi
 		}
 
 		if options.Verbose {
-			LogChangedf(
+			logging.LogChangedf(
 				"Merged %s . Merge commit is '%s'.",
 				mergeRequestUrl,
 				mergedCommitSha,
@@ -436,7 +438,7 @@ func (g *GitlabMergeRequest) Merge(options *GitlabMergeOptions) (mergeCommit *Gi
 
 func (g *GitlabMergeRequest) MustClose(closeMessage string, verbose bool) (err error) {
 	if closeMessage == "" {
-		return TracedErrorEmptyString("closeMessage")
+		return errors.TracedErrorEmptyString("closeMessage")
 	}
 
 	nativeService, err := g.GetNativeMergeRequestsService()
@@ -466,7 +468,7 @@ func (g *GitlabMergeRequest) MustClose(closeMessage string, verbose bool) (err e
 
 	if isClosed {
 		if verbose {
-			LogInfof("Merge request %s is already closed.", url)
+			logging.LogInfof("Merge request %s is already closed.", url)
 		}
 	} else {
 		stateEvent := "close"
@@ -479,11 +481,11 @@ func (g *GitlabMergeRequest) MustClose(closeMessage string, verbose bool) (err e
 			},
 		)
 		if err != nil {
-			return TracedErrorf("Update merge request failed: '%w'", err)
+			return errors.TracedErrorf("Update merge request failed: '%w'", err)
 		}
 
 		if verbose {
-			LogChangedf("Closed merge request %s", url)
+			logging.LogChangedf("Closed merge request %s", url)
 		}
 	}
 
@@ -493,7 +495,7 @@ func (g *GitlabMergeRequest) MustClose(closeMessage string, verbose bool) (err e
 func (g *GitlabMergeRequest) MustGetCachedSourceBranchName() (cachedSourceBranchName string) {
 	cachedSourceBranchName, err := g.GetCachedSourceBranchName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return cachedSourceBranchName
@@ -502,7 +504,7 @@ func (g *GitlabMergeRequest) MustGetCachedSourceBranchName() (cachedSourceBranch
 func (g *GitlabMergeRequest) MustGetCachedTargetBranchName() (cachedTargetBranchName string) {
 	cachedTargetBranchName, err := g.GetCachedTargetBranchName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return cachedTargetBranchName
@@ -511,7 +513,7 @@ func (g *GitlabMergeRequest) MustGetCachedTargetBranchName() (cachedTargetBranch
 func (g *GitlabMergeRequest) MustGetCachedTitle() (cachedTitle string) {
 	cachedTitle, err := g.GetCachedTitle()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return cachedTitle
@@ -520,7 +522,7 @@ func (g *GitlabMergeRequest) MustGetCachedTitle() (cachedTitle string) {
 func (g *GitlabMergeRequest) MustGetDescription() (description string) {
 	description, err := g.GetDescription()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return description
@@ -529,7 +531,7 @@ func (g *GitlabMergeRequest) MustGetDescription() (description string) {
 func (g *GitlabMergeRequest) MustGetDetailedMergeStatus(verbose bool) (mergeStatus string) {
 	mergeStatus, err := g.GetDetailedMergeStatus(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return mergeStatus
@@ -538,7 +540,7 @@ func (g *GitlabMergeRequest) MustGetDetailedMergeStatus(verbose bool) (mergeStat
 func (g *GitlabMergeRequest) MustGetGitlabMergeRequests() (gitlabMergeRequests *GitlabProjectMergeRequests) {
 	gitlabMergeRequests, err := g.GetGitlabProjectMergeRequests()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabMergeRequests
@@ -547,7 +549,7 @@ func (g *GitlabMergeRequest) MustGetGitlabMergeRequests() (gitlabMergeRequests *
 func (g *GitlabMergeRequest) MustGetGitlabProject() (gitlabProject *GitlabProject) {
 	gitlabProject, err := g.GetGitlabProject()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabProject
@@ -556,7 +558,7 @@ func (g *GitlabMergeRequest) MustGetGitlabProject() (gitlabProject *GitlabProjec
 func (g *GitlabMergeRequest) MustGetGitlabProjectMergeRequests() (gitlabProjectMergeRequests *GitlabProjectMergeRequests) {
 	gitlabProjectMergeRequests, err := g.GetGitlabProjectMergeRequests()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabProjectMergeRequests
@@ -565,7 +567,7 @@ func (g *GitlabMergeRequest) MustGetGitlabProjectMergeRequests() (gitlabProjectM
 func (g *GitlabMergeRequest) MustGetId() (id int) {
 	id, err := g.GetId()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return id
@@ -574,7 +576,7 @@ func (g *GitlabMergeRequest) MustGetId() (id int) {
 func (g *GitlabMergeRequest) MustGetLabels() (labels []string) {
 	labels, err := g.GetLabels()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return labels
@@ -583,7 +585,7 @@ func (g *GitlabMergeRequest) MustGetLabels() (labels []string) {
 func (g *GitlabMergeRequest) MustGetMergeCommit(verbose bool) (mergeCommit *GitlabCommit) {
 	mergeCommit, err := g.GetMergeCommit(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return mergeCommit
@@ -592,7 +594,7 @@ func (g *GitlabMergeRequest) MustGetMergeCommit(verbose bool) (mergeCommit *Gitl
 func (g *GitlabMergeRequest) MustGetMergeCommitSha(verbose bool) (mergeCommitSha string) {
 	mergeCommitSha, err := g.GetMergeCommitSha(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return mergeCommitSha
@@ -601,7 +603,7 @@ func (g *GitlabMergeRequest) MustGetMergeCommitSha(verbose bool) (mergeCommitSha
 func (g *GitlabMergeRequest) MustGetNativeMergeRequestsService() (nativeService *gitlab.MergeRequestsService) {
 	nativeService, err := g.GetNativeMergeRequestsService()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeService
@@ -610,7 +612,7 @@ func (g *GitlabMergeRequest) MustGetNativeMergeRequestsService() (nativeService 
 func (g *GitlabMergeRequest) MustGetProject() (project *GitlabProject) {
 	project, err := g.GetProject()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return project
@@ -619,7 +621,7 @@ func (g *GitlabMergeRequest) MustGetProject() (project *GitlabProject) {
 func (g *GitlabMergeRequest) MustGetProjectId() (projectId int) {
 	projectId, err := g.GetProjectId()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectId
@@ -628,7 +630,7 @@ func (g *GitlabMergeRequest) MustGetProjectId() (projectId int) {
 func (g *GitlabMergeRequest) MustGetRawResponse() (rawResponse *gitlab.MergeRequest) {
 	rawResponse, err := g.GetRawResponse()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return rawResponse
@@ -637,7 +639,7 @@ func (g *GitlabMergeRequest) MustGetRawResponse() (rawResponse *gitlab.MergeRequ
 func (g *GitlabMergeRequest) MustGetSourceBranchName() (sourceBranchName string) {
 	sourceBranchName, err := g.GetSourceBranchName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sourceBranchName
@@ -646,7 +648,7 @@ func (g *GitlabMergeRequest) MustGetSourceBranchName() (sourceBranchName string)
 func (g *GitlabMergeRequest) MustGetTargetBranchName() (targetBranchName string) {
 	targetBranchName, err := g.GetTargetBranchName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return targetBranchName
@@ -655,7 +657,7 @@ func (g *GitlabMergeRequest) MustGetTargetBranchName() (targetBranchName string)
 func (g *GitlabMergeRequest) MustGetUrlAsString() (url string) {
 	url, err := g.GetUrlAsString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return url
@@ -664,7 +666,7 @@ func (g *GitlabMergeRequest) MustGetUrlAsString() (url string) {
 func (g *GitlabMergeRequest) MustIsClosed() (isClosed bool) {
 	isClosed, err := g.IsClosed()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isClosed
@@ -673,7 +675,7 @@ func (g *GitlabMergeRequest) MustIsClosed() (isClosed bool) {
 func (g *GitlabMergeRequest) MustIsMerged() (isMerged bool) {
 	isMerged, err := g.IsMerged()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isMerged
@@ -682,7 +684,7 @@ func (g *GitlabMergeRequest) MustIsMerged() (isMerged bool) {
 func (g *GitlabMergeRequest) MustIsOpen() (isOpen bool) {
 	isOpen, err := g.IsOpen()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isOpen
@@ -691,7 +693,7 @@ func (g *GitlabMergeRequest) MustIsOpen() (isOpen bool) {
 func (g *GitlabMergeRequest) MustMerge(options *GitlabMergeOptions) (mergeCommit *GitlabCommit) {
 	mergeCommit, err := g.Merge(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return mergeCommit
@@ -700,48 +702,48 @@ func (g *GitlabMergeRequest) MustMerge(options *GitlabMergeOptions) (mergeCommit
 func (g *GitlabMergeRequest) MustSetCachedSourceBranchName(cachedSourceBranchName string) {
 	err := g.SetCachedSourceBranchName(cachedSourceBranchName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabMergeRequest) MustSetCachedTargetBranchName(cachedTargetBranchName string) {
 	err := g.SetCachedTargetBranchName(cachedTargetBranchName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabMergeRequest) MustSetCachedTitle(cachedTitle string) {
 	err := g.SetCachedTitle(cachedTitle)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabMergeRequest) MustSetGitlabProjectMergeRequests(gitlabProjectMergeRequests *GitlabProjectMergeRequests) {
 	err := g.SetGitlabProjectMergeRequests(gitlabProjectMergeRequests)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabMergeRequest) MustSetId(id int) {
 	err := g.SetId(id)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabMergeRequest) MustWaitUntilDetailedMergeStatusIsNotChecking(verbose bool) {
 	err := g.WaitUntilDetailedMergeStatusIsNotChecking(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabMergeRequest) SetCachedSourceBranchName(cachedSourceBranchName string) (err error) {
 	if cachedSourceBranchName == "" {
-		return TracedErrorf("cachedSourceBranchName is empty string")
+		return errors.TracedErrorf("cachedSourceBranchName is empty string")
 	}
 
 	g.cachedSourceBranchName = cachedSourceBranchName
@@ -751,7 +753,7 @@ func (g *GitlabMergeRequest) SetCachedSourceBranchName(cachedSourceBranchName st
 
 func (g *GitlabMergeRequest) SetCachedTargetBranchName(cachedTargetBranchName string) (err error) {
 	if cachedTargetBranchName == "" {
-		return TracedErrorf("cachedTargetBranchName is empty string")
+		return errors.TracedErrorf("cachedTargetBranchName is empty string")
 	}
 
 	g.cachedTargetBranchName = cachedTargetBranchName
@@ -761,7 +763,7 @@ func (g *GitlabMergeRequest) SetCachedTargetBranchName(cachedTargetBranchName st
 
 func (g *GitlabMergeRequest) SetCachedTitle(cachedTitle string) (err error) {
 	if cachedTitle == "" {
-		return TracedErrorf("cachedTitle is empty string")
+		return errors.TracedErrorf("cachedTitle is empty string")
 	}
 
 	g.cachedTitle = cachedTitle
@@ -771,7 +773,7 @@ func (g *GitlabMergeRequest) SetCachedTitle(cachedTitle string) (err error) {
 
 func (g *GitlabMergeRequest) SetGitlabProjectMergeRequests(gitlabProjectMergeRequests *GitlabProjectMergeRequests) (err error) {
 	if gitlabProjectMergeRequests == nil {
-		return TracedErrorf("gitlabProjectMergeRequests is nil")
+		return errors.TracedErrorf("gitlabProjectMergeRequests is nil")
 	}
 
 	g.gitlabProjectMergeRequests = gitlabProjectMergeRequests
@@ -781,7 +783,7 @@ func (g *GitlabMergeRequest) SetGitlabProjectMergeRequests(gitlabProjectMergeReq
 
 func (g *GitlabMergeRequest) SetId(id int) (err error) {
 	if id <= 0 {
-		return TracedErrorf("Invalid value '%d' for id", id)
+		return errors.TracedErrorf("Invalid value '%d' for id", id)
 	}
 
 	g.id = id
@@ -803,7 +805,7 @@ func (g *GitlabMergeRequest) WaitUntilDetailedMergeStatusIsNotChecking(verbose b
 
 		if mergeStatus == "checking" {
 			if verbose {
-				LogInfof("Waiting for merge request %s to finish status 'checking'.", mergeRequestUrl)
+				logging.LogInfof("Waiting for merge request %s to finish status 'checking'.", mergeRequestUrl)
 			}
 
 			time.Sleep(200 * time.Millisecond)
@@ -814,7 +816,7 @@ func (g *GitlabMergeRequest) WaitUntilDetailedMergeStatusIsNotChecking(verbose b
 	}
 
 	if verbose {
-		LogInfof("Merge request %s is not in status 'checking'.", mergeRequestUrl)
+		logging.LogInfof("Merge request %s is not in status 'checking'.", mergeRequestUrl)
 	}
 
 	return nil

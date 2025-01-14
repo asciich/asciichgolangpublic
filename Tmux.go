@@ -1,6 +1,11 @@
 package asciichgolangpublic
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
 
 type TmuxService struct {
 	commandExecutor CommandExecutor
@@ -20,7 +25,7 @@ func GetTmuxOnLocalMachine() (tmux *TmuxService, err error) {
 func MustGetTmuxOnLocalMachine() (tmux *TmuxService) {
 	tmux, err := GetTmuxOnLocalMachine()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tmux
@@ -37,7 +42,7 @@ func (t *TmuxService) GetCommandExecutor() (commandExecutor CommandExecutor, err
 
 func (t *TmuxService) GetSessionByName(name string) (tmuxSession *TmuxSession, err error) {
 	if name == "" {
-		return nil, TracedErrorEmptyString("name")
+		return nil, errors.TracedErrorEmptyString("name")
 	}
 
 	tmuxSession = NewTmuxSession()
@@ -57,11 +62,11 @@ func (t *TmuxService) GetSessionByName(name string) (tmuxSession *TmuxSession, e
 
 func (t *TmuxService) GetWindowByNames(sessionName string, windowName string) (window *TmuxWindow, err error) {
 	if sessionName == "" {
-		return nil, TracedErrorEmptyString("sessionName")
+		return nil, errors.TracedErrorEmptyString("sessionName")
 	}
 
 	if windowName == "" {
-		return nil, TracedErrorEmptyString("windowName")
+		return nil, errors.TracedErrorEmptyString("windowName")
 	}
 
 	session, err := t.GetSessionByName(sessionName)
@@ -100,7 +105,7 @@ func (t *TmuxService) ListSessionNames(verbose bool) (sessionNames []string, err
 		toAdd = strings.TrimSpace(toAdd)
 
 		if toAdd == "" {
-			return nil, TracedErrorf(
+			return nil, errors.TracedErrorf(
 				"toAdd is empty string after extracting session name from line='%s'",
 				line,
 			)
@@ -110,7 +115,7 @@ func (t *TmuxService) ListSessionNames(verbose bool) (sessionNames []string, err
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"There are '%d' tmux sessions.",
 			len(sessionNames),
 		)
@@ -122,7 +127,7 @@ func (t *TmuxService) ListSessionNames(verbose bool) (sessionNames []string, err
 func (t *TmuxService) MustGetCommandExecutor() (commandExecutor CommandExecutor) {
 	commandExecutor, err := t.GetCommandExecutor()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandExecutor
@@ -131,7 +136,7 @@ func (t *TmuxService) MustGetCommandExecutor() (commandExecutor CommandExecutor)
 func (t *TmuxService) MustGetSessionByName(name string) (tmuxSession *TmuxSession) {
 	tmuxSession, err := t.GetSessionByName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tmuxSession
@@ -140,7 +145,7 @@ func (t *TmuxService) MustGetSessionByName(name string) (tmuxSession *TmuxSessio
 func (t *TmuxService) MustGetWindowByNames(sessionName string, windowName string) (window *TmuxWindow) {
 	window, err := t.GetWindowByNames(sessionName, windowName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return window
@@ -149,7 +154,7 @@ func (t *TmuxService) MustGetWindowByNames(sessionName string, windowName string
 func (t *TmuxService) MustListSessionNames(verbose bool) (sessionNames []string) {
 	sessionNames, err := t.ListSessionNames(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sessionNames
@@ -158,7 +163,7 @@ func (t *TmuxService) MustListSessionNames(verbose bool) (sessionNames []string)
 func (t *TmuxService) MustSetCommandExecutor(commandExecutor CommandExecutor) {
 	err := t.SetCommandExecutor(commandExecutor)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 

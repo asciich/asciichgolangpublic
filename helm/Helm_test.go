@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func getHelmImplementationByName(implementationName string) (helm Helm) {
@@ -11,7 +12,7 @@ func getHelmImplementationByName(implementationName string) (helm Helm) {
 		return MustGetLocalCommandExecutorHelm()
 	}
 
-	asciichgolangpublic.LogFatalf("Unknwon implementation name '%s'", implementationName)
+	logging.LogFatalf("Unknwon implementation name '%s'", implementationName)
 
 	return nil
 }

@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type GitlabCreatePersonalAccessTokenOptions struct {
 	Name    string
 	Verbose bool
@@ -17,7 +22,7 @@ func (g *GitlabCreatePersonalAccessTokenOptions) GetVerbose() (verbose bool, err
 func (g *GitlabCreatePersonalAccessTokenOptions) MustGetName() (name string) {
 	name, err := g.GetName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -26,7 +31,7 @@ func (g *GitlabCreatePersonalAccessTokenOptions) MustGetName() (name string) {
 func (g *GitlabCreatePersonalAccessTokenOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := g.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -35,20 +40,20 @@ func (g *GitlabCreatePersonalAccessTokenOptions) MustGetVerbose() (verbose bool)
 func (g *GitlabCreatePersonalAccessTokenOptions) MustSetName(name string) {
 	err := g.SetName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCreatePersonalAccessTokenOptions) MustSetVerbose(verbose bool) {
 	err := g.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCreatePersonalAccessTokenOptions) SetName(name string) (err error) {
 	if name == "" {
-		return TracedErrorf("name is empty string")
+		return errors.TracedErrorf("name is empty string")
 	}
 
 	g.Name = name
@@ -64,7 +69,7 @@ func (g *GitlabCreatePersonalAccessTokenOptions) SetVerbose(verbose bool) (err e
 
 func (o *GitlabCreatePersonalAccessTokenOptions) GetName() (name string, err error) {
 	if len(o.Name) <= 0 {
-		return "", TracedError("name not set")
+		return "", errors.TracedError("name not set")
 	}
 
 	return o.Name, nil

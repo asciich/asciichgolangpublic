@@ -5,8 +5,10 @@ import (
 	"strings"
 	"time"
 
-	gitlab "gitlab.com/gitlab-org/api/client-go"
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
 type GitlabBranch struct {
@@ -20,11 +22,11 @@ func NewGitlabBranch() (g *GitlabBranch) {
 
 func (g *GitlabBranch) CopyFileToBranch(filePath string, targetBranch *GitlabBranch, verbose bool) (targetFile *GitlabRepositoryFile, err error) {
 	if filePath == "" {
-		return nil, TracedErrorEmptyString("filePath")
+		return nil, errors.TracedErrorEmptyString("filePath")
 	}
 
 	if targetBranch == nil {
-		return nil, TracedErrorNil("targetBranch")
+		return nil, errors.TracedErrorNil("targetBranch")
 	}
 
 	sourceFile, err := g.GetRepositoryFile(filePath, verbose)
@@ -68,7 +70,7 @@ func (g *GitlabBranch) CopyFileToBranch(filePath string, targetBranch *GitlabBra
 
 	if sourceSha == destSha {
 		if verbose {
-			LogInfof(
+			logging.LogInfof(
 				"File '%s' is equal in source branch '%s' and target branch '%s' have already equal content. Skip copy.",
 				filePath,
 				sourceBranchName,
@@ -95,7 +97,7 @@ func (g *GitlabBranch) CopyFileToBranch(filePath string, targetBranch *GitlabBra
 		}
 
 		if verbose {
-			LogChangedf(
+			logging.LogChangedf(
 				"File '%s' is copied from commit '%s' of source branch '%s' to target branch '%s'.",
 				filePath,
 				commitHash,
@@ -129,7 +131,7 @@ func (g *GitlabBranch) CreateFromDefaultBranch(verbose bool) (err error) {
 
 func (g *GitlabBranch) CreateMergeRequest(options *GitlabCreateMergeRequestOptions) (mergeRequest *GitlabMergeRequest, err error) {
 	if options == nil {
-		return nil, TracedErrorNil("options")
+		return nil, errors.TracedErrorNil("options")
 	}
 
 	mergeRequests, err := g.GetMergeRequests()
@@ -158,7 +160,7 @@ func (g *GitlabBranch) CreateMergeRequest(options *GitlabCreateMergeRequestOptio
 
 func (g *GitlabBranch) Delete(options *GitlabDeleteBranchOptions) (err error) {
 	if options == nil {
-		return TracedErrorNil("options")
+		return errors.TracedErrorNil("options")
 	}
 
 	nativeClient, projectId, err := g.GetNativeBranchesClientAndId()
@@ -187,7 +189,7 @@ func (g *GitlabBranch) Delete(options *GitlabDeleteBranchOptions) (err error) {
 			branchName,
 		)
 		if err != nil {
-			return TracedErrorf(
+			return errors.TracedErrorf(
 				"Delete branch '%s' in gitlab project %s failed: %w",
 				branchName,
 				projectUrl,
@@ -216,7 +218,7 @@ func (g *GitlabBranch) Delete(options *GitlabDeleteBranchOptions) (err error) {
 				if exists {
 					time.Sleep(1000 * time.Millisecond)
 					if options.Verbose {
-						LogInfof("Wait for branch '%s' to be deleted in %s .", branchName, projectUrl)
+						logging.LogInfof("Wait for branch '%s' to be deleted in %s .", branchName, projectUrl)
 					}
 				} else {
 					break
@@ -225,15 +227,15 @@ func (g *GitlabBranch) Delete(options *GitlabDeleteBranchOptions) (err error) {
 		}
 
 		if exists {
-			return TracedErrorf("Internal error: failed to delete '%s' in %s", branchName, projectUrl)
+			return errors.TracedErrorf("Internal error: failed to delete '%s' in %s", branchName, projectUrl)
 		}
 
 		if options.Verbose {
-			LogChangedf("Deleted branch '%s' in gitlab project %s .", branchName, projectUrl)
+			logging.LogChangedf("Deleted branch '%s' in gitlab project %s .", branchName, projectUrl)
 		}
 	} else {
 		if options.Verbose {
-			LogInfof("Branch '%s' is already absent on %s .", branchName, projectUrl)
+			logging.LogInfof("Branch '%s' is already absent on %s .", branchName, projectUrl)
 		}
 	}
 
@@ -242,11 +244,11 @@ func (g *GitlabBranch) Delete(options *GitlabDeleteBranchOptions) (err error) {
 
 func (g *GitlabBranch) DeleteRepositoryFile(filePath string, commitMessage string, verbose bool) (err error) {
 	if filePath == "" {
-		return TracedErrorEmptyString("filePath")
+		return errors.TracedErrorEmptyString("filePath")
 	}
 
 	if commitMessage == "" {
-		return TracedErrorEmptyString("commitMessage")
+		return errors.TracedErrorEmptyString("commitMessage")
 	}
 
 	fileToDelete, err := g.GetRepositoryFile(filePath, verbose)
@@ -283,7 +285,7 @@ func (g *GitlabBranch) Exists() (exists bool, err error) {
 			return false, nil
 		}
 
-		return false, TracedErrorf("Failed to evaluate if branch exists: '%w'", err)
+		return false, errors.TracedErrorf("Failed to evaluate if branch exists: '%w'", err)
 	}
 
 	return true, nil
@@ -345,7 +347,7 @@ func (g *GitlabBranch) GetGitlabBranches() (branches *GitlabBranches, err error)
 
 func (g *GitlabBranch) GetGitlabProject() (gitlabProject *GitlabProject, err error) {
 	if g.gitlabProject == nil {
-		return nil, TracedErrorf("gitlabProject not set")
+		return nil, errors.TracedErrorf("gitlabProject not set")
 	}
 
 	return g.gitlabProject, nil
@@ -378,12 +380,12 @@ func (g *GitlabBranch) GetLatestCommitHashAsString(verbose bool) (commitHash str
 
 	rawCommit := rawResponse.Commit
 	if rawCommit == nil {
-		return "", TracedError("rawCommit is nil in get latest commit hash as string")
+		return "", errors.TracedError("rawCommit is nil in get latest commit hash as string")
 	}
 
 	commitHash = rawCommit.ID
 	if commitHash == "" {
-		return "", TracedError("commitHash is empty string after evaluation")
+		return "", errors.TracedError("commitHash is empty string after evaluation")
 	}
 
 	branchName, err := g.GetName()
@@ -392,7 +394,7 @@ func (g *GitlabBranch) GetLatestCommitHashAsString(verbose bool) (commitHash str
 	}
 
 	if verbose {
-		LogInfof("Latest commit of branch '%s' is '%s'", branchName, commitHash)
+		logging.LogInfof("Latest commit of branch '%s' is '%s'", branchName, commitHash)
 	}
 
 	return commitHash, nil
@@ -414,7 +416,7 @@ func (g *GitlabBranch) GetMergeRequests() (mergeRequests *GitlabProjectMergeRequ
 
 func (g *GitlabBranch) GetName() (name string, err error) {
 	if g.name == "" {
-		return "", TracedErrorf("name not set")
+		return "", errors.TracedErrorf("name not set")
 	}
 
 	return g.name, nil
@@ -493,11 +495,11 @@ func (g *GitlabBranch) GetRawResponse() (rawResponse *gitlab.Branch, err error) 
 		nil,
 	)
 	if err != nil {
-		return nil, TracedErrorf("Unable to get branch: '%w'", err)
+		return nil, errors.TracedErrorf("Unable to get branch: '%w'", err)
 	}
 
 	if rawResponse == nil {
-		return nil, TracedError("rawResponse for GitlabBranch is nil after evaluation")
+		return nil, errors.TracedError("rawResponse for GitlabBranch is nil after evaluation")
 	}
 
 	return rawResponse, nil
@@ -505,7 +507,7 @@ func (g *GitlabBranch) GetRawResponse() (rawResponse *gitlab.Branch, err error) 
 
 func (g *GitlabBranch) GetRepositoryFile(filePath string, verbose bool) (repositoryFile *GitlabRepositoryFile, err error) {
 	if filePath == "" {
-		return nil, TracedErrorEmptyString("filePath")
+		return nil, errors.TracedErrorEmptyString("filePath")
 	}
 
 	gitlabProject, err := g.GetGitlabProject()
@@ -534,7 +536,7 @@ func (g *GitlabBranch) GetRepositoryFile(filePath string, verbose bool) (reposit
 
 func (g *GitlabBranch) GetRepositoryFileSha256Sum(filePath string, verbose bool) (sha256sum string, err error) {
 	if filePath == "" {
-		return "", TracedErrorEmptyString("filePath")
+		return "", errors.TracedErrorEmptyString("filePath")
 	}
 
 	repostioryFile, err := g.GetRepositoryFile(filePath, verbose)
@@ -553,7 +555,7 @@ func (g *GitlabBranch) GetRepositoryFileSha256Sum(filePath string, verbose bool)
 func (g *GitlabBranch) MustCopyFileToBranch(filePath string, targetBranch *GitlabBranch, verbose bool) (targetFile *GitlabRepositoryFile) {
 	targetFile, err := g.CopyFileToBranch(filePath, targetBranch, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return targetFile
@@ -562,14 +564,14 @@ func (g *GitlabBranch) MustCopyFileToBranch(filePath string, targetBranch *Gitla
 func (g *GitlabBranch) MustCreateFromDefaultBranch(verbose bool) {
 	err := g.CreateFromDefaultBranch(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabBranch) MustCreateMergeRequest(options *GitlabCreateMergeRequestOptions) (mergeRequest *GitlabMergeRequest) {
 	mergeRequest, err := g.CreateMergeRequest(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return mergeRequest
@@ -578,21 +580,21 @@ func (g *GitlabBranch) MustCreateMergeRequest(options *GitlabCreateMergeRequestO
 func (g *GitlabBranch) MustDelete(options *GitlabDeleteBranchOptions) {
 	err := g.Delete(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabBranch) MustDeleteRepositoryFile(filePath string, commitMessage string, verbose bool) {
 	err := g.DeleteRepositoryFile(filePath, commitMessage, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabBranch) MustExists() (exists bool) {
 	exists, err := g.Exists()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return exists
@@ -601,7 +603,7 @@ func (g *GitlabBranch) MustExists() (exists bool) {
 func (g *GitlabBranch) MustGetBranches() (branches *GitlabBranches) {
 	branches, err := g.GetBranches()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return branches
@@ -610,7 +612,7 @@ func (g *GitlabBranch) MustGetBranches() (branches *GitlabBranches) {
 func (g *GitlabBranch) MustGetGitlab() (gitlab *GitlabInstance) {
 	gitlab, err := g.GetGitlab()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlab
@@ -619,7 +621,7 @@ func (g *GitlabBranch) MustGetGitlab() (gitlab *GitlabInstance) {
 func (g *GitlabBranch) MustGetGitlabBranches() (branches *GitlabBranches) {
 	branches, err := g.GetGitlabBranches()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return branches
@@ -628,7 +630,7 @@ func (g *GitlabBranch) MustGetGitlabBranches() (branches *GitlabBranches) {
 func (g *GitlabBranch) MustGetGitlabProject() (gitlabProject *GitlabProject) {
 	gitlabProject, err := g.GetGitlabProject()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabProject
@@ -637,7 +639,7 @@ func (g *GitlabBranch) MustGetGitlabProject() (gitlabProject *GitlabProject) {
 func (g *GitlabBranch) MustGetLatestCommit(verbose bool) (latestCommit *GitlabCommit) {
 	latestCommit, err := g.GetLatestCommit(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return latestCommit
@@ -646,7 +648,7 @@ func (g *GitlabBranch) MustGetLatestCommit(verbose bool) (latestCommit *GitlabCo
 func (g *GitlabBranch) MustGetLatestCommitHashAsString(verbose bool) (commitHash string) {
 	commitHash, err := g.GetLatestCommitHashAsString(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commitHash
@@ -655,7 +657,7 @@ func (g *GitlabBranch) MustGetLatestCommitHashAsString(verbose bool) (commitHash
 func (g *GitlabBranch) MustGetMergeRequests() (mergeRequests *GitlabProjectMergeRequests) {
 	mergeRequests, err := g.GetMergeRequests()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return mergeRequests
@@ -664,7 +666,7 @@ func (g *GitlabBranch) MustGetMergeRequests() (mergeRequests *GitlabProjectMerge
 func (g *GitlabBranch) MustGetName() (name string) {
 	name, err := g.GetName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -673,7 +675,7 @@ func (g *GitlabBranch) MustGetName() (name string) {
 func (g *GitlabBranch) MustGetNativeBranchesClient() (nativeClient *gitlab.BranchesService) {
 	nativeClient, err := g.GetNativeBranchesClient()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeClient
@@ -682,7 +684,7 @@ func (g *GitlabBranch) MustGetNativeBranchesClient() (nativeClient *gitlab.Branc
 func (g *GitlabBranch) MustGetNativeBranchesClientAndId() (nativeClient *gitlab.BranchesService, projectId int) {
 	nativeClient, projectId, err := g.GetNativeBranchesClientAndId()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeClient, projectId
@@ -691,7 +693,7 @@ func (g *GitlabBranch) MustGetNativeBranchesClientAndId() (nativeClient *gitlab.
 func (g *GitlabBranch) MustGetProjectId() (projectId int) {
 	projectId, err := g.GetProjectId()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectId
@@ -700,7 +702,7 @@ func (g *GitlabBranch) MustGetProjectId() (projectId int) {
 func (g *GitlabBranch) MustGetProjectUrl() (projectUrl string) {
 	projectUrl, err := g.GetProjectUrl()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectUrl
@@ -709,7 +711,7 @@ func (g *GitlabBranch) MustGetProjectUrl() (projectUrl string) {
 func (g *GitlabBranch) MustGetRawResponse() (rawResponse *gitlab.Branch) {
 	rawResponse, err := g.GetRawResponse()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return rawResponse
@@ -718,7 +720,7 @@ func (g *GitlabBranch) MustGetRawResponse() (rawResponse *gitlab.Branch) {
 func (g *GitlabBranch) MustGetRepositoryFile(filePath string, verbose bool) (repositoryFile *GitlabRepositoryFile) {
 	repositoryFile, err := g.GetRepositoryFile(filePath, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return repositoryFile
@@ -727,7 +729,7 @@ func (g *GitlabBranch) MustGetRepositoryFile(filePath string, verbose bool) (rep
 func (g *GitlabBranch) MustGetRepositoryFileSha256Sum(filePath string, verbose bool) (sha256sum string) {
 	sha256sum, err := g.GetRepositoryFileSha256Sum(filePath, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sha256sum
@@ -736,7 +738,7 @@ func (g *GitlabBranch) MustGetRepositoryFileSha256Sum(filePath string, verbose b
 func (g *GitlabBranch) MustReadFileContentAsString(options *GitlabReadFileOptions) (content string) {
 	content, err := g.ReadFileContentAsString(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return content
@@ -745,7 +747,7 @@ func (g *GitlabBranch) MustReadFileContentAsString(options *GitlabReadFileOption
 func (g *GitlabBranch) MustRepositoryFileExists(filePath string, verbose bool) (exists bool) {
 	exists, err := g.RepositoryFileExists(filePath, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return exists
@@ -754,28 +756,28 @@ func (g *GitlabBranch) MustRepositoryFileExists(filePath string, verbose bool) (
 func (g *GitlabBranch) MustSetGitlabProject(gitlabProject *GitlabProject) {
 	err := g.SetGitlabProject(gitlabProject)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabBranch) MustSetName(name string) {
 	err := g.SetName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabBranch) MustSyncFilesToBranch(options *GitlabSyncBranchOptions) {
 	err := g.SyncFilesToBranch(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabBranch) MustSyncFilesToBranchUsingMergeRequest(options *GitlabSyncBranchOptions) (createdMergeRequest *GitlabMergeRequest) {
 	createdMergeRequest, err := g.SyncFilesToBranchUsingMergeRequest(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdMergeRequest
@@ -784,7 +786,7 @@ func (g *GitlabBranch) MustSyncFilesToBranchUsingMergeRequest(options *GitlabSyn
 func (g *GitlabBranch) MustWriteFileContent(options *GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile) {
 	gitlabRepositoryFile, err := g.WriteFileContent(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabRepositoryFile
@@ -792,7 +794,7 @@ func (g *GitlabBranch) MustWriteFileContent(options *GitlabWriteFileOptions) (gi
 
 func (g *GitlabBranch) ReadFileContentAsString(options *GitlabReadFileOptions) (content string, err error) {
 	if options == nil {
-		return "", TracedErrorNil("options")
+		return "", errors.TracedErrorNil("options")
 	}
 
 	gitlabProject, err := g.GetGitlabProject()
@@ -822,7 +824,7 @@ func (g *GitlabBranch) ReadFileContentAsString(options *GitlabReadFileOptions) (
 
 func (g *GitlabBranch) RepositoryFileExists(filePath string, verbose bool) (exists bool, err error) {
 	if filePath == "" {
-		return false, TracedErrorEmptyString("filePath")
+		return false, errors.TracedErrorEmptyString("filePath")
 	}
 
 	repositoryFile, err := g.GetRepositoryFile(filePath, verbose)
@@ -840,7 +842,7 @@ func (g *GitlabBranch) RepositoryFileExists(filePath string, verbose bool) (exis
 
 func (g *GitlabBranch) SetGitlabProject(gitlabProject *GitlabProject) (err error) {
 	if gitlabProject == nil {
-		return TracedErrorf("gitlabProject is nil")
+		return errors.TracedErrorf("gitlabProject is nil")
 	}
 
 	g.gitlabProject = gitlabProject
@@ -850,7 +852,7 @@ func (g *GitlabBranch) SetGitlabProject(gitlabProject *GitlabProject) (err error
 
 func (g *GitlabBranch) SetName(name string) (err error) {
 	if name == "" {
-		return TracedErrorf("name is empty string")
+		return errors.TracedErrorf("name is empty string")
 	}
 
 	g.name = name
@@ -860,7 +862,7 @@ func (g *GitlabBranch) SetName(name string) (err error) {
 
 func (g *GitlabBranch) SyncFilesToBranch(options *GitlabSyncBranchOptions) (err error) {
 	if options == nil {
-		return TracedErrorNil("options")
+		return errors.TracedErrorNil("options")
 	}
 
 	targetBranchName, err := options.GetTargetBranchName()
@@ -874,7 +876,7 @@ func (g *GitlabBranch) SyncFilesToBranch(options *GitlabSyncBranchOptions) (err 
 	}
 
 	if options.Verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Sync files from source branch '%s' to target branch '%s' started.",
 			sourceBranchName,
 			targetBranchName,
@@ -903,7 +905,7 @@ func (g *GitlabBranch) SyncFilesToBranch(options *GitlabSyncBranchOptions) (err 
 
 	if len(filesToSync) <= 0 {
 		if options.Verbose {
-			LogInfof(
+			logging.LogInfof(
 				"All '%d' files to sync from branch '%s' to target branch '%s' are already up to date.",
 				len(pathsToSync),
 				sourceBranchName,
@@ -919,7 +921,7 @@ func (g *GitlabBranch) SyncFilesToBranch(options *GitlabSyncBranchOptions) (err 
 		}
 
 		if options.Verbose {
-			LogChangedf(
+			logging.LogChangedf(
 				"Synced '%d' files to sync from branch '%s' to target branch '%s'. '%d' files were already up to date so there was no need for a sync.",
 				len(filesToSync),
 				sourceBranchName,
@@ -930,7 +932,7 @@ func (g *GitlabBranch) SyncFilesToBranch(options *GitlabSyncBranchOptions) (err 
 	}
 
 	if options.Verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Sync files from source branch '%s' to target branch '%s' finished.",
 			sourceBranchName,
 			targetBranchName,
@@ -942,7 +944,7 @@ func (g *GitlabBranch) SyncFilesToBranch(options *GitlabSyncBranchOptions) (err 
 
 func (g *GitlabBranch) SyncFilesToBranchUsingMergeRequest(options *GitlabSyncBranchOptions) (createdMergeRequest *GitlabMergeRequest, err error) {
 	if options == nil {
-		return nil, TracedErrorNil("options")
+		return nil, errors.TracedErrorNil("options")
 	}
 
 	targetBranchName, err := options.GetTargetBranchName()
@@ -1047,7 +1049,7 @@ func (g *GitlabBranch) SyncFilesToBranchUsingMergeRequest(options *GitlabSyncBra
 				return nil, err
 			}
 
-			LogChangedf(
+			logging.LogChangedf(
 				"Created merge request %s to sync '%d' files from branch '%s' to target branch '%s'.",
 				mrUrl,
 				len(filesToSync),
@@ -1055,7 +1057,7 @@ func (g *GitlabBranch) SyncFilesToBranchUsingMergeRequest(options *GitlabSyncBra
 				targetBranchName,
 			)
 		} else {
-			LogInfof(
+			logging.LogInfof(
 				"All '%d' files are in sync between branch '%s' and '%s'. No merge request was created.",
 				len(pathsToSync),
 				syncBranchName,
@@ -1069,7 +1071,7 @@ func (g *GitlabBranch) SyncFilesToBranchUsingMergeRequest(options *GitlabSyncBra
 
 func (g *GitlabBranch) WriteFileContent(options *GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile, err error) {
 	if options == nil {
-		return nil, TracedErrorNil("options")
+		return nil, errors.TracedErrorNil("options")
 	}
 
 	gitlabProject, err := g.GetGitlabProject()

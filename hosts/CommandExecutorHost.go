@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type CommandExecutorHost struct {
@@ -18,7 +20,7 @@ type CommandExecutorHost struct {
 // E.g. for SSH a SSHCLient can be used.
 func GetCommandExecutorHostByCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) (host Host, err error) {
 	if commandExecutor == nil {
-		return nil, asciichgolangpublic.TracedErrorNil("commandExecutor")
+		return nil, errors.TracedErrorNil("commandExecutor")
 	}
 
 	toReturn := NewCommandExecutorHost()
@@ -34,7 +36,7 @@ func GetCommandExecutorHostByCommandExecutor(commandExecutor asciichgolangpublic
 func MustGetCommandExecutorHostByCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) (host Host) {
 	host, err := GetCommandExecutorHostByCommandExecutor(commandExecutor)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return host
@@ -53,7 +55,7 @@ func (c *CommandExecutorHost) GetCommandExecutor() (commandExecutor asciichgolan
 
 func (c *CommandExecutorHost) GetDirectoryByPath(path string) (directory asciichgolangpublic.Directory, err error) {
 	if path == "" {
-		return nil, asciichgolangpublic.TracedErrorEmptyString("path")
+		return nil, errors.TracedErrorEmptyString("path")
 	}
 
 	commandExecutor, err := c.GetCommandExecutor()
@@ -86,7 +88,7 @@ func (c *CommandExecutorHost) GetHostDescription() (hostDescription string, err 
 func (c *CommandExecutorHost) MustGetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandExecutor
@@ -95,7 +97,7 @@ func (c *CommandExecutorHost) MustGetCommandExecutor() (commandExecutor asciichg
 func (c *CommandExecutorHost) MustIsReachable(verbose bool) (isReachable bool) {
 	isReachable, err := c.IsReachable(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isReachable
@@ -104,7 +106,7 @@ func (c *CommandExecutorHost) MustIsReachable(verbose bool) (isReachable bool) {
 func (c *CommandExecutorHost) MustRunCommand(options *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
 	commandOutput, err := c.RunCommand(options)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandOutput
@@ -113,20 +115,20 @@ func (c *CommandExecutorHost) MustRunCommand(options *asciichgolangpublic.RunCom
 func (c *CommandExecutorHost) MustSetCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) {
 	err := c.SetCommandExecutor(commandExecutor)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorHost) MustWaitUntilReachable(renewHostKey bool, verbose bool) {
 	err := c.WaitUntilReachable(renewHostKey, verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorHost) RunCommand(options *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
 	if options == nil {
-		return nil, asciichgolangpublic.TracedErrorNil("options")
+		return nil, errors.TracedErrorNil("options")
 	}
 
 	commandExecutor, err := c.GetCommandExecutor()
@@ -161,7 +163,7 @@ func (h *CommandExecutorHost) AddSshHostKeyToKnownHosts(verbose bool) (err error
 	}
 
 	if verbose {
-		asciichgolangpublic.LogInfof("Added host key of '%s' from known hosts", hostname)
+		logging.LogInfof("Added host key of '%s' from known hosts", hostname)
 	}
 
 	return nil
@@ -180,15 +182,15 @@ func (h *CommandExecutorHost) CheckFtpPortOpen(verbose bool) (err error) {
 
 	if isOpen {
 		if verbose {
-			asciichgolangpublic.LogInfof("FTP port on host '%s' is open.", hostname)
+			logging.LogInfof("FTP port on host '%s' is open.", hostname)
 		}
 	} else {
 		errorMessage := fmt.Sprintf("FTP port on host '%s' is not open.", hostname)
 		if verbose {
-			asciichgolangpublic.LogError(errorMessage)
+			logging.LogError(errorMessage)
 		}
 
-		return asciichgolangpublic.TracedError(errorMessage)
+		return errors.TracedError(errorMessage)
 	}
 
 	return nil
@@ -207,15 +209,15 @@ func (h *CommandExecutorHost) CheckReachable(verbose bool) (err error) {
 
 	if isReachable {
 		if verbose {
-			asciichgolangpublic.LogInfof("Host '%s' is reachable by SSH.", hostname)
+			logging.LogInfof("Host '%s' is reachable by SSH.", hostname)
 		}
 	} else {
 		errorMessage := fmt.Sprintf("Host '%s' is reachable by SSH.", hostname)
 		if verbose {
-			asciichgolangpublic.LogError(errorMessage)
+			logging.LogError(errorMessage)
 		}
 
-		return asciichgolangpublic.TracedError(errorMessage)
+		return errors.TracedError(errorMessage)
 	}
 
 	return nil
@@ -223,7 +225,7 @@ func (h *CommandExecutorHost) CheckReachable(verbose bool) (err error) {
 
 func (h *CommandExecutorHost) GetComment() (comment string, err error) {
 	if h.Comment == "" {
-		return "", asciichgolangpublic.TracedErrorf("Comment not set")
+		return "", errors.TracedErrorf("Comment not set")
 	}
 
 	return h.Comment, nil
@@ -231,7 +233,7 @@ func (h *CommandExecutorHost) GetComment() (comment string, err error) {
 
 func (h *CommandExecutorHost) InstallBinary(installOptions *asciichgolangpublic.InstallOptions) (installedFile asciichgolangpublic.File, err error) {
 	if installOptions == nil {
-		return nil, asciichgolangpublic.TracedErrorNil("installOptions")
+		return nil, errors.TracedErrorNil("installOptions")
 	}
 
 	hostName, err := h.GetHostName()
@@ -255,7 +257,7 @@ func (h *CommandExecutorHost) InstallBinary(installOptions *asciichgolangpublic.
 	}
 
 	if installOptions.Verbose {
-		asciichgolangpublic.LogInfof(
+		logging.LogInfof(
 			"Install '%s' as '%s' on host '%s' started.",
 			sourceFilePath,
 			binaryName,
@@ -302,7 +304,7 @@ func (h *CommandExecutorHost) InstallBinary(installOptions *asciichgolangpublic.
 	}
 
 	if installOptions.Verbose {
-		asciichgolangpublic.LogChangedf(
+		logging.LogChangedf(
 			"Install '%s' as '%s' on host '%s' finished.",
 			sourceFilePath,
 			binaryName,
@@ -345,7 +347,7 @@ func (h *CommandExecutorHost) IsPingable(verbose bool) (isPingable bool, err err
 		return false, nil
 	}
 
-	return false, asciichgolangpublic.TracedErrorf("Unexpected stdout: '%v'", stdout)
+	return false, errors.TracedErrorf("Unexpected stdout: '%v'", stdout)
 }
 
 func (h *CommandExecutorHost) IsReachable(verbose bool) (isReachable bool, err error) {
@@ -363,7 +365,7 @@ func (h *CommandExecutorHost) IsReachable(verbose bool) (isReachable bool, err e
 
 func (h *CommandExecutorHost) IsTcpPortOpen(portNumber int, verbose bool) (isOpen bool, err error) {
 	if portNumber <= 0 {
-		return false, asciichgolangpublic.TracedErrorf("Invalid portNumber: '%d'", portNumber)
+		return false, errors.TracedErrorf("Invalid portNumber: '%d'", portNumber)
 	}
 
 	hostname, err := h.GetHostName()
@@ -382,28 +384,28 @@ func (h *CommandExecutorHost) IsTcpPortOpen(portNumber int, verbose bool) (isOpe
 func (h *CommandExecutorHost) MustAddSshHostKeyToKnownHosts(verbose bool) {
 	err := h.AddSshHostKeyToKnownHosts(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (h *CommandExecutorHost) MustCheckFtpPortOpen(verbose bool) {
 	err := h.CheckFtpPortOpen(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (h *CommandExecutorHost) MustCheckReachable(verbose bool) {
 	err := h.CheckReachable(verbose)
 	if err != nil {
-		asciichgolangpublic.LogFatalf("host.CheckReachableBySsh failed: '%v'", err)
+		logging.LogFatalf("host.CheckReachableBySsh failed: '%v'", err)
 	}
 }
 
 func (h *CommandExecutorHost) MustGetComment() (comment string) {
 	comment, err := h.GetComment()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return comment
@@ -412,7 +414,7 @@ func (h *CommandExecutorHost) MustGetComment() (comment string) {
 func (h *CommandExecutorHost) MustGetDirectoryByPath(path string) (directory asciichgolangpublic.Directory) {
 	directory, err := h.GetDirectoryByPath(path)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return directory
@@ -421,7 +423,7 @@ func (h *CommandExecutorHost) MustGetDirectoryByPath(path string) (directory asc
 func (h *CommandExecutorHost) MustGetHostDescription() (hostDescription string) {
 	hostDescription, err := h.GetHostDescription()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hostDescription
@@ -430,7 +432,7 @@ func (h *CommandExecutorHost) MustGetHostDescription() (hostDescription string) 
 func (h *CommandExecutorHost) MustGetHostName() (hostname string) {
 	hostname, err := h.GetHostName()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hostname
@@ -439,7 +441,7 @@ func (h *CommandExecutorHost) MustGetHostName() (hostname string) {
 func (h *CommandExecutorHost) MustInstallBinary(installOptions *asciichgolangpublic.InstallOptions) (installedFile asciichgolangpublic.File) {
 	installedFile, err := h.InstallBinary(installOptions)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return installedFile
@@ -448,7 +450,7 @@ func (h *CommandExecutorHost) MustInstallBinary(installOptions *asciichgolangpub
 func (h *CommandExecutorHost) MustIsFtpPortOpen(verbose bool) (isOpen bool) {
 	isOpen, err := h.IsFtpPortOpen(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isOpen
@@ -457,7 +459,7 @@ func (h *CommandExecutorHost) MustIsFtpPortOpen(verbose bool) (isOpen bool) {
 func (h *CommandExecutorHost) MustIsPingable(verbose bool) (isPingable bool) {
 	isPingable, err := h.IsPingable(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isPingable
@@ -466,7 +468,7 @@ func (h *CommandExecutorHost) MustIsPingable(verbose bool) (isPingable bool) {
 func (h *CommandExecutorHost) MustIsTcpPortOpen(portNumber int, verbose bool) (isOpen bool) {
 	isOpen, err := h.IsTcpPortOpen(portNumber, verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isOpen
@@ -475,28 +477,28 @@ func (h *CommandExecutorHost) MustIsTcpPortOpen(portNumber int, verbose bool) (i
 func (h *CommandExecutorHost) MustRemoveSshHostKeyFromKnownHosts(verbose bool) {
 	err := h.RemoveSshHostKeyFromKnownHosts(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (h *CommandExecutorHost) MustRenewSshHostKey(verbose bool) {
 	err := h.RenewSshHostKey(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (h *CommandExecutorHost) MustSetComment(comment string) {
 	err := h.SetComment(comment)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (h *CommandExecutorHost) MustWaitUntilPingable(verbose bool) {
 	err := h.WaitUntilPingable(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
@@ -516,7 +518,7 @@ func (h *CommandExecutorHost) RemoveSshHostKeyFromKnownHosts(verbose bool) (err 
 	}
 
 	if verbose {
-		asciichgolangpublic.LogInfof("Removed host key of '%s' from known hosts", hostname)
+		logging.LogInfof("Removed host key of '%s' from known hosts", hostname)
 	}
 
 	return nil
@@ -538,7 +540,7 @@ func (h *CommandExecutorHost) RenewSshHostKey(verbose bool) (err error) {
 
 func (h *CommandExecutorHost) SetComment(comment string) (err error) {
 	if comment == "" {
-		return asciichgolangpublic.TracedErrorf("comment is empty string")
+		return errors.TracedErrorf("comment is empty string")
 	}
 
 	h.Comment = comment
@@ -566,7 +568,7 @@ func (h *CommandExecutorHost) WaitUntilPingable(verbose bool) (err error) {
 
 		if isPingable {
 			if verbose {
-				asciichgolangpublic.LogGoodf("Host '%s' is pingable after '%v'", hostname, elapsedTime)
+				logging.LogGoodf("Host '%s' is pingable after '%v'", hostname, elapsedTime)
 			}
 			return nil
 		}
@@ -574,13 +576,13 @@ func (h *CommandExecutorHost) WaitUntilPingable(verbose bool) (err error) {
 		if elapsedTime > timeout {
 			errorMessage := fmt.Sprintf("Host '%s' is not pingable after '%v'", hostname, elapsedTime)
 			if verbose {
-				asciichgolangpublic.LogError(errorMessage)
+				logging.LogError(errorMessage)
 			}
-			return asciichgolangpublic.TracedError(errorMessage)
+			return errors.TracedError(errorMessage)
 		}
 
 		if verbose {
-			asciichgolangpublic.LogInfof(
+			logging.LogInfof(
 				"Wait '%v' for host '%s' to get reachable by ping. Total '%v' left, elapsed time so far: '%v'.",
 				delayBetweenPings,
 				hostname,
@@ -605,7 +607,7 @@ func (h *CommandExecutorHost) WaitUntilReachable(renewHostKey bool, verbose bool
 		if renewHostKey {
 			err = h.RenewSshHostKey(verbose)
 			if err != nil {
-				asciichgolangpublic.LogWarn("Renewing host key failed, but error is ignored in WaitUntilReachableBySsh since running in a retry loop.")
+				logging.LogWarn("Renewing host key failed, but error is ignored in WaitUntilReachableBySsh since running in a retry loop.")
 			}
 		}
 
@@ -618,7 +620,7 @@ func (h *CommandExecutorHost) WaitUntilReachable(renewHostKey bool, verbose bool
 
 		if isReachableBySsh {
 			if verbose {
-				asciichgolangpublic.LogGoodf("Host '%s' is reachable by SSH after '%v'", hostname, elapsedTime)
+				logging.LogGoodf("Host '%s' is reachable by SSH after '%v'", hostname, elapsedTime)
 			}
 			return nil
 		}
@@ -626,13 +628,13 @@ func (h *CommandExecutorHost) WaitUntilReachable(renewHostKey bool, verbose bool
 		if elapsedTime > timeout {
 			errorMessage := fmt.Sprintf("Host '%s' is not reachable by SSH after '%v'", hostname, elapsedTime)
 			if verbose {
-				asciichgolangpublic.LogError(errorMessage)
+				logging.LogError(errorMessage)
 			}
-			return asciichgolangpublic.TracedError(errorMessage)
+			return errors.TracedError(errorMessage)
 		}
 
 		if verbose {
-			asciichgolangpublic.LogInfof(
+			logging.LogInfof(
 				"Wait '%v' for host '%s' to get reachable by SSH. Total '%v' left, elapsed time so far: '%v'.",
 				delayBetweenPings,
 				hostname,

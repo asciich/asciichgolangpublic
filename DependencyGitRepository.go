@@ -1,5 +1,11 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/changesummary"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 // Represents a dependency to (another) git repository.
 type DependencyGitRepository struct {
 	url           string
@@ -17,7 +23,7 @@ func NewDependencyGitRepository() (d *DependencyGitRepository) {
 
 func (d *DependencyGitRepository) AddSourceFile(sourceFile File) (err error) {
 	if sourceFile == nil {
-		return TracedErrorNil("sourceFile")
+		return errors.TracedErrorNil("sourceFile")
 	}
 
 	d.sourceFiles = append(d.sourceFiles, sourceFile)
@@ -47,7 +53,7 @@ func (d *DependencyGitRepository) GetNewestVersion(authOptions []AuthenticationO
 		}
 
 		if verbose {
-			LogInfof(
+			logging.LogInfof(
 				"Newest version for '%s' is set by already defined target version '%s'",
 				url,
 				targetVersionString,
@@ -78,7 +84,7 @@ func (d *DependencyGitRepository) GetNewestVersion(authOptions []AuthenticationO
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Newest version of git repository dependency '%s' is '%s'.",
 			name,
 			newestVersionString,
@@ -100,7 +106,7 @@ func (d *DependencyGitRepository) GetNewestVersionAsString(authOptions []Authent
 	}
 
 	if newestVersionString == "" {
-		return "", TracedError(
+		return "", errors.TracedError(
 			"Unable to get newest version string, newestVersionString is empty string after evaluation",
 		)
 	}
@@ -110,11 +116,11 @@ func (d *DependencyGitRepository) GetNewestVersionAsString(authOptions []Authent
 
 func (d *DependencyGitRepository) GetSourceFiles() (sourceFiles []File, err error) {
 	if d.sourceFiles == nil {
-		return nil, TracedErrorf("sourceFiles not set")
+		return nil, errors.TracedErrorf("sourceFiles not set")
 	}
 
 	if len(d.sourceFiles) <= 0 {
-		return nil, TracedErrorf("sourceFiles has no elements")
+		return nil, errors.TracedErrorf("sourceFiles has no elements")
 	}
 
 	return d.sourceFiles, nil
@@ -136,7 +142,7 @@ func (d *DependencyGitRepository) GetTargetVersion() (targetVersion Version, err
 
 func (d *DependencyGitRepository) GetTargetVersionString() (targetVersionString string, err error) {
 	if d.targetVersionString == "" {
-		return "", TracedErrorf("targetVersionString not set")
+		return "", errors.TracedErrorf("targetVersionString not set")
 	}
 
 	return d.targetVersionString, nil
@@ -144,7 +150,7 @@ func (d *DependencyGitRepository) GetTargetVersionString() (targetVersionString 
 
 func (d *DependencyGitRepository) GetUrl() (url string, err error) {
 	if d.url == "" {
-		return "", TracedErrorf("url not set")
+		return "", errors.TracedErrorf("url not set")
 	}
 
 	return d.url, nil
@@ -166,7 +172,7 @@ func (d *DependencyGitRepository) GetVersion() (version Version, err error) {
 
 func (d *DependencyGitRepository) GetVersionString() (versionString string, err error) {
 	if d.versionString == "" {
-		return "", TracedErrorf("versionString not set")
+		return "", errors.TracedErrorf("versionString not set")
 	}
 
 	return d.versionString, nil
@@ -204,14 +210,14 @@ func (d *DependencyGitRepository) IsUpdateAvailable(authOptions []Authentication
 
 	if verbose {
 		if isUpdateAvailable {
-			LogChangedf(
+			logging.LogChangedf(
 				"Update available for dependency '%s'. Current version is '%s' but newest version is '%s'.",
 				dependencyName,
 				currentVersion,
 				newestVersionString,
 			)
 		} else {
-			LogInfof(
+			logging.LogInfof(
 				"No Update available for dependency '%s'. Current version is '%s' and newest version is '%s'.",
 				dependencyName,
 				currentVersion,
@@ -230,14 +236,14 @@ func (d *DependencyGitRepository) IsVersionStringUnset() (isUnset bool) {
 func (d *DependencyGitRepository) MustAddSourceFile(sourceFile File) {
 	err := d.AddSourceFile(sourceFile)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (d *DependencyGitRepository) MustGetName() (name string) {
 	name, err := d.GetName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -246,7 +252,7 @@ func (d *DependencyGitRepository) MustGetName() (name string) {
 func (d *DependencyGitRepository) MustGetNewestVersion(authOptions []AuthenticationOption, verbose bool) (newestVersion Version) {
 	newestVersion, err := d.GetNewestVersion(authOptions, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return newestVersion
@@ -255,7 +261,7 @@ func (d *DependencyGitRepository) MustGetNewestVersion(authOptions []Authenticat
 func (d *DependencyGitRepository) MustGetNewestVersionAsString(authOptions []AuthenticationOption, verbose bool) (newestVersion string) {
 	newestVersion, err := d.GetNewestVersionAsString(authOptions, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return newestVersion
@@ -264,7 +270,7 @@ func (d *DependencyGitRepository) MustGetNewestVersionAsString(authOptions []Aut
 func (d *DependencyGitRepository) MustGetSourceFiles() (sourceFiles []File) {
 	sourceFiles, err := d.GetSourceFiles()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sourceFiles
@@ -273,7 +279,7 @@ func (d *DependencyGitRepository) MustGetSourceFiles() (sourceFiles []File) {
 func (d *DependencyGitRepository) MustGetTargetVersion() (targeVersion Version) {
 	targeVersion, err := d.GetTargetVersion()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return targeVersion
@@ -282,7 +288,7 @@ func (d *DependencyGitRepository) MustGetTargetVersion() (targeVersion Version) 
 func (d *DependencyGitRepository) MustGetTargetVersionString() (targetVersionString string) {
 	targetVersionString, err := d.GetTargetVersionString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return targetVersionString
@@ -291,7 +297,7 @@ func (d *DependencyGitRepository) MustGetTargetVersionString() (targetVersionStr
 func (d *DependencyGitRepository) MustGetUrl() (url string) {
 	url, err := d.GetUrl()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return url
@@ -300,7 +306,7 @@ func (d *DependencyGitRepository) MustGetUrl() (url string) {
 func (d *DependencyGitRepository) MustGetVersion() (version Version) {
 	version, err := d.GetVersion()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return version
@@ -309,7 +315,7 @@ func (d *DependencyGitRepository) MustGetVersion() (version Version) {
 func (d *DependencyGitRepository) MustGetVersionString() (versionString string) {
 	versionString, err := d.GetVersionString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return versionString
@@ -318,7 +324,7 @@ func (d *DependencyGitRepository) MustGetVersionString() (versionString string) 
 func (d *DependencyGitRepository) MustIsUpdateAvailable(authOptions []AuthenticationOption, verbose bool) (isUpdateAvailable bool) {
 	isUpdateAvailable, err := d.IsUpdateAvailable(authOptions, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isUpdateAvailable
@@ -327,44 +333,44 @@ func (d *DependencyGitRepository) MustIsUpdateAvailable(authOptions []Authentica
 func (d *DependencyGitRepository) MustSetSourceFiles(sourceFiles []File) {
 	err := d.SetSourceFiles(sourceFiles)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (d *DependencyGitRepository) MustSetTargetVersionString(targetVersionString string) {
 	err := d.SetTargetVersionString(targetVersionString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (d *DependencyGitRepository) MustSetUrl(url string) {
 	err := d.SetUrl(url)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (d *DependencyGitRepository) MustSetVersionString(versionString string) {
 	err := d.SetVersionString(versionString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (d *DependencyGitRepository) MustUpdate(options *UpdateDependenciesOptions) (changeSummary *ChangeSummary) {
+func (d *DependencyGitRepository) MustUpdate(options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary) {
 	changeSummary, err := d.Update(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return changeSummary
 }
 
-func (d *DependencyGitRepository) MustUpdateVersionByStringInSourceFile(version string, sourceFile File, options *UpdateDependenciesOptions) (changeSummary *ChangeSummary) {
+func (d *DependencyGitRepository) MustUpdateVersionByStringInSourceFile(version string, sourceFile File, options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary) {
 	changeSummary, err := d.UpdateVersionByStringInSourceFile(version, sourceFile, options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return changeSummary
@@ -372,11 +378,11 @@ func (d *DependencyGitRepository) MustUpdateVersionByStringInSourceFile(version 
 
 func (d *DependencyGitRepository) SetSourceFiles(sourceFiles []File) (err error) {
 	if sourceFiles == nil {
-		return TracedErrorf("sourceFiles is nil")
+		return errors.TracedErrorf("sourceFiles is nil")
 	}
 
 	if len(sourceFiles) <= 0 {
-		return TracedErrorf("sourceFiles has no elements")
+		return errors.TracedErrorf("sourceFiles has no elements")
 	}
 
 	d.sourceFiles = sourceFiles
@@ -386,7 +392,7 @@ func (d *DependencyGitRepository) SetSourceFiles(sourceFiles []File) (err error)
 
 func (d *DependencyGitRepository) SetTargetVersionString(targetVersionString string) (err error) {
 	if targetVersionString == "" {
-		return TracedErrorf("targetVersionString is empty string")
+		return errors.TracedErrorf("targetVersionString is empty string")
 	}
 
 	d.targetVersionString = targetVersionString
@@ -396,7 +402,7 @@ func (d *DependencyGitRepository) SetTargetVersionString(targetVersionString str
 
 func (d *DependencyGitRepository) SetUrl(url string) (err error) {
 	if url == "" {
-		return TracedErrorf("url is empty string")
+		return errors.TracedErrorf("url is empty string")
 	}
 
 	d.url = url
@@ -406,7 +412,7 @@ func (d *DependencyGitRepository) SetUrl(url string) (err error) {
 
 func (d *DependencyGitRepository) SetVersionString(versionString string) (err error) {
 	if versionString == "" {
-		return TracedErrorf("versionString is empty string")
+		return errors.TracedErrorf("versionString is empty string")
 	}
 
 	d.versionString = versionString
@@ -414,9 +420,9 @@ func (d *DependencyGitRepository) SetVersionString(versionString string) (err er
 	return nil
 }
 
-func (d *DependencyGitRepository) Update(options *UpdateDependenciesOptions) (changeSummary *ChangeSummary, err error) {
+func (d *DependencyGitRepository) Update(options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if options == nil {
-		return nil, TracedErrorNil("options")
+		return nil, errors.TracedErrorNil("options")
 	}
 
 	name, err := d.GetName()
@@ -424,14 +430,14 @@ func (d *DependencyGitRepository) Update(options *UpdateDependenciesOptions) (ch
 		return nil, err
 	}
 
-	changeSummary = NewChangeSummary()
+	changeSummary = changesummary.NewChangeSummary()
 
 	if options.Verbose {
-		LogInfof("Update git repository dependency '%s' started.", name)
+		logging.LogInfof("Update git repository dependency '%s' started.", name)
 	}
 
 	if !d.IsAtLeastOneSourceFileSet() {
-		return nil, TracedErrorf("No source files set for git repository dependency '%s'", name)
+		return nil, errors.TracedErrorf("No source files set for git repository dependency '%s'", name)
 	}
 
 	latestVersion, err := d.GetNewestVersionAsString(
@@ -460,26 +466,26 @@ func (d *DependencyGitRepository) Update(options *UpdateDependenciesOptions) (ch
 	}
 
 	if options.Verbose {
-		LogByChangeSummaryf(changeSummary, "Update git repository dependency '%s' finished.", name)
+		logging.LogByChangeSummaryf(changeSummary, "Update git repository dependency '%s' finished.", name)
 	}
 
 	return changeSummary, nil
 }
 
-func (d *DependencyGitRepository) UpdateVersionByStringInSourceFile(version string, sourceFile File, options *UpdateDependenciesOptions) (changeSummary *ChangeSummary, err error) {
+func (d *DependencyGitRepository) UpdateVersionByStringInSourceFile(version string, sourceFile File, options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if version == "" {
-		return nil, TracedErrorEmptyString("version")
+		return nil, errors.TracedErrorEmptyString("version")
 	}
 
 	if sourceFile == nil {
-		return nil, TracedErrorNil("sourceFile")
+		return nil, errors.TracedErrorNil("sourceFile")
 	}
 
 	if options == nil {
-		return nil, TracedErrorNil("options")
+		return nil, errors.TracedErrorNil("options")
 	}
 
-	changeSummary = NewChangeSummary()
+	changeSummary = changesummary.NewChangeSummary()
 
 	name, err := d.GetName()
 	if err != nil {
@@ -492,7 +498,7 @@ func (d *DependencyGitRepository) UpdateVersionByStringInSourceFile(version stri
 	}
 
 	if options.Verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Update of git repository dependency '%s' in '%s' started.",
 			name,
 			sourceFileUri,
@@ -518,5 +524,5 @@ func (d *DependencyGitRepository) UpdateVersionByStringInSourceFile(version stri
 		return fileChangeSummary, nil
 	}
 
-	return nil, TracedErrorf("Not implemneted for '%s'", sourceFileUri)
+	return nil, errors.TracedErrorf("Not implemneted for '%s'", sourceFileUri)
 }

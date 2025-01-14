@@ -11,6 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/asciich/asciichgolangpublic/datatypes/pointers"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func TestLocalFileImplementsFileInterface(t *testing.T) {
@@ -34,7 +35,6 @@ func TestLocalFileSetAndGetPath(t *testing.T) {
 	assert.EqualValues(nil, err)
 	assert.True(strings.HasSuffix(receivedPath, "/testpath"))
 }
-
 
 // TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileGetUriAsString(t *testing.T) {
@@ -502,7 +502,7 @@ func TestFileReplaceLineAfterLine(t *testing.T) {
 
 // TODO: Move to File_test.go and test for all File implementations.
 // Test if GetPath always returns an absolute value which stays the same even if the current working directory is changed.
-func TestLocalFileGetPathReturnsAbsoluteValue(t *testing.T) {
+func TestLocalFile_GetPathReturnsAbsoluteValue(t *testing.T) {
 	tests := []struct {
 		path string
 	}{
@@ -519,7 +519,7 @@ func TestLocalFileGetPathReturnsAbsoluteValue(t *testing.T) {
 
 				startPath, err := os.Getwd()
 				if err != nil {
-					LogFatalWithTrace(err)
+					logging.LogFatalWithTrace(err)
 				}
 
 				var path1 string

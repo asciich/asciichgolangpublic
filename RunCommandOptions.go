@@ -2,6 +2,8 @@ package asciichgolangpublic
 
 import (
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type RunCommandOptions struct {
@@ -26,7 +28,7 @@ func NewRunCommandOptions() (runCommandOptions *RunCommandOptions) {
 
 func (o *RunCommandOptions) GetCommand() (command []string, err error) {
 	if len(o.Command) <= 0 {
-		return nil, TracedError("command not set")
+		return nil, errors.TracedError("command not set")
 	}
 
 	command = aslices.GetDeepCopyOfStringsSlice(o.Command)
@@ -101,7 +103,7 @@ func (r *RunCommandOptions) GetRunAsRoot() (runAsRoot bool) {
 
 func (r *RunCommandOptions) GetStdinString() (stdinString string, err error) {
 	if r.StdinString == "" {
-		return "", TracedErrorf("StdinString not set")
+		return "", errors.TracedErrorf("StdinString not set")
 	}
 
 	return r.StdinString, nil
@@ -109,7 +111,7 @@ func (r *RunCommandOptions) GetStdinString() (stdinString string, err error) {
 
 func (r *RunCommandOptions) GetTimeoutString() (timeoutString string, err error) {
 	if r.TimeoutString == "" {
-		return "", TracedErrorf("TimeoutString not set")
+		return "", errors.TracedErrorf("TimeoutString not set")
 	}
 
 	return r.TimeoutString, nil
@@ -123,7 +125,7 @@ func (r *RunCommandOptions) GetVerbose() (verbose bool, err error) {
 func (r *RunCommandOptions) MustGetAllowAllExitCodes() (allowAllExitCodes bool) {
 	allowAllExitCodes, err := r.GetAllowAllExitCodes()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return allowAllExitCodes
@@ -132,7 +134,7 @@ func (r *RunCommandOptions) MustGetAllowAllExitCodes() (allowAllExitCodes bool) 
 func (r *RunCommandOptions) MustGetCommand() (command []string) {
 	command, err := r.GetCommand()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return command
@@ -141,7 +143,7 @@ func (r *RunCommandOptions) MustGetCommand() (command []string) {
 func (r *RunCommandOptions) MustGetJoinedCommand() (joinedCommand string) {
 	joinedCommand, err := r.GetJoinedCommand()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return joinedCommand
@@ -150,7 +152,7 @@ func (r *RunCommandOptions) MustGetJoinedCommand() (joinedCommand string) {
 func (r *RunCommandOptions) MustGetLiveOutputOnStdout() (liveOutputOnStdout bool) {
 	liveOutputOnStdout, err := r.GetLiveOutputOnStdout()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return liveOutputOnStdout
@@ -159,7 +161,7 @@ func (r *RunCommandOptions) MustGetLiveOutputOnStdout() (liveOutputOnStdout bool
 func (r *RunCommandOptions) MustGetStdinString() (stdinString string) {
 	stdinString, err := r.GetStdinString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return stdinString
@@ -168,7 +170,7 @@ func (r *RunCommandOptions) MustGetStdinString() (stdinString string) {
 func (r *RunCommandOptions) MustGetTimeoutSecondsAsString() (timeoutSeconds string) {
 	timeoutSeconds, err := r.GetTimeoutSecondsAsString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return timeoutSeconds
@@ -177,7 +179,7 @@ func (r *RunCommandOptions) MustGetTimeoutSecondsAsString() (timeoutSeconds stri
 func (r *RunCommandOptions) MustGetTimeoutString() (timeoutString string) {
 	timeoutString, err := r.GetTimeoutString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return timeoutString
@@ -186,7 +188,7 @@ func (r *RunCommandOptions) MustGetTimeoutString() (timeoutString string) {
 func (r *RunCommandOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := r.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -195,42 +197,42 @@ func (r *RunCommandOptions) MustGetVerbose() (verbose bool) {
 func (r *RunCommandOptions) MustSetAllowAllExitCodes(allowAllExitCodes bool) {
 	err := r.SetAllowAllExitCodes(allowAllExitCodes)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (r *RunCommandOptions) MustSetCommand(command []string) {
 	err := r.SetCommand(command)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (r *RunCommandOptions) MustSetLiveOutputOnStdout(liveOutputOnStdout bool) {
 	err := r.SetLiveOutputOnStdout(liveOutputOnStdout)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (r *RunCommandOptions) MustSetStdinString(stdinString string) {
 	err := r.SetStdinString(stdinString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (r *RunCommandOptions) MustSetTimeoutString(timeoutString string) {
 	err := r.SetTimeoutString(timeoutString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (r *RunCommandOptions) MustSetVerbose(verbose bool) {
 	err := r.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
@@ -242,11 +244,11 @@ func (r *RunCommandOptions) SetAllowAllExitCodes(allowAllExitCodes bool) (err er
 
 func (r *RunCommandOptions) SetCommand(command []string) (err error) {
 	if command == nil {
-		return TracedErrorf("command is nil")
+		return errors.TracedErrorf("command is nil")
 	}
 
 	if len(command) <= 0 {
-		return TracedErrorf("command has no elements")
+		return errors.TracedErrorf("command has no elements")
 	}
 
 	r.Command = command
@@ -266,7 +268,7 @@ func (r *RunCommandOptions) SetRunAsRoot(runAsRoot bool) {
 
 func (r *RunCommandOptions) SetStdinString(stdinString string) (err error) {
 	if stdinString == "" {
-		return TracedErrorf("stdinString is empty string")
+		return errors.TracedErrorf("stdinString is empty string")
 	}
 
 	r.StdinString = stdinString
@@ -276,7 +278,7 @@ func (r *RunCommandOptions) SetStdinString(stdinString string) (err error) {
 
 func (r *RunCommandOptions) SetTimeoutString(timeoutString string) (err error) {
 	if timeoutString == "" {
-		return TracedErrorf("timeoutString is empty string")
+		return errors.TracedErrorf("timeoutString is empty string")
 	}
 
 	r.TimeoutString = timeoutString

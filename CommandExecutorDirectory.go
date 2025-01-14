@@ -5,8 +5,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 // A CommandExecutorDirectory implements the functionality of a `Directory` by
@@ -26,11 +28,11 @@ type CommandExecutorDirectory struct {
 
 func GetCommandExecutorDirectoryByPath(commandExecutor CommandExecutor, path string) (c *CommandExecutorDirectory, err error) {
 	if commandExecutor == nil {
-		return nil, TracedErrorNil("commandExecutor")
+		return nil, errors.TracedErrorNil("commandExecutor")
 	}
 
 	if path == "" {
-		return nil, TracedErrorEmptyString("path")
+		return nil, errors.TracedErrorEmptyString("path")
 	}
 
 	c, err = NewCommandExecutorDirectory(commandExecutor)
@@ -48,7 +50,7 @@ func GetCommandExecutorDirectoryByPath(commandExecutor CommandExecutor, path str
 
 func GetLocalCommandExecutorDirectoryByPath(path string) (c *CommandExecutorDirectory, err error) {
 	if path == "" {
-		return nil, TracedErrorEmptyString("path")
+		return nil, errors.TracedErrorEmptyString("path")
 	}
 
 	return GetCommandExecutorDirectoryByPath(Bash(), path)
@@ -57,7 +59,7 @@ func GetLocalCommandExecutorDirectoryByPath(path string) (c *CommandExecutorDire
 func MustGetCommandExecutorDirectoryByPath(commandExecutor CommandExecutor, path string) (c *CommandExecutorDirectory) {
 	c, err := GetCommandExecutorDirectoryByPath(commandExecutor, path)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return c
@@ -66,7 +68,7 @@ func MustGetCommandExecutorDirectoryByPath(commandExecutor CommandExecutor, path
 func MustGetLocalCommandExecutorDirectoryByPath(path string) (c *CommandExecutorDirectory) {
 	c, err := GetLocalCommandExecutorDirectoryByPath(path)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return c
@@ -75,7 +77,7 @@ func MustGetLocalCommandExecutorDirectoryByPath(path string) (c *CommandExecutor
 func MustNewCommandExecutorDirectory(commandExecutor CommandExecutor) (c *CommandExecutorDirectory) {
 	c, err := NewCommandExecutorDirectory(commandExecutor)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return c
@@ -83,7 +85,7 @@ func MustNewCommandExecutorDirectory(commandExecutor CommandExecutor) (c *Comman
 
 func NewCommandExecutorDirectory(commandExecutor CommandExecutor) (c *CommandExecutorDirectory, err error) {
 	if commandExecutor == nil {
-		return nil, TracedErrorNil("commandExecutor")
+		return nil, errors.TracedErrorNil("commandExecutor")
 	}
 
 	c = new(CommandExecutorDirectory)
@@ -99,7 +101,7 @@ func NewCommandExecutorDirectory(commandExecutor CommandExecutor) (c *CommandExe
 
 func (c *CommandExecutorDirectory) Chmod(chmodOptions *ChmodOptions) (err error) {
 	if chmodOptions == nil {
-		return TracedErrorNil("chmodOptions")
+		return errors.TracedErrorNil("chmodOptions")
 	}
 
 	commandExecutor, dirPath, hostDescription, err := c.GetCommandExecutorAndDirPathAndHostDescription()
@@ -129,7 +131,7 @@ func (c *CommandExecutorDirectory) Chmod(chmodOptions *ChmodOptions) (err error)
 	}
 
 	if chmodOptions.Verbose {
-		LogChangedf(
+		logging.LogChangedf(
 			"Chmod '%s' for '%s' on '%s'",
 			permissionString,
 			dirPath,
@@ -142,7 +144,7 @@ func (c *CommandExecutorDirectory) Chmod(chmodOptions *ChmodOptions) (err error)
 
 func (c *CommandExecutorDirectory) CopyContentToDirectory(destinationDir Directory, verbose bool) (err error) {
 	if destinationDir == nil {
-		return TracedErrorNil("destinationDir")
+		return errors.TracedErrorNil("destinationDir")
 	}
 
 	commandExecutor, srcDirPath, srcHostDescription, err := c.GetCommandExecutorAndDirPathAndHostDescription()
@@ -156,7 +158,7 @@ func (c *CommandExecutorDirectory) CopyContentToDirectory(destinationDir Directo
 	}
 
 	if srcHostDescription != destHostDescription {
-		return TracedErrorf(
+		return errors.TracedErrorf(
 			"Copy from one host to another not imlemented. srcHostDescription='%s' != destHostDescription='%s'",
 			srcHostDescription,
 			destHostDescription,
@@ -180,7 +182,7 @@ func (c *CommandExecutorDirectory) CopyContentToDirectory(destinationDir Directo
 	}
 
 	if verbose {
-		LogChangedf(
+		logging.LogChangedf(
 			"Copied directory '%s' on '%s' to '%s' on '%s'",
 			srcDirPath,
 			srcHostDescription,
@@ -204,7 +206,7 @@ func (c *CommandExecutorDirectory) Create(verbose bool) (err error) {
 	}
 
 	if exists {
-		LogInfof(
+		logging.LogInfof(
 			"Directory '%s' on '%s' already exists.",
 			dirPath,
 			hostDescription,
@@ -220,7 +222,7 @@ func (c *CommandExecutorDirectory) Create(verbose bool) (err error) {
 			return err
 		}
 
-		LogChangedf(
+		logging.LogChangedf(
 			"Directory '%s' on '%s' created.",
 			dirPath,
 			hostDescription,
@@ -232,7 +234,7 @@ func (c *CommandExecutorDirectory) Create(verbose bool) (err error) {
 
 func (c *CommandExecutorDirectory) CreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory Directory, err error) {
 	if subDirectoryName == "" {
-		return nil, TracedErrorEmptyString("subDirectoryName")
+		return nil, errors.TracedErrorEmptyString("subDirectoryName")
 	}
 
 	createdSubDirectory, err = c.GetSubDirectory(subDirectoryName)
@@ -255,7 +257,7 @@ func (c *CommandExecutorDirectory) Delete(verbose bool) (err error) {
 	}
 
 	if !Paths().IsAbsolutePath(dirPath) {
-		return TracedErrorf(
+		return errors.TracedErrorf(
 			"For security reasons deleting a directory is only implemented for absolute paths but got '%s'",
 			dirPath,
 		)
@@ -277,13 +279,13 @@ func (c *CommandExecutorDirectory) Delete(verbose bool) (err error) {
 			return err
 		}
 
-		LogChangedf(
+		logging.LogChangedf(
 			"Directory '%s' on '%s' deleted.",
 			dirPath,
 			hostDescription,
 		)
 	} else {
-		LogInfof(
+		logging.LogInfof(
 			"Directory '%s' is already absent on '%s'.",
 			dirPath,
 			hostDescription,
@@ -322,7 +324,7 @@ func (c *CommandExecutorDirectory) Exists(verbose bool) (exists bool, err error)
 	} else if output == "no" {
 		exists = false
 	} else {
-		return false, TracedErrorf(
+		return false, errors.TracedErrorf(
 			"Unexpected output when evalution directory '%s' exists on '%s'",
 			dirPath,
 			hostDescription,
@@ -331,13 +333,13 @@ func (c *CommandExecutorDirectory) Exists(verbose bool) (exists bool, err error)
 
 	if verbose {
 		if exists {
-			LogInfof(
+			logging.LogInfof(
 				"Directory '%s' exists on host '%s'.",
 				dirPath,
 				hostDescription,
 			)
 		} else {
-			LogInfof(
+			logging.LogInfof(
 				"Directory '%s' exists on host '%s'.",
 				dirPath,
 				hostDescription,
@@ -357,7 +359,7 @@ func (c *CommandExecutorDirectory) GetBaseName() (baseName string, err error) {
 	baseName = filepath.Base(dirPath)
 
 	if baseName == "" {
-		return "", TracedError("baseName is nil after evaluation")
+		return "", errors.TracedError("baseName is nil after evaluation")
 	}
 
 	return baseName, nil
@@ -407,7 +409,7 @@ func (c *CommandExecutorDirectory) GetDirName() (parentPath string, err error) {
 
 func (c *CommandExecutorDirectory) GetDirPath() (dirPath string, err error) {
 	if c.dirPath == "" {
-		return "", TracedErrorf("dirPath not set")
+		return "", errors.TracedErrorf("dirPath not set")
 	}
 
 	return c.dirPath, nil
@@ -415,7 +417,7 @@ func (c *CommandExecutorDirectory) GetDirPath() (dirPath string, err error) {
 
 func (c *CommandExecutorDirectory) GetFileInDirectory(pathToFile ...string) (file File, err error) {
 	if len(pathToFile) <= 0 {
-		return nil, TracedErrorNil("pathToFile")
+		return nil, errors.TracedErrorNil("pathToFile")
 	}
 
 	commandExecutor, dirPath, err := c.GetCommandExecutorAndDirPath()
@@ -428,7 +430,7 @@ func (c *CommandExecutorDirectory) GetFileInDirectory(pathToFile ...string) (fil
 	toCheck := astrings.EnsureSuffix(dirPath, "/")
 
 	if !strings.HasPrefix(filePath, toCheck) {
-		return nil, TracedErrorf(
+		return nil, errors.TracedErrorf(
 			"filePath '%s' does not start with dirPath '%s' as expected.",
 			filePath,
 			dirPath,
@@ -483,7 +485,7 @@ func (c *CommandExecutorDirectory) GetLocalPath() (localPath string, err error) 
 			return "", err
 		}
 
-		return "", TracedErrorf("Directory is on '%s', not on localhost", hostDescription)
+		return "", errors.TracedErrorf("Directory is on '%s', not on localhost", hostDescription)
 	}
 }
 
@@ -511,7 +513,7 @@ func (c *CommandExecutorDirectory) GetPath() (path string, err error) {
 	}
 
 	if !Paths().IsAbsolutePath(path) {
-		return "", TracedErrorf("path '%s' is not absolute.", path)
+		return "", errors.TracedErrorf("path '%s' is not absolute.", path)
 	}
 
 	return path, nil
@@ -519,7 +521,7 @@ func (c *CommandExecutorDirectory) GetPath() (path string, err error) {
 
 func (c *CommandExecutorDirectory) GetSubDirectory(path ...string) (subDirectory Directory, err error) {
 	if len(path) <= 0 {
-		return nil, TracedErrorNil("path")
+		return nil, errors.TracedErrorNil("path")
 	}
 
 	commandExecutor, dirPath, err := c.GetCommandExecutorAndDirPath()
@@ -539,7 +541,7 @@ func (c *CommandExecutorDirectory) GetSubDirectory(path ...string) (subDirectory
 		subDirPath,
 		toCheck,
 	) {
-		return nil, TracedErrorf(
+		return nil, errors.TracedErrorf(
 			"subDirPath '%s' does not start with '%s' as expected.",
 			subDirPath,
 			toCheck,
@@ -567,7 +569,7 @@ func (c *CommandExecutorDirectory) IsLocalDirectory() (isLocalDirectory bool, er
 
 func (c *CommandExecutorDirectory) ListFilePaths(listFileOptions *ListFileOptions) (filePaths []string, err error) {
 	if listFileOptions == nil {
-		return nil, TracedErrorNil("listFileOptions")
+		return nil, errors.TracedErrorNil("listFileOptions")
 	}
 
 	commandExecutor, err := c.GetCommandExecutor()
@@ -613,7 +615,7 @@ func (c *CommandExecutorDirectory) ListFilePaths(listFileOptions *ListFileOption
 
 func (c *CommandExecutorDirectory) ListFiles(listFileOptions *ListFileOptions) (files []File, err error) {
 	if listFileOptions == nil {
-		return nil, TracedErrorNil("listFileOptions")
+		return nil, errors.TracedErrorNil("listFileOptions")
 	}
 
 	optionsToUse := listFileOptions.GetDeepCopy()
@@ -640,7 +642,7 @@ func (c *CommandExecutorDirectory) ListFiles(listFileOptions *ListFileOptions) (
 
 func (c *CommandExecutorDirectory) ListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory, err error) {
 	if options == nil {
-		return nil, TracedErrorNil("options")
+		return nil, errors.TracedErrorNil("options")
 	}
 
 	path, err := c.GetPath()
@@ -708,28 +710,28 @@ func (c *CommandExecutorDirectory) ListSubDirectories(options *ListDirectoryOpti
 func (c *CommandExecutorDirectory) MustChmod(chmodOptions *ChmodOptions) {
 	err := c.Chmod(chmodOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorDirectory) MustCopyContentToDirectory(destinationDir Directory, verbose bool) {
 	err := c.CopyContentToDirectory(destinationDir, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorDirectory) MustCreate(verbose bool) {
 	err := c.Create(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorDirectory) MustCreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory Directory) {
 	createdSubDirectory, err := c.CreateSubDirectory(subDirectoryName, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdSubDirectory
@@ -738,14 +740,14 @@ func (c *CommandExecutorDirectory) MustCreateSubDirectory(subDirectoryName strin
 func (c *CommandExecutorDirectory) MustDelete(verbose bool) {
 	err := c.Delete(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorDirectory) MustExists(verbose bool) (exists bool) {
 	exists, err := c.Exists(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return exists
@@ -754,7 +756,7 @@ func (c *CommandExecutorDirectory) MustExists(verbose bool) (exists bool) {
 func (c *CommandExecutorDirectory) MustGetBaseName() (baseName string) {
 	baseName, err := c.GetBaseName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return baseName
@@ -763,7 +765,7 @@ func (c *CommandExecutorDirectory) MustGetBaseName() (baseName string) {
 func (c *CommandExecutorDirectory) MustGetCommandExecutor() (commandExecutor CommandExecutor) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandExecutor
@@ -772,7 +774,7 @@ func (c *CommandExecutorDirectory) MustGetCommandExecutor() (commandExecutor Com
 func (c *CommandExecutorDirectory) MustGetCommandExecutorAndDirPath() (commandExecutor CommandExecutor, dirPath string) {
 	commandExecutor, dirPath, err := c.GetCommandExecutorAndDirPath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandExecutor, dirPath
@@ -781,7 +783,7 @@ func (c *CommandExecutorDirectory) MustGetCommandExecutorAndDirPath() (commandEx
 func (c *CommandExecutorDirectory) MustGetCommandExecutorAndDirPathAndHostDescription() (commandExecutor CommandExecutor, dirPath string, hostDescription string) {
 	commandExecutor, dirPath, hostDescription, err := c.GetCommandExecutorAndDirPathAndHostDescription()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandExecutor, dirPath, hostDescription
@@ -790,7 +792,7 @@ func (c *CommandExecutorDirectory) MustGetCommandExecutorAndDirPathAndHostDescri
 func (c *CommandExecutorDirectory) MustGetDirName() (dirName string) {
 	dirName, err := c.GetDirName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return dirName
@@ -799,7 +801,7 @@ func (c *CommandExecutorDirectory) MustGetDirName() (dirName string) {
 func (c *CommandExecutorDirectory) MustGetDirPath() (dirPath string) {
 	dirPath, err := c.GetDirPath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return dirPath
@@ -808,7 +810,7 @@ func (c *CommandExecutorDirectory) MustGetDirPath() (dirPath string) {
 func (c *CommandExecutorDirectory) MustGetFileInDirectory(pathToFile ...string) (file File) {
 	file, err := c.GetFileInDirectory(pathToFile...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return file
@@ -817,7 +819,7 @@ func (c *CommandExecutorDirectory) MustGetFileInDirectory(pathToFile ...string) 
 func (c *CommandExecutorDirectory) MustGetHostDescription() (hostDescription string) {
 	hostDescription, err := c.GetHostDescription()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hostDescription
@@ -826,7 +828,7 @@ func (c *CommandExecutorDirectory) MustGetHostDescription() (hostDescription str
 func (c *CommandExecutorDirectory) MustGetLocalPath() (localPath string) {
 	localPath, err := c.GetLocalPath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return localPath
@@ -835,7 +837,7 @@ func (c *CommandExecutorDirectory) MustGetLocalPath() (localPath string) {
 func (c *CommandExecutorDirectory) MustGetParentDirectory() (parent Directory) {
 	parent, err := c.GetParentDirectory()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return parent
@@ -844,7 +846,7 @@ func (c *CommandExecutorDirectory) MustGetParentDirectory() (parent Directory) {
 func (c *CommandExecutorDirectory) MustGetPath() (path string) {
 	path, err := c.GetPath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return path
@@ -853,7 +855,7 @@ func (c *CommandExecutorDirectory) MustGetPath() (path string) {
 func (c *CommandExecutorDirectory) MustGetSubDirectory(path ...string) (subDirectory Directory) {
 	subDirectory, err := c.GetSubDirectory(path...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return subDirectory
@@ -862,7 +864,7 @@ func (c *CommandExecutorDirectory) MustGetSubDirectory(path ...string) (subDirec
 func (c *CommandExecutorDirectory) MustIsLocalDirectory() (isLocalDirectory bool) {
 	isLocalDirectory, err := c.IsLocalDirectory()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isLocalDirectory
@@ -871,7 +873,7 @@ func (c *CommandExecutorDirectory) MustIsLocalDirectory() (isLocalDirectory bool
 func (c *CommandExecutorDirectory) MustListFilePaths(listFileOptions *ListFileOptions) (filePaths []string) {
 	filePaths, err := c.ListFilePaths(listFileOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return filePaths
@@ -880,7 +882,7 @@ func (c *CommandExecutorDirectory) MustListFilePaths(listFileOptions *ListFileOp
 func (c *CommandExecutorDirectory) MustListFiles(listFileOptions *ListFileOptions) (files []File) {
 	files, err := c.ListFiles(listFileOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return files
@@ -889,7 +891,7 @@ func (c *CommandExecutorDirectory) MustListFiles(listFileOptions *ListFileOption
 func (c *CommandExecutorDirectory) MustListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory) {
 	subDirectories, err := c.ListSubDirectories(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return subDirectories
@@ -898,14 +900,14 @@ func (c *CommandExecutorDirectory) MustListSubDirectories(options *ListDirectory
 func (c *CommandExecutorDirectory) MustSetCommandExecutor(commandExecutor CommandExecutor) {
 	err := c.SetCommandExecutor(commandExecutor)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorDirectory) MustSetDirPath(dirPath string) {
 	err := c.SetDirPath(dirPath)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
@@ -917,7 +919,7 @@ func (c *CommandExecutorDirectory) SetCommandExecutor(commandExecutor CommandExe
 
 func (c *CommandExecutorDirectory) SetDirPath(dirPath string) (err error) {
 	if dirPath == "" {
-		return TracedErrorf("dirPath is empty string")
+		return errors.TracedErrorf("dirPath is empty string")
 	}
 
 	c.dirPath = dirPath

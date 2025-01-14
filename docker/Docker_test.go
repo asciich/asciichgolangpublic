@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func getDockerImplementationByName(implementationName string) (docker Docker) {
@@ -12,7 +13,7 @@ func getDockerImplementationByName(implementationName string) (docker Docker) {
 		return MustGetLocalCommandExecutorDocker()
 	}
 
-	asciichgolangpublic.LogFatalf("Unknown implementation name '%s'", implementationName)
+	logging.LogFatalWithTracef("Unknown implementation name '%s'", implementationName)
 	return nil
 }
 

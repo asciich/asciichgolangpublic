@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 // Obsolete: Use https.RequestOptions instead
 type HttpRequestOptions struct {
 	URL               string
@@ -15,7 +20,7 @@ func NewHttpRequestOptions() (h *HttpRequestOptions) {
 
 func (h *HttpRequestOptions) GetOutputPath() (outputPath string, err error) {
 	if h.OutputPath == "" {
-		return "", TracedErrorf("OutputPath not set")
+		return "", errors.TracedErrorf("OutputPath not set")
 	}
 
 	return h.OutputPath, nil
@@ -28,7 +33,7 @@ func (h *HttpRequestOptions) GetOverwriteExisting() (overwriteExisting bool, err
 
 func (h *HttpRequestOptions) GetURL() (uRL string, err error) {
 	if h.URL == "" {
-		return "", TracedErrorf("URL not set")
+		return "", errors.TracedErrorf("URL not set")
 	}
 
 	return h.URL, nil
@@ -42,7 +47,7 @@ func (h *HttpRequestOptions) GetVerbose() (verbose bool, err error) {
 func (h *HttpRequestOptions) MustGetOutputFile() (outputFile File) {
 	outputFile, err := h.GetOutputFile()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return outputFile
@@ -51,7 +56,7 @@ func (h *HttpRequestOptions) MustGetOutputFile() (outputFile File) {
 func (h *HttpRequestOptions) MustGetOutputFilePath() (filePath string) {
 	filePath, err := h.GetOutputFilePath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return filePath
@@ -60,7 +65,7 @@ func (h *HttpRequestOptions) MustGetOutputFilePath() (filePath string) {
 func (h *HttpRequestOptions) MustGetOutputPath() (outputPath string) {
 	outputPath, err := h.GetOutputPath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return outputPath
@@ -69,7 +74,7 @@ func (h *HttpRequestOptions) MustGetOutputPath() (outputPath string) {
 func (h *HttpRequestOptions) MustGetOverwriteExisting() (overwriteExisting bool) {
 	overwriteExisting, err := h.GetOverwriteExisting()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return overwriteExisting
@@ -78,7 +83,7 @@ func (h *HttpRequestOptions) MustGetOverwriteExisting() (overwriteExisting bool)
 func (h *HttpRequestOptions) MustGetURL() (uRL string) {
 	uRL, err := h.GetURL()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return uRL
@@ -87,7 +92,7 @@ func (h *HttpRequestOptions) MustGetURL() (uRL string) {
 func (h *HttpRequestOptions) MustGetUrl() (url *URL) {
 	url, err := h.GetUrl()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return url
@@ -96,7 +101,7 @@ func (h *HttpRequestOptions) MustGetUrl() (url *URL) {
 func (h *HttpRequestOptions) MustGetUrlAsString() (url string) {
 	url, err := h.GetUrlAsString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return url
@@ -105,7 +110,7 @@ func (h *HttpRequestOptions) MustGetUrlAsString() (url string) {
 func (h *HttpRequestOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := h.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -114,41 +119,41 @@ func (h *HttpRequestOptions) MustGetVerbose() (verbose bool) {
 func (h *HttpRequestOptions) MustSetOutputPath(outputPath string) {
 	err := h.SetOutputPath(outputPath)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (h *HttpRequestOptions) MustSetOutputPathByFile(file File) {
 	err := h.SetOutputPathByFile(file)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (h *HttpRequestOptions) MustSetOverwriteExisting(overwriteExisting bool) {
 	err := h.SetOverwriteExisting(overwriteExisting)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (h *HttpRequestOptions) MustSetURL(uRL string) {
 	err := h.SetURL(uRL)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (h *HttpRequestOptions) MustSetVerbose(verbose bool) {
 	err := h.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (h *HttpRequestOptions) SetOutputPath(outputPath string) (err error) {
 	if outputPath == "" {
-		return TracedErrorf("outputPath is empty string")
+		return errors.TracedErrorf("outputPath is empty string")
 	}
 
 	h.OutputPath = outputPath
@@ -164,7 +169,7 @@ func (h *HttpRequestOptions) SetOverwriteExisting(overwriteExisting bool) (err e
 
 func (h *HttpRequestOptions) SetURL(uRL string) (err error) {
 	if uRL == "" {
-		return TracedErrorf("uRL is empty string")
+		return errors.TracedErrorf("uRL is empty string")
 	}
 
 	h.URL = uRL
@@ -233,7 +238,7 @@ func (o *HttpRequestOptions) GetUrl() (url *URL, err error) {
 
 func (o *HttpRequestOptions) GetUrlAsString() (url string, err error) {
 	if len(o.URL) <= 0 {
-		return "", TracedError("Url not set")
+		return "", errors.TracedError("Url not set")
 	}
 
 	return o.URL, nil
@@ -241,7 +246,7 @@ func (o *HttpRequestOptions) GetUrlAsString() (url string, err error) {
 
 func (o *HttpRequestOptions) SetOutputPathByFile(file File) (err error) {
 	if file == nil {
-		return TracedErrorNil("file")
+		return errors.TracedErrorNil("file")
 	}
 
 	localPath, err := file.GetLocalPath()

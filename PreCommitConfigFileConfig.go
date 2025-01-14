@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type PreCommitConfigFileConfig struct {
 	Repos []PreCommitConfigFileConfigRepo `yaml:"repos"`
 }
@@ -28,7 +33,7 @@ func NewPreCommitConfigFileConfigRepoHook() (p *PreCommitConfigFileConfigRepoHoo
 
 func (p *PreCommitConfigFileConfig) GetRepoByUrl(repoUrl string) (repo *PreCommitConfigFileConfigRepo, err error) {
 	if repoUrl == "" {
-		return nil, TracedErrorEmptyString("repoUrl")
+		return nil, errors.TracedErrorEmptyString("repoUrl")
 	}
 
 	repos, err := p.GetRepos()
@@ -47,7 +52,7 @@ func (p *PreCommitConfigFileConfig) GetRepoByUrl(repoUrl string) (repo *PreCommi
 		}
 	}
 
-	return nil, TracedErrorf(
+	return nil, errors.TracedErrorf(
 		"No pre-commit repo '%s' found.",
 		repoUrl,
 	)
@@ -55,11 +60,11 @@ func (p *PreCommitConfigFileConfig) GetRepoByUrl(repoUrl string) (repo *PreCommi
 
 func (p *PreCommitConfigFileConfig) GetRepos() (repos []PreCommitConfigFileConfigRepo, err error) {
 	if p.Repos == nil {
-		return nil, TracedErrorf("Repos not set")
+		return nil, errors.TracedErrorf("Repos not set")
 	}
 
 	if len(p.Repos) <= 0 {
-		return nil, TracedErrorf("Repos has no elements")
+		return nil, errors.TracedErrorf("Repos has no elements")
 	}
 
 	return p.Repos, nil
@@ -68,7 +73,7 @@ func (p *PreCommitConfigFileConfig) GetRepos() (repos []PreCommitConfigFileConfi
 func (p *PreCommitConfigFileConfig) MustGetRepoByUrl(repoUrl string) (repo *PreCommitConfigFileConfigRepo) {
 	repo, err := p.GetRepoByUrl(repoUrl)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return repo
@@ -77,7 +82,7 @@ func (p *PreCommitConfigFileConfig) MustGetRepoByUrl(repoUrl string) (repo *PreC
 func (p *PreCommitConfigFileConfig) MustGetRepos() (repos []PreCommitConfigFileConfigRepo) {
 	repos, err := p.GetRepos()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return repos
@@ -86,24 +91,24 @@ func (p *PreCommitConfigFileConfig) MustGetRepos() (repos []PreCommitConfigFileC
 func (p *PreCommitConfigFileConfig) MustSetRepos(repos []PreCommitConfigFileConfigRepo) {
 	err := p.SetRepos(repos)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (p *PreCommitConfigFileConfig) MustSetRepositoryVersion(repoUrl string, newVersion string) {
 	err := p.SetRepositoryVersion(repoUrl, newVersion)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (p *PreCommitConfigFileConfig) SetRepos(repos []PreCommitConfigFileConfigRepo) (err error) {
 	if repos == nil {
-		return TracedErrorf("repos is nil")
+		return errors.TracedErrorf("repos is nil")
 	}
 
 	if len(repos) <= 0 {
-		return TracedErrorf("repos has no elements")
+		return errors.TracedErrorf("repos has no elements")
 	}
 
 	p.Repos = repos
@@ -113,11 +118,11 @@ func (p *PreCommitConfigFileConfig) SetRepos(repos []PreCommitConfigFileConfigRe
 
 func (p *PreCommitConfigFileConfig) SetRepositoryVersion(repoUrl string, newVersion string) (err error) {
 	if repoUrl == "" {
-		return TracedErrorEmptyString("repoUrl")
+		return errors.TracedErrorEmptyString("repoUrl")
 	}
 
 	if newVersion == "" {
-		return TracedErrorEmptyString("newVersion")
+		return errors.TracedErrorEmptyString("newVersion")
 	}
 
 	repo, err := p.GetRepoByUrl(repoUrl)
@@ -135,11 +140,11 @@ func (p *PreCommitConfigFileConfig) SetRepositoryVersion(repoUrl string, newVers
 
 func (p *PreCommitConfigFileConfigRepo) GetHooks() (hooks []PreCommitConfigFileConfigRepoHook, err error) {
 	if p.Hooks == nil {
-		return nil, TracedErrorf("Hooks not set")
+		return nil, errors.TracedErrorf("Hooks not set")
 	}
 
 	if len(p.Hooks) <= 0 {
-		return nil, TracedErrorf("Hooks has no elements")
+		return nil, errors.TracedErrorf("Hooks has no elements")
 	}
 
 	return p.Hooks, nil
@@ -147,7 +152,7 @@ func (p *PreCommitConfigFileConfigRepo) GetHooks() (hooks []PreCommitConfigFileC
 
 func (p *PreCommitConfigFileConfigRepo) GetRepo() (repo string, err error) {
 	if p.Repo == "" {
-		return "", TracedErrorf("Repo not set")
+		return "", errors.TracedErrorf("Repo not set")
 	}
 
 	return p.Repo, nil
@@ -155,7 +160,7 @@ func (p *PreCommitConfigFileConfigRepo) GetRepo() (repo string, err error) {
 
 func (p *PreCommitConfigFileConfigRepo) GetRev() (rev string, err error) {
 	if p.Rev == "" {
-		return "", TracedErrorf("Rev not set")
+		return "", errors.TracedErrorf("Rev not set")
 	}
 
 	return p.Rev, nil
@@ -164,7 +169,7 @@ func (p *PreCommitConfigFileConfigRepo) GetRev() (rev string, err error) {
 func (p *PreCommitConfigFileConfigRepo) MustGetHooks() (hooks []PreCommitConfigFileConfigRepoHook) {
 	hooks, err := p.GetHooks()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hooks
@@ -173,7 +178,7 @@ func (p *PreCommitConfigFileConfigRepo) MustGetHooks() (hooks []PreCommitConfigF
 func (p *PreCommitConfigFileConfigRepo) MustGetRepo() (repo string) {
 	repo, err := p.GetRepo()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return repo
@@ -182,7 +187,7 @@ func (p *PreCommitConfigFileConfigRepo) MustGetRepo() (repo string) {
 func (p *PreCommitConfigFileConfigRepo) MustGetRev() (rev string) {
 	rev, err := p.GetRev()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return rev
@@ -191,31 +196,31 @@ func (p *PreCommitConfigFileConfigRepo) MustGetRev() (rev string) {
 func (p *PreCommitConfigFileConfigRepo) MustSetHooks(hooks []PreCommitConfigFileConfigRepoHook) {
 	err := p.SetHooks(hooks)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (p *PreCommitConfigFileConfigRepo) MustSetRepo(repo string) {
 	err := p.SetRepo(repo)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (p *PreCommitConfigFileConfigRepo) MustSetRev(rev string) {
 	err := p.SetRev(rev)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (p *PreCommitConfigFileConfigRepo) SetHooks(hooks []PreCommitConfigFileConfigRepoHook) (err error) {
 	if hooks == nil {
-		return TracedErrorf("hooks is nil")
+		return errors.TracedErrorf("hooks is nil")
 	}
 
 	if len(hooks) <= 0 {
-		return TracedErrorf("hooks has no elements")
+		return errors.TracedErrorf("hooks has no elements")
 	}
 
 	p.Hooks = hooks
@@ -225,7 +230,7 @@ func (p *PreCommitConfigFileConfigRepo) SetHooks(hooks []PreCommitConfigFileConf
 
 func (p *PreCommitConfigFileConfigRepo) SetRepo(repo string) (err error) {
 	if repo == "" {
-		return TracedErrorf("repo is empty string")
+		return errors.TracedErrorf("repo is empty string")
 	}
 
 	p.Repo = repo
@@ -235,7 +240,7 @@ func (p *PreCommitConfigFileConfigRepo) SetRepo(repo string) (err error) {
 
 func (p *PreCommitConfigFileConfigRepo) SetRev(rev string) (err error) {
 	if rev == "" {
-		return TracedErrorf("rev is empty string")
+		return errors.TracedErrorf("rev is empty string")
 	}
 
 	p.Rev = rev
@@ -245,7 +250,7 @@ func (p *PreCommitConfigFileConfigRepo) SetRev(rev string) (err error) {
 
 func (p *PreCommitConfigFileConfigRepoHook) GetID() (iD string, err error) {
 	if p.ID == "" {
-		return "", TracedErrorf("ID not set")
+		return "", errors.TracedErrorf("ID not set")
 	}
 
 	return p.ID, nil
@@ -254,7 +259,7 @@ func (p *PreCommitConfigFileConfigRepoHook) GetID() (iD string, err error) {
 func (p *PreCommitConfigFileConfigRepoHook) MustGetID() (iD string) {
 	iD, err := p.GetID()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return iD
@@ -263,13 +268,13 @@ func (p *PreCommitConfigFileConfigRepoHook) MustGetID() (iD string) {
 func (p *PreCommitConfigFileConfigRepoHook) MustSetID(iD string) {
 	err := p.SetID(iD)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (p *PreCommitConfigFileConfigRepoHook) SetID(iD string) (err error) {
 	if iD == "" {
-		return TracedErrorf("iD is empty string")
+		return errors.TracedErrorf("iD is empty string")
 	}
 
 	p.ID = iD

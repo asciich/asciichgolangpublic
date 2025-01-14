@@ -5,6 +5,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type TcpPortsService struct{}
@@ -22,11 +25,11 @@ func TcpPorts() (t *TcpPortsService) {
 func (t *TcpPortsService) IsPortOpen(hostnameOrIp string, port int, verbose bool) (isOpen bool, err error) {
 	hostnameOrIp = strings.TrimSpace(hostnameOrIp)
 	if hostnameOrIp == "" {
-		return false, TracedErrorEmptyString("hostnameOrIp")
+		return false, errors.TracedErrorEmptyString("hostnameOrIp")
 	}
 
 	if port <= 0 {
-		return false, TracedErrorf("Invalid port number '%d'.", port)
+		return false, errors.TracedErrorf("Invalid port number '%d'.", port)
 	}
 
 	portString := strconv.Itoa(port)
@@ -50,9 +53,9 @@ func (t *TcpPortsService) IsPortOpen(hostnameOrIp string, port int, verbose bool
 
 	if verbose {
 		if isOpen {
-			LogInfof("Port '%d' on host '%s' is open.", port, hostnameOrIp)
+			logging.LogInfof("Port '%d' on host '%s' is open.", port, hostnameOrIp)
 		} else {
-			LogInfof("Port '%d' on host '%s' is NOT open.", port, hostnameOrIp)
+			logging.LogInfof("Port '%d' on host '%s' is NOT open.", port, hostnameOrIp)
 		}
 	}
 
@@ -62,7 +65,7 @@ func (t *TcpPortsService) IsPortOpen(hostnameOrIp string, port int, verbose bool
 func (t *TcpPortsService) MustIsPortOpen(hostnameOrIp string, port int, verbose bool) (isOpen bool) {
 	isOpen, err := t.IsPortOpen(hostnameOrIp, port, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isOpen

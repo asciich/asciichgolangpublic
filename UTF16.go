@@ -1,6 +1,8 @@
 package asciichgolangpublic
 
 import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
@@ -29,7 +31,7 @@ func (u *UTF16Service) DecodeAsBytes(utf16 []byte) (decoded []byte, err error) {
 
 	decoded, _, err = transform.Bytes(unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewDecoder(), utf16)
 	if err != nil {
-		return nil, TracedError(err)
+		return nil, errors.TracedError(err)
 	}
 
 	return decoded, nil
@@ -38,7 +40,7 @@ func (u *UTF16Service) DecodeAsBytes(utf16 []byte) (decoded []byte, err error) {
 func (u *UTF16Service) DecodeAsString(utf16 []byte) (decoded string, err error) {
 	decodedBytes, err := u.DecodeAsBytes(utf16)
 	if err != nil {
-		return "", TracedError(err)
+		return "", errors.TracedError(err)
 	}
 
 	decoded = string(decodedBytes)
@@ -49,7 +51,7 @@ func (u *UTF16Service) DecodeAsString(utf16 []byte) (decoded string, err error) 
 func (u *UTF16Service) MustDecodeAsBytes(utf16 []byte) (decoded []byte) {
 	decoded, err := u.DecodeAsBytes(utf16)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return decoded
@@ -58,7 +60,7 @@ func (u *UTF16Service) MustDecodeAsBytes(utf16 []byte) (decoded []byte) {
 func (u *UTF16Service) MustDecodeAsString(utf16 []byte) (decoded string) {
 	decoded, err := u.DecodeAsString(utf16)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return decoded

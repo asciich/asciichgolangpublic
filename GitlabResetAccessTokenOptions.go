@@ -2,6 +2,9 @@ package asciichgolangpublic
 
 import (
 	"fmt"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type GitlabResetAccessTokenOptions struct {
@@ -18,7 +21,7 @@ func NewGitlabResetAccessTokenOptions() (g *GitlabResetAccessTokenOptions) {
 
 func (g *GitlabResetAccessTokenOptions) GetGitlabContainerNameOnGitlabHost() (gitlabContainerNameOnGitlabHost string, err error) {
 	if g.GitlabContainerNameOnGitlabHost == "" {
-		return "", TracedErrorf("GitlabContainerNameOnGitlabHost not set")
+		return "", errors.TracedErrorf("GitlabContainerNameOnGitlabHost not set")
 	}
 
 	return g.GitlabContainerNameOnGitlabHost, nil
@@ -26,7 +29,7 @@ func (g *GitlabResetAccessTokenOptions) GetGitlabContainerNameOnGitlabHost() (gi
 
 func (g *GitlabResetAccessTokenOptions) GetGopassPathToStoreNewToken() (gopassPathToStoreNewToken string, err error) {
 	if g.GopassPathToStoreNewToken == "" {
-		return "", TracedErrorf("GopassPathToStoreNewToken not set")
+		return "", errors.TracedErrorf("GopassPathToStoreNewToken not set")
 	}
 
 	return g.GopassPathToStoreNewToken, nil
@@ -34,7 +37,7 @@ func (g *GitlabResetAccessTokenOptions) GetGopassPathToStoreNewToken() (gopassPa
 
 func (g *GitlabResetAccessTokenOptions) GetSshUserNameForGitlabHost() (sshUserNameForGitlabHost string, err error) {
 	if g.SshUserNameForGitlabHost == "" {
-		return "", TracedErrorf("SshUserNameForGitlabHost not set")
+		return "", errors.TracedErrorf("SshUserNameForGitlabHost not set")
 	}
 
 	return g.SshUserNameForGitlabHost, nil
@@ -48,7 +51,7 @@ func (g *GitlabResetAccessTokenOptions) GetVerbose() (verbose bool, err error) {
 func (g *GitlabResetAccessTokenOptions) MustGetGitlabContainerNameOnGitlabHost() (gitlabContainerNameOnGitlabHost string) {
 	gitlabContainerNameOnGitlabHost, err := g.GetGitlabContainerNameOnGitlabHost()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabContainerNameOnGitlabHost
@@ -57,7 +60,7 @@ func (g *GitlabResetAccessTokenOptions) MustGetGitlabContainerNameOnGitlabHost()
 func (g *GitlabResetAccessTokenOptions) MustGetGopassPathToStoreNewToken() (gopassPathToStoreNewToken string) {
 	gopassPathToStoreNewToken, err := g.GetGopassPathToStoreNewToken()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gopassPathToStoreNewToken
@@ -66,7 +69,7 @@ func (g *GitlabResetAccessTokenOptions) MustGetGopassPathToStoreNewToken() (gopa
 func (g *GitlabResetAccessTokenOptions) MustGetSshUserNameForGitlabHost() (sshUserNameForGitlabHost string) {
 	sshUserNameForGitlabHost, err := g.GetSshUserNameForGitlabHost()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sshUserNameForGitlabHost
@@ -75,7 +78,7 @@ func (g *GitlabResetAccessTokenOptions) MustGetSshUserNameForGitlabHost() (sshUs
 func (g *GitlabResetAccessTokenOptions) MustGetUsername() (username string) {
 	username, err := g.GetUsername()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return username
@@ -84,7 +87,7 @@ func (g *GitlabResetAccessTokenOptions) MustGetUsername() (username string) {
 func (g *GitlabResetAccessTokenOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := g.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -93,41 +96,41 @@ func (g *GitlabResetAccessTokenOptions) MustGetVerbose() (verbose bool) {
 func (g *GitlabResetAccessTokenOptions) MustSetGitlabContainerNameOnGitlabHost(gitlabContainerNameOnGitlabHost string) {
 	err := g.SetGitlabContainerNameOnGitlabHost(gitlabContainerNameOnGitlabHost)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabResetAccessTokenOptions) MustSetGopassPathToStoreNewToken(gopassPathToStoreNewToken string) {
 	err := g.SetGopassPathToStoreNewToken(gopassPathToStoreNewToken)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabResetAccessTokenOptions) MustSetSshUserNameForGitlabHost(sshUserNameForGitlabHost string) {
 	err := g.SetSshUserNameForGitlabHost(sshUserNameForGitlabHost)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabResetAccessTokenOptions) MustSetUsername(username string) {
 	err := g.SetUsername(username)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabResetAccessTokenOptions) MustSetVerbose(verbose bool) {
 	err := g.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabResetAccessTokenOptions) SetGitlabContainerNameOnGitlabHost(gitlabContainerNameOnGitlabHost string) (err error) {
 	if gitlabContainerNameOnGitlabHost == "" {
-		return TracedErrorf("gitlabContainerNameOnGitlabHost is empty string")
+		return errors.TracedErrorf("gitlabContainerNameOnGitlabHost is empty string")
 	}
 
 	g.GitlabContainerNameOnGitlabHost = gitlabContainerNameOnGitlabHost
@@ -137,7 +140,7 @@ func (g *GitlabResetAccessTokenOptions) SetGitlabContainerNameOnGitlabHost(gitla
 
 func (g *GitlabResetAccessTokenOptions) SetGopassPathToStoreNewToken(gopassPathToStoreNewToken string) (err error) {
 	if gopassPathToStoreNewToken == "" {
-		return TracedErrorf("gopassPathToStoreNewToken is empty string")
+		return errors.TracedErrorf("gopassPathToStoreNewToken is empty string")
 	}
 
 	g.GopassPathToStoreNewToken = gopassPathToStoreNewToken
@@ -147,7 +150,7 @@ func (g *GitlabResetAccessTokenOptions) SetGopassPathToStoreNewToken(gopassPathT
 
 func (g *GitlabResetAccessTokenOptions) SetSshUserNameForGitlabHost(sshUserNameForGitlabHost string) (err error) {
 	if sshUserNameForGitlabHost == "" {
-		return TracedErrorf("sshUserNameForGitlabHost is empty string")
+		return errors.TracedErrorf("sshUserNameForGitlabHost is empty string")
 	}
 
 	g.SshUserNameForGitlabHost = sshUserNameForGitlabHost
@@ -157,7 +160,7 @@ func (g *GitlabResetAccessTokenOptions) SetSshUserNameForGitlabHost(sshUserNameF
 
 func (g *GitlabResetAccessTokenOptions) SetUsername(username string) (err error) {
 	if username == "" {
-		return TracedErrorf("username is empty string")
+		return errors.TracedErrorf("username is empty string")
 	}
 
 	g.Username = username

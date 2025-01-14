@@ -2,6 +2,9 @@ package asciichgolangpublic
 
 import (
 	"fmt"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type GitRepositoryCreateTagOptions struct {
@@ -23,7 +26,7 @@ func NewGitRepositoryCreateTagOptions() (g *GitRepositoryCreateTagOptions) {
 
 func (g *GitRepositoryCreateTagOptions) GetCommitHash() (commitHash string, err error) {
 	if g.CommitHash == "" {
-		return "", TracedErrorf("CommitHash not set")
+		return "", errors.TracedErrorf("CommitHash not set")
 	}
 
 	return g.CommitHash, nil
@@ -44,7 +47,7 @@ func (g *GitRepositoryCreateTagOptions) GetPushTagsToAllRemotes() (pushTagsToAll
 
 func (g *GitRepositoryCreateTagOptions) GetTagComment() (tagComment string, err error) {
 	if g.TagComment == "" {
-		return "", TracedErrorf("TagComment not set")
+		return "", errors.TracedErrorf("TagComment not set")
 	}
 
 	return g.TagComment, nil
@@ -65,7 +68,7 @@ func (g *GitRepositoryCreateTagOptions) GetTagCommentOrDefaultIfUnset() (tagComm
 
 func (g *GitRepositoryCreateTagOptions) GetTagName() (tagName string, err error) {
 	if g.TagName == "" {
-		return "", TracedErrorf("TagName not set")
+		return "", errors.TracedErrorf("TagName not set")
 	}
 
 	return g.TagName, nil
@@ -91,7 +94,7 @@ func (g *GitRepositoryCreateTagOptions) IsTagCommentSet() (isSet bool) {
 func (g *GitRepositoryCreateTagOptions) MustGetCommitHash() (commitHash string) {
 	commitHash, err := g.GetCommitHash()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commitHash
@@ -100,7 +103,7 @@ func (g *GitRepositoryCreateTagOptions) MustGetCommitHash() (commitHash string) 
 func (g *GitRepositoryCreateTagOptions) MustGetPushTagsToAllRemotes() (pushTagsToAllRemotes bool) {
 	pushTagsToAllRemotes, err := g.GetPushTagsToAllRemotes()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return pushTagsToAllRemotes
@@ -109,7 +112,7 @@ func (g *GitRepositoryCreateTagOptions) MustGetPushTagsToAllRemotes() (pushTagsT
 func (g *GitRepositoryCreateTagOptions) MustGetTagComment() (tagComment string) {
 	tagComment, err := g.GetTagComment()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tagComment
@@ -118,7 +121,7 @@ func (g *GitRepositoryCreateTagOptions) MustGetTagComment() (tagComment string) 
 func (g *GitRepositoryCreateTagOptions) MustGetTagName() (tagName string) {
 	tagName, err := g.GetTagName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tagName
@@ -127,7 +130,7 @@ func (g *GitRepositoryCreateTagOptions) MustGetTagName() (tagName string) {
 func (g *GitRepositoryCreateTagOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := g.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -136,41 +139,41 @@ func (g *GitRepositoryCreateTagOptions) MustGetVerbose() (verbose bool) {
 func (g *GitRepositoryCreateTagOptions) MustSetCommitHash(commitHash string) {
 	err := g.SetCommitHash(commitHash)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRepositoryCreateTagOptions) MustSetPushTagsToAllRemotes(pushTagsToAllRemotes bool) {
 	err := g.SetPushTagsToAllRemotes(pushTagsToAllRemotes)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRepositoryCreateTagOptions) MustSetTagComment(tagComment string) {
 	err := g.SetTagComment(tagComment)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRepositoryCreateTagOptions) MustSetTagName(tagName string) {
 	err := g.SetTagName(tagName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRepositoryCreateTagOptions) MustSetVerbose(verbose bool) {
 	err := g.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitRepositoryCreateTagOptions) SetCommitHash(commitHash string) (err error) {
 	if commitHash == "" {
-		return TracedErrorf("commitHash is empty string")
+		return errors.TracedErrorf("commitHash is empty string")
 	}
 
 	g.CommitHash = commitHash
@@ -186,7 +189,7 @@ func (g *GitRepositoryCreateTagOptions) SetPushTagsToAllRemotes(pushTagsToAllRem
 
 func (g *GitRepositoryCreateTagOptions) SetTagComment(tagComment string) (err error) {
 	if tagComment == "" {
-		return TracedErrorf("tagComment is empty string")
+		return errors.TracedErrorf("tagComment is empty string")
 	}
 
 	g.TagComment = tagComment
@@ -196,7 +199,7 @@ func (g *GitRepositoryCreateTagOptions) SetTagComment(tagComment string) (err er
 
 func (g *GitRepositoryCreateTagOptions) SetTagName(tagName string) (err error) {
 	if tagName == "" {
-		return TracedErrorf("tagName is empty string")
+		return errors.TracedErrorf("tagName is empty string")
 	}
 
 	g.TagName = tagName

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func getGitTagToTest(implementationName string) (gitTag GitTag) {
@@ -15,7 +16,7 @@ func getGitTagToTest(implementationName string) (gitTag GitTag) {
 		return NewGitlabTag()
 	}
 
-	LogFatalWithTracef(
+	logging.LogFatalWithTracef(
 		"Unknwon implementation name: '%s'",
 		implementationName,
 	)

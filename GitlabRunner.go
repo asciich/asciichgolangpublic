@@ -3,6 +3,8 @@ package asciichgolangpublic
 import (
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -20,7 +22,7 @@ func NewGitlabRunner() (gitlabRunner *GitlabRunner) {
 func (g *GitlabRunner) MustGetCachedDescription() (description string) {
 	description, err := g.GetCachedDescription()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return description
@@ -29,7 +31,7 @@ func (g *GitlabRunner) MustGetCachedDescription() (description string) {
 func (g *GitlabRunner) MustGetCachedName() (name string) {
 	name, err := g.GetCachedName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -38,7 +40,7 @@ func (g *GitlabRunner) MustGetCachedName() (name string) {
 func (g *GitlabRunner) MustGetCachedNameOrDescription() (name string) {
 	name, err := g.GetCachedNameOrDescription()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -47,7 +49,7 @@ func (g *GitlabRunner) MustGetCachedNameOrDescription() (name string) {
 func (g *GitlabRunner) MustGetGitlab() (gitlab *GitlabInstance) {
 	gitlab, err := g.GetGitlab()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlab
@@ -56,7 +58,7 @@ func (g *GitlabRunner) MustGetGitlab() (gitlab *GitlabInstance) {
 func (g *GitlabRunner) MustGetGitlabRunners() (gitlabRunners *GitlabRunnersService) {
 	gitlabRunners, err := g.GetGitlabRunners()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabRunners
@@ -65,7 +67,7 @@ func (g *GitlabRunner) MustGetGitlabRunners() (gitlabRunners *GitlabRunnersServi
 func (g *GitlabRunner) MustGetId() (id int) {
 	id, err := g.GetId()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return id
@@ -74,7 +76,7 @@ func (g *GitlabRunner) MustGetId() (id int) {
 func (g *GitlabRunner) MustGetNativeRunnersService() (nativeRunnersService *gitlab.RunnersService) {
 	nativeRunnersService, err := g.GetNativeRunnersService()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeRunnersService
@@ -83,7 +85,7 @@ func (g *GitlabRunner) MustGetNativeRunnersService() (nativeRunnersService *gitl
 func (g *GitlabRunner) MustIsStatusOk() (isStatusOk bool) {
 	isStatusOk, err := g.IsStatusOk()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isStatusOk
@@ -92,14 +94,14 @@ func (g *GitlabRunner) MustIsStatusOk() (isStatusOk bool) {
 func (g *GitlabRunner) MustRemove(verbose bool) {
 	err := g.Remove(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabRunner) MustResetRunnerToken() (runnerToken string) {
 	runnerToken, err := g.ResetRunnerToken()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return runnerToken
@@ -108,34 +110,34 @@ func (g *GitlabRunner) MustResetRunnerToken() (runnerToken string) {
 func (g *GitlabRunner) MustSetCachedDescription(description string) {
 	err := g.SetCachedDescription(description)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabRunner) MustSetCachedName(name string) {
 	err := g.SetCachedName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabRunner) MustSetGitlab(gitlab *GitlabInstance) {
 	err := g.SetGitlab(gitlab)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabRunner) MustSetId(id int) {
 	err := g.SetId(id)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (r *GitlabRunner) GetCachedDescription() (description string, err error) {
 	if len(r.cachedDescription) <= 0 {
-		return "", TracedError("cachedDescription not set")
+		return "", errors.TracedError("cachedDescription not set")
 	}
 
 	return r.cachedDescription, nil
@@ -143,7 +145,7 @@ func (r *GitlabRunner) GetCachedDescription() (description string, err error) {
 
 func (r *GitlabRunner) GetCachedName() (name string, err error) {
 	if len(r.cachedName) <= 0 {
-		return "", TracedError("cachedName not set")
+		return "", errors.TracedError("cachedName not set")
 	}
 
 	return r.cachedName, nil
@@ -158,7 +160,7 @@ func (r *GitlabRunner) GetCachedNameOrDescription() (name string, err error) {
 		return r.cachedDescription, nil
 	}
 
-	return "", TracedError("Both cachedName and cachedDescription not set")
+	return "", errors.TracedError("Both cachedName and cachedDescription not set")
 }
 
 func (r *GitlabRunner) GetGitlabRunners() (gitlabRunners *GitlabRunnersService, err error) {
@@ -218,7 +220,7 @@ func (r *GitlabRunner) IsStatusOk() (isStatusOk bool, err error) {
 
 	nativeDetails, _, err := nativeRunnerService.GetRunnerDetails(id)
 	if err != nil {
-		return false, TracedError(err.Error())
+		return false, errors.TracedError(err.Error())
 	}
 
 	if !nativeDetails.Online {
@@ -253,7 +255,7 @@ func (r *GitlabRunner) Remove(verbose bool) (err error) {
 	}
 
 	if verbose {
-		LogChangedf("Runner with id '%d' removed.", runnerId)
+		logging.LogChangedf("Runner with id '%d' removed.", runnerId)
 	}
 
 	return nil
@@ -272,11 +274,11 @@ func (r *GitlabRunner) ResetRunnerToken() (runnerToken string, err error) {
 
 	nativeToken, _, err := nativeRunnersService.ResetRunnerAuthenticationToken(id)
 	if err != nil {
-		return "", TracedError(err.Error())
+		return "", errors.TracedError(err.Error())
 	}
 
 	if nativeToken == nil {
-		return "", TracedError("nativeToken is nil")
+		return "", errors.TracedError("nativeToken is nil")
 	}
 
 	runnerToken = *nativeToken.Token
@@ -287,7 +289,7 @@ func (r *GitlabRunner) ResetRunnerToken() (runnerToken string, err error) {
 
 func (r *GitlabRunner) SetCachedDescription(description string) (err error) {
 	if len(description) <= 0 {
-		return TracedError("description is empty string")
+		return errors.TracedError("description is empty string")
 	}
 
 	r.cachedDescription = description
@@ -297,7 +299,7 @@ func (r *GitlabRunner) SetCachedDescription(description string) (err error) {
 
 func (s *GitlabRunner) GetGitlab() (gitlab *GitlabInstance, err error) {
 	if s.gitlab == nil {
-		return nil, TracedError("gitlab not set")
+		return nil, errors.TracedError("gitlab not set")
 	}
 
 	return s.gitlab, nil
@@ -305,7 +307,7 @@ func (s *GitlabRunner) GetGitlab() (gitlab *GitlabInstance, err error) {
 
 func (s *GitlabRunner) GetId() (id int, err error) {
 	if s.id <= 0 {
-		return -1, TracedError("id not set")
+		return -1, errors.TracedError("id not set")
 	}
 
 	return s.id, nil
@@ -313,7 +315,7 @@ func (s *GitlabRunner) GetId() (id int, err error) {
 
 func (s *GitlabRunner) SetCachedName(name string) (err error) {
 	if len(name) <= 0 {
-		return TracedError("name is empty string")
+		return errors.TracedError("name is empty string")
 	}
 
 	s.cachedName = name
@@ -323,7 +325,7 @@ func (s *GitlabRunner) SetCachedName(name string) (err error) {
 
 func (s *GitlabRunner) SetGitlab(gitlab *GitlabInstance) (err error) {
 	if gitlab == nil {
-		return TracedError("gitlab is nil")
+		return errors.TracedError("gitlab is nil")
 	}
 
 	s.gitlab = gitlab
@@ -333,7 +335,7 @@ func (s *GitlabRunner) SetGitlab(gitlab *GitlabInstance) (err error) {
 
 func (s *GitlabRunner) SetId(id int) (err error) {
 	if id <= 0 {
-		return TracedErrorf("Invalid id '%d'", id)
+		return errors.TracedErrorf("Invalid id '%d'", id)
 	}
 
 	s.id = id

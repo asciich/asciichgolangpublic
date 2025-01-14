@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type BashService struct {
 	CommandExecutorBase
 }
@@ -32,7 +37,7 @@ func (b *BashService) GetHostDescription() (hostDescription string, err error) {
 func (b *BashService) MustGetHostDescription() (hostDescription string) {
 	hostDescription, err := b.GetHostDescription()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hostDescription
@@ -41,7 +46,7 @@ func (b *BashService) MustGetHostDescription() (hostDescription string) {
 func (b *BashService) MustRunCommand(options *RunCommandOptions) (commandOutput *CommandOutput) {
 	commandOutput, err := b.RunCommand(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandOutput
@@ -50,7 +55,7 @@ func (b *BashService) MustRunCommand(options *RunCommandOptions) (commandOutput 
 func (b *BashService) MustRunOneLiner(oneLiner string, verbose bool) (output *CommandOutput) {
 	output, err := b.RunOneLiner(oneLiner, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return output
@@ -59,7 +64,7 @@ func (b *BashService) MustRunOneLiner(oneLiner string, verbose bool) (output *Co
 func (b *BashService) MustRunOneLinerAndGetStdoutAsLines(oneLiner string, verbose bool) (stdoutLines []string) {
 	stdoutLines, err := b.RunOneLinerAndGetStdoutAsLines(oneLiner, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return stdoutLines
@@ -68,7 +73,7 @@ func (b *BashService) MustRunOneLinerAndGetStdoutAsLines(oneLiner string, verbos
 func (b *BashService) MustRunOneLinerAndGetStdoutAsString(oneLiner string, verbose bool) (stdout string) {
 	stdout, err := b.RunOneLinerAndGetStdoutAsString(oneLiner, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return stdout
@@ -76,7 +81,7 @@ func (b *BashService) MustRunOneLinerAndGetStdoutAsString(oneLiner string, verbo
 
 func (b *BashService) RunCommand(options *RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	if options == nil {
-		return nil, TracedErrorNil("options")
+		return nil, errors.TracedErrorNil("options")
 	}
 
 	optionsToUse := options.GetDeepCopy()
@@ -103,7 +108,7 @@ func (b *BashService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 
 func (b *BashService) RunOneLiner(oneLiner string, verbose bool) (output *CommandOutput, err error) {
 	if oneLiner == "" {
-		return nil, TracedErrorEmptyString("oneLiner")
+		return nil, errors.TracedErrorEmptyString("oneLiner")
 	}
 
 	output, err = b.RunCommand(

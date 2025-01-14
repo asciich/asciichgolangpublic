@@ -5,11 +5,13 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/continuousintegration"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func TestTemuxWindow_CreateAndDeleteWindow(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogInfo("Not available in Github CI")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogInfo("Not available in Github CI")
 		return
 	}
 
@@ -56,8 +58,8 @@ func TestTemuxWindow_CreateAndDeleteWindow(t *testing.T) {
 }
 
 func TestTemuxWindow_ReadLastLine(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogInfo("Not available in Github CI")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogInfo("Not available in Github CI")
 		return
 	}
 
@@ -106,8 +108,8 @@ func TestTemuxWindow_ReadLastLine(t *testing.T) {
 }
 
 func TestTemuxWindow_RunCommand(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogInfo("Not available in Github CI")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogInfo("Not available in Github CI")
 		return
 	}
 
