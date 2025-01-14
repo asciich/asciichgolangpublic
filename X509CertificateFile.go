@@ -3,6 +3,9 @@ package asciichgolangpublic
 import (
 	"fmt"
 	"strings"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type X509CertificateFile struct {
@@ -11,7 +14,7 @@ type X509CertificateFile struct {
 
 func GetX509CertificateFileFromFile(input File) (x509CertificateFile *X509CertificateFile, err error) {
 	if input == nil {
-		return nil, TracedErrorNil("input")
+		return nil, errors.TracedErrorNil("input")
 	}
 
 	fileToAdd := input.GetDeepCopy()
@@ -25,7 +28,7 @@ func GetX509CertificateFileFromFile(input File) (x509CertificateFile *X509Certif
 
 func GetX509CertificateFileFromPath(inputPath string) (x509CertificateFile *X509CertificateFile, err error) {
 	if inputPath == "" {
-		return nil, TracedErrorEmptyString("inputPath")
+		return nil, errors.TracedErrorEmptyString("inputPath")
 	}
 
 	inputFile, err := GetLocalFileByPath(inputPath)
@@ -44,7 +47,7 @@ func GetX509CertificateFileFromPath(inputPath string) (x509CertificateFile *X509
 func MustGetX509CertificateFileFromFile(input File) (x509CertificateFile *X509CertificateFile) {
 	x509CertificateFile, err := GetX509CertificateFileFromFile(input)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return x509CertificateFile
@@ -53,7 +56,7 @@ func MustGetX509CertificateFileFromFile(input File) (x509CertificateFile *X509Ce
 func MustGetX509CertificateFileFromPath(inputPath string) (x509CertificateFile *X509CertificateFile) {
 	x509CertificateFile, err := GetX509CertificateFileFromPath(inputPath)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return x509CertificateFile
@@ -90,7 +93,7 @@ func (x *X509CertificateFile) IsX509Certificate(verbose bool) (isX509Certificate
 	}
 
 	if !exists {
-		return false, TracedErrorf("file '%v' does not exist", pathString)
+		return false, errors.TracedErrorf("file '%v' does not exist", pathString)
 	}
 
 	checkCommand := []string{
@@ -121,7 +124,7 @@ func (x *X509CertificateFile) IsX509Certificate(verbose bool) (isX509Certificate
 		return false, nil
 	}
 
-	return false, TracedErrorf(
+	return false, errors.TracedErrorf(
 		"Unable to check if '%v' contains a X509 certificate. Unexpected stdout: '%v'",
 		pathString,
 		stdout,
@@ -130,7 +133,7 @@ func (x *X509CertificateFile) IsX509Certificate(verbose bool) (isX509Certificate
 
 func (x *X509CertificateFile) IsX509CertificateSignedByCertificateFile(signingCertificateFile File, verbose bool) (isSignedBy bool, err error) {
 	if signingCertificateFile == nil {
-		return false, TracedErrorNil("signingCertificateFile")
+		return false, errors.TracedErrorNil("signingCertificateFile")
 	}
 
 	isSignedBy, err = X509Certificates().IsCertificateFileSignedByCertificateFile(x, signingCertificateFile, verbose)
@@ -186,7 +189,7 @@ func (x *X509CertificateFile) IsX509v3() (isX509v3 bool, err error) {
 func (x *X509CertificateFile) MustGetAsX509Certificate() (cert *X509Certificate) {
 	cert, err := x.GetAsX509Certificate()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return cert
@@ -210,9 +213,9 @@ func (x *X509CertificateFile) MustIsExpired(verbose bool) (isExpired bool, err e
 
 	if verbose {
 		if isExpired {
-			LogInfof("X509Certificate in '%s' is expired.", localPath)
+			logging.LogInfof("X509Certificate in '%s' is expired.", localPath)
 		} else {
-			LogInfof("X509Certificate in '%s' is NOT expired.", localPath)
+			logging.LogInfof("X509Certificate in '%s' is NOT expired.", localPath)
 		}
 	}
 
@@ -222,7 +225,7 @@ func (x *X509CertificateFile) MustIsExpired(verbose bool) (isExpired bool, err e
 func (x *X509CertificateFile) MustIsX509Certificate(verbose bool) (isX509Certificate bool) {
 	isX509Certificate, err := x.IsX509Certificate(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isX509Certificate
@@ -231,7 +234,7 @@ func (x *X509CertificateFile) MustIsX509Certificate(verbose bool) (isX509Certifi
 func (x *X509CertificateFile) MustIsX509CertificateSignedByCertificateFile(signingCertificateFile File, verbose bool) (isSignedBy bool) {
 	isSignedBy, err := x.IsX509CertificateSignedByCertificateFile(signingCertificateFile, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isSignedBy
@@ -240,7 +243,7 @@ func (x *X509CertificateFile) MustIsX509CertificateSignedByCertificateFile(signi
 func (x *X509CertificateFile) MustIsX509IntermediateCertificate() (isIntermediateCertificate bool) {
 	isIntermediateCertificate, err := x.IsX509IntermediateCertificate()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isIntermediateCertificate
@@ -249,7 +252,7 @@ func (x *X509CertificateFile) MustIsX509IntermediateCertificate() (isIntermediat
 func (x *X509CertificateFile) MustIsX509RootCertificate(verbose bool) (isX509Certificate bool) {
 	isX509Certificate, err := x.IsX509RootCertificate(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isX509Certificate
@@ -258,7 +261,7 @@ func (x *X509CertificateFile) MustIsX509RootCertificate(verbose bool) (isX509Cer
 func (x *X509CertificateFile) MustIsX509v3() (isX509v3 bool) {
 	isX509v3, err := x.IsX509v3()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isX509v3

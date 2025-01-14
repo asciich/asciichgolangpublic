@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type ReplaceBetweenMarkersService struct{}
@@ -19,11 +21,11 @@ func ReplaceBetweenMarkers() (r *ReplaceBetweenMarkersService) {
 
 func (r *ReplaceBetweenMarkersService) GetContentToInsertDefinedInStartLineAsLines(line string, options *ReplaceBetweenMarkersOptions) (lines []string, err error) {
 	if line == "" {
-		return nil, TracedError("line is empty string")
+		return nil, errors.TracedError("line is empty string")
 	}
 
 	if options == nil {
-		return nil, TracedError("options is nil")
+		return nil, errors.TracedError("options is nil")
 	}
 
 	sourceFile, err := r.GetSourceFile(line, options)
@@ -41,11 +43,11 @@ func (r *ReplaceBetweenMarkersService) GetContentToInsertDefinedInStartLineAsLin
 
 func (r *ReplaceBetweenMarkersService) GetSourceFile(line string, options *ReplaceBetweenMarkersOptions) (sourceFile File, err error) {
 	if line == "" {
-		return nil, TracedError("line is empty string")
+		return nil, errors.TracedError("line is empty string")
 	}
 
 	if options == nil {
-		return nil, TracedError("options is nil")
+		return nil, errors.TracedError("options is nil")
 	}
 
 	sourcePath, err := r.GetSourcePath(line, options)
@@ -63,20 +65,20 @@ func (r *ReplaceBetweenMarkersService) GetSourceFile(line string, options *Repla
 
 func (r *ReplaceBetweenMarkersService) GetSourcePath(line string, options *ReplaceBetweenMarkersOptions) (sourcePath string, err error) {
 	if line == "" {
-		return "", TracedError("line is empty string")
+		return "", errors.TracedError("line is empty string")
 	}
 
 	if options == nil {
-		return "", TracedError("options is nil")
+		return "", errors.TracedError("options is nil")
 	}
 
 	if !r.IsReplaceBetweenMarkerStart(line) {
-		return "", TracedErrorf("Unable to get source path of unknown line '%s'", line)
+		return "", errors.TracedErrorf("Unable to get source path of unknown line '%s'", line)
 	}
 
 	splitted := strings.Split(line, "source=")
 	if len(splitted) != 2 {
-		return "", TracedErrorf("Unexpected split: '%v'", splitted)
+		return "", errors.TracedErrorf("Unexpected split: '%v'", splitted)
 	}
 
 	sourcePath = splitted[1]
@@ -86,7 +88,7 @@ func (r *ReplaceBetweenMarkersService) GetSourcePath(line string, options *Repla
 	sourcePath = strings.TrimSpace(sourcePath)
 
 	if sourcePath == "" {
-		return "", TracedErrorf("sourcePath is empty string after evaluationg source path in line '%s'", line)
+		return "", errors.TracedErrorf("sourcePath is empty string after evaluationg source path in line '%s'", line)
 	}
 
 	if Paths().IsRelativePath(sourcePath) {
@@ -99,7 +101,7 @@ func (r *ReplaceBetweenMarkersService) GetSourcePath(line string, options *Repla
 	}
 
 	if options.Verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Source path found in replace between markers line '%s' is '%s'",
 			line,
 			sourcePath,
@@ -122,7 +124,7 @@ func (r *ReplaceBetweenMarkersService) IsReplaceBetweenMarkerStart(line string) 
 func (r *ReplaceBetweenMarkersService) MustGetContentToInsertDefinedInStartLineAsLines(line string, options *ReplaceBetweenMarkersOptions) (lines []string) {
 	lines, err := r.GetContentToInsertDefinedInStartLineAsLines(line, options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return lines
@@ -131,7 +133,7 @@ func (r *ReplaceBetweenMarkersService) MustGetContentToInsertDefinedInStartLineA
 func (r *ReplaceBetweenMarkersService) MustGetSourceFile(line string, options *ReplaceBetweenMarkersOptions) (sourceFile File) {
 	sourceFile, err := r.GetSourceFile(line, options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sourceFile
@@ -140,7 +142,7 @@ func (r *ReplaceBetweenMarkersService) MustGetSourceFile(line string, options *R
 func (r *ReplaceBetweenMarkersService) MustGetSourcePath(line string, options *ReplaceBetweenMarkersOptions) (sourcePath string) {
 	sourcePath, err := r.GetSourcePath(line, options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sourcePath
@@ -149,7 +151,7 @@ func (r *ReplaceBetweenMarkersService) MustGetSourcePath(line string, options *R
 func (r *ReplaceBetweenMarkersService) MustReplaceBySourcesInString(input string, options *ReplaceBetweenMarkersOptions) (replaced string) {
 	replaced, err := r.ReplaceBySourcesInString(input, options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return replaced
@@ -157,7 +159,7 @@ func (r *ReplaceBetweenMarkersService) MustReplaceBySourcesInString(input string
 
 func (r *ReplaceBetweenMarkersService) ReplaceBySourcesInString(input string, options *ReplaceBetweenMarkersOptions) (replaced string, err error) {
 	if options == nil {
-		return "", TracedError("options is nil")
+		return "", errors.TracedError("options is nil")
 	}
 
 	outLines := []string{}

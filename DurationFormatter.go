@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type DurationFormatterService struct {
@@ -20,7 +23,7 @@ func NewDurationFormatterService() (d *DurationFormatterService) {
 func (d *DurationFormatterService) MustToString(duration *time.Duration) (durationString string) {
 	durationString, err := d.ToString(duration)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return durationString
@@ -28,7 +31,7 @@ func (d *DurationFormatterService) MustToString(duration *time.Duration) (durati
 
 func (d *DurationFormatterService) ToString(duration *time.Duration) (durationString string, err error) {
 	if duration == nil {
-		return "", TracedError("duration is nil")
+		return "", errors.TracedError("duration is nil")
 	}
 
 	durationString = fmt.Sprintf("%v", *duration)

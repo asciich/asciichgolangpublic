@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type ExecService struct {
@@ -43,7 +46,7 @@ func (e *ExecService) GetHostDescription() (hostDescription string, err error) {
 func (e *ExecService) MustGetHostDescription() (hostDescription string) {
 	hostDescription, err := e.GetHostDescription()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hostDescription
@@ -52,7 +55,7 @@ func (e *ExecService) MustGetHostDescription() (hostDescription string) {
 func (e *ExecService) MustRunCommand(options *RunCommandOptions) (commandOutput *CommandOutput) {
 	commandOutput, err := e.RunCommand(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandOutput
@@ -60,7 +63,7 @@ func (e *ExecService) MustRunCommand(options *RunCommandOptions) (commandOutput 
 
 func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	if options == nil {
-		return nil, TracedErrorNil("options")
+		return nil, errors.TracedErrorNil("options")
 	}
 
 	command, err := options.GetCommand()
@@ -81,7 +84,7 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
-		return nil, TracedError(err.Error())
+		return nil, errors.TracedError(err.Error())
 	}
 	cmd.Stderr = &stderr
 
@@ -111,7 +114,7 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 		}
 
 		if nBytesToWrite != nWrittenBytes {
-			return nil, TracedErrorf(
+			return nil, errors.TracedErrorf(
 				"Writing to stdin of command '%v' failed. Expected '%d' bytes to write but '%d' got written",
 				command,
 				nBytesToWrite,
@@ -203,7 +206,7 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 	}
 
 	if cmd.ProcessState == nil {
-		return nil, TracedErrorf(
+		return nil, errors.TracedErrorf(
 			"unable to get exit code for failed command: '%v': '%v'",
 			commandJoined,
 			commandOutput.GetCmdRunErrorStringOrEmptyStringIfUnset(),
@@ -223,7 +226,7 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 	if !commandOutput.IsExitSuccess() {
 		if options.AllowAllExitCodes {
 			if options.Verbose {
-				LogInfof(
+				logging.LogInfof(
 					"Command '%v' has exit code '%d' != 0 but all exit codes are allowed by runOptions.AllowAllExitCodes.",
 					commandJoined,
 					returnCode,
@@ -237,9 +240,9 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 				commandOutput.GetStderrAsStringOrEmptyIfUnset(),
 			)
 			if options.Verbose {
-				LogError(errorMessage)
+				logging.LogError(errorMessage)
 			}
-			return commandOutput, TracedError(errorMessage)
+			return commandOutput, errors.TracedError(errorMessage)
 		}
 	}
 

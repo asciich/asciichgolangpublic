@@ -1,33 +1,23 @@
-package asciichgolangpublic
+package datetime
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
-
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/continuousintegration"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func TestDatesLayoutStringYYYYmmdd_HHMMSSS(t *testing.T) {
-	tests := []struct {
-		testcase string
-	}{
-		{"testcase"},
-	}
 
-	for _, tt := range tests {
-		t.Run(
-			MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				assert := assert.New(t)
+	assert := assert.New(t)
 
-				assert.EqualValues(
-					"20060102_150405",
-					Dates().LayoutStringYYYYmmdd_HHMMSS(),
-				)
-			},
-		)
-	}
+	assert.EqualValues(
+		"20060102_150405",
+		Dates().LayoutStringYYYYmmdd_HHMMSS(),
+	)
 }
 
 func TestDatesGetAsYYYYmmdd_HHMMSSString(t *testing.T) {
@@ -41,7 +31,7 @@ func TestDatesGetAsYYYYmmdd_HHMMSSString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -66,7 +56,7 @@ func TestDatesParseString_UTC(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -78,8 +68,8 @@ func TestDatesParseString_UTC(t *testing.T) {
 }
 
 func TestDatesParseString_CET(t *testing.T) {
-	if ContinuousIntegration().IsRunningInContinuousIntegration() {
-		LogInfo("does currently not work inside CI/CD.")
+	if continuousintegration.IsRunningInContinuousIntegration() {
+		logging.LogInfo("does currently not work inside CI/CD.")
 		return
 	}
 
@@ -93,7 +83,7 @@ func TestDatesParseString_CET(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 

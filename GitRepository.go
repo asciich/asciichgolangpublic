@@ -3,6 +3,10 @@ package asciichgolangpublic
 import (
 	"errors"
 	"time"
+
+	"github.com/asciich/asciichgolangpublic/datatypes"
+	aerrors "github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 var ErrGitRepositoryDoesNotExist = errors.New("gitRepository does not exist")
@@ -196,7 +200,7 @@ type GitRepository interface {
 
 func GetGitRepositoryByDirectory(directory Directory) (repository GitRepository, err error) {
 	if directory == nil {
-		return nil, TracedErrorNil("directory")
+		return nil, aerrors.TracedErrorNil("directory")
 	}
 
 	localDirectory, ok := directory.(*LocalDirectory)
@@ -209,12 +213,12 @@ func GetGitRepositoryByDirectory(directory Directory) (repository GitRepository,
 		return GetCommandExecutorGitRepositoryFromDirectory(commandExecutorDirectory)
 	}
 
-	unknownTypeName, err := Types().GetTypeName(directory)
+	unknownTypeName, err := datatypes.GetTypeName(directory)
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, TracedErrorf(
+	return nil, aerrors.TracedErrorf(
 		"Unknown directory implementation '%s'. Unable to get GitRepository",
 		unknownTypeName,
 	)
@@ -235,7 +239,7 @@ func GitRepositryDefaultAuthorName() (name string) {
 func MustGetGitRepositoryByDirectory(directory Directory) (repository GitRepository) {
 	repository, err := GetGitRepositoryByDirectory(directory)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return repository

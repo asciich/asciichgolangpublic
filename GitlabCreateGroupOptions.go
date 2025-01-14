@@ -1,5 +1,7 @@
 package asciichgolangpublic
 
+import "github.com/asciich/asciichgolangpublic/logging"
+
 type GitlabCreateGroupOptions struct {
 	Verbose bool
 }
@@ -16,7 +18,7 @@ func (g *GitlabCreateGroupOptions) GetVerbose() (verbose bool, err error) {
 func (g *GitlabCreateGroupOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := g.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -25,7 +27,7 @@ func (g *GitlabCreateGroupOptions) MustGetVerbose() (verbose bool) {
 func (g *GitlabCreateGroupOptions) MustSetVerbose(verbose bool) {
 	err := g.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 

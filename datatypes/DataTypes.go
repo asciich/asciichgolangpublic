@@ -1,23 +1,14 @@
-package asciichgolangpublic
+package datatypes
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 )
 
-type TypesServices struct{}
-
-func NewTypesServices() (t *TypesServices) {
-	return new(TypesServices)
-}
-
-func Types() (t *TypesServices) {
-	return NewTypesServices()
-}
-
-func (t *TypesServices) GetTypeName(input interface{}) (typeName string, err error) {
+func GetTypeName(input interface{}) (typeName string, err error) {
 	if input == nil {
-		return "", TracedErrorNil("input")
+		return "", fmt.Errorf("input is nil")
 	}
 
 	reflectType := reflect.TypeOf(input)
@@ -46,9 +37,9 @@ func (t *TypesServices) GetTypeName(input interface{}) (typeName string, err err
 
 		var message = inputAsError.Error()
 
-		asTracedError, err := Errors().GetAsTracedError(inputAsError)
-		if err == nil {
-			tracedErrorMessage, err := asTracedError.GetErrorMessage()
+		withErrorMessage, ok := err.(interface{ GetErrorMessage() (string, error) })
+		if ok {
+			tracedErrorMessage, err := withErrorMessage.GetErrorMessage()
 			if err == nil {
 				message = tracedErrorMessage
 			}
@@ -68,10 +59,10 @@ func (t *TypesServices) GetTypeName(input interface{}) (typeName string, err err
 	return typeName, nil
 }
 
-func (t *TypesServices) MustGetTypeName(input interface{}) (typeName string) {
-	typeName, err := t.GetTypeName(input)
+func MustGetTypeName(input interface{}) (typeName string) {
+	typeName, err := GetTypeName(input)
 	if err != nil {
-		LogGoErrorFatal(err)
+		log.Panic(err)
 	}
 
 	return typeName

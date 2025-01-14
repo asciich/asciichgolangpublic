@@ -5,7 +5,10 @@ import (
 
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/containers"
+	"github.com/asciich/asciichgolangpublic/datatypes"
+	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/hosts"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type CommandExecutorDocker struct {
@@ -14,7 +17,7 @@ type CommandExecutorDocker struct {
 
 func GetCommandExecutorDocker(commandExecutor asciichgolangpublic.CommandExecutor) (docker Docker, err error) {
 	if commandExecutor == nil {
-		return nil, asciichgolangpublic.TracedErrorNil("commandExecutor")
+		return nil, errors.TracedErrorNil("commandExecutor")
 	}
 
 	toReturn := NewCommandExecutorDocker()
@@ -30,7 +33,7 @@ func GetCommandExecutorDocker(commandExecutor asciichgolangpublic.CommandExecuto
 			return nil, err
 		}
 
-		return nil, asciichgolangpublic.TracedErrorf(
+		return nil, errors.TracedErrorf(
 			"Not implemented for command executor running on '%s'.",
 			hostDescription,
 		)
@@ -51,7 +54,7 @@ func GetCommandExecutorDocker(commandExecutor asciichgolangpublic.CommandExecuto
 
 func GetCommandExecutorDockerOnHost(host hosts.Host) (docker Docker, err error) {
 	if host == nil {
-		return nil, asciichgolangpublic.TracedErrorNil("host")
+		return nil, errors.TracedErrorNil("host")
 	}
 
 	toReturn := NewCommandExecutorDocker()
@@ -71,7 +74,7 @@ func GetLocalCommandExecutorDocker() (docker Docker, err error) {
 func MustGetCommandExecutorDocker(commandExecutor asciichgolangpublic.CommandExecutor) (docker Docker) {
 	docker, err := GetCommandExecutorDocker(commandExecutor)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return docker
@@ -80,7 +83,7 @@ func MustGetCommandExecutorDocker(commandExecutor asciichgolangpublic.CommandExe
 func MustGetCommandExecutorDockerOnHost(host hosts.Host) (docker Docker) {
 	docker, err := GetCommandExecutorDockerOnHost(host)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return docker
@@ -89,7 +92,7 @@ func MustGetCommandExecutorDockerOnHost(host hosts.Host) (docker Docker) {
 func MustGetLocalCommandExecutorDocker() (docker Docker) {
 	docker, err := GetLocalCommandExecutorDocker()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return docker
@@ -98,7 +101,7 @@ func MustGetLocalCommandExecutorDocker() (docker Docker) {
 func MustGetcommandExecutorDocker(commandExecutor asciichgolangpublic.CommandExecutor) (docker Docker) {
 	docker, err := GetCommandExecutorDocker(commandExecutor)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return docker
@@ -116,12 +119,12 @@ func (c *CommandExecutorDocker) GetCommandExecutor() (commandExecutor asciichgol
 
 	commandExecutorHost, ok := host.(*hosts.CommandExecutorHost)
 	if !ok {
-		typeString, err := asciichgolangpublic.Types().GetTypeName(host)
+		typeString, err := datatypes.GetTypeName(host)
 		if err != nil {
 			return nil, err
 		}
 
-		return nil, asciichgolangpublic.TracedErrorf(
+		return nil, errors.TracedErrorf(
 			"Only available for commandExecutorHost but got '%s'",
 			typeString,
 		)
@@ -132,7 +135,7 @@ func (c *CommandExecutorDocker) GetCommandExecutor() (commandExecutor asciichgol
 
 func (c *CommandExecutorDocker) GetContainerByName(containerName string) (dockerContainer containers.Container, err error) {
 	if len(containerName) <= 0 {
-		return nil, asciichgolangpublic.TracedError("containerName is empty string")
+		return nil, errors.TracedError("containerName is empty string")
 	}
 
 	toReturn := NewCommandExecutorDockerContainer()
@@ -151,7 +154,7 @@ func (c *CommandExecutorDocker) GetContainerByName(containerName string) (docker
 
 func (c *CommandExecutorDocker) GetHost() (host hosts.Host, err error) {
 	if c.host == nil {
-		return nil, asciichgolangpublic.TracedError("host not set")
+		return nil, errors.TracedError("host not set")
 	}
 
 	return c.host, nil
@@ -173,7 +176,7 @@ func (c *CommandExecutorDocker) IsHostSet() (isSet bool) {
 func (c *CommandExecutorDocker) KillContainerByName(name string, verbose bool) (err error) {
 	name = strings.TrimSpace(name)
 	if len(name) <= 0 {
-		return asciichgolangpublic.TracedError("name is empty string")
+		return errors.TracedError("name is empty string")
 	}
 
 	container, err := c.GetContainerByName(name)
@@ -192,7 +195,7 @@ func (c *CommandExecutorDocker) KillContainerByName(name string, verbose bool) (
 func (c *CommandExecutorDocker) MustGetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandExecutor
@@ -201,7 +204,7 @@ func (c *CommandExecutorDocker) MustGetCommandExecutor() (commandExecutor asciic
 func (c *CommandExecutorDocker) MustGetContainerByName(containerName string) (dockerContainer containers.Container) {
 	dockerContainer, err := c.GetContainerByName(containerName)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return dockerContainer
@@ -210,7 +213,7 @@ func (c *CommandExecutorDocker) MustGetContainerByName(containerName string) (do
 func (c *CommandExecutorDocker) MustGetHost() (host hosts.Host) {
 	host, err := c.GetHost()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return host
@@ -219,7 +222,7 @@ func (c *CommandExecutorDocker) MustGetHost() (host hosts.Host) {
 func (c *CommandExecutorDocker) MustGetHostDescription() (hostDescription string) {
 	hostDescription, err := c.GetHostDescription()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hostDescription
@@ -228,14 +231,14 @@ func (c *CommandExecutorDocker) MustGetHostDescription() (hostDescription string
 func (c *CommandExecutorDocker) MustKillContainerByName(name string, verbose bool) {
 	err := c.KillContainerByName(name, verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorDocker) MustRunCommand(runOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
 	commandOutput, err := c.RunCommand(runOptions)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandOutput
@@ -244,7 +247,7 @@ func (c *CommandExecutorDocker) MustRunCommand(runOptions *asciichgolangpublic.R
 func (c *CommandExecutorDocker) MustRunCommandAndGetStdoutAsString(runOptions *asciichgolangpublic.RunCommandOptions) (stdout string) {
 	stdout, err := c.RunCommandAndGetStdoutAsString(runOptions)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return stdout
@@ -253,7 +256,7 @@ func (c *CommandExecutorDocker) MustRunCommandAndGetStdoutAsString(runOptions *a
 func (c *CommandExecutorDocker) MustRunContainer(runOptions *DockerRunContainerOptions) (startedContainer containers.Container) {
 	startedContainer, err := c.RunContainer(runOptions)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return startedContainer
@@ -262,13 +265,13 @@ func (c *CommandExecutorDocker) MustRunContainer(runOptions *DockerRunContainerO
 func (c *CommandExecutorDocker) MustSetHost(host hosts.Host) {
 	err := c.SetHost(host)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CommandExecutorDocker) RunCommand(runOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
 	if runOptions == nil {
-		return nil, asciichgolangpublic.TracedErrorNil("runOptions")
+		return nil, errors.TracedErrorNil("runOptions")
 	}
 
 	commandExecutor, err := c.GetCommandExecutor()
@@ -281,7 +284,7 @@ func (c *CommandExecutorDocker) RunCommand(runOptions *asciichgolangpublic.RunCo
 
 func (c *CommandExecutorDocker) RunCommandAndGetStdoutAsString(runOptions *asciichgolangpublic.RunCommandOptions) (stdout string, err error) {
 	if runOptions == nil {
-		return "", asciichgolangpublic.TracedErrorNil("runOptions")
+		return "", errors.TracedErrorNil("runOptions")
 	}
 
 	commandExecutor, err := c.GetCommandExecutor()
@@ -294,7 +297,7 @@ func (c *CommandExecutorDocker) RunCommandAndGetStdoutAsString(runOptions *ascii
 
 func (c *CommandExecutorDocker) RunContainer(runOptions *DockerRunContainerOptions) (startedContainer containers.Container, err error) {
 	if runOptions == nil {
-		return nil, asciichgolangpublic.TracedError("runOptions is nil")
+		return nil, errors.TracedError("runOptions is nil")
 	}
 
 	containerName, err := runOptions.GetName()
@@ -308,7 +311,7 @@ func (c *CommandExecutorDocker) RunContainer(runOptions *DockerRunContainerOptio
 	}
 
 	if runOptions.Verbose {
-		asciichgolangpublic.LogInfof(
+		logging.LogInfof(
 			"Going to start container '%s' using image '%s'.",
 			containerName,
 			imageName,
@@ -348,7 +351,7 @@ func (c *CommandExecutorDocker) RunContainer(runOptions *DockerRunContainerOptio
 	startCommand = append(startCommand, runOptions.Command...)
 
 	if runOptions.VerboseDockerRunCommand {
-		asciichgolangpublic.LogInfof("Going to start docker container using:\n%v", startCommand)
+		logging.LogInfof("Going to start docker container using:\n%v", startCommand)
 	}
 
 	stdout, err := c.RunCommandAndGetStdoutAsString(
@@ -362,7 +365,7 @@ func (c *CommandExecutorDocker) RunContainer(runOptions *DockerRunContainerOptio
 	}
 
 	if runOptions.Verbose {
-		asciichgolangpublic.LogChangedf("Started container '%s':\n%s", containerName, stdout)
+		logging.LogChangedf("Started container '%s':\n%s", containerName, stdout)
 	}
 
 	startedContainer, err = c.GetContainerByName(containerName)
@@ -375,7 +378,7 @@ func (c *CommandExecutorDocker) RunContainer(runOptions *DockerRunContainerOptio
 
 func (c *CommandExecutorDocker) SetHost(host hosts.Host) (err error) {
 	if host == nil {
-		return asciichgolangpublic.TracedError("host not set")
+		return errors.TracedError("host not set")
 	}
 
 	c.host = host

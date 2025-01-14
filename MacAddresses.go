@@ -2,6 +2,9 @@ package asciichgolangpublic
 
 import (
 	"regexp"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type MacAddressesService struct{}
@@ -17,7 +20,7 @@ func NewMacAddressesService() (m *MacAddressesService) {
 func (m *MacAddressesService) CheckStringIsAMacAddress(input string) (isMacAddress bool, err error) {
 	isMacAddress = m.IsStringAMacAddress(input)
 	if !isMacAddress {
-		return false, TracedErrorf("'%s' is not a valid mac address", input)
+		return false, errors.TracedErrorf("'%s' is not a valid mac address", input)
 	}
 
 	return true, nil
@@ -31,7 +34,7 @@ func (m *MacAddressesService) IsStringAMacAddress(input string) (isMacAddress bo
 func (m *MacAddressesService) MustCheckStringIsAMacAddress(input string) (isMacAddress bool) {
 	isMacAddress, err := m.CheckStringIsAMacAddress(input)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isMacAddress

@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type SpreadSheetRenderOptions struct {
 	SkipTitle                 bool
 	StringDelimiter           string
@@ -23,7 +28,7 @@ func (s *SpreadSheetRenderOptions) GetSkipTitle() (skipTitle bool, err error) {
 
 func (s *SpreadSheetRenderOptions) GetStringDelimiter() (stringDelimiter string, err error) {
 	if s.StringDelimiter == "" {
-		return "", TracedErrorf("StringDelimiter not set")
+		return "", errors.TracedErrorf("StringDelimiter not set")
 	}
 
 	return s.StringDelimiter, nil
@@ -37,7 +42,7 @@ func (s *SpreadSheetRenderOptions) GetVerbose() (verbose bool, err error) {
 func (s *SpreadSheetRenderOptions) MustGetSameColumnWidthForAllRows() (sameColumnWidthForAllRows bool) {
 	sameColumnWidthForAllRows, err := s.GetSameColumnWidthForAllRows()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sameColumnWidthForAllRows
@@ -46,7 +51,7 @@ func (s *SpreadSheetRenderOptions) MustGetSameColumnWidthForAllRows() (sameColum
 func (s *SpreadSheetRenderOptions) MustGetSkipTitle() (skipTitle bool) {
 	skipTitle, err := s.GetSkipTitle()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return skipTitle
@@ -55,7 +60,7 @@ func (s *SpreadSheetRenderOptions) MustGetSkipTitle() (skipTitle bool) {
 func (s *SpreadSheetRenderOptions) MustGetStringDelimiter() (stringDelimiter string) {
 	stringDelimiter, err := s.GetStringDelimiter()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return stringDelimiter
@@ -64,7 +69,7 @@ func (s *SpreadSheetRenderOptions) MustGetStringDelimiter() (stringDelimiter str
 func (s *SpreadSheetRenderOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := s.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -73,28 +78,28 @@ func (s *SpreadSheetRenderOptions) MustGetVerbose() (verbose bool) {
 func (s *SpreadSheetRenderOptions) MustSetSameColumnWidthForAllRows(sameColumnWidthForAllRows bool) {
 	err := s.SetSameColumnWidthForAllRows(sameColumnWidthForAllRows)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (s *SpreadSheetRenderOptions) MustSetSkipTitle(skipTitle bool) {
 	err := s.SetSkipTitle(skipTitle)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (s *SpreadSheetRenderOptions) MustSetStringDelimiter(stringDelimiter string) {
 	err := s.SetStringDelimiter(stringDelimiter)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (s *SpreadSheetRenderOptions) MustSetVerbose(verbose bool) {
 	err := s.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
@@ -112,7 +117,7 @@ func (s *SpreadSheetRenderOptions) SetSkipTitle(skipTitle bool) (err error) {
 
 func (s *SpreadSheetRenderOptions) SetStringDelimiter(stringDelimiter string) (err error) {
 	if stringDelimiter == "" {
-		return TracedErrorf("stringDelimiter is empty string")
+		return errors.TracedErrorf("stringDelimiter is empty string")
 	}
 
 	s.StringDelimiter = stringDelimiter

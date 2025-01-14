@@ -1,6 +1,11 @@
 package asciichgolangpublic
 
-import "sort"
+import (
+	"sort"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
 
 type GitCommit struct {
 	gitRepo GitRepository
@@ -13,7 +18,7 @@ func NewGitCommit() (g *GitCommit) {
 
 func (g *GitCommit) CreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
 	if options == nil {
-		return nil, TracedErrorNil("options")
+		return nil, errors.TracedErrorNil("options")
 	}
 
 	repo, err := g.GetGitRepo()
@@ -116,14 +121,14 @@ func (g *GitCommit) GetCommitMessage() (commitMessage string, err error) {
 
 func (g *GitCommit) GetGitRepo() (gitRepo GitRepository, err error) {
 	if g.gitRepo == nil {
-		return nil, TracedError("gitRepo not set")
+		return nil, errors.TracedError("gitRepo not set")
 	}
 	return g.gitRepo, nil
 }
 
 func (g *GitCommit) GetHash() (hash string, err error) {
 	if g.hash == "" {
-		return "", TracedErrorf("hash not set")
+		return "", errors.TracedErrorf("hash not set")
 	}
 
 	return g.hash, nil
@@ -146,7 +151,7 @@ func (g *GitCommit) GetNewestTagVersion(verbose bool) (newestVersion Version, er
 			return nil, err
 		}
 
-		return nil, TracedErrorf(
+		return nil, errors.TracedErrorf(
 			"no version tag found for commit '%s' in repository '%s' on host '%s'",
 			hash,
 			path,
@@ -338,7 +343,7 @@ func (g *GitCommit) ListVersionTags(verbose bool) (tags []GitTag, err error) {
 func (g *GitCommit) MustCreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag) {
 	createdTag, err := g.CreateTag(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdTag
@@ -347,7 +352,7 @@ func (g *GitCommit) MustCreateTag(options *GitRepositoryCreateTagOptions) (creat
 func (g *GitCommit) MustGetAgeSeconds() (age float64) {
 	age, err := g.GetAgeSeconds()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return age
@@ -356,7 +361,7 @@ func (g *GitCommit) MustGetAgeSeconds() (age float64) {
 func (g *GitCommit) MustGetAuthorEmail() (authorEmail string) {
 	authorEmail, err := g.GetAuthorEmail()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return authorEmail
@@ -365,7 +370,7 @@ func (g *GitCommit) MustGetAuthorEmail() (authorEmail string) {
 func (g *GitCommit) MustGetAuthorString() (authorString string) {
 	authorString, err := g.GetAuthorString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return authorString
@@ -374,7 +379,7 @@ func (g *GitCommit) MustGetAuthorString() (authorString string) {
 func (g *GitCommit) MustGetCommitMessage() (commitMessage string) {
 	commitMessage, err := g.GetCommitMessage()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commitMessage
@@ -383,7 +388,7 @@ func (g *GitCommit) MustGetCommitMessage() (commitMessage string) {
 func (g *GitCommit) MustGetGitRepo() (gitRepo GitRepository) {
 	gitRepo, err := g.GetGitRepo()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitRepo
@@ -392,7 +397,7 @@ func (g *GitCommit) MustGetGitRepo() (gitRepo GitRepository) {
 func (g *GitCommit) MustGetHash() (hash string) {
 	hash, err := g.GetHash()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hash
@@ -401,7 +406,7 @@ func (g *GitCommit) MustGetHash() (hash string) {
 func (g *GitCommit) MustGetNewestTagVersion(verbose bool) (newestVersion Version) {
 	newestVersion, err := g.GetNewestTagVersion(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return newestVersion
@@ -410,7 +415,7 @@ func (g *GitCommit) MustGetNewestTagVersion(verbose bool) (newestVersion Version
 func (g *GitCommit) MustGetNewestTagVersionOrNilIfUnset(verbose bool) (newestVersion Version) {
 	newestVersion, err := g.GetNewestTagVersionOrNilIfUnset(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return newestVersion
@@ -419,7 +424,7 @@ func (g *GitCommit) MustGetNewestTagVersionOrNilIfUnset(verbose bool) (newestVer
 func (g *GitCommit) MustGetParentCommits(options *GitCommitGetParentsOptions) (parentCommit []*GitCommit) {
 	parentCommit, err := g.GetParentCommits(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return parentCommit
@@ -428,7 +433,7 @@ func (g *GitCommit) MustGetParentCommits(options *GitCommitGetParentsOptions) (p
 func (g *GitCommit) MustGetRepoRootPathAndHostDescription() (repoRootPath string, hostDescription string) {
 	repoRootPath, hostDescription, err := g.GetRepoRootPathAndHostDescription()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return repoRootPath, hostDescription
@@ -437,7 +442,7 @@ func (g *GitCommit) MustGetRepoRootPathAndHostDescription() (repoRootPath string
 func (g *GitCommit) MustHasParentCommit() (hasParentCommit bool) {
 	hasParentCommit, err := g.HasParentCommit()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hasParentCommit
@@ -446,7 +451,7 @@ func (g *GitCommit) MustHasParentCommit() (hasParentCommit bool) {
 func (g *GitCommit) MustHasVersionTag(verbose bool) (hasVersionTag bool) {
 	hasVersionTag, err := g.HasVersionTag(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return hasVersionTag
@@ -455,7 +460,7 @@ func (g *GitCommit) MustHasVersionTag(verbose bool) (hasVersionTag bool) {
 func (g *GitCommit) MustListTagNames(verbose bool) (tagNames []string) {
 	tagNames, err := g.ListTagNames(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tagNames
@@ -464,7 +469,7 @@ func (g *GitCommit) MustListTagNames(verbose bool) (tagNames []string) {
 func (g *GitCommit) MustListTags(verbose bool) (tags []GitTag) {
 	tags, err := g.ListTags(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tags
@@ -473,7 +478,7 @@ func (g *GitCommit) MustListTags(verbose bool) (tags []GitTag) {
 func (g *GitCommit) MustListVersionTagNames(verbose bool) (tagNames []string) {
 	tagNames, err := g.ListVersionTagNames(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tagNames
@@ -482,7 +487,7 @@ func (g *GitCommit) MustListVersionTagNames(verbose bool) (tagNames []string) {
 func (g *GitCommit) MustListVersionTagVersions(verbose bool) (versions []Version) {
 	versions, err := g.ListVersionTagVersions(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return versions
@@ -491,7 +496,7 @@ func (g *GitCommit) MustListVersionTagVersions(verbose bool) (versions []Version
 func (g *GitCommit) MustListVersionTags(verbose bool) (tags []GitTag) {
 	tags, err := g.ListVersionTags(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tags
@@ -500,20 +505,20 @@ func (g *GitCommit) MustListVersionTags(verbose bool) (tags []GitTag) {
 func (g *GitCommit) MustSetGitRepo(gitRepo GitRepository) {
 	err := g.SetGitRepo(gitRepo)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitCommit) MustSetHash(hash string) {
 	err := g.SetHash(hash)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitCommit) SetGitRepo(gitRepo GitRepository) (err error) {
 	if gitRepo == nil {
-		return TracedErrorNil("gitRepo")
+		return errors.TracedErrorNil("gitRepo")
 	}
 
 	g.gitRepo = gitRepo
@@ -523,7 +528,7 @@ func (g *GitCommit) SetGitRepo(gitRepo GitRepository) (err error) {
 
 func (g *GitCommit) SetHash(hash string) (err error) {
 	if hash == "" {
-		return TracedErrorf("hash is empty string")
+		return errors.TracedErrorf("hash is empty string")
 	}
 
 	g.hash = hash

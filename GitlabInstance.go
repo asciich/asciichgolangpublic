@@ -6,6 +6,8 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type GitlabInstance struct {
@@ -16,7 +18,7 @@ type GitlabInstance struct {
 
 func GetGitlabByFQDN(fqdn string) (gitlab *GitlabInstance, err error) {
 	if len(fqdn) <= 0 {
-		return nil, TracedError("fqdn is empty string")
+		return nil, errors.TracedError("fqdn is empty string")
 	}
 
 	gitlab = NewGitlab()
@@ -31,7 +33,7 @@ func GetGitlabByFQDN(fqdn string) (gitlab *GitlabInstance, err error) {
 func MustGetGitlabByFQDN(fqdn string) (gitlab *GitlabInstance) {
 	gitlab, err := GetGitlabByFQDN(fqdn)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlab
@@ -40,7 +42,7 @@ func MustGetGitlabByFQDN(fqdn string) (gitlab *GitlabInstance) {
 func MustGetGitlabByFqdn(fqdn string) (gitlab *GitlabInstance) {
 	gitlab, err := GetGitlabByFQDN(fqdn)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlab
@@ -118,7 +120,7 @@ func (g *GitlabInstance) GetCurrentUsersName(verbose bool) (currentUserName stri
 
 func (g *GitlabInstance) AddRunner(newRunnerOptions *GitlabAddRunnerOptions) (createdRunner *GitlabRunner, err error) {
 	if newRunnerOptions == nil {
-		return nil, TracedError("newRunnerOptions is nil")
+		return nil, errors.TracedError("newRunnerOptions is nil")
 	}
 
 	gitlabRunners, err := g.GetGitlabRunners()
@@ -136,7 +138,7 @@ func (g *GitlabInstance) AddRunner(newRunnerOptions *GitlabAddRunnerOptions) (cr
 
 func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) (err error) {
 	if authOptions == nil {
-		return TracedError("authOptions is nil")
+		return errors.TracedError("authOptions is nil")
 	}
 
 	fqdn, err := g.GetFqdn()
@@ -145,7 +147,7 @@ func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) 
 	}
 
 	if authOptions.Verbose {
-		LogInfof("Authenticate against gitlab '%s' started.", fqdn)
+		logging.LogInfof("Authenticate against gitlab '%s' started.", fqdn)
 	}
 
 	g.nativeClient = nil
@@ -166,7 +168,7 @@ func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) 
 			gitlab.WithBaseURL(apiV4Url),
 		)
 		if err != nil {
-			return TracedError(err.Error())
+			return errors.TracedError(err.Error())
 		}
 
 		g.nativeClient = nativeClient
@@ -181,7 +183,7 @@ func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) 
 
 		if !credentialExists {
 			if authOptions.Verbose {
-				LogInfof(
+				logging.LogInfof(
 					"Gopass credential '%s' does not exist and can therefore not be used to authenticate against gitlab.",
 					gopassPath,
 				)
@@ -206,7 +208,7 @@ func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) 
 			gitlab.WithBaseURL(apiV4Url),
 		)
 		if err != nil {
-			return TracedError(err.Error())
+			return errors.TracedError(err.Error())
 		}
 
 		g.nativeClient = nativeClient
@@ -214,11 +216,11 @@ func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) 
 	}
 
 	if g.nativeClient == nil {
-		return TracedErrorf("No authentication method for gitlab '%s' worked.", fqdn)
+		return errors.TracedErrorf("No authentication method for gitlab '%s' worked.", fqdn)
 	}
 
 	if authOptions.Verbose {
-		LogInfof("Authenticate against gitlab '%s' finished.", fqdn)
+		logging.LogInfof("Authenticate against gitlab '%s' finished.", fqdn)
 	}
 
 	return nil
@@ -226,7 +228,7 @@ func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) 
 
 func (g *GitlabInstance) CheckProjectByPathExists(projectPath string, verbose bool) (projectExists bool, err error) {
 	if projectPath == "" {
-		return false, TracedError("projectPath is empty string")
+		return false, errors.TracedError("projectPath is empty string")
 	}
 
 	projectExists, err = g.ProjectByProjectPathExists(projectPath, verbose)
@@ -238,10 +240,10 @@ func (g *GitlabInstance) CheckProjectByPathExists(projectPath string, verbose bo
 		errorMessage := fmt.Sprintf("Gitlab project '%s' does not exist.", projectPath)
 
 		if verbose {
-			LogError(errorMessage)
+			logging.LogError(errorMessage)
 		}
 
-		return false, TracedError(errorMessage)
+		return false, errors.TracedError(errorMessage)
 	}
 
 	return projectExists, nil
@@ -249,7 +251,7 @@ func (g *GitlabInstance) CheckProjectByPathExists(projectPath string, verbose bo
 
 func (g *GitlabInstance) CheckRunnerStatusOk(runnerName string, verbose bool) (isStatusOk bool, err error) {
 	if len(runnerName) <= 0 {
-		return false, TracedError("runnerName is empty string")
+		return false, errors.TracedError("runnerName is empty string")
 	}
 
 	gitlabRunners, err := g.GetGitlabRunners()
@@ -267,7 +269,7 @@ func (g *GitlabInstance) CheckRunnerStatusOk(runnerName string, verbose bool) (i
 
 func (g *GitlabInstance) CreateAccessToken(options *GitlabCreateAccessTokenOptions) (newToken string, err error) {
 	if options == nil {
-		return "", TracedError("options is nil")
+		return "", errors.TracedError("options is nil")
 	}
 
 	users, err := g.GetGitlabUsers()
@@ -285,11 +287,11 @@ func (g *GitlabInstance) CreateAccessToken(options *GitlabCreateAccessTokenOptio
 
 func (g *GitlabInstance) CreateGroupByPath(groupPath string, createOptions *GitlabCreateGroupOptions) (createdGroup *GitlabGroup, err error) {
 	if groupPath == "" {
-		return nil, TracedErrorEmptyString("groupPath")
+		return nil, errors.TracedErrorEmptyString("groupPath")
 	}
 
 	if createOptions == nil {
-		return nil, TracedErrorNil("createOptions")
+		return nil, errors.TracedErrorNil("createOptions")
 	}
 
 	gitlabGroups, err := g.GetGitlabGroups()
@@ -307,7 +309,7 @@ func (g *GitlabInstance) CreateGroupByPath(groupPath string, createOptions *Gitl
 
 func (g *GitlabInstance) CreatePersonalProject(projectName string, verbose bool) (personalProject *GitlabProject, err error) {
 	if projectName == "" {
-		return nil, TracedErrorEmptyString("projectName")
+		return nil, errors.TracedErrorEmptyString("projectName")
 	}
 
 	personalProject, err = g.GetPersonalProjectByName(projectName, verbose)
@@ -325,7 +327,7 @@ func (g *GitlabInstance) CreatePersonalProject(projectName string, verbose bool)
 
 func (g *GitlabInstance) CreateProject(createOptions *GitlabCreateProjectOptions) (gitlabProject *GitlabProject, err error) {
 	if createOptions == nil {
-		return nil, TracedError("createOptions is nil")
+		return nil, errors.TracedError("createOptions is nil")
 	}
 
 	gitlabProjects, err := g.GetGitlabProjects()
@@ -343,7 +345,7 @@ func (g *GitlabInstance) CreateProject(createOptions *GitlabCreateProjectOptions
 
 func (g *GitlabInstance) DeleteGroupByPath(groupPath string, verbose bool) (err error) {
 	if groupPath == "" {
-		return TracedErrorEmptyString("groupPath")
+		return errors.TracedErrorEmptyString("groupPath")
 	}
 
 	group, err := g.GetGroupByPath(groupPath, verbose)
@@ -386,7 +388,7 @@ func (g *GitlabInstance) GetCurrentUser(verbose bool) (currentUser *GitlabUser, 
 
 func (g *GitlabInstance) GetCurrentlyUsedAccessToken() (gitlabAccessToken string, err error) {
 	if g.currentlyUsedAccessToken == nil {
-		return "", TracedError("currentlyUsedAccessToken not set")
+		return "", errors.TracedError("currentlyUsedAccessToken not set")
 	}
 
 	return *g.currentlyUsedAccessToken, nil
@@ -406,7 +408,7 @@ func (g *GitlabInstance) GetDeepCopy() (copy *GitlabInstance) {
 
 func (g *GitlabInstance) GetFqdn() (fqdn string, err error) {
 	if len(g.fqdn) <= 0 {
-		return "", TracedError("fqdn not set")
+		return "", errors.TracedError("fqdn not set")
 	}
 
 	return g.fqdn, nil
@@ -425,7 +427,7 @@ func (g *GitlabInstance) GetGitlabGroups() (gitlabGroups *GitlabGroups, err erro
 
 func (g *GitlabInstance) GetGitlabProjectById(projectId int, verbose bool) (gitlabProject *GitlabProject, err error) {
 	if projectId <= 0 {
-		return nil, TracedErrorf("projectId '%d' <= 0 is invalid", projectId)
+		return nil, errors.TracedErrorf("projectId '%d' <= 0 is invalid", projectId)
 	}
 
 	gitlabProject = NewGitlabProject()
@@ -444,7 +446,7 @@ func (g *GitlabInstance) GetGitlabProjectById(projectId int, verbose bool) (gitl
 
 func (g *GitlabInstance) GetGitlabProjectByPath(projectPath string, verbose bool) (gitlabProject *GitlabProject, err error) {
 	if len(projectPath) <= 0 {
-		return nil, TracedError("projectPath is empty string")
+		return nil, errors.TracedError("projectPath is empty string")
 	}
 
 	exists, err := g.ProjectByProjectPathExists(projectPath, verbose)
@@ -560,7 +562,7 @@ func (g *GitlabInstance) GetNativeBranchesClient() (nativeClient *gitlab.Branche
 
 	nativeClient = client.Branches
 	if nativeClient == nil {
-		return nil, TracedError("nativeClient is nil after evaluation")
+		return nil, errors.TracedError("nativeClient is nil after evaluation")
 	}
 
 	return nativeClient, nil
@@ -568,7 +570,7 @@ func (g *GitlabInstance) GetNativeBranchesClient() (nativeClient *gitlab.Branche
 
 func (g *GitlabInstance) GetNativeClient() (nativeClient *gitlab.Client, err error) {
 	if g.nativeClient == nil {
-		return nil, TracedError("nativeClient not set")
+		return nil, errors.TracedError("nativeClient not set")
 	}
 
 	return g.nativeClient, nil
@@ -582,7 +584,7 @@ func (g *GitlabInstance) GetNativeMergeRequestsService() (nativeClient *gitlab.M
 
 	nativeClient = client.MergeRequests
 	if nativeClient == nil {
-		return nil, TracedError("nativeClient is nil after evaluation")
+		return nil, errors.TracedError("nativeClient is nil after evaluation")
 	}
 
 	return nativeClient, nil
@@ -597,7 +599,7 @@ func (g *GitlabInstance) GetNativeReleaseLinksClient() (nativeClient *gitlab.Rel
 	nativeClient = client.ReleaseLinks
 
 	if nativeClient == nil {
-		return nil, TracedError("native client is nil after evaluation.")
+		return nil, errors.TracedError("native client is nil after evaluation.")
 	}
 
 	return nativeClient, nil
@@ -612,7 +614,7 @@ func (g *GitlabInstance) GetNativeReleasesClient() (nativeReleasesClient *gitlab
 	nativeReleasesClient = gitlabClient.Releases
 
 	if nativeReleasesClient == nil {
-		return nil, TracedError(
+		return nil, errors.TracedError(
 			"Native releases client is empty string after evaluation.",
 		)
 	}
@@ -628,7 +630,7 @@ func (g *GitlabInstance) GetNativeRepositoriesClient() (nativeRepositoriesClient
 
 	nativeRepositoriesClient = client.Repositories
 	if nativeRepositoriesClient == nil {
-		return nil, TracedError("Repositories is nil after evaluation")
+		return nil, errors.TracedError("Repositories is nil after evaluation")
 	}
 
 	return nativeRepositoriesClient, nil
@@ -642,7 +644,7 @@ func (g *GitlabInstance) GetNativeRepositoryFilesClient() (nativeRepositoryFiles
 
 	nativeRepositoryFilesClient = client.RepositoryFiles
 	if nativeRepositoryFilesClient == nil {
-		return nil, TracedError("nativeRepositoryFilesClient is nil after evaluation")
+		return nil, errors.TracedError("nativeRepositoryFilesClient is nil after evaluation")
 	}
 
 	return nativeRepositoryFilesClient, nil
@@ -656,7 +658,7 @@ func (g *GitlabInstance) GetNativeTagsService() (nativeTagsService *gitlab.TagsS
 
 	nativeTagsService = nativeClient.Tags
 	if nativeTagsService == nil {
-		return nil, TracedError("nativeTagsService is nil after evaluation")
+		return nil, errors.TracedError("nativeTagsService is nil after evaluation")
 	}
 
 	return nativeTagsService, nil
@@ -689,7 +691,7 @@ func (g *GitlabInstance) GetPersonalAccessTokens() (tokens *GitlabPersonalAccess
 
 func (g *GitlabInstance) GetPersonalProjectByName(projectName string, verbose bool) (project *GitlabProject, err error) {
 	if projectName == "" {
-		return nil, TracedErrorEmptyString("projectName")
+		return nil, errors.TracedErrorEmptyString("projectName")
 	}
 
 	personalProjectsPath, err := g.GetPersonalProjectsPath(verbose)
@@ -711,7 +713,7 @@ func (g *GitlabInstance) GetPersonalProjectByName(projectName string, verbose bo
 
 func (g *GitlabInstance) GetProjectIdByPath(projectPath string, verbose bool) (projectId int, err error) {
 	if len(projectPath) <= 0 {
-		return -1, TracedError("projectPath is empty string")
+		return -1, errors.TracedError("projectPath is empty string")
 	}
 
 	projects, err := g.GetGitlabProjects()
@@ -729,7 +731,7 @@ func (g *GitlabInstance) GetProjectIdByPath(projectPath string, verbose bool) (p
 
 func (g *GitlabInstance) GetProjectPathList(options *GitlabgetProjectListOptions) (projectPaths []string, err error) {
 	if options == nil {
-		return nil, TracedErrorNil("options")
+		return nil, errors.TracedErrorNil("options")
 	}
 
 	project, err := g.GetGitlabProjects()
@@ -747,7 +749,7 @@ func (g *GitlabInstance) GetProjectPathList(options *GitlabgetProjectListOptions
 
 func (g *GitlabInstance) GetRunnerByName(name string) (runner *GitlabRunner, err error) {
 	if len(name) <= 0 {
-		return nil, TracedError("name is empty string")
+		return nil, errors.TracedError("name is empty string")
 	}
 
 	runners, err := g.GetGitlabRunners()
@@ -765,7 +767,7 @@ func (g *GitlabInstance) GetRunnerByName(name string) (runner *GitlabRunner, err
 
 func (g *GitlabInstance) GetUserById(id int) (gitlabUser *GitlabUser, err error) {
 	if id <= 0 {
-		return nil, TracedErrorf("id '%d' is invalid", id)
+		return nil, errors.TracedErrorf("id '%d' is invalid", id)
 	}
 
 	gitlabUsers, err := g.GetGitlabUsers()
@@ -783,7 +785,7 @@ func (g *GitlabInstance) GetUserById(id int) (gitlabUser *GitlabUser, err error)
 
 func (g *GitlabInstance) GetUserByUsername(username string) (gitlabUser *GitlabUser, err error) {
 	if len(username) <= 0 {
-		return nil, TracedError("username is empty string")
+		return nil, errors.TracedError("username is empty string")
 	}
 
 	gitlabUsers, err := g.GetGitlabUsers()
@@ -815,7 +817,7 @@ func (g *GitlabInstance) GetUserNameList(verbose bool) (userNames []string, err 
 
 func (g *GitlabInstance) GroupByGroupPathExists(groupPath string, verbose bool) (groupExists bool, err error) {
 	if len(groupPath) <= 0 {
-		return false, TracedError("groupPath is empty string")
+		return false, errors.TracedError("groupPath is empty string")
 	}
 
 	gitlabGroups, err := g.GetGitlabGroups()
@@ -834,7 +836,7 @@ func (g *GitlabInstance) GroupByGroupPathExists(groupPath string, verbose bool) 
 func (g *GitlabInstance) MustAddRunner(newRunnerOptions *GitlabAddRunnerOptions) (createdRunner *GitlabRunner) {
 	createdRunner, err := g.AddRunner(newRunnerOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdRunner
@@ -843,14 +845,14 @@ func (g *GitlabInstance) MustAddRunner(newRunnerOptions *GitlabAddRunnerOptions)
 func (g *GitlabInstance) MustAuthenticate(authOptions *GitlabAuthenticationOptions) {
 	err := g.Authenticate(authOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabInstance) MustCheckProjectByPathExists(projectPath string, verbose bool) (projectExists bool) {
 	projectExists, err := g.CheckProjectByPathExists(projectPath, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectExists
@@ -859,7 +861,7 @@ func (g *GitlabInstance) MustCheckProjectByPathExists(projectPath string, verbos
 func (g *GitlabInstance) MustCheckRunnerStatusOk(runnerName string, verbose bool) (isStatusOk bool) {
 	isStatusOk, err := g.CheckRunnerStatusOk(runnerName, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isStatusOk
@@ -868,7 +870,7 @@ func (g *GitlabInstance) MustCheckRunnerStatusOk(runnerName string, verbose bool
 func (g *GitlabInstance) MustCreateGroupByPath(groupPath string, createOptions *GitlabCreateGroupOptions) (createdGroup *GitlabGroup) {
 	createdGroup, err := g.CreateGroupByPath(groupPath, createOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdGroup
@@ -877,7 +879,7 @@ func (g *GitlabInstance) MustCreateGroupByPath(groupPath string, createOptions *
 func (g *GitlabInstance) MustCreatePersonalProject(projectName string, verbose bool) (personalProject *GitlabProject) {
 	personalProject, err := g.CreatePersonalProject(projectName, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return personalProject
@@ -886,7 +888,7 @@ func (g *GitlabInstance) MustCreatePersonalProject(projectName string, verbose b
 func (g *GitlabInstance) MustCreateProject(createOptions *GitlabCreateProjectOptions) (gitlabProject *GitlabProject) {
 	gitlabProject, err := g.CreateProject(createOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabProject
@@ -895,14 +897,14 @@ func (g *GitlabInstance) MustCreateProject(createOptions *GitlabCreateProjectOpt
 func (g *GitlabInstance) MustDeleteGroupByPath(groupPath string, verbose bool) {
 	err := g.DeleteGroupByPath(groupPath, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabInstance) MustGetApiV4Url() (v4ApiUrl string) {
 	v4ApiUrl, err := g.GetApiV4Url()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return v4ApiUrl
@@ -911,7 +913,7 @@ func (g *GitlabInstance) MustGetApiV4Url() (v4ApiUrl string) {
 func (g *GitlabInstance) MustGetCurrentUser(verbose bool) (currentUser *GitlabUser) {
 	currentUser, err := g.GetCurrentUser(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return currentUser
@@ -920,7 +922,7 @@ func (g *GitlabInstance) MustGetCurrentUser(verbose bool) (currentUser *GitlabUs
 func (g *GitlabInstance) MustGetCurrentUserName(verbose bool) (currentUserName string) {
 	currentUserName, err := g.GetCurrentUsersName(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return currentUserName
@@ -929,7 +931,7 @@ func (g *GitlabInstance) MustGetCurrentUserName(verbose bool) (currentUserName s
 func (g *GitlabInstance) MustGetCurrentUsersName(verbose bool) (currentUserName string) {
 	currentUserName, err := g.GetCurrentUsersName(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return currentUserName
@@ -938,7 +940,7 @@ func (g *GitlabInstance) MustGetCurrentUsersName(verbose bool) (currentUserName 
 func (g *GitlabInstance) MustGetCurrentUsersUsername(verbose bool) (currentUserName string) {
 	currentUserName, err := g.GetCurrentUsersUsername(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return currentUserName
@@ -947,7 +949,7 @@ func (g *GitlabInstance) MustGetCurrentUsersUsername(verbose bool) (currentUserN
 func (g *GitlabInstance) MustGetCurrentlyUsedAccessToken() (gitlabAccessToken string) {
 	gitlabAccessToken, err := g.GetCurrentlyUsedAccessToken()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabAccessToken
@@ -956,7 +958,7 @@ func (g *GitlabInstance) MustGetCurrentlyUsedAccessToken() (gitlabAccessToken st
 func (g *GitlabInstance) MustGetFqdn() (fqdn string) {
 	fqdn, err := g.GetFqdn()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return fqdn
@@ -965,7 +967,7 @@ func (g *GitlabInstance) MustGetFqdn() (fqdn string) {
 func (g *GitlabInstance) MustGetGitlabGroups() (gitlabGroups *GitlabGroups) {
 	gitlabGroups, err := g.GetGitlabGroups()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabGroups
@@ -974,7 +976,7 @@ func (g *GitlabInstance) MustGetGitlabGroups() (gitlabGroups *GitlabGroups) {
 func (g *GitlabInstance) MustGetGitlabProjectById(projectId int, verbose bool) (gitlabProject *GitlabProject) {
 	gitlabProject, err := g.GetGitlabProjectById(projectId, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabProject
@@ -983,7 +985,7 @@ func (g *GitlabInstance) MustGetGitlabProjectById(projectId int, verbose bool) (
 func (g *GitlabInstance) MustGetGitlabProjectByPath(projectPath string, verbose bool) (gitlabProject *GitlabProject) {
 	gitlabProject, err := g.GetGitlabProjectByPath(projectPath, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabProject
@@ -992,7 +994,7 @@ func (g *GitlabInstance) MustGetGitlabProjectByPath(projectPath string, verbose 
 func (g *GitlabInstance) MustGetGitlabProjects() (gitlabProjects *GitlabProjects) {
 	gitlabProjects, err := g.GetGitlabProjects()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabProjects
@@ -1001,7 +1003,7 @@ func (g *GitlabInstance) MustGetGitlabProjects() (gitlabProjects *GitlabProjects
 func (g *GitlabInstance) MustGetGitlabRunners() (gitlabRunners *GitlabRunnersService) {
 	gitlabRunners, err := g.GetGitlabRunners()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabRunners
@@ -1010,7 +1012,7 @@ func (g *GitlabInstance) MustGetGitlabRunners() (gitlabRunners *GitlabRunnersSer
 func (g *GitlabInstance) MustGetGitlabSettings() (gitlabSettings *GitlabSettings) {
 	gitlabSettings, err := g.GetGitlabSettings()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabSettings
@@ -1019,7 +1021,7 @@ func (g *GitlabInstance) MustGetGitlabSettings() (gitlabSettings *GitlabSettings
 func (g *GitlabInstance) MustGetGitlabUsers() (gitlabUsers *GitlabUsers) {
 	gitlabUsers, err := g.GetGitlabUsers()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabUsers
@@ -1028,7 +1030,7 @@ func (g *GitlabInstance) MustGetGitlabUsers() (gitlabUsers *GitlabUsers) {
 func (g *GitlabInstance) MustGetGroupById(id int, verbose bool) (gitlabGroup *GitlabGroup) {
 	gitlabGroup, err := g.GetGroupById(id, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabGroup
@@ -1037,7 +1039,7 @@ func (g *GitlabInstance) MustGetGroupById(id int, verbose bool) (gitlabGroup *Gi
 func (g *GitlabInstance) MustGetGroupByPath(groupPath string, verbose bool) (gitlabGroup *GitlabGroup) {
 	gitlabGroup, err := g.GetGroupByPath(groupPath, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabGroup
@@ -1046,7 +1048,7 @@ func (g *GitlabInstance) MustGetGroupByPath(groupPath string, verbose bool) (git
 func (g *GitlabInstance) MustGetNativeBranchesClient() (nativeClient *gitlab.BranchesService) {
 	nativeClient, err := g.GetNativeBranchesClient()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeClient
@@ -1055,7 +1057,7 @@ func (g *GitlabInstance) MustGetNativeBranchesClient() (nativeClient *gitlab.Bra
 func (g *GitlabInstance) MustGetNativeClient() (nativeClient *gitlab.Client) {
 	nativeClient, err := g.GetNativeClient()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeClient
@@ -1064,7 +1066,7 @@ func (g *GitlabInstance) MustGetNativeClient() (nativeClient *gitlab.Client) {
 func (g *GitlabInstance) MustGetNativeMergeRequestsService() (nativeClient *gitlab.MergeRequestsService) {
 	nativeClient, err := g.GetNativeMergeRequestsService()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeClient
@@ -1073,7 +1075,7 @@ func (g *GitlabInstance) MustGetNativeMergeRequestsService() (nativeClient *gitl
 func (g *GitlabInstance) MustGetNativeReleaseLinksClient() (nativeClient *gitlab.ReleaseLinksService) {
 	nativeClient, err := g.GetNativeReleaseLinksClient()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeClient
@@ -1082,7 +1084,7 @@ func (g *GitlabInstance) MustGetNativeReleaseLinksClient() (nativeClient *gitlab
 func (g *GitlabInstance) MustGetNativeReleasesClient() (nativeReleasesClient *gitlab.ReleasesService) {
 	nativeReleasesClient, err := g.GetNativeReleasesClient()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeReleasesClient
@@ -1091,7 +1093,7 @@ func (g *GitlabInstance) MustGetNativeReleasesClient() (nativeReleasesClient *gi
 func (g *GitlabInstance) MustGetNativeRepositoriesClient() (nativeRepositoriesClient *gitlab.RepositoriesService) {
 	nativeRepositoriesClient, err := g.GetNativeRepositoriesClient()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeRepositoriesClient
@@ -1100,7 +1102,7 @@ func (g *GitlabInstance) MustGetNativeRepositoriesClient() (nativeRepositoriesCl
 func (g *GitlabInstance) MustGetNativeRepositoryFilesClient() (nativeRepositoryFilesClient *gitlab.RepositoryFilesService) {
 	nativeRepositoryFilesClient, err := g.GetNativeRepositoryFilesClient()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeRepositoryFilesClient
@@ -1109,7 +1111,7 @@ func (g *GitlabInstance) MustGetNativeRepositoryFilesClient() (nativeRepositoryF
 func (g *GitlabInstance) MustGetNativeTagsService() (nativeTagsService *gitlab.TagsService) {
 	nativeTagsService, err := g.GetNativeTagsService()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeTagsService
@@ -1118,7 +1120,7 @@ func (g *GitlabInstance) MustGetNativeTagsService() (nativeTagsService *gitlab.T
 func (g *GitlabInstance) MustGetPersonalAccessTokenList(verbose bool) (personalAccessTokens []*GitlabPersonalAccessToken) {
 	personalAccessTokens, err := g.GetPersonalAccessTokenList(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return personalAccessTokens
@@ -1127,7 +1129,7 @@ func (g *GitlabInstance) MustGetPersonalAccessTokenList(verbose bool) (personalA
 func (g *GitlabInstance) MustGetPersonalAccessTokens() (tokens *GitlabPersonalAccessTokenService) {
 	tokens, err := g.GetPersonalAccessTokens()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tokens
@@ -1136,7 +1138,7 @@ func (g *GitlabInstance) MustGetPersonalAccessTokens() (tokens *GitlabPersonalAc
 func (g *GitlabInstance) MustGetPersonalProjectByName(projectName string, verbose bool) (project *GitlabProject) {
 	project, err := g.GetPersonalProjectByName(projectName, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return project
@@ -1145,7 +1147,7 @@ func (g *GitlabInstance) MustGetPersonalProjectByName(projectName string, verbos
 func (g *GitlabInstance) MustGetPersonalProjectsPath(verbose bool) (personalProjetsPath string) {
 	personalProjetsPath, err := g.GetPersonalProjectsPath(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return personalProjetsPath
@@ -1154,7 +1156,7 @@ func (g *GitlabInstance) MustGetPersonalProjectsPath(verbose bool) (personalProj
 func (g *GitlabInstance) MustGetProjectIdByPath(projectPath string, verbose bool) (projectId int) {
 	projectId, err := g.GetProjectIdByPath(projectPath, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectId
@@ -1163,7 +1165,7 @@ func (g *GitlabInstance) MustGetProjectIdByPath(projectPath string, verbose bool
 func (g *GitlabInstance) MustGetProjectPathList(options *GitlabgetProjectListOptions) (projectPaths []string) {
 	projectPaths, err := g.GetProjectPathList(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectPaths
@@ -1172,7 +1174,7 @@ func (g *GitlabInstance) MustGetProjectPathList(options *GitlabgetProjectListOpt
 func (g *GitlabInstance) MustGetRunnerByName(name string) (runner *GitlabRunner) {
 	runner, err := g.GetRunnerByName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return runner
@@ -1181,7 +1183,7 @@ func (g *GitlabInstance) MustGetRunnerByName(name string) (runner *GitlabRunner)
 func (g *GitlabInstance) MustGetUserById(id int) (gitlabUser *GitlabUser) {
 	gitlabUser, err := g.GetUserById(id)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabUser
@@ -1190,7 +1192,7 @@ func (g *GitlabInstance) MustGetUserById(id int) (gitlabUser *GitlabUser) {
 func (g *GitlabInstance) MustGetUserByUsername(username string) (gitlabUser *GitlabUser) {
 	gitlabUser, err := g.GetUserByUsername(username)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabUser
@@ -1199,7 +1201,7 @@ func (g *GitlabInstance) MustGetUserByUsername(username string) (gitlabUser *Git
 func (g *GitlabInstance) MustGetUserId() (userId int) {
 	userId, err := g.GetUserId()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return userId
@@ -1208,7 +1210,7 @@ func (g *GitlabInstance) MustGetUserId() (userId int) {
 func (g *GitlabInstance) MustGetUserNameList(verbose bool) (userNames []string) {
 	userNames, err := g.GetUserNameList(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return userNames
@@ -1217,7 +1219,7 @@ func (g *GitlabInstance) MustGetUserNameList(verbose bool) (userNames []string) 
 func (g *GitlabInstance) MustGroupByGroupPathExists(groupPath string, verbose bool) (groupExists bool) {
 	groupExists, err := g.GroupByGroupPathExists(groupPath, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return groupExists
@@ -1226,7 +1228,7 @@ func (g *GitlabInstance) MustGroupByGroupPathExists(groupPath string, verbose bo
 func (g *GitlabInstance) MustProjectByProjectIdExists(projectId int, verbose bool) (projectExists bool) {
 	projectExists, err := g.ProjectByProjectIdExists(projectId, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectExists
@@ -1235,7 +1237,7 @@ func (g *GitlabInstance) MustProjectByProjectIdExists(projectId int, verbose boo
 func (g *GitlabInstance) MustProjectByProjectPathExists(projectPath string, verbose bool) (projectExists bool) {
 	projectExists, err := g.ProjectByProjectPathExists(projectPath, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectExists
@@ -1244,7 +1246,7 @@ func (g *GitlabInstance) MustProjectByProjectPathExists(projectPath string, verb
 func (g *GitlabInstance) MustRecreatePersonalAccessToken(createOptions *GitlabCreatePersonalAccessTokenOptions) (newToken string) {
 	newToken, err := g.RecreatePersonalAccessToken(createOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return newToken
@@ -1253,55 +1255,55 @@ func (g *GitlabInstance) MustRecreatePersonalAccessToken(createOptions *GitlabCr
 func (g *GitlabInstance) MustRemoveAllRunners(verbose bool) {
 	err := g.RemoveAllRunners(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabInstance) MustResetAccessToken(options *GitlabResetAccessTokenOptions) {
 	err := g.ResetAccessToken(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabInstance) MustResetUserPassword(resetOptions *GitlabResetPasswordOptions) {
 	err := g.ResetUserPassword(resetOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabInstance) MustSetCurrentlyUsedAccessToken(currentlyUsedAccessToken *string) {
 	err := g.SetCurrentlyUsedAccessToken(currentlyUsedAccessToken)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabInstance) MustSetFqdn(fqdn string) {
 	err := g.SetFqdn(fqdn)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabInstance) MustSetNativeClient(nativeClient *gitlab.Client) {
 	err := g.SetNativeClient(nativeClient)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabInstance) MustUseUnauthenticatedClient(verbose bool) {
 	err := g.UseUnauthenticatedClient(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabInstance) ProjectByProjectIdExists(projectId int, verbose bool) (projectExists bool, err error) {
 	if projectId <= 0 {
-		return false, TracedErrorf("projectId '%d' <= 0 is invalid", projectId)
+		return false, errors.TracedErrorf("projectId '%d' <= 0 is invalid", projectId)
 	}
 
 	gitlabProjects, err := g.GetGitlabProjects()
@@ -1319,7 +1321,7 @@ func (g *GitlabInstance) ProjectByProjectIdExists(projectId int, verbose bool) (
 
 func (g *GitlabInstance) ProjectByProjectPathExists(projectPath string, verbose bool) (projectExists bool, err error) {
 	if len(projectPath) <= 0 {
-		return false, TracedError("projectPath is empty string")
+		return false, errors.TracedError("projectPath is empty string")
 	}
 
 	gitlabProjects, err := g.GetGitlabProjects()
@@ -1337,7 +1339,7 @@ func (g *GitlabInstance) ProjectByProjectPathExists(projectPath string, verbose 
 
 func (g *GitlabInstance) RecreatePersonalAccessToken(createOptions *GitlabCreatePersonalAccessTokenOptions) (newToken string, err error) {
 	if createOptions == nil {
-		return "", TracedError("createOptions is nil")
+		return "", errors.TracedError("createOptions is nil")
 	}
 
 	personalAccessTokens, err := g.GetPersonalAccessTokens()
@@ -1369,7 +1371,7 @@ func (g *GitlabInstance) RemoveAllRunners(verbose bool) (err error) {
 
 func (g *GitlabInstance) ResetAccessToken(options *GitlabResetAccessTokenOptions) (err error) {
 	if options == nil {
-		return TracedError("options is nil")
+		return errors.TracedError("options is nil")
 	}
 
 	fqdn, err := g.GetFqdn()
@@ -1385,10 +1387,10 @@ func (g *GitlabInstance) ResetAccessToken(options *GitlabResetAccessTokenOptions
 	accessTokenName := "PERSONAL_ACCESS_TOKEN"
 
 	if options.Verbose {
-		LogInfof("Reset access token '%s' for user '%s' on gitlab '%s' started.", accessTokenName, username, fqdn)
+		logging.LogInfof("Reset access token '%s' for user '%s' on gitlab '%s' started.", accessTokenName, username, fqdn)
 	}
 
-	return TracedErrorNotImplemented()
+	return errors.TracedErrorNotImplemented()
 	/*
 
 		gitlabContainer, err := docker.GetDockerContainerOnHost(
@@ -1404,7 +1406,7 @@ func (g *GitlabInstance) ResetAccessToken(options *GitlabResetAccessTokenOptions
 		}
 
 		if options.Verbose {
-			LogInfo("Going to create new token using gitlab-rails. Can take up to 30 seconds.")
+			logging.LogInfo("Going to create new token using gitlab-rails. Can take up to 30 seconds.")
 		}
 
 		expirationDate := time.Now().Add(time.Hour * 24 * 30)
@@ -1432,7 +1434,7 @@ func (g *GitlabInstance) ResetAccessToken(options *GitlabResetAccessTokenOptions
 		}
 
 		if options.Verbose {
-			LogInfof("Reset access token '%s' for user '%s' on gitlab '%s' finished.", accessTokenName, username, fqdn)
+			logging.LogInfof("Reset access token '%s' for user '%s' on gitlab '%s' finished.", accessTokenName, username, fqdn)
 		}
 
 		return nil
@@ -1442,7 +1444,7 @@ func (g *GitlabInstance) ResetAccessToken(options *GitlabResetAccessTokenOptions
 func (g *GitlabInstance) ResetUserPassword(resetOptions *GitlabResetPasswordOptions) (err error) {
 
 	if resetOptions == nil {
-		return TracedError("resetOptions is nil")
+		return errors.TracedError("resetOptions is nil")
 	}
 
 	fqdn, err := g.GetFqdn()
@@ -1456,10 +1458,10 @@ func (g *GitlabInstance) ResetUserPassword(resetOptions *GitlabResetPasswordOpti
 	}
 
 	if resetOptions.Verbose {
-		LogInfof("Reset password for user '%s' on  gitlab '%s' started.", username, fqdn)
+		logging.LogInfof("Reset password for user '%s' on  gitlab '%s' started.", username, fqdn)
 	}
 
-	return TracedErrorNotImplemented()
+	return errors.TracedErrorNotImplemented()
 	/*
 
 		gitlabContainer, err := docker.GetDockerContainerOnHost(
@@ -1476,7 +1478,7 @@ func (g *GitlabInstance) ResetUserPassword(resetOptions *GitlabResetPasswordOpti
 		}
 
 		if resetOptions.Verbose {
-			LogInfo("Going to reset password with gitlab-rake which usually takes several seconds.")
+			logging.LogInfo("Going to reset password with gitlab-rake which usually takes several seconds.")
 		}
 		_, err = gitlabContainer.RunCommandAndGetStdoutAsString(
 			&RunCommandOptions{
@@ -1512,7 +1514,7 @@ func (g *GitlabInstance) ResetUserPassword(resetOptions *GitlabResetPasswordOpti
 		}
 
 		if resetOptions.Verbose {
-			LogInfof("Reset password for user '%s' on  gitlab '%s' finished.", username, fqdn)
+			logging.LogInfof("Reset password for user '%s' on  gitlab '%s' finished.", username, fqdn)
 		}
 
 		return nil
@@ -1522,7 +1524,7 @@ func (g *GitlabInstance) ResetUserPassword(resetOptions *GitlabResetPasswordOpti
 
 func (g *GitlabInstance) SetCurrentlyUsedAccessToken(currentlyUsedAccessToken *string) (err error) {
 	if currentlyUsedAccessToken == nil {
-		return TracedErrorf("currentlyUsedAccessToken is nil")
+		return errors.TracedErrorf("currentlyUsedAccessToken is nil")
 	}
 
 	g.currentlyUsedAccessToken = currentlyUsedAccessToken
@@ -1532,7 +1534,7 @@ func (g *GitlabInstance) SetCurrentlyUsedAccessToken(currentlyUsedAccessToken *s
 
 func (g *GitlabInstance) SetFqdn(fqdn string) (err error) {
 	if len(fqdn) <= 0 {
-		return TracedError("fqdn is empty string")
+		return errors.TracedError("fqdn is empty string")
 	}
 
 	fqdnUrl, err := GetUrlFromString(fqdn)
@@ -1552,7 +1554,7 @@ func (g *GitlabInstance) SetFqdn(fqdn string) (err error) {
 
 func (g *GitlabInstance) SetNativeClient(nativeClient *gitlab.Client) (err error) {
 	if nativeClient == nil {
-		return TracedErrorf("nativeClient is nil")
+		return errors.TracedErrorf("nativeClient is nil")
 	}
 
 	g.nativeClient = nativeClient
@@ -1576,13 +1578,13 @@ func (g *GitlabInstance) UseUnauthenticatedClient(verbose bool) (err error) {
 		gitlab.WithBaseURL(apiV4Url),
 	)
 	if err != nil {
-		return TracedError(err.Error())
+		return errors.TracedError(err.Error())
 	}
 
 	g.nativeClient = nativeClient
 
 	if verbose {
-		LogInfof("Unauthenticated gitlab client for '%s' is used.", fqdn)
+		logging.LogInfof("Unauthenticated gitlab client for '%s' is used.", fqdn)
 	}
 
 	return nil

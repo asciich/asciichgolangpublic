@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func getKubernetesByImplementationName(implementationName string) (kubernetes KubernetesCluster) {
@@ -18,7 +19,7 @@ func getKubernetesByImplementationName(implementationName string) (kubernetes Ku
 		return MustGetLocalCommandExecutorKubernetesByName("kind-kind")
 	}
 
-	asciichgolangpublic.LogFatalWithTracef(
+	logging.LogFatalWithTracef(
 		"Unknwon implmentation name '%s'",
 		implementationName,
 	)

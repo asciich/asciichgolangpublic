@@ -4,8 +4,10 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
-	"github.com/asciich/asciichgolangpublic/hosts"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/hosts"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type KubernetesNodeHost struct {
@@ -14,7 +16,7 @@ type KubernetesNodeHost struct {
 
 func GetKubernetesNodeByHost(host hosts.Host) (kubernetesNodeHost *KubernetesNodeHost, err error) {
 	if host == nil {
-		return nil, asciichgolangpublic.TracedErrorNil("host")
+		return nil, errors.TracedErrorNil("host")
 	}
 
 	kubernetesNodeHost = NewKubernetesNodeHost()
@@ -26,7 +28,7 @@ func GetKubernetesNodeByHost(host hosts.Host) (kubernetesNodeHost *KubernetesNod
 
 func GetKubernetesNodeByHostname(hostname string) (kubernetesNodeHost *KubernetesNodeHost, err error) {
 	if len(hostname) <= 0 {
-		return nil, asciichgolangpublic.TracedError("hostname is empty string")
+		return nil, errors.TracedError("hostname is empty string")
 	}
 
 	host, err := hosts.GetHostByHostname("hostname")
@@ -40,7 +42,7 @@ func GetKubernetesNodeByHostname(hostname string) (kubernetesNodeHost *Kubernete
 func MustGetKubernetesNodeByHost(host hosts.Host) (kubernetesNodeHost *KubernetesNodeHost) {
 	kubernetesNodeHost, err := GetKubernetesNodeByHost(host)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return kubernetesNodeHost
@@ -49,7 +51,7 @@ func MustGetKubernetesNodeByHost(host hosts.Host) (kubernetesNodeHost *Kubernete
 func MustGetKubernetesNodeByHostname(hostname string) (kubernetesNodeHost *KubernetesNodeHost) {
 	kubernetesNodeHost, err := GetKubernetesNodeByHostname(hostname)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return kubernetesNodeHost
@@ -72,7 +74,7 @@ func (k *KubernetesNodeHost) CheckIsKubernetesNode(verbose bool) (isKubernetesNo
 	}
 
 	if !isKubernetesNode {
-		return false, asciichgolangpublic.TracedErrorf("Host '%s' is not a kubernetes node", hostname)
+		return false, errors.TracedErrorf("Host '%s' is not a kubernetes node", hostname)
 	}
 
 	return isKubernetesNode, nil
@@ -106,16 +108,16 @@ func (k *KubernetesNodeHost) IsKubernetesNode(verbose bool) (isKubernetesNode bo
 
 	if strings.Contains(stdout, "registry.k8s.io/etcd") {
 		if verbose {
-			asciichgolangpublic.LogInfof("Host '%s' seems to be a kubernetes controlplane since etcd container was found, not a node itself.", hostname)
+			logging.LogInfof("Host '%s' seems to be a kubernetes controlplane since etcd container was found, not a node itself.", hostname)
 		}
 		isKubernetesNode = false
 	}
 
 	if verbose {
 		if isKubernetesNode {
-			asciichgolangpublic.LogInfof("Host '%s' is a kubernetes node.", hostname)
+			logging.LogInfof("Host '%s' is a kubernetes node.", hostname)
 		} else {
-			asciichgolangpublic.LogInfof("Host '%s' is not a kubernetes node.", hostname)
+			logging.LogInfof("Host '%s' is not a kubernetes node.", hostname)
 		}
 	}
 
@@ -125,7 +127,7 @@ func (k *KubernetesNodeHost) IsKubernetesNode(verbose bool) (isKubernetesNode bo
 func (k *KubernetesNodeHost) MustCheckIsKubernetesNode(verbose bool) (isKubernetesNode bool) {
 	isKubernetesNode, err := k.CheckIsKubernetesNode(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isKubernetesNode
@@ -134,7 +136,7 @@ func (k *KubernetesNodeHost) MustCheckIsKubernetesNode(verbose bool) (isKubernet
 func (k *KubernetesNodeHost) MustIsKubernetesNode(verbose bool) (isKubernetesNode bool) {
 	isKubernetesNode, err := k.IsKubernetesNode(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isKubernetesNode

@@ -5,6 +5,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic"
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 // Returns true if running in a container like docker container.
@@ -30,21 +32,21 @@ func IsRunningInsideContainer(verbose bool) (isRunningInContainer bool, err erro
 
 		splittedLine := strings.Split(line, ":")
 		if len(splittedLine) != 3 {
-			return false, asciichgolangpublic.TracedErrorf("Unable to parse proc line '%s' from '%s'.", line, procFilePath)
+			return false, errors.TracedErrorf("Unable to parse proc line '%s' from '%s'.", line, procFilePath)
 		}
 
 		pathToCheck := splittedLine[2]
 
 		if !aslices.ContainsString([]string{"/", "/init.scope"}, pathToCheck) {
 			if verbose {
-				asciichgolangpublic.LogInfo("Currently running in a container")
+				logging.LogInfo("Currently running in a container")
 			}
 			return true, nil
 		}
 	}
 
 	if verbose {
-		asciichgolangpublic.LogInfo("Currently not running in a container")
+		logging.LogInfo("Currently not running in a container")
 	}
 
 	return false, nil
@@ -54,7 +56,7 @@ func IsRunningInsideContainer(verbose bool) (isRunningInContainer bool, err erro
 func MustIsRunningInsideContainer(verbose bool) (isRunningInContainer bool) {
 	isRunningInContainer, err := IsRunningInsideContainer(verbose)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isRunningInContainer

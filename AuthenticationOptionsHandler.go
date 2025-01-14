@@ -1,5 +1,9 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
 
 type AuthenticationOptionsHandlerService struct{}
 
@@ -13,7 +17,7 @@ func NewAuthenticationOptionsHandlerService() (a *AuthenticationOptionsHandlerSe
 
 func (a *AuthenticationOptionsHandlerService) GetAuthenticationoptionsForService(authentiationOptions []AuthenticationOption, serviceName string) (authOption AuthenticationOption, err error) {
 	if serviceName == "" {
-		return nil, TracedErrorEmptyString("serviceName")
+		return nil, errors.TracedErrorEmptyString("serviceName")
 	}
 
 	for _, authOption = range authentiationOptions {
@@ -27,7 +31,7 @@ func (a *AuthenticationOptionsHandlerService) GetAuthenticationoptionsForService
 		}
 	}
 
-	return nil, TracedErrorf(
+	return nil, errors.TracedErrorf(
 		"No authenticationOptions for '%s' found. Checked '%d' authenticationOptions in total.",
 		serviceName,
 		len(authentiationOptions),
@@ -36,7 +40,7 @@ func (a *AuthenticationOptionsHandlerService) GetAuthenticationoptionsForService
 
 func (a *AuthenticationOptionsHandlerService) GetAuthenticationoptionsForServiceByUrl(authenticationOptions []AuthenticationOption, url *URL) (authOption AuthenticationOption, err error) {
 	if url == nil {
-		return nil, TracedErrorNil("url")
+		return nil, errors.TracedErrorNil("url")
 	}
 
 	urlString, err := url.GetAsString()
@@ -55,7 +59,7 @@ func (a *AuthenticationOptionsHandlerService) GetAuthenticationoptionsForService
 func (a *AuthenticationOptionsHandlerService) MustGetAuthenticationoptionsForService(authentiationOptions []AuthenticationOption, serviceName string) (authOption AuthenticationOption) {
 	authOption, err := a.GetAuthenticationoptionsForService(authentiationOptions, serviceName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return authOption
@@ -64,7 +68,7 @@ func (a *AuthenticationOptionsHandlerService) MustGetAuthenticationoptionsForSer
 func (a *AuthenticationOptionsHandlerService) MustGetAuthenticationoptionsForServiceByUrl(authenticationOptions []AuthenticationOption, url *URL) (authOption AuthenticationOption) {
 	authOption, err := a.GetAuthenticationoptionsForServiceByUrl(authenticationOptions, url)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return authOption

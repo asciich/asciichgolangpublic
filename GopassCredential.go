@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type GopassCredential struct {
@@ -15,7 +17,7 @@ type GopassCredential struct {
 func GetGopassCredentialByName(name string) (credential *GopassCredential, err error) {
 	name = strings.TrimSpace(name)
 	if len(name) <= 0 {
-		return nil, TracedError("name is empty string")
+		return nil, errors.TracedError("name is empty string")
 	}
 
 	credential = NewGopassCredential()
@@ -30,7 +32,7 @@ func GetGopassCredentialByName(name string) (credential *GopassCredential, err e
 func MustGetGopassCredentialByName(name string) (credential *GopassCredential) {
 	credential, err := GetGopassCredentialByName(name)
 	if err != nil {
-		LogFatalf("GetGopassCredentialByName failed: '%v'", err)
+		logging.LogFatalf("GetGopassCredentialByName failed: '%v'", err)
 	}
 
 	return credential
@@ -116,7 +118,7 @@ func (c *GopassCredential) GetAsString() (credential string, err error) {
 
 func (c *GopassCredential) GetName() (name string, err error) {
 	if len(c.name) <= 0 {
-		return "", TracedError("name is not set")
+		return "", errors.TracedError("name is not set")
 	}
 
 	return c.name, nil
@@ -154,7 +156,7 @@ func (c *GopassCredential) IncrementIntValue() (err error) {
 func (c *GopassCredential) MustGetName() (name string) {
 	name, err := c.GetName()
 	if err != nil {
-		LogFatalf("gopassCredential.GetName failed: '%v'", err)
+		logging.LogFatalf("gopassCredential.GetName failed: '%v'", err)
 	}
 
 	return name
@@ -172,7 +174,7 @@ func (c *GopassCredential) SetByInt(newValue int) (err error) {
 
 func (c *GopassCredential) SetByString(newValue string) (err error) {
 	if strings.Contains(newValue, "\n") {
-		return TracedError("Unable to set copass value by string. newlines currenlty not supported.")
+		return errors.TracedError("Unable to set copass value by string. newlines currenlty not supported.")
 	}
 
 	name, err := c.GetName()
@@ -201,7 +203,7 @@ func (c *GopassCredential) SetByString(newValue string) (err error) {
 func (c *GopassCredential) SetName(name string) (err error) {
 	name = strings.TrimSpace(name)
 	if len(name) <= 0 {
-		return TracedError("name is empty string")
+		return errors.TracedError("name is empty string")
 	}
 
 	c.name = name
@@ -211,7 +213,7 @@ func (c *GopassCredential) SetName(name string) (err error) {
 
 func (c *GopassCredential) WriteIntoFile(outputFile File, verbose bool) (err error) {
 	if outputFile == nil {
-		return TracedError("outputFile is nil")
+		return errors.TracedError("outputFile is nil")
 	}
 
 	contentBytes, err := c.GetAsBytes()
@@ -235,7 +237,7 @@ func (c *GopassCredential) WriteIntoFile(outputFile File, verbose bool) (err err
 			return err
 		}
 
-		LogInfof("Wrote credential from gopass '%v' to file '%v'.", credentialName, filePath)
+		logging.LogInfof("Wrote credential from gopass '%v' to file '%v'.", credentialName, filePath)
 	}
 
 	return nil
@@ -258,7 +260,7 @@ func (c *GopassCredential) WriteIntoTemporaryFile(verbose bool) (temporaryFile F
 func (g *GopassCredential) MustExists() (exists bool) {
 	exists, err := g.Exists()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return exists
@@ -267,7 +269,7 @@ func (g *GopassCredential) MustExists() (exists bool) {
 func (g *GopassCredential) MustGetAsBytes() (credential []byte) {
 	credential, err := g.GetAsBytes()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return credential
@@ -276,7 +278,7 @@ func (g *GopassCredential) MustGetAsBytes() (credential []byte) {
 func (g *GopassCredential) MustGetAsInt() (value int) {
 	value, err := g.GetAsInt()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return value
@@ -285,7 +287,7 @@ func (g *GopassCredential) MustGetAsInt() (value int) {
 func (g *GopassCredential) MustGetAsString() (credential string) {
 	credential, err := g.GetAsString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return credential
@@ -294,7 +296,7 @@ func (g *GopassCredential) MustGetAsString() (credential string) {
 func (g *GopassCredential) MustGetSslCertificate() (sslCert *X509Certificate) {
 	sslCert, err := g.GetSslCertificate()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sslCert
@@ -303,42 +305,42 @@ func (g *GopassCredential) MustGetSslCertificate() (sslCert *X509Certificate) {
 func (g *GopassCredential) MustIncrementIntValue() {
 	err := g.IncrementIntValue()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GopassCredential) MustSetByInt(newValue int) {
 	err := g.SetByInt(newValue)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GopassCredential) MustSetByString(newValue string) {
 	err := g.SetByString(newValue)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GopassCredential) MustSetName(name string) {
 	err := g.SetName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GopassCredential) MustWriteIntoFile(outputFile File, verbose bool) {
 	err := g.WriteIntoFile(outputFile, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GopassCredential) MustWriteIntoTemporaryFile(verbose bool) (temporaryFile File) {
 	temporaryFile, err := g.WriteIntoTemporaryFile(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return temporaryFile

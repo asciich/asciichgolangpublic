@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type GopassSecretOptions struct {
@@ -31,7 +33,7 @@ func (g *GopassSecretOptions) GetVerbose() (verbose bool, err error) {
 func (g *GopassSecretOptions) MustGetGopassPath() (gopassPath string) {
 	gopassPath, err := g.GetGopassPath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gopassPath
@@ -40,7 +42,7 @@ func (g *GopassSecretOptions) MustGetGopassPath() (gopassPath string) {
 func (g *GopassSecretOptions) MustGetOverwrite() (overwrite bool) {
 	overwrite, err := g.GetOverwrite()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return overwrite
@@ -49,7 +51,7 @@ func (g *GopassSecretOptions) MustGetOverwrite() (overwrite bool) {
 func (g *GopassSecretOptions) MustGetSecretBasename() (basename string) {
 	basename, err := g.GetSecretBasename()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return basename
@@ -58,7 +60,7 @@ func (g *GopassSecretOptions) MustGetSecretBasename() (basename string) {
 func (g *GopassSecretOptions) MustGetSecretRootDirectoryPath() (rootDirectoryPath string) {
 	rootDirectoryPath, err := g.GetSecretRootDirectoryPath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return rootDirectoryPath
@@ -67,7 +69,7 @@ func (g *GopassSecretOptions) MustGetSecretRootDirectoryPath() (rootDirectoryPat
 func (g *GopassSecretOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := g.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -76,35 +78,35 @@ func (g *GopassSecretOptions) MustGetVerbose() (verbose bool) {
 func (g *GopassSecretOptions) MustSetGopassPath(fullPath string) {
 	err := g.SetGopassPath(fullPath)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GopassSecretOptions) MustSetOverwrite(overwrite bool) {
 	err := g.SetOverwrite(overwrite)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GopassSecretOptions) MustSetSecretBasename(secretBasename string) {
 	err := g.SetSecretBasename(secretBasename)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GopassSecretOptions) MustSetSecretRootDirectoryPath(secretRootDirectoryPath string) {
 	err := g.SetSecretRootDirectoryPath(secretRootDirectoryPath)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GopassSecretOptions) MustSetVerbose(verbose bool) {
 	err := g.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
@@ -116,7 +118,7 @@ func (g *GopassSecretOptions) SetOverwrite(overwrite bool) (err error) {
 
 func (g *GopassSecretOptions) SetSecretBasename(secretBasename string) (err error) {
 	if secretBasename == "" {
-		return TracedErrorf("secretBasename is empty string")
+		return errors.TracedErrorf("secretBasename is empty string")
 	}
 
 	g.SecretBasename = secretBasename
@@ -126,7 +128,7 @@ func (g *GopassSecretOptions) SetSecretBasename(secretBasename string) (err erro
 
 func (g *GopassSecretOptions) SetSecretRootDirectoryPath(secretRootDirectoryPath string) (err error) {
 	if secretRootDirectoryPath == "" {
-		return TracedErrorf("secretRootDirectoryPath is empty string")
+		return errors.TracedErrorf("secretRootDirectoryPath is empty string")
 	}
 
 	g.SecretRootDirectoryPath = secretRootDirectoryPath
@@ -160,7 +162,7 @@ func (o *GopassSecretOptions) GetGopassPath() (gopassPath string, err error) {
 	}
 
 	if strings.HasPrefix(basename, "/") {
-		return "", TracedErrorf("absolute secret gopass paths not allowed, but got: '%v'", basename)
+		return "", errors.TracedErrorf("absolute secret gopass paths not allowed, but got: '%v'", basename)
 	}
 
 	gopassPath = filepath.Join(rootDir, basename)
@@ -171,11 +173,11 @@ func (o *GopassSecretOptions) GetSecretBasename() (basename string, err error) {
 	basename = o.SecretBasename
 	basename = strings.TrimSpace(basename)
 	if len(basename) <= 0 {
-		return "", TracedError("basename is empty string")
+		return "", errors.TracedError("basename is empty string")
 	}
 
 	if strings.HasPrefix(basename, "/") {
-		return "", TracedErrorf("absolute secret basenames not allowed for gopass, but got: '%v'", basename)
+		return "", errors.TracedErrorf("absolute secret basenames not allowed for gopass, but got: '%v'", basename)
 	}
 
 	return basename, nil
@@ -185,11 +187,11 @@ func (o *GopassSecretOptions) GetSecretRootDirectoryPath() (rootDirectoryPath st
 	rootDirectoryPath = o.SecretRootDirectoryPath
 	rootDirectoryPath = strings.TrimSpace(rootDirectoryPath)
 	if len(rootDirectoryPath) <= 0 {
-		return "", TracedError("rootDirectoryPath is empty string")
+		return "", errors.TracedError("rootDirectoryPath is empty string")
 	}
 
 	if strings.HasPrefix(rootDirectoryPath, "/") {
-		return "", TracedErrorf("absolute secret rootDirectoryPaths not allowed for gopass, but got: '%v'", rootDirectoryPath)
+		return "", errors.TracedErrorf("absolute secret rootDirectoryPaths not allowed for gopass, but got: '%v'", rootDirectoryPath)
 	}
 
 	return rootDirectoryPath, nil
@@ -197,7 +199,7 @@ func (o *GopassSecretOptions) GetSecretRootDirectoryPath() (rootDirectoryPath st
 
 func (o *GopassSecretOptions) SetGopassPath(fullPath string) (err error) {
 	if len(fullPath) <= 0 {
-		return TracedError("fullPath is empty string")
+		return errors.TracedError("fullPath is empty string")
 	}
 
 	o.SecretBasename = filepath.Base(fullPath)

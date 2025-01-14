@@ -2,6 +2,9 @@ package asciichgolangpublic
 
 import (
 	"strings"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type GitlabAddRunnerOptions struct {
@@ -16,7 +19,7 @@ func NewGitlabAddRunnerOptions() (g *GitlabAddRunnerOptions) {
 
 func (g *GitlabAddRunnerOptions) GetName() (name string, err error) {
 	if g.Name == "" {
-		return "", TracedErrorf("Name not set")
+		return "", errors.TracedErrorf("Name not set")
 	}
 
 	return g.Name, nil
@@ -24,11 +27,11 @@ func (g *GitlabAddRunnerOptions) GetName() (name string, err error) {
 
 func (g *GitlabAddRunnerOptions) GetRunnerTags() (runnerTags []string, err error) {
 	if g.RunnerTags == nil {
-		return nil, TracedErrorf("RunnerTags not set")
+		return nil, errors.TracedErrorf("RunnerTags not set")
 	}
 
 	if len(g.RunnerTags) <= 0 {
-		return nil, TracedErrorf("RunnerTags has no elements")
+		return nil, errors.TracedErrorf("RunnerTags has no elements")
 	}
 
 	return g.RunnerTags, nil
@@ -42,7 +45,7 @@ func (g *GitlabAddRunnerOptions) GetVerbose() (verbose bool, err error) {
 func (g *GitlabAddRunnerOptions) MustGetName() (name string) {
 	name, err := g.GetName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -51,7 +54,7 @@ func (g *GitlabAddRunnerOptions) MustGetName() (name string) {
 func (g *GitlabAddRunnerOptions) MustGetRunnerName() (runnerName string) {
 	runnerName, err := g.GetRunnerName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return runnerName
@@ -60,7 +63,7 @@ func (g *GitlabAddRunnerOptions) MustGetRunnerName() (runnerName string) {
 func (g *GitlabAddRunnerOptions) MustGetRunnerTags() (runnerTags []string) {
 	runnerTags, err := g.GetRunnerTags()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return runnerTags
@@ -69,7 +72,7 @@ func (g *GitlabAddRunnerOptions) MustGetRunnerTags() (runnerTags []string) {
 func (g *GitlabAddRunnerOptions) MustGetTags() (runnerTags []string) {
 	runnerTags, err := g.GetTags()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return runnerTags
@@ -78,7 +81,7 @@ func (g *GitlabAddRunnerOptions) MustGetTags() (runnerTags []string) {
 func (g *GitlabAddRunnerOptions) MustGetTagsCommaSeparated() (tagsCommaSeperated string) {
 	tagsCommaSeperated, err := g.GetTagsCommaSeparated()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tagsCommaSeperated
@@ -87,7 +90,7 @@ func (g *GitlabAddRunnerOptions) MustGetTagsCommaSeparated() (tagsCommaSeperated
 func (g *GitlabAddRunnerOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := g.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -96,27 +99,27 @@ func (g *GitlabAddRunnerOptions) MustGetVerbose() (verbose bool) {
 func (g *GitlabAddRunnerOptions) MustSetName(name string) {
 	err := g.SetName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabAddRunnerOptions) MustSetRunnerTags(runnerTags []string) {
 	err := g.SetRunnerTags(runnerTags)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabAddRunnerOptions) MustSetVerbose(verbose bool) {
 	err := g.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabAddRunnerOptions) SetName(name string) (err error) {
 	if name == "" {
-		return TracedErrorf("name is empty string")
+		return errors.TracedErrorf("name is empty string")
 	}
 
 	g.Name = name
@@ -126,11 +129,11 @@ func (g *GitlabAddRunnerOptions) SetName(name string) (err error) {
 
 func (g *GitlabAddRunnerOptions) SetRunnerTags(runnerTags []string) (err error) {
 	if runnerTags == nil {
-		return TracedErrorf("runnerTags is nil")
+		return errors.TracedErrorf("runnerTags is nil")
 	}
 
 	if len(runnerTags) <= 0 {
-		return TracedErrorf("runnerTags has no elements")
+		return errors.TracedErrorf("runnerTags has no elements")
 	}
 
 	g.RunnerTags = runnerTags
@@ -146,7 +149,7 @@ func (g *GitlabAddRunnerOptions) SetVerbose(verbose bool) (err error) {
 
 func (o *GitlabAddRunnerOptions) GetRunnerName() (runnerName string, err error) {
 	if len(o.Name) <= 0 {
-		return "", TracedError("Name not set")
+		return "", errors.TracedError("Name not set")
 	}
 
 	return o.Name, nil
@@ -154,7 +157,7 @@ func (o *GitlabAddRunnerOptions) GetRunnerName() (runnerName string, err error) 
 
 func (o *GitlabAddRunnerOptions) GetTags() (runnerTags []string, err error) {
 	if len(o.RunnerTags) <= 0 {
-		return nil, TracedError("RunnerTags not set")
+		return nil, errors.TracedError("RunnerTags not set")
 	}
 
 	return o.RunnerTags, nil

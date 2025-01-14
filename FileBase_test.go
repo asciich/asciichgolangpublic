@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func TestFileBase(t *testing.T) {
@@ -24,7 +26,7 @@ func TestFileBase(t *testing.T) {
 				parent, err := fileBase.GetParentFileForBaseClass()
 				assert.Nil(parent)
 				assert.ErrorIs(err, ErrFileBaseParentNotSet)
-				assert.ErrorIs(err, ErrTracedError)
+				assert.ErrorIs(err, errors.ErrTracedError)
 			},
 		)
 	}
@@ -155,7 +157,7 @@ func getTemporaryFileToTest(implementationName string) (file File) {
 		return MustGetLocalCommandExecutorFileByFile(TemporaryFiles().MustCreateEmptyTemporaryFile(verbose), verbose)
 	}
 
-	LogFatalWithTracef("Unknown implementation name '%s'", implementationName)
+	logging.LogFatalWithTracef("Unknown implementation name '%s'", implementationName)
 
 	return nil
 }
@@ -300,4 +302,3 @@ func TestFileBase_GetValueAsInt(t *testing.T) {
 		)
 	}
 }
-

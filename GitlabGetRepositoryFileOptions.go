@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type GitlabGetRepositoryFileOptions struct {
 	Path       string
 	BranchName string
@@ -12,7 +17,7 @@ func NewGitlabGetRepositoryFileOptions() (g *GitlabGetRepositoryFileOptions) {
 
 func (g *GitlabGetRepositoryFileOptions) GetBranchName() (branchName string, err error) {
 	if g.BranchName == "" {
-		return "", TracedErrorf("BranchName not set")
+		return "", errors.TracedErrorf("BranchName not set")
 	}
 
 	return g.BranchName, nil
@@ -20,7 +25,7 @@ func (g *GitlabGetRepositoryFileOptions) GetBranchName() (branchName string, err
 
 func (g *GitlabGetRepositoryFileOptions) GetPath() (path string, err error) {
 	if g.Path == "" {
-		return "", TracedErrorf("Path not set")
+		return "", errors.TracedErrorf("Path not set")
 	}
 
 	return g.Path, nil
@@ -38,7 +43,7 @@ func (g *GitlabGetRepositoryFileOptions) IsBranchNameSet() (isSet bool) {
 func (g *GitlabGetRepositoryFileOptions) MustGetBranchName() (branchName string) {
 	branchName, err := g.GetBranchName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return branchName
@@ -47,7 +52,7 @@ func (g *GitlabGetRepositoryFileOptions) MustGetBranchName() (branchName string)
 func (g *GitlabGetRepositoryFileOptions) MustGetPath() (path string) {
 	path, err := g.GetPath()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return path
@@ -56,20 +61,20 @@ func (g *GitlabGetRepositoryFileOptions) MustGetPath() (path string) {
 func (g *GitlabGetRepositoryFileOptions) MustSetBranchName(branchName string) {
 	err := g.SetBranchName(branchName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabGetRepositoryFileOptions) MustSetPath(path string) {
 	err := g.SetPath(path)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabGetRepositoryFileOptions) SetBranchName(branchName string) (err error) {
 	if branchName == "" {
-		return TracedErrorf("branchName is empty string")
+		return errors.TracedErrorf("branchName is empty string")
 	}
 
 	g.BranchName = branchName
@@ -79,7 +84,7 @@ func (g *GitlabGetRepositoryFileOptions) SetBranchName(branchName string) (err e
 
 func (g *GitlabGetRepositoryFileOptions) SetPath(path string) (err error) {
 	if path == "" {
-		return TracedErrorf("path is empty string")
+		return errors.TracedErrorf("path is empty string")
 	}
 
 	g.Path = path

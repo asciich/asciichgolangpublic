@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type GnuPGService struct {
 }
 
@@ -13,12 +18,12 @@ func NewGnuPGService() (g *GnuPGService) {
 
 func (g *GnuPGService) CheckSignatureValid(signatureFile File, verbose bool) (err error) {
 	if signatureFile == nil {
-		return TracedErrorNil("signatureFile")
+		return errors.TracedErrorNil("signatureFile")
 	}
 
 	err = signatureFile.CheckIsLocalFile(verbose)
 	if err != nil {
-		return TracedErrorf("Only implemented for local available files: %w", err)
+		return errors.TracedErrorf("Only implemented for local available files: %w", err)
 	}
 
 	path, hostDescription, err := signatureFile.GetPathAndHostDescription()
@@ -27,7 +32,7 @@ func (g *GnuPGService) CheckSignatureValid(signatureFile File, verbose bool) (er
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Validate GnuPG signature from '%s' on host '%s' started.",
 			path,
 			hostDescription,
@@ -45,7 +50,7 @@ func (g *GnuPGService) CheckSignatureValid(signatureFile File, verbose bool) (er
 	}
 
 	if verbose {
-		LogInfof(
+		logging.LogInfof(
 			"GnuPG signature from '%s' on host '%s' validated.",
 			path,
 			hostDescription,
@@ -58,29 +63,29 @@ func (g *GnuPGService) CheckSignatureValid(signatureFile File, verbose bool) (er
 func (g *GnuPGService) MustCheckSignatureValid(signatureFile File, verbose bool) {
 	err := g.CheckSignatureValid(signatureFile, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GnuPGService) MustSignFile(fileToSign File, options *GnuPGSignOptions) {
 	err := g.SignFile(fileToSign, options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GnuPGService) SignFile(fileToSign File, options *GnuPGSignOptions) (err error) {
 	if fileToSign == nil {
-		return TracedError("fileToSign is nil")
+		return errors.TracedError("fileToSign is nil")
 	}
 
 	if options == nil {
-		return TracedError("options is nil")
+		return errors.TracedError("options is nil")
 	}
 
 	err = fileToSign.CheckIsLocalFile(options.Verbose)
 	if err != nil {
-		return TracedErrorf("Only implemented for local available files: %w", err)
+		return errors.TracedErrorf("Only implemented for local available files: %w", err)
 	}
 
 	path, err := fileToSign.GetPath()
@@ -89,15 +94,15 @@ func (g *GnuPGService) SignFile(fileToSign File, options *GnuPGSignOptions) (err
 	}
 
 	if options.Verbose {
-		LogInfof("Sign '%s' using gnupg started.", path)
+		logging.LogInfof("Sign '%s' using gnupg started.", path)
 	}
 
 	if !options.AsciiArmor {
-		return TracedError("Only implemented for asciiArmor at the moment")
+		return errors.TracedError("Only implemented for asciiArmor at the moment")
 	}
 
 	if !options.DetachedSign {
-		return TracedError("Only implemented for DetachedSign at the moment")
+		return errors.TracedError("Only implemented for DetachedSign at the moment")
 	}
 
 	signaturePath := path + ".asc"
@@ -133,7 +138,7 @@ func (g *GnuPGService) SignFile(fileToSign File, options *GnuPGSignOptions) (err
 	}
 
 	if !signatureFileExists {
-		return TracedErrorf(
+		return errors.TracedErrorf(
 			"Signing '%s' failed. Expected signature file '%s' does not exits.",
 			path,
 			signaturePath,
@@ -141,7 +146,7 @@ func (g *GnuPGService) SignFile(fileToSign File, options *GnuPGSignOptions) (err
 	}
 
 	if options.Verbose {
-		LogInfof("Sign '%s' using gnupg finished.", path)
+		logging.LogInfof("Sign '%s' using gnupg finished.", path)
 	}
 
 	return nil

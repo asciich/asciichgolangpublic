@@ -7,6 +7,8 @@ import (
 	"time"
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	aerrors "github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 var ErrTmuxWindowCliPromptNotReady = errors.New("tmux window CLI promptnot ready")
@@ -23,7 +25,7 @@ func NewTmuxWindow() (t *TmuxWindow) {
 // Default use case to send a command is using []string{"command to run", "enter"}. "enter" in this example is detected as enter key by tmux.
 func (t *TmuxWindow) SendKeys(toSend []string, verbose bool) (err error) {
 	if len(toSend) <= 0 {
-		return TracedError("toSend has no elements")
+		return aerrors.TracedError("toSend has no elements")
 	}
 
 	sessionName, windowName, err := t.GetSessionAndWindowName()
@@ -49,7 +51,7 @@ func (t *TmuxWindow) SendKeys(toSend []string, verbose bool) (err error) {
 	}
 
 	if verbose {
-		LogChangedf(
+		logging.LogChangedf(
 			"Send keys to tmux window '%s' in session '%s'.",
 			windowName,
 			sessionName,
@@ -88,7 +90,7 @@ func (t *TmuxWindow) GetSecondLatestPaneLine() (paneLine string, err error) {
 	}
 
 	if len(lines) <= 0 {
-		return "", TracedErrorf(
+		return "", aerrors.TracedErrorf(
 			"No lines for tmux window '%s' in session '%s' received.",
 			windowName,
 			sessionName,
@@ -96,7 +98,7 @@ func (t *TmuxWindow) GetSecondLatestPaneLine() (paneLine string, err error) {
 	}
 
 	if len(lines) <= 1 {
-		return "", TracedErrorf(
+		return "", aerrors.TracedErrorf(
 			"Only one line for tmux window '%s' in session '%s' received.",
 			windowName,
 			sessionName,
@@ -121,7 +123,7 @@ func (t *TmuxWindow) Create(verbose bool) (err error) {
 
 	if exists {
 		if verbose {
-			LogInfof(
+			logging.LogInfof(
 				"Tmux window '%s' in session '%s' already exists. Skip create.",
 				windowName,
 				sessionName,
@@ -154,7 +156,7 @@ func (t *TmuxWindow) Create(verbose bool) (err error) {
 		}
 
 		if verbose {
-			LogChangedf(
+			logging.LogChangedf(
 				"Tmux window '%s' in session '%s' created.",
 				windowName,
 				sessionName,
@@ -192,13 +194,13 @@ func (t *TmuxWindow) Delete(verbose bool) (err error) {
 			return err
 		}
 
-		LogChangedf(
+		logging.LogChangedf(
 			"Tmux window '%s' of session '%s' is already deleted.",
 			windowName,
 			sessionName,
 		)
 	} else {
-		LogInfof(
+		logging.LogInfof(
 			"Tmux window '%s' of session '%s' is already absent. Skip delete.",
 			windowName,
 			sessionName,
@@ -228,13 +230,13 @@ func (t *TmuxWindow) Exists(verbose bool) (exists bool, err error) {
 
 	if verbose {
 		if exists {
-			LogInfof(
+			logging.LogInfof(
 				"Window '%s' exists in tmux session '%s'.",
 				windowName,
 				sessionName,
 			)
 		} else {
-			LogInfof(
+			logging.LogInfof(
 				"Window '%s' does not exist in tmux session '%s'.",
 				windowName,
 				sessionName,
@@ -271,7 +273,7 @@ func (t *TmuxWindow) GetLatestPaneLine() (paneLine string, err error) {
 	}
 
 	if len(lines) <= 0 {
-		return "", TracedErrorf(
+		return "", aerrors.TracedErrorf(
 			"No lines for tmux window '%s' in session '%s' received.",
 			windowName,
 			sessionName,
@@ -285,7 +287,7 @@ func (t *TmuxWindow) GetLatestPaneLine() (paneLine string, err error) {
 
 func (t *TmuxWindow) GetName() (name string, err error) {
 	if t.name == "" {
-		return "", TracedErrorf("name not set")
+		return "", aerrors.TracedErrorf("name not set")
 	}
 
 	return t.name, nil
@@ -293,7 +295,7 @@ func (t *TmuxWindow) GetName() (name string, err error) {
 
 func (t *TmuxWindow) GetSession() (session *TmuxSession, err error) {
 	if t.session == nil {
-		return nil, TracedErrorf("session not set")
+		return nil, aerrors.TracedErrorf("session not set")
 	}
 
 	return t.session, nil
@@ -376,28 +378,28 @@ func (t *TmuxWindow) ListWindowNames(verbose bool) (windowNames []string, err er
 func (t *TmuxWindow) MustCreate(verbose bool) {
 	err := t.Create(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (t *TmuxWindow) MustDelete(verbose bool) {
 	err := t.Delete(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (t *TmuxWindow) MustDeleteSession(verbose bool) {
 	err := t.DeleteSession(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (t *TmuxWindow) MustExists(verbose bool) (exists bool) {
 	exists, err := t.Exists(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return exists
@@ -406,7 +408,7 @@ func (t *TmuxWindow) MustExists(verbose bool) (exists bool) {
 func (t *TmuxWindow) MustGetCommandExecutor() (commandExecutor CommandExecutor) {
 	commandExecutor, err := t.GetCommandExecutor()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandExecutor
@@ -415,7 +417,7 @@ func (t *TmuxWindow) MustGetCommandExecutor() (commandExecutor CommandExecutor) 
 func (t *TmuxWindow) MustGetLatestPaneLine() (paneLine string) {
 	paneLine, err := t.GetLatestPaneLine()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return paneLine
@@ -424,7 +426,7 @@ func (t *TmuxWindow) MustGetLatestPaneLine() (paneLine string) {
 func (t *TmuxWindow) MustGetName() (name string) {
 	name, err := t.GetName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -433,7 +435,7 @@ func (t *TmuxWindow) MustGetName() (name string) {
 func (t *TmuxWindow) MustGetSecondLatestPaneLine() (paneLine string) {
 	paneLine, err := t.GetSecondLatestPaneLine()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return paneLine
@@ -442,7 +444,7 @@ func (t *TmuxWindow) MustGetSecondLatestPaneLine() (paneLine string) {
 func (t *TmuxWindow) MustGetSession() (session *TmuxSession) {
 	session, err := t.GetSession()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return session
@@ -451,7 +453,7 @@ func (t *TmuxWindow) MustGetSession() (session *TmuxSession) {
 func (t *TmuxWindow) MustGetSessionAndWindowName() (sessionName string, windowName string) {
 	sessionName, windowName, err := t.GetSessionAndWindowName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sessionName, windowName
@@ -460,7 +462,7 @@ func (t *TmuxWindow) MustGetSessionAndWindowName() (sessionName string, windowNa
 func (t *TmuxWindow) MustGetSessionName() (sessionName string) {
 	sessionName, err := t.GetSessionName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sessionName
@@ -469,7 +471,7 @@ func (t *TmuxWindow) MustGetSessionName() (sessionName string) {
 func (t *TmuxWindow) MustGetShownLines() (lines []string) {
 	lines, err := t.GetShownLines()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return lines
@@ -478,7 +480,7 @@ func (t *TmuxWindow) MustGetShownLines() (lines []string) {
 func (t *TmuxWindow) MustListWindowNames(verbose bool) (windowNames []string) {
 	windowNames, err := t.ListWindowNames(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return windowNames
@@ -487,14 +489,14 @@ func (t *TmuxWindow) MustListWindowNames(verbose bool) (windowNames []string) {
 func (t *TmuxWindow) MustRecreate(verbose bool) {
 	err := t.Recreate(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (t *TmuxWindow) MustRunCommand(runCommandOptions *RunCommandOptions) (commandOutput *CommandOutput) {
 	commandOutput, err := t.RunCommand(runCommandOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandOutput
@@ -503,28 +505,28 @@ func (t *TmuxWindow) MustRunCommand(runCommandOptions *RunCommandOptions) (comma
 func (t *TmuxWindow) MustSendKeys(toSend []string, verbose bool) {
 	err := t.SendKeys(toSend, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (t *TmuxWindow) MustSetName(name string) {
 	err := t.SetName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (t *TmuxWindow) MustSetSession(session *TmuxSession) {
 	err := t.SetSession(session)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (t *TmuxWindow) MustWaitUntilCliPromptReady(verbose bool) {
 	err := t.WaitUntilCliPromptReady(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
@@ -545,7 +547,7 @@ func (t *TmuxWindow) Recreate(verbose bool) (err error) {
 	}
 
 	if verbose {
-		LogChangedf(
+		logging.LogChangedf(
 			"Tmux window '%s' in session '%s' recreated.",
 			windowName,
 			sessionName,
@@ -557,7 +559,7 @@ func (t *TmuxWindow) Recreate(verbose bool) (err error) {
 
 func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	if runCommandOptions == nil {
-		return nil, TracedErrorNil("runCommandOptions")
+		return nil, aerrors.TracedErrorNil("runCommandOptions")
 	}
 
 	sessionName, windowName, err := t.GetSessionAndWindowName()
@@ -566,7 +568,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 	}
 
 	if runCommandOptions.Verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Run command in tmux window '%s' of tmux session '%s' started.",
 			windowName,
 			sessionName,
@@ -615,7 +617,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 	}
 
 	if runCommandOptions.Verbose {
-		LogInfof("'%s' will be used to capture tmux output for command to run.", captureFilePath)
+		logging.LogInfof("'%s' will be used to capture tmux output for command to run.", captureFilePath)
 	}
 
 	commandToSend, err := runCommandOptions.GetJoinedCommand()
@@ -642,7 +644,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 		if len(lines) > 0 {
 			if strings.HasPrefix(lines[len(lines)-1], endCommandMarkerPrefix) {
 				if runCommandOptions.Verbose {
-					LogInfo("Found endCommandMarkerPrefix in latest line. Command is finished.")
+					logging.LogInfo("Found endCommandMarkerPrefix in latest line. Command is finished.")
 				}
 				break
 			}
@@ -651,7 +653,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 		if len(lines) > 1 {
 			if strings.HasPrefix(lines[len(lines)-2], endCommandMarkerPrefix) {
 				if runCommandOptions.Verbose {
-					LogInfo("Found endCommandMarkerPrefix in second last latest line. Command is finished.")
+					logging.LogInfo("Found endCommandMarkerPrefix in second last latest line. Command is finished.")
 				}
 				break
 			}
@@ -659,7 +661,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 
 		waitTime := time.Millisecond * 200
 		if runCommandOptions.Verbose {
-			LogInfof("Wait another '%v' until command is finished.", waitTime)
+			logging.LogInfof("Wait another '%v' until command is finished.", waitTime)
 		}
 
 		time.Sleep(waitTime)
@@ -688,7 +690,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 	allOutputLines = aslices.RemoveEmptyStringsAtEnd(allOutputLines)
 
 	if len(allOutputLines) < 2 {
-		return nil, TracedErrorf(
+		return nil, aerrors.TracedErrorf(
 			"Unable to parse tmux command output: allOutputLines is '%v'",
 			allOutputLines,
 		)
@@ -698,7 +700,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 	outputLines := allOutputLines[1:]
 
 	if len(outputLines) < 1 {
-		return nil, TracedErrorf(
+		return nil, aerrors.TracedErrorf(
 			"Unable to parse tmux command output: outputLines is '%v'",
 			outputLines,
 		)
@@ -708,7 +710,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 	exitCodeLine := outputLines[len(outputLines)-1]
 	splitted := strings.Split(exitCodeLine, " ")
 	if len(splitted) <= 2 {
-		return nil, TracedErrorf(
+		return nil, aerrors.TracedErrorf(
 			"Unable to parse tmux command output: splitted is '%v'",
 			splitted,
 		)
@@ -718,7 +720,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 
 	exitCode, err := strconv.Atoi(exitCodeString)
 	if err != nil {
-		return nil, TracedErrorf(
+		return nil, aerrors.TracedErrorf(
 			"Unable to parse exitCodeString='%s' %w",
 			exitCodeString,
 			err,
@@ -759,7 +761,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 	}
 
 	if runCommandOptions.Verbose {
-		LogInfof(
+		logging.LogInfof(
 			"Run command in tmux window '%s' of tmux session '%s' finished.",
 			windowName,
 			sessionName,
@@ -771,7 +773,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 
 func (t *TmuxWindow) SetName(name string) (err error) {
 	if name == "" {
-		return TracedErrorf("name is empty string")
+		return aerrors.TracedErrorf("name is empty string")
 	}
 
 	t.name = name
@@ -781,7 +783,7 @@ func (t *TmuxWindow) SetName(name string) (err error) {
 
 func (t *TmuxWindow) SetSession(session *TmuxSession) (err error) {
 	if session == nil {
-		return TracedErrorf("session is nil")
+		return aerrors.TracedErrorf("session is nil")
 	}
 
 	t.session = session
@@ -807,7 +809,7 @@ func (t *TmuxWindow) WaitUntilCliPromptReady(verbose bool) (err error) {
 
 			if CommandLineInterface().IsLinePromptOnly(lastLine) {
 				if verbose {
-					LogInfof(
+					logging.LogInfof(
 						"Tmux window '%s' in session '%s' shows CLI prompt and is ready to use.",
 						windowName,
 						sessionName,
@@ -821,7 +823,7 @@ func (t *TmuxWindow) WaitUntilCliPromptReady(verbose bool) (err error) {
 		delayTime := 100 * time.Millisecond
 
 		if verbose {
-			LogInfof(
+			logging.LogInfof(
 				"Wait '%v' before tmux window '%s' in session '%s' becomes ready (%d/%d).",
 				delayTime,
 				windowName,
@@ -834,7 +836,7 @@ func (t *TmuxWindow) WaitUntilCliPromptReady(verbose bool) (err error) {
 		time.Sleep(delayTime)
 	}
 
-	return TracedErrorf(
+	return aerrors.TracedErrorf(
 		"%w: tmux window '%s' in session '%s' is not ready",
 		ErrTmuxWindowCliPromptNotReady,
 		windowName,

@@ -4,6 +4,8 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 // Host like a VM, Laptop, Desktop, Server.
@@ -30,7 +32,7 @@ type Host interface {
 func GetHostByHostname(hostname string) (host Host, err error) {
 	hostname = strings.TrimSpace(hostname)
 	if len(hostname) <= 0 {
-		return nil, asciichgolangpublic.TracedError("hostname is empty string")
+		return nil, errors.TracedError("hostname is empty string")
 	}
 
 	var commandExecutor asciichgolangpublic.CommandExecutor
@@ -57,7 +59,7 @@ func GetLocalHost() (host Host, err error) {
 func MustGetHostByHostname(hostname string) (host Host) {
 	host, err := GetHostByHostname(hostname)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return host
@@ -66,7 +68,7 @@ func MustGetHostByHostname(hostname string) (host Host) {
 func MustGetLocalCommandExecutorHost() (host Host) {
 	host, err := GetLocalCommandExecutorHost()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return host
@@ -75,7 +77,7 @@ func MustGetLocalCommandExecutorHost() (host Host) {
 func MustGetLocalHost() (host Host) {
 	host, err := GetLocalHost()
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return host

@@ -2,6 +2,9 @@ package asciichgolangpublic
 
 import (
 	"strings"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type GitlabCreateDeployKeyOptions struct {
@@ -17,7 +20,7 @@ func NewGitlabCreateDeployKeyOptions() (g *GitlabCreateDeployKeyOptions) {
 
 func (g *GitlabCreateDeployKeyOptions) GetPublicKeyFile() (publicKeyFile File, err error) {
 	if g.PublicKeyFile == nil {
-		return nil, TracedErrorf("PublicKeyFile not set")
+		return nil, errors.TracedErrorf("PublicKeyFile not set")
 	}
 
 	return g.PublicKeyFile, nil
@@ -36,7 +39,7 @@ func (g *GitlabCreateDeployKeyOptions) GetWriteAccess() (writeAccess bool, err e
 func (g *GitlabCreateDeployKeyOptions) MustGetName() (name string) {
 	name, err := g.GetName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -45,7 +48,7 @@ func (g *GitlabCreateDeployKeyOptions) MustGetName() (name string) {
 func (g *GitlabCreateDeployKeyOptions) MustGetPublicKeyFile() (publicKeyFile File) {
 	publicKeyFile, err := g.GetPublicKeyFile()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return publicKeyFile
@@ -54,7 +57,7 @@ func (g *GitlabCreateDeployKeyOptions) MustGetPublicKeyFile() (publicKeyFile Fil
 func (g *GitlabCreateDeployKeyOptions) MustGetPublicKeyMaterialString() (keyMaterial string) {
 	keyMaterial, err := g.GetPublicKeyMaterialString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return keyMaterial
@@ -63,7 +66,7 @@ func (g *GitlabCreateDeployKeyOptions) MustGetPublicKeyMaterialString() (keyMate
 func (g *GitlabCreateDeployKeyOptions) MustGetPublicKeyfile() (keyFile File) {
 	keyFile, err := g.GetPublicKeyfile()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return keyFile
@@ -72,7 +75,7 @@ func (g *GitlabCreateDeployKeyOptions) MustGetPublicKeyfile() (keyFile File) {
 func (g *GitlabCreateDeployKeyOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := g.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -81,7 +84,7 @@ func (g *GitlabCreateDeployKeyOptions) MustGetVerbose() (verbose bool) {
 func (g *GitlabCreateDeployKeyOptions) MustGetWriteAccess() (writeAccess bool) {
 	writeAccess, err := g.GetWriteAccess()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return writeAccess
@@ -90,34 +93,34 @@ func (g *GitlabCreateDeployKeyOptions) MustGetWriteAccess() (writeAccess bool) {
 func (g *GitlabCreateDeployKeyOptions) MustSetName(name string) {
 	err := g.SetName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCreateDeployKeyOptions) MustSetPublicKeyFile(publicKeyFile File) {
 	err := g.SetPublicKeyFile(publicKeyFile)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCreateDeployKeyOptions) MustSetVerbose(verbose bool) {
 	err := g.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCreateDeployKeyOptions) MustSetWriteAccess(writeAccess bool) {
 	err := g.SetWriteAccess(writeAccess)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCreateDeployKeyOptions) SetName(name string) (err error) {
 	if name == "" {
-		return TracedErrorf("name is empty string")
+		return errors.TracedErrorf("name is empty string")
 	}
 
 	g.Name = name
@@ -127,7 +130,7 @@ func (g *GitlabCreateDeployKeyOptions) SetName(name string) (err error) {
 
 func (g *GitlabCreateDeployKeyOptions) SetPublicKeyFile(publicKeyFile File) (err error) {
 	if publicKeyFile == nil {
-		return TracedErrorf("publicKeyFile is nil")
+		return errors.TracedErrorf("publicKeyFile is nil")
 	}
 
 	g.PublicKeyFile = publicKeyFile
@@ -149,7 +152,7 @@ func (g *GitlabCreateDeployKeyOptions) SetWriteAccess(writeAccess bool) (err err
 
 func (o *GitlabCreateDeployKeyOptions) GetName() (name string, err error) {
 	if len(o.Name) <= 0 {
-		return "", TracedError("Name not set")
+		return "", errors.TracedError("Name not set")
 	}
 
 	return o.Name, nil
@@ -173,7 +176,7 @@ func (o *GitlabCreateDeployKeyOptions) GetPublicKeyMaterialString() (keyMaterial
 
 	keyMaterial = strings.TrimSpace(keyMaterial)
 	if len(keyMaterial) <= 0 {
-		return "", TracedErrorf(
+		return "", errors.TracedErrorf(
 			"Key material from '%s' failed. Got empty key material string",
 			keyFilePath,
 		)
@@ -184,7 +187,7 @@ func (o *GitlabCreateDeployKeyOptions) GetPublicKeyMaterialString() (keyMaterial
 
 func (o *GitlabCreateDeployKeyOptions) GetPublicKeyfile() (keyFile File, err error) {
 	if o.PublicKeyFile == nil {
-		return nil, TracedError("PublicKeyFile is nil")
+		return nil, errors.TracedError("PublicKeyFile is nil")
 	}
 
 	return o.PublicKeyFile, nil

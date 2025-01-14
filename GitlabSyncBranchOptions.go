@@ -2,6 +2,8 @@ package asciichgolangpublic
 
 import (
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type GitlabSyncBranchOptions struct {
@@ -37,11 +39,11 @@ func (g *GitlabSyncBranchOptions) GetDeepCopy() (copy *GitlabSyncBranchOptions) 
 
 func (g *GitlabSyncBranchOptions) GetPathsToSync() (pathsToSync []string, err error) {
 	if g.PathsToSync == nil {
-		return nil, TracedErrorf("PathsToSync not set")
+		return nil, errors.TracedErrorf("PathsToSync not set")
 	}
 
 	if len(g.PathsToSync) <= 0 {
-		return nil, TracedErrorf("PathsToSync has no elements")
+		return nil, errors.TracedErrorf("PathsToSync has no elements")
 	}
 
 	return g.PathsToSync, nil
@@ -49,7 +51,7 @@ func (g *GitlabSyncBranchOptions) GetPathsToSync() (pathsToSync []string, err er
 
 func (g *GitlabSyncBranchOptions) GetTargetBranch() (targetBranch *GitlabBranch, err error) {
 	if g.TargetBranch == nil {
-		return nil, TracedErrorf("TargetBranch not set")
+		return nil, errors.TracedErrorf("TargetBranch not set")
 	}
 
 	return g.TargetBranch, nil
@@ -75,7 +77,7 @@ func (g *GitlabSyncBranchOptions) GetTargetBranchName() (targetBranchName string
 	}
 
 	if targetBranchName == "" {
-		return targetBranchName, TracedErrorf("TargetBranchName not set")
+		return targetBranchName, errors.TracedErrorf("TargetBranchName not set")
 	}
 
 	return targetBranchName, nil
@@ -92,7 +94,7 @@ func (g *GitlabSyncBranchOptions) IsTargetBranchSet() (isSet bool) {
 func (g *GitlabSyncBranchOptions) MustGetPathsToSync() (pathsToSync []string) {
 	pathsToSync, err := g.GetPathsToSync()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return pathsToSync
@@ -101,7 +103,7 @@ func (g *GitlabSyncBranchOptions) MustGetPathsToSync() (pathsToSync []string) {
 func (g *GitlabSyncBranchOptions) MustGetTargetBranch() (targetBranch *GitlabBranch) {
 	targetBranch, err := g.GetTargetBranch()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return targetBranch
@@ -110,7 +112,7 @@ func (g *GitlabSyncBranchOptions) MustGetTargetBranch() (targetBranch *GitlabBra
 func (g *GitlabSyncBranchOptions) MustGetTargetBranchName() (targetBranchName string) {
 	targetBranchName, err := g.GetTargetBranchName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return targetBranchName
@@ -119,45 +121,45 @@ func (g *GitlabSyncBranchOptions) MustGetTargetBranchName() (targetBranchName st
 func (g *GitlabSyncBranchOptions) MustSetPathsToSync(pathsToSync []string) {
 	err := g.SetPathsToSync(pathsToSync)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabSyncBranchOptions) MustSetTargetBranch(targetBranch *GitlabBranch) {
 	err := g.SetTargetBranch(targetBranch)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabSyncBranchOptions) MustSetTargetBranchName(targetBranchName string) {
 	err := g.SetTargetBranchName(targetBranchName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabSyncBranchOptions) MustSetTargetBranchNameAndUnsetTargetBranchObject(targetBranchName string) {
 	err := g.SetTargetBranchNameAndUnsetTargetBranchObject(targetBranchName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabSyncBranchOptions) MustUnsetTargetBranch() {
 	err := g.UnsetTargetBranch()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabSyncBranchOptions) SetPathsToSync(pathsToSync []string) (err error) {
 	if pathsToSync == nil {
-		return TracedErrorf("pathsToSync is nil")
+		return errors.TracedErrorf("pathsToSync is nil")
 	}
 
 	if len(pathsToSync) <= 0 {
-		return TracedErrorf("pathsToSync has no elements")
+		return errors.TracedErrorf("pathsToSync has no elements")
 	}
 
 	g.PathsToSync = pathsToSync
@@ -167,7 +169,7 @@ func (g *GitlabSyncBranchOptions) SetPathsToSync(pathsToSync []string) (err erro
 
 func (g *GitlabSyncBranchOptions) SetTargetBranch(targetBranch *GitlabBranch) (err error) {
 	if targetBranch == nil {
-		return TracedErrorf("targetBranch is nil")
+		return errors.TracedErrorf("targetBranch is nil")
 	}
 
 	g.TargetBranch = targetBranch
@@ -177,7 +179,7 @@ func (g *GitlabSyncBranchOptions) SetTargetBranch(targetBranch *GitlabBranch) (e
 
 func (g *GitlabSyncBranchOptions) SetTargetBranchName(targetBranchName string) (err error) {
 	if targetBranchName == "" {
-		return TracedErrorf("targetBranchName is empty string")
+		return errors.TracedErrorf("targetBranchName is empty string")
 	}
 
 	g.TargetBranchName = targetBranchName

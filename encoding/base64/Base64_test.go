@@ -1,6 +1,7 @@
-package asciichgolangpublic
+package base64
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,15 +16,15 @@ func TestBase64_encodeAndDecode(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				encoded := Base64().MustEncodeStringAsString(tt.input)
+				encoded := MustEncodeStringAsString(tt.input)
 
 				assert.EqualValues(
 					tt.input,
-					Base64().MustDecodeStringAsString(encoded),
+					MustDecodeStringAsString(encoded),
 				)
 			},
 		)

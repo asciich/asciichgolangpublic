@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type ChmodOptions struct {
 	// Set permissions using string like "u=rwx,g=r,o="
 	PermissionsString string
@@ -17,7 +22,7 @@ func NewChmodOptions() (c *ChmodOptions) {
 
 func (c *ChmodOptions) GetPermissionsString() (permissionsString string, err error) {
 	if c.PermissionsString == "" {
-		return "", TracedErrorf("PermissionsString not set")
+		return "", errors.TracedErrorf("PermissionsString not set")
 	}
 
 	return c.PermissionsString, nil
@@ -36,7 +41,7 @@ func (c *ChmodOptions) GetVerbose() (verbose bool) {
 func (c *ChmodOptions) MustGetPermissionsString() (permissionsString string) {
 	permissionsString, err := c.GetPermissionsString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return permissionsString
@@ -45,13 +50,13 @@ func (c *ChmodOptions) MustGetPermissionsString() (permissionsString string) {
 func (c *ChmodOptions) MustSetPermissionsString(permissionsString string) {
 	err := c.SetPermissionsString(permissionsString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *ChmodOptions) SetPermissionsString(permissionsString string) (err error) {
 	if permissionsString == "" {
-		return TracedErrorf("permissionsString is empty string")
+		return errors.TracedErrorf("permissionsString is empty string")
 	}
 
 	c.PermissionsString = permissionsString

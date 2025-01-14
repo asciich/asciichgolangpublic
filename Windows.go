@@ -1,5 +1,7 @@
 package asciichgolangpublic
 
+import "github.com/asciich/asciichgolangpublic/logging"
+
 type WindowsService struct{}
 
 // Provides Windows (the operating system) related functions.
@@ -40,7 +42,7 @@ func (w *WindowsService) IsRunningOnWindows() (isRunningOnWindows bool) {
 func (w *WindowsService) MustDecodeAsBytes(windowsUtf16 []byte) (decoded []byte) {
 	decoded, err := w.DecodeAsBytes(windowsUtf16)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return decoded
@@ -49,7 +51,7 @@ func (w *WindowsService) MustDecodeAsBytes(windowsUtf16 []byte) (decoded []byte)
 func (w *WindowsService) MustDecodeAsString(windowsUtf16 []byte) (decoded string) {
 	decoded, err := w.DecodeAsString(windowsUtf16)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return decoded
@@ -58,7 +60,7 @@ func (w *WindowsService) MustDecodeAsString(windowsUtf16 []byte) (decoded string
 func (w *WindowsService) MustDecodeStringAsString(windowsUtf16 string) (decoded string) {
 	decoded, err := w.DecodeStringAsString(windowsUtf16)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return decoded

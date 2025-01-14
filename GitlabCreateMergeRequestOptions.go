@@ -2,6 +2,9 @@ package asciichgolangpublic
 
 import (
 	"sort"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type GitlabCreateMergeRequestOptions struct {
@@ -39,7 +42,7 @@ func (g *GitlabCreateMergeRequestOptions) GetDeleteSourceBranchOnMerge() (delete
 
 func (g *GitlabCreateMergeRequestOptions) GetDescription() (description string, err error) {
 	if g.Description == "" {
-		return "", TracedErrorf("Description not set")
+		return "", errors.TracedErrorf("Description not set")
 	}
 
 	return g.Description, nil
@@ -56,11 +59,11 @@ func (g *GitlabCreateMergeRequestOptions) GetFailIfMergeRequestAlreadyExists() (
 
 func (g *GitlabCreateMergeRequestOptions) GetLabels() (labels []string, err error) {
 	if g.Labels == nil {
-		return nil, TracedErrorf("Labels not set")
+		return nil, errors.TracedErrorf("Labels not set")
 	}
 
 	if len(g.Labels) <= 0 {
-		return nil, TracedErrorf("Labels has no elements")
+		return nil, errors.TracedErrorf("Labels has no elements")
 	}
 
 	return g.Labels, nil
@@ -78,7 +81,7 @@ func (g *GitlabCreateMergeRequestOptions) GetLabelsOrEmptySliceIfUnset() (labels
 
 func (g *GitlabCreateMergeRequestOptions) GetSourceBranchName() (sourceBranchName string, err error) {
 	if g.SourceBranchName == "" {
-		return "", TracedErrorf("SourceBranchName not set")
+		return "", errors.TracedErrorf("SourceBranchName not set")
 	}
 
 	return g.SourceBranchName, nil
@@ -91,7 +94,7 @@ func (g *GitlabCreateMergeRequestOptions) GetSquashEnabled() (squashEnabled bool
 
 func (g *GitlabCreateMergeRequestOptions) GetTargetBranchName() (targetBranchName string, err error) {
 	if g.TargetBranchName == "" {
-		return "", TracedErrorf("TargetBranchName not set")
+		return "", errors.TracedErrorf("TargetBranchName not set")
 	}
 
 	return g.TargetBranchName, nil
@@ -99,7 +102,7 @@ func (g *GitlabCreateMergeRequestOptions) GetTargetBranchName() (targetBranchNam
 
 func (g *GitlabCreateMergeRequestOptions) GetTitle() (title string, err error) {
 	if g.Title == "" {
-		return "", TracedErrorf("Title not set")
+		return "", errors.TracedErrorf("Title not set")
 	}
 
 	return g.Title, nil
@@ -117,7 +120,7 @@ func (g *GitlabCreateMergeRequestOptions) IsTargetBranchSet() (isSet bool) {
 func (g *GitlabCreateMergeRequestOptions) MustGetDescription() (description string) {
 	description, err := g.GetDescription()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return description
@@ -126,7 +129,7 @@ func (g *GitlabCreateMergeRequestOptions) MustGetDescription() (description stri
 func (g *GitlabCreateMergeRequestOptions) MustGetLabels() (labels []string) {
 	labels, err := g.GetLabels()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return labels
@@ -135,7 +138,7 @@ func (g *GitlabCreateMergeRequestOptions) MustGetLabels() (labels []string) {
 func (g *GitlabCreateMergeRequestOptions) MustGetSourceBranchName() (sourceBranchName string) {
 	sourceBranchName, err := g.GetSourceBranchName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sourceBranchName
@@ -144,7 +147,7 @@ func (g *GitlabCreateMergeRequestOptions) MustGetSourceBranchName() (sourceBranc
 func (g *GitlabCreateMergeRequestOptions) MustGetTargetBranchName() (targetBranchName string) {
 	targetBranchName, err := g.GetTargetBranchName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return targetBranchName
@@ -153,7 +156,7 @@ func (g *GitlabCreateMergeRequestOptions) MustGetTargetBranchName() (targetBranc
 func (g *GitlabCreateMergeRequestOptions) MustGetTitle() (title string) {
 	title, err := g.GetTitle()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return title
@@ -162,35 +165,35 @@ func (g *GitlabCreateMergeRequestOptions) MustGetTitle() (title string) {
 func (g *GitlabCreateMergeRequestOptions) MustSetDescription(description string) {
 	err := g.SetDescription(description)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCreateMergeRequestOptions) MustSetLabels(labels []string) {
 	err := g.SetLabels(labels)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCreateMergeRequestOptions) MustSetSourceBranchName(sourceBranchName string) {
 	err := g.SetSourceBranchName(sourceBranchName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCreateMergeRequestOptions) MustSetTargetBranchName(targetBranchName string) {
 	err := g.SetTargetBranchName(targetBranchName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabCreateMergeRequestOptions) MustSetTitle(title string) {
 	err := g.SetTitle(title)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
@@ -204,7 +207,7 @@ func (g *GitlabCreateMergeRequestOptions) SetDeleteSourceBranchOnMerge(deleteSou
 
 func (g *GitlabCreateMergeRequestOptions) SetDescription(description string) (err error) {
 	if description == "" {
-		return TracedErrorf("description is empty string")
+		return errors.TracedErrorf("description is empty string")
 	}
 
 	g.Description = description
@@ -218,11 +221,11 @@ func (g *GitlabCreateMergeRequestOptions) SetFailIfMergeRequestAlreadyExists(fai
 
 func (g *GitlabCreateMergeRequestOptions) SetLabels(labels []string) (err error) {
 	if labels == nil {
-		return TracedErrorf("labels is nil")
+		return errors.TracedErrorf("labels is nil")
 	}
 
 	if len(labels) <= 0 {
-		return TracedErrorf("labels has no elements")
+		return errors.TracedErrorf("labels has no elements")
 	}
 
 	g.Labels = labels
@@ -232,7 +235,7 @@ func (g *GitlabCreateMergeRequestOptions) SetLabels(labels []string) (err error)
 
 func (g *GitlabCreateMergeRequestOptions) SetSourceBranchName(sourceBranchName string) (err error) {
 	if sourceBranchName == "" {
-		return TracedErrorf("sourceBranchName is empty string")
+		return errors.TracedErrorf("sourceBranchName is empty string")
 	}
 
 	g.SourceBranchName = sourceBranchName
@@ -246,7 +249,7 @@ func (g *GitlabCreateMergeRequestOptions) SetSquashEnabled(squashEnabled bool) {
 
 func (g *GitlabCreateMergeRequestOptions) SetTargetBranchName(targetBranchName string) (err error) {
 	if targetBranchName == "" {
-		return TracedErrorf("targetBranchName is empty string")
+		return errors.TracedErrorf("targetBranchName is empty string")
 	}
 
 	g.TargetBranchName = targetBranchName
@@ -256,7 +259,7 @@ func (g *GitlabCreateMergeRequestOptions) SetTargetBranchName(targetBranchName s
 
 func (g *GitlabCreateMergeRequestOptions) SetTitle(title string) (err error) {
 	if title == "" {
-		return TracedErrorf("title is empty string")
+		return errors.TracedErrorf("title is empty string")
 	}
 
 	g.Title = title

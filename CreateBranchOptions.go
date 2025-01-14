@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 // TODO: This should become the generic "CreateBranchOptions" to use everywhere.
 // It then should replace GitlabCreateBranchOptions.
 type CreateBranchOptions struct {
@@ -16,7 +21,7 @@ func NewCreateBranchOptions() (c *CreateBranchOptions) {
 
 func (c *CreateBranchOptions) GetName() (name string, err error) {
 	if c.Name == "" {
-		return "", TracedErrorf("Name not set")
+		return "", errors.TracedErrorf("Name not set")
 	}
 
 	return c.Name, nil
@@ -30,7 +35,7 @@ func (c *CreateBranchOptions) GetVerbose() (verbose bool) {
 func (c *CreateBranchOptions) MustGetName() (name string) {
 	name, err := c.GetName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -39,13 +44,13 @@ func (c *CreateBranchOptions) MustGetName() (name string) {
 func (c *CreateBranchOptions) MustSetName(name string) {
 	err := c.SetName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (c *CreateBranchOptions) SetName(name string) (err error) {
 	if name == "" {
-		return TracedErrorf("name is empty string")
+		return errors.TracedErrorf("name is empty string")
 	}
 
 	c.Name = name

@@ -5,6 +5,8 @@ import (
 	"reflect"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/pointers"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type StructsService struct{}
@@ -19,7 +21,7 @@ func Structs() (structs *StructsService) {
 
 func (s *StructsService) GetFieldValuesAsString(structToGetFieldsFrom interface{}) (values []string, err error) {
 	if !s.IsStructOrPointerToStruct(structToGetFieldsFrom) {
-		return nil, TracedErrorf("'%v' is not as struct", structToGetFieldsFrom)
+		return nil, errors.TracedErrorf("'%v' is not as struct", structToGetFieldsFrom)
 	}
 
 	var structWithoutPointer reflect.Value
@@ -79,7 +81,7 @@ func (s *StructsService) IsStructOrPointerToStruct(objectToTest interface{}) (is
 func (s *StructsService) MustGetFieldValuesAsString(structToGetFieldsFrom interface{}) (values []string) {
 	values, err := s.GetFieldValuesAsString(structToGetFieldsFrom)
 	if err != nil {
-		LogFatalf("structs.GetFieldValuesAsString failed: '%v'", err)
+		logging.LogFatalf("structs.GetFieldValuesAsString failed: '%v'", err)
 	}
 	return values
 }

@@ -1,6 +1,8 @@
 package asciichgolangpublic
 
 import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -14,7 +16,7 @@ func NewGitlabTags() (g *GitlabTags) {
 
 func (g *GitlabTag) CreateRelease(createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease, err error) {
 	if createReleaseOptions == nil {
-		return nil, TracedErrorNil("createReleaseOptions")
+		return nil, errors.TracedErrorNil("createReleaseOptions")
 	}
 
 	releases, err := g.GetGitlabReleases()
@@ -47,7 +49,7 @@ func (g *GitlabTag) GetGitlabReleases() (gitlabReleases *GitlabReleases, err err
 func (g *GitlabTag) MustCreateRelease(createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease) {
 	createdRelease, err := g.CreateRelease(createReleaseOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdRelease
@@ -56,7 +58,7 @@ func (g *GitlabTag) MustCreateRelease(createReleaseOptions *GitlabCreateReleaseO
 func (g *GitlabTag) MustGetGitlabReleases() (gitlabReleases *GitlabReleases) {
 	gitlabReleases, err := g.GetGitlabReleases()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabReleases
@@ -64,7 +66,7 @@ func (g *GitlabTag) MustGetGitlabReleases() (gitlabReleases *GitlabReleases) {
 
 func (g *GitlabTags) CreateTag(createTagOptions *GitlabCreateTagOptions) (createdTag *GitlabTag, err error) {
 	if createTagOptions == nil {
-		return nil, TracedErrorNil("createTagOptions")
+		return nil, errors.TracedErrorNil("createTagOptions")
 	}
 
 	nativeClient, err := g.GetNativeTagsService()
@@ -89,7 +91,7 @@ func (g *GitlabTags) CreateTag(createTagOptions *GitlabCreateTagOptions) (create
 
 	if tagExists {
 		if createTagOptions.Verbose {
-			LogInfof(
+			logging.LogInfof(
 				"Tag '%s' in gitlab project %s already exists. Skip creation.",
 				tagName,
 				projectUrl,
@@ -109,7 +111,7 @@ func (g *GitlabTags) CreateTag(createTagOptions *GitlabCreateTagOptions) (create
 			},
 		)
 		if err != nil {
-			return nil, TracedErrorf(
+			return nil, errors.TracedErrorf(
 				"Create tag '%s' in gitlab project %s failed: %w",
 				tagName,
 				projectUrl,
@@ -118,7 +120,7 @@ func (g *GitlabTags) CreateTag(createTagOptions *GitlabCreateTagOptions) (create
 		}
 
 		if createTagOptions.Verbose {
-			LogChangedf(
+			logging.LogChangedf(
 				"Created tag '%s' on ref='%s' in gitlab project '%s'",
 				tagName,
 				ref,
@@ -151,7 +153,7 @@ func (g *GitlabTags) GetGitlab() (gitlab *GitlabInstance, err error) {
 
 func (g *GitlabTags) GetGitlabProject() (gitlabProject *GitlabProject, err error) {
 	if g.gitlabProject == nil {
-		return nil, TracedErrorf("gitlabProject not set")
+		return nil, errors.TracedErrorf("gitlabProject not set")
 	}
 
 	return g.gitlabProject, nil
@@ -215,7 +217,7 @@ func (g *GitlabTags) GetProjectUrl() (projectUrl string, err error) {
 
 func (g *GitlabTags) GetTagByName(tagName string) (tag *GitlabTag, err error) {
 	if tagName == "" {
-		return nil, TracedErrorEmptyString("tagName")
+		return nil, errors.TracedErrorEmptyString("tagName")
 	}
 
 	tag = NewGitlabTag()
@@ -295,7 +297,7 @@ func (g *GitlabTags) ListTags(verbose bool) (gitlabTags []*GitlabTag, err error)
 			listOptions,
 		)
 		if err != nil {
-			return nil, TracedErrorf("Unable to get gitlab native tag list: '%w'", err)
+			return nil, errors.TracedErrorf("Unable to get gitlab native tag list: '%w'", err)
 		}
 
 		nativeList = append(nativeList, tags...)
@@ -346,7 +348,7 @@ func (g *GitlabTags) ListVersionTagNames(verbose bool) (tagNames []string, err e
 func (g *GitlabTags) MustCreateTag(createTagOptions *GitlabCreateTagOptions) (createdTag *GitlabTag) {
 	createdTag, err := g.CreateTag(createTagOptions)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return createdTag
@@ -355,7 +357,7 @@ func (g *GitlabTags) MustCreateTag(createTagOptions *GitlabCreateTagOptions) (cr
 func (g *GitlabTags) MustGetGitlab() (gitlab *GitlabInstance) {
 	gitlab, err := g.GetGitlab()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlab
@@ -364,7 +366,7 @@ func (g *GitlabTags) MustGetGitlab() (gitlab *GitlabInstance) {
 func (g *GitlabTags) MustGetGitlabProject() (gitlabProject *GitlabProject) {
 	gitlabProject, err := g.GetGitlabProject()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabProject
@@ -373,7 +375,7 @@ func (g *GitlabTags) MustGetGitlabProject() (gitlabProject *GitlabProject) {
 func (g *GitlabTags) MustGetNativeTagsService() (nativeTagsService *gitlab.TagsService) {
 	nativeTagsService, err := g.GetNativeTagsService()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeTagsService
@@ -382,7 +384,7 @@ func (g *GitlabTags) MustGetNativeTagsService() (nativeTagsService *gitlab.TagsS
 func (g *GitlabTags) MustGetProjectId() (projectId int) {
 	projectId, err := g.GetProjectId()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectId
@@ -391,7 +393,7 @@ func (g *GitlabTags) MustGetProjectId() (projectId int) {
 func (g *GitlabTags) MustGetProjectIdAndUrl() (projectId int, projectUrl string) {
 	projectId, projectUrl, err := g.GetProjectIdAndUrl()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectId, projectUrl
@@ -400,7 +402,7 @@ func (g *GitlabTags) MustGetProjectIdAndUrl() (projectId int, projectUrl string)
 func (g *GitlabTags) MustGetProjectUrl() (projectUrl string) {
 	projectUrl, err := g.GetProjectUrl()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return projectUrl
@@ -409,7 +411,7 @@ func (g *GitlabTags) MustGetProjectUrl() (projectUrl string) {
 func (g *GitlabTags) MustGetTagByName(tagName string) (tag *GitlabTag) {
 	tag, err := g.GetTagByName(tagName)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tag
@@ -418,7 +420,7 @@ func (g *GitlabTags) MustGetTagByName(tagName string) (tag *GitlabTag) {
 func (g *GitlabTags) MustGetVersionTags(verbose bool) (versionTags []*GitlabTag) {
 	versionTags, err := g.GetVersionTags(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return versionTags
@@ -427,7 +429,7 @@ func (g *GitlabTags) MustGetVersionTags(verbose bool) (versionTags []*GitlabTag)
 func (g *GitlabTags) MustListTagNames(verbose bool) (tagNames []string) {
 	tagNames, err := g.ListTagNames(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tagNames
@@ -436,7 +438,7 @@ func (g *GitlabTags) MustListTagNames(verbose bool) (tagNames []string) {
 func (g *GitlabTags) MustListTags(verbose bool) (gitlabTags []*GitlabTag) {
 	gitlabTags, err := g.ListTags(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabTags
@@ -445,7 +447,7 @@ func (g *GitlabTags) MustListTags(verbose bool) (gitlabTags []*GitlabTag) {
 func (g *GitlabTags) MustListVersionTagNames(verbose bool) (tagNames []string) {
 	tagNames, err := g.ListVersionTagNames(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return tagNames
@@ -454,14 +456,14 @@ func (g *GitlabTags) MustListVersionTagNames(verbose bool) (tagNames []string) {
 func (g *GitlabTags) MustSetGitlabProject(gitlabProject *GitlabProject) {
 	err := g.SetGitlabProject(gitlabProject)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabTags) MustTagByNameExists(tagName string, verbose bool) (exists bool) {
 	exists, err := g.TagByNameExists(tagName, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return exists
@@ -469,7 +471,7 @@ func (g *GitlabTags) MustTagByNameExists(tagName string, verbose bool) (exists b
 
 func (g *GitlabTags) SetGitlabProject(gitlabProject *GitlabProject) (err error) {
 	if gitlabProject == nil {
-		return TracedErrorf("gitlabProject is nil")
+		return errors.TracedErrorf("gitlabProject is nil")
 	}
 
 	g.gitlabProject = gitlabProject
@@ -479,7 +481,7 @@ func (g *GitlabTags) SetGitlabProject(gitlabProject *GitlabProject) (err error) 
 
 func (g *GitlabTags) TagByNameExists(tagName string, verbose bool) (exists bool, err error) {
 	if tagName == "" {
-		return false, TracedErrorEmptyString("tagName")
+		return false, errors.TracedErrorEmptyString("tagName")
 	}
 
 	tag, err := g.GetTagByName(tagName)

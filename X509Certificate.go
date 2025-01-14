@@ -9,6 +9,9 @@ import (
 
 	"crypto/x509"
 	"encoding/pem"
+
+	aerrors "github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type X509Certificate struct {
@@ -36,7 +39,7 @@ func GetX509CertificateFromFile(certFile File) (cert *X509Certificate, err error
 func GetX509CertificateFromFilePath(certFilePath string) (cert *X509Certificate, err error) {
 	certFilePath = strings.TrimSpace(certFilePath)
 	if len(certFilePath) <= 0 {
-		return nil, TracedError("certPAth is empty string")
+		return nil, aerrors.TracedError("certPAth is empty string")
 	}
 
 	cert = NewX509Certificate()
@@ -51,7 +54,7 @@ func GetX509CertificateFromFilePath(certFilePath string) (cert *X509Certificate,
 func MustGetX509CertificateFromFile(certFile File) (cert *X509Certificate) {
 	cert, err := GetX509CertificateFromFile(certFile)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return cert
@@ -60,7 +63,7 @@ func MustGetX509CertificateFromFile(certFile File) (cert *X509Certificate) {
 func MustGetX509CertificateFromFilePath(certFilePath string) (cert *X509Certificate) {
 	cert, err := GetX509CertificateFromFilePath(certFilePath)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return cert
@@ -89,7 +92,7 @@ func (c *X509Certificate) GetAsPemBytes() (pemBytes []byte, err error) {
 	pemBytes = buf.Bytes()
 	const minLen = 50
 	if len(pemBytes) < minLen {
-		return nil, TracedErrorf("pemBytes has less than '%v' bytes which is not enough for a pem certificate", minLen)
+		return nil, aerrors.TracedErrorf("pemBytes has less than '%v' bytes which is not enough for a pem certificate", minLen)
 	}
 
 	return pemBytes, nil
@@ -117,7 +120,7 @@ func (c *X509Certificate) GetIssuerString() (issuerString string, err error) {
 
 func (c *X509Certificate) GetNativeCertificate() (nativeCertificate *x509.Certificate, err error) {
 	if c.nativeX509Certificate == nil {
-		return nil, TracedError("native certificate not set. Is the certificate Loaded?")
+		return nil, aerrors.TracedError("native certificate not set. Is the certificate Loaded?")
 	}
 
 	return c.nativeX509Certificate, nil
@@ -151,7 +154,7 @@ func (c *X509Certificate) IsIntermediateCertificate() (isIntermediateCertificate
 	}
 
 	if isV1 {
-		return false, TracedError("v1 certificates are not supported as intermediate certificate.")
+		return false, aerrors.TracedError("v1 certificates are not supported as intermediate certificate.")
 	}
 
 	subjectString, err := c.GetSubjectString()
@@ -190,7 +193,7 @@ func (c *X509Certificate) IsRootCa(verbose bool) (isRootCa bool, err error) {
 
 	if isV1 {
 		if verbose {
-			LogWarn("v1 certificates are not supported as root ca.")
+			logging.LogWarn("v1 certificates are not supported as root ca.")
 		}
 		return false, err
 	}
@@ -225,7 +228,7 @@ func (c *X509Certificate) IsRootCa(verbose bool) (isRootCa bool, err error) {
 
 func (c *X509Certificate) IsSignedByCertificateFile(signingCertificate File, verbose bool) (isSignedBy bool, err error) {
 	if signingCertificate == nil {
-		return false, TracedError("signingCertificate is nil")
+		return false, aerrors.TracedError("signingCertificate is nil")
 	}
 
 	rootCert, err := GetX509CertificateFromFile(signingCertificate)
@@ -246,7 +249,7 @@ func (c *X509Certificate) IsSignedByCertificateFile(signingCertificate File, ver
 	roots := x509.NewCertPool()
 	ok := roots.AppendCertsFromPEM(rootCertPemBytes)
 	if !ok {
-		return false, TracedError("Unable to add cert to root pool")
+		return false, aerrors.TracedError("Unable to add cert to root pool")
 	}
 
 	verifyOptions := x509.VerifyOptions{
@@ -258,7 +261,7 @@ func (c *X509Certificate) IsSignedByCertificateFile(signingCertificate File, ver
 		if errors.As(err, &x509.UnknownAuthorityError{}) {
 			isSignedBy = false
 		} else {
-			return false, TracedErrorf("Unable to verify certificate: '%v'", err)
+			return false, aerrors.TracedErrorf("Unable to verify certificate: '%v'", err)
 		}
 	} else {
 		isSignedBy = true
@@ -281,9 +284,9 @@ func (c *X509Certificate) IsSignedByCertificateFile(signingCertificate File, ver
 		}
 
 		if isSignedBy {
-			LogInfof("The certificate '%v' is signed by '%v' read from file '%v'.", toCheckSubject, rootCertSubject, rootCertPath)
+			logging.LogInfof("The certificate '%v' is signed by '%v' read from file '%v'.", toCheckSubject, rootCertSubject, rootCertPath)
 		} else {
-			LogInfof("The certificate '%v' is NOT signed by '%v' read from file '%v'.", toCheckSubject, rootCertSubject, rootCertPath)
+			logging.LogInfof("The certificate '%v' is NOT signed by '%v' read from file '%v'.", toCheckSubject, rootCertSubject, rootCertPath)
 		}
 	}
 
@@ -314,16 +317,16 @@ func (c *X509Certificate) IsV3() (isV3 bool, err error) {
 
 func (c *X509Certificate) LoadFromBytes(certBytes []byte) (err error) {
 	if len(certBytes) <= 0 {
-		return TracedError("certBytes has len 0")
+		return aerrors.TracedError("certBytes has len 0")
 	}
 
 	block, _ := pem.Decode(certBytes)
 	var blockBytes []byte = nil
 	if block == nil {
-		return TracedError("Failed to parse certificate PEM")
+		return aerrors.TracedError("Failed to parse certificate PEM")
 	} else {
 		if block.Bytes == nil {
-			return TracedError("Decode returned block.Bytes as nil")
+			return aerrors.TracedError("Decode returned block.Bytes as nil")
 		} else {
 			blockBytes = block.Bytes
 		}
@@ -331,16 +334,16 @@ func (c *X509Certificate) LoadFromBytes(certBytes []byte) (err error) {
 
 	var nativeCert *x509.Certificate = nil
 	if blockBytes == nil {
-		return TracedError("blockBytes is nil after evaluation")
+		return aerrors.TracedError("blockBytes is nil after evaluation")
 	} else {
 		nativeCert, err = x509.ParseCertificate(blockBytes)
 		if err != nil {
-			return TracedError("failed to parse certificate: " + err.Error())
+			return aerrors.TracedError("failed to parse certificate: " + err.Error())
 		}
 	}
 
 	if nativeCert == nil {
-		return TracedError("nativeCert is nil after evaluation")
+		return aerrors.TracedError("nativeCert is nil after evaluation")
 	} else {
 		c.nativeX509Certificate = nativeCert
 	}
@@ -350,7 +353,7 @@ func (c *X509Certificate) LoadFromBytes(certBytes []byte) (err error) {
 
 func (c *X509Certificate) LoadFromFile(loadFile File) (err error) {
 	if loadFile == nil {
-		return TracedError("loadFile is nil")
+		return aerrors.TracedError("loadFile is nil")
 	}
 
 	contentString, err := loadFile.ReadAsString()
@@ -369,7 +372,7 @@ func (c *X509Certificate) LoadFromFile(loadFile File) (err error) {
 func (c *X509Certificate) LoadFromFilePath(loadPath string) (err error) {
 	loadPath = strings.TrimSpace(loadPath)
 	if len(loadPath) <= 0 {
-		return TracedError("loadPath is empty string")
+		return aerrors.TracedError("loadPath is empty string")
 	}
 
 	loadFile, err := GetLocalFileByPath(loadPath)
@@ -387,7 +390,7 @@ func (c *X509Certificate) LoadFromFilePath(loadPath string) (err error) {
 
 func (c *X509Certificate) LoadFromString(certString string) (err error) {
 	if len(certString) <= 0 {
-		TracedError("certString is empty string")
+		return aerrors.TracedError("certString is empty string")
 	}
 
 	err = c.LoadFromBytes([]byte(certString))
@@ -400,7 +403,7 @@ func (c *X509Certificate) LoadFromString(certString string) (err error) {
 
 func (c *X509Certificate) WritePemToFile(outputFile File, verbose bool) (err error) {
 	if outputFile == nil {
-		return TracedError("outputFile is nil")
+		return aerrors.TracedError("outputFile is nil")
 	}
 
 	pemBytes, err := c.GetAsPemBytes()
@@ -419,7 +422,7 @@ func (c *X509Certificate) WritePemToFile(outputFile File, verbose bool) (err err
 	}
 
 	if verbose {
-		LogChangedf("Wrote certificate as PEM into '%s'", path)
+		logging.LogChangedf("Wrote certificate as PEM into '%s'", path)
 	}
 
 	return nil
@@ -453,7 +456,7 @@ func (x *X509Certificate) GetExpiryDate() (expiryDate *time.Time, err error) {
 
 func (x *X509Certificate) GetNativeX509Certificate() (nativeX509Certificate *x509.Certificate, err error) {
 	if x.nativeX509Certificate == nil {
-		return nil, TracedErrorf("nativeX509Certificate not set")
+		return nil, aerrors.TracedErrorf("nativeX509Certificate not set")
 	}
 
 	return x.nativeX509Certificate, nil
@@ -473,7 +476,7 @@ func (x *X509Certificate) IsExpired() (isExpired bool, err error) {
 func (x *X509Certificate) MustGetAsPemBytes() (pemBytes []byte) {
 	pemBytes, err := x.GetAsPemBytes()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return pemBytes
@@ -482,7 +485,7 @@ func (x *X509Certificate) MustGetAsPemBytes() (pemBytes []byte) {
 func (x *X509Certificate) MustGetAsPemString() (pemString string) {
 	pemString, err := x.GetAsPemString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return pemString
@@ -491,7 +494,7 @@ func (x *X509Certificate) MustGetAsPemString() (pemString string) {
 func (x *X509Certificate) MustGetExpiryDate() (expiryDate *time.Time) {
 	expiryDate, err := x.GetExpiryDate()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return expiryDate
@@ -500,7 +503,7 @@ func (x *X509Certificate) MustGetExpiryDate() (expiryDate *time.Time) {
 func (x *X509Certificate) MustGetIssuerString() (issuerString string) {
 	issuerString, err := x.GetIssuerString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return issuerString
@@ -509,7 +512,7 @@ func (x *X509Certificate) MustGetIssuerString() (issuerString string) {
 func (x *X509Certificate) MustGetNativeCertificate() (nativeCertificate *x509.Certificate) {
 	nativeCertificate, err := x.GetNativeCertificate()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeCertificate
@@ -518,7 +521,7 @@ func (x *X509Certificate) MustGetNativeCertificate() (nativeCertificate *x509.Ce
 func (x *X509Certificate) MustGetNativeX509Certificate() (nativeX509Certificate *x509.Certificate) {
 	nativeX509Certificate, err := x.GetNativeX509Certificate()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeX509Certificate
@@ -527,7 +530,7 @@ func (x *X509Certificate) MustGetNativeX509Certificate() (nativeX509Certificate 
 func (x *X509Certificate) MustGetSubjectString() (subject string) {
 	subject, err := x.GetSubjectString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return subject
@@ -536,7 +539,7 @@ func (x *X509Certificate) MustGetSubjectString() (subject string) {
 func (x *X509Certificate) MustGetVersion() (version int) {
 	version, err := x.GetVersion()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return version
@@ -545,7 +548,7 @@ func (x *X509Certificate) MustGetVersion() (version int) {
 func (x *X509Certificate) MustIsExpired() (isExpired bool) {
 	isExpired, err := x.IsExpired()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isExpired
@@ -554,7 +557,7 @@ func (x *X509Certificate) MustIsExpired() (isExpired bool) {
 func (x *X509Certificate) MustIsIntermediateCertificate() (isIntermediateCertificate bool) {
 	isIntermediateCertificate, err := x.IsIntermediateCertificate()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isIntermediateCertificate
@@ -563,7 +566,7 @@ func (x *X509Certificate) MustIsIntermediateCertificate() (isIntermediateCertifi
 func (x *X509Certificate) MustIsRootCa(verbose bool) (isRootCa bool) {
 	isRootCa, err := x.IsRootCa(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isRootCa
@@ -572,7 +575,7 @@ func (x *X509Certificate) MustIsRootCa(verbose bool) (isRootCa bool) {
 func (x *X509Certificate) MustIsSignedByCertificateFile(signingCertificate File, verbose bool) (isSignedBy bool) {
 	isSignedBy, err := x.IsSignedByCertificateFile(signingCertificate, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isSignedBy
@@ -581,7 +584,7 @@ func (x *X509Certificate) MustIsSignedByCertificateFile(signingCertificate File,
 func (x *X509Certificate) MustIsV1() (isV1 bool) {
 	isV1, err := x.IsV1()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isV1
@@ -590,7 +593,7 @@ func (x *X509Certificate) MustIsV1() (isV1 bool) {
 func (x *X509Certificate) MustIsV3() (isV3 bool) {
 	isV3, err := x.IsV3()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isV3
@@ -599,55 +602,55 @@ func (x *X509Certificate) MustIsV3() (isV3 bool) {
 func (x *X509Certificate) MustLoadFromBytes(certBytes []byte) {
 	err := x.LoadFromBytes(certBytes)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (x *X509Certificate) MustLoadFromFile(loadFile File) {
 	err := x.LoadFromFile(loadFile)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (x *X509Certificate) MustLoadFromFilePath(loadPath string) {
 	err := x.LoadFromFilePath(loadPath)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (x *X509Certificate) MustLoadFromString(certString string) {
 	err := x.LoadFromString(certString)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (x *X509Certificate) MustSetNativeX509Certificate(nativeX509Certificate *x509.Certificate) {
 	err := x.SetNativeX509Certificate(nativeX509Certificate)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (x *X509Certificate) MustWritePemToFile(outputFile File, verbose bool) {
 	err := x.WritePemToFile(outputFile, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (x *X509Certificate) MustWritePemToFilePath(filePath string, verbose bool) {
 	err := x.WritePemToFilePath(filePath, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (x *X509Certificate) SetNativeX509Certificate(nativeX509Certificate *x509.Certificate) (err error) {
 	if nativeX509Certificate == nil {
-		return TracedErrorf("nativeX509Certificate is nil")
+		return aerrors.TracedErrorf("nativeX509Certificate is nil")
 	}
 
 	x.nativeX509Certificate = nativeX509Certificate

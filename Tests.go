@@ -3,6 +3,9 @@ package asciichgolangpublic
 import (
 	"fmt"
 	"strings"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type TestsService struct{}
@@ -25,7 +28,7 @@ func (t *TestsService) FormatAsTestname(objectToFormat interface{}) (testname st
 	if Structs().IsStructOrPointerToStruct(objectToFormat) {
 		values, err := Structs().GetFieldValuesAsString(objectToFormat)
 		if err != nil {
-			return "", TracedErrorf("Unable to get values of '%v' to format as testname", objectToFormat)
+			return "", errors.TracedErrorf("Unable to get values of '%v' to format as testname", objectToFormat)
 		}
 		testname = strings.Join(values, "-")
 	}
@@ -44,7 +47,7 @@ func (t *TestsService) FormatAsTestname(objectToFormat interface{}) (testname st
 	}
 
 	if testname == "" {
-		return "", TracedError("testname is empty string after evaluation")
+		return "", errors.TracedError("testname is empty string after evaluation")
 	}
 
 	return testname, nil
@@ -53,7 +56,7 @@ func (t *TestsService) FormatAsTestname(objectToFormat interface{}) (testname st
 func (t *TestsService) MustFormatAsTestname(objectToFormat interface{}) (testname string) {
 	testname, err := t.FormatAsTestname(objectToFormat)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return testname

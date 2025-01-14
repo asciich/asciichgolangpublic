@@ -1,6 +1,8 @@
 package asciichgolangpublic
 
 import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -19,7 +21,7 @@ func NewGitlabUser() (gitlabUser *GitlabUser) {
 
 func (g *GitlabUser) GetCachedEmail() (cachedEmail string, err error) {
 	if g.cachedEmail == "" {
-		return "", TracedErrorf("cachedEmail not set")
+		return "", errors.TracedErrorf("cachedEmail not set")
 	}
 
 	return g.cachedEmail, nil
@@ -27,7 +29,7 @@ func (g *GitlabUser) GetCachedEmail() (cachedEmail string, err error) {
 
 func (g *GitlabUser) GetCachedUsername() (cachedUsername string, err error) {
 	if g.cachedUsername == "" {
-		return "", TracedErrorf("cachedUsername not set")
+		return "", errors.TracedErrorf("cachedUsername not set")
 	}
 
 	return g.cachedUsername, nil
@@ -36,28 +38,28 @@ func (g *GitlabUser) GetCachedUsername() (cachedUsername string, err error) {
 func (g *GitlabUser) MustAddSshKey(sshKey *SSHPublicKey, verbose bool) {
 	err := g.AddSshKey(sshKey, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabUser) MustAddSshKeysFromFile(sshKeysFile File, verbose bool) {
 	err := g.AddSshKeysFromFile(sshKeysFile, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabUser) MustAddSshKeysFromFilePath(sshKeyFilePath string, verbose bool) {
 	err := g.AddSshKeysFromFilePath(sshKeyFilePath, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabUser) MustCreateAccessToken(options *GitlabCreateAccessTokenOptions) (newToken string) {
 	newToken, err := g.CreateAccessToken(options)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return newToken
@@ -66,7 +68,7 @@ func (g *GitlabUser) MustCreateAccessToken(options *GitlabCreateAccessTokenOptio
 func (g *GitlabUser) MustGetCachedEmail() (cachedEmail string) {
 	cachedEmail, err := g.GetCachedEmail()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return cachedEmail
@@ -75,7 +77,7 @@ func (g *GitlabUser) MustGetCachedEmail() (cachedEmail string) {
 func (g *GitlabUser) MustGetCachedName() (name string) {
 	name, err := g.GetCachedName()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return name
@@ -84,7 +86,7 @@ func (g *GitlabUser) MustGetCachedName() (name string) {
 func (g *GitlabUser) MustGetCachedUsername() (cachedUsername string) {
 	cachedUsername, err := g.GetCachedUsername()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return cachedUsername
@@ -93,7 +95,7 @@ func (g *GitlabUser) MustGetCachedUsername() (cachedUsername string) {
 func (g *GitlabUser) MustGetChachedUsername() (username string) {
 	username, err := g.GetChachedUsername()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return username
@@ -102,7 +104,7 @@ func (g *GitlabUser) MustGetChachedUsername() (username string) {
 func (g *GitlabUser) MustGetFqdn() (fqdn string) {
 	fqdn, err := g.GetFqdn()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return fqdn
@@ -111,7 +113,7 @@ func (g *GitlabUser) MustGetFqdn() (fqdn string) {
 func (g *GitlabUser) MustGetGitlab() (gitlab *GitlabInstance) {
 	gitlab, err := g.GetGitlab()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlab
@@ -120,7 +122,7 @@ func (g *GitlabUser) MustGetGitlab() (gitlab *GitlabInstance) {
 func (g *GitlabUser) MustGetGitlabUsers() (gitlabUsers *GitlabUsers) {
 	gitlabUsers, err := g.GetGitlabUsers()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabUsers
@@ -129,7 +131,7 @@ func (g *GitlabUser) MustGetGitlabUsers() (gitlabUsers *GitlabUsers) {
 func (g *GitlabUser) MustGetId() (id int) {
 	id, err := g.GetId()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return id
@@ -138,7 +140,7 @@ func (g *GitlabUser) MustGetId() (id int) {
 func (g *GitlabUser) MustGetNativeUsersService() (nativeUsersService *gitlab.UsersService) {
 	nativeUsersService, err := g.GetNativeUsersService()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeUsersService
@@ -147,7 +149,7 @@ func (g *GitlabUser) MustGetNativeUsersService() (nativeUsersService *gitlab.Use
 func (g *GitlabUser) MustGetRawNativeUser() (rawUser *gitlab.User) {
 	rawUser, err := g.GetRawNativeUser()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return rawUser
@@ -156,7 +158,7 @@ func (g *GitlabUser) MustGetRawNativeUser() (rawUser *gitlab.User) {
 func (g *GitlabUser) MustGetSshKeys() (sshKeys []*SSHPublicKey) {
 	sshKeys, err := g.GetSshKeys()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sshKeys
@@ -165,7 +167,7 @@ func (g *GitlabUser) MustGetSshKeys() (sshKeys []*SSHPublicKey) {
 func (g *GitlabUser) MustGetSshKeysAsString() (sshKeys []string) {
 	sshKeys, err := g.GetSshKeysAsString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sshKeys
@@ -174,42 +176,42 @@ func (g *GitlabUser) MustGetSshKeysAsString() (sshKeys []string) {
 func (g *GitlabUser) MustSetCachedEmail(email string) {
 	err := g.SetCachedEmail(email)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabUser) MustSetCachedName(name string) {
 	err := g.SetCachedName(name)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabUser) MustSetCachedUsername(username string) {
 	err := g.SetCachedUsername(username)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabUser) MustSetGitlab(gitlab *GitlabInstance) {
 	err := g.SetGitlab(gitlab)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabUser) MustSetId(id int) {
 	err := g.SetId(id)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabUser) MustSshKeyExists(sshKey *SSHPublicKey) (keyExistsForUser bool) {
 	keyExistsForUser, err := g.SshKeyExists(sshKey)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return keyExistsForUser
@@ -218,13 +220,13 @@ func (g *GitlabUser) MustSshKeyExists(sshKey *SSHPublicKey) (keyExistsForUser bo
 func (g *GitlabUser) MustUpdatePassword(newPassword string, verbose bool) {
 	err := g.UpdatePassword(newPassword, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (u *GitlabUser) AddSshKey(sshKey *SSHPublicKey, verbose bool) (err error) {
 	if sshKey == nil {
-		return TracedError("sshKey is nil")
+		return errors.TracedError("sshKey is nil")
 	}
 
 	nativeUsersService, err := u.GetNativeUsersService()
@@ -253,7 +255,7 @@ func (u *GitlabUser) AddSshKey(sshKey *SSHPublicKey, verbose bool) (err error) {
 	}
 
 	if verbose {
-		LogInfof("Going to add SSH key to gitlab user '%s': '%s'", username, keyMaterial)
+		logging.LogInfof("Going to add SSH key to gitlab user '%s': '%s'", username, keyMaterial)
 	}
 
 	keyExists, err := u.SshKeyExists(sshKey)
@@ -263,7 +265,7 @@ func (u *GitlabUser) AddSshKey(sshKey *SSHPublicKey, verbose bool) (err error) {
 
 	if keyExists {
 		if verbose {
-			LogInfof("SSH key '%s' already present for gitlab user '%s'.", keyMaterial, username)
+			logging.LogInfof("SSH key '%s' already present for gitlab user '%s'.", keyMaterial, username)
 		}
 	} else {
 		_, _, err = nativeUsersService.AddSSHKeyForUser(
@@ -274,11 +276,11 @@ func (u *GitlabUser) AddSshKey(sshKey *SSHPublicKey, verbose bool) (err error) {
 			},
 		)
 		if err != nil {
-			return TracedError(err.Error())
+			return errors.TracedError(err.Error())
 		}
 
 		if verbose {
-			LogChangedf("SSH key '%s' added for gitlab user '%s'.", keyMaterial, username)
+			logging.LogChangedf("SSH key '%s' added for gitlab user '%s'.", keyMaterial, username)
 		}
 	}
 
@@ -287,7 +289,7 @@ func (u *GitlabUser) AddSshKey(sshKey *SSHPublicKey, verbose bool) (err error) {
 
 func (u *GitlabUser) AddSshKeysFromFile(sshKeysFile File, verbose bool) (err error) {
 	if sshKeysFile == nil {
-		return TracedError("sshKeysFile is nil")
+		return errors.TracedError("sshKeysFile is nil")
 	}
 
 	username, err := u.GetCachedName()
@@ -301,7 +303,7 @@ func (u *GitlabUser) AddSshKeysFromFile(sshKeysFile File, verbose bool) (err err
 	}
 
 	if verbose {
-		LogInfof("Going to add '%d' SSH keys for gitlab user '%s'.", len(sshKeys), username)
+		logging.LogInfof("Going to add '%d' SSH keys for gitlab user '%s'.", len(sshKeys), username)
 	}
 
 	for _, keyToAdd := range sshKeys {
@@ -316,7 +318,7 @@ func (u *GitlabUser) AddSshKeysFromFile(sshKeysFile File, verbose bool) (err err
 
 func (u *GitlabUser) AddSshKeysFromFilePath(sshKeyFilePath string, verbose bool) (err error) {
 	if len(sshKeyFilePath) <= 0 {
-		return TracedError("sshKeyFilePath is empty string")
+		return errors.TracedError("sshKeyFilePath is empty string")
 	}
 
 	sshKeyFile, err := GetLocalFileByPath(sshKeyFilePath)
@@ -334,7 +336,7 @@ func (u *GitlabUser) AddSshKeysFromFilePath(sshKeyFilePath string, verbose bool)
 
 func (u *GitlabUser) CreateAccessToken(options *GitlabCreateAccessTokenOptions) (newToken string, err error) {
 	if options == nil {
-		return "", TracedError("options is nil")
+		return "", errors.TracedError("options is nil")
 	}
 
 	nativeService, err := u.GetNativeUsersService()
@@ -371,12 +373,12 @@ func (u *GitlabUser) CreateAccessToken(options *GitlabCreateAccessTokenOptions) 
 		},
 	)
 	if err != nil {
-		return "", TracedError(err.Error())
+		return "", errors.TracedError(err.Error())
 	}
 
 	newToken = nativeToken.Token
 	if len(newToken) <= 0 {
-		return "", TracedError("newToken is empty string")
+		return "", errors.TracedError("newToken is empty string")
 	}
 
 	return newToken, nil
@@ -384,7 +386,7 @@ func (u *GitlabUser) CreateAccessToken(options *GitlabCreateAccessTokenOptions) 
 
 func (u *GitlabUser) GetCachedName() (name string, err error) {
 	if len(u.cachedName) <= 0 {
-		return "", TracedError("Cached name not set")
+		return "", errors.TracedError("Cached name not set")
 	}
 
 	return u.cachedName, nil
@@ -392,7 +394,7 @@ func (u *GitlabUser) GetCachedName() (name string, err error) {
 
 func (u *GitlabUser) GetChachedUsername() (username string, err error) {
 	if len(u.cachedUsername) <= 0 {
-		return "", TracedError("Cached username not set")
+		return "", errors.TracedError("Cached username not set")
 	}
 
 	return u.cachedUsername, nil
@@ -414,7 +416,7 @@ func (u *GitlabUser) GetFqdn() (fqdn string, err error) {
 
 func (u *GitlabUser) GetGitlab() (gitlab *GitlabInstance, err error) {
 	if u.gitlab == nil {
-		return nil, TracedError("gitlab not set")
+		return nil, errors.TracedError("gitlab not set")
 	}
 
 	return u.gitlab, nil
@@ -436,7 +438,7 @@ func (u *GitlabUser) GetGitlabUsers() (gitlabUsers *GitlabUsers, err error) {
 
 func (u *GitlabUser) GetId() (id int, err error) {
 	if u.id <= 0 {
-		return -1, TracedError("id not set")
+		return -1, errors.TracedError("id not set")
 	}
 
 	return u.id, nil
@@ -469,11 +471,11 @@ func (u *GitlabUser) GetRawNativeUser() (rawUser *gitlab.User, err error) {
 
 	rawUser, _, err = nativeUserService.GetUser(id, gitlab.GetUsersOptions{})
 	if err != nil {
-		return nil, TracedError(err.Error())
+		return nil, errors.TracedError(err.Error())
 	}
 
 	if rawUser == nil {
-		return nil, TracedError("rawUser is nil")
+		return nil, errors.TracedError("rawUser is nil")
 	}
 
 	return rawUser, nil
@@ -515,7 +517,7 @@ func (u *GitlabUser) GetSshKeysAsString() (sshKeys []string, err error) {
 		&gitlab.ListSSHKeysForUserOptions{},
 	)
 	if err != nil {
-		return nil, TracedError(err.Error())
+		return nil, errors.TracedError(err.Error())
 	}
 
 	sshKeys = []string{}
@@ -529,7 +531,7 @@ func (u *GitlabUser) GetSshKeysAsString() (sshKeys []string, err error) {
 
 func (u *GitlabUser) SetCachedEmail(email string) (err error) {
 	if len(email) <= 0 {
-		return TracedError("email is empty string")
+		return errors.TracedError("email is empty string")
 	}
 
 	u.cachedEmail = email
@@ -539,7 +541,7 @@ func (u *GitlabUser) SetCachedEmail(email string) (err error) {
 
 func (u *GitlabUser) SetCachedName(name string) (err error) {
 	if len(name) <= 0 {
-		return TracedError("name is empty string")
+		return errors.TracedError("name is empty string")
 	}
 
 	u.cachedName = name
@@ -549,7 +551,7 @@ func (u *GitlabUser) SetCachedName(name string) (err error) {
 
 func (u *GitlabUser) SetCachedUsername(username string) (err error) {
 	if len(username) <= 0 {
-		return TracedError("cached usernae is empty string")
+		return errors.TracedError("cached usernae is empty string")
 	}
 
 	u.cachedUsername = username
@@ -559,7 +561,7 @@ func (u *GitlabUser) SetCachedUsername(username string) (err error) {
 
 func (u *GitlabUser) SetGitlab(gitlab *GitlabInstance) (err error) {
 	if gitlab == nil {
-		return TracedError("gitlab is nil")
+		return errors.TracedError("gitlab is nil")
 	}
 
 	u.gitlab = gitlab
@@ -569,7 +571,7 @@ func (u *GitlabUser) SetGitlab(gitlab *GitlabInstance) (err error) {
 
 func (u *GitlabUser) SetId(id int) (err error) {
 	if id <= 0 {
-		return TracedErrorf("invalid id: '%d'", id)
+		return errors.TracedErrorf("invalid id: '%d'", id)
 	}
 
 	u.id = id
@@ -578,10 +580,10 @@ func (u *GitlabUser) SetId(id int) (err error) {
 }
 
 func (u *GitlabUser) SshKeyExists(sshKey *SSHPublicKey) (keyExistsForUser bool, err error) {
-	return false, TracedErrorNotImplemented()
+	return false, errors.TracedErrorNotImplemented()
 	/* TODO enable again
 	if sshKey == nil {
-		return false, TracedError("sshKey is nil")
+		return false, errors.TracedError("sshKey is nil")
 	}
 
 	existingKeys, err := u.GetSshKeys()
@@ -596,7 +598,7 @@ func (u *GitlabUser) SshKeyExists(sshKey *SSHPublicKey) (keyExistsForUser bool, 
 
 func (u *GitlabUser) UpdatePassword(newPassword string, verbose bool) (err error) {
 	if len(newPassword) <= 0 {
-		return TracedError("newPassword is empty string")
+		return errors.TracedError("newPassword is empty string")
 	}
 
 	fqdn, err := u.GetFqdn()
@@ -620,7 +622,7 @@ func (u *GitlabUser) UpdatePassword(newPassword string, verbose bool) (err error
 	}
 
 	if id <= 0 {
-		return TracedErrorf("Got invalid id: '%d'", id)
+		return errors.TracedErrorf("Got invalid id: '%d'", id)
 	}
 
 	_, _, err = nativeUsersService.ModifyUser(
@@ -634,7 +636,7 @@ func (u *GitlabUser) UpdatePassword(newPassword string, verbose bool) (err error
 	}
 
 	if verbose {
-		LogChangedf("password for user '%s' on gitlab '%s' updated", username, fqdn)
+		logging.LogChangedf("password for user '%s' on gitlab '%s' updated", username, fqdn)
 	}
 
 	return nil

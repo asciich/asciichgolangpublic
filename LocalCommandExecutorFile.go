@@ -1,12 +1,17 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 func GetCommandExecutorFileByPath(commandExector CommandExecutor, path string) (commandExecutorFile *CommandExecutorFile, err error) {
 	if commandExector == nil {
-		return nil, TracedErrorNil("commandExecutor")
+		return nil, errors.TracedErrorNil("commandExecutor")
 	}
 
 	if path == "" {
-		return nil, TracedErrorEmptyString("path")
+		return nil, errors.TracedErrorEmptyString("path")
 	}
 
 	commandExecutorFile = NewCommandExecutorFile()
@@ -26,7 +31,7 @@ func GetCommandExecutorFileByPath(commandExector CommandExecutor, path string) (
 
 func GetLocalCommandExecutorFileByFile(file File, verbose bool) (commandExecutorFile *CommandExecutorFile, err error) {
 	if file == nil {
-		return nil, TracedErrorEmptyString("file")
+		return nil, errors.TracedErrorEmptyString("file")
 	}
 
 	err = file.CheckIsLocalFile(verbose)
@@ -49,7 +54,7 @@ func GetLocalCommandExecutorFileByFile(file File, verbose bool) (commandExecutor
 
 func GetLocalCommandExecutorFileByPath(localPath string) (commandExecutorFile *CommandExecutorFile, err error) {
 	if localPath == "" {
-		return nil, TracedErrorEmptyString(localPath)
+		return nil, errors.TracedErrorEmptyString(localPath)
 	}
 
 	return GetCommandExecutorFileByPath(Bash(), localPath)
@@ -58,7 +63,7 @@ func GetLocalCommandExecutorFileByPath(localPath string) (commandExecutorFile *C
 func MustGetCommandExecutorFileByPath(commandExector CommandExecutor, path string) (commandExecutorFile *CommandExecutorFile) {
 	commandExecutorFile, err := GetCommandExecutorFileByPath(commandExector, path)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandExecutorFile
@@ -67,7 +72,7 @@ func MustGetCommandExecutorFileByPath(commandExector CommandExecutor, path strin
 func MustGetLocalCommandExecutorFileByFile(file File, verbose bool) (commandExecutorFile *CommandExecutorFile) {
 	commandExecutorFile, err := GetLocalCommandExecutorFileByFile(file, verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandExecutorFile
@@ -76,7 +81,7 @@ func MustGetLocalCommandExecutorFileByFile(file File, verbose bool) (commandExec
 func MustGetLocalCommandExecutorFileByPath(localPath string) (commandExecutorFile *CommandExecutorFile) {
 	commandExecutorFile, err := GetLocalCommandExecutorFileByPath(localPath)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return commandExecutorFile

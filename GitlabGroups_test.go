@@ -4,11 +4,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/continuousintegration"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func TestGitlabGroupsGroupByGroupPathExists(t *testing.T) {
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogWarn("Unavailable in continuous integration pipeline")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogWarn("Unavailable in continuous integration pipeline")
 		return
 	}
 
@@ -45,8 +47,8 @@ func TestGitlabGroupsGroupByGroupPathExists(t *testing.T) {
 
 func TestGitlabGroupsCreateAndDeleteGroup(t *testing.T) {
 
-	if ContinuousIntegration().IsRunningInGithub() {
-		LogWarn("Unavailable in continuous integration pipeline")
+	if continuousintegration.IsRunningInGithub() {
+		logging.LogWarn("Unavailable in continuous integration pipeline")
 		return
 	}
 

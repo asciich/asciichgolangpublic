@@ -4,7 +4,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 // HTTP client written using native go http implementation.
@@ -24,7 +25,7 @@ func NewNativeClient() (n *NativeClient) {
 
 func (c *NativeClient) SendRequest(requestOptions *RequestOptions) (response Response, err error) {
 	if requestOptions == nil {
-		return nil, asciichgolangpublic.TracedErrorNil("requestOptions")
+		return nil, errors.TracedErrorNil("requestOptions")
 	}
 
 	url, err := requestOptions.GetUrl()
@@ -52,7 +53,7 @@ func (c *NativeClient) SendRequest(requestOptions *RequestOptions) (response Res
 	response = NewGenericResponse()
 	body, err := io.ReadAll(nativeResponse.Body)
 	if err != nil {
-		return nil, asciichgolangpublic.TracedErrorf("Unable to read body as bytes: %w", err)
+		return nil, errors.TracedErrorf("Unable to read body as bytes: %w", err)
 	}
 
 	err = response.SetBody(body)
@@ -71,7 +72,7 @@ func (c *NativeClient) SendRequest(requestOptions *RequestOptions) (response Res
 func (n *NativeClient) MustSendRequest(requestOptions *RequestOptions) (response Response) {
 	response, err := n.SendRequest(requestOptions)
 	if err != nil {
-		asciichgolangpublic.LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return response

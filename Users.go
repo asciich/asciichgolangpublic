@@ -3,6 +3,9 @@ package asciichgolangpublic
 import (
 	"os"
 	"os/user"
+
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 type UsersService struct {
@@ -38,7 +41,7 @@ func IsRunningAsRoot(verbose bool) (isRunningAsRoot bool, err error) {
 func MustGetDirectoryInHomeDirectory(path ...string) (directoryInHome Directory) {
 	directoryInHome, err := GetDirectoryInHomeDirectory(path...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return directoryInHome
@@ -47,7 +50,7 @@ func MustGetDirectoryInHomeDirectory(path ...string) (directoryInHome Directory)
 func MustGetFileInHomeDirectory(path ...string) (fileInHome File) {
 	fileInHome, err := Users().GetFileInHomeDirectory(path...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return fileInHome
@@ -56,7 +59,7 @@ func MustGetFileInHomeDirectory(path ...string) (fileInHome File) {
 func MustIsRunningAsRoot(verbose bool) (isRunningAsRoot bool) {
 	isRunningAsRoot, err := IsRunningAsRoot(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isRunningAsRoot
@@ -65,7 +68,7 @@ func MustIsRunningAsRoot(verbose bool) (isRunningAsRoot bool) {
 func MustWhoAmI(verbose bool) (userName string) {
 	userName, err := WhoAmI(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return userName
@@ -97,11 +100,11 @@ func (u *UsersService) GetCurrentUserName(verbose bool) (currentUserName string,
 	currentUserName = nativeUser.Username
 
 	if currentUserName == "" {
-		return "", TracedError("currentUserName is empty string after evaluation")
+		return "", errors.TracedError("currentUserName is empty string after evaluation")
 	}
 
 	if verbose {
-		LogInfof("Current username is '%s'.", currentUserName)
+		logging.LogInfof("Current username is '%s'.", currentUserName)
 	}
 
 	return currentUserName, nil
@@ -109,7 +112,7 @@ func (u *UsersService) GetCurrentUserName(verbose bool) (currentUserName string,
 
 func (u *UsersService) GetDirectoryInHomeDirectory(path ...string) (fileInUnsersHome Directory, err error) {
 	if len(path) <= 0 {
-		return nil, TracedError("path has no length")
+		return nil, errors.TracedError("path has no length")
 	}
 
 	usersHome, err := u.GetHomeDirectory()
@@ -127,7 +130,7 @@ func (u *UsersService) GetDirectoryInHomeDirectory(path ...string) (fileInUnsers
 
 func (u *UsersService) GetFileInHomeDirectory(path ...string) (fileInUnsersHome File, err error) {
 	if len(path) <= 0 {
-		return nil, TracedError("path has no length")
+		return nil, errors.TracedError("path has no length")
 	}
 
 	usersHome, err := u.GetHomeDirectory()
@@ -145,7 +148,7 @@ func (u *UsersService) GetFileInHomeDirectory(path ...string) (fileInUnsersHome 
 
 func (u *UsersService) GetFileInHomeDirectoryAsLocalFile(path ...string) (localFile *LocalFile, err error) {
 	if len(path) <= 0 {
-		return nil, TracedError("path is empty")
+		return nil, errors.TracedError("path is empty")
 	}
 
 	fileToReturn, err := u.GetFileInHomeDirectory(path...)
@@ -155,7 +158,7 @@ func (u *UsersService) GetFileInHomeDirectoryAsLocalFile(path ...string) (localF
 
 	localFile, ok := fileToReturn.(*LocalFile)
 	if !ok {
-		return nil, TracedError("Unable to convert to local file")
+		return nil, errors.TracedError("Unable to convert to local file")
 	}
 
 	return localFile, nil
@@ -203,9 +206,9 @@ func (u *UsersService) IsRunningAsRoot(verbose bool) (isRunningAsRoot bool, err 
 
 	if verbose {
 		if isRunningAsRoot {
-			LogInfof("Running as root since current user name is '%s'.", userName)
+			logging.LogInfof("Running as root since current user name is '%s'.", userName)
 		} else {
-			LogInfof("Not running as root, current user name is '%s'.", userName)
+			logging.LogInfof("Not running as root, current user name is '%s'.", userName)
 		}
 	}
 
@@ -215,7 +218,7 @@ func (u *UsersService) IsRunningAsRoot(verbose bool) (isRunningAsRoot bool, err 
 func (u *UsersService) MustGetCurrentUserName(verbose bool) (currentUserName string) {
 	currentUserName, err := u.GetCurrentUserName(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return currentUserName
@@ -224,7 +227,7 @@ func (u *UsersService) MustGetCurrentUserName(verbose bool) (currentUserName str
 func (u *UsersService) MustGetDirectoryInHomeDirectory(path ...string) (fileInUnsersHome Directory) {
 	fileInUnsersHome, err := u.GetDirectoryInHomeDirectory(path...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return fileInUnsersHome
@@ -233,7 +236,7 @@ func (u *UsersService) MustGetDirectoryInHomeDirectory(path ...string) (fileInUn
 func (u *UsersService) MustGetFileInHomeDirectory(path ...string) (fileInUnsersHome File) {
 	fileInUnsersHome, err := u.GetFileInHomeDirectory(path...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return fileInUnsersHome
@@ -242,7 +245,7 @@ func (u *UsersService) MustGetFileInHomeDirectory(path ...string) (fileInUnsersH
 func (u *UsersService) MustGetFileInHomeDirectoryAsLocalFile(path ...string) (localFile *LocalFile) {
 	localFile, err := u.GetFileInHomeDirectoryAsLocalFile(path...)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return localFile
@@ -251,7 +254,7 @@ func (u *UsersService) MustGetFileInHomeDirectoryAsLocalFile(path ...string) (lo
 func (u *UsersService) MustGetHomeDirectory() (homeDir Directory) {
 	homeDir, err := u.GetHomeDirectory()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return homeDir
@@ -260,7 +263,7 @@ func (u *UsersService) MustGetHomeDirectory() (homeDir Directory) {
 func (u *UsersService) MustGetHomeDirectoryAsString() (homeDirPath string) {
 	homeDirPath, err := u.GetHomeDirectoryAsString()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return homeDirPath
@@ -269,7 +272,7 @@ func (u *UsersService) MustGetHomeDirectoryAsString() (homeDirPath string) {
 func (u *UsersService) MustGetNativeUser() (nativeUser *user.User) {
 	nativeUser, err := u.GetNativeUser()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return nativeUser
@@ -278,7 +281,7 @@ func (u *UsersService) MustGetNativeUser() (nativeUser *user.User) {
 func (u *UsersService) MustIsRunningAsRoot(verbose bool) (isRunningAsRoot bool) {
 	isRunningAsRoot, err := u.IsRunningAsRoot(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return isRunningAsRoot
@@ -287,7 +290,7 @@ func (u *UsersService) MustIsRunningAsRoot(verbose bool) (isRunningAsRoot bool) 
 func (u *UsersService) MustWhoAmI(verbose bool) (userName string) {
 	userName, err := u.WhoAmI(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return userName

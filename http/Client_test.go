@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func getClientByImplementationName(implementationName string) (client Client) {
@@ -13,7 +14,7 @@ func getClientByImplementationName(implementationName string) (client Client) {
 		return NewNativeClient()
 	}
 
-	asciichgolangpublic.LogFatalWithTracef(
+	logging.LogFatalWithTracef(
 		"Unknwon implmentation name '%s'",
 		implementationName,
 	)
@@ -45,12 +46,12 @@ func Test_Client_GetRequest_RootPage_PortInUrl(t *testing.T) {
 				var client Client = getClientByImplementationName(tt.implementationName)
 				var response Response = client.MustSendRequest(
 					&RequestOptions{
-						Url: "http://localhost:" + strconv.Itoa(port),
+						Url:     "http://localhost:" + strconv.Itoa(port),
 						Verbose: verbose,
-						Method: "GET",
+						Method:  "GET",
 					},
 				)
-				
+
 				assert.True(response.MustIsStatusCodeOk())
 				assert.Contains(
 					response.MustGetBodyAsString(),

@@ -1,5 +1,10 @@
 package asciichgolangpublic
 
+import (
+	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/logging"
+)
+
 type GitlabResetPasswordOptions struct {
 	Username                        string
 	GitlabContainerNameOnGitlabHost string
@@ -14,7 +19,7 @@ func NewGitlabResetPasswordOptions() (g *GitlabResetPasswordOptions) {
 
 func (g *GitlabResetPasswordOptions) GetGitlabContainerNameOnGitlabHost() (gitlabContainerNameOnGitlabHost string, err error) {
 	if g.GitlabContainerNameOnGitlabHost == "" {
-		return "", TracedErrorf("GitlabContainerNameOnGitlabHost not set")
+		return "", errors.TracedErrorf("GitlabContainerNameOnGitlabHost not set")
 	}
 
 	return g.GitlabContainerNameOnGitlabHost, nil
@@ -22,7 +27,7 @@ func (g *GitlabResetPasswordOptions) GetGitlabContainerNameOnGitlabHost() (gitla
 
 func (g *GitlabResetPasswordOptions) GetGopassPathToStoreNewPassword() (gopassPathToStoreNewPassword string, err error) {
 	if g.GopassPathToStoreNewPassword == "" {
-		return "", TracedErrorf("GopassPathToStoreNewPassword not set")
+		return "", errors.TracedErrorf("GopassPathToStoreNewPassword not set")
 	}
 
 	return g.GopassPathToStoreNewPassword, nil
@@ -36,7 +41,7 @@ func (g *GitlabResetPasswordOptions) GetVerbose() (verbose bool, err error) {
 func (g *GitlabResetPasswordOptions) MustGetGitlabContainerNameOnGitlabHost() (gitlabContainerNameOnGitlabHost string) {
 	gitlabContainerNameOnGitlabHost, err := g.GetGitlabContainerNameOnGitlabHost()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gitlabContainerNameOnGitlabHost
@@ -45,7 +50,7 @@ func (g *GitlabResetPasswordOptions) MustGetGitlabContainerNameOnGitlabHost() (g
 func (g *GitlabResetPasswordOptions) MustGetGopassPathToStoreNewPassword() (gopassPathToStoreNewPassword string) {
 	gopassPathToStoreNewPassword, err := g.GetGopassPathToStoreNewPassword()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return gopassPathToStoreNewPassword
@@ -54,7 +59,7 @@ func (g *GitlabResetPasswordOptions) MustGetGopassPathToStoreNewPassword() (gopa
 func (g *GitlabResetPasswordOptions) MustGetSshUserNameForGitlabHost() (sshUserName string) {
 	sshUserName, err := g.GetSshUserNameForGitlabHost()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return sshUserName
@@ -63,7 +68,7 @@ func (g *GitlabResetPasswordOptions) MustGetSshUserNameForGitlabHost() (sshUserN
 func (g *GitlabResetPasswordOptions) MustGetUsername() (username string) {
 	username, err := g.GetUsername()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return username
@@ -72,7 +77,7 @@ func (g *GitlabResetPasswordOptions) MustGetUsername() (username string) {
 func (g *GitlabResetPasswordOptions) MustGetVerbose() (verbose bool) {
 	verbose, err := g.GetVerbose()
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 
 	return verbose
@@ -81,41 +86,41 @@ func (g *GitlabResetPasswordOptions) MustGetVerbose() (verbose bool) {
 func (g *GitlabResetPasswordOptions) MustSetGitlabContainerNameOnGitlabHost(gitlabContainerNameOnGitlabHost string) {
 	err := g.SetGitlabContainerNameOnGitlabHost(gitlabContainerNameOnGitlabHost)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabResetPasswordOptions) MustSetGopassPathToStoreNewPassword(gopassPathToStoreNewPassword string) {
 	err := g.SetGopassPathToStoreNewPassword(gopassPathToStoreNewPassword)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabResetPasswordOptions) MustSetSshUserNameForGitlabHost(sshUserNameForGitlabHost string) {
 	err := g.SetSshUserNameForGitlabHost(sshUserNameForGitlabHost)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabResetPasswordOptions) MustSetUsername(username string) {
 	err := g.SetUsername(username)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabResetPasswordOptions) MustSetVerbose(verbose bool) {
 	err := g.SetVerbose(verbose)
 	if err != nil {
-		LogGoErrorFatal(err)
+		logging.LogGoErrorFatal(err)
 	}
 }
 
 func (g *GitlabResetPasswordOptions) SetGitlabContainerNameOnGitlabHost(gitlabContainerNameOnGitlabHost string) (err error) {
 	if gitlabContainerNameOnGitlabHost == "" {
-		return TracedErrorf("gitlabContainerNameOnGitlabHost is empty string")
+		return errors.TracedErrorf("gitlabContainerNameOnGitlabHost is empty string")
 	}
 
 	g.GitlabContainerNameOnGitlabHost = gitlabContainerNameOnGitlabHost
@@ -125,7 +130,7 @@ func (g *GitlabResetPasswordOptions) SetGitlabContainerNameOnGitlabHost(gitlabCo
 
 func (g *GitlabResetPasswordOptions) SetGopassPathToStoreNewPassword(gopassPathToStoreNewPassword string) (err error) {
 	if gopassPathToStoreNewPassword == "" {
-		return TracedErrorf("gopassPathToStoreNewPassword is empty string")
+		return errors.TracedErrorf("gopassPathToStoreNewPassword is empty string")
 	}
 
 	g.GopassPathToStoreNewPassword = gopassPathToStoreNewPassword
@@ -135,7 +140,7 @@ func (g *GitlabResetPasswordOptions) SetGopassPathToStoreNewPassword(gopassPathT
 
 func (g *GitlabResetPasswordOptions) SetSshUserNameForGitlabHost(sshUserNameForGitlabHost string) (err error) {
 	if sshUserNameForGitlabHost == "" {
-		return TracedErrorf("sshUserNameForGitlabHost is empty string")
+		return errors.TracedErrorf("sshUserNameForGitlabHost is empty string")
 	}
 
 	g.SshUserNameForGitlabHost = sshUserNameForGitlabHost
@@ -145,7 +150,7 @@ func (g *GitlabResetPasswordOptions) SetSshUserNameForGitlabHost(sshUserNameForG
 
 func (g *GitlabResetPasswordOptions) SetUsername(username string) (err error) {
 	if username == "" {
-		return TracedErrorf("username is empty string")
+		return errors.TracedErrorf("username is empty string")
 	}
 
 	g.Username = username
@@ -161,7 +166,7 @@ func (g *GitlabResetPasswordOptions) SetVerbose(verbose bool) (err error) {
 
 func (o *GitlabResetPasswordOptions) GetSshUserNameForGitlabHost() (sshUserName string, err error) {
 	if !o.IsSshUserNameForGitlabHostSet() {
-		return "", TracedError("SshUserNameForGitlabHost is not set")
+		return "", errors.TracedError("SshUserNameForGitlabHost is not set")
 	}
 
 	return o.SshUserNameForGitlabHost, nil
@@ -169,7 +174,7 @@ func (o *GitlabResetPasswordOptions) GetSshUserNameForGitlabHost() (sshUserName 
 
 func (o *GitlabResetPasswordOptions) GetUsername() (username string, err error) {
 	if len(o.Username) <= 0 {
-		return "", TracedError("username not set")
+		return "", errors.TracedError("username not set")
 	}
 
 	return o.Username, nil
