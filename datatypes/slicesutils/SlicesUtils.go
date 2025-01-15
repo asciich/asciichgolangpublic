@@ -300,8 +300,8 @@ func DiffStringSlices(a []string, b []string) (aNotInB []string, bNotInA []strin
 		bNotInA = append(bNotInA, toCheck)
 	}
 
-	aNotInB = SortStringSlice(aNotInB)
-	bNotInA = SortStringSlice(bNotInA)
+	sort.Strings(aNotInB)
+	sort.Strings(bNotInA)
 
 	return aNotInB, bNotInA
 }
@@ -322,8 +322,8 @@ func GetDeepCopyOfStringsSlice(sliceOfStrings []string) (deepCopy []string) {
 		return []string{}
 	}
 
-	deepCopy = []string{}
-	deepCopy = append(deepCopy, sliceOfStrings...)
+	deepCopy = make([]string, len(sliceOfStrings))
+	copy(deepCopy, sliceOfStrings)
 
 	return deepCopy
 }
@@ -505,7 +505,7 @@ func RemoveStringsWhichContains(sliceToRemoveStringsWhichContains []string, sear
 	return cleanedUpSlice, nil
 }
 
-func SortStringSlice(sliceOfStrings []string) (sorted []string) {
+func GetSortedDeepCopyOfStringsSlice(sliceOfStrings []string) (sorted []string) {
 	sorted = GetDeepCopyOfStringsSlice(sliceOfStrings)
 
 	sort.Strings(sorted)
@@ -518,7 +518,7 @@ func SortStringSliceAndRemoveDuplicates(input []string) (output []string) {
 		return []string{}
 	}
 
-	sorted := SortStringSlice(input)
+	sorted := GetSortedDeepCopyOfStringsSlice(input)
 	return RemoveDuplicatedStrings(sorted)
 }
 
@@ -528,13 +528,9 @@ func SortStringSliceAndRemoveEmpty(input []string) (sortedAndWithoutEmptyStrings
 	}
 
 	sortedAndWithoutEmptyStrings = RemoveEmptyStrings(input)
-	sortedAndWithoutEmptyStrings = SortStringSlice(sortedAndWithoutEmptyStrings)
+	sort.Strings(sortedAndWithoutEmptyStrings)
 
 	return sortedAndWithoutEmptyStrings
-}
-
-func SortVersionStringSlice(input []string) (sorted []string) {
-	return SortStringSlice(input)
 }
 
 func SplitStrings(input []string, splitAt string) (splitted []string) {
