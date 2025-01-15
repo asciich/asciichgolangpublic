@@ -1,9 +1,10 @@
-package asciichgolangpublic
+package testutils
 
 import (
 	"fmt"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/datatypes/structsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -25,8 +26,8 @@ func Tests() (tests *TestsService) {
 func (t *TestsService) FormatAsTestname(objectToFormat interface{}) (testname string, err error) {
 	testname = ""
 
-	if Structs().IsStructOrPointerToStruct(objectToFormat) {
-		values, err := Structs().GetFieldValuesAsString(objectToFormat)
+	if structsutils.IsStructOrPointerToStruct(objectToFormat) {
+		values, err := structsutils.GetFieldValuesAsString(objectToFormat)
 		if err != nil {
 			return "", tracederrors.TracedErrorf("Unable to get values of '%v' to format as testname", objectToFormat)
 		}

@@ -1,6 +1,7 @@
-package asciichgolangpublic
+package structsutils
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -31,11 +32,11 @@ func TestStructsIsStruct(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				isStruct := Structs().IsStruct(tt.objectToTest)
+				isStruct := IsStruct(tt.objectToTest)
 				assert.EqualValues(tt.isStruct, isStruct)
 			},
 		)
@@ -65,11 +66,11 @@ func TestStructsIsPointerToStruct(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				isStruct := Structs().IsPointerToStruct(tt.objectToTest)
+				isStruct := IsPointerToStruct(tt.objectToTest)
 				assert.EqualValues(tt.isPointerToStruct, isStruct)
 			},
 		)
@@ -99,11 +100,11 @@ func TestStructsIsStructOrPointerToStruct(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				isStruct := Structs().IsStructOrPointerToStruct(tt.objectToTest)
+				isStruct := IsStructOrPointerToStruct(tt.objectToTest)
 				assert.EqualValues(tt.isStructOrPointerToStruct, isStruct)
 			},
 		)
@@ -122,11 +123,11 @@ func TestStructsGetFieldValues_NoValues(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				fieldValues := Structs().MustGetFieldValuesAsString(tt.objectToTest)
+				fieldValues := MustGetFieldValuesAsString(tt.objectToTest)
 
 				assert.Len(fieldValues, 0)
 			},

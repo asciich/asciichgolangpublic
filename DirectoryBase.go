@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pathsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -150,7 +152,7 @@ func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose 
 	return createdFile, nil
 }
 
-func (d *DirectoryBase) DeleteFilesMatching(listFileOptions *ListFileOptions) (err error) {
+func (d *DirectoryBase) DeleteFilesMatching(listFileOptions *parameteroptions.ListFileOptions) (err error) {
 	if listFileOptions == nil {
 		return tracederrors.TracedErrorNil("listFileOptions")
 	}
@@ -266,7 +268,7 @@ func (d *DirectoryBase) GetPathAndHostDescription() (path string, hostDescriptio
 	return path, hostDescription, nil
 }
 
-func (d *DirectoryBase) ListFilePaths(listFileOptions *ListFileOptions) (filePaths []string, err error) {
+func (d *DirectoryBase) ListFilePaths(listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error) {
 	if listFileOptions == nil {
 		return nil, tracederrors.TracedErrorNil("listFileOptions")
 	}
@@ -305,7 +307,7 @@ func (d *DirectoryBase) ListFilePaths(listFileOptions *ListFileOptions) (filePat
 	return filePaths, nil
 }
 
-func (d *DirectoryBase) ListSubDirectoryPaths(options *ListDirectoryOptions) (subDirectoryPaths []string, err error) {
+func (d *DirectoryBase) ListSubDirectoryPaths(options *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -335,7 +337,7 @@ func (d *DirectoryBase) ListSubDirectoryPaths(options *ListDirectoryOptions) (su
 
 		toAdd := path
 		if options.ReturnRelativePaths {
-			toAdd, err = Paths().GetRelativePathTo(
+			toAdd, err = pathsutils.GetRelativePathTo(
 				toAdd,
 				dirPath,
 			)
@@ -386,7 +388,7 @@ func (d *DirectoryBase) MustCreateFileInDirectoryFromString(content string, verb
 	return createdFile
 }
 
-func (d *DirectoryBase) MustDeleteFilesMatching(listFileOptions *ListFileOptions) {
+func (d *DirectoryBase) MustDeleteFilesMatching(listFileOptions *parameteroptions.ListFileOptions) {
 	err := d.DeleteFilesMatching(listFileOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -429,7 +431,7 @@ func (d *DirectoryBase) MustGetPathAndHostDescription() (path string, hostDescri
 	return path, hostDescription
 }
 
-func (d *DirectoryBase) MustListFilePaths(listFileOptions *ListFileOptions) (filePaths []string) {
+func (d *DirectoryBase) MustListFilePaths(listFileOptions *parameteroptions.ListFileOptions) (filePaths []string) {
 	filePaths, err := d.ListFilePaths(listFileOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -438,7 +440,7 @@ func (d *DirectoryBase) MustListFilePaths(listFileOptions *ListFileOptions) (fil
 	return filePaths
 }
 
-func (d *DirectoryBase) MustListSubDirectoryPaths(options *ListDirectoryOptions) (subDirectoryPaths []string) {
+func (d *DirectoryBase) MustListSubDirectoryPaths(options *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string) {
 	subDirectoryPaths, err := d.ListSubDirectoryPaths(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

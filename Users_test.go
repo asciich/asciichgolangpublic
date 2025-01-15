@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestUserGetHomeDirectory(t *testing.T) {
@@ -16,7 +17,7 @@ func TestUserGetHomeDirectory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -41,7 +42,7 @@ func TestGetFileInHomeDirectory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -79,7 +80,7 @@ func TestGetDirectoryInHomeDirectory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 

@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestTemuxSession_CreateAndDeleteSession(t *testing.T) {
@@ -23,7 +24,7 @@ func TestTemuxSession_CreateAndDeleteSession(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 

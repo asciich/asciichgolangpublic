@@ -10,6 +10,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestGitlabGroupGetGroupPath(t *testing.T) {
@@ -31,7 +32,7 @@ func TestGitlabGroupGetGroupPath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -69,7 +70,7 @@ func TestGitlabGroupGetGroupName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -109,7 +110,7 @@ func TestGitlabGroupIsSubgroup(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -145,7 +146,7 @@ func TestGitlabGroupGetParentGroupPath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -179,7 +180,7 @@ func TestGitlabGroupByPathAndId(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -251,7 +252,7 @@ func TestGitlabGroupListProjects(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 

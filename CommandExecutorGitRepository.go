@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -884,7 +885,7 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootD
 
 		for {
 			filePaths, err := cwd.ListFilePaths(
-				&ListFileOptions{
+				&parameteroptions.ListFileOptions{
 					NonRecursive:        true,
 					Verbose:             verbose,
 					ReturnRelativePaths: true,

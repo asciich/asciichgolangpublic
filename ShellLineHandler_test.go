@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestShellLineHandlerSplit(t *testing.T) {
@@ -18,7 +19,7 @@ func TestShellLineHandlerSplit(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -37,8 +38,8 @@ func TestShellLineHandlerJoin(t *testing.T) {
 		{[]string{"echo"}, "echo"},
 		{[]string{"echo", ""}, "echo ''"},
 		{[]string{"echo", " "}, "echo ' '"},
-		{[]string{"echo", "abc\"abc"} , "echo 'abc\"abc'"}, // evalated using python -c "import shlex; print(shlex.join(['echo', 'abc\"abc']))"
-		{[]string{"echo", "abc'abc"} , "echo 'abc'\"'\"'abc'"}, // evalated using python -c "import shlex; print(shlex.join(['echo', 'abc\'abc']))"
+		{[]string{"echo", "abc\"abc"}, "echo 'abc\"abc'"},     // evalated using python -c "import shlex; print(shlex.join(['echo', 'abc\"abc']))"
+		{[]string{"echo", "abc'abc"}, "echo 'abc'\"'\"'abc'"}, // evalated using python -c "import shlex; print(shlex.join(['echo', 'abc\'abc']))"
 		{[]string{"echo", "hello"}, "echo hello"},
 		{[]string{"echo", "hello world"}, "echo 'hello world'"},
 		{[]string{"echo", "hello\nworld"}, "echo 'hello\nworld'"},
@@ -50,7 +51,7 @@ func TestShellLineHandlerJoin(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -70,7 +71,7 @@ func TestShellLineHandlerJoin(t *testing.T) {
 // TODO enable again
 // TODO enable again 	for _, tt := range tests {
 // TODO enable again 		t.Run(
-// TODO enable again 			MustFormatAsTestname(tt),
+// TODO enable again 			testutils.MustFormatAsTestname(tt),
 // TODO enable again 			func(t *testing.T) {
 // TODO enable again 				assert := assert.New(t)
 // TODO enable again
@@ -99,7 +100,7 @@ func TestShellLineHandlerJoin(t *testing.T) {
 // TODO enable again
 // TODO enable again	for _, tt := range tests {
 // TODO enable again		t.Run(
-// TODO enable again			MustFormatAsTestname(tt),
+// TODO enable again			testutils.MustFormatAsTestname(tt),
 // TODO enable again			func(t *testing.T) {
 // TODO enable again				assert := assert.New(t)
 // TODO enable again

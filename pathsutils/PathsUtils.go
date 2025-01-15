@@ -1,7 +1,8 @@
-package asciichgolangpublic
+package pathsutils
 
 import (
 	"errors"
+	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -10,23 +11,15 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 var ErrPathHasNoParentDirectory = errors.New("path has no parent directory")
 
-type PathsService struct{}
-
-func NewPathsService() (p *PathsService) {
-	return new(PathsService)
-}
-
-func Paths() (p *PathsService) {
-	return NewPathsService()
-}
 
 // Filter the given path list.
-func (p *PathsService) FilterPaths(pathList []string, pathFilterOptions PathFilterOptions) (filtered []string, err error) {
+func FilterPaths(pathList []string, pathFilterOptions parameteroptions.PathFilterOptions) (filtered []string, err error) {
 	if pathList == nil {
 		return nil, tracederrors.TracedErrorNil("pathList")
 	}
@@ -126,12 +119,12 @@ func (p *PathsService) FilterPaths(pathList []string, pathFilterOptions PathFilt
 
 // Returns true if path is a relative path.
 // An empty string as path will always be false.
-func (p *PathsService) IsRelativePath(path string) (isRelative bool) {
+func IsRelativePath(path string) (isRelative bool) {
 	if path == "" {
 		return false
 	}
 
-	if p.IsAbsolutePath(path) {
+	if IsAbsolutePath(path) {
 		return false
 	}
 
@@ -140,7 +133,7 @@ func (p *PathsService) IsRelativePath(path string) (isRelative bool) {
 
 // Returns true if path is an absolute path.
 // An empty string as path will always be false.
-func (p *PathsService) IsAbsolutePath(path string) (isAbsolute bool) {
+func IsAbsolutePath(path string) (isAbsolute bool) {
 	if path == "" {
 		return false
 	}
@@ -153,29 +146,29 @@ func (p *PathsService) IsAbsolutePath(path string) (isAbsolute bool) {
 	return re.Match([]byte(path))
 }
 
-func (p *PathsService) CheckAbsolutePath(path string) (err error) {
-	if p.IsAbsolutePath(path) {
+func CheckAbsolutePath(path string) (err error) {
+	if IsAbsolutePath(path) {
 		return nil
 	}
 
 	return tracederrors.TracedErrorf("path '%s' is not absolute", path)
 }
 
-func (p *PathsService) CheckRelativePath(path string) (err error) {
-	if p.IsRelativePath(path) {
+func CheckRelativePath(path string) (err error) {
+	if IsRelativePath(path) {
 		return nil
 	}
 
 	return tracederrors.TracedErrorf("path '%s' is not relative", path)
 }
 
-func (p *PathsService) GetAbsolutePath(path string) (absolutePath string, err error) {
+func GetAbsolutePath(path string) (absolutePath string, err error) {
 	if path == "" {
 		return "", tracederrors.TracedErrorEmptyString("path")
 	}
 
-	if Paths().IsRelativePath(path) {
-		workingDirectoryPath, err := OS().GetCurrentWorkingDirectoryAsString()
+	if IsRelativePath(path) {
+		workingDirectoryPath, err := os.Getwd()
 		if err != nil {
 			return "", err
 		}
@@ -186,7 +179,7 @@ func (p *PathsService) GetAbsolutePath(path string) (absolutePath string, err er
 	return path, nil
 }
 
-func (p *PathsService) GetDirPath(inputPath string) (dirPath string, err error) {
+func GetDirPath(inputPath string) (dirPath string, err error) {
 	if inputPath == "" {
 		return "", tracederrors.TracedErrorEmptyString("inputPath")
 	}
@@ -198,7 +191,7 @@ func (p *PathsService) GetDirPath(inputPath string) (dirPath string, err error) 
 	return filepath.Dir(inputPath), nil
 }
 
-func (p *PathsService) GetRelativePathTo(absolutePath string, relativeTo string) (relativePath string, err error) {
+func GetRelativePathTo(absolutePath string, relativeTo string) (relativePath string, err error) {
 	if absolutePath == "" {
 		return "", tracederrors.TracedErrorEmptyString("absolutePath")
 	}
@@ -207,12 +200,12 @@ func (p *PathsService) GetRelativePathTo(absolutePath string, relativeTo string)
 		return "", tracederrors.TracedErrorEmptyString("relatvieTo")
 	}
 
-	err = Paths().CheckAbsolutePath(absolutePath)
+	err = CheckAbsolutePath(absolutePath)
 	if err != nil {
 		return "", err
 	}
 
-	err = Paths().CheckAbsolutePath(relativeTo)
+	err = CheckAbsolutePath(relativeTo)
 	if err != nil {
 		return "", err
 	}
@@ -229,7 +222,7 @@ func (p *PathsService) GetRelativePathTo(absolutePath string, relativeTo string)
 
 	relativePath = strings.TrimPrefix(absolutePath, relativeToDirPath)
 
-	err = Paths().CheckRelativePath(relativePath)
+	err = CheckRelativePath(relativePath)
 	if err != nil {
 		return "", err
 	}
@@ -241,7 +234,7 @@ func (p *PathsService) GetRelativePathTo(absolutePath string, relativeTo string)
 	return relativePath, nil
 }
 
-func (p *PathsService) GetRelativePathsTo(absolutePaths []string, relativeTo string) (relativePaths []string, err error) {
+func GetRelativePathsTo(absolutePaths []string, relativeTo string) (relativePaths []string, err error) {
 	if absolutePaths == nil {
 		return nil, tracederrors.TracedErrorNil("absoultePaths")
 	}
@@ -252,7 +245,7 @@ func (p *PathsService) GetRelativePathsTo(absolutePaths []string, relativeTo str
 
 	relativePaths = []string{}
 	for _, path := range absolutePaths {
-		r, err := p.GetRelativePathTo(path, relativeTo)
+		r, err := GetRelativePathTo(path, relativeTo)
 		if err != nil {
 			return nil, err
 		}
@@ -263,22 +256,22 @@ func (p *PathsService) GetRelativePathsTo(absolutePaths []string, relativeTo str
 	return relativePaths, nil
 }
 
-func (p *PathsService) MustCheckAbsolutePath(path string) {
-	err := p.CheckAbsolutePath(path)
+func MustCheckAbsolutePath(path string) {
+	err := CheckAbsolutePath(path)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (p *PathsService) MustCheckRelativePath(path string) {
-	err := p.CheckRelativePath(path)
+func MustCheckRelativePath(path string) {
+	err := CheckRelativePath(path)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (p *PathsService) MustFilterPaths(pathList []string, pathFilterOptions PathFilterOptions) (filtered []string) {
-	filtered, err := p.FilterPaths(pathList, pathFilterOptions)
+func MustFilterPaths(pathList []string, pathFilterOptions parameteroptions.PathFilterOptions) (filtered []string) {
+	filtered, err := FilterPaths(pathList, pathFilterOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -286,8 +279,8 @@ func (p *PathsService) MustFilterPaths(pathList []string, pathFilterOptions Path
 	return filtered
 }
 
-func (p *PathsService) MustGetAbsolutePath(path string) (absolutePath string) {
-	absolutePath, err := p.GetAbsolutePath(path)
+func MustGetAbsolutePath(path string) (absolutePath string) {
+	absolutePath, err := GetAbsolutePath(path)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -295,8 +288,8 @@ func (p *PathsService) MustGetAbsolutePath(path string) (absolutePath string) {
 	return absolutePath
 }
 
-func (p *PathsService) MustGetDirPath(inputPath string) (dirPath string) {
-	dirPath, err := p.GetDirPath(inputPath)
+func MustGetDirPath(inputPath string) (dirPath string) {
+	dirPath, err := GetDirPath(inputPath)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -304,8 +297,8 @@ func (p *PathsService) MustGetDirPath(inputPath string) (dirPath string) {
 	return dirPath
 }
 
-func (p *PathsService) MustGetRelativePathTo(absolutePath string, relativeTo string) (relativePath string) {
-	relativePath, err := p.GetRelativePathTo(absolutePath, relativeTo)
+func MustGetRelativePathTo(absolutePath string, relativeTo string) (relativePath string) {
+	relativePath, err := GetRelativePathTo(absolutePath, relativeTo)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -313,8 +306,8 @@ func (p *PathsService) MustGetRelativePathTo(absolutePath string, relativeTo str
 	return relativePath
 }
 
-func (p *PathsService) MustGetRelativePathsTo(absolutePaths []string, relativeTo string) (relativePaths []string) {
-	relativePaths, err := p.GetRelativePathsTo(absolutePaths, relativeTo)
+func MustGetRelativePathsTo(absolutePaths []string, relativeTo string) (relativePaths []string) {
+	relativePaths, err := GetRelativePathsTo(absolutePaths, relativeTo)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}

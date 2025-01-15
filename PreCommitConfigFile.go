@@ -7,6 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/changesummary"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pathsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -108,7 +109,7 @@ func (p *PreCommitConfigFile) GetAbsolutePath() (absolutePath string, err error)
 		return "", err
 	}
 
-	if Paths().IsRelativePath(path) {
+	if pathsutils.IsRelativePath(path) {
 		return "", tracederrors.TracedErrorf(
 			"Unable to get absolute path, '%s' is relative",
 			path,

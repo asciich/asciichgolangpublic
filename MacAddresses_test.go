@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestMacAddressesIsStringAMacAddress(t *testing.T) {
@@ -31,7 +32,7 @@ func TestMacAddressesIsStringAMacAddress(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 				assert.EqualValues(tt.isMacAddress, MacAddresses().IsStringAMacAddress(tt.input))

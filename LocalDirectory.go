@@ -9,6 +9,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pathsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -424,7 +426,7 @@ func (l *LocalDirectory) GetDirName() (parentPath string, err error) {
 		return "", err
 	}
 
-	return Paths().GetDirPath(path)
+	return pathsutils.GetDirPath(path)
 }
 
 func (l *LocalDirectory) GetFileInDirectory(path ...string) (file File, err error) {
@@ -482,7 +484,7 @@ func (l *LocalDirectory) GetGitRepositories(verbose bool) (gitRepos []GitReposit
 }
 
 func (l *LocalDirectory) GetGitRepositoriesAsLocalGitRepositories(verbose bool) (gitRepos []*LocalGitRepository, err error) {
-	subDirectories, err := l.ListSubDirectories(&ListDirectoryOptions{
+	subDirectories, err := l.ListSubDirectories(&parameteroptions.ListDirectoryOptions{
 		Recursive: true,
 	})
 	if err != nil {
@@ -610,7 +612,7 @@ func (l *LocalDirectory) GetSubDirectoryAndLocalPath(path ...string) (subDirecto
 
 func (l *LocalDirectory) IsEmptyDirectory(verbose bool) (isEmpty bool, err error) {
 	subDirs, err := l.ListSubDirectories(
-		&ListDirectoryOptions{
+		&parameteroptions.ListDirectoryOptions{
 			Verbose: verbose,
 		},
 	)
@@ -623,7 +625,7 @@ func (l *LocalDirectory) IsEmptyDirectory(verbose bool) (isEmpty bool, err error
 	}
 
 	files, err := l.ListFiles(
-		&ListFileOptions{
+		&parameteroptions.ListFileOptions{
 			Verbose:                       verbose,
 			AllowEmptyListIfNoFileIsFound: true,
 		},
@@ -643,7 +645,7 @@ func (l *LocalDirectory) IsLocalDirectory() (isLocalDirectory bool, err error) {
 	return true, nil
 }
 
-func (l *LocalDirectory) ListFilePaths(listOptions *ListFileOptions) (filePathList []string, err error) {
+func (l *LocalDirectory) ListFilePaths(listOptions *parameteroptions.ListFileOptions) (filePathList []string, err error) {
 	if listOptions == nil {
 		return nil, tracederrors.TracedError("listOptions is nil")
 	}
@@ -678,13 +680,13 @@ func (l *LocalDirectory) ListFilePaths(listOptions *ListFileOptions) (filePathLi
 
 	filePathList = slicesutils.RemoveEmptyStrings(filePathList)
 
-	filePathList, err = Paths().FilterPaths(filePathList, listOptions)
+	filePathList, err = pathsutils.FilterPaths(filePathList, listOptions)
 	if err != nil {
 		return nil, err
 	}
 
 	if listOptions.ReturnRelativePaths {
-		filePathList, err = Paths().GetRelativePathsTo(filePathList, directoryPath)
+		filePathList, err = pathsutils.GetRelativePathsTo(filePathList, directoryPath)
 		if err != nil {
 			return nil, err
 		}
@@ -701,7 +703,7 @@ func (l *LocalDirectory) ListFilePaths(listOptions *ListFileOptions) (filePathLi
 	return filePathList, nil
 }
 
-func (l *LocalDirectory) ListFiles(options *ListFileOptions) (files []File, err error) {
+func (l *LocalDirectory) ListFiles(options *parameteroptions.ListFileOptions) (files []File, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedError("options is nil")
 	}
@@ -727,7 +729,7 @@ func (l *LocalDirectory) ListFiles(options *ListFileOptions) (files []File, err 
 	return files, nil
 }
 
-func (l *LocalDirectory) ListSubDirectories(listDirectoryOptions *ListDirectoryOptions) (subDirectories []Directory, err error) {
+func (l *LocalDirectory) ListSubDirectories(listDirectoryOptions *parameteroptions.ListDirectoryOptions) (subDirectories []Directory, err error) {
 	if listDirectoryOptions == nil {
 		return nil, tracederrors.TracedErrorNil("listDirectoryOptions")
 	}
@@ -749,7 +751,7 @@ func (l *LocalDirectory) ListSubDirectories(listDirectoryOptions *ListDirectoryO
 	return subDirectories, nil
 }
 
-func (l *LocalDirectory) ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions *ListDirectoryOptions) (subDirectoryPaths []string, err error) {
+func (l *LocalDirectory) ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string, err error) {
 	if listDirectoryOptions == nil {
 		return nil, tracederrors.TracedErrorNil("listDirectoryOptions")
 	}
@@ -767,9 +769,6 @@ func (l *LocalDirectory) ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions 
 	for _, entry := range allEntries {
 		if entry.IsDir() {
 			pathToAdd := filepath.Join(localPath, entry.Name())
-			if err != nil {
-				return nil, err
-			}
 
 			subDirectoryPaths = append(subDirectoryPaths, pathToAdd)
 
@@ -780,7 +779,7 @@ func (l *LocalDirectory) ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions 
 				}
 
 				subDirectoriesToAdd, err := subDirectory.ListSubDirectoriesAsAbsolutePaths(
-					&ListDirectoryOptions{
+					&parameteroptions.ListDirectoryOptions{
 						Recursive: true,
 					},
 				)
@@ -1013,7 +1012,7 @@ func (l *LocalDirectory) MustIsLocalDirectory() (isLocalDirectory bool) {
 	return isLocalDirectory
 }
 
-func (l *LocalDirectory) MustListFilePaths(listOptions *ListFileOptions) (filePathList []string) {
+func (l *LocalDirectory) MustListFilePaths(listOptions *parameteroptions.ListFileOptions) (filePathList []string) {
 	filePathList, err := l.ListFilePaths(listOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1022,7 +1021,7 @@ func (l *LocalDirectory) MustListFilePaths(listOptions *ListFileOptions) (filePa
 	return filePathList
 }
 
-func (l *LocalDirectory) MustListFilePathsns(listOptions *ListFileOptions) (filePathList []string) {
+func (l *LocalDirectory) MustListFilePathsns(listOptions *parameteroptions.ListFileOptions) (filePathList []string) {
 	filePathList, err := l.ListFilePaths(listOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1031,7 +1030,7 @@ func (l *LocalDirectory) MustListFilePathsns(listOptions *ListFileOptions) (file
 	return filePathList
 }
 
-func (l *LocalDirectory) MustListFiles(options *ListFileOptions) (files []File) {
+func (l *LocalDirectory) MustListFiles(options *parameteroptions.ListFileOptions) (files []File) {
 	files, err := l.ListFiles(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1040,7 +1039,7 @@ func (l *LocalDirectory) MustListFiles(options *ListFileOptions) (files []File) 
 	return files
 }
 
-func (l *LocalDirectory) MustListSubDirectories(listDirectoryOptions *ListDirectoryOptions) (subDirectories []Directory) {
+func (l *LocalDirectory) MustListSubDirectories(listDirectoryOptions *parameteroptions.ListDirectoryOptions) (subDirectories []Directory) {
 	subDirectories, err := l.ListSubDirectories(listDirectoryOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1049,7 +1048,7 @@ func (l *LocalDirectory) MustListSubDirectories(listDirectoryOptions *ListDirect
 	return subDirectories
 }
 
-func (l *LocalDirectory) MustListSubDirectoriesAsAbsolutePaths(listDirectoryOptions *ListDirectoryOptions) (subDirectoryPaths []string) {
+func (l *LocalDirectory) MustListSubDirectoriesAsAbsolutePaths(listDirectoryOptions *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string) {
 	subDirectoryPaths, err := l.ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1083,7 +1082,7 @@ func (l *LocalDirectory) MustSubDirectoryExists(subDirName string, verbose bool)
 
 func (l *LocalDirectory) ReplaceBetweenMarkers(verbose bool) (err error) {
 	files, err := l.ListFiles(
-		&ListFileOptions{
+		&parameteroptions.ListFileOptions{
 			Verbose: verbose,
 		},
 	)
@@ -1119,12 +1118,12 @@ func (l *LocalDirectory) SetLocalPath(localPath string) (err error) {
 		return tracederrors.TracedErrorf("localPath is empty string")
 	}
 
-	localPath, err = Paths().GetAbsolutePath(localPath)
+	localPath, err = pathsutils.GetAbsolutePath(localPath)
 	if err != nil {
 		return err
 	}
 
-	if !Paths().IsAbsolutePath(localPath) {
+	if !pathsutils.IsAbsolutePath(localPath) {
 		return tracederrors.TracedErrorf(
 			"Path '%s' is not absolute. Beware this is an internal issue since the code before this line should fix that.",
 			localPath,

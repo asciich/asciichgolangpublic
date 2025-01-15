@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func getKindByImplementationName(implementationName string) (kind Kind) {
@@ -30,7 +30,7 @@ func TestKind_CreateAndDeleteCluster(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			asciichgolangpublic.MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 

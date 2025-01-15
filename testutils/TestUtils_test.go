@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package testutils
 
 import (
 	"testing"

@@ -8,6 +8,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pathsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -256,7 +258,7 @@ func (c *CommandExecutorDirectory) Delete(verbose bool) (err error) {
 		return err
 	}
 
-	if !Paths().IsAbsolutePath(dirPath) {
+	if !pathsutils.IsAbsolutePath(dirPath) {
 		return tracederrors.TracedErrorf(
 			"For security reasons deleting a directory is only implemented for absolute paths but got '%s'",
 			dirPath,
@@ -404,7 +406,7 @@ func (c *CommandExecutorDirectory) GetDirName() (parentPath string, err error) {
 		return "", err
 	}
 
-	return Paths().GetDirPath(path)
+	return pathsutils.GetDirPath(path)
 }
 
 func (c *CommandExecutorDirectory) GetDirPath() (dirPath string, err error) {
@@ -512,7 +514,7 @@ func (c *CommandExecutorDirectory) GetPath() (path string, err error) {
 		return "", err
 	}
 
-	if !Paths().IsAbsolutePath(path) {
+	if !pathsutils.IsAbsolutePath(path) {
 		return "", tracederrors.TracedErrorf("path '%s' is not absolute.", path)
 	}
 
@@ -567,7 +569,7 @@ func (c *CommandExecutorDirectory) IsLocalDirectory() (isLocalDirectory bool, er
 	return isLocalDirectory, nil
 }
 
-func (c *CommandExecutorDirectory) ListFilePaths(listFileOptions *ListFileOptions) (filePaths []string, err error) {
+func (c *CommandExecutorDirectory) ListFilePaths(listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error) {
 	if listFileOptions == nil {
 		return nil, tracederrors.TracedErrorNil("listFileOptions")
 	}
@@ -596,13 +598,13 @@ func (c *CommandExecutorDirectory) ListFilePaths(listFileOptions *ListFileOption
 		return nil, err
 	}
 
-	filePaths, err = Paths().FilterPaths(foundPaths, listFileOptions)
+	filePaths, err = pathsutils.FilterPaths(foundPaths, listFileOptions)
 	if err != nil {
 		return nil, err
 	}
 
 	if listFileOptions.ReturnRelativePaths {
-		filePaths, err = Paths().GetRelativePathsTo(filePaths, dirPath)
+		filePaths, err = pathsutils.GetRelativePathsTo(filePaths, dirPath)
 		if err != nil {
 			return nil, err
 		}
@@ -613,7 +615,7 @@ func (c *CommandExecutorDirectory) ListFilePaths(listFileOptions *ListFileOption
 	return filePaths, nil
 }
 
-func (c *CommandExecutorDirectory) ListFiles(listFileOptions *ListFileOptions) (files []File, err error) {
+func (c *CommandExecutorDirectory) ListFiles(listFileOptions *parameteroptions.ListFileOptions) (files []File, err error) {
 	if listFileOptions == nil {
 		return nil, tracederrors.TracedErrorNil("listFileOptions")
 	}
@@ -640,7 +642,7 @@ func (c *CommandExecutorDirectory) ListFiles(listFileOptions *ListFileOptions) (
 	return files, nil
 }
 
-func (c *CommandExecutorDirectory) ListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory, err error) {
+func (c *CommandExecutorDirectory) ListSubDirectories(options *parameteroptions.ListDirectoryOptions) (subDirectories []Directory, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -678,8 +680,8 @@ func (c *CommandExecutorDirectory) ListSubDirectories(options *ListDirectoryOpti
 		}
 
 		pathToAdd := strings.TrimPrefix(line, "./")
-		if Paths().IsAbsolutePath(pathToAdd) {
-			pathToAdd, err = Paths().GetRelativePathTo(
+		if pathsutils.IsAbsolutePath(pathToAdd) {
+			pathToAdd, err = pathsutils.GetRelativePathTo(
 				pathToAdd,
 				path,
 			)
@@ -870,7 +872,7 @@ func (c *CommandExecutorDirectory) MustIsLocalDirectory() (isLocalDirectory bool
 	return isLocalDirectory
 }
 
-func (c *CommandExecutorDirectory) MustListFilePaths(listFileOptions *ListFileOptions) (filePaths []string) {
+func (c *CommandExecutorDirectory) MustListFilePaths(listFileOptions *parameteroptions.ListFileOptions) (filePaths []string) {
 	filePaths, err := c.ListFilePaths(listFileOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -879,7 +881,7 @@ func (c *CommandExecutorDirectory) MustListFilePaths(listFileOptions *ListFileOp
 	return filePaths
 }
 
-func (c *CommandExecutorDirectory) MustListFiles(listFileOptions *ListFileOptions) (files []File) {
+func (c *CommandExecutorDirectory) MustListFiles(listFileOptions *parameteroptions.ListFileOptions) (files []File) {
 	files, err := c.ListFiles(listFileOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -888,7 +890,7 @@ func (c *CommandExecutorDirectory) MustListFiles(listFileOptions *ListFileOption
 	return files
 }
 
-func (c *CommandExecutorDirectory) MustListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory) {
+func (c *CommandExecutorDirectory) MustListSubDirectories(options *parameteroptions.ListDirectoryOptions) (subDirectories []Directory) {
 	subDirectories, err := c.ListSubDirectories(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

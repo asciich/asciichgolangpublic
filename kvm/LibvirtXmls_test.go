@@ -1,4 +1,5 @@
 package kvm
+
 /* TODO enable again
 import (
 	"testing"
@@ -21,7 +22,7 @@ func TestLibvirtXmlsGetMacAddress(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 

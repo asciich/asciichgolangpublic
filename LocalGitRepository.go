@@ -794,9 +794,6 @@ func (l *LocalGitRepository) GetAuthorEmailByCommitHash(hash string) (authorEmai
 	}
 
 	authorEmail = goGitCommit.Author.Email
-	if err != nil {
-		return "", err
-	}
 
 	return authorEmail, nil
 }

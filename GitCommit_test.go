@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestGitCommit_CreateTag(t *testing.T) {
@@ -16,7 +17,7 @@ func TestGitCommit_CreateTag(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -80,7 +81,7 @@ func TestGitCommit_ListTagsNames(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -154,7 +155,7 @@ func TestGitCommit_ListVersionTagNames(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -233,7 +234,7 @@ func TestGitCommit_GetNewestTagVersion(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -304,7 +305,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -382,7 +383,6 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 	}
 }
 
-
 func TestGitCommit_HasVersionTag(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -393,7 +393,7 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 

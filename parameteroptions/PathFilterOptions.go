@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package parameteroptions
 
 // Options to filter a list of paths.
 type PathFilterOptions interface {

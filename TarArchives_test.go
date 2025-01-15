@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestTarArchiveAddAndGetFileOnTarBytes(t *testing.T) {
@@ -17,7 +18,7 @@ func TestTarArchiveAddAndGetFileOnTarBytes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -53,7 +54,7 @@ func TestTarArchiveAddAndGetFileOnTarBytes_multipleFiles(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -88,7 +89,7 @@ func TestTarArchiveAddAndGetFileOnTarBytes_multipleFiles(t *testing.T) {
 
 				fileList := TarArchives().MustListFileNamesFromTarArchiveBytes(tarArchiveBytes)
 				assert.EqualValues(
-					[]string{"file_name.txt","file_name2.txt"},
+					[]string{"file_name.txt", "file_name2.txt"},
 					fileList,
 				)
 

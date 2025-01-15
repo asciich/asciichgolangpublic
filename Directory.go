@@ -1,5 +1,7 @@
 package asciichgolangpublic
 
+import "github.com/asciich/asciichgolangpublic/parameteroptions"
+
 type Directory interface {
 	Chmod(chmodOptions *ChmodOptions) (err error)
 	CopyContentToDirectory(destinationDir Directory, verbose bool) (err error)
@@ -19,8 +21,8 @@ type Directory interface {
 	// TODO rename GetSubDirectory with GetDirectoryByPath to make it consistent.
 	GetSubDirectory(path ...string) (subDirectory Directory, err error)
 	IsLocalDirectory() (isLocalDirectory bool, err error)
-	ListFiles(listFileOptions *ListFileOptions) (files []File, err error)
-	ListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory, err error)
+	ListFiles(listFileOptions *parameteroptions.ListFileOptions) (files []File, err error)
+	ListSubDirectories(options *parameteroptions.ListDirectoryOptions) (subDirectories []Directory, err error)
 	MustChmod(chmodOptions *ChmodOptions)
 	MustCopyContentToDirectory(destinationDir Directory, verbose bool)
 	MustCreate(verbose bool)
@@ -38,26 +40,26 @@ type Directory interface {
 	MustGetPath() (dirPath string)
 	MustGetSubDirectory(path ...string) (subDirectory Directory)
 	MustIsLocalDirectory() (isLocalDirectory bool)
-	MustListFiles(listFileOptions *ListFileOptions) (files []File)
-	MustListSubDirectories(options *ListDirectoryOptions) (subDirectories []Directory)
+	MustListFiles(listFileOptions *parameteroptions.ListFileOptions) (files []File)
+	MustListSubDirectories(options *parameteroptions.ListDirectoryOptions) (subDirectories []Directory)
 
 	// All methods below this line can be implemented by embedding the `DirectoryBase` struct:
 	CheckExists(verbose bool) (err error)
 	CreateFileInDirectory(verbose bool, path ...string) (createdFile File, err error)
 	GetFilePathInDirectory(path ...string) (filePath string, err error)
 	GetPathAndHostDescription() (dirPath string, hostDescription string, err error)
-	DeleteFilesMatching(listFileOptons *ListFileOptions) (err error)
+	DeleteFilesMatching(listFileOptons *parameteroptions.ListFileOptions) (err error)
 	FileInDirectoryExists(verbose bool, path ...string) (exists bool, err error)
-	ListFilePaths(listFileOptions *ListFileOptions) (filePaths []string, err error)
-	ListSubDirectoryPaths(options *ListDirectoryOptions) (subDirectoryPaths []string, err error)
+	ListFilePaths(listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error)
+	ListSubDirectoryPaths(options *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string, err error)
 	MustCheckExists(verbose bool)
 	MustCreateFileInDirectory(verbose bool, path ...string) (createdFile File)
-	MustDeleteFilesMatching(listFileOptons *ListFileOptions)
+	MustDeleteFilesMatching(listFileOptons *parameteroptions.ListFileOptions)
 	MustGetFilePathInDirectory(path ...string) (filePath string)
 	MustGetPathAndHostDescription() (pathString string, hostDescription string)
 	MustFileInDirectoryExists(verbose bool, path ...string) (exists bool)
-	MustListFilePaths(listFileOptions *ListFileOptions) (filePaths []string)
-	MustListSubDirectoryPaths(options *ListDirectoryOptions) (subDirectoryPaths []string)
+	MustListFilePaths(listFileOptions *parameteroptions.ListFileOptions) (filePaths []string)
+	MustListSubDirectoryPaths(options *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string)
 	MustReadFileInDirectoryAsInt64(path ...string) (content int64)
 	MustReadFileInDirectoryAsLines(path ...string) (content []string)
 	MustReadFileInDirectoryAsString(path ...string) (content string)

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestFilesWriteStringToFile(t *testing.T) {
@@ -15,7 +16,7 @@ func TestFilesWriteStringToFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -32,7 +33,6 @@ func TestFilesWriteStringToFile(t *testing.T) {
 				// Since used often there is a convenience function to write a file by path:
 				content2 := tt.content + "2"
 				MustWriteStringToFile(tempFile2.MustGetLocalPath(), content2, verbose)
-	
 
 				assert.EqualValues(
 					tempFile.MustReadAsString(),
@@ -58,4 +58,3 @@ func TestFilesWriteStringToFile(t *testing.T) {
 		)
 	}
 }
-

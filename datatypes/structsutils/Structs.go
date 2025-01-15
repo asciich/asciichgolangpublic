@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package structsutils
 
 import (
 	"fmt"
@@ -9,23 +9,14 @@ import (
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-type StructsService struct{}
 
-func NewStructsService() (s *StructsService) {
-	return new(StructsService)
-}
-
-func Structs() (structs *StructsService) {
-	return new(StructsService)
-}
-
-func (s *StructsService) GetFieldValuesAsString(structToGetFieldsFrom interface{}) (values []string, err error) {
-	if !s.IsStructOrPointerToStruct(structToGetFieldsFrom) {
+func GetFieldValuesAsString(structToGetFieldsFrom interface{}) (values []string, err error) {
+	if !IsStructOrPointerToStruct(structToGetFieldsFrom) {
 		return nil, tracederrors.TracedErrorf("'%v' is not as struct", structToGetFieldsFrom)
 	}
 
 	var structWithoutPointer reflect.Value
-	if s.IsPointerToStruct(structToGetFieldsFrom) {
+	if IsPointerToStruct(structToGetFieldsFrom) {
 		structWithoutPointer = reflect.Indirect(reflect.ValueOf(structToGetFieldsFrom))
 	} else {
 		structWithoutPointer = reflect.ValueOf(structToGetFieldsFrom)
@@ -44,7 +35,7 @@ func (s *StructsService) GetFieldValuesAsString(structToGetFieldsFrom interface{
 	return values, nil
 }
 
-func (s *StructsService) IsPointerToStruct(objectToTest interface{}) (isStruct bool) {
+func IsPointerToStruct(objectToTest interface{}) (isStruct bool) {
 	if objectToTest == nil {
 		return false
 	}
@@ -57,7 +48,7 @@ func (s *StructsService) IsPointerToStruct(objectToTest interface{}) (isStruct b
 	return isStruct
 }
 
-func (s *StructsService) IsStruct(objectToTest interface{}) (isStruct bool) {
+func IsStruct(objectToTest interface{}) (isStruct bool) {
 	if objectToTest == nil {
 		return false
 	}
@@ -66,20 +57,20 @@ func (s *StructsService) IsStruct(objectToTest interface{}) (isStruct bool) {
 	return isStruct
 }
 
-func (s *StructsService) IsStructOrPointerToStruct(objectToTest interface{}) (isStruct bool) {
-	if s.IsStruct(objectToTest) {
+func IsStructOrPointerToStruct(objectToTest interface{}) (isStruct bool) {
+	if IsStruct(objectToTest) {
 		return true
 	}
 
-	if s.IsPointerToStruct(objectToTest) {
+	if IsPointerToStruct(objectToTest) {
 		return true
 	}
 
 	return false
 }
 
-func (s *StructsService) MustGetFieldValuesAsString(structToGetFieldsFrom interface{}) (values []string) {
-	values, err := s.GetFieldValuesAsString(structToGetFieldsFrom)
+func MustGetFieldValuesAsString(structToGetFieldsFrom interface{}) (values []string) {
+	values, err := GetFieldValuesAsString(structToGetFieldsFrom)
 	if err != nil {
 		logging.LogFatalf("structs.GetFieldValuesAsString failed: '%v'", err)
 	}
