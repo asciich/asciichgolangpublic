@@ -37,7 +37,7 @@ func TestPathsIsRelativePath(t *testing.T) {
 
 				assert.EqualValues(
 					tt.expectedIsRelative,
-				IsRelativePath(tt.path),
+					IsRelativePath(tt.path),
 				)
 			},
 		)
@@ -73,7 +73,7 @@ func TestPathsIsAbsolutePath(t *testing.T) {
 
 				assert.EqualValues(
 					tt.expectedIsRelative,
-				IsAbsolutePath(tt.path),
+					IsAbsolutePath(tt.path),
 				)
 			},
 		)
@@ -112,7 +112,7 @@ func TestPaths_MatchBaseNamePattern(t *testing.T) {
 
 				assert.EqualValues(
 					tt.expectedFileList,
-				MustFilterPaths(input, tt.pathFilterOptions),
+					MustFilterPaths(input, tt.pathFilterOptions),
 				)
 			},
 		)
@@ -155,7 +155,7 @@ func TestPaths_MatchBaseNamePattern_recursive(t *testing.T) {
 
 				assert.EqualValues(
 					tt.expectedFileList,
-				MustFilterPaths(input, tt.pathFilterOptions),
+					MustFilterPaths(input, tt.pathFilterOptions),
 				)
 			},
 		)
@@ -194,7 +194,7 @@ func TestPaths_ExcludeBasenamePattern_recursive(t *testing.T) {
 
 				assert.EqualValues(
 					tt.expectedFileList,
-				MustFilterPaths(input, tt.pathFilterOptions),
+					MustFilterPaths(input, tt.pathFilterOptions),
 				)
 			},
 		)
@@ -229,7 +229,7 @@ func TestPaths_ExcludeWholepathPattern_recursive(t *testing.T) {
 
 				assert.EqualValues(
 					tt.expectedFileList,
-				MustFilterPaths(input, tt.pathFilterOptions),
+					MustFilterPaths(input, tt.pathFilterOptions),
 				)
 			},
 		)
@@ -255,7 +255,7 @@ func TestPaths_GetRelativePathTo(t *testing.T) {
 
 				assert.EqualValues(
 					tt.expectedOutput,
-				MustGetRelativePathTo(tt.input, tt.relativeTo),
+					MustGetRelativePathTo(tt.input, tt.relativeTo),
 				)
 			},
 		)
@@ -281,7 +281,7 @@ func TestPaths_GetRelativePathsTo(t *testing.T) {
 
 				assert.EqualValues(
 					tt.expectedOutput,
-				MustGetRelativePathsTo(tt.input, tt.relativeTo),
+					MustGetRelativePathsTo(tt.input, tt.relativeTo),
 				)
 			},
 		)

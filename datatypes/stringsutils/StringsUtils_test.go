@@ -403,7 +403,6 @@ func TestStringsSplitLines(t *testing.T) {
 	}
 }
 
-
 func TestStringsSplitWords(t *testing.T) {
 	tests := []struct {
 		input         string
