@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -16,7 +16,7 @@ func NewGitlabProjectCommits() (g *GitlabProjectCommits) {
 
 func (g *GitlabProjectCommits) GetCommitByHashString(hash string, verbose bool) (commit *GitlabCommit, err error) {
 	if hash == "" {
-		return nil, errors.TracedErrorEmptyString("hash")
+		return nil, tracederrors.TracedErrorEmptyString("hash")
 	}
 
 	commit = NewGitlabCommit()
@@ -50,7 +50,7 @@ func (g *GitlabProjectCommits) GetGitlab() (gitlab *GitlabInstance, err error) {
 
 func (g *GitlabProjectCommits) GetGitlabProject() (gitlabProject *GitlabProject, err error) {
 	if g.gitlabProject == nil {
-		return nil, errors.TracedErrorf("gitlabProject not set")
+		return nil, tracederrors.TracedErrorf("gitlabProject not set")
 	}
 
 	return g.gitlabProject, nil
@@ -65,7 +65,7 @@ func (g *GitlabProjectCommits) GetNativeCommitsService() (nativeCommitsService *
 	nativeCommitsService = nativeClinet.Commits
 
 	if nativeCommitsService == nil {
-		return nil, errors.TracedError("nativeCommitsService is nil after evaluation")
+		return nil, tracederrors.TracedError("nativeCommitsService is nil after evaluation")
 	}
 
 	return nativeCommitsService, nil
@@ -139,7 +139,7 @@ func (g *GitlabProjectCommits) MustSetGitlabProject(gitlabProject *GitlabProject
 
 func (g *GitlabProjectCommits) SetGitlabProject(gitlabProject *GitlabProject) (err error) {
 	if gitlabProject == nil {
-		return errors.TracedErrorf("gitlabProject is nil")
+		return tracederrors.TracedErrorf("gitlabProject is nil")
 	}
 
 	g.gitlabProject = gitlabProject

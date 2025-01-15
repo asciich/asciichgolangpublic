@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type UploadArtifactOptions struct {
@@ -24,7 +24,7 @@ func NewUploadartifactOptions() (u *UploadArtifactOptions) {
 
 func (u *UploadArtifactOptions) GetArtifactName() (artifactName string, err error) {
 	if u.ArtifactName == "" {
-		return "", errors.TracedErrorf("ArtifactName not set")
+		return "", tracederrors.TracedErrorf("ArtifactName not set")
 	}
 
 	return u.ArtifactName, nil
@@ -32,11 +32,11 @@ func (u *UploadArtifactOptions) GetArtifactName() (artifactName string, err erro
 
 func (u *UploadArtifactOptions) GetAuthOptions() (authOptions []AuthenticationOption, err error) {
 	if u.AuthOptions == nil {
-		return nil, errors.TracedErrorf("AuthOptions not set")
+		return nil, tracederrors.TracedErrorf("AuthOptions not set")
 	}
 
 	if len(u.AuthOptions) <= 0 {
-		return nil, errors.TracedErrorf("AuthOptions has no elements")
+		return nil, tracederrors.TracedErrorf("AuthOptions has no elements")
 	}
 
 	return u.AuthOptions, nil
@@ -44,7 +44,7 @@ func (u *UploadArtifactOptions) GetAuthOptions() (authOptions []AuthenticationOp
 
 func (u *UploadArtifactOptions) GetBinaryPath() (binaryPath string, err error) {
 	if u.BinaryPath == "" {
-		return "", errors.TracedErrorf("BinaryPath not set")
+		return "", tracederrors.TracedErrorf("BinaryPath not set")
 	}
 
 	return u.BinaryPath, nil
@@ -52,7 +52,7 @@ func (u *UploadArtifactOptions) GetBinaryPath() (binaryPath string, err error) {
 
 func (u *UploadArtifactOptions) GetSignaturePath() (signaturePath string, err error) {
 	if u.SignaturePath == "" {
-		return "", errors.TracedErrorf("SignaturePath not set")
+		return "", tracederrors.TracedErrorf("SignaturePath not set")
 	}
 
 	return u.SignaturePath, nil
@@ -60,7 +60,7 @@ func (u *UploadArtifactOptions) GetSignaturePath() (signaturePath string, err er
 
 func (u *UploadArtifactOptions) GetSoftwareVersionString() (softwareVersionString string, err error) {
 	if u.SoftwareVersionString == "" {
-		return "", errors.TracedErrorf("SoftwareVersionString not set")
+		return "", tracederrors.TracedErrorf("SoftwareVersionString not set")
 	}
 
 	return u.SoftwareVersionString, nil
@@ -153,7 +153,7 @@ func (u *UploadArtifactOptions) MustSetSoftwareVersionString(softwareVersionStri
 
 func (u *UploadArtifactOptions) SetArtifactName(artifactName string) (err error) {
 	if artifactName == "" {
-		return errors.TracedErrorf("artifactName is empty string")
+		return tracederrors.TracedErrorf("artifactName is empty string")
 	}
 
 	u.ArtifactName = artifactName
@@ -163,11 +163,11 @@ func (u *UploadArtifactOptions) SetArtifactName(artifactName string) (err error)
 
 func (u *UploadArtifactOptions) SetAuthOptions(authOptions []AuthenticationOption) (err error) {
 	if authOptions == nil {
-		return errors.TracedErrorf("authOptions is nil")
+		return tracederrors.TracedErrorf("authOptions is nil")
 	}
 
 	if len(authOptions) <= 0 {
-		return errors.TracedErrorf("authOptions has no elements")
+		return tracederrors.TracedErrorf("authOptions has no elements")
 	}
 
 	u.AuthOptions = authOptions
@@ -177,7 +177,7 @@ func (u *UploadArtifactOptions) SetAuthOptions(authOptions []AuthenticationOptio
 
 func (u *UploadArtifactOptions) SetBinaryPath(binaryPath string) (err error) {
 	if binaryPath == "" {
-		return errors.TracedErrorf("binaryPath is empty string")
+		return tracederrors.TracedErrorf("binaryPath is empty string")
 	}
 
 	u.BinaryPath = binaryPath
@@ -187,7 +187,7 @@ func (u *UploadArtifactOptions) SetBinaryPath(binaryPath string) (err error) {
 
 func (u *UploadArtifactOptions) SetSignaturePath(signaturePath string) (err error) {
 	if signaturePath == "" {
-		return errors.TracedErrorf("signaturePath is empty string")
+		return tracederrors.TracedErrorf("signaturePath is empty string")
 	}
 
 	u.SignaturePath = signaturePath
@@ -197,7 +197,7 @@ func (u *UploadArtifactOptions) SetSignaturePath(signaturePath string) (err erro
 
 func (u *UploadArtifactOptions) SetSoftwareVersionString(softwareVersionString string) (err error) {
 	if softwareVersionString == "" {
-		return errors.TracedErrorf("softwareVersionString is empty string")
+		return tracederrors.TracedErrorf("softwareVersionString is empty string")
 	}
 
 	u.SoftwareVersionString = softwareVersionString

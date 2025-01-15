@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"errors"
 
-	aerrors "github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
@@ -53,7 +53,7 @@ func (g *GitlabTag) Delete(verbose bool) (err error) {
 			nil,
 		)
 		if err != nil {
-			return aerrors.TracedErrorf(
+			return tracederrors.TracedErrorf(
 				"Delete tag '%s' in gitlab project %s failed: %w",
 				name,
 				projectUrl,
@@ -125,7 +125,7 @@ func (g *GitlabTag) GetGitRepository() (gitRepo GitRepository, err error) {
 	// TODO: This should return the gitlab project which
 	// should implement everything a git repsository does so it
 	// fullfils the GitRepository interface:
-	return nil, aerrors.TracedErrorNotImplemented()
+	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
 func (g *GitlabTag) GetGitlabProject() (gitlabProject *GitlabProject, err error) {
@@ -144,7 +144,7 @@ func (g *GitlabTag) GetGitlabProject() (gitlabProject *GitlabProject, err error)
 
 func (g *GitlabTag) GetGitlabTags() (gitlabTags *GitlabTags, err error) {
 	if g.gitlabTags == nil {
-		return nil, aerrors.TracedErrorf("gitlabTags not set")
+		return nil, tracederrors.TracedErrorf("gitlabTags not set")
 	}
 
 	return g.gitlabTags, nil
@@ -158,7 +158,7 @@ func (g *GitlabTag) GetHash() (hash string, err error) {
 
 	commit := raw.Commit
 	if commit == nil {
-		return "", aerrors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"raw.Commit is nil after evaluation.",
 		)
 	}
@@ -166,7 +166,7 @@ func (g *GitlabTag) GetHash() (hash string, err error) {
 	hash = commit.ID
 
 	if hash == "" {
-		return "", aerrors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"hash is empty string after evaluation.",
 		)
 	}
@@ -176,7 +176,7 @@ func (g *GitlabTag) GetHash() (hash string, err error) {
 
 func (g *GitlabTag) GetName() (name string, err error) {
 	if g.name == "" {
-		return "", aerrors.TracedErrorf("name not set")
+		return "", tracederrors.TracedErrorf("name not set")
 	}
 
 	return g.name, nil
@@ -261,7 +261,7 @@ func (g *GitlabTag) GetRawResponse() (rawResponse *gitlab.Tag, err error) {
 	)
 	if err != nil {
 		if err.Error() == "404 Not Found" {
-			return nil, aerrors.TracedErrorf(
+			return nil, tracederrors.TracedErrorf(
 				"%w: tag '%s' in gitlab project %s: %w",
 				ErrGitlabTagNotFound,
 				name,
@@ -270,7 +270,7 @@ func (g *GitlabTag) GetRawResponse() (rawResponse *gitlab.Tag, err error) {
 			)
 		}
 
-		return nil, aerrors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Get raw response for tag '%s' in gitlab project %s failed: %w",
 			name,
 			projectUrl,
@@ -279,7 +279,7 @@ func (g *GitlabTag) GetRawResponse() (rawResponse *gitlab.Tag, err error) {
 	}
 
 	if rawResponse == nil {
-		return nil, aerrors.TracedError("rawResponse is nil after evaluation")
+		return nil, tracederrors.TracedError("rawResponse is nil after evaluation")
 	}
 
 	return rawResponse, nil
@@ -425,7 +425,7 @@ func (g *GitlabTag) MustSetName(name string) {
 
 func (g *GitlabTag) SetGitlabTags(gitlabTags *GitlabTags) (err error) {
 	if gitlabTags == nil {
-		return aerrors.TracedErrorf("gitlabTags is nil")
+		return tracederrors.TracedErrorf("gitlabTags is nil")
 	}
 
 	g.gitlabTags = gitlabTags
@@ -435,7 +435,7 @@ func (g *GitlabTag) SetGitlabTags(gitlabTags *GitlabTags) (err error) {
 
 func (g *GitlabTag) SetName(name string) (err error) {
 	if name == "" {
-		return aerrors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	g.name = name

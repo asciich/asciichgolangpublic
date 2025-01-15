@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitlabCreateTagOptions struct {
@@ -25,7 +25,7 @@ func (g *GitlabCreateTagOptions) GetDeepCopy() (deepCopy *GitlabCreateTagOptions
 
 func (g *GitlabCreateTagOptions) GetName() (name string, err error) {
 	if g.Name == "" {
-		return "", errors.TracedErrorf("Name not set")
+		return "", tracederrors.TracedErrorf("Name not set")
 	}
 
 	return g.Name, nil
@@ -33,7 +33,7 @@ func (g *GitlabCreateTagOptions) GetName() (name string, err error) {
 
 func (g *GitlabCreateTagOptions) GetRef() (ref string, err error) {
 	if g.Ref == "" {
-		return "", errors.TracedErrorf("Ref not set")
+		return "", tracederrors.TracedErrorf("Ref not set")
 	}
 
 	return g.Ref, nil
@@ -78,7 +78,7 @@ func (g *GitlabCreateTagOptions) MustSetRef(ref string) {
 
 func (g *GitlabCreateTagOptions) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	g.Name = name
@@ -88,7 +88,7 @@ func (g *GitlabCreateTagOptions) SetName(name string) (err error) {
 
 func (g *GitlabCreateTagOptions) SetRef(ref string) (err error) {
 	if ref == "" {
-		return errors.TracedErrorf("ref is empty string")
+		return tracederrors.TracedErrorf("ref is empty string")
 	}
 
 	g.Ref = ref

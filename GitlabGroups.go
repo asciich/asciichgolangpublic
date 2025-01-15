@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/asciich/asciichgolangpublic/logging"
-	aerrors "github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -20,11 +20,11 @@ func NewGitlabGroups() (gitlabGroups *GitlabGroups) {
 
 func (g *GitlabGroups) CreateGroup(groupPath string, createOptions *GitlabCreateGroupOptions) (createdGroup *GitlabGroup, err error) {
 	if groupPath == "" {
-		return nil, aerrors.TracedErrorEmptyString("groupPath")
+		return nil, tracederrors.TracedErrorEmptyString("groupPath")
 	}
 
 	if createOptions == nil {
-		return nil, aerrors.TracedError("createOptions is nil")
+		return nil, tracederrors.TracedError("createOptions is nil")
 	}
 
 	group, err := g.GetGroupByPath(groupPath, createOptions.Verbose)
@@ -42,7 +42,7 @@ func (g *GitlabGroups) CreateGroup(groupPath string, createOptions *GitlabCreate
 
 func (g *GitlabGroups) GetGroupById(id int, verbose bool) (gitlabGroup *GitlabGroup, err error) {
 	if id <= 0 {
-		return nil, aerrors.TracedErrorf("Invalid group id '%d'", id)
+		return nil, tracederrors.TracedErrorf("Invalid group id '%d'", id)
 	}
 
 	gitlabGroup = NewGitlabGroup()
@@ -88,7 +88,7 @@ func (g *GitlabGroups) GetGroupByPath(groupPath string, verbose bool) (gitlabGro
 
 func (g *GitlabGroups) GroupByGroupPathExists(groupPath string, verbose bool) (groupExists bool, err error) {
 	if len(groupPath) <= 0 {
-		return false, aerrors.TracedError("groupPath is empty string")
+		return false, tracederrors.TracedError("groupPath is empty string")
 	}
 
 	group, err := g.GetGroupByPath(groupPath, verbose)
@@ -199,7 +199,7 @@ func (p *GitlabGroups) GetFqdn() (fqdn string, err error) {
 
 func (p *GitlabGroups) GetGitlab() (gitlab *GitlabInstance, err error) {
 	if p.gitlab == nil {
-		return nil, aerrors.TracedError("gitlab is not set")
+		return nil, tracederrors.TracedError("gitlab is not set")
 	}
 
 	return p.gitlab, nil
@@ -227,7 +227,7 @@ func (p *GitlabGroups) GetNativeGroupsService() (nativeGroupsService *gitlab.Gro
 
 	nativeGroupsService = nativeClient.Groups
 	if nativeGroupsService == nil {
-		return nil, aerrors.TracedError("unable to get nativeGroupsService")
+		return nil, tracederrors.TracedError("unable to get nativeGroupsService")
 	}
 
 	return nativeGroupsService, nil
@@ -235,7 +235,7 @@ func (p *GitlabGroups) GetNativeGroupsService() (nativeGroupsService *gitlab.Gro
 
 func (p *GitlabGroups) SetGitlab(gitlab *GitlabInstance) (err error) {
 	if gitlab == nil {
-		return aerrors.TracedError("gitlab is nil")
+		return tracederrors.TracedError("gitlab is nil")
 	}
 
 	p.gitlab = gitlab

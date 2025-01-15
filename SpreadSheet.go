@@ -7,8 +7,8 @@ import (
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type SpreadSheet struct {
@@ -18,7 +18,7 @@ type SpreadSheet struct {
 
 func GetSpreadsheetWithNColumns(nColumns int) (s *SpreadSheet, err error) {
 	if nColumns <= 0 {
-		return nil, errors.TracedErrorf("Invalid nColumns: '%d'", nColumns)
+		return nil, tracederrors.TracedErrorf("Invalid nColumns: '%d'", nColumns)
 	}
 
 	titles := []string{}
@@ -50,7 +50,7 @@ func NewSpreadSheet() (s *SpreadSheet) {
 
 func (s *SpreadSheet) AddRow(rowEntries []string) (err error) {
 	if len(rowEntries) <= 0 {
-		return errors.TracedError("rowEntries is empty")
+		return tracederrors.TracedError("rowEntries is empty")
 	}
 
 	nColumns, err := s.GetNumberOfColumns()
@@ -60,7 +60,7 @@ func (s *SpreadSheet) AddRow(rowEntries []string) (err error) {
 
 	nColumnsToAdd := len(rowEntries)
 	if nColumnsToAdd != nColumns {
-		return errors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"Number of columns mismatch. Row to add has '%d' columns but spreadsheet has '%d' columns.",
 			nColumnsToAdd,
 			nColumns,
@@ -80,11 +80,11 @@ func (s *SpreadSheet) AddRow(rowEntries []string) (err error) {
 
 func (s *SpreadSheet) GetCellValueAsString(rowIndex int, columnIndex int) (cellValue string, err error) {
 	if rowIndex < 0 {
-		return "", errors.TracedErrorf("Invalid rowIndex: '%d'", rowIndex)
+		return "", tracederrors.TracedErrorf("Invalid rowIndex: '%d'", rowIndex)
 	}
 
 	if columnIndex < 0 {
-		return "", errors.TracedErrorf("Invalid columnIndex: '%d'", columnIndex)
+		return "", tracederrors.TracedErrorf("Invalid columnIndex: '%d'", columnIndex)
 	}
 
 	row, err := s.GetRowByIndex(rowIndex)
@@ -102,7 +102,7 @@ func (s *SpreadSheet) GetCellValueAsString(rowIndex int, columnIndex int) (cellV
 
 func (s *SpreadSheet) GetColumnIndexByName(columnName string) (columnIndex int, err error) {
 	if columnName == "" {
-		return -1, errors.TracedError("columnName is empty string")
+		return -1, tracederrors.TracedError("columnName is empty string")
 	}
 
 	titles, err := s.GetColumnTitlesAsStringSlice()
@@ -116,7 +116,7 @@ func (s *SpreadSheet) GetColumnIndexByName(columnName string) (columnIndex int, 
 		}
 	}
 
-	return -1, errors.TracedErrorf("Unable to find column title '%s'", columnName)
+	return -1, tracederrors.TracedErrorf("Unable to find column title '%s'", columnName)
 }
 
 func (s *SpreadSheet) GetColumnTitleAtIndexAsString(index int) (title string, err error) {
@@ -178,7 +178,7 @@ func (s *SpreadSheet) GetMaxColumnWidths() (columnWitdhs []int, err error) {
 
 func (s *SpreadSheet) GetMinColumnWithsAsSelectedInOptions(options *SpreadSheetRenderOptions) (columnWidths []int, err error) {
 	if options == nil {
-		return nil, errors.TracedError("options is nil")
+		return nil, tracederrors.TracedError("options is nil")
 	}
 
 	nColumns, err := s.GetNumberOfColumns()
@@ -236,7 +236,7 @@ func (s *SpreadSheet) GetNumberOfRows() (nRows int, err error) {
 
 func (s *SpreadSheet) GetRowByIndex(rowIndex int) (row *SpreadSheetRow, err error) {
 	if rowIndex < 0 {
-		return nil, errors.TracedErrorf("Invalid rowIndex: '%d'", rowIndex)
+		return nil, tracederrors.TracedErrorf("Invalid rowIndex: '%d'", rowIndex)
 	}
 
 	rows, err := s.GetRows()
@@ -247,13 +247,13 @@ func (s *SpreadSheet) GetRowByIndex(rowIndex int) (row *SpreadSheetRow, err erro
 	nRows := len(rows)
 
 	if rowIndex >= nRows {
-		return nil, errors.TracedErrorf("Invlaid rowIndex: Index '%d' is invalid for a spreadsheet with '%d' rows.", rowIndex, nRows)
+		return nil, tracederrors.TracedErrorf("Invlaid rowIndex: Index '%d' is invalid for a spreadsheet with '%d' rows.", rowIndex, nRows)
 	}
 
 	row = rows[rowIndex]
 
 	if row == nil {
-		return nil, errors.TracedError("row is nil after evaluation")
+		return nil, tracederrors.TracedError("row is nil after evaluation")
 	}
 
 	return row, nil
@@ -261,11 +261,11 @@ func (s *SpreadSheet) GetRowByIndex(rowIndex int) (row *SpreadSheetRow, err erro
 
 func (s *SpreadSheet) GetRows() (rows []*SpreadSheetRow, err error) {
 	if s.rows == nil {
-		return nil, errors.TracedErrorf("rows not set")
+		return nil, tracederrors.TracedErrorf("rows not set")
 	}
 
 	if len(s.rows) <= 0 {
-		return nil, errors.TracedErrorf("rows has no elements")
+		return nil, tracederrors.TracedErrorf("rows has no elements")
 	}
 
 	return s.rows, nil
@@ -273,7 +273,7 @@ func (s *SpreadSheet) GetRows() (rows []*SpreadSheetRow, err error) {
 
 func (s *SpreadSheet) GetTitleRow() (TitleRow *SpreadSheetRow, err error) {
 	if s.TitleRow == nil {
-		return nil, errors.TracedErrorf("TitleRow not set")
+		return nil, tracederrors.TracedErrorf("TitleRow not set")
 	}
 
 	return s.TitleRow, nil
@@ -461,7 +461,7 @@ func (s *SpreadSheet) MustSortByColumnByName(columnName string) {
 
 func (s *SpreadSheet) PrintAsString(options *SpreadSheetRenderOptions) (err error) {
 	if options == nil {
-		return errors.TracedError("options is nil")
+		return tracederrors.TracedError("options is nil")
 	}
 
 	stringToPrint, err := s.RenderAsString(options)
@@ -476,7 +476,7 @@ func (s *SpreadSheet) PrintAsString(options *SpreadSheetRenderOptions) (err erro
 
 func (s *SpreadSheet) RemoveColumnByIndex(columnIndex int) (err error) {
 	if columnIndex < 0 {
-		return errors.TracedErrorf("columnIndex '%d' is invalid", columnIndex)
+		return tracederrors.TracedErrorf("columnIndex '%d' is invalid", columnIndex)
 	}
 
 	nColumns, err := s.GetNumberOfColumns()
@@ -485,7 +485,7 @@ func (s *SpreadSheet) RemoveColumnByIndex(columnIndex int) (err error) {
 	}
 
 	if columnIndex >= nColumns {
-		return errors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"Invalid columnIndex '%d' for a spreadsheet with '%d' columns.",
 			columnIndex,
 			nColumns,
@@ -519,7 +519,7 @@ func (s *SpreadSheet) RemoveColumnByIndex(columnIndex int) (err error) {
 
 func (s *SpreadSheet) RemoveColumnByName(columnName string) (err error) {
 	if columnName == "" {
-		return errors.TracedError("columntName is empty string")
+		return tracederrors.TracedError("columntName is empty string")
 	}
 
 	columnIndex, err := s.GetColumnIndexByName(columnName)
@@ -537,7 +537,7 @@ func (s *SpreadSheet) RemoveColumnByName(columnName string) (err error) {
 
 func (s *SpreadSheet) RenderAsString(options *SpreadSheetRenderOptions) (rendered string, err error) {
 	if options == nil {
-		return "", errors.TracedErrorNil("options")
+		return "", tracederrors.TracedErrorNil("options")
 	}
 
 	var minColumnWidths []int = nil
@@ -582,7 +582,7 @@ func (s *SpreadSheet) RenderAsString(options *SpreadSheetRenderOptions) (rendere
 
 func (s *SpreadSheet) RenderTitleRowAsString(options *SpreadSheetRenderRowOptions) (rendered string, err error) {
 	if options == nil {
-		return "", errors.TracedError("options is nil")
+		return "", tracederrors.TracedError("options is nil")
 	}
 
 	titleRow, err := s.GetTitleRow()
@@ -600,7 +600,7 @@ func (s *SpreadSheet) RenderTitleRowAsString(options *SpreadSheetRenderRowOption
 
 func (s *SpreadSheet) RenderToStdout(options *SpreadSheetRenderOptions) (err error) {
 	if options == nil {
-		return errors.TracedErrorNil("options")
+		return tracederrors.TracedErrorNil("options")
 	}
 
 	rendered, err := s.RenderAsString(options)
@@ -617,7 +617,7 @@ func (s *SpreadSheet) RenderToStdout(options *SpreadSheetRenderOptions) (err err
 
 func (s *SpreadSheet) SetColumnTitles(titles []string) (err error) {
 	if len(titles) <= 0 {
-		return errors.TracedError("titles is empty slice")
+		return tracederrors.TracedError("titles is empty slice")
 	}
 
 	TitleRow := NewSpreadSheetRow()
@@ -633,11 +633,11 @@ func (s *SpreadSheet) SetColumnTitles(titles []string) (err error) {
 
 func (s *SpreadSheet) SetRows(rows []*SpreadSheetRow) (err error) {
 	if rows == nil {
-		return errors.TracedErrorf("rows is nil")
+		return tracederrors.TracedErrorf("rows is nil")
 	}
 
 	if len(rows) <= 0 {
-		return errors.TracedErrorf("rows has no elements")
+		return tracederrors.TracedErrorf("rows has no elements")
 	}
 
 	s.rows = rows
@@ -647,7 +647,7 @@ func (s *SpreadSheet) SetRows(rows []*SpreadSheetRow) (err error) {
 
 func (s *SpreadSheet) SetTitleRow(TitleRow *SpreadSheetRow) (err error) {
 	if TitleRow == nil {
-		return errors.TracedErrorf("TitleRow is nil")
+		return tracederrors.TracedErrorf("TitleRow is nil")
 	}
 
 	s.TitleRow = TitleRow
@@ -657,7 +657,7 @@ func (s *SpreadSheet) SetTitleRow(TitleRow *SpreadSheetRow) (err error) {
 
 func (s *SpreadSheet) SortByColumnByName(columnName string) (err error) {
 	if columnName == "" {
-		return errors.TracedError("columnName is empty string")
+		return tracederrors.TracedError("columnName is empty string")
 	}
 
 	columnIndex, err := s.GetColumnIndexByName(columnName)

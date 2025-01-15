@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/datetime"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type SignalMessengersService struct {
@@ -35,18 +35,18 @@ func (s *SignalMessengersService) MustParseCreationDateFromSignalPictureBaseName
 
 func (s SignalMessengersService) ParseCreationDateFromSignalPictureBaseName(baseName string) (creationDate *time.Time, err error) {
 	if baseName == "" {
-		return nil, errors.TracedError("baseName is empty string")
+		return nil, tracederrors.TracedError("baseName is empty string")
 	}
 
 	if !strings.HasPrefix(baseName, "signal-") {
-		return nil, errors.TracedErrorf("baseName '%s' is not a singal picture base name", baseName)
+		return nil, tracederrors.TracedErrorf("baseName '%s' is not a singal picture base name", baseName)
 	}
 
 	dateString := strings.TrimPrefix(baseName, "signal-")
 	layoutString := "2006-01-02-15-04-05"
 
 	if len(dateString) < len(layoutString) {
-		return nil, errors.TracedErrorf("To short dateString: '%s'", dateString)
+		return nil, tracederrors.TracedErrorf("To short dateString: '%s'", dateString)
 	}
 
 	dateString = dateString[:len(layoutString)]

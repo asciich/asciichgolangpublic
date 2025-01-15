@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitRemoteConfig struct {
@@ -37,7 +37,7 @@ func (c *GitRemoteConfig) Equals(other *GitRemoteConfig) (equals bool) {
 
 func (g *GitRemoteConfig) GetRemoteName() (remoteName string, err error) {
 	if g.RemoteName == "" {
-		return "", errors.TracedErrorf("RemoteName not set")
+		return "", tracederrors.TracedErrorf("RemoteName not set")
 	}
 
 	return g.RemoteName, nil
@@ -45,7 +45,7 @@ func (g *GitRemoteConfig) GetRemoteName() (remoteName string, err error) {
 
 func (g *GitRemoteConfig) GetUrlFetch() (urlFetch string, err error) {
 	if g.UrlFetch == "" {
-		return "", errors.TracedErrorf("UrlFetch not set")
+		return "", tracederrors.TracedErrorf("UrlFetch not set")
 	}
 
 	return g.UrlFetch, nil
@@ -53,7 +53,7 @@ func (g *GitRemoteConfig) GetUrlFetch() (urlFetch string, err error) {
 
 func (g *GitRemoteConfig) GetUrlPush() (urlPush string, err error) {
 	if g.UrlPush == "" {
-		return "", errors.TracedErrorf("UrlPush not set")
+		return "", tracederrors.TracedErrorf("UrlPush not set")
 	}
 
 	return g.UrlPush, nil
@@ -109,7 +109,7 @@ func (g *GitRemoteConfig) MustSetUrlPush(urlPush string) {
 
 func (g *GitRemoteConfig) SetRemoteName(remoteName string) (err error) {
 	if remoteName == "" {
-		return errors.TracedErrorf("remoteName is empty string")
+		return tracederrors.TracedErrorf("remoteName is empty string")
 	}
 
 	g.RemoteName = remoteName
@@ -119,7 +119,7 @@ func (g *GitRemoteConfig) SetRemoteName(remoteName string) (err error) {
 
 func (g *GitRemoteConfig) SetUrlFetch(urlFetch string) (err error) {
 	if urlFetch == "" {
-		return errors.TracedErrorf("urlFetch is empty string")
+		return tracederrors.TracedErrorf("urlFetch is empty string")
 	}
 
 	g.UrlFetch = urlFetch
@@ -129,7 +129,7 @@ func (g *GitRemoteConfig) SetUrlFetch(urlFetch string) (err error) {
 
 func (g *GitRemoteConfig) SetUrlPush(urlPush string) (err error) {
 	if urlPush == "" {
-		return errors.TracedErrorf("urlPush is empty string")
+		return tracederrors.TracedErrorf("urlPush is empty string")
 	}
 
 	g.UrlPush = urlPush

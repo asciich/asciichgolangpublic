@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"fmt"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitRepositoryCreateTagOptions struct {
@@ -26,7 +26,7 @@ func NewGitRepositoryCreateTagOptions() (g *GitRepositoryCreateTagOptions) {
 
 func (g *GitRepositoryCreateTagOptions) GetCommitHash() (commitHash string, err error) {
 	if g.CommitHash == "" {
-		return "", errors.TracedErrorf("CommitHash not set")
+		return "", tracederrors.TracedErrorf("CommitHash not set")
 	}
 
 	return g.CommitHash, nil
@@ -47,7 +47,7 @@ func (g *GitRepositoryCreateTagOptions) GetPushTagsToAllRemotes() (pushTagsToAll
 
 func (g *GitRepositoryCreateTagOptions) GetTagComment() (tagComment string, err error) {
 	if g.TagComment == "" {
-		return "", errors.TracedErrorf("TagComment not set")
+		return "", tracederrors.TracedErrorf("TagComment not set")
 	}
 
 	return g.TagComment, nil
@@ -68,7 +68,7 @@ func (g *GitRepositoryCreateTagOptions) GetTagCommentOrDefaultIfUnset() (tagComm
 
 func (g *GitRepositoryCreateTagOptions) GetTagName() (tagName string, err error) {
 	if g.TagName == "" {
-		return "", errors.TracedErrorf("TagName not set")
+		return "", tracederrors.TracedErrorf("TagName not set")
 	}
 
 	return g.TagName, nil
@@ -173,7 +173,7 @@ func (g *GitRepositoryCreateTagOptions) MustSetVerbose(verbose bool) {
 
 func (g *GitRepositoryCreateTagOptions) SetCommitHash(commitHash string) (err error) {
 	if commitHash == "" {
-		return errors.TracedErrorf("commitHash is empty string")
+		return tracederrors.TracedErrorf("commitHash is empty string")
 	}
 
 	g.CommitHash = commitHash
@@ -189,7 +189,7 @@ func (g *GitRepositoryCreateTagOptions) SetPushTagsToAllRemotes(pushTagsToAllRem
 
 func (g *GitRepositoryCreateTagOptions) SetTagComment(tagComment string) (err error) {
 	if tagComment == "" {
-		return errors.TracedErrorf("tagComment is empty string")
+		return tracederrors.TracedErrorf("tagComment is empty string")
 	}
 
 	g.TagComment = tagComment
@@ -199,7 +199,7 @@ func (g *GitRepositoryCreateTagOptions) SetTagComment(tagComment string) (err er
 
 func (g *GitRepositoryCreateTagOptions) SetTagName(tagName string) (err error) {
 	if tagName == "" {
-		return errors.TracedErrorf("tagName is empty string")
+		return tracederrors.TracedErrorf("tagName is empty string")
 	}
 
 	g.TagName = tagName

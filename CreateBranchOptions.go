@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // TODO: This should become the generic "CreateBranchOptions" to use everywhere.
@@ -21,7 +21,7 @@ func NewCreateBranchOptions() (c *CreateBranchOptions) {
 
 func (c *CreateBranchOptions) GetName() (name string, err error) {
 	if c.Name == "" {
-		return "", errors.TracedErrorf("Name not set")
+		return "", tracederrors.TracedErrorf("Name not set")
 	}
 
 	return c.Name, nil
@@ -50,7 +50,7 @@ func (c *CreateBranchOptions) MustSetName(name string) {
 
 func (c *CreateBranchOptions) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	c.Name = name

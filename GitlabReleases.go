@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -16,7 +16,7 @@ func NewGitlabReleases() (g *GitlabReleases) {
 
 func (g *GitlabReleases) CreateRelease(createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease, err error) {
 	if createReleaseOptions == nil {
-		return nil, errors.TracedErrorNil("createReleaseOptions")
+		return nil, tracederrors.TracedErrorNil("createReleaseOptions")
 	}
 
 	nativeClient, err := g.GetNativeReleasesClient()
@@ -62,7 +62,7 @@ func (g *GitlabReleases) CreateRelease(createReleaseOptions *GitlabCreateRelease
 			},
 		)
 		if err != nil {
-			return nil, errors.TracedErrorf(
+			return nil, tracederrors.TracedErrorf(
 				"Create release '%s' in gitlab project %s failed: %w",
 				releaseName,
 				projectUrl,
@@ -89,7 +89,7 @@ func (g *GitlabReleases) CreateRelease(createReleaseOptions *GitlabCreateRelease
 
 func (g *GitlabReleases) DeleteAllReleases(options *GitlabDeleteReleaseOptions) (err error) {
 	if options == nil {
-		return errors.TracedErrorNil("options")
+		return tracederrors.TracedErrorNil("options")
 	}
 
 	releaseList, err := g.ListReleases(options.Verbose)
@@ -136,7 +136,7 @@ func (g *GitlabReleases) GetGitlab() (gitlab *GitlabInstance, err error) {
 
 func (g *GitlabReleases) GetGitlabProject() (gitlabProject *GitlabProject, err error) {
 	if g.gitlabProject == nil {
-		return nil, errors.TracedErrorf("gitlabProject not set")
+		return nil, tracederrors.TracedErrorf("gitlabProject not set")
 	}
 
 	return g.gitlabProject, nil
@@ -144,7 +144,7 @@ func (g *GitlabReleases) GetGitlabProject() (gitlabProject *GitlabProject, err e
 
 func (g *GitlabReleases) GetGitlabReleaseByName(releaseName string) (gitlabRelease *GitlabRelease, err error) {
 	if releaseName == "" {
-		return nil, errors.TracedErrorEmptyString("releaseName")
+		return nil, tracederrors.TracedErrorEmptyString("releaseName")
 	}
 
 	gitlabRelease = NewGitlabRelease()
@@ -235,7 +235,7 @@ func (g *GitlabReleases) ListReleases(verbose bool) (releaseList []*GitlabReleas
 		nil,
 	)
 	if err != nil {
-		return nil, errors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Unable to list releases of gitlab project %s : %w",
 			projectUrl,
 			err,
@@ -361,7 +361,7 @@ func (g *GitlabReleases) MustSetGitlabProject(gitlabProject *GitlabProject) {
 
 func (g *GitlabReleases) ReleaseByNameExists(releaseName string, verbose bool) (exists bool, err error) {
 	if releaseName == "" {
-		return false, errors.TracedErrorEmptyString("releaseName")
+		return false, tracederrors.TracedErrorEmptyString("releaseName")
 	}
 
 	release, err := g.GetGitlabReleaseByName(releaseName)
@@ -379,7 +379,7 @@ func (g *GitlabReleases) ReleaseByNameExists(releaseName string, verbose bool) (
 
 func (g *GitlabReleases) SetGitlabProject(gitlabProject *GitlabProject) (err error) {
 	if gitlabProject == nil {
-		return errors.TracedErrorf("gitlabProject is nil")
+		return tracederrors.TracedErrorf("gitlabProject is nil")
 	}
 
 	g.gitlabProject = gitlabProject

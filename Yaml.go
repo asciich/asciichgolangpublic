@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 	"gopkg.in/yaml.v3"
 )
 
@@ -19,7 +19,7 @@ func Yaml() (yaml *YamlService) {
 func (y *YamlService) DataToYamlBytes(input interface{}) (yamlBytes []byte, err error) {
 	yamlBytes, err = yaml.Marshal(input)
 	if err != nil {
-		return nil, errors.TracedErrorf("Failed to marshal data to yaml: '%w'", err)
+		return nil, tracederrors.TracedErrorf("Failed to marshal data to yaml: '%w'", err)
 	}
 
 	yamlBytes = append([]byte("---\n"), yamlBytes...)
@@ -29,7 +29,7 @@ func (y *YamlService) DataToYamlBytes(input interface{}) (yamlBytes []byte, err 
 
 func (y *YamlService) DataToYamlFile(jsonData interface{}, outputFile File, verbose bool) (err error) {
 	if outputFile == nil {
-		return errors.TracedErrorNil("outputFile")
+		return tracederrors.TracedErrorNil("outputFile")
 	}
 
 	yamlString, err := y.DataToYamlString(jsonData)

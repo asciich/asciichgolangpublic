@@ -6,9 +6,9 @@ import (
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/containers"
 	"github.com/asciich/asciichgolangpublic/datatypes"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/hosts"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type CommandExecutorDocker struct {
@@ -17,7 +17,7 @@ type CommandExecutorDocker struct {
 
 func GetCommandExecutorDocker(commandExecutor asciichgolangpublic.CommandExecutor) (docker Docker, err error) {
 	if commandExecutor == nil {
-		return nil, errors.TracedErrorNil("commandExecutor")
+		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
 
 	toReturn := NewCommandExecutorDocker()
@@ -33,7 +33,7 @@ func GetCommandExecutorDocker(commandExecutor asciichgolangpublic.CommandExecuto
 			return nil, err
 		}
 
-		return nil, errors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Not implemented for command executor running on '%s'.",
 			hostDescription,
 		)
@@ -54,7 +54,7 @@ func GetCommandExecutorDocker(commandExecutor asciichgolangpublic.CommandExecuto
 
 func GetCommandExecutorDockerOnHost(host hosts.Host) (docker Docker, err error) {
 	if host == nil {
-		return nil, errors.TracedErrorNil("host")
+		return nil, tracederrors.TracedErrorNil("host")
 	}
 
 	toReturn := NewCommandExecutorDocker()
@@ -124,7 +124,7 @@ func (c *CommandExecutorDocker) GetCommandExecutor() (commandExecutor asciichgol
 			return nil, err
 		}
 
-		return nil, errors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Only available for commandExecutorHost but got '%s'",
 			typeString,
 		)
@@ -135,7 +135,7 @@ func (c *CommandExecutorDocker) GetCommandExecutor() (commandExecutor asciichgol
 
 func (c *CommandExecutorDocker) GetContainerByName(containerName string) (dockerContainer containers.Container, err error) {
 	if len(containerName) <= 0 {
-		return nil, errors.TracedError("containerName is empty string")
+		return nil, tracederrors.TracedError("containerName is empty string")
 	}
 
 	toReturn := NewCommandExecutorDockerContainer()
@@ -154,7 +154,7 @@ func (c *CommandExecutorDocker) GetContainerByName(containerName string) (docker
 
 func (c *CommandExecutorDocker) GetHost() (host hosts.Host, err error) {
 	if c.host == nil {
-		return nil, errors.TracedError("host not set")
+		return nil, tracederrors.TracedError("host not set")
 	}
 
 	return c.host, nil
@@ -176,7 +176,7 @@ func (c *CommandExecutorDocker) IsHostSet() (isSet bool) {
 func (c *CommandExecutorDocker) KillContainerByName(name string, verbose bool) (err error) {
 	name = strings.TrimSpace(name)
 	if len(name) <= 0 {
-		return errors.TracedError("name is empty string")
+		return tracederrors.TracedError("name is empty string")
 	}
 
 	container, err := c.GetContainerByName(name)
@@ -271,7 +271,7 @@ func (c *CommandExecutorDocker) MustSetHost(host hosts.Host) {
 
 func (c *CommandExecutorDocker) RunCommand(runOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
 	if runOptions == nil {
-		return nil, errors.TracedErrorNil("runOptions")
+		return nil, tracederrors.TracedErrorNil("runOptions")
 	}
 
 	commandExecutor, err := c.GetCommandExecutor()
@@ -284,7 +284,7 @@ func (c *CommandExecutorDocker) RunCommand(runOptions *asciichgolangpublic.RunCo
 
 func (c *CommandExecutorDocker) RunCommandAndGetStdoutAsString(runOptions *asciichgolangpublic.RunCommandOptions) (stdout string, err error) {
 	if runOptions == nil {
-		return "", errors.TracedErrorNil("runOptions")
+		return "", tracederrors.TracedErrorNil("runOptions")
 	}
 
 	commandExecutor, err := c.GetCommandExecutor()
@@ -297,7 +297,7 @@ func (c *CommandExecutorDocker) RunCommandAndGetStdoutAsString(runOptions *ascii
 
 func (c *CommandExecutorDocker) RunContainer(runOptions *DockerRunContainerOptions) (startedContainer containers.Container, err error) {
 	if runOptions == nil {
-		return nil, errors.TracedError("runOptions is nil")
+		return nil, tracederrors.TracedError("runOptions is nil")
 	}
 
 	containerName, err := runOptions.GetName()
@@ -378,7 +378,7 @@ func (c *CommandExecutorDocker) RunContainer(runOptions *DockerRunContainerOptio
 
 func (c *CommandExecutorDocker) SetHost(host hosts.Host) (err error) {
 	if host == nil {
-		return errors.TracedError("host not set")
+		return tracederrors.TracedError("host not set")
 	}
 
 	c.host = host

@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"sort"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitCommit struct {
@@ -18,7 +18,7 @@ func NewGitCommit() (g *GitCommit) {
 
 func (g *GitCommit) CreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	repo, err := g.GetGitRepo()
@@ -121,14 +121,14 @@ func (g *GitCommit) GetCommitMessage() (commitMessage string, err error) {
 
 func (g *GitCommit) GetGitRepo() (gitRepo GitRepository, err error) {
 	if g.gitRepo == nil {
-		return nil, errors.TracedError("gitRepo not set")
+		return nil, tracederrors.TracedError("gitRepo not set")
 	}
 	return g.gitRepo, nil
 }
 
 func (g *GitCommit) GetHash() (hash string, err error) {
 	if g.hash == "" {
-		return "", errors.TracedErrorf("hash not set")
+		return "", tracederrors.TracedErrorf("hash not set")
 	}
 
 	return g.hash, nil
@@ -151,7 +151,7 @@ func (g *GitCommit) GetNewestTagVersion(verbose bool) (newestVersion Version, er
 			return nil, err
 		}
 
-		return nil, errors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"no version tag found for commit '%s' in repository '%s' on host '%s'",
 			hash,
 			path,
@@ -518,7 +518,7 @@ func (g *GitCommit) MustSetHash(hash string) {
 
 func (g *GitCommit) SetGitRepo(gitRepo GitRepository) (err error) {
 	if gitRepo == nil {
-		return errors.TracedErrorNil("gitRepo")
+		return tracederrors.TracedErrorNil("gitRepo")
 	}
 
 	g.gitRepo = gitRepo
@@ -528,7 +528,7 @@ func (g *GitCommit) SetGitRepo(gitRepo GitRepository) (err error) {
 
 func (g *GitCommit) SetHash(hash string) (err error) {
 	if hash == "" {
-		return errors.TracedErrorf("hash is empty string")
+		return tracederrors.TracedErrorf("hash is empty string")
 	}
 
 	g.hash = hash

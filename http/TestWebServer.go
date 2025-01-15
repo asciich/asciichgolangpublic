@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // A simple webserver mostly used for testing.
@@ -45,7 +45,7 @@ func NewTestWebServer() (t *TestWebServer) {
 
 func (t *TestWebServer) GetPort() (port int, err error) {
 	if t.port <= 0 {
-		return -1, errors.TracedError("port not set")
+		return -1, tracederrors.TracedError("port not set")
 	}
 
 	return t.port, nil
@@ -53,7 +53,7 @@ func (t *TestWebServer) GetPort() (port int, err error) {
 
 func (t *TestWebServer) GetServer() (server *http.Server, err error) {
 	if t.server == nil {
-		return nil, errors.TracedErrorf("server not set")
+		return nil, tracederrors.TracedErrorf("server not set")
 	}
 
 	return t.server, nil
@@ -61,7 +61,7 @@ func (t *TestWebServer) GetServer() (server *http.Server, err error) {
 
 func (t *TestWebServer) GetWebServerWaitGroup() (webServerWaitGroup *sync.WaitGroup, err error) {
 	if t.webServerWaitGroup == nil {
-		return nil, errors.TracedErrorf("webServerWaitGroup not set")
+		return nil, tracederrors.TracedErrorf("webServerWaitGroup not set")
 	}
 
 	return t.webServerWaitGroup, nil
@@ -131,7 +131,7 @@ func (t *TestWebServer) MustStop(verbose bool) {
 
 func (t *TestWebServer) SetPort(port int) (err error) {
 	if port <= 0 {
-		return errors.TracedErrorf("Invalid value '%d' for port", port)
+		return tracederrors.TracedErrorf("Invalid value '%d' for port", port)
 	}
 
 	t.port = port
@@ -141,7 +141,7 @@ func (t *TestWebServer) SetPort(port int) (err error) {
 
 func (t *TestWebServer) SetServer(server *http.Server) (err error) {
 	if server == nil {
-		return errors.TracedErrorf("server is nil")
+		return tracederrors.TracedErrorf("server is nil")
 	}
 
 	t.server = server
@@ -151,7 +151,7 @@ func (t *TestWebServer) SetServer(server *http.Server) (err error) {
 
 func (t *TestWebServer) SetWebServerWaitGroup(webServerWaitGroup *sync.WaitGroup) (err error) {
 	if webServerWaitGroup == nil {
-		return errors.TracedErrorf("webServerWaitGroup is nil")
+		return tracederrors.TracedErrorf("webServerWaitGroup is nil")
 	}
 
 	t.webServerWaitGroup = webServerWaitGroup
@@ -175,7 +175,7 @@ func (t *TestWebServer) StartInBackground(verbose bool) (err error) {
 	if t.webServerWaitGroup == nil {
 		t.webServerWaitGroup = new(sync.WaitGroup)
 	} else {
-		return errors.TracedError(ErrWebServerAlreadyRunning)
+		return tracederrors.TracedError(ErrWebServerAlreadyRunning)
 	}
 
 	t.server = &http.Server{Addr: ":" + strconv.Itoa(port)}
@@ -218,12 +218,12 @@ func (t *TestWebServer) Stop(verbose bool) (err error) {
 	}
 
 	if t.server == nil {
-		return errors.TracedError("Unexpected t.server == nil")
+		return tracederrors.TracedError("Unexpected t.server == nil")
 	}
 
 	err = t.server.Shutdown(context.TODO())
 	if err != nil {
-		return errors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"Shutdown TestWebServer failed: '%w'",
 			err,
 		)

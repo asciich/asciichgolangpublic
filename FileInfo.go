@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type FileInfo struct {
@@ -16,7 +16,7 @@ func NewFileInfo() (f *FileInfo) {
 
 func (f *FileInfo) GetPath() (path string, err error) {
 	if f.Path == "" {
-		return "", errors.TracedErrorf("Path not set")
+		return "", tracederrors.TracedErrorf("Path not set")
 	}
 
 	return f.Path, nil
@@ -83,7 +83,7 @@ func (f *FileInfo) MustSetSizeBytes(sizeBytes int64) {
 
 func (f *FileInfo) SetPath(path string) (err error) {
 	if path == "" {
-		return errors.TracedErrorf("path is empty string")
+		return tracederrors.TracedErrorf("path is empty string")
 	}
 
 	f.Path = path

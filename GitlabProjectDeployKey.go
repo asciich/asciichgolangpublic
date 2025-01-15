@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -132,7 +132,7 @@ func (g *GitlabProjectDeployKey) MustSetName(name string) {
 
 func (k *GitlabProjectDeployKey) CreateDeployKey(createOptions *GitlabCreateDeployKeyOptions) (err error) {
 	if createOptions == nil {
-		return errors.TracedError("createOptions is nil")
+		return tracederrors.TracedError("createOptions is nil")
 	}
 
 	keyName, err := createOptions.GetName()
@@ -146,7 +146,7 @@ func (k *GitlabProjectDeployKey) CreateDeployKey(createOptions *GitlabCreateDepl
 	}
 
 	if exists {
-		return errors.TracedError("Key '%s' already exists. To recreate use the RecreateDeployKey function instead")
+		return tracederrors.TracedError("Key '%s' already exists. To recreate use the RecreateDeployKey function instead")
 	}
 
 	nativeProjectDeployKeyService, err := k.GetNativeProjectDeployKeyService()
@@ -170,7 +170,7 @@ func (k *GitlabProjectDeployKey) CreateDeployKey(createOptions *GitlabCreateDepl
 		CanPush: &createOptions.WriteAccess,
 	})
 	if err != nil {
-		return errors.TracedError(err.Error())
+		return tracederrors.TracedError(err.Error())
 	}
 
 	if createOptions.Verbose {
@@ -209,7 +209,7 @@ func (k *GitlabProjectDeployKey) Delete(verbose bool) (err error) {
 
 		_, err = nativeProjectDeployKeyService.DeleteDeployKey(projectId, keyId)
 		if err != nil {
-			return errors.TracedError(err.Error())
+			return tracederrors.TracedError(err.Error())
 		}
 
 		if verbose {
@@ -273,7 +273,7 @@ func (k *GitlabProjectDeployKey) GetGitlabProject() (gitlabProject *GitlabProjec
 
 func (k *GitlabProjectDeployKey) GetGitlabProjectDeployKeys() (gitlabProjectProjectDeployKeys *GitlabProjectDeployKeys, err error) {
 	if k.gitlabProjectDeployKeys == nil {
-		return nil, errors.TracedError("gitlabProject not set")
+		return nil, tracederrors.TracedError("gitlabProject not set")
 	}
 
 	return k.gitlabProjectDeployKeys, nil
@@ -304,7 +304,7 @@ func (k *GitlabProjectDeployKey) GetId() (id int, err error) {
 
 func (k *GitlabProjectDeployKey) GetName() (name string, err error) {
 	if len(k.name) <= 0 {
-		return "", errors.TracedError("name not set")
+		return "", tracederrors.TracedError("name not set")
 	}
 
 	return k.name, nil
@@ -340,7 +340,7 @@ func (k *GitlabProjectDeployKey) GetProjectId() (id int, err error) {
 
 func (k *GitlabProjectDeployKey) RecreateDeployKey(createOptions *GitlabCreateDeployKeyOptions) (err error) {
 	if createOptions == nil {
-		return errors.TracedError("createOptions is nil")
+		return tracederrors.TracedError("createOptions is nil")
 	}
 
 	keyName, err := createOptions.GetName()
@@ -371,7 +371,7 @@ func (k *GitlabProjectDeployKey) RecreateDeployKey(createOptions *GitlabCreateDe
 
 func (k *GitlabProjectDeployKey) SetGitlabProjectDeployKeys(gitlabProjectDeployKeys *GitlabProjectDeployKeys) (err error) {
 	if gitlabProjectDeployKeys == nil {
-		return errors.TracedError("gitlabProject is nil")
+		return tracederrors.TracedError("gitlabProject is nil")
 	}
 
 	k.gitlabProjectDeployKeys = gitlabProjectDeployKeys
@@ -381,7 +381,7 @@ func (k *GitlabProjectDeployKey) SetGitlabProjectDeployKeys(gitlabProjectDeployK
 
 func (k *GitlabProjectDeployKey) SetId(id int) (err error) {
 	if id <= 0 {
-		return errors.TracedErrorf("invalid id='%d'", id)
+		return tracederrors.TracedErrorf("invalid id='%d'", id)
 	}
 
 	k.id = id
@@ -391,7 +391,7 @@ func (k *GitlabProjectDeployKey) SetId(id int) (err error) {
 
 func (k *GitlabProjectDeployKey) SetName(name string) (err error) {
 	if len(name) <= 0 {
-		return errors.TracedError("name is empty string")
+		return tracederrors.TracedError("name is empty string")
 	}
 
 	k.name = name

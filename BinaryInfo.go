@@ -5,8 +5,8 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 const SOFTWARE_NAME_UNDEFINED = "[software name not defined]"
@@ -44,7 +44,7 @@ func NewBinaryInfo() (b *BinaryInfo) {
 func (b *BinaryInfo) GetGitHash() (gitHash string, err error) {
 	info, ok := debug.ReadBuildInfo()
 	if !ok {
-		return "", errors.TracedError("ReadBuildInfo failed")
+		return "", tracederrors.TracedError("ReadBuildInfo failed")
 	}
 	for _, setting := range info.Settings {
 		if setting.Key == "vcs.revision" {
@@ -52,7 +52,7 @@ func (b *BinaryInfo) GetGitHash() (gitHash string, err error) {
 		}
 	}
 
-	return "", errors.TracedError("Revision not found")
+	return "", tracederrors.TracedError("Revision not found")
 }
 
 func (b *BinaryInfo) GetGitHashOrErrorMessageOnError() (gitHash string) {
@@ -125,7 +125,7 @@ func (b *BinaryInfo) MustSetFallbackSoftwareName(defaultName string) {
 func (b *BinaryInfo) SetFallbackSoftwareName(defaultName string) (err error) {
 	defaultName = strings.TrimSpace(defaultName)
 	if len(defaultName) <= 0 {
-		return errors.TracedError("defaultName is empty string")
+		return tracederrors.TracedError("defaultName is empty string")
 	}
 
 	globalFallbackSoftwareName = defaultName

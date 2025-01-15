@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type TmuxSession struct {
@@ -171,7 +171,7 @@ func (t *TmuxSession) GetCommandExecutor() (commandExecutor CommandExecutor, err
 
 func (t *TmuxSession) GetName() (name string, err error) {
 	if t.name == "" {
-		return "", errors.TracedErrorf("name not set")
+		return "", tracederrors.TracedErrorf("name not set")
 	}
 
 	return t.name, nil
@@ -179,7 +179,7 @@ func (t *TmuxSession) GetName() (name string, err error) {
 
 func (t *TmuxSession) GetTmux() (tmux *TmuxService, err error) {
 	if t.tmux == nil {
-		return nil, errors.TracedErrorf("tmux not set")
+		return nil, tracederrors.TracedErrorf("tmux not set")
 	}
 
 	return t.tmux, nil
@@ -187,7 +187,7 @@ func (t *TmuxSession) GetTmux() (tmux *TmuxService, err error) {
 
 func (t *TmuxSession) GetWindowByName(windowName string) (window *TmuxWindow, err error) {
 	if windowName == "" {
-		return nil, errors.TracedErrorEmptyString("windowName")
+		return nil, tracederrors.TracedErrorEmptyString("windowName")
 	}
 
 	window = NewTmuxWindow()
@@ -232,7 +232,7 @@ func (t *TmuxSession) ListWindowNames(verbose bool) (windowsNames []string, err 
 		if strings.HasPrefix(l, name+":") {
 			splitted := strings.Split(l, ":")
 			if len(splitted) < 3 {
-				return nil, errors.TracedErrorf("Unable to get window name out of line='%s'", l)
+				return nil, tracederrors.TracedErrorf("Unable to get window name out of line='%s'", l)
 			}
 
 			windowInfoString := strings.TrimSpace(splitted[2])
@@ -373,7 +373,7 @@ func (t *TmuxSession) Recreate(verbose bool) (err error) {
 
 func (t *TmuxSession) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	t.name = name
@@ -383,7 +383,7 @@ func (t *TmuxSession) SetName(name string) (err error) {
 
 func (t *TmuxSession) SetTmux(tmux *TmuxService) (err error) {
 	if tmux == nil {
-		return errors.TracedErrorf("tmux is nil")
+		return tracederrors.TracedErrorf("tmux is nil")
 	}
 
 	t.tmux = tmux

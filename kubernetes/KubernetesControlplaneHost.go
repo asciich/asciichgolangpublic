@@ -5,9 +5,9 @@ import (
 
 	"github.com/asciich/asciichgolangpublic"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/hosts"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type KubernetesControlplaneHost struct {
@@ -16,7 +16,7 @@ type KubernetesControlplaneHost struct {
 
 func GetKubernetesControlplaneByHost(host hosts.Host) (kubernetesControlplaneHost *KubernetesControlplaneHost, err error) {
 	if host == nil {
-		return nil, errors.TracedErrorNil("host")
+		return nil, tracederrors.TracedErrorNil("host")
 	}
 
 	kubernetesControlplaneHost = NewKubernetesControlplaneHost()
@@ -27,7 +27,7 @@ func GetKubernetesControlplaneByHost(host hosts.Host) (kubernetesControlplaneHos
 
 func GetKubernetesControlplaneByHostname(hostname string) (kubernetesControlplaneHost *KubernetesControlplaneHost, err error) {
 	if len(hostname) <= 0 {
-		return nil, errors.TracedError("hostname is empty string")
+		return nil, tracederrors.TracedError("hostname is empty string")
 	}
 
 	host, err := hosts.GetHostByHostname(hostname)
@@ -73,7 +73,7 @@ func (k *KubernetesControlplaneHost) CheckIsKubernetesControlplane(verbose bool)
 	}
 
 	if !isKubernetesControlplane {
-		return false, errors.TracedErrorf("Host '%s' is not a kubernetes controlplane", hostname)
+		return false, tracederrors.TracedErrorf("Host '%s' is not a kubernetes controlplane", hostname)
 	}
 
 	return isKubernetesControlplane, nil
@@ -91,7 +91,7 @@ func (k *KubernetesControlplaneHost) GetJoinCommandAsString(verbose bool) (joinC
 	}
 
 	if !isControlPlane {
-		return "", errors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"host '%s' is not a kubernetes control plane and therefore join command can be generated.",
 			hostname,
 		)
@@ -110,7 +110,7 @@ func (k *KubernetesControlplaneHost) GetJoinCommandAsString(verbose bool) (joinC
 	joinCommand = strings.TrimSpace(joinCommand)
 
 	if len(joinCommand) <= 0 {
-		return "", errors.TracedError("Unable to get joinCommand. Evaluated joinCommand is empty string")
+		return "", tracederrors.TracedError("Unable to get joinCommand. Evaluated joinCommand is empty string")
 	}
 
 	if verbose {

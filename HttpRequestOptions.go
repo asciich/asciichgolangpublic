@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // Obsolete: Use https.RequestOptions instead
@@ -20,7 +20,7 @@ func NewHttpRequestOptions() (h *HttpRequestOptions) {
 
 func (h *HttpRequestOptions) GetOutputPath() (outputPath string, err error) {
 	if h.OutputPath == "" {
-		return "", errors.TracedErrorf("OutputPath not set")
+		return "", tracederrors.TracedErrorf("OutputPath not set")
 	}
 
 	return h.OutputPath, nil
@@ -33,7 +33,7 @@ func (h *HttpRequestOptions) GetOverwriteExisting() (overwriteExisting bool, err
 
 func (h *HttpRequestOptions) GetURL() (uRL string, err error) {
 	if h.URL == "" {
-		return "", errors.TracedErrorf("URL not set")
+		return "", tracederrors.TracedErrorf("URL not set")
 	}
 
 	return h.URL, nil
@@ -153,7 +153,7 @@ func (h *HttpRequestOptions) MustSetVerbose(verbose bool) {
 
 func (h *HttpRequestOptions) SetOutputPath(outputPath string) (err error) {
 	if outputPath == "" {
-		return errors.TracedErrorf("outputPath is empty string")
+		return tracederrors.TracedErrorf("outputPath is empty string")
 	}
 
 	h.OutputPath = outputPath
@@ -169,7 +169,7 @@ func (h *HttpRequestOptions) SetOverwriteExisting(overwriteExisting bool) (err e
 
 func (h *HttpRequestOptions) SetURL(uRL string) (err error) {
 	if uRL == "" {
-		return errors.TracedErrorf("uRL is empty string")
+		return tracederrors.TracedErrorf("uRL is empty string")
 	}
 
 	h.URL = uRL
@@ -238,7 +238,7 @@ func (o *HttpRequestOptions) GetUrl() (url *URL, err error) {
 
 func (o *HttpRequestOptions) GetUrlAsString() (url string, err error) {
 	if len(o.URL) <= 0 {
-		return "", errors.TracedError("Url not set")
+		return "", tracederrors.TracedError("Url not set")
 	}
 
 	return o.URL, nil
@@ -246,7 +246,7 @@ func (o *HttpRequestOptions) GetUrlAsString() (url string, err error) {
 
 func (o *HttpRequestOptions) SetOutputPathByFile(file File) (err error) {
 	if file == nil {
-		return errors.TracedErrorNil("file")
+		return tracederrors.TracedErrorNil("file")
 	}
 
 	localPath, err := file.GetLocalPath()

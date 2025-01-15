@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"fmt"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitlabCiYamlInclude struct {
@@ -52,15 +52,15 @@ func (g *GitlabCiYamlInclude) UnmarshalYAML(unmarshal func(interface{}) error) (
 	} else {
 		err = unmarshal(multiFile)
 		if err != nil {
-			return errors.TracedErrorf("Custom UnmarshalYAML for GitlabCiYamlInclude failed: %w", err)
+			return tracederrors.TracedErrorf("Custom UnmarshalYAML for GitlabCiYamlInclude failed: %w", err)
 		}
 
 		if len(multiFile.File) <= 0 {
-			return errors.TracedErrorf("No files found")
+			return tracederrors.TracedErrorf("No files found")
 		}
 
 		if len(multiFile.File) != 1 {
-			return errors.TracedErrorf("Only one file supported at the moment but got '%v'", multiFile.File)
+			return tracederrors.TracedErrorf("Only one file supported at the moment but got '%v'", multiFile.File)
 		}
 
 		g.File = multiFile.File[0]
@@ -73,7 +73,7 @@ func (g *GitlabCiYamlInclude) UnmarshalYAML(unmarshal func(interface{}) error) (
 
 func (g *GitlabCiYamlInclude) EqualsIgnoreVersion(other *GitlabCiYamlInclude) (isEqual bool, err error) {
 	if other == nil {
-		return false, errors.TracedError("other is nil")
+		return false, tracederrors.TracedError("other is nil")
 	}
 
 	thisProject, thisFile, err := g.GetProjectAndFile()
@@ -99,7 +99,7 @@ func (g *GitlabCiYamlInclude) EqualsIgnoreVersion(other *GitlabCiYamlInclude) (i
 
 func (g *GitlabCiYamlInclude) GetFile() (file string, err error) {
 	if g.File == "" {
-		return "", errors.TracedErrorf("File not set")
+		return "", tracederrors.TracedErrorf("File not set")
 	}
 
 	return g.File, nil
@@ -128,7 +128,7 @@ func (g *GitlabCiYamlInclude) GetLoggableString() (loggableString string, err er
 
 func (g *GitlabCiYamlInclude) GetProject() (project string, err error) {
 	if g.Project == "" {
-		return "", errors.TracedErrorf("Project not set")
+		return "", tracederrors.TracedErrorf("Project not set")
 	}
 
 	return g.Project, nil
@@ -150,7 +150,7 @@ func (g *GitlabCiYamlInclude) GetProjectAndFile() (project string, file string, 
 
 func (g *GitlabCiYamlInclude) GetRef() (ref string, err error) {
 	if g.Ref == "" {
-		return "", errors.TracedErrorf("Ref not set")
+		return "", tracederrors.TracedErrorf("Ref not set")
 	}
 
 	return g.Ref, nil
@@ -253,7 +253,7 @@ func (g *GitlabCiYamlInclude) MustSetRef(ref string) {
 
 func (g *GitlabCiYamlInclude) SetFile(file string) (err error) {
 	if file == "" {
-		return errors.TracedErrorf("file is empty string")
+		return tracederrors.TracedErrorf("file is empty string")
 	}
 
 	g.File = file
@@ -263,7 +263,7 @@ func (g *GitlabCiYamlInclude) SetFile(file string) (err error) {
 
 func (g *GitlabCiYamlInclude) SetProject(project string) (err error) {
 	if project == "" {
-		return errors.TracedErrorf("project is empty string")
+		return tracederrors.TracedErrorf("project is empty string")
 	}
 
 	g.Project = project
@@ -273,7 +273,7 @@ func (g *GitlabCiYamlInclude) SetProject(project string) (err error) {
 
 func (g *GitlabCiYamlInclude) SetRef(ref string) (err error) {
 	if ref == "" {
-		return errors.TracedErrorf("ref is empty string")
+		return tracederrors.TracedErrorf("ref is empty string")
 	}
 
 	g.Ref = ref

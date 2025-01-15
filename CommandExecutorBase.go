@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type CommandExecutorBase struct {
@@ -18,7 +18,7 @@ func NewCommandExecutorBase() (c *CommandExecutorBase) {
 
 func (c *CommandExecutorBase) GetParentCommandExecutorForBaseClass() (parentCommandExecutorForBaseClass CommandExecutor, err error) {
 	if c.parentCommandExecutorForBaseClass == nil {
-		return nil, errors.TracedError("parent for CommandExecutorBase not set")
+		return nil, tracederrors.TracedError("parent for CommandExecutorBase not set")
 	}
 
 	return c.parentCommandExecutorForBaseClass, nil
@@ -110,7 +110,7 @@ func (c *CommandExecutorBase) MustSetParentCommandExecutorForBaseClass(parentCom
 
 func (c *CommandExecutorBase) RunCommandAndGetStdoutAsBytes(options *RunCommandOptions) (stdout []byte, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	parent, err := c.GetParentCommandExecutorForBaseClass()
@@ -133,7 +133,7 @@ func (c *CommandExecutorBase) RunCommandAndGetStdoutAsBytes(options *RunCommandO
 
 func (c *CommandExecutorBase) RunCommandAndGetStdoutAsFloat64(options *RunCommandOptions) (stdout float64, err error) {
 	if options == nil {
-		return -1, errors.TracedErrorNil("options")
+		return -1, tracederrors.TracedErrorNil("options")
 	}
 
 	parent, err := c.GetParentCommandExecutorForBaseClass()
@@ -172,7 +172,7 @@ func (c *CommandExecutorBase) RunCommandAndGetStdoutAsInt64(options *RunCommandO
 
 func (c *CommandExecutorBase) RunCommandAndGetStdoutAsLines(options *RunCommandOptions) (stdoutLines []string, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	parent, err := c.GetParentCommandExecutorForBaseClass()
@@ -195,7 +195,7 @@ func (c *CommandExecutorBase) RunCommandAndGetStdoutAsLines(options *RunCommandO
 
 func (c *CommandExecutorBase) RunCommandAndGetStdoutAsString(options *RunCommandOptions) (stdout string, err error) {
 	if options == nil {
-		return "", errors.TracedErrorNil("options")
+		return "", tracederrors.TracedErrorNil("options")
 	}
 
 	parent, err := c.GetParentCommandExecutorForBaseClass()

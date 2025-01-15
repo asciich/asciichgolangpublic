@@ -7,9 +7,9 @@ import (
 	"github.com/asciich/asciichgolangpublic"
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/hosts"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type KVMHypervisor struct {
@@ -21,7 +21,7 @@ type KVMHypervisor struct {
 
 func GetKvmHypervisorByHost(host hosts.Host) (kvmHypervisor *KVMHypervisor, err error) {
 	if host == nil {
-		return nil, errors.TracedError("host is nil")
+		return nil, tracederrors.TracedError("host is nil")
 	}
 
 	kvmHypervisor = NewKVMHypervisor()
@@ -67,7 +67,7 @@ func NewKVMHypervisor() (kvmHypervisor *KVMHypervisor) {
 
 func (k *KVMHypervisor) CreateVm(createOptions *KvmCreateVmOptions) (createdVm *KvmVm, err error) {
 	if createOptions == nil {
-		return nil, errors.TracedError("createOptions is nil")
+		return nil, tracederrors.TracedError("createOptions is nil")
 	}
 
 	vmName, err := createOptions.GetVmName()
@@ -109,7 +109,7 @@ func (k *KVMHypervisor) CreateVm(createOptions *KvmCreateVmOptions) (createdVm *
 	}
 
 	if !diskImageExists {
-		return nil, errors.TracedErrorf("Disk image '%s' does not exist to create VM.", diskImagePath)
+		return nil, tracederrors.TracedErrorf("Disk image '%s' does not exist to create VM.", diskImagePath)
 	}
 
 	vmXml, err := asciichgolangpublic.TemporaryFiles().CreateEmptyTemporaryFile(createOptions.Verbose)
@@ -154,7 +154,7 @@ func (k *KVMHypervisor) CreateVm(createOptions *KvmCreateVmOptions) (createdVm *
 
 func (k *KVMHypervisor) GetHost() (host hosts.Host, err error) {
 	if k.host == nil {
-		return nil, errors.TracedError("host not set")
+		return nil, tracederrors.TracedError("host not set")
 	}
 
 	return k.host, nil
@@ -215,13 +215,13 @@ func (k *KVMHypervisor) GetStoragePools(verbose bool) (storagePools []*KvmStorag
 	firstLine, unparsedOutput := astrings.SplitFirstLineAndContent(listPoolOutput)
 	firstLine = strings.TrimSpace(firstLine)
 	if !strings.HasPrefix(firstLine, "Name") {
-		return nil, errors.TracedErrorf("Unexpected first line of list pool output: '%s'", firstLine)
+		return nil, tracederrors.TracedErrorf("Unexpected first line of list pool output: '%s'", firstLine)
 	}
 
 	secondLine, unparsedOutput := astrings.SplitFirstLineAndContent(unparsedOutput)
 	secondLine = strings.TrimSpace(secondLine)
 	if strings.Count(secondLine, "-") < 5 {
-		return nil, errors.TracedErrorf("Unexpected second line of list pool output: '%s'", secondLine)
+		return nil, tracederrors.TracedErrorf("Unexpected second line of list pool output: '%s'", secondLine)
 	}
 
 	storagePools = []*KvmStoragePool{}
@@ -233,7 +233,7 @@ func (k *KVMHypervisor) GetStoragePools(verbose bool) (storagePools []*KvmStorag
 
 		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(line)
 		if len(splitted) != 3 {
-			return nil, errors.TracedErrorf("Unable to splitt list pool line '%v' : '%v'", line, splitted)
+			return nil, tracederrors.TracedErrorf("Unable to splitt list pool line '%v' : '%v'", line, splitted)
 		}
 
 		nameToAdd := splitted[0]
@@ -285,7 +285,7 @@ func (k *KVMHypervisor) GetVmById(vmId int) (vm *KvmVm, err error) {
 
 func (k *KVMHypervisor) GetVmByName(vmName string, verbose bool) (vm *KvmVm, err error) {
 	if vmName == "" {
-		return nil, errors.TracedError("vmName")
+		return nil, tracederrors.TracedError("vmName")
 	}
 
 	vms, err := k.GetVmList(verbose)
@@ -304,7 +304,7 @@ func (k *KVMHypervisor) GetVmByName(vmName string, verbose bool) (vm *KvmVm, err
 		}
 	}
 
-	return nil, errors.TracedErrorf("No VM named '%s' found", vmName)
+	return nil, tracederrors.TracedErrorf("No VM named '%s' found", vmName)
 }
 
 func (k *KVMHypervisor) GetVmInfoList(verbose bool) (vmInfos []*KvmVmInfo, err error) {
@@ -335,12 +335,12 @@ func (k *KVMHypervisor) GetVmList(verbose bool) (vms []*KvmVm, err error) {
 	firstLine, unparsedOutput := astrings.SplitFirstLineAndContent(listOutput)
 	firstLine = strings.TrimSpace(firstLine)
 	if !strings.HasPrefix(firstLine, "Id ") {
-		return nil, errors.TracedErrorf("Unexpected first line '%s'. Full output is '%s'.", firstLine, listOutput)
+		return nil, tracederrors.TracedErrorf("Unexpected first line '%s'. Full output is '%s'.", firstLine, listOutput)
 	}
 
 	secondLine, unparsedOutput := astrings.SplitFirstLineAndContent(unparsedOutput)
 	if !strings.Contains(secondLine, "-----") {
-		return nil, errors.TracedErrorf("Unexpected second line '%s'. Full output is '%s'.", secondLine, listOutput)
+		return nil, tracederrors.TracedErrorf("Unexpected second line '%s'. Full output is '%s'.", secondLine, listOutput)
 	}
 
 	vms = []*KvmVm{}
@@ -353,7 +353,7 @@ func (k *KVMHypervisor) GetVmList(verbose bool) (vms []*KvmVm, err error) {
 
 		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(lineToProcess)
 		if len(splitted) != 3 {
-			return nil, errors.TracedErrorf("Failed to split line '%s'", line)
+			return nil, tracederrors.TracedErrorf("Failed to split line '%s'", line)
 		}
 
 		vmToAdd := NewKvmVm()
@@ -368,7 +368,7 @@ func (k *KVMHypervisor) GetVmList(verbose bool) (vms []*KvmVm, err error) {
 		if vmIdString != "-" {
 			vmId, err := strconv.Atoi(vmIdString)
 			if err != nil {
-				return nil, errors.TracedErrorf("Unable to extract Vm id: '%s'", err.Error())
+				return nil, tracederrors.TracedErrorf("Unable to extract Vm id: '%s'", err.Error())
 			}
 
 			vmToAdd, err = k.GetVmById(vmId)
@@ -412,7 +412,7 @@ func (k *KVMHypervisor) GetVmNames(verbose bool) (vmNames []string, err error) {
 
 func (k *KVMHypervisor) GetVolumeByName(volumeName string) (volume *KvmVolume, err error) {
 	if len(volumeName) <= 0 {
-		return nil, errors.TracedError("volumeName is empty string")
+		return nil, tracederrors.TracedError("volumeName is empty string")
 	}
 
 	hostname, err := k.GetHostName()
@@ -437,7 +437,7 @@ func (k *KVMHypervisor) GetVolumeByName(volumeName string) (volume *KvmVolume, e
 		}
 	}
 
-	return nil, errors.TracedErrorf("No volume '%s' found on hypervisor '%s'.", volumeName, hostname)
+	return nil, tracederrors.TracedErrorf("No volume '%s' found on hypervisor '%s'.", volumeName, hostname)
 }
 
 func (k *KVMHypervisor) GetVolumeNames(verbose bool) (volumeNames []string, err error) {
@@ -687,11 +687,11 @@ func (k *KVMHypervisor) MustVolumeByNameExists(volumeName string) (volumeExists 
 
 func (k *KVMHypervisor) RemoveVm(removeOptions *KvmRemoveVmOptions) (err error) {
 	if removeOptions == nil {
-		return errors.TracedError("removeOptions is nil")
+		return tracederrors.TracedError("removeOptions is nil")
 	}
 
 	if len(removeOptions.VmName) <= 0 {
-		return errors.TracedError("vmName is empty string")
+		return tracederrors.TracedError("vmName is empty string")
 	}
 
 	hostName, err := k.GetHostName()
@@ -744,7 +744,7 @@ func (k *KVMHypervisor) RemoveVm(removeOptions *KvmRemoveVmOptions) (err error) 
 
 func (k *KVMHypervisor) RemoveVolumeByName(volumeName string, verbose bool) (err error) {
 	if len(volumeName) <= 0 {
-		return errors.TracedError("voluemName is empty string")
+		return tracederrors.TracedError("voluemName is empty string")
 	}
 
 	hostname, err := k.GetHostName()
@@ -778,7 +778,7 @@ func (k *KVMHypervisor) RemoveVolumeByName(volumeName string, verbose bool) (err
 
 func (k *KVMHypervisor) RunKvmCommand(kvmCommand []string, verbose bool) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
 	if kvmCommand == nil {
-		return nil, errors.TracedError("kvmCommand is nil")
+		return nil, tracederrors.TracedError("kvmCommand is nil")
 	}
 
 	command := []string{"virsh", "-c", "qemu:///system"}
@@ -812,7 +812,7 @@ func (k *KVMHypervisor) RunKvmCommand(kvmCommand []string, verbose bool) (comman
 	}
 
 	if commandOutput == nil {
-		return nil, errors.TracedError("commandOutput is nil")
+		return nil, tracederrors.TracedError("commandOutput is nil")
 	}
 
 	return commandOutput, nil
@@ -834,7 +834,7 @@ func (k *KVMHypervisor) RunKvmCommandAndGetStdout(kvmCommand []string, verbose b
 
 func (k *KVMHypervisor) SetHost(host hosts.Host) (err error) {
 	if host == nil {
-		return errors.TracedError("nost is nil")
+		return tracederrors.TracedError("nost is nil")
 	}
 
 	k.host = host
@@ -849,7 +849,7 @@ func (k *KVMHypervisor) SetUseLocalhost(useLocalhost bool) (err error) {
 
 func (k *KVMHypervisor) VmByNameExists(vmName string) (vmExists bool, err error) {
 	if len(vmName) <= 0 {
-		return false, errors.TracedError("vmName is empty string")
+		return false, tracederrors.TracedError("vmName is empty string")
 	}
 
 	const verbose = false
@@ -867,7 +867,7 @@ func (k *KVMHypervisor) VmByNameExists(vmName string) (vmExists bool, err error)
 
 func (k *KVMHypervisor) VolumeByNameExists(volumeName string) (volumeExists bool, err error) {
 	if len(volumeName) <= 0 {
-		return false, errors.TracedError("volumeName is empty string")
+		return false, tracederrors.TracedError("volumeName is empty string")
 	}
 
 	const verboseVolumeCollection = false

@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitlabAuthenticationOptions struct {
@@ -20,7 +20,7 @@ func NewGitlabAuthenticationOptions() (g *GitlabAuthenticationOptions) {
 
 func (g *GitlabAuthenticationOptions) GetAccessToken() (accessToken string, err error) {
 	if g.AccessToken == "" {
-		return "", errors.TracedErrorf("AccessToken not set")
+		return "", tracederrors.TracedErrorf("AccessToken not set")
 	}
 
 	return g.AccessToken, nil
@@ -28,11 +28,11 @@ func (g *GitlabAuthenticationOptions) GetAccessToken() (accessToken string, err 
 
 func (g *GitlabAuthenticationOptions) GetAccessTokensFromGopass() (accessTokensFromGopass []string, err error) {
 	if g.AccessTokensFromGopass == nil {
-		return nil, errors.TracedErrorf("AccessTokensFromGopass not set")
+		return nil, tracederrors.TracedErrorf("AccessTokensFromGopass not set")
 	}
 
 	if len(g.AccessTokensFromGopass) <= 0 {
-		return nil, errors.TracedErrorf("AccessTokensFromGopass has no elements")
+		return nil, tracederrors.TracedErrorf("AccessTokensFromGopass has no elements")
 	}
 
 	return g.AccessTokensFromGopass, nil
@@ -40,7 +40,7 @@ func (g *GitlabAuthenticationOptions) GetAccessTokensFromGopass() (accessTokensF
 
 func (g *GitlabAuthenticationOptions) GetGitlabUrl() (gitlabUrl string, err error) {
 	if g.GitlabUrl == "" {
-		return "", errors.TracedErrorf("GitlabUrl not set")
+		return "", tracederrors.TracedErrorf("GitlabUrl not set")
 	}
 
 	return g.GitlabUrl, nil
@@ -145,7 +145,7 @@ func (g *GitlabAuthenticationOptions) MustSetVerbose(verbose bool) {
 
 func (g *GitlabAuthenticationOptions) SetAccessToken(accessToken string) (err error) {
 	if accessToken == "" {
-		return errors.TracedErrorf("accessToken is empty string")
+		return tracederrors.TracedErrorf("accessToken is empty string")
 	}
 
 	g.AccessToken = accessToken
@@ -155,11 +155,11 @@ func (g *GitlabAuthenticationOptions) SetAccessToken(accessToken string) (err er
 
 func (g *GitlabAuthenticationOptions) SetAccessTokensFromGopass(accessTokensFromGopass []string) (err error) {
 	if accessTokensFromGopass == nil {
-		return errors.TracedErrorf("accessTokensFromGopass is nil")
+		return tracederrors.TracedErrorf("accessTokensFromGopass is nil")
 	}
 
 	if len(accessTokensFromGopass) <= 0 {
-		return errors.TracedErrorf("accessTokensFromGopass has no elements")
+		return tracederrors.TracedErrorf("accessTokensFromGopass has no elements")
 	}
 
 	g.AccessTokensFromGopass = accessTokensFromGopass
@@ -169,7 +169,7 @@ func (g *GitlabAuthenticationOptions) SetAccessTokensFromGopass(accessTokensFrom
 
 func (g *GitlabAuthenticationOptions) SetGitlabUrl(gitlabUrl string) (err error) {
 	if gitlabUrl == "" {
-		return errors.TracedErrorf("gitlabUrl is empty string")
+		return tracederrors.TracedErrorf("gitlabUrl is empty string")
 	}
 
 	g.GitlabUrl = gitlabUrl

@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"sort"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type VersionDateVersion struct {
@@ -21,7 +21,7 @@ func (v *VersionDateVersion) GetNextVersion(versionType string) (nextVersion Ver
 
 func (v *VersionDateVersion) GetVersion() (version string, err error) {
 	if v.version == "" {
-		return "", errors.TracedErrorf("version not set")
+		return "", tracederrors.TracedErrorf("version not set")
 	}
 
 	return v.version, nil
@@ -63,7 +63,7 @@ func (v *VersionDateVersion) MustSetVersion(version string) {
 
 func (v *VersionDateVersion) SetVersion(version string) (err error) {
 	if version == "" {
-		return errors.TracedErrorf("version is empty string")
+		return tracederrors.TracedErrorf("version is empty string")
 	}
 
 	v.version = version
@@ -95,12 +95,12 @@ func (v VersionDateVersion) GetAsString() (version string, err error) {
 
 func (v VersionDateVersion) IsNewerThan(other Version) (isNewerThan bool, err error) {
 	if other == nil {
-		return false, errors.TracedErrorNil("other")
+		return false, tracederrors.TracedErrorNil("other")
 	}
 
 	otherDateVersion, ok := other.(*VersionDateVersion)
 	if !ok {
-		return false, errors.TracedErrorf(
+		return false, tracederrors.TracedErrorf(
 			"Incompatible versions to compare: '%s' and other '%s'",
 			v,
 			other,

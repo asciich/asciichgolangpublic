@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitRepositoryTag struct {
@@ -13,7 +13,7 @@ type GitRepositoryTag struct {
 
 func GetGitRepositoryTagByName(tagName string) (g *GitRepositoryTag, err error) {
 	if tagName == "" {
-		return nil, errors.TracedErrorEmptyString("tagName")
+		return nil, tracederrors.TracedErrorEmptyString("tagName")
 	}
 
 	g = NewGitRepositoryTag()
@@ -28,11 +28,11 @@ func GetGitRepositoryTagByName(tagName string) (g *GitRepositoryTag, err error) 
 
 func GetGitRepositoryTagByNameAndRepository(tagName string, gitRepository GitRepository) (g *GitRepositoryTag, err error) {
 	if tagName == "" {
-		return nil, errors.TracedErrorEmptyString("tagName")
+		return nil, tracederrors.TracedErrorEmptyString("tagName")
 	}
 
 	if gitRepository == nil {
-		return nil, errors.TracedErrorNil("gitRepository")
+		return nil, tracederrors.TracedErrorNil("gitRepository")
 	}
 
 	g, err = GetGitRepositoryTagByName(tagName)
@@ -76,7 +76,7 @@ func NewGitRepositoryTag() (g *GitRepositoryTag) {
 
 func (g *GitRepositoryTag) GetGitRepository() (gitRepository GitRepository, err error) {
 	if g.gitRepository == nil {
-		return nil, errors.TracedErrorf("gitRepository not set")
+		return nil, tracederrors.TracedErrorf("gitRepository not set")
 	}
 
 	return g.gitRepository, nil
@@ -98,7 +98,7 @@ func (g *GitRepositoryTag) GetHash() (hash string, err error) {
 
 func (g *GitRepositoryTag) GetName() (name string, err error) {
 	if g.name == "" {
-		return "", errors.TracedErrorf("name not set")
+		return "", tracederrors.TracedErrorf("name not set")
 	}
 
 	return g.name, nil
@@ -188,7 +188,7 @@ func (g *GitRepositoryTag) MustSetName(name string) {
 
 func (g *GitRepositoryTag) SetGitRepository(gitRepository GitRepository) (err error) {
 	if gitRepository == nil {
-		return errors.TracedErrorf("gitRepository is nil")
+		return tracederrors.TracedErrorf("gitRepository is nil")
 	}
 
 	g.gitRepository = gitRepository
@@ -198,7 +198,7 @@ func (g *GitRepositoryTag) SetGitRepository(gitRepository GitRepository) (err er
 
 func (g *GitRepositoryTag) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	g.name = name

@@ -1,8 +1,8 @@
 package kvm
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type KvmVolume struct {
@@ -110,7 +110,7 @@ func (v *KvmVolume) GetHypervisor() (hypervisor *KVMHypervisor, err error) {
 
 func (v *KvmVolume) GetName() (name string, err error) {
 	if len(v.name) <= 0 {
-		return "", errors.TracedError("name not set")
+		return "", tracederrors.TracedError("name not set")
 	}
 
 	return v.name, nil
@@ -118,7 +118,7 @@ func (v *KvmVolume) GetName() (name string, err error) {
 
 func (v *KvmVolume) GetStoragePool() (storagePool *KvmStoragePool, err error) {
 	if v.storagePool == nil {
-		return nil, errors.TracedError("storage pool not set")
+		return nil, tracederrors.TracedError("storage pool not set")
 	}
 
 	return v.storagePool, nil
@@ -173,7 +173,7 @@ func (v *KvmVolume) Remove(verbose bool) (err error) {
 
 func (v *KvmVolume) SetName(name string) (err error) {
 	if len(name) <= 0 {
-		return errors.TracedError("name is empty string")
+		return tracederrors.TracedError("name is empty string")
 	}
 
 	v.name = name
@@ -183,7 +183,7 @@ func (v *KvmVolume) SetName(name string) (err error) {
 
 func (v *KvmVolume) SetStoragePool(storagePool *KvmStoragePool) (err error) {
 	if storagePool == nil {
-		return errors.TracedError("storagePool is nil")
+		return tracederrors.TracedError("storagePool is nil")
 	}
 
 	v.storagePool = storagePool

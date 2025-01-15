@@ -9,8 +9,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes"
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // This is the GitRepository implementation based on a CommandExecutor (e.g. Bash, SSH...).
@@ -27,7 +27,7 @@ type CommandExecutorGitRepository struct {
 
 func GetCommandExecutorGitRepositoryFromDirectory(directory Directory) (c *CommandExecutorGitRepository, err error) {
 	if directory == nil {
-		return nil, errors.TracedErrorNil("directory")
+		return nil, tracederrors.TracedErrorNil("directory")
 	}
 
 	commandExecutoryDirectory, ok := directory.(*CommandExecutorDirectory)
@@ -55,7 +55,7 @@ func GetCommandExecutorGitRepositoryFromDirectory(directory Directory) (c *Comma
 		return nil, err
 	}
 
-	return nil, errors.TracedErrorf(
+	return nil, tracederrors.TracedErrorf(
 		"Not implemented for directory type = '%s'",
 		unknownTypeName,
 	)
@@ -81,7 +81,7 @@ func MustNewCommandExecutorGitRepository(commandExecutor CommandExecutor) (c *Co
 
 func NewCommandExecutorGitRepository(commandExecutor CommandExecutor) (c *CommandExecutorGitRepository, err error) {
 	if commandExecutor == nil {
-		return nil, errors.TracedErrorNil("commandExecutor")
+		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
 
 	c = new(CommandExecutorGitRepository)
@@ -107,18 +107,18 @@ func NewCommandExecutorGitRepository(commandExecutor CommandExecutor) (c *Comman
 // This function was only added to fulfil the current interface.
 // On the long run this method has to be removed.
 func (c *CommandExecutorGitRepository) GetAsLocalDirectory() (l *LocalDirectory, err error) {
-	return nil, errors.TracedErrorNotImplemented()
+	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
 // This function was only added to fulfil the current interface.
 // On the long run this method has to be removed.
 func (c *CommandExecutorGitRepository) GetAsLocalGitRepository() (l *LocalGitRepository, err error) {
-	return nil, errors.TracedErrorNotImplemented()
+	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) AddFileByPath(pathToAdd string, verbose bool) (err error) {
 	if pathToAdd == "" {
-		return errors.TracedErrorEmptyString("pathToAdd")
+		return tracederrors.TracedErrorEmptyString("pathToAdd")
 	}
 
 	_, err = c.RunGitCommand(
@@ -148,7 +148,7 @@ func (c *CommandExecutorGitRepository) AddFileByPath(pathToAdd string, verbose b
 
 func (c *CommandExecutorGitRepository) AddRemote(remoteOptions *GitRemoteAddOptions) (err error) {
 	if remoteOptions == nil {
-		return errors.TracedError("remoteOptions is nil")
+		return tracederrors.TracedError("remoteOptions is nil")
 	}
 
 	remoteName, err := remoteOptions.GetRemoteName()
@@ -203,7 +203,7 @@ func (c *CommandExecutorGitRepository) AddRemote(remoteOptions *GitRemoteAddOpti
 
 func (c *CommandExecutorGitRepository) CheckoutBranchByName(name string, verbose bool) (err error) {
 	if name == "" {
-		return errors.TracedErrorEmptyString("name")
+		return tracederrors.TracedErrorEmptyString("name")
 	}
 
 	currentBranchName, err := c.GetCurrentBranchName(verbose)
@@ -249,7 +249,7 @@ func (c *CommandExecutorGitRepository) CheckoutBranchByName(name string, verbose
 
 func (c *CommandExecutorGitRepository) CloneRepository(repository GitRepository, verbose bool) (err error) {
 	if repository == nil {
-		return errors.TracedErrorNil("repository")
+		return tracederrors.TracedErrorNil("repository")
 	}
 
 	repoHostDescription, err := repository.GetHostDescription()
@@ -263,7 +263,7 @@ func (c *CommandExecutorGitRepository) CloneRepository(repository GitRepository,
 	}
 
 	if hostDescription != repoHostDescription {
-		return errors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"Only implemented for two repositories on the same host. But repository from host '%s' should be cloned to host '%s'",
 			repoHostDescription,
 			hostDescription,
@@ -280,7 +280,7 @@ func (c *CommandExecutorGitRepository) CloneRepository(repository GitRepository,
 
 func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClone string, verbose bool) (err error) {
 	if pathOrUrlToClone == "" {
-		return errors.TracedErrorEmptyString("pathToClone")
+		return tracederrors.TracedErrorEmptyString("pathToClone")
 	}
 
 	path, hostDescription, err := c.GetPathAndHostDescription()
@@ -340,7 +340,7 @@ func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClo
 
 func (c *CommandExecutorGitRepository) Commit(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
 	if commitOptions == nil {
-		return nil, errors.TracedErrorNil("commitOptions")
+		return nil, tracederrors.TracedErrorNil("commitOptions")
 	}
 
 	commitCommand := []string{"commit"}
@@ -396,12 +396,12 @@ func (c *CommandExecutorGitRepository) Commit(commitOptions *GitCommitOptions) (
 }
 
 func (c *CommandExecutorGitRepository) CommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool, err error) {
-	return false, errors.TracedErrorNotImplemented()
+	return false, tracederrors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) CreateBranch(createOptions *CreateBranchOptions) (err error) {
 	if createOptions == nil {
-		return errors.TracedErrorNil("createOptions")
+		return tracederrors.TracedErrorNil("createOptions")
 	}
 
 	name, err := createOptions.GetName()
@@ -448,7 +448,7 @@ func (c *CommandExecutorGitRepository) CreateBranch(createOptions *CreateBranchO
 
 func (c *CommandExecutorGitRepository) CreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	tagName, err := options.GetTagName()
@@ -510,7 +510,7 @@ func (c *CommandExecutorGitRepository) CreateTag(options *GitRepositoryCreateTag
 
 func (c *CommandExecutorGitRepository) DeleteBranchByName(name string, verbose bool) (err error) {
 	if name == "" {
-		return errors.TracedErrorEmptyString("name")
+		return tracederrors.TracedErrorEmptyString("name")
 	}
 
 	branchExists, err := c.BranchByNameExists(name, verbose)
@@ -582,31 +582,31 @@ func (c *CommandExecutorGitRepository) Fetch(verbose bool) (err error) {
 
 func (c *CommandExecutorGitRepository) FileByPathExists(path string, verbose bool) (exists bool, err error) {
 	if path == "" {
-		return false, errors.TracedErrorEmptyString(path)
+		return false, tracederrors.TracedErrorEmptyString(path)
 	}
 
 	return c.FileInDirectoryExists(verbose, path)
 }
 
 func (c *CommandExecutorGitRepository) GetAuthorEmailByCommitHash(hash string) (authorEmail string, err error) {
-	return "", errors.TracedErrorNotImplemented()
+	return "", tracederrors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) GetAuthorStringByCommitHash(hash string) (authorEmail string, err error) {
-	return "", errors.TracedErrorNotImplemented()
+	return "", tracederrors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) GetCommitAgeDurationByCommitHash(hash string) (ageDuration *time.Duration, err error) {
-	return nil, errors.TracedErrorNotImplemented()
+	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) GetCommitAgeSecondsByCommitHash(hash string) (ageSeconds float64, err error) {
-	return -1, errors.TracedErrorNotImplemented()
+	return -1, tracederrors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) GetCommitByHash(hash string) (gitCommit *GitCommit, err error) {
 	if hash == "" {
-		return nil, errors.TracedErrorEmptyString("hash")
+		return nil, tracederrors.TracedErrorEmptyString("hash")
 	}
 
 	gitCommit = NewGitCommit()
@@ -626,7 +626,7 @@ func (c *CommandExecutorGitRepository) GetCommitByHash(hash string) (gitCommit *
 
 func (c *CommandExecutorGitRepository) GetCommitMessageByCommitHash(hash string) (commitMessage string, err error) {
 	if hash == "" {
-		return "", errors.TracedErrorEmptyString("hash")
+		return "", tracederrors.TracedErrorEmptyString("hash")
 	}
 
 	stdout, err := c.RunGitCommandAndGetStdoutAsString(
@@ -645,7 +645,7 @@ func (c *CommandExecutorGitRepository) GetCommitMessageByCommitHash(hash string)
 			return "", err
 		}
 
-		return "", errors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"Unable to get commit message for hash '%s' in git repository '%s' on host '%s'. commitMessage is empty string after evaluation.",
 			hash,
 			path,
@@ -657,11 +657,11 @@ func (c *CommandExecutorGitRepository) GetCommitMessageByCommitHash(hash string)
 }
 
 func (c *CommandExecutorGitRepository) GetCommitParentsByCommitHash(hash string, options *GitCommitGetParentsOptions) (commitParents []*GitCommit, err error) {
-	return nil, errors.TracedErrorNotImplemented()
+	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) GetCommitTimeByCommitHash(hash string) (commitTime *time.Time, err error) {
-	return nil, errors.TracedErrorNotImplemented()
+	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) GetCurrentBranchName(verbose bool) (branchName string, err error) {
@@ -681,7 +681,7 @@ func (c *CommandExecutorGitRepository) GetCurrentBranchName(verbose bool) (branc
 	}
 
 	if branchName == "" {
-		return "", errors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"Unable to get branch name for git repository '%s' on host '%s'. branchName is empty string after evaluation.",
 			path,
 			hostDescription,
@@ -744,19 +744,19 @@ func (c *CommandExecutorGitRepository) GetCurrentCommitHash(verbose bool) (curre
 
 func (c *CommandExecutorGitRepository) GetDirectoryByPath(pathToSubDir ...string) (subDir Directory, err error) {
 	if len(pathToSubDir) <= 0 {
-		return nil, errors.TracedError("pathToSubdir has no elements")
+		return nil, tracederrors.TracedError("pathToSubdir has no elements")
 	}
 
 	return c.GetSubDirectory(pathToSubDir...)
 }
 
 func (c *CommandExecutorGitRepository) GetGitStatusOutput(verbose bool) (output string, err error) {
-	return "", errors.TracedErrorNotImplemented()
+	return "", tracederrors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorGitRepository) GetHashByTagName(tagName string) (hash string, err error) {
 	if tagName == "" {
-		return "", errors.TracedErrorEmptyString("tagName")
+		return "", tracederrors.TracedErrorEmptyString("tagName")
 	}
 
 	stdoutLines, err := c.RunGitCommandAndGetStdoutAsLines(
@@ -777,7 +777,7 @@ func (c *CommandExecutorGitRepository) GetHashByTagName(tagName string) (hash st
 	hash = strings.TrimSpace(hash)
 
 	if hash == "" {
-		return "", errors.TracedError("hash is empty string after evaluation")
+		return "", tracederrors.TracedError("hash is empty string after evaluation")
 	}
 
 	return hash, nil
@@ -805,7 +805,7 @@ func (c *CommandExecutorGitRepository) GetRemoteConfigs(verbose bool) (remoteCon
 
 		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(lineCleaned)
 		if len(splitted) != 3 {
-			return nil, errors.TracedErrorf("Unable to parse '%s' as remote. splitted is '%v'", line, splitted)
+			return nil, tracederrors.TracedErrorf("Unable to parse '%s' as remote. splitted is '%v'", line, splitted)
 		}
 
 		remoteName := splitted[0]
@@ -831,7 +831,7 @@ func (c *CommandExecutorGitRepository) GetRemoteConfigs(verbose bool) (remoteCon
 		} else if remoteDirection == "(push)" {
 			remoteToModify.UrlPush = remoteUrl
 		} else {
-			return nil, errors.TracedErrorf("Unknown remoteDirection='%s'", remoteDirection)
+			return nil, tracederrors.TracedErrorf("Unknown remoteDirection='%s'", remoteDirection)
 		}
 	}
 
@@ -923,7 +923,7 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootD
 	}
 
 	if rootDirectoryPath == "" {
-		return "", errors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"rootDirectoryPath is empty string after evaluating root directory of git repository '%s' on host '%s'",
 			path,
 			hostDescription,
@@ -943,7 +943,7 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootD
 
 func (c *CommandExecutorGitRepository) GetTagByName(name string) (tag GitTag, err error) {
 	if name == "" {
-		return nil, errors.TracedErrorEmptyString("name")
+		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
 
 	toReturn := NewGitRepositoryTag()
@@ -1018,7 +1018,7 @@ func (c *CommandExecutorGitRepository) HasInitialCommit(verbose bool) (hasInitia
 	} else if stdout == "no" {
 		hasInitialCommit = false
 	} else {
-		return false, errors.TracedErrorf("Unexpected stdout='%s'", stdout)
+		return false, tracederrors.TracedErrorf("Unexpected stdout='%s'", stdout)
 	}
 
 	if verbose {
@@ -1098,7 +1098,7 @@ func (c *CommandExecutorGitRepository) HasUncommittedChanges(verbose bool) (hasU
 
 func (c *CommandExecutorGitRepository) Init(options *CreateRepositoryOptions) (err error) {
 	if options == nil {
-		return errors.TracedErrorNil("options")
+		return tracederrors.TracedErrorNil("options")
 	}
 
 	path, hostDescription, err := c.GetPathAndHostDescription()
@@ -1250,7 +1250,7 @@ func (c *CommandExecutorGitRepository) IsBareRepository(verbose bool) (isBare bo
 	} else if stdout == "true" {
 		isBare = true
 	} else {
-		return false, errors.TracedErrorf(
+		return false, tracederrors.TracedErrorf(
 			"Unknown is-bare-repositoy output '%s'",
 			stdout,
 		)
@@ -1359,7 +1359,7 @@ func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialite
 	} else if stdout == "no" {
 		isInitialited = false
 	} else {
-		return false, errors.TracedErrorNilf(
+		return false, tracederrors.TracedErrorNilf(
 			"Unexpected output='%s' when checking if git repository '%s' is initialized on host '%s'",
 			stdout,
 			path,
@@ -1451,7 +1451,7 @@ func (c *CommandExecutorGitRepository) ListTags(verbose bool) (tags []GitTag, er
 
 func (c *CommandExecutorGitRepository) ListTagsForCommitHash(hash string, verbose bool) (tags []GitTag, err error) {
 	if hash == "" {
-		return nil, errors.TracedErrorEmptyString("hash")
+		return nil, tracederrors.TracedErrorEmptyString("hash")
 	}
 
 	tagNames, err := c.RunGitCommandAndGetStdoutAsLines(
@@ -1992,7 +1992,7 @@ func (c *CommandExecutorGitRepository) Pull(verbose bool) (err error) {
 
 func (c *CommandExecutorGitRepository) PullFromRemote(pullOptions *GitPullFromRemoteOptions) (err error) {
 	if pullOptions == nil {
-		return errors.TracedError("pullOptions not set")
+		return tracederrors.TracedError("pullOptions not set")
 	}
 
 	remoteName, err := pullOptions.GetRemoteName()
@@ -2006,7 +2006,7 @@ func (c *CommandExecutorGitRepository) PullFromRemote(pullOptions *GitPullFromRe
 	}
 
 	if len(remoteName) <= 0 {
-		return errors.TracedError("remoteName is empty string")
+		return tracederrors.TracedError("remoteName is empty string")
 	}
 
 	path, hostDescription, err := c.GetPathAndHostDescription()
@@ -2066,7 +2066,7 @@ func (c *CommandExecutorGitRepository) Push(verbose bool) (err error) {
 
 func (c *CommandExecutorGitRepository) PushTagsToRemote(remoteName string, verbose bool) (err error) {
 	if len(remoteName) <= 0 {
-		return errors.TracedError("remoteName is empty string")
+		return tracederrors.TracedError("remoteName is empty string")
 	}
 
 	path, hostDescription, err := c.GetPathAndHostDescription()
@@ -2093,7 +2093,7 @@ func (c *CommandExecutorGitRepository) PushTagsToRemote(remoteName string, verbo
 
 func (c *CommandExecutorGitRepository) PushToRemote(remoteName string, verbose bool) (err error) {
 	if len(remoteName) <= 0 {
-		return errors.TracedError("remoteName is empty string")
+		return tracederrors.TracedError("remoteName is empty string")
 	}
 
 	_, err = c.RunGitCommand([]string{"push", remoteName}, verbose)
@@ -2139,7 +2139,7 @@ func (c *CommandExecutorGitRepository) RemoteByNameExists(remoteName string, ver
 
 func (c *CommandExecutorGitRepository) RemoteConfigurationExists(config *GitRemoteConfig, verbose bool) (exists bool, err error) {
 	if config == nil {
-		return false, errors.TracedError("config is nil")
+		return false, tracederrors.TracedError("config is nil")
 	}
 
 	remoteConfigs, err := c.GetRemoteConfigs(verbose)
@@ -2158,7 +2158,7 @@ func (c *CommandExecutorGitRepository) RemoteConfigurationExists(config *GitRemo
 
 func (c *CommandExecutorGitRepository) RemoveRemoteByName(remoteNameToRemove string, verbose bool) (err error) {
 	if len(remoteNameToRemove) <= 0 {
-		return errors.TracedError("remoteNameToRemove is empty string")
+		return tracederrors.TracedError("remoteNameToRemove is empty string")
 	}
 
 	remoteExists, err := c.RemoteByNameExists(remoteNameToRemove, verbose)
@@ -2194,7 +2194,7 @@ func (c *CommandExecutorGitRepository) RemoveRemoteByName(remoteNameToRemove str
 
 func (c *CommandExecutorGitRepository) RunGitCommand(gitCommand []string, verbose bool) (commandOutput *CommandOutput, err error) {
 	if len(gitCommand) <= 0 {
-		return nil, errors.TracedError("gitCommand has no elements")
+		return nil, tracederrors.TracedError("gitCommand has no elements")
 	}
 
 	path, err := c.GetPath()
@@ -2220,7 +2220,7 @@ func (c *CommandExecutorGitRepository) RunGitCommand(gitCommand []string, verbos
 
 func (c *CommandExecutorGitRepository) RunGitCommandAndGetStdoutAsLines(command []string, verbose bool) (lines []string, err error) {
 	if command == nil {
-		return nil, errors.TracedErrorNil("command")
+		return nil, tracederrors.TracedErrorNil("command")
 	}
 
 	output, err := c.RunGitCommand(command, verbose)
@@ -2274,7 +2274,7 @@ func (c *CommandExecutorGitRepository) SetDefaultAuthor(verbose bool) (err error
 
 func (c *CommandExecutorGitRepository) SetGitConfig(options *GitConfigSetOptions) (err error) {
 	if options == nil {
-		return errors.TracedErrorNil("options")
+		return tracederrors.TracedErrorNil("options")
 	}
 
 	if options.Email != "" {
@@ -2297,7 +2297,7 @@ func (c *CommandExecutorGitRepository) SetGitConfig(options *GitConfigSetOptions
 func (c *CommandExecutorGitRepository) SetRemoteUrl(remoteUrl string, verbose bool) (err error) {
 	remoteUrl = strings.TrimSpace(remoteUrl)
 	if len(remoteUrl) <= 0 {
-		return errors.TracedError("remoteUrl is empty string")
+		return tracederrors.TracedError("remoteUrl is empty string")
 	}
 
 	name := "origin"
@@ -2327,7 +2327,7 @@ func (c *CommandExecutorGitRepository) SetRemoteUrl(remoteUrl string, verbose bo
 
 func (c *CommandExecutorGitRepository) SetUserEmail(email string, verbose bool) (err error) {
 	if email == "" {
-		return errors.TracedErrorEmptyString("email")
+		return tracederrors.TracedErrorEmptyString("email")
 	}
 
 	_, err = c.RunGitCommand(
@@ -2357,7 +2357,7 @@ func (c *CommandExecutorGitRepository) SetUserEmail(email string, verbose bool) 
 
 func (c *CommandExecutorGitRepository) SetUserName(name string, verbose bool) (err error) {
 	if name == "" {
-		return errors.TracedErrorEmptyString("name")
+		return tracederrors.TracedErrorEmptyString("name")
 	}
 
 	_, err = c.RunGitCommand(

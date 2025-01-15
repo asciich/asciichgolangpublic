@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type X509CreateCertificateOptions struct {
@@ -31,7 +31,7 @@ func NewX509CreateCertificateOptions() (x *X509CreateCertificateOptions) {
 
 func (o *X509CreateCertificateOptions) GetCertificateOutputFilePath() (certOutputPath string, err error) {
 	if len(o.CertificateOutputFilePath) <= 0 {
-		return "", errors.TracedError("CertificateOutputFilePath not set")
+		return "", tracederrors.TracedError("CertificateOutputFilePath not set")
 	}
 
 	return o.CertificateOutputFilePath, nil
@@ -40,7 +40,7 @@ func (o *X509CreateCertificateOptions) GetCertificateOutputFilePath() (certOutpu
 func (o *X509CreateCertificateOptions) GetCommonName() (commonName string, err error) {
 	commonName = strings.TrimSpace(o.CommonName)
 	if len(commonName) <= 0 {
-		return "", errors.TracedError("commonName not set")
+		return "", tracederrors.TracedError("commonName not set")
 	}
 
 	return commonName, nil
@@ -49,7 +49,7 @@ func (o *X509CreateCertificateOptions) GetCommonName() (commonName string, err e
 func (o *X509CreateCertificateOptions) GetCountryName() (countryName string, err error) {
 	countryName = strings.TrimSpace(o.CountryName)
 	if len(countryName) <= 0 {
-		return "", errors.TracedError("countryName not set")
+		return "", tracederrors.TracedError("countryName not set")
 	}
 
 	return countryName, nil
@@ -65,7 +65,7 @@ func (o *X509CreateCertificateOptions) GetDeepCopy() (copy *X509CreateCertificat
 
 func (o *X509CreateCertificateOptions) GetIntermediateCertificateGopassCredential() (certificate *GopassCredential, err error) {
 	if o.IntermediateCertificateInGopass == nil {
-		return nil, errors.TracedError("IntermediateCertificateKeyInGopass not set")
+		return nil, tracederrors.TracedError("IntermediateCertificateKeyInGopass not set")
 	}
 
 	optionsToUse := o.IntermediateCertificateInGopass.GetDeepCopy()
@@ -81,7 +81,7 @@ func (o *X509CreateCertificateOptions) GetIntermediateCertificateGopassCredentia
 
 func (o *X509CreateCertificateOptions) GetIntermediateCertificateKeyGopassCredential() (key *GopassCredential, err error) {
 	if o.IntermediateCertificateInGopass == nil {
-		return nil, errors.TracedError("IntermediateCertificateKeyInGopass not set")
+		return nil, tracederrors.TracedError("IntermediateCertificateKeyInGopass not set")
 	}
 
 	optionsToUse := o.IntermediateCertificateInGopass.GetDeepCopy()
@@ -97,7 +97,7 @@ func (o *X509CreateCertificateOptions) GetIntermediateCertificateKeyGopassCreden
 
 func (o *X509CreateCertificateOptions) GetKeyOutputFilePath() (keyOutputPath string, err error) {
 	if len(o.KeyOutputFilePath) <= 0 {
-		return "", errors.TracedError("KeyOutputFilePath not set")
+		return "", tracederrors.TracedError("KeyOutputFilePath not set")
 	}
 
 	return o.KeyOutputFilePath, nil
@@ -106,7 +106,7 @@ func (o *X509CreateCertificateOptions) GetKeyOutputFilePath() (keyOutputPath str
 func (o *X509CreateCertificateOptions) GetLocallity() (locality string, err error) {
 	locality = strings.TrimSpace(o.Locality)
 	if len(locality) <= 0 {
-		return "", errors.TracedError("locality not set")
+		return "", tracederrors.TracedError("locality not set")
 	}
 
 	return locality, nil
@@ -152,11 +152,11 @@ func (o *X509CreateCertificateOptions) IsCertificateOutputFilePathSet() (isSet b
 
 func (x *X509CreateCertificateOptions) GetAdditionalSans() (additionalSans []string, err error) {
 	if x.AdditionalSans == nil {
-		return nil, errors.TracedErrorf("AdditionalSans not set")
+		return nil, tracederrors.TracedErrorf("AdditionalSans not set")
 	}
 
 	if len(x.AdditionalSans) <= 0 {
-		return nil, errors.TracedErrorf("AdditionalSans has no elements")
+		return nil, tracederrors.TracedErrorf("AdditionalSans has no elements")
 	}
 
 	return x.AdditionalSans, nil
@@ -164,7 +164,7 @@ func (x *X509CreateCertificateOptions) GetAdditionalSans() (additionalSans []str
 
 func (x *X509CreateCertificateOptions) GetIntermediateCertificateInGopass() (intermediateCertificateInGopass *GopassSecretOptions, err error) {
 	if x.IntermediateCertificateInGopass == nil {
-		return nil, errors.TracedErrorf("IntermediateCertificateInGopass not set")
+		return nil, tracederrors.TracedErrorf("IntermediateCertificateInGopass not set")
 	}
 
 	return x.IntermediateCertificateInGopass, nil
@@ -172,7 +172,7 @@ func (x *X509CreateCertificateOptions) GetIntermediateCertificateInGopass() (int
 
 func (x *X509CreateCertificateOptions) GetLocality() (locality string, err error) {
 	if x.Locality == "" {
-		return "", errors.TracedErrorf("Locality not set")
+		return "", tracederrors.TracedErrorf("Locality not set")
 	}
 
 	return x.Locality, nil
@@ -377,11 +377,11 @@ func (x *X509CreateCertificateOptions) MustSetVerbose(verbose bool) {
 
 func (x *X509CreateCertificateOptions) SetAdditionalSans(additionalSans []string) (err error) {
 	if additionalSans == nil {
-		return errors.TracedErrorf("additionalSans is nil")
+		return tracederrors.TracedErrorf("additionalSans is nil")
 	}
 
 	if len(additionalSans) <= 0 {
-		return errors.TracedErrorf("additionalSans has no elements")
+		return tracederrors.TracedErrorf("additionalSans has no elements")
 	}
 
 	x.AdditionalSans = additionalSans
@@ -391,7 +391,7 @@ func (x *X509CreateCertificateOptions) SetAdditionalSans(additionalSans []string
 
 func (x *X509CreateCertificateOptions) SetCertificateOutputFilePath(certificateOutputFilePath string) (err error) {
 	if certificateOutputFilePath == "" {
-		return errors.TracedErrorf("certificateOutputFilePath is empty string")
+		return tracederrors.TracedErrorf("certificateOutputFilePath is empty string")
 	}
 
 	x.CertificateOutputFilePath = certificateOutputFilePath
@@ -401,7 +401,7 @@ func (x *X509CreateCertificateOptions) SetCertificateOutputFilePath(certificateO
 
 func (x *X509CreateCertificateOptions) SetCommonName(commonName string) (err error) {
 	if commonName == "" {
-		return errors.TracedErrorf("commonName is empty string")
+		return tracederrors.TracedErrorf("commonName is empty string")
 	}
 
 	x.CommonName = commonName
@@ -411,7 +411,7 @@ func (x *X509CreateCertificateOptions) SetCommonName(commonName string) (err err
 
 func (x *X509CreateCertificateOptions) SetCountryName(countryName string) (err error) {
 	if countryName == "" {
-		return errors.TracedErrorf("countryName is empty string")
+		return tracederrors.TracedErrorf("countryName is empty string")
 	}
 
 	x.CountryName = countryName
@@ -421,7 +421,7 @@ func (x *X509CreateCertificateOptions) SetCountryName(countryName string) (err e
 
 func (x *X509CreateCertificateOptions) SetIntermediateCertificateInGopass(intermediateCertificateInGopass *GopassSecretOptions) (err error) {
 	if intermediateCertificateInGopass == nil {
-		return errors.TracedErrorf("intermediateCertificateInGopass is nil")
+		return tracederrors.TracedErrorf("intermediateCertificateInGopass is nil")
 	}
 
 	x.IntermediateCertificateInGopass = intermediateCertificateInGopass
@@ -431,7 +431,7 @@ func (x *X509CreateCertificateOptions) SetIntermediateCertificateInGopass(interm
 
 func (x *X509CreateCertificateOptions) SetKeyOutputFilePath(keyOutputFilePath string) (err error) {
 	if keyOutputFilePath == "" {
-		return errors.TracedErrorf("keyOutputFilePath is empty string")
+		return tracederrors.TracedErrorf("keyOutputFilePath is empty string")
 	}
 
 	x.KeyOutputFilePath = keyOutputFilePath
@@ -441,7 +441,7 @@ func (x *X509CreateCertificateOptions) SetKeyOutputFilePath(keyOutputFilePath st
 
 func (x *X509CreateCertificateOptions) SetLocality(locality string) (err error) {
 	if locality == "" {
-		return errors.TracedErrorf("locality is empty string")
+		return tracederrors.TracedErrorf("locality is empty string")
 	}
 
 	x.Locality = locality

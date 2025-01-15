@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitlabCreatePersonalAccessTokenOptions struct {
@@ -53,7 +53,7 @@ func (g *GitlabCreatePersonalAccessTokenOptions) MustSetVerbose(verbose bool) {
 
 func (g *GitlabCreatePersonalAccessTokenOptions) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	g.Name = name
@@ -69,7 +69,7 @@ func (g *GitlabCreatePersonalAccessTokenOptions) SetVerbose(verbose bool) (err e
 
 func (o *GitlabCreatePersonalAccessTokenOptions) GetName() (name string, err error) {
 	if len(o.Name) <= 0 {
-		return "", errors.TracedError("name not set")
+		return "", tracederrors.TracedError("name not set")
 	}
 
 	return o.Name, nil

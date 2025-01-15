@@ -2,8 +2,8 @@ package asciichgolangpublic
 
 import (
 	dto "github.com/prometheus/client_model/go"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type PrometheusParsedMetrics struct {
@@ -18,7 +18,7 @@ func NewPrometheusParsedMetrics() (p *PrometheusParsedMetrics) {
 // If the metric is not unique (e.g. a Vector with more than one value) this function will return an error.
 func (p *PrometheusParsedMetrics) GetMetricValueAsFloat64(metricName string) (metricValue float64, err error) {
 	if metricName == "" {
-		return -1, errors.TracedErrorEmptyString("metricName")
+		return -1, tracederrors.TracedErrorEmptyString("metricName")
 	}
 
 	nativeMetricFamilies, err := p.GetNativeMetricFamilies()
@@ -42,12 +42,12 @@ func (p *PrometheusParsedMetrics) GetMetricValueAsFloat64(metricName string) (me
 		}
 	}
 
-	return -1, errors.TracedErrorf("Metric '%s' not found.", metricName)
+	return -1, tracederrors.TracedErrorf("Metric '%s' not found.", metricName)
 }
 
 func (p *PrometheusParsedMetrics) GetNativeMetricFamilies() (nativeMetricFamilies map[string]*dto.MetricFamily, err error) {
 	if p.nativeMetricFamilies == nil {
-		return nil, errors.TracedError("nativeMetricFamilies not set")
+		return nil, tracederrors.TracedError("nativeMetricFamilies not set")
 	}
 	return p.nativeMetricFamilies, nil
 }

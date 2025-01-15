@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type SSHPublicKeysService struct{}
@@ -19,7 +19,7 @@ func SSHPublicKeys() (sshPublicKeys *SSHPublicKeysService) {
 
 func (s *SSHPublicKeysService) LoadKeysFromFile(sshKeysFile File, verbose bool) (sshKeys []*SSHPublicKey, err error) {
 	if sshKeysFile == nil {
-		return nil, errors.TracedError("sshKeysFile is nil")
+		return nil, tracederrors.TracedError("sshKeysFile is nil")
 	}
 
 	filePath, err := sshKeysFile.GetLocalPath()

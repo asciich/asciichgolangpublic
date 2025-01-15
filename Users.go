@@ -4,8 +4,8 @@ import (
 	"os"
 	"os/user"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type UsersService struct {
@@ -100,7 +100,7 @@ func (u *UsersService) GetCurrentUserName(verbose bool) (currentUserName string,
 	currentUserName = nativeUser.Username
 
 	if currentUserName == "" {
-		return "", errors.TracedError("currentUserName is empty string after evaluation")
+		return "", tracederrors.TracedError("currentUserName is empty string after evaluation")
 	}
 
 	if verbose {
@@ -112,7 +112,7 @@ func (u *UsersService) GetCurrentUserName(verbose bool) (currentUserName string,
 
 func (u *UsersService) GetDirectoryInHomeDirectory(path ...string) (fileInUnsersHome Directory, err error) {
 	if len(path) <= 0 {
-		return nil, errors.TracedError("path has no length")
+		return nil, tracederrors.TracedError("path has no length")
 	}
 
 	usersHome, err := u.GetHomeDirectory()
@@ -130,7 +130,7 @@ func (u *UsersService) GetDirectoryInHomeDirectory(path ...string) (fileInUnsers
 
 func (u *UsersService) GetFileInHomeDirectory(path ...string) (fileInUnsersHome File, err error) {
 	if len(path) <= 0 {
-		return nil, errors.TracedError("path has no length")
+		return nil, tracederrors.TracedError("path has no length")
 	}
 
 	usersHome, err := u.GetHomeDirectory()
@@ -148,7 +148,7 @@ func (u *UsersService) GetFileInHomeDirectory(path ...string) (fileInUnsersHome 
 
 func (u *UsersService) GetFileInHomeDirectoryAsLocalFile(path ...string) (localFile *LocalFile, err error) {
 	if len(path) <= 0 {
-		return nil, errors.TracedError("path is empty")
+		return nil, tracederrors.TracedError("path is empty")
 	}
 
 	fileToReturn, err := u.GetFileInHomeDirectory(path...)
@@ -158,7 +158,7 @@ func (u *UsersService) GetFileInHomeDirectoryAsLocalFile(path ...string) (localF
 
 	localFile, ok := fileToReturn.(*LocalFile)
 	if !ok {
-		return nil, errors.TracedError("Unable to convert to local file")
+		return nil, tracederrors.TracedError("Unable to convert to local file")
 	}
 
 	return localFile, nil

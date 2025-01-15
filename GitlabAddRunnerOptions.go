@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitlabAddRunnerOptions struct {
@@ -19,7 +19,7 @@ func NewGitlabAddRunnerOptions() (g *GitlabAddRunnerOptions) {
 
 func (g *GitlabAddRunnerOptions) GetName() (name string, err error) {
 	if g.Name == "" {
-		return "", errors.TracedErrorf("Name not set")
+		return "", tracederrors.TracedErrorf("Name not set")
 	}
 
 	return g.Name, nil
@@ -27,11 +27,11 @@ func (g *GitlabAddRunnerOptions) GetName() (name string, err error) {
 
 func (g *GitlabAddRunnerOptions) GetRunnerTags() (runnerTags []string, err error) {
 	if g.RunnerTags == nil {
-		return nil, errors.TracedErrorf("RunnerTags not set")
+		return nil, tracederrors.TracedErrorf("RunnerTags not set")
 	}
 
 	if len(g.RunnerTags) <= 0 {
-		return nil, errors.TracedErrorf("RunnerTags has no elements")
+		return nil, tracederrors.TracedErrorf("RunnerTags has no elements")
 	}
 
 	return g.RunnerTags, nil
@@ -119,7 +119,7 @@ func (g *GitlabAddRunnerOptions) MustSetVerbose(verbose bool) {
 
 func (g *GitlabAddRunnerOptions) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	g.Name = name
@@ -129,11 +129,11 @@ func (g *GitlabAddRunnerOptions) SetName(name string) (err error) {
 
 func (g *GitlabAddRunnerOptions) SetRunnerTags(runnerTags []string) (err error) {
 	if runnerTags == nil {
-		return errors.TracedErrorf("runnerTags is nil")
+		return tracederrors.TracedErrorf("runnerTags is nil")
 	}
 
 	if len(runnerTags) <= 0 {
-		return errors.TracedErrorf("runnerTags has no elements")
+		return tracederrors.TracedErrorf("runnerTags has no elements")
 	}
 
 	g.RunnerTags = runnerTags
@@ -149,7 +149,7 @@ func (g *GitlabAddRunnerOptions) SetVerbose(verbose bool) (err error) {
 
 func (o *GitlabAddRunnerOptions) GetRunnerName() (runnerName string, err error) {
 	if len(o.Name) <= 0 {
-		return "", errors.TracedError("Name not set")
+		return "", tracederrors.TracedError("Name not set")
 	}
 
 	return o.Name, nil
@@ -157,7 +157,7 @@ func (o *GitlabAddRunnerOptions) GetRunnerName() (runnerName string, err error) 
 
 func (o *GitlabAddRunnerOptions) GetTags() (runnerTags []string, err error) {
 	if len(o.RunnerTags) <= 0 {
-		return nil, errors.TracedError("RunnerTags not set")
+		return nil, tracederrors.TracedError("RunnerTags not set")
 	}
 
 	return o.RunnerTags, nil

@@ -2,8 +2,8 @@ package kvm
 
 import (
 	"github.com/asciich/asciichgolangpublic"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type KvmCreateVmOptions struct {
@@ -19,7 +19,7 @@ func NewKvmCreateVmOptions() (k *KvmCreateVmOptions) {
 
 func (k *KvmCreateVmOptions) GetDiskImage() (diskImage asciichgolangpublic.File, err error) {
 	if k.DiskImage == nil {
-		return nil, errors.TracedErrorf("DiskImage not set")
+		return nil, tracederrors.TracedErrorf("DiskImage not set")
 	}
 
 	return k.DiskImage, nil
@@ -41,7 +41,7 @@ func (k *KvmCreateVmOptions) GetDiskImagePath() (diskImagePath string, err error
 
 func (k *KvmCreateVmOptions) GetMacAddress() (macAddress string, err error) {
 	if k.MacAddress == "" {
-		return "", errors.TracedErrorf("MacAddress not set")
+		return "", tracederrors.TracedErrorf("MacAddress not set")
 	}
 
 	return k.MacAddress, nil
@@ -54,7 +54,7 @@ func (k *KvmCreateVmOptions) GetVerbose() (verbose bool, err error) {
 
 func (k *KvmCreateVmOptions) GetVmName() (vmName string, err error) {
 	if k.VmName == "" {
-		return "", errors.TracedErrorf("VmName not set")
+		return "", tracederrors.TracedErrorf("VmName not set")
 	}
 
 	return k.VmName, nil
@@ -135,7 +135,7 @@ func (k *KvmCreateVmOptions) MustSetVmName(vmName string) {
 
 func (k *KvmCreateVmOptions) SetDiskImage(diskImage asciichgolangpublic.File) (err error) {
 	if diskImage == nil {
-		return errors.TracedErrorf("diskImage is nil")
+		return tracederrors.TracedErrorf("diskImage is nil")
 	}
 
 	k.DiskImage = diskImage
@@ -145,7 +145,7 @@ func (k *KvmCreateVmOptions) SetDiskImage(diskImage asciichgolangpublic.File) (e
 
 func (k *KvmCreateVmOptions) SetMacAddress(macAddress string) (err error) {
 	if macAddress == "" {
-		return errors.TracedErrorf("macAddress is empty string")
+		return tracederrors.TracedErrorf("macAddress is empty string")
 	}
 
 	k.MacAddress = macAddress
@@ -161,7 +161,7 @@ func (k *KvmCreateVmOptions) SetVerbose(verbose bool) (err error) {
 
 func (k *KvmCreateVmOptions) SetVmName(vmName string) (err error) {
 	if vmName == "" {
-		return errors.TracedErrorf("vmName is empty string")
+		return tracederrors.TracedErrorf("vmName is empty string")
 	}
 
 	k.VmName = vmName

@@ -1,17 +1,17 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 func GetCommandExecutorFileByPath(commandExector CommandExecutor, path string) (commandExecutorFile *CommandExecutorFile, err error) {
 	if commandExector == nil {
-		return nil, errors.TracedErrorNil("commandExecutor")
+		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
 
 	if path == "" {
-		return nil, errors.TracedErrorEmptyString("path")
+		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
 
 	commandExecutorFile = NewCommandExecutorFile()
@@ -31,7 +31,7 @@ func GetCommandExecutorFileByPath(commandExector CommandExecutor, path string) (
 
 func GetLocalCommandExecutorFileByFile(file File, verbose bool) (commandExecutorFile *CommandExecutorFile, err error) {
 	if file == nil {
-		return nil, errors.TracedErrorEmptyString("file")
+		return nil, tracederrors.TracedErrorEmptyString("file")
 	}
 
 	err = file.CheckIsLocalFile(verbose)
@@ -54,7 +54,7 @@ func GetLocalCommandExecutorFileByFile(file File, verbose bool) (commandExecutor
 
 func GetLocalCommandExecutorFileByPath(localPath string) (commandExecutorFile *CommandExecutorFile, err error) {
 	if localPath == "" {
-		return nil, errors.TracedErrorEmptyString(localPath)
+		return nil, tracederrors.TracedErrorEmptyString(localPath)
 	}
 
 	return GetCommandExecutorFileByPath(Bash(), localPath)

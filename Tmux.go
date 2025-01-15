@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type TmuxService struct {
@@ -42,7 +42,7 @@ func (t *TmuxService) GetCommandExecutor() (commandExecutor CommandExecutor, err
 
 func (t *TmuxService) GetSessionByName(name string) (tmuxSession *TmuxSession, err error) {
 	if name == "" {
-		return nil, errors.TracedErrorEmptyString("name")
+		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
 
 	tmuxSession = NewTmuxSession()
@@ -62,11 +62,11 @@ func (t *TmuxService) GetSessionByName(name string) (tmuxSession *TmuxSession, e
 
 func (t *TmuxService) GetWindowByNames(sessionName string, windowName string) (window *TmuxWindow, err error) {
 	if sessionName == "" {
-		return nil, errors.TracedErrorEmptyString("sessionName")
+		return nil, tracederrors.TracedErrorEmptyString("sessionName")
 	}
 
 	if windowName == "" {
-		return nil, errors.TracedErrorEmptyString("windowName")
+		return nil, tracederrors.TracedErrorEmptyString("windowName")
 	}
 
 	session, err := t.GetSessionByName(sessionName)
@@ -105,7 +105,7 @@ func (t *TmuxService) ListSessionNames(verbose bool) (sessionNames []string, err
 		toAdd = strings.TrimSpace(toAdd)
 
 		if toAdd == "" {
-			return nil, errors.TracedErrorf(
+			return nil, tracederrors.TracedErrorf(
 				"toAdd is empty string after extracting session name from line='%s'",
 				line,
 			)

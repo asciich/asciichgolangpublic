@@ -5,9 +5,9 @@ import (
 
 	"github.com/asciich/asciichgolangpublic"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/hosts"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type KubernetesNodeHost struct {
@@ -16,7 +16,7 @@ type KubernetesNodeHost struct {
 
 func GetKubernetesNodeByHost(host hosts.Host) (kubernetesNodeHost *KubernetesNodeHost, err error) {
 	if host == nil {
-		return nil, errors.TracedErrorNil("host")
+		return nil, tracederrors.TracedErrorNil("host")
 	}
 
 	kubernetesNodeHost = NewKubernetesNodeHost()
@@ -28,7 +28,7 @@ func GetKubernetesNodeByHost(host hosts.Host) (kubernetesNodeHost *KubernetesNod
 
 func GetKubernetesNodeByHostname(hostname string) (kubernetesNodeHost *KubernetesNodeHost, err error) {
 	if len(hostname) <= 0 {
-		return nil, errors.TracedError("hostname is empty string")
+		return nil, tracederrors.TracedError("hostname is empty string")
 	}
 
 	host, err := hosts.GetHostByHostname("hostname")
@@ -74,7 +74,7 @@ func (k *KubernetesNodeHost) CheckIsKubernetesNode(verbose bool) (isKubernetesNo
 	}
 
 	if !isKubernetesNode {
-		return false, errors.TracedErrorf("Host '%s' is not a kubernetes node", hostname)
+		return false, tracederrors.TracedErrorf("Host '%s' is not a kubernetes node", hostname)
 	}
 
 	return isKubernetesNode, nil

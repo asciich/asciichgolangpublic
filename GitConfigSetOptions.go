@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitConfigSetOptions struct {
@@ -17,7 +17,7 @@ func NewGitConfigSetOptions() (g *GitConfigSetOptions) {
 
 func (g *GitConfigSetOptions) GetEmail() (email string, err error) {
 	if g.Email == "" {
-		return "", errors.TracedErrorf("Email not set")
+		return "", tracederrors.TracedErrorf("Email not set")
 	}
 
 	return g.Email, nil
@@ -25,7 +25,7 @@ func (g *GitConfigSetOptions) GetEmail() (email string, err error) {
 
 func (g *GitConfigSetOptions) GetName() (name string, err error) {
 	if g.Name == "" {
-		return "", errors.TracedErrorf("Name not set")
+		return "", tracederrors.TracedErrorf("Name not set")
 	}
 
 	return g.Name, nil
@@ -78,7 +78,7 @@ func (g *GitConfigSetOptions) MustSetName(name string) {
 
 func (g *GitConfigSetOptions) SetEmail(email string) (err error) {
 	if email == "" {
-		return errors.TracedErrorf("email is empty string")
+		return tracederrors.TracedErrorf("email is empty string")
 	}
 
 	g.Email = email
@@ -88,7 +88,7 @@ func (g *GitConfigSetOptions) SetEmail(email string) (err error) {
 
 func (g *GitConfigSetOptions) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	g.Name = name

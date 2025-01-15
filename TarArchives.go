@@ -10,8 +10,8 @@ import (
 	"time"
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	aerrors "github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type TarArchivesService struct {
@@ -27,15 +27,15 @@ func TarArchives() (t *TarArchivesService) {
 
 func (t *TarArchivesService) AddFileFromFileContentBytesToTarArchiveBytes(archiveToExtend []byte, fileName string, content []byte) (tarBytes []byte, err error) {
 	if archiveToExtend == nil {
-		return nil, aerrors.TracedErrorNil("archiveToExtend")
+		return nil, tracederrors.TracedErrorNil("archiveToExtend")
 	}
 
 	if fileName == "" {
-		return nil, aerrors.TracedErrorEmptyString("fileName")
+		return nil, tracederrors.TracedErrorEmptyString("fileName")
 	}
 
 	if content == nil {
-		return nil, aerrors.TracedErrorNil("content")
+		return nil, tracederrors.TracedErrorNil("content")
 	}
 
 	sizeBeforeWriting := len(archiveToExtend)
@@ -52,7 +52,7 @@ func (t *TarArchivesService) AddFileFromFileContentBytesToTarArchiveBytes(archiv
 	sizeAfterWriting := len(tarBytes)
 
 	if sizeAfterWriting <= sizeBeforeWriting {
-		return nil, aerrors.TracedError("Internal error: archive size did not grow after writing.")
+		return nil, tracederrors.TracedError("Internal error: archive size did not grow after writing.")
 	}
 
 	return tarBytes, err
@@ -60,15 +60,15 @@ func (t *TarArchivesService) AddFileFromFileContentBytesToTarArchiveBytes(archiv
 
 func (t *TarArchivesService) AddFileFromFileContentStringToTarArchiveBytes(archiveToExtend []byte, fileName string, content string) (tarBytes []byte, err error) {
 	if archiveToExtend == nil {
-		return nil, aerrors.TracedErrorNil("archiveToExtend")
+		return nil, tracederrors.TracedErrorNil("archiveToExtend")
 	}
 
 	if fileName == "" {
-		return nil, aerrors.TracedErrorEmptyString("fileName")
+		return nil, tracederrors.TracedErrorEmptyString("fileName")
 	}
 
 	if content == "" {
-		return nil, aerrors.TracedErrorEmptyString("content")
+		return nil, tracederrors.TracedErrorEmptyString("content")
 	}
 
 	tarBytes, err = t.AddFileFromFileContentBytesToTarArchiveBytes(archiveToExtend, fileName, []byte(content))
@@ -81,15 +81,15 @@ func (t *TarArchivesService) AddFileFromFileContentStringToTarArchiveBytes(archi
 
 func (t *TarArchivesService) CreateTarArchiveFromFileContentByteIntoWriter(ioWriter io.Writer, fileName string, content []byte) (err error) {
 	if fileName == "" {
-		return aerrors.TracedErrorEmptyString("fileName")
+		return tracederrors.TracedErrorEmptyString("fileName")
 	}
 
 	if content == nil {
-		return aerrors.TracedErrorNil("content")
+		return tracederrors.TracedErrorNil("content")
 	}
 
 	if ioWriter == nil {
-		return aerrors.TracedErrorNil("tarWriter")
+		return tracederrors.TracedErrorNil("tarWriter")
 	}
 
 	err = t.WriteFileContentBytesIntoWriter(ioWriter, fileName, content)
@@ -102,11 +102,11 @@ func (t *TarArchivesService) CreateTarArchiveFromFileContentByteIntoWriter(ioWri
 
 func (t *TarArchivesService) CreateTarArchiveFromFileContentStringAndGetAsBytes(fileName string, content string) (tarBytes []byte, err error) {
 	if fileName == "" {
-		return nil, aerrors.TracedErrorEmptyString("fileName")
+		return nil, tracederrors.TracedErrorEmptyString("fileName")
 	}
 
 	if content == "" {
-		return nil, aerrors.TracedErrorEmptyString("content")
+		return nil, tracederrors.TracedErrorEmptyString("content")
 	}
 
 	var b bytes.Buffer
@@ -119,7 +119,7 @@ func (t *TarArchivesService) CreateTarArchiveFromFileContentStringAndGetAsBytes(
 
 	err = tarWriter.Flush()
 	if err != nil {
-		return nil, aerrors.TracedErrorf("flush tarWriter failed: '%w'", err)
+		return nil, tracederrors.TracedErrorf("flush tarWriter failed: '%w'", err)
 	}
 
 	bufferReader := bufio.NewReader(&b)
@@ -129,11 +129,11 @@ func (t *TarArchivesService) CreateTarArchiveFromFileContentStringAndGetAsBytes(
 	tarBytes = make([]byte, bufferLen)
 	nReadBytes, err := io.ReadFull(bufferReader, tarBytes)
 	if err != nil {
-		return nil, aerrors.TracedErrorf("ReadFull on tarBytes failed: '%d'", err)
+		return nil, tracederrors.TracedErrorf("ReadFull on tarBytes failed: '%d'", err)
 	}
 
 	if bufferLen != nReadBytes {
-		return nil, aerrors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Internal error: bufferLen '%d' does not match nReadBytes '%d'",
 			bufferLen,
 			nReadBytes,
@@ -145,15 +145,15 @@ func (t *TarArchivesService) CreateTarArchiveFromFileContentStringAndGetAsBytes(
 
 func (t *TarArchivesService) CreateTarArchiveFromFileContentStringIntoWriter(fileName string, content string, ioWriter io.Writer) (err error) {
 	if fileName == "" {
-		return aerrors.TracedErrorEmptyString("fileName")
+		return tracederrors.TracedErrorEmptyString("fileName")
 	}
 
 	if content == "" {
-		return aerrors.TracedErrorEmptyString("content")
+		return tracederrors.TracedErrorEmptyString("content")
 	}
 
 	if ioWriter == nil {
-		return aerrors.TracedErrorNil("tarWriter")
+		return tracederrors.TracedErrorNil("tarWriter")
 	}
 
 	err = t.CreateTarArchiveFromFileContentByteIntoWriter(ioWriter, fileName, []byte(content))
@@ -166,7 +166,7 @@ func (t *TarArchivesService) CreateTarArchiveFromFileContentStringIntoWriter(fil
 
 func (t *TarArchivesService) ListFileNamesFromTarArchiveBytes(archiveBytes []byte) (fileNames []string, err error) {
 	if archiveBytes == nil {
-		return nil, aerrors.TracedErrorNil("archiveBytes")
+		return nil, tracederrors.TracedErrorNil("archiveBytes")
 	}
 
 	bytesReader := bytes.NewReader(archiveBytes)
@@ -180,7 +180,7 @@ func (t *TarArchivesService) ListFileNamesFromTarArchiveBytes(archiveBytes []byt
 				break
 			}
 
-			return nil, aerrors.TracedErrorf(
+			return nil, tracederrors.TracedErrorf(
 				"Reading next header in tar archive failed: %w",
 				err,
 			)
@@ -273,15 +273,15 @@ func (t *TarArchivesService) MustWriteFileContentBytesIntoWriter(ioWriter io.Wri
 
 func (t *TarArchivesService) ReadFileFromTarArchiveBytesAsBytes(archiveBytes []byte, fileNameToRead string) (content []byte, err error) {
 	if archiveBytes == nil {
-		return nil, aerrors.TracedErrorNil("archiveBytes")
+		return nil, tracederrors.TracedErrorNil("archiveBytes")
 	}
 
 	if fileNameToRead == "" {
-		return nil, aerrors.TracedErrorEmptyString("fileNameToRead")
+		return nil, tracederrors.TracedErrorEmptyString("fileNameToRead")
 	}
 
 	if len(archiveBytes) <= 0 {
-		return nil, aerrors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Unable to read '%s' from empty tar archive. len(archiveBytes) is 0.",
 			fileNameToRead,
 		)
@@ -297,7 +297,7 @@ func (t *TarArchivesService) ReadFileFromTarArchiveBytesAsBytes(archiveBytes []b
 				break
 			}
 
-			return nil, aerrors.TracedErrorf(
+			return nil, tracederrors.TracedErrorf(
 				"Reading next header in tar archive failed: %w",
 				err,
 			)
@@ -312,7 +312,7 @@ func (t *TarArchivesService) ReadFileFromTarArchiveBytesAsBytes(archiveBytes []b
 					// If file was finished to early the next check will catch that error by
 					// comparing the expected to the actual read bytes.
 				} else {
-					return nil, aerrors.TracedErrorf(
+					return nil, tracederrors.TracedErrorf(
 						"Reading file in tar archive failed: %w",
 						err,
 					)
@@ -320,7 +320,7 @@ func (t *TarArchivesService) ReadFileFromTarArchiveBytesAsBytes(archiveBytes []b
 			}
 
 			if nBytesRead != int(header.Size) {
-				return nil, aerrors.TracedErrorf(
+				return nil, tracederrors.TracedErrorf(
 					"Reading file '%s' from tar archive bytes failed. Expected '%d' bytes to read but go '%d'.",
 					fileNameToRead,
 					header.Size,
@@ -333,7 +333,7 @@ func (t *TarArchivesService) ReadFileFromTarArchiveBytesAsBytes(archiveBytes []b
 	}
 
 	if content == nil {
-		return nil, aerrors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Unable to read '%s' from given archive bytes. '%s' was not found.",
 			fileNameToRead,
 			fileNameToRead,
@@ -354,15 +354,15 @@ func (t *TarArchivesService) ReadFileFromTarArchiveBytesAsString(archiveBytes []
 
 func (t *TarArchivesService) WriteFileContentBytesIntoWriter(ioWriter io.Writer, fileName string, content []byte) (err error) {
 	if fileName == "" {
-		return aerrors.TracedErrorEmptyString("fileName")
+		return tracederrors.TracedErrorEmptyString("fileName")
 	}
 
 	if content == nil {
-		return aerrors.TracedErrorNil("content")
+		return tracederrors.TracedErrorNil("content")
 	}
 
 	if ioWriter == nil {
-		return aerrors.TracedErrorNil("tarWriter")
+		return tracederrors.TracedErrorNil("tarWriter")
 	}
 
 	fileSize := int64(len(content))
@@ -377,7 +377,7 @@ func (t *TarArchivesService) WriteFileContentBytesIntoWriter(ioWriter io.Writer,
 
 	err = tarWriter.WriteHeader(header)
 	if err != nil {
-		return aerrors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"Write tar header failed: '%w'", err,
 		)
 	}
@@ -386,7 +386,7 @@ func (t *TarArchivesService) WriteFileContentBytesIntoWriter(ioWriter io.Writer,
 
 	nBytesWritten, err := io.Copy(ioWriter, contentReader)
 	if err != nil {
-		return aerrors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"Write tar body failed: '%w'", err,
 		)
 	}
@@ -394,13 +394,13 @@ func (t *TarArchivesService) WriteFileContentBytesIntoWriter(ioWriter io.Writer,
 	requiredPaddingBytes := 512 - (len(content) % 512)
 	writtenPaddingBytes, err := ioWriter.Write(make([]byte, requiredPaddingBytes))
 	if err != nil {
-		return aerrors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"Write padding bytes failed: '%w'", err,
 		)
 	}
 
 	if requiredPaddingBytes != writtenPaddingBytes {
-		return aerrors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"writting tar padding bytes failed. Expected to write '%d' bytes but '%d' were written",
 			requiredPaddingBytes,
 			writtenPaddingBytes,
@@ -408,7 +408,7 @@ func (t *TarArchivesService) WriteFileContentBytesIntoWriter(ioWriter io.Writer,
 	}
 
 	if nBytesWritten != fileSize {
-		return aerrors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"writing '%s' to tar archive failed. Content to write has len '%d' but '%d' bytes were written",
 			fileName,
 			len(content),

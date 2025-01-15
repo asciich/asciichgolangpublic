@@ -2,9 +2,9 @@ package docker
 
 import (
 	"github.com/asciich/asciichgolangpublic/containers"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/hosts"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type Docker interface {
@@ -16,11 +16,11 @@ type Docker interface {
 
 func GetDockerContainerOnHost(host hosts.Host, containerName string) (dockerContainer containers.Container, err error) {
 	if host == nil {
-		return nil, errors.TracedErrorNil("host")
+		return nil, tracederrors.TracedErrorNil("host")
 	}
 
 	if containerName == "" {
-		return nil, errors.TracedErrorEmptyString("containerName")
+		return nil, tracederrors.TracedErrorEmptyString("containerName")
 	}
 
 	docker, err := GetDockerOnHost(host)
@@ -33,7 +33,7 @@ func GetDockerContainerOnHost(host hosts.Host, containerName string) (dockerCont
 
 func GetDockerOnHost(host hosts.Host) (docker Docker, err error) {
 	if host == nil {
-		return nil, errors.TracedErrorNil("host")
+		return nil, tracederrors.TracedErrorNil("host")
 	}
 
 	return GetCommandExecutorDockerOnHost(host)

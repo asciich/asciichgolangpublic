@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type KvmStoragePool struct {
@@ -33,7 +33,7 @@ func (k *KvmStoragePool) GetHostName() (hostname string, err error) {
 
 func (k *KvmStoragePool) GetHypervisor() (hypervisor *KVMHypervisor, err error) {
 	if k.hypervisor == nil {
-		return nil, errors.TracedError("hypervisor not set")
+		return nil, tracederrors.TracedError("hypervisor not set")
 	}
 
 	return k.hypervisor, nil
@@ -41,7 +41,7 @@ func (k *KvmStoragePool) GetHypervisor() (hypervisor *KVMHypervisor, err error) 
 
 func (k *KvmStoragePool) GetName() (name string, err error) {
 	if len(k.name) <= 0 {
-		return "", errors.TracedError("name not set")
+		return "", tracederrors.TracedError("name not set")
 	}
 
 	return k.name, nil
@@ -75,13 +75,13 @@ func (k *KvmStoragePool) GetVolumes(verbose bool) (volumes []*KvmVolume, err err
 	firstLine, unparsedOutput := astrings.SplitFirstLineAndContent(listPoolOutput)
 	firstLine = strings.TrimSpace(firstLine)
 	if !strings.HasPrefix(firstLine, "Name") {
-		return nil, errors.TracedErrorf("Unexpected first line of list volumes output: '%s'", firstLine)
+		return nil, tracederrors.TracedErrorf("Unexpected first line of list volumes output: '%s'", firstLine)
 	}
 
 	secondLine, unparsedOutput := astrings.SplitFirstLineAndContent(unparsedOutput)
 	secondLine = strings.TrimSpace(secondLine)
 	if strings.Count(secondLine, "-") < 5 {
-		return nil, errors.TracedErrorf("Unexpected second line of list volumes output: '%s'", secondLine)
+		return nil, tracederrors.TracedErrorf("Unexpected second line of list volumes output: '%s'", secondLine)
 	}
 
 	volumes = []*KvmVolume{}
@@ -93,7 +93,7 @@ func (k *KvmStoragePool) GetVolumes(verbose bool) (volumes []*KvmVolume, err err
 
 		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(line)
 		if len(splitted) != 2 {
-			return nil, errors.TracedErrorf("Unable to splitt list volume line '%v' : '%v'", line, splitted)
+			return nil, tracederrors.TracedErrorf("Unable to splitt list volume line '%v' : '%v'", line, splitted)
 		}
 
 		nameToAdd := splitted[0]
@@ -174,7 +174,7 @@ func (k *KvmStoragePool) MustSetName(name string) {
 
 func (k *KvmStoragePool) SetHypervisor(hypervisor *KVMHypervisor) (err error) {
 	if hypervisor == nil {
-		return errors.TracedError("hypervisor is nil")
+		return tracederrors.TracedError("hypervisor is nil")
 	}
 
 	k.hypervisor = hypervisor
@@ -184,7 +184,7 @@ func (k *KvmStoragePool) SetHypervisor(hypervisor *KVMHypervisor) (err error) {
 
 func (k *KvmStoragePool) SetName(name string) (err error) {
 	if len(name) <= 0 {
-		return errors.TracedError("name is nil")
+		return tracederrors.TracedError("name is nil")
 	}
 
 	k.name = name

@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type X509CertificatesService struct {
@@ -23,11 +23,11 @@ func X509Certificates() (x509Certificaets *X509CertificatesService) {
 
 func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey Directory, err error) {
 	if createOptions == nil {
-		return nil, errors.TracedError("createOptions is nil")
+		return nil, tracederrors.TracedError("createOptions is nil")
 	}
 
 	if !createOptions.GetUseTemporaryDirectory() {
-		return nil, errors.TracedError("Only implemented for temporary directory")
+		return nil, tracederrors.TracedError("Only implemented for temporary directory")
 	}
 
 	directoryToUse, err := TemporaryDirectories().CreateEmptyTemporaryDirectory(createOptions.Verbose)
@@ -75,11 +75,11 @@ func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(cre
 func (c *X509CertificatesService) CreateRootCaAndaddToGopass(createOptions *X509CreateCertificateOptions, gopassOptions *GopassSecretOptions) (err error) {
 
 	if createOptions == nil {
-		return errors.TracedError("createOptions is nil")
+		return tracederrors.TracedError("createOptions is nil")
 	}
 
 	if gopassOptions == nil {
-		return errors.TracedError("gopassOptions is nil")
+		return tracederrors.TracedError("gopassOptions is nil")
 	}
 
 	if createOptions.Verbose {
@@ -115,7 +115,7 @@ func (c *X509CertificatesService) CreateRootCaAndaddToGopass(createOptions *X509
 			return err
 		}
 
-		return errors.TracedErrorf("Internal error: certFile '%v' does not exist", certFileLocalPath)
+		return tracederrors.TracedErrorf("Internal error: certFile '%v' does not exist", certFileLocalPath)
 	}
 
 	keyFileExists, err := keyFile.Exists(createOptions.Verbose)
@@ -129,7 +129,7 @@ func (c *X509CertificatesService) CreateRootCaAndaddToGopass(createOptions *X509
 			return err
 		}
 
-		return errors.TracedErrorf("Internal error: keyFileExists '%v' does not exist", keyFileLocalPath)
+		return tracederrors.TracedErrorf("Internal error: keyFileExists '%v' does not exist", keyFileLocalPath)
 	}
 
 	certOptions := gopassOptions.GetDeepCopy()
@@ -165,11 +165,11 @@ func (c *X509CertificatesService) CreateRootCaAndaddToGopass(createOptions *X509
 
 func (c *X509CertificatesService) CreateRootCaIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey Directory, err error) {
 	if createOptions == nil {
-		return nil, errors.TracedError("createOptions is nil")
+		return nil, tracederrors.TracedError("createOptions is nil")
 	}
 
 	if !createOptions.GetUseTemporaryDirectory() {
-		return nil, errors.TracedError("Only implemented for temporary directory")
+		return nil, tracederrors.TracedError("Only implemented for temporary directory")
 	}
 
 	directoryToUse, err := TemporaryDirectories().CreateEmptyTemporaryDirectory(createOptions.Verbose)
@@ -239,7 +239,7 @@ func (c *X509CertificatesService) CreateRootCaIntoDirectory(createOptions *X509C
 
 func (c *X509CertificatesService) CreateSignedCertificate(createOptions *X509CreateCertificateOptions) (err error) {
 	if createOptions == nil {
-		return errors.TracedError("createOptions is nil")
+		return tracederrors.TracedError("createOptions is nil")
 	}
 
 	outputKeyOnStdout := false
@@ -508,15 +508,15 @@ func (c *X509CertificatesService) CreateSignedCertificate(createOptions *X509Cre
 
 func (c *X509CertificatesService) CreateSignedIntermediateCertificateAndAddToGopass(createOptions *X509CreateCertificateOptions, rootCaInGopass *GopassSecretOptions, intermediateGopassOptions *GopassSecretOptions) (err error) {
 	if createOptions == nil {
-		return errors.TracedError("createOptions is nil")
+		return tracederrors.TracedError("createOptions is nil")
 	}
 
 	if rootCaInGopass == nil {
-		return errors.TracedError("rootCaInGopass is nil")
+		return tracederrors.TracedError("rootCaInGopass is nil")
 	}
 
 	if intermediateGopassOptions == nil {
-		return errors.TracedError("intermediateGopassOptions is nil")
+		return tracederrors.TracedError("intermediateGopassOptions is nil")
 	}
 
 	rootCertOptions := rootCaInGopass.GetDeepCopy()
@@ -595,7 +595,7 @@ func (c *X509CertificatesService) CreateSignedIntermediateCertificateAndAddToGop
 
 func (c *X509CertificatesService) CreateSigningRequestFile(signOptions *X509SignCertificateOptions) (err error) {
 	if signOptions == nil {
-		return errors.TracedError("signOptions is nil")
+		return tracederrors.TracedError("signOptions is nil")
 	}
 
 	keyFileToSignPath, err := signOptions.GetKeyFileToSignPath()
@@ -713,11 +713,11 @@ func (c *X509CertificatesService) GetNextCaSerialNumberAsStringFromGopass(verbos
 
 func (c *X509CertificatesService) IsCertificateFileSignedByCertificateFile(thisCertificateFile *X509CertificateFile, isSignedByThisCertificateFile File, verbose bool) (isSignedBy bool, err error) {
 	if thisCertificateFile == nil {
-		return false, errors.TracedError("thisCertificateFile is nil")
+		return false, tracederrors.TracedError("thisCertificateFile is nil")
 	}
 
 	if isSignedByThisCertificateFile == nil {
-		return false, errors.TracedError("isSignedByThisCertificateFile is nil")
+		return false, tracederrors.TracedError("isSignedByThisCertificateFile is nil")
 	}
 
 	toCheckCert, err := thisCertificateFile.GetAsX509Certificate()
@@ -781,7 +781,7 @@ func (c *X509CertificatesService) MustSignIntermediateCertificate(signOptions *X
 
 func (c *X509CertificatesService) SignIntermediateCertificate(signOptions *X509SignCertificateOptions) (err error) {
 	if signOptions == nil {
-		return errors.TracedError("signOptions is nil")
+		return tracederrors.TracedError("signOptions is nil")
 	}
 
 	keyFileToUseForSigning, err := signOptions.GetKeyFileUsedForSigning()

@@ -6,8 +6,8 @@ import (
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type SSHPublicKey struct {
@@ -53,7 +53,7 @@ func (k *SSHPublicKey) GetKeyHostName() (hostName string, err error) {
 
 func (k *SSHPublicKey) GetKeyMaterialAsString() (keyMaterial string, err error) {
 	if len(k.keyMaterial) <= 0 {
-		return "", errors.TracedError("key material not set")
+		return "", tracederrors.TracedError("key material not set")
 	}
 
 	return k.keyMaterial, nil
@@ -77,7 +77,7 @@ func (k *SSHPublicKey) GetKeyUserAtHost() (userAtHost string, err error) {
 
 func (k *SSHPublicKey) GetKeyUserName() (keyUserName string, err error) {
 	if len(k.keyUserName) <= 0 {
-		return "", errors.TracedErrorf("keyUserName is empty string. Available data: '%v'", *k)
+		return "", tracederrors.TracedErrorf("keyUserName is empty string. Available data: '%v'", *k)
 	}
 
 	return k.keyUserName, nil
@@ -85,7 +85,7 @@ func (k *SSHPublicKey) GetKeyUserName() (keyUserName string, err error) {
 
 func (k *SSHPublicKey) LoadFromSshDir(sshDirectory Directory, verbose bool) (err error) {
 	if sshDirectory == nil {
-		return errors.TracedError("sshDirectory is nil")
+		return tracederrors.TracedError("sshDirectory is nil")
 	}
 
 	sshDirPath, err := sshDirectory.GetLocalPath()
@@ -99,7 +99,7 @@ func (k *SSHPublicKey) LoadFromSshDir(sshDirectory Directory, verbose bool) (err
 	}
 
 	if !exists {
-		return errors.TracedErrorf("ssh key directory '%v' does not exist", sshDirPath)
+		return tracederrors.TracedErrorf("ssh key directory '%v' does not exist", sshDirPath)
 	}
 
 	keyFilePath := filepath.Join(sshDirPath, "id_rsa.pub")
@@ -162,7 +162,7 @@ func (k *SSHPublicKey) MustSetFromString(keyMaterial string) {
 func (k *SSHPublicKey) SetFromString(keyMaterial string) (err error) {
 	keyMaterial = strings.TrimSpace(keyMaterial)
 	if len(keyMaterial) <= 0 {
-		return errors.TracedError("keyMaterial is empty string")
+		return tracederrors.TracedError("keyMaterial is empty string")
 	}
 
 	numberOfSpacesInKeyMaterial := strings.Count(keyMaterial, " ")
@@ -185,7 +185,7 @@ func (k *SSHPublicKey) SetFromString(keyMaterial string) (err error) {
 			if strings.HasPrefix(firstElement, "AAA") {
 				keyMaterialToAdd = splitted[0]
 			} else {
-				return errors.TracedErrorf(
+				return tracederrors.TracedErrorf(
 					"unable to extract key material. len(splitted) = '%v' != 1 as expected. splitted is '%v'",
 					len(splitted),
 					splitted,
@@ -195,7 +195,7 @@ func (k *SSHPublicKey) SetFromString(keyMaterial string) (err error) {
 
 		keyMaterialToAdd = strings.TrimSpace(keyMaterialToAdd)
 		if len(keyMaterialToAdd) <= 0 {
-			return errors.TracedErrorf(
+			return tracederrors.TracedErrorf(
 				"unable to extract key material. keyMaterialToAdd is empty string calculated from '%v'",
 				keyMaterial,
 			)
@@ -219,7 +219,7 @@ func (k *SSHPublicKey) SetFromString(keyMaterial string) (err error) {
 			}
 		}
 	} else {
-		return errors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"unable to extract key material. numberOfSpacesInKeyMaterial is '%v' from '%s'",
 			numberOfSpacesInKeyMaterial,
 			keyMaterial,
@@ -231,7 +231,7 @@ func (k *SSHPublicKey) SetFromString(keyMaterial string) (err error) {
 
 func (k *SSHPublicKey) WriteToFile(outputFile File, verbose bool) (err error) {
 	if outputFile == nil {
-		return errors.TracedError("outputFile is nil")
+		return tracederrors.TracedError("outputFile is nil")
 	}
 
 	sshKeyLine, err := k.GetAsPublicKeyLine()
@@ -250,7 +250,7 @@ func (k *SSHPublicKey) WriteToFile(outputFile File, verbose bool) (err error) {
 
 func (s *SSHPublicKey) GetKeyMaterial() (keyMaterial string, err error) {
 	if s.keyMaterial == "" {
-		return "", errors.TracedErrorf("keyMaterial not set")
+		return "", tracederrors.TracedErrorf("keyMaterial not set")
 	}
 
 	return s.keyMaterial, nil
@@ -258,7 +258,7 @@ func (s *SSHPublicKey) GetKeyMaterial() (keyMaterial string, err error) {
 
 func (s *SSHPublicKey) GetKeyUserHost() (keyUserHost string, err error) {
 	if s.keyUserHost == "" {
-		return "", errors.TracedErrorf("keyUserHost not set")
+		return "", tracederrors.TracedErrorf("keyUserHost not set")
 	}
 
 	return s.keyUserHost, nil
@@ -337,7 +337,7 @@ func (s *SSHPublicKey) MustWriteToFile(outputFile File, verbose bool) {
 
 func (s *SSHPublicKey) SetKeyMaterial(keyMaterial string) (err error) {
 	if keyMaterial == "" {
-		return errors.TracedErrorf("keyMaterial is empty string")
+		return tracederrors.TracedErrorf("keyMaterial is empty string")
 	}
 
 	s.keyMaterial = keyMaterial
@@ -347,7 +347,7 @@ func (s *SSHPublicKey) SetKeyMaterial(keyMaterial string) (err error) {
 
 func (s *SSHPublicKey) SetKeyUserHost(keyUserHost string) (err error) {
 	if keyUserHost == "" {
-		return errors.TracedErrorf("keyUserHost is empty string")
+		return tracederrors.TracedErrorf("keyUserHost is empty string")
 	}
 
 	s.keyUserHost = keyUserHost
@@ -357,7 +357,7 @@ func (s *SSHPublicKey) SetKeyUserHost(keyUserHost string) (err error) {
 
 func (s *SSHPublicKey) SetKeyUserName(keyUserName string) (err error) {
 	if keyUserName == "" {
-		return errors.TracedErrorf("keyUserName is empty string")
+		return tracederrors.TracedErrorf("keyUserName is empty string")
 	}
 
 	s.keyUserName = keyUserName

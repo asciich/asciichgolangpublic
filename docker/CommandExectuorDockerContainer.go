@@ -7,8 +7,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/datatypes"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type CommandExecutorDockerContainer struct {
@@ -33,7 +33,7 @@ func (c *CommandExecutorDockerContainer) GetCommandExecutor() (commandExectuor a
 			return nil, err
 		}
 
-		return nil, errors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Only implemented for CommandExecutorDocker but got '%s'",
 			typeString,
 		)
@@ -44,7 +44,7 @@ func (c *CommandExecutorDockerContainer) GetCommandExecutor() (commandExectuor a
 
 func (c *CommandExecutorDockerContainer) GetName() (name string, err error) {
 	if len(c.name) <= 0 {
-		return "", errors.TracedError("name not set")
+		return "", tracederrors.TracedError("name not set")
 	}
 
 	return c.name, nil
@@ -83,7 +83,7 @@ func (c *CommandExecutorDockerContainer) IsRunning(verbose bool) (isRunning bool
 		return false, nil
 	}
 
-	return false, errors.TracedErrorf("Unexpected stdout to evaluate docker container running: '%s'", stdout)
+	return false, tracederrors.TracedErrorf("Unexpected stdout to evaluate docker container running: '%s'", stdout)
 }
 
 func (c *CommandExecutorDockerContainer) Kill(verbose bool) (err error) {
@@ -168,7 +168,7 @@ func (c *CommandExecutorDockerContainer) MustRunCommandAndGetStdoutAsString(runO
 
 func (c *CommandExecutorDockerContainer) RunCommand(runOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
 	if runOptions == nil {
-		return nil, errors.TracedErrorNil("runOptions")
+		return nil, tracederrors.TracedErrorNil("runOptions")
 	}
 
 	commandExecutor, err := c.GetCommandExecutor()
@@ -181,7 +181,7 @@ func (c *CommandExecutorDockerContainer) RunCommand(runOptions *asciichgolangpub
 
 func (c *CommandExecutorDockerContainer) RunCommandAndGetStdoutAsString(runOptions *asciichgolangpublic.RunCommandOptions) (stdout string, err error) {
 	if runOptions == nil {
-		return "", errors.TracedErrorNil("runOptions")
+		return "", tracederrors.TracedErrorNil("runOptions")
 	}
 
 	commandExecutor, err := c.GetCommandExecutor()
@@ -194,7 +194,7 @@ func (c *CommandExecutorDockerContainer) RunCommandAndGetStdoutAsString(runOptio
 
 func (c *CommandExecutorDockerContainer) SetName(name string) (err error) {
 	if len(name) <= 0 {
-		return errors.TracedError("name is empty string")
+		return tracederrors.TracedError("name is empty string")
 	}
 
 	c.name = name
@@ -204,7 +204,7 @@ func (c *CommandExecutorDockerContainer) SetName(name string) (err error) {
 
 func (d *CommandExecutorDockerContainer) GetDocker() (docker Docker, err error) {
 	if d.docker == nil {
-		return nil, errors.TracedError("docker is not set")
+		return nil, tracederrors.TracedError("docker is not set")
 	}
 	return d.docker, nil
 }
@@ -259,7 +259,7 @@ func (d *CommandExecutorDockerContainer) MustSetName(name string) {
 
 func (d *CommandExecutorDockerContainer) SetDocker(docker Docker) (err error) {
 	if docker == nil {
-		return errors.TracedErrorNil("docker")
+		return tracederrors.TracedErrorNil("docker")
 	}
 
 	d.docker = docker

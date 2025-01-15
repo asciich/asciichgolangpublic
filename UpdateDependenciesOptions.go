@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type UpdateDependenciesOptions struct {
@@ -18,7 +18,7 @@ func NewUpdateDependenciesOptions() (u *UpdateDependenciesOptions) {
 
 func (u *UpdateDependenciesOptions) GetArtifactHandlerForSoftwareName(softwareName string) (artifactHandler ArtifactHandler, err error) {
 	if softwareName == "" {
-		return nil, errors.TracedError("softwareName is empty string")
+		return nil, tracederrors.TracedError("softwareName is empty string")
 	}
 
 	handlers, err := u.GetArtifactHandlers()
@@ -37,16 +37,16 @@ func (u *UpdateDependenciesOptions) GetArtifactHandlerForSoftwareName(softwareNa
 		}
 	}
 
-	return nil, errors.TracedErrorf("No handler for softwareName '%s' found", softwareName)
+	return nil, tracederrors.TracedErrorf("No handler for softwareName '%s' found", softwareName)
 }
 
 func (u *UpdateDependenciesOptions) GetArtifactHandlers() (artifactHandlers []ArtifactHandler, err error) {
 	if u.ArtifactHandlers == nil {
-		return nil, errors.TracedErrorf("ArtifactHandlers not set")
+		return nil, tracederrors.TracedErrorf("ArtifactHandlers not set")
 	}
 
 	if len(u.ArtifactHandlers) <= 0 {
-		return nil, errors.TracedErrorf("ArtifactHandlers has no elements")
+		return nil, tracederrors.TracedErrorf("ArtifactHandlers has no elements")
 	}
 
 	return u.ArtifactHandlers, nil
@@ -54,11 +54,11 @@ func (u *UpdateDependenciesOptions) GetArtifactHandlers() (artifactHandlers []Ar
 
 func (u *UpdateDependenciesOptions) GetAuthenticationOptions() (authenticationOptions []AuthenticationOption, err error) {
 	if u.AuthenticationOptions == nil {
-		return nil, errors.TracedErrorf("AuthenticationOptions not set")
+		return nil, tracederrors.TracedErrorf("AuthenticationOptions not set")
 	}
 
 	if len(u.AuthenticationOptions) <= 0 {
-		return nil, errors.TracedErrorf("AuthenticationOptions has no elements")
+		return nil, tracederrors.TracedErrorf("AuthenticationOptions has no elements")
 	}
 
 	return u.AuthenticationOptions, nil
@@ -71,7 +71,7 @@ func (u *UpdateDependenciesOptions) GetCommit() (commit bool, err error) {
 
 func (u *UpdateDependenciesOptions) GetLatestArtifactVersionAsString(softwareName string, verbose bool) (latestVersion string, err error) {
 	if softwareName == "" {
-		return "", errors.TracedError("softwareName is empty string")
+		return "", tracederrors.TracedError("softwareName is empty string")
 	}
 
 	artifactHandler, err := u.GetArtifactHandlerForSoftwareName(softwareName)
@@ -176,11 +176,11 @@ func (u *UpdateDependenciesOptions) MustSetVerbose(verbose bool) {
 
 func (u *UpdateDependenciesOptions) SetArtifactHandlers(artifactHandlers []ArtifactHandler) (err error) {
 	if artifactHandlers == nil {
-		return errors.TracedErrorf("artifactHandlers is nil")
+		return tracederrors.TracedErrorf("artifactHandlers is nil")
 	}
 
 	if len(artifactHandlers) <= 0 {
-		return errors.TracedErrorf("artifactHandlers has no elements")
+		return tracederrors.TracedErrorf("artifactHandlers has no elements")
 	}
 
 	u.ArtifactHandlers = artifactHandlers
@@ -190,11 +190,11 @@ func (u *UpdateDependenciesOptions) SetArtifactHandlers(artifactHandlers []Artif
 
 func (u *UpdateDependenciesOptions) SetAuthenticationOptions(authenticationOptions []AuthenticationOption) (err error) {
 	if authenticationOptions == nil {
-		return errors.TracedErrorf("authenticationOptions is nil")
+		return tracederrors.TracedErrorf("authenticationOptions is nil")
 	}
 
 	if len(authenticationOptions) <= 0 {
-		return errors.TracedErrorf("authenticationOptions has no elements")
+		return tracederrors.TracedErrorf("authenticationOptions has no elements")
 	}
 
 	u.AuthenticationOptions = authenticationOptions

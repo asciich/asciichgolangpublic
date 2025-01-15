@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/changesummary"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // A File represents any kind of file regardless if a local file or a remote file.
@@ -150,7 +150,7 @@ type File interface {
 
 func GetFileByOsFile(osFile *os.File) (file File, err error) {
 	if osFile == nil {
-		return nil, errors.TracedError("osFile is nil")
+		return nil, tracederrors.TracedError("osFile is nil")
 	}
 
 	file, err = NewLocalFileByPath(osFile.Name())

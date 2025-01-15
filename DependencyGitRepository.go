@@ -2,8 +2,8 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/changesummary"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // Represents a dependency to (another) git repository.
@@ -23,7 +23,7 @@ func NewDependencyGitRepository() (d *DependencyGitRepository) {
 
 func (d *DependencyGitRepository) AddSourceFile(sourceFile File) (err error) {
 	if sourceFile == nil {
-		return errors.TracedErrorNil("sourceFile")
+		return tracederrors.TracedErrorNil("sourceFile")
 	}
 
 	d.sourceFiles = append(d.sourceFiles, sourceFile)
@@ -106,7 +106,7 @@ func (d *DependencyGitRepository) GetNewestVersionAsString(authOptions []Authent
 	}
 
 	if newestVersionString == "" {
-		return "", errors.TracedError(
+		return "", tracederrors.TracedError(
 			"Unable to get newest version string, newestVersionString is empty string after evaluation",
 		)
 	}
@@ -116,11 +116,11 @@ func (d *DependencyGitRepository) GetNewestVersionAsString(authOptions []Authent
 
 func (d *DependencyGitRepository) GetSourceFiles() (sourceFiles []File, err error) {
 	if d.sourceFiles == nil {
-		return nil, errors.TracedErrorf("sourceFiles not set")
+		return nil, tracederrors.TracedErrorf("sourceFiles not set")
 	}
 
 	if len(d.sourceFiles) <= 0 {
-		return nil, errors.TracedErrorf("sourceFiles has no elements")
+		return nil, tracederrors.TracedErrorf("sourceFiles has no elements")
 	}
 
 	return d.sourceFiles, nil
@@ -142,7 +142,7 @@ func (d *DependencyGitRepository) GetTargetVersion() (targetVersion Version, err
 
 func (d *DependencyGitRepository) GetTargetVersionString() (targetVersionString string, err error) {
 	if d.targetVersionString == "" {
-		return "", errors.TracedErrorf("targetVersionString not set")
+		return "", tracederrors.TracedErrorf("targetVersionString not set")
 	}
 
 	return d.targetVersionString, nil
@@ -150,7 +150,7 @@ func (d *DependencyGitRepository) GetTargetVersionString() (targetVersionString 
 
 func (d *DependencyGitRepository) GetUrl() (url string, err error) {
 	if d.url == "" {
-		return "", errors.TracedErrorf("url not set")
+		return "", tracederrors.TracedErrorf("url not set")
 	}
 
 	return d.url, nil
@@ -172,7 +172,7 @@ func (d *DependencyGitRepository) GetVersion() (version Version, err error) {
 
 func (d *DependencyGitRepository) GetVersionString() (versionString string, err error) {
 	if d.versionString == "" {
-		return "", errors.TracedErrorf("versionString not set")
+		return "", tracederrors.TracedErrorf("versionString not set")
 	}
 
 	return d.versionString, nil
@@ -378,11 +378,11 @@ func (d *DependencyGitRepository) MustUpdateVersionByStringInSourceFile(version 
 
 func (d *DependencyGitRepository) SetSourceFiles(sourceFiles []File) (err error) {
 	if sourceFiles == nil {
-		return errors.TracedErrorf("sourceFiles is nil")
+		return tracederrors.TracedErrorf("sourceFiles is nil")
 	}
 
 	if len(sourceFiles) <= 0 {
-		return errors.TracedErrorf("sourceFiles has no elements")
+		return tracederrors.TracedErrorf("sourceFiles has no elements")
 	}
 
 	d.sourceFiles = sourceFiles
@@ -392,7 +392,7 @@ func (d *DependencyGitRepository) SetSourceFiles(sourceFiles []File) (err error)
 
 func (d *DependencyGitRepository) SetTargetVersionString(targetVersionString string) (err error) {
 	if targetVersionString == "" {
-		return errors.TracedErrorf("targetVersionString is empty string")
+		return tracederrors.TracedErrorf("targetVersionString is empty string")
 	}
 
 	d.targetVersionString = targetVersionString
@@ -402,7 +402,7 @@ func (d *DependencyGitRepository) SetTargetVersionString(targetVersionString str
 
 func (d *DependencyGitRepository) SetUrl(url string) (err error) {
 	if url == "" {
-		return errors.TracedErrorf("url is empty string")
+		return tracederrors.TracedErrorf("url is empty string")
 	}
 
 	d.url = url
@@ -412,7 +412,7 @@ func (d *DependencyGitRepository) SetUrl(url string) (err error) {
 
 func (d *DependencyGitRepository) SetVersionString(versionString string) (err error) {
 	if versionString == "" {
-		return errors.TracedErrorf("versionString is empty string")
+		return tracederrors.TracedErrorf("versionString is empty string")
 	}
 
 	d.versionString = versionString
@@ -422,7 +422,7 @@ func (d *DependencyGitRepository) SetVersionString(versionString string) (err er
 
 func (d *DependencyGitRepository) Update(options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	name, err := d.GetName()
@@ -437,7 +437,7 @@ func (d *DependencyGitRepository) Update(options *UpdateDependenciesOptions) (ch
 	}
 
 	if !d.IsAtLeastOneSourceFileSet() {
-		return nil, errors.TracedErrorf("No source files set for git repository dependency '%s'", name)
+		return nil, tracederrors.TracedErrorf("No source files set for git repository dependency '%s'", name)
 	}
 
 	latestVersion, err := d.GetNewestVersionAsString(
@@ -474,15 +474,15 @@ func (d *DependencyGitRepository) Update(options *UpdateDependenciesOptions) (ch
 
 func (d *DependencyGitRepository) UpdateVersionByStringInSourceFile(version string, sourceFile File, options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if version == "" {
-		return nil, errors.TracedErrorEmptyString("version")
+		return nil, tracederrors.TracedErrorEmptyString("version")
 	}
 
 	if sourceFile == nil {
-		return nil, errors.TracedErrorNil("sourceFile")
+		return nil, tracederrors.TracedErrorNil("sourceFile")
 	}
 
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	changeSummary = changesummary.NewChangeSummary()
@@ -524,5 +524,5 @@ func (d *DependencyGitRepository) UpdateVersionByStringInSourceFile(version stri
 		return fileChangeSummary, nil
 	}
 
-	return nil, errors.TracedErrorf("Not implemneted for '%s'", sourceFileUri)
+	return nil, tracederrors.TracedErrorf("Not implemneted for '%s'", sourceFileUri)
 }

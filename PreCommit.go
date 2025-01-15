@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"fmt"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type PreCommitService struct{}
@@ -64,11 +64,11 @@ func (p *PreCommitService) MustRunInGitRepository(gitRepo GitRepository, options
 
 func (p *PreCommitService) RunInDirectory(directoy Directory, options *PreCommitRunOptions) (err error) {
 	if directoy == nil {
-		return errors.TracedErrorNil("directoy")
+		return tracederrors.TracedErrorNil("directoy")
 	}
 
 	if options == nil {
-		return errors.TracedErrorNil("options")
+		return tracederrors.TracedErrorNil("options")
 	}
 
 	path, err := directoy.GetLocalPath()
@@ -105,11 +105,11 @@ func (p *PreCommitService) RunInDirectory(directoy Directory, options *PreCommit
 
 func (p *PreCommitService) RunInGitRepository(gitRepo GitRepository, options *PreCommitRunOptions) (err error) {
 	if gitRepo == nil {
-		return errors.TracedErrorNil("gitRepo")
+		return tracederrors.TracedErrorNil("gitRepo")
 	}
 
 	if options == nil {
-		return errors.TracedErrorNil("options")
+		return tracederrors.TracedErrorNil("options")
 	}
 
 	gitRepoDir, err := gitRepo.GetAsLocalGitRepository()

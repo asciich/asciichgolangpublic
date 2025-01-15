@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type CommandExecutorHost struct {
@@ -20,7 +20,7 @@ type CommandExecutorHost struct {
 // E.g. for SSH a SSHCLient can be used.
 func GetCommandExecutorHostByCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) (host Host, err error) {
 	if commandExecutor == nil {
-		return nil, errors.TracedErrorNil("commandExecutor")
+		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
 
 	toReturn := NewCommandExecutorHost()
@@ -55,7 +55,7 @@ func (c *CommandExecutorHost) GetCommandExecutor() (commandExecutor asciichgolan
 
 func (c *CommandExecutorHost) GetDirectoryByPath(path string) (directory asciichgolangpublic.Directory, err error) {
 	if path == "" {
-		return nil, errors.TracedErrorEmptyString("path")
+		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
 
 	commandExecutor, err := c.GetCommandExecutor()
@@ -128,7 +128,7 @@ func (c *CommandExecutorHost) MustWaitUntilReachable(renewHostKey bool, verbose 
 
 func (c *CommandExecutorHost) RunCommand(options *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	commandExecutor, err := c.GetCommandExecutor()
@@ -190,7 +190,7 @@ func (h *CommandExecutorHost) CheckFtpPortOpen(verbose bool) (err error) {
 			logging.LogError(errorMessage)
 		}
 
-		return errors.TracedError(errorMessage)
+		return tracederrors.TracedError(errorMessage)
 	}
 
 	return nil
@@ -217,7 +217,7 @@ func (h *CommandExecutorHost) CheckReachable(verbose bool) (err error) {
 			logging.LogError(errorMessage)
 		}
 
-		return errors.TracedError(errorMessage)
+		return tracederrors.TracedError(errorMessage)
 	}
 
 	return nil
@@ -225,7 +225,7 @@ func (h *CommandExecutorHost) CheckReachable(verbose bool) (err error) {
 
 func (h *CommandExecutorHost) GetComment() (comment string, err error) {
 	if h.Comment == "" {
-		return "", errors.TracedErrorf("Comment not set")
+		return "", tracederrors.TracedErrorf("Comment not set")
 	}
 
 	return h.Comment, nil
@@ -233,7 +233,7 @@ func (h *CommandExecutorHost) GetComment() (comment string, err error) {
 
 func (h *CommandExecutorHost) InstallBinary(installOptions *asciichgolangpublic.InstallOptions) (installedFile asciichgolangpublic.File, err error) {
 	if installOptions == nil {
-		return nil, errors.TracedErrorNil("installOptions")
+		return nil, tracederrors.TracedErrorNil("installOptions")
 	}
 
 	hostName, err := h.GetHostName()
@@ -347,7 +347,7 @@ func (h *CommandExecutorHost) IsPingable(verbose bool) (isPingable bool, err err
 		return false, nil
 	}
 
-	return false, errors.TracedErrorf("Unexpected stdout: '%v'", stdout)
+	return false, tracederrors.TracedErrorf("Unexpected stdout: '%v'", stdout)
 }
 
 func (h *CommandExecutorHost) IsReachable(verbose bool) (isReachable bool, err error) {
@@ -365,7 +365,7 @@ func (h *CommandExecutorHost) IsReachable(verbose bool) (isReachable bool, err e
 
 func (h *CommandExecutorHost) IsTcpPortOpen(portNumber int, verbose bool) (isOpen bool, err error) {
 	if portNumber <= 0 {
-		return false, errors.TracedErrorf("Invalid portNumber: '%d'", portNumber)
+		return false, tracederrors.TracedErrorf("Invalid portNumber: '%d'", portNumber)
 	}
 
 	hostname, err := h.GetHostName()
@@ -540,7 +540,7 @@ func (h *CommandExecutorHost) RenewSshHostKey(verbose bool) (err error) {
 
 func (h *CommandExecutorHost) SetComment(comment string) (err error) {
 	if comment == "" {
-		return errors.TracedErrorf("comment is empty string")
+		return tracederrors.TracedErrorf("comment is empty string")
 	}
 
 	h.Comment = comment
@@ -578,7 +578,7 @@ func (h *CommandExecutorHost) WaitUntilPingable(verbose bool) (err error) {
 			if verbose {
 				logging.LogError(errorMessage)
 			}
-			return errors.TracedError(errorMessage)
+			return tracederrors.TracedError(errorMessage)
 		}
 
 		if verbose {
@@ -630,7 +630,7 @@ func (h *CommandExecutorHost) WaitUntilReachable(renewHostKey bool, verbose bool
 			if verbose {
 				logging.LogError(errorMessage)
 			}
-			return errors.TracedError(errorMessage)
+			return tracederrors.TracedError(errorMessage)
 		}
 
 		if verbose {

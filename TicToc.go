@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type TicToc struct {
@@ -27,7 +27,7 @@ func NewTicToc() (t *TicToc) {
 
 func Tic(title string, verbose bool) (t *TicToc, err error) {
 	if title == "" {
-		return nil, errors.TracedError("title is empty string")
+		return nil, tracederrors.TracedError("title is empty string")
 	}
 
 	t = NewTicToc()
@@ -49,7 +49,7 @@ func TicWithoutTitle(verbose bool) (t *TicToc) {
 
 func (t *TicToc) GetTStart() (tStart *time.Time, err error) {
 	if t.tStart == nil {
-		return nil, errors.TracedErrorf("tStart not set")
+		return nil, tracederrors.TracedErrorf("tStart not set")
 	}
 
 	return t.tStart, nil
@@ -57,7 +57,7 @@ func (t *TicToc) GetTStart() (tStart *time.Time, err error) {
 
 func (t *TicToc) GetTitle() (title string, err error) {
 	if t.title == "" {
-		return "", errors.TracedErrorf("title not set")
+		return "", tracederrors.TracedErrorf("title not set")
 	}
 
 	return t.title, nil
@@ -114,7 +114,7 @@ func (t *TicToc) MustToc(verbose bool) (elapsedTime *time.Duration) {
 
 func (t *TicToc) SetTStart(tStart *time.Time) (err error) {
 	if tStart == nil {
-		return errors.TracedErrorf("tStart is nil")
+		return tracederrors.TracedErrorf("tStart is nil")
 	}
 
 	t.tStart = tStart
@@ -124,7 +124,7 @@ func (t *TicToc) SetTStart(tStart *time.Time) (err error) {
 
 func (t *TicToc) SetTitle(title string) (err error) {
 	if title == "" {
-		return errors.TracedErrorf("title is empty string")
+		return tracederrors.TracedErrorf("title is empty string")
 	}
 
 	t.title = title

@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"math/rand"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type RandomGeneratorService struct{}
@@ -19,7 +19,7 @@ func RandomGenerator() (randomGenerator *RandomGeneratorService) {
 
 func (r *RandomGeneratorService) GetRandomString(lenght int) (random string, err error) {
 	if lenght <= 0 {
-		return "", errors.TracedErrorf("Invalid lenght '%d' to generate random string", lenght)
+		return "", tracederrors.TracedErrorf("Invalid lenght '%d' to generate random string", lenght)
 	}
 
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")

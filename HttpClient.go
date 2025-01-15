@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type HttpClientService struct{}
@@ -22,7 +22,7 @@ func NewHttpClientService() (h *HttpClientService) {
 
 func (h *HttpClientService) DownloadAsFile(requestOptions *HttpRequestOptions) (downloadedFile File, err error) {
 	if requestOptions == nil {
-		return nil, errors.TracedErrorNil("requestOptions")
+		return nil, tracederrors.TracedErrorNil("requestOptions")
 	}
 
 	url, err := requestOptions.GetUrlAsString()
@@ -60,7 +60,7 @@ func (h *HttpClientService) DownloadAsFile(requestOptions *HttpRequestOptions) (
 
 	outFd, err := os.Create(outputFilePath)
 	if err != nil {
-		return nil, errors.TracedError(err.Error())
+		return nil, tracederrors.TracedError(err.Error())
 	}
 	defer outFd.Close()
 	outFd.ReadFrom(request.Body)
@@ -74,7 +74,7 @@ func (h *HttpClientService) DownloadAsFile(requestOptions *HttpRequestOptions) (
 
 func (h *HttpClientService) DownloadAsTemporaryFile(requestOptions *HttpRequestOptions) (downloadedFile File, err error) {
 	if requestOptions == nil {
-		return nil, errors.TracedErrorNil("requestOptions")
+		return nil, tracederrors.TracedErrorNil("requestOptions")
 	}
 
 	requestOptionsToUse := requestOptions.GetDeepCopy()

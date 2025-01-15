@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type ArtifactHandlersService struct{}
@@ -17,7 +17,7 @@ func NewArtifactHandlersService() (a *ArtifactHandlersService) {
 
 func (a *ArtifactHandlersService) GetArtifactHandlerForArtifact(artifactHandlers []ArtifactHandler, artifactName string) (handler ArtifactHandler, err error) {
 	if artifactName == "" {
-		return nil, errors.TracedErrorEmptyString("artifactName")
+		return nil, tracederrors.TracedErrorEmptyString("artifactName")
 	}
 
 	for _, handler = range artifactHandlers {
@@ -31,7 +31,7 @@ func (a *ArtifactHandlersService) GetArtifactHandlerForArtifact(artifactHandlers
 		}
 	}
 
-	return nil, errors.TracedErrorf("No artifact handler for '%s' found", artifactName)
+	return nil, tracederrors.TracedErrorf("No artifact handler for '%s' found", artifactName)
 }
 
 func (a *ArtifactHandlersService) MustGetArtifactHandlerForArtifact(artifactHandlers []ArtifactHandler, artifactName string) (handler ArtifactHandler) {

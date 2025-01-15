@@ -7,8 +7,8 @@ import (
 	"io"
 	"os/exec"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type ExecService struct {
@@ -63,7 +63,7 @@ func (e *ExecService) MustRunCommand(options *RunCommandOptions) (commandOutput 
 
 func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	command, err := options.GetCommand()
@@ -84,7 +84,7 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
-		return nil, errors.TracedError(err.Error())
+		return nil, tracederrors.TracedError(err.Error())
 	}
 	cmd.Stderr = &stderr
 
@@ -114,7 +114,7 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 		}
 
 		if nBytesToWrite != nWrittenBytes {
-			return nil, errors.TracedErrorf(
+			return nil, tracederrors.TracedErrorf(
 				"Writing to stdin of command '%v' failed. Expected '%d' bytes to write but '%d' got written",
 				command,
 				nBytesToWrite,
@@ -206,7 +206,7 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 	}
 
 	if cmd.ProcessState == nil {
-		return nil, errors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"unable to get exit code for failed command: '%v': '%v'",
 			commandJoined,
 			commandOutput.GetCmdRunErrorStringOrEmptyStringIfUnset(),
@@ -242,7 +242,7 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 			if options.Verbose {
 				logging.LogError(errorMessage)
 			}
-			return commandOutput, errors.TracedError(errorMessage)
+			return commandOutput, tracederrors.TracedError(errorMessage)
 		}
 	}
 

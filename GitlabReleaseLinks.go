@@ -4,8 +4,8 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitlabReleaseLinks struct {
@@ -18,7 +18,7 @@ func NewGitlabReleaseLinks() (g *GitlabReleaseLinks) {
 
 func (g *GitlabReleaseLinks) CreateReleaseLink(createOptions *GitlabCreateReleaseLinkOptions) (createdReleaseLink *GitlabReleaseLink, err error) {
 	if createOptions == nil {
-		return nil, errors.TracedErrorNil("createOptions")
+		return nil, tracederrors.TracedErrorNil("createOptions")
 	}
 
 	nativeClient, err := g.GetNativeReleaseLinksClient()
@@ -65,7 +65,7 @@ func (g *GitlabReleaseLinks) CreateReleaseLink(createOptions *GitlabCreateReleas
 			},
 		)
 		if err != nil {
-			return nil, errors.TracedErrorf(
+			return nil, tracederrors.TracedErrorf(
 				"Create release link '%s' in gitlab project %s failed: %w",
 				linkName,
 				projectUrl,
@@ -106,7 +106,7 @@ func (g *GitlabReleaseLinks) GetGitlab() (gitlab *GitlabInstance, err error) {
 
 func (g *GitlabReleaseLinks) GetGitlabRelease() (gitlabRelease *GitlabRelease, err error) {
 	if g.gitlabRelease == nil {
-		return nil, errors.TracedErrorf("gitlabRelease not set")
+		return nil, tracederrors.TracedErrorf("gitlabRelease not set")
 	}
 
 	return g.gitlabRelease, nil
@@ -170,7 +170,7 @@ func (g *GitlabReleaseLinks) GetProjectUrl() (projectUrl string, err error) {
 
 func (g *GitlabReleaseLinks) GetReleaseLinkByName(linkName string) (releaseLink *GitlabReleaseLink, err error) {
 	if linkName == "" {
-		return nil, errors.TracedErrorEmptyString("linkName")
+		return nil, tracederrors.TracedErrorEmptyString("linkName")
 	}
 
 	releaseLink = NewGitlabReleaseLink()
@@ -269,7 +269,7 @@ func (g *GitlabReleaseLinks) ListReleaseLinks(verbose bool) (releaseLinks []*Git
 
 	rawReleaseLinks, _, err := nativeClient.ListReleaseLinks(projectId, tagName, nil)
 	if err != nil {
-		return nil, errors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Failed to list release links for release '%s' in gitlab project %s : %w",
 			tagName,
 			projectUrl,
@@ -430,7 +430,7 @@ func (g *GitlabReleaseLinks) MustSetGitlabRelease(gitlabRelease *GitlabRelease) 
 
 func (g *GitlabReleaseLinks) ReleaseLinkByNameExists(linkName string, verbose bool) (exists bool, err error) {
 	if linkName == "" {
-		return false, errors.TracedErrorEmptyString("linkName")
+		return false, tracederrors.TracedErrorEmptyString("linkName")
 	}
 
 	releaseNames, err := g.ListReleaseLinkNames(verbose)
@@ -445,7 +445,7 @@ func (g *GitlabReleaseLinks) ReleaseLinkByNameExists(linkName string, verbose bo
 
 func (g *GitlabReleaseLinks) SetGitlabRelease(gitlabRelease *GitlabRelease) (err error) {
 	if gitlabRelease == nil {
-		return errors.TracedErrorf("gitlabRelease is nil")
+		return tracederrors.TracedErrorf("gitlabRelease is nil")
 	}
 
 	g.gitlabRelease = gitlabRelease

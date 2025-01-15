@@ -7,8 +7,8 @@ import (
 	"time"
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	aerrors "github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 var ErrTmuxWindowCliPromptNotReady = errors.New("tmux window CLI promptnot ready")
@@ -25,7 +25,7 @@ func NewTmuxWindow() (t *TmuxWindow) {
 // Default use case to send a command is using []string{"command to run", "enter"}. "enter" in this example is detected as enter key by tmux.
 func (t *TmuxWindow) SendKeys(toSend []string, verbose bool) (err error) {
 	if len(toSend) <= 0 {
-		return aerrors.TracedError("toSend has no elements")
+		return tracederrors.TracedError("toSend has no elements")
 	}
 
 	sessionName, windowName, err := t.GetSessionAndWindowName()
@@ -90,7 +90,7 @@ func (t *TmuxWindow) GetSecondLatestPaneLine() (paneLine string, err error) {
 	}
 
 	if len(lines) <= 0 {
-		return "", aerrors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"No lines for tmux window '%s' in session '%s' received.",
 			windowName,
 			sessionName,
@@ -98,7 +98,7 @@ func (t *TmuxWindow) GetSecondLatestPaneLine() (paneLine string, err error) {
 	}
 
 	if len(lines) <= 1 {
-		return "", aerrors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"Only one line for tmux window '%s' in session '%s' received.",
 			windowName,
 			sessionName,
@@ -273,7 +273,7 @@ func (t *TmuxWindow) GetLatestPaneLine() (paneLine string, err error) {
 	}
 
 	if len(lines) <= 0 {
-		return "", aerrors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"No lines for tmux window '%s' in session '%s' received.",
 			windowName,
 			sessionName,
@@ -287,7 +287,7 @@ func (t *TmuxWindow) GetLatestPaneLine() (paneLine string, err error) {
 
 func (t *TmuxWindow) GetName() (name string, err error) {
 	if t.name == "" {
-		return "", aerrors.TracedErrorf("name not set")
+		return "", tracederrors.TracedErrorf("name not set")
 	}
 
 	return t.name, nil
@@ -295,7 +295,7 @@ func (t *TmuxWindow) GetName() (name string, err error) {
 
 func (t *TmuxWindow) GetSession() (session *TmuxSession, err error) {
 	if t.session == nil {
-		return nil, aerrors.TracedErrorf("session not set")
+		return nil, tracederrors.TracedErrorf("session not set")
 	}
 
 	return t.session, nil
@@ -559,7 +559,7 @@ func (t *TmuxWindow) Recreate(verbose bool) (err error) {
 
 func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	if runCommandOptions == nil {
-		return nil, aerrors.TracedErrorNil("runCommandOptions")
+		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}
 
 	sessionName, windowName, err := t.GetSessionAndWindowName()
@@ -690,7 +690,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 	allOutputLines = aslices.RemoveEmptyStringsAtEnd(allOutputLines)
 
 	if len(allOutputLines) < 2 {
-		return nil, aerrors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Unable to parse tmux command output: allOutputLines is '%v'",
 			allOutputLines,
 		)
@@ -700,7 +700,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 	outputLines := allOutputLines[1:]
 
 	if len(outputLines) < 1 {
-		return nil, aerrors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Unable to parse tmux command output: outputLines is '%v'",
 			outputLines,
 		)
@@ -710,7 +710,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 	exitCodeLine := outputLines[len(outputLines)-1]
 	splitted := strings.Split(exitCodeLine, " ")
 	if len(splitted) <= 2 {
-		return nil, aerrors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Unable to parse tmux command output: splitted is '%v'",
 			splitted,
 		)
@@ -720,7 +720,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 
 	exitCode, err := strconv.Atoi(exitCodeString)
 	if err != nil {
-		return nil, aerrors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Unable to parse exitCodeString='%s' %w",
 			exitCodeString,
 			err,
@@ -773,7 +773,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 
 func (t *TmuxWindow) SetName(name string) (err error) {
 	if name == "" {
-		return aerrors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	t.name = name
@@ -783,7 +783,7 @@ func (t *TmuxWindow) SetName(name string) (err error) {
 
 func (t *TmuxWindow) SetSession(session *TmuxSession) (err error) {
 	if session == nil {
-		return aerrors.TracedErrorf("session is nil")
+		return tracederrors.TracedErrorf("session is nil")
 	}
 
 	t.session = session
@@ -836,7 +836,7 @@ func (t *TmuxWindow) WaitUntilCliPromptReady(verbose bool) (err error) {
 		time.Sleep(delayTime)
 	}
 
-	return aerrors.TracedErrorf(
+	return tracederrors.TracedErrorf(
 		"%w: tmux window '%s' in session '%s' is not ready",
 		ErrTmuxWindowCliPromptNotReady,
 		windowName,

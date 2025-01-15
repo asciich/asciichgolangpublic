@@ -3,8 +3,8 @@ package http
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type RequestOptions struct {
@@ -28,7 +28,7 @@ func NewRequestOptions() (r *RequestOptions) {
 
 func (r *RequestOptions) GetMethod() (method string, err error) {
 	if r.Method == "" {
-		return "", errors.TracedErrorf("Method not set")
+		return "", tracederrors.TracedErrorf("Method not set")
 	}
 
 	return strings.ToUpper(r.Method), nil
@@ -36,7 +36,7 @@ func (r *RequestOptions) GetMethod() (method string, err error) {
 
 func (r *RequestOptions) GetPort() (port int, err error) {
 	if r.Port <= 0 {
-		return -1, errors.TracedError("Port not set")
+		return -1, tracederrors.TracedError("Port not set")
 	}
 
 	return r.Port, nil
@@ -44,7 +44,7 @@ func (r *RequestOptions) GetPort() (port int, err error) {
 
 func (r *RequestOptions) GetUrl() (url string, err error) {
 	if r.Url == "" {
-		return "", errors.TracedErrorf("Url not set")
+		return "", tracederrors.TracedErrorf("Url not set")
 	}
 
 	return r.Url, nil
@@ -105,7 +105,7 @@ func (r *RequestOptions) MustSetUrl(url string) {
 
 func (r *RequestOptions) SetMethod(method string) (err error) {
 	if method == "" {
-		return errors.TracedErrorf("method is empty string")
+		return tracederrors.TracedErrorf("method is empty string")
 	}
 
 	r.Method = method
@@ -115,7 +115,7 @@ func (r *RequestOptions) SetMethod(method string) (err error) {
 
 func (r *RequestOptions) SetPort(port int) (err error) {
 	if port <= 0 {
-		return errors.TracedErrorf("Invalid value '%d' for port", port)
+		return tracederrors.TracedErrorf("Invalid value '%d' for port", port)
 	}
 
 	r.Port = port
@@ -125,7 +125,7 @@ func (r *RequestOptions) SetPort(port int) (err error) {
 
 func (r *RequestOptions) SetUrl(url string) (err error) {
 	if url == "" {
-		return errors.TracedErrorf("url is empty string")
+		return tracederrors.TracedErrorf("url is empty string")
 	}
 
 	r.Url = url

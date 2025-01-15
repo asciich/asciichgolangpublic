@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitlabCreateUserOptions struct {
@@ -19,7 +19,7 @@ func NewGitlabCreateUserOptions() (g *GitlabCreateUserOptions) {
 
 func (g *GitlabCreateUserOptions) GetEmail() (email string, err error) {
 	if g.Email == "" {
-		return "", errors.TracedErrorf("Email not set")
+		return "", tracederrors.TracedErrorf("Email not set")
 	}
 
 	return g.Email, nil
@@ -27,7 +27,7 @@ func (g *GitlabCreateUserOptions) GetEmail() (email string, err error) {
 
 func (g *GitlabCreateUserOptions) GetName() (name string, err error) {
 	if g.Name == "" {
-		return "", errors.TracedErrorf("Name not set")
+		return "", tracederrors.TracedErrorf("Name not set")
 	}
 
 	return g.Name, nil
@@ -35,7 +35,7 @@ func (g *GitlabCreateUserOptions) GetName() (name string, err error) {
 
 func (g *GitlabCreateUserOptions) GetPassword() (password string, err error) {
 	if g.Password == "" {
-		return "", errors.TracedErrorf("Password not set")
+		return "", tracederrors.TracedErrorf("Password not set")
 	}
 
 	return g.Password, nil
@@ -43,7 +43,7 @@ func (g *GitlabCreateUserOptions) GetPassword() (password string, err error) {
 
 func (g *GitlabCreateUserOptions) GetUsername() (username string, err error) {
 	if g.Username == "" {
-		return "", errors.TracedErrorf("Username not set")
+		return "", tracederrors.TracedErrorf("Username not set")
 	}
 
 	return g.Username, nil
@@ -136,7 +136,7 @@ func (g *GitlabCreateUserOptions) MustSetVerbose(verbose bool) {
 
 func (g *GitlabCreateUserOptions) SetEmail(email string) (err error) {
 	if email == "" {
-		return errors.TracedErrorf("email is empty string")
+		return tracederrors.TracedErrorf("email is empty string")
 	}
 
 	g.Email = email
@@ -146,7 +146,7 @@ func (g *GitlabCreateUserOptions) SetEmail(email string) (err error) {
 
 func (g *GitlabCreateUserOptions) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	g.Name = name
@@ -156,7 +156,7 @@ func (g *GitlabCreateUserOptions) SetName(name string) (err error) {
 
 func (g *GitlabCreateUserOptions) SetPassword(password string) (err error) {
 	if password == "" {
-		return errors.TracedErrorf("password is empty string")
+		return tracederrors.TracedErrorf("password is empty string")
 	}
 
 	g.Password = password
@@ -166,7 +166,7 @@ func (g *GitlabCreateUserOptions) SetPassword(password string) (err error) {
 
 func (g *GitlabCreateUserOptions) SetUsername(username string) (err error) {
 	if username == "" {
-		return errors.TracedErrorf("username is empty string")
+		return tracederrors.TracedErrorf("username is empty string")
 	}
 
 	g.Username = username

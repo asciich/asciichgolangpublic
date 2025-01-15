@@ -1,8 +1,8 @@
 package kubernetes
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type CreateRoleOptions struct {
@@ -18,7 +18,7 @@ func NewCreateRoleOptions() (c *CreateRoleOptions) {
 
 func (c *CreateRoleOptions) GetName() (name string, err error) {
 	if c.Name == "" {
-		return "", errors.TracedErrorf("Name not set")
+		return "", tracederrors.TracedErrorf("Name not set")
 	}
 
 	return c.Name, nil
@@ -26,11 +26,11 @@ func (c *CreateRoleOptions) GetName() (name string, err error) {
 
 func (c *CreateRoleOptions) GetResorces() (resorces []string, err error) {
 	if c.Resorces == nil {
-		return nil, errors.TracedErrorf("Resorces not set")
+		return nil, tracederrors.TracedErrorf("Resorces not set")
 	}
 
 	if len(c.Resorces) <= 0 {
-		return nil, errors.TracedErrorf("Resorces has no elements")
+		return nil, tracederrors.TracedErrorf("Resorces has no elements")
 	}
 
 	return c.Resorces, nil
@@ -43,11 +43,11 @@ func (c *CreateRoleOptions) GetVerbose() (verbose bool) {
 
 func (c *CreateRoleOptions) GetVerbs() (verbs []string, err error) {
 	if c.Verbs == nil {
-		return nil, errors.TracedErrorf("Verbs not set")
+		return nil, tracederrors.TracedErrorf("Verbs not set")
 	}
 
 	if len(c.Verbs) <= 0 {
-		return nil, errors.TracedErrorf("Verbs has no elements")
+		return nil, tracederrors.TracedErrorf("Verbs has no elements")
 	}
 
 	return c.Verbs, nil
@@ -103,7 +103,7 @@ func (c *CreateRoleOptions) MustSetVerbs(verbs []string) {
 
 func (c *CreateRoleOptions) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	c.Name = name
@@ -113,11 +113,11 @@ func (c *CreateRoleOptions) SetName(name string) (err error) {
 
 func (c *CreateRoleOptions) SetResorces(resorces []string) (err error) {
 	if resorces == nil {
-		return errors.TracedErrorf("resorces is nil")
+		return tracederrors.TracedErrorf("resorces is nil")
 	}
 
 	if len(resorces) <= 0 {
-		return errors.TracedErrorf("resorces has no elements")
+		return tracederrors.TracedErrorf("resorces has no elements")
 	}
 
 	c.Resorces = resorces
@@ -131,11 +131,11 @@ func (c *CreateRoleOptions) SetVerbose(verbose bool) {
 
 func (c *CreateRoleOptions) SetVerbs(verbs []string) (err error) {
 	if verbs == nil {
-		return errors.TracedErrorf("verbs is nil")
+		return tracederrors.TracedErrorf("verbs is nil")
 	}
 
 	if len(verbs) <= 0 {
-		return errors.TracedErrorf("verbs has no elements")
+		return tracederrors.TracedErrorf("verbs has no elements")
 	}
 
 	c.Verbs = verbs

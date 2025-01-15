@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type DependenciesSliceService struct{}
@@ -17,11 +17,11 @@ func NewDependenciesSliceService() (d *DependenciesSliceService) {
 
 func (d *DependenciesSliceService) AddSourceFileForEveryEntry(dependencies []Dependency, sourceFile File) (err error) {
 	if dependencies == nil {
-		return errors.TracedErrorNil("dependencies")
+		return tracederrors.TracedErrorNil("dependencies")
 	}
 
 	if sourceFile == nil {
-		return errors.TracedErrorNil("sourceFile")
+		return tracederrors.TracedErrorNil("sourceFile")
 	}
 
 	for _, dependency := range dependencies {

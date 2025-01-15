@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type DirectoryBase struct {
@@ -21,7 +21,7 @@ func NewDirectoryBase() (d *DirectoryBase) {
 // This renaming is needed to bring GitRepository and Directory together.
 func (d *DirectoryBase) WriteStringToFileInDirectory(content string, verbose bool, path ...string) (writtenFile File, err error) {
 	if len(path) <= 0 {
-		return nil, errors.TracedErrorf("Invalid path='%v'", path)
+		return nil, tracederrors.TracedErrorf("Invalid path='%v'", path)
 	}
 
 	parent, err := d.GetParentDirectoryForBaseClass()
@@ -44,11 +44,11 @@ func (d *DirectoryBase) WriteStringToFileInDirectory(content string, verbose boo
 
 func (c *DirectoryBase) WriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile File, err error) {
 	if content == nil {
-		return nil, errors.TracedErrorNil("content")
+		return nil, tracederrors.TracedErrorNil("content")
 	}
 
 	if len(path) <= 0 {
-		return nil, errors.TracedError("path is empty")
+		return nil, tracederrors.TracedError("path is empty")
 	}
 
 	parent, err := c.GetParentDirectoryForBaseClass()
@@ -89,14 +89,14 @@ func (d *DirectoryBase) CheckExists(verbose bool) (err error) {
 		return err
 	}
 
-	return errors.TracedErrorf(
+	return tracederrors.TracedErrorf(
 		"directory '%s' does not exist", path,
 	)
 }
 
 func (d *DirectoryBase) CreateFileInDirectory(verbose bool, path ...string) (createdFile File, err error) {
 	if len(path) <= 0 {
-		return nil, errors.TracedError("path has no elements")
+		return nil, tracederrors.TracedError("path has no elements")
 	}
 
 	parent, err := d.GetParentDirectoryForBaseClass()
@@ -119,7 +119,7 @@ func (d *DirectoryBase) CreateFileInDirectory(verbose bool, path ...string) (cre
 
 func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose bool, pathToCreate ...string) (createdFile File, err error) {
 	if len(pathToCreate) <= 0 {
-		return nil, errors.TracedErrorf("Invalid pathToCreate='%v'", pathToCreate)
+		return nil, tracederrors.TracedErrorf("Invalid pathToCreate='%v'", pathToCreate)
 	}
 
 	parent, err := d.GetParentDirectoryForBaseClass()
@@ -152,7 +152,7 @@ func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose 
 
 func (d *DirectoryBase) DeleteFilesMatching(listFileOptions *ListFileOptions) (err error) {
 	if listFileOptions == nil {
-		return errors.TracedErrorNil("listFileOptions")
+		return tracederrors.TracedErrorNil("listFileOptions")
 	}
 
 	parent, err := d.GetParentDirectoryForBaseClass()
@@ -196,7 +196,7 @@ func (d *DirectoryBase) DeleteFilesMatching(listFileOptions *ListFileOptions) (e
 
 func (d *DirectoryBase) FileInDirectoryExists(verbose bool, path ...string) (fileExists bool, err error) {
 	if len(path) <= 0 {
-		return false, errors.TracedError("path has no elements")
+		return false, tracederrors.TracedError("path has no elements")
 	}
 
 	parent, err := d.GetParentDirectoryForBaseClass()
@@ -219,7 +219,7 @@ func (d *DirectoryBase) FileInDirectoryExists(verbose bool, path ...string) (fil
 
 func (d *DirectoryBase) GetFilePathInDirectory(path ...string) (filePath string, err error) {
 	if len(path) <= 0 {
-		return "", errors.TracedError("path has no elements")
+		return "", tracederrors.TracedError("path has no elements")
 	}
 
 	parent, err := d.GetParentDirectoryForBaseClass()
@@ -242,7 +242,7 @@ func (d *DirectoryBase) GetFilePathInDirectory(path ...string) (filePath string,
 
 func (d *DirectoryBase) GetParentDirectoryForBaseClass() (parentDirectoryForBaseClass Directory, err error) {
 	if d.parentDirectoryForBaseClass == nil {
-		return nil, errors.TracedError("parentDirectoryForBaseClass not set")
+		return nil, tracederrors.TracedError("parentDirectoryForBaseClass not set")
 	}
 	return d.parentDirectoryForBaseClass, nil
 }
@@ -268,7 +268,7 @@ func (d *DirectoryBase) GetPathAndHostDescription() (path string, hostDescriptio
 
 func (d *DirectoryBase) ListFilePaths(listFileOptions *ListFileOptions) (filePaths []string, err error) {
 	if listFileOptions == nil {
-		return nil, errors.TracedErrorNil("listFileOptions")
+		return nil, tracederrors.TracedErrorNil("listFileOptions")
 	}
 
 	parent, err := d.GetParentDirectoryForBaseClass()
@@ -307,7 +307,7 @@ func (d *DirectoryBase) ListFilePaths(listFileOptions *ListFileOptions) (filePat
 
 func (d *DirectoryBase) ListSubDirectoryPaths(options *ListDirectoryOptions) (subDirectoryPaths []string, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	parent, err := d.GetParentDirectoryForBaseClass()
@@ -510,7 +510,7 @@ func (d *DirectoryBase) MustWriteStringToFileInDirectory(content string, verbose
 
 func (d *DirectoryBase) ReadFileInDirectoryAsInt64(path ...string) (value int64, err error) {
 	if len(path) <= 0 {
-		return -1, errors.TracedError("path has no elements")
+		return -1, tracederrors.TracedError("path has no elements")
 	}
 
 	parent, err := d.GetParentDirectoryForBaseClass()
@@ -527,7 +527,7 @@ func (d *DirectoryBase) ReadFileInDirectoryAsInt64(path ...string) (value int64,
 
 	value, err = strconv.ParseInt(content, 10, 64)
 	if err != nil {
-		return -1, errors.TracedErrorf(
+		return -1, tracederrors.TracedErrorf(
 			"Failed to parse file content as int64: %w",
 			err,
 		)
@@ -538,7 +538,7 @@ func (d *DirectoryBase) ReadFileInDirectoryAsInt64(path ...string) (value int64,
 
 func (d *DirectoryBase) ReadFileInDirectoryAsLines(path ...string) (content []string, err error) {
 	if len(path) == 0 {
-		return nil, errors.TracedError("path is empty")
+		return nil, tracederrors.TracedError("path is empty")
 	}
 
 	parent, err := d.GetParentDirectoryForBaseClass()
@@ -580,7 +580,7 @@ func (d *DirectoryBase) ReadFileInDirectoryAsString(path ...string) (content str
 
 func (d *DirectoryBase) ReadFirstLineOfFileInDirectoryAsString(path ...string) (firstLine string, err error) {
 	if len(path) <= 0 {
-		return "", errors.TracedError("No path given")
+		return "", tracederrors.TracedError("No path given")
 	}
 
 	parent, err := d.GetParentDirectoryForBaseClass()
@@ -598,7 +598,7 @@ func (d *DirectoryBase) ReadFirstLineOfFileInDirectoryAsString(path ...string) (
 
 func (d *DirectoryBase) SetParentDirectoryForBaseClass(parentDirectoryForBaseClass Directory) (err error) {
 	if parentDirectoryForBaseClass == nil {
-		return errors.TracedErrorNil("parentDirectoryForBaseClass")
+		return tracederrors.TracedErrorNil("parentDirectoryForBaseClass")
 	}
 
 	d.parentDirectoryForBaseClass = parentDirectoryForBaseClass

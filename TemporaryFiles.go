@@ -4,8 +4,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type TemporaryFilesService struct {
@@ -44,7 +44,7 @@ func (t *TemporaryFilesService) CreateEmptyTemporaryFileAndGetPath(verbose bool)
 
 func (t *TemporaryFilesService) CreateFromBytes(content []byte, verbose bool) (temporaryFile File, err error) {
 	if content == nil {
-		return nil, errors.TracedErrorNil("content")
+		return nil, tracederrors.TracedErrorNil("content")
 	}
 
 	temporaryFile, err = t.CreateEmptyTemporaryFile(verbose)
@@ -90,7 +90,7 @@ func (t *TemporaryFilesService) CreateFromStringAndGetPath(content string, verbo
 
 func (t *TemporaryFilesService) CreateNamedTemporaryFile(fileName string, verbose bool) (temporaryfile File, err error) {
 	if fileName == "" {
-		return nil, errors.TracedErrorEmptyString("fileName")
+		return nil, tracederrors.TracedErrorEmptyString("fileName")
 	}
 
 	osFile, err := os.CreateTemp("", fileName)
@@ -108,7 +108,7 @@ func (t *TemporaryFilesService) CreateNamedTemporaryFile(fileName string, verbos
 
 func (t *TemporaryFilesService) CreateTemporaryFileFromBytes(content []byte, verbose bool) (temporaryFile File, err error) {
 	if content == nil {
-		return nil, errors.TracedErrorNil("content")
+		return nil, tracederrors.TracedErrorNil("content")
 	}
 
 	temporaryFile, err = t.CreateTemporaryFileFromString(string(content), verbose)
@@ -121,7 +121,7 @@ func (t *TemporaryFilesService) CreateTemporaryFileFromBytes(content []byte, ver
 
 func (t *TemporaryFilesService) CreateTemporaryFileFromFile(fileToCopyAsTemporaryFile File, verbose bool) (temporaryFile File, err error) {
 	if fileToCopyAsTemporaryFile == nil {
-		return nil, errors.TracedErrorNil("fileToCopyAsTemporaryFile")
+		return nil, tracederrors.TracedErrorNil("fileToCopyAsTemporaryFile")
 	}
 
 	content, err := fileToCopyAsTemporaryFile.ReadAsBytes()
@@ -139,7 +139,7 @@ func (t *TemporaryFilesService) CreateTemporaryFileFromFile(fileToCopyAsTemporar
 
 func (t *TemporaryFilesService) CreateTemporaryFileFromPath(verbose bool, filePathToCopyAsTemporaryFile ...string) (temporaryFile File, err error) {
 	if len(filePathToCopyAsTemporaryFile) <= 0 {
-		return nil, errors.TracedError("filePathToCopyAsTemporaryFile")
+		return nil, tracederrors.TracedError("filePathToCopyAsTemporaryFile")
 	}
 
 	pathToUse := strings.Join(filePathToCopyAsTemporaryFile, "/")

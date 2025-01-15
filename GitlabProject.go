@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -17,11 +17,11 @@ type GitlabProject struct {
 
 func GetGitlabProjectByUrl(url *URL, authOptions []AuthenticationOption, verbose bool) (gitlabProject *GitlabProject, err error) {
 	if url == nil {
-		return nil, errors.TracedErrorNil("url")
+		return nil, tracederrors.TracedErrorNil("url")
 	}
 
 	if authOptions == nil {
-		return nil, errors.TracedErrorNil("authOptions")
+		return nil, tracederrors.TracedErrorNil("authOptions")
 	}
 
 	fqdnWithSheme, path, err := url.GetFqdnWitShemeAndPathAsString()
@@ -41,7 +41,7 @@ func GetGitlabProjectByUrl(url *URL, authOptions []AuthenticationOption, verbose
 
 	gitlabAuthenticationOption, ok := authOption.(*GitlabAuthenticationOptions)
 	if !ok {
-		return nil, errors.TracedErrorf("Unable to get %v as GitlabAuthenticationOptions", authOption)
+		return nil, tracederrors.TracedErrorf("Unable to get %v as GitlabAuthenticationOptions", authOption)
 	}
 
 	if authOptions != nil {
@@ -61,7 +61,7 @@ func GetGitlabProjectByUrl(url *URL, authOptions []AuthenticationOption, verbose
 
 func GetGitlabProjectByUrlFromString(urlString string, authOptions []AuthenticationOption, verbose bool) (gitlabProject *GitlabProject, err error) {
 	if urlString == "" {
-		return nil, errors.TracedErrorEmptyString("urlString")
+		return nil, tracederrors.TracedErrorEmptyString("urlString")
 	}
 
 	url, err := GetUrlFromString(urlString)
@@ -158,7 +158,7 @@ func (g *GitlabProject) CreateEmptyFile(fileName string, ref string, verbose boo
 
 func (g *GitlabProject) CreateMergeRequest(options *GitlabCreateMergeRequestOptions) (createdMergeRequest *GitlabMergeRequest, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	sourceBranchName, err := options.GetSourceBranchName()
@@ -181,7 +181,7 @@ func (g *GitlabProject) CreateMergeRequest(options *GitlabCreateMergeRequestOpti
 
 func (g *GitlabProject) CreateNextMajorReleaseFromLatestCommitInDefaultBranch(description string, verbose bool) (createdRelease *GitlabRelease, err error) {
 	if description == "" {
-		return nil, errors.TracedErrorEmptyString("description")
+		return nil, tracederrors.TracedErrorEmptyString("description")
 	}
 
 	nextPatchVersionString, err := g.GetNextMajorReleaseVersionString(verbose)
@@ -205,7 +205,7 @@ func (g *GitlabProject) CreateNextMajorReleaseFromLatestCommitInDefaultBranch(de
 
 func (g *GitlabProject) CreateNextMinorReleaseFromLatestCommitInDefaultBranch(description string, verbose bool) (createdRelease *GitlabRelease, err error) {
 	if description == "" {
-		return nil, errors.TracedErrorEmptyString("description")
+		return nil, tracederrors.TracedErrorEmptyString("description")
 	}
 
 	nextPatchVersionString, err := g.GetNextMinorReleaseVersionString(verbose)
@@ -229,7 +229,7 @@ func (g *GitlabProject) CreateNextMinorReleaseFromLatestCommitInDefaultBranch(de
 
 func (g *GitlabProject) CreateNextPatchReleaseFromLatestCommitInDefaultBranch(description string, verbose bool) (createdRelease *GitlabRelease, err error) {
 	if description == "" {
-		return nil, errors.TracedErrorEmptyString("description")
+		return nil, tracederrors.TracedErrorEmptyString("description")
 	}
 
 	nextPatchVersionString, err := g.GetNextPatchReleaseVersionString(verbose)
@@ -307,11 +307,11 @@ func (g *GitlabProject) DeleteAllReleases(deleteOptions *GitlabDeleteReleaseOpti
 
 func (g *GitlabProject) DeleteBranch(branchName string, deleteOptions *GitlabDeleteBranchOptions) (err error) {
 	if branchName == "" {
-		return errors.TracedErrorEmptyString("branchNAme")
+		return tracederrors.TracedErrorEmptyString("branchNAme")
 	}
 
 	if deleteOptions == nil {
-		return errors.TracedErrorNil("deleteOptons")
+		return tracederrors.TracedErrorNil("deleteOptons")
 	}
 
 	branch, err := g.GetBranchByName(branchName)
@@ -329,11 +329,11 @@ func (g *GitlabProject) DeleteBranch(branchName string, deleteOptions *GitlabDel
 
 func (g *GitlabProject) DeleteFileInDefaultBranch(fileName string, commitMessage string, verbose bool) (err error) {
 	if fileName == "" {
-		return errors.TracedErrorEmptyString("fileName")
+		return tracederrors.TracedErrorEmptyString("fileName")
 	}
 
 	if commitMessage == "" {
-		return errors.TracedErrorEmptyString("commitMessage")
+		return tracederrors.TracedErrorEmptyString("commitMessage")
 	}
 
 	fileInRepo, err := g.GetFileInDefaultBranch(
@@ -389,7 +389,7 @@ func (g *GitlabProject) Exists(verbose bool) (projectExists bool, err error) {
 
 func (g *GitlabProject) GetBranchByName(branchName string) (branch *GitlabBranch, err error) {
 	if branchName == "" {
-		return nil, errors.TracedErrorEmptyString("branchName")
+		return nil, tracederrors.TracedErrorEmptyString("branchName")
 	}
 
 	branches, err := g.GetBranches()
@@ -455,7 +455,7 @@ func (g *GitlabProject) GetCachedProjectName() (projectName string, err error) {
 
 	projectName = filepath.Base(cachedPath)
 	if projectName == "" {
-		return "", errors.TracedErrorf("Unable to extract project name from cachedPath = '%s'", cachedPath)
+		return "", tracederrors.TracedErrorf("Unable to extract project name from cachedPath = '%s'", cachedPath)
 	}
 
 	return projectName, nil
@@ -463,7 +463,7 @@ func (g *GitlabProject) GetCachedProjectName() (projectName string, err error) {
 
 func (g *GitlabProject) GetCommitByHashString(hashString string, verbose bool) (commit *GitlabCommit, err error) {
 	if hashString == "" {
-		return nil, errors.TracedErrorNil("hashString")
+		return nil, tracederrors.TracedErrorNil("hashString")
 	}
 
 	projectCommits, err := g.GetProjectCommits()
@@ -527,7 +527,7 @@ func (g *GitlabProject) GetDefaultBranchName() (defaultBranchName string, err er
 
 	defaultBranchName = nativeProject.DefaultBranch
 	if defaultBranchName == "" {
-		return "", errors.TracedError("defaultBranchName is empty string after evaluation")
+		return "", tracederrors.TracedError("defaultBranchName is empty string after evaluation")
 	}
 
 	return defaultBranchName, nil
@@ -549,7 +549,7 @@ func (g *GitlabProject) GetDirectoryNames(ref string, verbose bool) (directoryNa
 
 func (g *GitlabProject) GetFileInDefaultBranch(fileName string, verbose bool) (repositoryFile *GitlabRepositoryFile, err error) {
 	if fileName == "" {
-		return nil, errors.TracedErrorEmptyString("fileName")
+		return nil, tracederrors.TracedErrorEmptyString("fileName")
 	}
 
 	repositoryFile, err = g.GetRepositoryFile(
@@ -595,7 +595,7 @@ func (g *GitlabProject) GetGitlabFqdn() (fqdn string, err error) {
 
 func (g *GitlabProject) GetLatestCommit(branchName string, verbose bool) (latestCommit *GitlabCommit, err error) {
 	if branchName == "" {
-		return nil, errors.TracedErrorNil("branchName")
+		return nil, tracederrors.TracedErrorNil("branchName")
 	}
 
 	latestHash, err := g.GetLatestCommitHashAsString(branchName, verbose)
@@ -619,7 +619,7 @@ func (g *GitlabProject) GetLatestCommit(branchName string, verbose bool) (latest
 
 func (g *GitlabProject) GetLatestCommitHashAsString(branchName string, verbose bool) (commitHash string, err error) {
 	if branchName == "" {
-		return "", errors.TracedErrorEmptyString("branchName")
+		return "", tracederrors.TracedErrorEmptyString("branchName")
 	}
 
 	branch, err := g.GetBranchByName(branchName)
@@ -686,7 +686,7 @@ func (g *GitlabProject) GetNewestSemanticVersion(verbose bool) (newestSemanticVe
 
 	newestSemanticVersion, ok := newestVersion.(*VersionSemanticVersion)
 	if !ok {
-		return nil, errors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Unable to get newest semantiv version from '%v'",
 			newestVersion,
 		)
@@ -702,7 +702,7 @@ func (g *GitlabProject) GetNewestVersion(verbose bool) (newestVersion Version, e
 	}
 
 	if len(availableVersions) <= 0 {
-		return nil, errors.TracedError("No versionTags returned")
+		return nil, tracederrors.TracedError("No versionTags returned")
 	}
 
 	newestVersion, err = Versions().GetLatestVersionFromSlice(availableVersions)
@@ -820,7 +820,7 @@ func (g *GitlabProject) GetPath() (projectPath string, err error) {
 
 	projectPath = nativeProject.PathWithNamespace
 	if projectPath == "" {
-		return "", errors.TracedError("projectPath is empty string after evaluation")
+		return "", tracederrors.TracedError("projectPath is empty string after evaluation")
 	}
 
 	err = g.SetCachedPath(projectPath)
@@ -901,16 +901,16 @@ func (g *GitlabProject) GetRawResponse() (nativeGitlabProject *gitlab.Project, e
 	}
 
 	if pid == nil {
-		return nil, errors.TracedErrorf("Unable to evaluate pid to get native gitlab project: '%w'", err)
+		return nil, tracederrors.TracedErrorf("Unable to evaluate pid to get native gitlab project: '%w'", err)
 	}
 
 	nativeProject, _, err := projectsService.GetProject(pid, nil, nil)
 	if err != nil {
-		return nil, errors.TracedErrorf("Unable to get native project: '%w'", err)
+		return nil, tracederrors.TracedErrorf("Unable to get native project: '%w'", err)
 	}
 
 	if nativeProject == nil {
-		return nil, errors.TracedError("nativeProject is nil after evaluation")
+		return nil, tracederrors.TracedError("nativeProject is nil after evaluation")
 	}
 
 	return nativeProject, nil
@@ -918,7 +918,7 @@ func (g *GitlabProject) GetRawResponse() (nativeGitlabProject *gitlab.Project, e
 
 func (g *GitlabProject) GetRepositoryFile(options *GitlabGetRepositoryFileOptions) (repositoryFile *GitlabRepositoryFile, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	repositoryFiles, err := g.GetRepositoryFiles()
@@ -963,7 +963,7 @@ func (g *GitlabProject) GetSemanticVersions(verbose bool) (semanticVersions []Ve
 
 func (g *GitlabProject) GetTagByName(tagName string) (tag *GitlabTag, err error) {
 	if tagName == "" {
-		return nil, errors.TracedErrorEmptyString("tagName")
+		return nil, tracederrors.TracedErrorEmptyString("tagName")
 	}
 
 	tags, err := g.GetTags()
@@ -1714,7 +1714,7 @@ func (g *GitlabProject) MustWriteFileContentInDefaultBranch(writeOptions *Gitlab
 
 func (g *GitlabProject) ReadFileContentAsString(options *GitlabReadFileOptions) (content string, err error) {
 	if options == nil {
-		return "", errors.TracedErrorNil("options")
+		return "", tracederrors.TracedErrorNil("options")
 	}
 
 	repositoryFiles, err := g.GetRepositoryFiles()
@@ -1732,7 +1732,7 @@ func (g *GitlabProject) ReadFileContentAsString(options *GitlabReadFileOptions) 
 
 func (g *GitlabProject) SetId(id int) (err error) {
 	if id <= 0 {
-		return errors.TracedErrorf("invalid id = '%d'", id)
+		return tracederrors.TracedErrorf("invalid id = '%d'", id)
 	}
 
 	g.id = id
@@ -1742,7 +1742,7 @@ func (g *GitlabProject) SetId(id int) (err error) {
 
 func (g *GitlabProject) WriteFileContent(options *GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	repositoryFiles, err := g.GetRepositoryFiles()
@@ -1760,7 +1760,7 @@ func (g *GitlabProject) WriteFileContent(options *GitlabWriteFileOptions) (gitla
 
 func (g *GitlabProject) WriteFileContentInDefaultBranch(writeOptions *GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile, err error) {
 	if writeOptions == nil {
-		return nil, errors.TracedErrorNil("writeOptions")
+		return nil, tracederrors.TracedErrorNil("writeOptions")
 	}
 
 	defaultBranch, err := g.GetDefaultBranch()
@@ -1778,7 +1778,7 @@ func (g *GitlabProject) WriteFileContentInDefaultBranch(writeOptions *GitlabWrit
 
 func (p *GitlabProject) CreateReleaseFromLatestCommitInDefaultBranch(createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease, err error) {
 	if createReleaseOptions == nil {
-		return nil, errors.TracedErrorNil("createReleaseOptions")
+		return nil, tracederrors.TracedErrorNil("createReleaseOptions")
 	}
 
 	latestCommit, err := p.GetLatestCommitOfDefaultBranch(createReleaseOptions.Verbose)
@@ -1796,7 +1796,7 @@ func (p *GitlabProject) CreateReleaseFromLatestCommitInDefaultBranch(createRelea
 
 func (p *GitlabProject) DeployKeyByNameExists(keyName string) (exists bool, err error) {
 	if len(keyName) <= 0 {
-		return false, errors.TracedError("keyName is empty string")
+		return false, tracederrors.TracedError("keyName is empty string")
 	}
 
 	deployKeys, err := p.GetDeployKeys()
@@ -1821,7 +1821,7 @@ func (p *GitlabProject) GetCachedPath() (path string, err error) {
 	}
 
 	if len(p.cachedPath) <= 0 {
-		return "", errors.TracedError("cachedPath not set")
+		return "", tracederrors.TracedError("cachedPath not set")
 	}
 
 	return p.cachedPath, nil
@@ -1829,7 +1829,7 @@ func (p *GitlabProject) GetCachedPath() (path string, err error) {
 
 func (p *GitlabProject) GetDeployKeyByName(keyName string) (projectDeployKey *GitlabProjectDeployKey, err error) {
 	if len(keyName) <= 0 {
-		return nil, errors.TracedError("keyName is nil")
+		return nil, tracederrors.TracedError("keyName is nil")
 	}
 
 	deployKeys, err := p.GetGitlabProjectDeployKeys()
@@ -1857,7 +1857,7 @@ func (p *GitlabProject) GetDeployKeys() (deployKeys *GitlabProjectDeployKeys, er
 
 func (p *GitlabProject) GetGitlab() (gitlab *GitlabInstance, err error) {
 	if p.gitlab == nil {
-		return nil, errors.TracedError("gitlab is not set")
+		return nil, tracederrors.TracedError("gitlab is not set")
 	}
 
 	return p.gitlab, nil
@@ -1901,7 +1901,7 @@ func (p *GitlabProject) GetGitlabReleases() (gitlabReleases *GitlabReleases, err
 
 func (p *GitlabProject) GetId() (id int, err error) {
 	if p.id < 0 {
-		return -1, errors.TracedErrorf("id is set to invalid value of '%d'", p.id)
+		return -1, tracederrors.TracedErrorf("id is set to invalid value of '%d'", p.id)
 	}
 
 	if p.id == 0 {
@@ -1912,7 +1912,7 @@ func (p *GitlabProject) GetId() (id int, err error) {
 
 		id = rawResponse.ID
 		if id <= 0 {
-			return -1, errors.TracedErrorf("GetId failed for GitlabProject: id is '%d' after evaluation", id)
+			return -1, tracederrors.TracedErrorf("GetId failed for GitlabProject: id is '%d' after evaluation", id)
 		}
 	}
 
@@ -1935,7 +1935,7 @@ func (p *GitlabProject) GetNativeProjectsService() (nativeGitlabProject *gitlab.
 
 func (p *GitlabProject) GetReleaseByName(releaseName string) (gitlabRelease *GitlabRelease, err error) {
 	if releaseName == "" {
-		return nil, errors.TracedErrorEmptyString("releaseName")
+		return nil, tracederrors.TracedErrorEmptyString("releaseName")
 	}
 
 	gitlabReleases, err := p.GetGitlabReleases()
@@ -2013,7 +2013,7 @@ func (p *GitlabProject) MakePublic(verbose bool) (err error) {
 
 func (p *GitlabProject) RecreateDeployKey(keyOptions *GitlabCreateDeployKeyOptions) (err error) {
 	if keyOptions == nil {
-		return errors.TracedError("keyOptions is nil")
+		return tracederrors.TracedError("keyOptions is nil")
 	}
 
 	deployKey, err := p.GetDeployKeyByName(keyOptions.Name)
@@ -2031,7 +2031,7 @@ func (p *GitlabProject) RecreateDeployKey(keyOptions *GitlabCreateDeployKeyOptio
 
 func (p *GitlabProject) SetCachedPath(pathToCache string) (err error) {
 	if len(pathToCache) <= 0 {
-		return errors.TracedError("pathToCache is empty string")
+		return tracederrors.TracedError("pathToCache is empty string")
 	}
 
 	p.cachedPath = pathToCache
@@ -2041,7 +2041,7 @@ func (p *GitlabProject) SetCachedPath(pathToCache string) (err error) {
 
 func (p *GitlabProject) SetGitlab(gitlab *GitlabInstance) (err error) {
 	if gitlab == nil {
-		return errors.TracedError("gitlab is nil")
+		return tracederrors.TracedError("gitlab is nil")
 	}
 
 	p.gitlab = gitlab

@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type ChownOptions struct {
@@ -18,7 +18,7 @@ func NewChownOptions() (c *ChownOptions) {
 
 func (c *ChownOptions) GetGroupName() (GroupName string, err error) {
 	if c.GroupName == "" {
-		return "", errors.TracedErrorf("GroupName not set")
+		return "", tracederrors.TracedErrorf("GroupName not set")
 	}
 
 	return c.GroupName, nil
@@ -49,7 +49,7 @@ func (c *ChownOptions) GetUserAndOptionallyGroupForChownCommand() (userAndGroup 
 
 func (c *ChownOptions) GetUserName() (userName string, err error) {
 	if c.UserName == "" {
-		return "", errors.TracedErrorf("UserName not set")
+		return "", tracederrors.TracedErrorf("UserName not set")
 	}
 
 	return c.UserName, nil
@@ -107,7 +107,7 @@ func (c *ChownOptions) MustSetUserName(userName string) {
 
 func (c *ChownOptions) SetGroupName(GroupName string) (err error) {
 	if GroupName == "" {
-		return errors.TracedErrorf("GroupName is empty string")
+		return tracederrors.TracedErrorf("GroupName is empty string")
 	}
 
 	c.GroupName = GroupName
@@ -121,7 +121,7 @@ func (c *ChownOptions) SetUseSudo(useSudo bool) {
 
 func (c *ChownOptions) SetUserName(userName string) (err error) {
 	if userName == "" {
-		return errors.TracedErrorf("userName is empty string")
+		return tracederrors.TracedErrorf("userName is empty string")
 	}
 
 	c.UserName = userName

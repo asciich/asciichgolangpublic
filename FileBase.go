@@ -13,8 +13,8 @@ import (
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 	"github.com/asciich/asciichgolangpublic/datetime"
-	aerrors "github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 var ErrFileBaseParentNotSet = errors.New("parent is not set")
@@ -39,7 +39,7 @@ func (f *FileBase) IsLocalFile(verbose bool) (isLocalFile bool, err error) {
 
 	localPath, err := parent.GetLocalPath()
 	if err != nil {
-		return false, aerrors.TracedErrorf(
+		return false, tracederrors.TracedErrorf(
 			"Not implemented for %w",
 			err,
 		)
@@ -96,7 +96,7 @@ func (f *FileBase) CheckIsLocalFile(verbose bool) (err error) {
 	}
 
 	if !isLocalFile {
-		return aerrors.TracedError("Not a local file")
+		return tracederrors.TracedError("Not a local file")
 	}
 
 	return nil
@@ -252,13 +252,13 @@ func (f *FileBase) GetFileTypeDescription(verbose bool) (fileTypeDescription str
 
 	stdoutLines = aslices.RemoveEmptyStrings(stdoutLines)
 	if len(stdoutLines) != 1 {
-		return "", aerrors.TracedErrorf("Expected exactly one line left bug got: '%v'", stdoutLines)
+		return "", tracederrors.TracedErrorf("Expected exactly one line left bug got: '%v'", stdoutLines)
 	}
 
 	line := stdoutLines[0]
 	splitted := strings.Split(line, ":")
 	if len(splitted) != 2 {
-		return "", aerrors.TracedErrorf("Unexpected amount of splitted: '%v'", splitted)
+		return "", tracederrors.TracedErrorf("Unexpected amount of splitted: '%v'", splitted)
 	}
 
 	fileTypeDescription = strings.TrimSpace(splitted[1])
@@ -279,7 +279,7 @@ func (f *FileBase) GetMimeType(verbose bool) (mimeType string, err error) {
 
 	mimeType = http.DetectContentType(beginningOfFile)
 	if mimeType == "" {
-		return "", aerrors.TracedError("Mimetype is empty string after evaluation")
+		return "", tracederrors.TracedError("Mimetype is empty string after evaluation")
 	}
 
 	path, err := parent.GetLocalPath()
@@ -371,7 +371,7 @@ func (f *FileBase) GetParentDirectoryPath() (parentDirectoryPath string, err err
 
 func (f *FileBase) GetParentFileForBaseClass() (parentFileForBaseClass File, err error) {
 	if f.parentFileForBaseClass == nil {
-		return nil, aerrors.TracedErrorf("%w", ErrFileBaseParentNotSet)
+		return nil, tracederrors.TracedErrorf("%w", ErrFileBaseParentNotSet)
 	}
 	return f.parentFileForBaseClass, nil
 }
@@ -483,7 +483,7 @@ func (f *FileBase) GetTextBlocks(verbose bool) (textBlocks []string, err error) 
 
 func (f *FileBase) GetValueAsInt(key string) (value int, err error) {
 	if key == "" {
-		return -1, aerrors.TracedErrorEmptyString("key")
+		return -1, tracederrors.TracedErrorEmptyString("key")
 	}
 
 	parent, err := f.GetParentFileForBaseClass()
@@ -501,7 +501,7 @@ func (f *FileBase) GetValueAsInt(key string) (value int, err error) {
 
 func (f *FileBase) GetValueAsString(key string) (value string, err error) {
 	if key == "" {
-		return "", aerrors.TracedErrorEmptyString("key")
+		return "", tracederrors.TracedErrorEmptyString("key")
 	}
 
 	parent, err := f.GetParentFileForBaseClass()
@@ -519,7 +519,7 @@ func (f *FileBase) GetValueAsString(key string) (value string, err error) {
 
 func (f *FileBase) IsContentEqualByComparingSha256Sum(otherFile File, verbose bool) (isEqual bool, err error) {
 	if otherFile == nil {
-		return false, aerrors.TracedErrorNil("otherFile")
+		return false, tracederrors.TracedErrorNil("otherFile")
 	}
 
 	thisChecksum, err := f.GetSha256Sum()
@@ -1077,7 +1077,7 @@ func (f *FileBase) ReadAsInt() (readValue int, err error) {
 
 	readValue, err = strconv.Atoi(contentString)
 	if err != nil {
-		return 0, aerrors.TracedErrorf(
+		return 0, tracederrors.TracedErrorf(
 			"Unable to parse file '%s' as int: '%w'",
 			localPath,
 			err,
@@ -1107,7 +1107,7 @@ func (f *FileBase) ReadAsInt64() (readValue int64, err error) {
 
 	readValue, err = strconv.ParseInt(contentString, 10, 64)
 	if err != nil {
-		return 0, aerrors.TracedErrorf(
+		return 0, tracederrors.TracedErrorf(
 			"Unable to parse file '%s' as int64: '%w'",
 			localPath,
 			err,
@@ -1207,7 +1207,7 @@ func (f *FileBase) ReadLastCharAsString() (lastChar string, err error) {
 	}
 
 	if len(content) <= 0 {
-		return "", aerrors.TracedErrorf("Get last char failed, '%s' is empty file", localPath)
+		return "", tracederrors.TracedErrorf("Get last char failed, '%s' is empty file", localPath)
 	}
 
 	lastChar = content[len(content)-1:]
@@ -1460,7 +1460,7 @@ func (f *FileBase) WriteInt64(toWrite int64, verbose bool) (err error) {
 
 func (f *FileBase) WriteLines(linesToWrite []string, verbose bool) (err error) {
 	if linesToWrite == nil {
-		return aerrors.TracedErrorNil("linesToWrite")
+		return tracederrors.TracedErrorNil("linesToWrite")
 	}
 
 	contentToWrite := strings.Join(linesToWrite, "\n")
@@ -1539,7 +1539,7 @@ func (xxx *FileBase) GetCreationDateByFileName(verbose bool) (creationDate *time
 	}
 
 	if creationDate == nil {
-		return nil, aerrors.TracedError("All attempts failed to extract creationDate")
+		return nil, tracederrors.TracedError("All attempts failed to extract creationDate")
 	}
 
 	return creationDate, nil

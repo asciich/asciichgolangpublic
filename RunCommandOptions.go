@@ -2,8 +2,8 @@ package asciichgolangpublic
 
 import (
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type RunCommandOptions struct {
@@ -28,7 +28,7 @@ func NewRunCommandOptions() (runCommandOptions *RunCommandOptions) {
 
 func (o *RunCommandOptions) GetCommand() (command []string, err error) {
 	if len(o.Command) <= 0 {
-		return nil, errors.TracedError("command not set")
+		return nil, tracederrors.TracedError("command not set")
 	}
 
 	command = aslices.GetDeepCopyOfStringsSlice(o.Command)
@@ -103,7 +103,7 @@ func (r *RunCommandOptions) GetRunAsRoot() (runAsRoot bool) {
 
 func (r *RunCommandOptions) GetStdinString() (stdinString string, err error) {
 	if r.StdinString == "" {
-		return "", errors.TracedErrorf("StdinString not set")
+		return "", tracederrors.TracedErrorf("StdinString not set")
 	}
 
 	return r.StdinString, nil
@@ -111,7 +111,7 @@ func (r *RunCommandOptions) GetStdinString() (stdinString string, err error) {
 
 func (r *RunCommandOptions) GetTimeoutString() (timeoutString string, err error) {
 	if r.TimeoutString == "" {
-		return "", errors.TracedErrorf("TimeoutString not set")
+		return "", tracederrors.TracedErrorf("TimeoutString not set")
 	}
 
 	return r.TimeoutString, nil
@@ -244,11 +244,11 @@ func (r *RunCommandOptions) SetAllowAllExitCodes(allowAllExitCodes bool) (err er
 
 func (r *RunCommandOptions) SetCommand(command []string) (err error) {
 	if command == nil {
-		return errors.TracedErrorf("command is nil")
+		return tracederrors.TracedErrorf("command is nil")
 	}
 
 	if len(command) <= 0 {
-		return errors.TracedErrorf("command has no elements")
+		return tracederrors.TracedErrorf("command has no elements")
 	}
 
 	r.Command = command
@@ -268,7 +268,7 @@ func (r *RunCommandOptions) SetRunAsRoot(runAsRoot bool) {
 
 func (r *RunCommandOptions) SetStdinString(stdinString string) (err error) {
 	if stdinString == "" {
-		return errors.TracedErrorf("stdinString is empty string")
+		return tracederrors.TracedErrorf("stdinString is empty string")
 	}
 
 	r.StdinString = stdinString
@@ -278,7 +278,7 @@ func (r *RunCommandOptions) SetStdinString(stdinString string) (err error) {
 
 func (r *RunCommandOptions) SetTimeoutString(timeoutString string) (err error) {
 	if timeoutString == "" {
-		return errors.TracedErrorf("timeoutString is empty string")
+		return tracederrors.TracedErrorf("timeoutString is empty string")
 	}
 
 	r.TimeoutString = timeoutString

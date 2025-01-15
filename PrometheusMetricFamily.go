@@ -2,8 +2,8 @@ package asciichgolangpublic
 
 import (
 	dto "github.com/prometheus/client_model/go"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type PrometheusMetricFamily struct {
@@ -14,7 +14,7 @@ type PrometheusMetricFamily struct {
 
 func GetPrometheusMetricFamilyFromNativeMetricFamily(metricFamily *dto.MetricFamily) (p *PrometheusMetricFamily, err error) {
 	if metricFamily == nil {
-		return nil, errors.TracedErrorNil("metricFamily")
+		return nil, tracederrors.TracedErrorNil("metricFamily")
 	}
 
 	p = NewPrometheusMetricFamily()
@@ -40,7 +40,7 @@ func GetPrometheusMetricFamilyFromNativeMetricFamily(metricFamily *dto.MetricFam
 				return nil, err
 			}
 		} else {
-			return nil, errors.TracedErrorf("Not implemented for '%v'", metric)
+			return nil, tracederrors.TracedErrorf("Not implemented for '%v'", metric)
 		}
 
 		err = p.AddMetric(toAdd)
@@ -67,7 +67,7 @@ func NewPrometheusMetricFamily() (p *PrometheusMetricFamily) {
 
 func (p *PrometheusMetricFamily) AddMetric(toAdd *PrometheusMetric) (err error) {
 	if toAdd == nil {
-		return errors.TracedErrorNil("toAdd")
+		return tracederrors.TracedErrorNil("toAdd")
 	}
 
 	p.metrics = append(p.metrics, toAdd)
@@ -77,7 +77,7 @@ func (p *PrometheusMetricFamily) AddMetric(toAdd *PrometheusMetric) (err error) 
 
 func (p *PrometheusMetricFamily) GetHelp() (help string, err error) {
 	if p.help == "" {
-		return "", errors.TracedErrorf("help not set")
+		return "", tracederrors.TracedErrorf("help not set")
 	}
 
 	return p.help, nil
@@ -85,11 +85,11 @@ func (p *PrometheusMetricFamily) GetHelp() (help string, err error) {
 
 func (p *PrometheusMetricFamily) GetMetrics() (metrics []*PrometheusMetric, err error) {
 	if p.metrics == nil {
-		return nil, errors.TracedErrorf("metrics not set")
+		return nil, tracederrors.TracedErrorf("metrics not set")
 	}
 
 	if len(p.metrics) <= 0 {
-		return nil, errors.TracedErrorf("metrics has no elements")
+		return nil, tracederrors.TracedErrorf("metrics has no elements")
 	}
 
 	return p.metrics, nil
@@ -97,7 +97,7 @@ func (p *PrometheusMetricFamily) GetMetrics() (metrics []*PrometheusMetric, err 
 
 func (p *PrometheusMetricFamily) GetName() (name string, err error) {
 	if p.name == "" {
-		return "", errors.TracedErrorf("name not set")
+		return "", tracederrors.TracedErrorf("name not set")
 	}
 
 	return p.name, nil
@@ -115,7 +115,7 @@ func (p *PrometheusMetricFamily) GetValueAsFloat64() (value float64, err error) 
 	}
 
 	if len(metrics) != 1 {
-		return -1, errors.TracedErrorf(
+		return -1, tracederrors.TracedErrorf(
 			"Expected exactly 1 metric for '%s' to get the value from but got '%d'.",
 			metricName,
 			len(metrics),
@@ -196,7 +196,7 @@ func (p *PrometheusMetricFamily) MustSetName(name string) {
 
 func (p *PrometheusMetricFamily) SetHelp(help string) (err error) {
 	if help == "" {
-		return errors.TracedErrorf("help is empty string")
+		return tracederrors.TracedErrorf("help is empty string")
 	}
 
 	p.help = help
@@ -206,11 +206,11 @@ func (p *PrometheusMetricFamily) SetHelp(help string) (err error) {
 
 func (p *PrometheusMetricFamily) SetMetrics(metrics []*PrometheusMetric) (err error) {
 	if metrics == nil {
-		return errors.TracedErrorf("metrics is nil")
+		return tracederrors.TracedErrorf("metrics is nil")
 	}
 
 	if len(metrics) <= 0 {
-		return errors.TracedErrorf("metrics has no elements")
+		return tracederrors.TracedErrorf("metrics has no elements")
 	}
 
 	p.metrics = metrics
@@ -220,7 +220,7 @@ func (p *PrometheusMetricFamily) SetMetrics(metrics []*PrometheusMetric) (err er
 
 func (p *PrometheusMetricFamily) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	p.name = name

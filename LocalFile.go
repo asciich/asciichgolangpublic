@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	aerrors "github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // A LocalFile represents a locally available file.
@@ -19,12 +19,12 @@ type LocalFile struct {
 
 func GetLocalFileByFile(inputFile File) (localFile *LocalFile, err error) {
 	if inputFile == nil {
-		return nil, aerrors.TracedErrorNil("inputFile")
+		return nil, tracederrors.TracedErrorNil("inputFile")
 	}
 
 	localFile, ok := inputFile.(*LocalFile)
 	if !ok {
-		return nil, aerrors.TracedError("inputFile is not a LocalFile")
+		return nil, tracederrors.TracedError("inputFile is not a LocalFile")
 	}
 
 	return localFile, nil
@@ -72,7 +72,7 @@ func NewLocalFile() (l *LocalFile) {
 
 func NewLocalFileByPath(localPath string) (l *LocalFile, err error) {
 	if localPath == "" {
-		return nil, aerrors.TracedErrorEmptyString("localPath")
+		return nil, tracederrors.TracedErrorEmptyString("localPath")
 	}
 
 	l = NewLocalFile()
@@ -101,7 +101,7 @@ func (l *LocalFile) Delete(verbose bool) (err error) {
 	if exists {
 		err = os.Remove(path)
 		if err != nil {
-			return aerrors.TracedErrorf("Failed to delet localFile '%s': '%w'", path, err)
+			return tracederrors.TracedErrorf("Failed to delet localFile '%s': '%w'", path, err)
 		}
 
 		if verbose {
@@ -118,7 +118,7 @@ func (l *LocalFile) Delete(verbose bool) (err error) {
 
 func (l *LocalFile) AppendBytes(toWrite []byte, verbose bool) (err error) {
 	if toWrite == nil {
-		return aerrors.TracedErrorNil("toWrite")
+		return tracederrors.TracedErrorNil("toWrite")
 	}
 
 	localPath, err := l.GetLocalPath()
@@ -128,7 +128,7 @@ func (l *LocalFile) AppendBytes(toWrite []byte, verbose bool) (err error) {
 
 	fileToWrite, err := os.OpenFile(localPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		return aerrors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"Unable to open file '%s' to append: '%w'",
 			localPath,
 			err,
@@ -136,12 +136,12 @@ func (l *LocalFile) AppendBytes(toWrite []byte, verbose bool) (err error) {
 	}
 	_, err = fileToWrite.Write(toWrite)
 	if err != nil {
-		return aerrors.TracedErrorf("Unable to append: '%w'", err)
+		return tracederrors.TracedErrorf("Unable to append: '%w'", err)
 	}
 
 	err = fileToWrite.Close()
 	if err != nil {
-		return aerrors.TracedErrorf("Unable to close file after append: '%w'", err)
+		return tracederrors.TracedErrorf("Unable to close file after append: '%w'", err)
 	}
 
 	if verbose {
@@ -162,7 +162,7 @@ func (l *LocalFile) AppendString(toWrite string, verbose bool) (err error) {
 
 func (l *LocalFile) Chmod(chmodOptions *ChmodOptions) (err error) {
 	if chmodOptions == nil {
-		return aerrors.TracedErrorNil("chmodOptions")
+		return tracederrors.TracedErrorNil("chmodOptions")
 	}
 
 	chmodString, err := chmodOptions.GetPermissionsString()
@@ -194,7 +194,7 @@ func (l *LocalFile) Chmod(chmodOptions *ChmodOptions) (err error) {
 
 func (l *LocalFile) Chown(options *ChownOptions) (err error) {
 	if options == nil {
-		return aerrors.TracedErrorNil("options")
+		return tracederrors.TracedErrorNil("options")
 	}
 
 	path, hostDescription, err := l.GetPathAndHostDescription()
@@ -245,7 +245,7 @@ func (l *LocalFile) Chown(options *ChownOptions) (err error) {
 
 func (l *LocalFile) CopyToFile(destFile File, verbose bool) (err error) {
 	if destFile == nil {
-		return aerrors.TracedErrorNil("destFile")
+		return tracederrors.TracedErrorNil("destFile")
 	}
 
 	content, err := l.ReadAsBytes()
@@ -316,7 +316,7 @@ func (l *LocalFile) Exists(verbose bool) (exists bool, err error) {
 			return false, nil
 		}
 
-		return false, aerrors.TracedErrorf("Unable to evaluate if local file exists: '%w'", err)
+		return false, tracederrors.TracedErrorf("Unable to evaluate if local file exists: '%w'", err)
 	}
 
 	return !fileInfo.IsDir(), err
@@ -331,7 +331,7 @@ func (l *LocalFile) GetBaseName() (baseName string, err error) {
 	baseName = filepath.Base(path)
 
 	if baseName == "" {
-		return "", aerrors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"Base name is empty string after evaluation of path='%s'",
 			path,
 		)
@@ -407,7 +407,7 @@ func (l *LocalFile) GetSizeBytes() (fileSizeBytes int64, err error) {
 
 	fi, err := os.Stat(path)
 	if err != nil {
-		return -1, aerrors.TracedError(err)
+		return -1, tracederrors.TracedError(err)
 	}
 	fileSizeBytes = fi.Size()
 
@@ -421,7 +421,7 @@ func (l *LocalFile) GetUriAsString() (uri string, err error) {
 	}
 
 	if Paths().IsRelativePath(path) {
-		return "", aerrors.TracedErrorf("Only implemeted for absolute paths but got '%s'", path)
+		return "", tracederrors.TracedErrorf("Only implemeted for absolute paths but got '%s'", path)
 	}
 
 	uri = "file://" + path
@@ -435,7 +435,7 @@ func (l *LocalFile) IsPathSet() (isSet bool) {
 
 func (l *LocalFile) MoveToPath(path string, useSudo bool, verbose bool) (movedFile File, err error) {
 	if path == "" {
-		return nil, aerrors.TracedErrorEmptyString(path)
+		return nil, tracederrors.TracedErrorEmptyString(path)
 	}
 
 	srcPath, hostDescription, err := l.GetPathAndHostDescription()
@@ -455,7 +455,7 @@ func (l *LocalFile) MoveToPath(path string, useSudo bool, verbose bool) (movedFi
 	} else {
 		err = os.Rename(srcPath, path)
 		if err != nil {
-			return nil, aerrors.TracedErrorf(
+			return nil, tracederrors.TracedErrorf(
 				"Move '%s' to '%s' on host '%s' failed: %w",
 				srcPath,
 				path,
@@ -679,7 +679,7 @@ func (l *LocalFile) ReadAsBytes() (content []byte, err error) {
 
 	content, err = os.ReadFile(path)
 	if err != nil {
-		return nil, aerrors.TracedError(err)
+		return nil, tracederrors.TracedError(err)
 	}
 
 	return content, err
@@ -687,7 +687,7 @@ func (l *LocalFile) ReadAsBytes() (content []byte, err error) {
 
 func (l *LocalFile) ReadFirstNBytes(numberOfBytesToRead int) (firstBytes []byte, err error) {
 	if numberOfBytesToRead <= 0 {
-		return nil, aerrors.TracedErrorf("Invalid numberOfBytesToRead: '%d'", numberOfBytesToRead)
+		return nil, tracederrors.TracedErrorf("Invalid numberOfBytesToRead: '%d'", numberOfBytesToRead)
 	}
 
 	path, err := l.GetLocalPath()
@@ -697,7 +697,7 @@ func (l *LocalFile) ReadFirstNBytes(numberOfBytesToRead int) (firstBytes []byte,
 
 	fd, err := os.Open(path)
 	if err != nil {
-		return nil, aerrors.TracedError(err.Error())
+		return nil, tracederrors.TracedError(err.Error())
 	}
 
 	defer fd.Close()
@@ -706,7 +706,7 @@ func (l *LocalFile) ReadFirstNBytes(numberOfBytesToRead int) (firstBytes []byte,
 	readBytes, err := fd.Read(firstBytes)
 	if err != nil {
 		if !errors.Is(err, io.EOF) {
-			return nil, aerrors.TracedError(err.Error())
+			return nil, tracederrors.TracedError(err.Error())
 		}
 	}
 
@@ -722,7 +722,7 @@ func (l *LocalFile) SecurelyDelete(verbose bool) (err error) {
 	}
 
 	if !Paths().IsAbsolutePath(pathToDelete) {
-		return aerrors.TracedErrorf("pathToDelete='%v' is not absolute", pathToDelete)
+		return tracederrors.TracedErrorf("pathToDelete='%v' is not absolute", pathToDelete)
 	}
 
 	deleteCommand := []string{"shred", "-u", pathToDelete}
@@ -743,7 +743,7 @@ func (l *LocalFile) SecurelyDelete(verbose bool) (err error) {
 
 func (l *LocalFile) SetPath(path string) (err error) {
 	if path == "" {
-		return aerrors.TracedError("path is empty string")
+		return tracederrors.TracedError("path is empty string")
 	}
 
 	path, err = Paths().GetAbsolutePath(path)
@@ -752,7 +752,7 @@ func (l *LocalFile) SetPath(path string) (err error) {
 	}
 
 	if !Paths().IsAbsolutePath(path) {
-		return aerrors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"Path '%s' is not absolute. Beware this is an internal issue since the code before this line should fix that.",
 			path,
 		)
@@ -765,7 +765,7 @@ func (l *LocalFile) SetPath(path string) (err error) {
 
 func (l *LocalFile) Truncate(newSizeBytes int64, verbose bool) (err error) {
 	if newSizeBytes < 0 {
-		return aerrors.TracedErrorf("Invalid newSizeBytes='%d'", newSizeBytes)
+		return tracederrors.TracedErrorf("Invalid newSizeBytes='%d'", newSizeBytes)
 	}
 
 	localPath, err := l.GetLocalPath()
@@ -787,7 +787,7 @@ func (l *LocalFile) Truncate(newSizeBytes int64, verbose bool) (err error) {
 	} else {
 		fileToTruncate, err := os.OpenFile(localPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
-			return aerrors.TracedErrorf(
+			return tracederrors.TracedErrorf(
 				"Unable to open file '%s' to truncate: '%w'",
 				localPath,
 				err,
@@ -797,7 +797,7 @@ func (l *LocalFile) Truncate(newSizeBytes int64, verbose bool) (err error) {
 
 		err = fileToTruncate.Truncate(newSizeBytes)
 		if err != nil {
-			return aerrors.TracedErrorf(
+			return tracederrors.TracedErrorf(
 				"Unable to truncate file '%s': '%w'",
 				localPath,
 				err,
@@ -818,7 +818,7 @@ func (l *LocalFile) Truncate(newSizeBytes int64, verbose bool) (err error) {
 
 func (l *LocalFile) WriteBytes(toWrite []byte, verbose bool) (err error) {
 	if toWrite == nil {
-		return aerrors.TracedErrorNil("toWrite")
+		return tracederrors.TracedErrorNil("toWrite")
 	}
 
 	localPath, err := l.GetLocalPath()
@@ -828,7 +828,7 @@ func (l *LocalFile) WriteBytes(toWrite []byte, verbose bool) (err error) {
 
 	err = os.WriteFile(localPath, toWrite, 0644)
 	if err != nil {
-		return aerrors.TracedErrorf("Unable to write file '%s': %w", localPath, err)
+		return tracederrors.TracedErrorf("Unable to write file '%s': %w", localPath, err)
 	}
 
 	if verbose {

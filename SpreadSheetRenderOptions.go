@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type SpreadSheetRenderOptions struct {
@@ -28,7 +28,7 @@ func (s *SpreadSheetRenderOptions) GetSkipTitle() (skipTitle bool, err error) {
 
 func (s *SpreadSheetRenderOptions) GetStringDelimiter() (stringDelimiter string, err error) {
 	if s.StringDelimiter == "" {
-		return "", errors.TracedErrorf("StringDelimiter not set")
+		return "", tracederrors.TracedErrorf("StringDelimiter not set")
 	}
 
 	return s.StringDelimiter, nil
@@ -117,7 +117,7 @@ func (s *SpreadSheetRenderOptions) SetSkipTitle(skipTitle bool) (err error) {
 
 func (s *SpreadSheetRenderOptions) SetStringDelimiter(stringDelimiter string) (err error) {
 	if stringDelimiter == "" {
-		return errors.TracedErrorf("stringDelimiter is empty string")
+		return tracederrors.TracedErrorf("stringDelimiter is empty string")
 	}
 
 	s.StringDelimiter = stringDelimiter

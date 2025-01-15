@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // Host like a VM, Laptop, Desktop, Server.
@@ -32,7 +32,7 @@ type Host interface {
 func GetHostByHostname(hostname string) (host Host, err error) {
 	hostname = strings.TrimSpace(hostname)
 	if len(hostname) <= 0 {
-		return nil, errors.TracedError("hostname is empty string")
+		return nil, tracederrors.TracedError("hostname is empty string")
 	}
 
 	var commandExecutor asciichgolangpublic.CommandExecutor

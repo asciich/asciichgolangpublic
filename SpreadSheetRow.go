@@ -5,8 +5,8 @@ import (
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type SpreadSheetRow struct {
@@ -19,7 +19,7 @@ func NewSpreadSheetRow() (s *SpreadSheetRow) {
 
 func (s *SpreadSheetRow) GetColumnValueAsString(columnIndex int) (columnValue string, err error) {
 	if columnIndex < 0 {
-		return "", errors.TracedErrorf("Invalid columnIndex: '%d'", columnIndex)
+		return "", tracederrors.TracedErrorf("Invalid columnIndex: '%d'", columnIndex)
 	}
 
 	entries, err := s.GetEntries()
@@ -29,7 +29,7 @@ func (s *SpreadSheetRow) GetColumnValueAsString(columnIndex int) (columnValue st
 
 	nEntries := len(entries)
 	if columnIndex >= nEntries {
-		return "", errors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"Invalid columnIndex '%d' for a spread sheet with '%d' columns",
 			columnIndex,
 			nEntries,
@@ -62,11 +62,11 @@ func (s *SpreadSheetRow) GetColumnWidths() (columnWidths []int, err error) {
 
 func (s *SpreadSheetRow) GetEntries() (entries []string, err error) {
 	if s.entries == nil {
-		return nil, errors.TracedErrorf("entries not set")
+		return nil, tracederrors.TracedErrorf("entries not set")
 	}
 
 	if len(s.entries) <= 0 {
-		return nil, errors.TracedErrorf("entries has no elements")
+		return nil, tracederrors.TracedErrorf("entries has no elements")
 	}
 
 	return s.entries, nil
@@ -142,7 +142,7 @@ func (s *SpreadSheetRow) MustSetEntries(entries []string) {
 
 func (s *SpreadSheetRow) RemoveElementAtIndex(index int) (err error) {
 	if index < 0 {
-		return errors.TracedErrorf("Index '%d' is invalid.", index)
+		return tracederrors.TracedErrorf("Index '%d' is invalid.", index)
 	}
 
 	entries, err := s.GetEntries()
@@ -162,7 +162,7 @@ func (s *SpreadSheetRow) RemoveElementAtIndex(index int) (err error) {
 
 func (s *SpreadSheetRow) RenderAsString(options *SpreadSheetRenderRowOptions) (rendered string, err error) {
 	if options == nil {
-		return "", errors.TracedError("options is nil")
+		return "", tracederrors.TracedError("options is nil")
 	}
 
 	entries, err := s.GetEntries()
@@ -191,7 +191,7 @@ func (s *SpreadSheetRow) RenderAsString(options *SpreadSheetRenderRowOptions) (r
 		nEntries := len(entries)
 		nCloumnWidths := len(minColumnWidth)
 		if nEntries != nCloumnWidths {
-			return "", errors.TracedErrorf("nEntries = '%d' != nCloumnWidths = '%d'", nEntries, nCloumnWidths)
+			return "", tracederrors.TracedErrorf("nEntries = '%d' != nCloumnWidths = '%d'", nEntries, nCloumnWidths)
 		}
 
 		entriesFilled := []string{}
@@ -211,11 +211,11 @@ func (s *SpreadSheetRow) RenderAsString(options *SpreadSheetRenderRowOptions) (r
 
 func (s *SpreadSheetRow) SetEntries(entries []string) (err error) {
 	if entries == nil {
-		return errors.TracedErrorf("entries is nil")
+		return tracederrors.TracedErrorf("entries is nil")
 	}
 
 	if len(entries) <= 0 {
-		return errors.TracedErrorf("entries has no elements")
+		return tracederrors.TracedErrorf("entries has no elements")
 	}
 
 	s.entries = entries

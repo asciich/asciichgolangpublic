@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -41,12 +41,12 @@ func (u *GitlabUsers) GetUserId() (userId int, err error) {
 
 	nativeUser, _, err := usersService.CurrentUser()
 	if err != nil {
-		return -1, errors.TracedError(err.Error())
+		return -1, tracederrors.TracedError(err.Error())
 	}
 
 	userId = nativeUser.ID
 	if userId <= 0 {
-		return -1, errors.TracedErrorf("Got invalid user id for current user: '%d'", userId)
+		return -1, tracederrors.TracedErrorf("Got invalid user id for current user: '%d'", userId)
 	}
 
 	return userId, nil
@@ -54,7 +54,7 @@ func (u *GitlabUsers) GetUserId() (userId int, err error) {
 
 func (g *GitlabUsers) GetUserById(id int) (gitlabUser *GitlabUser, err error) {
 	if id <= 0 {
-		return nil, errors.TracedErrorf("id '%d' is invalid", id)
+		return nil, tracederrors.TracedErrorf("id '%d' is invalid", id)
 	}
 
 	nativeClient, err := g.GetNativeUsersService()
@@ -64,11 +64,11 @@ func (g *GitlabUsers) GetUserById(id int) (gitlabUser *GitlabUser, err error) {
 
 	nativeUser, _, err := nativeClient.GetUser(id, gitlab.GetUsersOptions{})
 	if err != nil {
-		return nil, errors.TracedErrorf("Getting user with id '%d' failed: '%w'", id, err)
+		return nil, tracederrors.TracedErrorf("Getting user with id '%d' failed: '%w'", id, err)
 	}
 
 	if nativeUser == nil {
-		return nil, errors.TracedErrorf("nativeUser is nil after evaluation")
+		return nil, tracederrors.TracedErrorf("nativeUser is nil after evaluation")
 	}
 
 	gitlabUser, err = g.GetUserByNativeGitlabUser(nativeUser)
@@ -81,7 +81,7 @@ func (g *GitlabUsers) GetUserById(id int) (gitlabUser *GitlabUser, err error) {
 
 func (g *GitlabUsers) GetUserByNativeGitlabUser(nativeUser *gitlab.User) (user *GitlabUser, err error) {
 	if nativeUser == nil {
-		return nil, errors.TracedErrorNil("nativeUser")
+		return nil, tracederrors.TracedErrorNil("nativeUser")
 	}
 
 	gitlab, err := g.GetGitlab()
@@ -284,7 +284,7 @@ func (g *GitlabUsers) MustUserByUserNameExists(username string) (userExists bool
 
 func (u *GitlabUsers) CreateAccessToken(options *GitlabCreateAccessTokenOptions) (newToken string, err error) {
 	if options == nil {
-		return "", errors.TracedError("options is nil")
+		return "", tracederrors.TracedError("options is nil")
 	}
 
 	username, err := options.GetUserName()
@@ -307,7 +307,7 @@ func (u *GitlabUsers) CreateAccessToken(options *GitlabCreateAccessTokenOptions)
 
 func (u *GitlabUsers) CreateUser(createUserOptions *GitlabCreateUserOptions) (createdUser *GitlabUser, err error) {
 	if createUserOptions == nil {
-		return nil, errors.TracedError("createUserOptions is nil")
+		return nil, tracederrors.TracedError("createUserOptions is nil")
 	}
 
 	nativeUsersService, err := u.GetNativeUsersService()
@@ -407,7 +407,7 @@ func (u *GitlabUsers) GetFqdn() (fqdn string, err error) {
 
 func (u *GitlabUsers) GetGitlab() (gitlab *GitlabInstance, err error) {
 	if u.gitlab == nil {
-		return nil, errors.TracedError("gitlab not set")
+		return nil, tracederrors.TracedError("gitlab not set")
 	}
 
 	return u.gitlab, nil
@@ -435,7 +435,7 @@ func (u *GitlabUsers) GetNativeUsersService() (nativeUsersService *gitlab.UsersS
 
 	nativeUsersService = nativeGitlabClient.Users
 	if nativeUsersService == nil {
-		return nil, errors.TracedError("nativeUsersService was returned as nil pointer")
+		return nil, tracederrors.TracedError("nativeUsersService was returned as nil pointer")
 	}
 
 	return nativeUsersService, nil
@@ -445,7 +445,7 @@ func (u *GitlabUsers) GetUserByUsername(username string) (gitlabUser *GitlabUser
 	username = strings.TrimSpace(username)
 
 	if len(username) <= 0 {
-		return nil, errors.TracedError("username is empty string")
+		return nil, tracederrors.TracedError("username is empty string")
 	}
 
 	fqdn, err := u.GetFqdn()
@@ -469,7 +469,7 @@ func (u *GitlabUsers) GetUserByUsername(username string) (gitlabUser *GitlabUser
 		}
 	}
 
-	return nil, errors.TracedErrorf("User '%s' not found on gitlab '%s'", username, fqdn)
+	return nil, tracederrors.TracedErrorf("User '%s' not found on gitlab '%s'", username, fqdn)
 }
 
 func (u *GitlabUsers) GetUserNames() (userNames []string, err error) {
@@ -493,7 +493,7 @@ func (u *GitlabUsers) GetUserNames() (userNames []string, err error) {
 
 func (u *GitlabUsers) SetGitlab(gitlab *GitlabInstance) (err error) {
 	if gitlab == nil {
-		return errors.TracedError("gitlab is nil")
+		return tracederrors.TracedError("gitlab is nil")
 	}
 
 	u.gitlab = gitlab
@@ -505,7 +505,7 @@ func (u *GitlabUsers) UserByUserNameExists(username string) (userExists bool, er
 	username = strings.TrimSpace(username)
 
 	if len(username) <= 0 {
-		return false, errors.TracedError("username is empty string")
+		return false, tracederrors.TracedError("username is empty string")
 	}
 
 	userNameList, err := u.GetUserNames()

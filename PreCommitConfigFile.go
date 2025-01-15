@@ -6,8 +6,8 @@ import (
 	"reflect"
 
 	"github.com/asciich/asciichgolangpublic/changesummary"
-	aerrors "github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type PreCommitConfigFile struct {
@@ -16,7 +16,7 @@ type PreCommitConfigFile struct {
 
 func GetPreCommitConfigByFile(file File) (preCommitConfigFile *PreCommitConfigFile, err error) {
 	if file == nil {
-		return nil, aerrors.TracedErrorNil("file")
+		return nil, tracederrors.TracedErrorNil("file")
 	}
 
 	path, err := file.GetLocalPath()
@@ -35,7 +35,7 @@ func GetPreCommitConfigByFile(file File) (preCommitConfigFile *PreCommitConfigFi
 
 func GetPreCommitConfigByLocalPath(localPath string) (preCommitConfigFile *PreCommitConfigFile, err error) {
 	if localPath == "" {
-		return nil, aerrors.TracedErrorEmptyString("localPath")
+		return nil, tracederrors.TracedErrorEmptyString("localPath")
 	}
 
 	file, err := NewLocalFileByPath(localPath)
@@ -53,7 +53,7 @@ func GetPreCommitConfigByLocalPath(localPath string) (preCommitConfigFile *PreCo
 
 func GetPreCommitConfigFileInGitRepository(gitRepository GitRepository) (preCommitConfigFile *PreCommitConfigFile, err error) {
 	if gitRepository == nil {
-		return nil, aerrors.TracedErrorNil("gitRepository")
+		return nil, tracederrors.TracedErrorNil("gitRepository")
 	}
 
 	fileInRepo, err := gitRepository.GetFileByPath(PreCommit().GetDefaultConfigFileName())
@@ -109,7 +109,7 @@ func (p *PreCommitConfigFile) GetAbsolutePath() (absolutePath string, err error)
 	}
 
 	if Paths().IsRelativePath(path) {
-		return "", aerrors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"Unable to get absolute path, '%s' is relative",
 			path,
 		)
@@ -270,7 +270,7 @@ func (p *PreCommitConfigFile) MustWritePreCommitConfigFileContent(content *PreCo
 
 func (p *PreCommitConfigFile) UpdateDependencies(options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if options == nil {
-		return nil, aerrors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	dependencies, err := p.GetDependencies(options.Verbose)
@@ -310,16 +310,16 @@ func (p *PreCommitConfigFile) UpdateDependencies(options *UpdateDependenciesOpti
 
 func (p *PreCommitConfigFile) UpdateDependency(dependency Dependency, options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if dependency == nil {
-		return nil, aerrors.TracedErrorNil("dependency")
+		return nil, tracederrors.TracedErrorNil("dependency")
 	}
 
 	if options == nil {
-		return nil, aerrors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	gitRepoDependency, ok := dependency.(*DependencyGitRepository)
 	if !ok {
-		return nil, aerrors.TracedErrorf("Not implemented for dependency type '%v'", reflect.TypeOf(dependency))
+		return nil, tracederrors.TracedErrorf("Not implemented for dependency type '%v'", reflect.TypeOf(dependency))
 	}
 
 	url, err := gitRepoDependency.GetUrl()

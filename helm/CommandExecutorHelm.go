@@ -2,8 +2,8 @@ package helm
 
 import (
 	"github.com/asciich/asciichgolangpublic"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type commandExecutorHelm struct {
@@ -12,7 +12,7 @@ type commandExecutorHelm struct {
 
 func GetCommandExecutorHelm(executor asciichgolangpublic.CommandExecutor) (helm Helm, err error) {
 	if executor == nil {
-		return nil, errors.TracedErrorNil("executor")
+		return nil, tracederrors.TracedErrorNil("executor")
 	}
 
 	toReturn := NewcommandExecutorHelm()
@@ -53,11 +53,11 @@ func NewcommandExecutorHelm() (c *commandExecutorHelm) {
 
 func (c *commandExecutorHelm) AddRepositoryByName(name string, url string, verbose bool) (err error) {
 	if name == "" {
-		return errors.TracedErrorEmptyString("name")
+		return tracederrors.TracedErrorEmptyString("name")
 	}
 
 	if url == "" {
-		return errors.TracedErrorEmptyString("url")
+		return tracederrors.TracedErrorEmptyString("url")
 	}
 
 	commandExecutor, hostDescription, err := c.GetCommandExecutorAndHostDescription()

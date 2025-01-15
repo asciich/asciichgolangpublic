@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitCommitOptions struct {
@@ -43,7 +43,7 @@ func (g *GitCommitOptions) GetDeepCopy() (deepCopy *GitCommitOptions) {
 
 func (g *GitCommitOptions) GetMessage() (message string, err error) {
 	if g.Message == "" {
-		return "", errors.TracedErrorf("Message not set")
+		return "", tracederrors.TracedErrorf("Message not set")
 	}
 
 	return g.Message, nil
@@ -80,7 +80,7 @@ func (g *GitCommitOptions) SetCommitAllChanges(commitAllChanges bool) {
 
 func (g *GitCommitOptions) SetMessage(message string) (err error) {
 	if message == "" {
-		return errors.TracedErrorf("message is empty string")
+		return tracederrors.TracedErrorf("message is empty string")
 	}
 
 	g.Message = message

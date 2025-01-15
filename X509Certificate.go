@@ -10,8 +10,8 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 
-	aerrors "github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type X509Certificate struct {
@@ -39,7 +39,7 @@ func GetX509CertificateFromFile(certFile File) (cert *X509Certificate, err error
 func GetX509CertificateFromFilePath(certFilePath string) (cert *X509Certificate, err error) {
 	certFilePath = strings.TrimSpace(certFilePath)
 	if len(certFilePath) <= 0 {
-		return nil, aerrors.TracedError("certPAth is empty string")
+		return nil, tracederrors.TracedError("certPAth is empty string")
 	}
 
 	cert = NewX509Certificate()
@@ -92,7 +92,7 @@ func (c *X509Certificate) GetAsPemBytes() (pemBytes []byte, err error) {
 	pemBytes = buf.Bytes()
 	const minLen = 50
 	if len(pemBytes) < minLen {
-		return nil, aerrors.TracedErrorf("pemBytes has less than '%v' bytes which is not enough for a pem certificate", minLen)
+		return nil, tracederrors.TracedErrorf("pemBytes has less than '%v' bytes which is not enough for a pem certificate", minLen)
 	}
 
 	return pemBytes, nil
@@ -120,7 +120,7 @@ func (c *X509Certificate) GetIssuerString() (issuerString string, err error) {
 
 func (c *X509Certificate) GetNativeCertificate() (nativeCertificate *x509.Certificate, err error) {
 	if c.nativeX509Certificate == nil {
-		return nil, aerrors.TracedError("native certificate not set. Is the certificate Loaded?")
+		return nil, tracederrors.TracedError("native certificate not set. Is the certificate Loaded?")
 	}
 
 	return c.nativeX509Certificate, nil
@@ -154,7 +154,7 @@ func (c *X509Certificate) IsIntermediateCertificate() (isIntermediateCertificate
 	}
 
 	if isV1 {
-		return false, aerrors.TracedError("v1 certificates are not supported as intermediate certificate.")
+		return false, tracederrors.TracedError("v1 certificates are not supported as intermediate certificate.")
 	}
 
 	subjectString, err := c.GetSubjectString()
@@ -228,7 +228,7 @@ func (c *X509Certificate) IsRootCa(verbose bool) (isRootCa bool, err error) {
 
 func (c *X509Certificate) IsSignedByCertificateFile(signingCertificate File, verbose bool) (isSignedBy bool, err error) {
 	if signingCertificate == nil {
-		return false, aerrors.TracedError("signingCertificate is nil")
+		return false, tracederrors.TracedError("signingCertificate is nil")
 	}
 
 	rootCert, err := GetX509CertificateFromFile(signingCertificate)
@@ -249,7 +249,7 @@ func (c *X509Certificate) IsSignedByCertificateFile(signingCertificate File, ver
 	roots := x509.NewCertPool()
 	ok := roots.AppendCertsFromPEM(rootCertPemBytes)
 	if !ok {
-		return false, aerrors.TracedError("Unable to add cert to root pool")
+		return false, tracederrors.TracedError("Unable to add cert to root pool")
 	}
 
 	verifyOptions := x509.VerifyOptions{
@@ -261,7 +261,7 @@ func (c *X509Certificate) IsSignedByCertificateFile(signingCertificate File, ver
 		if errors.As(err, &x509.UnknownAuthorityError{}) {
 			isSignedBy = false
 		} else {
-			return false, aerrors.TracedErrorf("Unable to verify certificate: '%v'", err)
+			return false, tracederrors.TracedErrorf("Unable to verify certificate: '%v'", err)
 		}
 	} else {
 		isSignedBy = true
@@ -317,16 +317,16 @@ func (c *X509Certificate) IsV3() (isV3 bool, err error) {
 
 func (c *X509Certificate) LoadFromBytes(certBytes []byte) (err error) {
 	if len(certBytes) <= 0 {
-		return aerrors.TracedError("certBytes has len 0")
+		return tracederrors.TracedError("certBytes has len 0")
 	}
 
 	block, _ := pem.Decode(certBytes)
 	var blockBytes []byte = nil
 	if block == nil {
-		return aerrors.TracedError("Failed to parse certificate PEM")
+		return tracederrors.TracedError("Failed to parse certificate PEM")
 	} else {
 		if block.Bytes == nil {
-			return aerrors.TracedError("Decode returned block.Bytes as nil")
+			return tracederrors.TracedError("Decode returned block.Bytes as nil")
 		} else {
 			blockBytes = block.Bytes
 		}
@@ -334,16 +334,16 @@ func (c *X509Certificate) LoadFromBytes(certBytes []byte) (err error) {
 
 	var nativeCert *x509.Certificate = nil
 	if blockBytes == nil {
-		return aerrors.TracedError("blockBytes is nil after evaluation")
+		return tracederrors.TracedError("blockBytes is nil after evaluation")
 	} else {
 		nativeCert, err = x509.ParseCertificate(blockBytes)
 		if err != nil {
-			return aerrors.TracedError("failed to parse certificate: " + err.Error())
+			return tracederrors.TracedError("failed to parse certificate: " + err.Error())
 		}
 	}
 
 	if nativeCert == nil {
-		return aerrors.TracedError("nativeCert is nil after evaluation")
+		return tracederrors.TracedError("nativeCert is nil after evaluation")
 	} else {
 		c.nativeX509Certificate = nativeCert
 	}
@@ -353,7 +353,7 @@ func (c *X509Certificate) LoadFromBytes(certBytes []byte) (err error) {
 
 func (c *X509Certificate) LoadFromFile(loadFile File) (err error) {
 	if loadFile == nil {
-		return aerrors.TracedError("loadFile is nil")
+		return tracederrors.TracedError("loadFile is nil")
 	}
 
 	contentString, err := loadFile.ReadAsString()
@@ -372,7 +372,7 @@ func (c *X509Certificate) LoadFromFile(loadFile File) (err error) {
 func (c *X509Certificate) LoadFromFilePath(loadPath string) (err error) {
 	loadPath = strings.TrimSpace(loadPath)
 	if len(loadPath) <= 0 {
-		return aerrors.TracedError("loadPath is empty string")
+		return tracederrors.TracedError("loadPath is empty string")
 	}
 
 	loadFile, err := GetLocalFileByPath(loadPath)
@@ -390,7 +390,7 @@ func (c *X509Certificate) LoadFromFilePath(loadPath string) (err error) {
 
 func (c *X509Certificate) LoadFromString(certString string) (err error) {
 	if len(certString) <= 0 {
-		return aerrors.TracedError("certString is empty string")
+		return tracederrors.TracedError("certString is empty string")
 	}
 
 	err = c.LoadFromBytes([]byte(certString))
@@ -403,7 +403,7 @@ func (c *X509Certificate) LoadFromString(certString string) (err error) {
 
 func (c *X509Certificate) WritePemToFile(outputFile File, verbose bool) (err error) {
 	if outputFile == nil {
-		return aerrors.TracedError("outputFile is nil")
+		return tracederrors.TracedError("outputFile is nil")
 	}
 
 	pemBytes, err := c.GetAsPemBytes()
@@ -456,7 +456,7 @@ func (x *X509Certificate) GetExpiryDate() (expiryDate *time.Time, err error) {
 
 func (x *X509Certificate) GetNativeX509Certificate() (nativeX509Certificate *x509.Certificate, err error) {
 	if x.nativeX509Certificate == nil {
-		return nil, aerrors.TracedErrorf("nativeX509Certificate not set")
+		return nil, tracederrors.TracedErrorf("nativeX509Certificate not set")
 	}
 
 	return x.nativeX509Certificate, nil
@@ -650,7 +650,7 @@ func (x *X509Certificate) MustWritePemToFilePath(filePath string, verbose bool) 
 
 func (x *X509Certificate) SetNativeX509Certificate(nativeX509Certificate *x509.Certificate) (err error) {
 	if nativeX509Certificate == nil {
-		return aerrors.TracedErrorf("nativeX509Certificate is nil")
+		return tracederrors.TracedErrorf("nativeX509Certificate is nil")
 	}
 
 	x.nativeX509Certificate = nativeX509Certificate

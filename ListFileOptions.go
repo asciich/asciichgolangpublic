@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type ListFileOptions struct {
@@ -27,11 +27,11 @@ func (l *ListFileOptions) GetAllowEmptyListIfNoFileIsFound() (allowEmptyListIfNo
 
 func (l *ListFileOptions) GetExcludeBasenamePattern() (excludePattern []string, err error) {
 	if l.ExcludeBasenamePattern == nil {
-		return nil, errors.TracedErrorf("ExcludePattern not set")
+		return nil, tracederrors.TracedErrorf("ExcludePattern not set")
 	}
 
 	if len(l.ExcludeBasenamePattern) <= 0 {
-		return nil, errors.TracedErrorf("ExcludePattern has no elements")
+		return nil, tracederrors.TracedErrorf("ExcludePattern has no elements")
 	}
 
 	return l.ExcludeBasenamePattern, nil
@@ -47,11 +47,11 @@ func (l *ListFileOptions) GetExcludeBasenamePatternOrEmptySliceIfUnset() (exclud
 
 func (l *ListFileOptions) GetExcludePatternWholepath() (excludePatternWholepath []string, err error) {
 	if l.ExcludePatternWholepath == nil {
-		return nil, errors.TracedErrorf("ExcludePatternWholepath not set")
+		return nil, tracederrors.TracedErrorf("ExcludePatternWholepath not set")
 	}
 
 	if len(l.ExcludePatternWholepath) <= 0 {
-		return nil, errors.TracedErrorf("ExcludePatternWholepath has no elements")
+		return nil, tracederrors.TracedErrorf("ExcludePatternWholepath has no elements")
 	}
 
 	return l.ExcludePatternWholepath, nil
@@ -59,11 +59,11 @@ func (l *ListFileOptions) GetExcludePatternWholepath() (excludePatternWholepath 
 
 func (l *ListFileOptions) GetMatchBasenamePattern() (matchPattern []string, err error) {
 	if l.MatchBasenamePattern == nil {
-		return nil, errors.TracedErrorf("MatchPattern not set")
+		return nil, tracederrors.TracedErrorf("MatchPattern not set")
 	}
 
 	if len(l.MatchBasenamePattern) <= 0 {
-		return nil, errors.TracedErrorf("MatchPattern has no elements")
+		return nil, tracederrors.TracedErrorf("MatchPattern has no elements")
 	}
 
 	return l.MatchBasenamePattern, nil
@@ -259,11 +259,11 @@ func (l *ListFileOptions) SetAllowEmptyListIfNoFileIsFound(allowEmptyListIfNoFil
 
 func (l *ListFileOptions) SetExcludeBasenamePattern(excludeBasenamePattern []string) (err error) {
 	if excludeBasenamePattern == nil {
-		return errors.TracedErrorf("excludeBasenamePattern is nil")
+		return tracederrors.TracedErrorf("excludeBasenamePattern is nil")
 	}
 
 	if len(excludeBasenamePattern) <= 0 {
-		return errors.TracedErrorf("excludeBasenamePattern has no elements")
+		return tracederrors.TracedErrorf("excludeBasenamePattern has no elements")
 	}
 
 	l.ExcludeBasenamePattern = excludeBasenamePattern
@@ -273,11 +273,11 @@ func (l *ListFileOptions) SetExcludeBasenamePattern(excludeBasenamePattern []str
 
 func (l *ListFileOptions) SetExcludePattern(excludePattern []string) (err error) {
 	if excludePattern == nil {
-		return errors.TracedErrorf("excludePattern is nil")
+		return tracederrors.TracedErrorf("excludePattern is nil")
 	}
 
 	if len(excludePattern) <= 0 {
-		return errors.TracedErrorf("excludePattern has no elements")
+		return tracederrors.TracedErrorf("excludePattern has no elements")
 	}
 
 	l.ExcludeBasenamePattern = excludePattern
@@ -287,11 +287,11 @@ func (l *ListFileOptions) SetExcludePattern(excludePattern []string) (err error)
 
 func (l *ListFileOptions) SetExcludePatternWholepath(excludePatternWholepath []string) (err error) {
 	if excludePatternWholepath == nil {
-		return errors.TracedErrorf("excludePatternWholepath is nil")
+		return tracederrors.TracedErrorf("excludePatternWholepath is nil")
 	}
 
 	if len(excludePatternWholepath) <= 0 {
-		return errors.TracedErrorf("excludePatternWholepath has no elements")
+		return tracederrors.TracedErrorf("excludePatternWholepath has no elements")
 	}
 
 	l.ExcludePatternWholepath = excludePatternWholepath
@@ -301,11 +301,11 @@ func (l *ListFileOptions) SetExcludePatternWholepath(excludePatternWholepath []s
 
 func (l *ListFileOptions) SetMatchBasenamePattern(matchBasenamePattern []string) (err error) {
 	if matchBasenamePattern == nil {
-		return errors.TracedErrorf("matchBasenamePattern is nil")
+		return tracederrors.TracedErrorf("matchBasenamePattern is nil")
 	}
 
 	if len(matchBasenamePattern) <= 0 {
-		return errors.TracedErrorf("matchBasenamePattern has no elements")
+		return tracederrors.TracedErrorf("matchBasenamePattern has no elements")
 	}
 
 	l.MatchBasenamePattern = matchBasenamePattern
@@ -315,11 +315,11 @@ func (l *ListFileOptions) SetMatchBasenamePattern(matchBasenamePattern []string)
 
 func (l *ListFileOptions) SetMatchPattern(matchPattern []string) (err error) {
 	if matchPattern == nil {
-		return errors.TracedErrorf("matchPattern is nil")
+		return tracederrors.TracedErrorf("matchPattern is nil")
 	}
 
 	if len(matchPattern) <= 0 {
-		return errors.TracedErrorf("matchPattern has no elements")
+		return tracederrors.TracedErrorf("matchPattern has no elements")
 	}
 
 	l.MatchBasenamePattern = matchPattern
