@@ -376,6 +376,31 @@ func TestSlicesGetDeepCopyOfByteSlice(t *testing.T) {
 	}
 }
 
+func TestSlicesGetDeepCopyOfStringSlice(t *testing.T) {
+	tests := []struct {
+		input           []string
+		expected_output []string
+	}{
+		{nil, []string{}},
+		{[]string{"a"}, []string{"a"}},
+		{[]string{"a", ""}, []string{"a", ""}},
+		{[]string{"a", "b"}, []string{"a", "b"}},
+		{[]string{"a", "b", "c"}, []string{"a", "b", "c"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			fmt.Sprintf("%v", tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				copy := GetDeepCopyOfStringsSlice(tt.input)
+				assert.EqualValues(tt.expected_output, copy)
+			},
+		)
+	}
+}
+
 func TestSlices_RemoveEmptyStringsAtEnd(t *testing.T) {
 	tests := []struct {
 		input          []string
