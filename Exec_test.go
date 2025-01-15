@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestExecRunCommandAndGetStdoutAsString(t *testing.T) {
@@ -17,7 +18,7 @@ func TestExecRunCommandAndGetStdoutAsString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -68,7 +69,7 @@ func TestExecRunCommandStdin(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -77,8 +78,8 @@ func TestExecRunCommandStdin(t *testing.T) {
 				var exec CommandExecutor = Exec()
 				output := exec.MustRunCommandAndGetStdoutAsBytes(
 					&RunCommandOptions{
-						Command: tt.command,
-						Verbose: verbose,
+						Command:     tt.command,
+						Verbose:     verbose,
 						StdinString: tt.stdin,
 					},
 				)
@@ -88,7 +89,7 @@ func TestExecRunCommandStdin(t *testing.T) {
 						Command:            tt.command,
 						Verbose:            verbose,
 						LiveOutputOnStdout: true,
-						StdinString: tt.stdin,
+						StdinString:        tt.stdin,
 					},
 				)
 

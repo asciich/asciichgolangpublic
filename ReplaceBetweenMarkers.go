@@ -6,6 +6,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pathsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -91,7 +92,7 @@ func (r *ReplaceBetweenMarkersService) GetSourcePath(line string, options *Repla
 		return "", tracederrors.TracedErrorf("sourcePath is empty string after evaluationg source path in line '%s'", line)
 	}
 
-	if Paths().IsRelativePath(sourcePath) {
+	if pathsutils.IsRelativePath(sourcePath) {
 		workingDirectory, err := options.GetWorkingDirPath()
 		if err != nil {
 			return "", err

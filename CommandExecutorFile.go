@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pathsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -198,7 +199,7 @@ func (c *CommandExecutorFile) Delete(verbose bool) (err error) {
 		return err
 	}
 
-	if !Paths().IsAbsolutePath(filePath) {
+	if !pathsutils.IsAbsolutePath(filePath) {
 		return tracederrors.TracedErrorf(
 			"For security reasons deleting a file is only implemented for absolute paths but got '%s'",
 			filePath,
@@ -392,7 +393,7 @@ func (c *CommandExecutorFile) GetLocalPath() (localPath string, err error) {
 		)
 	}
 
-	if !Paths().IsAbsolutePath(filePath) {
+	if !pathsutils.IsAbsolutePath(filePath) {
 		return "", tracederrors.TracedErrorf(
 			"File path '%s' is not absolute.",
 			filePath,
@@ -507,7 +508,7 @@ func (c *CommandExecutorFile) GetUriAsString() (uri string, err error) {
 			return "", err
 		}
 
-		if Paths().IsRelativePath(filePath) {
+		if pathsutils.IsRelativePath(filePath) {
 			return "", tracederrors.TracedErrorf("Only implemeted for absolute paths but got '%s'", filePath)
 		}
 

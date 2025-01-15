@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package parameteroptions
 
 type ListDirectoryOptions struct {
 	// Enable recursive file and/or directory listing:

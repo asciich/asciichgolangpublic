@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func getCommandExecutorByImplementationName(implementationName string) (commandExecutor CommandExecutor) {
@@ -32,7 +33,7 @@ func TestCommandExecutor_GetDeepCopyOfCommandExecutor(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 

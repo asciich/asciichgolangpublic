@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pathsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -420,7 +421,7 @@ func (l *LocalFile) GetUriAsString() (uri string, err error) {
 		return "", err
 	}
 
-	if Paths().IsRelativePath(path) {
+	if pathsutils.IsRelativePath(path) {
 		return "", tracederrors.TracedErrorf("Only implemeted for absolute paths but got '%s'", path)
 	}
 
@@ -721,7 +722,7 @@ func (l *LocalFile) SecurelyDelete(verbose bool) (err error) {
 		return err
 	}
 
-	if !Paths().IsAbsolutePath(pathToDelete) {
+	if !pathsutils.IsAbsolutePath(pathToDelete) {
 		return tracederrors.TracedErrorf("pathToDelete='%v' is not absolute", pathToDelete)
 	}
 
@@ -746,12 +747,12 @@ func (l *LocalFile) SetPath(path string) (err error) {
 		return tracederrors.TracedError("path is empty string")
 	}
 
-	path, err = Paths().GetAbsolutePath(path)
+	path, err = pathsutils.GetAbsolutePath(path)
 	if err != nil {
 		return err
 	}
 
-	if !Paths().IsAbsolutePath(path) {
+	if !pathsutils.IsAbsolutePath(path) {
 		return tracederrors.TracedErrorf(
 			"Path '%s' is not absolute. Beware this is an internal issue since the code before this line should fix that.",
 			path,

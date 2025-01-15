@@ -7,6 +7,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pathsutils"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestLocalDirectoryExists(t *testing.T) {
@@ -19,7 +22,7 @@ func TestLocalDirectoryExists(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -60,7 +63,7 @@ func TestLocalDirectoryGetFileInDirectory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -89,7 +92,7 @@ func TestLocalDirectoryGetFilePathInDirectory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -119,7 +122,7 @@ func TestLocalDirectoryGetSubDirectory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -149,7 +152,7 @@ func TestLocalDirectoryParentForBaseClassSet(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -172,7 +175,7 @@ func TestLocalDirectoryCreateFileInDirectoryFromString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -205,7 +208,7 @@ func TestLocalDirectoryGetLocalPathIsAbsolute(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -213,7 +216,7 @@ func TestLocalDirectoryGetLocalPathIsAbsolute(t *testing.T) {
 
 				localPath := localDir.MustGetLocalPath()
 
-				assert.True(Paths().IsAbsolutePath(localPath))
+				assert.True(pathsutils.IsAbsolutePath(localPath))
 			},
 		)
 	}
@@ -228,7 +231,7 @@ func TestLocalDirectoryGetGitRepositories(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -276,7 +279,7 @@ func TestLocalDirectoryWriteStringToFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -302,24 +305,24 @@ func TestLocalDirectoryWriteStringToFile(t *testing.T) {
 func TestDirectoryListFilesInDirectory(t *testing.T) {
 	tests := []struct {
 		fileNames     []string
-		listOptions   ListFileOptions
+		listOptions   parameteroptions.ListFileOptions
 		expectedPaths []string
 	}{
-		{[]string{"a.go", "b.go"}, ListFileOptions{ReturnRelativePaths: true}, []string{"a.go", "b.go"}},
-		{[]string{"a.go", "a/b.go"}, ListFileOptions{ReturnRelativePaths: true}, []string{"a.go", "a/b.go"}},
-		{[]string{"a.go", "a/b.go", "b.go"}, ListFileOptions{ReturnRelativePaths: true, ExcludeBasenamePattern: []string{"a.*"}}, []string{"a/b.go", "b.go"}},
-		{[]string{"a.go", "a/b.go", "b.go"}, ListFileOptions{ReturnRelativePaths: true, ExcludeBasenamePattern: []string{"a.*"}}, []string{"a/b.go", "b.go"}},
-		{[]string{"a.go", "a/b.go", "b.go"}, ListFileOptions{ReturnRelativePaths: true, ExcludeBasenamePattern: []string{"b.*"}}, []string{"a.go"}},
-		{[]string{"b.go", "a.go"}, ListFileOptions{ReturnRelativePaths: true}, []string{"a.go", "b.go"}},
-		{[]string{"b.go", "a.go", "go.mod", "go.sum"}, ListFileOptions{ReturnRelativePaths: true}, []string{"a.go", "b.go", "go.mod", "go.sum"}},
-		{[]string{"b.go", "a.go", "go.mod", "go.sum"}, ListFileOptions{ReturnRelativePaths: true, MatchBasenamePattern: []string{".*.go"}}, []string{"a.go", "b.go"}},
-		{[]string{"b.go", "a.go", "go.mod", "go.sum"}, ListFileOptions{ReturnRelativePaths: true, ExcludeBasenamePattern: []string{".*.go"}}, []string{"go.mod", "go.sum"}},
-		{[]string{"b.go", "a.go", "go.go", "go.mod", "go.sum"}, ListFileOptions{ReturnRelativePaths: true, MatchBasenamePattern: []string{"go.*"}, ExcludeBasenamePattern: []string{".*.go", ".*.mod"}}, []string{"go.sum"}},
+		{[]string{"a.go", "b.go"}, parameteroptions.ListFileOptions{ReturnRelativePaths: true}, []string{"a.go", "b.go"}},
+		{[]string{"a.go", "a/b.go"}, parameteroptions.ListFileOptions{ReturnRelativePaths: true}, []string{"a.go", "a/b.go"}},
+		{[]string{"a.go", "a/b.go", "b.go"}, parameteroptions.ListFileOptions{ReturnRelativePaths: true, ExcludeBasenamePattern: []string{"a.*"}}, []string{"a/b.go", "b.go"}},
+		{[]string{"a.go", "a/b.go", "b.go"}, parameteroptions.ListFileOptions{ReturnRelativePaths: true, ExcludeBasenamePattern: []string{"a.*"}}, []string{"a/b.go", "b.go"}},
+		{[]string{"a.go", "a/b.go", "b.go"}, parameteroptions.ListFileOptions{ReturnRelativePaths: true, ExcludeBasenamePattern: []string{"b.*"}}, []string{"a.go"}},
+		{[]string{"b.go", "a.go"}, parameteroptions.ListFileOptions{ReturnRelativePaths: true}, []string{"a.go", "b.go"}},
+		{[]string{"b.go", "a.go", "go.mod", "go.sum"}, parameteroptions.ListFileOptions{ReturnRelativePaths: true}, []string{"a.go", "b.go", "go.mod", "go.sum"}},
+		{[]string{"b.go", "a.go", "go.mod", "go.sum"}, parameteroptions.ListFileOptions{ReturnRelativePaths: true, MatchBasenamePattern: []string{".*.go"}}, []string{"a.go", "b.go"}},
+		{[]string{"b.go", "a.go", "go.mod", "go.sum"}, parameteroptions.ListFileOptions{ReturnRelativePaths: true, ExcludeBasenamePattern: []string{".*.go"}}, []string{"go.mod", "go.sum"}},
+		{[]string{"b.go", "a.go", "go.go", "go.mod", "go.sum"}, parameteroptions.ListFileOptions{ReturnRelativePaths: true, MatchBasenamePattern: []string{"go.*"}, ExcludeBasenamePattern: []string{".*.go", ".*.mod"}}, []string{"go.sum"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -345,7 +348,7 @@ func TestLocalDirectoryCreate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -372,7 +375,7 @@ func TestDirectoryGetPathReturnsAbsoluteValue(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -400,8 +403,8 @@ func TestDirectoryGetPathReturnsAbsoluteValue(t *testing.T) {
 				go testFunction()
 				waitGroup.Wait()
 
-				assert.True(Paths().IsAbsolutePath(path1))
-				assert.True(Paths().IsAbsolutePath(path2))
+				assert.True(pathsutils.IsAbsolutePath(path1))
+				assert.True(pathsutils.IsAbsolutePath(path2))
 
 				assert.EqualValues(path1, path2)
 
@@ -425,7 +428,7 @@ func TestDirectoryIsEmptyDirectory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -449,7 +452,7 @@ func TestDirectory_CheckExists(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 

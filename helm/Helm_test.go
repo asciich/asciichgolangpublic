@@ -3,8 +3,8 @@ package helm
 import (
 	"testing"
 
-	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func getHelmImplementationByName(implementationName string) (helm Helm) {
@@ -26,7 +26,7 @@ func TestRole_AddHelmRepo(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			asciichgolangpublic.MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				// assert := assert.New(t)
 

@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestX509CertificateLoadFromFilePath(t *testing.T) {
@@ -15,13 +17,13 @@ func TestX509CertificateLoadFromFilePath(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range testDir.MustListSubDirectories(&ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
+	for _, testCaseDir := range testDir.MustListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -52,13 +54,13 @@ func TestX509CertificateGetAsPemString(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range testDir.MustListSubDirectories(&ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
+	for _, testCaseDir := range testDir.MustListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -85,13 +87,13 @@ func TestX509CertificateIsRootCa(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range testDir.MustListSubDirectories(&ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
+	for _, testCaseDir := range testDir.MustListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -120,13 +122,13 @@ func TestX509CertificateIsV1(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range testDir.MustListSubDirectories(&ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
+	for _, testCaseDir := range testDir.MustListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -153,13 +155,13 @@ func TestX509CertificateIsV3(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range testDir.MustListSubDirectories(&ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
+	for _, testCaseDir := range testDir.MustListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 

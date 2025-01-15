@@ -6,6 +6,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -63,8 +64,8 @@ type GitRepository interface {
 	IsGitRepository(verbose bool) (isRepository bool, err error)
 	IsInitialized(verbose bool) (isInitialited bool, err error)
 	ListBranchNames(verbose bool) (branchNames []string, err error)
-	ListFilePaths(listFileOptions *ListFileOptions) (filePaths []string, err error)
-	ListFiles(listFileOptions *ListFileOptions) (files []File, err error)
+	ListFilePaths(listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error)
+	ListFiles(listFileOptions *parameteroptions.ListFileOptions) (files []File, err error)
 	ListTagNames(verbose bool) (tagNames []string, err error)
 	ListTags(verbose bool) (tags []GitTag, err error)
 	ListTagsForCommitHash(hash string, verbose bool) (tags []GitTag, err error)
@@ -115,8 +116,8 @@ type GitRepository interface {
 	MustIsGitRepository(verbose bool) (isRepository bool)
 	MustIsInitialized(verbose bool) (isInitialited bool)
 	MustListBranchNames(verbose bool) (branchNames []string)
-	MustListFilePaths(listFileOptions *ListFileOptions) (filePaths []string)
-	MustListFiles(listFileOptions *ListFileOptions) (files []File)
+	MustListFilePaths(listFileOptions *parameteroptions.ListFileOptions) (filePaths []string)
+	MustListFiles(listFileOptions *parameteroptions.ListFileOptions) (files []File)
 	MustListTagNames(verbose bool) (tagNames []string)
 	MustListTags(verbose bool) (tags []GitTag)
 	MustListTagsForCommitHash(hash string, verbose bool) (tags []GitTag)

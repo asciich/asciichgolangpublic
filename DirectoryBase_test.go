@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestDirectoryBase_SetAndGetParentDirectory(t *testing.T) {
@@ -15,7 +17,7 @@ func TestDirectoryBase_SetAndGetParentDirectory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -50,7 +52,6 @@ func getTemporaryDirectoryToTest(implementationName string, verbose bool) (d Dir
 	panic("Unknown implmementation name '" + implementationName + "'")
 }
 
-
 func TestDirectoryBase_ListFiles_withoutFilter(t *testing.T) {
 	tests := []struct {
 		fileImplementationToTest string
@@ -61,7 +62,7 @@ func TestDirectoryBase_ListFiles_withoutFilter(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -77,8 +78,8 @@ func TestDirectoryBase_ListFiles_withoutFilter(t *testing.T) {
 				directory.MustCreateFileInDirectory(verbose, "b.toc")
 
 				fileList := directory.MustListFilePaths(
-					&ListFileOptions{
-						ReturnRelativePaths:  true,
+					&parameteroptions.ListFileOptions{
+						ReturnRelativePaths: true,
 					},
 				)
 
@@ -102,7 +103,7 @@ func TestDirectoryBase_ListFiles(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -118,7 +119,7 @@ func TestDirectoryBase_ListFiles(t *testing.T) {
 				directory.MustCreateFileInDirectory(verbose, "b.toc")
 
 				fileList := directory.MustListFilePaths(
-					&ListFileOptions{
+					&parameteroptions.ListFileOptions{
 						MatchBasenamePattern: []string{".*.log", ".*.toc"},
 						ReturnRelativePaths:  true,
 					},
@@ -144,7 +145,7 @@ func TestDirectoryBase_DeleteFilesMatching(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -158,7 +159,7 @@ func TestDirectoryBase_DeleteFilesMatching(t *testing.T) {
 				toc2File := directory.MustCreateFileInDirectory(verbose, "b.toc")
 
 				directory.MustDeleteFilesMatching(
-					&ListFileOptions{
+					&parameteroptions.ListFileOptions{
 						MatchBasenamePattern: []string{".*.log", ".*.toc"},
 					},
 				)

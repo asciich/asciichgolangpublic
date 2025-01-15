@@ -4,6 +4,8 @@ import (
 	"slices"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pathsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -317,7 +319,7 @@ func (g *GitRepositoryBase) ContainsGoSourceFileOfMainPackageWithMainFunction(ve
 	}
 
 	goFiles, err := parent.ListFiles(
-		&ListFileOptions{
+		&parameteroptions.ListFileOptions{
 			NonRecursive:                  true,
 			MatchBasenamePattern:          []string{".*.go"},
 			AllowEmptyListIfNoFileIsFound: true,
@@ -435,7 +437,7 @@ func (g *GitRepositoryBase) DirectoryByPathExists(verbose bool, path ...string) 
 			return false, err
 		}
 
-		relativeSubDirPath, err := Paths().GetRelativePathTo(subDirPath, path)
+		relativeSubDirPath, err := pathsutils.GetRelativePathTo(subDirPath, path)
 		if err != nil {
 			return false, err
 		}

@@ -6,6 +6,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func getDirectoryToTest(implementationName string) (directory Directory) {
@@ -36,7 +38,7 @@ func TestDirectory_GetParentDirectory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -73,7 +75,7 @@ func TestDirectory_ReadFileInDirectoryAsString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -115,7 +117,7 @@ func TestDirectory_ReadFileInDirectoryAsInt64(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -145,7 +147,7 @@ func TestDirectory_ReadFirstLineOfFileInDirectoryAsString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -175,7 +177,7 @@ func TestDirectory_ListSubDirectories_RelativePaths(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -192,7 +194,7 @@ func TestDirectory_ListSubDirectories_RelativePaths(t *testing.T) {
 				test2.MustCreateSubDirectory("c", verbose)
 
 				subDirectoryList := testDirectory.MustListSubDirectoryPaths(
-					&ListDirectoryOptions{
+					&parameteroptions.ListDirectoryOptions{
 						Recursive:           false,
 						ReturnRelativePaths: true,
 						Verbose:             verbose,
@@ -204,7 +206,7 @@ func TestDirectory_ListSubDirectories_RelativePaths(t *testing.T) {
 				assert.EqualValues("test2", subDirectoryList[1])
 
 				subDirectoryList = testDirectory.MustListSubDirectoryPaths(
-					&ListDirectoryOptions{
+					&parameteroptions.ListDirectoryOptions{
 						Recursive:           true,
 						ReturnRelativePaths: true,
 						Verbose:             verbose,
@@ -234,7 +236,7 @@ func TestDirectory_ListSubDirectories(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -251,7 +253,7 @@ func TestDirectory_ListSubDirectories(t *testing.T) {
 				test2.MustCreateSubDirectory("c", verbose)
 
 				subDirectoryList := testDirectory.MustListSubDirectories(
-					&ListDirectoryOptions{
+					&parameteroptions.ListDirectoryOptions{
 						Recursive: false,
 					},
 				)
@@ -263,7 +265,7 @@ func TestDirectory_ListSubDirectories(t *testing.T) {
 				assert.EqualValues(testDirectory.MustGetLocalPath(), subDirectoryList[1].MustGetDirName())
 
 				subDirectoryList = testDirectory.MustListSubDirectories(
-					&ListDirectoryOptions{
+					&parameteroptions.ListDirectoryOptions{
 						Recursive: true,
 					},
 				)

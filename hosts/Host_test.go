@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestHost_CheckReachable(t *testing.T) {
@@ -26,7 +27,7 @@ func TestHost_CheckReachable(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			asciichgolangpublic.MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose = true
 
@@ -52,7 +53,7 @@ func TestHostGetHostName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			asciichgolangpublic.MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -81,7 +82,7 @@ func TestHostGetHostDescripion(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			asciichgolangpublic.MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -110,7 +111,7 @@ func TestHostRunCommand(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			asciichgolangpublic.MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -152,7 +153,7 @@ func TestHost_GetDirectoryByPath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			asciichgolangpublic.MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 

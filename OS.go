@@ -5,6 +5,7 @@ import (
 	"runtime"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pathsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -38,7 +39,7 @@ func (o *OsService) GetCurrentWorkingDirectoryAsString() (workingDirPath string,
 		return "", tracederrors.TracedErrorf("Get working directory failed: %w", err)
 	}
 
-	if !Paths().IsAbsolutePath(workingDirPath) {
+	if !pathsutils.IsAbsolutePath(workingDirPath) {
 		return "", tracederrors.TracedErrorf(
 			"Evaluated working directory path '%s' is not an absolute path after evaluation.",
 			workingDirPath,

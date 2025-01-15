@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package parameteroptions
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"

@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
@@ -17,13 +19,13 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 	tests := []TestCase{}
 
 	testDataDirectory := MustGetLocalGitRepositoryByPath(".").MustGetSubDirectory("testdata", "PreCommitConfigFile", "UpdateDependency")
-	for _, testDirectory := range testDataDirectory.MustListSubDirectories(&ListDirectoryOptions{Recursive: false}) {
+	for _, testDirectory := range testDataDirectory.MustListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false}) {
 		tests = append(tests, TestCase{testDirectory.MustGetLocalPath()})
 	}
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -81,7 +83,7 @@ func TestPreCommitConfigFile_GetPreCommitConfigInGitRepository(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 

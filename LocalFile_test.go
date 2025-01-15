@@ -12,6 +12,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/asciich/asciichgolangpublic/datatypes/pointersutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pathsutils"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestLocalFileImplementsFileInterface(t *testing.T) {
@@ -48,7 +51,7 @@ func TestLocalFileGetUriAsString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -74,7 +77,7 @@ func TestLocalFileReadAndWriteAsBytes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -106,7 +109,7 @@ func TestLocalFileReadAndWriteAsInt64(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -136,7 +139,7 @@ func TestLocalFileReadAndWriteAsString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -169,7 +172,7 @@ func TestLocalFileGetBaseName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -193,7 +196,7 @@ func TestLocalFileGetSha256Sum(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -226,7 +229,7 @@ func TestLocalFileIsMatchingSha256Sum(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -254,7 +257,7 @@ func TestLocalFileGetParentDirectory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -291,7 +294,7 @@ func TestLocalFileIsContentEqualByComparingSha256Sum(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -322,7 +325,7 @@ func TestLocalFileGetLocalPathIsAbsolute(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -330,7 +333,7 @@ func TestLocalFileGetLocalPathIsAbsolute(t *testing.T) {
 
 				localPath := localFile.MustGetLocalPath()
 
-				assert.True(Paths().IsAbsolutePath(localPath))
+				assert.True(pathsutils.IsAbsolutePath(localPath))
 			},
 		)
 	}
@@ -346,7 +349,7 @@ func TestFileGetTextBlocksGolangWithCommentAboveFunction(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -379,7 +382,7 @@ func TestFileGetTextBlocksYamlWithoutLeadingThreeMinuses(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -408,7 +411,7 @@ func TestFileGetTextBlocksYamlWithLeadingThreeMinuses(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -438,7 +441,7 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -481,7 +484,7 @@ func TestFileReplaceLineAfterLine(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -513,7 +516,7 @@ func TestLocalFile_GetPathReturnsAbsoluteValue(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -541,8 +544,8 @@ func TestLocalFile_GetPathReturnsAbsoluteValue(t *testing.T) {
 				go testFunction()
 				waitGroup.Wait()
 
-				assert.True(Paths().IsAbsolutePath(path1))
-				assert.True(Paths().IsAbsolutePath(path2))
+				assert.True(pathsutils.IsAbsolutePath(path1))
+				assert.True(pathsutils.IsAbsolutePath(path2))
 
 				assert.EqualValues(path1, path2)
 
@@ -566,13 +569,13 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 	tests := []TestCase{}
 
 	testDataDirectory := MustGetLocalGitRepositoryByPath(".").MustGetSubDirectory("testdata", "File", "SortBlocksInFile")
-	for _, testDirectory := range testDataDirectory.MustListSubDirectories(&ListDirectoryOptions{Recursive: false}) {
+	for _, testDirectory := range testDataDirectory.MustListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false}) {
 		tests = append(tests, TestCase{testDirectory.MustGetLocalPath()})
 	}
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -613,7 +616,7 @@ func TestLocalFileGetLastCharAsString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -646,7 +649,7 @@ func TestLocalFileGetAsFloat64(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -679,7 +682,7 @@ func TestFileGetAsInt64(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -712,7 +715,7 @@ func TestFileGetAsInt(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -743,7 +746,7 @@ func TestFileGetParentDirectoryPath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -769,7 +772,7 @@ func TestFileIsPgpEncrypted_Case1_unencrypted(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -794,7 +797,7 @@ func TestFileIsPgpEncrypted_Case2_encryptedBinary(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -834,7 +837,7 @@ func TestFileIsPgpEncrypted_Case3_encryptedAsciiArmor(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -874,7 +877,7 @@ func TestFileGetMimeTypeOfEmptyFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -908,7 +911,7 @@ func TestFileGetCreationDateByFileName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -945,7 +948,7 @@ func TestFileHasYYYYmmdd_HHMMSSPrefix(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -973,7 +976,7 @@ func TestFileGetSizeBytes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -998,7 +1001,7 @@ func TestFileEnsureEndsWithLineBreakOnEmptyFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -1023,7 +1026,7 @@ func TestFileEnsureEndsWithLineBreakOnNonExitistingFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -1059,7 +1062,7 @@ func TestFileTrimSpacesAtBeginningOfFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -1086,13 +1089,13 @@ func TestFileReplaceBetweenMarkers(t *testing.T) {
 	tests := []TestCase{}
 
 	testDataDirectory := MustGetLocalGitRepositoryByPath(".").MustGetSubDirectory("testdata", "File", "ReplaceBetweenMarkers")
-	for _, testDirectory := range testDataDirectory.MustListSubDirectories(&ListDirectoryOptions{Recursive: false}) {
+	for _, testDirectory := range testDataDirectory.MustListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false}) {
 		tests = append(tests, TestCase{testDirectory.MustGetLocalPath()})
 	}
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
@@ -1110,7 +1113,7 @@ func TestFileReplaceBetweenMarkers(t *testing.T) {
 
 				tempDir.MustReplaceBetweenMarkers(verbose)
 
-				listOptions := NewListFileOptions()
+				listOptions := parameteroptions.NewListFileOptions()
 				listOptions.NonRecursive = false
 				listOptions.ReturnRelativePaths = true
 				expectedFilePaths := expectedDir.MustListFilePaths(listOptions)
@@ -1160,7 +1163,7 @@ func TestLocalFileGetNumberOfNonEmptyLines(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
