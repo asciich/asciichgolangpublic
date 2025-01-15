@@ -9,7 +9,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-
 func GetFieldValuesAsString(structToGetFieldsFrom interface{}) (values []string, err error) {
 	if !IsStructOrPointerToStruct(structToGetFieldsFrom) {
 		return nil, tracederrors.TracedErrorf("'%v' is not as struct", structToGetFieldsFrom)

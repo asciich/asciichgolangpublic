@@ -5,7 +5,6 @@ import (
 	"fmt"
 )
 
-
 func GetSha256SumFromBytes(bytesToHash []byte) (checksum string) {
 	// Source: https://gobyexample.com/sha256-hashes
 	h := sha256.New()

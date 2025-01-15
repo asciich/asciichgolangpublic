@@ -17,7 +17,6 @@ import (
 
 var ErrPathHasNoParentDirectory = errors.New("path has no parent directory")
 
-
 // Filter the given path list.
 func FilterPaths(pathList []string, pathFilterOptions parameteroptions.PathFilterOptions) (filtered []string, err error) {
 	if pathList == nil {

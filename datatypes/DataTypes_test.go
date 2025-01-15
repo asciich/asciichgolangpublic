@@ -26,7 +26,6 @@ func TestTypes_GetTypeName(t *testing.T) {
 		// This allows single selection in test runs while addresses can change and are not suitable for test selection.
 		{"&ErrForTesting", "&error{message='this error is for testing'}"},
 		{"ErrForTesting", "error{message='this error is for testing'}"},
-
 	}
 
 	for _, tt := range tests {
