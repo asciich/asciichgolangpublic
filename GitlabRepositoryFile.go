@@ -2,10 +2,10 @@ package asciichgolangpublic
 
 import (
 	"errors"
+	"slices"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	"github.com/asciich/asciichgolangpublic/encoding/base64"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -613,7 +613,7 @@ func (g *GitlabRepositoryFile) WriteFileContentByBytes(content []byte, commitMes
 			return err
 		}
 
-		if aslices.ByteSlicesEqual(currentContent, content) {
+		if slices.Equal(currentContent, content) {
 			if verbose {
 				logging.LogInfof(
 					"Content of Gitlab repository file '%s' in project '%s' is already up to date.",

@@ -1,4 +1,4 @@
-package bytes
+package bytesutils
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/float"
+	"github.com/asciich/asciichgolangpublic/datatypes/floatsutils"
 )
 
 func GetSizeAsHumanReadableString(sizeBytes int64) (readableSize string, err error) {
@@ -23,7 +23,7 @@ func GetSizeAsHumanReadableString(sizeBytes int64) (readableSize string, err err
 		}
 		if sizeBytes >= v {
 			const maxDigits int = 2
-			readableValue, err := float.ToString(float64(sizeBytes)/float64(v), maxDigits)
+			readableValue, err := floatsutils.ToString(float64(sizeBytes)/float64(v), maxDigits)
 			if err != nil {
 				return "", fmt.Errorf("failed to format float as string: %w", err)
 			}

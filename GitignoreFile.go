@@ -1,8 +1,9 @@
 package asciichgolangpublic
 
 import (
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"slices"
+
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -93,7 +94,7 @@ func (g *GitignoreFile) AddDirToIgnore(pathToIgnore string, comment string, verb
 		return tracederrors.TracedError("comment is empty string")
 	}
 
-	pathToIgnore = astrings.EnsureSuffix(pathToIgnore, "/")
+	pathToIgnore = stringsutils.EnsureSuffix(pathToIgnore, "/")
 
 	err = g.Create(verbose)
 	if err != nil {
@@ -208,7 +209,7 @@ func (g *GitignoreFile) ContainsIgnore(pathToCheck string) (containsIgnore bool,
 		return false, err
 	}
 
-	containsIgnore = aslices.ContainsString(ignoredPaths, pathToCheck)
+	containsIgnore = slices.Contains(ignoredPaths, pathToCheck)
 
 	return containsIgnore, nil
 }

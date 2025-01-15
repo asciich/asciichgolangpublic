@@ -2,10 +2,10 @@ package asciichgolangpublic
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -226,7 +226,7 @@ func (p *GitlabPersonalAccessTokenService) CreateToken(tokenOptions *GitlabCreat
 	}
 
 	newToken = strings.TrimSpace(newToken)
-	newToken = astrings.RemoveSurroundingQuotationMarks(newToken)
+	newToken = stringsutils.RemoveSurroundingQuotationMarks(newToken)
 	if len(newToken) <= 0 {
 		return "", tracederrors.TracedError("Unable to get newToken. newToken is empty string.")
 	}
@@ -244,7 +244,7 @@ func (p *GitlabPersonalAccessTokenService) ExistsByName(tokenName string, verbos
 		return false, err
 	}
 
-	exists = aslices.ContainsString(tokenNames, tokenName)
+	exists = slices.Contains(tokenNames, tokenName)
 
 	return exists, nil
 }

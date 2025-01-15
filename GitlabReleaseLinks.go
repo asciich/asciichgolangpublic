@@ -1,9 +1,10 @@
 package asciichgolangpublic
 
 import (
+	"slices"
+
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -438,7 +439,7 @@ func (g *GitlabReleaseLinks) ReleaseLinkByNameExists(linkName string, verbose bo
 		return false, err
 	}
 
-	exists = aslices.ContainsString(releaseNames, linkName)
+	exists = slices.Contains(releaseNames, linkName)
 
 	return exists, nil
 }

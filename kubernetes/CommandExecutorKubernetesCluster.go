@@ -1,12 +1,12 @@
 package kubernetes
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -283,7 +283,7 @@ func (c *CommandExecutorKubernetes) GetKubectlContexts() (contexts []KubectlCont
 	contexts = []KubectlContext{}
 	for _, line := range lines {
 		line = strings.ReplaceAll(line, "\t", " ")
-		line = astrings.RepeatReplaceAll(line, "  ", " ")
+		line = stringsutils.RepeatReplaceAll(line, "  ", " ")
 		line = strings.TrimSpace(line)
 		line = strings.TrimPrefix(line, "*")
 		line = strings.TrimSpace(line)
@@ -555,7 +555,7 @@ func (c *CommandExecutorKubernetes) NamespaceByNameExists(name string, verbose b
 		return false, err
 	}
 
-	exists = aslices.ContainsString(namespaces, name)
+	exists = slices.Contains(namespaces, name)
 
 	if verbose {
 		clusterName, err := c.GetName()

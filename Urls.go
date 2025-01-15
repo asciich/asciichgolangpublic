@@ -1,7 +1,7 @@
 package asciichgolangpublic
 
 import (
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -30,7 +30,7 @@ func (u *UrlsService) IsUrl(url string) (isUrl bool) {
 		return false
 	}
 
-	return astrings.HasAtLeastOnePrefix(url, []string{
+	return stringsutils.HasAtLeastOnePrefix(url, []string{
 		"https://",
 		"http://",
 	})

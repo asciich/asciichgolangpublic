@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 )
 
@@ -61,8 +61,8 @@ func TestCommitGetHash(t *testing.T) {
 					hashes = append(hashes, testProject.MustGetLatestCommitHashAsString(branchName, verbose))
 				}
 
-				assert.True(aslices.ContainsOnlyUniqeStrings(hashes))
-				assert.True(aslices.ContainsNoEmptyStrings(hashes))
+				assert.True(slicesutils.ContainsOnlyUniqeStrings(hashes))
+				assert.True(slicesutils.ContainsNoEmptyStrings(hashes))
 			},
 		)
 	}

@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/shlex"
 
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 )
 
@@ -33,7 +33,7 @@ func (s *ShellLineHandlerService) Join(command []string) (joinedCommand string, 
 			c = "''"
 		}
 
-		if astrings.ContainsAtLeastOneSubstring(c, []string{" ", "\n", "\\n", "\""}) {
+		if stringsutils.ContainsAtLeastOneSubstring(c, []string{" ", "\n", "\\n", "\""}) {
 			c = "'" + c + "'"
 		}
 

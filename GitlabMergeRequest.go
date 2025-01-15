@@ -1,9 +1,9 @@
 package asciichgolangpublic
 
 import (
+	"sort"
 	"time"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -120,7 +120,7 @@ func (g *GitlabMergeRequest) GetLabels() (labels []string, err error) {
 		return nil, tracederrors.TracedError("labels is nil after evaluation")
 	}
 
-	labels = aslices.SortStringSlice(labels)
+	sort.Strings(labels)
 
 	return labels, nil
 }

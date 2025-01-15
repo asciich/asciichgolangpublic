@@ -1,7 +1,7 @@
 package asciichgolangpublic
 
 import (
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -31,7 +31,7 @@ func (g *GitlabSyncBranchOptions) GetDeepCopy() (copy *GitlabSyncBranchOptions) 
 	}
 
 	if g.PathsToSync != nil {
-		copy.PathsToSync = aslices.GetDeepCopyOfStringsSlice(g.PathsToSync)
+		copy.PathsToSync = slicesutils.GetDeepCopyOfStringsSlice(g.PathsToSync)
 	}
 
 	return copy

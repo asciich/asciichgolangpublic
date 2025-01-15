@@ -3,10 +3,10 @@ package asciichgolangpublic
 import (
 	"fmt"
 	"path/filepath"
+	"sort"
 	"strings"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -427,7 +427,7 @@ func (c *CommandExecutorDirectory) GetFileInDirectory(pathToFile ...string) (fil
 
 	filePath := filepath.Join(append([]string{dirPath}, pathToFile...)...)
 
-	toCheck := astrings.EnsureSuffix(dirPath, "/")
+	toCheck := stringsutils.EnsureSuffix(dirPath, "/")
 
 	if !strings.HasPrefix(filePath, toCheck) {
 		return nil, tracederrors.TracedErrorf(
@@ -536,7 +536,7 @@ func (c *CommandExecutorDirectory) GetSubDirectory(path ...string) (subDirectory
 
 	subDirPath := filepath.Join(append([]string{dirPath}, path...)...)
 
-	toCheck := astrings.EnsureSuffix(dirPath, "/")
+	toCheck := stringsutils.EnsureSuffix(dirPath, "/")
 	if !strings.HasPrefix(
 		subDirPath,
 		toCheck,
@@ -608,7 +608,7 @@ func (c *CommandExecutorDirectory) ListFilePaths(listFileOptions *ListFileOption
 		}
 	}
 
-	filePaths = aslices.SortStringSlice(filePaths)
+	sort.Strings(filePaths)
 
 	return filePaths, nil
 }
@@ -692,7 +692,7 @@ func (c *CommandExecutorDirectory) ListSubDirectories(options *ListDirectoryOpti
 		}
 	}
 
-	pathsToAdd = aslices.SortStringSlice(pathsToAdd)
+	sort.Strings(pathsToAdd)
 
 	subDirectories = []Directory{}
 	for _, pathToAdd := range pathsToAdd {

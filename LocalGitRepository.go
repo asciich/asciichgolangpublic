@@ -14,7 +14,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -1000,8 +1000,8 @@ func (l *LocalGitRepository) GetCurrentBranchName(verbose bool) (branchName stri
 		return "", tracederrors.TracedErrorf("Unable to get head: '%w'", err)
 	}
 	branchName = head.String()
-	branchName = astrings.SplitAndGetLastElement(branchName, " ")
-	branchName = astrings.SplitAndGetLastElement(branchName, "/")
+	branchName = stringsutils.SplitAndGetLastElement(branchName, " ")
+	branchName = stringsutils.SplitAndGetLastElement(branchName, "/")
 	branchName = strings.TrimSpace(branchName)
 
 	path, hostDescription, err := l.GetPathAndHostDescription()
@@ -1092,7 +1092,7 @@ func (l *LocalGitRepository) GetCurrentCommitHashAsBytes(verbose bool) (hash []b
 		return nil, err
 	}
 
-	return astrings.HexStringToBytes(currentHash)
+	return stringsutils.HexStringToBytes(currentHash)
 }
 
 func (l *LocalGitRepository) GetDirectoryByPath(pathToSubDir ...string) (subDir Directory, err error) {
@@ -1169,7 +1169,7 @@ func (l *LocalGitRepository) GetGoGitHashFromHashString(hashString string) (hash
 		return nil, tracederrors.TracedErrorNil("hashString")
 	}
 
-	hashBytes, err := astrings.HexStringToBytes(hashString)
+	hashBytes, err := stringsutils.HexStringToBytes(hashString)
 	if err != nil {
 		return nil, err
 	}
@@ -1292,7 +1292,7 @@ func (l *LocalGitRepository) GetRemoteConfigs(verbose bool) (remoteConfigs []*Gi
 
 		lineCleaned := strings.ReplaceAll(line, "\t", " ")
 
-		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(lineCleaned)
+		splitted := stringsutils.SplitAtSpacesAndRemoveEmptyStrings(lineCleaned)
 		if len(splitted) != 3 {
 			return nil, tracederrors.TracedErrorf("Unable to parse '%s' as remote. splitted is '%v'", line, splitted)
 		}

@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -360,9 +360,9 @@ func (o *CommandOutput) GetStdoutAsLines(removeLastLineIfEmpty bool) (stdoutLine
 		return nil, err
 	}
 
-	stdoutLines = astrings.SplitLines(stdoutString, removeLastLineIfEmpty)
+	stdoutLines = stringsutils.SplitLines(stdoutString, removeLastLineIfEmpty)
 
-	stdoutLines = aslices.RemoveLastElementIfEmptyString(stdoutLines)
+	stdoutLines = slicesutils.RemoveLastElementIfEmptyString(stdoutLines)
 	return stdoutLines, nil
 }
 

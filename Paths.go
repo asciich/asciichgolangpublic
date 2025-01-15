@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -48,7 +48,7 @@ func (p *PathsService) FilterPaths(pathList []string, pathFilterOptions PathFilt
 		for _, f := range filtered {
 			match := false
 			for _, pattern := range excludePatterns {
-				match, err = astrings.MatchesRegex(f, pattern)
+				match, err = stringsutils.MatchesRegex(f, pattern)
 				if err != nil {
 					return nil, err
 				}
@@ -63,7 +63,7 @@ func (p *PathsService) FilterPaths(pathList []string, pathFilterOptions PathFilt
 			}
 		}
 
-		filtered = aslices.SortStringSliceAndRemoveDuplicates(newFiltered)
+		filtered = slicesutils.SortStringSliceAndRemoveDuplicates(newFiltered)
 	}
 
 	if pathFilterOptions.IsExcludeBasenamePatternSet() {
@@ -77,7 +77,7 @@ func (p *PathsService) FilterPaths(pathList []string, pathFilterOptions PathFilt
 		for _, f := range filtered {
 			match := false
 			for _, pattern := range excludePatterns {
-				match, err = astrings.MatchesRegex(filepath.Base(f), pattern)
+				match, err = stringsutils.MatchesRegex(filepath.Base(f), pattern)
 				if err != nil {
 					return nil, err
 				}
@@ -92,7 +92,7 @@ func (p *PathsService) FilterPaths(pathList []string, pathFilterOptions PathFilt
 			}
 		}
 
-		filtered = aslices.SortStringSliceAndRemoveDuplicates(newFiltered)
+		filtered = slicesutils.SortStringSliceAndRemoveDuplicates(newFiltered)
 	}
 
 	if pathFilterOptions.IsMatchBasenamePatternSet() {
@@ -105,7 +105,7 @@ func (p *PathsService) FilterPaths(pathList []string, pathFilterOptions PathFilt
 
 		for _, pattern := range matchBaseNamePatterns {
 			for _, f := range filtered {
-				match, err := astrings.MatchesRegex(filepath.Base(f), pattern)
+				match, err := stringsutils.MatchesRegex(filepath.Base(f), pattern)
 				if err != nil {
 					return nil, err
 				}
@@ -116,7 +116,7 @@ func (p *PathsService) FilterPaths(pathList []string, pathFilterOptions PathFilt
 			}
 		}
 
-		filtered = aslices.SortStringSliceAndRemoveDuplicates(newFiltered)
+		filtered = slicesutils.SortStringSliceAndRemoveDuplicates(newFiltered)
 	}
 
 	sort.Strings(filtered)
@@ -217,7 +217,7 @@ func (p *PathsService) GetRelativePathTo(absolutePath string, relativeTo string)
 		return "", err
 	}
 
-	relativeToDirPath := astrings.EnsureSuffix(relativeTo, "/")
+	relativeToDirPath := stringsutils.EnsureSuffix(relativeTo, "/")
 
 	if !strings.HasPrefix(absolutePath, relativeToDirPath) {
 		return "", tracederrors.TracedErrorf(

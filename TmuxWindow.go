@@ -2,11 +2,12 @@ package asciichgolangpublic
 
 import (
 	"errors"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -221,7 +222,7 @@ func (t *TmuxWindow) Exists(verbose bool) (exists bool, err error) {
 		return false, err
 	}
 
-	exists = aslices.ContainsString(windowNames, windowName)
+	exists = slices.Contains(windowNames, windowName)
 
 	sessionName, err := t.GetSessionName()
 	if err != nil {
@@ -356,7 +357,7 @@ func (t *TmuxWindow) GetShownLines() (lines []string, err error) {
 		return nil, err
 	}
 
-	lines = aslices.RemoveEmptyStringsAtEnd(lines)
+	lines = slicesutils.RemoveEmptyStringsAtEnd(lines)
 
 	return lines, nil
 }
@@ -687,7 +688,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 		return nil, err
 	}
 
-	allOutputLines = aslices.RemoveEmptyStringsAtEnd(allOutputLines)
+	allOutputLines = slicesutils.RemoveEmptyStringsAtEnd(allOutputLines)
 
 	if len(allOutputLines) < 2 {
 		return nil, tracederrors.TracedErrorf(

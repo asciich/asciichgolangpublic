@@ -1,12 +1,12 @@
 package kind
 
 import (
+	"slices"
+
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/kubernetes"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
-
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 )
 
 type CommandExecutorKind struct {
@@ -64,7 +64,7 @@ func (c *CommandExecutorKind) ClusterByNameExists(clusterName string, verbose bo
 		return false, err
 	}
 
-	exists = aslices.ContainsString(clusterNames, clusterName)
+	exists = slices.Contains(clusterNames, clusterName)
 
 	if verbose {
 		hostDescription, err := c.GetHostDescription()

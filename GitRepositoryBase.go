@@ -1,7 +1,8 @@
 package asciichgolangpublic
 
 import (
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"slices"
+
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -63,7 +64,7 @@ func (g *GitRepositoryBase) BranchByNameExists(branchName string, verbose bool) 
 		return false, err
 	}
 
-	branchExists = aslices.ContainsString(branchNames, branchName)
+	branchExists = slices.Contains(branchNames, branchName)
 
 	if verbose {
 		path, hostDescription, err := parent.GetPathAndHostDescription()

@@ -2,13 +2,13 @@ package asciichgolangpublic
 
 import (
 	"fmt"
+	"slices"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	"github.com/asciich/asciichgolangpublic/logging"
 )
 
@@ -296,7 +296,7 @@ func TestGitlabGroupListProjects(t *testing.T) {
 
 				for _, toCheck := range projectPaths {
 					assert.True(
-						aslices.ContainsString(
+						slices.Contains(
 							listedProjectPaths,
 							toCheck,
 						),

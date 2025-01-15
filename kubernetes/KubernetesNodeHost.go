@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/hosts"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -98,7 +98,7 @@ func (k *KubernetesNodeHost) IsKubernetesNode(verbose bool) (isKubernetesNode bo
 
 	isKubernetesNode = true
 
-	if len(astrings.SplitLines(stdout, false)) <= 5 {
+	if len(stringsutils.SplitLines(stdout, false)) <= 5 {
 		isKubernetesNode = false
 	}
 

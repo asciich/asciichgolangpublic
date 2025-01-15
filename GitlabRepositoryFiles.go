@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"sort"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -100,12 +100,12 @@ func (g *GitlabRepositoryFiles) GetDirectoryNames(ref string, verbose bool) (dir
 	directoryNames = []string{}
 	for _, toCheck := range fileAndDirectoryNames {
 		toCheckWithAppendix := toCheck + "/"
-		if aslices.AtLeastOneElementStartsWith(fileAndDirectoryNames, toCheckWithAppendix) {
+		if slicesutils.AtLeastOneElementStartsWith(fileAndDirectoryNames, toCheckWithAppendix) {
 			directoryNames = append(directoryNames, toCheck)
 		}
 	}
 
-	directoryNames = aslices.RemoveDuplicatedStrings(directoryNames)
+	directoryNames = slicesutils.RemoveDuplicatedStrings(directoryNames)
 
 	sort.Strings(directoryNames)
 
@@ -169,14 +169,14 @@ func (g *GitlabRepositoryFiles) GetFileNames(ref string, verbose bool) (fileName
 	fileNames = []string{}
 	for _, toCheck := range fileAndDirectoryNames {
 		toCheckWithAppendix := toCheck + "/"
-		if aslices.AtLeastOneElementStartsWith(fileAndDirectoryNames, toCheckWithAppendix) {
+		if slicesutils.AtLeastOneElementStartsWith(fileAndDirectoryNames, toCheckWithAppendix) {
 			continue
 		}
 
 		fileNames = append(fileNames, toCheck)
 	}
 
-	fileNames = aslices.RemoveDuplicatedStrings(fileNames)
+	fileNames = slicesutils.RemoveDuplicatedStrings(fileNames)
 
 	sort.Strings(fileNames)
 

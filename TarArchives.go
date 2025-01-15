@@ -9,7 +9,7 @@ import (
 	"sort"
 	"time"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -189,7 +189,7 @@ func (t *TarArchivesService) ListFileNamesFromTarArchiveBytes(archiveBytes []byt
 		fileNames = append(fileNames, header.Name)
 	}
 
-	fileNames = aslices.RemoveEmptyStrings(fileNames)
+	fileNames = slicesutils.RemoveEmptyStrings(fileNames)
 
 	sort.Strings(fileNames)
 

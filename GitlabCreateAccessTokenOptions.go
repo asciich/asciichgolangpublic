@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"time"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -190,7 +190,7 @@ func (o *GitlabCreateAccessTokenOptions) GetScopes() (scopes []string, err error
 		return nil, tracederrors.TracedError("Scopes not set")
 	}
 
-	return aslices.GetDeepCopyOfStringsSlice(o.Scopes), nil
+	return slicesutils.GetDeepCopyOfStringsSlice(o.Scopes), nil
 }
 
 func (o *GitlabCreateAccessTokenOptions) GetTokenName() (tokenName string, err error) {

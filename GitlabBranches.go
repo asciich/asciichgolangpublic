@@ -1,9 +1,10 @@
 package asciichgolangpublic
 
 import (
+	"slices"
 	"time"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -175,7 +176,7 @@ func (g *GitlabBranches) DeleteAllBranchesExceptDefaultBranch(verbose bool) (err
 		}
 
 		for _, deleted := range deletedBranchNames {
-			if aslices.ContainsString(currentBranchNames, deleted) {
+			if slices.Contains(currentBranchNames, deleted) {
 				branchNotDeletedYetFound = true
 				break
 			}
@@ -277,7 +278,7 @@ func (g *GitlabBranches) GetBranchNamesExceptDefaultBranch(verbose bool) (branch
 		return nil, err
 	}
 
-	branchNames = aslices.RemoveString(allBranchNames, defaultBranchName)
+	branchNames = slicesutils.RemoveString(allBranchNames, defaultBranchName)
 
 	return branchNames, nil
 }

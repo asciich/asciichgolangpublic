@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -318,7 +318,7 @@ func (g *GitlabCommit) IsParentCommitOf(childCommit *GitlabCommit, verbose bool)
 		return false, err
 	}
 
-	isParent = aslices.ContainsStringIgnoreCase(
+	isParent = slicesutils.ContainsStringIgnoreCase(
 		parentHashes,
 		hash,
 	)

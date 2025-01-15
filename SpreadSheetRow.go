@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"strings"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -150,7 +150,7 @@ func (s *SpreadSheetRow) RemoveElementAtIndex(index int) (err error) {
 		return err
 	}
 
-	entries = aslices.RemoveStringEntryAtIndex(entries, index)
+	entries = slicesutils.RemoveStringEntryAtIndex(entries, index)
 
 	err = s.SetEntries(entries)
 	if err != nil {
@@ -198,7 +198,7 @@ func (s *SpreadSheetRow) RenderAsString(options *SpreadSheetRenderRowOptions) (r
 		for i, entry := range entries {
 			entriesFilled = append(
 				entriesFilled,
-				astrings.RightFillWithSpaces(entry, minColumnWidth[i]),
+				stringsutils.RightFillWithSpaces(entry, minColumnWidth[i]),
 			)
 		}
 

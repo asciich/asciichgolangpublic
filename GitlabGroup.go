@@ -9,8 +9,8 @@ import (
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -387,7 +387,7 @@ func (g *GitlabGroup) GetRawResponse() (rawRespoonse *gitlab.Group, err error) {
 
 	nativeGroup, _, err := nativeGroupsService.GetGroup(gid, &gitlab.GetGroupOptions{})
 	if err != nil {
-		if aslices.ContainsStringIgnoreCase([]string{"404 Not Found", "404 {message: 404 Group Not Found}"}, err.Error()) {
+		if slicesutils.ContainsStringIgnoreCase([]string{"404 Not Found", "404 {message: 404 Group Not Found}"}, err.Error()) {
 			return nil, tracederrors.TracedErrorf("%w: %v", ErrGitlabGroupNotFoundError, gid)
 		}
 		return nil, err
@@ -679,7 +679,7 @@ func (g *GitlabGroup) SetGroupPath(groupPath string) (err error) {
 		return tracederrors.TracedErrorf("groupPath is empty string")
 	}
 
-	trimmed := astrings.TrimPrefixAndSuffix(groupPath, "/", "/")
+	trimmed := stringsutils.TrimPrefixAndSuffix(groupPath, "/", "/")
 	trimmed = strings.TrimSpace(trimmed)
 
 	if trimmed == "" {

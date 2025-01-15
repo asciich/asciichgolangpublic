@@ -1,7 +1,8 @@
 package asciichgolangpublic
 
 import (
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"slices"
+
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -122,7 +123,7 @@ func (k *GitlabProjectDeployKeys) DeployKeyByNameExists(keyName string) (keyExis
 		return false, err
 	}
 
-	keyExists = aslices.ContainsString(keyNameList, keyName)
+	keyExists = slices.Contains(keyNameList, keyName)
 
 	return keyExists, nil
 }

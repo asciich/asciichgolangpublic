@@ -2,11 +2,11 @@ package kubernetes
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/datatypes"
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -445,7 +445,7 @@ func (c *CommandExecutorNamespace) RoleByNameExists(name string, verbose bool) (
 		return false, err
 	}
 
-	exists = aslices.ContainsString(roleNames, name)
+	exists = slices.Contains(roleNames, name)
 
 	if verbose {
 		clusterName, err := c.GetClusterName()
