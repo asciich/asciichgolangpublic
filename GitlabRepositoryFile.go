@@ -7,8 +7,8 @@ import (
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	"github.com/asciich/asciichgolangpublic/encoding/base64"
-	aerrors "github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 var ErrGitlabRepositoryFileDoesNotExist = errors.New("Gitlab repository file does not exist")
@@ -25,7 +25,7 @@ func NewGitlabRepositoryFile() (g *GitlabRepositoryFile) {
 
 func (g *GitlabRepositoryFile) Delete(commitMessage string, verbose bool) (err error) {
 	if commitMessage == "" {
-		return aerrors.TracedErrorEmptyString("commitMessage")
+		return tracederrors.TracedErrorEmptyString("commitMessage")
 	}
 
 	nativeClient, projectId, err := g.GetNativeRepositoryFilesClientAndProjectId()
@@ -57,7 +57,7 @@ func (g *GitlabRepositoryFile) Delete(commitMessage string, verbose bool) (err e
 	}
 
 	if branchName == "" {
-		return aerrors.TracedError("branchName is empty string after evaluation")
+		return tracederrors.TracedError("branchName is empty string after evaluation")
 	}
 
 	exits, err := g.Exists()
@@ -75,7 +75,7 @@ func (g *GitlabRepositoryFile) Delete(commitMessage string, verbose bool) (err e
 			},
 		)
 		if err != nil {
-			return aerrors.TracedErrorf(
+			return tracederrors.TracedErrorf(
 				"Failed to delete '%s' in branch '%s' on '%s': '%w'",
 				fileName,
 				branchName,
@@ -118,7 +118,7 @@ func (g *GitlabRepositoryFile) Exists() (fileExists bool, err error) {
 
 func (g *GitlabRepositoryFile) GetBranchName() (branchName string, err error) {
 	if g.BranchName == "" {
-		return "", aerrors.TracedError("BranchName not set")
+		return "", tracederrors.TracedError("BranchName not set")
 	}
 
 	return g.BranchName, nil
@@ -149,7 +149,7 @@ func (g *GitlabRepositoryFile) GetContentAsBytesAndCommitHash(verbose bool) (con
 	sha256sum = nativeRepoFile.SHA256
 
 	if sha256sum == "" {
-		return nil, "", aerrors.TracedError("sha256sum is empty string after evaluation.")
+		return nil, "", tracederrors.TracedError("sha256sum is empty string after evaluation.")
 	}
 
 	return content, sha256sum, nil
@@ -181,7 +181,7 @@ func (g *GitlabRepositoryFile) GetDefaultBranchName() (defaultBranchName string,
 
 func (g *GitlabRepositoryFile) GetGitlabProject() (gitlabProject *GitlabProject, err error) {
 	if g.gitlabProject == nil {
-		return nil, aerrors.TracedErrorf("gitlabProject not set")
+		return nil, tracederrors.TracedErrorf("gitlabProject not set")
 	}
 
 	return g.gitlabProject, nil
@@ -229,13 +229,13 @@ func (g *GitlabRepositoryFile) GetNativeRepositoryFile() (nativeFile *gitlab.Fil
 	)
 	if err != nil {
 		if err.Error() == "404 Not Found" {
-			return nil, aerrors.TracedErrorf("%w, %w", ErrGitlabRepositoryFileDoesNotExist, err)
+			return nil, tracederrors.TracedErrorf("%w, %w", ErrGitlabRepositoryFileDoesNotExist, err)
 		}
-		return nil, aerrors.TracedErrorf("Unable to get native file: '%w'", err)
+		return nil, tracederrors.TracedErrorf("Unable to get native file: '%w'", err)
 	}
 
 	if nativeFile == nil {
-		return nil, aerrors.TracedError("nativeFile is nil after evaluation")
+		return nil, tracederrors.TracedError("nativeFile is nil after evaluation")
 	}
 
 	return nativeFile, nil
@@ -271,7 +271,7 @@ func (g *GitlabRepositoryFile) GetNativeRepositoryFilesClientAndProjectId() (nat
 
 func (g *GitlabRepositoryFile) GetPath() (path string, err error) {
 	if g.Path == "" {
-		return "", aerrors.TracedErrorf("Path not set")
+		return "", tracederrors.TracedErrorf("Path not set")
 	}
 
 	return g.Path, nil
@@ -338,7 +338,7 @@ func (g *GitlabRepositoryFile) GetSha256CheckSum() (checkSum string, err error) 
 	checkSum = rawResponse.SHA256
 
 	if checkSum == "" {
-		return "", aerrors.TracedErrorf("SHA256 checksum is empty string after evalutaion for repository file '%s' in branch '%s'.", filePath, branchName)
+		return "", tracederrors.TracedErrorf("SHA256 checksum is empty string after evalutaion for repository file '%s' in branch '%s'.", filePath, branchName)
 	}
 
 	return checkSum, nil
@@ -527,7 +527,7 @@ func (g *GitlabRepositoryFile) MustWriteFileContentByString(content string, comm
 
 func (g *GitlabRepositoryFile) SetBranchName(branchName string) (err error) {
 	if branchName == "" {
-		return aerrors.TracedErrorf("branchName is empty string")
+		return tracederrors.TracedErrorf("branchName is empty string")
 	}
 
 	g.BranchName = branchName
@@ -537,7 +537,7 @@ func (g *GitlabRepositoryFile) SetBranchName(branchName string) (err error) {
 
 func (g *GitlabRepositoryFile) SetGitlabProject(gitlabProject *GitlabProject) (err error) {
 	if gitlabProject == nil {
-		return aerrors.TracedErrorf("gitlabProject is nil")
+		return tracederrors.TracedErrorf("gitlabProject is nil")
 	}
 
 	g.gitlabProject = gitlabProject
@@ -547,7 +547,7 @@ func (g *GitlabRepositoryFile) SetGitlabProject(gitlabProject *GitlabProject) (e
 
 func (g *GitlabRepositoryFile) SetPath(path string) (err error) {
 	if path == "" {
-		return aerrors.TracedErrorf("path is empty string")
+		return tracederrors.TracedErrorf("path is empty string")
 	}
 
 	g.Path = path
@@ -557,11 +557,11 @@ func (g *GitlabRepositoryFile) SetPath(path string) (err error) {
 
 func (g *GitlabRepositoryFile) WriteFileContentByBytes(content []byte, commitMessage string, verbose bool) (err error) {
 	if content == nil {
-		return aerrors.TracedErrorNil("content")
+		return tracederrors.TracedErrorNil("content")
 	}
 
 	if commitMessage == "" {
-		return aerrors.TracedErrorEmptyString("commitMessage")
+		return tracederrors.TracedErrorEmptyString("commitMessage")
 	}
 
 	exists, err := g.Exists()
@@ -602,7 +602,7 @@ func (g *GitlabRepositoryFile) WriteFileContentByBytes(content []byte, commitMes
 		}
 	}
 	if branchName == "" {
-		return aerrors.TracedError("Internal error: branchName is empty string after evaluation.")
+		return tracederrors.TracedError("Internal error: branchName is empty string after evaluation.")
 	}
 
 	contentString := string(content)
@@ -634,7 +634,7 @@ func (g *GitlabRepositoryFile) WriteFileContentByBytes(content []byte, commitMes
 				nil,
 			)
 			if err != nil {
-				return aerrors.TracedErrorf("Unable to update file: '%w'", err)
+				return tracederrors.TracedErrorf("Unable to update file: '%w'", err)
 			}
 
 			if verbose {
@@ -660,7 +660,7 @@ func (g *GitlabRepositoryFile) WriteFileContentByBytes(content []byte, commitMes
 			nil,
 		)
 		if err != nil {
-			return aerrors.TracedErrorf("Unable to create file in gitlab project: '%w'", err)
+			return tracederrors.TracedErrorf("Unable to create file in gitlab project: '%w'", err)
 		}
 
 		if verbose {

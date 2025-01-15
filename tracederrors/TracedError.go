@@ -1,4 +1,4 @@
-package errors
+package tracederrors
 
 import (
 	"errors"
@@ -253,7 +253,7 @@ func (t TracedErrorType) Error() (errorMessage string) {
 		errorMessage += "\n"
 	}
 
-	allErrors := Errors().UnwrapRecursive(t)
+	allErrors := UnwrapRecursive(t)
 	for _, unwrapped := range allErrors {
 		unwrapType, err := datatypes.GetTypeName(unwrapped)
 		if err != nil {

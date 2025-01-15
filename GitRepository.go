@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/datatypes"
-	aerrors "github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 var ErrGitRepositoryDoesNotExist = errors.New("gitRepository does not exist")
@@ -200,7 +200,7 @@ type GitRepository interface {
 
 func GetGitRepositoryByDirectory(directory Directory) (repository GitRepository, err error) {
 	if directory == nil {
-		return nil, aerrors.TracedErrorNil("directory")
+		return nil, tracederrors.TracedErrorNil("directory")
 	}
 
 	localDirectory, ok := directory.(*LocalDirectory)
@@ -218,7 +218,7 @@ func GetGitRepositoryByDirectory(directory Directory) (repository GitRepository,
 		return nil, err
 	}
 
-	return nil, aerrors.TracedErrorf(
+	return nil, tracederrors.TracedErrorf(
 		"Unknown directory implementation '%s'. Unable to get GitRepository",
 		unknownTypeName,
 	)

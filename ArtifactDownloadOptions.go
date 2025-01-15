@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type ArtifactDownloadOptions struct {
@@ -23,7 +23,7 @@ func NewAsciichArtifactDownloadOptions() (a *ArtifactDownloadOptions) {
 
 func (a *ArtifactDownloadOptions) GetArtifactName() (artifactName string, err error) {
 	if a.ArtifactName == "" {
-		return "", errors.TracedErrorf("ArtifactName not set")
+		return "", tracederrors.TracedErrorf("ArtifactName not set")
 	}
 
 	return a.ArtifactName, nil
@@ -31,7 +31,7 @@ func (a *ArtifactDownloadOptions) GetArtifactName() (artifactName string, err er
 
 func (a *ArtifactDownloadOptions) GetOutputPath() (outputPath string, err error) {
 	if a.OutputPath == "" {
-		return "", errors.TracedErrorf("OutputPath not set")
+		return "", tracederrors.TracedErrorf("OutputPath not set")
 	}
 
 	return a.OutputPath, nil
@@ -49,7 +49,7 @@ func (a *ArtifactDownloadOptions) GetVerbose() (verbose bool, err error) {
 
 func (a *ArtifactDownloadOptions) GetVersionToDownload() (versionToDownload string, err error) {
 	if a.VersionToDownload == "" {
-		return "", errors.TracedErrorf("VersionToDownload not set")
+		return "", tracederrors.TracedErrorf("VersionToDownload not set")
 	}
 
 	return a.VersionToDownload, nil
@@ -145,7 +145,7 @@ func (a *ArtifactDownloadOptions) MustSetVersionToDownload(versionToDownload str
 
 func (a *ArtifactDownloadOptions) SetArtifactName(artifactName string) (err error) {
 	if artifactName == "" {
-		return errors.TracedErrorf("artifactName is empty string")
+		return tracederrors.TracedErrorf("artifactName is empty string")
 	}
 
 	a.ArtifactName = artifactName
@@ -155,7 +155,7 @@ func (a *ArtifactDownloadOptions) SetArtifactName(artifactName string) (err erro
 
 func (a *ArtifactDownloadOptions) SetOutputPath(outputPath string) (err error) {
 	if outputPath == "" {
-		return errors.TracedErrorf("outputPath is empty string")
+		return tracederrors.TracedErrorf("outputPath is empty string")
 	}
 
 	a.OutputPath = outputPath
@@ -177,7 +177,7 @@ func (a *ArtifactDownloadOptions) SetVerbose(verbose bool) (err error) {
 
 func (a *ArtifactDownloadOptions) SetVersionToDownload(versionToDownload string) (err error) {
 	if versionToDownload == "" {
-		return errors.TracedErrorf("versionToDownload is empty string")
+		return tracederrors.TracedErrorf("versionToDownload is empty string")
 	}
 
 	a.VersionToDownload = versionToDownload

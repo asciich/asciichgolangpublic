@@ -1,8 +1,8 @@
 package kubernetes
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type CommandExecutorRole struct {
@@ -16,7 +16,7 @@ func NewCommandExecutorRole() (c *CommandExecutorRole) {
 
 func (c *CommandExecutorRole) GetName() (name string, err error) {
 	if c.name == "" {
-		return "", errors.TracedErrorf("name not set")
+		return "", tracederrors.TracedErrorf("name not set")
 	}
 
 	return c.name, nil
@@ -61,7 +61,7 @@ func (c *CommandExecutorRole) MustSetNamespace(namespace Namespace) {
 
 func (c *CommandExecutorRole) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	c.name = name

@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type TemporaryGitRepositoriesService struct {
@@ -43,7 +43,7 @@ func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepository(verbose b
 
 func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepositoryAndAddDataFromDirectory(dataToAdd Directory, verbose bool) (temporaryRepository GitRepository, err error) {
 	if dataToAdd == nil {
-		return nil, errors.TracedError("dataToAdd is nil")
+		return nil, tracederrors.TracedError("dataToAdd is nil")
 	}
 
 	temporaryRepository, err = g.CreateTemporaryGitRepository(verbose)

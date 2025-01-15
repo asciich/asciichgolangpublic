@@ -2,8 +2,8 @@ package asciichgolangpublic
 
 import (
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitRepositoryBase struct {
@@ -16,7 +16,7 @@ func NewGitRepositoryBase() (g *GitRepositoryBase) {
 
 func (g *GitRepositoryBase) AddFilesByPath(pathsToAdd []string, verbose bool) (err error) {
 	if len(pathsToAdd) <= 0 {
-		return errors.TracedError("pathToAdd has no elements")
+		return tracederrors.TracedError("pathToAdd has no elements")
 	}
 
 	parent, err := g.GetParentRepositoryForBaseClass()
@@ -50,7 +50,7 @@ func (g *GitRepositoryBase) AddFilesByPath(pathsToAdd []string, verbose bool) (e
 
 func (g *GitRepositoryBase) BranchByNameExists(branchName string, verbose bool) (branchExists bool, err error) {
 	if branchName == "" {
-		return false, errors.TracedErrorEmptyString("branchName")
+		return false, tracederrors.TracedErrorEmptyString("branchName")
 	}
 
 	parent, err := g.GetParentRepositoryForBaseClass()
@@ -108,7 +108,7 @@ func (g *GitRepositoryBase) CheckHasNoUncommittedChanges(verbose bool) (err erro
 			return err
 		}
 
-		return errors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"There are uncommited changes in git repository '%s' on host '%s'",
 			path,
 			hostDescription,
@@ -138,7 +138,7 @@ func (g *GitRepositoryBase) CheckIsGolangApplication(verbose bool) (err error) {
 		return err
 	}
 
-	return errors.TracedErrorf(
+	return tracederrors.TracedErrorf(
 		"git repository '%s' on host '%s' is not a golang application",
 		path,
 		hostDescription,
@@ -162,7 +162,7 @@ func (g *GitRepositoryBase) CheckIsGolangPackage(verbose bool) (err error) {
 			return err
 		}
 
-		return errors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"git repository '%s' on host '%s' is not a golang package",
 			path,
 			hostDescription,
@@ -189,7 +189,7 @@ func (g *GitRepositoryBase) CheckIsOnLocalhost(verbose bool) (err error) {
 			return err
 		}
 
-		return errors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"git repository '%s' is not on localhost. Host is '%s'",
 			path,
 			hostDescription,
@@ -216,7 +216,7 @@ func (g *GitRepositoryBase) CheckIsPreCommitRepository(verbose bool) (err error)
 	}
 
 	if !isPreCommitRepository {
-		return errors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"Repository '%s' on host '%s' is not a pre-commit repository.",
 			path,
 			hostDescription,
@@ -228,7 +228,7 @@ func (g *GitRepositoryBase) CheckIsPreCommitRepository(verbose bool) (err error)
 
 func (g *GitRepositoryBase) CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
 	if commitOptions == nil {
-		return nil, errors.TracedErrorNil("commitOptions")
+		return nil, tracederrors.TracedErrorNil("commitOptions")
 	}
 
 	parent, err := g.GetParentRepositoryForBaseClass()
@@ -251,7 +251,7 @@ func (g *GitRepositoryBase) CommitAndPush(commitOptions *GitCommitOptions) (crea
 
 func (g *GitRepositoryBase) CommitIfUncommittedChanges(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
 	if commitOptions == nil {
-		return nil, errors.TracedErrorNil("commitOptions")
+		return nil, tracederrors.TracedErrorNil("commitOptions")
 	}
 
 	parent, err := g.GetParentRepositoryForBaseClass()
@@ -382,7 +382,7 @@ func (g *GitRepositoryBase) ContainsGoSourceFileOfMainPackageWithMainFunction(ve
 
 func (g *GitRepositoryBase) CreateAndInit(createOptions *CreateRepositoryOptions) (err error) {
 	if createOptions == nil {
-		return errors.TracedErrorNil("createOptions")
+		return tracederrors.TracedErrorNil("createOptions")
 	}
 
 	parent, err := g.GetParentRepositoryForBaseClass()
@@ -405,7 +405,7 @@ func (g *GitRepositoryBase) CreateAndInit(createOptions *CreateRepositoryOptions
 
 func (g *GitRepositoryBase) DirectoryByPathExists(verbose bool, path ...string) (exists bool, err error) {
 	if len(path) <= 0 {
-		return false, errors.TracedError("path has no elements")
+		return false, tracederrors.TracedError("path has no elements")
 	}
 
 	parent, err := g.GetParentRepositoryForBaseClass()
@@ -524,7 +524,7 @@ func (g *GitRepositoryBase) GetCurrentCommitsNewestVersionOrNilIfNotPresent(verb
 
 func (g *GitRepositoryBase) GetFileByPath(path ...string) (file File, err error) {
 	if len(path) <= 0 {
-		return nil, errors.TracedError("path has no elements")
+		return nil, tracederrors.TracedError("path has no elements")
 	}
 
 	parent, err := g.GetParentRepositoryForBaseClass()
@@ -557,7 +557,7 @@ func (g *GitRepositoryBase) GetLatestTagVersion(verbose bool) (latestTagVersion 
 			return nil, err
 		}
 
-		return nil, errors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"No version tag in git repository '%s' on host '%s' found.",
 			path,
 			hostDescription,
@@ -613,7 +613,7 @@ func (g *GitRepositoryBase) GetLatestTagVersionOrNilIfNotFound(verbose bool) (la
 
 func (g *GitRepositoryBase) GetParentRepositoryForBaseClass() (parentRepositoryForBaseClass GitRepository, err error) {
 	if g.parentRepositoryForBaseClass == nil {
-		return nil, errors.TracedErrorf("parentRepositoryForBaseClass not set")
+		return nil, tracederrors.TracedErrorf("parentRepositoryForBaseClass not set")
 	}
 
 	return g.parentRepositoryForBaseClass, nil
@@ -1132,7 +1132,7 @@ func (g *GitRepositoryBase) MustWriteStringToFile(content string, verbose bool, 
 
 func (g *GitRepositoryBase) SetParentRepositoryForBaseClass(parentRepositoryForBaseClass GitRepository) (err error) {
 	if parentRepositoryForBaseClass == nil {
-		return errors.TracedErrorf("parentRepositoryForBaseClass is nil")
+		return tracederrors.TracedErrorf("parentRepositoryForBaseClass is nil")
 	}
 
 	g.parentRepositoryForBaseClass = parentRepositoryForBaseClass
@@ -1142,7 +1142,7 @@ func (g *GitRepositoryBase) SetParentRepositoryForBaseClass(parentRepositoryForB
 
 func (g *GitRepositoryBase) WriteStringToFile(content string, verbose bool, path ...string) (writtenFile File, err error) {
 	if len(path) <= 0 {
-		return nil, errors.TracedError("path has no elements")
+		return nil, tracederrors.TracedError("path has no elements")
 	}
 
 	parent, err := g.GetParentRepositoryForBaseClass()

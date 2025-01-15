@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitlabPersonalProjects struct {
@@ -15,7 +15,7 @@ func NewGitlabPersonalProjects() (g *GitlabPersonalProjects) {
 
 func (g *GitlabPersonalProjects) GetGitlab() (gitlab *GitlabInstance, err error) {
 	if g.gitlab == nil {
-		return nil, errors.TracedErrorf("gitlab not set")
+		return nil, tracederrors.TracedErrorf("gitlab not set")
 	}
 
 	return g.gitlab, nil
@@ -39,7 +39,7 @@ func (g *GitlabPersonalProjects) MustSetGitlab(gitlab *GitlabInstance) {
 
 func (g *GitlabPersonalProjects) SetGitlab(gitlab *GitlabInstance) (err error) {
 	if gitlab == nil {
-		return errors.TracedErrorf("gitlab is nil")
+		return tracederrors.TracedErrorf("gitlab is nil")
 	}
 
 	g.gitlab = gitlab

@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type FilesService struct {
@@ -58,7 +58,7 @@ func (f *FilesService) MustWriteStringToFile(path string, content string, verbos
 
 func (f *FilesService) ReadAsString(path string) (content string, err error) {
 	if path == "" {
-		return "", errors.TracedErrorEmptyString(path)
+		return "", tracederrors.TracedErrorEmptyString(path)
 	}
 
 	localFile, err := GetLocalFileByPath(path)
@@ -76,7 +76,7 @@ func (f *FilesService) ReadAsString(path string) (content string, err error) {
 
 func (f *FilesService) WriteStringToFile(path string, content string, verbose bool) (err error) {
 	if path == "" {
-		return errors.TracedErrorEmptyString(path)
+		return tracederrors.TracedErrorEmptyString(path)
 	}
 
 	localFile, err := GetLocalFileByPath(path)

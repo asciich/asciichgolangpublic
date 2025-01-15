@@ -4,8 +4,8 @@ import (
 	_ "embed"
 
 	"github.com/asciich/asciichgolangpublic"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 	libvirtxml "libvirt.org/libvirt-go-xml"
 )
 
@@ -23,10 +23,10 @@ func NewLibvirtXmlsService() (libvirtXmls *LibvirtXmlsService) {
 }
 
 func (l *LibvirtXmlsService) CreateXmlForVmOnLatopAsString(createOptions *KvmCreateVmOptions) (libvirtXml string, err error) {
-	return "", errors.TracedErrorNotImplemented()
+	return "", tracederrors.TracedErrorNotImplemented()
 	/* TODO enable again
 	if createOptions == nil {
-		return "", errors.TracedError("createOptions is nil")
+		return "", tracederrors.TracedError("createOptions is nil")
 	}
 
 	vmName, err := createOptions.GetVmName()
@@ -67,19 +67,19 @@ func (l *LibvirtXmlsService) CreateXmlForVmOnLatopAsString(createOptions *KvmCre
 
 func (l *LibvirtXmlsService) GetMacAddressFromXmlString(libvirtXml string) (macAddress string, err error) {
 	if libvirtXml == "" {
-		return "", errors.TracedError("libvirtXml is empty string")
+		return "", tracederrors.TracedError("libvirtXml is empty string")
 	}
 
 	domcfg := &libvirtxml.Domain{}
 	err = domcfg.Unmarshal(libvirtXml)
 	if err != nil {
-		return "", errors.TracedError(err.Error())
+		return "", tracederrors.TracedError(err.Error())
 	}
 
 	networkInterfaces := domcfg.Devices.Interfaces
 	nInterfaces := len(networkInterfaces)
 	if nInterfaces != 1 {
-		return "", errors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"Only exactly one network interface is supported at the moment but got '%d'",
 			nInterfaces,
 		)
@@ -87,12 +87,12 @@ func (l *LibvirtXmlsService) GetMacAddressFromXmlString(libvirtXml string) (macA
 
 	nativeMac := networkInterfaces[0].MAC
 	if nativeMac == nil {
-		return "", errors.TracedError("nativeMac is nil after evaluation")
+		return "", tracederrors.TracedError("nativeMac is nil after evaluation")
 	}
 
 	macAddress = nativeMac.Address
 	if macAddress == "" {
-		return "", errors.TracedError("macAddress is empty string after evaluation")
+		return "", tracederrors.TracedError("macAddress is empty string after evaluation")
 	}
 
 	return macAddress, nil
@@ -125,11 +125,11 @@ func (l *LibvirtXmlsService) MustWriteXmlForVmOnLatopToFile(createOptions *KvmCr
 
 func (l *LibvirtXmlsService) WriteXmlForVmOnLatopToFile(createOptions *KvmCreateVmOptions, outputFile asciichgolangpublic.File) (err error) {
 	if createOptions == nil {
-		return errors.TracedError("createOptions is nil")
+		return tracederrors.TracedError("createOptions is nil")
 	}
 
 	if outputFile == nil {
-		return errors.TracedError("outputFile is nil")
+		return tracederrors.TracedError("outputFile is nil")
 	}
 
 	xmlString, err := l.CreateXmlForVmOnLatopAsString(createOptions)

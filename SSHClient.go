@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type SSHClient struct {
@@ -56,7 +56,7 @@ func (s *SSHClient) CheckReachable(verbose bool) (err error) {
 		return nil
 	}
 
-	return errors.TracedErrorf("host '%v' is not reachable", hostname)
+	return tracederrors.TracedErrorf("host '%v' is not reachable", hostname)
 }
 
 func (s *SSHClient) GetDeepCopy() (copy CommandExecutor) {
@@ -75,7 +75,7 @@ func (s *SSHClient) GetHostDescription() (hostDescription string, err error) {
 
 func (s *SSHClient) GetHostName() (hostName string, err error) {
 	if s.hostName == "" {
-		return "", errors.TracedErrorf("hostName not set")
+		return "", tracederrors.TracedErrorf("hostName not set")
 	}
 
 	return s.hostName, nil
@@ -83,7 +83,7 @@ func (s *SSHClient) GetHostName() (hostName string, err error) {
 
 func (s *SSHClient) GetSshUserName() (sshUserName string, err error) {
 	if !s.IsSshUserNameSet() {
-		return "", errors.TracedError("sshUserName not set")
+		return "", tracederrors.TracedError("sshUserName not set")
 	}
 
 	return s.sshUserName, nil
@@ -105,7 +105,7 @@ func (s *SSHClient) IsReachable(verbose bool) (isReachable bool, err error) {
 	)
 	if err != nil {
 		if commandOutput == nil {
-			return false, errors.TracedErrorf("commandOutput is nil and '%v'", err)
+			return false, tracederrors.TracedErrorf("commandOutput is nil and '%v'", err)
 		}
 
 		isTimedOut, err := commandOutput.IsTimedOut()
@@ -140,7 +140,7 @@ func (s *SSHClient) IsReachable(verbose bool) (isReachable bool, err error) {
 	stdout = strings.TrimSpace(stdout)
 
 	if stdout != "hello" {
-		return false, errors.TracedErrorf(
+		return false, tracederrors.TracedErrorf(
 			"Unexpected stdout: '%s', stderr is '%s', return value is '%d'",
 			stdout,
 			commandOutput.GetStderrAsStringOrEmptyIfUnset(),
@@ -261,7 +261,7 @@ func (s *SSHClient) RunCommand(options *RunCommandOptions) (commandOutput *Comma
 
 func (s *SSHClient) SetHostName(hostName string) (err error) {
 	if hostName == "" {
-		return errors.TracedErrorf("hostName is empty string")
+		return tracederrors.TracedErrorf("hostName is empty string")
 	}
 
 	s.hostName = hostName
@@ -271,7 +271,7 @@ func (s *SSHClient) SetHostName(hostName string) (err error) {
 
 func (s *SSHClient) SetSshUserName(sshUserName string) (err error) {
 	if len(sshUserName) <= 0 {
-		return errors.TracedError("sshUserName is nil")
+		return tracederrors.TracedError("sshUserName is nil")
 	}
 
 	s.sshUserName = sshUserName

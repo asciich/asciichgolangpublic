@@ -1,8 +1,8 @@
 package http
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // This is the generic response type.
@@ -18,7 +18,7 @@ func NewGenericResponse() (g *GenericResponse) {
 
 func (g *GenericResponse) GetBody() (body []byte, err error) {
 	if g.body == nil {
-		return nil, errors.TracedErrorf("body not set")
+		return nil, tracederrors.TracedErrorf("body not set")
 	}
 
 	return g.body, nil
@@ -35,7 +35,7 @@ func (g *GenericResponse) GetBodyAsString() (body string, err error) {
 
 func (g *GenericResponse) GetStatusCode() (statusCode int, err error) {
 	if g.statusCode <= 0 {
-		return -1, errors.TracedError("statusCode not set")
+		return -1, tracederrors.TracedError("statusCode not set")
 	}
 
 	return g.statusCode, nil
@@ -102,11 +102,11 @@ func (g *GenericResponse) MustSetStatusCode(statusCode int) {
 
 func (g *GenericResponse) SetBody(body []byte) (err error) {
 	if body == nil {
-		return errors.TracedErrorf("body is nil")
+		return tracederrors.TracedErrorf("body is nil")
 	}
 
 	if len(body) <= 0 {
-		return errors.TracedErrorf("body has no elements")
+		return tracederrors.TracedErrorf("body has no elements")
 	}
 
 	g.body = body
@@ -116,7 +116,7 @@ func (g *GenericResponse) SetBody(body []byte) (err error) {
 
 func (g *GenericResponse) SetStatusCode(statusCode int) (err error) {
 	if statusCode <= 0 {
-		return errors.TracedErrorf("Invalid value '%d' for statusCode", statusCode)
+		return tracederrors.TracedErrorf("Invalid value '%d' for statusCode", statusCode)
 	}
 
 	g.statusCode = statusCode

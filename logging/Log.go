@@ -6,20 +6,20 @@ import (
 	"os"
 
 	"github.com/asciich/asciichgolangpublic/changesummary"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/shell/terminalcolors"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 var globalLogSettings LogSettings
 var globalLoggers []*log.Logger
 
 func EnableLoggingToUsersHome(applicationName string, verbose bool) (logFilePath string, err error) {
-	return "", errors.TracedErrorNotImplemented()
+	return "", tracederrors.TracedErrorNotImplemented()
 	/* TODO enable again
 	applicationName = strings.TrimSpace(applicationName)
 
 	if applicationName == "" {
-		return nil, errors.TracedErrorEmptyString("applicationName")
+		return nil, tracederrors.TracedErrorEmptyString("applicationName")
 	}
 
 	homeDir, err := Users().GetHomeDirectory()
@@ -141,7 +141,7 @@ func LogFatal(logmessage string) {
 }
 
 func LogFatalWithTrace(errorMessageOrError interface{}) {
-	LogGoErrorFatal(errors.TracedError(errorMessageOrError))
+	LogGoErrorFatal(tracederrors.TracedError(errorMessageOrError))
 }
 
 func LogFatalWithTracef(logmessage string, args ...interface{}) {
@@ -163,7 +163,7 @@ func LogGoErrorFatal(err error) {
 }
 
 func LogGoErrorFatalWithTrace(err error) {
-	LogGoErrorFatal(errors.TracedErrorf("%v", err))
+	LogGoErrorFatal(tracederrors.TracedErrorf("%v", err))
 }
 
 func LogGood(logmessage string) {

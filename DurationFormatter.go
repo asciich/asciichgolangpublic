@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type DurationFormatterService struct {
@@ -31,7 +31,7 @@ func (d *DurationFormatterService) MustToString(duration *time.Duration) (durati
 
 func (d *DurationFormatterService) ToString(duration *time.Duration) (durationString string, err error) {
 	if duration == nil {
-		return "", errors.TracedError("duration is nil")
+		return "", tracederrors.TracedError("duration is nil")
 	}
 
 	durationString = fmt.Sprintf("%v", *duration)

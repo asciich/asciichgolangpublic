@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GopassService struct{}
@@ -24,7 +24,7 @@ func (g *GopassService) CredentialExists(fullCredentialPath string) (credentialE
 	fullCredentialPath = strings.TrimSpace(fullCredentialPath)
 
 	if len(fullCredentialPath) <= 0 {
-		return false, errors.TracedError("fullCredentailPath is empty string")
+		return false, tracederrors.TracedError("fullCredentailPath is empty string")
 	}
 
 	credentailList, err := g.GetCredentialNameList()
@@ -37,7 +37,7 @@ func (g *GopassService) CredentialExists(fullCredentialPath string) (credentialE
 
 func (g *GopassService) Generate(credentialName string, verbose bool) (generatedCredential *GopassCredential, err error) {
 	if credentialName == "" {
-		return nil, errors.TracedError("credentailName is empty string")
+		return nil, tracederrors.TracedError("credentailName is empty string")
 	}
 
 	newPassword, err := RandomGenerator().GetRandomString(16)
@@ -64,7 +64,7 @@ func (g *GopassService) Generate(credentialName string, verbose bool) (generated
 
 func (g *GopassService) GetCredential(getOptions *GopassSecretOptions) (credential *GopassCredential, err error) {
 	if getOptions == nil {
-		return nil, errors.TracedError("getOptions is nil")
+		return nil, tracederrors.TracedError("getOptions is nil")
 	}
 
 	name, err := getOptions.GetGopassPath()
@@ -131,7 +131,7 @@ func (g *GopassService) GetCredentialNameList() (credentialNames []string, err e
 
 func (g *GopassService) GetCredentialValueAsString(getOptions *GopassSecretOptions) (credentialValue string, err error) {
 	if getOptions == nil {
-		return "", errors.TracedError("getOptions is nil")
+		return "", tracederrors.TracedError("getOptions is nil")
 	}
 
 	credential, err := g.GetCredential(getOptions)
@@ -149,7 +149,7 @@ func (g *GopassService) GetCredentialValueAsString(getOptions *GopassSecretOptio
 
 func (g *GopassService) GetCredentialValueAsStringByPath(secretPath string) (secretValue string, err error) {
 	if secretPath == "" {
-		return "", errors.TracedError("secretPath is empty string")
+		return "", tracederrors.TracedError("secretPath is empty string")
 	}
 
 	secretValue, err = g.GetCredentialValueAsString(&GopassSecretOptions{
@@ -165,7 +165,7 @@ func (g *GopassService) GetCredentialValueAsStringByPath(secretPath string) (sec
 
 func (g *GopassService) GetCredentialValueOrEmptyIfUnsetAsStringByPath(secretPath string) (credentialValue string, err error) {
 	if secretPath == "" {
-		return "", errors.TracedErrorEmptyString(secretPath)
+		return "", tracederrors.TracedErrorEmptyString(secretPath)
 	}
 
 	credential, err := g.GetCredential(&GopassSecretOptions{
@@ -195,7 +195,7 @@ func (g *GopassService) GetCredentialValueOrEmptyIfUnsetAsStringByPath(secretPat
 
 func (g *GopassService) GetGopassCredentialByName(name string) (credential *GopassCredential, err error) {
 	if name == "" {
-		return nil, errors.TracedError("name is empty string")
+		return nil, tracederrors.TracedError("name is empty string")
 	}
 
 	credential, err = GetGopassCredentialByName(name)
@@ -208,7 +208,7 @@ func (g *GopassService) GetGopassCredentialByName(name string) (credential *Gopa
 
 func (g *GopassService) GetSslCertificate(getOptions *GopassSecretOptions) (cert *X509Certificate, err error) {
 	if getOptions == nil {
-		return nil, errors.TracedError("getOptions is nil")
+		return nil, tracederrors.TracedError("getOptions is nil")
 	}
 
 	credential, err := g.GetCredential(getOptions)
@@ -226,11 +226,11 @@ func (g *GopassService) GetSslCertificate(getOptions *GopassSecretOptions) (cert
 
 func (g *GopassService) InsertFile(fileToInsert File, gopassOptions *GopassSecretOptions) (err error) {
 	if fileToInsert == nil {
-		return errors.TracedError("fileToInsert is nil")
+		return tracederrors.TracedError("fileToInsert is nil")
 	}
 
 	if gopassOptions == nil {
-		return errors.TracedError("gopassOptions is nil")
+		return tracederrors.TracedError("gopassOptions is nil")
 	}
 
 	fileToInsertPath, err := fileToInsert.GetLocalPath()
@@ -244,7 +244,7 @@ func (g *GopassService) InsertFile(fileToInsert File, gopassOptions *GopassSecre
 	}
 
 	if !fileExists {
-		return errors.TracedError("fileToInsert does not exist in file system.")
+		return tracederrors.TracedError("fileToInsert does not exist in file system.")
 	}
 
 	gopassPath, err := gopassOptions.GetGopassPath()
@@ -259,7 +259,7 @@ func (g *GopassService) InsertFile(fileToInsert File, gopassOptions *GopassSecre
 		}
 
 		if secretExists {
-			return errors.TracedErrorf("Secret '%v' already exists in gopass.", gopassPath)
+			return tracederrors.TracedErrorf("Secret '%v' already exists in gopass.", gopassPath)
 		}
 	}
 
@@ -292,11 +292,11 @@ func (g *GopassService) InsertFile(fileToInsert File, gopassOptions *GopassSecre
 
 func (g *GopassService) InsertSecret(secretToInsert string, gopassOptions *GopassSecretOptions) (err error) {
 	if len(secretToInsert) <= 0 {
-		return errors.TracedError("secretToInsert is empty string")
+		return tracederrors.TracedError("secretToInsert is empty string")
 	}
 
 	if gopassOptions == nil {
-		return errors.TracedError("gopassOptions is nil")
+		return tracederrors.TracedError("gopassOptions is nil")
 	}
 
 	gopassPath, err := gopassOptions.GetGopassPath()
@@ -311,7 +311,7 @@ func (g *GopassService) InsertSecret(secretToInsert string, gopassOptions *Gopas
 		}
 
 		if secretExists {
-			return errors.TracedErrorf("Secret '%v' already exists in gopass.", gopassPath)
+			return tracederrors.TracedErrorf("Secret '%v' already exists in gopass.", gopassPath)
 		}
 	}
 
@@ -490,7 +490,7 @@ func (g *GopassService) MustWriteSecretIntoTemporaryFile(getOptions *GopassSecre
 func (g *GopassService) SecretNameExist(secretName string) (secretExists bool, err error) {
 	secretName = strings.TrimSpace(secretName)
 	if len(secretName) <= 0 {
-		return false, errors.TracedError("secretName is empty string")
+		return false, tracederrors.TracedError("secretName is empty string")
 	}
 
 	secretNames, err := g.GetCredentialNameList()
@@ -520,7 +520,7 @@ func (g *GopassService) Sync(verbose bool) (err error) {
 func (g *GopassService) WriteInfoToGopass(gopassPath string) (err error) {
 	gopassPath = strings.TrimSpace(gopassPath)
 	if len(gopassPath) <= 0 {
-		return errors.TracedError("gopassPath is empty string")
+		return tracederrors.TracedError("gopassPath is empty string")
 	}
 
 	gopassPath += "_info"
@@ -548,7 +548,7 @@ func (g *GopassService) WriteInfoToGopass(gopassPath string) (err error) {
 
 func (g *GopassService) WriteSecretIntoTemporaryFile(getOptions *GopassSecretOptions) (temporaryFile File, err error) {
 	if getOptions == nil {
-		return nil, errors.TracedError("getOptions is nil")
+		return nil, tracederrors.TracedError("getOptions is nil")
 	}
 
 	credential, err := g.GetCredential(getOptions)

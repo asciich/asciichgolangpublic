@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type PrometheusMetric struct {
@@ -17,7 +17,7 @@ func NewPrometheusMetric() (p *PrometheusMetric) {
 
 func (p *PrometheusMetric) GetHelp() (help string, err error) {
 	if p.help == "" {
-		return "", errors.TracedErrorf("help not set")
+		return "", tracederrors.TracedErrorf("help not set")
 	}
 
 	return p.help, nil
@@ -25,7 +25,7 @@ func (p *PrometheusMetric) GetHelp() (help string, err error) {
 
 func (p *PrometheusMetric) GetName() (name string, err error) {
 	if p.name == "" {
-		return "", errors.TracedErrorf("name not set")
+		return "", tracederrors.TracedErrorf("name not set")
 	}
 
 	return p.name, nil
@@ -106,7 +106,7 @@ func (p *PrometheusMetric) MustSetValueByFloat64(value float64) {
 
 func (p *PrometheusMetric) SetHelp(help string) (err error) {
 	if help == "" {
-		return errors.TracedErrorf("help is empty string")
+		return tracederrors.TracedErrorf("help is empty string")
 	}
 
 	p.help = help
@@ -116,7 +116,7 @@ func (p *PrometheusMetric) SetHelp(help string) (err error) {
 
 func (p *PrometheusMetric) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	p.name = name

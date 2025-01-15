@@ -1,8 +1,8 @@
 package kvm
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type KvmVm struct {
@@ -24,7 +24,7 @@ func (k *KvmVm) GetCachedName() (cachedName string, err error) {
 	}
 
 	if len(k.cachedName) <= 0 {
-		return "", errors.TracedError("Unable to load cached name")
+		return "", tracederrors.TracedError("Unable to load cached name")
 	}
 
 	return k.cachedName, nil
@@ -54,7 +54,7 @@ func (k *KvmVm) GetDomainXmlAsString(verbose bool) (domainXml string, err error)
 
 func (k *KvmVm) GetHypervisor() (hypervisor *KVMHypervisor, err error) {
 	if k.hypervisor == nil {
-		return nil, errors.TracedErrorf("hypervisor not set")
+		return nil, tracederrors.TracedErrorf("hypervisor not set")
 	}
 
 	return k.hypervisor, nil
@@ -62,7 +62,7 @@ func (k *KvmVm) GetHypervisor() (hypervisor *KVMHypervisor, err error) {
 
 func (k *KvmVm) GetId() (id int, err error) {
 	if k.vmId == nil {
-		return -1, errors.TracedError("name is not set")
+		return -1, tracederrors.TracedError("name is not set")
 	}
 
 	return *(k.vmId), nil
@@ -109,12 +109,12 @@ func (k *KvmVm) GetMacAddress(verbose bool) (macAddress string, err error) {
 }
 
 func (k *KvmVm) GetName() (name string, err error) {
-	return "", errors.TracedError("Not implemented")
+	return "", tracederrors.TracedError("Not implemented")
 }
 
 func (k *KvmVm) GetVmId() (vmId *int, err error) {
 	if k.vmId == nil {
-		return nil, errors.TracedErrorf("vmId not set")
+		return nil, tracederrors.TracedErrorf("vmId not set")
 	}
 
 	return k.vmId, nil
@@ -222,7 +222,7 @@ func (k *KvmVm) MustSetVmId(vmId *int) {
 
 func (k *KvmVm) SetCachedName(cachedName string) (err error) {
 	if len(cachedName) <= 0 {
-		return errors.TracedError("cachedName is empty string")
+		return tracederrors.TracedError("cachedName is empty string")
 	}
 
 	k.cachedName = cachedName
@@ -232,7 +232,7 @@ func (k *KvmVm) SetCachedName(cachedName string) (err error) {
 
 func (k *KvmVm) SetHypervisor(hypervisor *KVMHypervisor) (err error) {
 	if hypervisor == nil {
-		return errors.TracedErrorf("hypervisor is nil")
+		return tracederrors.TracedErrorf("hypervisor is nil")
 	}
 
 	k.hypervisor = hypervisor
@@ -242,7 +242,7 @@ func (k *KvmVm) SetHypervisor(hypervisor *KVMHypervisor) (err error) {
 
 func (k *KvmVm) SetId(id int) (err error) {
 	if id < 0 {
-		return errors.TracedErrorf("invalid id '%d'", id)
+		return tracederrors.TracedErrorf("invalid id '%d'", id)
 	}
 
 	idToAdd := id
@@ -254,7 +254,7 @@ func (k *KvmVm) SetId(id int) (err error) {
 
 func (k *KvmVm) SetVmId(vmId *int) (err error) {
 	if vmId == nil {
-		return errors.TracedErrorf("vmId is nil")
+		return tracederrors.TracedErrorf("vmId is nil")
 	}
 
 	k.vmId = vmId

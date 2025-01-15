@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type X509CertificateFile struct {
@@ -14,7 +14,7 @@ type X509CertificateFile struct {
 
 func GetX509CertificateFileFromFile(input File) (x509CertificateFile *X509CertificateFile, err error) {
 	if input == nil {
-		return nil, errors.TracedErrorNil("input")
+		return nil, tracederrors.TracedErrorNil("input")
 	}
 
 	fileToAdd := input.GetDeepCopy()
@@ -28,7 +28,7 @@ func GetX509CertificateFileFromFile(input File) (x509CertificateFile *X509Certif
 
 func GetX509CertificateFileFromPath(inputPath string) (x509CertificateFile *X509CertificateFile, err error) {
 	if inputPath == "" {
-		return nil, errors.TracedErrorEmptyString("inputPath")
+		return nil, tracederrors.TracedErrorEmptyString("inputPath")
 	}
 
 	inputFile, err := GetLocalFileByPath(inputPath)
@@ -93,7 +93,7 @@ func (x *X509CertificateFile) IsX509Certificate(verbose bool) (isX509Certificate
 	}
 
 	if !exists {
-		return false, errors.TracedErrorf("file '%v' does not exist", pathString)
+		return false, tracederrors.TracedErrorf("file '%v' does not exist", pathString)
 	}
 
 	checkCommand := []string{
@@ -124,7 +124,7 @@ func (x *X509CertificateFile) IsX509Certificate(verbose bool) (isX509Certificate
 		return false, nil
 	}
 
-	return false, errors.TracedErrorf(
+	return false, tracederrors.TracedErrorf(
 		"Unable to check if '%v' contains a X509 certificate. Unexpected stdout: '%v'",
 		pathString,
 		stdout,
@@ -133,7 +133,7 @@ func (x *X509CertificateFile) IsX509Certificate(verbose bool) (isX509Certificate
 
 func (x *X509CertificateFile) IsX509CertificateSignedByCertificateFile(signingCertificateFile File, verbose bool) (isSignedBy bool, err error) {
 	if signingCertificateFile == nil {
-		return false, errors.TracedErrorNil("signingCertificateFile")
+		return false, tracederrors.TracedErrorNil("signingCertificateFile")
 	}
 
 	isSignedBy, err = X509Certificates().IsCertificateFileSignedByCertificateFile(x, signingCertificateFile, verbose)

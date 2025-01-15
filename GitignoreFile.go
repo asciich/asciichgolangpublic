@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitignoreFile struct {
@@ -17,7 +17,7 @@ func GetGitignoreDefaultBaseName() (defaultBaseName string) {
 
 func GetGitignoreFileByFile(fileToUse File) (gitignoreFile *GitignoreFile, err error) {
 	if fileToUse == nil {
-		return nil, errors.TracedErrorEmptyString("fileToUse")
+		return nil, tracederrors.TracedErrorEmptyString("fileToUse")
 	}
 
 	gitignoreFile = NewGitignoreFile()
@@ -29,7 +29,7 @@ func GetGitignoreFileByFile(fileToUse File) (gitignoreFile *GitignoreFile, err e
 
 func GetGitignoreFileByPath(filePath string) (gitignoreFile *GitignoreFile, err error) {
 	if filePath == "" {
-		return nil, errors.TracedErrorEmptyString("filePath")
+		return nil, tracederrors.TracedErrorEmptyString("filePath")
 	}
 
 	fileToUse, err := GetLocalFileByPath(filePath)
@@ -42,7 +42,7 @@ func GetGitignoreFileByPath(filePath string) (gitignoreFile *GitignoreFile, err 
 
 func GetGitignoreFileInGitRepository(gitRepository GitRepository) (gitignoreFile *GitignoreFile, err error) {
 	if gitRepository == nil {
-		return nil, errors.TracedErrorNil("gitRepository")
+		return nil, tracederrors.TracedErrorNil("gitRepository")
 	}
 
 	fileToUse, err := gitRepository.GetFileByPath(GetGitignoreDefaultBaseName())
@@ -86,11 +86,11 @@ func NewGitignoreFile() (g *GitignoreFile) {
 
 func (g *GitignoreFile) AddDirToIgnore(pathToIgnore string, comment string, verbose bool) (err error) {
 	if pathToIgnore == "" {
-		return errors.TracedError("pathToIgnore is empty string")
+		return tracederrors.TracedError("pathToIgnore is empty string")
 	}
 
 	if comment == "" {
-		return errors.TracedError("comment is empty string")
+		return tracederrors.TracedError("comment is empty string")
 	}
 
 	pathToIgnore = astrings.EnsureSuffix(pathToIgnore, "/")
@@ -144,11 +144,11 @@ func (g *GitignoreFile) AddDirToIgnore(pathToIgnore string, comment string, verb
 
 func (g *GitignoreFile) AddFileToIgnore(pathToIgnore string, comment string, verbose bool) (err error) {
 	if pathToIgnore == "" {
-		return errors.TracedError("pathToIgnore is empty string")
+		return tracederrors.TracedError("pathToIgnore is empty string")
 	}
 
 	if comment == "" {
-		return errors.TracedError("comment is empty string")
+		return tracederrors.TracedError("comment is empty string")
 	}
 
 	err = g.Create(verbose)
@@ -200,7 +200,7 @@ func (g *GitignoreFile) AddFileToIgnore(pathToIgnore string, comment string, ver
 
 func (g *GitignoreFile) ContainsIgnore(pathToCheck string) (containsIgnore bool, err error) {
 	if pathToCheck == "" {
-		return false, errors.TracedError("pathToCheck is empty string")
+		return false, tracederrors.TracedError("pathToCheck is empty string")
 	}
 
 	ignoredPaths, err := g.GetIgnoredPaths()

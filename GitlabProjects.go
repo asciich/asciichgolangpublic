@@ -9,8 +9,8 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
-	aerrors "github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 var ErrGitlabProjectNotFound = errors.New("Gitlab project not found")
@@ -69,7 +69,7 @@ func (g *GitlabProject) MustHasNoRepositoryFiles(branchName string, verbose bool
 
 func (g *GitlabProjects) DeleteProject(deleteProjectOptions *GitlabDeleteProjectOptions) (err error) {
 	if deleteProjectOptions == nil {
-		return aerrors.TracedErrorNil("deleteProjectOptions")
+		return tracederrors.TracedErrorNil("deleteProjectOptions")
 	}
 
 	fqdn, err := g.GetFqdn()
@@ -119,7 +119,7 @@ func (g *GitlabProjects) DeleteProject(deleteProjectOptions *GitlabDeleteProject
 
 		_, err = nativeProjectsService.DeleteProject(projectPath, &gitlab.DeleteProjectOptions{})
 		if err != nil {
-			return aerrors.TracedErrorf(
+			return tracederrors.TracedErrorf(
 				"Failed to delete gitlab project '%s' on instance '%s': '%w'",
 				projectPath,
 				fqdn,
@@ -170,7 +170,7 @@ func (g *GitlabProjects) GetPersonalProjectsPath(verbose bool) (personalProjectP
 
 func (g *GitlabProjects) GetProjectById(projectId int) (gitlabProject *GitlabProject, err error) {
 	if projectId <= 0 {
-		return nil, aerrors.TracedErrorf("projectId '%d' <= 0 is invalid", projectId)
+		return nil, tracederrors.TracedErrorf("projectId '%d' <= 0 is invalid", projectId)
 	}
 
 	nativeProjectsClient, err := g.GetNativeProjectsService()
@@ -181,7 +181,7 @@ func (g *GitlabProjects) GetProjectById(projectId int) (gitlabProject *GitlabPro
 	nativeProject, _, err := nativeProjectsClient.GetProject(projectId, &gitlab.GetProjectOptions{})
 	if err != nil {
 		if astrings.ContainsAtLeastOneSubstring(err.Error(), []string{"404 {message: 404 Project Not Found}"}) {
-			return nil, aerrors.TracedErrorf("%w: %d", ErrGitlabProjectNotFound, projectId)
+			return nil, tracederrors.TracedErrorf("%w: %d", ErrGitlabProjectNotFound, projectId)
 		}
 		return nil, err
 	}
@@ -196,7 +196,7 @@ func (g *GitlabProjects) GetProjectById(projectId int) (gitlabProject *GitlabPro
 
 func (g *GitlabProjects) GetProjectByNativeProject(nativeProject *gitlab.Project) (gitlabProject *GitlabProject, err error) {
 	if nativeProject == nil {
-		return nil, aerrors.TracedErrorNil("nativeProject")
+		return nil, tracederrors.TracedErrorNil("nativeProject")
 	}
 
 	gitlab, err := g.GetGitlab()
@@ -220,7 +220,7 @@ func (g *GitlabProjects) GetProjectByNativeProject(nativeProject *gitlab.Project
 
 func (g *GitlabProjects) GetProjectByProjectPath(projectPath string, verbose bool) (gitlabProject *GitlabProject, err error) {
 	if len(projectPath) <= 0 {
-		return nil, aerrors.TracedError("projectPath is empty string")
+		return nil, tracederrors.TracedError("projectPath is empty string")
 	}
 
 	nativeProjectsClient, err := g.GetNativeProjectsService()
@@ -274,7 +274,7 @@ func (g *GitlabProjects) GetProjectByProjectPath(projectPath string, verbose boo
 		}
 
 		if gitlabProject == nil {
-			errorNotFound := aerrors.TracedErrorf("%w: Personal project %s", ErrGitlabProjectNotFound, projectPath)
+			errorNotFound := tracederrors.TracedErrorf("%w: Personal project %s", ErrGitlabProjectNotFound, projectPath)
 			return nil, errorNotFound
 		}
 	} else {
@@ -282,7 +282,7 @@ func (g *GitlabProjects) GetProjectByProjectPath(projectPath string, verbose boo
 		if err != nil {
 
 			if astrings.ContainsAtLeastOneSubstring(err.Error(), []string{"404 {message: 404 Project Not Found}", "404 Not Found"}) {
-				errorNotFound := aerrors.TracedErrorf("%w: %s", ErrGitlabProjectNotFound, projectPath)
+				errorNotFound := tracederrors.TracedErrorf("%w: %s", ErrGitlabProjectNotFound, projectPath)
 				return nil, errorNotFound
 			}
 			return nil, err
@@ -299,7 +299,7 @@ func (g *GitlabProjects) GetProjectByProjectPath(projectPath string, verbose boo
 
 func (g *GitlabProjects) GetProjectIdByProjectPath(projectPath string, verbose bool) (projectId int, err error) {
 	if projectPath == "" {
-		return -1, aerrors.TracedErrorEmptyString("projectPath")
+		return -1, tracederrors.TracedErrorEmptyString("projectPath")
 	}
 
 	project, err := g.GetProjectByProjectPath(projectPath, verbose)
@@ -475,7 +475,7 @@ func (g *GitlabProjects) MustSetGitlab(gitlab *GitlabInstance) {
 
 func (g *GitlabProjects) ProjectByProjectIdExists(projectId int, verbose bool) (projectExists bool, err error) {
 	if projectId <= 0 {
-		return false, aerrors.TracedErrorf("projectId '%d' <= 0 is invalid", projectId)
+		return false, tracederrors.TracedErrorf("projectId '%d' <= 0 is invalid", projectId)
 	}
 
 	_, err = g.GetProjectById(projectId)
@@ -497,7 +497,7 @@ func (g *GitlabProjects) ProjectByProjectIdExists(projectId int, verbose bool) (
 
 func (p *GitlabProjects) CreateProject(createOptions *GitlabCreateProjectOptions) (createdGitlabProject *GitlabProject, err error) {
 	if createOptions == nil {
-		return nil, aerrors.TracedError("createOptions is nil")
+		return nil, tracederrors.TracedError("createOptions is nil")
 	}
 
 	fqdn, err := p.GetFqdn()
@@ -638,7 +638,7 @@ func (p *GitlabProjects) GetFqdn() (fqdn string, err error) {
 
 func (p *GitlabProjects) GetGitlab() (gitlab *GitlabInstance, err error) {
 	if p.gitlab == nil {
-		return nil, aerrors.TracedError("gitlab is not set")
+		return nil, tracederrors.TracedError("gitlab is not set")
 	}
 
 	return p.gitlab, nil
@@ -666,7 +666,7 @@ func (p *GitlabProjects) GetNativeProjectsService() (nativeGitlabProject *gitlab
 
 	nativeGitlabProject = nativeClient.Projects
 	if nativeGitlabProject == nil {
-		return nil, aerrors.TracedError("Unable to get nativeGitlabProject")
+		return nil, tracederrors.TracedError("Unable to get nativeGitlabProject")
 	}
 
 	return nativeGitlabProject, nil
@@ -674,7 +674,7 @@ func (p *GitlabProjects) GetNativeProjectsService() (nativeGitlabProject *gitlab
 
 func (p *GitlabProjects) GetProjectList(options *GitlabgetProjectListOptions) (gitlabProjects []*GitlabProject, err error) {
 	if options == nil {
-		return nil, aerrors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	nativeService, err := p.GetNativeProjectsService()
@@ -694,7 +694,7 @@ func (p *GitlabProjects) GetProjectList(options *GitlabgetProjectListOptions) (g
 			},
 		)
 		if err != nil {
-			return nil, aerrors.TracedErrorf("Unable  to get gitlab native project list: '%w'", err)
+			return nil, tracederrors.TracedErrorf("Unable  to get gitlab native project list: '%w'", err)
 		}
 
 		nativeList = append(nativeList, partList...)
@@ -740,7 +740,7 @@ func (p *GitlabProjects) GetProjectList(options *GitlabgetProjectListOptions) (g
 
 func (p *GitlabProjects) GetProjectPathList(options *GitlabgetProjectListOptions) (projectPaths []string, err error) {
 	if options == nil {
-		return nil, aerrors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	projects, err := p.GetProjectList(options)
@@ -765,7 +765,7 @@ func (p *GitlabProjects) GetProjectPathList(options *GitlabgetProjectListOptions
 
 func (p *GitlabProjects) IsProjectPathPersonalProject(projectPath string) (isPersonalProject bool, err error) {
 	if projectPath == "" {
-		return false, aerrors.TracedErrorEmptyString("projectPath")
+		return false, tracederrors.TracedErrorEmptyString("projectPath")
 	}
 
 	isPersonalProject = astrings.HasAtLeastOnePrefix(projectPath, []string{"users/", "/users/"})
@@ -775,7 +775,7 @@ func (p *GitlabProjects) IsProjectPathPersonalProject(projectPath string) (isPer
 
 func (p *GitlabProjects) ProjectByProjectPathExists(projectPath string, verbose bool) (projectExists bool, err error) {
 	if len(projectPath) <= 0 {
-		return false, aerrors.TracedError("projectPath is empty string")
+		return false, tracederrors.TracedError("projectPath is empty string")
 	}
 
 	_, err = p.GetProjectByProjectPath(projectPath, verbose)
@@ -797,7 +797,7 @@ func (p *GitlabProjects) ProjectByProjectPathExists(projectPath string, verbose 
 
 func (p *GitlabProjects) SetGitlab(gitlab *GitlabInstance) (err error) {
 	if gitlab == nil {
-		return aerrors.TracedError("gitlab is nil")
+		return tracederrors.TracedError("gitlab is nil")
 	}
 
 	p.gitlab = gitlab

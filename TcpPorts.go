@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type TcpPortsService struct{}
@@ -25,11 +25,11 @@ func TcpPorts() (t *TcpPortsService) {
 func (t *TcpPortsService) IsPortOpen(hostnameOrIp string, port int, verbose bool) (isOpen bool, err error) {
 	hostnameOrIp = strings.TrimSpace(hostnameOrIp)
 	if hostnameOrIp == "" {
-		return false, errors.TracedErrorEmptyString("hostnameOrIp")
+		return false, tracederrors.TracedErrorEmptyString("hostnameOrIp")
 	}
 
 	if port <= 0 {
-		return false, errors.TracedErrorf("Invalid port number '%d'.", port)
+		return false, tracederrors.TracedErrorf("Invalid port number '%d'.", port)
 	}
 
 	portString := strconv.Itoa(port)

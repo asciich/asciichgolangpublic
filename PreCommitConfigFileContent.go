@@ -5,8 +5,8 @@ import (
 	"reflect"
 
 	"github.com/asciich/asciichgolangpublic/changesummary"
-	aerrors "github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 	"gopkg.in/yaml.v3"
 )
 
@@ -28,7 +28,7 @@ func (p *PreCommitConfigFileContent) GetAsString() (contentString string, err er
 
 	contentBytes, err := yaml.Marshal(config)
 	if err != nil {
-		return "", aerrors.TracedError(err)
+		return "", tracederrors.TracedError(err)
 	}
 
 	contentString = string(contentBytes)
@@ -38,7 +38,7 @@ func (p *PreCommitConfigFileContent) GetAsString() (contentString string, err er
 
 func (p *PreCommitConfigFileContent) GetConfig() (config *PreCommitConfigFileConfig, err error) {
 	if p.config == nil {
-		return nil, aerrors.TracedErrorf("config not set")
+		return nil, tracederrors.TracedErrorf("config not set")
 	}
 
 	return p.config, nil
@@ -86,13 +86,13 @@ func (p *PreCommitConfigFileContent) GetDependencies(verbose bool) (dependencies
 
 func (p *PreCommitConfigFileContent) LoadFromString(toLoad string) (err error) {
 	if toLoad == "" {
-		return aerrors.TracedErrorEmptyString("toLoad")
+		return tracederrors.TracedErrorEmptyString("toLoad")
 	}
 
 	content := NewPreCommitConfigFileConfig()
 	err = yaml.Unmarshal([]byte(toLoad), &content)
 	if err != nil {
-		return aerrors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"%w: %w",
 			ErrorPreCommitConfigFileContentLoad,
 			err,
@@ -101,7 +101,7 @@ func (p *PreCommitConfigFileContent) LoadFromString(toLoad string) (err error) {
 
 	err = p.SetConfig(content)
 	if err != nil {
-		return aerrors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"%w: %w",
 			ErrorPreCommitConfigFileContentLoad,
 			err,
@@ -163,7 +163,7 @@ func (p *PreCommitConfigFileContent) MustUpdateDependency(dependency Dependency,
 
 func (p *PreCommitConfigFileContent) SetConfig(config *PreCommitConfigFileConfig) (err error) {
 	if config == nil {
-		return aerrors.TracedErrorf("config is nil")
+		return tracederrors.TracedErrorf("config is nil")
 	}
 
 	p.config = config
@@ -173,12 +173,12 @@ func (p *PreCommitConfigFileContent) SetConfig(config *PreCommitConfigFileConfig
 
 func (p *PreCommitConfigFileContent) UpdateDependency(dependency Dependency, authOptions []AuthenticationOption, verbose bool) (changeSummary *changesummary.ChangeSummary, err error) {
 	if dependency == nil {
-		return nil, aerrors.TracedErrorNil("dependency")
+		return nil, tracederrors.TracedErrorNil("dependency")
 	}
 
 	gitRepoDependency, ok := dependency.(*DependencyGitRepository)
 	if !ok {
-		return nil, aerrors.TracedErrorf("Not implemented for dependency type '%v'", reflect.TypeOf(dependency))
+		return nil, tracederrors.TracedErrorf("Not implemented for dependency type '%v'", reflect.TypeOf(dependency))
 	}
 
 	repoUrl, err := gitRepoDependency.GetUrl()

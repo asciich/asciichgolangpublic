@@ -3,14 +3,14 @@ package base64
 import (
 	"encoding/base64"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 func DecodeStringAsBytes(input string) (decoded []byte, err error) {
 	decoded, err = base64.StdEncoding.DecodeString(input)
 	if err != nil {
-		return nil, errors.TracedErrorf("Base64 decoding failed: '%w'", err)
+		return nil, tracederrors.TracedErrorf("Base64 decoding failed: '%w'", err)
 	}
 
 	return decoded, nil
@@ -29,7 +29,7 @@ func DecodeStringAsString(input string) (decoded string, err error) {
 
 func EncodeBytesAsString(input []byte) (encoded string, err error) {
 	if input == nil {
-		return "", errors.TracedErrorNil("input")
+		return "", tracederrors.TracedErrorNil("input")
 	}
 
 	encoded = base64.StdEncoding.EncodeToString(input)

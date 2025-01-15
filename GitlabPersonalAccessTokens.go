@@ -6,8 +6,8 @@ import (
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -161,7 +161,7 @@ func (g *GitlabPersonalAccessTokenService) MustSetGitlab(gitlab *GitlabInstance)
 
 func (p *GitlabPersonalAccessTokenService) CreateToken(tokenOptions *GitlabCreatePersonalAccessTokenOptions) (newToken string, err error) {
 	if tokenOptions == nil {
-		return "", errors.TracedError("tokenOptions is nil")
+		return "", tracederrors.TracedError("tokenOptions is nil")
 	}
 
 	tokenName, err := tokenOptions.GetName()
@@ -175,7 +175,7 @@ func (p *GitlabPersonalAccessTokenService) CreateToken(tokenOptions *GitlabCreat
 	}
 
 	if exists {
-		return "", errors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"Unable to create token '%s'. Token '%s' already exists. Use RecreateToken to overwrite existing tokens",
 			tokenName,
 			tokenName,
@@ -228,7 +228,7 @@ func (p *GitlabPersonalAccessTokenService) CreateToken(tokenOptions *GitlabCreat
 	newToken = strings.TrimSpace(newToken)
 	newToken = astrings.RemoveSurroundingQuotationMarks(newToken)
 	if len(newToken) <= 0 {
-		return "", errors.TracedError("Unable to get newToken. newToken is empty string.")
+		return "", tracederrors.TracedError("Unable to get newToken. newToken is empty string.")
 	}
 
 	return newToken, nil
@@ -236,7 +236,7 @@ func (p *GitlabPersonalAccessTokenService) CreateToken(tokenOptions *GitlabCreat
 
 func (p *GitlabPersonalAccessTokenService) ExistsByName(tokenName string, verbose bool) (exists bool, err error) {
 	if len(tokenName) <= 0 {
-		return false, errors.TracedError("tokenName is nil")
+		return false, tracederrors.TracedError("tokenName is nil")
 	}
 
 	tokenNames, err := p.GetPersonalAccessTokenNameList(verbose)
@@ -297,7 +297,7 @@ func (p *GitlabPersonalAccessTokenService) GetCurrentlyUsedAccessToken() (access
 
 func (p *GitlabPersonalAccessTokenService) GetGitlab() (gitlab *GitlabInstance, err error) {
 	if p.gitlab == nil {
-		return nil, errors.TracedError("gitlab not set")
+		return nil, tracederrors.TracedError("gitlab not set")
 	}
 
 	return p.gitlab, nil
@@ -339,7 +339,7 @@ func (p *GitlabPersonalAccessTokenService) GetNativePersonalTokenService() (nati
 
 	nativeService = nativeClient.PersonalAccessTokens
 	if nativeService == nil {
-		return nil, errors.TracedError("nativeService is nil")
+		return nil, tracederrors.TracedError("nativeService is nil")
 	}
 
 	return nativeService, nil
@@ -416,7 +416,7 @@ func (p *GitlabPersonalAccessTokenService) GetPersonalAccessTokenNameList(verbos
 
 func (p *GitlabPersonalAccessTokenService) GetTokenIdByName(tokenName string, verbose bool) (tokenId int, err error) {
 	if len(tokenName) <= 0 {
-		return -1, errors.TracedError("tokenName is empty string")
+		return -1, tracederrors.TracedError("tokenName is empty string")
 	}
 
 	tokens, err := p.GetPersonalAccessTokenList(verbose)
@@ -440,12 +440,12 @@ func (p *GitlabPersonalAccessTokenService) GetTokenIdByName(tokenName string, ve
 		}
 	}
 
-	return -1, errors.TracedErrorf("No token with name '%s' found.", tokenName)
+	return -1, tracederrors.TracedErrorf("No token with name '%s' found.", tokenName)
 }
 
 func (p *GitlabPersonalAccessTokenService) RecreateToken(tokenOptions *GitlabCreatePersonalAccessTokenOptions) (newToken string, err error) {
 	if tokenOptions == nil {
-		return "", errors.TracedError("tokenOptions is nil")
+		return "", tracederrors.TracedError("tokenOptions is nil")
 	}
 
 	tokenName, err := tokenOptions.GetName()
@@ -478,7 +478,7 @@ func (p *GitlabPersonalAccessTokenService) RecreateToken(tokenOptions *GitlabCre
 
 		newToken = nativeToken.Token
 		if len(newToken) <= 0 {
-			return "", errors.TracedError("recreate personal access token failed. NewToken is empty string.")
+			return "", tracederrors.TracedError("recreate personal access token failed. NewToken is empty string.")
 		}
 
 		if tokenOptions.Verbose {
@@ -501,7 +501,7 @@ func (p *GitlabPersonalAccessTokenService) RecreateToken(tokenOptions *GitlabCre
 
 func (p *GitlabPersonalAccessTokenService) RevokeTokenByName(tokenName string, verbose bool) (err error) {
 	if len(tokenName) <= 0 {
-		return errors.TracedError("tokenName is empty string")
+		return tracederrors.TracedError("tokenName is empty string")
 	}
 
 	exists, err := p.ExistsByName(tokenName, verbose)
@@ -539,7 +539,7 @@ func (p *GitlabPersonalAccessTokenService) RevokeTokenByName(tokenName string, v
 
 func (p *GitlabPersonalAccessTokenService) SetGitlab(gitlab *GitlabInstance) (err error) {
 	if gitlab == nil {
-		return errors.TracedError("gitlab is nil")
+		return tracederrors.TracedError("gitlab is nil")
 	}
 
 	p.gitlab = gitlab

@@ -1,8 +1,8 @@
 package docker
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type DockerRunContainerOptions struct {
@@ -23,11 +23,11 @@ func NewDockerRunContainerOptions() (d *DockerRunContainerOptions) {
 
 func (d *DockerRunContainerOptions) GetCommand() (command []string, err error) {
 	if d.Command == nil {
-		return nil, errors.TracedErrorf("Command not set")
+		return nil, tracederrors.TracedErrorf("Command not set")
 	}
 
 	if len(d.Command) <= 0 {
-		return nil, errors.TracedErrorf("Command has no elements")
+		return nil, tracederrors.TracedErrorf("Command has no elements")
 	}
 
 	return d.Command, nil
@@ -40,11 +40,11 @@ func (d *DockerRunContainerOptions) GetKeepStoppedContainer() (keepStoppedContai
 
 func (d *DockerRunContainerOptions) GetMounts() (mounts []string, err error) {
 	if d.Mounts == nil {
-		return nil, errors.TracedErrorf("Mounts not set")
+		return nil, tracederrors.TracedErrorf("Mounts not set")
 	}
 
 	if len(d.Mounts) <= 0 {
-		return nil, errors.TracedErrorf("Mounts has no elements")
+		return nil, tracederrors.TracedErrorf("Mounts has no elements")
 	}
 
 	return d.Mounts, nil
@@ -52,11 +52,11 @@ func (d *DockerRunContainerOptions) GetMounts() (mounts []string, err error) {
 
 func (d *DockerRunContainerOptions) GetPorts() (ports []string, err error) {
 	if d.Ports == nil {
-		return nil, errors.TracedErrorf("Ports not set")
+		return nil, tracederrors.TracedErrorf("Ports not set")
 	}
 
 	if len(d.Ports) <= 0 {
-		return nil, errors.TracedErrorf("Ports has no elements")
+		return nil, tracederrors.TracedErrorf("Ports has no elements")
 	}
 
 	return d.Ports, nil
@@ -223,11 +223,11 @@ func (d *DockerRunContainerOptions) MustSetVerboseDockerRunCommand(verboseDocker
 
 func (d *DockerRunContainerOptions) SetCommand(command []string) (err error) {
 	if command == nil {
-		return errors.TracedErrorf("command is nil")
+		return tracederrors.TracedErrorf("command is nil")
 	}
 
 	if len(command) <= 0 {
-		return errors.TracedErrorf("command has no elements")
+		return tracederrors.TracedErrorf("command has no elements")
 	}
 
 	d.Command = command
@@ -237,7 +237,7 @@ func (d *DockerRunContainerOptions) SetCommand(command []string) (err error) {
 
 func (d *DockerRunContainerOptions) SetImageName(imageName string) (err error) {
 	if imageName == "" {
-		return errors.TracedErrorf("imageName is empty string")
+		return tracederrors.TracedErrorf("imageName is empty string")
 	}
 
 	d.ImageName = imageName
@@ -253,11 +253,11 @@ func (d *DockerRunContainerOptions) SetKeepStoppedContainer(keepStoppedContainer
 
 func (d *DockerRunContainerOptions) SetMounts(mounts []string) (err error) {
 	if mounts == nil {
-		return errors.TracedErrorf("mounts is nil")
+		return tracederrors.TracedErrorf("mounts is nil")
 	}
 
 	if len(mounts) <= 0 {
-		return errors.TracedErrorf("mounts has no elements")
+		return tracederrors.TracedErrorf("mounts has no elements")
 	}
 
 	d.Mounts = mounts
@@ -267,7 +267,7 @@ func (d *DockerRunContainerOptions) SetMounts(mounts []string) (err error) {
 
 func (d *DockerRunContainerOptions) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	d.Name = name
@@ -277,11 +277,11 @@ func (d *DockerRunContainerOptions) SetName(name string) (err error) {
 
 func (d *DockerRunContainerOptions) SetPorts(ports []string) (err error) {
 	if ports == nil {
-		return errors.TracedErrorf("ports is nil")
+		return tracederrors.TracedErrorf("ports is nil")
 	}
 
 	if len(ports) <= 0 {
-		return errors.TracedErrorf("ports has no elements")
+		return tracederrors.TracedErrorf("ports has no elements")
 	}
 
 	d.Ports = ports
@@ -309,7 +309,7 @@ func (d *DockerRunContainerOptions) SetVerboseDockerRunCommand(verboseDockerRunC
 
 func (o *DockerRunContainerOptions) GetImageName() (imageName string, err error) {
 	if len(o.ImageName) <= 0 {
-		return "", errors.TracedError("ImageName not set")
+		return "", tracederrors.TracedError("ImageName not set")
 	}
 
 	return o.ImageName, nil
@@ -317,7 +317,7 @@ func (o *DockerRunContainerOptions) GetImageName() (imageName string, err error)
 
 func (o *DockerRunContainerOptions) GetName() (name string, err error) {
 	if len(o.Name) <= 0 {
-		return "", errors.TracedError("Name not set")
+		return "", tracederrors.TracedError("Name not set")
 	}
 
 	return o.Name, nil

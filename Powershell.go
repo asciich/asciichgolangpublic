@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type PowerShellService struct {
@@ -23,7 +23,7 @@ func PowerShell() (p *PowerShellService) {
 
 func (b *PowerShellService) RunCommand(options *RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	optionsToUse := options.GetDeepCopy()
@@ -90,7 +90,7 @@ func (p *PowerShellService) MustRunOneLinerAndGetStdoutAsString(oneLiner string,
 
 func (p *PowerShellService) RunOneLiner(oneLiner string, verbose bool) (output *CommandOutput, err error) {
 	if oneLiner == "" {
-		return nil, errors.TracedErrorEmptyString("oneLiner")
+		return nil, tracederrors.TracedErrorEmptyString("oneLiner")
 	}
 
 	output, err = p.RunCommand(

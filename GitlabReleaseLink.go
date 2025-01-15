@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitlabReleaseLink struct {
@@ -17,7 +17,7 @@ func NewGitlabReleaseLink() (g *GitlabReleaseLink) {
 
 func (g *GitlabReleaseLink) GetCachedUrl() (cachedUrl string, err error) {
 	if g.cachedUrl == "" {
-		return "", errors.TracedErrorf("cachedUrl not set")
+		return "", tracederrors.TracedErrorf("cachedUrl not set")
 	}
 
 	return g.cachedUrl, nil
@@ -25,7 +25,7 @@ func (g *GitlabReleaseLink) GetCachedUrl() (cachedUrl string, err error) {
 
 func (g *GitlabReleaseLink) GetGitlabReleaseLinks() (gitlabReleaseLinks *GitlabReleaseLinks, err error) {
 	if g.gitlabReleaseLinks == nil {
-		return nil, errors.TracedErrorf("gitlabReleaseLinks not set")
+		return nil, tracederrors.TracedErrorf("gitlabReleaseLinks not set")
 	}
 
 	return g.gitlabReleaseLinks, nil
@@ -33,7 +33,7 @@ func (g *GitlabReleaseLink) GetGitlabReleaseLinks() (gitlabReleaseLinks *GitlabR
 
 func (g *GitlabReleaseLink) GetName() (name string, err error) {
 	if g.name == "" {
-		return "", errors.TracedErrorf("name not set")
+		return "", tracederrors.TracedErrorf("name not set")
 	}
 
 	return g.name, nil
@@ -89,7 +89,7 @@ func (g *GitlabReleaseLink) MustSetName(name string) {
 
 func (g *GitlabReleaseLink) SetCachedUrl(cachedUrl string) (err error) {
 	if cachedUrl == "" {
-		return errors.TracedErrorf("cachedUrl is empty string")
+		return tracederrors.TracedErrorf("cachedUrl is empty string")
 	}
 
 	g.cachedUrl = cachedUrl
@@ -99,7 +99,7 @@ func (g *GitlabReleaseLink) SetCachedUrl(cachedUrl string) (err error) {
 
 func (g *GitlabReleaseLink) SetGitlabReleaseLinks(gitlabReleaseLinks *GitlabReleaseLinks) (err error) {
 	if gitlabReleaseLinks == nil {
-		return errors.TracedErrorf("gitlabReleaseLinks is nil")
+		return tracederrors.TracedErrorf("gitlabReleaseLinks is nil")
 	}
 
 	g.gitlabReleaseLinks = gitlabReleaseLinks
@@ -109,7 +109,7 @@ func (g *GitlabReleaseLink) SetGitlabReleaseLinks(gitlabReleaseLinks *GitlabRele
 
 func (g *GitlabReleaseLink) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	g.name = name

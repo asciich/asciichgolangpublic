@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitRepositoriesService struct {
@@ -24,16 +24,16 @@ func NewGitRepositoriesService() (g *GitRepositoriesService) {
 
 func (g *GitRepositoriesService) CloneGitRepositoryToDirectory(toClone GitRepository, destinationPath string, verbose bool) (repo GitRepository, err error) {
 	if toClone == nil {
-		return nil, errors.TracedErrorNil("toClone")
+		return nil, tracederrors.TracedErrorNil("toClone")
 	}
 
 	if destinationPath == "" {
-		return nil, errors.TracedErrorNil("checkoutPath")
+		return nil, tracederrors.TracedErrorNil("checkoutPath")
 	}
 
 	localRepository, ok := toClone.(*LocalGitRepository)
 	if !ok {
-		return nil, errors.TracedError("Only implemented for LocalGitRepository")
+		return nil, tracederrors.TracedError("Only implemented for LocalGitRepository")
 	}
 
 	localPath, err := localRepository.GetLocalPath()
@@ -51,7 +51,7 @@ func (g *GitRepositoriesService) CloneGitRepositoryToDirectory(toClone GitReposi
 
 func (g *GitRepositoriesService) CloneGitRepositoryToTemporaryDirectory(toClone GitRepository, verbose bool) (repo GitRepository, err error) {
 	if toClone == nil {
-		return nil, errors.TracedErrorNil("toClone")
+		return nil, tracederrors.TracedErrorNil("toClone")
 	}
 
 	localRepository, ok := toClone.(*LocalGitRepository)
@@ -89,7 +89,7 @@ func (g *GitRepositoriesService) CloneGitRepositoryToTemporaryDirectory(toClone 
 			}
 
 			if hostDescription != "localhost" {
-				return nil, errors.TracedErrorf(
+				return nil, tracederrors.TracedErrorf(
 					"Only implemented for CommandExecutorGitRepository on localhost, but hostDescription is '%s'",
 					hostDescription,
 				)
@@ -122,12 +122,12 @@ func (g *GitRepositoriesService) CloneGitRepositoryToTemporaryDirectory(toClone 
 func (g *GitRepositoriesService) CloneToDirectoryByPath(urlOrPath string, destinationPath string, verbose bool) (repo *LocalGitRepository, err error) {
 	urlOrPath = strings.TrimSpace(urlOrPath)
 	if urlOrPath == "" {
-		return nil, errors.TracedErrorEmptyString("urlOrPath")
+		return nil, tracederrors.TracedErrorEmptyString("urlOrPath")
 	}
 
 	destinationPath = strings.TrimSpace(destinationPath)
 	if destinationPath == "" {
-		return nil, errors.TracedErrorEmptyString("destinationPath")
+		return nil, tracederrors.TracedErrorEmptyString("destinationPath")
 	}
 
 	repo, err = GetLocalGitRepositoryByPath(destinationPath)
@@ -146,7 +146,7 @@ func (g *GitRepositoriesService) CloneToDirectoryByPath(urlOrPath string, destin
 func (g *GitRepositoriesService) CloneToTemporaryDirectory(urlOrPath string, verbose bool) (repo GitRepository, err error) {
 	urlOrPath = strings.TrimSpace(urlOrPath)
 	if urlOrPath == "" {
-		return nil, errors.TracedErrorEmptyString("urlOrPath")
+		return nil, tracederrors.TracedErrorEmptyString("urlOrPath")
 	}
 
 	destinationPath, err := TemporaryDirectories().CreateEmptyTemporaryDirectoryAndGetPath(verbose)
@@ -168,7 +168,7 @@ func (g *GitRepositoriesService) CloneToTemporaryDirectory(urlOrPath string, ver
 
 func (g *GitRepositoriesService) CreateTemporaryInitializedRepository(options *CreateRepositoryOptions) (repo GitRepository, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	repoPath, err := TemporaryDirectories().CreateEmptyTemporaryDirectoryAndGetPath(options.Verbose)

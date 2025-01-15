@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"fmt"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -20,7 +20,7 @@ func NewGitlabPersonalAccessToken() (accessToken *GitlabPersonalAccessToken) {
 
 func (g *GitlabPersonalAccessToken) GetGitlabPersonalAccessTokens() (gitlabPersonalAccessTokens *GitlabPersonalAccessTokenService, err error) {
 	if g.gitlabPersonalAccessTokens == nil {
-		return nil, errors.TracedErrorf("gitlabPersonalAccessTokens not set")
+		return nil, tracederrors.TracedErrorf("gitlabPersonalAccessTokens not set")
 	}
 
 	return g.gitlabPersonalAccessTokens, nil
@@ -119,7 +119,7 @@ func (g *GitlabPersonalAccessToken) MustSetPersonalAccessTokens(tokensService *G
 
 func (g *GitlabPersonalAccessToken) SetGitlabPersonalAccessTokens(gitlabPersonalAccessTokens *GitlabPersonalAccessTokenService) (err error) {
 	if gitlabPersonalAccessTokens == nil {
-		return errors.TracedErrorf("gitlabPersonalAccessTokens is nil")
+		return tracederrors.TracedErrorf("gitlabPersonalAccessTokens is nil")
 	}
 
 	g.gitlabPersonalAccessTokens = gitlabPersonalAccessTokens
@@ -129,7 +129,7 @@ func (g *GitlabPersonalAccessToken) SetGitlabPersonalAccessTokens(gitlabPersonal
 
 func (t *GitlabPersonalAccessToken) GetCachedName() (cachedName string, err error) {
 	if len(t.cachedName) <= 0 {
-		return "", errors.TracedError("cachedName not implemented")
+		return "", tracederrors.TracedError("cachedName not implemented")
 	}
 
 	return t.cachedName, nil
@@ -137,7 +137,7 @@ func (t *GitlabPersonalAccessToken) GetCachedName() (cachedName string, err erro
 
 func (t *GitlabPersonalAccessToken) GetId() (id int, err error) {
 	if t.id <= 0 {
-		return -1, errors.TracedError("id not set")
+		return -1, tracederrors.TracedError("id not set")
 	}
 
 	return t.id, nil
@@ -173,7 +173,7 @@ func (t *GitlabPersonalAccessToken) GetNativePersonalTokenService() (nativeServi
 
 func (t *GitlabPersonalAccessToken) GetPersonalAccessTokens() (tokensService *GitlabPersonalAccessTokenService, err error) {
 	if t.gitlabPersonalAccessTokens == nil {
-		return nil, errors.TracedError("gitlabPersonalAccessTokens is not set")
+		return nil, tracederrors.TracedError("gitlabPersonalAccessTokens is not set")
 	}
 
 	return t.gitlabPersonalAccessTokens, nil
@@ -192,11 +192,11 @@ func (t *GitlabPersonalAccessToken) GetTokenRawResponse(verbose bool) (nativeRes
 
 	nativeResponse, _, err = nativeService.GetSinglePersonalAccessTokenByID(id)
 	if err != nil {
-		return nil, errors.TracedError(err.Error())
+		return nil, tracederrors.TracedError(err.Error())
 	}
 
 	if nativeResponse == nil {
-		return nil, errors.TracedError("nativeResponse is nil")
+		return nil, tracederrors.TracedError("nativeResponse is nil")
 	}
 
 	if verbose {
@@ -208,7 +208,7 @@ func (t *GitlabPersonalAccessToken) GetTokenRawResponse(verbose bool) (nativeRes
 
 func (t *GitlabPersonalAccessToken) SetCachedName(cachedName string) (err error) {
 	if len(cachedName) <= 0 {
-		return errors.TracedError("cachedName is empty string")
+		return tracederrors.TracedError("cachedName is empty string")
 	}
 
 	t.cachedName = cachedName
@@ -218,7 +218,7 @@ func (t *GitlabPersonalAccessToken) SetCachedName(cachedName string) (err error)
 
 func (t *GitlabPersonalAccessToken) SetId(id int) (err error) {
 	if id <= 0 {
-		return errors.TracedErrorf("invalid id '%d'", id)
+		return tracederrors.TracedErrorf("invalid id '%d'", id)
 	}
 
 	t.id = id
@@ -228,7 +228,7 @@ func (t *GitlabPersonalAccessToken) SetId(id int) (err error) {
 
 func (t *GitlabPersonalAccessToken) SetPersonalAccessTokens(tokensService *GitlabPersonalAccessTokenService) (err error) {
 	if tokensService == nil {
-		return errors.TracedError("tokenService is nil")
+		return tracederrors.TracedError("tokenService is nil")
 	}
 
 	t.gitlabPersonalAccessTokens = tokensService

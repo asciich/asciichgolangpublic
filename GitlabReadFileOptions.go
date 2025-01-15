@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitlabReadFileOptions struct {
@@ -17,7 +17,7 @@ func NewGitlabReadFileOptions() (g *GitlabReadFileOptions) {
 
 func (g *GitlabReadFileOptions) GetBranchName() (branchName string, err error) {
 	if g.BranchName == "" {
-		return "", errors.TracedErrorf("BranchName not set")
+		return "", tracederrors.TracedErrorf("BranchName not set")
 	}
 
 	return g.BranchName, nil
@@ -41,7 +41,7 @@ func (g *GitlabReadFileOptions) GetGitlabGetRepositoryFileOptions() (getOptions 
 
 func (g *GitlabReadFileOptions) GetPath() (path string, err error) {
 	if g.Path == "" {
-		return "", errors.TracedErrorf("Path not set")
+		return "", tracederrors.TracedErrorf("Path not set")
 	}
 
 	return g.Path, nil
@@ -95,7 +95,7 @@ func (g *GitlabReadFileOptions) MustSetPath(path string) {
 
 func (g *GitlabReadFileOptions) SetBranchName(branchName string) (err error) {
 	if branchName == "" {
-		return errors.TracedErrorf("branchName is empty string")
+		return tracederrors.TracedErrorf("branchName is empty string")
 	}
 
 	g.BranchName = branchName
@@ -105,7 +105,7 @@ func (g *GitlabReadFileOptions) SetBranchName(branchName string) (err error) {
 
 func (g *GitlabReadFileOptions) SetPath(path string) (err error) {
 	if path == "" {
-		return errors.TracedErrorf("path is empty string")
+		return tracederrors.TracedErrorf("path is empty string")
 	}
 
 	g.Path = path

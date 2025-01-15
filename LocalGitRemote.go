@@ -2,8 +2,8 @@ package asciichgolangpublic
 
 import (
 	"github.com/go-git/go-git/v5"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type LocalGitRemote struct {
@@ -26,14 +26,14 @@ func NewLocalGitRemote() (l *LocalGitRemote) {
 
 func NewLocalGitRemoteByNativeGoGitRemote(goGitRemote *git.Remote) (l *LocalGitRemote, err error) {
 	if goGitRemote == nil {
-		return nil, errors.TracedErrorEmptyString("goGitRemote")
+		return nil, tracederrors.TracedErrorEmptyString("goGitRemote")
 	}
 
 	l = NewLocalGitRemote()
 
 	remoteConfig := goGitRemote.Config()
 	if remoteConfig == nil {
-		return nil, errors.TracedErrorEmptyString("Config")
+		return nil, tracederrors.TracedErrorEmptyString("Config")
 	}
 
 	err = l.SetName(remoteConfig.Name)
@@ -42,7 +42,7 @@ func NewLocalGitRemoteByNativeGoGitRemote(goGitRemote *git.Remote) (l *LocalGitR
 	}
 
 	if len(remoteConfig.URLs) != 1 {
-		return nil, errors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Only implemented for 1 remote URL at the moment but got '%v'",
 			remoteConfig.URLs,
 		)
@@ -58,7 +58,7 @@ func NewLocalGitRemoteByNativeGoGitRemote(goGitRemote *git.Remote) (l *LocalGitR
 
 func (l *LocalGitRemote) GetName() (name string, err error) {
 	if l.Name == "" {
-		return "", errors.TracedErrorf("Name not set")
+		return "", tracederrors.TracedErrorf("Name not set")
 	}
 
 	return l.Name, nil
@@ -66,7 +66,7 @@ func (l *LocalGitRemote) GetName() (name string, err error) {
 
 func (l *LocalGitRemote) GetRemoteUrl() (remoteUrl string, err error) {
 	if l.RemoteUrl == "" {
-		return "", errors.TracedErrorf("RemoteUrl not set")
+		return "", tracederrors.TracedErrorf("RemoteUrl not set")
 	}
 
 	return l.RemoteUrl, nil
@@ -106,7 +106,7 @@ func (l *LocalGitRemote) MustSetRemoteUrl(remoteUrl string) {
 
 func (l *LocalGitRemote) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	l.Name = name
@@ -116,7 +116,7 @@ func (l *LocalGitRemote) SetName(name string) (err error) {
 
 func (l *LocalGitRemote) SetRemoteUrl(remoteUrl string) (err error) {
 	if remoteUrl == "" {
-		return errors.TracedErrorf("remoteUrl is empty string")
+		return tracederrors.TracedErrorf("remoteUrl is empty string")
 	}
 
 	l.RemoteUrl = remoteUrl

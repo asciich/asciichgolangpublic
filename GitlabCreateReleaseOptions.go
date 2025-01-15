@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitlabCreateReleaseOptions struct {
@@ -17,7 +17,7 @@ func NewGitlabCreateReleaseOptions() (g *GitlabCreateReleaseOptions) {
 
 func (g *GitlabCreateReleaseOptions) GetDescription() (description string, err error) {
 	if g.Description == "" {
-		return "", errors.TracedErrorf("Description not set")
+		return "", tracederrors.TracedErrorf("Description not set")
 	}
 
 	return g.Description, nil
@@ -25,7 +25,7 @@ func (g *GitlabCreateReleaseOptions) GetDescription() (description string, err e
 
 func (g *GitlabCreateReleaseOptions) GetName() (name string, err error) {
 	if g.Name == "" {
-		return "", errors.TracedErrorf("Name not set")
+		return "", tracederrors.TracedErrorf("Name not set")
 	}
 
 	return g.Name, nil
@@ -70,7 +70,7 @@ func (g *GitlabCreateReleaseOptions) MustSetName(name string) {
 
 func (g *GitlabCreateReleaseOptions) SetDescription(description string) (err error) {
 	if description == "" {
-		return errors.TracedErrorf("description is empty string")
+		return tracederrors.TracedErrorf("description is empty string")
 	}
 
 	g.Description = description
@@ -80,7 +80,7 @@ func (g *GitlabCreateReleaseOptions) SetDescription(description string) (err err
 
 func (g *GitlabCreateReleaseOptions) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	g.Name = name

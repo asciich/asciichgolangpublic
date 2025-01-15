@@ -4,8 +4,8 @@ import (
 	"time"
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -19,7 +19,7 @@ func NewGitlabBranches() (g *GitlabBranches) {
 
 func (g *GitlabBranches) BranchByNameExists(branchName string) (exists bool, err error) {
 	if branchName == "" {
-		return false, errors.TracedErrorEmptyString("branchName")
+		return false, tracederrors.TracedErrorEmptyString("branchName")
 	}
 
 	branch, err := g.GetBranchByName(branchName)
@@ -37,7 +37,7 @@ func (g *GitlabBranches) BranchByNameExists(branchName string) (exists bool, err
 
 func (g *GitlabBranches) CreateBranch(options *GitlabCreateBranchOptions) (createdBranch *GitlabBranch, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	nativeClient, projectId, err := g.GetNativeBranchesClientAndId()
@@ -67,7 +67,7 @@ func (g *GitlabBranches) CreateBranch(options *GitlabCreateBranchOptions) (creat
 
 	if exists {
 		if options.FailIfAlreadyExists {
-			return nil, errors.TracedErrorf(
+			return nil, tracederrors.TracedErrorf(
 				"Branch '%s' already exists in gitlab project %s .", branchName, projectUrl,
 			)
 		}
@@ -84,7 +84,7 @@ func (g *GitlabBranches) CreateBranch(options *GitlabCreateBranchOptions) (creat
 			},
 		)
 		if err != nil {
-			return nil, errors.TracedErrorf(
+			return nil, tracederrors.TracedErrorf(
 				"Unable to create branch '%s' from branch '%s' in gitlab project %s : '%w'",
 				branchName,
 				sourceBranchName,
@@ -113,7 +113,7 @@ func (g *GitlabBranches) CreateBranch(options *GitlabCreateBranchOptions) (creat
 
 func (g *GitlabBranches) CreateBranchFromDefaultBranch(branchName string, verbose bool) (createdBranch *GitlabBranch, err error) {
 	if branchName == "" {
-		return nil, errors.TracedErrorEmptyString("branchName")
+		return nil, tracederrors.TracedErrorEmptyString("branchName")
 	}
 
 	sourceBranch, err := g.GetDefaultBranchName()
@@ -192,7 +192,7 @@ func (g *GitlabBranches) DeleteAllBranchesExceptDefaultBranch(verbose bool) (err
 	}
 
 	if branchNotDeletedYetFound {
-		return errors.TracedError("Unable to delete all branches except default branch")
+		return tracederrors.TracedError("Unable to delete all branches except default branch")
 	}
 
 	if len(branches) > 0 {
@@ -206,7 +206,7 @@ func (g *GitlabBranches) DeleteAllBranchesExceptDefaultBranch(verbose bool) (err
 
 func (g *GitlabBranches) GetBranchByName(branchName string) (branch *GitlabBranch, err error) {
 	if branchName == "" {
-		return nil, errors.TracedErrorNil("branchName")
+		return nil, tracederrors.TracedErrorNil("branchName")
 	}
 
 	project, err := g.GetGitlabProject()
@@ -253,7 +253,7 @@ func (g *GitlabBranches) GetBranchNames(verbose bool) (branchNames []string, err
 			},
 		)
 		if err != nil {
-			return nil, errors.TracedErrorf("Unable to get branch list: '%w'", err)
+			return nil, tracederrors.TracedErrorf("Unable to get branch list: '%w'", err)
 		}
 
 		for _, toAdd := range nativeBranches {
@@ -329,15 +329,15 @@ func (g *GitlabBranches) GetDefaultBranchName() (defaultBranchName string, err e
 
 func (g *GitlabBranches) GetFilesFromListWithDiffBetweenBranches(branchA *GitlabBranch, branchB *GitlabBranch, filesToCheck []string, verbose bool) (filesWithDiffBetweenBranches []string, err error) {
 	if branchA == nil {
-		return nil, errors.TracedErrorNil("branchA")
+		return nil, tracederrors.TracedErrorNil("branchA")
 	}
 
 	if branchB == nil {
-		return nil, errors.TracedErrorNil("branchB")
+		return nil, tracederrors.TracedErrorNil("branchB")
 	}
 
 	if len(filesToCheck) <= 0 {
-		return nil, errors.TracedError("filesToCkeck has no elements")
+		return nil, tracederrors.TracedError("filesToCkeck has no elements")
 	}
 
 	branchAName, err := branchA.GetName()
@@ -445,7 +445,7 @@ func (g *GitlabBranches) GetGitlab() (gitlab *GitlabInstance, err error) {
 
 func (g *GitlabBranches) GetGitlabProject() (gitlabProject *GitlabProject, err error) {
 	if g.gitlabProject == nil {
-		return nil, errors.TracedErrorf("gitlabProject not set")
+		return nil, tracederrors.TracedErrorf("gitlabProject not set")
 	}
 
 	return g.gitlabProject, nil
@@ -658,7 +658,7 @@ func (g *GitlabBranches) MustSetGitlabProject(gitlabProject *GitlabProject) {
 
 func (g *GitlabBranches) SetGitlabProject(gitlabProject *GitlabProject) (err error) {
 	if gitlabProject == nil {
-		return errors.TracedErrorf("gitlabProject is nil")
+		return tracederrors.TracedErrorf("gitlabProject is nil")
 	}
 
 	g.gitlabProject = gitlabProject

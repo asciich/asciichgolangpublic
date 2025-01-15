@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type SpreadSheetRenderRowOptions struct {
@@ -17,11 +17,11 @@ func NewSpreadSheetRenderRowOptions() (s *SpreadSheetRenderRowOptions) {
 
 func (s *SpreadSheetRenderRowOptions) GetMinColumnWidths() (minColumnWidths []int, err error) {
 	if s.MinColumnWidths == nil {
-		return nil, errors.TracedErrorf("MinColumnWidths not set")
+		return nil, tracederrors.TracedErrorf("MinColumnWidths not set")
 	}
 
 	if len(s.MinColumnWidths) <= 0 {
-		return nil, errors.TracedErrorf("MinColumnWidths has no elements")
+		return nil, tracederrors.TracedErrorf("MinColumnWidths has no elements")
 	}
 
 	return s.MinColumnWidths, nil
@@ -29,7 +29,7 @@ func (s *SpreadSheetRenderRowOptions) GetMinColumnWidths() (minColumnWidths []in
 
 func (s *SpreadSheetRenderRowOptions) GetStringDelimiter() (stringDelimiter string, err error) {
 	if s.StringDelimiter == "" {
-		return "", errors.TracedErrorf("StringDelimiter not set")
+		return "", tracederrors.TracedErrorf("StringDelimiter not set")
 	}
 
 	return s.StringDelimiter, nil
@@ -98,11 +98,11 @@ func (s *SpreadSheetRenderRowOptions) MustSetVerbose(verbose bool) {
 
 func (s *SpreadSheetRenderRowOptions) SetMinColumnWidths(minColumnWidths []int) (err error) {
 	if minColumnWidths == nil {
-		return errors.TracedErrorf("minColumnWidths is nil")
+		return tracederrors.TracedErrorf("minColumnWidths is nil")
 	}
 
 	if len(minColumnWidths) <= 0 {
-		return errors.TracedErrorf("minColumnWidths has no elements")
+		return tracederrors.TracedErrorf("minColumnWidths has no elements")
 	}
 
 	s.MinColumnWidths = minColumnWidths
@@ -112,7 +112,7 @@ func (s *SpreadSheetRenderRowOptions) SetMinColumnWidths(minColumnWidths []int) 
 
 func (s *SpreadSheetRenderRowOptions) SetStringDelimiter(stringDelimiter string) (err error) {
 	if stringDelimiter == "" {
-		return errors.TracedErrorf("stringDelimiter is empty string")
+		return tracederrors.TracedErrorf("stringDelimiter is empty string")
 	}
 
 	s.StringDelimiter = stringDelimiter

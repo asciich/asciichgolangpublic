@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitService struct {
@@ -20,7 +20,7 @@ func NewGitService() (g *GitService) {
 
 func (g *GitService) GetRepositoryRootPathByPath(path string, verbose bool) (repoRootPath string, err error) {
 	if path == "" {
-		return "", errors.TracedErrorEmptyString("path")
+		return "", tracederrors.TracedErrorEmptyString("path")
 	}
 
 	repoRootPath, err = Bash().RunCommandAndGetStdoutAsString(
@@ -47,7 +47,7 @@ func (g *GitService) GetRepositoryRootPathByPath(path string, verbose bool) (rep
 	}
 
 	if !exists {
-		return "", errors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"internal error: repoRootDir '%s' points to an non existent path after evaluation",
 			repoRootPath,
 		)

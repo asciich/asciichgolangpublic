@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitlabCreateDeployKeyOptions struct {
@@ -20,7 +20,7 @@ func NewGitlabCreateDeployKeyOptions() (g *GitlabCreateDeployKeyOptions) {
 
 func (g *GitlabCreateDeployKeyOptions) GetPublicKeyFile() (publicKeyFile File, err error) {
 	if g.PublicKeyFile == nil {
-		return nil, errors.TracedErrorf("PublicKeyFile not set")
+		return nil, tracederrors.TracedErrorf("PublicKeyFile not set")
 	}
 
 	return g.PublicKeyFile, nil
@@ -120,7 +120,7 @@ func (g *GitlabCreateDeployKeyOptions) MustSetWriteAccess(writeAccess bool) {
 
 func (g *GitlabCreateDeployKeyOptions) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	g.Name = name
@@ -130,7 +130,7 @@ func (g *GitlabCreateDeployKeyOptions) SetName(name string) (err error) {
 
 func (g *GitlabCreateDeployKeyOptions) SetPublicKeyFile(publicKeyFile File) (err error) {
 	if publicKeyFile == nil {
-		return errors.TracedErrorf("publicKeyFile is nil")
+		return tracederrors.TracedErrorf("publicKeyFile is nil")
 	}
 
 	g.PublicKeyFile = publicKeyFile
@@ -152,7 +152,7 @@ func (g *GitlabCreateDeployKeyOptions) SetWriteAccess(writeAccess bool) (err err
 
 func (o *GitlabCreateDeployKeyOptions) GetName() (name string, err error) {
 	if len(o.Name) <= 0 {
-		return "", errors.TracedError("Name not set")
+		return "", tracederrors.TracedError("Name not set")
 	}
 
 	return o.Name, nil
@@ -176,7 +176,7 @@ func (o *GitlabCreateDeployKeyOptions) GetPublicKeyMaterialString() (keyMaterial
 
 	keyMaterial = strings.TrimSpace(keyMaterial)
 	if len(keyMaterial) <= 0 {
-		return "", errors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"Key material from '%s' failed. Got empty key material string",
 			keyFilePath,
 		)
@@ -187,7 +187,7 @@ func (o *GitlabCreateDeployKeyOptions) GetPublicKeyMaterialString() (keyMaterial
 
 func (o *GitlabCreateDeployKeyOptions) GetPublicKeyfile() (keyFile File, err error) {
 	if o.PublicKeyFile == nil {
-		return nil, errors.TracedError("PublicKeyFile is nil")
+		return nil, tracederrors.TracedError("PublicKeyFile is nil")
 	}
 
 	return o.PublicKeyFile, nil

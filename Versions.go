@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type VersionsService struct {
@@ -16,7 +16,7 @@ type VersionsService struct {
 
 func GetVersionByString(versionString string) (version Version, err error) {
 	if versionString == "" {
-		return nil, errors.TracedErrorEmptyString("version")
+		return nil, tracederrors.TracedErrorEmptyString("version")
 	}
 
 	version, err = Versions().GetNewVersionByString(versionString)
@@ -50,14 +50,14 @@ func (v *VersionsService) CheckDateVersionString(versionString string) (isVersio
 	if isVersionString {
 		return true, nil
 	} else {
-		return false, errors.TracedErrorf("'%s' is not a version string", versionString)
+		return false, tracederrors.TracedErrorf("'%s' is not a version string", versionString)
 	}
 }
 
 func (v *VersionsService) GetLatestVersionFromSlice(versions []Version) (latestVersion Version, err error) {
 	for _, toCheck := range versions {
 		if toCheck == nil {
-			return nil, errors.TracedErrorNilf(
+			return nil, tracederrors.TracedErrorNilf(
 				"toCheck is nil in '%v'",
 				versions,
 			)
@@ -78,7 +78,7 @@ func (v *VersionsService) GetLatestVersionFromSlice(versions []Version) (latestV
 	}
 
 	if latestVersion == nil {
-		return nil, errors.TracedErrorf("Unable to find latest version in '%v'", versions)
+		return nil, tracederrors.TracedErrorf("Unable to find latest version in '%v'", versions)
 	}
 
 	return latestVersion, nil
@@ -105,7 +105,7 @@ func (v *VersionsService) GetNewDateVersionString() (versionString string, err e
 
 func (v *VersionsService) GetNewVersionByString(versionString string) (version Version, err error) {
 	if !v.IsVersionString(versionString) {
-		return nil, errors.TracedErrorf("versionString '%s' is not a valid version string", versionString)
+		return nil, tracederrors.TracedErrorf("versionString '%s' is not a valid version string", versionString)
 	}
 
 	if v.IsDateVersionString(versionString) {
@@ -128,7 +128,7 @@ func (v *VersionsService) GetNewVersionByString(versionString string) (version V
 		return semanticVersion, nil
 	}
 
-	return nil, errors.TracedErrorf("Not implemented for versionString='%s'", versionString)
+	return nil, tracederrors.TracedErrorf("Not implemented for versionString='%s'", versionString)
 }
 
 func (v *VersionsService) GetSoftwareVersionEnvVarName() (envVarName string) {
@@ -172,7 +172,7 @@ func (v *VersionsService) GetVersionStringsFromStringSlice(input []string) (vers
 
 func (v *VersionsService) GetVersionStringsFromVersionSlice(versions []Version) (versionStrings []string, err error) {
 	if versions == nil {
-		return nil, errors.TracedErrorNil("versions")
+		return nil, tracederrors.TracedErrorNil("versions")
 	}
 
 	versionStrings = []string{}
@@ -190,7 +190,7 @@ func (v *VersionsService) GetVersionStringsFromVersionSlice(versions []Version) 
 
 func (v *VersionsService) GetVersionsFromStringSlice(stringSlice []string) (versions []Version, err error) {
 	if stringSlice == nil {
-		return nil, errors.TracedErrorNil("stringSlice")
+		return nil, tracederrors.TracedErrorNil("stringSlice")
 	}
 
 	versions = []Version{}
@@ -322,11 +322,11 @@ func (v *VersionsService) MustSortVersionSlice(versions []Version) (sorted []Ver
 
 func (v *VersionsService) ReturnNewerVersion(v1 Version, v2 Version) (newerVersion Version, err error) {
 	if v1 == nil {
-		return nil, errors.TracedErrorNil("v1")
+		return nil, tracederrors.TracedErrorNil("v1")
 	}
 
 	if v2 == nil {
-		return nil, errors.TracedErrorNil("v2")
+		return nil, tracederrors.TracedErrorNil("v2")
 	}
 
 	isNewer, err := v1.IsNewerThan(v2)
@@ -343,7 +343,7 @@ func (v *VersionsService) ReturnNewerVersion(v1 Version, v2 Version) (newerVersi
 
 func (v *VersionsService) SortStringSlice(versionStrings []string) (sorted []string, err error) {
 	if versionStrings == nil {
-		return nil, errors.TracedErrorNil("versionStrings")
+		return nil, tracederrors.TracedErrorNil("versionStrings")
 	}
 
 	versions, err := v.GetVersionsFromStringSlice(versionStrings)
@@ -361,7 +361,7 @@ func (v *VersionsService) SortStringSlice(versionStrings []string) (sorted []str
 
 func (v *VersionsService) SortVersionSlice(versions []Version) (sorted []Version, err error) {
 	if versions == nil {
-		return nil, errors.TracedErrorNil("versions")
+		return nil, tracederrors.TracedErrorNil("versions")
 	}
 
 	var errDuringSort error

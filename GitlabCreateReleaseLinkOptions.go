@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitlabCreateReleaseLinkOptions struct {
@@ -17,7 +17,7 @@ func NewGitlabCreateReleaseLinkOptions() (g *GitlabCreateReleaseLinkOptions) {
 
 func (g *GitlabCreateReleaseLinkOptions) GetName() (name string, err error) {
 	if g.Name == "" {
-		return "", errors.TracedErrorf("Name not set")
+		return "", tracederrors.TracedErrorf("Name not set")
 	}
 
 	return g.Name, nil
@@ -39,7 +39,7 @@ func (g *GitlabCreateReleaseLinkOptions) GetNameAndUrl() (name string, url strin
 
 func (g *GitlabCreateReleaseLinkOptions) GetUrl() (url string, err error) {
 	if g.Url == "" {
-		return "", errors.TracedErrorf("Url not set")
+		return "", tracederrors.TracedErrorf("Url not set")
 	}
 
 	return g.Url, nil
@@ -93,7 +93,7 @@ func (g *GitlabCreateReleaseLinkOptions) MustSetUrl(url string) {
 
 func (g *GitlabCreateReleaseLinkOptions) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	g.Name = name
@@ -103,7 +103,7 @@ func (g *GitlabCreateReleaseLinkOptions) SetName(name string) (err error) {
 
 func (g *GitlabCreateReleaseLinkOptions) SetUrl(url string) (err error) {
 	if url == "" {
-		return errors.TracedErrorf("url is empty string")
+		return tracederrors.TracedErrorf("url is empty string")
 	}
 
 	g.Url = url

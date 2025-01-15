@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type BashService struct {
@@ -81,7 +81,7 @@ func (b *BashService) MustRunOneLinerAndGetStdoutAsString(oneLiner string, verbo
 
 func (b *BashService) RunCommand(options *RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	optionsToUse := options.GetDeepCopy()
@@ -108,7 +108,7 @@ func (b *BashService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 
 func (b *BashService) RunOneLiner(oneLiner string, verbose bool) (output *CommandOutput, err error) {
 	if oneLiner == "" {
-		return nil, errors.TracedErrorEmptyString("oneLiner")
+		return nil, tracederrors.TracedErrorEmptyString("oneLiner")
 	}
 
 	output, err = b.RunCommand(

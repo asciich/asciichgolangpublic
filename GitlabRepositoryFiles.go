@@ -4,8 +4,8 @@ import (
 	"sort"
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -19,11 +19,11 @@ func NewGitlabRepositoryFiles() (g *GitlabRepositoryFiles) {
 
 func (g *GitlabRepositoryFiles) CreateEmptyFile(fileName string, ref string, verbose bool) (createdFile *GitlabRepositoryFile, err error) {
 	if fileName == "" {
-		return nil, errors.TracedErrorEmptyString("fileName")
+		return nil, tracederrors.TracedErrorEmptyString("fileName")
 	}
 
 	if ref == "" {
-		return nil, errors.TracedErrorEmptyString("ref")
+		return nil, tracederrors.TracedErrorEmptyString("ref")
 	}
 
 	createdFile, err = g.WriteFileContent(
@@ -44,7 +44,7 @@ func (g *GitlabRepositoryFiles) CreateEmptyFile(fileName string, ref string, ver
 
 func (g *GitlabRepositoryFiles) DeleteAllRepositoryFiles(branchName string, verbose bool) (err error) {
 	if branchName == "" {
-		return errors.TracedErrorEmptyString("branchName")
+		return tracederrors.TracedErrorEmptyString("branchName")
 	}
 
 	projectUrl, err := g.GetProjectUrl()
@@ -89,7 +89,7 @@ func (g *GitlabRepositoryFiles) DeleteAllRepositoryFiles(branchName string, verb
 
 func (g *GitlabRepositoryFiles) GetDirectoryNames(ref string, verbose bool) (directoryNames []string, err error) {
 	if ref == "" {
-		return nil, errors.TracedErrorEmptyString("ref")
+		return nil, tracederrors.TracedErrorEmptyString("ref")
 	}
 
 	fileAndDirectoryNames, err := g.GetFileAndDirectoryNames(ref, verbose)
@@ -114,7 +114,7 @@ func (g *GitlabRepositoryFiles) GetDirectoryNames(ref string, verbose bool) (dir
 
 func (g *GitlabRepositoryFiles) GetFileAndDirectoryNames(ref string, verbose bool) (fileNames []string, err error) {
 	if ref == "" {
-		return nil, errors.TracedErrorEmptyString("ref")
+		return nil, tracederrors.TracedErrorEmptyString("ref")
 	}
 
 	nativeClient, projectId, err := g.GetNativeRepositoriesClientAndProjectid()
@@ -142,7 +142,7 @@ func (g *GitlabRepositoryFiles) GetFileAndDirectoryNames(ref string, verbose boo
 			},
 		)
 		if err != nil {
-			return nil, errors.TracedErrorf("ListTree failed: '%w'", err)
+			return nil, tracederrors.TracedErrorf("ListTree failed: '%w'", err)
 		}
 
 		for _, entry := range nativeList {
@@ -158,7 +158,7 @@ func (g *GitlabRepositoryFiles) GetFileAndDirectoryNames(ref string, verbose boo
 
 func (g *GitlabRepositoryFiles) GetFileNames(ref string, verbose bool) (fileNames []string, err error) {
 	if ref == "" {
-		return nil, errors.TracedErrorEmptyString("ref")
+		return nil, tracederrors.TracedErrorEmptyString("ref")
 	}
 
 	fileAndDirectoryNames, err := g.GetFileAndDirectoryNames(ref, verbose)
@@ -185,7 +185,7 @@ func (g *GitlabRepositoryFiles) GetFileNames(ref string, verbose bool) (fileName
 
 func (g *GitlabRepositoryFiles) GetFiles(ref string, verbose bool) (files []*GitlabRepositoryFile, err error) {
 	if ref == "" {
-		return nil, errors.TracedErrorEmptyString("ref")
+		return nil, tracederrors.TracedErrorEmptyString("ref")
 	}
 
 	gitlabProject, err := g.GetGitlabProject()
@@ -239,7 +239,7 @@ func (g *GitlabRepositoryFiles) GetGitlab() (gitlab *GitlabInstance, err error) 
 
 func (g *GitlabRepositoryFiles) GetGitlabProject() (gitlabProject *GitlabProject, err error) {
 	if g.gitlabProject == nil {
-		return nil, errors.TracedErrorf("gitlabProject not set")
+		return nil, tracederrors.TracedErrorf("gitlabProject not set")
 	}
 
 	return g.gitlabProject, nil
@@ -331,7 +331,7 @@ func (g *GitlabRepositoryFiles) GetProjectUrl() (projectUrl string, err error) {
 
 func (g *GitlabRepositoryFiles) GetRepositoryFile(options *GitlabGetRepositoryFileOptions) (repositoryFile *GitlabRepositoryFile, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	repositoryFile = NewGitlabRepositoryFile()
@@ -373,7 +373,7 @@ func (g *GitlabRepositoryFiles) GetRepositoryFile(options *GitlabGetRepositoryFi
 
 func (g *GitlabRepositoryFiles) HasNoRepositoryFiles(branchName string, verbose bool) (hasNoRepositoryFiles bool, err error) {
 	if branchName == "" {
-		return false, errors.TracedErrorEmptyString("branchName")
+		return false, tracederrors.TracedErrorEmptyString("branchName")
 	}
 
 	hasRepositoryFile, err := g.HasRepositoryFiles(branchName, false)
@@ -388,7 +388,7 @@ func (g *GitlabRepositoryFiles) HasNoRepositoryFiles(branchName string, verbose 
 
 func (g *GitlabRepositoryFiles) HasRepositoryFiles(branchName string, verbose bool) (hasRepositoryFiles bool, err error) {
 	if branchName == "" {
-		return false, errors.TracedErrorEmptyString("branchName")
+		return false, tracederrors.TracedErrorEmptyString("branchName")
 	}
 
 	fileNameList, err := g.GetFileNames(branchName, verbose)
@@ -579,7 +579,7 @@ func (g *GitlabRepositoryFiles) MustWriteFileContent(options *GitlabWriteFileOpt
 
 func (g *GitlabRepositoryFiles) ReadFileContentAsString(options *GitlabReadFileOptions) (content string, err error) {
 	if options == nil {
-		return "", errors.TracedErrorNil("options")
+		return "", tracederrors.TracedErrorNil("options")
 	}
 
 	getFileOptions, err := options.GetGitlabGetRepositoryFileOptions()
@@ -602,7 +602,7 @@ func (g *GitlabRepositoryFiles) ReadFileContentAsString(options *GitlabReadFileO
 
 func (g *GitlabRepositoryFiles) SetGitlabProject(gitlabProject *GitlabProject) (err error) {
 	if gitlabProject == nil {
-		return errors.TracedErrorf("gitlabProject is nil")
+		return tracederrors.TracedErrorf("gitlabProject is nil")
 	}
 
 	g.gitlabProject = gitlabProject
@@ -612,7 +612,7 @@ func (g *GitlabRepositoryFiles) SetGitlabProject(gitlabProject *GitlabProject) (
 
 func (g *GitlabRepositoryFiles) WriteFileContent(options *GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile, err error) {
 	if options == nil {
-		return nil, errors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	getFileOptions, err := options.GetGitlabGetRepositoryFileOptions()

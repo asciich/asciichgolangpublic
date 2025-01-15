@@ -3,7 +3,7 @@ package changesummary
 import (
 	"log"
 
-	"github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // A ChangeSummary is used to return details about if/what/how much was actually changed.
@@ -19,7 +19,7 @@ func NewChangeSummary() (c *ChangeSummary) {
 
 func (c *ChangeSummary) AddChildSummary(childSummary *ChangeSummary) (err error) {
 	if childSummary == nil {
-		return errors.TracedErrorNil("childSummary")
+		return tracederrors.TracedErrorNil("childSummary")
 	}
 
 	c.childSummaries = append(c.childSummaries, childSummary)
@@ -29,11 +29,11 @@ func (c *ChangeSummary) AddChildSummary(childSummary *ChangeSummary) (err error)
 
 func (c *ChangeSummary) GetChildSummaries() (childSummaries []*ChangeSummary, err error) {
 	if c.childSummaries == nil {
-		return nil, errors.TracedErrorf("childSummaries not set")
+		return nil, tracederrors.TracedErrorf("childSummaries not set")
 	}
 
 	if len(c.childSummaries) <= 0 {
-		return nil, errors.TracedErrorf("childSummaries has no elements")
+		return nil, tracederrors.TracedErrorf("childSummaries has no elements")
 	}
 
 	return c.childSummaries, nil
@@ -101,11 +101,11 @@ func (c *ChangeSummary) SetChanged(isChanged bool) {
 
 func (c *ChangeSummary) SetChildSummaries(childSummaries []*ChangeSummary) (err error) {
 	if childSummaries == nil {
-		return errors.TracedErrorf("childSummaries is nil")
+		return tracederrors.TracedErrorf("childSummaries is nil")
 	}
 
 	if len(childSummaries) <= 0 {
-		return errors.TracedErrorf("childSummaries has no elements")
+		return tracederrors.TracedErrorf("childSummaries has no elements")
 	}
 
 	c.childSummaries = childSummaries
@@ -127,7 +127,7 @@ func (c *ChangeSummary) SetIsChanged(isChanged bool) {
 
 func (c *ChangeSummary) SetNumberOfChanges(numberOfChanges int) (err error) {
 	if numberOfChanges < 0 {
-		return errors.TracedErrorf("Invalid value '%d' for numberOfChanges", numberOfChanges)
+		return tracederrors.TracedErrorf("Invalid value '%d' for numberOfChanges", numberOfChanges)
 	}
 
 	c.numberOfChanges = numberOfChanges

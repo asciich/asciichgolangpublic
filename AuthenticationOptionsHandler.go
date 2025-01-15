@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type AuthenticationOptionsHandlerService struct{}
@@ -17,7 +17,7 @@ func NewAuthenticationOptionsHandlerService() (a *AuthenticationOptionsHandlerSe
 
 func (a *AuthenticationOptionsHandlerService) GetAuthenticationoptionsForService(authentiationOptions []AuthenticationOption, serviceName string) (authOption AuthenticationOption, err error) {
 	if serviceName == "" {
-		return nil, errors.TracedErrorEmptyString("serviceName")
+		return nil, tracederrors.TracedErrorEmptyString("serviceName")
 	}
 
 	for _, authOption = range authentiationOptions {
@@ -31,7 +31,7 @@ func (a *AuthenticationOptionsHandlerService) GetAuthenticationoptionsForService
 		}
 	}
 
-	return nil, errors.TracedErrorf(
+	return nil, tracederrors.TracedErrorf(
 		"No authenticationOptions for '%s' found. Checked '%d' authenticationOptions in total.",
 		serviceName,
 		len(authentiationOptions),
@@ -40,7 +40,7 @@ func (a *AuthenticationOptionsHandlerService) GetAuthenticationoptionsForService
 
 func (a *AuthenticationOptionsHandlerService) GetAuthenticationoptionsForServiceByUrl(authenticationOptions []AuthenticationOption, url *URL) (authOption AuthenticationOption, err error) {
 	if url == nil {
-		return nil, errors.TracedErrorNil("url")
+		return nil, tracederrors.TracedErrorNil("url")
 	}
 
 	urlString, err := url.GetAsString()

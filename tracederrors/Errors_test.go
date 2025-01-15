@@ -1,4 +1,4 @@
-package errors
+package tracederrors
 
 import (
 	"fmt"
@@ -19,13 +19,13 @@ func TestErrorsIsTracedError(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			fmt.Sprintf("%v",tt),
+			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
 
 				assert.EqualValues(
 					tt.expectedIsTracedError,
-					Errors().IsTracedError(tt.err),
+					IsTracedError(tt.err),
 				)
 			},
 		)

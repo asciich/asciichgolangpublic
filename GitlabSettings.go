@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -215,7 +215,7 @@ func (s *GitlabSettings) GetFqdn() (fqdn string, err error) {
 
 func (s *GitlabSettings) GetGitlab() (gitlab *GitlabInstance, err error) {
 	if s.gitlab == nil {
-		return nil, errors.TracedError("gitlab not set")
+		return nil, tracederrors.TracedError("gitlab not set")
 	}
 
 	return s.gitlab, nil
@@ -276,7 +276,7 @@ func (s *GitlabSettings) MustDisableAutoDevos(verbose bool) {
 
 func (s *GitlabSettings) SetGitlab(gitlab *GitlabInstance) (err error) {
 	if gitlab == nil {
-		return errors.TracedError("gitlab is nil")
+		return tracederrors.TracedError("gitlab is nil")
 	}
 
 	s.gitlab = gitlab

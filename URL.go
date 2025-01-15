@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // Parts of an URL
@@ -55,7 +55,7 @@ func NewUrl() (url *URL) {
 
 func (u *URL) GetAsString() (urlString string, err error) {
 	if len(u.urlString) <= 0 {
-		return "", errors.TracedError("urlString not set")
+		return "", tracederrors.TracedError("urlString not set")
 	}
 
 	return u.urlString, nil
@@ -73,7 +73,7 @@ func (u *URL) GetFqdnAsString() (fqdn string, err error) {
 	fqdn = strings.Split(fqdnAndPath, "/")[0]
 
 	if fqdn == "" {
-		return "", errors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"fqdn is empty string after evaluation of urlString='%s'",
 			urlString,
 		)
@@ -119,7 +119,7 @@ func (u *URL) GetPathAsString() (urlPath string, err error) {
 	}
 	splitted := strings.Split(withoutSheme, "/")
 	if len(splitted) <= 0 {
-		return "", errors.TracedError("failed to split 'withoutSheme'")
+		return "", tracederrors.TracedError("failed to split 'withoutSheme'")
 	}
 
 	pathParts := splitted[1:]
@@ -138,7 +138,7 @@ func (u *URL) GetPathBasename() (basename string, err error) {
 
 	splitted := strings.Split(path, "/")
 	if len(splitted) <= 0 {
-		return "", errors.TracedErrorf("failed to split '%v'", path)
+		return "", tracederrors.TracedErrorf("failed to split '%v'", path)
 	}
 
 	basename = splitted[len(splitted)-1]
@@ -153,7 +153,7 @@ func (u *URL) GetSheme() (sheme string, err error) {
 
 	splitted := strings.SplitN(urlString, "://", 2)
 	if len(splitted) != 2 {
-		return "", errors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"Unable to get sheme from urlString '%s'",
 			urlString,
 		)
@@ -161,7 +161,7 @@ func (u *URL) GetSheme() (sheme string, err error) {
 
 	sheme = splitted[0]
 	if sheme == "" {
-		return "", errors.TracedError("sheme is empty string after evaluation")
+		return "", tracederrors.TracedError("sheme is empty string after evaluation")
 	}
 
 	return sheme, nil
@@ -169,7 +169,7 @@ func (u *URL) GetSheme() (sheme string, err error) {
 
 func (u *URL) GetUrlString() (urlString string, err error) {
 	if u.urlString == "" {
-		return "", errors.TracedErrorf("urlString not set")
+		return "", tracederrors.TracedErrorf("urlString not set")
 	}
 
 	return u.urlString, nil
@@ -285,7 +285,7 @@ func (u *URL) MustSetUrlString(urlString string) {
 func (u *URL) SetByString(urlString string) (err error) {
 	urlString = strings.TrimSpace(urlString)
 	if len(urlString) <= 0 {
-		return errors.TracedError("urlString is empty string")
+		return tracederrors.TracedError("urlString is empty string")
 	}
 
 	u.urlString = urlString
@@ -295,7 +295,7 @@ func (u *URL) SetByString(urlString string) (err error) {
 
 func (u *URL) SetUrlString(urlString string) (err error) {
 	if urlString == "" {
-		return errors.TracedErrorf("urlString is empty string")
+		return tracederrors.TracedErrorf("urlString is empty string")
 	}
 
 	u.urlString = urlString

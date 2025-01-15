@@ -5,8 +5,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic"
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // Returns true if running in a container like docker container.
@@ -32,7 +32,7 @@ func IsRunningInsideContainer(verbose bool) (isRunningInContainer bool, err erro
 
 		splittedLine := strings.Split(line, ":")
 		if len(splittedLine) != 3 {
-			return false, errors.TracedErrorf("Unable to parse proc line '%s' from '%s'.", line, procFilePath)
+			return false, tracederrors.TracedErrorf("Unable to parse proc line '%s' from '%s'.", line, procFilePath)
 		}
 
 		pathToCheck := splittedLine[2]

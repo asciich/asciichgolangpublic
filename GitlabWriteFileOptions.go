@@ -2,8 +2,8 @@ package asciichgolangpublic
 
 import (
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitlabWriteFileOptions struct {
@@ -20,7 +20,7 @@ func NewGitlabWriteFileOptions() (g *GitlabWriteFileOptions) {
 
 func (g *GitlabWriteFileOptions) GetBranchName() (branchName string, err error) {
 	if g.BranchName == "" {
-		return "", errors.TracedErrorf("BranchName not set")
+		return "", tracederrors.TracedErrorf("BranchName not set")
 	}
 
 	return g.BranchName, nil
@@ -28,7 +28,7 @@ func (g *GitlabWriteFileOptions) GetBranchName() (branchName string, err error) 
 
 func (g *GitlabWriteFileOptions) GetCommitMessage() (commitMessage string, err error) {
 	if g.CommitMessage == "" {
-		return "", errors.TracedErrorf("CommitMessage not set")
+		return "", tracederrors.TracedErrorf("CommitMessage not set")
 	}
 
 	return g.CommitMessage, nil
@@ -36,11 +36,11 @@ func (g *GitlabWriteFileOptions) GetCommitMessage() (commitMessage string, err e
 
 func (g *GitlabWriteFileOptions) GetContent() (content []byte, err error) {
 	if g.Content == nil {
-		return nil, errors.TracedErrorf("Content not set")
+		return nil, tracederrors.TracedErrorf("Content not set")
 	}
 
 	if len(g.Content) <= 0 {
-		return nil, errors.TracedErrorf("Content has no elements")
+		return nil, tracederrors.TracedErrorf("Content has no elements")
 	}
 
 	return g.Content, nil
@@ -67,7 +67,7 @@ func (g *GitlabWriteFileOptions) GetGitlabGetRepositoryFileOptions() (getOptions
 
 func (g *GitlabWriteFileOptions) GetPath() (path string, err error) {
 	if g.Path == "" {
-		return "", errors.TracedErrorf("Path not set")
+		return "", tracederrors.TracedErrorf("Path not set")
 	}
 
 	return g.Path, nil
@@ -153,7 +153,7 @@ func (g *GitlabWriteFileOptions) MustSetPath(path string) {
 
 func (g *GitlabWriteFileOptions) SetBranchName(branchName string) (err error) {
 	if branchName == "" {
-		return errors.TracedErrorf("branchName is empty string")
+		return tracederrors.TracedErrorf("branchName is empty string")
 	}
 
 	g.BranchName = branchName
@@ -163,7 +163,7 @@ func (g *GitlabWriteFileOptions) SetBranchName(branchName string) (err error) {
 
 func (g *GitlabWriteFileOptions) SetCommitMessage(commitMessage string) (err error) {
 	if commitMessage == "" {
-		return errors.TracedErrorf("commitMessage is empty string")
+		return tracederrors.TracedErrorf("commitMessage is empty string")
 	}
 
 	g.CommitMessage = commitMessage
@@ -173,11 +173,11 @@ func (g *GitlabWriteFileOptions) SetCommitMessage(commitMessage string) (err err
 
 func (g *GitlabWriteFileOptions) SetContent(content []byte) (err error) {
 	if content == nil {
-		return errors.TracedErrorf("content is nil")
+		return tracederrors.TracedErrorf("content is nil")
 	}
 
 	if len(content) <= 0 {
-		return errors.TracedErrorf("content has no elements")
+		return tracederrors.TracedErrorf("content has no elements")
 	}
 
 	g.Content = content
@@ -187,7 +187,7 @@ func (g *GitlabWriteFileOptions) SetContent(content []byte) (err error) {
 
 func (g *GitlabWriteFileOptions) SetPath(path string) (err error) {
 	if path == "" {
-		return errors.TracedErrorf("path is empty string")
+		return tracederrors.TracedErrorf("path is empty string")
 	}
 
 	g.Path = path

@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 func TestFileBase(t *testing.T) {
@@ -26,7 +26,7 @@ func TestFileBase(t *testing.T) {
 				parent, err := fileBase.GetParentFileForBaseClass()
 				assert.Nil(parent)
 				assert.ErrorIs(err, ErrFileBaseParentNotSet)
-				assert.ErrorIs(err, errors.ErrTracedError)
+				assert.ErrorIs(err, tracederrors.ErrTracedError)
 			},
 		)
 	}

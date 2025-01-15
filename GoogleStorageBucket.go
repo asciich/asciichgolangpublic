@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"cloud.google.com/go/storage"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GoogleStorageBucket struct {
@@ -16,7 +16,7 @@ type GoogleStorageBucket struct {
 
 func GetGoogleStorageBucketByName(bucketName string) (g *GoogleStorageBucket, err error) {
 	if bucketName == "" {
-		return nil, errors.TracedErrorEmptyString("bucketName")
+		return nil, tracederrors.TracedErrorEmptyString("bucketName")
 	}
 
 	g = NewGoogleStorageBucket()
@@ -53,7 +53,7 @@ func (g *GoogleStorageBucket) Exists() (bucketExists bool, err error) {
 		if err.Error() == "storage: bucket doesn't exist" {
 			return false, nil
 		}
-		return false, errors.TracedErrorf("Unable to get bucket Attrs: '%w'", err)
+		return false, tracederrors.TracedErrorf("Unable to get bucket Attrs: '%w'", err)
 	}
 
 	return true, nil
@@ -61,7 +61,7 @@ func (g *GoogleStorageBucket) Exists() (bucketExists bool, err error) {
 
 func (g *GoogleStorageBucket) GetName() (name string, err error) {
 	if g.name == "" {
-		return "", errors.TracedErrorf("name not set")
+		return "", tracederrors.TracedErrorf("name not set")
 	}
 
 	return g.name, nil
@@ -87,7 +87,7 @@ func (g *GoogleStorageBucket) GetNativeClient() (nativeClient *storage.Client, e
 	if g.nativeClient == nil {
 		clientToAdd, err := storage.NewClient(context.Background())
 		if err != nil {
-			return nil, errors.TracedErrorf("Unable to create native storage client: %w", err)
+			return nil, tracederrors.TracedErrorf("Unable to create native storage client: %w", err)
 		}
 		g.nativeClient = clientToAdd
 	}
@@ -146,7 +146,7 @@ func (g *GoogleStorageBucket) MustSetNativeClient(nativeClient *storage.Client) 
 
 func (g *GoogleStorageBucket) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	g.name = name

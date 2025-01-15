@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"os"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type TemporaryDirectoriesService struct {
@@ -48,7 +48,7 @@ func (t *TemporaryDirectoriesService) CreateEmptyTemporaryDirectoryAndGetPath(ve
 
 func (t *TemporaryDirectoriesService) CreateEmptyTemporaryGitRepository(createRepoOptions *CreateRepositoryOptions) (temporaryGitRepository GitRepository, err error) {
 	if createRepoOptions == nil {
-		return nil, errors.TracedErrorNil("createRepoOptions")
+		return nil, tracederrors.TracedErrorNil("createRepoOptions")
 	}
 
 	tempDirectory, err := t.CreateEmptyTemporaryDirectory(createRepoOptions.Verbose)

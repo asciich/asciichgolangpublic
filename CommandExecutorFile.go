@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // A CommandExecutorFile implements the functionality of a `File` by
@@ -32,7 +32,7 @@ func NewCommandExecutorFile() (c *CommandExecutorFile) {
 }
 
 func (c *CommandExecutorFile) AppendBytes(toWrite []byte, verbose bool) (err error) {
-	return errors.TracedErrorNotImplemented()
+	return tracederrors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorFile) AppendString(toWrite string, verbose bool) (err error) {
@@ -64,7 +64,7 @@ func (c *CommandExecutorFile) AppendString(toWrite string, verbose bool) (err er
 
 func (c *CommandExecutorFile) Chmod(chmodOptions *ChmodOptions) (err error) {
 	if chmodOptions == nil {
-		return errors.TracedErrorNil("chmodOptions")
+		return tracederrors.TracedErrorNil("chmodOptions")
 	}
 
 	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
@@ -92,7 +92,7 @@ func (c *CommandExecutorFile) Chmod(chmodOptions *ChmodOptions) (err error) {
 
 func (c *CommandExecutorFile) Chown(options *ChownOptions) (err error) {
 	if options == nil {
-		return errors.TracedErrorNil("options")
+		return tracederrors.TracedErrorNil("options")
 	}
 
 	path, hostDescription, err := c.GetPathAndHostDescription()
@@ -148,10 +148,10 @@ func (c *CommandExecutorFile) Chown(options *ChownOptions) (err error) {
 
 func (c *CommandExecutorFile) CopyToFile(destFile File, verbose bool) (err error) {
 	if destFile == nil {
-		return errors.TracedErrorNil("destFile")
+		return tracederrors.TracedErrorNil("destFile")
 	}
 
-	return errors.TracedErrorNotImplemented()
+	return tracederrors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorFile) Create(verbose bool) (err error) {
@@ -199,7 +199,7 @@ func (c *CommandExecutorFile) Delete(verbose bool) (err error) {
 	}
 
 	if !Paths().IsAbsolutePath(filePath) {
-		return errors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"For security reasons deleting a file is only implemented for absolute paths but got '%s'",
 			filePath,
 		)
@@ -265,7 +265,7 @@ func (c *CommandExecutorFile) Exists(verbose bool) (exists bool, err error) {
 	} else if output == "no" {
 		exists = false
 	} else {
-		return false, errors.TracedErrorf(
+		return false, tracederrors.TracedErrorf(
 			"Unexpected output when checking for file to exist: '%s'",
 			output,
 		)
@@ -353,7 +353,7 @@ func (c *CommandExecutorFile) GetDeepCopy() (deepCopy File) {
 
 func (c *CommandExecutorFile) GetFilePath() (filePath string, err error) {
 	if c.filePath == "" {
-		return "", errors.TracedErrorf("filePath not set")
+		return "", tracederrors.TracedErrorf("filePath not set")
 	}
 
 	return c.filePath, nil
@@ -385,7 +385,7 @@ func (c *CommandExecutorFile) GetLocalPath() (localPath string, err error) {
 	}
 
 	if !isRunningOnLocalhost {
-		return "", errors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"File '%s' is not local. It is on '%s'.",
 			filePath,
 			hostDescription,
@@ -393,7 +393,7 @@ func (c *CommandExecutorFile) GetLocalPath() (localPath string, err error) {
 	}
 
 	if !Paths().IsAbsolutePath(filePath) {
-		return "", errors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"File path '%s' is not absolute.",
 			filePath,
 		)
@@ -412,7 +412,7 @@ func (c *CommandExecutorFile) GetLocalPathOrEmptyStringIfUnset() (localPath stri
 		return c.filePath, nil
 	}
 
-	return "", errors.TracedError("Not running on local host.")
+	return "", tracederrors.TracedError("Not running on local host.")
 }
 
 func (c *CommandExecutorFile) GetParentDirectory() (parentDirectory Directory, err error) {
@@ -450,11 +450,11 @@ func (c *CommandExecutorFile) GetPath() (path string, err error) {
 			return path, nil
 		}
 	} else {
-		return "", errors.TracedErrorNotImplemented()
+		return "", tracederrors.TracedErrorNotImplemented()
 	}
 
 	if path == "" {
-		return "", errors.TracedError("path is empty string after evaluation.")
+		return "", tracederrors.TracedError("path is empty string after evaluation.")
 	}
 
 	return path, nil
@@ -508,7 +508,7 @@ func (c *CommandExecutorFile) GetUriAsString() (uri string, err error) {
 		}
 
 		if Paths().IsRelativePath(filePath) {
-			return "", errors.TracedErrorf("Only implemeted for absolute paths but got '%s'", filePath)
+			return "", tracederrors.TracedErrorf("Only implemeted for absolute paths but got '%s'", filePath)
 		}
 
 		uri = "file://" + filePath
@@ -521,7 +521,7 @@ func (c *CommandExecutorFile) GetUriAsString() (uri string, err error) {
 		return "", err
 	}
 
-	return "", errors.TracedErrorf("not implemented for '%s' on '%s'", filePath, hostDescription)
+	return "", tracederrors.TracedErrorf("not implemented for '%s' on '%s'", filePath, hostDescription)
 }
 
 func (c *CommandExecutorFile) IsRunningOnLocalhost() (isRunningOnLocalhost bool, err error) {
@@ -537,7 +537,7 @@ func (c *CommandExecutorFile) IsRunningOnLocalhost() (isRunningOnLocalhost bool,
 
 func (c *CommandExecutorFile) MoveToPath(path string, useSudo bool, verbose bool) (movedFile File, err error) {
 	if path == "" {
-		return nil, errors.TracedErrorEmptyString("path")
+		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
 
 	srcPath, hostDescription, err := c.GetPathAndHostDescription()
@@ -843,7 +843,7 @@ func (c *CommandExecutorFile) ReadAsBytes() (content []byte, err error) {
 
 func (c *CommandExecutorFile) ReadFirstNBytes(numberOfBytesToRead int) (firstBytes []byte, err error) {
 	if numberOfBytesToRead < 0 {
-		return nil, errors.TracedErrorf("Invalid number of bytest to read: '%d'", numberOfBytesToRead)
+		return nil, tracederrors.TracedErrorf("Invalid number of bytest to read: '%d'", numberOfBytesToRead)
 	}
 
 	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
@@ -920,7 +920,7 @@ func (c *CommandExecutorFile) SetCommandExecutor(commandExecutor CommandExecutor
 
 func (c *CommandExecutorFile) SetFilePath(filePath string) (err error) {
 	if filePath == "" {
-		return errors.TracedErrorf("filePath is empty string")
+		return tracederrors.TracedErrorf("filePath is empty string")
 	}
 
 	c.filePath = filePath
@@ -930,7 +930,7 @@ func (c *CommandExecutorFile) SetFilePath(filePath string) (err error) {
 
 func (c *CommandExecutorFile) Truncate(newSizeBytes int64, verbose bool) (err error) {
 	if newSizeBytes < 0 {
-		return errors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"Invalid size for truncating: newSizeBytes='%d'",
 			newSizeBytes,
 		)
@@ -987,7 +987,7 @@ func (c *CommandExecutorFile) Truncate(newSizeBytes int64, verbose bool) (err er
 
 func (c *CommandExecutorFile) WriteBytes(toWrite []byte, verbose bool) (err error) {
 	if toWrite == nil {
-		return errors.TracedErrorNil("toWrite")
+		return tracederrors.TracedErrorNil("toWrite")
 	}
 
 	commandExecutor, filePath, hostDescription, err := c.GetCommandExecutorAndFilePathAndHostDescription()

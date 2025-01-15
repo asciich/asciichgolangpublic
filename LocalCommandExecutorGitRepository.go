@@ -1,17 +1,17 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 func GetCommandExecutorGitRepositoryByPath(commandExecutor CommandExecutor, path string) (gitRepo *CommandExecutorGitRepository, err error) {
 	if commandExecutor == nil {
-		return nil, errors.TracedErrorNil("commandExecturo")
+		return nil, tracederrors.TracedErrorNil("commandExecturo")
 	}
 
 	if path == "" {
-		return nil, errors.TracedErrorEmptyString("path")
+		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
 
 	gitRepo, err = NewCommandExecutorGitRepository(commandExecutor)
@@ -29,7 +29,7 @@ func GetCommandExecutorGitRepositoryByPath(commandExecutor CommandExecutor, path
 
 func GetLocalCommandExecutorGitRepositoryByDirectory(directory Directory) (gitRepo *CommandExecutorGitRepository, err error) {
 	if directory == nil {
-		return nil, errors.TracedErrorNil("directory")
+		return nil, tracederrors.TracedErrorNil("directory")
 	}
 
 	isLocalDir, err := directory.IsLocalDirectory()
@@ -43,7 +43,7 @@ func GetLocalCommandExecutorGitRepositoryByDirectory(directory Directory) (gitRe
 	}
 
 	if !isLocalDir {
-		return nil, errors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Unable to get LocalCommandExecutorGitRepository for non local path '%s'",
 			path,
 		)
@@ -59,7 +59,7 @@ func GetLocalCommandExecutorGitRepositoryByDirectory(directory Directory) (gitRe
 
 func GetLocalCommandExecutorGitRepositoryByPath(path string) (gitRepo *CommandExecutorGitRepository, err error) {
 	if path == "" {
-		return nil, errors.TracedErrorEmptyString("path")
+		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
 
 	return GetCommandExecutorGitRepositoryByPath(

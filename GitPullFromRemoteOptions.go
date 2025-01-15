@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitPullFromRemoteOptions struct {
@@ -70,7 +70,7 @@ func (g *GitPullFromRemoteOptions) MustSetVerbose(verbose bool) {
 
 func (g *GitPullFromRemoteOptions) SetBranchName(branchName string) (err error) {
 	if branchName == "" {
-		return errors.TracedErrorf("branchName is empty string")
+		return tracederrors.TracedErrorf("branchName is empty string")
 	}
 
 	g.BranchName = branchName
@@ -80,7 +80,7 @@ func (g *GitPullFromRemoteOptions) SetBranchName(branchName string) (err error) 
 
 func (g *GitPullFromRemoteOptions) SetRemoteName(remoteName string) (err error) {
 	if remoteName == "" {
-		return errors.TracedErrorf("remoteName is empty string")
+		return tracederrors.TracedErrorf("remoteName is empty string")
 	}
 
 	g.RemoteName = remoteName
@@ -96,7 +96,7 @@ func (g *GitPullFromRemoteOptions) SetVerbose(verbose bool) (err error) {
 
 func (o *GitPullFromRemoteOptions) GetBranchName() (branchName string, err error) {
 	if len(o.BranchName) <= 0 {
-		return "", errors.TracedError("BranchName not set")
+		return "", tracederrors.TracedError("BranchName not set")
 	}
 
 	return o.BranchName, nil
@@ -104,7 +104,7 @@ func (o *GitPullFromRemoteOptions) GetBranchName() (branchName string, err error
 
 func (o *GitPullFromRemoteOptions) GetRemoteName() (remoteName string, err error) {
 	if len(o.RemoteName) <= 0 {
-		return "", errors.TracedError("RemoteName not set")
+		return "", tracederrors.TracedError("RemoteName not set")
 	}
 
 	return o.RemoteName, nil

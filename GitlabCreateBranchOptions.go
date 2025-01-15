@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitlabCreateBranchOptions struct {
@@ -18,7 +18,7 @@ func NewGitlabCreateBranchOptions() (g *GitlabCreateBranchOptions) {
 
 func (g *GitlabCreateBranchOptions) GetBranchName() (branchName string, err error) {
 	if g.BranchName == "" {
-		return "", errors.TracedErrorf("BranchName not set")
+		return "", tracederrors.TracedErrorf("BranchName not set")
 	}
 
 	return g.BranchName, nil
@@ -31,7 +31,7 @@ func (g *GitlabCreateBranchOptions) GetFailIfAlreadyExists() (failIfAlreadyExist
 
 func (g *GitlabCreateBranchOptions) GetSourceBranchName() (sourceBranchName string, err error) {
 	if g.SourceBranchName == "" {
-		return "", errors.TracedErrorf("SourceBranchName not set")
+		return "", tracederrors.TracedErrorf("SourceBranchName not set")
 	}
 
 	return g.SourceBranchName, nil
@@ -76,7 +76,7 @@ func (g *GitlabCreateBranchOptions) MustSetSourceBranchName(sourceBranchName str
 
 func (g *GitlabCreateBranchOptions) SetBranchName(branchName string) (err error) {
 	if branchName == "" {
-		return errors.TracedErrorf("branchName is empty string")
+		return tracederrors.TracedErrorf("branchName is empty string")
 	}
 
 	g.BranchName = branchName
@@ -90,7 +90,7 @@ func (g *GitlabCreateBranchOptions) SetFailIfAlreadyExists(failIfAlreadyExists b
 
 func (g *GitlabCreateBranchOptions) SetSourceBranchName(sourceBranchName string) (err error) {
 	if sourceBranchName == "" {
-		return errors.TracedErrorf("sourceBranchName is empty string")
+		return tracederrors.TracedErrorf("sourceBranchName is empty string")
 	}
 
 	g.SourceBranchName = sourceBranchName

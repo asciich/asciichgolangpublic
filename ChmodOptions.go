@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type ChmodOptions struct {
@@ -22,7 +22,7 @@ func NewChmodOptions() (c *ChmodOptions) {
 
 func (c *ChmodOptions) GetPermissionsString() (permissionsString string, err error) {
 	if c.PermissionsString == "" {
-		return "", errors.TracedErrorf("PermissionsString not set")
+		return "", tracederrors.TracedErrorf("PermissionsString not set")
 	}
 
 	return c.PermissionsString, nil
@@ -56,7 +56,7 @@ func (c *ChmodOptions) MustSetPermissionsString(permissionsString string) {
 
 func (c *ChmodOptions) SetPermissionsString(permissionsString string) (err error) {
 	if permissionsString == "" {
-		return errors.TracedErrorf("permissionsString is empty string")
+		return tracederrors.TracedErrorf("permissionsString is empty string")
 	}
 
 	c.PermissionsString = permissionsString

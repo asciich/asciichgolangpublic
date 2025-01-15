@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type ReplaceBetweenMarkersOptions struct {
@@ -21,7 +21,7 @@ func (r *ReplaceBetweenMarkersOptions) GetVerbose() (verbose bool, err error) {
 
 func (r *ReplaceBetweenMarkersOptions) GetWorkingDirPath() (workingDirPath string, err error) {
 	if r.WorkingDirPath == "" {
-		return "", errors.TracedErrorf("WorkingDirPath not set")
+		return "", tracederrors.TracedErrorf("WorkingDirPath not set")
 	}
 
 	return r.WorkingDirPath, nil
@@ -67,7 +67,7 @@ func (r *ReplaceBetweenMarkersOptions) SetVerbose(verbose bool) (err error) {
 
 func (r *ReplaceBetweenMarkersOptions) SetWorkingDirPath(workingDirPath string) (err error) {
 	if workingDirPath == "" {
-		return errors.TracedErrorf("workingDirPath is empty string")
+		return tracederrors.TracedErrorf("workingDirPath is empty string")
 	}
 
 	r.WorkingDirPath = workingDirPath

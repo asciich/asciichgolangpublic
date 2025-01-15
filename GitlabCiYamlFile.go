@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 	"gopkg.in/yaml.v3"
 )
 
@@ -18,7 +18,7 @@ func GetGitlabCiYamlDefaultBaseName() (defaultBaseName string) {
 
 func GetGitlabCiYamlFileByFile(file File) (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
 	if file == nil {
-		return nil, errors.TracedErrorNil("file")
+		return nil, tracederrors.TracedErrorNil("file")
 	}
 
 	gitlabCiYamlFile = NewGitlabCiYamlFile()
@@ -29,7 +29,7 @@ func GetGitlabCiYamlFileByFile(file File) (gitlabCiYamlFile *GitlabCiYamlFile, e
 
 func GetGitlabCiYamlFileByPath(filePath string) (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
 	if filePath == "" {
-		return nil, errors.TracedError("filePath is empty string")
+		return nil, tracederrors.TracedError("filePath is empty string")
 	}
 
 	localFile, err := GetLocalFileByPath(filePath)
@@ -42,7 +42,7 @@ func GetGitlabCiYamlFileByPath(filePath string) (gitlabCiYamlFile *GitlabCiYamlF
 
 func GetGitlabCiYamlFileInGitRepository(gitRepository GitRepository) (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
 	if gitRepository == nil {
-		return nil, errors.TracedErrorNil("gitRepository")
+		return nil, tracederrors.TracedErrorNil("gitRepository")
 	}
 
 	fileToUse, err := gitRepository.GetFileByPath(GetGitlabCiYamlDefaultBaseName())
@@ -86,7 +86,7 @@ func NewGitlabCiYamlFile() (g *GitlabCiYamlFile) {
 
 func (g *GitlabCiYamlFile) AddInclude(include *GitlabCiYamlInclude, verbose bool) (err error) {
 	if include == nil {
-		return errors.TracedError("include is nil")
+		return tracederrors.TracedError("include is nil")
 	}
 
 	err = g.Create(verbose)
@@ -143,7 +143,7 @@ func (g *GitlabCiYamlFile) AddInclude(include *GitlabCiYamlInclude, verbose bool
 
 func (g *GitlabCiYamlFile) ContainsInclude(include *GitlabCiYamlInclude, ignoreVersion bool, verbose bool) (containsInclude bool, err error) {
 	if include == nil {
-		return false, errors.TracedError("include is nil")
+		return false, tracederrors.TracedError("include is nil")
 	}
 
 	includes, err := g.GetIncludes(verbose)
@@ -152,7 +152,7 @@ func (g *GitlabCiYamlFile) ContainsInclude(include *GitlabCiYamlInclude, ignoreV
 	}
 
 	if !ignoreVersion {
-		return false, errors.TracedError("Not implemented for !ignoreVersion")
+		return false, tracederrors.TracedError("Not implemented for !ignoreVersion")
 	}
 
 	for _, toCheck := range includes {
@@ -190,7 +190,7 @@ func (g *GitlabCiYamlFile) GetIncludes(verbose bool) (includes []*GitlabCiYamlIn
 
 	err = yaml.Unmarshal([]byte(includeBlock), includesYaml)
 	if err != nil {
-		return nil, errors.TracedErrorf("Unable to parse inclues in gitlab-ci.yaml '%s': %w", localPath, err)
+		return nil, tracederrors.TracedErrorf("Unable to parse inclues in gitlab-ci.yaml '%s': %w", localPath, err)
 	}
 
 	includes = includesYaml.Includes
@@ -323,7 +323,7 @@ func (g *GitlabCiYamlFile) getIncludeBlock(verbose bool) (includeBlock string, e
 
 func (g *GitlabCiYamlFile) getIncludesAsTextBlock(includes []*GitlabCiYamlInclude) (textBlock string, err error) {
 	if includes == nil {
-		return "", errors.TracedError("includes is nil")
+		return "", tracederrors.TracedError("includes is nil")
 	}
 
 	if len(includes) == 0 {
@@ -332,7 +332,7 @@ func (g *GitlabCiYamlFile) getIncludesAsTextBlock(includes []*GitlabCiYamlInclud
 
 	textBlockBytes, err := yaml.Marshal(includes)
 	if err != nil {
-		return "", errors.TracedError(err.Error())
+		return "", tracederrors.TracedError(err.Error())
 	}
 
 	textBlock = "include:\n" + string(textBlockBytes)

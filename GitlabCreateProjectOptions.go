@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitlabCreateProjectOptions struct {
@@ -112,7 +112,7 @@ func (g *GitlabCreateProjectOptions) SetIsPublic(isPublic bool) (err error) {
 
 func (g *GitlabCreateProjectOptions) SetProjectPath(projectPath string) (err error) {
 	if projectPath == "" {
-		return errors.TracedErrorf("projectPath is empty string")
+		return tracederrors.TracedErrorf("projectPath is empty string")
 	}
 
 	g.ProjectPath = projectPath
@@ -176,7 +176,7 @@ func (o *GitlabCreateProjectOptions) GetProjectName() (projectName string, err e
 
 func (o *GitlabCreateProjectOptions) GetProjectPath() (projectPath string, err error) {
 	if len(o.ProjectPath) <= 0 {
-		return "", errors.TracedError("ProjectPath is not set")
+		return "", tracederrors.TracedError("ProjectPath is not set")
 	}
 
 	return o.ProjectPath, nil

@@ -1,8 +1,8 @@
 package kvm
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type KvmVmInfo struct {
@@ -16,7 +16,7 @@ func NewKvmVmInfo() (k *KvmVmInfo) {
 
 func (k *KvmVmInfo) GetMacAddress() (macAddress string, err error) {
 	if k.MacAddress == "" {
-		return "", errors.TracedErrorf("MacAddress not set")
+		return "", tracederrors.TracedErrorf("MacAddress not set")
 	}
 
 	return k.MacAddress, nil
@@ -24,7 +24,7 @@ func (k *KvmVmInfo) GetMacAddress() (macAddress string, err error) {
 
 func (k *KvmVmInfo) GetName() (name string, err error) {
 	if k.Name == "" {
-		return "", errors.TracedErrorf("Name not set")
+		return "", tracederrors.TracedErrorf("Name not set")
 	}
 
 	return k.Name, nil
@@ -87,7 +87,7 @@ func (k *KvmVmInfo) MustSetName(name string) {
 
 func (k *KvmVmInfo) SetMacAddress(macAddress string) (err error) {
 	if macAddress == "" {
-		return errors.TracedErrorf("macAddress is empty string")
+		return tracederrors.TracedErrorf("macAddress is empty string")
 	}
 
 	k.MacAddress = macAddress
@@ -97,7 +97,7 @@ func (k *KvmVmInfo) SetMacAddress(macAddress string) (err error) {
 
 func (k *KvmVmInfo) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	k.Name = name

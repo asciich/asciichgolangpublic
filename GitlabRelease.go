@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"errors"
 
-	aerrors "github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -35,7 +35,7 @@ func (g *GitlabRelease) CreateReleaseLink(createOptions *GitlabCreateReleaseLink
 
 func (g *GitlabRelease) Delete(deleteOptions *GitlabDeleteReleaseOptions) (err error) {
 	if deleteOptions == nil {
-		return aerrors.TracedErrorNil("deleteOptions")
+		return tracederrors.TracedErrorNil("deleteOptions")
 	}
 
 	exists, err := g.Exists(deleteOptions.Verbose)
@@ -209,7 +209,7 @@ func (g *GitlabRelease) GetGitlabReleaseLinks() (gitlabReleaseLinks *GitlabRelea
 
 func (g *GitlabRelease) GetGitlabReleases() (gitlabReleases *GitlabReleases, err error) {
 	if g.gitlabReleases == nil {
-		return nil, aerrors.TracedErrorf("gitlabReleases not set")
+		return nil, tracederrors.TracedErrorf("gitlabReleases not set")
 	}
 
 	return g.gitlabReleases, nil
@@ -217,7 +217,7 @@ func (g *GitlabRelease) GetGitlabReleases() (gitlabReleases *GitlabReleases, err
 
 func (g *GitlabRelease) GetName() (name string, err error) {
 	if g.name == "" {
-		return "", aerrors.TracedErrorf("name not set")
+		return "", tracederrors.TracedErrorf("name not set")
 	}
 
 	return g.name, nil
@@ -303,7 +303,7 @@ func (g *GitlabRelease) GetRawResponse() (rawRelease *gitlab.Release, err error)
 	rawRelease, _, err = nativeClient.GetRelease(projectId, name)
 	if err != nil {
 		if err.Error() == "404 Not Found" {
-			return nil, aerrors.TracedErrorf(
+			return nil, tracederrors.TracedErrorf(
 				"%w, Project %s release '%s'",
 				ErrGitlabReleaseNotFound,
 				projectUrl,
@@ -311,7 +311,7 @@ func (g *GitlabRelease) GetRawResponse() (rawRelease *gitlab.Release, err error)
 			)
 		}
 
-		return nil, aerrors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Failed to GetRawResponse for gitlab release '%s' for project %s : '%w'",
 			releaseName,
 			projectUrl,
@@ -320,7 +320,7 @@ func (g *GitlabRelease) GetRawResponse() (rawRelease *gitlab.Release, err error)
 	}
 
 	if rawRelease == nil {
-		return nil, aerrors.TracedError("rawRelease is empty string after evaluation")
+		return nil, tracederrors.TracedError("rawRelease is empty string after evaluation")
 	}
 
 	return rawRelease, nil
@@ -538,7 +538,7 @@ func (g *GitlabRelease) MustSetName(name string) {
 
 func (g *GitlabRelease) SetGitlabReleases(gitlabReleases *GitlabReleases) (err error) {
 	if gitlabReleases == nil {
-		return aerrors.TracedErrorf("gitlabReleases is nil")
+		return tracederrors.TracedErrorf("gitlabReleases is nil")
 	}
 
 	g.gitlabReleases = gitlabReleases
@@ -548,7 +548,7 @@ func (g *GitlabRelease) SetGitlabReleases(gitlabReleases *GitlabReleases) (err e
 
 func (g *GitlabRelease) SetName(name string) (err error) {
 	if name == "" {
-		return aerrors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	g.name = name

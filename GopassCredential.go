@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GopassCredential struct {
@@ -17,7 +17,7 @@ type GopassCredential struct {
 func GetGopassCredentialByName(name string) (credential *GopassCredential, err error) {
 	name = strings.TrimSpace(name)
 	if len(name) <= 0 {
-		return nil, errors.TracedError("name is empty string")
+		return nil, tracederrors.TracedError("name is empty string")
 	}
 
 	credential = NewGopassCredential()
@@ -118,7 +118,7 @@ func (c *GopassCredential) GetAsString() (credential string, err error) {
 
 func (c *GopassCredential) GetName() (name string, err error) {
 	if len(c.name) <= 0 {
-		return "", errors.TracedError("name is not set")
+		return "", tracederrors.TracedError("name is not set")
 	}
 
 	return c.name, nil
@@ -174,7 +174,7 @@ func (c *GopassCredential) SetByInt(newValue int) (err error) {
 
 func (c *GopassCredential) SetByString(newValue string) (err error) {
 	if strings.Contains(newValue, "\n") {
-		return errors.TracedError("Unable to set copass value by string. newlines currenlty not supported.")
+		return tracederrors.TracedError("Unable to set copass value by string. newlines currenlty not supported.")
 	}
 
 	name, err := c.GetName()
@@ -203,7 +203,7 @@ func (c *GopassCredential) SetByString(newValue string) (err error) {
 func (c *GopassCredential) SetName(name string) (err error) {
 	name = strings.TrimSpace(name)
 	if len(name) <= 0 {
-		return errors.TracedError("name is empty string")
+		return tracederrors.TracedError("name is empty string")
 	}
 
 	c.name = name
@@ -213,7 +213,7 @@ func (c *GopassCredential) SetName(name string) (err error) {
 
 func (c *GopassCredential) WriteIntoFile(outputFile File, verbose bool) (err error) {
 	if outputFile == nil {
-		return errors.TracedError("outputFile is nil")
+		return tracederrors.TracedError("outputFile is nil")
 	}
 
 	contentBytes, err := c.GetAsBytes()

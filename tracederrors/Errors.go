@@ -1,27 +1,16 @@
-package errors
+package tracederrors
 
 import (
 	"errors"
-	nativeErrors "errors"
 	"log"
 )
 
-type ErrorsService struct{}
-
-func Errors() (e *ErrorsService) {
-	return new(ErrorsService)
-}
-
-func NewErrorsService() (e *ErrorsService) {
-	return new(ErrorsService)
-}
-
 // Returns true if given error 'err' is a TracedError, false otherwise.
-func (e ErrorsService) IsTracedError(err error) (isTracedError bool) {
-	return nativeErrors.Is(err, ErrTracedError)
+func IsTracedError(err error) (isTracedError bool) {
+	return errors.Is(err, ErrTracedError)
 }
 
-func (e *ErrorsService) AddErrorToUnwrapToTracedError(tracedError error, errorToAdd error) error {
+func AddErrorToUnwrapToTracedError(tracedError error, errorToAdd error) error {
 	if tracedError == nil {
 		return nil
 	}
@@ -40,7 +29,7 @@ func (e *ErrorsService) AddErrorToUnwrapToTracedError(tracedError error, errorTo
 	return resultingError
 }
 
-func (e *ErrorsService) GetAsTracedError(errorToConvert error) (tracedError *TracedErrorType, err error) {
+func GetAsTracedError(errorToConvert error) (tracedError *TracedErrorType, err error) {
 	if errorToConvert == nil {
 		return nil, TracedErrorNil("errorToConvert")
 	}
@@ -58,8 +47,8 @@ func (e *ErrorsService) GetAsTracedError(errorToConvert error) (tracedError *Tra
 	return tracedError, nil
 }
 
-func (e *ErrorsService) MustGetAsTracedError(errorToConvert error) (tracedError *TracedErrorType) {
-	tracedError, err := e.GetAsTracedError(errorToConvert)
+func MustGetAsTracedError(errorToConvert error) (tracedError *TracedErrorType) {
+	tracedError, err := GetAsTracedError(errorToConvert)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -67,19 +56,19 @@ func (e *ErrorsService) MustGetAsTracedError(errorToConvert error) (tracedError 
 	return tracedError
 }
 
-func (e ErrorsService) IsEmptyStringError(err error) (isEmptyStringError bool) {
+func IsEmptyStringError(err error) (isEmptyStringError bool) {
 	return errors.Is(err, ErrTracedErrorEmptyString)
 }
 
-func (e ErrorsService) IsNilError(err error) (IsNilError bool) {
+func IsNilError(err error) (IsNilError bool) {
 	return errors.Is(err, ErrTracedErrorNil)
 }
 
-func (e ErrorsService) IsNotImplementedError(err error) (isNotImplementedError bool) {
+func IsNotImplementedError(err error) (isNotImplementedError bool) {
 	return errors.Is(err, ErrTracedErrorNotImplemented)
 }
 
-func (e ErrorsService) UnwrapRecursive(errorToUnwrap error) (errors []error) {
+func UnwrapRecursive(errorToUnwrap error) (errors []error) {
 	errors = []error{}
 
 	if errorToUnwrap == nil {
@@ -91,13 +80,13 @@ func (e ErrorsService) UnwrapRecursive(errorToUnwrap error) (errors []error) {
 		toAdd := x.Unwrap()
 		if toAdd == nil {
 			errors = append(errors, toAdd)
-			errors = append(errors, e.UnwrapRecursive(toAdd)...)
+			errors = append(errors, UnwrapRecursive(toAdd)...)
 		}
 
 	case interface{ Unwrap() []error }:
 		for _, toAdd := range x.Unwrap() {
 			errors = append(errors, toAdd)
-			errors = append(errors, e.UnwrapRecursive(toAdd)...)
+			errors = append(errors, UnwrapRecursive(toAdd)...)
 		}
 	}
 

@@ -1,8 +1,8 @@
 package kubernetes
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type KubectlContext struct {
@@ -16,7 +16,7 @@ func NewKubectlContext() (k *KubectlContext) {
 
 func (k *KubectlContext) GetCluster() (cluster string, err error) {
 	if k.cluster == "" {
-		return "", errors.TracedErrorf("cluster not set")
+		return "", tracederrors.TracedErrorf("cluster not set")
 	}
 
 	return k.cluster, nil
@@ -24,7 +24,7 @@ func (k *KubectlContext) GetCluster() (cluster string, err error) {
 
 func (k *KubectlContext) GetName() (name string, err error) {
 	if k.name == "" {
-		return "", errors.TracedErrorf("name not set")
+		return "", tracederrors.TracedErrorf("name not set")
 	}
 
 	return k.name, nil
@@ -64,7 +64,7 @@ func (k *KubectlContext) MustSetName(name string) {
 
 func (k *KubectlContext) SetCluster(cluster string) (err error) {
 	if cluster == "" {
-		return errors.TracedErrorf("cluster is empty string")
+		return tracederrors.TracedErrorf("cluster is empty string")
 	}
 
 	k.cluster = cluster
@@ -74,7 +74,7 @@ func (k *KubectlContext) SetCluster(cluster string) (err error) {
 
 func (k *KubectlContext) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	k.name = name

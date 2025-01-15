@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type VersionSemanticVersion struct {
@@ -67,7 +67,7 @@ func (v *VersionSemanticVersion) GetAsStringWithoutLeadingV() (versionString str
 
 func (v *VersionSemanticVersion) GetMajor() (major int, err error) {
 	if v.major < 0 {
-		return -1, errors.TracedError("major not set")
+		return -1, tracederrors.TracedError("major not set")
 	}
 
 	return v.major, nil
@@ -94,7 +94,7 @@ func (v *VersionSemanticVersion) GetMajorMinorPatch() (major int, minor int, pat
 
 func (v *VersionSemanticVersion) GetMinor() (minor int, err error) {
 	if v.minor < 0 {
-		return -1, errors.TracedError("minor not set")
+		return -1, tracederrors.TracedError("minor not set")
 	}
 
 	return v.minor, nil
@@ -102,7 +102,7 @@ func (v *VersionSemanticVersion) GetMinor() (minor int, err error) {
 
 func (v *VersionSemanticVersion) GetNextVersion(versionType string) (nextVersion Version, err error) {
 	if versionType == "" {
-		return nil, errors.TracedErrorEmptyString("versionType")
+		return nil, tracederrors.TracedErrorEmptyString("versionType")
 	}
 
 	major, minor, patch, err := v.GetMajorMinorPatch()
@@ -120,7 +120,7 @@ func (v *VersionSemanticVersion) GetNextVersion(versionType string) (nextVersion
 		minor = 0
 		patch = 0
 	} else {
-		return nil, errors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Unknown versionType='%s'",
 			versionType,
 		)
@@ -137,7 +137,7 @@ func (v *VersionSemanticVersion) GetNextVersion(versionType string) (nextVersion
 
 func (v *VersionSemanticVersion) GetPatch() (patch int, err error) {
 	if v.patch < 0 {
-		return -1, errors.TracedError("patch not set")
+		return -1, tracederrors.TracedError("patch not set")
 	}
 
 	return v.patch, nil
@@ -145,12 +145,12 @@ func (v *VersionSemanticVersion) GetPatch() (patch int, err error) {
 
 func (v *VersionSemanticVersion) IsNewerThan(other Version) (isNewerThan bool, err error) {
 	if other == nil {
-		return false, errors.TracedErrorNil("other")
+		return false, tracederrors.TracedErrorNil("other")
 	}
 
 	otherSemanticVersion, ok := other.(*VersionSemanticVersion)
 	if !ok {
-		return false, errors.TracedErrorf(
+		return false, tracederrors.TracedErrorf(
 			"Non compareable versions '%v' and '%v'",
 			v,
 			other,
@@ -327,7 +327,7 @@ func (v *VersionSemanticVersion) Set(major int, minor int, patch int) (err error
 
 func (v *VersionSemanticVersion) SetMajor(major int) (err error) {
 	if major < 0 {
-		return errors.TracedErrorf("Invalid value '%d' for major", major)
+		return tracederrors.TracedErrorf("Invalid value '%d' for major", major)
 	}
 
 	v.major = major
@@ -356,7 +356,7 @@ func (v *VersionSemanticVersion) SetMajorMinorPatch(major int, minor int, patch 
 
 func (v *VersionSemanticVersion) SetMinor(minor int) (err error) {
 	if minor < 0 {
-		return errors.TracedErrorf("Invalid value '%d' for minor", minor)
+		return tracederrors.TracedErrorf("Invalid value '%d' for minor", minor)
 	}
 
 	v.minor = minor
@@ -366,7 +366,7 @@ func (v *VersionSemanticVersion) SetMinor(minor int) (err error) {
 
 func (v *VersionSemanticVersion) SetPatch(patch int) (err error) {
 	if patch < 0 {
-		return errors.TracedErrorf("Invalid value '%d' for patch", patch)
+		return tracederrors.TracedErrorf("Invalid value '%d' for patch", patch)
 	}
 
 	v.patch = patch
@@ -377,14 +377,14 @@ func (v *VersionSemanticVersion) SetPatch(patch int) (err error) {
 func (v *VersionSemanticVersion) SetVersionByString(version string) (err error) {
 	version = strings.TrimSpace(version)
 	if version == "" {
-		return errors.TracedErrorEmptyString("version")
+		return tracederrors.TracedErrorEmptyString("version")
 	}
 
 	version = astrings.TrimPrefixIgnoreCase(version, "v")
 
 	splitted := strings.Split(version, ".")
 	if len(splitted) != 3 {
-		return errors.TracedErrorf(
+		return tracederrors.TracedErrorf(
 			"Unexepected number of spitted elements '%v' for version string '%s'",
 			splitted,
 			version,
@@ -393,17 +393,17 @@ func (v *VersionSemanticVersion) SetVersionByString(version string) (err error) 
 
 	major, err := strconv.Atoi(splitted[0])
 	if err != nil {
-		return errors.TracedErrorf("Unable to parse major '%s': '%w'", splitted[0], err)
+		return tracederrors.TracedErrorf("Unable to parse major '%s': '%w'", splitted[0], err)
 	}
 
 	minor, err := strconv.Atoi(splitted[1])
 	if err != nil {
-		return errors.TracedErrorf("Unable to parse minor '%s': '%w'", splitted[1], err)
+		return tracederrors.TracedErrorf("Unable to parse minor '%s': '%w'", splitted[1], err)
 	}
 
 	patch, err := strconv.Atoi(splitted[2])
 	if err != nil {
-		return errors.TracedErrorf("Unable to parse patch '%s': '%w'", splitted[2], err)
+		return tracederrors.TracedErrorf("Unable to parse patch '%s': '%w'", splitted[2], err)
 	}
 
 	err = v.SetMajorMinorPatch(major, minor, patch)

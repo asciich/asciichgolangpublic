@@ -1,8 +1,8 @@
 package kvm
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type KvmRemoveVmOptions struct {
@@ -28,7 +28,7 @@ func (k *KvmRemoveVmOptions) GetVerbose() (verbose bool, err error) {
 
 func (k *KvmRemoveVmOptions) GetVmName() (vmName string, err error) {
 	if k.VmName == "" {
-		return "", errors.TracedErrorf("VmName not set")
+		return "", tracederrors.TracedErrorf("VmName not set")
 	}
 
 	return k.VmName, nil
@@ -36,11 +36,11 @@ func (k *KvmRemoveVmOptions) GetVmName() (vmName string, err error) {
 
 func (k *KvmRemoveVmOptions) GetVolumeNamesToRemove() (volumeNamesToRemove []string, err error) {
 	if k.VolumeNamesToRemove == nil {
-		return nil, errors.TracedErrorf("VolumeNamesToRemove not set")
+		return nil, tracederrors.TracedErrorf("VolumeNamesToRemove not set")
 	}
 
 	if len(k.VolumeNamesToRemove) <= 0 {
-		return nil, errors.TracedErrorf("VolumeNamesToRemove has no elements")
+		return nil, tracederrors.TracedErrorf("VolumeNamesToRemove has no elements")
 	}
 
 	return k.VolumeNamesToRemove, nil
@@ -124,7 +124,7 @@ func (k *KvmRemoveVmOptions) SetVerbose(verbose bool) (err error) {
 
 func (k *KvmRemoveVmOptions) SetVmName(vmName string) (err error) {
 	if vmName == "" {
-		return errors.TracedErrorf("vmName is empty string")
+		return tracederrors.TracedErrorf("vmName is empty string")
 	}
 
 	k.VmName = vmName
@@ -134,11 +134,11 @@ func (k *KvmRemoveVmOptions) SetVmName(vmName string) (err error) {
 
 func (k *KvmRemoveVmOptions) SetVolumeNamesToRemove(volumeNamesToRemove []string) (err error) {
 	if volumeNamesToRemove == nil {
-		return errors.TracedErrorf("volumeNamesToRemove is nil")
+		return tracederrors.TracedErrorf("volumeNamesToRemove is nil")
 	}
 
 	if len(volumeNamesToRemove) <= 0 {
-		return errors.TracedErrorf("volumeNamesToRemove has no elements")
+		return tracederrors.TracedErrorf("volumeNamesToRemove has no elements")
 	}
 
 	k.VolumeNamesToRemove = volumeNamesToRemove

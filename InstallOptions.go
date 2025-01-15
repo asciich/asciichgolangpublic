@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"path/filepath"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type InstallOptions struct {
@@ -22,7 +22,7 @@ func NewInstallOptions() (i *InstallOptions) {
 
 func (i *InstallOptions) GetBinaryName() (binaryName string, err error) {
 	if i.BinaryName == "" {
-		return "", errors.TracedErrorf("BinaryName not set")
+		return "", tracederrors.TracedErrorf("BinaryName not set")
 	}
 
 	return i.BinaryName, nil
@@ -35,7 +35,7 @@ func (i *InstallOptions) GetInstallBashCompletion() (installBashCompletion bool)
 
 func (i *InstallOptions) GetInstallationPath() (installationPath string, err error) {
 	if i.InstallationPath == "" {
-		return "", errors.TracedErrorf("InstallationPath not set")
+		return "", tracederrors.TracedErrorf("InstallationPath not set")
 	}
 
 	return i.InstallationPath, nil
@@ -72,7 +72,7 @@ func (i *InstallOptions) GetSourceFile() (sourceFile File, err error) {
 
 func (i *InstallOptions) GetSourcePath() (sourcePath string, err error) {
 	if i.SourcePath == "" {
-		return "", errors.TracedErrorf("SourcePath not set")
+		return "", tracederrors.TracedErrorf("SourcePath not set")
 	}
 
 	return i.SourcePath, nil
@@ -156,7 +156,7 @@ func (i *InstallOptions) MustSetSourcePath(sourcePath string) {
 
 func (i *InstallOptions) SetBinaryName(binaryName string) (err error) {
 	if binaryName == "" {
-		return errors.TracedErrorf("binaryName is empty string")
+		return tracederrors.TracedErrorf("binaryName is empty string")
 	}
 
 	i.BinaryName = binaryName
@@ -170,7 +170,7 @@ func (i *InstallOptions) SetInstallBashCompletion(installBashCompletion bool) {
 
 func (i *InstallOptions) SetInstallationPath(installationPath string) (err error) {
 	if installationPath == "" {
-		return errors.TracedErrorf("installationPath is empty string")
+		return tracederrors.TracedErrorf("installationPath is empty string")
 	}
 
 	i.InstallationPath = installationPath
@@ -180,7 +180,7 @@ func (i *InstallOptions) SetInstallationPath(installationPath string) (err error
 
 func (i *InstallOptions) SetSourcePath(sourcePath string) (err error) {
 	if sourcePath == "" {
-		return errors.TracedErrorf("sourcePath is empty string")
+		return tracederrors.TracedErrorf("sourcePath is empty string")
 	}
 
 	i.SourcePath = sourcePath

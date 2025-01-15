@@ -2,8 +2,8 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/datatypes"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // A CommandExecutor is able to run a command like Exec or bash does.
@@ -30,7 +30,7 @@ type CommandExecutor interface {
 
 func GetDeepCopyOfCommandExecutor(commandExectuor CommandExecutor) (copy CommandExecutor, err error) {
 	if commandExectuor == nil {
-		return nil, errors.TracedErrorNil("commandExecutor")
+		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
 
 	withDeepCopy, ok := commandExectuor.(interface{ GetDeepCopy() CommandExecutor })
@@ -40,7 +40,7 @@ func GetDeepCopyOfCommandExecutor(commandExectuor CommandExecutor) (copy Command
 			return nil, err
 		}
 
-		return nil, errors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"CommandExecutor implementation '%s' has no GetDeepCopyFunction!",
 			typeName,
 		)

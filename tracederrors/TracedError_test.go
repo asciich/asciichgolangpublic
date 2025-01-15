@@ -1,4 +1,4 @@
-package errors
+package tracederrors
 
 import (
 	"errors"
@@ -89,10 +89,10 @@ func TestTracedErrorEmptyString(t *testing.T) {
 
 				var err error = TracedErrorEmptyString(tt.stringName)
 				assert.Contains(err.Error(), "'"+tt.stringName+"' is empty string")
-				assert.True(Errors().IsTracedError(err))
-				assert.True(Errors().IsEmptyStringError(err))
-				assert.False(Errors().IsNilError(err))
-				assert.False(Errors().IsNotImplementedError(err))
+				assert.True(IsTracedError(err))
+				assert.True(IsEmptyStringError(err))
+				assert.False(IsNilError(err))
+				assert.False(IsNotImplementedError(err))
 			},
 		)
 	}
@@ -115,10 +115,10 @@ func TestTracedErrorNil(t *testing.T) {
 
 				var err error = TracedErrorNil(tt.stringName)
 				assert.Contains(err.Error(), "'"+tt.stringName+"' is nil")
-				assert.True(Errors().IsTracedError(err))
-				assert.True(Errors().IsNilError(err))
-				assert.False(Errors().IsEmptyStringError(err))
-				assert.False(Errors().IsNotImplementedError(err))
+				assert.True(IsTracedError(err))
+				assert.True(IsNilError(err))
+				assert.False(IsEmptyStringError(err))
+				assert.False(IsNotImplementedError(err))
 			},
 		)
 	}
@@ -141,10 +141,10 @@ func TestTracedErrorNotImplemented(t *testing.T) {
 
 				var err error = TracedErrorNotImplemented()
 				assert.Contains(err.Error(), "Not implemented")
-				assert.True(Errors().IsTracedError(err))
-				assert.True(Errors().IsNotImplementedError(err))
-				assert.False(Errors().IsNilError(err))
-				assert.False(Errors().IsEmptyStringError(err))
+				assert.True(IsTracedError(err))
+				assert.True(IsNotImplementedError(err))
+				assert.False(IsNilError(err))
+				assert.False(IsEmptyStringError(err))
 			},
 		)
 	}
@@ -167,7 +167,7 @@ func TestTracedErrorGetErrorMessage(t *testing.T) {
 			func(t *testing.T) {
 				assert := assert.New(t)
 				
-				tracedError := Errors().MustGetAsTracedError(TracedError(tt.errorMessage))
+				tracedError := MustGetAsTracedError(TracedError(tt.errorMessage))
 
 				assert.EqualValues(
 					tt.expectedErrorMessage,

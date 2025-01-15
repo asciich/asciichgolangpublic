@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type DurationParserService struct{}
@@ -78,7 +78,7 @@ func (d *DurationParserService) ToSecondsAsTimeDuration(durationString string) (
 
 func (d *DurationParserService) ToSecondsFloat64(durationString string) (seconds float64, err error) {
 	if len(durationString) <= 0 {
-		return -1, errors.TracedError("durationString is empty string")
+		return -1, tracederrors.TracedError("durationString is empty string")
 	}
 
 	unifiedDurationString := durationString
@@ -119,7 +119,7 @@ func (d *DurationParserService) ToSecondsFloat64(durationString string) (seconds
 
 		parsedValue, err := strconv.ParseFloat(unifiedDurationString, 64)
 		if err != nil {
-			return -1, errors.TracedError(err.Error())
+			return -1, tracederrors.TracedError(err.Error())
 		}
 
 		seconds = parsedValue * v
@@ -128,7 +128,7 @@ func (d *DurationParserService) ToSecondsFloat64(durationString string) (seconds
 
 	seconds, err = strconv.ParseFloat(unifiedDurationString, 64)
 	if err != nil {
-		return -1, errors.TracedError(err.Error())
+		return -1, tracederrors.TracedError(err.Error())
 	}
 
 	return seconds, nil

@@ -10,8 +10,7 @@ import (
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
 	"github.com/asciich/asciichgolangpublic/logging"
-
-	aerrors "github.com/asciich/asciichgolangpublic/errors"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 var ErrPathHasNoParentDirectory = errors.New("path has no parent directory")
@@ -29,11 +28,11 @@ func Paths() (p *PathsService) {
 // Filter the given path list.
 func (p *PathsService) FilterPaths(pathList []string, pathFilterOptions PathFilterOptions) (filtered []string, err error) {
 	if pathList == nil {
-		return nil, aerrors.TracedErrorNil("pathList")
+		return nil, tracederrors.TracedErrorNil("pathList")
 	}
 
 	if pathFilterOptions == nil {
-		return nil, aerrors.TracedErrorNil("pathFilterOptions")
+		return nil, tracederrors.TracedErrorNil("pathFilterOptions")
 	}
 
 	filtered = pathList
@@ -159,7 +158,7 @@ func (p *PathsService) CheckAbsolutePath(path string) (err error) {
 		return nil
 	}
 
-	return aerrors.TracedErrorf("path '%s' is not absolute", path)
+	return tracederrors.TracedErrorf("path '%s' is not absolute", path)
 }
 
 func (p *PathsService) CheckRelativePath(path string) (err error) {
@@ -167,12 +166,12 @@ func (p *PathsService) CheckRelativePath(path string) (err error) {
 		return nil
 	}
 
-	return aerrors.TracedErrorf("path '%s' is not relative", path)
+	return tracederrors.TracedErrorf("path '%s' is not relative", path)
 }
 
 func (p *PathsService) GetAbsolutePath(path string) (absolutePath string, err error) {
 	if path == "" {
-		return "", aerrors.TracedErrorEmptyString("path")
+		return "", tracederrors.TracedErrorEmptyString("path")
 	}
 
 	if Paths().IsRelativePath(path) {
@@ -189,11 +188,11 @@ func (p *PathsService) GetAbsolutePath(path string) (absolutePath string, err er
 
 func (p *PathsService) GetDirPath(inputPath string) (dirPath string, err error) {
 	if inputPath == "" {
-		return "", aerrors.TracedErrorEmptyString("inputPath")
+		return "", tracederrors.TracedErrorEmptyString("inputPath")
 	}
 
 	if inputPath == "/" {
-		return "", aerrors.TracedErrorf("%w: '%s'", ErrPathHasNoParentDirectory, err)
+		return "", tracederrors.TracedErrorf("%w: '%s'", ErrPathHasNoParentDirectory, err)
 	}
 
 	return filepath.Dir(inputPath), nil
@@ -201,11 +200,11 @@ func (p *PathsService) GetDirPath(inputPath string) (dirPath string, err error) 
 
 func (p *PathsService) GetRelativePathTo(absolutePath string, relativeTo string) (relativePath string, err error) {
 	if absolutePath == "" {
-		return "", aerrors.TracedErrorEmptyString("absolutePath")
+		return "", tracederrors.TracedErrorEmptyString("absolutePath")
 	}
 
 	if relativeTo == "" {
-		return "", aerrors.TracedErrorEmptyString("relatvieTo")
+		return "", tracederrors.TracedErrorEmptyString("relatvieTo")
 	}
 
 	err = Paths().CheckAbsolutePath(absolutePath)
@@ -221,7 +220,7 @@ func (p *PathsService) GetRelativePathTo(absolutePath string, relativeTo string)
 	relativeToDirPath := astrings.EnsureSuffix(relativeTo, "/")
 
 	if !strings.HasPrefix(absolutePath, relativeToDirPath) {
-		return "", aerrors.TracedErrorf(
+		return "", tracederrors.TracedErrorf(
 			"Only implemented for sub directories but '%s' is not a subdirectory of '%s'",
 			absolutePath,
 			relativeToDirPath,
@@ -236,7 +235,7 @@ func (p *PathsService) GetRelativePathTo(absolutePath string, relativeTo string)
 	}
 
 	if relativePath == "" {
-		return "", aerrors.TracedErrorf("relativePath is empty string after evaluation")
+		return "", tracederrors.TracedErrorf("relativePath is empty string after evaluation")
 	}
 
 	return relativePath, nil
@@ -244,11 +243,11 @@ func (p *PathsService) GetRelativePathTo(absolutePath string, relativeTo string)
 
 func (p *PathsService) GetRelativePathsTo(absolutePaths []string, relativeTo string) (relativePaths []string, err error) {
 	if absolutePaths == nil {
-		return nil, aerrors.TracedErrorNil("absoultePaths")
+		return nil, tracederrors.TracedErrorNil("absoultePaths")
 	}
 
 	if relativeTo == "" {
-		return nil, aerrors.TracedErrorEmptyString("relativeTo")
+		return nil, tracederrors.TracedErrorEmptyString("relativeTo")
 	}
 
 	relativePaths = []string{}

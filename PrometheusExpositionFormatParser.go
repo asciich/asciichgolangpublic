@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/prometheus/common/expfmt"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type PrometheusExpositionFormatParserService struct{}
@@ -31,7 +31,7 @@ func (p *PrometheusExpositionFormatParserService) MustParseString(toParse string
 
 func (p *PrometheusExpositionFormatParserService) ParseString(toParse string) (parsed *PrometheusParsedMetrics, err error) {
 	if toParse == "" {
-		return nil, errors.TracedErrorEmptyString("toParse")
+		return nil, tracederrors.TracedErrorEmptyString("toParse")
 	}
 
 	stringReader := strings.NewReader(toParse)
@@ -39,7 +39,7 @@ func (p *PrometheusExpositionFormatParserService) ParseString(toParse string) (p
 	var parser expfmt.TextParser
 	metricFamilies, err := parser.TextToMetricFamilies(stringReader)
 	if err != nil {
-		return nil, errors.TracedErrorf(
+		return nil, tracederrors.TracedErrorf(
 			"Failed to parse text into metric families: '%w'",
 			err,
 		)

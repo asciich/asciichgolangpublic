@@ -1,8 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type DirectoriesService struct {
@@ -18,7 +18,7 @@ func NewDirectoriesService() (d *DirectoriesService) {
 
 func (d *DirectoriesService) CreateLocalDirectoryByPath(path string, verbose bool) (l Directory, err error) {
 	if path == "" {
-		return nil, errors.TracedErrorEmptyString("path")
+		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
 
 	dir, err := GetLocalDirectoryByPath(path)

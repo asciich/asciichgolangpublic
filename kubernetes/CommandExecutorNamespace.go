@@ -7,8 +7,8 @@ import (
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/datatypes"
 	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	"github.com/asciich/asciichgolangpublic/errors"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type CommandExecutorNamespace struct {
@@ -22,7 +22,7 @@ func NewCommandExecutorNamespace() (c *CommandExecutorNamespace) {
 
 func (c *CommandExecutorNamespace) CreateRole(createOptions *CreateRoleOptions) (createdRole Role, err error) {
 	if createOptions == nil {
-		return nil, errors.TracedErrorNil("createOptions")
+		return nil, tracederrors.TracedErrorNil("createOptions")
 	}
 
 	roleName, err := createOptions.GetName()
@@ -106,7 +106,7 @@ func (c *CommandExecutorNamespace) CreateRole(createOptions *CreateRoleOptions) 
 
 func (c *CommandExecutorNamespace) DeleteRoleByName(name string, verbose bool) (err error) {
 	if name == "" {
-		return errors.TracedErrorEmptyString("name")
+		return tracederrors.TracedErrorEmptyString("name")
 	}
 
 	namespaceName, err := c.GetName()
@@ -183,7 +183,7 @@ func (c *CommandExecutorNamespace) GetCachedKubectlContext(verbose bool) (contex
 			return "", err
 		}
 
-		return "", errors.TracedErrorNilf(
+		return "", tracederrors.TracedErrorNilf(
 			"Unable to get kubectl context. unexpected kubernetes type '%s'",
 			typeName,
 		)
@@ -214,7 +214,7 @@ func (c *CommandExecutorNamespace) GetCommandExecutor() (commandExecutor asciich
 			return nil, err
 		}
 
-		return nil, errors.TracedErrorNilf(
+		return nil, tracederrors.TracedErrorNilf(
 			"Unable to get command executor. unexpected kubernetes type '%s'",
 			typeName,
 		)
@@ -230,7 +230,7 @@ func (c *CommandExecutorNamespace) GetKubernetesCluster() (kubernetesCluster Kub
 
 func (c *CommandExecutorNamespace) GetName() (name string, err error) {
 	if c.name == "" {
-		return "", errors.TracedErrorf("name not set")
+		return "", tracederrors.TracedErrorf("name not set")
 	}
 
 	return c.name, nil
@@ -238,7 +238,7 @@ func (c *CommandExecutorNamespace) GetName() (name string, err error) {
 
 func (c *CommandExecutorNamespace) GetRoleByName(name string) (role Role, err error) {
 	if name == "" {
-		return nil, errors.TracedErrorEmptyString("name")
+		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
 
 	toReturn := NewCommandExecutorRole()
@@ -295,7 +295,7 @@ func (c *CommandExecutorNamespace) ListRoleNames(verbose bool) (roleNames []stri
 
 		splitted := strings.Split(line, "/")
 		if len(splitted) != 2 {
-			return nil, errors.TracedErrorf(
+			return nil, tracederrors.TracedErrorf(
 				"Unable to get role name out of line='%s'.",
 				line,
 			)
@@ -303,7 +303,7 @@ func (c *CommandExecutorNamespace) ListRoleNames(verbose bool) (roleNames []stri
 
 		roleName := splitted[1]
 		if roleName == "" {
-			return nil, errors.TracedErrorf(
+			return nil, tracederrors.TracedErrorf(
 				"roleName is empty stiring after evaluation of line '%s'",
 				line,
 			)
@@ -437,7 +437,7 @@ func (c *CommandExecutorNamespace) MustSetName(name string) {
 
 func (c *CommandExecutorNamespace) RoleByNameExists(name string, verbose bool) (exists bool, err error) {
 	if name == "" {
-		return false, errors.TracedErrorEmptyString("name")
+		return false, tracederrors.TracedErrorEmptyString("name")
 	}
 
 	roleNames, err := c.ListRoleNames(false)
@@ -473,7 +473,7 @@ func (c *CommandExecutorNamespace) RoleByNameExists(name string, verbose bool) (
 
 func (c *CommandExecutorNamespace) RunCommand(runCommandOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
 	if runCommandOptions == nil {
-		return nil, errors.TracedErrorNil("runCommandOptions")
+		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}
 
 	commandExecutor, err := c.GetCommandExecutor()
@@ -486,7 +486,7 @@ func (c *CommandExecutorNamespace) RunCommand(runCommandOptions *asciichgolangpu
 
 func (c *CommandExecutorNamespace) RunCommandAndGetStdoutAsLines(runCommandOptions *asciichgolangpublic.RunCommandOptions) (lines []string, err error) {
 	if runCommandOptions == nil {
-		return nil, errors.TracedErrorNil("runCommandOptions")
+		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}
 
 	commandOutput, err := c.RunCommand(runCommandOptions)
@@ -505,7 +505,7 @@ func (c *CommandExecutorNamespace) SetKubernetesCluster(kubernetesCluster Kubern
 
 func (c *CommandExecutorNamespace) SetName(name string) (err error) {
 	if name == "" {
-		return errors.TracedErrorf("name is empty string")
+		return tracederrors.TracedErrorf("name is empty string")
 	}
 
 	c.name = name
