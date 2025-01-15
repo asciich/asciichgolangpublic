@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"strings"
 
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -125,7 +125,7 @@ func (u *URL) GetPathAsString() (urlPath string, err error) {
 	pathParts := splitted[1:]
 	urlPath = strings.Join(pathParts, "/")
 
-	urlPath = astrings.TrimAllSuffix(urlPath, "/")
+	urlPath = stringsutils.TrimAllSuffix(urlPath, "/")
 
 	return urlPath, nil
 }

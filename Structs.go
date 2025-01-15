@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/pointers"
+	"github.com/asciich/asciichgolangpublic/datatypes/pointersutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -49,7 +49,7 @@ func (s *StructsService) IsPointerToStruct(objectToTest interface{}) (isStruct b
 		return false
 	}
 
-	if !pointers.IsPointer(objectToTest) {
+	if !pointersutils.IsPointer(objectToTest) {
 		return false
 	}
 

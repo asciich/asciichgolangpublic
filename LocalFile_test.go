@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/asciich/asciichgolangpublic/datatypes/pointers"
+	"github.com/asciich/asciichgolangpublic/datatypes/pointersutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 )
 
@@ -454,7 +454,7 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 				)
 				localCopy := MustGetLocalFileByFile(copy)
 
-				assert.False(pointers.MustPointersEqual(
+				assert.False(pointersutils.MustPointersEqual(
 					localTestFile.MustGetParentFileForBaseClassAsLocalFile(),
 					localCopy.MustGetParentFileForBaseClassAsLocalFile(),
 				))

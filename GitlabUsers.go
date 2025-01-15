@@ -1,9 +1,9 @@
 package asciichgolangpublic
 
 import (
+	"slices"
 	"strings"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -513,6 +513,6 @@ func (u *GitlabUsers) UserByUserNameExists(username string) (userExists bool, er
 		return false, err
 	}
 
-	userExists = aslices.ContainsString(userNameList, username)
+	userExists = slices.Contains(userNameList, username)
 	return userExists, nil
 }

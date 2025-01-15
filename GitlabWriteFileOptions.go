@@ -1,7 +1,7 @@
 package asciichgolangpublic
 
 import (
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -51,7 +51,7 @@ func (g *GitlabWriteFileOptions) GetDeepCopy() (copy *GitlabWriteFileOptions) {
 	*copy = *g
 
 	if len(g.Content) > 0 {
-		copy.Content = aslices.GetDeepCopyOfByteSlice(g.Content)
+		copy.Content = slicesutils.GetDeepCopyOfByteSlice(g.Content)
 	}
 
 	return copy

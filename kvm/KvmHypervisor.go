@@ -1,12 +1,12 @@
 package kvm
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/hosts"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -212,26 +212,26 @@ func (k *KVMHypervisor) GetStoragePools(verbose bool) (storagePools []*KvmStorag
 		return nil, err
 	}
 
-	firstLine, unparsedOutput := astrings.SplitFirstLineAndContent(listPoolOutput)
+	firstLine, unparsedOutput := stringsutils.SplitFirstLineAndContent(listPoolOutput)
 	firstLine = strings.TrimSpace(firstLine)
 	if !strings.HasPrefix(firstLine, "Name") {
 		return nil, tracederrors.TracedErrorf("Unexpected first line of list pool output: '%s'", firstLine)
 	}
 
-	secondLine, unparsedOutput := astrings.SplitFirstLineAndContent(unparsedOutput)
+	secondLine, unparsedOutput := stringsutils.SplitFirstLineAndContent(unparsedOutput)
 	secondLine = strings.TrimSpace(secondLine)
 	if strings.Count(secondLine, "-") < 5 {
 		return nil, tracederrors.TracedErrorf("Unexpected second line of list pool output: '%s'", secondLine)
 	}
 
 	storagePools = []*KvmStoragePool{}
-	for _, line := range astrings.SplitLines(unparsedOutput, true) {
+	for _, line := range stringsutils.SplitLines(unparsedOutput, true) {
 		line = strings.TrimSpace(line)
 		if len(line) <= 0 {
 			continue
 		}
 
-		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(line)
+		splitted := stringsutils.SplitAtSpacesAndRemoveEmptyStrings(line)
 		if len(splitted) != 3 {
 			return nil, tracederrors.TracedErrorf("Unable to splitt list pool line '%v' : '%v'", line, splitted)
 		}
@@ -332,26 +332,26 @@ func (k *KVMHypervisor) GetVmList(verbose bool) (vms []*KvmVm, err error) {
 		return nil, err
 	}
 
-	firstLine, unparsedOutput := astrings.SplitFirstLineAndContent(listOutput)
+	firstLine, unparsedOutput := stringsutils.SplitFirstLineAndContent(listOutput)
 	firstLine = strings.TrimSpace(firstLine)
 	if !strings.HasPrefix(firstLine, "Id ") {
 		return nil, tracederrors.TracedErrorf("Unexpected first line '%s'. Full output is '%s'.", firstLine, listOutput)
 	}
 
-	secondLine, unparsedOutput := astrings.SplitFirstLineAndContent(unparsedOutput)
+	secondLine, unparsedOutput := stringsutils.SplitFirstLineAndContent(unparsedOutput)
 	if !strings.Contains(secondLine, "-----") {
 		return nil, tracederrors.TracedErrorf("Unexpected second line '%s'. Full output is '%s'.", secondLine, listOutput)
 	}
 
 	vms = []*KvmVm{}
-	for _, line := range astrings.SplitLines(unparsedOutput, true) {
+	for _, line := range stringsutils.SplitLines(unparsedOutput, true) {
 		if len(strings.TrimSpace(line)) <= 0 {
 			continue
 		}
 
 		lineToProcess := strings.ReplaceAll(line, "shut off", "shut_off")
 
-		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(lineToProcess)
+		splitted := stringsutils.SplitAtSpacesAndRemoveEmptyStrings(lineToProcess)
 		if len(splitted) != 3 {
 			return nil, tracederrors.TracedErrorf("Failed to split line '%s'", line)
 		}
@@ -858,7 +858,7 @@ func (k *KVMHypervisor) VmByNameExists(vmName string) (vmExists bool, err error)
 		return false, err
 	}
 
-	if aslices.ContainsString(vmNameList, vmName) {
+	if slices.Contains(vmNameList, vmName) {
 		return true, nil
 	} else {
 		return false, nil

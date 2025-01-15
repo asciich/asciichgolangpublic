@@ -4,14 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/changesummary"
 	"github.com/asciich/asciichgolangpublic/checksums"
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/datetime"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -61,8 +63,8 @@ func (f *FileBase) AppendLine(line string, verbose bool) (err error) {
 		return err
 	}
 
-	toWrite := astrings.TrimAllLeadingAndTailingNewLines(line)
-	toWrite = astrings.EnsureEndsWithExactlyOneLineBreak(toWrite)
+	toWrite := stringsutils.TrimAllLeadingAndTailingNewLines(line)
+	toWrite = stringsutils.EnsureEndsWithExactlyOneLineBreak(toWrite)
 
 	isEmptyFile, err := f.IsEmptyFile()
 	if err != nil {
@@ -113,7 +115,7 @@ func (f *FileBase) ContainsLine(line string) (containsLine bool, err error) {
 		return false, err
 	}
 
-	return astrings.ContainsLine(content, line), nil
+	return stringsutils.ContainsLine(content, line), nil
 }
 
 func (f *FileBase) CreateParentDirectory(verbose bool) (err error) {
@@ -193,7 +195,7 @@ func (f *FileBase) EnsureEndsWithLineBreak(verbose bool) (err error) {
 }
 
 func (f *FileBase) EnsureLineInFile(line string, verbose bool) (err error) {
-	line = astrings.TrimAllLeadingAndTailingNewLines(line)
+	line = stringsutils.TrimAllLeadingAndTailingNewLines(line)
 
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
@@ -215,7 +217,7 @@ func (f *FileBase) EnsureLineInFile(line string, verbose bool) (err error) {
 		return err
 	}
 
-	if aslices.ContainsString(lines, line) {
+	if slices.Contains(lines, line) {
 		logging.LogInfof("Line '%s' already present in '%s'.", line, localPath)
 	} else {
 		err := parent.AppendLine(line, verbose)
@@ -250,7 +252,7 @@ func (f *FileBase) GetFileTypeDescription(verbose bool) (fileTypeDescription str
 		return "", err
 	}
 
-	stdoutLines = aslices.RemoveEmptyStrings(stdoutLines)
+	stdoutLines = slicesutils.RemoveEmptyStrings(stdoutLines)
 	if len(stdoutLines) != 1 {
 		return "", tracederrors.TracedErrorf("Expected exactly one line left bug got: '%v'", stdoutLines)
 	}
@@ -324,7 +326,7 @@ func (f *FileBase) GetNumberOfLinesWithPrefix(prefix string, trimLines bool) (nL
 		return -1, err
 	}
 
-	nLines = astrings.GetNumberOfLinesWithPrefix(contentString, prefix, trimLines)
+	nLines = stringsutils.GetNumberOfLinesWithPrefix(contentString, prefix, trimLines)
 
 	return nLines, nil
 }
@@ -441,7 +443,7 @@ func (f *FileBase) GetTextBlocks(verbose bool) (textBlocks []string, err error) 
 				braceEndMarker = ""
 			} else {
 				if !strings.HasPrefix(trimmedLine, "//") {
-					currentBlockWithoutComments := astrings.RemoveCommentsAndTrimSpace(blockToAdd)
+					currentBlockWithoutComments := stringsutils.RemoveCommentsAndTrimSpace(blockToAdd)
 					if currentBlockWithoutComments == "" {
 						if strings.HasSuffix(trimmedLine, "(") {
 							braceEndMarker = ")"
@@ -496,7 +498,7 @@ func (f *FileBase) GetValueAsInt(key string) (value int, err error) {
 		return -1, err
 	}
 
-	return astrings.GetValueAsInt(content, key)
+	return stringsutils.GetValueAsInt(content, key)
 }
 
 func (f *FileBase) GetValueAsString(key string) (value string, err error) {
@@ -514,7 +516,7 @@ func (f *FileBase) GetValueAsString(key string) (value string, err error) {
 		return "", err
 	}
 
-	return astrings.GetValueAsString(content, key)
+	return stringsutils.GetValueAsString(content, key)
 }
 
 func (f *FileBase) IsContentEqualByComparingSha256Sum(otherFile File, verbose bool) (isEqual bool, err error) {
@@ -583,7 +585,7 @@ func (f *FileBase) IsPgpEncrypted(verbose bool) (isEncrypted bool, err error) {
 		return false, err
 	}
 
-	if astrings.ContainsAtLeastOneSubstringIgnoreCase(
+	if stringsutils.ContainsAtLeastOneSubstringIgnoreCase(
 		fileDescription,
 		[]string{"gpg", "pgp"},
 	) {
@@ -1123,7 +1125,7 @@ func (f *FileBase) ReadAsLines() (contentLines []string, err error) {
 		return nil, err
 	}
 
-	contentLines = astrings.SplitLines(content, false)
+	contentLines = stringsutils.SplitLines(content, false)
 
 	return contentLines, nil
 }
@@ -1134,8 +1136,8 @@ func (f *FileBase) ReadAsLinesWithoutComments() (contentLines []string, err erro
 		return nil, err
 	}
 
-	contentString = astrings.RemoveComments(contentString)
-	contentLines = astrings.SplitLines(contentString, false)
+	contentString = stringsutils.RemoveComments(contentString)
+	contentLines = stringsutils.SplitLines(contentString, false)
 
 	return contentLines, nil
 }
@@ -1174,7 +1176,7 @@ func (f *FileBase) ReadFirstLine() (firstLine string, err error) {
 		return "", err
 	}
 
-	firstLine = astrings.GetFirstLine(content)
+	firstLine = stringsutils.GetFirstLine(content)
 
 	return firstLine, nil
 }
@@ -1226,7 +1228,7 @@ func (f *FileBase) RemoveLinesWithPrefix(prefix string, verbose bool) (err error
 		return err
 	}
 
-	replaced := astrings.RemoveLinesWithPrefix(content, prefix)
+	replaced := stringsutils.RemoveLinesWithPrefix(content, prefix)
 
 	path, err := parent.GetPath()
 	if err != nil {
@@ -1416,7 +1418,7 @@ func (f *FileBase) SortBlocksInFile(verbose bool) (err error) {
 		return err
 	}
 
-	blocks = aslices.SortStringSlice(blocks)
+	sort.Strings(blocks)
 
 	err = f.WriteTextBlocks(blocks, verbose)
 	if err != nil {
@@ -1437,7 +1439,7 @@ func (f *FileBase) TrimSpacesAtBeginningOfFile(verbose bool) (err error) {
 		return err
 	}
 
-	content = astrings.TrimSpacesLeft(content)
+	content = stringsutils.TrimSpacesLeft(content)
 
 	err = f.WriteString(content, verbose)
 	if err != nil {
@@ -1489,7 +1491,7 @@ func (f *FileBase) WriteTextBlocks(textBlocks []string, verbose bool) (err error
 		if i > 0 {
 			blockToWrite = "\n" + blockToWrite
 		}
-		blockToWrite = astrings.EnsureEndsWithExactlyOneLineBreak(blockToWrite)
+		blockToWrite = stringsutils.EnsureEndsWithExactlyOneLineBreak(blockToWrite)
 
 		textToWrite += blockToWrite
 	}

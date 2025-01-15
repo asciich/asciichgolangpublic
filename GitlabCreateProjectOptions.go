@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -139,8 +139,8 @@ func (o *GitlabCreateProjectOptions) GetGroupNames(verbose bool) (groupNames []s
 	}
 
 	groupNames = strings.Split(pathOnly, "/")
-	groupNames = aslices.RemoveEmptyStrings(groupNames)
-	groupNames = aslices.RemoveMatchingStrings(groupNames, ".")
+	groupNames = slicesutils.RemoveEmptyStrings(groupNames)
+	groupNames = slicesutils.RemoveMatchingStrings(groupNames, ".")
 
 	if verbose {
 		logging.LogInfof(

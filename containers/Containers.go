@@ -1,10 +1,10 @@
 package containers
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -37,7 +37,7 @@ func IsRunningInsideContainer(verbose bool) (isRunningInContainer bool, err erro
 
 		pathToCheck := splittedLine[2]
 
-		if !aslices.ContainsString([]string{"/", "/init.scope"}, pathToCheck) {
+		if !slices.Contains([]string{"/", "/init.scope"}, pathToCheck) {
 			if verbose {
 				logging.LogInfo("Currently running in a container")
 			}

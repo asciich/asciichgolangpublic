@@ -4,9 +4,10 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -509,7 +510,7 @@ func (l *LocalDirectory) GetGitRepositoriesAsLocalGitRepositories(verbose bool) 
 			return nil, err
 		}
 
-		if !aslices.ContainsString(repoPaths, rootDirectoryPath) {
+		if !slicesutils.ContainsString(repoPaths, rootDirectoryPath) {
 			repoPaths = append(repoPaths, rootDirectoryPath)
 		}
 	}
@@ -675,7 +676,7 @@ func (l *LocalDirectory) ListFilePaths(listOptions *ListFileOptions) (filePathLi
 		return nil, tracederrors.TracedErrorf("Unable to filepath.Walk: '%w'", err)
 	}
 
-	filePathList = aslices.RemoveEmptyStrings(filePathList)
+	filePathList = slicesutils.RemoveEmptyStrings(filePathList)
 
 	filePathList, err = Paths().FilterPaths(filePathList, listOptions)
 	if err != nil {
@@ -689,7 +690,7 @@ func (l *LocalDirectory) ListFilePaths(listOptions *ListFileOptions) (filePathLi
 		}
 	}
 
-	filePathList = aslices.SortStringSliceAndRemoveEmpty(filePathList)
+	filePathList = slicesutils.SortStringSliceAndRemoveEmpty(filePathList)
 
 	if len(filePathList) <= 0 {
 		if !listOptions.AllowEmptyListIfNoFileIsFound {
@@ -792,7 +793,7 @@ func (l *LocalDirectory) ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions 
 		}
 	}
 
-	subDirectoryPaths = aslices.SortStringSlice(subDirectoryPaths)
+	sort.Strings(subDirectoryPaths)
 
 	return subDirectoryPaths, nil
 }

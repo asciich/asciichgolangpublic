@@ -1,9 +1,9 @@
 package asciichgolangpublic
 
 import (
+	"slices"
 	"strings"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -134,7 +134,7 @@ func (t *TmuxSession) Exists(verbose bool) (exists bool, err error) {
 		return false, err
 	}
 
-	exists = aslices.ContainsString(sessionNames, name)
+	exists = slices.Contains(sessionNames, name)
 
 	if exists {
 		if verbose {

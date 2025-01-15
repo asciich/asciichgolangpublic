@@ -1,7 +1,7 @@
 package asciichgolangpublic
 
 import (
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -31,7 +31,7 @@ func (o *RunCommandOptions) GetCommand() (command []string, err error) {
 		return nil, tracederrors.TracedError("command not set")
 	}
 
-	command = aslices.GetDeepCopyOfStringsSlice(o.Command)
+	command = slicesutils.GetDeepCopyOfStringsSlice(o.Command)
 
 	if o.IsTimeoutSet() {
 		timeout, err := o.GetTimeoutSecondsAsString()

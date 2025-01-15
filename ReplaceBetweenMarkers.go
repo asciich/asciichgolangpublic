@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -84,7 +84,7 @@ func (r *ReplaceBetweenMarkersService) GetSourcePath(line string, options *Repla
 	sourcePath = splitted[1]
 	sourcePath = strings.Split(sourcePath, " ")[0]
 	sourcePath = strings.TrimSpace(sourcePath)
-	sourcePath = astrings.RemoveSurroundingQuotationMarks(sourcePath)
+	sourcePath = stringsutils.RemoveSurroundingQuotationMarks(sourcePath)
 	sourcePath = strings.TrimSpace(sourcePath)
 
 	if sourcePath == "" {
@@ -112,12 +112,12 @@ func (r *ReplaceBetweenMarkersService) GetSourcePath(line string, options *Repla
 }
 
 func (r *ReplaceBetweenMarkersService) IsReplaceBetweenMarkerEnd(line string) (isReplaceBetweenMarkerEnd bool) {
-	commentContent := astrings.RemoveCommentMarkersAndTrimSpace(line)
+	commentContent := stringsutils.RemoveCommentMarkersAndTrimSpace(line)
 	return strings.HasPrefix(commentContent, "REPLACE_BETWEEN_MARKERS END")
 }
 
 func (r *ReplaceBetweenMarkersService) IsReplaceBetweenMarkerStart(line string) (isReplaceBetweenMarkerStart bool) {
-	commentContent := astrings.RemoveCommentMarkersAndTrimSpace(line)
+	commentContent := stringsutils.RemoveCommentMarkersAndTrimSpace(line)
 	return strings.HasPrefix(commentContent, "REPLACE_BETWEEN_MARKERS START")
 }
 
@@ -165,8 +165,8 @@ func (r *ReplaceBetweenMarkersService) ReplaceBySourcesInString(input string, op
 	outLines := []string{}
 
 	var startMarkerFound bool = false
-	for _, line := range astrings.SplitLines(input, false) {
-		if astrings.IsComment(line) {
+	for _, line := range stringsutils.SplitLines(input, false) {
+		if stringsutils.IsComment(line) {
 			if r.IsReplaceBetweenMarkerStart(line) {
 				startMarkerFound = true
 				outLines = append(outLines, line)

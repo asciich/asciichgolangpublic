@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -380,7 +380,7 @@ func (v *VersionSemanticVersion) SetVersionByString(version string) (err error) 
 		return tracederrors.TracedErrorEmptyString("version")
 	}
 
-	version = astrings.TrimPrefixIgnoreCase(version, "v")
+	version = stringsutils.TrimPrefixIgnoreCase(version, "v")
 
 	splitted := strings.Split(version, ".")
 	if len(splitted) != 3 {

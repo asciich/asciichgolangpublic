@@ -5,7 +5,7 @@ import (
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -699,9 +699,9 @@ func (g *GitlabInstance) GetPersonalProjectByName(projectName string, verbose bo
 		return nil, err
 	}
 
-	personalProjectsPath = astrings.EnsureSuffix(personalProjectsPath, "/")
+	personalProjectsPath = stringsutils.EnsureSuffix(personalProjectsPath, "/")
 
-	projectPath := astrings.EnsurePrefix(projectName, personalProjectsPath)
+	projectPath := stringsutils.EnsurePrefix(projectName, personalProjectsPath)
 
 	project, err = g.GetGitlabProjectByPath(projectPath, verbose)
 	if err != nil {

@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/datatypes"
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -803,7 +803,7 @@ func (c *CommandExecutorGitRepository) GetRemoteConfigs(verbose bool) (remoteCon
 
 		lineCleaned := strings.ReplaceAll(line, "\t", " ")
 
-		splitted := astrings.SplitAtSpacesAndRemoveEmptyStrings(lineCleaned)
+		splitted := stringsutils.SplitAtSpacesAndRemoveEmptyStrings(lineCleaned)
 		if len(splitted) != 3 {
 			return nil, tracederrors.TracedErrorf("Unable to parse '%s' as remote. splitted is '%v'", line, splitted)
 		}
@@ -894,7 +894,7 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootD
 				return "", err
 			}
 
-			if aslices.ContainsAllStrings(filePaths, []string{"config", "HEAD"}) {
+			if slicesutils.ContainsAllStrings(filePaths, []string{"config", "HEAD"}) {
 				rootDirectoryPath, err = cwd.GetPath()
 				if err != nil {
 					return "", err

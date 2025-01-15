@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -111,7 +111,7 @@ func (c *GopassCredential) GetAsString() (credential string, err error) {
 		return "", err
 	}
 
-	credential = astrings.RemoveTailingNewline(string(credentialBytes))
+	credential = stringsutils.RemoveTailingNewline(string(credentialBytes))
 
 	return credential, nil
 }

@@ -2,10 +2,10 @@ package asciichgolangpublic
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -214,7 +214,7 @@ func (g *GitlabBranch) Delete(options *GitlabDeleteBranchOptions) (err error) {
 					return err
 				}
 
-				exists = aslices.ContainsString(branchNames, branchName)
+				exists = slices.Contains(branchNames, branchName)
 				if exists {
 					time.Sleep(1000 * time.Millisecond)
 					if options.Verbose {

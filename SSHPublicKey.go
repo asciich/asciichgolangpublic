@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -168,11 +168,11 @@ func (k *SSHPublicKey) SetFromString(keyMaterial string) (err error) {
 	numberOfSpacesInKeyMaterial := strings.Count(keyMaterial, " ")
 	if numberOfSpacesInKeyMaterial == 0 {
 		k.keyMaterial = keyMaterial
-	} else if aslices.ContainsInt([]int{1, 2, 3}, numberOfSpacesInKeyMaterial) {
+	} else if slicesutils.ContainsInt([]int{1, 2, 3}, numberOfSpacesInKeyMaterial) {
 		splittedAllElements := strings.Split(keyMaterial, " ")
-		splitted := aslices.TrimSpace(splittedAllElements)
-		splitted = aslices.RemoveMatchingStrings(splitted, "ssh-rsa")
-		splitted, err = aslices.RemoveStringsWhichContains(splitted, "@")
+		splitted := slicesutils.TrimSpace(splittedAllElements)
+		splitted = slicesutils.RemoveMatchingStrings(splitted, "ssh-rsa")
+		splitted, err = slicesutils.RemoveStringsWhichContains(splitted, "@")
 		if err != nil {
 			return err
 		}
@@ -239,7 +239,7 @@ func (k *SSHPublicKey) WriteToFile(outputFile File, verbose bool) (err error) {
 		return err
 	}
 
-	sshKeyLine = astrings.EnsureEndsWithExactlyOneLineBreak(sshKeyLine)
+	sshKeyLine = stringsutils.EnsureEndsWithExactlyOneLineBreak(sshKeyLine)
 	err = outputFile.WriteString(sshKeyLine, verbose)
 	if err != nil {
 		return err

@@ -2,11 +2,11 @@ package asciichgolangpublic
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -487,8 +487,7 @@ func (s *GitlabRunnersService) RunnerByNameExists(runnerName string) (exists boo
 		return false, err
 	}
 
-	exists = aslices.ContainsString(runnerNames, runnerName)
-	return exists, nil
+	return slices.Contains(runnerNames, runnerName), nil
 }
 
 func (s *GitlabRunnersService) SetGitlab(gitlab *GitlabInstance) (err error) {

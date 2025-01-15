@@ -3,9 +3,10 @@ package asciichgolangpublic
 import (
 	"fmt"
 	"path/filepath"
+	"slices"
 	"strings"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -32,7 +33,7 @@ func (g *GopassService) CredentialExists(fullCredentialPath string) (credentialE
 		return false, err
 	}
 
-	return aslices.ContainsString(credentailList, fullCredentialPath), nil
+	return slices.Contains(credentailList, fullCredentialPath), nil
 }
 
 func (g *GopassService) Generate(credentialName string, verbose bool) (generatedCredential *GopassCredential, err error) {
@@ -498,8 +499,7 @@ func (g *GopassService) SecretNameExist(secretName string) (secretExists bool, e
 		return false, err
 	}
 
-	secretExists = aslices.ContainsString(secretNames, secretName)
-	return secretExists, nil
+	return slicesutils.ContainsString(secretNames, secretName), nil
 }
 
 func (g *GopassService) Sync(verbose bool) (err error) {

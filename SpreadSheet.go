@@ -5,8 +5,8 @@ import (
 	"sort"
 	"strconv"
 
-	aslices "github.com/asciich/asciichgolangpublic/datatypes/slices"
-	astrings "github.com/asciich/asciichgolangpublic/datatypes/strings"
+	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -162,7 +162,7 @@ func (s *SpreadSheet) GetMaxColumnWidths() (columnWitdhs []int, err error) {
 		return nil, err
 	}
 
-	columnWidths := aslices.GetIntSliceInitializedWithZeros(nColumns)
+	columnWidths := slicesutils.GetIntSliceInitializedWithZeros(nColumns)
 
 	for _, row := range rows {
 		rowColumnWidths, err := row.GetColumnWidths()
@@ -170,7 +170,7 @@ func (s *SpreadSheet) GetMaxColumnWidths() (columnWitdhs []int, err error) {
 			return nil, err
 		}
 
-		columnWidths = aslices.MaxIntValuePerIndex(columnWidths, rowColumnWidths)
+		columnWidths = slicesutils.MaxIntValuePerIndex(columnWidths, rowColumnWidths)
 	}
 
 	return columnWidths, nil
@@ -608,7 +608,7 @@ func (s *SpreadSheet) RenderToStdout(options *SpreadSheetRenderOptions) (err err
 		return err
 	}
 
-	rendered = astrings.EnsureEndsWithLineBreak(rendered)
+	rendered = stringsutils.EnsureEndsWithLineBreak(rendered)
 
 	fmt.Print(rendered)
 
