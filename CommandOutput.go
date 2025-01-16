@@ -7,6 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/encoding/utf16utils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/osutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -327,7 +328,7 @@ func (o *CommandOutput) GetStderrAsString() (stderr string, err error) {
 	}
 
 	if osutils.IsRunningOnWindows() {
-		stderr, err = UTF16().DecodeAsString(*o.stderr)
+		stderr, err = utf16utils.DecodeAsString(*o.stderr)
 		if err != nil {
 			return "", err
 		}
@@ -373,7 +374,7 @@ func (o *CommandOutput) GetStdoutAsString() (stdout string, err error) {
 	}
 
 	if osutils.IsRunningOnWindows() {
-		stdout, err = UTF16().DecodeAsString(*o.stdout)
+		stdout, err = utf16utils.DecodeAsString(*o.stdout)
 		if err != nil {
 			return "", err
 		}

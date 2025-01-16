@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"github.com/asciich/asciichgolangpublic/encoding/utf16utils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/osutils"
 )
@@ -17,7 +18,7 @@ func NewWindowsService() (w *WindowsService) {
 }
 
 func (w *WindowsService) DecodeAsBytes(windowsUtf16 []byte) (decoded []byte, err error) {
-	decoded, err = UTF16().DecodeAsBytes(windowsUtf16)
+	decoded, err = utf16utils.DecodeAsBytes(windowsUtf16)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +27,7 @@ func (w *WindowsService) DecodeAsBytes(windowsUtf16 []byte) (decoded []byte, err
 }
 
 func (w *WindowsService) DecodeAsString(windowsUtf16 []byte) (decoded string, err error) {
-	decoded, err = UTF16().DecodeAsString(windowsUtf16)
+	decoded, err = utf16utils.DecodeAsString(windowsUtf16)
 	if err != nil {
 		return "", err
 	}
