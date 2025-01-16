@@ -1,6 +1,9 @@
 package asciichgolangpublic
 
-import "github.com/asciich/asciichgolangpublic/logging"
+import (
+	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/osutils"
+)
 
 type WindowsService struct{}
 
@@ -36,7 +39,7 @@ func (w *WindowsService) DecodeStringAsString(windowsUtf16 string) (decoded stri
 }
 
 func (w *WindowsService) IsRunningOnWindows() (isRunningOnWindows bool) {
-	return OS().IsRunningOnWindows()
+	return osutils.IsRunningOnWindows()
 }
 
 func (w *WindowsService) MustDecodeAsBytes(windowsUtf16 []byte) (decoded []byte) {

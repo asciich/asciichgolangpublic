@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/osutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -90,4 +91,27 @@ func (f *FilesService) WriteStringToFile(path string, content string, verbose bo
 	}
 
 	return nil
+}
+
+func GetCurrentWorkingDirectory() (workingDirectory *LocalDirectory, err error) {
+	workingDirectoryPath, err := osutils.GetCurrentWorkingDirectoryAsString()
+	if err != nil {
+		return nil, err
+	}
+
+	workingDirectory, err = GetLocalDirectoryByPath(workingDirectoryPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return workingDirectory, nil
+}
+
+func MustGetCurrentWorkingDirectory() (workingDirectory *LocalDirectory) {
+	workingDirectory, err := GetCurrentWorkingDirectory()
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return workingDirectory
 }

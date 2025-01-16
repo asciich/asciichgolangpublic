@@ -135,9 +135,6 @@ func (o *X509CreateCertificateOptions) GetSubjectStringForOpenssl() (subjectStri
 	}
 
 	subjectString += "/L=" + locality
-	if err != nil {
-		return "", err
-	}
 
 	return subjectString, nil
 }
