@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package osutils
 
 import (
 	"testing"
@@ -20,7 +20,7 @@ func TestOsIsRunningOnWindows(t *testing.T) {
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				assert.False(OS().IsRunningOnWindows())
+				assert.False(IsRunningOnWindows())
 			},
 		)
 	}

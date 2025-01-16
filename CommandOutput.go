@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/osutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -325,7 +326,7 @@ func (o *CommandOutput) GetStderrAsString() (stderr string, err error) {
 		return "", tracederrors.TracedError("stderr is not set")
 	}
 
-	if OS().IsRunningOnWindows() {
+	if osutils.IsRunningOnWindows() {
 		stderr, err = UTF16().DecodeAsString(*o.stderr)
 		if err != nil {
 			return "", err
@@ -371,7 +372,7 @@ func (o *CommandOutput) GetStdoutAsString() (stdout string, err error) {
 		return "", tracederrors.TracedError("stdout is not set")
 	}
 
-	if OS().IsRunningOnWindows() {
+	if osutils.IsRunningOnWindows() {
 		stdout, err = UTF16().DecodeAsString(*o.stdout)
 		if err != nil {
 			return "", err

@@ -178,9 +178,6 @@ func (c *X509Certificate) IsIntermediateCertificate() (isIntermediateCertificate
 	}
 
 	isIntermediateCertificate = nativeCert.IsCA
-	if err != nil {
-		return false, err
-	}
 
 	return isIntermediateCertificate, nil
 }
