@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package utf16utils
 
 import (
 	"testing"
@@ -32,7 +32,7 @@ func TestUTF16DecodeAsString(t *testing.T) {
 
 				assert.EqualValues(
 					tt.expectedOutput,
-					UTF16().MustDecodeAsString(tt.inputUtf16),
+					MustDecodeAsString(tt.inputUtf16),
 				)
 			},
 		)
