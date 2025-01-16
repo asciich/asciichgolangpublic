@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -41,7 +42,7 @@ func (b *PowerShellService) RunCommand(options *RunCommandOptions) (commandOutpu
 	if optionsToUse.RunAsRoot {
 		powerShellCommand = []string{
 			"powershell",
-			ShellLineHandler().MustJoin([]string{
+			shelllinehandler.MustJoin([]string{
 				"Start-Process",
 				"powershell",
 				"-Verb",

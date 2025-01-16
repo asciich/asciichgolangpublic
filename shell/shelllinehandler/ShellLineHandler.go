@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package shelllinehandler
 
 import (
 	"strings"
@@ -9,18 +9,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 )
 
-type ShellLineHandlerService struct {
-}
 
-func NewShellLineHandlerService() (s *ShellLineHandlerService) {
-	return new(ShellLineHandlerService)
-}
-
-func ShellLineHandler() (shellLineHandler *ShellLineHandlerService) {
-	return new(ShellLineHandlerService)
-}
-
-func (s *ShellLineHandlerService) Join(command []string) (joinedCommand string, err error) {
+func Join(command []string) (joinedCommand string, err error) {
 	if len(command) == 1 {
 		return command[0], nil
 	}
@@ -44,8 +34,8 @@ func (s *ShellLineHandlerService) Join(command []string) (joinedCommand string, 
 	return joinedCommand, nil
 }
 
-func (s *ShellLineHandlerService) MustJoin(command []string) (joinedCommand string) {
-	joinedCommand, err := s.Join(command)
+func MustJoin(command []string) (joinedCommand string) {
+	joinedCommand, err := Join(command)
 	if err != nil {
 		logging.LogFatalf("shellLineHandler.Join failed: '%v'", err)
 	}
@@ -53,8 +43,8 @@ func (s *ShellLineHandlerService) MustJoin(command []string) (joinedCommand stri
 	return joinedCommand
 }
 
-func (s *ShellLineHandlerService) MustSplit(command string) (splittedCommand []string) {
-	splittedCommand, err := s.Split(command)
+func MustSplit(command string) (splittedCommand []string) {
+	splittedCommand, err := Split(command)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -62,7 +52,7 @@ func (s *ShellLineHandlerService) MustSplit(command string) (splittedCommand []s
 	return splittedCommand
 }
 
-func (s *ShellLineHandlerService) Split(command string) (splittedCommand []string, err error) {
+func Split(command string) (splittedCommand []string, err error) {
 	splittedCommand, err = shlex.Split(command)
 	if err != nil {
 		return nil, err

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -209,7 +210,7 @@ func (c *X509CertificatesService) CreateRootCaIntoDirectory(createOptions *X509C
 		"rootCA.crt",
 	}
 
-	joinedSslCommand, err := ShellLineHandler().Join(sslCommand)
+	joinedSslCommand, err := shelllinehandler.Join(sslCommand)
 	if err != nil {
 		return nil, err
 	}

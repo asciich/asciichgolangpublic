@@ -16,6 +16,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -138,7 +139,7 @@ func (l *LocalGitRepository) RunGitCommand(gitCommand []string, verbose bool) (c
 		return nil, err
 	}
 
-	gitCommandString, err := ShellLineHandler().Join(gitCommand)
+	gitCommandString, err := shelllinehandler.Join(gitCommand)
 	if err != nil {
 		return nil, err
 	}

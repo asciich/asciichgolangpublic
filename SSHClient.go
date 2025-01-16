@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -239,7 +240,7 @@ func (s *SSHClient) RunCommand(options *RunCommandOptions) (commandOutput *Comma
 		userAtHost = username + "@" + userAtHost
 	}
 
-	commandString, err := ShellLineHandler().Join(options.Command)
+	commandString, err := shelllinehandler.Join(options.Command)
 	if err != nil {
 		return nil, err
 	}
