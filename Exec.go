@@ -8,7 +8,8 @@ import (
 	"os/exec"
 
 	"github.com/asciich/asciichgolangpublic/logging"
-	"github.com/asciich/asciichgolangpublic/osutils"
+	"github.com/asciich/asciichgolangpublic/os/osutils"
+	"github.com/asciich/asciichgolangpublic/os/windows"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -163,7 +164,7 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 						}
 					}
 
-					mOutput, err = Windows().DecodeStringAsString(mOutput)
+					mOutput, err = windows.DecodeStringAsString(mOutput)
 					if err != nil {
 						return nil, err
 					}
@@ -195,7 +196,7 @@ func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *Com
 
 	stderrBytes := stderr.Bytes()
 	if osutils.IsRunningOnWindows() {
-		stderrBytes, err = Windows().DecodeAsBytes(stderrBytes)
+		stderrBytes, err = windows.DecodeAsBytes(stderrBytes)
 		if err != nil {
 			return nil, err
 		}

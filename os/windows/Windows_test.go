@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package windows
 
 import (
 	"testing"
@@ -20,7 +20,7 @@ func TestWindowsIsRunningOnWindows(t *testing.T) {
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				assert.False(Windows().IsRunningOnWindows())
+				assert.False(IsRunningOnWindows())
 			},
 		)
 	}
@@ -46,7 +46,7 @@ func TestWindowsDecodeAsString(t *testing.T) {
 
 				assert.EqualValues(
 					tt.expectedOutput,
-					Windows().MustDecodeAsString(tt.inputUtf16),
+					MustDecodeAsString(tt.inputUtf16),
 				)
 			},
 		)

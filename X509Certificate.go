@@ -216,10 +216,7 @@ func (c *X509Certificate) IsRootCa(verbose bool) (isRootCa bool, err error) {
 	}
 
 	isRootCa = nativeCert.IsCA
-	if err != nil {
-		return false, err
-	}
-
+	
 	return isRootCa, nil
 }
 

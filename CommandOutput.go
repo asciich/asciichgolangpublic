@@ -9,7 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/encoding/utf16utils"
 	"github.com/asciich/asciichgolangpublic/logging"
-	"github.com/asciich/asciichgolangpublic/osutils"
+	"github.com/asciich/asciichgolangpublic/os/osutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
