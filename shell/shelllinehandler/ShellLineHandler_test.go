@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package shelllinehandler
 
 import (
 	"testing"
@@ -23,7 +23,7 @@ func TestShellLineHandlerSplit(t *testing.T) {
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				splitted := ShellLineHandler().MustSplit(tt.commandString)
+				splitted := MustSplit(tt.commandString)
 				assert.EqualValues(tt.expectedSplitted, splitted)
 			},
 		)
@@ -55,7 +55,7 @@ func TestShellLineHandlerJoin(t *testing.T) {
 			func(t *testing.T) {
 				assert := assert.New(t)
 
-				joined := ShellLineHandler().MustJoin(tt.command)
+				joined := MustJoin(tt.command)
 				assert.EqualValues(tt.expectedJoined, joined)
 			},
 		)

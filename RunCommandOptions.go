@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -57,7 +58,7 @@ func (o *RunCommandOptions) GetJoinedCommand() (joinedCommand string, err error)
 		return "", err
 	}
 
-	joinedCommand, err = ShellLineHandler().Join(command)
+	joinedCommand, err = shelllinehandler.Join(command)
 	if err != nil {
 		return "", err
 	}
