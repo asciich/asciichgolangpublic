@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
@@ -67,7 +68,7 @@ func (l *LocalDirectory) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err
 		return err
 	}
 
-	_, err = Bash().RunCommand(
+	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"chmod", chmodString, localPath},
 			Verbose: chmodOptions.Verbose,
@@ -106,7 +107,7 @@ func (l *LocalDirectory) CopyContentToDirectory(destinationDir Directory, verbos
 		destPath + "/.",
 	}
 
-	stdout, err := Bash().RunCommandAndGetStdoutAsString(
+	stdout, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
 		&parameteroptions.RunCommandOptions{
 			Command:            copyCommand,
 			Verbose:            verbose,
@@ -153,7 +154,7 @@ func (l *LocalDirectory) CopyContentToLocalDirectory(destDirectory *LocalDirecto
 		return tracederrors.TracedErrorf("Unable to copy content to local directory, '%s' does not exist.", srcPath)
 	}
 
-	_, err = Bash().RunCommand(
+	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command:            []string{"cp", "-r", "-v", srcPath + "/.", destPath + "/."},
 			Verbose:            verbose,

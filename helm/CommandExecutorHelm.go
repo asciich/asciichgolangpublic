@@ -1,17 +1,17 @@
 package helm
 
 import (
-	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type commandExecutorHelm struct {
-	commandExecutor asciichgolangpublic.CommandExecutor
+	commandExecutor commandexecutor.CommandExecutor
 }
 
-func GetCommandExecutorHelm(executor asciichgolangpublic.CommandExecutor) (helm Helm, err error) {
+func GetCommandExecutorHelm(executor commandexecutor.CommandExecutor) (helm Helm, err error) {
 	if executor == nil {
 		return nil, tracederrors.TracedErrorNil("executor")
 	}
@@ -27,10 +27,10 @@ func GetCommandExecutorHelm(executor asciichgolangpublic.CommandExecutor) (helm 
 }
 
 func GetLocalCommandExecutorHelm() (helm Helm, err error) {
-	return GetCommandExecutorHelm(asciichgolangpublic.Bash())
+	return GetCommandExecutorHelm(commandexecutor.Bash())
 }
 
-func MustGetCommandExecutorHelm(executor asciichgolangpublic.CommandExecutor) (helm Helm) {
+func MustGetCommandExecutorHelm(executor commandexecutor.CommandExecutor) (helm Helm) {
 	helm, err := GetCommandExecutorHelm(executor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -112,12 +112,12 @@ func (c *commandExecutorHelm) AddRepositoryByName(name string, url string, verbo
 	return nil
 }
 
-func (c *commandExecutorHelm) GetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor, err error) {
+func (c *commandExecutorHelm) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
 
 	return c.commandExecutor, nil
 }
 
-func (c *commandExecutorHelm) GetCommandExecutorAndHostDescription() (commandExecutor asciichgolangpublic.CommandExecutor, hostDescription string, err error) {
+func (c *commandExecutorHelm) GetCommandExecutorAndHostDescription() (commandExecutor commandexecutor.CommandExecutor, hostDescription string, err error) {
 	commandExecutor, err = c.GetCommandExecutor()
 	if err != nil {
 		return nil, "", err
@@ -147,7 +147,7 @@ func (c *commandExecutorHelm) MustAddRepositoryByName(name string, url string, v
 	}
 }
 
-func (c *commandExecutorHelm) MustGetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor) {
+func (c *commandExecutorHelm) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -156,7 +156,7 @@ func (c *commandExecutorHelm) MustGetCommandExecutor() (commandExecutor asciichg
 	return commandExecutor
 }
 
-func (c *commandExecutorHelm) MustGetCommandExecutorAndHostDescription() (commandExecutor asciichgolangpublic.CommandExecutor, hostDescription string) {
+func (c *commandExecutorHelm) MustGetCommandExecutorAndHostDescription() (commandExecutor commandexecutor.CommandExecutor, hostDescription string) {
 	commandExecutor, hostDescription, err := c.GetCommandExecutorAndHostDescription()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -174,14 +174,14 @@ func (c *commandExecutorHelm) MustGetHostDescription() (hostDescription string) 
 	return hostDescription
 }
 
-func (c *commandExecutorHelm) MustSetCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) {
+func (c *commandExecutorHelm) MustSetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) {
 	err := c.SetCommandExecutor(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (c *commandExecutorHelm) SetCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) (err error) {
+func (c *commandExecutorHelm) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
 	c.commandExecutor = commandExecutor
 
 	return nil

@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
@@ -184,6 +185,6 @@ func TestHost_LocalHostUsesBashCommandExecutorByDefault(t *testing.T) {
 
 	commandExecutor := commandExecutorHost.MustGetCommandExecutor()
 
-	_, ok = commandExecutor.(*asciichgolangpublic.BashService)
+	_, ok = commandExecutor.(*commandexecutor.BashService)
 	require.True(t, ok)
 }

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -12,7 +12,7 @@ import (
 func getKubernetesByImplementationName(implementationName string) (kubernetes KubernetesCluster) {
 	if implementationName == "commandExecutorKubernetes" {
 		// Directly call kind binary to avoid cyclic import...
-		asciichgolangpublic.Bash().RunOneLiner(
+		commandexecutor.Bash().RunOneLiner(
 			"kind create cluster -n kind || true",
 			true,
 		)

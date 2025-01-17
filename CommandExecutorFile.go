@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
@@ -22,7 +23,7 @@ import (
 // in the process table which operations where done.
 type CommandExecutorFile struct {
 	FileBase
-	commandExecutor CommandExecutor
+	commandExecutor commandexecutor.CommandExecutor
 	filePath        string
 }
 
@@ -308,12 +309,12 @@ func (c *CommandExecutorFile) GetBaseName() (baseName string, err error) {
 	return baseName, nil
 }
 
-func (c *CommandExecutorFile) GetCommandExecutor() (commandExecutor CommandExecutor, err error) {
+func (c *CommandExecutorFile) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
 
 	return c.commandExecutor, nil
 }
 
-func (c *CommandExecutorFile) GetCommandExecutorAndFilePath() (commandExecutor CommandExecutor, filePath string, err error) {
+func (c *CommandExecutorFile) GetCommandExecutorAndFilePath() (commandExecutor commandexecutor.CommandExecutor, filePath string, err error) {
 	commandExecutor, err = c.GetCommandExecutor()
 	if err != nil {
 		return nil, "", err
@@ -327,7 +328,7 @@ func (c *CommandExecutorFile) GetCommandExecutorAndFilePath() (commandExecutor C
 	return commandExecutor, filePath, nil
 }
 
-func (c *CommandExecutorFile) GetCommandExecutorAndFilePathAndHostDescription() (commandExecutor CommandExecutor, filePath string, hostDescription string, err error) {
+func (c *CommandExecutorFile) GetCommandExecutorAndFilePathAndHostDescription() (commandExecutor commandexecutor.CommandExecutor, filePath string, hostDescription string, err error) {
 	commandExecutor, filePath, err = c.GetCommandExecutorAndFilePath()
 	if err != nil {
 		return nil, "", "", err
@@ -347,7 +348,7 @@ func (c *CommandExecutorFile) GetDeepCopy() (deepCopy File) {
 	*d = *c
 
 	if c.commandExecutor != nil {
-		d.commandExecutor = MustGetDeepCopyOfCommandExecutor(c.commandExecutor)
+		d.commandExecutor = commandexecutor.MustGetDeepCopyOfCommandExecutor(c.commandExecutor)
 	}
 
 	return d
@@ -645,7 +646,7 @@ func (c *CommandExecutorFile) MustGetBaseName() (baseName string) {
 	return baseName
 }
 
-func (c *CommandExecutorFile) MustGetCommandExecutor() (commandExecutor CommandExecutor) {
+func (c *CommandExecutorFile) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -654,7 +655,7 @@ func (c *CommandExecutorFile) MustGetCommandExecutor() (commandExecutor CommandE
 	return commandExecutor
 }
 
-func (c *CommandExecutorFile) MustGetCommandExecutorAndFilePath() (commandExecutor CommandExecutor, filePath string) {
+func (c *CommandExecutorFile) MustGetCommandExecutorAndFilePath() (commandExecutor commandexecutor.CommandExecutor, filePath string) {
 	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -663,7 +664,7 @@ func (c *CommandExecutorFile) MustGetCommandExecutorAndFilePath() (commandExecut
 	return commandExecutor, filePath
 }
 
-func (c *CommandExecutorFile) MustGetCommandExecutorAndFilePathAndHostDescription() (commandExecutor CommandExecutor, filePath string, hostDescription string) {
+func (c *CommandExecutorFile) MustGetCommandExecutorAndFilePathAndHostDescription() (commandExecutor commandexecutor.CommandExecutor, filePath string, hostDescription string) {
 	commandExecutor, filePath, hostDescription, err := c.GetCommandExecutorAndFilePathAndHostDescription()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -796,7 +797,7 @@ func (c *CommandExecutorFile) MustSecurelyDelete(verbose bool) {
 	}
 }
 
-func (c *CommandExecutorFile) MustSetCommandExecutor(commandExecutor CommandExecutor) {
+func (c *CommandExecutorFile) MustSetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) {
 	err := c.SetCommandExecutor(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -914,7 +915,7 @@ func (c *CommandExecutorFile) SecurelyDelete(verbose bool) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorFile) SetCommandExecutor(commandExecutor CommandExecutor) (err error) {
+func (c *CommandExecutorFile) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
 	c.commandExecutor = commandExecutor
 
 	return nil

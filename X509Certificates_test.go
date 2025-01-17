@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -177,7 +178,7 @@ func TestX509Certificates_NoTestdataCertificateUnexpired(t *testing.T) {
 	tests := []TestCase{}
 
 	repoRoot := Git().MustGetRepositoryRootPathByPath(".", verbose)
-	pathsToCheck := Bash().MustRunOneLinerAndGetStdoutAsLines(
+	pathsToCheck := commandexecutor.Bash().MustRunOneLinerAndGetStdoutAsLines(
 		fmt.Sprintf(
 			"grep -l -r 'CERTIFICATE' '%s/testdata'",
 			repoRoot,

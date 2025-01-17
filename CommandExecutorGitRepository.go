@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes"
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
@@ -71,7 +72,7 @@ func MustGetCommandExecutorGitRepositoryFromDirectory(directory Directory) (c *C
 	return c
 }
 
-func MustNewCommandExecutorGitRepository(commandExecutor CommandExecutor) (c *CommandExecutorGitRepository) {
+func MustNewCommandExecutorGitRepository(commandExecutor commandexecutor.CommandExecutor) (c *CommandExecutorGitRepository) {
 	c, err := NewCommandExecutorGitRepository(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -80,7 +81,7 @@ func MustNewCommandExecutorGitRepository(commandExecutor CommandExecutor) (c *Co
 	return c
 }
 
-func NewCommandExecutorGitRepository(commandExecutor CommandExecutor) (c *CommandExecutorGitRepository, err error) {
+func NewCommandExecutorGitRepository(commandExecutor commandexecutor.CommandExecutor) (c *CommandExecutorGitRepository, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -1896,7 +1897,7 @@ func (c *CommandExecutorGitRepository) MustRemoveRemoteByName(remoteNameToRemove
 	}
 }
 
-func (c *CommandExecutorGitRepository) MustRunGitCommand(gitCommand []string, verbose bool) (commandOutput *CommandOutput) {
+func (c *CommandExecutorGitRepository) MustRunGitCommand(gitCommand []string, verbose bool) (commandOutput *commandexecutor.CommandOutput) {
 	commandOutput, err := c.RunGitCommand(gitCommand, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -2193,7 +2194,7 @@ func (c *CommandExecutorGitRepository) RemoveRemoteByName(remoteNameToRemove str
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) RunGitCommand(gitCommand []string, verbose bool) (commandOutput *CommandOutput, err error) {
+func (c *CommandExecutorGitRepository) RunGitCommand(gitCommand []string, verbose bool) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if len(gitCommand) <= 0 {
 		return nil, tracederrors.TracedError("gitCommand has no elements")
 	}

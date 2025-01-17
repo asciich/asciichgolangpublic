@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
@@ -202,7 +202,7 @@ func (c *CommandExecutorNamespace) GetClusterName() (clusterName string, err err
 	return kubernetesCluster.GetName()
 }
 
-func (c *CommandExecutorNamespace) GetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor, err error) {
+func (c *CommandExecutorNamespace) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
 	kubernetes, err := c.GetKubernetesCluster()
 	if err != nil {
 		return nil, err
@@ -350,7 +350,7 @@ func (c *CommandExecutorNamespace) MustGetClusterName() (clusterName string) {
 	return clusterName
 }
 
-func (c *CommandExecutorNamespace) MustGetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor) {
+func (c *CommandExecutorNamespace) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -404,7 +404,7 @@ func (c *CommandExecutorNamespace) MustRoleByNameExists(name string, verbose boo
 	return exists
 }
 
-func (c *CommandExecutorNamespace) MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
+func (c *CommandExecutorNamespace) MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput) {
 	commandOutput, err := c.RunCommand(runCommandOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -472,7 +472,7 @@ func (c *CommandExecutorNamespace) RoleByNameExists(name string, verbose bool) (
 	return exists, nil
 }
 
-func (c *CommandExecutorNamespace) RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
+func (c *CommandExecutorNamespace) RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}

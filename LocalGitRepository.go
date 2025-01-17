@@ -14,6 +14,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
@@ -129,7 +130,7 @@ func NewLocalGitRepository() (l *LocalGitRepository) {
 }
 
 // TODO remove: LocalGitRepository should purely base on goGit, not by calling the git binary.
-func (l *LocalGitRepository) RunGitCommand(gitCommand []string, verbose bool) (commandOutput *CommandOutput, err error) {
+func (l *LocalGitRepository) RunGitCommand(gitCommand []string, verbose bool) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if gitCommand == nil {
 		return nil, tracederrors.TracedErrorEmptyString("gitCommand")
 	}
@@ -150,7 +151,7 @@ func (l *LocalGitRepository) RunGitCommand(gitCommand []string, verbose bool) (c
 		gitCommandString,
 	)
 
-	commandOutput, err = Bash().RunOneLiner(command, verbose)
+	commandOutput, err = commandexecutor.Bash().RunOneLiner(command, verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -2364,7 +2365,7 @@ func (l *LocalGitRepository) MustRemoveRemoteByName(remoteNameToRemove string, v
 	}
 }
 
-func (l *LocalGitRepository) MustRunGitCommand(gitCommand []string, verbose bool) (commandOutput *CommandOutput) {
+func (l *LocalGitRepository) MustRunGitCommand(gitCommand []string, verbose bool) (commandOutput *commandexecutor.CommandOutput) {
 	commandOutput, err := l.RunGitCommand(gitCommand, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

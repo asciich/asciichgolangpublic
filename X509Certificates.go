@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
@@ -59,7 +60,7 @@ func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(cre
 		"4096",
 	}
 
-	_, err = Bash().RunCommand(&parameteroptions.RunCommandOptions{
+	_, err = commandexecutor.Bash().RunCommand(&parameteroptions.RunCommandOptions{
 		Command: sslCommand,
 		Verbose: createOptions.Verbose,
 	})
@@ -222,7 +223,7 @@ func (c *X509CertificatesService) CreateRootCaIntoDirectory(createOptions *X509C
 		fmt.Sprintf("cd '%v' && %v", directoryPathToUse, joinedSslCommand),
 	}
 
-	_, err = Bash().RunCommand(
+	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command: createCommand,
 			Verbose: createOptions.Verbose,
@@ -317,7 +318,7 @@ func (c *X509CertificatesService) CreateSignedCertificate(createOptions *X509Cre
 		fmt.Sprintf("subjectAltName = DNS:%s", commonName),
 	}
 
-	_, err = Bash().RunCommand(
+	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command: createKeyCommand,
 			Verbose: createOptions.Verbose,
@@ -341,7 +342,7 @@ func (c *X509CertificatesService) CreateSignedCertificate(createOptions *X509Cre
 			csrPath,
 		}
 
-		csrInfo, err := Bash().RunCommandAndGetStdoutAsString(
+		csrInfo, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
 			&parameteroptions.RunCommandOptions{
 				Command: opensslCsrInfoCmd,
 			},
@@ -442,7 +443,7 @@ func (c *X509CertificatesService) CreateSignedCertificate(createOptions *X509Cre
 		"-extfile",
 		signingConfigFilePath,
 	}
-	_, err = Bash().RunCommand(
+	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command: signCommand,
 			Verbose: createOptions.Verbose,
@@ -466,7 +467,7 @@ func (c *X509CertificatesService) CreateSignedCertificate(createOptions *X509Cre
 			certPath,
 		}
 
-		certificateInfo, err := Bash().RunCommandAndGetStdoutAsString(
+		certificateInfo, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
 			&parameteroptions.RunCommandOptions{
 				Command: certInfoCommand,
 			},
@@ -661,7 +662,7 @@ func (c *X509CertificatesService) CreateSigningRequestFile(signOptions *X509Sign
 		signingRequestFilePath,
 	}
 
-	_, err = Bash().RunCommand(
+	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command: signCommand,
 			Verbose: signOptions.Verbose,
@@ -889,7 +890,7 @@ func (c *X509CertificatesService) SignIntermediateCertificate(signOptions *X509S
 		outputCertificateFilePath,
 	}
 
-	_, err = Bash().RunCommand(
+	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command: signCommand,
 			Verbose: signOptions.Verbose,

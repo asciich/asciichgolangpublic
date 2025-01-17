@@ -3,19 +3,20 @@ package asciichgolangpublic
 import (
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type TmuxService struct {
-	commandExecutor CommandExecutor
+	commandExecutor commandexecutor.CommandExecutor
 }
 
 func GetTmuxOnLocalMachine() (tmux *TmuxService, err error) {
 	tmux = NewTmuxService()
 
-	err = tmux.SetCommandExecutor(Bash())
+	err = tmux.SetCommandExecutor(commandexecutor.Bash())
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +37,7 @@ func NewTmuxService() (t *TmuxService) {
 	return new(TmuxService)
 }
 
-func (t *TmuxService) GetCommandExecutor() (commandExecutor CommandExecutor, err error) {
+func (t *TmuxService) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
 
 	return t.commandExecutor, nil
 }
@@ -125,7 +126,7 @@ func (t *TmuxService) ListSessionNames(verbose bool) (sessionNames []string, err
 	return sessionNames, nil
 }
 
-func (t *TmuxService) MustGetCommandExecutor() (commandExecutor CommandExecutor) {
+func (t *TmuxService) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
 	commandExecutor, err := t.GetCommandExecutor()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -161,14 +162,14 @@ func (t *TmuxService) MustListSessionNames(verbose bool) (sessionNames []string)
 	return sessionNames
 }
 
-func (t *TmuxService) MustSetCommandExecutor(commandExecutor CommandExecutor) {
+func (t *TmuxService) MustSetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) {
 	err := t.SetCommandExecutor(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (t *TmuxService) SetCommandExecutor(commandExecutor CommandExecutor) (err error) {
+func (t *TmuxService) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
 	t.commandExecutor = commandExecutor
 
 	return nil

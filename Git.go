@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -24,7 +25,7 @@ func (g *GitService) GetRepositoryRootPathByPath(path string, verbose bool) (rep
 		return "", tracederrors.TracedErrorEmptyString("path")
 	}
 
-	repoRootPath, err = Bash().RunCommandAndGetStdoutAsString(
+	repoRootPath, err = commandexecutor.Bash().RunCommandAndGetStdoutAsString(
 		&parameteroptions.RunCommandOptions{
 			Command:            []string{"git", "-C", path, "rev-parse", "--show-toplevel"},
 			Verbose:            verbose,

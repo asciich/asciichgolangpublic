@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes/pointersutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
@@ -814,7 +815,7 @@ func TestFileIsPgpEncrypted_Case2_encryptedBinary(t *testing.T) {
 						temporaryFile.MustGetLocalPath(),
 					),
 				}
-				Bash().MustRunCommand(
+				commandexecutor.Bash().MustRunCommand(
 					&parameteroptions.RunCommandOptions{
 						Command: createCommand,
 						Verbose: verbose,
@@ -854,7 +855,7 @@ func TestFileIsPgpEncrypted_Case3_encryptedAsciiArmor(t *testing.T) {
 						temporaryFile.MustGetLocalPath(),
 					),
 				}
-				Bash().MustRunCommand(
+				commandexecutor.Bash().MustRunCommand(
 					&parameteroptions.RunCommandOptions{
 						Command: createCommand,
 						Verbose: verbose,

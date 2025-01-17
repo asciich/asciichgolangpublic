@@ -3,7 +3,7 @@ package kind
 import (
 	"slices"
 
-	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/kubernetes"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
@@ -11,10 +11,10 @@ import (
 )
 
 type CommandExecutorKind struct {
-	commandExecutor asciichgolangpublic.CommandExecutor
+	commandExecutor commandexecutor.CommandExecutor
 }
 
-func GetCommandExecutorKind(commandExecutor asciichgolangpublic.CommandExecutor) (kind Kind, err error) {
+func GetCommandExecutorKind(commandExecutor commandexecutor.CommandExecutor) (kind Kind, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExectuor")
 	}
@@ -30,10 +30,10 @@ func GetCommandExecutorKind(commandExecutor asciichgolangpublic.CommandExecutor)
 }
 
 func GetLocalCommandExecutorKind() (kind Kind, err error) {
-	return GetCommandExecutorKind(asciichgolangpublic.Bash())
+	return GetCommandExecutorKind(commandexecutor.Bash())
 }
 
-func MustGetCommandExecutorKind(commandExecutor asciichgolangpublic.CommandExecutor) (kind Kind) {
+func MustGetCommandExecutorKind(commandExecutor commandexecutor.CommandExecutor) (kind Kind) {
 	kind, err := GetCommandExecutorKind(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -224,7 +224,7 @@ func (c *CommandExecutorKind) GetClusterByName(clusterName string) (cluster kube
 	return toReturn, nil
 }
 
-func (c *CommandExecutorKind) GetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor, err error) {
+func (c *CommandExecutorKind) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
 
 	return c.commandExecutor, nil
 }
@@ -281,7 +281,7 @@ func (c *CommandExecutorKind) MustGetClusterByName(clusterName string) (cluster 
 	return cluster
 }
 
-func (c *CommandExecutorKind) MustGetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor) {
+func (c *CommandExecutorKind) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -308,7 +308,7 @@ func (c *CommandExecutorKind) MustListClusterNames(verbose bool) (clusterNames [
 	return clusterNames
 }
 
-func (c *CommandExecutorKind) MustRunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
+func (c *CommandExecutorKind) MustRunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput) {
 	commandOutput, err := c.RunCommand(runOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -326,14 +326,14 @@ func (c *CommandExecutorKind) MustRunCommandAndGetStdoutAsLines(runOptions *para
 	return lines
 }
 
-func (c *CommandExecutorKind) MustSetCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) {
+func (c *CommandExecutorKind) MustSetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) {
 	err := c.SetCommandExecutor(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (c *CommandExecutorKind) RunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
+func (c *CommandExecutorKind) RunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runOptions")
 	}
@@ -359,7 +359,7 @@ func (c *CommandExecutorKind) RunCommandAndGetStdoutAsLines(runOptions *paramete
 	return commandOutput.GetStdoutAsLines(false)
 }
 
-func (c *CommandExecutorKind) SetCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) (err error) {
+func (c *CommandExecutorKind) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
 	c.commandExecutor = commandExecutor
 
 	return nil

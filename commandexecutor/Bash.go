@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package commandexecutor
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"
