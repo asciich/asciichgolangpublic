@@ -3,7 +3,7 @@ package asciichgolangpublic
 import "github.com/asciich/asciichgolangpublic/parameteroptions"
 
 type Directory interface {
-	Chmod(chmodOptions *ChmodOptions) (err error)
+	Chmod(chmodOptions *parameteroptions.ChmodOptions) (err error)
 	CopyContentToDirectory(destinationDir Directory, verbose bool) (err error)
 	Create(verbose bool) (err error)
 	CreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory Directory, err error)
@@ -23,7 +23,7 @@ type Directory interface {
 	IsLocalDirectory() (isLocalDirectory bool, err error)
 	ListFiles(listFileOptions *parameteroptions.ListFileOptions) (files []File, err error)
 	ListSubDirectories(options *parameteroptions.ListDirectoryOptions) (subDirectories []Directory, err error)
-	MustChmod(chmodOptions *ChmodOptions)
+	MustChmod(chmodOptions *parameteroptions.ChmodOptions)
 	MustCopyContentToDirectory(destinationDir Directory, verbose bool)
 	MustCreate(verbose bool)
 	MustCreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory Directory)

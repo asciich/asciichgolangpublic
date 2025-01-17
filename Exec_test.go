@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -26,14 +27,14 @@ func TestExecRunCommandAndGetStdoutAsString(t *testing.T) {
 
 				var exec CommandExecutor = Exec()
 				output := exec.MustRunCommandAndGetStdoutAsString(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
 						Verbose: verbose,
 					},
 				)
 
 				output2 := exec.MustRunCommandAndGetStdoutAsString(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command:            tt.command,
 						Verbose:            verbose,
 						LiveOutputOnStdout: true,
@@ -77,7 +78,7 @@ func TestExecRunCommandStdin(t *testing.T) {
 
 				var exec CommandExecutor = Exec()
 				output := exec.MustRunCommandAndGetStdoutAsBytes(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command:     tt.command,
 						Verbose:     verbose,
 						StdinString: tt.stdin,
@@ -85,7 +86,7 @@ func TestExecRunCommandStdin(t *testing.T) {
 				)
 
 				output2 := exec.MustRunCommandAndGetStdoutAsString(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command:            tt.command,
 						Verbose:            verbose,
 						LiveOutputOnStdout: true,

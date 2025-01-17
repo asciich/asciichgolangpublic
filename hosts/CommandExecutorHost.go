@@ -7,6 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -103,7 +104,7 @@ func (c *CommandExecutorHost) MustIsReachable(verbose bool) (isReachable bool) {
 	return isReachable
 }
 
-func (c *CommandExecutorHost) MustRunCommand(options *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
+func (c *CommandExecutorHost) MustRunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
 	commandOutput, err := c.RunCommand(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -126,7 +127,7 @@ func (c *CommandExecutorHost) MustWaitUntilReachable(renewHostKey bool, verbose 
 	}
 }
 
-func (c *CommandExecutorHost) RunCommand(options *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
+func (c *CommandExecutorHost) RunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -152,7 +153,7 @@ func (h *CommandExecutorHost) AddSshHostKeyToKnownHosts(verbose bool) (err error
 	}
 
 	_, err = asciichgolangpublic.Bash().RunCommand(
-		&asciichgolangpublic.RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				fmt.Sprintf("ssh-keyscan -H '%s' >> ${HOME}/.ssh/known_hosts", hostname),
 			},
@@ -281,7 +282,7 @@ func (h *CommandExecutorHost) InstallBinary(installOptions *asciichgolangpublic.
 	}
 
 	err = installedFile.Chmod(
-		&asciichgolangpublic.ChmodOptions{
+		&parameteroptions.ChmodOptions{
 			PermissionsString: "u=rwx,g=rx,o=rx",
 			UseSudo:           installOptions.UseSudoToInstall,
 			Verbose:           installOptions.Verbose,
@@ -292,7 +293,7 @@ func (h *CommandExecutorHost) InstallBinary(installOptions *asciichgolangpublic.
 	}
 
 	err = installedFile.Chown(
-		&asciichgolangpublic.ChownOptions{
+		&parameteroptions.ChownOptions{
 			UserName:  "root",
 			GroupName: "root",
 			UseSudo:   installOptions.UseSudoToInstall,
@@ -331,7 +332,7 @@ func (h *CommandExecutorHost) IsPingable(verbose bool) (isPingable bool, err err
 	}
 
 	stdout, err := asciichgolangpublic.Bash().RunCommandAndGetStdoutAsString(
-		&asciichgolangpublic.RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{"bash", "-c", fmt.Sprintf("ping -c 1 '%s' &>/dev/null && echo yes || echo no", hostname)},
 		},
 	)
@@ -352,7 +353,7 @@ func (h *CommandExecutorHost) IsPingable(verbose bool) (isPingable bool, err err
 
 func (h *CommandExecutorHost) IsReachable(verbose bool) (isReachable bool, err error) {
 	_, err = h.RunCommandAndGetStdoutAsString(
-		&asciichgolangpublic.RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{"echo", "hello"},
 		},
 	)
@@ -509,7 +510,7 @@ func (h *CommandExecutorHost) RemoveSshHostKeyFromKnownHosts(verbose bool) (err 
 	}
 
 	_, err = asciichgolangpublic.Bash().RunCommand(
-		&asciichgolangpublic.RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{"ssh-keygen", "-R", hostname},
 		},
 	)

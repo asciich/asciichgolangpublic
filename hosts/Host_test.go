@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -119,7 +120,7 @@ func TestHostRunCommand(t *testing.T) {
 
 				host := MustGetHostByHostname(tt.hostname)
 				ipsString := host.MustRunCommandAndGetStdoutAsString(
-					&asciichgolangpublic.RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command: []string{"hostname", "-i"},
 						Verbose: verbose,
 					},

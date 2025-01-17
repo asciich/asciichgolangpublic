@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -24,7 +25,7 @@ func (g *GitService) GetRepositoryRootPathByPath(path string, verbose bool) (rep
 	}
 
 	repoRootPath, err = Bash().RunCommandAndGetStdoutAsString(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command:            []string{"git", "-C", path, "rev-parse", "--show-toplevel"},
 			Verbose:            verbose,
 			LiveOutputOnStdout: verbose,

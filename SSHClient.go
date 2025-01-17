@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -97,7 +98,7 @@ func (s *SSHClient) IsReachable(verbose bool) (isReachable bool, err error) {
 	}
 
 	commandOutput, err := s.RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command:           []string{"echo", "hello"},
 			TimeoutString:     "5 seconds",
 			AllowAllExitCodes: true,
@@ -202,7 +203,7 @@ func (s *SSHClient) MustIsReachable(verbose bool) (isReachavble bool) {
 	return isReachavble
 }
 
-func (s *SSHClient) MustRunCommand(options *RunCommandOptions) (commandOutput *CommandOutput) {
+func (s *SSHClient) MustRunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput) {
 	commandOutput, err := s.RunCommand(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -225,7 +226,7 @@ func (s *SSHClient) MustSetSshUserName(sshUserName string) {
 	}
 }
 
-func (s *SSHClient) RunCommand(options *RunCommandOptions) (commandOutput *CommandOutput, err error) {
+func (s *SSHClient) RunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	userAtHost, err := s.GetHostName()
 	if err != nil {
 		return nil, err

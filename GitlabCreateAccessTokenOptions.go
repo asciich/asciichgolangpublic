@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/datetime"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -179,7 +180,7 @@ func (o *GitlabCreateAccessTokenOptions) GetExipiresAtOrDefaultIfUnset() (expire
 
 	defaultTime := time.Now()
 	defaultTime = defaultTime.Add(
-		*DurationParser().MustToSecondsAsTimeDuration("1month"),
+		*datetime.DurationParser().MustToSecondsAsTimeDuration("1month"),
 	)
 
 	return &defaultTime, nil

@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/datatypes"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -62,7 +63,7 @@ func (c *CommandExecutorDockerContainer) IsRunning(verbose bool) (isRunning bool
 	}
 
 	stdout, err := commandExecutor.RunCommandAndGetStdoutAsString(
-		&asciichgolangpublic.RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
 				"-c",
@@ -108,7 +109,7 @@ func (c *CommandExecutorDockerContainer) Kill(verbose bool) (err error) {
 		}
 
 		_, err = commandExecutor.RunCommand(
-			&asciichgolangpublic.RunCommandOptions{
+			&parameteroptions.RunCommandOptions{
 				Command: []string{"docker", "kill", containerName},
 				Verbose: verbose,
 			},
@@ -148,7 +149,7 @@ func (c *CommandExecutorDockerContainer) MustGetCommandExecutor() (commandExectu
 	return commandExectuor
 }
 
-func (c *CommandExecutorDockerContainer) MustRunCommand(runOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
+func (c *CommandExecutorDockerContainer) MustRunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
 	commandOutput, err := c.RunCommand(runOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -157,7 +158,7 @@ func (c *CommandExecutorDockerContainer) MustRunCommand(runOptions *asciichgolan
 	return commandOutput
 }
 
-func (c *CommandExecutorDockerContainer) MustRunCommandAndGetStdoutAsString(runOptions *asciichgolangpublic.RunCommandOptions) (stdout string) {
+func (c *CommandExecutorDockerContainer) MustRunCommandAndGetStdoutAsString(runOptions *parameteroptions.RunCommandOptions) (stdout string) {
 	stdout, err := c.RunCommandAndGetStdoutAsString(runOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -166,7 +167,7 @@ func (c *CommandExecutorDockerContainer) MustRunCommandAndGetStdoutAsString(runO
 	return stdout
 }
 
-func (c *CommandExecutorDockerContainer) RunCommand(runOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
+func (c *CommandExecutorDockerContainer) RunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runOptions")
 	}
@@ -179,7 +180,7 @@ func (c *CommandExecutorDockerContainer) RunCommand(runOptions *asciichgolangpub
 	return commandExecutor.RunCommand(runOptions)
 }
 
-func (c *CommandExecutorDockerContainer) RunCommandAndGetStdoutAsString(runOptions *asciichgolangpublic.RunCommandOptions) (stdout string, err error) {
+func (c *CommandExecutorDockerContainer) RunCommandAndGetStdoutAsString(runOptions *parameteroptions.RunCommandOptions) (stdout string, err error) {
 	if runOptions == nil {
 		return "", tracederrors.TracedErrorNil("runOptions")
 	}

@@ -7,6 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
@@ -211,7 +212,7 @@ func (p *GitlabPersonalAccessTokenService) CreateToken(tokenOptions *GitlabCreat
 		apiV4Urt + "/user/personal_access_tokens",
 	}
 	stdout, err := Bash().RunCommandAndGetStdoutAsString(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: command,
 			Verbose: tokenOptions.Verbose,
 		},

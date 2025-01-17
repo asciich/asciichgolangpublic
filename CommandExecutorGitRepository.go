@@ -316,7 +316,7 @@ func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClo
 		}
 
 		_, err = commandExecutor.RunCommand(
-			&RunCommandOptions{
+			&parameteroptions.RunCommandOptions{
 				Command:            []string{"git", "clone", pathOrUrlToClone, path},
 				Verbose:            verbose,
 				LiveOutputOnStdout: verbose,
@@ -995,7 +995,7 @@ func (c *CommandExecutorGitRepository) HasInitialCommit(verbose bool) (hasInitia
 	}
 
 	stdout, err := commandExecutor.RunCommandAndGetStdoutAsString(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
 				"-c",
@@ -1053,7 +1053,7 @@ func (c *CommandExecutorGitRepository) HasUncommittedChanges(verbose bool) (hasU
 	}
 
 	commandOutput, err := commandExecutor.RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
 				"-c",
@@ -1336,7 +1336,7 @@ func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialite
 	}
 
 	stdout, err := commandExecutor.RunCommandAndGetStdoutAsString(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
 				"-c",
@@ -2211,7 +2211,7 @@ func (c *CommandExecutorGitRepository) RunGitCommand(gitCommand []string, verbos
 	commandToUse := append([]string{"git", "-C", path}, gitCommand...)
 
 	return commandExecutor.RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command:            commandToUse,
 			Verbose:            verbose,
 			LiveOutputOnStdout: verbose,

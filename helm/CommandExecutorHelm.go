@@ -3,6 +3,7 @@ package helm
 import (
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -75,7 +76,7 @@ func (c *commandExecutorHelm) AddRepositoryByName(name string, url string, verbo
 	}
 
 	_, err = commandExecutor.RunCommand(
-		&asciichgolangpublic.RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"helm",
 				"repo",

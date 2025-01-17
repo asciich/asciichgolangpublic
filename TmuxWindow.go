@@ -9,6 +9,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -42,7 +43,7 @@ func (t *TmuxWindow) SendKeys(toSend []string, verbose bool) (err error) {
 	commandToUse := append([]string{"tmux", "send-keys", "-t", sessionName + ":" + windowName}, toSend...)
 
 	_, err = commandExecutor.RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: commandToUse,
 			Verbose: verbose,
 		},
@@ -147,7 +148,7 @@ func (t *TmuxWindow) Create(verbose bool) (err error) {
 		}
 
 		_, err = commandExecutor.RunCommand(
-			&RunCommandOptions{
+			&parameteroptions.RunCommandOptions{
 				Command: []string{"tmux", "new-window", "-t", sessionName, "-n", windowName},
 				Verbose: verbose,
 			},
@@ -186,7 +187,7 @@ func (t *TmuxWindow) Delete(verbose bool) (err error) {
 		}
 
 		_, err = commandExecutor.RunCommand(
-			&RunCommandOptions{
+			&parameteroptions.RunCommandOptions{
 				Command: []string{"tmux", "kill-window", "-t", sessionName + ":" + windowName},
 				Verbose: verbose,
 			},
@@ -342,7 +343,7 @@ func (t *TmuxWindow) GetShownLines() (lines []string, err error) {
 	}
 
 	lines, err = commandExecutor.RunCommandAndGetStdoutAsLines(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"tmux",
 				"capture-pane",
@@ -494,7 +495,7 @@ func (t *TmuxWindow) MustRecreate(verbose bool) {
 	}
 }
 
-func (t *TmuxWindow) MustRunCommand(runCommandOptions *RunCommandOptions) (commandOutput *CommandOutput) {
+func (t *TmuxWindow) MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput) {
 	commandOutput, err := t.RunCommand(runCommandOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -558,7 +559,7 @@ func (t *TmuxWindow) Recreate(verbose bool) (err error) {
 	return nil
 }
 
-func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOutput *CommandOutput, err error) {
+func (t *TmuxWindow) RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}
@@ -603,7 +604,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 
 	// start output capture
 	_, err = commandExecutor.RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"tmux",
 				"pipe-pane",
@@ -670,7 +671,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *RunCommandOptions) (commandOu
 
 	// stop output capture
 	_, err = commandExecutor.RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"tmux",
 				"pipe-pane",

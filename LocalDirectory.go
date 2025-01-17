@@ -52,7 +52,7 @@ func NewLocalDirectory() (l *LocalDirectory) {
 	return l
 }
 
-func (l *LocalDirectory) Chmod(chmodOptions *ChmodOptions) (err error) {
+func (l *LocalDirectory) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err error) {
 	if chmodOptions == nil {
 		return tracederrors.TracedErrorNil("chmodOptions")
 	}
@@ -68,7 +68,7 @@ func (l *LocalDirectory) Chmod(chmodOptions *ChmodOptions) (err error) {
 	}
 
 	_, err = Bash().RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{"chmod", chmodString, localPath},
 			Verbose: chmodOptions.Verbose,
 		},
@@ -107,7 +107,7 @@ func (l *LocalDirectory) CopyContentToDirectory(destinationDir Directory, verbos
 	}
 
 	stdout, err := Bash().RunCommandAndGetStdoutAsString(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command:            copyCommand,
 			Verbose:            verbose,
 			LiveOutputOnStdout: verbose,
@@ -154,7 +154,7 @@ func (l *LocalDirectory) CopyContentToLocalDirectory(destDirectory *LocalDirecto
 	}
 
 	_, err = Bash().RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command:            []string{"cp", "-r", "-v", srcPath + "/.", destPath + "/."},
 			Verbose:            verbose,
 			LiveOutputOnStdout: verbose,
@@ -797,7 +797,7 @@ func (l *LocalDirectory) ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions 
 	return subDirectoryPaths, nil
 }
 
-func (l *LocalDirectory) MustChmod(chmodOptions *ChmodOptions) {
+func (l *LocalDirectory) MustChmod(chmodOptions *parameteroptions.ChmodOptions) {
 	err := l.Chmod(chmodOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

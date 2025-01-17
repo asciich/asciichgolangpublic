@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -143,7 +144,7 @@ func TestTemuxWindow_RunCommand(t *testing.T) {
 				window.MustRecreate(verbose)
 
 				commandOutput := window.MustRunCommand(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
 						Verbose: verbose,
 					},

@@ -6,6 +6,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/changesummary"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -13,8 +14,8 @@ import (
 type File interface {
 	AppendBytes(toWrite []byte, verbose bool) (err error)
 	AppendString(toWrite string, verbose bool) (err error)
-	Chmod(options *ChmodOptions) (err error)
-	Chown(options *ChownOptions) (err error)
+	Chmod(options *parameteroptions.ChmodOptions) (err error)
+	Chown(options *parameteroptions.ChownOptions) (err error)
 	CopyToFile(destFile File, verbose bool) (err error)
 	Create(verbose bool) (err error)
 	Delete(verbose bool) (err error)
@@ -31,8 +32,8 @@ type File interface {
 	MoveToPath(destPath string, useSudo bool, verbose bool) (movedFile File, err error)
 	MustAppendBytes(toWrtie []byte, verbose bool)
 	MustAppendString(toWrtie string, verbose bool)
-	MustChmod(options *ChmodOptions)
-	MustChown(options *ChownOptions)
+	MustChmod(options *parameteroptions.ChmodOptions)
+	MustChown(options *parameteroptions.ChownOptions)
 	MustCopyToFile(destFile File, verbose bool)
 	MustCreate(verbose bool)
 	MustDelete(verbose bool)

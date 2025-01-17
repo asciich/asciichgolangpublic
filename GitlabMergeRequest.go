@@ -136,7 +136,7 @@ func (g *GitlabMergeRequest) GetMergeCommit(verbose bool) (mergeCommit *GitlabCo
 		return nil, err
 	}
 
-	mergeCommit, err = gitlabProject.GetCommitByHashString(mergeCommitSha, NewChownOptions().Verbose)
+	mergeCommit, err = gitlabProject.GetCommitByHashString(mergeCommitSha, verbose)
 	if err != nil {
 		return nil, err
 	}

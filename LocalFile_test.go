@@ -815,7 +815,7 @@ func TestFileIsPgpEncrypted_Case2_encryptedBinary(t *testing.T) {
 					),
 				}
 				Bash().MustRunCommand(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command: createCommand,
 						Verbose: verbose,
 					},
@@ -855,7 +855,7 @@ func TestFileIsPgpEncrypted_Case3_encryptedAsciiArmor(t *testing.T) {
 					),
 				}
 				Bash().MustRunCommand(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command: createCommand,
 						Verbose: verbose,
 					},

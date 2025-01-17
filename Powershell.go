@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -22,7 +23,7 @@ func PowerShell() (p *PowerShellService) {
 	return NewPowerShell()
 }
 
-func (b *PowerShellService) RunCommand(options *RunCommandOptions) (commandOutput *CommandOutput, err error) {
+func (b *PowerShellService) RunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -62,7 +63,7 @@ func (b *PowerShellService) RunCommand(options *RunCommandOptions) (commandOutpu
 	return commandOutput, nil
 }
 
-func (p *PowerShellService) MustRunCommand(options *RunCommandOptions) (commandOutput *CommandOutput) {
+func (p *PowerShellService) MustRunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput) {
 	commandOutput, err := p.RunCommand(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -95,7 +96,7 @@ func (p *PowerShellService) RunOneLiner(oneLiner string, verbose bool) (output *
 	}
 
 	output, err = p.RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command:            []string{oneLiner},
 			Verbose:            verbose,
 			LiveOutputOnStdout: verbose,

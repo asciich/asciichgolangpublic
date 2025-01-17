@@ -101,7 +101,7 @@ func NewCommandExecutorDirectory(commandExecutor CommandExecutor) (c *CommandExe
 	return c, nil
 }
 
-func (c *CommandExecutorDirectory) Chmod(chmodOptions *ChmodOptions) (err error) {
+func (c *CommandExecutorDirectory) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err error) {
 	if chmodOptions == nil {
 		return tracederrors.TracedErrorNil("chmodOptions")
 	}
@@ -123,7 +123,7 @@ func (c *CommandExecutorDirectory) Chmod(chmodOptions *ChmodOptions) (err error)
 	}
 
 	_, err = commandExecutor.RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: command,
 			Verbose: chmodOptions.Verbose,
 		},
@@ -173,7 +173,7 @@ func (c *CommandExecutorDirectory) CopyContentToDirectory(destinationDir Directo
 	}
 
 	_, err = commandExecutor.RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command:            []string{"cp", "-r", "-v", srcDirPath, destDirPath},
 			LiveOutputOnStdout: verbose,
 			Verbose:            verbose,
@@ -215,7 +215,7 @@ func (c *CommandExecutorDirectory) Create(verbose bool) (err error) {
 		)
 	} else {
 		_, err = commandExecutor.RunCommand(
-			&RunCommandOptions{
+			&parameteroptions.RunCommandOptions{
 				Command: []string{"mkdir", "-p", dirPath},
 				Verbose: verbose,
 			},
@@ -272,7 +272,7 @@ func (c *CommandExecutorDirectory) Delete(verbose bool) (err error) {
 
 	if exists {
 		_, err = commandExecutor.RunCommand(
-			&RunCommandOptions{
+			&parameteroptions.RunCommandOptions{
 				Command: []string{"rm", "-rf", dirPath},
 				Verbose: verbose,
 			},
@@ -304,7 +304,7 @@ func (c *CommandExecutorDirectory) Exists(verbose bool) (exists bool, err error)
 	}
 
 	output, err := commandExecutor.RunCommandAndGetStdoutAsString(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
 				"-c",
@@ -590,7 +590,7 @@ func (c *CommandExecutorDirectory) ListFilePaths(listFileOptions *parameteroptio
 	}
 
 	foundPaths, err := commandExecutor.RunCommandAndGetStdoutAsLines(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: commandToUse,
 		},
 	)
@@ -665,7 +665,7 @@ func (c *CommandExecutorDirectory) ListSubDirectories(options *parameteroptions.
 	}
 
 	stdoutLines, err := commandExecutor.RunCommandAndGetStdoutAsLines(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: findCommand,
 		},
 	)
@@ -709,7 +709,7 @@ func (c *CommandExecutorDirectory) ListSubDirectories(options *parameteroptions.
 	return subDirectories, nil
 }
 
-func (c *CommandExecutorDirectory) MustChmod(chmodOptions *ChmodOptions) {
+func (c *CommandExecutorDirectory) MustChmod(chmodOptions *parameteroptions.ChmodOptions) {
 	err := c.Chmod(chmodOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

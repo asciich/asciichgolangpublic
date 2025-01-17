@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -42,7 +43,7 @@ func (t *TmuxSession) Create(verbose bool) (err error) {
 		}
 
 		_, err = commandExecutor.RunCommand(
-			&RunCommandOptions{
+			&parameteroptions.RunCommandOptions{
 				Command: []string{
 					"tmux",
 					"new-session",
@@ -87,7 +88,7 @@ func (t *TmuxSession) Delete(verbose bool) (err error) {
 		}
 
 		_, err = commandExecutor.RunCommand(
-			&RunCommandOptions{
+			&parameteroptions.RunCommandOptions{
 				Command: []string{
 					"tmux",
 					"kill-session",
@@ -217,7 +218,7 @@ func (t *TmuxSession) ListWindowNames(verbose bool) (windowsNames []string, err 
 	}
 
 	lines, err := commandExecutor.RunCommandAndGetStdoutAsLines(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{"tmux", "list-windows", "-a"},
 			Verbose: verbose,
 		},
