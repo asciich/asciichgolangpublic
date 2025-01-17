@@ -4,8 +4,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic"
-
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
@@ -14,11 +13,11 @@ import (
 
 type CommandExecutorKubernetes struct {
 	name              string
-	commandExecutor   asciichgolangpublic.CommandExecutor
+	commandExecutor   commandexecutor.CommandExecutor
 	cachedContextName string
 }
 
-func GetCommandExecutorKubernetsByName(commandExecutor asciichgolangpublic.CommandExecutor, clusterName string) (kubernetes KubernetesCluster, err error) {
+func GetCommandExecutorKubernetsByName(commandExecutor commandexecutor.CommandExecutor, clusterName string) (kubernetes KubernetesCluster, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -47,10 +46,10 @@ func GetLocalCommandExecutorKubernetesByName(clusterName string) (kubernetes Kub
 		return nil, tracederrors.TracedErrorEmptyString("clusterName")
 	}
 
-	return GetCommandExecutorKubernetsByName(asciichgolangpublic.Bash(), clusterName)
+	return GetCommandExecutorKubernetsByName(commandexecutor.Bash(), clusterName)
 }
 
-func MustGetCommandExecutorKubernetsByName(commandExecutor asciichgolangpublic.CommandExecutor, clusterName string) (kubernetes KubernetesCluster) {
+func MustGetCommandExecutorKubernetsByName(commandExecutor commandexecutor.CommandExecutor, clusterName string) (kubernetes KubernetesCluster) {
 	kubernetes, err := GetCommandExecutorKubernetsByName(commandExecutor, clusterName)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -225,7 +224,7 @@ func (c *CommandExecutorKubernetes) GetCachedKubectlContext(verbose bool) (conte
 	return
 }
 
-func (c *CommandExecutorKubernetes) GetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor, err error) {
+func (c *CommandExecutorKubernetes) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
 
 	return c.commandExecutor, nil
 }
@@ -435,7 +434,7 @@ func (c *CommandExecutorKubernetes) MustGetCachedKubectlContext(verbose bool) (c
 	return context
 }
 
-func (c *CommandExecutorKubernetes) MustGetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor) {
+func (c *CommandExecutorKubernetes) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -507,7 +506,7 @@ func (c *CommandExecutorKubernetes) MustNamespaceByNameExists(name string, verbo
 	return exists
 }
 
-func (c *CommandExecutorKubernetes) MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
+func (c *CommandExecutorKubernetes) MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput) {
 	commandOutput, err := c.RunCommand(runCommandOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -532,7 +531,7 @@ func (c *CommandExecutorKubernetes) MustSetCachedContextName(cachedContextName s
 	}
 }
 
-func (c *CommandExecutorKubernetes) MustSetCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) {
+func (c *CommandExecutorKubernetes) MustSetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) {
 	err := c.SetCommandExecutor(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -582,7 +581,7 @@ func (c *CommandExecutorKubernetes) NamespaceByNameExists(name string, verbose b
 	return exists, nil
 }
 
-func (c *CommandExecutorKubernetes) RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
+func (c *CommandExecutorKubernetes) RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}
@@ -618,7 +617,7 @@ func (c *CommandExecutorKubernetes) SetCachedContextName(cachedContextName strin
 	return nil
 }
 
-func (c *CommandExecutorKubernetes) SetCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) (err error) {
+func (c *CommandExecutorKubernetes) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
 	c.commandExecutor = commandExecutor
 
 	return nil

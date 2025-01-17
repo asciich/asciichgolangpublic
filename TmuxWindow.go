@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
@@ -249,7 +250,7 @@ func (t *TmuxWindow) Exists(verbose bool) (exists bool, err error) {
 	return exists, nil
 }
 
-func (t *TmuxWindow) GetCommandExecutor() (commandExecutor CommandExecutor, err error) {
+func (t *TmuxWindow) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
 	session, err := t.GetSession()
 	if err != nil {
 		return nil, err
@@ -407,7 +408,7 @@ func (t *TmuxWindow) MustExists(verbose bool) (exists bool) {
 	return exists
 }
 
-func (t *TmuxWindow) MustGetCommandExecutor() (commandExecutor CommandExecutor) {
+func (t *TmuxWindow) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
 	commandExecutor, err := t.GetCommandExecutor()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -495,7 +496,7 @@ func (t *TmuxWindow) MustRecreate(verbose bool) {
 	}
 }
 
-func (t *TmuxWindow) MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput) {
+func (t *TmuxWindow) MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput) {
 	commandOutput, err := t.RunCommand(runCommandOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -559,7 +560,7 @@ func (t *TmuxWindow) Recreate(verbose bool) (err error) {
 	return nil
 }
 
-func (t *TmuxWindow) RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput, err error) {
+func (t *TmuxWindow) RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}
@@ -745,7 +746,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *parameteroptions.RunCommandOp
 
 	stdout := strings.Join(outputLines, "\n")
 
-	commandOutput = NewCommandOutput()
+	commandOutput = commandexecutor.NewCommandOutput()
 
 	err = commandOutput.SetStdoutByString(stdout)
 	if err != nil {

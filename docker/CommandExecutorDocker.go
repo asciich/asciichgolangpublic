@@ -3,7 +3,7 @@ package docker
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/containers"
 	"github.com/asciich/asciichgolangpublic/datatypes"
 	"github.com/asciich/asciichgolangpublic/hosts"
@@ -16,7 +16,7 @@ type CommandExecutorDocker struct {
 	host hosts.Host
 }
 
-func GetCommandExecutorDocker(commandExecutor asciichgolangpublic.CommandExecutor) (docker Docker, err error) {
+func GetCommandExecutorDocker(commandExecutor commandexecutor.CommandExecutor) (docker Docker, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -69,10 +69,10 @@ func GetCommandExecutorDockerOnHost(host hosts.Host) (docker Docker, err error) 
 }
 
 func GetLocalCommandExecutorDocker() (docker Docker, err error) {
-	return GetCommandExecutorDocker(asciichgolangpublic.Bash())
+	return GetCommandExecutorDocker(commandexecutor.Bash())
 }
 
-func MustGetCommandExecutorDocker(commandExecutor asciichgolangpublic.CommandExecutor) (docker Docker) {
+func MustGetCommandExecutorDocker(commandExecutor commandexecutor.CommandExecutor) (docker Docker) {
 	docker, err := GetCommandExecutorDocker(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -99,7 +99,7 @@ func MustGetLocalCommandExecutorDocker() (docker Docker) {
 	return docker
 }
 
-func MustGetcommandExecutorDocker(commandExecutor asciichgolangpublic.CommandExecutor) (docker Docker) {
+func MustGetcommandExecutorDocker(commandExecutor commandexecutor.CommandExecutor) (docker Docker) {
 	docker, err := GetCommandExecutorDocker(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -112,7 +112,7 @@ func NewCommandExecutorDocker() (c *CommandExecutorDocker) {
 	return new(CommandExecutorDocker)
 }
 
-func (c *CommandExecutorDocker) GetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor, err error) {
+func (c *CommandExecutorDocker) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
 	host, err := c.GetHost()
 	if err != nil {
 		return nil, err
@@ -193,7 +193,7 @@ func (c *CommandExecutorDocker) KillContainerByName(name string, verbose bool) (
 	return nil
 }
 
-func (c *CommandExecutorDocker) MustGetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor) {
+func (c *CommandExecutorDocker) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -236,7 +236,7 @@ func (c *CommandExecutorDocker) MustKillContainerByName(name string, verbose boo
 	}
 }
 
-func (c *CommandExecutorDocker) MustRunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
+func (c *CommandExecutorDocker) MustRunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput) {
 	commandOutput, err := c.RunCommand(runOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -270,7 +270,7 @@ func (c *CommandExecutorDocker) MustSetHost(host hosts.Host) {
 	}
 }
 
-func (c *CommandExecutorDocker) RunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
+func (c *CommandExecutorDocker) RunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runOptions")
 	}

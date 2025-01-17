@@ -4,6 +4,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -156,7 +157,7 @@ func (t *TmuxSession) Exists(verbose bool) (exists bool, err error) {
 	return exists, nil
 }
 
-func (t *TmuxSession) GetCommandExecutor() (commandExecutor CommandExecutor, err error) {
+func (t *TmuxSession) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
 	tmux, err := t.GetTmux()
 	if err != nil {
 		return nil, err
@@ -279,7 +280,7 @@ func (t *TmuxSession) MustExists(verbose bool) (exists bool) {
 	return exists
 }
 
-func (t *TmuxSession) MustGetCommandExecutor() (commandExecutor CommandExecutor) {
+func (t *TmuxSession) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
 	commandExecutor, err := t.GetCommandExecutor()
 	if err != nil {
 		logging.LogGoErrorFatal(err)

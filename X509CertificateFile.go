@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -106,7 +107,7 @@ func (x *X509CertificateFile) IsX509Certificate(verbose bool) (isX509Certificate
 		),
 	}
 
-	stdout, err := Bash().RunCommandAndGetStdoutAsString(
+	stdout, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
 		&parameteroptions.RunCommandOptions{
 			Command: checkCommand,
 		},

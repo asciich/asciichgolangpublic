@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
@@ -84,7 +85,7 @@ func (g *GopassService) GetCredential(getOptions *GopassSecretOptions) (credenti
 }
 
 func (g *GopassService) GetCredentialList() (credentials []*GopassCredential, err error) {
-	outLines, err := Bash().RunCommandAndGetStdoutAsLines(
+	outLines, err := commandexecutor.Bash().RunCommandAndGetStdoutAsLines(
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"gopass", "list", "-f"},
 		},
@@ -271,7 +272,7 @@ func (g *GopassService) InsertFile(fileToInsert File, gopassOptions *GopassSecre
 		fmt.Sprintf("cat '%s' | gopass cat '%s'", fileToInsertPath, gopassPath),
 	}
 
-	_, err = Bash().RunCommand(
+	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,
 		},
@@ -323,7 +324,7 @@ func (g *GopassService) InsertSecret(secretToInsert string, gopassOptions *Gopas
 		fmt.Sprintf("echo '%s' | gopass insert -f '%s'", secretToInsert, gopassPath),
 	}
 
-	_, err = Bash().RunCommand(
+	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,
 		},
@@ -504,7 +505,7 @@ func (g *GopassService) SecretNameExist(secretName string) (secretExists bool, e
 }
 
 func (g *GopassService) Sync(verbose bool) (err error) {
-	_, err = Bash().RunCommand(
+	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command:            []string{"gopass", "sync"},
 			Verbose:            verbose,
@@ -535,7 +536,7 @@ func (g *GopassService) WriteInfoToGopass(gopassPath string) (err error) {
 		fmt.Sprintf("echo '%v' | gopass insert -f '%v'", infoString, gopassPath),
 	}
 
-	_, err = Bash().RunCommand(
+	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,
 		},

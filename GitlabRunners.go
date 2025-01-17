@@ -7,6 +7,7 @@ import (
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -298,7 +299,7 @@ func (s *GitlabRunnersService) AddRunner(newRunnerOptions *GitlabAddRunnerOption
 			"--header", "PRIVATE-TOKEN: " + privateToken,
 		}
 
-		_, err = Bash().RunCommand(
+		_, err = commandexecutor.Bash().RunCommand(
 			&parameteroptions.RunCommandOptions{
 				Command: addRunnerCommand,
 				Verbose: newRunnerOptions.Verbose,

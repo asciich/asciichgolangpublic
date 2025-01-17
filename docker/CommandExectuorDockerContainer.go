@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
@@ -21,7 +21,7 @@ func NewCommandExecutorDockerContainer() (c *CommandExecutorDockerContainer) {
 	return new(CommandExecutorDockerContainer)
 }
 
-func (c *CommandExecutorDockerContainer) GetCommandExecutor() (commandExectuor asciichgolangpublic.CommandExecutor, err error) {
+func (c *CommandExecutorDockerContainer) GetCommandExecutor() (commandExectuor commandexecutor.CommandExecutor, err error) {
 	docker, err := c.GetDocker()
 	if err != nil {
 		return nil, err
@@ -140,7 +140,7 @@ func (c *CommandExecutorDockerContainer) Kill(verbose bool) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorDockerContainer) MustGetCommandExecutor() (commandExectuor asciichgolangpublic.CommandExecutor) {
+func (c *CommandExecutorDockerContainer) MustGetCommandExecutor() (commandExectuor commandexecutor.CommandExecutor) {
 	commandExectuor, err := c.GetCommandExecutor()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -149,7 +149,7 @@ func (c *CommandExecutorDockerContainer) MustGetCommandExecutor() (commandExectu
 	return commandExectuor
 }
 
-func (c *CommandExecutorDockerContainer) MustRunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
+func (c *CommandExecutorDockerContainer) MustRunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput) {
 	commandOutput, err := c.RunCommand(runOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -167,7 +167,7 @@ func (c *CommandExecutorDockerContainer) MustRunCommandAndGetStdoutAsString(runO
 	return stdout
 }
 
-func (c *CommandExecutorDockerContainer) RunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
+func (c *CommandExecutorDockerContainer) RunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runOptions")
 	}

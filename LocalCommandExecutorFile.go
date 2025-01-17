@@ -1,11 +1,12 @@
 package asciichgolangpublic
 
 import (
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-func GetCommandExecutorFileByPath(commandExector CommandExecutor, path string) (commandExecutorFile *CommandExecutorFile, err error) {
+func GetCommandExecutorFileByPath(commandExector commandexecutor.CommandExecutor, path string) (commandExecutorFile *CommandExecutorFile, err error) {
 	if commandExector == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -57,10 +58,10 @@ func GetLocalCommandExecutorFileByPath(localPath string) (commandExecutorFile *C
 		return nil, tracederrors.TracedErrorEmptyString(localPath)
 	}
 
-	return GetCommandExecutorFileByPath(Bash(), localPath)
+	return GetCommandExecutorFileByPath(commandexecutor.Bash(), localPath)
 }
 
-func MustGetCommandExecutorFileByPath(commandExector CommandExecutor, path string) (commandExecutorFile *CommandExecutorFile) {
+func MustGetCommandExecutorFileByPath(commandExector commandexecutor.CommandExecutor, path string) (commandExecutorFile *CommandExecutorFile) {
 	commandExecutorFile, err := GetCommandExecutorFileByPath(commandExector, path)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

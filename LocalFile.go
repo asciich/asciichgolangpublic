@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
@@ -177,7 +178,7 @@ func (l *LocalFile) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err erro
 		return err
 	}
 
-	_, err = Bash().RunCommand(
+	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"chmod", chmodString, localPath},
 			Verbose: chmodOptions.Verbose,
@@ -224,7 +225,7 @@ func (l *LocalFile) Chown(options *parameteroptions.ChownOptions) (err error) {
 		command = append([]string{"sudo"}, command...)
 	}
 
-	_, err = Bash().RunCommand(
+	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command: command,
 		},
@@ -446,7 +447,7 @@ func (l *LocalFile) MoveToPath(path string, useSudo bool, verbose bool) (movedFi
 	}
 
 	if useSudo {
-		_, err = Bash().RunCommand(
+		_, err = commandexecutor.Bash().RunCommand(
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"sudo", "mv", srcPath, path},
 			},
@@ -728,7 +729,7 @@ func (l *LocalFile) SecurelyDelete(verbose bool) (err error) {
 	}
 
 	deleteCommand := []string{"shred", "-u", pathToDelete}
-	_, err = Bash().RunCommand(&parameteroptions.RunCommandOptions{
+	_, err = commandexecutor.Bash().RunCommand(&parameteroptions.RunCommandOptions{
 		Command: deleteCommand,
 		Verbose: verbose,
 	})

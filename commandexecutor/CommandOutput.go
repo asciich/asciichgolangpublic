@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package commandexecutor
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/encoding/utf16utils"
+	"github.com/asciich/asciichgolangpublic/exitcodes"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/os/osutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -391,7 +392,7 @@ func (o *CommandOutput) IsExitSuccess() (isSuccess bool) {
 		return false
 	}
 
-	return *o.returnCode == ExitCodes().ExitCodeOK()
+	return *o.returnCode == exitcodes.ExitCodeOK()
 }
 
 func (o *CommandOutput) IsTimedOut() (IsTimedOut bool, err error) {
@@ -400,7 +401,7 @@ func (o *CommandOutput) IsTimedOut() (IsTimedOut bool, err error) {
 		return false, err
 	}
 
-	return returnCode == ExitCodes().ExitCodeTimeout(), nil
+	return returnCode == exitcodes.ExitCodeTimeout(), nil
 }
 
 func (o *CommandOutput) SetCmdRunError(err error) {

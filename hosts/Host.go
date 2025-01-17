@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -22,8 +23,8 @@ type Host interface {
 	MustGetHostDescription() (hostDescription string)
 	MustGetHostName() (hostName string)
 	MustInstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile asciichgolangpublic.File)
-	MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput)
-	RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error)
+	MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput)
+	RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error)
 
 	// All methods below this line can be implemented by embedding the `CommandExecutorBase` struct:
 	RunCommandAndGetStdoutAsString(runCommandOptions *parameteroptions.RunCommandOptions) (stdout string, err error)
@@ -36,9 +37,9 @@ func GetHostByHostname(hostname string) (host Host, err error) {
 		return nil, tracederrors.TracedError("hostname is empty string")
 	}
 
-	var commandExecutor asciichgolangpublic.CommandExecutor
+	var commandExecutor commandexecutor.CommandExecutor
 	if hostname == "localhost" {
-		commandExecutor = asciichgolangpublic.Bash()
+		commandExecutor = commandexecutor.Bash()
 	} else {
 		commandExecutor, err = asciichgolangpublic.GetSshClientByHostName(hostname)
 		if err != nil {

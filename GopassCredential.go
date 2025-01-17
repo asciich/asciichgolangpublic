@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
@@ -49,7 +50,7 @@ func (c *GopassCredential) Exists() (exists bool, err error) {
 		return false, err
 	}
 
-	output, err := Bash().RunCommand(
+	output, err := commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
@@ -79,7 +80,7 @@ func (c *GopassCredential) GetAsBytes() (credential []byte, err error) {
 		return nil, err
 	}
 
-	credential, err = Bash().RunCommandAndGetStdoutAsBytes(
+	credential, err = commandexecutor.Bash().RunCommandAndGetStdoutAsBytes(
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"gopass", "cat", name},
 		})
@@ -189,7 +190,7 @@ func (c *GopassCredential) SetByString(newValue string) (err error) {
 		fmt.Sprintf("echo '%s' | gopass insert -f '%s'", newValue, name),
 	}
 
-	_, err = Bash().RunCommand(
+	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,
 		},

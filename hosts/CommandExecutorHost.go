@@ -6,20 +6,21 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type CommandExecutorHost struct {
-	asciichgolangpublic.CommandExecutorBase
-	commandExecutor asciichgolangpublic.CommandExecutor
+	commandexecutor.CommandExecutorBase
+	commandExecutor commandexecutor.CommandExecutor
 	Comment         string
 }
 
 // Get a Host by a CommandExecutor capable of executing commands on the Host.
 // E.g. for SSH a SSHCLient can be used.
-func GetCommandExecutorHostByCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) (host Host, err error) {
+func GetCommandExecutorHostByCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (host Host, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -34,7 +35,7 @@ func GetCommandExecutorHostByCommandExecutor(commandExecutor asciichgolangpublic
 	return toReturn, nil
 }
 
-func MustGetCommandExecutorHostByCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) (host Host) {
+func MustGetCommandExecutorHostByCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (host Host) {
 	host, err := GetCommandExecutorHostByCommandExecutor(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -49,7 +50,7 @@ func NewCommandExecutorHost() (c *CommandExecutorHost) {
 	return c
 }
 
-func (c *CommandExecutorHost) GetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor, err error) {
+func (c *CommandExecutorHost) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
 
 	return c.commandExecutor, nil
 }
@@ -86,7 +87,7 @@ func (c *CommandExecutorHost) GetHostDescription() (hostDescription string, err 
 	return commandExecutor.GetHostDescription()
 }
 
-func (c *CommandExecutorHost) MustGetCommandExecutor() (commandExecutor asciichgolangpublic.CommandExecutor) {
+func (c *CommandExecutorHost) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -104,7 +105,7 @@ func (c *CommandExecutorHost) MustIsReachable(verbose bool) (isReachable bool) {
 	return isReachable
 }
 
-func (c *CommandExecutorHost) MustRunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
+func (c *CommandExecutorHost) MustRunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput) {
 	commandOutput, err := c.RunCommand(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -113,7 +114,7 @@ func (c *CommandExecutorHost) MustRunCommand(options *parameteroptions.RunComman
 	return commandOutput
 }
 
-func (c *CommandExecutorHost) MustSetCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) {
+func (c *CommandExecutorHost) MustSetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) {
 	err := c.SetCommandExecutor(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -127,7 +128,7 @@ func (c *CommandExecutorHost) MustWaitUntilReachable(renewHostKey bool, verbose 
 	}
 }
 
-func (c *CommandExecutorHost) RunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
+func (c *CommandExecutorHost) RunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -140,7 +141,7 @@ func (c *CommandExecutorHost) RunCommand(options *parameteroptions.RunCommandOpt
 	return commandExecutor.RunCommand(options)
 }
 
-func (c *CommandExecutorHost) SetCommandExecutor(commandExecutor asciichgolangpublic.CommandExecutor) (err error) {
+func (c *CommandExecutorHost) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
 	c.commandExecutor = commandExecutor
 
 	return nil
@@ -152,7 +153,7 @@ func (h *CommandExecutorHost) AddSshHostKeyToKnownHosts(verbose bool) (err error
 		return err
 	}
 
-	_, err = asciichgolangpublic.Bash().RunCommand(
+	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				fmt.Sprintf("ssh-keyscan -H '%s' >> ${HOME}/.ssh/known_hosts", hostname),
@@ -349,7 +350,7 @@ func (h *CommandExecutorHost) IsPingable(verbose bool) (isPingable bool, err err
 		return false, err
 	}
 
-	stdout, err := asciichgolangpublic.Bash().RunCommandAndGetStdoutAsString(
+	stdout, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"bash", "-c", fmt.Sprintf("ping -c 1 '%s' &>/dev/null && echo yes || echo no", hostname)},
 		},
@@ -527,7 +528,7 @@ func (h *CommandExecutorHost) RemoveSshHostKeyFromKnownHosts(verbose bool) (err 
 		return err
 	}
 
-	_, err = asciichgolangpublic.Bash().RunCommand(
+	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"ssh-keygen", "-R", hostname},
 		},
