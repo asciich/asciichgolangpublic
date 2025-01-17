@@ -1737,7 +1737,7 @@ func TestGitRepository_CreateAndDeleteBranch(t *testing.T) {
 
 				for i := 0; i < 2; i++ {
 					gitRepo.MustCreateBranch(
-						&CreateBranchOptions{
+						&parameteroptions.CreateBranchOptions{
 							Name:    "testbranch",
 							Verbose: verbose,
 						},
@@ -1777,7 +1777,7 @@ func TestGitRepository_CheckoutBranch(t *testing.T) {
 
 				for _, branchName := range []string{"testbranch1", "testbranch2"} {
 					gitRepo.MustCreateBranch(
-						&CreateBranchOptions{
+						&parameteroptions.CreateBranchOptions{
 							Name:    branchName,
 							Verbose: verbose,
 						},
