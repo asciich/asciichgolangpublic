@@ -401,7 +401,7 @@ func (c *CommandExecutorGitRepository) CommitHasParentCommitByCommitHash(hash st
 	return false, tracederrors.TracedErrorNotImplemented()
 }
 
-func (c *CommandExecutorGitRepository) CreateBranch(createOptions *CreateBranchOptions) (err error) {
+func (c *CommandExecutorGitRepository) CreateBranch(createOptions *parameteroptions.CreateBranchOptions) (err error) {
 	if createOptions == nil {
 		return tracederrors.TracedErrorNil("createOptions")
 	}
@@ -1530,7 +1530,7 @@ func (c *CommandExecutorGitRepository) MustCommitHasParentCommitByCommitHash(has
 	return hasParentCommit
 }
 
-func (c *CommandExecutorGitRepository) MustCreateBranch(createOptions *CreateBranchOptions) {
+func (c *CommandExecutorGitRepository) MustCreateBranch(createOptions *parameteroptions.CreateBranchOptions) {
 	err := c.CreateBranch(createOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

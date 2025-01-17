@@ -17,6 +17,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -480,7 +481,7 @@ func (l *LocalGitRepository) CommitHasParentCommitByCommitHash(hash string) (has
 	return hasParentCommit, nil
 }
 
-func (l *LocalGitRepository) CreateBranch(createOptions *CreateBranchOptions) (err error) {
+func (l *LocalGitRepository) CreateBranch(createOptions *parameteroptions.CreateBranchOptions) (err error) {
 	if createOptions == nil {
 		return tracederrors.TracedErrorNil("createOptions")
 	}
@@ -1874,7 +1875,7 @@ func (l *LocalGitRepository) MustCommitHasParentCommitByCommitHash(hash string) 
 	return hasParentCommit
 }
 
-func (l *LocalGitRepository) MustCreateBranch(createOptions *CreateBranchOptions) {
+func (l *LocalGitRepository) MustCreateBranch(createOptions *parameteroptions.CreateBranchOptions) {
 	err := l.CreateBranch(createOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
