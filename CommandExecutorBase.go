@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -56,7 +57,7 @@ func (c *CommandExecutorBase) MustIsRunningOnLocalhost() (isRunningOnLocalhost b
 	return isRunningOnLocalhost
 }
 
-func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsBytes(options *RunCommandOptions) (stdout []byte) {
+func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsBytes(options *parameteroptions.RunCommandOptions) (stdout []byte) {
 	stdout, err := c.RunCommandAndGetStdoutAsBytes(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -65,7 +66,7 @@ func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsBytes(options *RunComm
 	return stdout
 }
 
-func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsFloat64(options *RunCommandOptions) (stdout float64) {
+func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsFloat64(options *parameteroptions.RunCommandOptions) (stdout float64) {
 	stdout, err := c.RunCommandAndGetStdoutAsFloat64(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -74,7 +75,7 @@ func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsFloat64(options *RunCo
 	return stdout
 }
 
-func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsInt64(options *RunCommandOptions) (stdout int64) {
+func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsInt64(options *parameteroptions.RunCommandOptions) (stdout int64) {
 	stdout, err := c.RunCommandAndGetStdoutAsInt64(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -83,7 +84,7 @@ func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsInt64(options *RunComm
 	return stdout
 }
 
-func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsLines(options *RunCommandOptions) (stdoutLines []string) {
+func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsLines(options *parameteroptions.RunCommandOptions) (stdoutLines []string) {
 	stdoutLines, err := c.RunCommandAndGetStdoutAsLines(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -92,7 +93,7 @@ func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsLines(options *RunComm
 	return stdoutLines
 }
 
-func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsString(options *RunCommandOptions) (stdout string) {
+func (c *CommandExecutorBase) MustRunCommandAndGetStdoutAsString(options *parameteroptions.RunCommandOptions) (stdout string) {
 	stdout, err := c.RunCommandAndGetStdoutAsString(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -108,7 +109,7 @@ func (c *CommandExecutorBase) MustSetParentCommandExecutorForBaseClass(parentCom
 	}
 }
 
-func (c *CommandExecutorBase) RunCommandAndGetStdoutAsBytes(options *RunCommandOptions) (stdout []byte, err error) {
+func (c *CommandExecutorBase) RunCommandAndGetStdoutAsBytes(options *parameteroptions.RunCommandOptions) (stdout []byte, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -131,7 +132,7 @@ func (c *CommandExecutorBase) RunCommandAndGetStdoutAsBytes(options *RunCommandO
 	return stdout, nil
 }
 
-func (c *CommandExecutorBase) RunCommandAndGetStdoutAsFloat64(options *RunCommandOptions) (stdout float64, err error) {
+func (c *CommandExecutorBase) RunCommandAndGetStdoutAsFloat64(options *parameteroptions.RunCommandOptions) (stdout float64, err error) {
 	if options == nil {
 		return -1, tracederrors.TracedErrorNil("options")
 	}
@@ -154,7 +155,7 @@ func (c *CommandExecutorBase) RunCommandAndGetStdoutAsFloat64(options *RunComman
 	return stdout, nil
 }
 
-func (c *CommandExecutorBase) RunCommandAndGetStdoutAsInt64(options *RunCommandOptions) (stdout int64, err error) {
+func (c *CommandExecutorBase) RunCommandAndGetStdoutAsInt64(options *parameteroptions.RunCommandOptions) (stdout int64, err error) {
 	stdoutString, err := c.RunCommandAndGetStdoutAsString(options)
 	if err != nil {
 		return -1, err
@@ -170,7 +171,7 @@ func (c *CommandExecutorBase) RunCommandAndGetStdoutAsInt64(options *RunCommandO
 	return stdout, nil
 }
 
-func (c *CommandExecutorBase) RunCommandAndGetStdoutAsLines(options *RunCommandOptions) (stdoutLines []string, err error) {
+func (c *CommandExecutorBase) RunCommandAndGetStdoutAsLines(options *parameteroptions.RunCommandOptions) (stdoutLines []string, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -193,7 +194,7 @@ func (c *CommandExecutorBase) RunCommandAndGetStdoutAsLines(options *RunCommandO
 	return stdoutLines, nil
 }
 
-func (c *CommandExecutorBase) RunCommandAndGetStdoutAsString(options *RunCommandOptions) (stdout string, err error) {
+func (c *CommandExecutorBase) RunCommandAndGetStdoutAsString(options *parameteroptions.RunCommandOptions) (stdout string, err error) {
 	if options == nil {
 		return "", tracederrors.TracedErrorNil("options")
 	}

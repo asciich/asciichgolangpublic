@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -89,7 +90,7 @@ func (t *TmuxService) ListSessionNames(verbose bool) (sessionNames []string, err
 	}
 
 	fullSessionLines, err := commandExecutor.RunCommandAndGetStdoutAsLines(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command:            []string{"tmux", "ls"},
 			LiveOutputOnStdout: verbose,
 			Verbose:            verbose,

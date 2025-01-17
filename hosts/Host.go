@@ -5,6 +5,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -21,12 +22,12 @@ type Host interface {
 	MustGetHostDescription() (hostDescription string)
 	MustGetHostName() (hostName string)
 	MustInstallBinary(installOptions *asciichgolangpublic.InstallOptions) (installedFile asciichgolangpublic.File)
-	MustRunCommand(runCommandOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput)
-	RunCommand(runCommandOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error)
+	MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput)
+	RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error)
 
 	// All methods below this line can be implemented by embedding the `CommandExecutorBase` struct:
-	RunCommandAndGetStdoutAsString(runCommandOptions *asciichgolangpublic.RunCommandOptions) (stdout string, err error)
-	MustRunCommandAndGetStdoutAsString(runCommandOptions *asciichgolangpublic.RunCommandOptions) (stdout string)
+	RunCommandAndGetStdoutAsString(runCommandOptions *parameteroptions.RunCommandOptions) (stdout string, err error)
+	MustRunCommandAndGetStdoutAsString(runCommandOptions *parameteroptions.RunCommandOptions) (stdout string)
 }
 
 func GetHostByHostname(hostname string) (host Host, err error) {

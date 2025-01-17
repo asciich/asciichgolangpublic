@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/os/osutils"
 	"github.com/asciich/asciichgolangpublic/os/windows"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -54,7 +55,7 @@ func (e *ExecService) MustGetHostDescription() (hostDescription string) {
 	return hostDescription
 }
 
-func (e *ExecService) MustRunCommand(options *RunCommandOptions) (commandOutput *CommandOutput) {
+func (e *ExecService) MustRunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput) {
 	commandOutput, err := e.RunCommand(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -63,7 +64,7 @@ func (e *ExecService) MustRunCommand(options *RunCommandOptions) (commandOutput 
 	return commandOutput
 }
 
-func (e *ExecService) RunCommand(options *RunCommandOptions) (commandOutput *CommandOutput, err error) {
+func (e *ExecService) RunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}

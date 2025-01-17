@@ -6,6 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/kubernetes"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -128,7 +129,7 @@ func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bo
 		}
 
 		_, err = commandExecutor.RunCommand(
-			&asciichgolangpublic.RunCommandOptions{
+			&parameteroptions.RunCommandOptions{
 				Command:            []string{"kind", "create", "cluster", "--name", clusterName},
 				Verbose:            verbose,
 				LiveOutputOnStdout: verbose,
@@ -172,7 +173,7 @@ func (c *CommandExecutorKind) DeleteClusterByName(clusterName string, verbose bo
 		}
 
 		_, err = commandExecutor.RunCommand(
-			&asciichgolangpublic.RunCommandOptions{
+			&parameteroptions.RunCommandOptions{
 				Command:            []string{"kind", "delete", "cluster", "--name", clusterName},
 				Verbose:            verbose,
 				LiveOutputOnStdout: verbose,
@@ -239,7 +240,7 @@ func (c *CommandExecutorKind) GetHostDescription() (hostDescription string, err 
 
 func (c *CommandExecutorKind) ListClusterNames(verbose bool) (clusterNames []string, err error) {
 	return c.RunCommandAndGetStdoutAsLines(
-		&asciichgolangpublic.RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{"kind", "get", "clusters"},
 			Verbose: false,
 		},
@@ -307,7 +308,7 @@ func (c *CommandExecutorKind) MustListClusterNames(verbose bool) (clusterNames [
 	return clusterNames
 }
 
-func (c *CommandExecutorKind) MustRunCommand(runOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
+func (c *CommandExecutorKind) MustRunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
 	commandOutput, err := c.RunCommand(runOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -316,7 +317,7 @@ func (c *CommandExecutorKind) MustRunCommand(runOptions *asciichgolangpublic.Run
 	return commandOutput
 }
 
-func (c *CommandExecutorKind) MustRunCommandAndGetStdoutAsLines(runOptions *asciichgolangpublic.RunCommandOptions) (lines []string) {
+func (c *CommandExecutorKind) MustRunCommandAndGetStdoutAsLines(runOptions *parameteroptions.RunCommandOptions) (lines []string) {
 	lines, err := c.RunCommandAndGetStdoutAsLines(runOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -332,7 +333,7 @@ func (c *CommandExecutorKind) MustSetCommandExecutor(commandExecutor asciichgola
 	}
 }
 
-func (c *CommandExecutorKind) RunCommand(runOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
+func (c *CommandExecutorKind) RunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runOptions")
 	}
@@ -345,7 +346,7 @@ func (c *CommandExecutorKind) RunCommand(runOptions *asciichgolangpublic.RunComm
 	return commandExecutor.RunCommand(runOptions)
 }
 
-func (c *CommandExecutorKind) RunCommandAndGetStdoutAsLines(runOptions *asciichgolangpublic.RunCommandOptions) (lines []string, err error) {
+func (c *CommandExecutorKind) RunCommandAndGetStdoutAsLines(runOptions *parameteroptions.RunCommandOptions) (lines []string, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runOptions")
 	}

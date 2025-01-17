@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/datatypes"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -92,7 +93,7 @@ func (c *CommandExecutorNamespace) CreateRole(createOptions *CreateRoleOptions) 
 		}
 
 		_, err = c.RunCommand(
-			&asciichgolangpublic.RunCommandOptions{
+			&parameteroptions.RunCommandOptions{
 				Command: command,
 			},
 		)
@@ -131,7 +132,7 @@ func (c *CommandExecutorNamespace) DeleteRoleByName(name string, verbose bool) (
 		}
 
 		_, err = c.RunCommand(
-			&asciichgolangpublic.RunCommandOptions{
+			&parameteroptions.RunCommandOptions{
 				Command: []string{
 					"kubectl",
 					"--context",
@@ -268,7 +269,7 @@ func (c *CommandExecutorNamespace) ListRoleNames(verbose bool) (roleNames []stri
 	}
 
 	lines, err := c.RunCommandAndGetStdoutAsLines(
-		&asciichgolangpublic.RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"kubectl",
 				"--context",
@@ -403,7 +404,7 @@ func (c *CommandExecutorNamespace) MustRoleByNameExists(name string, verbose boo
 	return exists
 }
 
-func (c *CommandExecutorNamespace) MustRunCommand(runCommandOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
+func (c *CommandExecutorNamespace) MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
 	commandOutput, err := c.RunCommand(runCommandOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -412,7 +413,7 @@ func (c *CommandExecutorNamespace) MustRunCommand(runCommandOptions *asciichgola
 	return commandOutput
 }
 
-func (c *CommandExecutorNamespace) MustRunCommandAndGetStdoutAsLines(runCommandOptions *asciichgolangpublic.RunCommandOptions) (lines []string) {
+func (c *CommandExecutorNamespace) MustRunCommandAndGetStdoutAsLines(runCommandOptions *parameteroptions.RunCommandOptions) (lines []string) {
 	lines, err := c.RunCommandAndGetStdoutAsLines(runCommandOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -471,7 +472,7 @@ func (c *CommandExecutorNamespace) RoleByNameExists(name string, verbose bool) (
 	return exists, nil
 }
 
-func (c *CommandExecutorNamespace) RunCommand(runCommandOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
+func (c *CommandExecutorNamespace) RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}
@@ -484,7 +485,7 @@ func (c *CommandExecutorNamespace) RunCommand(runCommandOptions *asciichgolangpu
 	return commandExecutor.RunCommand(runCommandOptions)
 }
 
-func (c *CommandExecutorNamespace) RunCommandAndGetStdoutAsLines(runCommandOptions *asciichgolangpublic.RunCommandOptions) (lines []string, err error) {
+func (c *CommandExecutorNamespace) RunCommandAndGetStdoutAsLines(runCommandOptions *parameteroptions.RunCommandOptions) (lines []string, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}

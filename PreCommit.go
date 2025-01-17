@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -86,7 +87,7 @@ func (p *PreCommitService) RunInDirectory(directoy Directory, options *PreCommit
 	}
 
 	_, err = Bash().RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command:            preCommitCommand,
 			Verbose:            options.Verbose,
 			LiveOutputOnStdout: options.Verbose,

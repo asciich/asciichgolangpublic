@@ -1,7 +1,8 @@
-package asciichgolangpublic
+package parameteroptions
 
 import (
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/datetime"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -71,7 +72,7 @@ func (o *RunCommandOptions) GetTimeoutSecondsAsString() (timeoutSeconds string, 
 		return "", err
 	}
 
-	timeoutSeconds, err = DurationParser().ToSecondsAsString(o.TimeoutString)
+	timeoutSeconds, err = datetime.DurationParser().ToSecondsAsString(o.TimeoutString)
 	if err != nil {
 		return "", err
 	}

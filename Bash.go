@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -43,7 +44,7 @@ func (b *BashService) MustGetHostDescription() (hostDescription string) {
 	return hostDescription
 }
 
-func (b *BashService) MustRunCommand(options *RunCommandOptions) (commandOutput *CommandOutput) {
+func (b *BashService) MustRunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput) {
 	commandOutput, err := b.RunCommand(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -79,7 +80,7 @@ func (b *BashService) MustRunOneLinerAndGetStdoutAsString(oneLiner string, verbo
 	return stdout
 }
 
-func (b *BashService) RunCommand(options *RunCommandOptions) (commandOutput *CommandOutput, err error) {
+func (b *BashService) RunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -112,7 +113,7 @@ func (b *BashService) RunOneLiner(oneLiner string, verbose bool) (output *Comman
 	}
 
 	output, err = b.RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command:            []string{oneLiner},
 			Verbose:            verbose,
 			LiveOutputOnStdout: verbose,

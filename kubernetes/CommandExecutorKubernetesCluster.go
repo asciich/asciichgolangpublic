@@ -8,6 +8,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -110,7 +111,7 @@ func (c *CommandExecutorKubernetes) CreateNamespaceByName(name string, verbose b
 		}
 
 		_, err = c.RunCommand(
-			&asciichgolangpublic.RunCommandOptions{
+			&parameteroptions.RunCommandOptions{
 				Command: []string{
 					"kubectl",
 					"--context",
@@ -160,7 +161,7 @@ func (c *CommandExecutorKubernetes) DeleteNamespaceByName(name string, verbose b
 		}
 
 		_, err = c.RunCommand(
-			&asciichgolangpublic.RunCommandOptions{
+			&parameteroptions.RunCommandOptions{
 				Command: []string{
 					"kubectl",
 					"--context",
@@ -272,7 +273,7 @@ func (c *CommandExecutorKubernetes) GetKubectlContext(verbose bool) (context str
 
 func (c *CommandExecutorKubernetes) GetKubectlContexts() (contexts []KubectlContext, err error) {
 	lines, err := c.RunCommandAndGetStdoutAsLines(
-		&asciichgolangpublic.RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{"kubectl", "config", "get-contexts", "--no-headers"},
 		},
 	)
@@ -363,7 +364,7 @@ func (c *CommandExecutorKubernetes) ListNamespaces(verbose bool) (namespaces []N
 	}
 
 	lines, err := c.RunCommandAndGetStdoutAsLines(
-		&asciichgolangpublic.RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"kubectl",
 				"--context",
@@ -506,7 +507,7 @@ func (c *CommandExecutorKubernetes) MustNamespaceByNameExists(name string, verbo
 	return exists
 }
 
-func (c *CommandExecutorKubernetes) MustRunCommand(runCommandOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
+func (c *CommandExecutorKubernetes) MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput) {
 	commandOutput, err := c.RunCommand(runCommandOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -515,7 +516,7 @@ func (c *CommandExecutorKubernetes) MustRunCommand(runCommandOptions *asciichgol
 	return commandOutput
 }
 
-func (c *CommandExecutorKubernetes) MustRunCommandAndGetStdoutAsLines(runCommandOptions *asciichgolangpublic.RunCommandOptions) (lines []string) {
+func (c *CommandExecutorKubernetes) MustRunCommandAndGetStdoutAsLines(runCommandOptions *parameteroptions.RunCommandOptions) (lines []string) {
 	lines, err := c.RunCommandAndGetStdoutAsLines(runCommandOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -581,7 +582,7 @@ func (c *CommandExecutorKubernetes) NamespaceByNameExists(name string, verbose b
 	return exists, nil
 }
 
-func (c *CommandExecutorKubernetes) RunCommand(runCommandOptions *asciichgolangpublic.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
+func (c *CommandExecutorKubernetes) RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *asciichgolangpublic.CommandOutput, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}
@@ -594,7 +595,7 @@ func (c *CommandExecutorKubernetes) RunCommand(runCommandOptions *asciichgolangp
 	return commandExecutor.RunCommand(runCommandOptions)
 }
 
-func (c *CommandExecutorKubernetes) RunCommandAndGetStdoutAsLines(runCommandOptions *asciichgolangpublic.RunCommandOptions) (lines []string, err error) {
+func (c *CommandExecutorKubernetes) RunCommandAndGetStdoutAsLines(runCommandOptions *parameteroptions.RunCommandOptions) (lines []string, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}

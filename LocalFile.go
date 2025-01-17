@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -161,7 +162,7 @@ func (l *LocalFile) AppendString(toWrite string, verbose bool) (err error) {
 	return nil
 }
 
-func (l *LocalFile) Chmod(chmodOptions *ChmodOptions) (err error) {
+func (l *LocalFile) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err error) {
 	if chmodOptions == nil {
 		return tracederrors.TracedErrorNil("chmodOptions")
 	}
@@ -177,7 +178,7 @@ func (l *LocalFile) Chmod(chmodOptions *ChmodOptions) (err error) {
 	}
 
 	_, err = Bash().RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{"chmod", chmodString, localPath},
 			Verbose: chmodOptions.Verbose,
 		},
@@ -193,7 +194,7 @@ func (l *LocalFile) Chmod(chmodOptions *ChmodOptions) (err error) {
 	return nil
 }
 
-func (l *LocalFile) Chown(options *ChownOptions) (err error) {
+func (l *LocalFile) Chown(options *parameteroptions.ChownOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
@@ -224,7 +225,7 @@ func (l *LocalFile) Chown(options *ChownOptions) (err error) {
 	}
 
 	_, err = Bash().RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: command,
 		},
 	)
@@ -446,7 +447,7 @@ func (l *LocalFile) MoveToPath(path string, useSudo bool, verbose bool) (movedFi
 
 	if useSudo {
 		_, err = Bash().RunCommand(
-			&RunCommandOptions{
+			&parameteroptions.RunCommandOptions{
 				Command: []string{"sudo", "mv", srcPath, path},
 			},
 		)
@@ -492,14 +493,14 @@ func (l *LocalFile) MustAppendString(toWrite string, verbose bool) {
 	}
 }
 
-func (l *LocalFile) MustChmod(chmodOptions *ChmodOptions) {
+func (l *LocalFile) MustChmod(chmodOptions *parameteroptions.ChmodOptions) {
 	err := l.Chmod(chmodOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (l *LocalFile) MustChown(options *ChownOptions) {
+func (l *LocalFile) MustChown(options *parameteroptions.ChownOptions) {
 	err := l.Chown(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -727,7 +728,7 @@ func (l *LocalFile) SecurelyDelete(verbose bool) (err error) {
 	}
 
 	deleteCommand := []string{"shred", "-u", pathToDelete}
-	_, err = Bash().RunCommand(&RunCommandOptions{
+	_, err = Bash().RunCommand(&parameteroptions.RunCommandOptions{
 		Command: deleteCommand,
 		Verbose: verbose,
 	})

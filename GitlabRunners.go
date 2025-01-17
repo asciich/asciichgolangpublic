@@ -8,6 +8,7 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -298,7 +299,7 @@ func (s *GitlabRunnersService) AddRunner(newRunnerOptions *GitlabAddRunnerOption
 		}
 
 		_, err = Bash().RunCommand(
-			&RunCommandOptions{
+			&parameteroptions.RunCommandOptions{
 				Command: addRunnerCommand,
 				Verbose: newRunnerOptions.Verbose,
 			},

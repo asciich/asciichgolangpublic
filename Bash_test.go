@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -31,13 +32,13 @@ func TestBashRunCommandAndGetStdoutAsString(t *testing.T) {
 
 				var bash CommandExecutor = Bash()
 				output := bash.MustRunCommandAndGetStdoutAsString(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
 						Verbose: verbose,
 					},
 				)
 				output2 := bash.MustRunCommandAndGetStdoutAsString(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command:            tt.command,
 						Verbose:            verbose,
 						LiveOutputOnStdout: true,
@@ -73,7 +74,7 @@ func TestBashRunCommand(t *testing.T) {
 				const verbose bool = true
 
 				output := Bash().MustRunCommand(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
 						Verbose: verbose,
 					},
@@ -84,7 +85,7 @@ func TestBashRunCommand(t *testing.T) {
 				assert.EqualValues(0, output.MustGetReturnCode())
 
 				output2 := Bash().MustRunCommand(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command:            tt.command,
 						Verbose:            verbose,
 						LiveOutputOnStdout: true,
@@ -119,13 +120,13 @@ func TestBashRunCommandAndGetStdoutAsFloat64(t *testing.T) {
 				const verbose bool = true
 
 				output := Bash().MustRunCommandAndGetStdoutAsFloat64(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
 						Verbose: verbose,
 					},
 				)
 				output2 := Bash().MustRunCommandAndGetStdoutAsFloat64(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command:            tt.command,
 						Verbose:            verbose,
 						LiveOutputOnStdout: true,
@@ -160,7 +161,7 @@ func TestBashRunCommandExitCode(t *testing.T) {
 				assert := assert.New(t)
 
 				output := Bash().MustRunCommand(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command:           tt.command,
 						AllowAllExitCodes: true,
 					},
@@ -191,13 +192,13 @@ func TestBashRunCommandAndGetStdoutAsLines(t *testing.T) {
 				const verbose bool = true
 
 				output := Bash().MustRunCommandAndGetStdoutAsLines(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
 						Verbose: verbose,
 					},
 				)
 				output2 := Bash().MustRunCommandAndGetStdoutAsLines(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command:            tt.command,
 						Verbose:            verbose,
 						LiveOutputOnStdout: true,
@@ -253,7 +254,7 @@ func TestBashCommandAndGetFirstLineOfStdoutAsString(t *testing.T) {
 
 				const verbose bool = true
 
-				output := Bash().MustRunCommand(&RunCommandOptions{
+				output := Bash().MustRunCommand(&parameteroptions.RunCommandOptions{
 					Command: tt.command,
 					Verbose: verbose,
 				})
@@ -319,7 +320,7 @@ func TestBashRunCommandStdin(t *testing.T) {
 
 				var bash CommandExecutor = Bash()
 				output := bash.MustRunCommandAndGetStdoutAsBytes(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command:     tt.command,
 						Verbose:     verbose,
 						StdinString: tt.stdin,
@@ -327,7 +328,7 @@ func TestBashRunCommandStdin(t *testing.T) {
 				)
 
 				output2 := bash.MustRunCommandAndGetStdoutAsString(
-					&RunCommandOptions{
+					&parameteroptions.RunCommandOptions{
 						Command:            tt.command,
 						Verbose:            verbose,
 						LiveOutputOnStdout: true,

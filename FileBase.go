@@ -16,6 +16,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/datetime"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -242,7 +243,7 @@ func (f *FileBase) GetFileTypeDescription(verbose bool) (fileTypeDescription str
 	}
 
 	stdoutLines, err := Bash().RunCommandAndGetStdoutAsLines(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{"file", path},
 			Verbose: verbose,
 		},

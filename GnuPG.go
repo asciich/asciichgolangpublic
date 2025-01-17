@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -40,7 +41,7 @@ func (g *GnuPGService) CheckSignatureValid(signatureFile File, verbose bool) (er
 	}
 
 	_, err = Bash().RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{"gpg", "--verify", path},
 			Verbose: verbose,
 		},
@@ -123,7 +124,7 @@ func (g *GnuPGService) SignFile(fileToSign File, options *GnuPGSignOptions) (err
 	}
 
 	_, err = Bash().RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: signCommand,
 			Verbose: options.Verbose,
 		},

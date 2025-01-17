@@ -8,6 +8,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -84,7 +85,7 @@ func (g *GopassService) GetCredential(getOptions *GopassSecretOptions) (credenti
 
 func (g *GopassService) GetCredentialList() (credentials []*GopassCredential, err error) {
 	outLines, err := Bash().RunCommandAndGetStdoutAsLines(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: []string{"gopass", "list", "-f"},
 		},
 	)
@@ -271,7 +272,7 @@ func (g *GopassService) InsertFile(fileToInsert File, gopassOptions *GopassSecre
 	}
 
 	_, err = Bash().RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,
 		},
 	)
@@ -323,7 +324,7 @@ func (g *GopassService) InsertSecret(secretToInsert string, gopassOptions *Gopas
 	}
 
 	_, err = Bash().RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,
 		},
 	)
@@ -504,7 +505,7 @@ func (g *GopassService) SecretNameExist(secretName string) (secretExists bool, e
 
 func (g *GopassService) Sync(verbose bool) (err error) {
 	_, err = Bash().RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command:            []string{"gopass", "sync"},
 			Verbose:            verbose,
 			LiveOutputOnStdout: verbose,
@@ -535,7 +536,7 @@ func (g *GopassService) WriteInfoToGopass(gopassPath string) (err error) {
 	}
 
 	_, err = Bash().RunCommand(
-		&RunCommandOptions{
+		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,
 		},
 	)
