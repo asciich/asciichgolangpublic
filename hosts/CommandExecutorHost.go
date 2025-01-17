@@ -232,7 +232,25 @@ func (h *CommandExecutorHost) GetComment() (comment string, err error) {
 	return h.Comment, nil
 }
 
-func (h *CommandExecutorHost) InstallBinary(installOptions *asciichgolangpublic.InstallOptions) (installedFile asciichgolangpublic.File, err error) {
+func (h *CommandExecutorHost) GetFileByPath(path string) (file asciichgolangpublic.File, err error) {
+	if path == "" {
+		return nil, err
+	}
+
+	commandExecutor, err := h.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	file, err = asciichgolangpublic.GetCommandExecutorFileByPath(commandExecutor, path)
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
+}
+
+func (h *CommandExecutorHost) InstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile asciichgolangpublic.File, err error) {
 	if installOptions == nil {
 		return nil, tracederrors.TracedErrorNil("installOptions")
 	}
@@ -242,12 +260,12 @@ func (h *CommandExecutorHost) InstallBinary(installOptions *asciichgolangpublic.
 		return nil, err
 	}
 
-	sourceFile, err := installOptions.GetSourceFile()
+	sourceFilePath, err := installOptions.GetSourcePath()
 	if err != nil {
 		return nil, err
 	}
 
-	sourceFilePath, err := sourceFile.GetLocalPath()
+	sourceFile, err := h.GetFileByPath(sourceFilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -439,7 +457,7 @@ func (h *CommandExecutorHost) MustGetHostName() (hostname string) {
 	return hostname
 }
 
-func (h *CommandExecutorHost) MustInstallBinary(installOptions *asciichgolangpublic.InstallOptions) (installedFile asciichgolangpublic.File) {
+func (h *CommandExecutorHost) MustInstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile asciichgolangpublic.File) {
 	installedFile, err := h.InstallBinary(installOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
