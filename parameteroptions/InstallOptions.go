@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package parameteroptions
 
 import (
 	"path/filepath"
@@ -56,20 +56,6 @@ func (i *InstallOptions) GetInstallationPathOrDefaultIfUnset() (installationPath
 	return installationPath, nil
 }
 
-func (i *InstallOptions) GetSourceFile() (sourceFile File, err error) {
-	sourcePath, err := i.GetSourcePath()
-	if err != nil {
-		return nil, err
-	}
-
-	sourceFile, err = GetLocalFileByPath(sourcePath)
-	if err != nil {
-		return nil, err
-	}
-
-	return sourceFile, nil
-}
-
 func (i *InstallOptions) GetSourcePath() (sourcePath string, err error) {
 	if i.SourcePath == "" {
 		return "", tracederrors.TracedErrorf("SourcePath not set")
@@ -113,15 +99,6 @@ func (i *InstallOptions) MustGetInstallationPathOrDefaultIfUnset() (installation
 	}
 
 	return installationPath
-}
-
-func (i *InstallOptions) MustGetSourceFile() (sourceFile File) {
-	sourceFile, err := i.GetSourceFile()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return sourceFile
 }
 
 func (i *InstallOptions) MustGetSourcePath() (sourcePath string) {
