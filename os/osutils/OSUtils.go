@@ -9,7 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-func  GetCurrentWorkingDirectoryAsString() (workingDirPath string, err error) {
+func GetCurrentWorkingDirectoryAsString() (workingDirPath string, err error) {
 	workingDirPath, err = os.Getwd()
 	if err != nil {
 		return "", tracederrors.TracedErrorf("Get working directory failed: %w", err)
@@ -32,7 +32,6 @@ func IsRunningOnLinux() (isRunningOnLinux bool) {
 func IsRunningOnWindows() (isRunningOnWindows bool) {
 	return runtime.GOOS == "windows"
 }
-
 
 func MustGetCurrentWorkingDirectoryAsString() (workingDirPath string) {
 	workingDirPath, err := GetCurrentWorkingDirectoryAsString()

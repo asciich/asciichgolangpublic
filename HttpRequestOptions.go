@@ -4,6 +4,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/urlsutils"
 )
 
 // Obsolete: Use https.RequestOptions instead
@@ -90,7 +91,7 @@ func (h *HttpRequestOptions) MustGetURL() (uRL string) {
 	return uRL
 }
 
-func (h *HttpRequestOptions) MustGetUrl() (url *URL) {
+func (h *HttpRequestOptions) MustGetUrl() (url *urlsutils.URL) {
 	url, err := h.GetUrl()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -223,13 +224,13 @@ func (o *HttpRequestOptions) GetOutputFilePath() (filePath string, err error) {
 	return filePath, nil
 }
 
-func (o *HttpRequestOptions) GetUrl() (url *URL, err error) {
+func (o *HttpRequestOptions) GetUrl() (url *urlsutils.URL, err error) {
 	urlString, err := o.GetUrlAsString()
 	if err != nil {
 		return nil, err
 	}
 
-	url, err = GetUrlFromString(urlString)
+	url, err = urlsutils.GetUrlFromString(urlString)
 	if err != nil {
 		return nil, err
 	}

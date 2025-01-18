@@ -4,6 +4,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/changesummary"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -36,7 +38,7 @@ func (d *DependencyGitRepository) GetName() (name string, err error) {
 	return d.GetUrl()
 }
 
-func (d *DependencyGitRepository) GetNewestVersion(authOptions []AuthenticationOption, verbose bool) (newestVersion Version, err error) {
+func (d *DependencyGitRepository) GetNewestVersion(authOptions []authenticationoptions.AuthenticationOption, verbose bool) (newestVersion Version, err error) {
 	url, err := d.GetUrl()
 	if err != nil {
 		return nil, err
@@ -95,7 +97,7 @@ func (d *DependencyGitRepository) GetNewestVersion(authOptions []AuthenticationO
 	return newestVersion, err
 }
 
-func (d *DependencyGitRepository) GetNewestVersionAsString(authOptions []AuthenticationOption, verbose bool) (newestVersionString string, err error) {
+func (d *DependencyGitRepository) GetNewestVersionAsString(authOptions []authenticationoptions.AuthenticationOption, verbose bool) (newestVersionString string, err error) {
 	newestVersion, err := d.GetNewestVersion(authOptions, verbose)
 	if err != nil {
 		return "", err
@@ -187,7 +189,7 @@ func (d *DependencyGitRepository) IsTargetVersionSet() (isSet bool) {
 	return d.targetVersionString != ""
 }
 
-func (d *DependencyGitRepository) IsUpdateAvailable(authOptions []AuthenticationOption, verbose bool) (isUpdateAvailable bool, err error) {
+func (d *DependencyGitRepository) IsUpdateAvailable(authOptions []authenticationoptions.AuthenticationOption, verbose bool) (isUpdateAvailable bool, err error) {
 	if d.IsVersionStringUnset() {
 		return true, nil
 	}
@@ -250,7 +252,7 @@ func (d *DependencyGitRepository) MustGetName() (name string) {
 	return name
 }
 
-func (d *DependencyGitRepository) MustGetNewestVersion(authOptions []AuthenticationOption, verbose bool) (newestVersion Version) {
+func (d *DependencyGitRepository) MustGetNewestVersion(authOptions []authenticationoptions.AuthenticationOption, verbose bool) (newestVersion Version) {
 	newestVersion, err := d.GetNewestVersion(authOptions, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -259,7 +261,7 @@ func (d *DependencyGitRepository) MustGetNewestVersion(authOptions []Authenticat
 	return newestVersion
 }
 
-func (d *DependencyGitRepository) MustGetNewestVersionAsString(authOptions []AuthenticationOption, verbose bool) (newestVersion string) {
+func (d *DependencyGitRepository) MustGetNewestVersionAsString(authOptions []authenticationoptions.AuthenticationOption, verbose bool) (newestVersion string) {
 	newestVersion, err := d.GetNewestVersionAsString(authOptions, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -322,7 +324,7 @@ func (d *DependencyGitRepository) MustGetVersionString() (versionString string) 
 	return versionString
 }
 
-func (d *DependencyGitRepository) MustIsUpdateAvailable(authOptions []AuthenticationOption, verbose bool) (isUpdateAvailable bool) {
+func (d *DependencyGitRepository) MustIsUpdateAvailable(authOptions []authenticationoptions.AuthenticationOption, verbose bool) (isUpdateAvailable bool) {
 	isUpdateAvailable, err := d.IsUpdateAvailable(authOptions, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -359,7 +361,7 @@ func (d *DependencyGitRepository) MustSetVersionString(versionString string) {
 	}
 }
 
-func (d *DependencyGitRepository) MustUpdate(options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary) {
+func (d *DependencyGitRepository) MustUpdate(options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary) {
 	changeSummary, err := d.Update(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -368,7 +370,7 @@ func (d *DependencyGitRepository) MustUpdate(options *UpdateDependenciesOptions)
 	return changeSummary
 }
 
-func (d *DependencyGitRepository) MustUpdateVersionByStringInSourceFile(version string, sourceFile files.File, options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary) {
+func (d *DependencyGitRepository) MustUpdateVersionByStringInSourceFile(version string, sourceFile files.File, options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary) {
 	changeSummary, err := d.UpdateVersionByStringInSourceFile(version, sourceFile, options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -421,7 +423,7 @@ func (d *DependencyGitRepository) SetVersionString(versionString string) (err er
 	return nil
 }
 
-func (d *DependencyGitRepository) Update(options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
+func (d *DependencyGitRepository) Update(options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -473,7 +475,7 @@ func (d *DependencyGitRepository) Update(options *UpdateDependenciesOptions) (ch
 	return changeSummary, nil
 }
 
-func (d *DependencyGitRepository) UpdateVersionByStringInSourceFile(version string, sourceFile files.File, options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
+func (d *DependencyGitRepository) UpdateVersionByStringInSourceFile(version string, sourceFile files.File, options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if version == "" {
 		return nil, tracederrors.TracedErrorEmptyString("version")
 	}

@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package artifacthandler
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"

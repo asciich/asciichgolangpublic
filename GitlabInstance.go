@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/urlsutils"
 )
 
 type GitlabInstance struct {
@@ -1537,7 +1538,7 @@ func (g *GitlabInstance) SetFqdn(fqdn string) (err error) {
 		return tracederrors.TracedError("fqdn is empty string")
 	}
 
-	fqdnUrl, err := GetUrlFromString(fqdn)
+	fqdnUrl, err := urlsutils.GetUrlFromString(fqdn)
 	if err != nil {
 		return err
 	}

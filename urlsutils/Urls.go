@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package urlsutils
 
 import (
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
