@@ -4,7 +4,9 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -20,7 +22,7 @@ func NewHttpClientService() (h *HttpClientService) {
 	return new(HttpClientService)
 }
 
-func (h *HttpClientService) DownloadAsFile(requestOptions *HttpRequestOptions) (downloadedFile File, err error) {
+func (h *HttpClientService) DownloadAsFile(requestOptions *HttpRequestOptions) (downloadedFile files.File, err error) {
 	if requestOptions == nil {
 		return nil, tracederrors.TracedErrorNil("requestOptions")
 	}
@@ -72,14 +74,14 @@ func (h *HttpClientService) DownloadAsFile(requestOptions *HttpRequestOptions) (
 	return downloadedFile, nil
 }
 
-func (h *HttpClientService) DownloadAsTemporaryFile(requestOptions *HttpRequestOptions) (downloadedFile File, err error) {
+func (h *HttpClientService) DownloadAsTemporaryFile(requestOptions *HttpRequestOptions) (downloadedFile files.File, err error) {
 	if requestOptions == nil {
 		return nil, tracederrors.TracedErrorNil("requestOptions")
 	}
 
 	requestOptionsToUse := requestOptions.GetDeepCopy()
 
-	temporaryFile, err := TemporaryFiles().CreateEmptyTemporaryFile(requestOptions.Verbose)
+	temporaryFile, err := tempfiles.CreateEmptyTemporaryFile(requestOptions.Verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +104,7 @@ func (h *HttpClientService) DownloadAsTemporaryFile(requestOptions *HttpRequestO
 	return downloadedFile, nil
 }
 
-func (h *HttpClientService) MustDownloadAsFile(requestOptions *HttpRequestOptions) (downloadedFile File) {
+func (h *HttpClientService) MustDownloadAsFile(requestOptions *HttpRequestOptions) (downloadedFile files.File) {
 	downloadedFile, err := h.DownloadAsFile(requestOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -111,7 +113,7 @@ func (h *HttpClientService) MustDownloadAsFile(requestOptions *HttpRequestOption
 	return downloadedFile
 }
 
-func (h *HttpClientService) MustDownloadAsTemporaryFile(requestOptions *HttpRequestOptions) (downloadedFile File) {
+func (h *HttpClientService) MustDownloadAsTemporaryFile(requestOptions *HttpRequestOptions) (downloadedFile files.File) {
 	downloadedFile, err := h.DownloadAsTemporaryFile(requestOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

@@ -6,16 +6,17 @@ import (
 	"reflect"
 
 	"github.com/asciich/asciichgolangpublic/changesummary"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type PreCommitConfigFile struct {
-	LocalFile
+	files.LocalFile
 }
 
-func GetPreCommitConfigByFile(file File) (preCommitConfigFile *PreCommitConfigFile, err error) {
+func GetPreCommitConfigByFile(file files.File) (preCommitConfigFile *PreCommitConfigFile, err error) {
 	if file == nil {
 		return nil, tracederrors.TracedErrorNil("file")
 	}
@@ -39,7 +40,7 @@ func GetPreCommitConfigByLocalPath(localPath string) (preCommitConfigFile *PreCo
 		return nil, tracederrors.TracedErrorEmptyString("localPath")
 	}
 
-	file, err := NewLocalFileByPath(localPath)
+	file, err := files.GetLocalFileByPath(localPath)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +66,7 @@ func GetPreCommitConfigFileInGitRepository(gitRepository GitRepository) (preComm
 	return GetPreCommitConfigByFile(fileInRepo)
 }
 
-func MustGetPreCommitConfigByFile(file File) (preCommitConfigFile *PreCommitConfigFile) {
+func MustGetPreCommitConfigByFile(file files.File) (preCommitConfigFile *PreCommitConfigFile) {
 	preCommitConfigFile, err := GetPreCommitConfigByFile(file)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -135,7 +136,7 @@ func (p *PreCommitConfigFile) GetDependencies(verbose bool) (dependencies []Depe
 		return nil, err
 	}
 
-	asciichgolangpublicFile, err := GetLocalFileByPath(localPath)
+	asciichgolangpublicFile, err := files.GetLocalFileByPath(localPath)
 	if err != nil {
 		return nil, err
 	}

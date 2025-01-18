@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -28,7 +29,7 @@ func GetCommandExecutorGitRepositoryByPath(commandExecutor commandexecutor.Comma
 	return gitRepo, nil
 }
 
-func GetLocalCommandExecutorGitRepositoryByDirectory(directory Directory) (gitRepo *CommandExecutorGitRepository, err error) {
+func GetLocalCommandExecutorGitRepositoryByDirectory(directory files.Directory) (gitRepo *CommandExecutorGitRepository, err error) {
 	if directory == nil {
 		return nil, tracederrors.TracedErrorNil("directory")
 	}
@@ -78,7 +79,7 @@ func MustGetCommandExecutorGitRepositoryByPath(commandExecutor commandexecutor.C
 	return gitRepo
 }
 
-func MustGetLocalCommandExecutorGitRepositoryByDirectory(directory Directory) (gitRepo *CommandExecutorGitRepository) {
+func MustGetLocalCommandExecutorGitRepositoryByDirectory(directory files.Directory) (gitRepo *CommandExecutorGitRepository) {
 	gitRepo, err := GetLocalCommandExecutorGitRepositoryByDirectory(directory)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

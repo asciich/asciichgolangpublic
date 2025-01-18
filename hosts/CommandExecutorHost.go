@@ -7,8 +7,10 @@ import (
 
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -55,7 +57,7 @@ func (c *CommandExecutorHost) GetCommandExecutor() (commandExecutor commandexecu
 	return c.commandExecutor, nil
 }
 
-func (c *CommandExecutorHost) GetDirectoryByPath(path string) (directory asciichgolangpublic.Directory, err error) {
+func (c *CommandExecutorHost) GetDirectoryByPath(path string) (directory files.Directory, err error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
@@ -65,17 +67,7 @@ func (c *CommandExecutorHost) GetDirectoryByPath(path string) (directory asciich
 		return nil, err
 	}
 
-	commandExecutorDir, err := asciichgolangpublic.NewCommandExecutorDirectory(commandExecutor)
-	if err != nil {
-		return nil, err
-	}
-
-	err = commandExecutorDir.SetDirPath(path)
-	if err != nil {
-		return nil, err
-	}
-
-	return commandExecutorDir, nil
+	return files.GetCommandExecutorDirectoryByPath(commandExecutor, path)
 }
 
 func (c *CommandExecutorHost) GetHostDescription() (hostDescription string, err error) {
@@ -233,7 +225,7 @@ func (h *CommandExecutorHost) GetComment() (comment string, err error) {
 	return h.Comment, nil
 }
 
-func (h *CommandExecutorHost) GetFileByPath(path string) (file asciichgolangpublic.File, err error) {
+func (h *CommandExecutorHost) GetFileByPath(path string) (file files.File, err error) {
 	if path == "" {
 		return nil, err
 	}
@@ -243,7 +235,7 @@ func (h *CommandExecutorHost) GetFileByPath(path string) (file asciichgolangpubl
 		return nil, err
 	}
 
-	file, err = asciichgolangpublic.GetCommandExecutorFileByPath(commandExecutor, path)
+	file, err = files.GetCommandExecutorFileByPath(commandExecutor, path)
 	if err != nil {
 		return nil, err
 	}
@@ -251,7 +243,7 @@ func (h *CommandExecutorHost) GetFileByPath(path string) (file asciichgolangpubl
 	return file, nil
 }
 
-func (h *CommandExecutorHost) InstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile asciichgolangpublic.File, err error) {
+func (h *CommandExecutorHost) InstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile files.File, err error) {
 	if installOptions == nil {
 		return nil, tracederrors.TracedErrorNil("installOptions")
 	}
@@ -285,7 +277,7 @@ func (h *CommandExecutorHost) InstallBinary(installOptions *parameteroptions.Ins
 		)
 	}
 
-	tempCopy, err := asciichgolangpublic.TemporaryFiles().CreateTemporaryFileFromFile(sourceFile, installOptions.Verbose)
+	tempCopy, err := tempfiles.CreateTemporaryFileFromFile(sourceFile, installOptions.Verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -431,7 +423,7 @@ func (h *CommandExecutorHost) MustGetComment() (comment string) {
 	return comment
 }
 
-func (h *CommandExecutorHost) MustGetDirectoryByPath(path string) (directory asciichgolangpublic.Directory) {
+func (h *CommandExecutorHost) MustGetDirectoryByPath(path string) (directory files.Directory) {
 	directory, err := h.GetDirectoryByPath(path)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -458,7 +450,7 @@ func (h *CommandExecutorHost) MustGetHostName() (hostname string) {
 	return hostname
 }
 
-func (h *CommandExecutorHost) MustInstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile asciichgolangpublic.File) {
+func (h *CommandExecutorHost) MustInstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile files.File) {
 	installedFile, err := h.InstallBinary(installOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

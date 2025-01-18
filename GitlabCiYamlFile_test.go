@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -22,7 +23,7 @@ func TestGitlabCiYamlFileGetInclude(t *testing.T) {
 
 				const verbose bool = true
 
-				emptyFilePath := TemporaryFiles().MustCreateEmptyTemporaryFileAndGetPath(verbose)
+				emptyFilePath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose)
 				gitlabCiYamlFile := MustGetGitlabCiYamlFileByPath(emptyFilePath)
 
 				gitlabCiYamlFile.MustWriteString("---\n", verbose)
@@ -58,7 +59,7 @@ func TestGitlabCiYamlFileGetInclude2(t *testing.T) {
 
 				const verbose bool = true
 
-				emptyFilePath := TemporaryFiles().MustCreateEmptyTemporaryFileAndGetPath(verbose)
+				emptyFilePath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose)
 				gitlabCiYamlFile := MustGetGitlabCiYamlFileByPath(emptyFilePath)
 
 				gitlabCiYamlFile.MustWriteString("---\n", verbose)
@@ -97,7 +98,7 @@ func TestGitlabCiYamlFileGetIncludeIgnoreRules(t *testing.T) {
 
 				const verbose bool = true
 
-				emptyFilePath := TemporaryFiles().MustCreateEmptyTemporaryFileAndGetPath(verbose)
+				emptyFilePath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose)
 				gitlabCiYamlFile := MustGetGitlabCiYamlFileByPath(emptyFilePath)
 
 				gitlabCiYamlFile.MustWriteString("---\n", verbose)
@@ -137,7 +138,7 @@ func TestGitlabCiYamlFileAddIncludes(t *testing.T) {
 
 				const verbose bool = true
 
-				emptyFilePath := TemporaryFiles().MustCreateEmptyTemporaryFileAndGetPath(verbose)
+				emptyFilePath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose)
 				gitlabCiYamlFile := MustGetGitlabCiYamlFileByPath(emptyFilePath)
 
 				for i := 0; i < 3; i++ {

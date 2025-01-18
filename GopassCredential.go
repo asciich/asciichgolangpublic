@@ -7,8 +7,10 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -213,7 +215,7 @@ func (c *GopassCredential) SetName(name string) (err error) {
 	return nil
 }
 
-func (c *GopassCredential) WriteIntoFile(outputFile File, verbose bool) (err error) {
+func (c *GopassCredential) WriteIntoFile(outputFile files.File, verbose bool) (err error) {
 	if outputFile == nil {
 		return tracederrors.TracedError("outputFile is nil")
 	}
@@ -245,8 +247,8 @@ func (c *GopassCredential) WriteIntoFile(outputFile File, verbose bool) (err err
 	return nil
 }
 
-func (c *GopassCredential) WriteIntoTemporaryFile(verbose bool) (temporaryFile File, err error) {
-	temporaryFile, err = TemporaryFiles().CreateEmptyTemporaryFile(verbose)
+func (c *GopassCredential) WriteIntoTemporaryFile(verbose bool) (temporaryFile files.File, err error) {
+	temporaryFile, err = tempfiles.CreateEmptyTemporaryFile(verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -332,14 +334,14 @@ func (g *GopassCredential) MustSetName(name string) {
 	}
 }
 
-func (g *GopassCredential) MustWriteIntoFile(outputFile File, verbose bool) {
+func (g *GopassCredential) MustWriteIntoFile(outputFile files.File, verbose bool) {
 	err := g.WriteIntoFile(outputFile, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (g *GopassCredential) MustWriteIntoTemporaryFile(verbose bool) (temporaryFile File) {
+func (g *GopassCredential) MustWriteIntoTemporaryFile(verbose bool) (temporaryFile files.File) {
 	temporaryFile, err := g.WriteIntoTemporaryFile(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

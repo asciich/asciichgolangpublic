@@ -5,9 +5,33 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
+
+// Return a temporary file of the given 'implementationName'.
+//
+// Use defer file.Delete(verbose) to after calling this function to ensure
+// the file is deleted after the test is over.
+func getFileToTest(implementationName string) (file files.File) {
+	const verbose = true
+
+	if implementationName == "localFile" {
+		file = files.MustGetLocalFileByPath(
+			tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose),
+		)
+	} else if implementationName == "localCommandExecutorFile" {
+		file = files.MustGetLocalCommandExecutorFileByPath(
+			tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose),
+		)
+	} else {
+		logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)
+	}
+
+	return file
+}
 
 func TestGnuPg_SignAndValidate(t *testing.T) {
 	if continuousintegration.IsRunningInGithub() {

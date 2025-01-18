@@ -4,6 +4,8 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -149,7 +151,7 @@ func (g *GitRepositoriesService) CloneToTemporaryDirectory(urlOrPath string, ver
 		return nil, tracederrors.TracedErrorEmptyString("urlOrPath")
 	}
 
-	destinationPath, err := TemporaryDirectories().CreateEmptyTemporaryDirectoryAndGetPath(verbose)
+	destinationPath, err := tempfiles.CreateEmptyTemporaryDirectoryAndGetPath(verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -166,12 +168,12 @@ func (g *GitRepositoriesService) CloneToTemporaryDirectory(urlOrPath string, ver
 	return repo, nil
 }
 
-func (g *GitRepositoriesService) CreateTemporaryInitializedRepository(options *CreateRepositoryOptions) (repo GitRepository, err error) {
+func (g *GitRepositoriesService) CreateTemporaryInitializedRepository(options *parameteroptions.CreateRepositoryOptions) (repo GitRepository, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	repoPath, err := TemporaryDirectories().CreateEmptyTemporaryDirectoryAndGetPath(options.Verbose)
+	repoPath, err := tempfiles.CreateEmptyTemporaryDirectoryAndGetPath(options.Verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +227,7 @@ func (g *GitRepositoriesService) MustCloneToTemporaryDirectory(urlOrPath string,
 	return repo
 }
 
-func (g *GitRepositoriesService) MustCreateTemporaryInitializedRepository(options *CreateRepositoryOptions) (repo GitRepository) {
+func (g *GitRepositoriesService) MustCreateTemporaryInitializedRepository(options *parameteroptions.CreateRepositoryOptions) (repo GitRepository) {
 	repo, err := g.CreateTemporaryInitializedRepository(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

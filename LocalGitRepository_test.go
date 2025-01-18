@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -21,8 +23,8 @@ func TestGetCurrentCommitGoGitHash(t *testing.T) {
 
 				const verbose bool = true
 
-				repo := TemporaryDirectories().MustCreateEmptyTemporaryGitRepository(
-					&CreateRepositoryOptions{
+				repo := TemporaryGitRepositories().MustCreateEmptyTemporaryGitRepository(
+					&parameteroptions.CreateRepositoryOptions{
 						Verbose:                     verbose,
 						BareRepository:              tt.bareRepository,
 						InitializeWithEmptyCommit:   true,
@@ -56,7 +58,7 @@ func TestLocalGitRepository_GetLocalGitReposioryFromDirectory(t *testing.T) {
 
 				const verbose bool = true
 
-				directory := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
+				directory := tempfiles.MustCreateEmptyTemporaryDirectory(verbose)
 				defer directory.Delete(verbose)
 
 				assert.EqualValues(
@@ -95,8 +97,8 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 
 				const verbose bool = true
 
-				repo := TemporaryDirectories().MustCreateEmptyTemporaryGitRepository(
-					&CreateRepositoryOptions{
+				repo := TemporaryGitRepositories().MustCreateEmptyTemporaryGitRepository(
+					&parameteroptions.CreateRepositoryOptions{
 						Verbose:                     verbose,
 						BareRepository:              tt.bareRepository,
 						InitializeWithEmptyCommit:   false,
@@ -124,10 +126,10 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 				assert.EqualValues("message 1", firstCommit.MustGetCommitMessage())
 				assert.False(firstCommit.MustHasParentCommit())
 
-				firstCommitDirectParents := firstCommit.MustGetParentCommits(&GitCommitGetParentsOptions{IncludeParentsOfParents: false})
+				firstCommitDirectParents := firstCommit.MustGetParentCommits(&parameteroptions.GitCommitGetParentsOptions{IncludeParentsOfParents: false})
 				assert.Len(firstCommitDirectParents, 0)
 
-				firstCommitAllParents := firstCommit.MustGetParentCommits(&GitCommitGetParentsOptions{IncludeParentsOfParents: true})
+				firstCommitAllParents := firstCommit.MustGetParentCommits(&parameteroptions.GitCommitGetParentsOptions{IncludeParentsOfParents: true})
 				assert.Len(firstCommitAllParents, 0)
 
 				// Second commit
@@ -141,11 +143,11 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 				assert.EqualValues("message 2", secondCommit.MustGetCommitMessage())
 				assert.True(secondCommit.MustHasParentCommit())
 
-				secondCommitDirectParents := secondCommit.MustGetParentCommits(&GitCommitGetParentsOptions{IncludeParentsOfParents: false})
+				secondCommitDirectParents := secondCommit.MustGetParentCommits(&parameteroptions.GitCommitGetParentsOptions{IncludeParentsOfParents: false})
 				assert.Len(secondCommitDirectParents, 1)
 				assert.EqualValues("message 1", secondCommitDirectParents[0].MustGetCommitMessage())
 
-				secondCommitAllParents := secondCommit.MustGetParentCommits(&GitCommitGetParentsOptions{IncludeParentsOfParents: true})
+				secondCommitAllParents := secondCommit.MustGetParentCommits(&parameteroptions.GitCommitGetParentsOptions{IncludeParentsOfParents: true})
 				assert.Len(secondCommitAllParents, 1)
 				assert.EqualValues("message 1", secondCommitAllParents[0].MustGetCommitMessage())
 
@@ -160,14 +162,50 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 				assert.EqualValues("message 3", thirdCommit.MustGetCommitMessage())
 				assert.True(thirdCommit.MustHasParentCommit())
 
-				thirdCommitDirectParents := thirdCommit.MustGetParentCommits(&GitCommitGetParentsOptions{IncludeParentsOfParents: false})
+				thirdCommitDirectParents := thirdCommit.MustGetParentCommits(&parameteroptions.GitCommitGetParentsOptions{IncludeParentsOfParents: false})
 				assert.Len(thirdCommitDirectParents, 1)
 				assert.EqualValues("message 2", thirdCommitDirectParents[0].MustGetCommitMessage())
 
-				thirdCommitAllParents := thirdCommit.MustGetParentCommits(&GitCommitGetParentsOptions{IncludeParentsOfParents: true})
+				thirdCommitAllParents := thirdCommit.MustGetParentCommits(&parameteroptions.GitCommitGetParentsOptions{IncludeParentsOfParents: true})
 				assert.Len(thirdCommitAllParents, 2)
 				assert.EqualValues("message 2", thirdCommitAllParents[0].MustGetCommitMessage())
 				assert.EqualValues("message 1", thirdCommitAllParents[1].MustGetCommitMessage())
+			},
+		)
+	}
+}
+
+func TestLocalGitRepositoryCreateEmptyTemporaryGitRepository(t *testing.T) {
+	tests := []struct {
+		bareRepository bool
+	}{
+		{true},
+		{false},
+	}
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				repo := TemporaryGitRepositories().MustCreateEmptyTemporaryGitRepository(
+					&parameteroptions.CreateRepositoryOptions{
+						Verbose:                     verbose,
+						BareRepository:              tt.bareRepository,
+						InitializeWithEmptyCommit:   true,
+						InitializeWithDefaultAuthor: true,
+					})
+
+				commit := repo.MustGetCurrentCommit(verbose)
+				assert.EqualValues("Initial empty commit during repo initialization", commit.MustGetCommitMessage())
+				assert.EqualValues("asciichgolangpublic git repo initializer <asciichgolangpublic@example.net>", commit.MustGetAuthorString())
+				assert.EqualValues("asciichgolangpublic@example.net", commit.MustGetAuthorEmail())
+				assert.Greater(commit.MustGetAgeSeconds(), 0.)
+				assert.Less(commit.MustGetAgeSeconds(), 1.)
+				assert.False(commit.MustHasParentCommit())
+				assert.Len(commit.MustGetParentCommits(&parameteroptions.GitCommitGetParentsOptions{IncludeParentsOfParents: false}), 0)
 			},
 		)
 	}

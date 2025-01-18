@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -13,7 +14,7 @@ func TestX509CertificateLoadFromFilePath(t *testing.T) {
 	testDir := gitRepo.MustGetSubDirectory("testdata", "X509Certificate", "LoadFromFilePath")
 
 	type TestCase struct {
-		testDir Directory
+		testDir files.Directory
 	}
 
 	tests := []TestCase{}
@@ -50,7 +51,7 @@ func TestX509CertificateGetAsPemString(t *testing.T) {
 	testDir := gitRepo.MustGetSubDirectory("testdata", "X509Certificate", "GetAsPemString")
 
 	type TestCase struct {
-		testDir Directory
+		testDir files.Directory
 	}
 
 	tests := []TestCase{}
@@ -83,7 +84,7 @@ func TestX509CertificateIsRootCa(t *testing.T) {
 	testDir := gitRepo.MustGetSubDirectory("testdata", "X509Certificate", "IsRootCa")
 
 	type TestCase struct {
-		testDir Directory
+		testDir files.Directory
 	}
 
 	tests := []TestCase{}
@@ -118,7 +119,7 @@ func TestX509CertificateIsV1(t *testing.T) {
 	testDir := gitRepo.MustGetSubDirectory("testdata", "X509Certificate", "IsV1")
 
 	type TestCase struct {
-		testDir Directory
+		testDir files.Directory
 	}
 
 	tests := []TestCase{}
@@ -151,7 +152,7 @@ func TestX509CertificateIsV3(t *testing.T) {
 	testDir := gitRepo.MustGetSubDirectory("testdata", "X509Certificate", "IsV3")
 
 	type TestCase struct {
-		testDir Directory
+		testDir files.Directory
 	}
 
 	tests := []TestCase{}

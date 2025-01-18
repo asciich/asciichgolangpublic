@@ -5,16 +5,17 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type X509CertificateFile struct {
-	File
+	files.File
 }
 
-func GetX509CertificateFileFromFile(input File) (x509CertificateFile *X509CertificateFile, err error) {
+func GetX509CertificateFileFromFile(input files.File) (x509CertificateFile *X509CertificateFile, err error) {
 	if input == nil {
 		return nil, tracederrors.TracedErrorNil("input")
 	}
@@ -33,7 +34,7 @@ func GetX509CertificateFileFromPath(inputPath string) (x509CertificateFile *X509
 		return nil, tracederrors.TracedErrorEmptyString("inputPath")
 	}
 
-	inputFile, err := GetLocalFileByPath(inputPath)
+	inputFile, err := files.GetLocalFileByPath(inputPath)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +47,7 @@ func GetX509CertificateFileFromPath(inputPath string) (x509CertificateFile *X509
 	return x509CertificateFile, nil
 }
 
-func MustGetX509CertificateFileFromFile(input File) (x509CertificateFile *X509CertificateFile) {
+func MustGetX509CertificateFileFromFile(input files.File) (x509CertificateFile *X509CertificateFile) {
 	x509CertificateFile, err := GetX509CertificateFileFromFile(input)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -133,7 +134,7 @@ func (x *X509CertificateFile) IsX509Certificate(verbose bool) (isX509Certificate
 	)
 }
 
-func (x *X509CertificateFile) IsX509CertificateSignedByCertificateFile(signingCertificateFile File, verbose bool) (isSignedBy bool, err error) {
+func (x *X509CertificateFile) IsX509CertificateSignedByCertificateFile(signingCertificateFile files.File, verbose bool) (isSignedBy bool, err error) {
 	if signingCertificateFile == nil {
 		return false, tracederrors.TracedErrorNil("signingCertificateFile")
 	}
@@ -233,7 +234,7 @@ func (x *X509CertificateFile) MustIsX509Certificate(verbose bool) (isX509Certifi
 	return isX509Certificate
 }
 
-func (x *X509CertificateFile) MustIsX509CertificateSignedByCertificateFile(signingCertificateFile File, verbose bool) (isSignedBy bool) {
+func (x *X509CertificateFile) MustIsX509CertificateSignedByCertificateFile(signingCertificateFile files.File, verbose bool) (isSignedBy bool) {
 	isSignedBy, err := x.IsX509CertificateSignedByCertificateFile(signingCertificateFile, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
