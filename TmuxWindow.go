@@ -11,6 +11,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/tempfiles"
+
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -583,7 +585,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *parameteroptions.RunCommandOp
 		return nil, err
 	}
 
-	captureFile, err := TemporaryFiles().CreateEmptyTemporaryFile(runCommandOptions.Verbose)
+	captureFile, err := tempfiles.CreateEmptyTemporaryFile(runCommandOptions.Verbose)
 	if err != nil {
 		return nil, err
 	}

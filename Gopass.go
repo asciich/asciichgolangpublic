@@ -8,6 +8,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -227,7 +228,7 @@ func (g *GopassService) GetSslCertificate(getOptions *GopassSecretOptions) (cert
 	return cert, nil
 }
 
-func (g *GopassService) InsertFile(fileToInsert File, gopassOptions *GopassSecretOptions) (err error) {
+func (g *GopassService) InsertFile(fileToInsert files.File, gopassOptions *GopassSecretOptions) (err error) {
 	if fileToInsert == nil {
 		return tracederrors.TracedError("fileToInsert is nil")
 	}
@@ -444,7 +445,7 @@ func (g *GopassService) MustGetSslCertificate(getOptions *GopassSecretOptions) (
 	return cert
 }
 
-func (g *GopassService) MustInsertFile(fileToInsert File, gopassOptions *GopassSecretOptions) {
+func (g *GopassService) MustInsertFile(fileToInsert files.File, gopassOptions *GopassSecretOptions) {
 	err := g.InsertFile(fileToInsert, gopassOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -481,7 +482,7 @@ func (g *GopassService) MustWriteInfoToGopass(gopassPath string) {
 	}
 }
 
-func (g *GopassService) MustWriteSecretIntoTemporaryFile(getOptions *GopassSecretOptions) (temporaryFile File) {
+func (g *GopassService) MustWriteSecretIntoTemporaryFile(getOptions *GopassSecretOptions) (temporaryFile files.File) {
 	temporaryFile, err := g.WriteSecretIntoTemporaryFile(getOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -548,7 +549,7 @@ func (g *GopassService) WriteInfoToGopass(gopassPath string) (err error) {
 	return nil
 }
 
-func (g *GopassService) WriteSecretIntoTemporaryFile(getOptions *GopassSecretOptions) (temporaryFile File, err error) {
+func (g *GopassService) WriteSecretIntoTemporaryFile(getOptions *GopassSecretOptions) (temporaryFile files.File, err error) {
 	if getOptions == nil {
 		return nil, tracederrors.TracedError("getOptions is nil")
 	}

@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/changesummary"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -10,7 +11,7 @@ import (
 type DependencyGitRepository struct {
 	url           string
 	versionString string
-	sourceFiles   []File
+	sourceFiles   []files.File
 
 	// If defined the url will not be used to get the newest version automatically.
 	// Instead this targetVersionString will become the newest available version and will be set in the sourceFiles.
@@ -21,7 +22,7 @@ func NewDependencyGitRepository() (d *DependencyGitRepository) {
 	return new(DependencyGitRepository)
 }
 
-func (d *DependencyGitRepository) AddSourceFile(sourceFile File) (err error) {
+func (d *DependencyGitRepository) AddSourceFile(sourceFile files.File) (err error) {
 	if sourceFile == nil {
 		return tracederrors.TracedErrorNil("sourceFile")
 	}
@@ -114,7 +115,7 @@ func (d *DependencyGitRepository) GetNewestVersionAsString(authOptions []Authent
 	return newestVersionString, nil
 }
 
-func (d *DependencyGitRepository) GetSourceFiles() (sourceFiles []File, err error) {
+func (d *DependencyGitRepository) GetSourceFiles() (sourceFiles []files.File, err error) {
 	if d.sourceFiles == nil {
 		return nil, tracederrors.TracedErrorf("sourceFiles not set")
 	}
@@ -233,7 +234,7 @@ func (d *DependencyGitRepository) IsVersionStringUnset() (isUnset bool) {
 	return d.versionString == ""
 }
 
-func (d *DependencyGitRepository) MustAddSourceFile(sourceFile File) {
+func (d *DependencyGitRepository) MustAddSourceFile(sourceFile files.File) {
 	err := d.AddSourceFile(sourceFile)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -267,7 +268,7 @@ func (d *DependencyGitRepository) MustGetNewestVersionAsString(authOptions []Aut
 	return newestVersion
 }
 
-func (d *DependencyGitRepository) MustGetSourceFiles() (sourceFiles []File) {
+func (d *DependencyGitRepository) MustGetSourceFiles() (sourceFiles []files.File) {
 	sourceFiles, err := d.GetSourceFiles()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -330,7 +331,7 @@ func (d *DependencyGitRepository) MustIsUpdateAvailable(authOptions []Authentica
 	return isUpdateAvailable
 }
 
-func (d *DependencyGitRepository) MustSetSourceFiles(sourceFiles []File) {
+func (d *DependencyGitRepository) MustSetSourceFiles(sourceFiles []files.File) {
 	err := d.SetSourceFiles(sourceFiles)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -367,7 +368,7 @@ func (d *DependencyGitRepository) MustUpdate(options *UpdateDependenciesOptions)
 	return changeSummary
 }
 
-func (d *DependencyGitRepository) MustUpdateVersionByStringInSourceFile(version string, sourceFile File, options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary) {
+func (d *DependencyGitRepository) MustUpdateVersionByStringInSourceFile(version string, sourceFile files.File, options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary) {
 	changeSummary, err := d.UpdateVersionByStringInSourceFile(version, sourceFile, options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -376,7 +377,7 @@ func (d *DependencyGitRepository) MustUpdateVersionByStringInSourceFile(version 
 	return changeSummary
 }
 
-func (d *DependencyGitRepository) SetSourceFiles(sourceFiles []File) (err error) {
+func (d *DependencyGitRepository) SetSourceFiles(sourceFiles []files.File) (err error) {
 	if sourceFiles == nil {
 		return tracederrors.TracedErrorf("sourceFiles is nil")
 	}
@@ -472,7 +473,7 @@ func (d *DependencyGitRepository) Update(options *UpdateDependenciesOptions) (ch
 	return changeSummary, nil
 }
 
-func (d *DependencyGitRepository) UpdateVersionByStringInSourceFile(version string, sourceFile File, options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
+func (d *DependencyGitRepository) UpdateVersionByStringInSourceFile(version string, sourceFile files.File, options *UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if version == "" {
 		return nil, tracederrors.TracedErrorEmptyString("version")
 	}

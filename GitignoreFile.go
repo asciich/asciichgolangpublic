@@ -4,19 +4,20 @@ import (
 	"slices"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type GitignoreFile struct {
-	File
+	files.File
 }
 
 func GetGitignoreDefaultBaseName() (defaultBaseName string) {
 	return ".gitignore"
 }
 
-func GetGitignoreFileByFile(fileToUse File) (gitignoreFile *GitignoreFile, err error) {
+func GetGitignoreFileByFile(fileToUse files.File) (gitignoreFile *GitignoreFile, err error) {
 	if fileToUse == nil {
 		return nil, tracederrors.TracedErrorEmptyString("fileToUse")
 	}
@@ -33,7 +34,7 @@ func GetGitignoreFileByPath(filePath string) (gitignoreFile *GitignoreFile, err 
 		return nil, tracederrors.TracedErrorEmptyString("filePath")
 	}
 
-	fileToUse, err := GetLocalFileByPath(filePath)
+	fileToUse, err := files.GetLocalFileByPath(filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +55,7 @@ func GetGitignoreFileInGitRepository(gitRepository GitRepository) (gitignoreFile
 	return GetGitignoreFileByFile(fileToUse)
 }
 
-func MustGetGitignoreFileByFile(fileToUse File) (gitignoreFile *GitignoreFile) {
+func MustGetGitignoreFileByFile(fileToUse files.File) (gitignoreFile *GitignoreFile) {
 	gitignoreFile, err := GetGitignoreFileByFile(fileToUse)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

@@ -7,7 +7,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -32,7 +34,7 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 				const verbose bool = true
 
 				inputFile := MustGetPreCommitConfigByLocalPath(filepath.Join(tt.testDataDir, "input"))
-				preCommitFile := MustGetPreCommitConfigByFile(TemporaryFiles().MustCreateTemporaryFileFromFile(inputFile, verbose))
+				preCommitFile := MustGetPreCommitConfigByFile(tempfiles.MustCreateTemporaryFileFromFile(inputFile, verbose))
 				defer preCommitFile.Delete(verbose)
 
 				expectedOutput := MustGetPreCommitConfigByLocalPath(filepath.Join(tt.testDataDir, "expected_output"))
@@ -46,7 +48,7 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 				dependency := &DependencyGitRepository{
 					url:                 "https://gitlab.asciich.ch/gitlab_management/pre-commit",
 					versionString:       "v0.1.0",
-					sourceFiles:         []File{preCommitFile},
+					sourceFiles:         []files.File{preCommitFile},
 					targetVersionString: "v0.10.0",
 				}
 

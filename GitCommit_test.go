@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -27,7 +28,7 @@ func TestGitCommit_CreateTag(t *testing.T) {
 				defer repo.Delete(verbose)
 
 				repo.MustInit(
-					&CreateRepositoryOptions{
+					&parameteroptions.CreateRepositoryOptions{
 						Verbose:                     verbose,
 						InitializeWithEmptyCommit:   true,
 						InitializeWithDefaultAuthor: true,
@@ -91,7 +92,7 @@ func TestGitCommit_ListTagsNames(t *testing.T) {
 				defer repo.Delete(verbose)
 
 				repo.MustInit(
-					&CreateRepositoryOptions{
+					&parameteroptions.CreateRepositoryOptions{
 						Verbose:                     verbose,
 						InitializeWithEmptyCommit:   true,
 						InitializeWithDefaultAuthor: true,
@@ -165,7 +166,7 @@ func TestGitCommit_ListVersionTagNames(t *testing.T) {
 				defer repo.Delete(verbose)
 
 				repo.MustInit(
-					&CreateRepositoryOptions{
+					&parameteroptions.CreateRepositoryOptions{
 						Verbose:                     verbose,
 						InitializeWithEmptyCommit:   true,
 						InitializeWithDefaultAuthor: true,
@@ -244,7 +245,7 @@ func TestGitCommit_GetNewestTagVersion(t *testing.T) {
 				defer repo.Delete(verbose)
 
 				repo.MustInit(
-					&CreateRepositoryOptions{
+					&parameteroptions.CreateRepositoryOptions{
 						Verbose:                     verbose,
 						InitializeWithEmptyCommit:   true,
 						InitializeWithDefaultAuthor: true,
@@ -315,7 +316,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 				defer repo.Delete(verbose)
 
 				repo.MustInit(
-					&CreateRepositoryOptions{
+					&parameteroptions.CreateRepositoryOptions{
 						Verbose:                     verbose,
 						InitializeWithEmptyCommit:   true,
 						InitializeWithDefaultAuthor: true,
@@ -403,7 +404,7 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 				defer repo.Delete(verbose)
 
 				repo.MustInit(
-					&CreateRepositoryOptions{
+					&parameteroptions.CreateRepositoryOptions{
 						Verbose:                     verbose,
 						InitializeWithEmptyCommit:   true,
 						InitializeWithDefaultAuthor: true,

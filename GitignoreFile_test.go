@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -22,7 +23,7 @@ func TestGitignoreFileAddFileToIgnore(t *testing.T) {
 
 				const verbose bool = true
 
-				gitignoreFilePath := TemporaryFiles().MustCreateEmptyTemporaryFileAndGetPath(verbose)
+				gitignoreFilePath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose)
 
 				gitignoreFile := MustGetGitignoreFileByPath(gitignoreFilePath)
 				defer gitignoreFile.Delete(verbose)
@@ -58,7 +59,7 @@ func TestGitignoreFileContainsIgnoreOnNonExistingFile(t *testing.T) {
 
 				const verbose bool = true
 
-				nonExitstingFile := TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)
+				nonExitstingFile := tempfiles.MustCreateEmptyTemporaryFile(verbose)
 				nonExitstingFile.MustDelete(verbose)
 
 				gitignoreFile := MustGetGitignoreFileByFile(nonExitstingFile)
@@ -87,7 +88,7 @@ func TestGitignoreFileContainsIgnoreOnEmptyFile(t *testing.T) {
 
 				const verbose bool = true
 
-				emptyFile := TemporaryFiles().MustCreateEmptyTemporaryFile(verbose)
+				emptyFile := tempfiles.MustCreateEmptyTemporaryFile(verbose)
 
 				gitignoreFile := MustGetGitignoreFileByFile(emptyFile)
 				defer gitignoreFile.Delete(verbose)
