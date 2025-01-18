@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -42,7 +43,7 @@ func (g *GitlabUser) MustAddSshKey(sshKey *SSHPublicKey, verbose bool) {
 	}
 }
 
-func (g *GitlabUser) MustAddSshKeysFromFile(sshKeysFile File, verbose bool) {
+func (g *GitlabUser) MustAddSshKeysFromFile(sshKeysFile files.File, verbose bool) {
 	err := g.AddSshKeysFromFile(sshKeysFile, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -287,7 +288,7 @@ func (u *GitlabUser) AddSshKey(sshKey *SSHPublicKey, verbose bool) (err error) {
 	return nil
 }
 
-func (u *GitlabUser) AddSshKeysFromFile(sshKeysFile File, verbose bool) (err error) {
+func (u *GitlabUser) AddSshKeysFromFile(sshKeysFile files.File, verbose bool) (err error) {
 	if sshKeysFile == nil {
 		return tracederrors.TracedError("sshKeysFile is nil")
 	}
@@ -321,7 +322,7 @@ func (u *GitlabUser) AddSshKeysFromFilePath(sshKeyFilePath string, verbose bool)
 		return tracederrors.TracedError("sshKeyFilePath is empty string")
 	}
 
-	sshKeyFile, err := GetLocalFileByPath(sshKeyFilePath)
+	sshKeyFile, err := files.GetLocalFileByPath(sshKeyFilePath)
 	if err != nil {
 		return err
 	}

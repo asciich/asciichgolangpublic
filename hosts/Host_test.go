@@ -6,9 +6,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -164,7 +164,7 @@ func TestHost_GetDirectoryByPath(t *testing.T) {
 				host := MustGetHostByHostname(tt.hostname)
 				directory := host.MustGetDirectoryByPath(tt.dirPath)
 
-				_, ok := directory.(*asciichgolangpublic.CommandExecutorDirectory)
+				_, ok := directory.(*files.CommandExecutorDirectory)
 				assert.True(ok)
 
 				assert.EqualValues(

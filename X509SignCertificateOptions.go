@@ -3,16 +3,17 @@ package asciichgolangpublic
 import (
 	"fmt"
 
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type X509SignCertificateOptions struct {
-	CertFileUsedForSigning File
-	KeyFileUsedForSigning  File
-	KeyFileToSign          File
-	OutputCertificateFile  File
-	SigningRequestFile     File
+	CertFileUsedForSigning files.File
+	KeyFileUsedForSigning  files.File
+	KeyFileToSign          files.File
+	OutputCertificateFile  files.File
+	SigningRequestFile     files.File
 	CommonName             string
 	CountryName            string
 	Locality               string
@@ -23,7 +24,7 @@ func NewX509SignCertificateOptions() (deepCopy *X509SignCertificateOptions) {
 	return new(X509SignCertificateOptions)
 }
 
-func (o *X509SignCertificateOptions) GetCertFileUsedForSigning() (keyFileForSigning File, err error) {
+func (o *X509SignCertificateOptions) GetCertFileUsedForSigning() (keyFileForSigning files.File, err error) {
 	if o.CertFileUsedForSigning == nil {
 		return nil, tracederrors.TracedError("CertFileUsedForSigning not set")
 	}
@@ -74,7 +75,7 @@ func (o *X509SignCertificateOptions) GetDeepCopy() (deepCopy *X509SignCertificat
 	return deepCopy
 }
 
-func (o *X509SignCertificateOptions) GetKeyFileToSign() (keyFileForSigning File, err error) {
+func (o *X509SignCertificateOptions) GetKeyFileToSign() (keyFileForSigning files.File, err error) {
 	if o.KeyFileToSign == nil {
 		return nil, tracederrors.TracedError("KeyFileToSign not set")
 	}
@@ -96,7 +97,7 @@ func (o *X509SignCertificateOptions) GetKeyFileToSignPath() (keyFileForSigningPa
 	return keyFileForSigningPath, nil
 }
 
-func (o *X509SignCertificateOptions) GetKeyFileUsedForSigning() (keyFileForSigning File, err error) {
+func (o *X509SignCertificateOptions) GetKeyFileUsedForSigning() (keyFileForSigning files.File, err error) {
 	if o.KeyFileUsedForSigning == nil {
 		return nil, tracederrors.TracedError("KeyFileUsedForSigning not set")
 	}
@@ -112,7 +113,7 @@ func (o *X509SignCertificateOptions) GetLocality() (locality string, err error) 
 	return o.CommonName, nil
 }
 
-func (o *X509SignCertificateOptions) GetOutputCertificateFile() (keyFileForSigning File, err error) {
+func (o *X509SignCertificateOptions) GetOutputCertificateFile() (keyFileForSigning files.File, err error) {
 	if o.OutputCertificateFile == nil {
 		return nil, tracederrors.TracedError("OutputCertificateFile not set")
 	}
@@ -120,7 +121,7 @@ func (o *X509SignCertificateOptions) GetOutputCertificateFile() (keyFileForSigni
 	return o.OutputCertificateFile, nil
 }
 
-func (o *X509SignCertificateOptions) GetSigningRequestFile() (signingRequestFile File, err error) {
+func (o *X509SignCertificateOptions) GetSigningRequestFile() (signingRequestFile files.File, err error) {
 	if o.SigningRequestFile == nil {
 		return nil, tracederrors.TracedError("SigningRequestFile is not set")
 	}
@@ -162,7 +163,7 @@ func (x *X509SignCertificateOptions) GetVerbose() (verbose bool, err error) {
 	return x.Verbose, nil
 }
 
-func (x *X509SignCertificateOptions) MustGetCertFileUsedForSigning() (keyFileForSigning File) {
+func (x *X509SignCertificateOptions) MustGetCertFileUsedForSigning() (keyFileForSigning files.File) {
 	keyFileForSigning, err := x.GetCertFileUsedForSigning()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -189,7 +190,7 @@ func (x *X509SignCertificateOptions) MustGetCountryName() (countryName string) {
 	return countryName
 }
 
-func (x *X509SignCertificateOptions) MustGetKeyFileToSign() (keyFileForSigning File) {
+func (x *X509SignCertificateOptions) MustGetKeyFileToSign() (keyFileForSigning files.File) {
 	keyFileForSigning, err := x.GetKeyFileToSign()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -207,7 +208,7 @@ func (x *X509SignCertificateOptions) MustGetKeyFileToSignPath() (keyFileForSigni
 	return keyFileForSigningPath
 }
 
-func (x *X509SignCertificateOptions) MustGetKeyFileUsedForSigning() (keyFileForSigning File) {
+func (x *X509SignCertificateOptions) MustGetKeyFileUsedForSigning() (keyFileForSigning files.File) {
 	keyFileForSigning, err := x.GetKeyFileUsedForSigning()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -225,7 +226,7 @@ func (x *X509SignCertificateOptions) MustGetLocality() (locality string) {
 	return locality
 }
 
-func (x *X509SignCertificateOptions) MustGetOutputCertificateFile() (keyFileForSigning File) {
+func (x *X509SignCertificateOptions) MustGetOutputCertificateFile() (keyFileForSigning files.File) {
 	keyFileForSigning, err := x.GetOutputCertificateFile()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -234,7 +235,7 @@ func (x *X509SignCertificateOptions) MustGetOutputCertificateFile() (keyFileForS
 	return keyFileForSigning
 }
 
-func (x *X509SignCertificateOptions) MustGetSigningRequestFile() (signingRequestFile File) {
+func (x *X509SignCertificateOptions) MustGetSigningRequestFile() (signingRequestFile files.File) {
 	signingRequestFile, err := x.GetSigningRequestFile()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -270,7 +271,7 @@ func (x *X509SignCertificateOptions) MustGetVerbose() (verbose bool) {
 	return verbose
 }
 
-func (x *X509SignCertificateOptions) MustSetCertFileUsedForSigning(certFileUsedForSigning File) {
+func (x *X509SignCertificateOptions) MustSetCertFileUsedForSigning(certFileUsedForSigning files.File) {
 	err := x.SetCertFileUsedForSigning(certFileUsedForSigning)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -291,14 +292,14 @@ func (x *X509SignCertificateOptions) MustSetCountryName(countryName string) {
 	}
 }
 
-func (x *X509SignCertificateOptions) MustSetKeyFileToSign(keyFileToSign File) {
+func (x *X509SignCertificateOptions) MustSetKeyFileToSign(keyFileToSign files.File) {
 	err := x.SetKeyFileToSign(keyFileToSign)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (x *X509SignCertificateOptions) MustSetKeyFileUsedForSigning(keyFileUsedForSigning File) {
+func (x *X509SignCertificateOptions) MustSetKeyFileUsedForSigning(keyFileUsedForSigning files.File) {
 	err := x.SetKeyFileUsedForSigning(keyFileUsedForSigning)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -312,14 +313,14 @@ func (x *X509SignCertificateOptions) MustSetLocality(locality string) {
 	}
 }
 
-func (x *X509SignCertificateOptions) MustSetOutputCertificateFile(outputCertificateFile File) {
+func (x *X509SignCertificateOptions) MustSetOutputCertificateFile(outputCertificateFile files.File) {
 	err := x.SetOutputCertificateFile(outputCertificateFile)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (x *X509SignCertificateOptions) MustSetSigningRequestFile(signingRequestFile File) {
+func (x *X509SignCertificateOptions) MustSetSigningRequestFile(signingRequestFile files.File) {
 	err := x.SetSigningRequestFile(signingRequestFile)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -333,7 +334,7 @@ func (x *X509SignCertificateOptions) MustSetVerbose(verbose bool) {
 	}
 }
 
-func (x *X509SignCertificateOptions) SetCertFileUsedForSigning(certFileUsedForSigning File) (err error) {
+func (x *X509SignCertificateOptions) SetCertFileUsedForSigning(certFileUsedForSigning files.File) (err error) {
 	if certFileUsedForSigning == nil {
 		return tracederrors.TracedErrorf("certFileUsedForSigning is nil")
 	}
@@ -363,7 +364,7 @@ func (x *X509SignCertificateOptions) SetCountryName(countryName string) (err err
 	return nil
 }
 
-func (x *X509SignCertificateOptions) SetKeyFileToSign(keyFileToSign File) (err error) {
+func (x *X509SignCertificateOptions) SetKeyFileToSign(keyFileToSign files.File) (err error) {
 	if keyFileToSign == nil {
 		return tracederrors.TracedErrorf("keyFileToSign is nil")
 	}
@@ -373,7 +374,7 @@ func (x *X509SignCertificateOptions) SetKeyFileToSign(keyFileToSign File) (err e
 	return nil
 }
 
-func (x *X509SignCertificateOptions) SetKeyFileUsedForSigning(keyFileUsedForSigning File) (err error) {
+func (x *X509SignCertificateOptions) SetKeyFileUsedForSigning(keyFileUsedForSigning files.File) (err error) {
 	if keyFileUsedForSigning == nil {
 		return tracederrors.TracedErrorf("keyFileUsedForSigning is nil")
 	}
@@ -393,7 +394,7 @@ func (x *X509SignCertificateOptions) SetLocality(locality string) (err error) {
 	return nil
 }
 
-func (x *X509SignCertificateOptions) SetOutputCertificateFile(outputCertificateFile File) (err error) {
+func (x *X509SignCertificateOptions) SetOutputCertificateFile(outputCertificateFile files.File) (err error) {
 	if outputCertificateFile == nil {
 		return tracederrors.TracedErrorf("outputCertificateFile is nil")
 	}
@@ -403,7 +404,7 @@ func (x *X509SignCertificateOptions) SetOutputCertificateFile(outputCertificateF
 	return nil
 }
 
-func (x *X509SignCertificateOptions) SetSigningRequestFile(signingRequestFile File) (err error) {
+func (x *X509SignCertificateOptions) SetSigningRequestFile(signingRequestFile files.File) (err error) {
 	if signingRequestFile == nil {
 		return tracederrors.TracedErrorf("signingRequestFile is nil")
 	}

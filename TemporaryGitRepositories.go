@@ -1,7 +1,10 @@
 package asciichgolangpublic
 
 import (
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -17,7 +20,7 @@ func TemporaryGitRepositories() (temporaryDirectoriesService *TemporaryGitReposi
 }
 
 func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepository(verbose bool) (temporaryGitRepository GitRepository, err error) {
-	tempDir, err := TemporaryDirectories().CreateEmptyTemporaryDirectory(verbose)
+	tempDir, err := tempfiles.CreateEmptyTemporaryDirectory(verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +31,7 @@ func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepository(verbose b
 	}
 
 	err = localRepository.Init(
-		&CreateRepositoryOptions{
+		&parameteroptions.CreateRepositoryOptions{
 			Verbose: verbose,
 		},
 	)
@@ -41,7 +44,7 @@ func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepository(verbose b
 	return temporaryGitRepository, nil
 }
 
-func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepositoryAndAddDataFromDirectory(dataToAdd Directory, verbose bool) (temporaryRepository GitRepository, err error) {
+func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepositoryAndAddDataFromDirectory(dataToAdd files.Directory, verbose bool) (temporaryRepository GitRepository, err error) {
 	if dataToAdd == nil {
 		return nil, tracederrors.TracedError("dataToAdd is nil")
 	}
@@ -64,7 +67,7 @@ func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepositoryAndAddData
 	return temporaryRepository, nil
 }
 
-func (g *TemporaryGitRepositoriesService) MustCreateTemporaryGitRepositoryAndAddDataFromDirectory(dataToAdd Directory, verbose bool) (temporaryRepository GitRepository) {
+func (g *TemporaryGitRepositoriesService) MustCreateTemporaryGitRepositoryAndAddDataFromDirectory(dataToAdd files.Directory, verbose bool) (temporaryRepository GitRepository) {
 	temporaryRepository, err := g.CreateTemporaryGitRepositoryAndAddDataFromDirectory(dataToAdd, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -75,6 +78,47 @@ func (g *TemporaryGitRepositoriesService) MustCreateTemporaryGitRepositoryAndAdd
 
 func (g TemporaryGitRepositoriesService) MustCreateTemporaryGitRepository(verbose bool) (temporaryGitRepository GitRepository) {
 	temporaryGitRepository, err := g.CreateTemporaryGitRepository(verbose)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return temporaryGitRepository
+}
+
+func (t TemporaryGitRepositoriesService) CreateEmptyTemporaryGitRepository(createRepoOptions *parameteroptions.CreateRepositoryOptions) (temporaryGitRepository GitRepository, err error) {
+	if createRepoOptions == nil {
+		return nil, tracederrors.TracedErrorNil("createRepoOptions")
+	}
+
+	tempDirectory, err := tempfiles.CreateEmptyTemporaryDirectory(createRepoOptions.Verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	temporaryGitRepository, err = GetLocalGitReposioryFromDirectory(tempDirectory)
+	if err != nil {
+		return nil, err
+	}
+
+	err = temporaryGitRepository.Init(createRepoOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	repoPath, err := tempDirectory.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
+	if createRepoOptions.Verbose {
+		logging.LogInfof("Created temporary local git repository '%s'.", repoPath)
+	}
+
+	return temporaryGitRepository, err
+}
+
+func (t TemporaryGitRepositoriesService) MustCreateEmptyTemporaryGitRepository(createRepoOptions *parameteroptions.CreateRepositoryOptions) (temporaryGitRepository GitRepository) {
+	temporaryGitRepository, err := t.CreateEmptyTemporaryGitRepository(createRepoOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}

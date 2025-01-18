@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -19,7 +20,7 @@ func PreCommit() (p *PreCommitService) {
 	return NewPreCommitService()
 }
 
-func (p *PreCommitService) GetAsPreCommitConfigFileOrNilIfContentIsInvalid(file File, verbose bool) (preCommitConfigFile *PreCommitConfigFile, err error) {
+func (p *PreCommitService) GetAsPreCommitConfigFileOrNilIfContentIsInvalid(file files.File, verbose bool) (preCommitConfigFile *PreCommitConfigFile, err error) {
 	preCommitConfigFile, err = GetPreCommitConfigByFile(file)
 	if err != nil {
 		return nil, err
@@ -41,7 +42,7 @@ func (p *PreCommitService) GetDefaultConfigFileName() (preCommitDefaultName stri
 	return ".pre-commit-config.yaml"
 }
 
-func (p *PreCommitService) MustGetAsPreCommitConfigFileOrNilIfContentIsInvalid(file File, verbose bool) (preCommitConfigFile *PreCommitConfigFile) {
+func (p *PreCommitService) MustGetAsPreCommitConfigFileOrNilIfContentIsInvalid(file files.File, verbose bool) (preCommitConfigFile *PreCommitConfigFile) {
 	preCommitConfigFile, err := p.GetAsPreCommitConfigFileOrNilIfContentIsInvalid(file, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -50,7 +51,7 @@ func (p *PreCommitService) MustGetAsPreCommitConfigFileOrNilIfContentIsInvalid(f
 	return preCommitConfigFile
 }
 
-func (p *PreCommitService) MustRunInDirectory(directoy Directory, options *PreCommitRunOptions) {
+func (p *PreCommitService) MustRunInDirectory(directoy files.Directory, options *PreCommitRunOptions) {
 	err := p.RunInDirectory(directoy, options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -64,7 +65,7 @@ func (p *PreCommitService) MustRunInGitRepository(gitRepo GitRepository, options
 	}
 }
 
-func (p *PreCommitService) RunInDirectory(directoy Directory, options *PreCommitRunOptions) (err error) {
+func (p *PreCommitService) RunInDirectory(directoy files.Directory, options *PreCommitRunOptions) (err error) {
 	if directoy == nil {
 		return tracederrors.TracedErrorNil("directoy")
 	}

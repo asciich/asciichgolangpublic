@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/user"
 
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -11,7 +12,7 @@ import (
 type UsersService struct {
 }
 
-func GetDirectoryInHomeDirectory(path ...string) (directoryInHome Directory, err error) {
+func GetDirectoryInHomeDirectory(path ...string) (directoryInHome files.Directory, err error) {
 	directoryInHome, err = Users().GetDirectoryInHomeDirectory(path...)
 	if err != nil {
 		return nil, err
@@ -20,7 +21,7 @@ func GetDirectoryInHomeDirectory(path ...string) (directoryInHome Directory, err
 	return directoryInHome, nil
 }
 
-func GetFileInHomeDirectory(path ...string) (fileInHome File, err error) {
+func GetFileInHomeDirectory(path ...string) (fileInHome files.File, err error) {
 	fileInHome, err = Users().GetFileInHomeDirectory(path...)
 	if err != nil {
 		return nil, err
@@ -38,7 +39,7 @@ func IsRunningAsRoot(verbose bool) (isRunningAsRoot bool, err error) {
 	return isRunningAsRoot, nil
 }
 
-func MustGetDirectoryInHomeDirectory(path ...string) (directoryInHome Directory) {
+func MustGetDirectoryInHomeDirectory(path ...string) (directoryInHome files.Directory) {
 	directoryInHome, err := GetDirectoryInHomeDirectory(path...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -47,7 +48,7 @@ func MustGetDirectoryInHomeDirectory(path ...string) (directoryInHome Directory)
 	return directoryInHome
 }
 
-func MustGetFileInHomeDirectory(path ...string) (fileInHome File) {
+func MustGetFileInHomeDirectory(path ...string) (fileInHome files.File) {
 	fileInHome, err := Users().GetFileInHomeDirectory(path...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -110,7 +111,7 @@ func (u *UsersService) GetCurrentUserName(verbose bool) (currentUserName string,
 	return currentUserName, nil
 }
 
-func (u *UsersService) GetDirectoryInHomeDirectory(path ...string) (fileInUnsersHome Directory, err error) {
+func (u *UsersService) GetDirectoryInHomeDirectory(path ...string) (fileInUnsersHome files.Directory, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedError("path has no length")
 	}
@@ -128,7 +129,7 @@ func (u *UsersService) GetDirectoryInHomeDirectory(path ...string) (fileInUnsers
 	return fileInUnsersHome, nil
 }
 
-func (u *UsersService) GetFileInHomeDirectory(path ...string) (fileInUnsersHome File, err error) {
+func (u *UsersService) GetFileInHomeDirectory(path ...string) (fileInUnsersHome files.File, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedError("path has no length")
 	}
@@ -146,7 +147,7 @@ func (u *UsersService) GetFileInHomeDirectory(path ...string) (fileInUnsersHome 
 	return fileInUnsersHome, nil
 }
 
-func (u *UsersService) GetFileInHomeDirectoryAsLocalFile(path ...string) (localFile *LocalFile, err error) {
+func (u *UsersService) GetFileInHomeDirectoryAsLocalFile(path ...string) (localFile *files.LocalFile, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedError("path is empty")
 	}
@@ -156,7 +157,7 @@ func (u *UsersService) GetFileInHomeDirectoryAsLocalFile(path ...string) (localF
 		return nil, err
 	}
 
-	localFile, ok := fileToReturn.(*LocalFile)
+	localFile, ok := fileToReturn.(*files.LocalFile)
 	if !ok {
 		return nil, tracederrors.TracedError("Unable to convert to local file")
 	}
@@ -164,13 +165,13 @@ func (u *UsersService) GetFileInHomeDirectoryAsLocalFile(path ...string) (localF
 	return localFile, nil
 }
 
-func (u *UsersService) GetHomeDirectory() (homeDir Directory, err error) {
+func (u *UsersService) GetHomeDirectory() (homeDir files.Directory, err error) {
 	homeDirPath, err := u.GetHomeDirectoryAsString()
 	if err != nil {
 		return nil, err
 	}
 
-	homeDir, err = GetLocalDirectoryByPath(homeDirPath)
+	homeDir, err = files.GetLocalDirectoryByPath(homeDirPath)
 	if err != nil {
 		return nil, err
 	}
@@ -224,7 +225,7 @@ func (u *UsersService) MustGetCurrentUserName(verbose bool) (currentUserName str
 	return currentUserName
 }
 
-func (u *UsersService) MustGetDirectoryInHomeDirectory(path ...string) (fileInUnsersHome Directory) {
+func (u *UsersService) MustGetDirectoryInHomeDirectory(path ...string) (fileInUnsersHome files.Directory) {
 	fileInUnsersHome, err := u.GetDirectoryInHomeDirectory(path...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -233,7 +234,7 @@ func (u *UsersService) MustGetDirectoryInHomeDirectory(path ...string) (fileInUn
 	return fileInUnsersHome
 }
 
-func (u *UsersService) MustGetFileInHomeDirectory(path ...string) (fileInUnsersHome File) {
+func (u *UsersService) MustGetFileInHomeDirectory(path ...string) (fileInUnsersHome files.File) {
 	fileInUnsersHome, err := u.GetFileInHomeDirectory(path...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -242,7 +243,7 @@ func (u *UsersService) MustGetFileInHomeDirectory(path ...string) (fileInUnsersH
 	return fileInUnsersHome
 }
 
-func (u *UsersService) MustGetFileInHomeDirectoryAsLocalFile(path ...string) (localFile *LocalFile) {
+func (u *UsersService) MustGetFileInHomeDirectoryAsLocalFile(path ...string) (localFile *files.LocalFile) {
 	localFile, err := u.GetFileInHomeDirectoryAsLocalFile(path...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -251,7 +252,7 @@ func (u *UsersService) MustGetFileInHomeDirectoryAsLocalFile(path ...string) (lo
 	return localFile
 }
 
-func (u *UsersService) MustGetHomeDirectory() (homeDir Directory) {
+func (u *UsersService) MustGetHomeDirectory() (homeDir files.Directory) {
 	homeDir, err := u.GetHomeDirectory()
 	if err != nil {
 		logging.LogGoErrorFatal(err)

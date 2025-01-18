@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -175,7 +176,7 @@ func (g *GitCommit) GetNewestTagVersionOrNilIfUnset(verbose bool) (newestVersion
 	return Versions().GetLatestVersionFromSlice(versions)
 }
 
-func (g *GitCommit) GetParentCommits(options *GitCommitGetParentsOptions) (parentCommit []*GitCommit, err error) {
+func (g *GitCommit) GetParentCommits(options *parameteroptions.GitCommitGetParentsOptions) (parentCommit []*GitCommit, err error) {
 	hash, err := g.GetHash()
 	if err != nil {
 		return nil, err
@@ -421,7 +422,7 @@ func (g *GitCommit) MustGetNewestTagVersionOrNilIfUnset(verbose bool) (newestVer
 	return newestVersion
 }
 
-func (g *GitCommit) MustGetParentCommits(options *GitCommitGetParentsOptions) (parentCommit []*GitCommit) {
+func (g *GitCommit) MustGetParentCommits(options *parameteroptions.GitCommitGetParentsOptions) (parentCommit []*GitCommit) {
 	parentCommit, err := g.GetParentCommits(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

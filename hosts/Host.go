@@ -5,6 +5,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -14,15 +15,15 @@ import (
 type Host interface {
 	CheckReachable(verbose bool) (err error)
 
-	GetDirectoryByPath(path string) (directory asciichgolangpublic.Directory, err error)
+	GetDirectoryByPath(path string) (directory files.Directory, err error)
 	GetHostDescription() (hostDescription string, err error)
 	GetHostName() (hostName string, err error)
-	InstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile asciichgolangpublic.File, err error)
+	InstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile files.File, err error)
 	MustCheckReachable(verbose bool)
-	MustGetDirectoryByPath(path string) (directory asciichgolangpublic.Directory)
+	MustGetDirectoryByPath(path string) (directory files.Directory)
 	MustGetHostDescription() (hostDescription string)
 	MustGetHostName() (hostName string)
-	MustInstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile asciichgolangpublic.File)
+	MustInstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile files.File)
 	MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput)
 	RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error)
 

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/datatypes"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -25,8 +26,8 @@ type GitRepository interface {
 	CommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool, err error)
 	CreateBranch(createOptions *parameteroptions.CreateBranchOptions) (err error)
 	Create(verbose bool) (err error)
-	CreateFileInDirectory(verbose bool, filePath ...string) (createdFile File, err error)
-	CreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory Directory, err error)
+	CreateFileInDirectory(verbose bool, filePath ...string) (createdFile files.File, err error)
+	CreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory files.Directory, err error)
 	CreateTag(createOptions *GitRepositoryCreateTagOptions) (createdTag GitTag, err error)
 	Delete(verbose bool) (err error)
 	DeleteBranchByName(name string, verbose bool) (err error)
@@ -35,16 +36,16 @@ type GitRepository interface {
 	Fetch(verbose bool) (err error)
 	FileByPathExists(path string, verbose bool) (exists bool, err error)
 	// TODO: Will be removed as there should be no need to explitly get as local Directory:
-	GetAsLocalDirectory() (localDirectory *LocalDirectory, err error)
+	GetAsLocalDirectory() (localDirectory *files.LocalDirectory, err error)
 	// TODO: Will be removed as there should be no need to explitly get as local GitRepository:
 	GetAsLocalGitRepository() (localGitRepository *LocalGitRepository, err error)
 	GetAuthorEmailByCommitHash(hash string) (authorEmail string, err error)
 	GetAuthorStringByCommitHash(hash string) (authorString string, err error)
-	GetDirectoryByPath(pathToSubDir ...string) (subDir Directory, err error)
+	GetDirectoryByPath(pathToSubDir ...string) (subDir files.Directory, err error)
 	GetCommitAgeDurationByCommitHash(hash string) (ageDuration *time.Duration, err error)
 	GetCommitAgeSecondsByCommitHash(hash string) (ageSeconds float64, err error)
 	GetCommitMessageByCommitHash(hash string) (commitMessage string, err error)
-	GetCommitParentsByCommitHash(hash string, options *GitCommitGetParentsOptions) (commitParents []*GitCommit, err error)
+	GetCommitParentsByCommitHash(hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []*GitCommit, err error)
 	GetCommitTimeByCommitHash(hash string) (commitTime *time.Time, err error)
 	GetCurrentBranchName(verbose bool) (branchName string, err error)
 	GetCurrentCommit(verbose bool) (commit *GitCommit, err error)
@@ -54,18 +55,18 @@ type GitRepository interface {
 	GetHostDescription() (hostDescription string, err error)
 	GetPath() (path string, err error)
 	GetRemoteConfigs(verbose bool) (remoteConfigs []*GitRemoteConfig, err error)
-	GetRootDirectory(verbose bool) (directory Directory, err error)
+	GetRootDirectory(verbose bool) (directory files.Directory, err error)
 	GetRootDirectoryPath(verbose bool) (path string, err error)
 	HasInitialCommit(verbose bool) (hasInitialCommit bool, err error)
 	HasUncommittedChanges(verbose bool) (hasUncommitedChanges bool, err error)
-	Init(options *CreateRepositoryOptions) (err error)
+	Init(options *parameteroptions.CreateRepositoryOptions) (err error)
 	IsBareRepository(verbose bool) (isBareRepository bool, err error)
 	// Returns true if pointing to an existing git repository, false otherwise
 	IsGitRepository(verbose bool) (isRepository bool, err error)
 	IsInitialized(verbose bool) (isInitialited bool, err error)
 	ListBranchNames(verbose bool) (branchNames []string, err error)
 	ListFilePaths(listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error)
-	ListFiles(listFileOptions *parameteroptions.ListFileOptions) (files []File, err error)
+	ListFiles(listFileOptions *parameteroptions.ListFileOptions) (files []files.File, err error)
 	ListTagNames(verbose bool) (tagNames []string, err error)
 	ListTags(verbose bool) (tags []GitTag, err error)
 	ListTagsForCommitHash(hash string, verbose bool) (tags []GitTag, err error)
@@ -78,8 +79,8 @@ type GitRepository interface {
 	MustCommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool)
 	MustCreate(verbose bool)
 	MustCreateBranch(createOptions *parameteroptions.CreateBranchOptions)
-	MustCreateFileInDirectory(verbose bool, filePath ...string) (createdFile File)
-	MustCreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory Directory)
+	MustCreateFileInDirectory(verbose bool, filePath ...string) (createdFile files.File)
+	MustCreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory files.Directory)
 	MustCreateTag(createOptions *GitRepositoryCreateTagOptions) (createdTag GitTag)
 	MustDelete(verbose bool)
 	MustDeleteBranchByName(name string, verbose bool)
@@ -88,16 +89,16 @@ type GitRepository interface {
 	MustFetch(verbose bool)
 	MustFileByPathExists(path string, verbose bool) (exists bool)
 	// TODO: Will be removed as there should be no need to explitly get a local Directory:
-	MustGetAsLocalDirectory() (localDirectory *LocalDirectory)
+	MustGetAsLocalDirectory() (localDirectory *files.LocalDirectory)
 	// TODO: Will be removed as there should be no need to explitly get as local GitRepository:
 	MustGetAsLocalGitRepository() (localGitRepository *LocalGitRepository)
-	MustGetDirectoryByPath(pathToSubDir ...string) (subDir Directory)
+	MustGetDirectoryByPath(pathToSubDir ...string) (subDir files.Directory)
 	MustGetAuthorEmailByCommitHash(hash string) (authorEmail string)
 	MustGetAuthorStringByCommitHash(hash string) (authorString string)
 	MustGetCommitAgeDurationByCommitHash(hash string) (ageDuration *time.Duration)
 	MustGetCommitAgeSecondsByCommitHash(hash string) (ageSeconds float64)
 	MustGetCommitMessageByCommitHash(hash string) (commitMessage string)
-	MustGetCommitParentsByCommitHash(hash string, options *GitCommitGetParentsOptions) (commitParents []*GitCommit)
+	MustGetCommitParentsByCommitHash(hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []*GitCommit)
 	MustGetCommitTimeByCommitHash(hash string) (commitTime *time.Time)
 	MustGetCurrentBranchName(verbose bool) (branchName string)
 	MustGetCurrentCommit(verbose bool) (commit *GitCommit)
@@ -107,17 +108,17 @@ type GitRepository interface {
 	MustGetHostDescription() (hostDescription string)
 	MustGetPath() (path string)
 	MustGetRemoteConfigs(verbose bool) (remoteConfigs []*GitRemoteConfig)
-	MustGetRootDirectory(verbose bool) (directory Directory)
+	MustGetRootDirectory(verbose bool) (directory files.Directory)
 	MustGetRootDirectoryPath(verbose bool) (path string)
 	MustHasInitialCommit(verbose bool) (hasInitialCommit bool)
 	MustHasUncommittedChanges(verbose bool) (hasUncommitedChanges bool)
-	MustInit(options *CreateRepositoryOptions)
+	MustInit(options *parameteroptions.CreateRepositoryOptions)
 	MustIsBareRepository(verbose bool) (isBareRepository bool)
 	MustIsGitRepository(verbose bool) (isRepository bool)
 	MustIsInitialized(verbose bool) (isInitialited bool)
 	MustListBranchNames(verbose bool) (branchNames []string)
 	MustListFilePaths(listFileOptions *parameteroptions.ListFileOptions) (filePaths []string)
-	MustListFiles(listFileOptions *parameteroptions.ListFileOptions) (files []File)
+	MustListFiles(listFileOptions *parameteroptions.ListFileOptions) (files []files.File)
 	MustListTagNames(verbose bool) (tagNames []string)
 	MustListTags(verbose bool) (tags []GitTag)
 	MustListTagsForCommitHash(hash string, verbose bool) (tags []GitTag)
@@ -152,12 +153,12 @@ type GitRepository interface {
 	CheckIsPreCommitRepository(verbose bool) (err error)
 	CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error)
 	CommitIfUncommittedChanges(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error)
-	CreateAndInit(options *CreateRepositoryOptions) (err error)
+	CreateAndInit(options *parameteroptions.CreateRepositoryOptions) (err error)
 	EnsureMainReadmeMdExists(verbose bool) (err error)
 	GetCurrentCommitMessage(verbose bool) (currentCommitMessage string, err error)
 	GetCurrentCommitsNewestVersion(verbose bool) (newestVersion Version, err error)
 	GetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose bool) (newestVersion Version, err error)
-	GetFileByPath(path ...string) (fileInRepo File, err error)
+	GetFileByPath(path ...string) (fileInRepo files.File, err error)
 	GetLatestTagVersion(verbose bool) (latestTagVersion Version, err error)
 	GetLatestTagVersionAsString(verbose bool) (latestTagVersion string, err error)
 	GetLatestTagVersionOrNilIfNotFound(verbose bool) (latestTagVersion Version, err error)
@@ -177,12 +178,12 @@ type GitRepository interface {
 	MustCheckIsPreCommitRepository(verbose bool)
 	MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit)
 	MustCommitIfUncommittedChanges(commitOptions *GitCommitOptions) (createdCommit *GitCommit)
-	MustCreateAndInit(options *CreateRepositoryOptions)
+	MustCreateAndInit(options *parameteroptions.CreateRepositoryOptions)
 	MustEnsureMainReadmeMdExists(verbose bool)
 	MustGetCurrentCommitMessage(verbose bool) (currentCommitMessage string)
 	MustGetCurrentCommitsNewestVersion(verbose bool) (newestVersion Version)
 	MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose bool) (newestVersion Version)
-	MustGetFileByPath(path ...string) (fileInRepo File)
+	MustGetFileByPath(path ...string) (fileInRepo files.File)
 	MustGetLatestTagVersion(verbose bool) (latestTagVersion Version)
 	MustGetLatestTagVersionAsString(verbose bool) (latestTagVersion string)
 	MustGetLatestTagVersionOrNilIfNotFound(verbose bool) (latestTagVersion Version)
@@ -193,23 +194,23 @@ type GitRepository interface {
 	MustIsOnLocalhost(verbose bool) (isOnLocalhost bool)
 	MustIsPreCommitRepository(verbose bool) (isPreCommitRepository bool)
 	MustListVersionTags(verbose bool) (versionTags []GitTag)
-	MustWriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile File)
-	MustWriteStringToFile(content string, verbose bool, path ...string) (writtenFile File)
-	WriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile File, err error)
-	WriteStringToFile(content string, verbose bool, path ...string) (writtenFile File, err error)
+	MustWriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile files.File)
+	MustWriteStringToFile(content string, verbose bool, path ...string) (writtenFile files.File)
+	WriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile files.File, err error)
+	WriteStringToFile(content string, verbose bool, path ...string) (writtenFile files.File, err error)
 }
 
-func GetGitRepositoryByDirectory(directory Directory) (repository GitRepository, err error) {
+func GetGitRepositoryByDirectory(directory files.Directory) (repository GitRepository, err error) {
 	if directory == nil {
 		return nil, tracederrors.TracedErrorNil("directory")
 	}
 
-	localDirectory, ok := directory.(*LocalDirectory)
+	localDirectory, ok := directory.(*files.LocalDirectory)
 	if ok {
 		return GetLocalGitReposioryFromDirectory(localDirectory)
 	}
 
-	commandExecutorDirectory, ok := directory.(*CommandExecutorDirectory)
+	commandExecutorDirectory, ok := directory.(*files.CommandExecutorDirectory)
 	if ok {
 		return GetCommandExecutorGitRepositoryFromDirectory(commandExecutorDirectory)
 	}
@@ -237,7 +238,7 @@ func GitRepositryDefaultAuthorName() (name string) {
 	return "asciichgolangpublic git repo initializer"
 }
 
-func MustGetGitRepositoryByDirectory(directory Directory) (repository GitRepository) {
+func MustGetGitRepositoryByDirectory(directory files.Directory) (repository GitRepository) {
 	repository, err := GetGitRepositoryByDirectory(directory)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

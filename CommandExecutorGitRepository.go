@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes"
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -23,16 +24,16 @@ import (
 // When dealing with locally available repositories it's recommended to use the LocalGitRepository
 // implementation which uses go build in git functionality instead.
 type CommandExecutorGitRepository struct {
-	CommandExecutorDirectory
+	files.CommandExecutorDirectory
 	GitRepositoryBase
 }
 
-func GetCommandExecutorGitRepositoryFromDirectory(directory Directory) (c *CommandExecutorGitRepository, err error) {
+func GetCommandExecutorGitRepositoryFromDirectory(directory files.Directory) (c *CommandExecutorGitRepository, err error) {
 	if directory == nil {
 		return nil, tracederrors.TracedErrorNil("directory")
 	}
 
-	commandExecutoryDirectory, ok := directory.(*CommandExecutorDirectory)
+	commandExecutoryDirectory, ok := directory.(*files.CommandExecutorDirectory)
 	if ok {
 		commandExecutor, path, err := commandExecutoryDirectory.GetCommandExecutorAndDirPath()
 		if err != nil {
@@ -42,7 +43,7 @@ func GetCommandExecutorGitRepositoryFromDirectory(directory Directory) (c *Comma
 		return GetCommandExecutorGitRepositoryByPath(commandExecutor, path)
 	}
 
-	localDirectory, ok := directory.(*LocalDirectory)
+	localDirectory, ok := directory.(*files.LocalDirectory)
 	if ok {
 		path, err := localDirectory.GetPath()
 		if err != nil {
@@ -63,7 +64,7 @@ func GetCommandExecutorGitRepositoryFromDirectory(directory Directory) (c *Comma
 	)
 }
 
-func MustGetCommandExecutorGitRepositoryFromDirectory(directory Directory) (c *CommandExecutorGitRepository) {
+func MustGetCommandExecutorGitRepositoryFromDirectory(directory files.Directory) (c *CommandExecutorGitRepository) {
 	c, err := GetCommandExecutorGitRepositoryFromDirectory(directory)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -108,7 +109,7 @@ func NewCommandExecutorGitRepository(commandExecutor commandexecutor.CommandExec
 
 // This function was only added to fulfil the current interface.
 // On the long run this method has to be removed.
-func (c *CommandExecutorGitRepository) GetAsLocalDirectory() (l *LocalDirectory, err error) {
+func (c *CommandExecutorGitRepository) GetAsLocalDirectory() (l *files.LocalDirectory, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
@@ -658,7 +659,7 @@ func (c *CommandExecutorGitRepository) GetCommitMessageByCommitHash(hash string)
 	return commitMessage, nil
 }
 
-func (c *CommandExecutorGitRepository) GetCommitParentsByCommitHash(hash string, options *GitCommitGetParentsOptions) (commitParents []*GitCommit, err error) {
+func (c *CommandExecutorGitRepository) GetCommitParentsByCommitHash(hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []*GitCommit, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
@@ -744,7 +745,7 @@ func (c *CommandExecutorGitRepository) GetCurrentCommitHash(verbose bool) (curre
 	return currentCommitHash, nil
 }
 
-func (c *CommandExecutorGitRepository) GetDirectoryByPath(pathToSubDir ...string) (subDir Directory, err error) {
+func (c *CommandExecutorGitRepository) GetDirectoryByPath(pathToSubDir ...string) (subDir files.Directory, err error) {
 	if len(pathToSubDir) <= 0 {
 		return nil, tracederrors.TracedError("pathToSubdir has no elements")
 	}
@@ -840,7 +841,7 @@ func (c *CommandExecutorGitRepository) GetRemoteConfigs(verbose bool) (remoteCon
 	return remoteConfigs, nil
 }
 
-func (c *CommandExecutorGitRepository) GetRootDirectory(verbose bool) (rootDirectory Directory, err error) {
+func (c *CommandExecutorGitRepository) GetRootDirectory(verbose bool) (rootDirectory files.Directory, err error) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
 		return nil, err
@@ -851,7 +852,7 @@ func (c *CommandExecutorGitRepository) GetRootDirectory(verbose bool) (rootDirec
 		return nil, err
 	}
 
-	rootDirectory, err = GetCommandExecutorDirectoryByPath(
+	rootDirectory, err = files.GetCommandExecutorDirectoryByPath(
 		commandExecutor,
 		rootDirPath,
 	)
@@ -874,11 +875,16 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootD
 	}
 
 	if isBareRepository {
-		var cwd Directory
+		var cwd files.Directory
 
-		cwd, err = GetCommandExecutorDirectoryByPath(
-			c.commandExecutor,
-			c.dirPath,
+		commandExecutor, err := c.GetCommandExecutor()
+		if err != nil {
+			return "", err
+		}
+
+		cwd, err = files.GetCommandExecutorDirectoryByPath(
+			commandExecutor,
+			path,
 		)
 		if err != nil {
 			return "", err
@@ -1098,7 +1104,7 @@ func (c *CommandExecutorGitRepository) HasUncommittedChanges(verbose bool) (hasU
 	return hasUncommitedChanges, nil
 }
 
-func (c *CommandExecutorGitRepository) Init(options *CreateRepositoryOptions) (err error) {
+func (c *CommandExecutorGitRepository) Init(options *parameteroptions.CreateRepositoryOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
@@ -1569,7 +1575,7 @@ func (c *CommandExecutorGitRepository) MustFileByPathExists(path string, verbose
 	return exists
 }
 
-func (c *CommandExecutorGitRepository) MustGetAsLocalDirectory() (l *LocalDirectory) {
+func (c *CommandExecutorGitRepository) MustGetAsLocalDirectory() (l *files.LocalDirectory) {
 	l, err := c.GetAsLocalDirectory()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1641,7 +1647,7 @@ func (c *CommandExecutorGitRepository) MustGetCommitMessageByCommitHash(hash str
 	return commitMessage
 }
 
-func (c *CommandExecutorGitRepository) MustGetCommitParentsByCommitHash(hash string, options *GitCommitGetParentsOptions) (commitParents []*GitCommit) {
+func (c *CommandExecutorGitRepository) MustGetCommitParentsByCommitHash(hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []*GitCommit) {
 	commitParents, err := c.GetCommitParentsByCommitHash(hash, options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1686,7 +1692,7 @@ func (c *CommandExecutorGitRepository) MustGetCurrentCommitHash(verbose bool) (c
 	return currentCommitHash
 }
 
-func (c *CommandExecutorGitRepository) MustGetDirectoryByPath(pathToSubDir ...string) (subDir Directory) {
+func (c *CommandExecutorGitRepository) MustGetDirectoryByPath(pathToSubDir ...string) (subDir files.Directory) {
 	subDir, err := c.GetDirectoryByPath(pathToSubDir...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1722,7 +1728,7 @@ func (c *CommandExecutorGitRepository) MustGetRemoteConfigs(verbose bool) (remot
 	return remoteConfigs
 }
 
-func (c *CommandExecutorGitRepository) MustGetRootDirectory(verbose bool) (rootDirectory Directory) {
+func (c *CommandExecutorGitRepository) MustGetRootDirectory(verbose bool) (rootDirectory files.Directory) {
 	rootDirectory, err := c.GetRootDirectory(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1767,7 +1773,7 @@ func (c *CommandExecutorGitRepository) MustHasUncommittedChanges(verbose bool) (
 	return hasUncommitedChanges
 }
 
-func (c *CommandExecutorGitRepository) MustInit(options *CreateRepositoryOptions) {
+func (c *CommandExecutorGitRepository) MustInit(options *parameteroptions.CreateRepositoryOptions) {
 	err := c.Init(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

@@ -4,7 +4,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -13,7 +13,7 @@ import (
 func IsRunningInsideContainer(verbose bool) (isRunningInContainer bool, err error) {
 	const procFilePath string = "/proc/1/cgroup"
 
-	procFile, err := asciichgolangpublic.GetLocalFileByPath(procFilePath)
+	procFile, err := files.GetLocalFileByPath(procFilePath)
 	if err != nil {
 		return false, err
 	}

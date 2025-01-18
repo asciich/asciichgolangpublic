@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -44,7 +45,7 @@ func (h *HttpRequestOptions) GetVerbose() (verbose bool, err error) {
 	return h.Verbose, nil
 }
 
-func (h *HttpRequestOptions) MustGetOutputFile() (outputFile File) {
+func (h *HttpRequestOptions) MustGetOutputFile() (outputFile files.File) {
 	outputFile, err := h.GetOutputFile()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -123,7 +124,7 @@ func (h *HttpRequestOptions) MustSetOutputPath(outputPath string) {
 	}
 }
 
-func (h *HttpRequestOptions) MustSetOutputPathByFile(file File) {
+func (h *HttpRequestOptions) MustSetOutputPathByFile(file files.File) {
 	err := h.SetOutputPathByFile(file)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -190,13 +191,13 @@ func (o *HttpRequestOptions) GetDeepCopy() (copy *HttpRequestOptions) {
 	return copy
 }
 
-func (o *HttpRequestOptions) GetOutputFile() (outputFile File, err error) {
+func (o *HttpRequestOptions) GetOutputFile() (outputFile files.File, err error) {
 	filePath, err := o.GetOutputFilePath()
 	if err != nil {
 		return nil, err
 	}
 
-	outputFile, err = GetLocalFileByPath(filePath)
+	outputFile, err = files.GetLocalFileByPath(filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -244,7 +245,7 @@ func (o *HttpRequestOptions) GetUrlAsString() (url string, err error) {
 	return o.URL, nil
 }
 
-func (o *HttpRequestOptions) SetOutputPathByFile(file File) (err error) {
+func (o *HttpRequestOptions) SetOutputPathByFile(file files.File) (err error) {
 	if file == nil {
 		return tracederrors.TracedErrorNil("file")
 	}

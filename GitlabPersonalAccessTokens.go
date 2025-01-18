@@ -7,6 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/fileformats/jsonutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -222,7 +223,7 @@ func (p *GitlabPersonalAccessTokenService) CreateToken(tokenOptions *GitlabCreat
 		return "", err
 	}
 
-	newToken, err = Json().RunJqAgainstJsonStringAsString(stdout, ".token")
+	newToken, err = jsonutils.RunJqAgainstJsonStringAsString(stdout, ".token")
 	if err != nil {
 		return "", err
 	}
