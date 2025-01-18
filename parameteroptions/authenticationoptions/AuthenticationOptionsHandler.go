@@ -1,8 +1,9 @@
-package asciichgolangpublic
+package authenticationoptions
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/urlsutils"
 )
 
 type AuthenticationOptionsHandlerService struct{}
@@ -38,7 +39,7 @@ func (a *AuthenticationOptionsHandlerService) GetAuthenticationoptionsForService
 	)
 }
 
-func (a *AuthenticationOptionsHandlerService) GetAuthenticationoptionsForServiceByUrl(authenticationOptions []AuthenticationOption, url *URL) (authOption AuthenticationOption, err error) {
+func (a *AuthenticationOptionsHandlerService) GetAuthenticationoptionsForServiceByUrl(authenticationOptions []AuthenticationOption, url *urlsutils.URL) (authOption AuthenticationOption, err error) {
 	if url == nil {
 		return nil, tracederrors.TracedErrorNil("url")
 	}
@@ -65,7 +66,7 @@ func (a *AuthenticationOptionsHandlerService) MustGetAuthenticationoptionsForSer
 	return authOption
 }
 
-func (a *AuthenticationOptionsHandlerService) MustGetAuthenticationoptionsForServiceByUrl(authenticationOptions []AuthenticationOption, url *URL) (authOption AuthenticationOption) {
+func (a *AuthenticationOptionsHandlerService) MustGetAuthenticationoptionsForServiceByUrl(authenticationOptions []AuthenticationOption, url *urlsutils.URL) (authOption AuthenticationOption) {
 	authOption, err := a.GetAuthenticationoptionsForServiceByUrl(authenticationOptions, url)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

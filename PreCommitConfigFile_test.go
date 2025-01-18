@@ -54,7 +54,7 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 
 				preCommitFile.MustUpdateDependency(
 					dependency,
-					&UpdateDependenciesOptions{
+					&parameteroptions.UpdateDependenciesOptions{
 						Commit:  false,
 						Verbose: verbose,
 					},

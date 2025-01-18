@@ -1,7 +1,8 @@
-package asciichgolangpublic
+package artifactparameteroptions
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -11,7 +12,7 @@ type UploadArtifactOptions struct {
 	SignaturePath         string
 	SoftwareVersionString string
 	Verbose               bool
-	AuthOptions           []AuthenticationOption
+	AuthOptions           []authenticationoptions.AuthenticationOption
 }
 
 func NewUploadArtifactOptions() (u *UploadArtifactOptions) {
@@ -30,7 +31,7 @@ func (u *UploadArtifactOptions) GetArtifactName() (artifactName string, err erro
 	return u.ArtifactName, nil
 }
 
-func (u *UploadArtifactOptions) GetAuthOptions() (authOptions []AuthenticationOption, err error) {
+func (u *UploadArtifactOptions) GetAuthOptions() (authOptions []authenticationoptions.AuthenticationOption, err error) {
 	if u.AuthOptions == nil {
 		return nil, tracederrors.TracedErrorf("AuthOptions not set")
 	}
@@ -80,7 +81,7 @@ func (u *UploadArtifactOptions) MustGetArtifactName() (artifactName string) {
 	return artifactName
 }
 
-func (u *UploadArtifactOptions) MustGetAuthOptions() (authOptions []AuthenticationOption) {
+func (u *UploadArtifactOptions) MustGetAuthOptions() (authOptions []authenticationoptions.AuthenticationOption) {
 	authOptions, err := u.GetAuthOptions()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -123,7 +124,7 @@ func (u *UploadArtifactOptions) MustSetArtifactName(artifactName string) {
 	}
 }
 
-func (u *UploadArtifactOptions) MustSetAuthOptions(authOptions []AuthenticationOption) {
+func (u *UploadArtifactOptions) MustSetAuthOptions(authOptions []authenticationoptions.AuthenticationOption) {
 	err := u.SetAuthOptions(authOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -161,7 +162,7 @@ func (u *UploadArtifactOptions) SetArtifactName(artifactName string) (err error)
 	return nil
 }
 
-func (u *UploadArtifactOptions) SetAuthOptions(authOptions []AuthenticationOption) (err error) {
+func (u *UploadArtifactOptions) SetAuthOptions(authOptions []authenticationoptions.AuthenticationOption) (err error) {
 	if authOptions == nil {
 		return tracederrors.TracedErrorf("authOptions is nil")
 	}

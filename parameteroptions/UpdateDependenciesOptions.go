@@ -1,22 +1,24 @@
-package asciichgolangpublic
+package parameteroptions
 
 import (
+	"github.com/asciich/asciichgolangpublic/artifacthandler"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type UpdateDependenciesOptions struct {
-	ArtifactHandlers      []ArtifactHandler
+	ArtifactHandlers      []artifacthandler.ArtifactHandler
 	Commit                bool
 	Verbose               bool
-	AuthenticationOptions []AuthenticationOption
+	AuthenticationOptions []authenticationoptions.AuthenticationOption
 }
 
 func NewUpdateDependenciesOptions() (u *UpdateDependenciesOptions) {
 	return new(UpdateDependenciesOptions)
 }
 
-func (u *UpdateDependenciesOptions) GetArtifactHandlerForSoftwareName(softwareName string) (artifactHandler ArtifactHandler, err error) {
+func (u *UpdateDependenciesOptions) GetArtifactHandlerForSoftwareName(softwareName string) (artifactHandler artifacthandler.ArtifactHandler, err error) {
 	if softwareName == "" {
 		return nil, tracederrors.TracedError("softwareName is empty string")
 	}
@@ -40,7 +42,7 @@ func (u *UpdateDependenciesOptions) GetArtifactHandlerForSoftwareName(softwareNa
 	return nil, tracederrors.TracedErrorf("No handler for softwareName '%s' found", softwareName)
 }
 
-func (u *UpdateDependenciesOptions) GetArtifactHandlers() (artifactHandlers []ArtifactHandler, err error) {
+func (u *UpdateDependenciesOptions) GetArtifactHandlers() (artifactHandlers []artifacthandler.ArtifactHandler, err error) {
 	if u.ArtifactHandlers == nil {
 		return nil, tracederrors.TracedErrorf("ArtifactHandlers not set")
 	}
@@ -52,7 +54,7 @@ func (u *UpdateDependenciesOptions) GetArtifactHandlers() (artifactHandlers []Ar
 	return u.ArtifactHandlers, nil
 }
 
-func (u *UpdateDependenciesOptions) GetAuthenticationOptions() (authenticationOptions []AuthenticationOption, err error) {
+func (u *UpdateDependenciesOptions) GetAuthenticationOptions() (authenticationOptions []authenticationoptions.AuthenticationOption, err error) {
 	if u.AuthenticationOptions == nil {
 		return nil, tracederrors.TracedErrorf("AuthenticationOptions not set")
 	}
@@ -92,7 +94,7 @@ func (u *UpdateDependenciesOptions) GetVerbose() (verbose bool, err error) {
 	return u.Verbose, nil
 }
 
-func (u *UpdateDependenciesOptions) MustGetArtifactHandlerForSoftwareName(softwareName string) (artifactHandler ArtifactHandler) {
+func (u *UpdateDependenciesOptions) MustGetArtifactHandlerForSoftwareName(softwareName string) (artifactHandler artifacthandler.ArtifactHandler) {
 	artifactHandler, err := u.GetArtifactHandlerForSoftwareName(softwareName)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -101,7 +103,7 @@ func (u *UpdateDependenciesOptions) MustGetArtifactHandlerForSoftwareName(softwa
 	return artifactHandler
 }
 
-func (u *UpdateDependenciesOptions) MustGetArtifactHandlers() (artifactHandlers []ArtifactHandler) {
+func (u *UpdateDependenciesOptions) MustGetArtifactHandlers() (artifactHandlers []artifacthandler.ArtifactHandler) {
 	artifactHandlers, err := u.GetArtifactHandlers()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -110,7 +112,7 @@ func (u *UpdateDependenciesOptions) MustGetArtifactHandlers() (artifactHandlers 
 	return artifactHandlers
 }
 
-func (u *UpdateDependenciesOptions) MustGetAuthenticationOptions() (authenticationOptions []AuthenticationOption) {
+func (u *UpdateDependenciesOptions) MustGetAuthenticationOptions() (authenticationOptions []authenticationoptions.AuthenticationOption) {
 	authenticationOptions, err := u.GetAuthenticationOptions()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -146,14 +148,14 @@ func (u *UpdateDependenciesOptions) MustGetVerbose() (verbose bool) {
 	return verbose
 }
 
-func (u *UpdateDependenciesOptions) MustSetArtifactHandlers(artifactHandlers []ArtifactHandler) {
+func (u *UpdateDependenciesOptions) MustSetArtifactHandlers(artifactHandlers []artifacthandler.ArtifactHandler) {
 	err := u.SetArtifactHandlers(artifactHandlers)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (u *UpdateDependenciesOptions) MustSetAuthenticationOptions(authenticationOptions []AuthenticationOption) {
+func (u *UpdateDependenciesOptions) MustSetAuthenticationOptions(authenticationOptions []authenticationoptions.AuthenticationOption) {
 	err := u.SetAuthenticationOptions(authenticationOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -174,7 +176,7 @@ func (u *UpdateDependenciesOptions) MustSetVerbose(verbose bool) {
 	}
 }
 
-func (u *UpdateDependenciesOptions) SetArtifactHandlers(artifactHandlers []ArtifactHandler) (err error) {
+func (u *UpdateDependenciesOptions) SetArtifactHandlers(artifactHandlers []artifacthandler.ArtifactHandler) (err error) {
 	if artifactHandlers == nil {
 		return tracederrors.TracedErrorf("artifactHandlers is nil")
 	}
@@ -188,7 +190,7 @@ func (u *UpdateDependenciesOptions) SetArtifactHandlers(artifactHandlers []Artif
 	return nil
 }
 
-func (u *UpdateDependenciesOptions) SetAuthenticationOptions(authenticationOptions []AuthenticationOption) (err error) {
+func (u *UpdateDependenciesOptions) SetAuthenticationOptions(authenticationOptions []authenticationoptions.AuthenticationOption) (err error) {
 	if authenticationOptions == nil {
 		return tracederrors.TracedErrorf("authenticationOptions is nil")
 	}

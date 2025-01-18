@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package artifactparameteroptions
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"

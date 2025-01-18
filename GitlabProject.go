@@ -5,7 +5,9 @@ import (
 	"path/filepath"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/urlsutils"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
@@ -15,7 +17,7 @@ type GitlabProject struct {
 	cachedPath string
 }
 
-func GetGitlabProjectByUrl(url *URL, authOptions []AuthenticationOption, verbose bool) (gitlabProject *GitlabProject, err error) {
+func GetGitlabProjectByUrl(url *urlsutils.URL, authOptions []authenticationoptions.AuthenticationOption, verbose bool) (gitlabProject *GitlabProject, err error) {
 	if url == nil {
 		return nil, tracederrors.TracedErrorNil("url")
 	}
@@ -34,7 +36,7 @@ func GetGitlabProjectByUrl(url *URL, authOptions []AuthenticationOption, verbose
 		return nil, err
 	}
 
-	authOption, err := AuthenticationOptionsHandler().GetAuthenticationoptionsForServiceByUrl(authOptions, url)
+	authOption, err := authenticationoptions.AuthenticationOptionsHandler().GetAuthenticationoptionsForServiceByUrl(authOptions, url)
 	if err != nil {
 		return nil, err
 	}
@@ -59,12 +61,12 @@ func GetGitlabProjectByUrl(url *URL, authOptions []AuthenticationOption, verbose
 	return gitlabProject, err
 }
 
-func GetGitlabProjectByUrlFromString(urlString string, authOptions []AuthenticationOption, verbose bool) (gitlabProject *GitlabProject, err error) {
+func GetGitlabProjectByUrlFromString(urlString string, authOptions []authenticationoptions.AuthenticationOption, verbose bool) (gitlabProject *GitlabProject, err error) {
 	if urlString == "" {
 		return nil, tracederrors.TracedErrorEmptyString("urlString")
 	}
 
-	url, err := GetUrlFromString(urlString)
+	url, err := urlsutils.GetUrlFromString(urlString)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +74,7 @@ func GetGitlabProjectByUrlFromString(urlString string, authOptions []Authenticat
 	return GetGitlabProjectByUrl(url, authOptions, verbose)
 }
 
-func MustGetGitlabProjectByUrl(url *URL, authOptions []AuthenticationOption, verbose bool) (gitlabProject *GitlabProject) {
+func MustGetGitlabProjectByUrl(url *urlsutils.URL, authOptions []authenticationoptions.AuthenticationOption, verbose bool) (gitlabProject *GitlabProject) {
 	gitlabProject, err := GetGitlabProjectByUrl(url, authOptions, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -81,7 +83,7 @@ func MustGetGitlabProjectByUrl(url *URL, authOptions []AuthenticationOption, ver
 	return gitlabProject
 }
 
-func MustGetGitlabProjectByUrlFromString(urlString string, authOptions []AuthenticationOption, verbose bool) (gitlabProject *GitlabProject) {
+func MustGetGitlabProjectByUrlFromString(urlString string, authOptions []authenticationoptions.AuthenticationOption, verbose bool) (gitlabProject *GitlabProject) {
 	gitlabProject, err := GetGitlabProjectByUrlFromString(urlString, authOptions, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
