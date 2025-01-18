@@ -16,6 +16,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
@@ -23,11 +24,11 @@ import (
 )
 
 type LocalGitRepository struct {
-	LocalDirectory
+	files.LocalDirectory
 	GitRepositoryBase
 }
 
-func GetLocalGitReposioryFromDirectory(directory Directory) (repo GitRepository, err error) {
+func GetLocalGitReposioryFromDirectory(directory files.Directory) (repo GitRepository, err error) {
 	if directory == nil {
 		return nil, tracederrors.TracedErrorNil("directory")
 	}
@@ -54,7 +55,7 @@ func GetLocalGitReposioryFromDirectory(directory Directory) (repo GitRepository,
 	return repo, nil
 }
 
-func GetLocalGitReposioryFromLocalDirectory(localDirectory *LocalDirectory) (l *LocalGitRepository, err error) {
+func GetLocalGitReposioryFromLocalDirectory(localDirectory *files.LocalDirectory) (l *LocalGitRepository, err error) {
 	if localDirectory == nil {
 		return nil, tracederrors.TracedErrorNil("directory")
 	}
@@ -87,7 +88,7 @@ func GetLocalGitRepositoryByPath(path string) (l *LocalGitRepository, err error)
 	return l, nil
 }
 
-func MustGetLocalGitReposioryFromDirectory(directory Directory) (repo GitRepository) {
+func MustGetLocalGitReposioryFromDirectory(directory files.Directory) (repo GitRepository) {
 	repo, err := GetLocalGitReposioryFromDirectory(directory)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -96,7 +97,7 @@ func MustGetLocalGitReposioryFromDirectory(directory Directory) (repo GitReposit
 	return repo
 }
 
-func MustGetLocalGitReposioryFromLocalDirectory(localDirectory *LocalDirectory) (l *LocalGitRepository) {
+func MustGetLocalGitReposioryFromLocalDirectory(localDirectory *files.LocalDirectory) (l *LocalGitRepository) {
 	l, err := GetLocalGitReposioryFromLocalDirectory(localDirectory)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -384,7 +385,7 @@ func (l *LocalGitRepository) CloneRepositoryByPathOrUrl(urlOrPathToClone string,
 				}
 
 				err = l.Init(
-					&CreateRepositoryOptions{
+					&parameteroptions.CreateRepositoryOptions{
 						Verbose:                   verbose,
 						BareRepository:            isBare,
 						InitializeWithEmptyCommit: false,
@@ -758,13 +759,13 @@ func (l *LocalGitRepository) GetAsGoGitRepository() (goGitRepository *git.Reposi
 	return goGitRepository, nil
 }
 
-func (l *LocalGitRepository) GetAsLocalDirectory() (localDirectory *LocalDirectory, err error) {
+func (l *LocalGitRepository) GetAsLocalDirectory() (localDirectory *files.LocalDirectory, err error) {
 	localPath, err := l.GetLocalPath()
 	if err != nil {
 		return nil, err
 	}
 
-	localDirectory, err = GetLocalDirectoryByPath(localPath)
+	localDirectory, err = files.GetLocalDirectoryByPath(localPath)
 	if err != nil {
 		return nil, err
 	}
@@ -922,7 +923,7 @@ func (l *LocalGitRepository) GetCommitMessageByCommitHash(hash string) (commitMe
 	return commitMessage, nil
 }
 
-func (l *LocalGitRepository) GetCommitParentsByCommitHash(hash string, options *GitCommitGetParentsOptions) (commitParents []*GitCommit, err error) {
+func (l *LocalGitRepository) GetCommitParentsByCommitHash(hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []*GitCommit, err error) {
 	if hash == "" {
 		return nil, tracederrors.TracedErrorEmptyString("hash")
 	}
@@ -956,7 +957,7 @@ func (l *LocalGitRepository) GetCommitParentsByCommitHash(hash string, options *
 		commitParents = append(commitParents, toAdd)
 
 		if options.IncludeParentsOfParents {
-			additionalParents, err := toAdd.GetParentCommits(&GitCommitGetParentsOptions{
+			additionalParents, err := toAdd.GetParentCommits(&parameteroptions.GitCommitGetParentsOptions{
 				IncludeParentsOfParents: true,
 			})
 			if err != nil {
@@ -1095,7 +1096,7 @@ func (l *LocalGitRepository) GetCurrentCommitHashAsBytes(verbose bool) (hash []b
 	return stringsutils.HexStringToBytes(currentHash)
 }
 
-func (l *LocalGitRepository) GetDirectoryByPath(pathToSubDir ...string) (subDir Directory, err error) {
+func (l *LocalGitRepository) GetDirectoryByPath(pathToSubDir ...string) (subDir files.Directory, err error) {
 	if len(pathToSubDir) <= 0 {
 		return nil, tracederrors.TracedError("pathToSubdir has no elements")
 	}
@@ -1327,13 +1328,13 @@ func (l *LocalGitRepository) GetRemoteConfigs(verbose bool) (remoteConfigs []*Gi
 	return remoteConfigs, nil
 }
 
-func (l *LocalGitRepository) GetRootDirectory(verbose bool) (rootDirectory Directory, err error) {
+func (l *LocalGitRepository) GetRootDirectory(verbose bool) (rootDirectory files.Directory, err error) {
 	rootDirectoryPath, err := l.GetRootDirectoryPath(verbose)
 	if err != nil {
 		return nil, err
 	}
 
-	rootDirectory, err = GetLocalDirectoryByPath(rootDirectoryPath)
+	rootDirectory, err = files.GetLocalDirectoryByPath(rootDirectoryPath)
 	if err != nil {
 		return nil, err
 	}
@@ -1350,7 +1351,7 @@ func (l *LocalGitRepository) GetRootDirectoryPath(verbose bool) (rootDirectoryPa
 	searchedFromPath := pathToCheck
 
 	for {
-		localDirToCheck, err := GetLocalDirectoryByPath(pathToCheck)
+		localDirToCheck, err := files.GetLocalDirectoryByPath(pathToCheck)
 		if err != nil {
 			return "", nil
 		}
@@ -1475,7 +1476,7 @@ func (l *LocalGitRepository) HasUncommittedChanges(verbose bool) (hasUncommitted
 	return hasUncommittedChanges, nil
 }
 
-func (l *LocalGitRepository) Init(options *CreateRepositoryOptions) (err error) {
+func (l *LocalGitRepository) Init(options *parameteroptions.CreateRepositoryOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
@@ -1923,7 +1924,7 @@ func (l *LocalGitRepository) MustGetAsGoGitRepository() (goGitRepository *git.Re
 	return goGitRepository
 }
 
-func (l *LocalGitRepository) MustGetAsLocalDirectory() (localDirectory *LocalDirectory) {
+func (l *LocalGitRepository) MustGetAsLocalDirectory() (localDirectory *files.LocalDirectory) {
 	localDirectory, err := l.GetAsLocalDirectory()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -2013,7 +2014,7 @@ func (l *LocalGitRepository) MustGetCommitMessageByCommitHash(hash string) (comm
 	return commitMessage
 }
 
-func (l *LocalGitRepository) MustGetCommitParentsByCommitHash(hash string, options *GitCommitGetParentsOptions) (commitParents []*GitCommit) {
+func (l *LocalGitRepository) MustGetCommitParentsByCommitHash(hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []*GitCommit) {
 	commitParents, err := l.GetCommitParentsByCommitHash(hash, options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -2076,7 +2077,7 @@ func (l *LocalGitRepository) MustGetCurrentCommitHashAsBytes(verbose bool) (hash
 	return hash
 }
 
-func (l *LocalGitRepository) MustGetDirectoryByPath(pathToSubDir ...string) (subDir Directory) {
+func (l *LocalGitRepository) MustGetDirectoryByPath(pathToSubDir ...string) (subDir files.Directory) {
 	subDir, err := l.GetDirectoryByPath(pathToSubDir...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -2166,7 +2167,7 @@ func (l *LocalGitRepository) MustGetRemoteConfigs(verbose bool) (remoteConfigs [
 	return remoteConfigs
 }
 
-func (l *LocalGitRepository) MustGetRootDirectory(verbose bool) (rootDirectory Directory) {
+func (l *LocalGitRepository) MustGetRootDirectory(verbose bool) (rootDirectory files.Directory) {
 	rootDirectory, err := l.GetRootDirectory(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -2229,7 +2230,7 @@ func (l *LocalGitRepository) MustHasUncommittedChanges(verbose bool) (hasUncommi
 	return hasUncommittedChanges
 }
 
-func (l *LocalGitRepository) MustInit(options *CreateRepositoryOptions) {
+func (l *LocalGitRepository) MustInit(options *parameteroptions.CreateRepositoryOptions) {
 	err := l.Init(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

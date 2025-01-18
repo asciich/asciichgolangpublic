@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -38,7 +39,7 @@ func (g *GitService) GetRepositoryRootPathByPath(path string, verbose bool) (rep
 
 	repoRootPath = strings.TrimSpace(repoRootPath)
 
-	repoRootDir, err := GetLocalDirectoryByPath(repoRootPath)
+	repoRootDir, err := files.GetLocalDirectoryByPath(repoRootPath)
 	if err != nil {
 		return "", err
 	}

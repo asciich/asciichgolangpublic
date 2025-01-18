@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"slices"
 
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
@@ -383,7 +384,7 @@ func (g *GitRepositoryBase) ContainsGoSourceFileOfMainPackageWithMainFunction(ve
 	return false, nil
 }
 
-func (g *GitRepositoryBase) CreateAndInit(createOptions *CreateRepositoryOptions) (err error) {
+func (g *GitRepositoryBase) CreateAndInit(createOptions *parameteroptions.CreateRepositoryOptions) (err error) {
 	if createOptions == nil {
 		return tracederrors.TracedErrorNil("createOptions")
 	}
@@ -525,7 +526,7 @@ func (g *GitRepositoryBase) GetCurrentCommitsNewestVersionOrNilIfNotPresent(verb
 	return currentCommit.GetNewestTagVersionOrNilIfUnset(verbose)
 }
 
-func (g *GitRepositoryBase) GetFileByPath(path ...string) (file File, err error) {
+func (g *GitRepositoryBase) GetFileByPath(path ...string) (file files.File, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedError("path has no elements")
 	}
@@ -959,7 +960,7 @@ func (g *GitRepositoryBase) MustContainsGoSourceFileOfMainPackageWithMainFunctio
 	return mainFound
 }
 
-func (g *GitRepositoryBase) MustCreateAndInit(createOptions *CreateRepositoryOptions) {
+func (g *GitRepositoryBase) MustCreateAndInit(createOptions *parameteroptions.CreateRepositoryOptions) {
 	err := g.CreateAndInit(createOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1009,7 +1010,7 @@ func (g *GitRepositoryBase) MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(
 	return newestVersion
 }
 
-func (g *GitRepositoryBase) MustGetFileByPath(path ...string) (file File) {
+func (g *GitRepositoryBase) MustGetFileByPath(path ...string) (file files.File) {
 	file, err := g.GetFileByPath(path...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1124,7 +1125,7 @@ func (g *GitRepositoryBase) MustSetParentRepositoryForBaseClass(parentRepository
 	}
 }
 
-func (g *GitRepositoryBase) MustWriteStringToFile(content string, verbose bool, path ...string) (writtenFile File) {
+func (g *GitRepositoryBase) MustWriteStringToFile(content string, verbose bool, path ...string) (writtenFile files.File) {
 	writtenFile, err := g.WriteStringToFile(content, verbose, path...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1143,7 +1144,7 @@ func (g *GitRepositoryBase) SetParentRepositoryForBaseClass(parentRepositoryForB
 	return nil
 }
 
-func (g *GitRepositoryBase) WriteStringToFile(content string, verbose bool, path ...string) (writtenFile File, err error) {
+func (g *GitRepositoryBase) WriteStringToFile(content string, verbose bool, path ...string) (writtenFile files.File, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedError("path has no elements")
 	}

@@ -3,20 +3,21 @@ package asciichgolangpublic
 import (
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	"gopkg.in/yaml.v3"
 )
 
 type GitlabCiYamlFile struct {
-	File
+	files.File
 }
 
 func GetGitlabCiYamlDefaultBaseName() (defaultBaseName string) {
 	return ".gitlab-ci.yml"
 }
 
-func GetGitlabCiYamlFileByFile(file File) (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
+func GetGitlabCiYamlFileByFile(file files.File) (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
 	if file == nil {
 		return nil, tracederrors.TracedErrorNil("file")
 	}
@@ -32,7 +33,7 @@ func GetGitlabCiYamlFileByPath(filePath string) (gitlabCiYamlFile *GitlabCiYamlF
 		return nil, tracederrors.TracedError("filePath is empty string")
 	}
 
-	localFile, err := GetLocalFileByPath(filePath)
+	localFile, err := files.GetLocalFileByPath(filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +54,7 @@ func GetGitlabCiYamlFileInGitRepository(gitRepository GitRepository) (gitlabCiYa
 	return GetGitlabCiYamlFileByFile(fileToUse)
 }
 
-func MustGetGitlabCiYamlFileByFile(file File) (gitlabCiYamlFile *GitlabCiYamlFile) {
+func MustGetGitlabCiYamlFileByFile(file files.File) (gitlabCiYamlFile *GitlabCiYamlFile) {
 	gitlabCiYamlFile, err := GetGitlabCiYamlFileByFile(file)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

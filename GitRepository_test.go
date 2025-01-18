@@ -5,8 +5,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -15,18 +17,18 @@ func getGitRepositoryToTest(implementationName string) (repo GitRepository) {
 
 	if implementationName == "localGitRepository" {
 		repo = MustGetLocalGitReposioryFromDirectory(
-			TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose),
+			tempfiles.MustCreateEmptyTemporaryDirectory(verbose),
 		)
 	} else if implementationName == "localCommandExecutorRepository" {
 		repo = MustGetLocalCommandExecutorGitRepositoryByDirectory(
-			TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose),
+			tempfiles.MustCreateEmptyTemporaryDirectory(verbose),
 		)
 	} else {
 		logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)
 	}
 
 	repo.MustInit(
-		&CreateRepositoryOptions{
+		&parameteroptions.CreateRepositoryOptions{
 			Verbose:                     verbose,
 			InitializeWithEmptyCommit:   true,
 			InitializeWithDefaultAuthor: true,
@@ -66,7 +68,7 @@ func TestGitRepository_Init_minimal(t *testing.T) {
 
 				for i := 0; i < 2; i++ {
 					repo.MustInit(
-						&CreateRepositoryOptions{
+						&parameteroptions.CreateRepositoryOptions{
 							Verbose:        verbose,
 							BareRepository: tt.bareRepository,
 						},
@@ -111,14 +113,14 @@ func TestGitRepository_IsGitRepository(t *testing.T) {
 				// An non existing directory is not a git repository:
 				assert.False(repo.MustIsGitRepository(verbose))
 
-				Directories().MustCreateLocalDirectoryByPath(repo.MustGetPath(), verbose)
+				files.Directories().MustCreateLocalDirectoryByPath(repo.MustGetPath(), verbose)
 
 				// The directory exists but is empty which is not a git directory:
 				assert.False(repo.MustIsGitRepository(verbose))
 
 				for i := 0; i < 2; i++ {
 					repo.MustInit(
-						&CreateRepositoryOptions{
+						&parameteroptions.CreateRepositoryOptions{
 							Verbose:        verbose,
 							BareRepository: tt.bareRepository,
 						},
@@ -165,7 +167,7 @@ func TestGitRepository_Init(t *testing.T) {
 
 				for i := 0; i < 2; i++ {
 					repo.MustInit(
-						&CreateRepositoryOptions{
+						&parameteroptions.CreateRepositoryOptions{
 							Verbose: verbose,
 						},
 					)
@@ -176,7 +178,7 @@ func TestGitRepository_Init(t *testing.T) {
 
 				for i := 0; i < 2; i++ {
 					repo.MustInit(
-						&CreateRepositoryOptions{
+						&parameteroptions.CreateRepositoryOptions{
 							Verbose:                     verbose,
 							InitializeWithEmptyCommit:   true,
 							InitializeWithDefaultAuthor: true,
@@ -223,7 +225,7 @@ func TestGitRepository_Init_fullInOneStep(t *testing.T) {
 
 				for i := 0; i < 2; i++ {
 					repo.MustInit(
-						&CreateRepositoryOptions{
+						&parameteroptions.CreateRepositoryOptions{
 							Verbose:                     verbose,
 							InitializeWithDefaultAuthor: true,
 							InitializeWithEmptyCommit:   true,
@@ -269,7 +271,7 @@ func TestGitRepository_CreateAndDeleteRepository(t *testing.T) {
 
 				for i := 0; i < 2; i++ {
 					repo.MustCreateAndInit(
-						&CreateRepositoryOptions{
+						&parameteroptions.CreateRepositoryOptions{
 							InitializeWithEmptyCommit:   true,
 							InitializeWithDefaultAuthor: true,
 							Verbose:                     verbose,
@@ -398,7 +400,7 @@ func TestGitRepository_GetRootDirectoryPath(t *testing.T) {
 				repo.MustDelete(verbose)
 
 				repo.MustInit(
-					&CreateRepositoryOptions{
+					&parameteroptions.CreateRepositoryOptions{
 						Verbose:        verbose,
 						BareRepository: tt.bareRepository,
 					},
@@ -438,7 +440,7 @@ func TestGitRepository_GetRootDirectory(t *testing.T) {
 				repo.MustDelete(verbose)
 
 				repo.MustInit(
-					&CreateRepositoryOptions{
+					&parameteroptions.CreateRepositoryOptions{
 						Verbose:        verbose,
 						BareRepository: tt.bareRepository,
 					},
@@ -478,7 +480,7 @@ func TestGitRepository_GetRootDirectory_from_subdirectory(t *testing.T) {
 				repo.MustDelete(verbose)
 
 				repo.MustInit(
-					&CreateRepositoryOptions{
+					&parameteroptions.CreateRepositoryOptions{
 						Verbose:        verbose,
 						BareRepository: tt.bareRepository,
 					},
@@ -526,7 +528,7 @@ func TestGitRepository_CloneRepository_idempotence(t *testing.T) {
 				defer upstreamRepo.MustDelete(verbose)
 				upstreamRepo.MustDelete(verbose)
 				upstreamRepo.MustInit(
-					&CreateRepositoryOptions{
+					&parameteroptions.CreateRepositoryOptions{
 						BareRepository:              true,
 						InitializeWithEmptyCommit:   true,
 						InitializeWithDefaultAuthor: true,
@@ -574,7 +576,7 @@ func TestGitRepository_PullAndPush(t *testing.T) {
 				defer upstreamRepo.MustDelete(verbose)
 				upstreamRepo.MustDelete(verbose)
 				upstreamRepo.MustInit(
-					&CreateRepositoryOptions{
+					&parameteroptions.CreateRepositoryOptions{
 						BareRepository:              true,
 						InitializeWithEmptyCommit:   true,
 						InitializeWithDefaultAuthor: true,
@@ -681,7 +683,7 @@ func TestGitRepository_AddFilesByPath(t *testing.T) {
 				defer upstreamRepo.MustDelete(verbose)
 				upstreamRepo.MustDelete(verbose)
 				upstreamRepo.MustInit(
-					&CreateRepositoryOptions{
+					&parameteroptions.CreateRepositoryOptions{
 						BareRepository:              true,
 						InitializeWithEmptyCommit:   true,
 						InitializeWithDefaultAuthor: true,

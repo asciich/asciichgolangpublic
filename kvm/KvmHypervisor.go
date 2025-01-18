@@ -5,12 +5,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/hosts"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -114,7 +114,7 @@ func (k *KVMHypervisor) CreateVm(createOptions *KvmCreateVmOptions) (createdVm *
 		return nil, tracederrors.TracedErrorf("Disk image '%s' does not exist to create VM.", diskImagePath)
 	}
 
-	vmXml, err := asciichgolangpublic.TemporaryFiles().CreateEmptyTemporaryFile(createOptions.Verbose)
+	vmXml, err := tempfiles.CreateEmptyTemporaryFile(createOptions.Verbose)
 	if err != nil {
 		return nil, err
 	}

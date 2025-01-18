@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -17,7 +18,7 @@ func SSHPublicKeys() (sshPublicKeys *SSHPublicKeysService) {
 	return NewSSHPublicKeysService()
 }
 
-func (s *SSHPublicKeysService) LoadKeysFromFile(sshKeysFile File, verbose bool) (sshKeys []*SSHPublicKey, err error) {
+func (s *SSHPublicKeysService) LoadKeysFromFile(sshKeysFile files.File, verbose bool) (sshKeys []*SSHPublicKey, err error) {
 	if sshKeysFile == nil {
 		return nil, tracederrors.TracedError("sshKeysFile is nil")
 	}
@@ -59,7 +60,7 @@ func (s *SSHPublicKeysService) LoadKeysFromFile(sshKeysFile File, verbose bool) 
 	return sshKeys, nil
 }
 
-func (s *SSHPublicKeysService) MustLoadKeysFromFile(sshKeysFile File, verbose bool) (sshKeys []*SSHPublicKey) {
+func (s *SSHPublicKeysService) MustLoadKeysFromFile(sshKeysFile files.File, verbose bool) (sshKeys []*SSHPublicKey) {
 	sshKeys, err := s.LoadKeysFromFile(sshKeysFile, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

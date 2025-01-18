@@ -6,6 +6,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -83,7 +84,7 @@ func (k *SSHPublicKey) GetKeyUserName() (keyUserName string, err error) {
 	return k.keyUserName, nil
 }
 
-func (k *SSHPublicKey) LoadFromSshDir(sshDirectory Directory, verbose bool) (err error) {
+func (k *SSHPublicKey) LoadFromSshDir(sshDirectory files.Directory, verbose bool) (err error) {
 	if sshDirectory == nil {
 		return tracederrors.TracedError("sshDirectory is nil")
 	}
@@ -103,7 +104,7 @@ func (k *SSHPublicKey) LoadFromSshDir(sshDirectory Directory, verbose bool) (err
 	}
 
 	keyFilePath := filepath.Join(sshDirPath, "id_rsa.pub")
-	keyFile, err := GetLocalFileByPath(keyFilePath)
+	keyFile, err := files.GetLocalFileByPath(keyFilePath)
 	if err != nil {
 		return err
 	}
@@ -229,7 +230,7 @@ func (k *SSHPublicKey) SetFromString(keyMaterial string) (err error) {
 	return nil
 }
 
-func (k *SSHPublicKey) WriteToFile(outputFile File, verbose bool) (err error) {
+func (k *SSHPublicKey) WriteToFile(outputFile files.File, verbose bool) (err error) {
 	if outputFile == nil {
 		return tracederrors.TracedError("outputFile is nil")
 	}
@@ -300,7 +301,7 @@ func (s *SSHPublicKey) MustGetKeyUserHost() (keyUserHost string) {
 	return keyUserHost
 }
 
-func (s *SSHPublicKey) MustLoadFromSshDir(sshDirectory Directory, verbose bool) {
+func (s *SSHPublicKey) MustLoadFromSshDir(sshDirectory files.Directory, verbose bool) {
 	err := s.LoadFromSshDir(sshDirectory, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -328,7 +329,7 @@ func (s *SSHPublicKey) MustSetKeyUserName(keyUserName string) {
 	}
 }
 
-func (s *SSHPublicKey) MustWriteToFile(outputFile File, verbose bool) {
+func (s *SSHPublicKey) MustWriteToFile(outputFile files.File, verbose bool) {
 	err := s.WriteToFile(outputFile, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
