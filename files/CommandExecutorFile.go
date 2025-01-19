@@ -154,7 +154,50 @@ func (c *CommandExecutorFile) CopyToFile(destFile File, verbose bool) (err error
 		return tracederrors.TracedErrorNil("destFile")
 	}
 
-	return tracederrors.TracedErrorNotImplemented()
+	srcPath, srcHostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	destPath, destHostDescription, err := destFile.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if srcHostDescription != destHostDescription {
+		return tracederrors.TracedErrorf(
+			"Unable to copy src file '%s' from host '%s' to '%s' on host '%s'. Only implemented on the same host.",
+			srcPath,
+			srcHostDescription,
+			destPath,
+			destHostDescription,
+		)
+	}
+
+	commandexecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return err
+	}
+
+	_, err = commandexecutor.RunCommand(
+		&parameteroptions.RunCommandOptions{
+			Command: []string{"cp", srcPath, destPath},
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		logging.LogInfof(
+			"Copied '%s' to '%s' on host '%s'.",
+			srcPath,
+			destPath,
+			destHostDescription,
+		)
+	}
+
+	return nil
 }
 
 func (c *CommandExecutorFile) Create(verbose bool) (err error) {

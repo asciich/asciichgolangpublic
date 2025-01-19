@@ -287,6 +287,15 @@ func (h *CommandExecutorHost) InstallBinary(installOptions *parameteroptions.Ins
 		return nil, err
 	}
 
+	if installOptions.Verbose {
+		logging.LogInfof(
+			"'%s' will be installed as '%s' on host '%s'.",
+			binaryName,
+			destPath,
+			hostName,
+		)
+	}
+
 	installedFile, err = tempCopy.MoveToPath(destPath, installOptions.UseSudoToInstall, installOptions.Verbose)
 	if err != nil {
 		return nil, err
