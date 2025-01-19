@@ -12,7 +12,7 @@ func getHelmImplementationByName(implementationName string) (helm Helm) {
 		return MustGetLocalCommandExecutorHelm()
 	}
 
-	logging.LogFatalf("Unknwon implementation name '%s'", implementationName)
+	logging.LogFatalf("Unknown implementation name '%s'", implementationName)
 
 	return nil
 }

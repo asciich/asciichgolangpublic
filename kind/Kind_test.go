@@ -14,7 +14,7 @@ func getKindByImplementationName(implementationName string) (kind Kind) {
 	}
 
 	logging.LogFatalWithTracef(
-		"Unknwon implmentation name '%s'",
+		"Unknown implmentation name '%s'",
 		implementationName,
 	)
 
