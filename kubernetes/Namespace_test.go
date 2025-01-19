@@ -21,7 +21,7 @@ func getKubernetesByImplementationName(implementationName string) (kubernetes Ku
 	}
 
 	logging.LogFatalWithTracef(
-		"Unknwon implmentation name '%s'",
+		"Unknown implmentation name '%s'",
 		implementationName,
 	)
 

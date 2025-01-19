@@ -18,7 +18,7 @@ func getGitTagToTest(implementationName string) (gitTag GitTag) {
 	}
 
 	logging.LogFatalWithTracef(
-		"Unknwon implementation name: '%s'",
+		"Unknown implementation name: '%s'",
 		implementationName,
 	)
 

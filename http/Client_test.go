@@ -15,7 +15,7 @@ func getClientByImplementationName(implementationName string) (client Client) {
 	}
 
 	logging.LogFatalWithTracef(
-		"Unknwon implmentation name '%s'",
+		"Unknown implmentation name '%s'",
 		implementationName,
 	)
 
