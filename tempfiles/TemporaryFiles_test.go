@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/asciich/asciichgolangpublic/files"
+	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -90,11 +91,28 @@ func TestCreateEmptyTemporaryFileAndGetPath(t *testing.T) {
 	}
 }
 
+func getFileToTest(implementationName string) (fileToTest files.File) {
+	temporayFile := MustCreateEmptyTemporaryFileAndGetPath(false)
+
+	if implementationName == "localFile" {
+		return files.MustGetLocalFileByPath(temporayFile)
+	}
+
+	if implementationName == "localCommandExecutorFile" {
+		return files.MustGetLocalCommandExecutorFileByPath(temporayFile)
+	}
+
+	logging.LogFatalWithTracef("Unknown implementation name '%s'", implementationName)
+	return nil
+}
+
 func TestTemporaryFilesCreateFromFile(t *testing.T) {
 	tests := []struct {
-		content string
+		implementationName string
+		content            string
 	}{
-		{"testcase"},
+		{"localFile", "testcase"},
+		{"localCommandExecutorFile", "testcase"},
 	}
 
 	for _, tt := range tests {
@@ -105,7 +123,8 @@ func TestTemporaryFilesCreateFromFile(t *testing.T) {
 
 				const verbose bool = true
 
-				sourceFile := MustCreateTemporaryFileFromString(tt.content, verbose)
+				sourceFile := getFileToTest(tt.implementationName)
+				sourceFile.MustWriteString(tt.content, verbose)
 				defer sourceFile.Delete(verbose)
 
 				assert.EqualValues(
@@ -115,6 +134,11 @@ func TestTemporaryFilesCreateFromFile(t *testing.T) {
 
 				tempFile := MustCreateTemporaryFileFromFile(sourceFile, verbose)
 				defer tempFile.Delete(verbose)
+
+				assert.EqualValues(
+					tt.content,
+					tempFile.MustReadAsString(),
+				)
 			},
 		)
 	}

@@ -2,6 +2,7 @@ package tempfiles
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/files"
@@ -114,14 +115,55 @@ func CreateTemporaryFileFromFile(fileToCopyAsTemporaryFile files.File, verbose b
 		return nil, tracederrors.TracedErrorNil("fileToCopyAsTemporaryFile")
 	}
 
-	content, err := fileToCopyAsTemporaryFile.ReadAsBytes()
+	hostDescription, err := fileToCopyAsTemporaryFile.GetHostDescription()
 	if err != nil {
 		return nil, err
 	}
 
-	temporaryFile, err = CreateTemporaryFileFromBytes(content, verbose)
+	isLocalFile, err := fileToCopyAsTemporaryFile.IsLocalFile(verbose)
 	if err != nil {
 		return nil, err
+	}
+
+	if !isLocalFile {
+		return nil, tracederrors.TracedErrorf(
+			"Only implemented for files on 'localhost' but got '%s'",
+			hostDescription,
+		)
+	}
+
+	fileToCopyAsTemporaryFilePath, err := fileToCopyAsTemporaryFile.GetPath()
+	if err != nil {
+		return nil, err
+	}
+
+	temporaryFile, err = CreateNamedTemporaryFile(filepath.Base(fileToCopyAsTemporaryFilePath)+"_tmp", verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	err = fileToCopyAsTemporaryFile.CopyToFile(temporaryFile, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	if verbose {
+		temporaryfilePath, err := temporaryFile.GetPath()
+		if err != nil {
+			return nil, err
+		}
+
+		srcPath, err := fileToCopyAsTemporaryFile.GetPath()
+		if err != nil {
+			return nil, err
+		}
+
+		logging.LogChangedf(
+			"Created temporary file '%s' filed with content from '%s' on '%s'",
+			temporaryfilePath,
+			srcPath,
+			hostDescription,
+		)
 	}
 
 	return temporaryFile, nil

@@ -217,3 +217,50 @@ func TestFile_MoveToPath(t *testing.T) {
 		)
 	}
 }
+
+func TestFile_CopyToFile(t *testing.T) {
+	tests := []struct {
+		implementationName string
+		content            string
+	}{
+		{"localFile", "test content\nwith a new line\n"},
+		{"localCommandExecutorFile", "test content\nwith a new line\n"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				const verbose bool = true
+
+				srcFile := getFileToTest(tt.implementationName)
+				srcFile.MustWriteString(tt.content, verbose)
+				defer srcFile.Delete(verbose)
+
+				destFile := getFileToTest(tt.implementationName)
+				defer destFile.Delete(verbose)
+				destFile.Delete(verbose)
+
+				assert.True(srcFile.MustExists(verbose))
+				assert.False(destFile.MustExists(verbose))
+
+				srcFile.MustCopyToFile(destFile, verbose)
+
+				assert.True(srcFile.MustExists(verbose))
+				assert.True(destFile.MustExists(verbose))
+
+				assert.EqualValues(
+					tt.content,
+					srcFile.MustReadAsString(),
+				)
+
+				assert.EqualValues(
+					tt.content,
+					destFile.MustReadAsString(),
+				)
+			},
+		)
+	}
+}
