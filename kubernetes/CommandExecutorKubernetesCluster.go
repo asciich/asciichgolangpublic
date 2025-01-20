@@ -337,6 +337,27 @@ func (c *CommandExecutorKubernetes) GetNamespaceByName(name string) (namespace N
 	return toReturn, nil
 }
 
+func (c *CommandExecutorKubernetes) GetResourceByNames(resourceName string, resourceType string, namespaceName string) (resource Resource, err error) {
+	if resourceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("resourceName")
+	}
+
+	if resourceType == "" {
+		return nil, tracederrors.TracedErrorEmptyString("resourceType")
+	}
+
+	if namespaceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
+	}
+
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.GetResourceByNames(resourceName, resourceType)
+}
+
 func (c *CommandExecutorKubernetes) ListNamespaceNames(verbose bool) (namespaceNames []string, err error) {
 	namespaces, err := c.ListNamespaces(verbose)
 	if err != nil {
@@ -479,6 +500,15 @@ func (c *CommandExecutorKubernetes) MustGetNamespaceByName(name string) (namespa
 	return namespace
 }
 
+func (c *CommandExecutorKubernetes) MustGetResourceByNames(resourceName string, resourceType string, namespaceName string) (resource Resource) {
+	resource, err := c.GetResourceByNames(resourceName, resourceType, namespaceName)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return resource
+}
+
 func (c *CommandExecutorKubernetes) MustListNamespaceNames(verbose bool) (namespaceNames []string) {
 	namespaceNames, err := c.ListNamespaceNames(verbose)
 	if err != nil {
@@ -571,7 +601,7 @@ func (c *CommandExecutorKubernetes) NamespaceByNameExists(name string, verbose b
 			)
 		} else {
 			logging.LogInfof(
-				"Namespace does not '%s' exist in kubernetes cluster '%s'.",
+				"Namespace '%s' does not exist in kubernetes cluster '%s'.",
 				name,
 				clusterName,
 			)

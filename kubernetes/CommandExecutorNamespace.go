@@ -21,6 +21,25 @@ func NewCommandExecutorNamespace() (c *CommandExecutorNamespace) {
 	return new(CommandExecutorNamespace)
 }
 
+func (c *CommandExecutorNamespace) Create(verbose bool) (err error) {
+	name, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	cluster, err := c.GetKubernetesCluster()
+	if err != nil {
+		return err
+	}
+
+	_, err = cluster.CreateNamespaceByName(name, verbose)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *CommandExecutorNamespace) CreateRole(createOptions *CreateRoleOptions) (createdRole Role, err error) {
 	if createOptions == nil {
 		return nil, tracederrors.TracedErrorNil("createOptions")
@@ -224,6 +243,15 @@ func (c *CommandExecutorNamespace) GetCommandExecutor() (commandExecutor command
 	return commandExecutorKubernetes.GetCommandExecutor()
 }
 
+func (c *CommandExecutorNamespace) GetKubectlContext(verbose bool) (contextName string, err error) {
+	cluster, err := c.GetKubernetesCluster()
+	if err != nil {
+		return "", err
+	}
+
+	return cluster.GetKubectlContext(verbose)
+}
+
 func (c *CommandExecutorNamespace) GetKubernetesCluster() (kubernetesCluster KubernetesCluster, err error) {
 
 	return c.kubernetesCluster, nil
@@ -235,6 +263,23 @@ func (c *CommandExecutorNamespace) GetName() (name string, err error) {
 	}
 
 	return c.name, nil
+}
+
+func (c *CommandExecutorNamespace) GetResourceByNames(resourceName string, resourceType string) (resource Resource, err error) {
+	if resourceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("resourceName")
+	}
+
+	if resourceType == "" {
+		return nil, tracederrors.TracedErrorEmptyString("resourceType")
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	return GetCommandExecutorResource(commandExecutor, c, resourceName, resourceType)
 }
 
 func (c *CommandExecutorNamespace) GetRoleByName(name string) (role Role, err error) {
@@ -316,6 +361,13 @@ func (c *CommandExecutorNamespace) ListRoleNames(verbose bool) (roleNames []stri
 	return roleNames, nil
 }
 
+func (c *CommandExecutorNamespace) MustCreate(verbose bool) {
+	err := c.Create(verbose)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+}
+
 func (c *CommandExecutorNamespace) MustCreateRole(createOptions *CreateRoleOptions) (createdRole Role) {
 	createdRole, err := c.CreateRole(createOptions)
 	if err != nil {
@@ -359,6 +411,15 @@ func (c *CommandExecutorNamespace) MustGetCommandExecutor() (commandExecutor com
 	return commandExecutor
 }
 
+func (c *CommandExecutorNamespace) MustGetKubectlContext(verbose bool) (contextName string) {
+	contextName, err := c.GetKubectlContext(verbose)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return contextName
+}
+
 func (c *CommandExecutorNamespace) MustGetKubernetesCluster() (kubernetesCluster KubernetesCluster) {
 	kubernetesCluster, err := c.GetKubernetesCluster()
 	if err != nil {
@@ -375,6 +436,15 @@ func (c *CommandExecutorNamespace) MustGetName() (name string) {
 	}
 
 	return name
+}
+
+func (c *CommandExecutorNamespace) MustGetResourceByNames(resourceName string, resourceType string) (resource Resource) {
+	resource, err := c.GetResourceByNames(resourceName, resourceType)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return resource
 }
 
 func (c *CommandExecutorNamespace) MustGetRoleByName(name string) (role Role) {
