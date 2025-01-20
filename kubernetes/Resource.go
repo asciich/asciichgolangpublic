@@ -1,0 +1,11 @@
+package kubernetes
+
+// a generic representation of a kubernetes resource like a pod, ingress, role...
+type Resource interface {
+	CreateByYamlString(roleYaml string, verbose bool) (err error)
+	Delete(verbose bool) (err error)
+	Exists(verbose bool) (exists bool, err error)
+	MustCreateByYamlString(roleYaml string, verbose bool)
+	MustDelete(verbose bool)
+	MustExists(verbose bool) (exists bool)
+}
