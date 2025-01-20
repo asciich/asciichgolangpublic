@@ -1,5 +1,7 @@
 package kubernetes
 
+import "github.com/asciich/asciichgolangpublic/parameteroptions"
+
 type KubernetesCluster interface {
 	CreateNamespaceByName(namespaceName string, verbose bool) (createdNamespace Namespace, err error)
 	DeleteNamespaceByName(namespaceName string, verbose bool) (err error)
@@ -9,6 +11,8 @@ type KubernetesCluster interface {
 	GetResourceByNames(resourceName string, resourceType string, namespaceName string) (resource Resource, err error)
 	ListNamespaces(verbose bool) (namespaces []Namespace, err error)
 	ListNamespaceNames(verbose bool) (namespaceNames []string, err error)
+	ListResources(options *parameteroptions.ListKubernetesResourcesOptions) (resources []Resource, err error)
+	ListResourceNames(options *parameteroptions.ListKubernetesResourcesOptions) (resourceNames []string, err error)
 	MustNamespaceByNameExists(namespaceName string, verbose bool) (exist bool)
 	MustDeleteNamespaceByName(namespaceName string, verbose bool)
 	MustCreateNamespaceByName(namespaceName string, verbose bool) (createdNamespace Namespace)
@@ -18,5 +22,7 @@ type KubernetesCluster interface {
 	MustGetResourceByNames(resourceName string, resourceType string, namespaceName string) (resource Resource)
 	MustListNamespaces(verbose bool) (namespaces []Namespace)
 	MustListNamespaceNames(verbose bool) (namespaceNames []string)
+	MustListResources(options *parameteroptions.ListKubernetesResourcesOptions) (resources []Resource)
+	MustListResourceNames(options *parameteroptions.ListKubernetesResourcesOptions) (resourceNames []string)
 	NamespaceByNameExists(namespaceName string, verbose bool) (exist bool, err error)
 }

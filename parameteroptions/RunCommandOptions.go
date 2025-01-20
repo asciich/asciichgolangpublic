@@ -98,6 +98,11 @@ func (r *RunCommandOptions) GetLiveOutputOnStdout() (liveOutputOnStdout bool, er
 	return r.LiveOutputOnStdout, nil
 }
 
+func (r *RunCommandOptions) GetRemoveLastLineIfEmpty() (removeLastLineIfEmpty bool) {
+
+	return r.RemoveLastLineIfEmpty
+}
+
 func (r *RunCommandOptions) GetRunAsRoot() (runAsRoot bool) {
 
 	return r.RunAsRoot
@@ -262,6 +267,10 @@ func (r *RunCommandOptions) SetLiveOutputOnStdout(liveOutputOnStdout bool) (err 
 	r.LiveOutputOnStdout = liveOutputOnStdout
 
 	return nil
+}
+
+func (r *RunCommandOptions) SetRemoveLastLineIfEmpty(removeLastLineIfEmpty bool) {
+	r.RemoveLastLineIfEmpty = removeLastLineIfEmpty
 }
 
 func (r *RunCommandOptions) SetRunAsRoot(runAsRoot bool) {
