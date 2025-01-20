@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
@@ -421,6 +422,93 @@ func (c *CommandExecutorKubernetes) ListNamespaces(verbose bool) (namespaces []N
 	return namespaces, nil
 }
 
+func (c *CommandExecutorKubernetes) ListResourceNames(options *parameteroptions.ListKubernetesResourcesOptions) (resourceNames []string, err error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := options.GetNamespace()
+	if err != nil {
+		return nil, err
+	}
+
+	context, err := c.GetKubectlContext(options.Verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	resourceType, err := options.GetResourceType()
+	if err != nil {
+		return nil, err
+	}
+
+	output, err := commandExecutor.RunCommandAndGetStdoutAsLines(
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"get",
+				"--context",
+				context,
+				"--namespace",
+				namespaceName,
+				"-o",
+				"name",
+				resourceType,
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	resourceNames = []string{}
+	for _, name := range output {
+		resourceNames = append(resourceNames, strings.TrimPrefix(name, resourceType+"/"))
+	}
+
+	sort.Strings(resourceNames)
+
+	return resourceNames, nil
+}
+
+func (c *CommandExecutorKubernetes) ListResources(options *parameteroptions.ListKubernetesResourcesOptions) (resources []Resource, err error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	resourceNames, err := c.ListResourceNames(options)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := options.GetNamespace()
+	if err != nil {
+		return nil, err
+	}
+
+	resourceType, err := options.GetResourceType()
+	if err != nil {
+		return nil, err
+	}
+
+	resources = []Resource{}
+	for _, name := range resourceNames {
+		toAdd, err := c.GetResourceByNames(name, resourceType, namespaceName)
+		if err != nil {
+			return nil, err
+		}
+
+		resources = append(resources, toAdd)
+	}
+
+	return resources, nil
+}
+
 func (c *CommandExecutorKubernetes) MustCreateNamespaceByName(name string, verbose bool) (createdNamespace Namespace) {
 	createdNamespace, err := c.CreateNamespaceByName(name, verbose)
 	if err != nil {
@@ -525,6 +613,24 @@ func (c *CommandExecutorKubernetes) MustListNamespaces(verbose bool) (namespaces
 	}
 
 	return namespaces
+}
+
+func (c *CommandExecutorKubernetes) MustListResourceNames(options *parameteroptions.ListKubernetesResourcesOptions) (resourceNames []string) {
+	resourceNames, err := c.ListResourceNames(options)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return resourceNames
+}
+
+func (c *CommandExecutorKubernetes) MustListResources(options *parameteroptions.ListKubernetesResourcesOptions) (resources []Resource) {
+	resources, err := c.ListResources(options)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return resources
 }
 
 func (c *CommandExecutorKubernetes) MustNamespaceByNameExists(name string, verbose bool) (exists bool) {
