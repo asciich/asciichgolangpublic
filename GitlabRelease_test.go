@@ -6,6 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/randomgenerator"
+
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -223,7 +225,7 @@ func TestGitlabRelease_CreateNewPatchRelease(t *testing.T) {
 				project.MustWriteFileContentInDefaultBranch(
 					&GitlabWriteFileOptions{
 						Path:          "random.txt",
-						Content:       []byte(RandomGenerator().MustGetRandomString(50)),
+						Content:       []byte(randomgenerator.MustGetRandomString(50)),
 						CommitMessage: "Dummy change to test release.",
 						Verbose:       verbose,
 					},

@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package commandlineinterface
 
 import (
 	"testing"
@@ -65,7 +65,7 @@ func TestCommandLineInterface_IsLinePromptOnly(t *testing.T) {
 
 				assert.EqualValues(
 					tt.expectedIsPromptOnly,
-					CommandLineInterface().IsLinePromptOnly(tt.line),
+					IsLinePromptOnly(tt.line),
 				)
 			},
 		)

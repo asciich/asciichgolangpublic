@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/randomgenerator"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -45,7 +46,7 @@ func TestCommitGetHash(t *testing.T) {
 				}
 
 				for _, branchName := range branchNames {
-					content := RandomGenerator().MustGetRandomString(16)
+					content := randomgenerator.MustGetRandomString(16)
 					testProject.MustWriteFileContent(
 						&GitlabWriteFileOptions{
 							Path:          "testfile",
