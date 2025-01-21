@@ -11,6 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/randomgenerator"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -44,7 +45,7 @@ func (g *GopassService) Generate(credentialName string, verbose bool) (generated
 		return nil, tracederrors.TracedError("credentailName is empty string")
 	}
 
-	newPassword, err := RandomGenerator().GetRandomString(16)
+	newPassword, err := randomgenerator.GetRandomString(16)
 	if err != nil {
 		return nil, err
 	}

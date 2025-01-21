@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package tmux
 
 import (
 	"errors"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/commandlineinterface"
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
@@ -812,7 +813,7 @@ func (t *TmuxWindow) WaitUntilCliPromptReady(verbose bool) (err error) {
 		if len(lines) > 0 {
 			lastLine := lines[len(lines)-1]
 
-			if CommandLineInterface().IsLinePromptOnly(lastLine) {
+			if commandlineinterface.IsLinePromptOnly(lastLine) {
 				if verbose {
 					logging.LogInfof(
 						"Tmux window '%s' in session '%s' shows CLI prompt and is ready to use.",

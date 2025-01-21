@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package randomgenerator
 
 import (
 	"math/rand"
@@ -7,17 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-type RandomGeneratorService struct{}
-
-func NewRandomGeneratorService() (randomGenerator *RandomGeneratorService) {
-	return new(RandomGeneratorService)
-}
-
-func RandomGenerator() (randomGenerator *RandomGeneratorService) {
-	return NewRandomGeneratorService()
-}
-
-func (r *RandomGeneratorService) GetRandomString(lenght int) (random string, err error) {
+func GetRandomString(lenght int) (random string, err error) {
 	if lenght <= 0 {
 		return "", tracederrors.TracedErrorf("Invalid lenght '%d' to generate random string", lenght)
 	}
@@ -30,8 +20,8 @@ func (r *RandomGeneratorService) GetRandomString(lenght int) (random string, err
 	return string(b), nil
 }
 
-func (r *RandomGeneratorService) MustGetRandomString(length int) (random string) {
-	random, err := r.GetRandomString(length)
+func MustGetRandomString(length int) (random string) {
+	random, err := GetRandomString(length)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}

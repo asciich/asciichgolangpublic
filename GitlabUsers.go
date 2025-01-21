@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/randomgenerator"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
@@ -345,7 +346,7 @@ func (u *GitlabUsers) CreateUser(createUserOptions *GitlabCreateUserOptions) (cr
 				logging.LogInfof("Going to use a random %d digit password for user '%s' since no password was specified.", nDigits, createUserOptions.Name)
 			}
 
-			passwordToSet, err = RandomGenerator().GetRandomString(nDigits)
+			passwordToSet, err = randomgenerator.GetRandomString(nDigits)
 			if err != nil {
 				return nil, err
 			}

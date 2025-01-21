@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package tmux
 
 import (
 	"testing"
@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/randomgenerator"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -91,7 +92,7 @@ func TestTemuxWindow_ReadLastLine(t *testing.T) {
 				window.MustCreate(verbose)
 
 				for i := 0; i < 3; i++ {
-					content := RandomGenerator().MustGetRandomString(10)
+					content := randomgenerator.MustGetRandomString(10)
 
 					window.MustWaitUntilCliPromptReady(verbose)
 
