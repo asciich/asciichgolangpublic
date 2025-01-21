@@ -92,13 +92,16 @@ func (t *TmuxService) ListSessionNames(verbose bool) (sessionNames []string, err
 
 	fullSessionLines, err := commandExecutor.RunCommandAndGetStdoutAsLines(
 		&parameteroptions.RunCommandOptions{
-			Command:            []string{"tmux", "ls"},
-			LiveOutputOnStdout: verbose,
-			Verbose:            verbose,
+			Command: []string{"tmux", "ls"},
 		},
 	)
 	if err != nil {
-		return nil, err
+		if strings.Contains(err.Error(), "\nno server running on ") {
+			// no sessions avaiable:
+			fullSessionLines = []string{}
+		} else {
+			return nil, err
+		}
 	}
 
 	sessionNames = []string{}

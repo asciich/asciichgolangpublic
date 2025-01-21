@@ -221,11 +221,15 @@ func (t *TmuxSession) ListWindowNames(verbose bool) (windowsNames []string, err 
 	lines, err := commandExecutor.RunCommandAndGetStdoutAsLines(
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"tmux", "list-windows", "-a"},
-			Verbose: verbose,
 		},
 	)
 	if err != nil {
-		return nil, err
+		if strings.Contains(err.Error(), "\nno server running on ") {
+			// no sever running means no sessions and windows available:
+			lines = []string{}
+		} else {
+			return nil, err
+		}
 	}
 
 	windowsNames = []string{}
