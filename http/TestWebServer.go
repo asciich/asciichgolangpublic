@@ -16,6 +16,7 @@ import (
 type TestWebServer struct {
 	webServerWaitGroup *sync.WaitGroup
 	port               int
+	mux                *http.ServeMux
 	server             *http.Server
 }
 
@@ -43,6 +44,14 @@ func NewTestWebServer() (t *TestWebServer) {
 	return new(TestWebServer)
 }
 
+func (t *TestWebServer) GetMux() (mux *http.ServeMux, err error) {
+	if t.mux == nil {
+		return nil, tracederrors.TracedErrorf("mux not set")
+	}
+
+	return t.mux, nil
+}
+
 func (t *TestWebServer) GetPort() (port int, err error) {
 	if t.port <= 0 {
 		return -1, tracederrors.TracedError("port not set")
@@ -65,6 +74,15 @@ func (t *TestWebServer) GetWebServerWaitGroup() (webServerWaitGroup *sync.WaitGr
 	}
 
 	return t.webServerWaitGroup, nil
+}
+
+func (t *TestWebServer) MustGetMux() (mux *http.ServeMux) {
+	mux, err := t.GetMux()
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return mux
 }
 
 func (t *TestWebServer) MustGetPort() (port int) {
@@ -92,6 +110,13 @@ func (t *TestWebServer) MustGetWebServerWaitGroup() (webServerWaitGroup *sync.Wa
 	}
 
 	return webServerWaitGroup
+}
+
+func (t *TestWebServer) MustSetMux(mux *http.ServeMux) {
+	err := t.SetMux(mux)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
 }
 
 func (t *TestWebServer) MustSetPort(port int) {
@@ -127,6 +152,16 @@ func (t *TestWebServer) MustStop(verbose bool) {
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
+}
+
+func (t *TestWebServer) SetMux(mux *http.ServeMux) (err error) {
+	if mux == nil {
+		return tracederrors.TracedErrorf("mux is nil")
+	}
+
+	t.mux = mux
+
+	return nil
 }
 
 func (t *TestWebServer) SetPort(port int) (err error) {
@@ -178,11 +213,19 @@ func (t *TestWebServer) StartInBackground(verbose bool) (err error) {
 		return tracederrors.TracedError(ErrWebServerAlreadyRunning)
 	}
 
-	t.server = &http.Server{Addr: ":" + strconv.Itoa(port)}
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	t.mux = http.NewServeMux()
+	t.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "TestWebServer main page\n")
 	})
+
+	t.mux.HandleFunc("/hello_world.txt", func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, "hello world\n")
+	})
+
+	t.server = &http.Server{
+		Addr:    ":" + strconv.Itoa(port),
+		Handler: t.mux,
+	}
 
 	t.webServerWaitGroup.Add(1)
 	go func() {

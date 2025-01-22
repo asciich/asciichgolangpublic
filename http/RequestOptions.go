@@ -26,6 +26,14 @@ func NewRequestOptions() (r *RequestOptions) {
 	return new(RequestOptions)
 }
 
+func (r *RequestOptions) GetDeepCopy() (copy *RequestOptions) {
+	copy = new(RequestOptions)
+
+	*copy = *r
+
+	return copy
+}
+
 func (r *RequestOptions) GetMethod() (method string, err error) {
 	if r.Method == "" {
 		return "", tracederrors.TracedErrorf("Method not set")
