@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package x509utils
 
 import (
 	"fmt"
@@ -177,7 +177,7 @@ func TestX509Certificates_NoTestdataCertificateUnexpired(t *testing.T) {
 
 	tests := []TestCase{}
 
-	repoRoot := Git().MustGetRepositoryRootPathByPath(".", verbose)
+	repoRoot := mustRepoRoot()
 	pathsToCheck := commandexecutor.Bash().MustRunOneLinerAndGetStdoutAsLines(
 		fmt.Sprintf(
 			"grep -l -r 'CERTIFICATE' '%s/testdata'",

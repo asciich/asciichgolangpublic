@@ -20,6 +20,49 @@ type TestWebServer struct {
 	server             *http.Server
 }
 
+/* TODO implement
+func GetTlsTestWebServer(port int, verbose bool) (webServer Server, err error) {
+	toReturn, err := GetTestWebServer(port)
+	if err != nil {
+		return nil, err
+	}
+
+	certFilePath, err := tempfiles.CreateEmptyTemporaryFile(verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	keyFilePath, err := tempfiles.CreateEmptyTemporaryFileAndGetPath(verbose)
+	if err != nil {
+		return nil, err
+	}
+	defer files.MustDeleteFilesByPath(
+		verbose,
+		certFilePath,
+		keyFilePath,
+	)
+
+	err := x509utils.CreateSelfSignedCertificate(
+		&x509utils.X509CreateCertificateOptions{
+			CommonName:                "localhost",
+			CountryName:               "CH",
+			Locality:                  "Zurich",
+			AdditionalSans:            []string{"localhost"},
+			Verbose:                   true,
+			KeyOutputFilePath:         keyFilePath,
+			CertificateOutputFilePath: certFilePath,
+		},
+	)
+
+	err = toReturn.SetTlsCertAndKey(certFilePath, keyFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	return toReturn, nil
+}
+*/
+
 func GetTestWebServer(port int) (webServer Server, err error) {
 	toReturn := NewTestWebServer()
 

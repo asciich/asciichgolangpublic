@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package x509utils
 
 import (
 	"bytes"

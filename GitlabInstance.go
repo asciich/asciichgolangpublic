@@ -7,6 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	"github.com/asciich/asciichgolangpublic/urlsutils"
 )
@@ -192,7 +193,7 @@ func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) 
 			continue
 		}
 
-		getSecretOptions := NewGopassSecretOptions()
+		getSecretOptions := parameteroptions.NewGopassSecretOptions()
 		getSecretOptions.SetGopassPath(gopassPath)
 		accessToken, err := Gopass().GetCredentialValueAsString(getSecretOptions)
 		if err != nil {

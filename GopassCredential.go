@@ -11,6 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
+	"github.com/asciich/asciichgolangpublic/tlsutils/x509utils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -128,13 +129,13 @@ func (c *GopassCredential) GetName() (name string, err error) {
 	return c.name, nil
 }
 
-func (c *GopassCredential) GetSslCertificate() (sslCert *X509Certificate, err error) {
+func (c *GopassCredential) GetSslCertificate() (sslCert *x509utils.X509Certificate, err error) {
 	contentBytes, err := c.GetAsBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	sslCert = NewX509Certificate()
+	sslCert = x509utils.NewX509Certificate()
 	err = sslCert.LoadFromBytes(contentBytes)
 	if err != nil {
 		return nil, err
@@ -297,7 +298,7 @@ func (g *GopassCredential) MustGetAsString() (credential string) {
 	return credential
 }
 
-func (g *GopassCredential) MustGetSslCertificate() (sslCert *X509Certificate) {
+func (g *GopassCredential) MustGetSslCertificate() (sslCert *x509utils.X509Certificate) {
 	sslCert, err := g.GetSslCertificate()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
