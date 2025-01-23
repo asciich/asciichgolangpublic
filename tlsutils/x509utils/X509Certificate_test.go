@@ -1,17 +1,43 @@
-package asciichgolangpublic
+package x509utils
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/files"
+	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
+func mustRepoRoot() (repoRootDir files.Directory) {
+	const verbose = true
+
+	repoRootPath, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
+		&parameteroptions.RunCommandOptions{
+			Command:            []string{"git", "-C", ".", "rev-parse", "--show-toplevel"},
+			Verbose:            verbose,
+			LiveOutputOnStdout: verbose,
+		},
+	)
+	if err != nil {
+		logging.LogGoErrorFatalWithTrace(err)
+	}
+
+	repoRootPath = strings.TrimSpace(repoRootPath)
+
+	repoRootDir, err = files.GetLocalDirectoryByPath(repoRootPath)
+	if err != nil {
+		logging.LogGoErrorFatalWithTrace(err)
+	}
+
+	return repoRootDir
+}
+
 func TestX509CertificateLoadFromFilePath(t *testing.T) {
-	gitRepo := MustGetLocalGitRepositoryByPath(".")
-	testDir := gitRepo.MustGetSubDirectory("testdata", "X509Certificate", "LoadFromFilePath")
+	testDir := mustRepoRoot().MustGetSubDirectory("testdata", "X509Certificate", "LoadFromFilePath")
 
 	type TestCase struct {
 		testDir files.Directory
@@ -47,8 +73,7 @@ func TestX509CertificateLoadFromFilePath(t *testing.T) {
 }
 
 func TestX509CertificateGetAsPemString(t *testing.T) {
-	gitRepo := MustGetLocalGitRepositoryByPath(".")
-	testDir := gitRepo.MustGetSubDirectory("testdata", "X509Certificate", "GetAsPemString")
+	testDir := mustRepoRoot().MustGetSubDirectory("testdata", "X509Certificate", "GetAsPemString")
 
 	type TestCase struct {
 		testDir files.Directory
@@ -80,8 +105,7 @@ func TestX509CertificateGetAsPemString(t *testing.T) {
 }
 
 func TestX509CertificateIsRootCa(t *testing.T) {
-	gitRepo := MustGetLocalGitRepositoryByPath(".")
-	testDir := gitRepo.MustGetSubDirectory("testdata", "X509Certificate", "IsRootCa")
+	testDir := mustRepoRoot().MustGetSubDirectory("testdata", "X509Certificate", "IsRootCa")
 
 	type TestCase struct {
 		testDir files.Directory
@@ -115,8 +139,7 @@ func TestX509CertificateIsRootCa(t *testing.T) {
 }
 
 func TestX509CertificateIsV1(t *testing.T) {
-	gitRepo := MustGetLocalGitRepositoryByPath(".")
-	testDir := gitRepo.MustGetSubDirectory("testdata", "X509Certificate", "IsV1")
+	testDir := mustRepoRoot().MustGetSubDirectory("testdata", "X509Certificate", "IsV1")
 
 	type TestCase struct {
 		testDir files.Directory
@@ -148,8 +171,7 @@ func TestX509CertificateIsV1(t *testing.T) {
 }
 
 func TestX509CertificateIsV3(t *testing.T) {
-	gitRepo := MustGetLocalGitRepositoryByPath(".")
-	testDir := gitRepo.MustGetSubDirectory("testdata", "X509Certificate", "IsV3")
+	testDir := mustRepoRoot().MustGetSubDirectory("testdata", "X509Certificate", "IsV3")
 
 	type TestCase struct {
 		testDir files.Directory

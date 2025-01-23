@@ -1,9 +1,10 @@
-package asciichgolangpublic
+package x509utils
 
 import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -19,7 +20,7 @@ type X509CreateCertificateOptions struct {
 	KeyOutputFilePath         string
 	CertificateOutputFilePath string
 
-	IntermediateCertificateInGopass *GopassSecretOptions
+	IntermediateCertificateInGopass *parameteroptions.GopassSecretOptions // TODO move to Gopass
 
 	OverwriteExistingCertificateInGopass bool
 	Verbose                              bool
@@ -63,6 +64,7 @@ func (o *X509CreateCertificateOptions) GetDeepCopy() (copy *X509CreateCertificat
 	return copy
 }
 
+/* TODO move to gopass
 func (o *X509CreateCertificateOptions) GetIntermediateCertificateGopassCredential() (certificate *GopassCredential, err error) {
 	if o.IntermediateCertificateInGopass == nil {
 		return nil, tracederrors.TracedError("IntermediateCertificateKeyInGopass not set")
@@ -78,7 +80,9 @@ func (o *X509CreateCertificateOptions) GetIntermediateCertificateGopassCredentia
 
 	return certificate, nil
 }
+*/
 
+/* TODO move to gopass
 func (o *X509CreateCertificateOptions) GetIntermediateCertificateKeyGopassCredential() (key *GopassCredential, err error) {
 	if o.IntermediateCertificateInGopass == nil {
 		return nil, tracederrors.TracedError("IntermediateCertificateKeyInGopass not set")
@@ -94,6 +98,7 @@ func (o *X509CreateCertificateOptions) GetIntermediateCertificateKeyGopassCreden
 
 	return key, nil
 }
+*/
 
 func (o *X509CreateCertificateOptions) GetKeyOutputFilePath() (keyOutputPath string, err error) {
 	if len(o.KeyOutputFilePath) <= 0 {
@@ -159,6 +164,7 @@ func (x *X509CreateCertificateOptions) GetAdditionalSans() (additionalSans []str
 	return x.AdditionalSans, nil
 }
 
+/*
 func (x *X509CreateCertificateOptions) GetIntermediateCertificateInGopass() (intermediateCertificateInGopass *GopassSecretOptions, err error) {
 	if x.IntermediateCertificateInGopass == nil {
 		return nil, tracederrors.TracedErrorf("IntermediateCertificateInGopass not set")
@@ -166,6 +172,7 @@ func (x *X509CreateCertificateOptions) GetIntermediateCertificateInGopass() (int
 
 	return x.IntermediateCertificateInGopass, nil
 }
+*/
 
 func (x *X509CreateCertificateOptions) GetLocality() (locality string, err error) {
 	if x.Locality == "" {
@@ -221,6 +228,7 @@ func (x *X509CreateCertificateOptions) MustGetCountryName() (countryName string)
 	return countryName
 }
 
+/*
 func (x *X509CreateCertificateOptions) MustGetIntermediateCertificateGopassCredential() (certificate *GopassCredential) {
 	certificate, err := x.GetIntermediateCertificateGopassCredential()
 	if err != nil {
@@ -229,7 +237,9 @@ func (x *X509CreateCertificateOptions) MustGetIntermediateCertificateGopassCrede
 
 	return certificate
 }
+*/
 
+/*
 func (x *X509CreateCertificateOptions) MustGetIntermediateCertificateInGopass() (intermediateCertificateInGopass *GopassSecretOptions) {
 	intermediateCertificateInGopass, err := x.GetIntermediateCertificateInGopass()
 	if err != nil {
@@ -238,7 +248,9 @@ func (x *X509CreateCertificateOptions) MustGetIntermediateCertificateInGopass() 
 
 	return intermediateCertificateInGopass
 }
+*/
 
+/*
 func (x *X509CreateCertificateOptions) MustGetIntermediateCertificateKeyGopassCredential() (key *GopassCredential) {
 	key, err := x.GetIntermediateCertificateKeyGopassCredential()
 	if err != nil {
@@ -247,6 +259,7 @@ func (x *X509CreateCertificateOptions) MustGetIntermediateCertificateKeyGopassCr
 
 	return key
 }
+*/
 
 func (x *X509CreateCertificateOptions) MustGetKeyOutputFilePath() (keyOutputPath string) {
 	keyOutputPath, err := x.GetKeyOutputFilePath()
@@ -330,12 +343,14 @@ func (x *X509CreateCertificateOptions) MustSetCountryName(countryName string) {
 	}
 }
 
+/*
 func (x *X509CreateCertificateOptions) MustSetIntermediateCertificateInGopass(intermediateCertificateInGopass *GopassSecretOptions) {
 	err := x.SetIntermediateCertificateInGopass(intermediateCertificateInGopass)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
+*/
 
 func (x *X509CreateCertificateOptions) MustSetKeyOutputFilePath(keyOutputFilePath string) {
 	err := x.SetKeyOutputFilePath(keyOutputFilePath)
@@ -416,6 +431,7 @@ func (x *X509CreateCertificateOptions) SetCountryName(countryName string) (err e
 	return nil
 }
 
+/*
 func (x *X509CreateCertificateOptions) SetIntermediateCertificateInGopass(intermediateCertificateInGopass *GopassSecretOptions) (err error) {
 	if intermediateCertificateInGopass == nil {
 		return tracederrors.TracedErrorf("intermediateCertificateInGopass is nil")
@@ -424,7 +440,7 @@ func (x *X509CreateCertificateOptions) SetIntermediateCertificateInGopass(interm
 	x.IntermediateCertificateInGopass = intermediateCertificateInGopass
 
 	return nil
-}
+}*/
 
 func (x *X509CreateCertificateOptions) SetKeyOutputFilePath(keyOutputFilePath string) (err error) {
 	if keyOutputFilePath == "" {
