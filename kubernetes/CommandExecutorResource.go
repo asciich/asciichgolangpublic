@@ -276,6 +276,55 @@ func (c *CommandExecutorResource) Exists(verbose bool) (exists bool, err error) 
 	return exists, nil
 }
 
+func (c *CommandExecutorResource) GetAsYamlString() (yamlString string, err error) {
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return "", err
+	}
+
+	contextName, err := c.GetKubectlContext(false)
+	if err != nil {
+		return "", err
+	}
+
+	resourceName, resourceType, namspaceName, clusterName, err := c.GetResourceAndTypeAndNamespaceAndClusterName()
+	if err != nil {
+		return "", err
+	}
+
+	yamlString, err = commandExecutor.RunCommandAndGetStdoutAsString(
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"get",
+				"--context",
+				contextName,
+				"--namespace",
+				namspaceName,
+				resourceType,
+				resourceName,
+				"-o",
+				"yaml",
+			},
+		},
+	)
+	if err != nil {
+		return "", err
+	}
+
+	if yamlString == "" {
+		return "", tracederrors.TracedErrorf(
+			"yamlString is empty string after evaluation. Tried to get resource type '%s' named '%s' in namespace '%s' in cluster '%s'.",
+			resourceType,
+			resourceName,
+			namspaceName,
+			clusterName,
+		)
+	}
+
+	return yamlString, nil
+}
+
 func (c *CommandExecutorResource) GetClusterName() (clusterName string, err error) {
 	namespace, err := c.GetNamespace()
 	if err != nil {
@@ -384,6 +433,15 @@ func (c *CommandExecutorResource) MustExists(verbose bool) (exists bool) {
 	}
 
 	return exists
+}
+
+func (c *CommandExecutorResource) MustGetAsYamlString() (yamlString string) {
+	yamlString, err := c.GetAsYamlString()
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return yamlString
 }
 
 func (c *CommandExecutorResource) MustGetClusterName() (clusterName string) {
