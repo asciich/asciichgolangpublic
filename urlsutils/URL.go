@@ -27,7 +27,7 @@ type URL struct {
 }
 
 func GetUrlFromString(urlString string) (url *URL, err error) {
-	url = NewUrl()
+	url = NewURL()
 	err = url.SetByString(urlString)
 	if err != nil {
 		return nil, err
@@ -46,10 +46,6 @@ func MustGetUrlFromString(urlString string) (url *URL) {
 }
 
 func NewURL() (u *URL) {
-	return new(URL)
-}
-
-func NewUrl() (url *URL) {
 	return new(URL)
 }
 

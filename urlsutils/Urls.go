@@ -6,18 +6,9 @@ import (
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-type UrlsService struct{}
 
-func NewUrlsService() (service *UrlsService) {
-	return new(UrlsService)
-}
-
-func Urls() (urlService *UrlsService) {
-	return NewUrlsService()
-}
-
-func (u *UrlsService) CheckIsUrl(url string) (isUrl bool, err error) {
-	isUrl = u.IsUrl(url)
+func CheckIsUrl(url string) (isUrl bool, err error) {
+	isUrl = IsUrl(url)
 	if !isUrl {
 		return false, tracederrors.TracedErrorf("'%s' is not an URL.", url)
 	}
@@ -25,7 +16,7 @@ func (u *UrlsService) CheckIsUrl(url string) (isUrl bool, err error) {
 	return isUrl, nil
 }
 
-func (u *UrlsService) IsUrl(url string) (isUrl bool) {
+func IsUrl(url string) (isUrl bool) {
 	if url == "" {
 		return false
 	}
@@ -36,8 +27,8 @@ func (u *UrlsService) IsUrl(url string) (isUrl bool) {
 	})
 }
 
-func (u *UrlsService) MustCheckIsUrl(url string) (isUrl bool) {
-	isUrl, err := u.CheckIsUrl(url)
+func MustCheckIsUrl(url string) (isUrl bool) {
+	isUrl, err := CheckIsUrl(url)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
