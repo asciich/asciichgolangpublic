@@ -35,7 +35,7 @@ func TestMacAddressesIsStringAMacAddress(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				assert := assert.New(t)
-				assert.EqualValues(tt.isMacAddress, MacAddresses().IsStringAMacAddress(tt.input))
+				assert.EqualValues(tt.isMacAddress, IsStringAMacAddress(tt.input))
 			},
 		)
 	}
