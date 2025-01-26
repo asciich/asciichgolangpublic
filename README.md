@@ -67,25 +67,25 @@ To provide easy readable CLI output its recommended to use the provided logging 
 ```golang
 package main
 
-import "github.com/asciich/asciichgolangpublic"
+import "github.com/asciich/asciichgolangpublic/logging"
 
 func main() {
-	asciichgolangpublic.LogInfo("Shown without additional color.")
-	asciichgolangpublic.LogInfof("Shown without additional color. %s", "Also available with formatting.")
+	logging.LogInfo("Shown without additional color.")
+	logging.LogInfof("Shown without additional color. %s", "Also available with formatting.")
 
-	asciichgolangpublic.LogGood("Good messages are green.")
-	asciichgolangpublic.LogGoodf("Good messages are green. %s", "Also available with formatting.")
+	logging.LogGood("Good messages are green.")
+	logging.LogGoodf("Good messages are green. %s", "Also available with formatting.")
 
-	asciichgolangpublic.LogChanged("Changes are purple.")
-	asciichgolangpublic.LogChangedf("Changes are purple. %s", "Also available with formatting.")
+	logging.LogChanged("Changes are purple.")
+	logging.LogChangedf("Changes are purple. %s", "Also available with formatting.")
 
-	asciichgolangpublic.LogWarn("Warnings are yellow.")
-	asciichgolangpublic.LogWarnf("Warnings are yellow. %s", "Also available with formatting.")
+	logging.LogWarn("Warnings are yellow.")
+	logging.LogWarnf("Warnings are yellow. %s", "Also available with formatting.")
 
-	asciichgolangpublic.LogError("Errors are red.")
-	asciichgolangpublic.LogErrorf("Errors are red. %s", "Also available with formatting.")
+	logging.LogError("Errors are red.")
+	logging.LogErrorf("Errors are red. %s", "Also available with formatting.")
 
-	asciichgolangpublic.LogFatalf("Fatal will exit with a red error message and exit code %d", 1)
+	logging.LogFatalf("Fatal will exit with a red error message and exit code %d", 1)
 }
 ```
 
@@ -102,12 +102,12 @@ TracedErrors give you a nice debug output including the stack trace in a human r
 Example usage:
 ```golang
 func inThisFunctionSomethingGoesWrong() (err error) {
-    return asciichgolangpublic.TracedError("This is an error message") // Use TracedErrors when an error occures.
+    return tracederrors.TracedError("This is an error message") // Use TracedErrors when an error occures.
 }
 
 err = inThisFunctionSomethingGoesWrong()
-asciichgolangpublic.Errors().IsTracedError(err) // returns true for all TracedErrors.
-asciichgolangpublic.Errors().IsTracedError(fmt.Errorf("another error")) // returns false for all non TracedErrors.
+tracederrors.Errors().IsTracedError(err) // returns true for all TracedErrors.
+tracederrors.Errors().IsTracedError(fmt.Errorf("another error")) // returns false for all non TracedErrors.
 
 err.Error() // includes the error message and the stack trace as human readable text.
 ```

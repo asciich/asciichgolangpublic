@@ -12,6 +12,11 @@ func IsCertificateRootCa(cert *x509.Certificate) (isRootCa bool, err error) {
 		return false, tracederrors.TracedErrorNil("cert")
 	}
 
+	if cert.Version == 1 {
+		// version 1 is not supported for root CA.
+		return false, nil
+	}
+
 	if cert.Subject.String() != cert.Issuer.String() {
 		return false, err
 	}
@@ -30,6 +35,14 @@ func GetPublicKeyFromPrivateKey(privateKey crypto.PrivateKey) (publicKey crypto.
 	}
 
 	return withPublic.Public(), nil
+}
+
+func IsCertificateVersion1(cert *x509.Certificate) (isV1 bool, err error) {
+	if cert == nil {
+		return false, tracederrors.TracedErrorNil("cert")
+	}
+
+	return cert.Version == 1, nil
 }
 
 func IsCertificateMatchingPrivateKey(cert *x509.Certificate, privateKey crypto.PrivateKey) (isMatching bool, err error) {
