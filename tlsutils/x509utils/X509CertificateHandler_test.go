@@ -19,7 +19,7 @@ func getX509CertificateHandlerToTest(implementationName string) (handler X509Cer
 	return
 }
 
-func TestX509Handler_CreateRootCertificate(t *testing.T) {
+func TestX509Handler_CreateRootCaCertificate(t *testing.T) {
 	tests := []struct {
 		implementationName string
 	}{
@@ -35,12 +35,12 @@ func TestX509Handler_CreateRootCertificate(t *testing.T) {
 
 				handler := getX509CertificateHandlerToTest(tt.implementationName)
 
-				cert, _ := mustutils.Must2(handler.CreateRootCertificate(
+				cert, privateKey := mustutils.Must2(handler.CreateRootCaCertificate(
 					&X509CreateCertificateOptions{
 						CountryName: "CH",
-						Locality: "Zurich",
-						
-						Verbose:     true,
+						Locality:    "Zurich",
+
+						Verbose: true,
 					},
 				))
 
@@ -48,6 +48,8 @@ func TestX509Handler_CreateRootCertificate(t *testing.T) {
 
 				assert.EqualValues([]string{"CH"}, cert.Issuer.Country)
 				assert.EqualValues([]string{"Zurich"}, cert.Issuer.Locality)
+
+				assert.True(mustutils.Must(IsCertificateMatchingPrivateKey(cert, privateKey)))
 			},
 		)
 	}

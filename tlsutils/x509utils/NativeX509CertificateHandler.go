@@ -23,7 +23,7 @@ func GetNativeX509CertificateHandler() (Handler X509CertificateHandler) {
 	return NewNativeX509CertificateHandler()
 }
 
-func (n *NativeX509CertificateHandler) CreateRootCertificate(options *X509CreateCertificateOptions) (cert *x509.Certificate, privateKey crypto.PrivateKey, err error) {
+func (n *NativeX509CertificateHandler) CreateRootCaCertificate(options *X509CreateCertificateOptions) (cert *x509.Certificate, privateKey crypto.PrivateKey, err error) {
 	if options == nil {
 		return nil, nil, tracederrors.TracedErrorNil("options")
 	}
