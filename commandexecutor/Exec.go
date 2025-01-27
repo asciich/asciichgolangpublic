@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 
 	"github.com/asciich/asciichgolangpublic/logging"
@@ -73,9 +74,21 @@ func (e *ExecService) RunCommand(options *parameteroptions.RunCommandOptions) (c
 	if err != nil {
 		return nil, err
 	}
+
 	commandJoined, err := options.GetJoinedCommand()
 	if err != nil {
 		return nil, err
+	}
+
+	const avoidExecEnvVarName = "ASCIICHGOLANGPUBLIC_AVOID_EXEC"
+	const trueValue = "1"
+	if os.Getenv(avoidExecEnvVarName) == trueValue {
+		return nil, tracederrors.TracedErrorf(
+			"env var '%s' is set to '%s'. The command exec is therefore blocked. The blocked command is '%s'",
+			avoidExecEnvVarName,
+			trueValue,
+			commandJoined,
+		)
 	}
 
 	cmd := exec.Command(command[0])
