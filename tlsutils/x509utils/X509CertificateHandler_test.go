@@ -54,3 +54,52 @@ func TestX509Handler_CreateRootCaCertificate(t *testing.T) {
 		)
 	}
 }
+
+func TestX509Handler_CreateIntermediateCertificate(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"NativeX509CertificateHandler"},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				handler := getX509CertificateHandlerToTest(tt.implementationName)
+
+				caCert, caPrivateKey := mustutils.Must2(handler.CreateRootCaCertificate(
+					&X509CreateCertificateOptions{
+						CountryName:  "CH",
+						Locality:     "Zurich",
+						Organization: "myOrg root",
+
+						Verbose: true,
+					},
+				))
+
+				intermediateCert, intermediateKey := mustutils.Must2(handler.CreateSignedIntermediateCertificate(
+					&X509CreateCertificateOptions{
+						CountryName:  "CH",
+						Locality:     "Zurich",
+						Organization: "myOrg intermediate",
+
+						Verbose: true,
+					},
+					caCert,
+					caPrivateKey,
+					true,
+				))
+
+				assert.True(mustutils.Must(IsCertificateMatchingPrivateKey(caCert, caPrivateKey)))
+				assert.True(mustutils.Must(IsCertificateRootCa(caCert)))
+
+				assert.True(mustutils.Must(IsCertificateMatchingPrivateKey(intermediateCert, intermediateKey)))
+				assert.False(mustutils.Must(IsCertificateRootCa(intermediateCert)))
+			},
+		)
+	}
+}

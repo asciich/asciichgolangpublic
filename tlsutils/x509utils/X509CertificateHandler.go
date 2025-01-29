@@ -7,4 +7,6 @@ import (
 
 type X509CertificateHandler interface {
 	CreateRootCaCertificate(options *X509CreateCertificateOptions) (caCert *x509.Certificate, caPrivateKey crypto.PrivateKey, err error)
+	CreateIntermediateCertificate(options *X509CreateCertificateOptions) (intermediateCert *x509.Certificate, intermediateCertPrivateKey crypto.PrivateKey, err error)
+	CreateSignedIntermediateCertificate(options *X509CreateCertificateOptions, caCert *x509.Certificate, caPrivateKey crypto.PrivateKey, verbose bool) (intermediateCert *x509.Certificate, intermediateCertPrivateKey crypto.PrivateKey, err error)
 }
