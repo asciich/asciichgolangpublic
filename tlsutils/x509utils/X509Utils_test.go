@@ -43,6 +43,7 @@ func TestX509Utils_IsCertificateMatchingPrivateKey(t *testing.T) {
 					&X509CreateCertificateOptions{
 						CountryName: "CH",
 						Locality:    "Zurich",
+						Organization: "RootOrg",
 
 						Verbose: true,
 					},

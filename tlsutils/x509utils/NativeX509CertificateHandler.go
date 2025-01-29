@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -23,35 +24,49 @@ func GetNativeX509CertificateHandler() (Handler X509CertificateHandler) {
 	return NewNativeX509CertificateHandler()
 }
 
-func (n *NativeX509CertificateHandler) CreateRootCaCertificate(options *X509CreateCertificateOptions) (cert *x509.Certificate, privateKey crypto.PrivateKey, err error) {
-	if options == nil {
-		return nil, nil, tracederrors.TracedErrorNil("options")
+func (n *NativeX509CertificateHandler) SignCertificate(certToSign *x509.Certificate, certWhichSigns *x509.Certificate, certToSignKey crypto.PublicKey, certWhichSignsPrivateKey crypto.PrivateKey, verbose bool) (signedCert *x509.Certificate, err error) {
+	if certToSign == nil {
+		return nil, tracederrors.TracedErrorNil("certToSign")
 	}
 
-	countryName, err := options.GetCountryName()
+	if certWhichSigns == nil {
+		return nil, tracederrors.TracedErrorNil("certWhichSigns")
+	}
+
+	if certToSignKey == nil {
+		return nil, tracederrors.TracedErrorNil("certToSignKey")
+	}
+
+	if certWhichSignsPrivateKey == nil {
+		return nil, tracederrors.TracedErrorNil("certWhichSignsPrivateKey")
+	}
+
+	certToSign.Issuer = pkix.Name{}
+
+	signedCertData, err := x509.CreateCertificate(rand.Reader, certToSign, certWhichSigns, certToSignKey, certWhichSignsPrivateKey)
 	if err != nil {
-		return nil, nil, err
+		return nil, tracederrors.TracedErrorf("Unable to sign cert: %w", err)
 	}
 
-	locality, err := options.GetLocality()
+	signedCert, err = LoadCertificateFromDerBytes(signedCertData)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	ca := &x509.Certificate{
-		SerialNumber: big.NewInt(1),
-		Subject: pkix.Name{
-			Organization:  []string{"Company, INC."},
-			Country:       []string{countryName},
-			Province:      []string{""},
-			Locality:      []string{locality},
-		},
-		NotBefore:             time.Now(),
-		NotAfter:              time.Now().AddDate(10, 0, 0),
-		IsCA:                  true,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
-		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
-		BasicConstraintsValid: true,
+	if verbose {
+		logging.LogChangedf(
+			"Signed certificate '%s' by '%s'.",
+			certToSign.Subject,
+			certWhichSigns.Subject,
+		)
+	}
+
+	return signedCert, nil
+}
+
+func (n *NativeX509CertificateHandler) generateAndAddKey(cert *x509.Certificate) (certWithKey *x509.Certificate, privateKey crypto.PrivateKey, err error) {
+	if cert == nil {
+		return nil, nil, tracederrors.TracedErrorNil("cert")
 	}
 
 	generatedKey, err := rsa.GenerateKey(rand.Reader, 4096)
@@ -59,15 +74,104 @@ func (n *NativeX509CertificateHandler) CreateRootCaCertificate(options *X509Crea
 		return nil, nil, tracederrors.TracedErrorf("Unable to create private key: %w", err)
 	}
 
-	certBytes, err := x509.CreateCertificate(rand.Reader, ca, ca, &generatedKey.PublicKey, generatedKey)
+	certBytes, err := x509.CreateCertificate(rand.Reader, cert, cert, &generatedKey.PublicKey, generatedKey)
 	if err != nil {
 		return nil, nil, tracederrors.TracedErrorf("Unable to create private key: %w", err)
 	}
 
-	cert, err = LoadCertificateFromDerBytes(certBytes)
+	certWithKey, err = LoadCertificateFromDerBytes(certBytes)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return cert, generatedKey, nil
+	return certWithKey, generatedKey, nil
+}
+
+func (n *NativeX509CertificateHandler) CreateSignedIntermediateCertificate(options *X509CreateCertificateOptions, caCert *x509.Certificate, caPrivateKey crypto.PrivateKey, verbose bool) (intermediateCert *x509.Certificate, intermediateCertPrivateKey crypto.PrivateKey, err error) {
+	if options == nil {
+		return nil, nil, tracederrors.TracedErrorNil("options")
+	}
+
+	if caCert == nil {
+		return nil, nil, tracederrors.TracedErrorNil("caCert")
+	}
+
+	if caPrivateKey == nil {
+		return nil, nil, tracederrors.TracedErrorNil("caPrivateKey")
+	}
+
+	intermediateCert, intermediateCertPrivateKey, err = n.CreateIntermediateCertificate(options)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	pubKey, err := GetPublicKeyFromPrivateKey(intermediateCertPrivateKey)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	intermediateCert, err = n.SignCertificate(intermediateCert, caCert, pubKey, caPrivateKey, verbose)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return intermediateCert, intermediateCertPrivateKey, err
+}
+
+func (n *NativeX509CertificateHandler) CreateIntermediateCertificate(options *X509CreateCertificateOptions) (cert *x509.Certificate, privateKey crypto.PrivateKey, err error) {
+	if options == nil {
+		return nil, nil, tracederrors.TracedErrorNil("options")
+	}
+
+	subject, err := options.GetSubjectAsPkixName()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	ca := &x509.Certificate{
+		SerialNumber:          big.NewInt(1),
+		Subject:               *subject,
+		NotBefore:             time.Now(),
+		NotAfter:              time.Now().AddDate(1, 0, 0),
+		IsCA:                  true,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
+		BasicConstraintsValid: true,
+	}
+
+	cert, privateKey, err = n.generateAndAddKey(ca)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return cert, privateKey, nil
+}
+
+func (n *NativeX509CertificateHandler) CreateRootCaCertificate(options *X509CreateCertificateOptions) (cert *x509.Certificate, privateKey crypto.PrivateKey, err error) {
+	if options == nil {
+		return nil, nil, tracederrors.TracedErrorNil("options")
+	}
+
+	subject, err := options.GetSubjectAsPkixName()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	ca := &x509.Certificate{
+		SerialNumber:          big.NewInt(1),
+		Subject:               *subject,
+		NotBefore:             time.Now(),
+		NotAfter:              time.Now().AddDate(1, 0, 0),
+		IsCA:                  true,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
+		BasicConstraintsValid: true,
+	}
+
+	cert, privateKey, err = n.generateAndAddKey(ca)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return cert, privateKey, nil
 }

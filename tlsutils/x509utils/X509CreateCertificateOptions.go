@@ -1,6 +1,7 @@
 package x509utils
 
 import (
+	"crypto/x509/pkix"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/logging"
@@ -14,6 +15,7 @@ type X509CreateCertificateOptions struct {
 	// Certificate Attributes
 	CommonName     string // the CN field
 	CountryName    string // the C field
+	Organization   string
 	Locality       string // the L field
 	AdditionalSans []string
 
@@ -28,6 +30,40 @@ type X509CreateCertificateOptions struct {
 
 func NewX509CreateCertificateOptions() (x *X509CreateCertificateOptions) {
 	return new(X509CreateCertificateOptions)
+}
+
+func (o *X509CreateCertificateOptions) GetSubjectAsPkixName() (subject *pkix.Name, err error) {
+	countryName, err := o.GetCountryName()
+	if err != nil {
+		return nil, err
+	}
+
+	locality, err := o.GetLocality()
+	if err != nil {
+		return nil, err
+	}
+
+	organization, err := o.GetOrganization()
+	if err != nil {
+		return nil, err
+	}
+
+	subject = &pkix.Name{
+		Organization: []string{organization},
+		Country:      []string{countryName},
+		Province:     []string{""},
+		Locality:     []string{locality},
+	}
+
+	return subject, nil
+}
+
+func (o *X509CreateCertificateOptions) GetOrganization() (organization string, err error) {
+	if o.Organization == "" {
+		return "", tracederrors.TracedError("Organization not set")
+	}
+
+	return o.Organization, nil
 }
 
 func (o *X509CreateCertificateOptions) GetCertificateOutputFilePath() (certOutputPath string, err error) {
