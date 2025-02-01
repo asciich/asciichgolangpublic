@@ -1,4 +1,4 @@
-package http
+package httputils
 
 import (
 	"strconv"
@@ -113,7 +113,6 @@ func TestClient_DownloadAsFile(t *testing.T) {
 		)
 	}
 }
-
 
 func TestClient_DownloadAsTempraryFile(t *testing.T) {
 	tests := []struct {
