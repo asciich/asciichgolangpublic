@@ -1,4 +1,4 @@
-package http
+package httputils
 
 type Response interface {
 	GetBodyAsString() (body string, err error)
