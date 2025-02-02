@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package gopass
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/binaryinfo"
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/files"
@@ -534,7 +535,7 @@ func (g *GopassService) WriteInfoToGopass(gopassPath string) (err error) {
 
 	gopassPath += "_info"
 
-	infoString := fmt.Sprintf("This secret was added by '%v'", GetBinaryInfo().GetInfoString())
+	infoString := fmt.Sprintf("This secret was added by '%v'", binaryinfo.GetInfoString())
 	infoString = strings.ReplaceAll(infoString, "'", "\"")
 
 	insertCommand := []string{
