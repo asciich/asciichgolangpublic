@@ -1,9 +1,13 @@
 package x509utils
 
 import (
+	"bytes"
 	"crypto"
 	"crypto/x509"
+	"encoding/pem"
+	"io"
 
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -96,6 +100,65 @@ func IsCertificateMatchingPrivateKey(cert *x509.Certificate, privateKey crypto.P
 	return certPublicKeyWithEqual.Equal(publicKey), nil
 }
 
+func LoadCertificateFromPEMString(pemEncoded string) (cert *x509.Certificate, err error) {
+	if pemEncoded == "" {
+		return nil, tracederrors.TracedErrorEmptyString("pemEncoded")
+	}
+
+	block, _ := pem.Decode([]byte(pemEncoded))
+	var blockBytes []byte = nil
+	if block == nil {
+		return nil, tracederrors.TracedError("Failed to parse certificate PEM")
+	} else {
+		if block.Bytes == nil {
+			return nil, tracederrors.TracedError("Decode returned block.Bytes as nil")
+		} else {
+			blockBytes = block.Bytes
+		}
+	}
+
+	return LoadCertificateFromDerBytes(blockBytes)
+}
+
+func EncodeCertificateAsPEMString(cert *x509.Certificate) (pemEncoded string, err error) {
+	if cert == nil {
+		return "", tracederrors.TracedErrorNil("derEncodecCertificate")
+	}
+
+	derBytes, err := EncodeCertificateAsDerBytes(cert)
+	if err != nil {
+		return "", err
+	}
+
+	var buf bytes.Buffer
+	var pemCert = &pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: derBytes,
+	}
+	err = pem.Encode(io.Writer(&buf), pemCert)
+	if err != nil {
+		return "", err
+	}
+
+	pemEncoded = buf.String()
+	pemEncoded = stringsutils.EnsureEndsWithExactlyOneLineBreak(pemEncoded)
+
+	const minLen = 50
+	if len(pemEncoded) < minLen {
+		return "", tracederrors.TracedErrorf("pemBytes has less than '%v' bytes which is not enough for a pem certificate", minLen)
+	}
+
+	return pemEncoded, nil
+}
+
+func EncodeCertificateAsDerBytes(cert *x509.Certificate) (derEncodecCertificate []byte, err error) {
+	if cert == nil {
+		return
+	}
+
+	return cert.Raw, nil
+}
+
 func LoadCertificateFromDerBytes(derEncodecCertificate []byte) (cert *x509.Certificate, err error) {
 	if derEncodecCertificate == nil {
 		return nil, tracederrors.TracedErrorNil("derEncodecCertificate")
@@ -131,7 +194,6 @@ func GetSubjectCountryName(cert *x509.Certificate) (countryName string, err erro
 		country,
 	)
 }
-
 
 func GetSubjectLocalityName(cert *x509.Certificate) (locality string, err error) {
 	if cert == nil {

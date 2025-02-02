@@ -64,17 +64,31 @@ func (n *NativeX509CertificateHandler) SignCertificate(certToSign *x509.Certific
 	return signedCert, nil
 }
 
+func (n *NativeX509CertificateHandler) GeneratePrivateKey() (privateKey crypto.PrivateKey, err error) {
+	privateKey, err = rsa.GenerateKey(rand.Reader, 4096)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Unable to create private key: %w", err)
+	}
+
+	return privateKey, nil
+}
+
 func (n *NativeX509CertificateHandler) generateAndAddKey(cert *x509.Certificate) (certWithKey *x509.Certificate, privateKey crypto.PrivateKey, err error) {
 	if cert == nil {
 		return nil, nil, tracederrors.TracedErrorNil("cert")
 	}
 
-	generatedKey, err := rsa.GenerateKey(rand.Reader, 4096)
+	generatedKey, err := n.GeneratePrivateKey()
 	if err != nil {
-		return nil, nil, tracederrors.TracedErrorf("Unable to create private key: %w", err)
+		return nil, nil, err
 	}
 
-	certBytes, err := x509.CreateCertificate(rand.Reader, cert, cert, &generatedKey.PublicKey, generatedKey)
+	publicKey, err := GetPublicKeyFromPrivateKey(generatedKey)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	certBytes, err := x509.CreateCertificate(rand.Reader, cert, cert, publicKey, generatedKey)
 	if err != nil {
 		return nil, nil, tracederrors.TracedErrorf("Unable to create private key: %w", err)
 	}
