@@ -120,6 +120,59 @@ func LoadCertificateFromPEMString(pemEncoded string) (cert *x509.Certificate, er
 	return LoadCertificateFromDerBytes(blockBytes)
 }
 
+func LoadPrivateKeyFromPEMString(pemEncoded string) (privateKey crypto.PrivateKey, err error) {
+	if pemEncoded == "" {
+		return nil, tracederrors.TracedErrorEmptyString("pemEncoded")
+	}
+
+	block, _ := pem.Decode([]byte(pemEncoded))
+	if block == nil || block.Type != "PRIVATE KEY" {
+		return nil, tracederrors.TracedError("invalid private key.")
+	}
+
+	if key, err := x509.ParsePKCS8PrivateKey(block.Bytes); err == nil {
+		privateKey = key
+	} else if key, err := x509.ParseECPrivateKey(block.Bytes); err == nil {
+		privateKey = key
+	}
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Unable to parse as key: %w", err)
+	}
+
+	return privateKey, nil
+}
+
+func EncodePrivateKeyAsPEMString(privateKey crypto.PrivateKey) (pemEncoded string, err error) {
+	if privateKey == nil {
+		return "", tracederrors.TracedErrorNil("privateKey")
+	}
+
+	privateKeyBytes, err := x509.MarshalPKCS8PrivateKey(privateKey)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Failed to marshal private key: '%w'", err)
+	}
+
+	var buf bytes.Buffer
+	pemBlock := &pem.Block{
+		Type:  "PRIVATE KEY",
+		Bytes: privateKeyBytes,
+	}
+	err = pem.Encode(io.Writer(&buf), pemBlock)
+	if err != nil {
+		return "", err
+	}
+
+	pemEncoded = buf.String()
+	pemEncoded = stringsutils.EnsureEndsWithExactlyOneLineBreak(pemEncoded)
+
+	const minLen = 50
+	if len(pemEncoded) < minLen {
+		return "", tracederrors.TracedErrorf("pemBytes has less than '%v' bytes which is not enough for a pem certificate", minLen)
+	}
+
+	return pemEncoded, nil
+}
+
 func EncodeCertificateAsPEMString(cert *x509.Certificate) (pemEncoded string, err error) {
 	if cert == nil {
 		return "", tracederrors.TracedErrorNil("derEncodecCertificate")
@@ -131,11 +184,11 @@ func EncodeCertificateAsPEMString(cert *x509.Certificate) (pemEncoded string, er
 	}
 
 	var buf bytes.Buffer
-	var pemCert = &pem.Block{
+	var pemBlock = &pem.Block{
 		Type:  "CERTIFICATE",
 		Bytes: derBytes,
 	}
-	err = pem.Encode(io.Writer(&buf), pemCert)
+	err = pem.Encode(io.Writer(&buf), pemBlock)
 	if err != nil {
 		return "", err
 	}
@@ -278,4 +331,23 @@ func IsSubjectOrganizationName(cert *x509.Certificate, expectedOrganizationName 
 	}
 
 	return organizationName == expectedOrganizationName, nil
+}
+
+func IsPrivateKeyEqual(key1 crypto.PrivateKey, key2 crypto.PrivateKey) (isEqual bool, err error) {
+	if key1 == nil {
+		return false, tracederrors.TracedErrorNil("key1")
+	}
+
+	if key2 == nil {
+		return false, tracederrors.TracedErrorNil("key2")
+	}
+
+	withEqual, ok := key1.(interface {
+		Equal(other crypto.PrivateKey) bool
+	})
+	if !ok {
+		return false, tracederrors.TracedErrorf("key 1 does not implement Equal function to other private keys.")
+	}
+
+	return withEqual.Equal(key2), nil
 }

@@ -75,98 +75,6 @@ func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(cre
 	return directoryToUse, nil
 }
 
-func (c *X509CertificatesService) CreateRootCaAndaddToGopass(createOptions *X509CreateCertificateOptions, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
-	/* TODO move to Gopass
-	if createOptions == nil {
-		return tracederrors.TracedError("createOptions is nil")
-	}
-
-	if gopassOptions == nil {
-		return tracederrors.TracedError("gopassOptions is nil")
-	}
-
-	if createOptions.Verbose {
-		logging.LogInfo("Create root CA and add to gopass started.")
-	}
-
-	createOptionsToUse := createOptions.GetDeepCopy()
-	createOptionsToUse.UseTemporaryDirectory = true
-
-	certificateDir, err := c.CreateRootCaIntoDirectory(createOptionsToUse)
-	if err != nil {
-		return err
-	}
-
-	certFile, err := certificateDir.GetFileInDirectory("rootCA.crt")
-	if err != nil {
-		return err
-	}
-
-	keyFile, err := certificateDir.GetFileInDirectory("rootCA.key")
-	if err != nil {
-		return err
-	}
-
-	certFileExists, err := certFile.Exists(createOptions.Verbose)
-	if err != nil {
-		return err
-	}
-
-	if !certFileExists {
-		certFileLocalPath, err := certFile.GetLocalPathOrEmptyStringIfUnset()
-		if err != nil {
-			return err
-		}
-
-		return tracederrors.TracedErrorf("Internal error: certFile '%v' does not exist", certFileLocalPath)
-	}
-
-	keyFileExists, err := keyFile.Exists(createOptions.Verbose)
-	if err != nil {
-		return err
-	}
-
-	if !keyFileExists {
-		keyFileLocalPath, err := keyFile.GetLocalPathOrEmptyStringIfUnset()
-		if err != nil {
-			return err
-		}
-
-		return tracederrors.TracedErrorf("Internal error: keyFileExists '%v' does not exist", keyFileLocalPath)
-	}
-
-	certOptions := gopassOptions.GetDeepCopy()
-	certOptions.SecretBasename = "rootCa.crt"
-	err = Gopass().InsertFile(certFile, certOptions)
-	if err != nil {
-		return err
-	}
-
-	keyOptions := gopassOptions.GetDeepCopy()
-	keyOptions.SecretBasename = "rootCa.key"
-	err = Gopass().InsertFile(keyFile, keyOptions)
-	if err != nil {
-		return err
-	}
-
-	err = certFile.SecurelyDelete(gopassOptions.Verbose)
-	if err != nil {
-		return err
-	}
-
-	err = keyFile.SecurelyDelete(gopassOptions.Verbose)
-	if err != nil {
-		return err
-	}
-
-	if createOptions.Verbose {
-		logging.LogInfo("Create root CA and add to gopass finished.")
-	}
-
-	return nil
-	*/
-}
 
 func (c *X509CertificatesService) CreateRootCaIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey files.Directory, err error) {
 	if createOptions == nil {
@@ -756,13 +664,6 @@ func (c *X509CertificatesService) MustCreateIntermediateCertificateIntoDirectory
 	return directoryContianingCreatedCertAndKey
 }
 
-func (c *X509CertificatesService) MustCreateRootCAAndAddToGopass(createOptions *X509CreateCertificateOptions, gopassOptions *parameteroptions.GopassSecretOptions) {
-	err := c.CreateRootCaAndaddToGopass(createOptions, gopassOptions)
-	if err != nil {
-		logging.LogFatalf("X509Certificates.CreateRootCaAndaddToGopass: failed: '%v'", err)
-	}
-}
-
 func (c *X509CertificatesService) MustCreateRootCaIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey files.Directory) {
 	directoryContianingCreatedCertAndKey, err := c.CreateRootCaIntoDirectory(createOptions)
 	if err != nil {
@@ -916,13 +817,6 @@ func (c *X509CertificatesService) SignIntermediateCertificate(signOptions *X509S
 	}
 
 	return nil
-}
-
-func (x *X509CertificatesService) MustCreateRootCaAndaddToGopass(createOptions *X509CreateCertificateOptions, gopassOptions *parameteroptions.GopassSecretOptions) {
-	err := x.CreateRootCaAndaddToGopass(createOptions, gopassOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (x *X509CertificatesService) MustCreateSigningRequestFile(signOptions *X509SignCertificateOptions) {

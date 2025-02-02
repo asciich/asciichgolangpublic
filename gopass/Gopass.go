@@ -235,6 +235,55 @@ func (g *GopassService) GetSslCertificate(getOptions *parameteroptions.GopassSec
 	return cert, nil
 }
 
+func (g *GopassService) InsertFileByString(fileContent string, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
+	if gopassOptions == nil {
+		return tracederrors.TracedErrorNil("gopassOptions")
+	}
+
+	gopassPath, err := gopassOptions.GetGopassPath()
+	if err != nil {
+		return err
+	}
+
+	if !gopassOptions.Overwrite {
+		secretExists, err := g.SecretNameExist(gopassPath)
+		if err != nil {
+			return err
+		}
+
+		if secretExists {
+			return tracederrors.TracedErrorf("Secret '%v' already exists in gopass.", gopassPath)
+		}
+	}
+
+	insertCommand := []string{
+		"bash",
+		"-c",
+		fmt.Sprintf("gpass cat '%s'", gopassPath),
+	}
+
+	_, err = commandexecutor.Bash().RunCommand(
+		&parameteroptions.RunCommandOptions{
+			Command:     insertCommand,
+			StdinString: fileContent,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	err = g.WriteInfoToGopass(gopassPath)
+	if err != nil {
+		return err
+	}
+
+	if gopassOptions.Verbose {
+		logging.LogChangedf("Added file content to gopass as '%s'", gopassPath)
+	}
+
+	return nil
+}
+
 func (g *GopassService) InsertFile(fileToInsert files.File, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
 	if fileToInsert == nil {
 		return tracederrors.TracedError("fileToInsert is nil")
@@ -572,4 +621,55 @@ func (g *GopassService) WriteSecretIntoTemporaryFile(getOptions *parameteroption
 	}
 
 	return temporaryFile, nil
+}
+
+func CreateRootCaAndAddToGopass(createOptions *x509utils.X509CreateCertificateOptions, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
+	if createOptions == nil {
+		return tracederrors.TracedError("createOptions is nil")
+	}
+
+	if gopassOptions == nil {
+		return tracederrors.TracedError("gopassOptions is nil")
+	}
+
+	if createOptions.Verbose {
+		logging.LogInfo("Create root CA and add to gopass started.")
+	}
+
+	certHandler := x509utils.GetNativeX509CertificateHandler()
+
+	caCert, caKey, err := certHandler.CreateRootCaCertificate(createOptions)
+	if err != nil {
+		return err
+	}
+
+	ceCertPem, err := x509utils.EncodeCertificateAsPEMString(caCert)
+	if err != nil {
+		return err
+	}
+
+	caKeyPem, err := x509utils.EncodePrivateKeyAsPEMString(caKey)
+	if err != nil {
+		return err
+	}
+
+	certOptions := gopassOptions.GetDeepCopy()
+	certOptions.SecretBasename = "rootCa.crt"
+	err = Gopass().InsertFileByString(ceCertPem, certOptions)
+	if err != nil {
+		return err
+	}
+
+	keyOptions := gopassOptions.GetDeepCopy()
+	keyOptions.SecretBasename = "rootCa.key"
+	err = Gopass().InsertFileByString(caKeyPem, keyOptions)
+	if err != nil {
+		return err
+	}
+
+	if createOptions.Verbose {
+		logging.LogInfo("Create root CA and add to gopass finished.")
+	}
+
+	return nil
 }
