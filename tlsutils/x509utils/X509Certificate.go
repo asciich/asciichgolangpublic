@@ -74,6 +74,7 @@ func NewX509Certificate() (cert *X509Certificate) {
 	return new(X509Certificate)
 }
 
+// TODO replace by EncodeCertificateAsPEMString
 func (c *X509Certificate) GetAsPemBytes() (pemBytes []byte, err error) {
 	nativeCert, err := c.GetNativeCertificate()
 	if err != nil {
