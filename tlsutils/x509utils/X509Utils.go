@@ -108,3 +108,112 @@ func LoadCertificateFromDerBytes(derEncodecCertificate []byte) (cert *x509.Certi
 
 	return cert, nil
 }
+
+func GetSubjectCountryName(cert *x509.Certificate) (countryName string, err error) {
+	if cert == nil {
+		return "", tracederrors.TracedErrorNil("cert")
+	}
+
+	country := cert.Subject.Country
+
+	nCountries := len(country)
+	if nCountries == 0 {
+		return "", nil
+	}
+
+	if nCountries == 1 {
+		return country[0], nil
+	}
+
+	return "", tracederrors.TracedErrorf(
+		"Not implemented for nCountries != 1. Got '%d' countries: '%v'",
+		nCountries,
+		country,
+	)
+}
+
+
+func GetSubjectLocalityName(cert *x509.Certificate) (locality string, err error) {
+	if cert == nil {
+		return "", tracederrors.TracedErrorNil("cert")
+	}
+
+	country := cert.Subject.Locality
+
+	nLocalities := len(country)
+	if nLocalities == 0 {
+		return "", nil
+	}
+
+	if nLocalities == 1 {
+		return country[0], nil
+	}
+
+	return "", tracederrors.TracedErrorf(
+		"Not implemented for nLocalities != 1. Got '%d' localities: '%v'",
+		nLocalities,
+		country,
+	)
+}
+
+func GetSubjectOrganizationName(cert *x509.Certificate) (organizationName string, err error) {
+	if cert == nil {
+		return "", tracederrors.TracedErrorNil("cert")
+	}
+
+	organization := cert.Subject.Organization
+
+	nOrganizations := len(organization)
+	if nOrganizations == 0 {
+		return "", nil
+	}
+
+	if nOrganizations == 1 {
+		return organization[0], nil
+	}
+
+	return "", tracederrors.TracedErrorf(
+		"Not implemented for nLocalities != 1. Got '%d' localities: '%v'",
+		nOrganizations,
+		organization,
+	)
+}
+
+func IsSubjectCountryName(cert *x509.Certificate, expectedCountryName string) (isMatchingExpectedCountryName bool, err error) {
+	if cert == nil {
+		return false, tracederrors.TracedErrorNil("cert")
+	}
+
+	countryName, err := GetSubjectCountryName(cert)
+	if err != nil {
+		return false, err
+	}
+
+	return countryName == expectedCountryName, nil
+}
+
+func IsSubjectLocalityName(cert *x509.Certificate, expectedLocalityName string) (isMatchingExpectedLocalityName bool, err error) {
+	if cert == nil {
+		return false, tracederrors.TracedErrorNil("cert")
+	}
+
+	localityName, err := GetSubjectLocalityName(cert)
+	if err != nil {
+		return false, err
+	}
+
+	return localityName == expectedLocalityName, nil
+}
+
+func IsSubjectOrganizationName(cert *x509.Certificate, expectedOrganizationName string) (isMatchingExpectedOrganizationName bool, err error) {
+	if cert == nil {
+		return false, tracederrors.TracedErrorNil("cert")
+	}
+
+	organizationName, err := GetSubjectOrganizationName(cert)
+	if err != nil {
+		return false, err
+	}
+
+	return organizationName == expectedOrganizationName, nil
+}
