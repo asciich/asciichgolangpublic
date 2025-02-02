@@ -37,8 +37,8 @@ func TestX509Handler_CreateRootCaCertificate(t *testing.T) {
 
 				cert, privateKey := mustutils.Must2(handler.CreateRootCaCertificate(
 					&X509CreateCertificateOptions{
-						CountryName: "CH",
-						Locality:    "Zurich",
+						CountryName:  "CH",
+						Locality:     "Zurich",
 						Organization: "myOrg root",
 
 						Verbose: true,
@@ -46,6 +46,8 @@ func TestX509Handler_CreateRootCaCertificate(t *testing.T) {
 				))
 
 				assert.True(mustutils.Must(IsCertificateRootCa(cert)))
+				assert.False(mustutils.Must(IsIntermediateCertificate(cert)))
+				assert.False(mustutils.Must(IsEndEndityCertificate(cert)))
 
 				assert.EqualValues([]string{"CH"}, cert.Issuer.Country)
 				assert.EqualValues([]string{"Zurich"}, cert.Issuer.Locality)
@@ -97,9 +99,13 @@ func TestX509Handler_CreateIntermediateCertificate(t *testing.T) {
 
 				assert.True(mustutils.Must(IsCertificateMatchingPrivateKey(caCert, caPrivateKey)))
 				assert.True(mustutils.Must(IsCertificateRootCa(caCert)))
+				assert.False(mustutils.Must(IsIntermediateCertificate(caCert)))
+				assert.False(mustutils.Must(IsEndEndityCertificate(caCert)))
 
 				assert.True(mustutils.Must(IsCertificateMatchingPrivateKey(intermediateCert, intermediateKey)))
 				assert.False(mustutils.Must(IsCertificateRootCa(intermediateCert)))
+				assert.True(mustutils.Must(IsIntermediateCertificate(intermediateCert)))
+				assert.False(mustutils.Must(IsEndEndityCertificate(intermediateCert)))
 			},
 		)
 	}
