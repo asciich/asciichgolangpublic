@@ -7,6 +7,33 @@ import (
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
+func IsIntermediateCertificate(cert *x509.Certificate) (isIntermediateCertificate bool, err error) {
+	if cert == nil {
+		return false, tracederrors.TracedErrorNil("cert")
+	}
+
+	if cert.Version == 1 {
+		// version 1 is not supported for root CA.
+		return false, nil
+	}
+
+	if cert.Subject.String() == cert.Issuer.String() {
+		return false, err
+	}
+
+	return cert.IsCA, nil
+}
+
+// An End-Endity certificate is a cert used by the systems/ services.
+// So it's neither an intermedate nor a rootCA certificate.
+func IsEndEndityCertificate(cert *x509.Certificate) (isIntermediateCertificate bool, err error) {
+	if cert == nil {
+		return false, tracederrors.TracedErrorNil("cert")
+	}
+
+	return !cert.IsCA, nil
+}
+
 func IsCertificateRootCa(cert *x509.Certificate) (isRootCa bool, err error) {
 	if cert == nil {
 		return false, tracederrors.TracedErrorNil("cert")
