@@ -6,6 +6,7 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/gopass"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -178,7 +179,7 @@ func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) 
 	}
 
 	for _, gopassPath := range authOptions.AccessTokensFromGopass {
-		credentialExists, err := Gopass().CredentialExists(gopassPath)
+		credentialExists, err := gopass.Gopass().CredentialExists(gopassPath)
 		if err != nil {
 			return err
 		}
@@ -195,7 +196,7 @@ func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) 
 
 		getSecretOptions := parameteroptions.NewGopassSecretOptions()
 		getSecretOptions.SetGopassPath(gopassPath)
-		accessToken, err := Gopass().GetCredentialValueAsString(getSecretOptions)
+		accessToken, err := gopass.Gopass().GetCredentialValueAsString(getSecretOptions)
 		if err != nil {
 			return err
 		}

@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package gopass
 
 import (
 	"testing"

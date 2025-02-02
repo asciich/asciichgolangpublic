@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"fmt"
 
+	"github.com/asciich/asciichgolangpublic/binaryinfo"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -58,8 +59,8 @@ func (g *GitRepositoryCreateTagOptions) GetTagCommentOrDefaultIfUnset() (tagComm
 		return fmt.Sprintf(
 			"Create tag '%s' by '%s' version '%s'.",
 			g.GetTagNameOrEmptyStringIfUnset(),
-			GetSoftwareNameString(),
-			GetSoftwareVersionString(),
+			binaryinfo.GetSoftwareNameString(),
+			binaryinfo.GetSoftwareVersionString(),
 		)
 	}
 
