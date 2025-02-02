@@ -129,3 +129,40 @@ func TestX509Utils_EndcodeAndDecodeAsPEM(t *testing.T) {
 		)
 	}
 }
+
+func TestX509Utils_EndcodeAndDecodePrivateKeyAsPem(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"NativeX509CertificateHandler"},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				assert := assert.New(t)
+
+				handler := getX509CertificateHandlerToTest(tt.implementationName)
+				_, key := mustutils.Must2(handler.CreateRootCaCertificate(
+					&X509CreateCertificateOptions{
+						CountryName:  "CH",
+						Locality:     "Zurich",
+						Organization: "RootOrg",
+
+						Verbose: true,
+					},
+				))
+
+				derEncoded := mustutils.Must(EncodePrivateKeyAsPEMString(key))
+				assert.True(strings.HasPrefix(derEncoded, "-----BEGIN PRIVATE KEY-----\n"))
+				assert.True(strings.HasSuffix(derEncoded, "\n-----END PRIVATE KEY-----\n"))
+
+				key2 := mustutils.Must(LoadPrivateKeyFromPEMString(derEncoded))
+
+				assert.True(mustutils.Must(IsPrivateKeyEqual(key, key2)))
+			},
+		)
+	}
+}
