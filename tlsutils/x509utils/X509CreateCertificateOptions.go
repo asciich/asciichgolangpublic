@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/logging"
-	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -21,8 +20,6 @@ type X509CreateCertificateOptions struct {
 
 	KeyOutputFilePath         string
 	CertificateOutputFilePath string
-
-	IntermediateCertificateInGopass *parameteroptions.GopassSecretOptions // TODO move to Gopass
 
 	OverwriteExistingCertificateInGopass bool
 	Verbose                              bool
