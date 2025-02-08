@@ -17,24 +17,14 @@ import (
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-type GopassService struct{}
-
-func Gopass() (gopass *GopassService) {
-	return new(GopassService)
-}
-
-func NewGopassService() (g *GopassService) {
-	return new(GopassService)
-}
-
-func (g *GopassService) CredentialExists(fullCredentialPath string) (credentialExists bool, err error) {
+func CredentialExists(fullCredentialPath string) (credentialExists bool, err error) {
 	fullCredentialPath = strings.TrimSpace(fullCredentialPath)
 
 	if len(fullCredentialPath) <= 0 {
 		return false, tracederrors.TracedError("fullCredentailPath is empty string")
 	}
 
-	credentailList, err := g.GetCredentialNameList()
+	credentailList, err := GetCredentialNameList()
 	if err != nil {
 		return false, err
 	}
@@ -42,7 +32,7 @@ func (g *GopassService) CredentialExists(fullCredentialPath string) (credentialE
 	return slices.Contains(credentailList, fullCredentialPath), nil
 }
 
-func (g *GopassService) Generate(credentialName string, verbose bool) (generatedCredential *GopassCredential, err error) {
+func Generate(credentialName string, verbose bool) (generatedCredential *GopassCredential, err error) {
 	if credentialName == "" {
 		return nil, tracederrors.TracedError("credentailName is empty string")
 	}
@@ -52,7 +42,7 @@ func (g *GopassService) Generate(credentialName string, verbose bool) (generated
 		return nil, err
 	}
 
-	credential, err := g.GetGopassCredentialByName(credentialName)
+	credential, err := GetGopassCredentialByName(credentialName)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +59,7 @@ func (g *GopassService) Generate(credentialName string, verbose bool) (generated
 	return credential, nil
 }
 
-func (g *GopassService) GetCredential(getOptions *parameteroptions.GopassSecretOptions) (credential *GopassCredential, err error) {
+func GetCredential(getOptions *parameteroptions.GopassSecretOptions) (credential *GopassCredential, err error) {
 	if getOptions == nil {
 		return nil, tracederrors.TracedError("getOptions is nil")
 	}
@@ -88,7 +78,7 @@ func (g *GopassService) GetCredential(getOptions *parameteroptions.GopassSecretO
 	return credential, nil
 }
 
-func (g *GopassService) GetCredentialList() (credentials []*GopassCredential, err error) {
+func GetCredentialList() (credentials []*GopassCredential, err error) {
 	outLines, err := commandexecutor.Bash().RunCommandAndGetStdoutAsLines(
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"gopass", "list", "-f"},
@@ -117,8 +107,8 @@ func (g *GopassService) GetCredentialList() (credentials []*GopassCredential, er
 	return credentials, nil
 }
 
-func (g *GopassService) GetCredentialNameList() (credentialNames []string, err error) {
-	credentials, err := g.GetCredentialList()
+func GetCredentialNameList() (credentialNames []string, err error) {
+	credentials, err := GetCredentialList()
 	if err != nil {
 		return nil, err
 	}
@@ -136,12 +126,12 @@ func (g *GopassService) GetCredentialNameList() (credentialNames []string, err e
 	return credentialNames, nil
 }
 
-func (g *GopassService) GetCredentialValueAsString(getOptions *parameteroptions.GopassSecretOptions) (credentialValue string, err error) {
+func GetCredentialValueAsString(getOptions *parameteroptions.GopassSecretOptions) (credentialValue string, err error) {
 	if getOptions == nil {
 		return "", tracederrors.TracedError("getOptions is nil")
 	}
 
-	credential, err := g.GetCredential(getOptions)
+	credential, err := GetCredential(getOptions)
 	if err != nil {
 		return
 	}
@@ -154,12 +144,12 @@ func (g *GopassService) GetCredentialValueAsString(getOptions *parameteroptions.
 	return credentialValue, nil
 }
 
-func (g *GopassService) GetCredentialValueAsStringByPath(secretPath string) (secretValue string, err error) {
+func GetCredentialValueAsStringByPath(secretPath string) (secretValue string, err error) {
 	if secretPath == "" {
 		return "", tracederrors.TracedError("secretPath is empty string")
 	}
 
-	secretValue, err = g.GetCredentialValueAsString(
+	secretValue, err = GetCredentialValueAsString(
 		&parameteroptions.GopassSecretOptions{
 			SecretRootDirectoryPath: filepath.Dir(secretPath),
 			SecretBasename:          filepath.Base(secretPath),
@@ -172,12 +162,12 @@ func (g *GopassService) GetCredentialValueAsStringByPath(secretPath string) (sec
 	return secretValue, nil
 }
 
-func (g *GopassService) GetCredentialValueOrEmptyIfUnsetAsStringByPath(secretPath string) (credentialValue string, err error) {
+func GetCredentialValueOrEmptyIfUnsetAsStringByPath(secretPath string) (credentialValue string, err error) {
 	if secretPath == "" {
 		return "", tracederrors.TracedErrorEmptyString(secretPath)
 	}
 
-	credential, err := g.GetCredential(
+	credential, err := GetCredential(
 		&parameteroptions.GopassSecretOptions{
 			SecretRootDirectoryPath: filepath.Dir(secretPath),
 			SecretBasename:          filepath.Base(secretPath),
@@ -204,25 +194,12 @@ func (g *GopassService) GetCredentialValueOrEmptyIfUnsetAsStringByPath(secretPat
 	return credentialValue, nil
 }
 
-func (g *GopassService) GetGopassCredentialByName(name string) (credential *GopassCredential, err error) {
-	if name == "" {
-		return nil, tracederrors.TracedError("name is empty string")
-	}
-
-	credential, err = GetGopassCredentialByName(name)
-	if err != nil {
-		return nil, err
-	}
-
-	return credential, nil
-}
-
-func (g *GopassService) GetSslCertificate(getOptions *parameteroptions.GopassSecretOptions) (cert *x509utils.X509Certificate, err error) {
+func GetSslCertificate(getOptions *parameteroptions.GopassSecretOptions) (cert *x509utils.X509Certificate, err error) {
 	if getOptions == nil {
 		return nil, tracederrors.TracedError("getOptions is nil")
 	}
 
-	credential, err := g.GetCredential(getOptions)
+	credential, err := GetCredential(getOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +212,7 @@ func (g *GopassService) GetSslCertificate(getOptions *parameteroptions.GopassSec
 	return cert, nil
 }
 
-func (g *GopassService) InsertFileByString(fileContent string, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
+func InsertFileByString(fileContent string, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
 	if gopassOptions == nil {
 		return tracederrors.TracedErrorNil("gopassOptions")
 	}
@@ -246,7 +223,7 @@ func (g *GopassService) InsertFileByString(fileContent string, gopassOptions *pa
 	}
 
 	if !gopassOptions.Overwrite {
-		secretExists, err := g.SecretNameExist(gopassPath)
+		secretExists, err := SecretNameExist(gopassPath)
 		if err != nil {
 			return err
 		}
@@ -272,7 +249,7 @@ func (g *GopassService) InsertFileByString(fileContent string, gopassOptions *pa
 		return err
 	}
 
-	err = g.WriteInfoToGopass(gopassPath)
+	err = WriteInfoToGopass(gopassPath)
 	if err != nil {
 		return err
 	}
@@ -284,7 +261,7 @@ func (g *GopassService) InsertFileByString(fileContent string, gopassOptions *pa
 	return nil
 }
 
-func (g *GopassService) InsertFile(fileToInsert files.File, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
+func InsertFile(fileToInsert files.File, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
 	if fileToInsert == nil {
 		return tracederrors.TracedError("fileToInsert is nil")
 	}
@@ -313,7 +290,7 @@ func (g *GopassService) InsertFile(fileToInsert files.File, gopassOptions *param
 	}
 
 	if !gopassOptions.Overwrite {
-		secretExists, err := g.SecretNameExist(gopassPath)
+		secretExists, err := SecretNameExist(gopassPath)
 		if err != nil {
 			return err
 		}
@@ -338,7 +315,7 @@ func (g *GopassService) InsertFile(fileToInsert files.File, gopassOptions *param
 		return err
 	}
 
-	err = g.WriteInfoToGopass(gopassPath)
+	err = WriteInfoToGopass(gopassPath)
 	if err != nil {
 		return err
 	}
@@ -350,7 +327,7 @@ func (g *GopassService) InsertFile(fileToInsert files.File, gopassOptions *param
 	return nil
 }
 
-func (g *GopassService) InsertSecret(secretToInsert string, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
+func InsertSecret(secretToInsert string, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
 	if len(secretToInsert) <= 0 {
 		return tracederrors.TracedError("secretToInsert is empty string")
 	}
@@ -365,7 +342,7 @@ func (g *GopassService) InsertSecret(secretToInsert string, gopassOptions *param
 	}
 
 	if !gopassOptions.Overwrite {
-		secretExists, err := g.SecretNameExist(gopassPath)
+		secretExists, err := SecretNameExist(gopassPath)
 		if err != nil {
 			return err
 		}
@@ -390,7 +367,7 @@ func (g *GopassService) InsertSecret(secretToInsert string, gopassOptions *param
 		return err
 	}
 
-	err = g.WriteInfoToGopass(gopassPath)
+	err = WriteInfoToGopass(gopassPath)
 	if err != nil {
 		return err
 	}
@@ -402,8 +379,8 @@ func (g *GopassService) InsertSecret(secretToInsert string, gopassOptions *param
 	return nil
 }
 
-func (g *GopassService) MustCredentialExists(fullCredentialPath string) (credentialExists bool) {
-	credentialExists, err := g.CredentialExists(fullCredentialPath)
+func MustCredentialExists(fullCredentialPath string) (credentialExists bool) {
+	credentialExists, err := CredentialExists(fullCredentialPath)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -411,8 +388,8 @@ func (g *GopassService) MustCredentialExists(fullCredentialPath string) (credent
 	return credentialExists
 }
 
-func (g *GopassService) MustGenerate(credentialName string, verbose bool) (generatedCredential *GopassCredential) {
-	generatedCredential, err := g.Generate(credentialName, verbose)
+func MustGenerate(credentialName string, verbose bool) (generatedCredential *GopassCredential) {
+	generatedCredential, err := Generate(credentialName, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -420,8 +397,8 @@ func (g *GopassService) MustGenerate(credentialName string, verbose bool) (gener
 	return generatedCredential
 }
 
-func (g *GopassService) MustGetCredential(getOptions *parameteroptions.GopassSecretOptions) (credential *GopassCredential) {
-	credential, err := g.GetCredential(getOptions)
+func MustGetCredential(getOptions *parameteroptions.GopassSecretOptions) (credential *GopassCredential) {
+	credential, err := GetCredential(getOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -429,8 +406,8 @@ func (g *GopassService) MustGetCredential(getOptions *parameteroptions.GopassSec
 	return credential
 }
 
-func (g *GopassService) MustGetCredentialList() (credentials []*GopassCredential) {
-	credentials, err := g.GetCredentialList()
+func MustGetCredentialList() (credentials []*GopassCredential) {
+	credentials, err := GetCredentialList()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -438,8 +415,8 @@ func (g *GopassService) MustGetCredentialList() (credentials []*GopassCredential
 	return credentials
 }
 
-func (g *GopassService) MustGetCredentialNameList() (credentialNames []string) {
-	credentialNames, err := g.GetCredentialNameList()
+func MustGetCredentialNameList() (credentialNames []string) {
+	credentialNames, err := GetCredentialNameList()
 	if err != nil {
 		logging.LogFatalf("gopass.GetCredentialNameList failed: '%v'", err)
 	}
@@ -447,8 +424,8 @@ func (g *GopassService) MustGetCredentialNameList() (credentialNames []string) {
 	return credentialNames
 }
 
-func (g *GopassService) MustGetCredentialValue(getOptions *parameteroptions.GopassSecretOptions) (credentialValue string) {
-	credentialValue, err := g.GetCredentialValueAsString(getOptions)
+func MustGetCredentialValue(getOptions *parameteroptions.GopassSecretOptions) (credentialValue string) {
+	credentialValue, err := GetCredentialValueAsString(getOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -456,8 +433,8 @@ func (g *GopassService) MustGetCredentialValue(getOptions *parameteroptions.Gopa
 	return credentialValue
 }
 
-func (g *GopassService) MustGetCredentialValueAsString(getOptions *parameteroptions.GopassSecretOptions) (credentialValue string) {
-	credentialValue, err := g.GetCredentialValueAsString(getOptions)
+func MustGetCredentialValueAsString(getOptions *parameteroptions.GopassSecretOptions) (credentialValue string) {
+	credentialValue, err := GetCredentialValueAsString(getOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -465,8 +442,8 @@ func (g *GopassService) MustGetCredentialValueAsString(getOptions *parameteropti
 	return credentialValue
 }
 
-func (g *GopassService) MustGetCredentialValueAsStringByPath(secretPath string) (secretValue string) {
-	secretValue, err := g.GetCredentialValueAsStringByPath(secretPath)
+func MustGetCredentialValueAsStringByPath(secretPath string) (secretValue string) {
+	secretValue, err := GetCredentialValueAsStringByPath(secretPath)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -474,8 +451,8 @@ func (g *GopassService) MustGetCredentialValueAsStringByPath(secretPath string) 
 	return secretValue
 }
 
-func (g *GopassService) MustGetCredentialValueOrEmptyIfUnsetAsStringByPath(secretPath string) (credentialValue string) {
-	credentialValue, err := g.GetCredentialValueOrEmptyIfUnsetAsStringByPath(secretPath)
+func MustGetCredentialValueOrEmptyIfUnsetAsStringByPath(secretPath string) (credentialValue string) {
+	credentialValue, err := GetCredentialValueOrEmptyIfUnsetAsStringByPath(secretPath)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -483,17 +460,8 @@ func (g *GopassService) MustGetCredentialValueOrEmptyIfUnsetAsStringByPath(secre
 	return credentialValue
 }
 
-func (g *GopassService) MustGetGopassCredentialByName(name string) (credential *GopassCredential) {
-	credential, err := g.GetGopassCredentialByName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return credential
-}
-
-func (g *GopassService) MustGetSslCertificate(getOptions *parameteroptions.GopassSecretOptions) (cert *x509utils.X509Certificate) {
-	cert, err := g.GetSslCertificate(getOptions)
+func MustGetSslCertificate(getOptions *parameteroptions.GopassSecretOptions) (cert *x509utils.X509Certificate) {
+	cert, err := GetSslCertificate(getOptions)
 	if err != nil {
 		logging.LogFatalf("Gopass.GetSslCertificate: '%v'", err)
 	}
@@ -501,22 +469,22 @@ func (g *GopassService) MustGetSslCertificate(getOptions *parameteroptions.Gopas
 	return cert
 }
 
-func (g *GopassService) MustInsertFile(fileToInsert files.File, gopassOptions *parameteroptions.GopassSecretOptions) {
-	err := g.InsertFile(fileToInsert, gopassOptions)
+func MustInsertFile(fileToInsert files.File, gopassOptions *parameteroptions.GopassSecretOptions) {
+	err := InsertFile(fileToInsert, gopassOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (g *GopassService) MustInsertSecret(secretToInsert string, gopassOptions *parameteroptions.GopassSecretOptions) {
-	err := g.InsertSecret(secretToInsert, gopassOptions)
+func MustInsertSecret(secretToInsert string, gopassOptions *parameteroptions.GopassSecretOptions) {
+	err := InsertSecret(secretToInsert, gopassOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (g *GopassService) MustSecretNameExist(secretName string) (secretExists bool) {
-	secretExists, err := g.SecretNameExist(secretName)
+func MustSecretNameExist(secretName string) (secretExists bool) {
+	secretExists, err := SecretNameExist(secretName)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -524,22 +492,22 @@ func (g *GopassService) MustSecretNameExist(secretName string) (secretExists boo
 	return secretExists
 }
 
-func (g *GopassService) MustSync(verbose bool) {
-	err := g.Sync(verbose)
+func MustSync(verbose bool) {
+	err := Sync(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (g *GopassService) MustWriteInfoToGopass(gopassPath string) {
-	err := g.WriteInfoToGopass(gopassPath)
+func MustWriteInfoToGopass(gopassPath string) {
+	err := WriteInfoToGopass(gopassPath)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (g *GopassService) MustWriteSecretIntoTemporaryFile(getOptions *parameteroptions.GopassSecretOptions) (temporaryFile files.File) {
-	temporaryFile, err := g.WriteSecretIntoTemporaryFile(getOptions)
+func MustWriteSecretIntoTemporaryFile(getOptions *parameteroptions.GopassSecretOptions) (temporaryFile files.File) {
+	temporaryFile, err := WriteSecretIntoTemporaryFile(getOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -547,13 +515,13 @@ func (g *GopassService) MustWriteSecretIntoTemporaryFile(getOptions *parameterop
 	return temporaryFile
 }
 
-func (g *GopassService) SecretNameExist(secretName string) (secretExists bool, err error) {
+func SecretNameExist(secretName string) (secretExists bool, err error) {
 	secretName = strings.TrimSpace(secretName)
 	if len(secretName) <= 0 {
 		return false, tracederrors.TracedError("secretName is empty string")
 	}
 
-	secretNames, err := g.GetCredentialNameList()
+	secretNames, err := GetCredentialNameList()
 	if err != nil {
 		return false, err
 	}
@@ -561,7 +529,7 @@ func (g *GopassService) SecretNameExist(secretName string) (secretExists bool, e
 	return slicesutils.ContainsString(secretNames, secretName), nil
 }
 
-func (g *GopassService) Sync(verbose bool) (err error) {
+func Sync(verbose bool) (err error) {
 	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command:            []string{"gopass", "sync"},
@@ -576,7 +544,7 @@ func (g *GopassService) Sync(verbose bool) (err error) {
 	return nil
 }
 
-func (g *GopassService) WriteInfoToGopass(gopassPath string) (err error) {
+func WriteInfoToGopass(gopassPath string) (err error) {
 	gopassPath = strings.TrimSpace(gopassPath)
 	if len(gopassPath) <= 0 {
 		return tracederrors.TracedError("gopassPath is empty string")
@@ -605,12 +573,12 @@ func (g *GopassService) WriteInfoToGopass(gopassPath string) (err error) {
 	return nil
 }
 
-func (g *GopassService) WriteSecretIntoTemporaryFile(getOptions *parameteroptions.GopassSecretOptions) (temporaryFile files.File, err error) {
+func WriteSecretIntoTemporaryFile(getOptions *parameteroptions.GopassSecretOptions) (temporaryFile files.File, err error) {
 	if getOptions == nil {
 		return nil, tracederrors.TracedError("getOptions is nil")
 	}
 
-	credential, err := g.GetCredential(getOptions)
+	credential, err := GetCredential(getOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -621,6 +589,13 @@ func (g *GopassService) WriteSecretIntoTemporaryFile(getOptions *parameteroption
 	}
 
 	return temporaryFile, nil
+}
+
+func MustCreateRootCaAndAddToGopass(createOptions *x509utils.X509CreateCertificateOptions, gopassOptions *parameteroptions.GopassSecretOptions) {
+	err := CreateRootCaAndAddToGopass(createOptions, gopassOptions)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
 }
 
 func CreateRootCaAndAddToGopass(createOptions *x509utils.X509CreateCertificateOptions, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
@@ -655,14 +630,14 @@ func CreateRootCaAndAddToGopass(createOptions *x509utils.X509CreateCertificateOp
 
 	certOptions := gopassOptions.GetDeepCopy()
 	certOptions.SecretBasename = "rootCa.crt"
-	err = Gopass().InsertFileByString(ceCertPem, certOptions)
+	err = InsertFileByString(ceCertPem, certOptions)
 	if err != nil {
 		return err
 	}
 
 	keyOptions := gopassOptions.GetDeepCopy()
 	keyOptions.SecretBasename = "rootCa.key"
-	err = Gopass().InsertFileByString(caKeyPem, keyOptions)
+	err = InsertFileByString(caKeyPem, keyOptions)
 	if err != nil {
 		return err
 	}
