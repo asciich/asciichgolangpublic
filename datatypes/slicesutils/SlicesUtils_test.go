@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSlicesContainsInt(t *testing.T) {
@@ -399,6 +400,16 @@ func TestSlicesGetDeepCopyOfStringSlice(t *testing.T) {
 			},
 		)
 	}
+}
+
+func TestSlices_GetSortedDeepCopyString(t *testing.T) {
+	require := require.New(t)
+	inputSlice := []string{"c", "b", "a"}
+
+	sorted := GetSortedDeepCopyOfStringsSlice(inputSlice)
+	require.EqualValues([]string{"a", "b", "c"}, sorted)
+	require.NotEqual(inputSlice, sorted)
+	require.EqualValues([]string{"c", "b", "a"}, inputSlice)
 }
 
 func TestSlices_RemoveEmptyStringsAtEnd(t *testing.T) {
