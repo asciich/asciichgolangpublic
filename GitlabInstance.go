@@ -179,7 +179,7 @@ func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) 
 	}
 
 	for _, gopassPath := range authOptions.AccessTokensFromGopass {
-		credentialExists, err := gopass.Gopass().CredentialExists(gopassPath)
+		credentialExists, err := gopass.CredentialExists(gopassPath)
 		if err != nil {
 			return err
 		}
@@ -196,7 +196,7 @@ func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) 
 
 		getSecretOptions := parameteroptions.NewGopassSecretOptions()
 		getSecretOptions.SetGopassPath(gopassPath)
-		accessToken, err := gopass.Gopass().GetCredentialValueAsString(getSecretOptions)
+		accessToken, err := gopass.GetCredentialValueAsString(getSecretOptions)
 		if err != nil {
 			return err
 		}
