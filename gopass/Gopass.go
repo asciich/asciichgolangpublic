@@ -2,7 +2,6 @@ package gopass
 
 import (
 	"fmt"
-	"path/filepath"
 	"slices"
 	"strings"
 
@@ -64,7 +63,7 @@ func GetCredential(getOptions *parameteroptions.GopassSecretOptions) (credential
 		return nil, tracederrors.TracedError("getOptions is nil")
 	}
 
-	name, err := getOptions.GetGopassPath()
+	name, err := getOptions.GetSecretPath()
 	if err != nil {
 		return nil, err
 	}
@@ -151,8 +150,7 @@ func GetCredentialValueAsStringByPath(secretPath string) (secretValue string, er
 
 	secretValue, err = GetCredentialValueAsString(
 		&parameteroptions.GopassSecretOptions{
-			SecretRootDirectoryPath: filepath.Dir(secretPath),
-			SecretBasename:          filepath.Base(secretPath),
+			SecretPath: secretPath,
 		},
 	)
 	if err != nil {
@@ -169,8 +167,7 @@ func GetCredentialValueOrEmptyIfUnsetAsStringByPath(secretPath string) (credenti
 
 	credential, err := GetCredential(
 		&parameteroptions.GopassSecretOptions{
-			SecretRootDirectoryPath: filepath.Dir(secretPath),
-			SecretBasename:          filepath.Base(secretPath),
+			SecretPath: secretPath,
 		},
 	)
 	if err != nil {
@@ -217,7 +214,7 @@ func InsertFileByString(fileContent string, gopassOptions *parameteroptions.Gopa
 		return tracederrors.TracedErrorNil("gopassOptions")
 	}
 
-	gopassPath, err := gopassOptions.GetGopassPath()
+	gopassPath, err := gopassOptions.GetSecretPath()
 	if err != nil {
 		return err
 	}
@@ -284,7 +281,7 @@ func InsertFile(fileToInsert files.File, gopassOptions *parameteroptions.GopassS
 		return tracederrors.TracedError("fileToInsert does not exist in file system.")
 	}
 
-	gopassPath, err := gopassOptions.GetGopassPath()
+	gopassPath, err := gopassOptions.GetSecretPath()
 	if err != nil {
 		return err
 	}
@@ -336,7 +333,7 @@ func InsertSecret(secretToInsert string, gopassOptions *parameteroptions.GopassS
 		return tracederrors.TracedError("gopassOptions is nil")
 	}
 
-	gopassPath, err := gopassOptions.GetGopassPath()
+	gopassPath, err := gopassOptions.GetSecretPath()
 	if err != nil {
 		return err
 	}
@@ -629,14 +626,22 @@ func CreateRootCaAndAddToGopass(createOptions *x509utils.X509CreateCertificateOp
 	}
 
 	certOptions := gopassOptions.GetDeepCopy()
-	certOptions.SecretBasename = "rootCa.crt"
+	err = certOptions.SetBaseName("rootCa.crt")
+	if err != nil {
+		return err
+	}
+
 	err = InsertFileByString(ceCertPem, certOptions)
 	if err != nil {
 		return err
 	}
 
 	keyOptions := gopassOptions.GetDeepCopy()
-	keyOptions.SecretBasename = "rootCa.key"
+	err = keyOptions.SetBaseName("rootCa.key")
+	if err != nil {
+		return err
+	}
+
 	err = InsertFileByString(caKeyPem, keyOptions)
 	if err != nil {
 		return err
