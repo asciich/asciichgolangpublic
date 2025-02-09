@@ -2,208 +2,193 @@ package parameteroptions
 
 import (
 	"path/filepath"
-	"strings"
+	"regexp"
 
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
+const baseNameRegexString = "^[a-zA-Z0-9.]*$"
+
+const secretPathRegexString = "^[a-zA-Z0-9.][a-zA-Z0-9.\\/]*$"
+
+var baseNameRegex = regexp.MustCompile(baseNameRegexString)
+
+var secretPathRegex = regexp.MustCompile(secretPathRegexString)
+
 type GopassSecretOptions struct {
-	SecretRootDirectoryPath string
-	SecretBasename          string
+	SecretPath string
 
 	Overwrite bool
 	Verbose   bool
 }
 
-func NewGopassSecretOptions() (gopassSecretOptions *GopassSecretOptions) {
+func NewGopassSecretOptions() (g *GopassSecretOptions) {
 	return new(GopassSecretOptions)
 }
 
-func (g *GopassSecretOptions) GetOverwrite() (overwrite bool, err error) {
-
-	return g.Overwrite, nil
-}
-
-func (g *GopassSecretOptions) GetVerbose() (verbose bool, err error) {
-
-	return g.Verbose, nil
-}
-
-func (g *GopassSecretOptions) MustGetGopassPath() (gopassPath string) {
-	gopassPath, err := g.GetGopassPath()
+func (g *GopassSecretOptions) GetBaseName() (baseName string, err error) {
+	path, err := g.GetSecretPath()
 	if err != nil {
-		logging.LogGoErrorFatal(err)
+		return "", err
 	}
 
-	return gopassPath
-}
+	baseName = filepath.Base(path)
 
-func (g *GopassSecretOptions) MustGetOverwrite() (overwrite bool) {
-	overwrite, err := g.GetOverwrite()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
+	if baseName == "" {
+		return "", tracederrors.TracedErrorf(
+			"base name is empty string after evaluation of path='%s'", path,
+		)
 	}
 
-	return overwrite
+	return baseName, nil
 }
 
-func (g *GopassSecretOptions) MustGetSecretBasename() (basename string) {
-	basename, err := g.GetSecretBasename()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
+func (g *GopassSecretOptions) GetDeepCopy() (copy *GopassSecretOptions) {
+	copy = NewGopassSecretOptions()
 
-	return basename
-}
-
-func (g *GopassSecretOptions) MustGetSecretRootDirectoryPath() (rootDirectoryPath string) {
-	rootDirectoryPath, err := g.GetSecretRootDirectoryPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return rootDirectoryPath
-}
-
-func (g *GopassSecretOptions) MustGetVerbose() (verbose bool) {
-	verbose, err := g.GetVerbose()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return verbose
-}
-
-func (g *GopassSecretOptions) MustSetGopassPath(fullPath string) {
-	err := g.SetGopassPath(fullPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GopassSecretOptions) MustSetOverwrite(overwrite bool) {
-	err := g.SetOverwrite(overwrite)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GopassSecretOptions) MustSetSecretBasename(secretBasename string) {
-	err := g.SetSecretBasename(secretBasename)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GopassSecretOptions) MustSetSecretRootDirectoryPath(secretRootDirectoryPath string) {
-	err := g.SetSecretRootDirectoryPath(secretRootDirectoryPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GopassSecretOptions) MustSetVerbose(verbose bool) {
-	err := g.SetVerbose(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GopassSecretOptions) SetOverwrite(overwrite bool) (err error) {
-	g.Overwrite = overwrite
-
-	return nil
-}
-
-func (g *GopassSecretOptions) SetSecretBasename(secretBasename string) (err error) {
-	if secretBasename == "" {
-		return tracederrors.TracedErrorf("secretBasename is empty string")
-	}
-
-	g.SecretBasename = secretBasename
-
-	return nil
-}
-
-func (g *GopassSecretOptions) SetSecretRootDirectoryPath(secretRootDirectoryPath string) (err error) {
-	if secretRootDirectoryPath == "" {
-		return tracederrors.TracedErrorf("secretRootDirectoryPath is empty string")
-	}
-
-	g.SecretRootDirectoryPath = secretRootDirectoryPath
-
-	return nil
-}
-
-func (g *GopassSecretOptions) SetVerbose(verbose bool) (err error) {
-	g.Verbose = verbose
-
-	return nil
-}
-
-func (o *GopassSecretOptions) GetDeepCopy() (copy *GopassSecretOptions) {
-	copy = new(GopassSecretOptions)
-
-	*copy = *o
+	*copy = *g
 
 	return copy
 }
 
-func (o *GopassSecretOptions) GetGopassPath() (gopassPath string, err error) {
-	rootDir, err := o.GetSecretRootDirectoryPath()
+func (g *GopassSecretOptions) GetDirName() (dirName string, err error) {
+	path, err := g.GetSecretPath()
 	if err != nil {
 		return "", err
 	}
 
-	basename, err := o.GetSecretBasename()
+	dirName = filepath.Dir(path)
+
+	if dirName == "" {
+		return "", tracederrors.TracedErrorf("dirName is empty string after evaluation.")
+	}
+
+	return dirName, nil
+}
+
+func (g *GopassSecretOptions) GetOverwrite() (overwrite bool) {
+
+	return g.Overwrite
+}
+
+func (g *GopassSecretOptions) GetSecretPath() (secretPath string, err error) {
+	secretPath = g.SecretPath
+
+	if secretPath == "" {
+		return "", tracederrors.TracedErrorf("SecretPath not set")
+	}
+
+	secretPath = stringsutils.TrimAllPrefix(secretPath, "/")
+	if secretPath == "" {
+		return "", tracederrors.TracedErrorf("secret path is empty string after evaluation of '%s'", g.SecretPath)
+	}
+
+	if !secretPathRegex.MatchString(secretPath) {
+		return "", tracederrors.TracedErrorf("given secretPath '%s' does not match '%s'", secretPath, secretPathRegexString)
+	}
+
+	return secretPath, nil
+}
+
+func (g *GopassSecretOptions) GetVerbose() (verbose bool) {
+
+	return g.Verbose
+}
+
+func (g *GopassSecretOptions) MustGetBaseName() (baseName string) {
+	baseName, err := g.GetBaseName()
 	if err != nil {
-		return "", err
+		logging.LogGoErrorFatal(err)
 	}
 
-	if strings.HasPrefix(basename, "/") {
-		return "", tracederrors.TracedErrorf("absolute secret gopass paths not allowed, but got: '%v'", basename)
-	}
-
-	gopassPath = filepath.Join(rootDir, basename)
-	return gopassPath, nil
+	return baseName
 }
 
-func (o *GopassSecretOptions) GetSecretBasename() (basename string, err error) {
-	basename = o.SecretBasename
-	basename = strings.TrimSpace(basename)
-	if len(basename) <= 0 {
-		return "", tracederrors.TracedError("basename is empty string")
+func (g *GopassSecretOptions) MustGetDirName() (dirName string) {
+	dirName, err := g.GetDirName()
+	if err != nil {
+		logging.LogGoErrorFatal(err)
 	}
 
-	if strings.HasPrefix(basename, "/") {
-		return "", tracederrors.TracedErrorf("absolute secret basenames not allowed for gopass, but got: '%v'", basename)
-	}
-
-	return basename, nil
+	return dirName
 }
 
-func (o *GopassSecretOptions) GetSecretRootDirectoryPath() (rootDirectoryPath string, err error) {
-	rootDirectoryPath = o.SecretRootDirectoryPath
-	rootDirectoryPath = strings.TrimSpace(rootDirectoryPath)
-	if len(rootDirectoryPath) <= 0 {
-		return "", tracederrors.TracedError("rootDirectoryPath is empty string")
+func (g *GopassSecretOptions) MustGetSecretPath() (secretPath string) {
+	secretPath, err := g.GetSecretPath()
+	if err != nil {
+		logging.LogGoErrorFatal(err)
 	}
 
-	if strings.HasPrefix(rootDirectoryPath, "/") {
-		return "", tracederrors.TracedErrorf("absolute secret rootDirectoryPaths not allowed for gopass, but got: '%v'", rootDirectoryPath)
-	}
-
-	return rootDirectoryPath, nil
+	return secretPath
 }
 
-func (o *GopassSecretOptions) SetGopassPath(fullPath string) (err error) {
-	if len(fullPath) <= 0 {
-		return tracederrors.TracedError("fullPath is empty string")
+func (g *GopassSecretOptions) MustSetBaseName(newBaseName string) {
+	err := g.SetBaseName(newBaseName)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+}
+
+func (g *GopassSecretOptions) MustSetSecretPath(secretPath string) {
+	err := g.SetSecretPath(secretPath)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+}
+
+func (g *GopassSecretOptions) SetBaseName(newBaseName string) (err error) {
+	if newBaseName == "" {
+		return tracederrors.TracedErrorEmptyString("newBaseName")
 	}
 
-	o.SecretBasename = filepath.Base(fullPath)
-	o.SecretRootDirectoryPath = filepath.Dir(fullPath)
+	if !baseNameRegex.MatchString(newBaseName) {
+		return tracederrors.TracedErrorf(
+			"newBaseName '%s' does not match regex '%s'",
+			newBaseName,
+			baseNameRegexString,
+		)
+	}
+
+	dirName, err := g.GetDirName()
+	if err != nil {
+		return err
+	}
+
+	newPath := filepath.Join(dirName, newBaseName)
+
+	err = g.SetSecretPath(newPath)
+	if err != nil {
+		return err
+	}
 
 	return nil
+}
+
+func (g *GopassSecretOptions) SetOverwrite(overwrite bool) {
+	g.Overwrite = overwrite
+}
+
+func (g *GopassSecretOptions) SetSecretPath(secretPath string) (err error) {
+	if secretPath == "" {
+		return tracederrors.TracedErrorf("secretPath is empty string")
+	}
+
+	secretPath = stringsutils.TrimAllPrefix(secretPath, "/")
+	if secretPath == "" {
+		return tracederrors.TracedErrorf("secret path is empty string after evaluation of '%s'", g.SecretPath)
+	}
+
+	if !secretPathRegex.MatchString(secretPath) {
+		return tracederrors.TracedErrorf("given secretPath '%s' does not match '%s'", secretPath, secretPathRegexString)
+	}
+
+	g.SecretPath = secretPath
+
+	return nil
+}
+
+func (g *GopassSecretOptions) SetVerbose(verbose bool) {
+	g.Verbose = verbose
 }

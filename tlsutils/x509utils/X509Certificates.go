@@ -1,6 +1,8 @@
 package x509utils
 
 import (
+	"crypto"
+	"crypto/x509"
 	"fmt"
 	"path/filepath"
 
@@ -13,6 +15,31 @@ import (
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
+func GetDefaultHandler() (certHandler X509CertificateHandler) {
+	return GetNativeX509CertificateHandler()
+}
+
+func MustCreateSignedEndEndityCertificate(options *X509CreateCertificateOptions, caCert *x509.Certificate, caPrivateKey crypto.PrivateKey, verbose bool) (endEndityCert *x509.Certificate, privateKey crypto.PrivateKey) {
+	endEndityCert, privateKey, err := CreateSignedEndEndityCertificate(options, caCert, caPrivateKey, verbose)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return endEndityCert, privateKey
+}
+
+func CreateSignedEndEndityCertificate(options *X509CreateCertificateOptions, caCert *x509.Certificate, caPrivateKey crypto.PrivateKey, verbose bool) (endEndityCert *x509.Certificate, privateKey crypto.PrivateKey, err error) {
+	return GetDefaultHandler().CreateSignedEndEndityCertificate(
+		options,
+		caCert,
+		caPrivateKey,
+		verbose,
+	)
+}
+
+// ================================
+// TODO rewrite/ remove from here:
+// ================================
 type X509CertificatesService struct {
 }
 
@@ -74,7 +101,6 @@ func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(cre
 
 	return directoryToUse, nil
 }
-
 
 func (c *X509CertificatesService) CreateRootCaIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey files.Directory, err error) {
 	if createOptions == nil {
@@ -826,14 +852,6 @@ func (x *X509CertificatesService) MustCreateSigningRequestFile(signOptions *X509
 	}
 }
 
-func (x *X509CertificatesService) MustGetNextCaSerialNumberAsStringFromGopass(verbose bool) (serial string) {
-	serial, err := x.GetNextCaSerialNumberAsStringFromGopass(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return serial
-}
 
 func (x *X509CertificatesService) MustIsCertificateFileSignedByCertificateFile(thisCertificateFile *X509CertificateFile, isSignedByThisCertificateFile files.File, verbose bool) (isSignedBy bool) {
 	isSignedBy, err := x.IsCertificateFileSignedByCertificateFile(thisCertificateFile, isSignedByThisCertificateFile, verbose)

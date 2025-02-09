@@ -134,8 +134,7 @@ func LoadPrivateKeyFromPEMString(pemEncoded string) (privateKey crypto.PrivateKe
 		privateKey = key
 	} else if key, err := x509.ParseECPrivateKey(block.Bytes); err == nil {
 		privateKey = key
-	}
-	if err != nil {
+	} else {
 		return nil, tracederrors.TracedErrorf("Unable to parse as key: %w", err)
 	}
 
