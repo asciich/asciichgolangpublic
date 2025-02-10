@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,9 +27,9 @@ func TestSlicesContainsInt(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(tt.expectedContains, ContainsInt(tt.inputSlice, tt.intToSearch))
+				require.EqualValues(tt.expectedContains, ContainsInt(tt.inputSlice, tt.intToSearch))
 			},
 		)
 	}
@@ -59,9 +58,9 @@ func TestSlicesContainsString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(tt.expectedContains, ContainsString(tt.inputSlice, tt.stringToSearch))
+				require.EqualValues(tt.expectedContains, ContainsString(tt.inputSlice, tt.stringToSearch))
 			},
 		)
 	}
@@ -90,9 +89,9 @@ func TestSlicesContainsStringIgnoreCase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(tt.expectedContains, ContainsStringIgnoreCase(tt.inputSlice, tt.stringToSearch))
+				require.EqualValues(tt.expectedContains, ContainsStringIgnoreCase(tt.inputSlice, tt.stringToSearch))
 			},
 		)
 	}
@@ -123,10 +122,10 @@ func TestSlicesTrimSpace(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				trimmed := TrimSpace(tt.input)
-				assert.EqualValues(tt.expectedOutput, trimmed)
+				require.EqualValues(tt.expectedOutput, trimmed)
 			},
 		)
 	}
@@ -151,10 +150,10 @@ func TestSlicesRemoveMatchingStrings(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				removedMatching := RemoveMatchingStrings(tt.input, tt.removeMatching)
-				assert.EqualValues(tt.expectedOutput, removedMatching)
+				require.EqualValues(tt.expectedOutput, removedMatching)
 			},
 		)
 	}
@@ -178,10 +177,10 @@ func TestSlicesRemoveStringsWhichContains(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				removedContains := MustRemoveStringsWhichContains(tt.input, tt.searchString)
-				assert.EqualValues(tt.expectedOutput, removedContains)
+				require.EqualValues(tt.expectedOutput, removedContains)
 			},
 		)
 	}
@@ -205,10 +204,10 @@ func TestSlicesMaxIntValuePerIndex(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				maxValues := MaxIntValuePerIndex(tt.input1, tt.input2)
-				assert.EqualValues(tt.expectedOutput, maxValues)
+				require.EqualValues(tt.expectedOutput, maxValues)
 			},
 		)
 	}
@@ -232,10 +231,10 @@ func TestSlicesRemoveLastElementIfEmptyString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				output := RemoveLastElementIfEmptyString(tt.input)
-				assert.EqualValues(tt.expectedOutput, output)
+				require.EqualValues(tt.expectedOutput, output)
 			},
 		)
 	}
@@ -262,10 +261,10 @@ func TestSlicesRemoveDuplicatedEntries(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				output := RemoveDuplicatedStrings(tt.input)
-				assert.EqualValues(tt.expectedOutput, output)
+				require.EqualValues(tt.expectedOutput, output)
 			},
 		)
 	}
@@ -294,9 +293,9 @@ func TestSlicesStringSlicesEqual(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedEqual,
 					StringSlicesEqual(tt.input1, tt.input2),
 				)
@@ -329,15 +328,15 @@ func TestSlicesDiffStringSlices(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				aNotInB, bNotInA := DiffStringSlices(tt.input1, tt.input2)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedANotInB,
 					aNotInB,
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedBNotInA,
 					bNotInA,
 				)
@@ -362,16 +361,16 @@ func TestSlicesGetDeepCopyOfByteSlice(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				copy := GetDeepCopyOfByteSlice(tt.input)
-				assert.EqualValues(tt.expected_output, copy)
+				require.EqualValues(tt.expected_output, copy)
 
 				for i := 0; i < len(tt.input); i++ {
 					tt.input[i] = 0x00
 				}
 
-				assert.EqualValues(tt.expected_output, copy)
+				require.EqualValues(tt.expected_output, copy)
 			},
 		)
 	}
@@ -393,10 +392,10 @@ func TestSlicesGetDeepCopyOfStringSlice(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				copy := GetDeepCopyOfStringsSlice(tt.input)
-				assert.EqualValues(tt.expected_output, copy)
+				require.EqualValues(tt.expected_output, copy)
 			},
 		)
 	}
@@ -436,10 +435,10 @@ func TestSlices_RemoveEmptyStringsAtEnd(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				copy := RemoveEmptyStringsAtEnd(tt.input)
-				assert.EqualValues(tt.expectedOutput, copy)
+				require.EqualValues(tt.expectedOutput, copy)
 			},
 		)
 	}

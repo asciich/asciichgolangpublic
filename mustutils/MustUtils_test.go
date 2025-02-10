@@ -3,7 +3,7 @@ package mustutils
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func functionReturningOneValueAndAnError() (string, error) {
@@ -23,7 +23,7 @@ func functionReturningFourValuesAndAnError() (string, int, bool, uint64, error) 
 }
 
 func TestMustUtils_Must(t *testing.T) {
-	assert.EqualValues(
+	require.EqualValues(
 		t,
 		"",
 		Must(functionReturningOneValueAndAnError()),
@@ -33,23 +33,23 @@ func TestMustUtils_Must(t *testing.T) {
 func TestMustUtils_Must2(t *testing.T) {
 	v1, v2 := Must2(functionReturningTwoValuesAndAnError())
 
-	assert.EqualValues(t, "", v1)
-	assert.EqualValues(t, 123, v2)
+	require.EqualValues(t, "", v1)
+	require.EqualValues(t, 123, v2)
 }
 
 func TestMustUtils_Must3(t *testing.T) {
 	v1, v2, v3 := Must3(functionReturningThreeValuesAndAnError())
 
-	assert.EqualValues(t, "", v1)
-	assert.EqualValues(t, 123, v2)
-	assert.EqualValues(t, false, v3)
+	require.EqualValues(t, "", v1)
+	require.EqualValues(t, 123, v2)
+	require.EqualValues(t, false, v3)
 }
 
 func TestMustUtils_Must4(t *testing.T) {
 	v1, v2, v3, v4 := Must4(functionReturningFourValuesAndAnError())
 
-	assert.EqualValues(t, "", v1)
-	assert.EqualValues(t, 123, v2)
-	assert.EqualValues(t, false, v3)
-	assert.EqualValues(t, uint64(17), v4)
+	require.EqualValues(t, "", v1)
+	require.EqualValues(t, 123, v2)
+	require.EqualValues(t, false, v3)
+	require.EqualValues(t, uint64(17), v4)
 }

@@ -3,7 +3,7 @@ package docker
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -29,11 +29,11 @@ func TestDocker_GetHostName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				docker := getDockerImplementationByName(tt.implementationName)
 
-				assert.EqualValues(
+				require.EqualValues(
 					"localhost",
 					docker.MustGetHostDescription(),
 				)

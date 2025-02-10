@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -25,7 +25,7 @@ func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -39,7 +39,7 @@ func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
 				const projectPath string = "test_group/testproject"
 
 				gitlabProject := gitlab.MustGetGitlabProjectByPath(projectPath, verbose)
-				assert.True(gitlabProject.MustExists(verbose))
+				require.True(gitlabProject.MustExists(verbose))
 
 				defaultBranch := gitlabProject.MustGetDefaultBranch()
 				syncBranch := gitlabProject.MustCreateBranchFromDefaultBranch("test_sync", verbose)
@@ -64,11 +64,11 @@ func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					"hello",
 					defaultBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					"world",
 					syncBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
 				)
@@ -79,11 +79,11 @@ func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
 					PathsToSync:  []string{filePath},
 				})
 
-				assert.EqualValues(
+				require.EqualValues(
 					"world",
 					defaultBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					"world",
 					syncBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
 				)
@@ -108,7 +108,7 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -122,7 +122,7 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile(t *testing.T) {
 				const projectPath string = "test_group/testproject"
 
 				gitlabProject := gitlab.MustGetGitlabProjectByPath(projectPath, verbose)
-				assert.True(gitlabProject.MustExists(verbose))
+				require.True(gitlabProject.MustExists(verbose))
 
 				defaultBranch := gitlabProject.MustGetDefaultBranch()
 				syncBranch := gitlabProject.MustCreateBranchFromDefaultBranch("test_sync", verbose)
@@ -144,10 +144,10 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile(t *testing.T) {
 					},
 				)
 
-				assert.False(
+				require.False(
 					defaultBranch.MustRepositoryFileExists(filePath, verbose),
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					"world",
 					syncBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
 				)
@@ -158,11 +158,11 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile(t *testing.T) {
 					PathsToSync:  []string{filePath},
 				})
 
-				assert.EqualValues(
+				require.EqualValues(
 					"world",
 					defaultBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					"world",
 					syncBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
 				)
@@ -187,7 +187,7 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -201,7 +201,7 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 				const projectPath string = "test_group/testproject"
 
 				gitlabProject := gitlab.MustGetGitlabProjectByPath(projectPath, verbose)
-				assert.True(gitlabProject.MustExists(verbose))
+				require.True(gitlabProject.MustExists(verbose))
 
 				defaultBranch := gitlabProject.MustGetDefaultBranch()
 				syncBranch := gitlabProject.MustCreateBranchFromDefaultBranch("test_sync", verbose)
@@ -223,10 +223,10 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 					},
 				)
 
-				assert.False(
+				require.False(
 					defaultBranch.MustRepositoryFileExists(filePath, verbose),
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					"world",
 					syncBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
 				)
@@ -237,11 +237,11 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 					PathsToSync:  []string{filePath},
 				})
 
-				assert.True(mergeRequest.MustIsOpen())
-				assert.False(
+				require.True(mergeRequest.MustIsOpen())
+				require.False(
 					defaultBranch.MustRepositoryFileExists(filePath, verbose),
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					"world",
 					syncBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
 				)
@@ -252,12 +252,12 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 					},
 				)
 
-				assert.True(mergeRequest.MustIsMerged())
-				assert.EqualValues(
+				require.True(mergeRequest.MustIsMerged())
+				require.EqualValues(
 					"world",
 					defaultBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					"world",
 					syncBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
 				)

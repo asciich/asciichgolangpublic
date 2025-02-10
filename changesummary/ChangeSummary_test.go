@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestChangeSummryIsChanged(t *testing.T) {
@@ -18,24 +18,24 @@ func TestChangeSummryIsChanged(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				changeSummary := NewChangeSummary()
-				assert.False(changeSummary.IsChanged())
+				require.False(changeSummary.IsChanged())
 
 				for i := 0; i < 2; i++ {
 					changeSummary.SetChanged(false)
-					assert.False(changeSummary.IsChanged())
+					require.False(changeSummary.IsChanged())
 				}
 
 				for i := 0; i < 2; i++ {
 					changeSummary.SetChanged(true)
-					assert.True(changeSummary.IsChanged())
+					require.True(changeSummary.IsChanged())
 				}
 
 				for i := 0; i < 2; i++ {
 					changeSummary.SetChanged(false)
-					assert.False(changeSummary.IsChanged())
+					require.False(changeSummary.IsChanged())
 				}
 			},
 		)
@@ -53,30 +53,30 @@ func TestChangeSummryNumberOfChnages(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				changeSummary := NewChangeSummary()
-				assert.False(changeSummary.IsChanged())
-				assert.EqualValues(0, changeSummary.GetNumberOfChanges())
+				require.False(changeSummary.IsChanged())
+				require.EqualValues(0, changeSummary.GetNumberOfChanges())
 
 				nLoops := 3
 
 				for i := 0; i < nLoops; i++ {
 					changeSummary.IncrementNumberOfChanges()
-					assert.True(changeSummary.IsChanged())
-					assert.EqualValues(i+1, changeSummary.GetNumberOfChanges())
+					require.True(changeSummary.IsChanged())
+					require.EqualValues(i+1, changeSummary.GetNumberOfChanges())
 				}
 
 				for i := 0; i < 2; i++ {
 					changeSummary.SetChanged(true)
-					assert.True(changeSummary.IsChanged())
-					assert.EqualValues(nLoops, changeSummary.GetNumberOfChanges())
+					require.True(changeSummary.IsChanged())
+					require.EqualValues(nLoops, changeSummary.GetNumberOfChanges())
 				}
 
 				for i := 0; i < 2; i++ {
 					changeSummary.SetChanged(false)
-					assert.False(changeSummary.IsChanged())
-					assert.EqualValues(0, changeSummary.GetNumberOfChanges())
+					require.False(changeSummary.IsChanged())
+					require.EqualValues(0, changeSummary.GetNumberOfChanges())
 				}
 			},
 		)

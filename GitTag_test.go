@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -43,13 +43,13 @@ func TestGitlabTag_IsVersionTag(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				toTest := getGitTagToTest(tt.implementationName)
 
 				toTest.MustSetName(tt.tagName)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedIsVersionTag,
 					toTest.MustIsVersionTag(),
 				)

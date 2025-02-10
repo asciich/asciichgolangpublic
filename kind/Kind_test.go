@@ -3,7 +3,7 @@ package kind
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -32,7 +32,7 @@ func TestKind_CreateAndDeleteCluster(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 				const clusterName = "kind-ci-test"
@@ -40,16 +40,16 @@ func TestKind_CreateAndDeleteCluster(t *testing.T) {
 				kind := getKindByImplementationName(tt.implementationName)
 
 				kind.MustDeleteClusterByName(clusterName, verbose)
-				assert.False(kind.MustClusterByNameExists(clusterName, verbose))
+				require.False(kind.MustClusterByNameExists(clusterName, verbose))
 
 				for i := 0; i < 2; i++ {
 					kind.MustCreateClusterByName(clusterName, verbose)
-					assert.True(kind.MustClusterByNameExists(clusterName, verbose))
+					require.True(kind.MustClusterByNameExists(clusterName, verbose))
 				}
 
 				for i := 0; i < 2; i++ {
 					kind.MustDeleteClusterByName(clusterName, verbose)
-					assert.False(kind.MustClusterByNameExists(clusterName, verbose))
+					require.False(kind.MustClusterByNameExists(clusterName, verbose))
 				}
 			},
 		)

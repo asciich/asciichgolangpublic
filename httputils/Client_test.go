@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -38,7 +38,7 @@ func TestClient_GetRequest_RootPage_PortInUrl(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 				const port int = 9123
@@ -57,8 +57,8 @@ func TestClient_GetRequest_RootPage_PortInUrl(t *testing.T) {
 					},
 				)
 
-				assert.True(response.MustIsStatusCodeOk())
-				assert.Contains(
+				require.True(response.MustIsStatusCodeOk())
+				require.Contains(
 					response.MustGetBodyAsString(),
 					"TestWebServer",
 				)
@@ -79,7 +79,7 @@ func TestClient_DownloadAsFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 				const port int = 9123
@@ -105,7 +105,7 @@ func TestClient_DownloadAsFile(t *testing.T) {
 				)
 				defer downloadedFile.MustDelete(verbose)
 
-				assert.Contains(
+				require.Contains(
 					"hello world\n",
 					downloadedFile.MustReadAsString(),
 				)
@@ -126,7 +126,7 @@ func TestClient_DownloadAsTempraryFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 				const port int = 9123
@@ -148,7 +148,7 @@ func TestClient_DownloadAsTempraryFile(t *testing.T) {
 				)
 				defer downloadedFile.MustDelete(verbose)
 
-				assert.Contains(
+				require.Contains(
 					"hello world\n",
 					downloadedFile.MustReadAsString(),
 				)

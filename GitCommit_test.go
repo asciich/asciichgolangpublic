@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -20,7 +20,7 @@ func TestGitCommit_CreateTag(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -37,7 +37,7 @@ func TestGitCommit_CreateTag(t *testing.T) {
 
 				commitToTag := repo.MustGetCurrentCommit(verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					[]GitTag{},
 					commitToTag.MustListTags(verbose),
 				)
@@ -58,12 +58,12 @@ func TestGitCommit_CreateTag(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					commitToTag.MustGetHash(),
 					createdTag.MustGetHash(),
 				)
 
-				assert.NotEqualValues(
+				require.NotEqualValues(
 					newerCommit.MustGetHash(),
 					createdTag.MustGetHash(),
 				)
@@ -84,7 +84,7 @@ func TestGitCommit_ListTagsNames(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -101,7 +101,7 @@ func TestGitCommit_ListTagsNames(t *testing.T) {
 
 				currentCommit := repo.MustGetCurrentCommit(verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					[]GitTag{},
 					currentCommit.MustListTags(verbose),
 				)
@@ -113,11 +113,11 @@ func TestGitCommit_ListTagsNames(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					"first_tag",
 					currentCommit.MustListTagNames(verbose)[0],
 				)
-				assert.Len(
+				require.Len(
 					currentCommit.MustListTagNames(verbose),
 					1,
 				)
@@ -129,15 +129,15 @@ func TestGitCommit_ListTagsNames(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					"first_tag",
 					currentCommit.MustListTagNames(verbose)[0],
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					"second_tag",
 					currentCommit.MustListTagNames(verbose)[1],
 				)
-				assert.Len(
+				require.Len(
 					currentCommit.MustListTagNames(verbose),
 					2,
 				)
@@ -158,7 +158,7 @@ func TestGitCommit_ListVersionTagNames(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -175,7 +175,7 @@ func TestGitCommit_ListVersionTagNames(t *testing.T) {
 
 				currentCommit := repo.MustGetCurrentCommit(verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					[]GitTag{},
 					currentCommit.MustListTags(verbose),
 				)
@@ -208,15 +208,15 @@ func TestGitCommit_ListVersionTagNames(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					"v0.1.2",
 					currentCommit.MustListVersionTagNames(verbose)[0],
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					"v1.0.0",
 					currentCommit.MustListVersionTagNames(verbose)[1],
 				)
-				assert.Len(
+				require.Len(
 					currentCommit.MustListVersionTagNames(verbose),
 					2,
 				)
@@ -237,7 +237,7 @@ func TestGitCommit_GetNewestTagVersion(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -254,7 +254,7 @@ func TestGitCommit_GetNewestTagVersion(t *testing.T) {
 
 				currentCommit := repo.MustGetCurrentCommit(verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					[]GitTag{},
 					currentCommit.MustListTags(verbose),
 				)
@@ -287,7 +287,7 @@ func TestGitCommit_GetNewestTagVersion(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					"v1.0.0",
 					currentCommit.MustGetNewestTagVersion(verbose).MustGetAsString(),
 				)
@@ -308,7 +308,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -325,11 +325,11 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 
 				currentCommit := repo.MustGetCurrentCommit(verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					[]GitTag{},
 					currentCommit.MustListTags(verbose),
 				)
-				assert.Nil(
+				require.Nil(
 					currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose),
 				)
 
@@ -340,7 +340,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 					},
 				)
 
-				assert.Nil(
+				require.Nil(
 					currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose),
 				)
 
@@ -351,7 +351,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					"v1.0.0",
 					currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).MustGetAsString(),
 				)
@@ -363,7 +363,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					"v1.0.0",
 					currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).MustGetAsString(),
 				)
@@ -375,7 +375,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					"v1.0.0",
 					currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).MustGetAsString(),
 				)
@@ -396,7 +396,7 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -413,7 +413,7 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 
 				currentCommit := repo.MustGetCurrentCommit(verbose)
 
-				assert.False(
+				require.False(
 					currentCommit.MustHasVersionTag(verbose),
 				)
 
@@ -424,7 +424,7 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 					},
 				)
 
-				assert.False(
+				require.False(
 					currentCommit.MustHasVersionTag(verbose),
 				)
 
@@ -435,7 +435,7 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 					},
 				)
 
-				assert.True(
+				require.True(
 					currentCommit.MustHasVersionTag(verbose),
 				)
 
@@ -446,7 +446,7 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 					},
 				)
 
-				assert.True(
+				require.True(
 					currentCommit.MustHasVersionTag(verbose),
 				)
 			},

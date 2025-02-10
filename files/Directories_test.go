@@ -4,7 +4,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -22,8 +21,6 @@ func TestDirectoriesCreateLocalDirectoryByPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
-
 				const verbose bool = true
 
 				tempDir, err := os.MkdirTemp("", "tempdir_for_testing")
@@ -32,17 +29,17 @@ func TestDirectoriesCreateLocalDirectoryByPath(t *testing.T) {
 				var directory Directory = MustGetLocalDirectoryByPath(tempDir)
 				defer directory.Delete(verbose)
 
-				assert.True(directory.MustExists(verbose))
+				require.True(t, directory.MustExists(verbose))
 
 				for i := 0; i < 2; i++ {
 					directory.MustDelete(verbose)
-					assert.False(directory.MustExists(verbose))
+					require.False(t, directory.MustExists(verbose))
 				}
 
 				for i := 0; i < 2; i++ {
 					createdDir := Directories().MustCreateLocalDirectoryByPath(directory.MustGetLocalPath(), verbose)
-					assert.True(directory.MustExists(verbose))
-					assert.True(createdDir.MustExists(verbose))
+					require.True(t, directory.MustExists(verbose))
+					require.True(t, createdDir.MustExists(verbose))
 				}
 
 			},

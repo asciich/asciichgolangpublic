@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -41,10 +41,10 @@ func TestDurationParserToSecondsInt64(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				parsedDuration := DurationParser().MustToSecondsInt64(tt.durationString)
-				assert.EqualValues(tt.expectedDuration, parsedDuration)
+				require.EqualValues(tt.expectedDuration, parsedDuration)
 			},
 		)
 	}
@@ -120,10 +120,10 @@ func TestDurationParserToSecondsFloat64(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				parsedDuration := DurationParser().MustToSecondsFloat64(tt.durationString)
-				assert.EqualValues(tt.expectedDuration, parsedDuration)
+				require.EqualValues(tt.expectedDuration, parsedDuration)
 			},
 		)
 	}
@@ -165,10 +165,10 @@ func TestDurationParserToTimeDuration(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				parsedDuration := DurationParser().MustToSecondsAsTimeDuration(tt.durationString)
-				assert.EqualValues(tt.expectedDuration, *parsedDuration)
+				require.EqualValues(tt.expectedDuration, *parsedDuration)
 			},
 		)
 	}

@@ -3,7 +3,7 @@ package commandexecutor
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -35,13 +35,13 @@ func TestCommandExecutor_GetDeepCopyOfCommandExecutor(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				commandExecutor := getCommandExecutorByImplementationName(tt.implementationName)
 
 				copy := MustGetDeepCopyOfCommandExecutor(commandExecutor)
 
-				assert.EqualValues(
+				require.EqualValues(
 					commandExecutor.MustGetHostDescription(),
 					copy.MustGetHostDescription(),
 				)

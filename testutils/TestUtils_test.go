@@ -3,7 +3,7 @@ package testutils
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTestsFormatAsTestname(t *testing.T) {
@@ -19,11 +19,11 @@ func TestTestsFormatAsTestname(t *testing.T) {
 		t.Run(
 			MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				testname := MustFormatAsTestname(tt.objectToFormat)
 
-				assert.EqualValues(tt.expectedTestname, testname)
+				require.EqualValues(tt.expectedTestname, testname)
 			},
 		)
 	}

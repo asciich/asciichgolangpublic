@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -23,8 +22,6 @@ func TestCommandExecutorDirectoryRead_GetFileInDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
-
 				const verbose bool = true
 
 				temporaryDir, err := os.MkdirTemp("", "testdir")
@@ -39,14 +36,16 @@ func TestCommandExecutorDirectoryRead_GetFileInDirectory(t *testing.T) {
 				parentDirPath := filepath.Dir(temporaryFile.Name())
 
 				dir := MustGetLocalCommandExecutorDirectoryByPath(parentDirPath)
-				assert.NotNil(
+				require.NotNil(
+					t,
 					dir.MustGetCommandExecutor(),
 				)
 				defer dir.MustDelete(verbose)
 
 				commandExecutorFile := dir.MustGetFileInDirectory(filepath.Base(temporaryFile.Name()))
 
-				assert.EqualValues(
+				require.EqualValues(
+					t,
 					tt.testContent,
 					commandExecutorFile.MustReadAsString(),
 				)

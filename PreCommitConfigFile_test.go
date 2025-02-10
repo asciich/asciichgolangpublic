@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
@@ -29,7 +29,7 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -69,7 +69,7 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 					}
 				}
 
-				assert.EqualValues(expectedOutputSha, updatedSha)
+				require.EqualValues(expectedOutputSha, updatedSha)
 			},
 		)
 	}
@@ -87,7 +87,7 @@ func TestPreCommitConfigFile_GetPreCommitConfigInGitRepository(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -97,8 +97,8 @@ func TestPreCommitConfigFile_GetPreCommitConfigInGitRepository(t *testing.T) {
 				gitRepo.MustWriteStringToFile("# placeholder", verbose, ".pre-commit-config.yaml")
 
 				preCommitConfigFile := MustGetPreCommitConfigFileInGitRepository(gitRepo)
-				assert.True(preCommitConfigFile.MustExists(verbose))
-				assert.True(strings.HasSuffix(preCommitConfigFile.MustGetPath(), "/.pre-commit-config.yaml"))
+				require.True(preCommitConfigFile.MustExists(verbose))
+				require.True(strings.HasSuffix(preCommitConfigFile.MustGetPath(), "/.pre-commit-config.yaml"))
 			},
 		)
 	}

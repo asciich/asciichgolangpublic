@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBytesParseSizeStringAsInt64(t *testing.T) {
@@ -33,10 +33,10 @@ func TestBytesParseSizeStringAsInt64(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				sizeBytes := MustParseSizeStringAsInt64(tt.stringToParse)
-				assert.EqualValues(tt.expectedSizeBytes, sizeBytes)
+				require.EqualValues(tt.expectedSizeBytes, sizeBytes)
 			},
 		)
 	}
@@ -63,10 +63,10 @@ func TestGetSizeAsHumanReadableString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				sizeString := MustGetSizeAsHumanReadableString(tt.sizeToConvert)
-				assert.EqualValues(tt.expectedSizeString, sizeString)
+				require.EqualValues(tt.expectedSizeString, sizeString)
 			},
 		)
 	}

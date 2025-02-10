@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/randomgenerator"
@@ -27,7 +27,7 @@ func TestGitlabReleaseCreateAndDelete(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -54,7 +54,7 @@ func TestGitlabReleaseCreateAndDelete(t *testing.T) {
 						},
 					)
 
-					assert.False(release.MustExists(verbose))
+					require.False(release.MustExists(verbose))
 				}
 
 				var tag *GitlabTag
@@ -69,8 +69,8 @@ func TestGitlabReleaseCreateAndDelete(t *testing.T) {
 					)
 					tag = release.MustGetTag()
 
-					assert.True(release.MustExists(verbose))
-					assert.True(tag.MustExists(verbose))
+					require.True(release.MustExists(verbose))
+					require.True(tag.MustExists(verbose))
 				}
 
 				for i := 0; i < 2; i++ {
@@ -81,8 +81,8 @@ func TestGitlabReleaseCreateAndDelete(t *testing.T) {
 						},
 					)
 
-					assert.False(release.MustExists(verbose))
-					assert.False(tag.MustExists(verbose))
+					require.False(release.MustExists(verbose))
+					require.False(tag.MustExists(verbose))
 				}
 			},
 		)
@@ -105,7 +105,7 @@ func TestGitlabRelease_ReleaseLinks(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -138,11 +138,11 @@ func TestGitlabRelease_ReleaseLinks(t *testing.T) {
 						Description: releaseDescription,
 					},
 				)
-				assert.True(release.MustExists(verbose))
+				require.True(release.MustExists(verbose))
 
 				const releaseLink = "https://asciich.ch/release/link/1"
 
-				assert.False(release.MustHasReleaseLinks(verbose))
+				require.False(release.MustHasReleaseLinks(verbose))
 
 				for i := 0; i < 2; i++ {
 					release.MustCreateReleaseLink(
@@ -152,10 +152,10 @@ func TestGitlabRelease_ReleaseLinks(t *testing.T) {
 							Verbose: verbose,
 						},
 					)
-					assert.True(release.MustHasReleaseLinks(verbose))
+					require.True(release.MustHasReleaseLinks(verbose))
 				}
 
-				assert.EqualValues(
+				require.EqualValues(
 					[]string{releaseLink},
 					release.MustListReleaseLinkUrls(verbose),
 				)
@@ -167,7 +167,7 @@ func TestGitlabRelease_ReleaseLinks(t *testing.T) {
 					},
 				)
 
-				assert.False(release.MustExists(verbose))
+				require.False(release.MustExists(verbose))
 			},
 		)
 	}
@@ -189,7 +189,7 @@ func TestGitlabRelease_CreateNewPatchRelease(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -220,7 +220,7 @@ func TestGitlabRelease_CreateNewPatchRelease(t *testing.T) {
 						Verbose:     verbose,
 					},
 				)
-				assert.True(release.MustExists(verbose))
+				require.True(release.MustExists(verbose))
 
 				project.MustWriteFileContentInDefaultBranch(
 					&GitlabWriteFileOptions{
@@ -233,21 +233,21 @@ func TestGitlabRelease_CreateNewPatchRelease(t *testing.T) {
 
 				nextPatchRelease := project.MustCreateNextPatchReleaseFromLatestCommitInDefaultBranch("next patch release", verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					"v1.2.4",
 					nextPatchRelease.MustGetName(),
 				)
 
 				nextMinorRelease := project.MustCreateNextMinorReleaseFromLatestCommitInDefaultBranch("next minor release", verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					"v1.3.0",
 					nextMinorRelease.MustGetName(),
 				)
 
 				nextMajorRelease := project.MustCreateNextMajorReleaseFromLatestCommitInDefaultBranch("next minor release", verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					"v2.0.0",
 					nextMajorRelease.MustGetName(),
 				)

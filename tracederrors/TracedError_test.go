@@ -5,45 +5,45 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTracedErrorIsError(t *testing.T) {
-	assert := assert.New(t)
+	require := require.New(t)
 
 	var err error = TracedError("example error")
 	_, ok := err.(TracedErrorType)
-	assert.True(ok)
+	require.True(ok)
 }
 
 func TestTracedErrorIsTracedError(t *testing.T) {
-	assert := assert.New(t)
+	require := require.New(t)
 
 	var err error = TracedError("example error")
-	assert.True(errors.Is(err, ErrTracedError))
+	require.True(errors.Is(err, ErrTracedError))
 }
 
 func TestTracedErrorWrap(t *testing.T) {
-	assert := assert.New(t)
+	require := require.New(t)
 
 	exampleError := errors.New("exampleError")
 
 	var errFmt error = fmt.Errorf("%w", exampleError)
-	assert.True(errors.Is(errFmt, exampleError))
+	require.True(errors.Is(errFmt, exampleError))
 
 	var tracedErrorWithWrapFormatted error = TracedErrorf("%w", exampleError)
-	assert.True(errors.Is(tracedErrorWithWrapFormatted, exampleError))
+	require.True(errors.Is(tracedErrorWithWrapFormatted, exampleError))
 
 	var tracedErrorWithWrap error = TracedError(exampleError)
-	assert.True(errors.Is(tracedErrorWithWrap, exampleError))
+	require.True(errors.Is(tracedErrorWithWrap, exampleError))
 
 	var wrappedAgain error = fmt.Errorf("again: %w", tracedErrorWithWrap)
-	assert.True(errors.Is(wrappedAgain, exampleError))
-	assert.True(errors.Is(wrappedAgain, ErrTracedError))
+	require.True(errors.Is(wrappedAgain, exampleError))
+	require.True(errors.Is(wrappedAgain, ErrTracedError))
 
 	var wrappedAgain2 error = fmt.Errorf("again2: %w", wrappedAgain)
-	assert.True(errors.Is(wrappedAgain2, exampleError))
-	assert.True(errors.Is(wrappedAgain2, ErrTracedError))
+	require.True(errors.Is(wrappedAgain2, exampleError))
+	require.True(errors.Is(wrappedAgain2, ErrTracedError))
 }
 
 func testFunctionRaisingError(errorMessage string) (err error) {
@@ -61,12 +61,12 @@ func TestTracedErrorStackTraceInMessage(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				err := testFunctionRaisingError(tt.testmessage)
 
-				assert.Contains(err.Error(), tt.testmessage)
-				assert.Contains(err.Error(), "testFunctionRaisingError")
+				require.Contains(err.Error(), tt.testmessage)
+				require.Contains(err.Error(), "testFunctionRaisingError")
 			},
 		)
 	}
@@ -85,14 +85,14 @@ func TestTracedErrorEmptyString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				var err error = TracedErrorEmptyString(tt.stringName)
-				assert.Contains(err.Error(), "'"+tt.stringName+"' is empty string")
-				assert.True(IsTracedError(err))
-				assert.True(IsEmptyStringError(err))
-				assert.False(IsNilError(err))
-				assert.False(IsNotImplementedError(err))
+				require.Contains(err.Error(), "'"+tt.stringName+"' is empty string")
+				require.True(IsTracedError(err))
+				require.True(IsEmptyStringError(err))
+				require.False(IsNilError(err))
+				require.False(IsNotImplementedError(err))
 			},
 		)
 	}
@@ -111,14 +111,14 @@ func TestTracedErrorNil(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				var err error = TracedErrorNil(tt.stringName)
-				assert.Contains(err.Error(), "'"+tt.stringName+"' is nil")
-				assert.True(IsTracedError(err))
-				assert.True(IsNilError(err))
-				assert.False(IsEmptyStringError(err))
-				assert.False(IsNotImplementedError(err))
+				require.Contains(err.Error(), "'"+tt.stringName+"' is nil")
+				require.True(IsTracedError(err))
+				require.True(IsNilError(err))
+				require.False(IsEmptyStringError(err))
+				require.False(IsNotImplementedError(err))
 			},
 		)
 	}
@@ -137,14 +137,14 @@ func TestTracedErrorNotImplemented(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				var err error = TracedErrorNotImplemented()
-				assert.Contains(err.Error(), "Not implemented")
-				assert.True(IsTracedError(err))
-				assert.True(IsNotImplementedError(err))
-				assert.False(IsNilError(err))
-				assert.False(IsEmptyStringError(err))
+				require.Contains(err.Error(), "Not implemented")
+				require.True(IsTracedError(err))
+				require.True(IsNotImplementedError(err))
+				require.False(IsNilError(err))
+				require.False(IsEmptyStringError(err))
 			},
 		)
 	}
@@ -164,11 +164,11 @@ func TestTracedErrorGetErrorMessage(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				tracedError := MustGetAsTracedError(TracedError(tt.errorMessage))
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedErrorMessage,
 					tracedError.MustGetErrorMessage(),
 				)

@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -29,12 +29,12 @@ func TestVersionEquals(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				version1 := Versions().MustGetNewVersionByString(tt.version1)
 				version2 := Versions().MustGetNewVersionByString(tt.version2)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedEquals,
 					version1.Equals(version2),
 				)

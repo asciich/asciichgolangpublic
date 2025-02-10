@@ -3,7 +3,7 @@ package shelllinehandler
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -21,10 +21,10 @@ func TestShellLineHandlerSplit(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				splitted := MustSplit(tt.commandString)
-				assert.EqualValues(tt.expectedSplitted, splitted)
+				require.EqualValues(tt.expectedSplitted, splitted)
 			},
 		)
 	}
@@ -53,10 +53,10 @@ func TestShellLineHandlerJoin(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				joined := MustJoin(tt.command)
-				assert.EqualValues(tt.expectedJoined, joined)
+				require.EqualValues(tt.expectedJoined, joined)
 			},
 		)
 	}
@@ -73,18 +73,18 @@ func TestShellLineHandlerJoin(t *testing.T) {
 // TODO enable again 		t.Run(
 // TODO enable again 			testutils.MustFormatAsTestname(tt),
 // TODO enable again 			func(t *testing.T) {
-// TODO enable again 				assert := assert.New(t)
+// TODO enable again 				require := require.New(t)
 // TODO enable again
 // TODO enable again 				joined1 := ShellLineHandler().MustJoin([]string{"echo", "hello \"world"})
 // TODO enable again 				joined2 := ShellLineHandler().MustJoin([]string{"bash", "-c", joined1})
 // TODO enable again
 // TODO enable again 				expected := "bash -c 'echo '\"'\"'hello \"world'\"'\"''"
-// TODO enable again 				assert.EqualValues(expected, joined2)
+// TODO enable again 				require.EqualValues(expected, joined2)
 // TODO enable again
 // TODO enable again 				for _, joined := range []string{joined1, joined2} {
 // TODO enable again 					executedOutput := Shell().MustRunCommandAndGetStdoutAsString(&RunCommandOptions{Command: []string{"bash", "-c", joined}})
 // TODO enable again 					executedOutput = strings.TrimSpace(executedOutput)
-// TODO enable again 					assert.EqualValues("hello \"world", executedOutput)
+// TODO enable again 					require.EqualValues("hello \"world", executedOutput)
 // TODO enable again 				}
 // TODO enable again 			},
 // TODO enable again 		)
@@ -102,19 +102,19 @@ func TestShellLineHandlerJoin(t *testing.T) {
 // TODO enable again		t.Run(
 // TODO enable again			testutils.MustFormatAsTestname(tt),
 // TODO enable again			func(t *testing.T) {
-// TODO enable again				assert := assert.New(t)
+// TODO enable again				require := require.New(t)
 // TODO enable again
 // TODO enable again				joined1 := ShellLineHandler().MustJoin([]string{"echo", "hello \"world"})
 // TODO enable again				joined2 := ShellLineHandler().MustJoin([]string{"bash", "-c", joined1})
 // TODO enable again				joined3 := ShellLineHandler().MustJoin([]string{"bash", "-c", joined2})
 // TODO enable again
 // TODO enable again				expected := "bash -c 'bash -c '\"'\"'echo '\"'\"'\"'\"'\"'\"'\"'\"'hello \"world'\"'\"'\"'\"'\"'\"'\"'\"''\"'\"''"
-// TODO enable again				assert.EqualValues(expected, joined3)
+// TODO enable again				require.EqualValues(expected, joined3)
 // TODO enable again
 // TODO enable again				for _, joined := range []string{joined1, joined2, joined3} {
 // TODO enable again					executedOutput := Shell().MustRunCommandAndGetStdoutAsString(&RunCommandOptions{Command: []string{"bash", "-c", joined}})
 // TODO enable again					executedOutput = strings.TrimSpace(executedOutput)
-// TODO enable again					assert.EqualValues("hello \"world", executedOutput)
+// TODO enable again					require.EqualValues("hello \"world", executedOutput)
 // TODO enable again				}
 // TODO enable again			},
 // TODO enable again		)
