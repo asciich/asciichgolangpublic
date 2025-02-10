@@ -13,6 +13,9 @@ func TestGopassSecretOptions_GetPath(t *testing.T) {
 		expectedPath string
 	}{
 		{"this/is/my/path", "this/is/my/path"},
+		{"this/is/my/path2", "this/is/my/path2"},
+		{"this/is/my/path_2", "this/is/my/path_2"},
+		{"this/is/my_my/path_2", "this/is/my_my/path_2"},
 
 		// Leading slashes "/" are removed automatically.
 		// This is expected behaviour since gopass does not work with leading slashes "/"
@@ -50,6 +53,10 @@ func TestGopassSecretOptions_SetAndGetBaseName(t *testing.T) {
 		{"/this/is/my/path", "path", "baseName", "this/is/my/baseName"},
 		{"/this/is/my/baseName", "baseName", "abc", "this/is/my/abc"},
 		{"/this/is/my/baseName", "baseName", "abc.key", "this/is/my/abc.key"},
+		{"/this/is/my/base-Name", "base-Name", "abc", "this/is/my/abc"},
+		{"/this/is/my/base-Name", "base-Name", "abc.key", "this/is/my/abc.key"},
+		{"/this/is/my/base_Name", "base_Name", "abc", "this/is/my/abc"},
+		{"/this/is/my/base_Name", "base_Name", "abc.key", "this/is/my/abc.key"},
 	}
 
 	for _, tt := range tests {
