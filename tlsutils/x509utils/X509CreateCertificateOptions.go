@@ -2,8 +2,10 @@ package x509utils
 
 import (
 	"crypto/x509/pkix"
+	"math/big"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/datatypes/bigints"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -17,6 +19,10 @@ type X509CreateCertificateOptions struct {
 	Organization   string
 	Locality       string // the L field
 	AdditionalSans []string
+
+	// Serial number of the certificate.
+	// To ensure big serial numbers are handled correctly a string is used instead of an int type.
+	SerialNumber string
 
 	KeyOutputFilePath         string
 	CertificateOutputFilePath string
@@ -511,4 +517,99 @@ func (x *X509CreateCertificateOptions) SetVerbose(verbose bool) (err error) {
 	x.Verbose = verbose
 
 	return nil
+}
+
+func (x *X509CreateCertificateOptions) GetSerialNumber() (serialNumber string, err error) {
+	if x.SerialNumber == "" {
+		return "", tracederrors.TracedErrorf("SerialNumber not set")
+	}
+
+	return x.SerialNumber, nil
+}
+
+func (x *X509CreateCertificateOptions) SetOrganization(organization string) (err error) {
+	if organization == "" {
+		return tracederrors.TracedErrorf("organization is empty string")
+	}
+
+	x.Organization = organization
+
+	return nil
+}
+
+func (x *X509CreateCertificateOptions) SetSerialNumber(serialNumber string) (err error) {
+	if serialNumber == "" {
+		return tracederrors.TracedErrorf("serialNumber is empty string")
+	}
+
+	x.SerialNumber = serialNumber
+
+	return nil
+}
+
+func (x *X509CreateCertificateOptions) MustGetOrganization() (organization string) {
+	organization, err := x.GetOrganization()
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return organization
+}
+
+func (x *X509CreateCertificateOptions) MustGetSerialNumber() (serialNumber string) {
+	serialNumber, err := x.GetSerialNumber()
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return serialNumber
+}
+
+func (x *X509CreateCertificateOptions) MustGetSubjectAsPkixName() (subject *pkix.Name) {
+	subject, err := x.GetSubjectAsPkixName()
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return subject
+}
+
+func (x *X509CreateCertificateOptions) MustSetOrganization(organization string) {
+	err := x.SetOrganization(organization)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+}
+
+func (x *X509CreateCertificateOptions) MustSetSerialNumber(serialNumber string) {
+	err := x.SetSerialNumber(serialNumber)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+}
+
+func (x *X509CreateCertificateOptions) IsSerialNumberSet() (isSet bool) {
+	return x.SerialNumber != ""
+}
+
+func (x *X509CreateCertificateOptions) GetSerialNumberOrDefaultIfUnsetAsStringBigInt() (serialNumber *big.Int, err error) {
+	if x.IsSerialNumberSet() {
+		return x.GetSerialNumberAsBigInt()
+	}
+
+	return big.NewInt(1), nil
+}
+
+func (x *X509CreateCertificateOptions) GetSerialNumberAsBigInt() (serialNumber *big.Int, err error) {
+	serialString, err := x.GetSerialNumber()
+	if err != nil {
+		return nil, err
+	}
+
+	serialNumber, err = bigints.GetFromDecimalString(serialString)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("parse serial number '%s' as big int failed: %w", serialNumber, err)
+	}
+
+	return serialNumber, nil
 }

@@ -231,8 +231,13 @@ func (n *NativeX509CertificateHandler) CreateRootCaCertificate(options *X509Crea
 		return nil, nil, err
 	}
 
+	serialNumber, err := options.GetSerialNumberOrDefaultIfUnsetAsStringBigInt()
+	if err != nil {
+		return nil, nil, err
+	}
+
 	ca := &x509.Certificate{
-		SerialNumber:          big.NewInt(1),
+		SerialNumber:          serialNumber,
 		Subject:               *subject,
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().AddDate(1, 0, 0),
