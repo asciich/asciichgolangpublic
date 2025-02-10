@@ -3,7 +3,7 @@ package mathutils
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -26,7 +26,7 @@ func TestMathUtils_MaxInt(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert.EqualValues(
+				require.EqualValues(
 					t,
 					tt.expectedResult,
 					MaxInt(tt.i1, tt.i2),

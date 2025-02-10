@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -30,13 +30,13 @@ func TestSshPublicKeySetFromString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				sshPublicKey := new(SSHPublicKey)
 				sshPublicKey.MustSetFromString(tt.keyMaterial)
 
 				keyMaterial := sshPublicKey.MustGetKeyMaterialAsString()
-				assert.EqualValues(tt.expectedKeyMaterial, keyMaterial)
+				require.EqualValues(tt.expectedKeyMaterial, keyMaterial)
 			},
 		)
 	}
@@ -62,14 +62,14 @@ func TestSshPublicKeySetFromStringUserCorrect(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				sshPublicKey := new(SSHPublicKey)
 				sshPublicKey.MustSetFromString(tt.keyMaterial)
 
-				assert.EqualValues(tt.expectedKeyMaterial, sshPublicKey.MustGetKeyMaterialAsString())
-				assert.EqualValues(tt.expectedUserName, sshPublicKey.MustGetKeyUserName())
-				assert.EqualValues(tt.expectedUserHost, sshPublicKey.MustGetKeyHostName())
+				require.EqualValues(tt.expectedKeyMaterial, sshPublicKey.MustGetKeyMaterialAsString())
+				require.EqualValues(tt.expectedUserName, sshPublicKey.MustGetKeyUserName())
+				require.EqualValues(tt.expectedUserHost, sshPublicKey.MustGetKeyHostName())
 			},
 		)
 	}

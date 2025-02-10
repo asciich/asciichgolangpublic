@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
@@ -28,7 +28,7 @@ func TestTemuxWindow_CreateAndDeleteWindow(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -43,17 +43,17 @@ func TestTemuxWindow_CreateAndDeleteWindow(t *testing.T) {
 
 				for i := 0; i < 2; i++ {
 					window.MustDelete(verbose)
-					assert.False(window.MustExists(verbose))
+					require.False(window.MustExists(verbose))
 				}
 
 				for i := 0; i < 2; i++ {
 					window.MustCreate(verbose)
-					assert.True(window.MustExists(verbose))
+					require.True(window.MustExists(verbose))
 				}
 
 				for i := 0; i < 2; i++ {
 					window.MustDelete(verbose)
-					assert.False(window.MustExists(verbose))
+					require.False(window.MustExists(verbose))
 				}
 			},
 		)
@@ -76,7 +76,7 @@ func TestTemuxWindow_ReadLastLine(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -100,7 +100,7 @@ func TestTemuxWindow_ReadLastLine(t *testing.T) {
 
 					time.Sleep(time.Millisecond * 500)
 
-					assert.EqualValues(
+					require.EqualValues(
 						content,
 						window.MustGetSecondLatestPaneLine(),
 					)
@@ -133,7 +133,7 @@ func TestTemuxWindow_RunCommand(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -151,7 +151,7 @@ func TestTemuxWindow_RunCommand(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedStdout,
 					commandOutput.MustGetStdoutAsString(),
 				)

@@ -3,7 +3,7 @@ package kubernetes
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -18,7 +18,7 @@ func TestRole_CreateAndDeleteRole(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 				const namespaceName = "testnamespace"
@@ -28,7 +28,7 @@ func TestRole_CreateAndDeleteRole(t *testing.T) {
 				namespace := kubernetes.MustCreateNamespaceByName(namespaceName, verbose)
 
 				namespace.MustDeleteRoleByName(roleName, verbose)
-				assert.False(namespace.MustRoleByNameExists(roleName, verbose))
+				require.False(namespace.MustRoleByNameExists(roleName, verbose))
 
 				for i := 0; i < 2; i++ {
 					namespace.MustCreateRole(
@@ -38,12 +38,12 @@ func TestRole_CreateAndDeleteRole(t *testing.T) {
 							Resorces: []string{"pod"},
 						},
 					)
-					assert.True(namespace.MustRoleByNameExists(roleName, verbose))
+					require.True(namespace.MustRoleByNameExists(roleName, verbose))
 				}
 
 				for i := 0; i < 2; i++ {
 					namespace.MustDeleteRoleByName(roleName, verbose)
-					assert.False(namespace.MustRoleByNameExists(roleName, verbose))
+					require.False(namespace.MustRoleByNameExists(roleName, verbose))
 				}
 			},
 		)

@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -25,7 +25,7 @@ func TestGitlabUserGetCurrentUserName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -35,7 +35,7 @@ func TestGitlabUserGetCurrentUserName(t *testing.T) {
 				})
 
 				userName := gitlab.MustGetCurrentUserName(verbose)
-				assert.EqualValues("reto", userName)
+				require.EqualValues("reto", userName)
 			},
 		)
 	}

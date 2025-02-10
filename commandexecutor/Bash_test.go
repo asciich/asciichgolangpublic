@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -26,7 +26,7 @@ func TestBashRunCommandAndGetStdoutAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -45,8 +45,8 @@ func TestBashRunCommandAndGetStdoutAsString(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(tt.expectedOutput, output)
-				assert.EqualValues(tt.expectedOutput, output2)
+				require.EqualValues(tt.expectedOutput, output)
+				require.EqualValues(tt.expectedOutput, output2)
 			},
 		)
 	}
@@ -69,7 +69,7 @@ func TestBashRunCommand(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -80,9 +80,9 @@ func TestBashRunCommand(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(tt.expectedStdout, output.MustGetStdoutAsString())
-				assert.EqualValues(tt.expectedStderr, output.MustGetStderrAsString())
-				assert.EqualValues(0, output.MustGetReturnCode())
+				require.EqualValues(tt.expectedStdout, output.MustGetStdoutAsString())
+				require.EqualValues(tt.expectedStderr, output.MustGetStderrAsString())
+				require.EqualValues(0, output.MustGetReturnCode())
 
 				output2 := Bash().MustRunCommand(
 					&parameteroptions.RunCommandOptions{
@@ -92,9 +92,9 @@ func TestBashRunCommand(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(tt.expectedStdout, output2.MustGetStdoutAsString())
-				assert.EqualValues(tt.expectedStderr, output2.MustGetStderrAsString())
-				assert.EqualValues(0, output2.MustGetReturnCode())
+				require.EqualValues(tt.expectedStdout, output2.MustGetStdoutAsString())
+				require.EqualValues(tt.expectedStderr, output2.MustGetStderrAsString())
+				require.EqualValues(0, output2.MustGetReturnCode())
 			},
 		)
 	}
@@ -115,7 +115,7 @@ func TestBashRunCommandAndGetStdoutAsFloat64(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -133,8 +133,8 @@ func TestBashRunCommandAndGetStdoutAsFloat64(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(tt.expectedFloat64, output)
-				assert.EqualValues(tt.expectedFloat64, output2)
+				require.EqualValues(tt.expectedFloat64, output)
+				require.EqualValues(tt.expectedFloat64, output2)
 			},
 		)
 	}
@@ -158,7 +158,7 @@ func TestBashRunCommandExitCode(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				output := Bash().MustRunCommand(
 					&parameteroptions.RunCommandOptions{
@@ -167,7 +167,7 @@ func TestBashRunCommandExitCode(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(tt.expectedExitCode, output.MustGetReturnCode())
+				require.EqualValues(tt.expectedExitCode, output.MustGetReturnCode())
 			},
 		)
 	}
@@ -187,7 +187,7 @@ func TestBashRunCommandAndGetStdoutAsLines(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -205,8 +205,8 @@ func TestBashRunCommandAndGetStdoutAsLines(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(tt.expectedLines, output)
-				assert.EqualValues(tt.expectedLines, output2)
+				require.EqualValues(tt.expectedLines, output)
+				require.EqualValues(tt.expectedLines, output2)
 			},
 		)
 	}
@@ -225,12 +225,8 @@ func TestBashRunOneLinerAndGetStdoutAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
-
-				const verbose bool = true
-
-				output := Bash().MustRunOneLinerAndGetStdoutAsString(tt.oneLiner, verbose)
-				assert.EqualValues(tt.expectedOutput, output)
+				output := Bash().MustRunOneLinerAndGetStdoutAsString(tt.oneLiner, true)
+				require.EqualValues(t, tt.expectedOutput, output)
 			},
 		)
 	}
@@ -250,8 +246,6 @@ func TestBashCommandAndGetFirstLineOfStdoutAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
-
 				const verbose bool = true
 
 				output := Bash().MustRunCommand(&parameteroptions.RunCommandOptions{
@@ -259,7 +253,8 @@ func TestBashCommandAndGetFirstLineOfStdoutAsString(t *testing.T) {
 					Verbose: verbose,
 				})
 
-				assert.EqualValues(
+				require.EqualValues(
+					t,
 					output.MustGetFirstLineOfStdoutAsString(),
 					tt.expectedOutput,
 				)
@@ -269,25 +264,11 @@ func TestBashCommandAndGetFirstLineOfStdoutAsString(t *testing.T) {
 }
 
 func TestBashGetHostDescription(t *testing.T) {
-	tests := []struct {
-		testcase string
-	}{
-		{"testcase"},
-	}
-
-	for _, tt := range tests {
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				assert := assert.New(t)
-
-				assert.EqualValues(
-					"localhost",
-					Bash().MustGetHostDescription(),
-				)
-			},
-		)
-	}
+	require.EqualValues(
+		t,
+		"localhost",
+		Bash().MustGetHostDescription(),
+	)
 }
 
 func TestBashRunCommandStdin(t *testing.T) {
@@ -314,7 +295,7 @@ func TestBashRunCommandStdin(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -336,8 +317,8 @@ func TestBashRunCommandStdin(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues([]byte(tt.expectedOutput), output)
-				assert.EqualValues(tt.expectedOutput, output2)
+				require.EqualValues([]byte(tt.expectedOutput), output)
+				require.EqualValues(tt.expectedOutput, output2)
 			},
 		)
 	}

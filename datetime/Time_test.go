@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTimeGetCurrentTimeAsVersionStringString(t *testing.T) {
@@ -18,10 +18,10 @@ func TestTimeGetCurrentTimeAsVersionStringString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				generatedString := Time().GetCurrentTimeAsSortableString()
-				assert.Len(generatedString, len("YYYYmmdd_HHMMSS"))
+				require.Len(generatedString, len("YYYYmmdd_HHMMSS"))
 			},
 		)
 	}

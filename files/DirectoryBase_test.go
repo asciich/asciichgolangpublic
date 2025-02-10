@@ -4,7 +4,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -21,8 +20,6 @@ func TestDirectoryBase_SetAndGetParentDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
-
 				const verbose bool = true
 
 				directoryBase := NewDirectoryBase()
@@ -35,7 +32,8 @@ func TestDirectoryBase_SetAndGetParentDirectory(t *testing.T) {
 
 				directoryBase.MustSetParentDirectoryForBaseClass(directory)
 
-				assert.EqualValues(
+				require.EqualValues(
+					t,
 					directoryBase.MustGetParentDirectoryForBaseClass(),
 					directory,
 				)
@@ -56,7 +54,7 @@ func TestDirectoryBase_ListFiles_withoutFilter(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -75,7 +73,7 @@ func TestDirectoryBase_ListFiles_withoutFilter(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					[]string{"a.log", "a.toc", "a.txt", "b.toc"},
 					fileList,
 				)
@@ -97,7 +95,7 @@ func TestDirectoryBase_ListFiles(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -117,7 +115,7 @@ func TestDirectoryBase_ListFiles(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					[]string{"a.log", "a.toc", "b.toc"},
 					fileList,
 				)
@@ -139,7 +137,7 @@ func TestDirectoryBase_DeleteFilesMatching(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -156,10 +154,10 @@ func TestDirectoryBase_DeleteFilesMatching(t *testing.T) {
 					},
 				)
 
-				assert.True(txtFile.MustExists(verbose))
-				assert.False(locFile.MustExists(verbose))
-				assert.False(tocFile.MustExists(verbose))
-				assert.False(toc2File.MustExists(verbose))
+				require.True(txtFile.MustExists(verbose))
+				require.False(locFile.MustExists(verbose))
+				require.False(tocFile.MustExists(verbose))
+				require.False(toc2File.MustExists(verbose))
 			},
 		)
 	}

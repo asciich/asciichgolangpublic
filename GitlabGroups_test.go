@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -26,7 +26,7 @@ func TestGitlabGroupsGroupByGroupPathExists(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -40,7 +40,7 @@ func TestGitlabGroupsGroupByGroupPathExists(t *testing.T) {
 
 				exists := gitlab.MustGroupByGroupPathExists(tt.groupPath, verbose)
 
-				assert.EqualValues(tt.expectedExists, exists)
+				require.EqualValues(tt.expectedExists, exists)
 			},
 		)
 	}
@@ -63,7 +63,7 @@ func TestGitlabGroupsCreateAndDeleteGroup(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -82,7 +82,7 @@ func TestGitlabGroupsCreateAndDeleteGroup(t *testing.T) {
 						tt.groupName,
 						verbose,
 					)
-					assert.False(groupUnderTest.MustExists(verbose))
+					require.False(groupUnderTest.MustExists(verbose))
 				}
 
 				for i := 0; i < 2; i++ {
@@ -92,17 +92,17 @@ func TestGitlabGroupsCreateAndDeleteGroup(t *testing.T) {
 							Verbose: verbose,
 						},
 					)
-					assert.True(createdGroup.MustExists(verbose))
-					assert.True(groupUnderTest.MustExists(verbose))
+					require.True(createdGroup.MustExists(verbose))
+					require.True(groupUnderTest.MustExists(verbose))
 				}
-				assert.Greater(groupUnderTest.MustGetId(verbose), 0)
+				require.Greater(groupUnderTest.MustGetId(verbose), 0)
 
 				for i := 0; i < 2; i++ {
 					gitlab.MustDeleteGroupByPath(
 						tt.groupName,
 						verbose,
 					)
-					assert.False(groupUnderTest.MustExists(verbose))
+					require.False(groupUnderTest.MustExists(verbose))
 				}
 			},
 		)

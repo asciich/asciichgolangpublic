@@ -3,7 +3,7 @@ package kubernetes
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -39,7 +39,7 @@ func TestNamespace_CreateAndDeleteNamespace(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 				const namespaceName = "testnamespace"
@@ -47,16 +47,16 @@ func TestNamespace_CreateAndDeleteNamespace(t *testing.T) {
 				kubernetes := getKubernetesByImplementationName(tt.implementationName)
 
 				kubernetes.MustDeleteNamespaceByName(namespaceName, verbose)
-				assert.False(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
+				require.False(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
 
 				for i := 0; i < 2; i++ {
 					kubernetes.MustCreateNamespaceByName(namespaceName, verbose)
-					assert.True(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
+					require.True(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
 				}
 
 				for i := 0; i < 2; i++ {
 					kubernetes.MustDeleteNamespaceByName(namespaceName, verbose)
-					assert.False(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
+					require.False(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
 				}
 			},
 		)

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -26,7 +26,7 @@ func TestTemuxSession_CreateAndDeleteSession(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -37,19 +37,19 @@ func TestTemuxSession_CreateAndDeleteSession(t *testing.T) {
 
 				for i := 0; i < 2; i++ {
 					session.MustDelete(verbose)
-					assert.False(session.MustExists(verbose))
+					require.False(session.MustExists(verbose))
 				}
 
 				for i := 0; i < 2; i++ {
 					session.MustCreate(verbose)
-					assert.True(session.MustExists(verbose))
+					require.True(session.MustExists(verbose))
 				}
 
 				time.Sleep(1 * time.Second)
 
 				for i := 0; i < 2; i++ {
 					session.MustDelete(verbose)
-					assert.False(session.MustExists(verbose))
+					require.False(session.MustExists(verbose))
 				}
 			},
 		)

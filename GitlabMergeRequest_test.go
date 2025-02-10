@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -26,7 +26,7 @@ func TestMergeRequestCreateAndClose(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -51,12 +51,12 @@ func TestMergeRequestCreateAndClose(t *testing.T) {
 							Verbose: verbose,
 						},
 					)
-					assert.True(mergeRequest.MustIsOpen())
-					assert.EqualValues(
+					require.True(mergeRequest.MustIsOpen())
+					require.EqualValues(
 						testProject.MustGetDefaultBranchName(),
 						mergeRequest.MustGetTargetBranchName(),
 					)
-					assert.EqualValues(
+					require.EqualValues(
 						testBranchName,
 						mergeRequest.MustGetSourceBranchName(),
 					)
@@ -65,7 +65,7 @@ func TestMergeRequestCreateAndClose(t *testing.T) {
 				mergeRequest := testProject.MustGetOpenMergeRequestByTitle(tt.mergeRequestTitle, verbose)
 				for i := 0; i < 2; i++ {
 					mergeRequest.MustClose("closed for testing", verbose)
-					assert.True(mergeRequest.MustIsClosed())
+					require.True(mergeRequest.MustIsClosed())
 				}
 			},
 		)
@@ -99,7 +99,7 @@ func TestMergeRequestCreateAndClose_withLabels(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -127,22 +127,22 @@ func TestMergeRequestCreateAndClose_withLabels(t *testing.T) {
 							Verbose:          verbose,
 						},
 					)
-					assert.True(mergeRequest.MustIsOpen())
-					assert.EqualValues(
+					require.True(mergeRequest.MustIsOpen())
+					require.EqualValues(
 						testProject.MustGetDefaultBranchName(),
 						mergeRequest.MustGetTargetBranchName(),
 					)
-					assert.EqualValues(
+					require.EqualValues(
 						testBranchName,
 						mergeRequest.MustGetSourceBranchName(),
 					)
 
-					assert.EqualValues(
+					require.EqualValues(
 						tt.labels,
 						mergeRequest.MustGetLabels(),
 					)
 
-					assert.EqualValues(
+					require.EqualValues(
 						tt.description,
 						mergeRequest.MustGetDescription(),
 					)
@@ -155,7 +155,7 @@ func TestMergeRequestCreateAndClose_withLabels(t *testing.T) {
 				)
 				for i := 0; i < 2; i++ {
 					mergeRequest.MustClose("closed for testing", verbose)
-					assert.True(mergeRequest.MustIsClosed())
+					require.True(mergeRequest.MustIsClosed())
 				}
 			},
 		)

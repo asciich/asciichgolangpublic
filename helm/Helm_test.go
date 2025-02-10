@@ -28,7 +28,7 @@ func TestRole_AddHelmRepo(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				// assert := assert.New(t)
+				// require := require.New(t)
 
 				const verbose bool = true
 

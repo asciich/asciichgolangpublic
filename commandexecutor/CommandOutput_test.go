@@ -3,7 +3,7 @@ package commandexecutor
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -21,11 +21,11 @@ func TestCommandOutputGetAndSetReturnCode(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				commandOutput := NewCommandOutput()
 				commandOutput.MustSetReturnCode(tt.returnCode)
-				assert.EqualValues(
+				require.EqualValues(
 					tt.returnCode,
 					commandOutput.MustGetReturnCode(),
 				)

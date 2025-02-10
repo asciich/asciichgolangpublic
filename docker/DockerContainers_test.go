@@ -3,7 +3,7 @@ package docker
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/containers"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -31,13 +31,9 @@ func TestContainers_IsHostRunning(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
-
-				const verbose bool = true
-
 				container := getDockerContainerToTest(tt.implementationName, "thisContainerDoesNotRun")
 
-				assert.False(container.MustIsRunning(verbose))
+				require.False(t, container.MustIsRunning(true))
 			},
 		)
 	}

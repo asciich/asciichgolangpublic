@@ -3,7 +3,7 @@ package kvm
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -18,10 +18,10 @@ func TestKvmHypervisorGetHostNameWhenUsingLocalhost(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				hypervisor := MustGetKvmHypervisorOnLocalhost()
-				assert.EqualValues(
+				require.EqualValues(
 					"localhost_connection",
 					hypervisor.MustGetHostName(),
 				)

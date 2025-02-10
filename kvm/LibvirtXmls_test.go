@@ -24,14 +24,14 @@ func TestLibvirtXmlsGetMacAddress(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				inputString := tt.testDir.ReadFileInDirectoryAsString("input.xml")
 				expectedMac := tt.testDir.MustGetFirstLineOfFileInDirectoryAsString("expected_mac.txt")
 
 				macAddress := LibvirtXmls().MustGetMacAddressFromXmlString(inputString)
 
-				assert.EqualValues(expectedMac, macAddress)
+				require.EqualValues(expectedMac, macAddress)
 			},
 		)
 	}

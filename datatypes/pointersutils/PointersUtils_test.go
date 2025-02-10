@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var constIntForTesting int = 10
@@ -24,9 +24,9 @@ func TestPointersIsPointer(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedIsPointer,
 					IsPointer(tt.pointerToCheck),
 				)
@@ -50,11 +50,11 @@ func TestPointersGetMemoryAddressAsHexString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				expectedPointerAddress := fmt.Sprintf("%p", tt.pointer)
 
-				assert.EqualValues(
+				require.EqualValues(
 					expectedPointerAddress,
 					MustGetMemoryAddressAsHexString(tt.pointer),
 				)
@@ -82,9 +82,9 @@ func TestPointersPointersEqual(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedIsEqual,
 					MustPointersEqual(tt.pointer1, tt.pointer2),
 				)

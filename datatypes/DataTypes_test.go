@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var ErrGlobalForTesting = errors.New("this global error is for testing")
@@ -32,8 +32,6 @@ func TestTypes_GetTypeName(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
-
 				input := tt.input
 
 				if input == "&ErrForTesting" {
@@ -52,7 +50,8 @@ func TestTypes_GetTypeName(t *testing.T) {
 					input = ErrGlobalForTesting
 				}
 
-				assert.EqualValues(
+				require.EqualValues(
+					t,
 					tt.expectedName,
 					MustGetTypeName(input),
 				)

@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -19,7 +19,7 @@ func TestGitlabCiYamlFileGetInclude(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -33,12 +33,12 @@ func TestGitlabCiYamlFileGetInclude(t *testing.T) {
 				gitlabCiYamlFile.MustAppendString("    file: c.yaml\n", verbose)
 
 				includes := gitlabCiYamlFile.MustGetIncludes(verbose)
-				assert.Len(includes, 1)
+				require.Len(includes, 1)
 
 				include := includes[0]
-				assert.EqualValues("a", include.MustGetProject())
-				assert.EqualValues("b", include.MustGetRef())
-				assert.EqualValues("c.yaml", include.MustGetFile())
+				require.EqualValues("a", include.MustGetProject())
+				require.EqualValues("b", include.MustGetRef())
+				require.EqualValues("c.yaml", include.MustGetFile())
 			},
 		)
 	}
@@ -55,7 +55,7 @@ func TestGitlabCiYamlFileGetInclude2(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -70,13 +70,13 @@ func TestGitlabCiYamlFileGetInclude2(t *testing.T) {
 				gitlabCiYamlFile.MustAppendString("     - c.yaml\n", verbose)
 
 				includes := gitlabCiYamlFile.MustGetIncludes(verbose)
-				assert.Len(includes, 1)
+				require.Len(includes, 1)
 
 				include := includes[0]
 
-				assert.EqualValues("a", include.MustGetProject())
-				assert.EqualValues("b", include.MustGetRef())
-				assert.EqualValues("c.yaml", include.MustGetFile())
+				require.EqualValues("a", include.MustGetProject())
+				require.EqualValues("b", include.MustGetRef())
+				require.EqualValues("c.yaml", include.MustGetFile())
 			},
 		)
 	}
@@ -94,7 +94,7 @@ func TestGitlabCiYamlFileGetIncludeIgnoreRules(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -111,13 +111,13 @@ func TestGitlabCiYamlFileGetIncludeIgnoreRules(t *testing.T) {
 				gitlabCiYamlFile.MustAppendString("     - if: $CI_PIPELINE_SOURCE != \"pipeline\"\n", verbose)
 
 				includes := gitlabCiYamlFile.MustGetIncludes(verbose)
-				assert.Len(includes, 1)
+				require.Len(includes, 1)
 
 				include := includes[0]
 
-				assert.EqualValues("a", include.MustGetProject())
-				assert.EqualValues("b", include.MustGetRef())
-				assert.EqualValues("c.yaml", include.MustGetFile())
+				require.EqualValues("a", include.MustGetProject())
+				require.EqualValues("b", include.MustGetRef())
+				require.EqualValues("c.yaml", include.MustGetFile())
 			},
 		)
 	}
@@ -134,7 +134,7 @@ func TestGitlabCiYamlFileAddIncludes(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -152,7 +152,7 @@ func TestGitlabCiYamlFileAddIncludes(t *testing.T) {
 					)
 
 					includes := gitlabCiYamlFile.MustGetIncludes(verbose)
-					assert.Len(includes, 1)
+					require.Len(includes, 1)
 				}
 
 				for i := 0; i < 3; i++ {
@@ -166,7 +166,7 @@ func TestGitlabCiYamlFileAddIncludes(t *testing.T) {
 					)
 
 					includes := gitlabCiYamlFile.MustGetIncludes(verbose)
-					assert.Len(includes, 2)
+					require.Len(includes, 2)
 				}
 			},
 		)

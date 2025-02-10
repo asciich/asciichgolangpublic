@@ -3,7 +3,7 @@ package yamlutils
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -25,7 +25,7 @@ func TestYaml_runYqQueryAgainstYamlStringAsString_2(t *testing.T) {
 	expectedYaml += "  name: " + resourceName + "\n"
 	expectedYaml += "  namespace: " + namespaceName
 
-	assert.EqualValues(
+	require.EqualValues(
 		t,
 		expectedYaml,
 		MustRunYqQueryAginstYamlStringAsString(roleYaml, ".kind=\"hello_world\""),
@@ -51,9 +51,9 @@ func TestYaml_runYqQueryAgainstYamlStringAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedResult,
 					MustRunYqQueryAginstYamlStringAsString(tt.yamlString, tt.query),
 				)

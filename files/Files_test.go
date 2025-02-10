@@ -3,14 +3,14 @@ package files
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestFilesWriteStringToFile(t *testing.T) {
 	tests := []struct {
 		implementationName string
-		content string
+		content            string
 	}{
 		{"localFile", "hello_world"},
 		{"localCommandExecutorFile", "hello_world"},
@@ -20,7 +20,7 @@ func TestFilesWriteStringToFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -36,23 +36,23 @@ func TestFilesWriteStringToFile(t *testing.T) {
 				content2 := tt.content + "2"
 				MustWriteStringToFile(tempFile2.MustGetLocalPath(), content2, verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tempFile.MustReadAsString(),
 					tt.content,
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tempFile2.MustReadAsString(),
 					content2,
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					Files().MustReadAsString(tempFile.MustGetLocalPath()),
 					tt.content,
 				)
 
 				// Since used often there is a convenience function to read a file by path:
-				assert.EqualValues(
+				require.EqualValues(
 					MustReadFileAsString(tempFile.MustGetLocalPath()),
 					tt.content,
 				)

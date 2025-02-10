@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -48,7 +48,7 @@ func TestFile_WriteString_ReadAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -57,7 +57,7 @@ func TestFile_WriteString_ReadAsString(t *testing.T) {
 
 				fileToTest.MustWriteString(tt.content, verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.content,
 					fileToTest.MustReadAsString(),
 				)
@@ -79,18 +79,18 @@ func TestFile_Exists(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
 				fileToTest := getFileToTest(tt.implementationName)
 				defer fileToTest.Delete(verbose)
 
-				assert.True(fileToTest.MustExists(verbose))
+				require.True(fileToTest.MustExists(verbose))
 
 				fileToTest.MustDelete(verbose)
 
-				assert.False(fileToTest.MustExists(verbose))
+				require.False(fileToTest.MustExists(verbose))
 			},
 		)
 	}
@@ -108,7 +108,7 @@ func TestFile_Truncate(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -117,7 +117,7 @@ func TestFile_Truncate(t *testing.T) {
 
 				for i := 0; i < 10; i++ {
 					fileToTest.MustTruncate(int64(i), verbose)
-					assert.EqualValues(
+					require.EqualValues(
 						fileToTest.MustGetSizeBytes(),
 						int64(i),
 					)
@@ -125,7 +125,7 @@ func TestFile_Truncate(t *testing.T) {
 
 				fileToTest.MustTruncate(0, verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					fileToTest.MustGetSizeBytes(),
 					0,
 				)
@@ -150,7 +150,7 @@ func TestFile_ContainsLine(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -162,7 +162,7 @@ func TestFile_ContainsLine(t *testing.T) {
 					verbose,
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedContains,
 					fileToTest.MustContainsLine(
 						tt.line,
@@ -185,7 +185,7 @@ func TestFile_MoveToPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -196,23 +196,23 @@ func TestFile_MoveToPath(t *testing.T) {
 				defer destFile.Delete(verbose)
 				destFile.Delete(verbose)
 
-				assert.True(fileToTest.MustExists(verbose))
-				assert.False(destFile.MustExists(verbose))
+				require.True(fileToTest.MustExists(verbose))
+				require.False(destFile.MustExists(verbose))
 
 				movedFile := fileToTest.MustMoveToPath(destFile.MustGetPath(), false, verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					movedFile.MustGetPath(),
 					destFile.MustGetPath(),
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					movedFile.MustGetHostDescription(),
 					destFile.MustGetHostDescription(),
 				)
 
-				assert.False(fileToTest.MustExists(verbose))
-				assert.True(destFile.MustExists(verbose))
+				require.False(fileToTest.MustExists(verbose))
+				require.True(destFile.MustExists(verbose))
 			},
 		)
 	}
@@ -231,7 +231,7 @@ func TestFile_CopyToFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -243,20 +243,20 @@ func TestFile_CopyToFile(t *testing.T) {
 				defer destFile.Delete(verbose)
 				destFile.Delete(verbose)
 
-				assert.True(srcFile.MustExists(verbose))
-				assert.False(destFile.MustExists(verbose))
+				require.True(srcFile.MustExists(verbose))
+				require.False(destFile.MustExists(verbose))
 
 				srcFile.MustCopyToFile(destFile, verbose)
 
-				assert.True(srcFile.MustExists(verbose))
-				assert.True(destFile.MustExists(verbose))
+				require.True(srcFile.MustExists(verbose))
+				require.True(destFile.MustExists(verbose))
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.content,
 					srcFile.MustReadAsString(),
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.content,
 					destFile.MustReadAsString(),
 				)

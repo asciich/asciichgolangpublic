@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestChecksumsGetSha256SumFromString(t *testing.T) {
@@ -21,10 +21,8 @@ func TestChecksumsGetSha256SumFromString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
-
 				calculatedSum := GetSha256SumFromString(tt.input)
-				assert.EqualValues(tt.expectedChecksum, calculatedSum)
+				require.EqualValues(t, tt.expectedChecksum, calculatedSum)
 			},
 		)
 	}
@@ -44,10 +42,8 @@ func TestChecksumsGetSha256SumFromBytes(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
-
 				calculatedSum := GetSha256SumFromBytes(tt.input)
-				assert.EqualValues(tt.expectedChecksum, calculatedSum)
+				require.EqualValues(t, tt.expectedChecksum, calculatedSum)
 			},
 		)
 	}

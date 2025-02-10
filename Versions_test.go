@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -18,12 +18,12 @@ func TestVersions_GetDateVersionString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				dateVersion := Versions().MustGetNewDateVersionString()
-				assert.Len(dateVersion, len("YYYYmmdd_HHMMSS"))
+				require.Len(dateVersion, len("YYYYmmdd_HHMMSS"))
 
-				assert.True(Versions().MustCheckDateVersionString(dateVersion))
+				require.True(Versions().MustCheckDateVersionString(dateVersion))
 			},
 		)
 	}
@@ -40,9 +40,9 @@ func TestVersions_GetSoftwareVersionEnvVarName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues("SOFTWARE_VERSION", Versions().GetSoftwareVersionEnvVarName())
+				require.EqualValues("SOFTWARE_VERSION", Versions().GetSoftwareVersionEnvVarName())
 			},
 		)
 	}
@@ -68,9 +68,9 @@ func TestVersions_IsDateVersionString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedIsVersionString,
 					Versions().IsDateVersionString(tt.versionString),
 				)
@@ -131,9 +131,9 @@ func TestVersions_IsVersionString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedIsVersionString,
 					Versions().IsVersionString(tt.versionString),
 				)
@@ -190,11 +190,11 @@ func TestVersions_IsSemanticVersion(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				var version Version = Versions().MustGetNewVersionByString(tt.versionString)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedIsSemanticVersion,
 					version.IsSemanticVersion(),
 				)
@@ -228,7 +228,7 @@ func TestVersions_GetLatestVersionFromSlice(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				versions := Versions().MustGetVersionsFromStringSlice(tt.versionStrings)
 
@@ -236,7 +236,7 @@ func TestVersions_GetLatestVersionFromSlice(t *testing.T) {
 
 				expectedNewestVersion := MustGetVersionByString(tt.expectedNewest)
 
-				assert.True(latestVersion.Equals(expectedNewestVersion))
+				require.True(latestVersion.Equals(expectedNewestVersion))
 			},
 		)
 	}
@@ -255,9 +255,9 @@ func TestVersions_SortStringSlice(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedSorted,
 					Versions().MustSortStringSlice(tt.versionStrings),
 				)

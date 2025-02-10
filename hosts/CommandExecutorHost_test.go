@@ -3,15 +3,15 @@ package hosts
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCommandExecutorHost_HostnameOfLocalhost(t *testing.T) {
-	assert := assert.New(t)
+	require := require.New(t)
 
 	host := MustGetLocalCommandExecutorHost()
 
-	assert.EqualValues(
+	require.EqualValues(
 		"localhost",
 		host.MustGetHostName(),
 	)

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -19,9 +19,9 @@ func TestUserGetHomeDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.True(
+				require.True(
 					strings.HasPrefix(
 						Users().MustGetHomeDirectoryAsString(),
 						"/home/",
@@ -44,13 +44,13 @@ func TestGetFileInHomeDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				fileInHome := Users().MustGetFileInHomeDirectory(tt.filePath...)
 
 				filePath := fileInHome.MustGetLocalPath()
 
-				assert.True(
+				require.True(
 					strings.HasPrefix(
 						filePath,
 						"/home/",
@@ -59,7 +59,7 @@ func TestGetFileInHomeDirectory(t *testing.T) {
 
 				expectedPrefix := "/" + strings.Join(tt.filePath, "/")
 
-				assert.True(
+				require.True(
 					strings.HasSuffix(
 						filePath,
 						expectedPrefix,
@@ -82,13 +82,13 @@ func TestGetDirectoryInHomeDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				fileInHome := Users().MustGetDirectoryInHomeDirectory(tt.filePath...)
 
 				filePath := fileInHome.MustGetLocalPath()
 
-				assert.True(
+				require.True(
 					strings.HasPrefix(
 						filePath,
 						"/home/",
@@ -97,7 +97,7 @@ func TestGetDirectoryInHomeDirectory(t *testing.T) {
 
 				expectedPrefix := "/" + strings.Join(tt.filePath, "/")
 
-				assert.True(
+				require.True(
 					strings.HasSuffix(
 						filePath,
 						expectedPrefix,

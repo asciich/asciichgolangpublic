@@ -3,7 +3,7 @@ package utf16utils
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -28,9 +28,9 @@ func TestUTF16DecodeAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedOutput,
 					MustDecodeAsString(tt.inputUtf16),
 				)
