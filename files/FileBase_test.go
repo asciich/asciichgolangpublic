@@ -3,7 +3,7 @@ package files
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -19,14 +19,14 @@ func TestFileBase(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				fileBase := FileBase{}
 
 				parent, err := fileBase.GetParentFileForBaseClass()
-				assert.Nil(parent)
-				assert.ErrorIs(err, ErrFileBaseParentNotSet)
-				assert.ErrorIs(err, tracederrors.ErrTracedError)
+				require.Nil(parent)
+				require.ErrorIs(err, ErrFileBaseParentNotSet)
+				require.ErrorIs(err, tracederrors.ErrTracedError)
 			},
 		)
 	}
@@ -46,7 +46,7 @@ func TestFileBaseEnsureLineInFile_testcase1(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				fileToTest := getFileToTest(tt.implementationName)
 				defer fileToTest.MustDelete(verbose)
@@ -54,33 +54,33 @@ func TestFileBaseEnsureLineInFile_testcase1(t *testing.T) {
 				const testContent string = "hello\nworld\n"
 				fileToTest.MustWriteString(testContent, verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					testContent,
 					fileToTest.MustReadAsString(),
 				)
 
 				fileToTest.MustEnsureLineInFile("hello", verbose)
-				assert.EqualValues(
+				require.EqualValues(
 					testContent,
 					fileToTest.MustReadAsString(),
 				)
 				fileToTest.MustEnsureLineInFile("hello\n", verbose)
-				assert.EqualValues(
+				require.EqualValues(
 					testContent,
 					fileToTest.MustReadAsString(),
 				)
 				fileToTest.MustEnsureLineInFile("\nhello", verbose)
-				assert.EqualValues(
+				require.EqualValues(
 					testContent,
 					fileToTest.MustReadAsString(),
 				)
 				fileToTest.MustEnsureLineInFile("\nhello\n", verbose)
-				assert.EqualValues(
+				require.EqualValues(
 					testContent,
 					fileToTest.MustReadAsString(),
 				)
 				fileToTest.MustEnsureLineInFile("abc", verbose)
-				assert.EqualValues(
+				require.EqualValues(
 					testContent+"abc\n",
 					fileToTest.MustReadAsString(),
 				)
@@ -123,7 +123,7 @@ func TestFileBase_EnsureLineInFile_testcaseWriteToNonexstingString(t *testing.T)
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				fileToTest := getFileToTest(tt.implementationName)
 				defer fileToTest.MustDelete(true)
@@ -132,7 +132,7 @@ func TestFileBase_EnsureLineInFile_testcaseWriteToNonexstingString(t *testing.T)
 
 				for i := 0; i < 2; i++ {
 					fileToTest.MustEnsureLineInFile(tt.line, verbose)
-					assert.EqualValues(
+					require.EqualValues(
 						tt.expected,
 						fileToTest.MustReadAsString(),
 					)
@@ -192,7 +192,7 @@ func TestFileBase_RemoveLinesWithPrefix(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose = true
 
@@ -202,7 +202,7 @@ func TestFileBase_RemoveLinesWithPrefix(t *testing.T) {
 				toTest.MustWriteString(tt.input, verbose)
 				toTest.MustRemoveLinesWithPrefix(tt.prefix, verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedOutput,
 					toTest.MustReadAsString(),
 				)
@@ -228,7 +228,7 @@ func TestFileBase_GetValueAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose = true
 
@@ -237,7 +237,7 @@ func TestFileBase_GetValueAsString(t *testing.T) {
 
 				toTest.MustWriteString(tt.input, verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedValue,
 					toTest.MustGetValueAsString(tt.key),
 				)
@@ -265,7 +265,7 @@ func TestFileBase_GetValueAsInt(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose = true
 
@@ -274,7 +274,7 @@ func TestFileBase_GetValueAsInt(t *testing.T) {
 
 				toTest.MustWriteString(tt.input, verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedValue,
 					toTest.MustGetValueAsInt(tt.key),
 				)

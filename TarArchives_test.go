@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -20,7 +20,7 @@ func TestTarArchiveAddAndGetFileOnTarBytes(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const fileName = "file_name.txt"
 
@@ -34,7 +34,7 @@ func TestTarArchiveAddAndGetFileOnTarBytes(t *testing.T) {
 					fileName,
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.content,
 					readContent,
 				)
@@ -56,7 +56,7 @@ func TestTarArchiveAddAndGetFileOnTarBytes_multipleFiles(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const fileName = "file_name.txt"
 				const fileName2 = "file_name2.txt"
@@ -72,14 +72,14 @@ func TestTarArchiveAddAndGetFileOnTarBytes_multipleFiles(t *testing.T) {
 					tt.content+"2",
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.content,
 					TarArchives().MustReadFileFromTarArchiveBytesAsString(
 						tarArchiveBytes,
 						fileName,
 					),
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					tt.content+"2",
 					TarArchives().MustReadFileFromTarArchiveBytesAsString(
 						tarArchiveBytes,
@@ -88,7 +88,7 @@ func TestTarArchiveAddAndGetFileOnTarBytes_multipleFiles(t *testing.T) {
 				)
 
 				fileList := TarArchives().MustListFileNamesFromTarArchiveBytes(tarArchiveBytes)
-				assert.EqualValues(
+				require.EqualValues(
 					[]string{"file_name.txt", "file_name2.txt"},
 					fileList,
 				)

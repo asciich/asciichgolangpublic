@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
@@ -52,7 +52,7 @@ func TestGnuPg_SignAndValidate(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -64,8 +64,8 @@ func TestGnuPg_SignAndValidate(t *testing.T) {
 				)
 				defer signatureFile.Delete(verbose)
 
-				assert.True(toTest.MustExists(verbose))
-				assert.False(signatureFile.MustExists(verbose))
+				require.True(toTest.MustExists(verbose))
+				require.False(signatureFile.MustExists(verbose))
 
 				GnuPG().MustSignFile(
 					toTest,
@@ -76,8 +76,8 @@ func TestGnuPg_SignAndValidate(t *testing.T) {
 					},
 				)
 
-				assert.True(toTest.MustExists(verbose))
-				assert.True(signatureFile.MustExists(verbose))
+				require.True(toTest.MustExists(verbose))
+				require.True(signatureFile.MustExists(verbose))
 
 				GnuPG().MustCheckSignatureValid(signatureFile, verbose)
 			},

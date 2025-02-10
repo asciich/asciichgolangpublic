@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBase64_encodeAndDecode(t *testing.T) {
@@ -18,11 +18,11 @@ func TestBase64_encodeAndDecode(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				encoded := MustEncodeStringAsString(tt.input)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.input,
 					MustDecodeStringAsString(encoded),
 				)

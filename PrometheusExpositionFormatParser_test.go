@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -19,19 +19,19 @@ func TestPrometheusExpositionFormatParserParseExample(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				gitRepo := MustGetLocalGitRepositoryByPath(".")
 				metricsTxt := gitRepo.MustReadFileInDirectoryAsString("testdata", "PrometheusExpositionFormatParser", "metrics.txt")
 
 				parsedMetrics := PrometheusExpositionFormatParser().MustParseString(metricsTxt)
 
-				assert.EqualValues(
+				require.EqualValues(
 					12.47,
 					parsedMetrics.MustGetMetricValueAsFloat64("metric_without_timestamp_and_labels"),
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					1.458255915e9,
 					parsedMetrics.MustGetMetricValueAsFloat64("msdos_file_access_time_seconds"),
 				)
@@ -53,7 +53,7 @@ func TestPrometheusExpositionFormatParserParseGauge(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				metricsTxt := ""
 				metricsTxt += "# HELP abc_value help text\n"
@@ -62,7 +62,7 @@ func TestPrometheusExpositionFormatParserParseGauge(t *testing.T) {
 
 				parsedMetrics := PrometheusExpositionFormatParser().MustParseString(metricsTxt)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedValue,
 					parsedMetrics.MustGetMetricValueAsFloat64("abc_value"),
 				)

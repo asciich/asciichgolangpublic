@@ -4,7 +4,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
@@ -57,10 +56,10 @@ func TestHostGetHostName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				host := MustGetHostByHostname(tt.hostname)
-				assert.EqualValues(
+				require.EqualValues(
 					tt.hostname,
 					host.MustGetHostName(),
 				)
@@ -86,10 +85,10 @@ func TestHostGetHostDescripion(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				host := MustGetHostByHostname(tt.hostname)
-				assert.EqualValues(
+				require.EqualValues(
 					tt.hostname,
 					host.MustGetHostDescription(),
 				)
@@ -115,7 +114,7 @@ func TestHostRunCommand(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose = true
 
@@ -129,7 +128,7 @@ func TestHostRunCommand(t *testing.T) {
 
 				ips := strings.Split(strings.TrimSpace(ipsString), " ")
 
-				assert.Contains(
+				require.Contains(
 					ips,
 					"192.168.10.32",
 				)
@@ -157,7 +156,7 @@ func TestHost_GetDirectoryByPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose = true
 
@@ -165,9 +164,9 @@ func TestHost_GetDirectoryByPath(t *testing.T) {
 				directory := host.MustGetDirectoryByPath(tt.dirPath)
 
 				_, ok := directory.(*files.CommandExecutorDirectory)
-				assert.True(ok)
+				require.True(ok)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedExists,
 					directory.MustExists(verbose),
 				)

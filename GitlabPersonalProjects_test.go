@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -26,7 +26,7 @@ func TestGitlabPersonalProjectsCreateAndDelete(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -36,27 +36,27 @@ func TestGitlabPersonalProjectsCreateAndDelete(t *testing.T) {
 				})
 
 				privateProject := gitlab.MustGetPersonalProjectByName(tt.projectName, verbose)
-				assert.True(privateProject.MustIsPersonalProject())
+				require.True(privateProject.MustIsPersonalProject())
 
 				for i := 0; i < 2; i++ {
 					privateProject.MustDelete(verbose)
-					assert.False(privateProject.MustExists(verbose))
+					require.False(privateProject.MustExists(verbose))
 
-					assert.True(privateProject.MustIsPersonalProject())
+					require.True(privateProject.MustIsPersonalProject())
 				}
 
 				for i := 0; i < 2; i++ {
 					privateProject.MustCreate(verbose)
-					assert.True(privateProject.MustExists(verbose))
+					require.True(privateProject.MustExists(verbose))
 
-					assert.True(privateProject.MustIsPersonalProject())
+					require.True(privateProject.MustIsPersonalProject())
 				}
 
 				for i := 0; i < 2; i++ {
 					privateProject.MustDelete(verbose)
-					assert.False(privateProject.MustExists(verbose))
+					require.False(privateProject.MustExists(verbose))
 
-					assert.True(privateProject.MustIsPersonalProject())
+					require.True(privateProject.MustIsPersonalProject())
 				}
 			},
 		)

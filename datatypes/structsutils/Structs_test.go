@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type testStruct struct{}
@@ -34,10 +34,10 @@ func TestStructsIsStruct(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				isStruct := IsStruct(tt.objectToTest)
-				assert.EqualValues(tt.isStruct, isStruct)
+				require.EqualValues(tt.isStruct, isStruct)
 			},
 		)
 	}
@@ -68,10 +68,10 @@ func TestStructsIsPointerToStruct(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				isStruct := IsPointerToStruct(tt.objectToTest)
-				assert.EqualValues(tt.isPointerToStruct, isStruct)
+				require.EqualValues(tt.isPointerToStruct, isStruct)
 			},
 		)
 	}
@@ -102,10 +102,10 @@ func TestStructsIsStructOrPointerToStruct(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				isStruct := IsStructOrPointerToStruct(tt.objectToTest)
-				assert.EqualValues(tt.isStructOrPointerToStruct, isStruct)
+				require.EqualValues(tt.isStructOrPointerToStruct, isStruct)
 			},
 		)
 	}
@@ -125,11 +125,11 @@ func TestStructsGetFieldValues_NoValues(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				fieldValues := MustGetFieldValuesAsString(tt.objectToTest)
 
-				assert.Len(fieldValues, 0)
+				require.Len(fieldValues, 0)
 			},
 		)
 	}

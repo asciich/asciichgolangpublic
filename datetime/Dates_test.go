@@ -5,16 +5,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func TestDatesLayoutStringYYYYmmdd_HHMMSSS(t *testing.T) {
 
-	assert := assert.New(t)
+	require := require.New(t)
 
-	assert.EqualValues(
+	require.EqualValues(
 		"20060102_150405",
 		Dates().LayoutStringYYYYmmdd_HHMMSS(),
 	)
@@ -33,11 +33,11 @@ func TestDatesGetAsYYYYmmdd_HHMMSSString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				formated := Dates().MustFormatAsYYYYmmdd_HHMMSSString(&tt.input)
 
-				assert.EqualValues(tt.expected, formated)
+				require.EqualValues(tt.expected, formated)
 			},
 		)
 	}
@@ -58,10 +58,10 @@ func TestDatesParseString_UTC(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				parsed := Dates().MustParseString(tt.input)
-				assert.EqualValues(tt.expectedDate, parsed.UTC())
+				require.EqualValues(tt.expectedDate, parsed.UTC())
 			},
 		)
 	}
@@ -85,10 +85,10 @@ func TestDatesParseString_CET(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				parsed := Dates().MustParseString(tt.input)
-				assert.EqualValues(tt.expectedDate, parsed.UTC())
+				require.EqualValues(tt.expectedDate, parsed.UTC())
 			},
 		)
 	}

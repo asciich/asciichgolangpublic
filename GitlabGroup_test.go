@@ -6,8 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -34,7 +33,7 @@ func TestGitlabGroupGetGroupPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -42,7 +41,7 @@ func TestGitlabGroupGetGroupPath(t *testing.T) {
 
 				testGroup := gitlab.MustGetGroupByPath(tt.groupPath, verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedGroupName,
 					testGroup.MustGetGroupPath(),
 				)
@@ -72,7 +71,7 @@ func TestGitlabGroupGetGroupName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -80,7 +79,7 @@ func TestGitlabGroupGetGroupName(t *testing.T) {
 
 				testGroup := gitlab.MustGetGroupByPath(tt.groupPath, verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedGroupName,
 					testGroup.MustGetGroupName(),
 				)
@@ -112,7 +111,7 @@ func TestGitlabGroupIsSubgroup(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -120,7 +119,7 @@ func TestGitlabGroupIsSubgroup(t *testing.T) {
 
 				testGroup := gitlab.MustGetGroupByPath(tt.groupPath, verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedIsSubgroup,
 					testGroup.MustIsSubgroup(),
 				)
@@ -148,7 +147,7 @@ func TestGitlabGroupGetParentGroupPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -156,7 +155,7 @@ func TestGitlabGroupGetParentGroupPath(t *testing.T) {
 
 				testGroup := gitlab.MustGetGroupByPath(tt.groupPath, verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedParentGroupPath,
 					testGroup.MustGetParentGroupPath(verbose),
 				)
@@ -182,7 +181,7 @@ func TestGitlabGroupByPathAndId(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -199,8 +198,8 @@ func TestGitlabGroupByPathAndId(t *testing.T) {
 				parentGroup := testGroup.MustGetParentGroup(verbose)
 
 				parentGroup.MustDelete(verbose)
-				assert.False(testGroup.MustExists(verbose))
-				assert.False(parentGroup.MustExists(verbose))
+				require.False(testGroup.MustExists(verbose))
+				require.False(parentGroup.MustExists(verbose))
 
 				testGroup.MustCreate(
 					&GitlabCreateGroupOptions{
@@ -208,30 +207,30 @@ func TestGitlabGroupByPathAndId(t *testing.T) {
 					},
 				)
 
-				assert.True(testGroup.MustExists(verbose))
-				assert.True(parentGroup.MustExists(verbose))
+				require.True(testGroup.MustExists(verbose))
+				require.True(parentGroup.MustExists(verbose))
 
 				testGroupId := testGroup.MustGetId(verbose)
 				testGroupById := gitlab.MustGetGroupById(testGroupId, verbose)
 
-				assert.True(testGroupById.MustExists(verbose))
-				assert.EqualValues(
+				require.True(testGroupById.MustExists(verbose))
+				require.EqualValues(
 					tt.groupPath,
 					testGroupById.MustGetGroupPath(),
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					testGroup.MustGetGroupName(),
 					testGroupById.MustGetGroupName(),
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					parentGroup.MustGetGroupPath(),
 					testGroupById.MustGetParentGroupPath(verbose),
 				)
 
 				parentGroup.MustDelete(verbose)
-				assert.False(testGroup.MustExists(verbose))
-				assert.False(testGroupById.MustExists(verbose))
-				assert.False(parentGroup.MustExists(verbose))
+				require.False(testGroup.MustExists(verbose))
+				require.False(testGroupById.MustExists(verbose))
+				require.False(parentGroup.MustExists(verbose))
 
 			},
 		)
@@ -254,7 +253,7 @@ func TestGitlabGroupListProjects(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -270,7 +269,7 @@ func TestGitlabGroupListProjects(t *testing.T) {
 				testGroup := gitlab.MustGetGroupByPath(testGroupName, verbose)
 
 				testGroup.MustDelete(verbose)
-				assert.False(testGroup.MustExists(verbose))
+				require.False(testGroup.MustExists(verbose))
 
 				nProjects := 25
 				projectPaths := []string{}
@@ -293,10 +292,10 @@ func TestGitlabGroupListProjects(t *testing.T) {
 					},
 				)
 
-				assert.Len(listedProjectPaths, nProjects)
+				require.Len(listedProjectPaths, nProjects)
 
 				for _, toCheck := range projectPaths {
-					assert.True(
+					require.True(
 						slices.Contains(
 							listedProjectPaths,
 							toCheck,
@@ -305,7 +304,7 @@ func TestGitlabGroupListProjects(t *testing.T) {
 				}
 
 				testGroup.MustDelete(verbose)
-				assert.False(testGroup.MustExists(verbose))
+				require.False(testGroup.MustExists(verbose))
 			},
 		)
 	}

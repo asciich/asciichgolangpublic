@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -26,7 +26,7 @@ func TestGitlabProjectBranches_pagination(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -36,14 +36,14 @@ func TestGitlabProjectBranches_pagination(t *testing.T) {
 				})
 
 				gitlabProject := gitlab.MustGetGitlabProjectByPath("test_group/testproject", verbose)
-				assert.True(gitlabProject.MustExists(verbose))
+				require.True(gitlabProject.MustExists(verbose))
 
 				branchName := gitlabProject.MustGetDefaultBranchName()
 
 				gitlabProject.MustDeleteAllBranchesExceptDefaultBranch(verbose)
 
 				branchList := gitlabProject.MustGetBranchNames(verbose)
-				assert.EqualValues(
+				require.EqualValues(
 					[]string{branchName},
 					branchList,
 				)
@@ -61,7 +61,7 @@ func TestGitlabProjectBranches_pagination(t *testing.T) {
 				}
 
 				branchList = gitlabProject.MustGetBranchNames(verbose)
-				assert.EqualValues(branchList, branchList)
+				require.EqualValues(branchList, branchList)
 			},
 		)
 	}

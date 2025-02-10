@@ -3,7 +3,7 @@ package jsonutils
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -28,11 +28,11 @@ func TestJsonRunJqAgainstJsonStringAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				result := MustRunJqAgainstJsonStringAsString(tt.jsonString, tt.query)
 
-				assert.EqualValues(tt.expectedResult, result)
+				require.EqualValues(tt.expectedResult, result)
 			},
 		)
 	}
@@ -52,11 +52,11 @@ func TestJsonLoadKeyValueDict(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				result := MustLoadKeyValueStringDictFromJsonString(tt.jsonString)
 
-				assert.EqualValues(tt.expectedResult, result)
+				require.EqualValues(tt.expectedResult, result)
 			},
 		)
 	}
@@ -76,11 +76,11 @@ func TestJsonPrettyFormatJsonString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				result := MustPrettyFormatJsonString(tt.jsonString)
 
-				assert.EqualValues(tt.expectedResult, result)
+				require.EqualValues(tt.expectedResult, result)
 			},
 		)
 	}
@@ -102,11 +102,11 @@ func TestJsonStringToYamlString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				result := MustJsonStringToYamlString(tt.jsonString)
 
-				assert.EqualValues(tt.expectedResult, result)
+				require.EqualValues(tt.expectedResult, result)
 			},
 		)
 	}
@@ -128,7 +128,7 @@ func TestJsonStringToYamlFileByPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -137,7 +137,7 @@ func TestJsonStringToYamlFileByPath(t *testing.T) {
 
 				createdFile := MustJsonStringToYamlFileByPath(tt.jsonString, emptyFile.MustGetLocalPath(), verbose)
 
-				assert.EqualValues(tt.expectedResult, createdFile.MustReadAsString())
+				require.EqualValues(tt.expectedResult, createdFile.MustReadAsString())
 			},
 		)
 	}
@@ -165,9 +165,9 @@ func TestJsonStringHas(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedResult,
 					MustJsonStringHas(tt.jsonString, tt.query, tt.keyToCheck),
 				)
@@ -198,14 +198,14 @@ func TestJsonFileHas(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
 				tempFile := tempfiles.MustCreateFromString(tt.jsonString, verbose)
 				defer tempFile.Delete(verbose)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedResult,
 					MustJsonFileByPathHas(tempFile.MustGetLocalPath(), tt.query, tt.keyToCheck),
 				)

@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -30,11 +30,11 @@ func TestGoogleStorageBucketExists(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				var bucket ObjectStoreBucket = MustGetGoogleStorageBucketByName(tt.bucketName)
 
-				assert.EqualValues(tt.expectedExists, bucket.MustExists())
+				require.EqualValues(tt.expectedExists, bucket.MustExists())
 			},
 		)
 	}

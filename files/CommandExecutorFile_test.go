@@ -3,7 +3,7 @@ package files
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -21,7 +21,7 @@ func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -30,21 +30,21 @@ func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 				var fileToTest File = MustGetLocalCommandExecutorFileByPath(temporaryFilePath)
 				defer fileToTest.Delete(verbose)
 
-				assert.True(fileToTest.MustExists(verbose))
-				assert.EqualValues(
+				require.True(fileToTest.MustExists(verbose))
+				require.EqualValues(
 					"",
 					fileToTest.MustReadAsString(),
 				)
 
 				fileToTest.WriteString(tt.testContent, verbose)
-				assert.True(fileToTest.MustExists(verbose))
-				assert.EqualValues(
+				require.True(fileToTest.MustExists(verbose))
+				require.EqualValues(
 					tt.testContent,
 					fileToTest.MustReadAsString(),
 				)
 
 				fileToTest.MustDelete(verbose)
-				assert.False(fileToTest.MustExists(verbose))
+				require.False(fileToTest.MustExists(verbose))
 			},
 		)
 	}

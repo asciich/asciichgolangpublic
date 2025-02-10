@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/fileformats/yamlutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -23,19 +23,19 @@ func TestKubernetesResource_CreateAndDelete(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 				const namespaceName = "testnamespace"
 
 				kubernetes := getKubernetesByImplementationName(tt.implementationName)
 				kubernetes.MustDeleteNamespaceByName(namespaceName, verbose)
-				assert.False(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
+				require.False(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
 
 				k8sResource := kubernetes.MustGetResourceByNames(tt.resourceName, tt.resourceType, namespaceName)
 				k8sResource.MustDelete(verbose)
 
-				assert.False(k8sResource.MustExists(verbose))
+				require.False(k8sResource.MustExists(verbose))
 
 				roleYaml := ""
 				roleYaml += "apiVersion: v1\n"
@@ -46,12 +46,12 @@ func TestKubernetesResource_CreateAndDelete(t *testing.T) {
 
 				for i := 0; i < 2; i++ {
 					k8sResource.MustCreateByYamlString(roleYaml, verbose)
-					assert.True(k8sResource.MustExists(verbose))
+					require.True(k8sResource.MustExists(verbose))
 				}
 
 				for i := 0; i < 2; i++ {
 					k8sResource.MustDelete(verbose)
-					assert.False(k8sResource.MustExists(verbose))
+					require.False(k8sResource.MustExists(verbose))
 				}
 			},
 		)
@@ -71,16 +71,16 @@ func TestKubernetesResource_ListResources(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 				const namespaceName = "testnamespace"
 
 				kubernetes := getKubernetesByImplementationName(tt.implementationName)
 				kubernetes.MustDeleteNamespaceByName(namespaceName, verbose)
-				assert.False(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
+				require.False(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
 
-				assert.Len(
+				require.Len(
 					kubernetes.MustListResources(
 						&parameteroptions.ListKubernetesResourcesOptions{
 							Namespace:    namespaceName,
@@ -100,10 +100,10 @@ func TestKubernetesResource_ListResources(t *testing.T) {
 				for i := 0; i < 3; i++ {
 					k8sResource := kubernetes.MustGetResourceByNames(tt.resourceName+strconv.Itoa(i), tt.resourceType, namespaceName)
 					k8sResource.MustCreateByYamlString(roleYaml, verbose)
-					assert.True(k8sResource.MustExists(verbose))
+					require.True(k8sResource.MustExists(verbose))
 				}
 
-				assert.Len(
+				require.Len(
 					kubernetes.MustListResources(
 						&parameteroptions.ListKubernetesResourcesOptions{
 							Namespace:    namespaceName,
@@ -118,7 +118,7 @@ func TestKubernetesResource_ListResources(t *testing.T) {
 					expectedNames = append(expectedNames, tt.resourceName+strconv.Itoa(i))
 				}
 
-				assert.EqualValues(
+				require.EqualValues(
 					expectedNames,
 					kubernetes.MustListResourceNames(
 						&parameteroptions.ListKubernetesResourcesOptions{
@@ -131,7 +131,6 @@ func TestKubernetesResource_ListResources(t *testing.T) {
 		)
 	}
 }
-
 
 func TestKubernetesResource_GetAsYamlString(t *testing.T) {
 	tests := []struct {
@@ -146,19 +145,19 @@ func TestKubernetesResource_GetAsYamlString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 				const namespaceName = "testnamespace"
 
 				kubernetes := getKubernetesByImplementationName(tt.implementationName)
 				kubernetes.MustDeleteNamespaceByName(namespaceName, verbose)
-				assert.False(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
+				require.False(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
 
 				k8sResource := kubernetes.MustGetResourceByNames(tt.resourceName, tt.resourceType, namespaceName)
 				k8sResource.MustDelete(verbose)
 
-				assert.False(k8sResource.MustExists(verbose))
+				require.False(k8sResource.MustExists(verbose))
 
 				roleYaml := ""
 				roleYaml += "apiVersion: v1\n"
@@ -171,7 +170,7 @@ func TestKubernetesResource_GetAsYamlString(t *testing.T) {
 				defer k8sResource.MustDelete(verbose)
 
 				yamlString := k8sResource.MustGetAsYamlString()
-				assert.EqualValues(
+				require.EqualValues(
 					tt.resourceName,
 					yamlutils.MustRunYqQueryAginstYamlStringAsString(yamlString, ".metadata.name"),
 				)

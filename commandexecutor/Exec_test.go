@@ -3,7 +3,7 @@ package commandexecutor
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -21,7 +21,7 @@ func TestExecRunCommandAndGetStdoutAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -41,8 +41,8 @@ func TestExecRunCommandAndGetStdoutAsString(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues(tt.expectedOutput, output)
-				assert.EqualValues(tt.expectedOutput, output2)
+				require.EqualValues(tt.expectedOutput, output)
+				require.EqualValues(tt.expectedOutput, output2)
 			},
 		)
 	}
@@ -72,7 +72,7 @@ func TestExecRunCommandStdin(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -94,8 +94,8 @@ func TestExecRunCommandStdin(t *testing.T) {
 					},
 				)
 
-				assert.EqualValues([]byte(tt.expectedOutput), output)
-				assert.EqualValues(tt.expectedOutput, output2)
+				require.EqualValues([]byte(tt.expectedOutput), output)
+				require.EqualValues(tt.expectedOutput, output2)
 			},
 		)
 	}

@@ -6,7 +6,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
@@ -25,28 +24,28 @@ func TestLocalDirectoryExists(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
 				var directory Directory = getDirectoryToTest("localDirectory")
 				defer directory.Delete(verbose)
 
-				assert.True(directory.MustExists(verbose))
+				require.True(directory.MustExists(verbose))
 
 				for i := 0; i < 2; i++ {
 					directory.MustDelete(verbose)
-					assert.False(directory.MustExists(verbose))
+					require.False(directory.MustExists(verbose))
 				}
 
 				for i := 0; i < 2; i++ {
 					directory.MustCreate(verbose)
-					assert.True(directory.MustExists(verbose))
+					require.True(directory.MustExists(verbose))
 				}
 
 				for i := 0; i < 2; i++ {
 					directory.MustDelete(verbose)
-					assert.False(directory.MustExists(verbose))
+					require.False(directory.MustExists(verbose))
 				}
 
 			},
@@ -66,16 +65,16 @@ func TestLocalDirectoryGetFileInDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				homeDir := MustGetLocalDirectoryByPath("/home/")
 
-				assert.EqualValues(
+				require.EqualValues(
 					"/home/testfile",
 					homeDir.MustGetFileInDirectory("testfile").MustGetLocalPath(),
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					"/home/subdir/another_file",
 					homeDir.MustGetFileInDirectory("subdir", "another_file").MustGetLocalPath(),
 				)
@@ -95,16 +94,16 @@ func TestLocalDirectoryGetFilePathInDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				homeDir := MustGetLocalDirectoryByPath("/home/")
 
-				assert.EqualValues(
+				require.EqualValues(
 					"/home/testfile",
 					homeDir.MustGetFilePathInDirectory("testfile"),
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					"/home/subdir/another_file",
 					homeDir.MustGetFilePathInDirectory("subdir", "another_file"),
 				)
@@ -125,16 +124,16 @@ func TestLocalDirectoryGetSubDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				homeDir := MustGetLocalDirectoryByPath("/home/")
 
-				assert.EqualValues(
+				require.EqualValues(
 					"/home/testfile",
 					homeDir.MustGetSubDirectory("testfile").MustGetLocalPath(),
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					"/home/subdir/another_file",
 					homeDir.MustGetSubDirectory("subdir", "another_file").MustGetLocalPath(),
 				)
@@ -155,10 +154,10 @@ func TestLocalDirectoryParentForBaseClassSet(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				dir := NewLocalDirectory()
-				assert.NotNil(dir.MustGetParentDirectoryForBaseClass())
+				require.NotNil(dir.MustGetParentDirectoryForBaseClass())
 			},
 		)
 	}
@@ -178,7 +177,7 @@ func TestLocalDirectoryCreateFileInDirectoryFromString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -194,8 +193,8 @@ func TestLocalDirectoryCreateFileInDirectoryFromString(t *testing.T) {
 				pathElements = append(pathElements, tt.filename...)
 				expectedFileName := filepath.Join(pathElements...)
 
-				assert.EqualValues(expectedFileName, createdFile.MustGetLocalPath())
-				assert.EqualValues(tt.content, createdFile.MustReadAsString())
+				require.EqualValues(expectedFileName, createdFile.MustGetLocalPath())
+				require.EqualValues(tt.content, createdFile.MustReadAsString())
 			},
 		)
 	}
@@ -214,13 +213,13 @@ func TestLocalDirectoryGetLocalPathIsAbsolute(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				localDir := MustGetLocalDirectoryByPath(tt.pathToTest)
 
 				localPath := localDir.MustGetLocalPath()
 
-				assert.True(pathsutils.IsAbsolutePath(localPath))
+				require.True(pathsutils.IsAbsolutePath(localPath))
 			},
 		)
 	}
@@ -238,7 +237,7 @@ func TestLocalDirectoryGetGitRepositories(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose = true
 
@@ -263,11 +262,11 @@ func TestLocalDirectoryGetGitRepositories(t *testing.T) {
 
 				gitRepos := testDirectory.MustGetGitRepositoriesAsLocalGitRepositories(verbose)
 
-				assert.Len(gitRepos, 2)
-				assert.EqualValues("test1", gitRepos[0].MustGetBaseName(), "test1")
-				assert.EqualValues("c", gitRepos[1].MustGetBaseName(), "c")
-				assert.EqualValues(testDirectory.MustGetLocalPath(), gitRepos[0].MustGetDirName())
-				assert.EqualValues(filepath.Join(testDirectory.MustGetLocalPath(), "test2"), gitRepos[1].MustGetDirName())
+				require.Len(gitRepos, 2)
+				require.EqualValues("test1", gitRepos[0].MustGetBaseName(), "test1")
+				require.EqualValues("c", gitRepos[1].MustGetBaseName(), "c")
+				require.EqualValues(testDirectory.MustGetLocalPath(), gitRepos[0].MustGetDirName())
+				require.EqualValues(filepath.Join(testDirectory.MustGetLocalPath(), "test2"), gitRepos[1].MustGetDirName())
 			},
 		)
 	}
@@ -287,7 +286,7 @@ func TestLocalDirectoryWriteStringToFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose = true
 
@@ -297,12 +296,12 @@ func TestLocalDirectoryWriteStringToFile(t *testing.T) {
 				testDirectory := MustGetLocalDirectoryByPath(tempDirPath)
 				defer testDirectory.Delete(verbose)
 
-				assert.False(testDirectory.MustFileInDirectoryExists(verbose, tt.fileName))
+				require.False(testDirectory.MustFileInDirectoryExists(verbose, tt.fileName))
 
 				testFile := testDirectory.MustWriteStringToFileInDirectory(tt.content, verbose, tt.fileName)
 
-				assert.True(testDirectory.MustFileInDirectoryExists(verbose, tt.fileName))
-				assert.EqualValues(
+				require.True(testDirectory.MustFileInDirectoryExists(verbose, tt.fileName))
+				require.EqualValues(
 					tt.content,
 					testFile.MustReadAsString(),
 				)
@@ -333,7 +332,7 @@ func TestDirectoryListFilesInDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose = true
 				tt.listOptions.Verbose = verbose
@@ -344,7 +343,7 @@ func TestDirectoryListFilesInDirectory(t *testing.T) {
 				temporaryDirectory := MustGetLocalDirectoryByPath(tempDirPath)
 				temporaryDirectory.MustCreateFilesInDirectory(tt.fileNames, verbose)
 				listedFiles := temporaryDirectory.MustListFilePaths(&tt.listOptions)
-				assert.EqualValues(tt.expectedPaths, listedFiles)
+				require.EqualValues(tt.expectedPaths, listedFiles)
 			},
 		)
 	}
@@ -362,15 +361,15 @@ func TestLocalDirectoryCreate(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose = true
 
 				tempDir := getDirectoryToTest("localDirectory")
 				subDir := tempDir.MustGetSubDirectory(tt.subDirPath...)
-				assert.False(subDir.MustExists(verbose))
+				require.False(subDir.MustExists(verbose))
 				subDir.MustCreate(verbose)
-				assert.True(subDir.MustExists(verbose))
+				require.True(subDir.MustExists(verbose))
 			},
 		)
 	}
@@ -389,7 +388,7 @@ func TestDirectoryGetPathReturnsAbsoluteValue(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				startPath, err := os.Getwd()
 				if err != nil {
@@ -415,17 +414,17 @@ func TestDirectoryGetPathReturnsAbsoluteValue(t *testing.T) {
 				go testFunction()
 				waitGroup.Wait()
 
-				assert.True(pathsutils.IsAbsolutePath(path1))
-				assert.True(pathsutils.IsAbsolutePath(path2))
+				require.True(pathsutils.IsAbsolutePath(path1))
+				require.True(pathsutils.IsAbsolutePath(path2))
 
-				assert.EqualValues(path1, path2)
+				require.EqualValues(path1, path2)
 
 				currentPath, err := os.Getwd()
 				if err != nil {
 					t.Fatalf("%v", err)
 				}
 
-				assert.EqualValues(startPath, currentPath)
+				require.EqualValues(startPath, currentPath)
 			},
 		)
 	}
@@ -442,7 +441,7 @@ func TestDirectoryIsEmptyDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose = true
 
@@ -451,7 +450,7 @@ func TestDirectoryIsEmptyDirectory(t *testing.T) {
 				)
 				defer tempDir.Delete(verbose)
 
-				assert.True(tempDir.MustIsEmptyDirectory(verbose))
+				require.True(tempDir.MustIsEmptyDirectory(verbose))
 			},
 		)
 	}
@@ -468,18 +467,18 @@ func TestDirectory_CheckExists(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose = true
 
 				temporaryDirectory := getDirectoryToTest("localDirectory")
 				defer temporaryDirectory.Delete(verbose)
 
-				assert.Nil(temporaryDirectory.CheckExists(verbose))
+				require.Nil(temporaryDirectory.CheckExists(verbose))
 
 				temporaryDirectory.MustDelete(verbose)
 
-				assert.NotNil(temporaryDirectory.CheckExists(verbose))
+				require.NotNil(temporaryDirectory.CheckExists(verbose))
 			},
 		)
 	}

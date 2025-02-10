@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -25,14 +25,14 @@ func TestGitlabProjectsProjectDoesNotExist(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
 				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
 				gitlab.MustUseUnauthenticatedClient(verbose)
 				doesExist := gitlab.MustProjectByProjectPathExists("this/project_does_not_exist", verbose)
-				assert.False(doesExist)
+				require.False(doesExist)
 			},
 		)
 	}
@@ -54,7 +54,7 @@ func TestGitlabProjectsGetProjectIdAndPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -68,34 +68,34 @@ func TestGitlabProjectsGetProjectIdAndPath(t *testing.T) {
 				const projectPath string = "test_group/testproject"
 
 				gitlabProject := gitlab.MustGetGitlabProjectByPath(projectPath, verbose)
-				assert.True(gitlabProject.MustExists(verbose))
+				require.True(gitlabProject.MustExists(verbose))
 
 				projectId := gitlabProject.MustGetId()
 				gitlabProject2 := gitlab.MustGetGitlabProjectById(projectId, verbose)
-				assert.True(gitlabProject2.MustExists(verbose))
+				require.True(gitlabProject2.MustExists(verbose))
 
-				assert.EqualValues(
+				require.EqualValues(
 					projectPath,
 					gitlabProject.MustGetCachedPath(),
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					projectPath,
 					gitlabProject2.MustGetCachedPath(),
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					projectPath,
 					gitlabProject.MustGetPath(),
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					projectPath,
 					gitlabProject2.MustGetPath(),
 				)
 
-				assert.EqualValues(
+				require.EqualValues(
 					"https://"+gitlabFQDN+"/"+projectPath,
 					gitlabProject.MustGetProjectUrl(),
 				)
-				assert.EqualValues(
+				require.EqualValues(
 					"https://"+gitlabFQDN+"/"+projectPath,
 					gitlabProject2.MustGetProjectUrl(),
 				)
@@ -120,7 +120,7 @@ func TestGitlabProjectsGetFileContentAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -130,7 +130,7 @@ func TestGitlabProjectsGetFileContentAsString(t *testing.T) {
 				})
 
 				gitlabProject := gitlab.MustGetGitlabProjectByPath("test_group/testproject", verbose)
-				assert.True(gitlabProject.MustExists(verbose))
+				require.True(gitlabProject.MustExists(verbose))
 
 				fileName := "test.txt"
 
@@ -144,7 +144,7 @@ func TestGitlabProjectsGetFileContentAsString(t *testing.T) {
 						},
 					)
 
-					assert.EqualValues(
+					require.EqualValues(
 						content,
 						gitlabProject.MustReadFileContentAsString(
 							&GitlabReadFileOptions{

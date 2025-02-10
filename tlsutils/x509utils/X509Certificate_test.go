@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
@@ -52,7 +52,7 @@ func TestX509CertificateLoadFromFilePath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				inputFile := tt.testDir.MustGetFileInDirectory("input")
 				expectedSubjectFile := tt.testDir.MustGetFileInDirectory("expected_subject")
@@ -62,11 +62,11 @@ func TestX509CertificateLoadFromFilePath(t *testing.T) {
 
 				subject := cert.MustGetSubjectString()
 				expectedSubject := expectedSubjectFile.MustReadFirstLineAndTrimSpace()
-				assert.EqualValues(expectedSubject, subject)
+				require.EqualValues(expectedSubject, subject)
 
 				issuert := cert.MustGetIssuerString()
 				expectedIssuer := expectedIssuerStringFile.MustReadFirstLineAndTrimSpace()
-				assert.EqualValues(expectedIssuer, issuert)
+				require.EqualValues(expectedIssuer, issuert)
 			},
 		)
 	}
@@ -88,7 +88,7 @@ func TestX509CertificateGetAsPemString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				inputFile := tt.testDir.MustGetFileInDirectory("input")
 				expectedSubjectFile := tt.testDir.MustGetFileInDirectory("expected_pem")
@@ -98,7 +98,7 @@ func TestX509CertificateGetAsPemString(t *testing.T) {
 				pemString := cert.MustGetAsPemString()
 				expectedPemString := expectedSubjectFile.MustReadAsString()
 
-				assert.EqualValues(expectedPemString, pemString)
+				require.EqualValues(expectedPemString, pemString)
 			},
 		)
 	}
@@ -120,7 +120,7 @@ func TestX509CertificateIsRootCa(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -132,7 +132,7 @@ func TestX509CertificateIsRootCa(t *testing.T) {
 				isRootCa := cert.MustIsRootCa(verbose)
 				expectedIsRootCa := expectedSubjectFile.MustReadAsBool()
 
-				assert.EqualValues(expectedIsRootCa, isRootCa)
+				require.EqualValues(expectedIsRootCa, isRootCa)
 			},
 		)
 	}
@@ -154,7 +154,7 @@ func TestX509CertificateIsV1(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				inputFile := tt.testDir.MustGetFileInDirectory("input")
 				expectedSubjectFile := tt.testDir.MustGetFileInDirectory("expected_is_v1")
@@ -164,7 +164,7 @@ func TestX509CertificateIsV1(t *testing.T) {
 				isV1 := cert.MustIsV1()
 				expectedIsV1 := expectedSubjectFile.MustReadAsBool()
 
-				assert.EqualValues(expectedIsV1, isV1)
+				require.EqualValues(expectedIsV1, isV1)
 			},
 		)
 	}
@@ -186,7 +186,7 @@ func TestX509CertificateIsV3(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				inputFile := tt.testDir.MustGetFileInDirectory("input")
 				expectedSubjectFile := tt.testDir.MustGetFileInDirectory("expected_is_v3")
@@ -196,7 +196,7 @@ func TestX509CertificateIsV3(t *testing.T) {
 				isV3 := cert.MustIsV3()
 				expectedIsV3 := expectedSubjectFile.MustReadAsBool()
 
-				assert.EqualValues(expectedIsV3, isV3)
+				require.EqualValues(expectedIsV3, isV3)
 			},
 		)
 	}

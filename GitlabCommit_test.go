@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/logging"
@@ -29,7 +28,7 @@ func TestCommitGetHash(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -63,8 +62,8 @@ func TestCommitGetHash(t *testing.T) {
 					hashes = append(hashes, testProject.MustGetLatestCommitHashAsString(branchName, verbose))
 				}
 
-				assert.True(slicesutils.ContainsOnlyUniqeStrings(hashes))
-				assert.True(slicesutils.ContainsNoEmptyStrings(hashes))
+				require.True(slicesutils.ContainsOnlyUniqeStrings(hashes))
+				require.True(slicesutils.ContainsNoEmptyStrings(hashes))
 			},
 		)
 	}
@@ -86,7 +85,7 @@ func TestGitlabCommitGetParentCommit(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -107,15 +106,15 @@ func TestGitlabCommitGetParentCommit(t *testing.T) {
 					},
 				)
 				latestCommitAfterWrite := testProject.MustGetLatestCommitOfDefaultBranch(verbose)
-				assert.NotEqualValues(
+				require.NotEqualValues(
 					latestCommit.MustGetCommitHash(),
 					latestCommitAfterWrite.MustGetCommitHash(),
 				)
 
 				parents := latestCommitAfterWrite.MustGetParentCommits(verbose)
-				assert.Len(parents, 1)
+				require.Len(parents, 1)
 
-				assert.EqualValues(
+				require.EqualValues(
 					latestCommit.MustGetCommitHash(),
 					parents[0].MustGetCommitHash(),
 				)
@@ -140,7 +139,7 @@ func TestGitlabCommitGetIsMergeCommit(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -176,7 +175,7 @@ func TestGitlabCommitGetIsMergeCommit(t *testing.T) {
 					},
 				)
 				latestCommitAfterWrite := branch.MustGetLatestCommit(verbose)
-				assert.NotEqualValues(
+				require.NotEqualValues(
 					latestCommit.MustGetCommitHash(),
 					latestCommitAfterWrite.MustGetCommitHash(),
 				)
@@ -195,16 +194,16 @@ func TestGitlabCommitGetIsMergeCommit(t *testing.T) {
 							Verbose: verbose,
 						},
 					)
-					assert.True(mergeRequest.MustIsMerged())
+					require.True(mergeRequest.MustIsMerged())
 				}
 
 				commitAfterMerge := testProject.MustGetLatestCommitOfDefaultBranch(verbose)
 
-				assert.True(commitAfterMerge.MustIsMergeCommit(verbose))
-				assert.False(latestCommitAfterWrite.MustIsMergeCommit(verbose))
+				require.True(commitAfterMerge.MustIsMergeCommit(verbose))
+				require.False(latestCommitAfterWrite.MustIsMergeCommit(verbose))
 
-				assert.True(latestCommit.MustIsParentCommitOf(commitAfterMerge, verbose))
-				assert.True(latestCommit.MustIsParentCommitOf(latestCommitAfterWrite, verbose))
+				require.True(latestCommit.MustIsParentCommitOf(commitAfterMerge, verbose))
+				require.True(latestCommit.MustIsParentCommitOf(latestCommitAfterWrite, verbose))
 			},
 		)
 	}

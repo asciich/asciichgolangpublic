@@ -3,7 +3,7 @@ package pathsutils
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -33,9 +33,9 @@ func TestPathsIsRelativePath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedIsRelative,
 					IsRelativePath(tt.path),
 				)
@@ -69,9 +69,9 @@ func TestPathsIsAbsolutePath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedIsRelative,
 					IsAbsolutePath(tt.path),
 				)
@@ -101,7 +101,7 @@ func TestPaths_MatchBaseNamePattern(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				input := []string{
 					"a.txt",
@@ -110,7 +110,7 @@ func TestPaths_MatchBaseNamePattern(t *testing.T) {
 					"b.html",
 				}
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedFileList,
 					MustFilterPaths(input, tt.pathFilterOptions),
 				)
@@ -140,7 +140,7 @@ func TestPaths_MatchBaseNamePattern_recursive(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				input := []string{
 					"a.txt",
@@ -153,7 +153,7 @@ func TestPaths_MatchBaseNamePattern_recursive(t *testing.T) {
 					"abc/b.html",
 				}
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedFileList,
 					MustFilterPaths(input, tt.pathFilterOptions),
 				)
@@ -179,7 +179,7 @@ func TestPaths_ExcludeBasenamePattern_recursive(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				input := []string{
 					"a.txt",
@@ -192,7 +192,7 @@ func TestPaths_ExcludeBasenamePattern_recursive(t *testing.T) {
 					"abc/b.html",
 				}
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedFileList,
 					MustFilterPaths(input, tt.pathFilterOptions),
 				)
@@ -214,7 +214,7 @@ func TestPaths_ExcludeWholepathPattern_recursive(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				input := []string{
 					"a.txt",
@@ -227,7 +227,7 @@ func TestPaths_ExcludeWholepathPattern_recursive(t *testing.T) {
 					"abc/b.html",
 				}
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedFileList,
 					MustFilterPaths(input, tt.pathFilterOptions),
 				)
@@ -251,9 +251,9 @@ func TestPaths_GetRelativePathTo(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedOutput,
 					MustGetRelativePathTo(tt.input, tt.relativeTo),
 				)
@@ -277,9 +277,9 @@ func TestPaths_GetRelativePathsTo(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedOutput,
 					MustGetRelativePathsTo(tt.input, tt.relativeTo),
 				)

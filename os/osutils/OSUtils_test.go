@@ -3,7 +3,7 @@ package osutils
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -18,9 +18,7 @@ func TestOsIsRunningOnWindows(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
-
-				assert.False(IsRunningOnWindows())
+				require.False(t, IsRunningOnWindows())
 			},
 		)
 	}

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -24,10 +24,10 @@ func TestDurationFormatterToString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				durationString := DurationFormatter().MustToString(&tt.duration)
-				assert.EqualValues(tt.expectedDuration, durationString)
+				require.EqualValues(tt.expectedDuration, durationString)
 			},
 		)
 	}

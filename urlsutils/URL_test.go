@@ -3,7 +3,7 @@ package urlsutils
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -24,13 +24,13 @@ func TestUrlGetFqdnAndPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				url := MustGetUrlFromString(tt.url)
 				fqdn, path := url.MustGetFqdnWitShemeAndPathAsString()
 
-				assert.EqualValues(tt.expectedFqdn, fqdn)
-				assert.EqualValues(tt.expectedPath, path)
+				require.EqualValues(tt.expectedFqdn, fqdn)
+				require.EqualValues(tt.expectedPath, path)
 			},
 		)
 	}

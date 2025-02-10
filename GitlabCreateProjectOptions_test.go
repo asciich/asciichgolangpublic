@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -26,10 +26,10 @@ func TestGitlabCreateProjectOptionsGetProjectName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				projectName := tt.createOptions.MustGetProjectName()
-				assert.EqualValues(tt.expectedProjectName, projectName)
+				require.EqualValues(tt.expectedProjectName, projectName)
 			},
 		)
 	}
@@ -54,12 +54,12 @@ func TestGitlabCreateProjectOptionsGetGroupNames(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
 				groupNames := tt.createOptions.MustGetGroupNames(verbose)
-				assert.EqualValues(tt.expectedGroupNames, groupNames)
+				require.EqualValues(tt.expectedGroupNames, groupNames)
 			},
 		)
 	}
@@ -84,12 +84,12 @@ func TestGitlabCreateProjectOptionsGetGroupPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
 				groupPath := tt.createOptions.MustGetGroupPath(verbose)
-				assert.EqualValues(tt.expectedGroupPath, groupPath)
+				require.EqualValues(tt.expectedGroupPath, groupPath)
 			},
 		)
 	}

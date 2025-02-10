@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -26,7 +26,7 @@ func TestGitlabProjectBranchCreateAndDelete(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -36,7 +36,7 @@ func TestGitlabProjectBranchCreateAndDelete(t *testing.T) {
 				})
 
 				gitlabProject := gitlab.MustGetGitlabProjectByPath("test_group/testproject", verbose)
-				assert.True(gitlabProject.MustExists(verbose))
+				require.True(gitlabProject.MustExists(verbose))
 
 				branch := gitlabProject.MustGetBranchByName(tt.branchName)
 
@@ -44,11 +44,11 @@ func TestGitlabProjectBranchCreateAndDelete(t *testing.T) {
 					SkipWaitForDeletion: false,
 					Verbose:             verbose,
 				})
-				assert.False(branch.MustExists())
+				require.False(branch.MustExists())
 
 				for i := 0; i < 2; i++ {
 					branch.CreateFromDefaultBranch(verbose)
-					assert.True(branch.MustExists())
+					require.True(branch.MustExists())
 				}
 
 				for i := 0; i < 2; i++ {
@@ -56,7 +56,7 @@ func TestGitlabProjectBranchCreateAndDelete(t *testing.T) {
 						SkipWaitForDeletion: false,
 						Verbose:             verbose,
 					})
-					assert.False(branch.MustExists())
+					require.False(branch.MustExists())
 				}
 			},
 		)

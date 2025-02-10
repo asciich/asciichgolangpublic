@@ -3,7 +3,7 @@ package commandlineinterface
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -61,9 +61,9 @@ func TestCommandLineInterface_IsLinePromptOnly(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedIsPromptOnly,
 					IsLinePromptOnly(tt.line),
 				)

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -26,7 +26,7 @@ func TestGitlabProjectsGetFileList(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -36,12 +36,12 @@ func TestGitlabProjectsGetFileList(t *testing.T) {
 				})
 
 				gitlabProject := gitlab.MustGetGitlabProjectByPath("test_group/testproject", verbose)
-				assert.True(gitlabProject.MustExists(verbose))
+				require.True(gitlabProject.MustExists(verbose))
 
 				branchName := gitlabProject.MustGetDefaultBranchName()
 
 				gitlabProject.MustDeleteAllRepositoryFiles(branchName, verbose)
-				assert.True(gitlabProject.MustHasNoRepositoryFiles(branchName, verbose))
+				require.True(gitlabProject.MustHasNoRepositoryFiles(branchName, verbose))
 
 				gitlabProject.MustCreateEmptyFile("a.txt", branchName, verbose)
 				gitlabProject.MustCreateEmptyFile("b.txt", branchName, verbose)
@@ -59,7 +59,7 @@ func TestGitlabProjectsGetFileList(t *testing.T) {
 					"evenMore/aa/a.txt",
 					"evenMore/aa/b.txt",
 				}
-				assert.EqualValues(expectedFileList, fileList)
+				require.EqualValues(expectedFileList, fileList)
 
 				directoryList := gitlabProject.MustGetDirectoryNames(branchName, verbose)
 				exepctedDirectoryList := []string{
@@ -67,7 +67,7 @@ func TestGitlabProjectsGetFileList(t *testing.T) {
 					"evenMore",
 					"evenMore/aa",
 				}
-				assert.EqualValues(exepctedDirectoryList, directoryList)
+				require.EqualValues(exepctedDirectoryList, directoryList)
 			},
 		)
 	}
@@ -89,7 +89,7 @@ func TestGitlabProjectsGetFileList_pagination(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				const verbose bool = true
 
@@ -99,12 +99,12 @@ func TestGitlabProjectsGetFileList_pagination(t *testing.T) {
 				})
 
 				gitlabProject := gitlab.MustGetGitlabProjectByPath("test_group/testproject", verbose)
-				assert.True(gitlabProject.MustExists(verbose))
+				require.True(gitlabProject.MustExists(verbose))
 
 				branchName := gitlabProject.MustGetDefaultBranchName()
 
 				gitlabProject.MustDeleteAllRepositoryFiles(branchName, verbose)
-				assert.True(gitlabProject.MustHasNoRepositoryFiles(branchName, verbose))
+				require.True(gitlabProject.MustHasNoRepositoryFiles(branchName, verbose))
 
 				expectedFileList := []string{}
 				for i := 0; i < 21; i++ {
@@ -119,7 +119,7 @@ func TestGitlabProjectsGetFileList_pagination(t *testing.T) {
 				}
 
 				fileList := gitlabProject.MustGetFilesNames(branchName, verbose)
-				assert.EqualValues(expectedFileList, fileList)
+				require.EqualValues(expectedFileList, fileList)
 			},
 		)
 	}

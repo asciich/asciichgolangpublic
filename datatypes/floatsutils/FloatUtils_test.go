@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFloatToString(t *testing.T) {
@@ -31,10 +31,10 @@ func TestFloatToString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				floatAsString := MustToString(tt.input, tt.maxDigits)
-				assert.EqualValues(tt.expectedOutput, floatAsString)
+				require.EqualValues(tt.expectedOutput, floatAsString)
 			},
 		)
 	}
@@ -72,10 +72,10 @@ func TestFloatRound(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				rounded := MustRound(tt.input, tt.digits)
-				assert.EqualValues(tt.expectedOutput, rounded)
+				require.EqualValues(tt.expectedOutput, rounded)
 			},
 		)
 	}

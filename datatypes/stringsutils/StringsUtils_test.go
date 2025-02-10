@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestStringsGetFirstLine(t *testing.T) {
@@ -22,10 +22,10 @@ func TestStringsGetFirstLine(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				firstLine := GetFirstLine(tt.input)
-				assert.EqualValues(tt.expectedOutput, firstLine)
+				require.EqualValues(tt.expectedOutput, firstLine)
 			},
 		)
 	}
@@ -62,10 +62,10 @@ func TestStringsGetFirstLineAndTrimSpace(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				firstLine := GetFirstLineAndTrimSpace(tt.input)
-				assert.EqualValues(tt.expectedOutput, firstLine)
+				require.EqualValues(tt.expectedOutput, firstLine)
 			},
 		)
 	}
@@ -94,10 +94,10 @@ func TestStringsEnsureEndsWithExactlyOneLine(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				ensuredLineBreak := EnsureEndsWithExactlyOneLineBreak(tt.input)
-				assert.EqualValues(tt.expectedOutput, ensuredLineBreak)
+				require.EqualValues(tt.expectedOutput, ensuredLineBreak)
 			},
 		)
 	}
@@ -122,10 +122,10 @@ func TestStringsRemoveTailingNewline(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				ensuredLineBreak := RemoveTailingNewline(tt.input)
-				assert.EqualValues(tt.expectedOutput, ensuredLineBreak)
+				require.EqualValues(tt.expectedOutput, ensuredLineBreak)
 			},
 		)
 	}
@@ -148,10 +148,10 @@ func TestStringsEnsureFirstCharUppercase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				firstCharUppercased := EnsureFirstCharUppercase(tt.input)
-				assert.EqualValues(tt.expectedOutput, firstCharUppercased)
+				require.EqualValues(tt.expectedOutput, firstCharUppercased)
 			},
 		)
 	}
@@ -174,10 +174,10 @@ func TestStringsEnsureFirstCharLowercase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				firstCharUppercased := EnsureFirstCharLowercase(tt.input)
-				assert.EqualValues(tt.expectedOutput, firstCharUppercased)
+				require.EqualValues(tt.expectedOutput, firstCharUppercased)
 			},
 		)
 	}
@@ -205,10 +205,10 @@ func TestStringsRemoveComments(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				commentsRemoved := RemoveComments(tt.input)
-				assert.EqualValues(tt.expectedOutput, commentsRemoved)
+				require.EqualValues(tt.expectedOutput, commentsRemoved)
 			},
 		)
 	}
@@ -238,10 +238,10 @@ func TestStringsRightFillWithSpaces(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				filled := RightFillWithSpaces(tt.input, tt.fillLenght)
-				assert.EqualValues(tt.expectedOutput, filled)
+				require.EqualValues(tt.expectedOutput, filled)
 			},
 		)
 	}
@@ -265,9 +265,9 @@ func TestStringsHasPrefixIgnoreCase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedHasPrefix,
 					HasPrefixIgnoreCase(tt.input, tt.prefix),
 				)
@@ -296,9 +296,9 @@ func TestStringsTrimPrefixIgnoreCase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedTrimmed,
 					TrimPrefixIgnoreCase(tt.input, tt.prefix),
 				)
@@ -325,9 +325,9 @@ func TestStringsIsFirstCharLowerCase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedFirstCharLowerCase,
 					IsFirstCharLowerCase(tt.input),
 				)
@@ -354,9 +354,9 @@ func TestStringsIsFirstCharUpperCase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedFirstCharLowerCase,
 					IsFirstCharUpperCase(tt.input),
 				)
@@ -392,9 +392,9 @@ func TestStringsSplitLines(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedLines,
 					SplitLines(tt.input, true),
 				)
@@ -420,9 +420,9 @@ func TestStringsSplitWords(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedWords,
 					SplitWords(tt.input),
 				)
@@ -452,9 +452,9 @@ func TestStrings_MatchesRegex(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedMatch,
 					MustMatchesRegex(tt.input, tt.regex),
 				)
@@ -482,9 +482,9 @@ func TestStringsIsComment(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedIsComment,
 					IsComment(tt.input),
 				)
@@ -512,9 +512,9 @@ func TestStringsTrimSpacesLeft(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedOutput,
 					TrimSpacesLeft(tt.input),
 				)
@@ -554,9 +554,9 @@ func TestStringsContainsAtLeastOneSubstring(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedContains,
 					ContainsAtLeastOneSubstring(tt.input, tt.subsrings),
 				)
@@ -596,9 +596,9 @@ func TestContainsAtLeastOneSubstringIngoreCase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedContains,
 					ContainsAtLeastOneSubstringIgnoreCase(tt.input, tt.subsrings),
 				)
@@ -623,9 +623,9 @@ func TestStringsContainsIgnoreCase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedContains,
 					ContainsIgnoreCase(tt.input, tt.subsring),
 				)
@@ -652,10 +652,10 @@ func TestStringsTrimAllLeadingAndTailingNewLines(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
 				output := TrimAllLeadingAndTailingNewLines(tt.input)
-				assert.EqualValues(tt.expectedOutput, output)
+				require.EqualValues(tt.expectedOutput, output)
 			},
 		)
 	}
@@ -690,9 +690,9 @@ func TestStrings_RemoveLinesWithPrefix(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedOutput,
 					RemoveLinesWithPrefix(
 						tt.input,
@@ -738,9 +738,9 @@ func TestStrings_HexStringToBytes(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.hexBytes,
 					MustHexStringToBytes(tt.hexString),
 				)
@@ -772,9 +772,9 @@ func TestStrings_ContainsLine(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedContains,
 					ContainsLine(tt.input, tt.line),
 				)
@@ -828,9 +828,9 @@ func TestStrings_GetAsKeyValues(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedKeyValues,
 					MustGetAsKeyValues(tt.input),
 				)
@@ -853,9 +853,9 @@ func TestStrings_GetValueAsString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
+				require := require.New(t)
 
-				assert.EqualValues(
+				require.EqualValues(
 					tt.expectedValue,
 					MustGetValueAsString(tt.input, tt.key),
 				)
@@ -879,9 +879,8 @@ func TestStrings_GetValueAsInt(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				assert := assert.New(t)
-
-				assert.EqualValues(
+				require.EqualValues(
+					t,
 					tt.expectedValue,
 					MustGetValueAsInt(tt.input, tt.key),
 				)
