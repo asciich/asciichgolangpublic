@@ -319,6 +319,37 @@ func IsSubjectLocalityName(cert *x509.Certificate, expectedLocalityName string) 
 	return localityName == expectedLocalityName, nil
 }
 
+func GetSerialNumberAsString(cert *x509.Certificate) (serialNumber string, err error) {
+	if cert == nil {
+		return "", tracederrors.TracedErrorNil("cert")
+	}
+
+	serial := cert.SerialNumber
+	if serial == nil {
+		return "", tracederrors.TracedError("unable to get serial number from x509 certificate. SerialNumber is nil")
+	}
+
+	serialNumber = serial.String()
+	if serialNumber == "" {
+		return "", tracederrors.TracedError("Serial number is empty string after evaluation")
+	}
+
+	return serialNumber, nil
+}
+
+func IsSerialNumber(cert *x509.Certificate, expectedSerialNumber string) (isSerialNumber bool, err error) {
+	if cert == nil {
+		return false, tracederrors.TracedErrorNil("cert")
+	}
+
+	serialNumber, err := GetSerialNumberAsString(cert)
+	if err != nil {
+		return false, err
+	}
+
+	return serialNumber == expectedSerialNumber, nil
+}
+
 func IsSubjectOrganizationName(cert *x509.Certificate, expectedOrganizationName string) (isMatchingExpectedOrganizationName bool, err error) {
 	if cert == nil {
 		return false, tracederrors.TracedErrorNil("cert")

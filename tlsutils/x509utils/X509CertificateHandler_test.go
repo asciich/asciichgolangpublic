@@ -40,6 +40,7 @@ func TestX509Handler_CreateRootCaCertificate(t *testing.T) {
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "myOrg root",
+						SerialNumber: "12345",
 
 						Verbose: true,
 					},
@@ -51,6 +52,7 @@ func TestX509Handler_CreateRootCaCertificate(t *testing.T) {
 				assert.True(mustutils.Must(IsSubjectCountryName(caCert, "CH")))
 				assert.True(mustutils.Must(IsSubjectLocalityName(caCert, "Zurich")))
 				assert.True(mustutils.Must(IsSubjectOrganizationName(caCert, "myOrg root")))
+				assert.True(mustutils.Must(IsSerialNumber(caCert, "12345")))
 
 				assert.EqualValues([]string{"CH"}, caCert.Issuer.Country)
 				assert.EqualValues([]string{"Zurich"}, caCert.Issuer.Locality)
