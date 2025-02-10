@@ -9,9 +9,9 @@ import (
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-const baseNameRegexString = "^[a-zA-Z0-9.]*$"
+const baseNameRegexString = "^[a-zA-Z0-9._-]*$"
 
-const secretPathRegexString = "^[a-zA-Z0-9.][a-zA-Z0-9.\\/]*$"
+const secretPathRegexString = "^[a-zA-Z0-9.][a-zA-Z0-9.\\/_-]*$"
 
 var baseNameRegex = regexp.MustCompile(baseNameRegexString)
 
