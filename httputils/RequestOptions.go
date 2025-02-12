@@ -18,6 +18,9 @@ type RequestOptions struct {
 	// Request method like GET, POST...
 	Method string
 
+	// Skip TLS validation
+	SkipTLSvalidation bool
+
 	// Enable verbose output
 	Verbose bool
 }
@@ -42,12 +45,25 @@ func (r *RequestOptions) GetMethod() (method string, err error) {
 	return strings.ToUpper(r.Method), nil
 }
 
+func (r *RequestOptions) GetMethodOrDefault() (method string, err error) {
+	if r.IsMethodSet() {
+		return r.GetMethod()
+	}
+
+	return "GET", err
+}
+
 func (r *RequestOptions) GetPort() (port int, err error) {
 	if r.Port <= 0 {
 		return -1, tracederrors.TracedError("Port not set")
 	}
 
 	return r.Port, nil
+}
+
+func (r *RequestOptions) GetSkipTLSvalidation() (skipTLSvalidation bool) {
+
+	return r.SkipTLSvalidation
 }
 
 func (r *RequestOptions) GetUrl() (url string, err error) {
@@ -63,8 +79,21 @@ func (r *RequestOptions) GetVerbose() (verbose bool) {
 	return r.Verbose
 }
 
+func (r *RequestOptions) IsMethodSet() (isSet bool) {
+	return r.Method != ""
+}
+
 func (r *RequestOptions) MustGetMethod() (method string) {
 	method, err := r.GetMethod()
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return method
+}
+
+func (r *RequestOptions) MustGetMethodOrDefault() (method string) {
+	method, err := r.GetMethodOrDefault()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -129,6 +158,10 @@ func (r *RequestOptions) SetPort(port int) (err error) {
 	r.Port = port
 
 	return nil
+}
+
+func (r *RequestOptions) SetSkipTLSvalidation(skipTLSvalidation bool) {
+	r.SkipTLSvalidation = skipTLSvalidation
 }
 
 func (r *RequestOptions) SetUrl(url string) (err error) {
