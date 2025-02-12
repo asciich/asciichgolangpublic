@@ -265,6 +265,10 @@ func (t *TestWebServer) StartInBackground(verbose bool) (err error) {
 		io.WriteString(w, "hello world\n")
 	})
 
+	t.mux.HandleFunc("/example1.yaml", func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, "---\nhello: world\n")
+	})
+
 	t.server = &http.Server{
 		Addr:    ":" + strconv.Itoa(port),
 		Handler: t.mux,

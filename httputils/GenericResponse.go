@@ -1,6 +1,7 @@
 package httputils
 
 import (
+	"github.com/asciich/asciichgolangpublic/fileformats/yamlutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -14,6 +15,19 @@ type GenericResponse struct {
 
 func NewGenericResponse() (g *GenericResponse) {
 	return new(GenericResponse)
+}
+
+func (g *GenericResponse) RunYqQueryAgainstBody(query string) (result string, err error) {
+	if query == "" {
+		return "", tracederrors.TracedErrorEmptyString("query")
+	}
+
+	body, err := g.GetBodyAsString()
+	if err != nil {
+		return "", err
+	}
+
+	return yamlutils.RunYqQueryAginstYamlStringAsString(body, query)
 }
 
 func (g *GenericResponse) GetBody() (body []byte, err error) {
