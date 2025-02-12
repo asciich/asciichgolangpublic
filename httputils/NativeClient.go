@@ -27,6 +27,32 @@ func NewNativeClient() (n *NativeClient) {
 	return new(NativeClient)
 }
 
+func (c *NativeClient) MustSendRequestAndRunYqQueryAgainstBody(requestOptions *RequestOptions, query string) (result string) {
+	result, err := c.SendRequestAndRunYqQueryAgainstBody(requestOptions, query)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return result
+}
+
+func (c *NativeClient) SendRequestAndRunYqQueryAgainstBody(requestOptions *RequestOptions, query string) (result string, err error) {
+	if requestOptions == nil {
+		return "", tracederrors.TracedErrorNil("requestOptions")
+	}
+
+	if query == "" {
+		return "", tracederrors.TracedErrorEmptyString("query")
+	}
+
+	response, err := c.SendRequest(requestOptions)
+	if err != nil {
+		return "", err
+	}
+
+	return response.RunYqQueryAgainstBody(query)
+}
+
 func (c *NativeClient) SendRequest(requestOptions *RequestOptions) (response Response, err error) {
 	if requestOptions == nil {
 		return nil, tracederrors.TracedErrorNil("requestOptions")
