@@ -10,6 +10,11 @@ type DownloadAsFileOptions struct {
 	OutputPath        string
 	OverwriteExisting bool
 	Verbose           bool
+
+	// If Sha256Sum is set:
+	// - The download will be skipped if OutputPath has already the expected content.
+	// - The download is validated.
+	Sha256Sum         string
 }
 
 func NewDownloadAsFileOptions() (d *DownloadAsFileOptions) {

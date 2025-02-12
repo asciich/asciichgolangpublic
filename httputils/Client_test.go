@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/checksums"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -112,6 +113,51 @@ func TestClient_GetRequestBodyAsString_RootPage_PortInUrl(t *testing.T) {
 	}
 }
 
+func TestClient_DownloadAsFile_ChecksumMismatch(t *testing.T) {
+	tests := []struct {
+		implementationName string
+		method             string
+	}{
+		{"nativeClient", "get"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				require := require.New(t)
+
+				const verbose bool = true
+				const port int = 9123
+
+				testServer := MustGetTestWebServer(port)
+				defer testServer.Stop(verbose)
+
+				testServer.MustStartInBackground(verbose)
+
+				tempFile := tempfiles.MustCreateEmptyTemporaryFile(verbose)
+				defer tempFile.MustDelete(verbose)
+
+				const expectedOutput = "hello world\n"
+
+				var client Client = getClientByImplementationName(tt.implementationName)
+				_, err := client.DownloadAsFile(
+					&DownloadAsFileOptions{
+						RequestOptions: &RequestOptions{
+							Url:     "http://localhost:" + strconv.Itoa(testServer.MustGetPort()) + "/hello_world.txt",
+							Verbose: verbose,
+							Method:  tt.method,
+						},
+						OutputPath: tempFile.MustGetPath(),
+						Sha256Sum:  "a" + checksums.GetSha256SumFromString(expectedOutput),
+					},
+				)
+				require.Error(err)
+			},
+		)
+	}
+}
+
 func TestClient_DownloadAsFile(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -137,21 +183,40 @@ func TestClient_DownloadAsFile(t *testing.T) {
 				tempFile := tempfiles.MustCreateEmptyTemporaryFile(verbose)
 				defer tempFile.MustDelete(verbose)
 
+				const expectedOutput = "hello world\n"
+
 				var client Client = getClientByImplementationName(tt.implementationName)
 				downloadedFile := client.MustDownloadAsFile(
 					&DownloadAsFileOptions{
 						RequestOptions: &RequestOptions{
-							Url:     "http://localhost:" + strconv.Itoa(testServer.MustGetPort()) + "/hello_world.txt",
-							Verbose: verbose,
-							Method:  tt.method,
+							Url:    "http://localhost:" + strconv.Itoa(testServer.MustGetPort()) + "/hello_world.txt",
+							Method: tt.method,
 						},
 						OutputPath: tempFile.MustGetPath(),
+						Sha256Sum:  checksums.GetSha256SumFromString(expectedOutput),
+						Verbose:    verbose,
 					},
 				)
 				defer downloadedFile.MustDelete(verbose)
 
-				require.Contains(
-					"hello world\n",
+				require.EqualValues(
+					expectedOutput,
+					downloadedFile.MustReadAsString(),
+				)
+
+				downloadedFile = client.MustDownloadAsFile(
+					&DownloadAsFileOptions{
+						RequestOptions: &RequestOptions{
+							Url:    "http://localhost:" + strconv.Itoa(testServer.MustGetPort()) + "/hello_world.txt",
+							Method: tt.method,
+						},
+						OutputPath: tempFile.MustGetPath(),
+						Sha256Sum:  checksums.GetSha256SumFromString(expectedOutput),
+						Verbose:    verbose,
+					},
+				)
+				require.EqualValues(
+					expectedOutput,
 					downloadedFile.MustReadAsString(),
 				)
 			},

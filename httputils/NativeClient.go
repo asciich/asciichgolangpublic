@@ -151,6 +151,32 @@ func (n *NativeClient) DownloadAsFile(downloadOptions *DownloadAsFileOptions) (d
 		return nil, err
 	}
 
+	if downloadOptions.Sha256Sum != "" {
+		exists, err := downloadedFile.Exists(false)
+		if err != nil {
+			return nil, err
+		}
+
+		if exists {
+			sha256, err := downloadedFile.GetSha256Sum()
+			if err != nil {
+				return nil, err
+			}
+
+			if sha256 == downloadOptions.Sha256Sum {
+				if downloadOptions.Verbose {
+					logging.LogInfof(
+						"File '%s' already exists and matches sha256sum '%s'. Skip download.",
+						outputFilePath,
+						sha256,
+					)
+				}
+
+				return downloadedFile, nil
+			}
+		}
+	}
+
 	if downloadOptions.OverwriteExisting {
 		logging.LogInfof("Going to ensure '%s' is absent before download starts", outputFilePath)
 		err = downloadedFile.Delete(requestOptions.Verbose)
@@ -172,6 +198,40 @@ func (n *NativeClient) DownloadAsFile(downloadOptions *DownloadAsFileOptions) (d
 
 	if requestOptions.Verbose {
 		logging.LogInfof("Downloaded '%v' as file '%v'.", url, outputFilePath)
+	}
+
+	if downloadOptions.Sha256Sum != "" {
+		expectedSha256 := downloadOptions.Sha256Sum
+
+		if downloadOptions.Verbose {
+			logging.LogInfof(
+				"Going to validate downloaded file '%s' using expected sha256sum %s",
+				outputFilePath,
+				expectedSha256,
+			)
+		}
+
+		sha256, err := downloadedFile.GetSha256Sum()
+		if err != nil {
+			return nil, err
+		}
+
+		if expectedSha256 == sha256 {
+			if downloadOptions.Verbose {
+				logging.LogInfof(
+					"Downloaded file '%s' matches expected sha256sum %s",
+					outputFilePath,
+					expectedSha256,
+				)
+			}
+		} else {
+			return nil, tracederrors.TracedErrorf(
+				"Downloaded file '%s' has checksum '%s' and is not matching expected '%s'.",
+				outputFilePath,
+				sha256,
+				expectedSha256,
+			)
+		}
 	}
 
 	return downloadedFile, nil
