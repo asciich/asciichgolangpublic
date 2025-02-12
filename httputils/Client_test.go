@@ -32,6 +32,7 @@ func TestClient_GetRequest_RootPage_PortInUrl(t *testing.T) {
 		{"nativeClient", "Get"},
 		{"nativeClient", "GET"},
 		{"nativeClient", "GeT"},
+		{"nativeClient", ""},
 	}
 
 	for _, tt := range tests {
@@ -66,6 +67,52 @@ func TestClient_GetRequest_RootPage_PortInUrl(t *testing.T) {
 		)
 	}
 }
+
+
+func TestClient_GetRequestBodyAsString_RootPage_PortInUrl(t *testing.T) {
+	tests := []struct {
+		implementationName string
+		method             string
+	}{
+		{"nativeClient", "get"},
+		{"nativeClient", "Get"},
+		{"nativeClient", "GET"},
+		{"nativeClient", "GeT"},
+		{"nativeClient", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				require := require.New(t)
+
+				const verbose bool = true
+				const port int = 9123
+
+				testServer := MustGetTestWebServer(port)
+				defer testServer.Stop(verbose)
+
+				testServer.MustStartInBackground(verbose)
+
+				var client Client = getClientByImplementationName(tt.implementationName)
+				responseBody := client.MustSendRequestAndGetBodyAsString(
+					&RequestOptions{
+						Url:     "http://localhost:" + strconv.Itoa(testServer.MustGetPort()),
+						Verbose: verbose,
+						Method:  tt.method,
+					},
+				)
+
+				require.Contains(
+					responseBody,
+					"TestWebServer",
+				)
+			},
+		)
+	}
+}
+
 
 func TestClient_DownloadAsFile(t *testing.T) {
 	tests := []struct {

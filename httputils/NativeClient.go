@@ -1,6 +1,7 @@
 package httputils
 
 import (
+	"crypto/tls"
 	"io"
 	"net/http"
 	"os"
@@ -36,12 +37,15 @@ func (c *NativeClient) SendRequest(requestOptions *RequestOptions) (response Res
 		return nil, err
 	}
 
-	method, err := requestOptions.GetMethod()
+	method, err := requestOptions.GetMethodOrDefault()
 	if err != nil {
 		return nil, err
 	}
 
-	client := http.Client{}
+	customTransport := http.DefaultTransport.(*http.Transport).Clone()
+	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: requestOptions.SkipTLSvalidation}
+
+	client := http.Client{Transport: customTransport}
 	request, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		return nil, err
@@ -70,6 +74,19 @@ func (c *NativeClient) SendRequest(requestOptions *RequestOptions) (response Res
 	}
 
 	return response, err
+}
+
+func (c *NativeClient) SendRequestAndGetBodyAsString(requestOptions *RequestOptions) (responseBody string, err error) {
+	if requestOptions == nil {
+		return "", tracederrors.TracedErrorNil("requestOptions")
+	}
+
+	response, err := c.SendRequest(requestOptions)
+	if err != nil {
+		return "", err
+	}
+
+	return response.GetBodyAsString()
 }
 
 func (n *NativeClient) DownloadAsFile(downloadOptions *DownloadAsFileOptions) (downloadedFile files.File, err error) {
@@ -175,4 +192,13 @@ func (n *NativeClient) MustSendRequest(requestOptions *RequestOptions) (response
 	}
 
 	return response
+}
+
+func (n *NativeClient) MustSendRequestAndGetBodyAsString(requestOptions *RequestOptions) (responseBody string) {
+	responseBody, err := n.SendRequestAndGetBodyAsString(requestOptions)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return responseBody
 }
