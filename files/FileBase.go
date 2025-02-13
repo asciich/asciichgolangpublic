@@ -559,7 +559,21 @@ func (f *FileBase) IsEmptyFile() (isEmtpyFile bool, err error) {
 }
 
 func (f *FileBase) IsMatchingSha256Sum(sha256sum string) (isMatching bool, err error) {
-	currentSum, err := f.GetSha256Sum()
+	parent, err := f.GetParentFileForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	exists, err := parent.Exists(false)
+	if err != nil {
+		return false, err
+	}
+
+	if !exists {
+		return false, nil
+	}
+
+	currentSum, err := parent.GetSha256Sum()
 	if err != nil {
 		return false, err
 	}
