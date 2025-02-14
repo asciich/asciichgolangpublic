@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/netutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -394,7 +395,7 @@ func (h *CommandExecutorHost) IsTcpPortOpen(portNumber int, verbose bool) (isOpe
 		return false, err
 	}
 
-	isOpen, err = asciichgolangpublic.TcpPorts().IsPortOpen(hostname, portNumber, verbose)
+	isOpen, err = netutils.IsTcpPortOpen(hostname, portNumber, verbose)
 	if err != nil {
 		return false, err
 	}

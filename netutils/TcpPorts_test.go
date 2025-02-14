@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package netutils
 
 import (
 	"testing"
@@ -28,7 +28,7 @@ func TestTcpPortsIsPortOpen(t *testing.T) {
 
 				require.EqualValues(
 					tt.expectedIsOpen,
-					TcpPorts().MustIsPortOpen(tt.hostname, tt.portNumber, verbose),
+					MustIsTcpPortOpen(tt.hostname, tt.portNumber, verbose),
 				)
 			},
 		)
