@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package netutils
 
 import (
 	"net"
@@ -10,19 +10,9 @@ import (
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-type TcpPortsService struct{}
-
-func NewTcpPortsService() (t *TcpPortsService) {
-	return new(TcpPortsService)
-}
-
-func TcpPorts() (t *TcpPortsService) {
-	return NewTcpPortsService()
-}
-
 // Check if a TCP port on the given hostnameOrIp with given portNumber is open.
 // The evaluation is done by opening a TCP socket and close it again.
-func (t *TcpPortsService) IsPortOpen(hostnameOrIp string, port int, verbose bool) (isOpen bool, err error) {
+func IsTcpPortOpen(hostnameOrIp string, port int, verbose bool) (isOpen bool, err error) {
 	hostnameOrIp = strings.TrimSpace(hostnameOrIp)
 	if hostnameOrIp == "" {
 		return false, tracederrors.TracedErrorEmptyString("hostnameOrIp")
@@ -62,8 +52,8 @@ func (t *TcpPortsService) IsPortOpen(hostnameOrIp string, port int, verbose bool
 	return isOpen, nil
 }
 
-func (t *TcpPortsService) MustIsPortOpen(hostnameOrIp string, port int, verbose bool) (isOpen bool) {
-	isOpen, err := t.IsPortOpen(hostnameOrIp, port, verbose)
+func MustIsTcpPortOpen(hostnameOrIp string, port int, verbose bool) (isOpen bool) {
+	isOpen, err := IsTcpPortOpen(hostnameOrIp, port, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
