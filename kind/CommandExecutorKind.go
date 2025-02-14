@@ -209,9 +209,9 @@ func (c *CommandExecutorKind) GetClusterByName(clusterName string) (cluster kube
 		return nil, tracederrors.TracedErrorEmptyString("clusterName")
 	}
 
-	toReturn := NewKindCluster()
+	toReturn := NewCommandExecutorKindCluster()
 
-	err = toReturn.SetName(clusterName)
+	err = toReturn.SetName("kind-" + clusterName)
 	if err != nil {
 		return nil, err
 	}
@@ -221,11 +221,23 @@ func (c *CommandExecutorKind) GetClusterByName(clusterName string) (cluster kube
 		return nil, err
 	}
 
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	err = toReturn.SetCommandExecutor(commandExecutor)
+	if err != nil {
+		return nil, err
+	}
+
 	return toReturn, nil
 }
 
 func (c *CommandExecutorKind) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
-
+	if c.commandExecutor == nil {
+		return nil, tracederrors.TracedError("commandExecutor not set")
+	}
 	return c.commandExecutor, nil
 }
 

@@ -226,6 +226,9 @@ func (c *CommandExecutorKubernetes) GetCachedKubectlContext(verbose bool) (conte
 }
 
 func (c *CommandExecutorKubernetes) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
+	if c.commandExecutor == nil {
+		return nil, tracederrors.TracedError("CommandExecutor not set")
+	}
 
 	return c.commandExecutor, nil
 }
