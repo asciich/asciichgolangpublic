@@ -888,3 +888,58 @@ func TestStrings_GetValueAsInt(t *testing.T) {
 		)
 	}
 }
+
+func TestStrings_EnsureSuffix(t *testing.T) {
+	tests := []struct {
+		input    string
+		suffix   string
+		expected string
+	}{
+		{"a", "\n", "a\n"},
+		{"a\n", "\n", "a\n"},
+		{"a", "x", "ax"},
+		{"a\n", "x", "a\nx"},
+		{"ax", "x", "ax"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			fmt.Sprintf("%v", tt),
+			func(t *testing.T) {
+				require.EqualValues(
+					t,
+					tt.expected,
+					EnsureSuffix(tt.input, tt.suffix),
+				)
+			},
+		)
+	}
+}
+
+func TestStrings_EnsurePrefix(t *testing.T) {
+	tests := []struct {
+		input    string
+		prefix   string
+		expected string
+	}{
+		{"a", "\n", "\na"},
+		{"a\n", "\n", "\na\n"},
+		{"\na", "\n", "\na"},
+		{"a", "x", "xa"},
+		{"a\n", "x", "xa\n"},
+		{"xa", "x", "xa"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			fmt.Sprintf("%v", tt),
+			func(t *testing.T) {
+				require.EqualValues(
+					t,
+					tt.expected,
+					EnsurePrefix(tt.input, tt.prefix),
+				)
+			},
+		)
+	}
+}
