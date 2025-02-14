@@ -131,17 +131,15 @@ func EnsureFirstCharUppercase(input string) (firstCharUppercase string) {
 func EnsurePrefix(input string, prefix string) (ensuredPrefix string) {
 	if strings.HasPrefix(input, prefix) {
 		return input
-	} else {
-		return prefix + input
 	}
+	return prefix + input
 }
 
 func EnsureSuffix(input string, suffix string) (ensuredSuffix string) {
 	if strings.HasSuffix(input, suffix) {
 		return input
-	} else {
-		return input + suffix
 	}
+	return input + suffix
 }
 
 func FirstCharToUpper(input string) (output string) {
