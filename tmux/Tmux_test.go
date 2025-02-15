@@ -16,6 +16,9 @@ func TestTemux_IsTmuxKey(t *testing.T) {
 		{"testcase", false},
 		{"", false},
 		{"enter", true},
+		{"C-c", true},
+		{"C-d", true},
+		{"C-l", true},
 	}
 
 	for _, tt := range tests {
