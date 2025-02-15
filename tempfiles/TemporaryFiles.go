@@ -94,6 +94,15 @@ func CreateNamedTemporaryFile(fileName string, verbose bool) (temporaryfile file
 		return nil, err
 	}
 
+	if verbose {
+		createdFilePath, err := temporaryfile.GetPath()
+		if err != nil {
+			return nil, err
+		}
+
+		logging.LogInfof("Created temporary file '%s'", createdFilePath)
+	}
+
 	return temporaryfile, nil
 }
 

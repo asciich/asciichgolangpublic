@@ -346,18 +346,18 @@ func (t *TmuxWindow) GetSessionName() (sessionName string, err error) {
 	return sessionName, nil
 }
 
-func (t *TmuxWindow) GetShownLines() (lines []string, err error) {
+func (t *TmuxWindow) GetShownOutput() (output string, err error) {
 	sessionName, windowName, err := t.GetSessionAndWindowName()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	commandExecutor, err := t.GetCommandExecutor()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	lines, err = commandExecutor.RunCommandAndGetStdoutAsLines(
+	output, err = commandExecutor.RunCommandAndGetStdoutAsString(
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"tmux",
@@ -370,9 +370,19 @@ func (t *TmuxWindow) GetShownLines() (lines []string, err error) {
 		},
 	)
 	if err != nil {
+		return "", err
+	}
+
+	return output, nil
+}
+
+func (t *TmuxWindow) GetShownLines() (lines []string, err error) {
+	output, err := t.GetShownOutput()
+	if err != nil {
 		return nil, err
 	}
 
+	lines = stringsutils.SplitLines(output, true)
 	lines = slicesutils.RemoveEmptyStringsAtEnd(lines)
 
 	return lines, nil
@@ -517,6 +527,127 @@ func (t *TmuxWindow) MustRunCommand(runCommandOptions *parameteroptions.RunComma
 	}
 
 	return commandOutput
+}
+
+func (t *TmuxWindow) WaitUntilOutputMatchesRegex(regex string, timeout time.Duration, verbose bool) (err error) {
+	if regex == "" {
+		return tracederrors.TracedErrorEmptyString("regex")
+	}
+
+	sessionName, windowName, err := t.GetSessionAndWindowName()
+	if err != nil {
+		return err
+	}
+
+	tStart := time.Now()
+
+	for {
+		if time.Since(tStart) > timeout {
+			return tracederrors.TracedErrorf(
+				"Timeout (%v) while waiting for tmux terminal output of '%s:%s' matches regex '%s'.",
+				timeout,
+				sessionName,
+				windowName,
+				regex,
+			)
+		}
+
+		output, err := t.GetShownOutput()
+		if err != nil {
+			return err
+		}
+
+		matches, err := stringsutils.MatchesRegex(output, regex)
+		if err != nil {
+			return err
+		}
+
+		if matches {
+			break
+		}
+
+		retryDelay := time.Millisecond * 100
+
+		if verbose {
+			logging.LogInfof(
+				"Tmux output of '%s:%s' does not match regex '%s'. Going to retry in '%s'",
+				sessionName,
+				windowName,
+				regex,
+				retryDelay,
+			)
+		}
+
+		time.Sleep(retryDelay)
+	}
+
+	if verbose {
+		logging.LogInfof(
+			"Tmux terminal output of '%s:%s' now matches regex '%s'.",
+			sessionName,
+			windowName,
+			regex,
+		)
+	}
+
+	return nil
+}
+
+func (t *TmuxWindow) IsOutputMatchingRegex(regex string, verbose bool) (isMatching bool, err error) {
+	if regex == "" {
+		return false, tracederrors.TracedErrorEmptyString("regex")
+	}
+
+	sessionName, windowName, err := t.GetSessionAndWindowName()
+	if err != nil {
+		return false, err
+	}
+
+	output, err := t.GetShownOutput()
+	if err != nil {
+		return false, err
+	}
+
+	isMatching, err = stringsutils.MatchesRegex(output, regex)
+	if err != nil {
+		return false, err
+	}
+
+	if verbose {
+		if isMatching {
+			logging.LogInfof(
+				"Output of tmux window '%s:%s' matches regex '%s'.",
+				sessionName,
+				windowName,
+				regex,
+			)
+		} else {
+			logging.LogInfof(
+				"Output of tmux window '%s:%s' does not match regex '%s'.",
+				sessionName,
+				windowName,
+				regex,
+			)
+		}
+	}
+
+	return isMatching, nil
+}
+
+func (t *TmuxWindow) MustIsOutputMatchingRegex(regex string, verbose bool) (isMatching bool) {
+	isMatching, err := t.IsOutputMatchingRegex(regex, verbose)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return isMatching
+}
+
+func (t *TmuxWindow) MustWaitUntilOutputMatchesRegex(regex string, timeout time.Duration, verbose bool) {
+	err := t.WaitUntilOutputMatchesRegex(regex, timeout, verbose)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
 }
 
 func (t *TmuxWindow) MustSendKeys(toSend []string, verbose bool) {

@@ -13,6 +13,31 @@ func Files() (f *FilesService) {
 	return NewFilesService()
 }
 
+func DeleteFileByPath(path string, verbose bool) (err error) {
+	if path == "" {
+		return tracederrors.TracedErrorEmptyString("path")
+	}
+
+	toDelete, err := GetLocalFileByPath(path)
+	if err != nil {
+		return err
+	}
+
+	err = toDelete.Delete(verbose)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func MustDeleteFileByPath(path string, verbose bool) {
+	err := DeleteFileByPath(path, verbose)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+}
+
 func MustReadFileAsString(path string) (content string) {
 	content, err := ReadFileAsString(path)
 	if err != nil {

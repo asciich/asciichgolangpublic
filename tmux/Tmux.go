@@ -183,7 +183,10 @@ func (t *TmuxService) SetCommandExecutor(commandExecutor commandexecutor.Command
 // Returns false otherwise.
 func IsTmuxKey(input string) (isKey bool) {
 	knownKeys := []string{
-		"enter",
+		"enter", // Enter key
+		"C-c",   // CTRL + C
+		"C-d",   // CTRL + D
+		"C-l",   // CTRL + L
 	}
 
 	return slices.Contains(knownKeys, input)
