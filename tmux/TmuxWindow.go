@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/commandlineinterface"
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
@@ -44,16 +45,26 @@ func (t *TmuxWindow) SendKeys(toSend []string, verbose bool) (err error) {
 		return err
 	}
 
-	commandToUse := append([]string{"tmux", "send-keys", "-t", sessionName + ":" + windowName}, toSend...)
+	for _, t := range toSend {
+		commandToUse := []string{"tmux", "send-keys", "-t", sessionName + ":" + windowName}
 
-	_, err = commandExecutor.RunCommand(
-		&parameteroptions.RunCommandOptions{
-			Command: commandToUse,
-			Verbose: verbose,
-		},
-	)
-	if err != nil {
-		return err
+		if IsTmuxKey(t) {
+			commandToUse = append(commandToUse, t)
+		} else {
+			hexEncoded := stringsutils.ToHexStringSlice(t)
+			commandToUse = append(commandToUse, "-H")
+			commandToUse = append(commandToUse, hexEncoded...)
+		}
+
+		_, err = commandExecutor.RunCommand(
+			&parameteroptions.RunCommandOptions{
+				Command: commandToUse,
+				Verbose: verbose,
+			},
+		)
+		if err != nil {
+			return err
+		}
 	}
 
 	if verbose {

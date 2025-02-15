@@ -1,6 +1,7 @@
 package tmux
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
@@ -176,4 +177,14 @@ func (t *TmuxService) SetCommandExecutor(commandExecutor commandexecutor.Command
 	t.commandExecutor = commandExecutor
 
 	return nil
+}
+
+// Returns true if input string is a valid tmux key like "enter".
+// Returns false otherwise.
+func IsTmuxKey(input string) (isKey bool) {
+	knownKeys := []string{
+		"enter",
+	}
+
+	return slices.Contains(knownKeys, input)
 }
