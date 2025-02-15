@@ -943,3 +943,53 @@ func TestStrings_EnsurePrefix(t *testing.T) {
 		)
 	}
 }
+
+func TestStrings_ToHexString(t *testing.T) {
+	tests := []struct {
+		input     string
+		delimiter string
+		expected  string
+	}{
+		{"", "", ""},
+		{"ls", "", "6c73"},
+		{"ls", " ", "6c 73"},
+		{"ls", "_", "6c_73"},
+		{"ls", "_-_", "6c_-_73"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			fmt.Sprintf("%v", tt),
+			func(t *testing.T) {
+				require.EqualValues(
+					t,
+					tt.expected,
+					ToHexString(tt.input, tt.delimiter),
+				)
+			},
+		)
+	}
+}
+
+func TestStrings_ToHexStringSlice(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []string
+	}{
+		{"", []string{}},
+		{"ls", []string{"6c", "73"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			fmt.Sprintf("%v", tt),
+			func(t *testing.T) {
+				require.EqualValues(
+					t,
+					tt.expected,
+					ToHexStringSlice(tt.input),
+				)
+			},
+		)
+	}
+}

@@ -793,3 +793,32 @@ func TrimSuffixUntilAbsent(input string, suffixToRemove string) (withoutSuffix s
 	}
 	return withoutSuffix
 }
+
+// Convert "input" to a hex string while every char is separated by the "delimiter".
+func ToHexString(input string, delimiter string) (hexString string) {
+	if delimiter == "" {
+		return hex.EncodeToString([]byte(input))
+	}
+
+	for i, c := range input {
+		toAdd := hex.EncodeToString([]byte(string(c)))
+		if i == 0 {
+			hexString += toAdd
+		} else {
+			hexString += delimiter + toAdd
+		}
+	}
+	return hexString
+}
+
+// Convert "input" to a hex string slices while every element of the hexStringSlice is the value of a char in hex as string.
+func ToHexStringSlice(input string) (hexStringSlice []string) {
+	hexStringSlice = []string{}
+	for _, c := range input {
+		hexStringSlice = append(
+			hexStringSlice,
+			hex.EncodeToString([]byte(string(c))),
+		)
+	}
+	return hexStringSlice
+}

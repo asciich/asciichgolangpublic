@@ -8,7 +8,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/randomgenerator"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -69,7 +68,10 @@ func TestTemuxWindow_ReadLastLine(t *testing.T) {
 	tests := []struct {
 		testmessage string
 	}{
-		{"testcase"},
+		{"Aengia0s"},
+		{"Gu2aivai"},
+		{"Aen8ayai"},
+		{"Aen8a;yai"},
 	}
 
 	for _, tt := range tests {
@@ -91,20 +93,16 @@ func TestTemuxWindow_ReadLastLine(t *testing.T) {
 
 				window.MustCreate(verbose)
 
-				for i := 0; i < 3; i++ {
-					content := randomgenerator.MustGetRandomString(10)
+				window.MustWaitUntilCliPromptReady(verbose)
 
-					window.MustWaitUntilCliPromptReady(verbose)
+				window.MustSendKeys([]string{"echo '" + tt.testmessage + "'", "enter"}, verbose)
 
-					window.MustSendKeys([]string{"echo " + content, "enter"}, verbose)
+				time.Sleep(time.Millisecond * 500)
 
-					time.Sleep(time.Millisecond * 500)
-
-					require.EqualValues(
-						content,
-						window.MustGetSecondLatestPaneLine(),
-					)
-				}
+				require.EqualValues(
+					tt.testmessage,
+					window.MustGetSecondLatestPaneLine(),
+				)
 			},
 		)
 	}
