@@ -5,18 +5,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/randomgenerator"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestCommitGetHash(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogWarn("Unavailable in github")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testcase string
@@ -70,10 +65,7 @@ func TestCommitGetHash(t *testing.T) {
 }
 
 func TestGitlabCommitGetParentCommit(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogWarn("Unavailable in github")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testcase string
@@ -124,10 +116,7 @@ func TestGitlabCommitGetParentCommit(t *testing.T) {
 }
 
 func TestGitlabCommitGetIsMergeCommit(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogWarn("Unavailable in github")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testcase string

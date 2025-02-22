@@ -6,8 +6,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/continuousintegration"
-	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestDatesLayoutStringYYYYmmdd_HHMMSSS(t *testing.T) {
@@ -68,10 +67,7 @@ func TestDatesParseString_UTC(t *testing.T) {
 }
 
 func TestDatesParseString_CET(t *testing.T) {
-	if continuousintegration.IsRunningInContinuousIntegration() {
-		logging.LogInfo("does currently not work inside CI/CD.")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		input        string

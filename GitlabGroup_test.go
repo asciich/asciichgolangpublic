@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/continuousintegration"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -166,10 +164,7 @@ func TestGitlabGroupGetParentGroupPath(t *testing.T) {
 
 // Validate if getting the gitlab group by path and by id works.
 func TestGitlabGroupByPathAndId(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Not available in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		groupPath string
@@ -238,10 +233,7 @@ func TestGitlabGroupByPathAndId(t *testing.T) {
 }
 
 func TestGitlabGroupListProjects(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Not available in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testcase string

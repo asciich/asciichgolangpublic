@@ -80,10 +80,7 @@ func TestX509CertificatesCreateIntermediateCertificateIntoTemporaryDirectory(t *
 
 /* TODO move to gopass
 func TestX509CertificateCreateAndSignIntermediateCertificate(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Not implemented on Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testcase string

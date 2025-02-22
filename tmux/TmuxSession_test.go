@@ -5,16 +5,11 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/continuousintegration"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestTemuxSession_CreateAndDeleteSession(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Not available in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testmessage string

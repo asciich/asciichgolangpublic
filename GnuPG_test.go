@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
@@ -34,10 +33,7 @@ func getFileToTest(implementationName string) (file files.File) {
 }
 
 func TestGnuPg_SignAndValidate(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogWarnf("Not available in Github CI.")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		implementationName string

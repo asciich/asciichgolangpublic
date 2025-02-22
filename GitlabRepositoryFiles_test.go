@@ -5,16 +5,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/continuousintegration"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestGitlabProjectsGetFileList(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Unavailable in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testcase string
@@ -74,10 +69,7 @@ func TestGitlabProjectsGetFileList(t *testing.T) {
 }
 
 func TestGitlabProjectsGetFileList_pagination(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Unavailable in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testcase string

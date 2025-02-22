@@ -6,18 +6,13 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/files"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestHost_CheckReachable(t *testing.T) {
-	if continuousintegration.IsRunningInContinuousIntegration() {
-		logging.LogInfo("Currently not available in CI/CD pipeline")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		hostname          string
@@ -40,10 +35,7 @@ func TestHost_CheckReachable(t *testing.T) {
 }
 
 func TestHostGetHostName(t *testing.T) {
-	if continuousintegration.IsRunningInContinuousIntegration() {
-		logging.LogInfo("Currently not available in CI/CD pipeline")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		hostname          string
@@ -69,11 +61,7 @@ func TestHostGetHostName(t *testing.T) {
 }
 
 func TestHostGetHostDescripion(t *testing.T) {
-	if continuousintegration.IsRunningInContinuousIntegration() {
-		logging.LogInfo("Currently not available in CI/CD pipeline")
-		return
-	}
-
+	testutils.SkipIfRunningInGithub(t)
 	tests := []struct {
 		hostname          string
 		expectedReachable bool
@@ -98,10 +86,7 @@ func TestHostGetHostDescripion(t *testing.T) {
 }
 
 func TestHostRunCommand(t *testing.T) {
-	if continuousintegration.IsRunningInContinuousIntegration() {
-		logging.LogInfo("Currently not available in CI/CD pipeline")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		hostname          string
@@ -138,10 +123,7 @@ func TestHostRunCommand(t *testing.T) {
 }
 
 func TestHost_GetDirectoryByPath(t *testing.T) {
-	if continuousintegration.IsRunningInContinuousIntegration() {
-		logging.LogInfo("Currently not available in CI/CD pipeline")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		hostname       string

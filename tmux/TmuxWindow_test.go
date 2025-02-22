@@ -5,19 +5,14 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/files"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestTemuxWindow_CreateAndDeleteWindow(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Not available in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testmessage string
@@ -62,10 +57,7 @@ func TestTemuxWindow_CreateAndDeleteWindow(t *testing.T) {
 }
 
 func TestTemuxWindow_ReadLastLine(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Not available in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testmessage string
@@ -111,10 +103,7 @@ func TestTemuxWindow_ReadLastLine(t *testing.T) {
 }
 
 func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Not available in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		username string
@@ -187,10 +176,7 @@ func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
 }
 
 func TestTemuxWindow_RunCommand(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Not available in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		command        []string

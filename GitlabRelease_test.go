@@ -4,18 +4,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/continuousintegration"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/randomgenerator"
 
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestGitlabReleaseCreateAndDelete(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Unavailable in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testcase string
@@ -90,10 +85,7 @@ func TestGitlabReleaseCreateAndDelete(t *testing.T) {
 }
 
 func TestGitlabRelease_ReleaseLinks(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Unavailable in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testcase string
@@ -174,10 +166,7 @@ func TestGitlabRelease_ReleaseLinks(t *testing.T) {
 }
 
 func TestGitlabRelease_CreateNewPatchRelease(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Unavailable in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testcase string
