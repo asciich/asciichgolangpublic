@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package gnupg
 
 import (
 	"testing"
@@ -63,7 +63,7 @@ func TestGnuPg_SignAndValidate(t *testing.T) {
 				require.True(toTest.MustExists(verbose))
 				require.False(signatureFile.MustExists(verbose))
 
-				GnuPG().MustSignFile(
+				MustSignFile(
 					toTest,
 					&GnuPGSignOptions{
 						DetachedSign: true,
@@ -75,7 +75,7 @@ func TestGnuPg_SignAndValidate(t *testing.T) {
 				require.True(toTest.MustExists(verbose))
 				require.True(signatureFile.MustExists(verbose))
 
-				GnuPG().MustCheckSignatureValid(signatureFile, verbose)
+				MustCheckSignatureValid(signatureFile, verbose)
 			},
 		)
 	}

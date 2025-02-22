@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package gnupg
 
 import (
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
@@ -8,18 +8,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-type GnuPGService struct {
-}
 
-func GnuPG() (gnuPG *GnuPGService) {
-	return new(GnuPGService)
-}
-
-func NewGnuPGService() (g *GnuPGService) {
-	return new(GnuPGService)
-}
-
-func (g *GnuPGService) CheckSignatureValid(signatureFile files.File, verbose bool) (err error) {
+func CheckSignatureValid(signatureFile files.File, verbose bool) (err error) {
 	if signatureFile == nil {
 		return tracederrors.TracedErrorNil("signatureFile")
 	}
@@ -63,21 +53,21 @@ func (g *GnuPGService) CheckSignatureValid(signatureFile files.File, verbose boo
 	return nil
 }
 
-func (g *GnuPGService) MustCheckSignatureValid(signatureFile files.File, verbose bool) {
-	err := g.CheckSignatureValid(signatureFile, verbose)
+func MustCheckSignatureValid(signatureFile files.File, verbose bool) {
+	err := CheckSignatureValid(signatureFile, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (g *GnuPGService) MustSignFile(fileToSign files.File, options *GnuPGSignOptions) {
-	err := g.SignFile(fileToSign, options)
+func MustSignFile(fileToSign files.File, options *GnuPGSignOptions) {
+	err := SignFile(fileToSign, options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (g *GnuPGService) SignFile(fileToSign files.File, options *GnuPGSignOptions) (err error) {
+func SignFile(fileToSign files.File, options *GnuPGSignOptions) (err error) {
 	if fileToSign == nil {
 		return tracederrors.TracedError("fileToSign is nil")
 	}
