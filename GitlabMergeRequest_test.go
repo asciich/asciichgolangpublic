@@ -4,16 +4,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/continuousintegration"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestMergeRequestCreateAndClose(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogWarn("Unavailable in github")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		mergeRequestTitle string
@@ -73,10 +68,7 @@ func TestMergeRequestCreateAndClose(t *testing.T) {
 }
 
 func TestMergeRequestCreateAndClose_withLabels(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogWarn("Unavailable in github")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		mergeRequestTitle string

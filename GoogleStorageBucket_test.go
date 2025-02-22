@@ -4,19 +4,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/continuousintegration"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 const TEST_BUCKET_NAME = "asciich-test-bucket"
 
 func TestGoogleStorageBucketExists(t *testing.T) {
-
-	if continuousintegration.IsRunningInContinuousIntegration() {
-		logging.LogInfo("Currently not available in CI/CD.")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		bucketName     string

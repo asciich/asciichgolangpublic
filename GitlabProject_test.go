@@ -4,16 +4,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/continuousintegration"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Unavailable in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testcase string
@@ -93,10 +88,7 @@ func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
 }
 
 func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Unavailable in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testcase string
@@ -172,10 +164,7 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile(t *testing.T) {
 }
 
 func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Unavailable in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testcase string

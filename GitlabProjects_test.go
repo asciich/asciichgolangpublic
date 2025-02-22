@@ -4,16 +4,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/continuousintegration"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestGitlabProjectsProjectDoesNotExist(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Unavailable in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testcase string
@@ -39,10 +34,7 @@ func TestGitlabProjectsProjectDoesNotExist(t *testing.T) {
 }
 
 func TestGitlabProjectsGetProjectIdAndPath(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Unavailable in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testcase string
@@ -105,10 +97,7 @@ func TestGitlabProjectsGetProjectIdAndPath(t *testing.T) {
 }
 
 func TestGitlabProjectsGetFileContentAsString(t *testing.T) {
-	if continuousintegration.IsRunningInGithub() {
-		logging.LogInfo("Unavailable in Github CI")
-		return
-	}
+	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
 		testcase string

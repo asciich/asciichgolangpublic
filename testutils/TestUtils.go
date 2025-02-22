@@ -3,27 +3,15 @@ package testutils
 import (
 	"fmt"
 	"strings"
+	"testing"
 
+	"github.com/asciich/asciichgolangpublic/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/datatypes/structsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-type TestsService struct{}
-
-func MustFormatAsTestname(objectToFormat interface{}) (testname string) {
-	return Tests().MustFormatAsTestname(objectToFormat)
-}
-
-func NewTestsService() (t *TestsService) {
-	return new(TestsService)
-}
-
-func Tests() (tests *TestsService) {
-	return NewTestsService()
-}
-
-func (t *TestsService) FormatAsTestname(objectToFormat interface{}) (testname string, err error) {
+func FormatAsTestname(objectToFormat interface{}) (testname string, err error) {
 	testname = ""
 
 	if structsutils.IsStructOrPointerToStruct(objectToFormat) {
@@ -54,11 +42,23 @@ func (t *TestsService) FormatAsTestname(objectToFormat interface{}) (testname st
 	return testname, nil
 }
 
-func (t *TestsService) MustFormatAsTestname(objectToFormat interface{}) (testname string) {
-	testname, err := t.FormatAsTestname(objectToFormat)
+func MustFormatAsTestname(objectToFormat interface{}) (testname string) {
+	testname, err := FormatAsTestname(objectToFormat)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 
 	return testname
+}
+
+func SkipIfRunningInContinuousIntegration(t testing.TB) {
+	if continuousintegration.IsRunningInContinuousIntegration() {
+		t.Skip("Test not available in continuous integration")
+	}
+}
+
+func SkipIfRunningInGithub(t testing.TB) {
+	if continuousintegration.IsRunningInGithub() {
+		t.Skip("Test not available in Github continuous integration")
+	}
 }
