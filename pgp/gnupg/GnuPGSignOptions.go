@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package gnupg
 
 import "github.com/asciich/asciichgolangpublic/logging"
 
