@@ -1,7 +1,6 @@
-package asciichgolangpublic
+package commandexecutor
 
 import (
-	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
@@ -9,7 +8,7 @@ import (
 )
 
 type PowerShellService struct {
-	commandexecutor.CommandExecutorBase
+	CommandExecutorBase
 }
 
 func NewPowerShell() (p *PowerShellService) {
@@ -24,7 +23,7 @@ func PowerShell() (p *PowerShellService) {
 	return NewPowerShell()
 }
 
-func (b *PowerShellService) RunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (b *PowerShellService) RunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -56,7 +55,7 @@ func (b *PowerShellService) RunCommand(options *parameteroptions.RunCommandOptio
 
 	optionsToUse.Command = powerShellCommand
 
-	commandOutput, err = commandexecutor.Exec().RunCommand(optionsToUse)
+	commandOutput, err = Exec().RunCommand(optionsToUse)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +63,7 @@ func (b *PowerShellService) RunCommand(options *parameteroptions.RunCommandOptio
 	return commandOutput, nil
 }
 
-func (p *PowerShellService) MustRunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput) {
+func (p *PowerShellService) MustRunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput) {
 	commandOutput, err := p.RunCommand(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -73,7 +72,7 @@ func (p *PowerShellService) MustRunCommand(options *parameteroptions.RunCommandO
 	return commandOutput
 }
 
-func (p *PowerShellService) MustRunOneLiner(oneLiner string, verbose bool) (output *commandexecutor.CommandOutput) {
+func (p *PowerShellService) MustRunOneLiner(oneLiner string, verbose bool) (output *CommandOutput) {
 	output, err := p.RunOneLiner(oneLiner, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -91,7 +90,7 @@ func (p *PowerShellService) MustRunOneLinerAndGetStdoutAsString(oneLiner string,
 	return stdout
 }
 
-func (p *PowerShellService) RunOneLiner(oneLiner string, verbose bool) (output *commandexecutor.CommandOutput, err error) {
+func (p *PowerShellService) RunOneLiner(oneLiner string, verbose bool) (output *CommandOutput, err error) {
 	if oneLiner == "" {
 		return nil, tracederrors.TracedErrorEmptyString("oneLiner")
 	}
