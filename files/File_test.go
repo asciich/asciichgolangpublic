@@ -6,6 +6,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/os/unixfilepermissionsutils"
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -45,6 +47,7 @@ func TestFile_WriteString_ReadAsString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -76,6 +79,7 @@ func TestFile_Exists(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -105,6 +109,7 @@ func TestFile_Truncate(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -147,6 +152,7 @@ func TestFile_ContainsLine(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -182,6 +188,7 @@ func TestFile_MoveToPath(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -228,6 +235,7 @@ func TestFile_CopyToFile(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -259,6 +267,49 @@ func TestFile_CopyToFile(t *testing.T) {
 				require.EqualValues(
 					tt.content,
 					destFile.MustReadAsString(),
+				)
+			},
+		)
+	}
+}
+
+func TestFile_Chmod(t *testing.T) {
+	tests := []struct {
+		implementationName       string
+		permissionsString        string
+		expectedPermissionString string
+	}{
+		{"localFile", "u=rw,g=,o=", "u=rw,g=,o="},
+		{"localCommandExecutorFile", "u=rw,g=,o=", "u=rw,g=,o="},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				const verbose bool = true
+
+				toTest := getFileToTest(tt.implementationName)
+				defer toTest.Delete(verbose)
+
+				toTest.MustChmod(
+					&parameteroptions.ChmodOptions{
+						PermissionsString: tt.permissionsString,
+						Verbose:           verbose,
+					},
+				)
+
+				require.EqualValues(
+					t,
+					tt.expectedPermissionString,
+					toTest.MustGetAccessPermissionsString(),
+				)
+
+				require.EqualValues(
+					t,
+					unixfilepermissionsutils.MustGetPermissionsValue(tt.expectedPermissionString),
+					toTest.MustGetAccessPermissions(),
 				)
 			},
 		)
