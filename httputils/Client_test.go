@@ -307,3 +307,41 @@ func TestClient_GetRequestAndRunYqQuery(t *testing.T) {
 		)
 	}
 }
+
+func TestClient_GetRequestUsingTls_insecure(t *testing.T) {
+	tests := []struct {
+		implementationName string
+		method             string
+	}{
+		{"nativeClient", "get"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				require := require.New(t)
+
+				const verbose bool = true
+				const port int = 9123
+
+				testServer := MustGetTlsTestWebServer(port, verbose)
+				defer testServer.Stop(verbose)
+
+				testServer.MustStartInBackground(verbose)
+
+				var client Client = getClientByImplementationName(tt.implementationName)
+				output := client.MustSendRequestAndGetBodyAsString(
+					&RequestOptions{
+						Url:               "https://localhost:" + strconv.Itoa(testServer.MustGetPort()) + "/hello_world.txt",
+						Verbose:           verbose,
+						Method:            tt.method,
+						SkipTLSvalidation: true,
+					},
+				)
+
+				require.Contains(output, "hello world")
+			},
+		)
+	}
+}

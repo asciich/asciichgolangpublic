@@ -27,7 +27,7 @@ type X509CreateCertificateOptions struct {
 	KeyOutputFilePath         string
 	CertificateOutputFilePath string
 
-	OverwriteExistingCertificateInGopass bool
+	OverwriteExistingCertificateInGopass bool // Will be removed soon!
 	Verbose                              bool
 }
 

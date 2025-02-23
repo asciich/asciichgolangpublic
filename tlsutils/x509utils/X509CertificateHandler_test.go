@@ -47,6 +47,7 @@ func TestX509Handler_CreateRootCaCertificate(t *testing.T) {
 				))
 
 				require.True(mustutils.Must(IsCertificateRootCa(caCert)))
+				require.True(mustutils.Must(IsSelfSignedCertificate(caCert)))
 				require.False(mustutils.Must(IsIntermediateCertificate(caCert)))
 				require.False(mustutils.Must(IsEndEndityCertificate(caCert)))
 				require.True(mustutils.Must(IsSubjectCountryName(caCert, "CH")))
@@ -197,6 +198,51 @@ func TestX509Handler_CreateEndEndityCertificate(t *testing.T) {
 				require.True(mustutils.Must(IsSubjectCountryName(endEndityCertificate, "CH")))
 				require.True(mustutils.Must(IsSubjectLocalityName(endEndityCertificate, "Zurich")))
 				require.True(mustutils.Must(IsSubjectOrganizationName(endEndityCertificate, "myOrg endEndity")))
+			},
+		)
+	}
+}
+
+func TestX509Handler_CreateSelfSignedCertificate(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"NativeX509CertificateHandler"},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				require := require.New(t)
+
+				handler := getX509CertificateHandlerToTest(tt.implementationName)
+
+				caCert, privateKey := mustutils.Must2(handler.CreateSelfSignedCertificate(
+					&X509CreateCertificateOptions{
+						CountryName:  "CH",
+						Locality:     "Zurich",
+						Organization: "myOrg root",
+						SerialNumber: "12345",
+
+						Verbose: true,
+					},
+				))
+
+				require.False(mustutils.Must(IsCertificateRootCa(caCert)))
+				require.True(mustutils.Must(IsSelfSignedCertificate(caCert)))
+				require.False(mustutils.Must(IsIntermediateCertificate(caCert)))
+				require.True(mustutils.Must(IsEndEndityCertificate(caCert)))
+				require.True(mustutils.Must(IsSubjectCountryName(caCert, "CH")))
+				require.True(mustutils.Must(IsSubjectLocalityName(caCert, "Zurich")))
+				require.True(mustutils.Must(IsSubjectOrganizationName(caCert, "myOrg root")))
+				require.True(mustutils.Must(IsSerialNumber(caCert, "12345")))
+
+				require.EqualValues([]string{"CH"}, caCert.Issuer.Country)
+				require.EqualValues([]string{"Zurich"}, caCert.Issuer.Locality)
+
+				require.True(mustutils.Must(IsCertificateMatchingPrivateKey(caCert, privateKey)))
 			},
 		)
 	}

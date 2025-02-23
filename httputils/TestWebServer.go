@@ -2,6 +2,9 @@ package httputils
 
 import (
 	"context"
+	"crypto"
+	"crypto/tls"
+	"crypto/x509"
 	"io"
 	"log"
 	"net/http"
@@ -9,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tlsutils/x509utils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -18,50 +22,47 @@ type TestWebServer struct {
 	port               int
 	mux                *http.ServeMux
 	server             *http.Server
+	tlsConfig          *tls.Config
 }
 
-/* TODO implement
+func MustGetTlsTestWebServer(port int, verbose bool) (webServer Server) {
+	webServer, err := GetTlsTestWebServer(port, verbose)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return webServer
+}
+
 func GetTlsTestWebServer(port int, verbose bool) (webServer Server, err error) {
-	toReturn, err := GetTestWebServer(port)
+	toReturn := NewTestWebServer()
+
+	err = toReturn.SetPort(port)
 	if err != nil {
 		return nil, err
 	}
 
-	certFilePath, err := tempfiles.CreateEmptyTemporaryFile(verbose)
-	if err != nil {
-		return nil, err
-	}
-
-	keyFilePath, err := tempfiles.CreateEmptyTemporaryFileAndGetPath(verbose)
-	if err != nil {
-		return nil, err
-	}
-	defer files.MustDeleteFilesByPath(
-		verbose,
-		certFilePath,
-		keyFilePath,
-	)
-
-	err := x509utils.CreateSelfSignedCertificate(
+	cert, key, err := x509utils.CreateSelfSignedCertificate(
 		&x509utils.X509CreateCertificateOptions{
-			CommonName:                "localhost",
-			CountryName:               "CH",
-			Locality:                  "Zurich",
-			AdditionalSans:            []string{"localhost"},
-			Verbose:                   true,
-			KeyOutputFilePath:         keyFilePath,
-			CertificateOutputFilePath: certFilePath,
+			Organization:   "localorg",
+			CommonName:     "localhost",
+			CountryName:    "CH",
+			Locality:       "Zurich",
+			AdditionalSans: []string{"localhost"},
+			Verbose:        true,
 		},
 	)
+	if err != nil {
+		return nil, err
+	}
 
-	err = toReturn.SetTlsCertAndKey(certFilePath, keyFilePath)
+	err = toReturn.SetTlsCertAndKey(cert, key)
 	if err != nil {
 		return nil, err
 	}
 
 	return toReturn, nil
 }
-*/
 
 func GetTestWebServer(port int) (webServer Server, err error) {
 	toReturn := NewTestWebServer()
@@ -270,16 +271,23 @@ func (t *TestWebServer) StartInBackground(verbose bool) (err error) {
 	})
 
 	t.server = &http.Server{
-		Addr:    ":" + strconv.Itoa(port),
-		Handler: t.mux,
+		Addr:      ":" + strconv.Itoa(port),
+		Handler:   t.mux,
+		TLSConfig: t.tlsConfig,
 	}
 
 	t.webServerWaitGroup.Add(1)
 	go func() {
 		defer t.webServerWaitGroup.Done()
 
-		if err := t.server.ListenAndServe(); err != http.ErrServerClosed {
-			log.Fatalf("ListenAndServe(): %v", err)
+		if t.tlsConfig == nil {
+			if err := t.server.ListenAndServe(); err != http.ErrServerClosed {
+				log.Fatalf("ListenAndServe(): %v", err)
+			}
+		} else {
+			if err := t.server.ListenAndServeTLS("", ""); err != http.ErrServerClosed {
+				log.Fatalf("ListenAndServeTLS(): %v", err)
+			}
 		}
 	}()
 
@@ -289,6 +297,25 @@ func (t *TestWebServer) StartInBackground(verbose bool) (err error) {
 			port,
 		)
 	}
+
+	return nil
+}
+
+func (t *TestWebServer) SetTlsCertAndKey(cert *x509.Certificate, privateKey crypto.PrivateKey) (err error) {
+	if cert == nil {
+		return tracederrors.TracedErrorNil("cert")
+	}
+
+	if privateKey == nil {
+		return tracederrors.TracedErrorNil("privateKey")
+	}
+
+	tlsCert := tls.Certificate{
+		Certificate: [][]byte{cert.Raw},
+		PrivateKey:  privateKey,
+	}
+
+	t.tlsConfig = &tls.Config{Certificates: []tls.Certificate{tlsCert}}
 
 	return nil
 }
