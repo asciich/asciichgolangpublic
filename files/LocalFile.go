@@ -9,6 +9,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/os/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -839,4 +840,52 @@ func (l *LocalFile) WriteBytes(toWrite []byte, verbose bool) (err error) {
 	}
 
 	return nil
+}
+
+func (l *LocalFile) MustGetAccessPermissionsString() (permissionString string) {
+	permissionString, err := l.GetAccessPermissionsString()
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return permissionString
+}
+
+func (l *LocalFile) MustGetAccessPermissions() (permissions int) {
+	permissions, err := l.GetAccessPermissions()
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return permissions
+}
+
+func (l *LocalFile) GetAccessPermissions() (permissions int, err error) {
+	path, err := l.GetPath()
+	if err != nil {
+		return 0, err
+	}
+
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		return 0, tracederrors.TracedErrorf("Unable to get fileInfo of '%s': %w", path, err)
+	}
+
+	perm := fileInfo.Mode().Perm()
+
+	return int(perm), nil
+}
+
+func (l *LocalFile) GetAccessPermissionsString() (permissionsString string, err error) {
+	permissions, err := l.GetAccessPermissions()
+	if err != nil {
+		return "", err
+	}
+
+	permissionsString, err = unixfilepermissionsutils.GetPermissionString(permissions)
+	if err != nil {
+		return "", err
+	}
+
+	return permissionsString, nil
 }

@@ -3,10 +3,12 @@ package files
 import (
 	"fmt"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/os/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -1068,4 +1070,68 @@ func (c *CommandExecutorFile) WriteBytes(toWrite []byte, verbose bool) (err erro
 	}
 
 	return nil
+}
+
+func (c *CommandExecutorFile) MustGetAccessPermissionsString() (permissionString string) {
+	permissionString, err := c.GetAccessPermissionsString()
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return permissionString
+}
+
+func (c *CommandExecutorFile) MustGetAccessPermissions() (permissions int) {
+	permissions, err := c.GetAccessPermissions()
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return permissions
+}
+
+func (c *CommandExecutorFile) GetAccessPermissions() (permissions int, err error) {
+	commandexecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return 0, err
+	}
+
+	path, err := c.GetPath()
+	if err != nil {
+		return 0, err
+	}
+
+	output, err := commandexecutor.RunCommandAndGetStdoutAsString(
+		&parameteroptions.RunCommandOptions{
+			Command: []string{"stat", "-c", "%a", path},
+		},
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	output = strings.TrimSpace(output)
+
+	permissions64, err := strconv.ParseInt(output, 8, 32)
+	if err != nil {
+		return 0, tracederrors.TracedErrorf("Unable to parse permission string '%s': %w", output, err)
+	}
+
+	permissions = int(permissions64)
+
+	return permissions, nil
+}
+
+func (c *CommandExecutorFile) GetAccessPermissionsString() (permissionsString string, err error) {
+	permissions, err := c.GetAccessPermissions()
+	if err != nil {
+		return "", err
+	}
+
+	permissionsString, err = unixfilepermissionsutils.GetPermissionString(permissions)
+	if err != nil {
+		return "", err
+	}
+
+	return permissionsString, nil
 }

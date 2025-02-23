@@ -22,6 +22,7 @@ func TestHost_CheckReachable(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -45,6 +46,7 @@ func TestHostGetHostName(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -70,6 +72,7 @@ func TestHostGetHostDescripion(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -96,6 +99,7 @@ func TestHostRunCommand(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -135,6 +139,7 @@ func TestHost_GetDirectoryByPath(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
