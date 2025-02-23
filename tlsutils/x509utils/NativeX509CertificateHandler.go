@@ -254,3 +254,36 @@ func (n *NativeX509CertificateHandler) CreateRootCaCertificate(options *X509Crea
 
 	return cert, privateKey, nil
 }
+
+func (n *NativeX509CertificateHandler) CreateSelfSignedCertificate(options *X509CreateCertificateOptions) (selfSignedCert *x509.Certificate, selfSignedCertPrivateKey crypto.PrivateKey, err error) {
+	if options == nil {
+		return nil, nil, tracederrors.TracedErrorNil("options")
+	}
+
+	subject, err := options.GetSubjectAsPkixName()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	serialNumber, err := options.GetSerialNumberOrDefaultIfUnsetAsStringBigInt()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	selfSigned := &x509.Certificate{
+		SerialNumber:          serialNumber,
+		Subject:               *subject,
+		NotBefore:             time.Now(),
+		NotAfter:              time.Now().AddDate(1, 0, 0),
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
+		BasicConstraintsValid: true,
+	}
+
+	selfSignedCert, selfSignedCertPrivateKey, err = n.generateAndAddKey(selfSigned)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return selfSignedCert, selfSignedCertPrivateKey, nil
+}

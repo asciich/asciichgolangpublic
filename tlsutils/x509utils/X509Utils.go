@@ -38,6 +38,14 @@ func IsEndEndityCertificate(cert *x509.Certificate) (isIntermediateCertificate b
 	return !cert.IsCA, nil
 }
 
+func IsSelfSignedCertificate(cert *x509.Certificate) (isSelfSigend bool, err error) {
+	if cert == nil {
+		return false, tracederrors.TracedErrorNil("cert")
+	}
+
+	return cert.Subject.String() == cert.Issuer.String(), nil
+}
+
 func IsCertificateRootCa(cert *x509.Certificate) (isRootCa bool, err error) {
 	if cert == nil {
 		return false, tracederrors.TracedErrorNil("cert")
@@ -380,4 +388,12 @@ func IsPrivateKeyEqual(key1 crypto.PrivateKey, key2 crypto.PrivateKey) (isEqual 
 	}
 
 	return withEqual.Equal(key2), nil
+}
+
+func CreateSelfSignedCertificate(options *X509CreateCertificateOptions) (selfSignedCert *x509.Certificate, selfSignedCertKey crypto.PrivateKey, err error) {
+	if options == nil {
+		return nil, nil, tracederrors.TracedErrorNil("options")
+	}
+
+	return GetNativeX509CertificateHandler().CreateSelfSignedCertificate(options)
 }
