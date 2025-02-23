@@ -3,11 +3,14 @@ package x509utils
 import (
 	"bytes"
 	"crypto"
+	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 	"io"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -396,4 +399,26 @@ func CreateSelfSignedCertificate(options *X509CreateCertificateOptions) (selfSig
 	}
 
 	return GetNativeX509CertificateHandler().CreateSelfSignedCertificate(options)
+}
+
+func MustTlsCertToX509Cert(tlsCert *tls.Certificate) (cert *x509.Certificate) {
+	cert, err := TlsCertToX509Cert(tlsCert)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return cert
+}
+
+func TlsCertToX509Cert(tlsCert *tls.Certificate) (cert *x509.Certificate, err error) {
+	if len(tlsCert.Certificate) == 0 {
+		return nil, fmt.Errorf("tls.Certificate has no certificate data")
+	}
+
+	x509Cert, err := x509.ParseCertificate(tlsCert.Certificate[0])
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse x509 certificate: %w", err)
+	}
+
+	return x509Cert, nil
 }

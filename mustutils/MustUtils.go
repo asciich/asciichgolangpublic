@@ -14,6 +14,14 @@ func Must[T any](v T, err error) T {
 	return v
 }
 
+// Same as `Must` but for functions only returning an error.
+func Must0(err error) {
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+	return
+}
+
 // Same as `Must` but supporting 2 return values.
 func Must2[T1 any, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
 	if err != nil {

@@ -34,15 +34,8 @@ func MustGetTlsTestWebServer(port int, verbose bool) (webServer Server) {
 	return webServer
 }
 
-func GetTlsTestWebServer(port int, verbose bool) (webServer Server, err error) {
-	toReturn := NewTestWebServer()
-
-	err = toReturn.SetPort(port)
-	if err != nil {
-		return nil, err
-	}
-
-	cert, key, err := x509utils.CreateSelfSignedCertificate(
+func generateCertAndKeyForTestWebserver() (cert *x509.Certificate, privateKey crypto.PrivateKey, err error) {
+	return x509utils.CreateSelfSignedCertificate(
 		&x509utils.X509CreateCertificateOptions{
 			Organization:   "localorg",
 			CommonName:     "localhost",
@@ -52,6 +45,17 @@ func GetTlsTestWebServer(port int, verbose bool) (webServer Server, err error) {
 			Verbose:        true,
 		},
 	)
+}
+
+func GetTlsTestWebServer(port int, verbose bool) (webServer Server, err error) {
+	toReturn := NewTestWebServer()
+
+	err = toReturn.SetPort(port)
+	if err != nil {
+		return nil, err
+	}
+
+	cert, key, err := generateCertAndKeyForTestWebserver()
 	if err != nil {
 		return nil, err
 	}
@@ -62,6 +66,20 @@ func GetTlsTestWebServer(port int, verbose bool) (webServer Server, err error) {
 	}
 
 	return toReturn, nil
+}
+
+func (t *TestWebServer) GetTlsCert() (cert *x509.Certificate, err error) {
+	if t.tlsConfig == nil {
+		return
+	}
+
+	if len(t.tlsConfig.Certificates) != 1 {
+		return
+	}
+
+	tlsCert := t.tlsConfig.Certificates[0]
+
+	return x509utils.TlsCertToX509Cert(&tlsCert)
 }
 
 func GetTestWebServer(port int) (webServer Server, err error) {
