@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -356,6 +357,32 @@ var overrideFunctionLogInfo func(logmessage string)
 
 func OverrideLogInfo(overrideFunction func(logmessage string)) {
 	overrideFunctionLogInfo = overrideFunction
+}
+
+func getVerboseFromCtx(ctx context.Context) (verbose bool) {
+	if ctx == nil {
+		return false
+	}
+
+	verboseValue := ctx.Value("verbose")
+	if verboseValue == nil {
+		return false
+	}
+
+	verbose, ok := verboseValue.(bool)
+	if !ok {
+		return false
+	}
+
+	return verbose
+}
+
+func LogInfoByCtxf(ctx context.Context, logmessage string, args ...interface{}) {
+	if !getVerboseFromCtx(ctx) {
+		return
+	}
+
+	LogInfof(logmessage, args...)
 }
 
 func LogInfo(logmessage string) {
