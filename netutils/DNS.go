@@ -3,6 +3,7 @@ package netutils
 import (
 	"context"
 	"net"
+	"sort"
 
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -26,6 +27,8 @@ func LookupIpV4(ctx context.Context, fqdn string) (ipV4Addresses []string, err e
 			ipV4Addresses = append(ipV4Addresses, v4Addr.String())
 		}
 	}
+
+	sort.Strings(ipV4Addresses)
 
 	if len(ipV4Addresses) <= 0 {
 		return nil, tracederrors.TracedErrorf("No IPv4 address for host '%s' found.", fqdn)
