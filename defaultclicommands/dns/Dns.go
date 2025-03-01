@@ -31,7 +31,7 @@ func NewDnsCommand() (dnsCmd *cobra.Command) {
 
 			hostname := args[0]
 
-			ips := netutils.MustLookupIpV4(
+			ips := netutils.MustDnsLookupIpV4(
 				contextutils.GetVerbosityContextByBool(verbose),
 				hostname,
 			)

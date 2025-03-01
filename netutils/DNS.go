@@ -9,7 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-func LookupIpV4(ctx context.Context, fqdn string) (ipV4Addresses []string, err error) {
+func DnsLookupIpV4(ctx context.Context, fqdn string) (ipV4Addresses []string, err error) {
 	if fqdn == "" {
 		return nil, tracederrors.TracedErrorEmptyString("fqdn")
 	}
@@ -39,8 +39,8 @@ func LookupIpV4(ctx context.Context, fqdn string) (ipV4Addresses []string, err e
 	return ipV4Addresses, nil
 }
 
-func MustLookupIpV4(ctx context.Context, fqdn string) (ipV4Addresses []string) {
-	ipV4Addresses, err := LookupIpV4(ctx, fqdn)
+func MustDnsLookupIpV4(ctx context.Context, fqdn string) (ipV4Addresses []string) {
+	ipV4Addresses, err := DnsLookupIpV4(ctx, fqdn)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
