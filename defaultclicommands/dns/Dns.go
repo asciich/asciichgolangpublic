@@ -42,7 +42,34 @@ func NewDnsCommand() (dnsCmd *cobra.Command) {
 		},
 	}
 
+	dnsReverseLookupCmd := &cobra.Command{
+		Use:   "reverse-lookup",
+		Short: "Reverse lookup for given IP address.",
+		Run: func(cmd *cobra.Command, args []string) {
+			verbose, err := cmd.Flags().GetBool("verbose")
+			if err != nil {
+				logging.LogGoErrorFatal(err)
+			}
+
+			if len(args) != 1 {
+				logging.LogFatal("Please specify exaclty 1 IP address to resolve.")
+			}
+
+			hostname := args[0]
+
+			ips := netutils.MustDnsReverseLookup(
+				contextutils.GetVerbosityContextByBool(verbose),
+				hostname,
+			)
+
+			for _, ip := range ips {
+				fmt.Println(ip)
+			}
+		},
+	}
+
 	dnsCmd.AddCommand(dnsLookupV4Cmd)
+	dnsCmd.AddCommand(dnsReverseLookupCmd)
 
 	return dnsCmd
 }
