@@ -25,16 +25,15 @@ func NewDnsCommand() (dnsCmd *cobra.Command) {
 				logging.LogGoErrorFatal(err)
 			}
 
+			ctx := contextutils.WithVerbosityContextByBool(cmd.Context(), verbose)
+
 			if len(args) != 1 {
 				logging.LogFatal("Please specify exaclty 1 hostname to resolve.")
 			}
 
 			hostname := args[0]
 
-			ips := netutils.MustDnsLookupIpV4(
-				contextutils.GetVerbosityContextByBool(verbose),
-				hostname,
-			)
+			ips := netutils.MustDnsLookupIpV4(ctx, hostname)
 
 			for _, ip := range ips {
 				fmt.Println(ip)
@@ -51,16 +50,15 @@ func NewDnsCommand() (dnsCmd *cobra.Command) {
 				logging.LogGoErrorFatal(err)
 			}
 
+			ctx := contextutils.WithVerbosityContextByBool(cmd.Context(), verbose)
+
 			if len(args) != 1 {
 				logging.LogFatal("Please specify exaclty 1 IP address to resolve.")
 			}
 
 			hostname := args[0]
 
-			ips := netutils.MustDnsReverseLookup(
-				contextutils.GetVerbosityContextByBool(verbose),
-				hostname,
-			)
+			ips := netutils.MustDnsReverseLookup(ctx, hostname)
 
 			for _, ip := range ips {
 				fmt.Println(ip)

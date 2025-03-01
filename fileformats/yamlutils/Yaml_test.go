@@ -61,3 +61,52 @@ func TestYaml_runYqQueryAgainstYamlStringAsString(t *testing.T) {
 		)
 	}
 }
+
+func Test_SplitMultiYaml(t *testing.T) {
+	t.Run("split single", func(t *testing.T) {
+		content := "a: 5"
+		require.EqualValues(
+			t,
+			[]string{content + "\n"},
+			SplitMultiYaml(content),
+		)
+	})
+	t.Run("split single and doxument start", func(t *testing.T) {
+		content := "a: 5"
+		require.EqualValues(
+			t,
+			[]string{content + "\n"},
+			SplitMultiYaml("---\n"+content),
+		)
+	})
+
+	t.Run("split double and doxument start", func(t *testing.T) {
+		content := "a: 5"
+		content2 := "b: 1"
+		require.EqualValues(
+			t,
+			[]string{content + "\n", content2 + "\n"},
+			SplitMultiYaml("---\n"+content+"\n---\n"+content2),
+		)
+	})
+
+	t.Run("split double and multiple document start", func(t *testing.T) {
+		content := "a: 5"
+		content2 := "b: 1"
+		require.EqualValues(
+			t,
+			[]string{content + "\n", content2 + "\n"},
+			SplitMultiYaml("---\n"+content+"\n---\n---\n---\n"+content2),
+		)
+	})
+
+	t.Run("split double and commented out", func(t *testing.T) {
+		content := "a: 5"
+		content2 := "b: 1"
+		require.EqualValues(
+			t,
+			[]string{"a: 5\n#---\n#c: 16 is commented out\n", content2 + "\n"},
+			SplitMultiYaml("---\n"+content+"\n#---\n#c: 16 is commented out\n---\n---\n"+content2),
+		)
+	})
+}
