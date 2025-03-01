@@ -34,9 +34,24 @@ func DnsLookupIpV4(ctx context.Context, fqdn string) (ipV4Addresses []string, er
 		return nil, tracederrors.TracedErrorf("No IPv4 address for host '%s' found.", fqdn)
 	}
 
-	logging.LogInfoByCtxf(ctx, "Resolved '%s' to IPv4 addresses '%s'", fqdn, ipV4Addresses)
+	logging.LogInfoByCtxf(ctx, "Resolved '%s' to IPv4 addresses '%v'", fqdn, ipV4Addresses)
 
 	return ipV4Addresses, nil
+}
+
+func DnsReverseLookup(ctx context.Context, ipAddress string) (fqdns []string, err error) {
+	fqdns, err = net.LookupAddr(ipAddress)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf(
+			"Unable to reverse lookup ipAddress '%s': %w",
+			ipAddress,
+			err,
+		)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Resolved IP address '%s' to  '%v'", ipAddress, fqdns)
+
+	return fqdns, nil
 }
 
 func MustDnsLookupIpV4(ctx context.Context, fqdn string) (ipV4Addresses []string) {
@@ -46,4 +61,13 @@ func MustDnsLookupIpV4(ctx context.Context, fqdn string) (ipV4Addresses []string
 	}
 
 	return ipV4Addresses
+}
+
+func MustDnsReverseLookup(ctx context.Context, ipAddress string) (fqdn []string) {
+	fqdn, err := DnsReverseLookup(ctx, ipAddress)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return fqdn
 }
