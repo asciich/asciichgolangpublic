@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -116,4 +117,35 @@ func RunYqQueryAginstYamlStringAsString(yamlString string, query string) (result
 	result = strings.TrimSuffix(result, "\n")
 
 	return result, nil
+}
+
+func SplitMultiYaml(yamlString string) (splitted []string) {
+	var toAdd string
+
+	for _, line := range stringsutils.SplitLines(yamlString, true) {
+		trimmedLine := strings.TrimSpace(line)
+		if trimmedLine == "---" {
+			if toAdd == "" {
+				continue
+			}
+
+			toAdd = stringsutils.EnsureEndsWithExactlyOneLineBreak(toAdd)
+			splitted = append(splitted, toAdd)
+			toAdd = ""
+			continue
+		}
+
+		if toAdd == "" {
+			toAdd = trimmedLine
+		} else {
+			toAdd += "\n" + trimmedLine
+		}
+	}
+
+	if toAdd != "" {
+		toAdd = stringsutils.EnsureEndsWithExactlyOneLineBreak(toAdd)
+		splitted = append(splitted, toAdd)
+	}
+
+	return splitted
 }
