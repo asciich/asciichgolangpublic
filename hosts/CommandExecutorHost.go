@@ -1,11 +1,14 @@
 package hosts
 
 import (
+	"context"
 	"fmt"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/contextutils"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/ftp"
 	"github.com/asciich/asciichgolangpublic/logging"
@@ -51,6 +54,56 @@ func NewCommandExecutorHost() (c *CommandExecutorHost) {
 	c = new(CommandExecutorHost)
 	c.MustSetParentCommandExecutorForBaseClass(c)
 	return c
+}
+
+func (c *CommandExecutorHost) GetFileInUsersHome(ctx context.Context, userName string, path string) (file files.File, err error) {
+	if userName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("userName")
+	}
+
+	fullPath := filepath.Join("/home", userName, path)
+
+	return c.GetFileByPath(fullPath)
+}
+
+func (c *CommandExecutorHost) GetSshPublicKeyOfUser(ctx context.Context, userName string) (publicKey string, err error) {
+	if userName == "" {
+		return "", tracederrors.TracedErrorEmptyString("userName")
+	}
+
+	hostDescription, err := c.GetHostDescription()
+	if err != nil {
+		return "", err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Getting SSH public key of user '%s' on host '%s'.", userName, hostDescription)
+
+	verbose := contextutils.GetVerboseFromContext(ctx)
+
+	for _, publicKeyBaseName := range []string{"id_ed25519.pub", "id_rsa.pub"} {
+		sshKeyFile, err := c.GetFileInUsersHome(ctx, userName, ".ssh/"+publicKeyBaseName)
+		if err != nil {
+			return "", err
+		}
+
+		exists, err := sshKeyFile.Exists(verbose)
+		if err != nil {
+			return "", err
+		}
+
+		if exists {
+			path, err := sshKeyFile.GetPath()
+			if err != nil {
+				return "", err
+			}
+
+			logging.LogInfoByCtxf(ctx, "SSH public key for user '%s' on host '%s' found in '%s'.", userName, hostDescription, path)
+
+			return sshKeyFile.ReadAsString()
+		}
+	}
+
+	return "", tracederrors.TracedErrorf("No SSH public key for user '%s' on host '%s' found.", userName, hostDescription)
 }
 
 func (c *CommandExecutorHost) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {

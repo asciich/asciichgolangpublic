@@ -498,7 +498,7 @@ func (c *CommandExecutorFile) GetPath() (path string, err error) {
 			return path, nil
 		}
 	} else {
-		return "", tracederrors.TracedErrorNotImplemented()
+		path = c.filePath
 	}
 
 	if path == "" {
