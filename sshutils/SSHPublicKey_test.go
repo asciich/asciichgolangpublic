@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package sshutils
 
 import (
 	"testing"
@@ -32,8 +32,7 @@ func TestSshPublicKeySetFromString(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				sshPublicKey := new(SSHPublicKey)
-				sshPublicKey.MustSetFromString(tt.keyMaterial)
+				sshPublicKey := MustLoadPublicKeyFromString(tt.keyMaterial)
 
 				keyMaterial := sshPublicKey.MustGetKeyMaterialAsString()
 				require.EqualValues(tt.expectedKeyMaterial, keyMaterial)
@@ -64,8 +63,7 @@ func TestSshPublicKeySetFromStringUserCorrect(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				sshPublicKey := new(SSHPublicKey)
-				sshPublicKey.MustSetFromString(tt.keyMaterial)
+				sshPublicKey := MustLoadPublicKeyFromString(tt.keyMaterial)
 
 				require.EqualValues(tt.expectedKeyMaterial, sshPublicKey.MustGetKeyMaterialAsString())
 				require.EqualValues(tt.expectedUserName, sshPublicKey.MustGetKeyUserName())

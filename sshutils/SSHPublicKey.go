@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package sshutils
 
 import (
 	"path/filepath"
@@ -364,4 +364,78 @@ func (s *SSHPublicKey) SetKeyUserName(keyUserName string) (err error) {
 	s.keyUserName = keyUserName
 
 	return nil
+}
+
+func LoadPublicKeysFromFile(sshKeysFile files.File, verbose bool) (sshKeys []*SSHPublicKey, err error) {
+	if sshKeysFile == nil {
+		return nil, tracederrors.TracedError("sshKeysFile is nil")
+	}
+
+	filePath, err := sshKeysFile.GetLocalPath()
+	if err != nil {
+		return nil, err
+	}
+
+	if verbose {
+		logging.LogInfof("Load SSH public keys from file '%s' started.", filePath)
+	}
+
+	lines, err := sshKeysFile.ReadAsLinesWithoutComments()
+	if err != nil {
+		return nil, err
+	}
+
+	sshKeys = []*SSHPublicKey{}
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if len(line) <= 0 {
+			continue
+		}
+
+		keyToAdd := NewSSHPublicKey()
+		err = keyToAdd.SetFromString(line)
+		if err != nil {
+			return nil, err
+		}
+
+		sshKeys = append(sshKeys, keyToAdd)
+	}
+
+	if verbose {
+		logging.LogInfof("Load SSH public keys from file '%s' finished.", filePath)
+	}
+
+	return sshKeys, nil
+}
+
+func MustLoadPublicKeysFromFile(sshKeysFile files.File, verbose bool) (sshKeys []*SSHPublicKey) {
+	sshKeys, err := LoadPublicKeysFromFile(sshKeysFile, verbose)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return sshKeys
+}
+
+func MustLoadPublicKeyFromString(keyMaterial string) (key *SSHPublicKey) {
+	key, err := LoadPublicKeyFromFile(keyMaterial)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return key
+}
+
+func LoadPublicKeyFromFile(keyMaterial string) (key *SSHPublicKey, err error) {
+	if keyMaterial == "" {
+		return nil, tracederrors.TracedErrorEmptyString("keyMaterial")
+	}
+
+	key = NewSSHPublicKey()
+	err = key.SetFromString(keyMaterial)
+	if err != nil {
+		return nil, err
+	}
+
+	return key, nil
 }
