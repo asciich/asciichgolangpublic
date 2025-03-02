@@ -13,7 +13,10 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 		return tracederrors.TracedErrorNil("rootCmd")
 	}
 
-	rootCmd.PersistentFlags().Bool("verbose", false, "Enable verbose output")
+	const verbose_flag_name = "verbose"
+	if rootCmd.PersistentFlags().Lookup(verbose_flag_name) == nil {
+		rootCmd.PersistentFlags().Bool(verbose_flag_name, false, "Enable verbose output")
+	}
 
 	err = dns_cmd.AddDnsCommand(rootCmd)
 	if err != nil {
