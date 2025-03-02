@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/sshutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
@@ -36,7 +37,7 @@ func (g *GitlabUser) GetCachedUsername() (cachedUsername string, err error) {
 	return g.cachedUsername, nil
 }
 
-func (g *GitlabUser) MustAddSshKey(sshKey *SSHPublicKey, verbose bool) {
+func (g *GitlabUser) MustAddSshKey(sshKey *sshutils.SSHPublicKey, verbose bool) {
 	err := g.AddSshKey(sshKey, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -156,7 +157,7 @@ func (g *GitlabUser) MustGetRawNativeUser() (rawUser *gitlab.User) {
 	return rawUser
 }
 
-func (g *GitlabUser) MustGetSshKeys() (sshKeys []*SSHPublicKey) {
+func (g *GitlabUser) MustGetSshKeys() (sshKeys []*sshutils.SSHPublicKey) {
 	sshKeys, err := g.GetSshKeys()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -209,7 +210,7 @@ func (g *GitlabUser) MustSetId(id int) {
 	}
 }
 
-func (g *GitlabUser) MustSshKeyExists(sshKey *SSHPublicKey) (keyExistsForUser bool) {
+func (g *GitlabUser) MustSshKeyExists(sshKey *sshutils.SSHPublicKey) (keyExistsForUser bool) {
 	keyExistsForUser, err := g.SshKeyExists(sshKey)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -225,7 +226,7 @@ func (g *GitlabUser) MustUpdatePassword(newPassword string, verbose bool) {
 	}
 }
 
-func (u *GitlabUser) AddSshKey(sshKey *SSHPublicKey, verbose bool) (err error) {
+func (u *GitlabUser) AddSshKey(sshKey *sshutils.SSHPublicKey, verbose bool) (err error) {
 	if sshKey == nil {
 		return tracederrors.TracedError("sshKey is nil")
 	}
@@ -298,7 +299,7 @@ func (u *GitlabUser) AddSshKeysFromFile(sshKeysFile files.File, verbose bool) (e
 		return err
 	}
 
-	sshKeys, err := SSHPublicKeys().LoadKeysFromFile(sshKeysFile, verbose)
+	sshKeys, err := sshutils.LoadPublicKeysFromFile(sshKeysFile, verbose)
 	if err != nil {
 		return err
 	}
@@ -482,15 +483,15 @@ func (u *GitlabUser) GetRawNativeUser() (rawUser *gitlab.User, err error) {
 	return rawUser, nil
 }
 
-func (u *GitlabUser) GetSshKeys() (sshKeys []*SSHPublicKey, err error) {
+func (u *GitlabUser) GetSshKeys() (sshKeys []*sshutils.SSHPublicKey, err error) {
 	sshKeysString, err := u.GetSshKeysAsString()
 	if err != nil {
 		return nil, err
 	}
 
-	sshKeys = []*SSHPublicKey{}
+	sshKeys = []*sshutils.SSHPublicKey{}
 	for _, keyString := range sshKeysString {
-		keyToAdd := NewSSHPublicKey()
+		keyToAdd := sshutils.NewSSHPublicKey()
 		err = keyToAdd.SetFromString(keyString)
 		if err != nil {
 			return nil, err
@@ -580,7 +581,7 @@ func (u *GitlabUser) SetId(id int) (err error) {
 	return nil
 }
 
-func (u *GitlabUser) SshKeyExists(sshKey *SSHPublicKey) (keyExistsForUser bool, err error) {
+func (u *GitlabUser) SshKeyExists(sshKey *sshutils.SSHPublicKey) (keyExistsForUser bool, err error) {
 	return false, tracederrors.TracedErrorNotImplemented()
 	/* TODO enable again
 	if sshKey == nil {
