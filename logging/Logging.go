@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/asciich/asciichgolangpublic/changesummary"
+	"github.com/asciich/asciichgolangpublic/contextutils"
 	"github.com/asciich/asciichgolangpublic/shell/terminalcolors"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -359,26 +360,8 @@ func OverrideLogInfo(overrideFunction func(logmessage string)) {
 	overrideFunctionLogInfo = overrideFunction
 }
 
-func getVerboseFromCtx(ctx context.Context) (verbose bool) {
-	if ctx == nil {
-		return false
-	}
-
-	verboseValue := ctx.Value("verbose")
-	if verboseValue == nil {
-		return false
-	}
-
-	verbose, ok := verboseValue.(bool)
-	if !ok {
-		return false
-	}
-
-	return verbose
-}
-
 func LogInfoByCtxf(ctx context.Context, logmessage string, args ...interface{}) {
-	if !getVerboseFromCtx(ctx) {
+	if !contextutils.GetVerboseFromContext(ctx) {
 		return
 	}
 

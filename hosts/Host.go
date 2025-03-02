@@ -1,6 +1,7 @@
 package hosts
 
 import (
+	"context"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic"
@@ -18,6 +19,7 @@ type Host interface {
 	GetDirectoryByPath(path string) (directory files.Directory, err error)
 	GetHostDescription() (hostDescription string, err error)
 	GetHostName() (hostName string, err error)
+	GetSshPublicKeyOfUser(ctx context.Context, username string) (publicKey string, err error)
 	InstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile files.File, err error)
 	MustCheckReachable(verbose bool)
 	MustGetDirectoryByPath(path string) (directory files.Directory)

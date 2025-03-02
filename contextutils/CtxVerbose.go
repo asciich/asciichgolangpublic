@@ -27,3 +27,21 @@ func ContextVerbose() (ctx context.Context) {
 func ContextSilent() (ctx context.Context) {
 	return context.WithValue(context.Background(), "verbose", false)
 }
+
+func GetVerboseFromContext(ctx context.Context) (verbose bool) {
+	if ctx == nil {
+		return false
+	}
+
+	verboseValue := ctx.Value("verbose")
+	if verboseValue == nil {
+		return false
+	}
+
+	verbose, ok := verboseValue.(bool)
+	if !ok {
+		return false
+	}
+
+	return verbose
+}
