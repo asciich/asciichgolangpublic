@@ -1,6 +1,10 @@
 package contextutils
 
-import "context"
+import (
+	"context"
+
+	"github.com/spf13/cobra"
+)
 
 // Returns a child context of ctx with verbosity enabled according to `verbose`.
 // If ctx is nil a new context with verbosity set is returned.
@@ -10,6 +14,25 @@ func WithVerbosityContextByBool(ctx context.Context, verbose bool) (ctxWithVerbo
 	}
 
 	return context.WithValue(ctx, "verbose", verbose)
+}
+
+func GetVerbosityContextByCobraCmd(cmd *cobra.Command) (ctx context.Context) {
+	if cmd == nil {
+		return ContextSilent()
+	}
+
+	ctx = cmd.Context()
+
+	if cmd.Flags().Lookup("verbose") == nil {
+		return WithVerbosityContextByBool(ctx, false)
+	}
+
+	verbose, err := cmd.Flags().GetBool("verbose")
+	if err != nil {
+		return WithVerbosityContextByBool(ctx, false)
+	}
+
+	return WithVerbosityContextByBool(ctx, verbose)
 }
 
 func GetVerbosityContextByBool(verbose bool) (ctx context.Context) {
