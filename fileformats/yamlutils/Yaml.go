@@ -1,7 +1,9 @@
 package yamlutils
 
 import (
+	"errors"
 	"io"
+	"regexp"
 	"strings"
 
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
@@ -12,6 +14,20 @@ import (
 	gologging "gopkg.in/op/go-logging.v1"
 	"gopkg.in/yaml.v3"
 )
+
+var ErrInvalidYaml = errors.New("invalid yaml")
+
+type errTypeInvalidYamlEmptyString struct{}
+
+func (e errTypeInvalidYamlEmptyString) Error() string {
+	return "empty string is not a valid yaml"
+}
+
+func (e errTypeInvalidYamlEmptyString) Unwrap() error {
+	return ErrInvalidYaml
+}
+
+var ErrInvalidYamlEmptyString = errTypeInvalidYamlEmptyString{}
 
 func disableYqlibLogging() {
 	logger := yqlib.GetLogger()
@@ -36,12 +52,12 @@ func DataToYamlBytes(input interface{}) (yamlBytes []byte, err error) {
 	return yamlBytes, nil
 }
 
-func DataToYamlFile(jsonData interface{}, outputFile files.File, verbose bool) (err error) {
+func DataToYamlFile(data interface{}, outputFile files.File, verbose bool) (err error) {
 	if outputFile == nil {
 		return tracederrors.TracedErrorNil("outputFile")
 	}
 
-	yamlString, err := DataToYamlString(jsonData)
+	yamlString, err := DataToYamlString(data)
 	if err != nil {
 		return err
 	}
@@ -123,13 +139,13 @@ func SplitMultiYaml(yamlString string) (splitted []string) {
 	var toAdd string
 
 	for _, line := range stringsutils.SplitLines(yamlString, true) {
-		trimmedLine := strings.TrimSpace(line)
+		trimmedLine := stringsutils.TrimSpacesRight(line)
 		if trimmedLine == "---" {
 			if toAdd == "" {
 				continue
 			}
 
-			toAdd = stringsutils.EnsureEndsWithExactlyOneLineBreak(toAdd)
+			toAdd = "---\n" + stringsutils.EnsureEndsWithExactlyOneLineBreak(toAdd)
 			splitted = append(splitted, toAdd)
 			toAdd = ""
 			continue
@@ -143,9 +159,111 @@ func SplitMultiYaml(yamlString string) (splitted []string) {
 	}
 
 	if toAdd != "" {
-		toAdd = stringsutils.EnsureEndsWithExactlyOneLineBreak(toAdd)
+		toAdd = "---\n" + stringsutils.EnsureEndsWithExactlyOneLineBreak(toAdd)
 		splitted = append(splitted, toAdd)
 	}
 
 	return splitted
+}
+
+var regexDocumentStartRemoval = regexp.MustCompile("^---.*\n")
+
+func MergeMultiYaml(yamls []string) (merged string, err error) {
+	if yamls == nil {
+		return "", tracederrors.TracedError("yamls")
+	}
+
+	for _, y := range yamls {
+		y = stringsutils.TrimSpacesRight(y)
+		y = stringsutils.TrimAllLeadingNewLines(y)
+
+		if strings.HasPrefix(y, "---") {
+			y = string(regexDocumentStartRemoval.ReplaceAll([]byte(y), []byte("")))
+			y = stringsutils.TrimAllLeadingNewLines(y)
+		}
+
+		if y == "" {
+			continue
+		}
+
+		merged += "---\n" + stringsutils.EnsureEndsWithExactlyOneLineBreak(y)
+	}
+
+	return merged, nil
+}
+
+func MustMergeMultiYaml(yamls []string) (merged string) {
+	merged, err := MergeMultiYaml(yamls)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	merged = stringsutils.EnsureEndsWithExactlyOneLineBreak(merged)
+
+	return merged
+}
+
+func MustLoadGeneric(input string) (data interface{}) {
+	data, err := LoadGeneric(input)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return data
+}
+
+func LoadGeneric(input string) (data interface{}, err error) {
+	data = new(interface{})
+
+	err = yaml.Unmarshal([]byte(input), data)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("%w: %w", ErrInvalidYaml, err)
+	}
+
+	return data, nil
+}
+
+func Validate(toValidate string) (err error) {
+	trimmed := strings.TrimSpace(toValidate)
+
+	if trimmed == "" {
+		return ErrInvalidYamlEmptyString
+	}
+
+	_, err = LoadGeneric(toValidate)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func EnsureDocumentStart(input string) (output string) {
+	trimmed := stringsutils.TrimSpacesLeft(input)
+
+	if trimmed == "---" {
+		return "---\n"
+	}
+
+	if strings.HasPrefix(trimmed, "---\n") {
+		return trimmed
+	}
+
+	if strings.HasPrefix(trimmed, "#") {
+		withoutComments := stringsutils.RemoveComments(input)
+		if withoutComments == "---" {
+			return trimmed + "\n"
+		}
+
+		if strings.HasPrefix(trimmed, "---\n") {
+			return trimmed
+		}
+	}
+
+	return "---\n" + trimmed
+}
+
+func EnsureDocumentStartAndEnd(input string) (output string) {
+	output = EnsureDocumentStart(input)
+	return stringsutils.EnsureEndsWithExactlyOneLineBreak(output)
 }
