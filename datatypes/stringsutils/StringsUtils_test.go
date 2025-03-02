@@ -993,3 +993,41 @@ func TestStrings_ToHexStringSlice(t *testing.T) {
 		)
 	}
 }
+
+func Test_IsBeforeInAlphabeth(t *testing.T) {
+	tests := []struct {
+		input    string
+		input2   string
+		expected bool
+	}{
+		{"", "", false},
+		{"a", "", false},
+		{"a", "a", false},
+		{"a", "b", true},
+		{"aa", "b", true},
+		{"aa", "bb", true},
+		{"b", "a", false},
+		{"b", "aa", false},
+		{"bb", "aa", false},
+		{"1", "b", true},
+		{"1", "1", false},
+		{"11", "b", true},
+		{"11", "bb", true},
+		{"b", "1", false},
+		{"b", "11", false},
+		{"bb", "11", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			fmt.Sprintf("%v", tt),
+			func(t *testing.T) {
+				require.EqualValues(
+					t,
+					tt.expected,
+					IsBeforeInAlphabeth(tt.input, tt.input2),
+				)
+			},
+		)
+	}
+}

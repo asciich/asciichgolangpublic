@@ -779,6 +779,10 @@ func TrimSpacesLeft(input string) (trimmedLeft string) {
 	return strings.TrimLeft(input, "\t \n")
 }
 
+func TrimSpacesRight(input string) (trimmedLeft string) {
+	return strings.TrimRight(input, "\t \n")
+}
+
 func TrimSuffixAndSpace(input string, suffix string) (output string) {
 	output = strings.TrimSuffix(input, suffix)
 	output = strings.TrimSpace(output)
@@ -821,4 +825,25 @@ func ToHexStringSlice(input string) (hexStringSlice []string) {
 		)
 	}
 	return hexStringSlice
+}
+
+// Returns true if s1 comes before s2 in the alphabeth.
+// Alphabethical order is:
+// - empty string
+// - numbers [0-9]
+// - chars [a-z]
+func IsBeforeInAlphabeth(s1 string, s2 string) (isBefore bool) {
+	if s1 == "" && s2 == "" {
+		return false
+	}
+
+	if s2 == "" {
+		return false
+	}
+
+	if strings.Compare(s1, s2) >= 0 {
+		return false
+	}
+
+	return true
 }
