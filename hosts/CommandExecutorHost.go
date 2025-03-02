@@ -66,7 +66,7 @@ func (c *CommandExecutorHost) GetFileInUsersHome(ctx context.Context, userName s
 	return c.GetFileByPath(fullPath)
 }
 
-func (c *CommandExecutorHost) GetSshPublicKeyOfUser(ctx context.Context, userName string) (publicKey string, err error) {
+func (c *CommandExecutorHost) GetSshPublicKeyOfUserAsString(ctx context.Context, userName string) (publicKey string, err error) {
 	if userName == "" {
 		return "", tracederrors.TracedErrorEmptyString("userName")
 	}
