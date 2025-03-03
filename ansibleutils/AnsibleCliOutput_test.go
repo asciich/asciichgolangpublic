@@ -14,7 +14,7 @@ func Test_Constructor(t *testing.T) {
 
 	t.Run("number of hosts", func(t *testing.T) {
 		output := NewAnsibleCliOutput()
-		require.EqualValues(t, 0, output.GetNumberOfHosts(ctx()))
+		require.EqualValues(t, 0, output.MustGetNumberOfHosts(ctx()))
 	})
 }
 

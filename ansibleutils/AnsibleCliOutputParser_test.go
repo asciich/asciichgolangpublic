@@ -25,7 +25,7 @@ func Test_ParseListHostsOutput(t *testing.T) {
 		require.EqualValues(
 			t,
 			[]string{"one.example.net"},
-			parsed.inventory.GetHostNames(),
+			parsed.inventory.MustListHostNames(),
 		)
 	})
 
@@ -35,7 +35,7 @@ func Test_ParseListHostsOutput(t *testing.T) {
 		require.EqualValues(
 			t,
 			[]string{"one.example.net", "two.example.net"},
-			parsed.inventory.GetHostNames(),
+			parsed.inventory.MustListHostNames(),
 		)
 	})
 }
