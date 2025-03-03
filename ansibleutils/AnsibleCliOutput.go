@@ -28,16 +28,28 @@ func (a *AnsibleCliOuput) Inventory() (inventory *AnsibleInventory) {
 	return a.inventory
 }
 
-func (a *AnsibleCliOuput) GetNumberOfHosts(ctx context.Context) (nHosts int) {
+func (a *AnsibleCliOuput) MustGetNumberOfHosts(ctx context.Context) (nHosts int) {
+	nHosts, err := a.GetNumberOfHosts(ctx)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return nHosts
+}
+
+func (a *AnsibleCliOuput) GetNumberOfHosts(ctx context.Context) (nHosts int, err error) {
 	inventory := a.Inventory()
 	if inventory == nil {
 		nHosts = 0
 		logging.LogInfoByCtxf(ctx, "There are '%d' hosts in ansible cli output '%s'.", nHosts, a.Name())
 	} else {
-		nHosts = inventory.GetNumberOfHosts(ctx)
+		nHosts, err = inventory.GetNumberOfHosts(ctx)
+		if err != nil {
+			return 0, err
+		}
 	}
 
-	return nHosts
+	return nHosts, err
 }
 
 func (a *AnsibleCliOuput) CreateInventory() (inventory *AnsibleInventory) {

@@ -368,6 +368,14 @@ func OverrideLogInfo(overrideFunction func(logmessage string)) {
 	overrideFunctionLogInfo = overrideFunction
 }
 
+func LogInfoByCtx(ctx context.Context, logmessage string) {
+	if !contextutils.GetVerboseFromContext(ctx) {
+		return
+	}
+
+	LogInfo(logmessage)
+}
+
 func LogInfoByCtxf(ctx context.Context, logmessage string, args ...interface{}) {
 	if !contextutils.GetVerboseFromContext(ctx) {
 		return

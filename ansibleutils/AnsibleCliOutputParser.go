@@ -37,7 +37,7 @@ func parseListHostsCliOutput(ctx context.Context, cliOutput string) (ansibleOutp
 			continue
 		}
 
-		err = inventory.AddHostByName(ctx, toAdd)
+		_, err = inventory.CreateHostByName(ctx, toAdd)
 		if err != nil {
 			return nil, err
 		}
