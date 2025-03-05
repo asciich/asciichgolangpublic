@@ -444,6 +444,8 @@ func (g *GitlabGroup) ListProjectPaths(options *GitlabListProjectsOptions) (proj
 
 	projectPaths = []string{}
 
+	recursive := options.Recursive
+
 	for {
 		if nextPage <= 0 {
 			break
@@ -452,7 +454,8 @@ func (g *GitlabGroup) ListProjectPaths(options *GitlabListProjectsOptions) (proj
 		nativeProjects, response, err := nativeService.ListGroupProjects(
 			gid,
 			&gitlab.ListGroupProjectsOptions{
-				Archived: &falseBoolean,
+				Archived:         &falseBoolean,
+				IncludeSubGroups: &recursive,
 				ListOptions: gitlab.ListOptions{
 					Page: nextPage,
 				},

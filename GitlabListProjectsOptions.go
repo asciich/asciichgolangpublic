@@ -1,7 +1,8 @@
 package asciichgolangpublic
 
 type GitlabListProjectsOptions struct {
-	Verbose bool
+	Recursive bool
+	Verbose   bool
 }
 
 func NewGitlabListProjectsOptions() (g *GitlabListProjectsOptions) {
