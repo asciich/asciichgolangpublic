@@ -113,7 +113,7 @@ func TracedErrorNotImplemented() (tracedError error) {
 	return toReturn
 }
 
-func (t *TracedErrorType) GetErrorMessage() (errorMessage string, err error) {
+func (t TracedErrorType) GetErrorMessage() (errorMessage string, err error) {
 	formattedError, err := t.GetFormattedError()
 	if err != nil {
 		return "", err
@@ -124,7 +124,7 @@ func (t *TracedErrorType) GetErrorMessage() (errorMessage string, err error) {
 	return errorMessage, nil
 }
 
-func (t *TracedErrorType) GetErrorsToUnwrap() (errorsToUnwrap []error, err error) {
+func (t TracedErrorType) GetErrorsToUnwrap() (errorsToUnwrap []error, err error) {
 	if t.errorsToUnwrap == nil {
 		return nil, TracedErrorf("errorsToUnwrap not set")
 	}
@@ -136,12 +136,12 @@ func (t *TracedErrorType) GetErrorsToUnwrap() (errorsToUnwrap []error, err error
 	return t.errorsToUnwrap, nil
 }
 
-func (t *TracedErrorType) GetFormattedError() (formattedError error, err error) {
+func (t TracedErrorType) GetFormattedError() (formattedError error, err error) {
 
 	return t.formattedError, nil
 }
 
-func (t *TracedErrorType) GetFunctionCalls() (functionCalls []string, err error) {
+func (t TracedErrorType) GetFunctionCalls() (functionCalls []string, err error) {
 	if t.functionCalls == nil {
 		return nil, TracedErrorf("functionCalls not set")
 	}
@@ -153,7 +153,7 @@ func (t *TracedErrorType) GetFunctionCalls() (functionCalls []string, err error)
 	return t.functionCalls, nil
 }
 
-func (t *TracedErrorType) MustGetErrorMessage() (errorMessage string) {
+func (t TracedErrorType) MustGetErrorMessage() (errorMessage string) {
 	errorMessage, err := t.GetErrorMessage()
 	if err != nil {
 		log.Panic(err)
@@ -162,7 +162,7 @@ func (t *TracedErrorType) MustGetErrorMessage() (errorMessage string) {
 	return errorMessage
 }
 
-func (t *TracedErrorType) MustGetErrorsToUnwrap() (errorsToUnwrap []error) {
+func (t TracedErrorType) MustGetErrorsToUnwrap() (errorsToUnwrap []error) {
 	errorsToUnwrap, err := t.GetErrorsToUnwrap()
 	if err != nil {
 		log.Panic(err)
@@ -171,7 +171,7 @@ func (t *TracedErrorType) MustGetErrorsToUnwrap() (errorsToUnwrap []error) {
 	return errorsToUnwrap
 }
 
-func (t *TracedErrorType) MustGetFormattedError() (formattedError error) {
+func (t TracedErrorType) MustGetFormattedError() (formattedError error) {
 	formattedError, err := t.GetFormattedError()
 	if err != nil {
 		log.Panic(err)
@@ -180,7 +180,7 @@ func (t *TracedErrorType) MustGetFormattedError() (formattedError error) {
 	return formattedError
 }
 
-func (t *TracedErrorType) MustGetFunctionCalls() (functionCalls []string) {
+func (t TracedErrorType) MustGetFunctionCalls() (functionCalls []string) {
 	functionCalls, err := t.GetFunctionCalls()
 	if err != nil {
 		log.Panic(err)
@@ -189,21 +189,21 @@ func (t *TracedErrorType) MustGetFunctionCalls() (functionCalls []string) {
 	return functionCalls
 }
 
-func (t *TracedErrorType) MustSetErrorsToUnwrap(errorsToUnwrap []error) {
+func (t TracedErrorType) MustSetErrorsToUnwrap(errorsToUnwrap []error) {
 	err := t.SetErrorsToUnwrap(errorsToUnwrap)
 	if err != nil {
 		log.Panic(err)
 	}
 }
 
-func (t *TracedErrorType) MustSetFormattedError(formattedError error) {
+func (t TracedErrorType) MustSetFormattedError(formattedError error) {
 	err := t.SetFormattedError(formattedError)
 	if err != nil {
 		log.Panic(err)
 	}
 }
 
-func (t *TracedErrorType) MustSetFunctionCalls(functionCalls []string) {
+func (t TracedErrorType) MustSetFunctionCalls(functionCalls []string) {
 	err := t.SetFunctionCalls(functionCalls)
 	if err != nil {
 		log.Panic(err)
