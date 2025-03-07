@@ -480,6 +480,43 @@ func (g *GitlabGroup) ListProjectPaths(options *GitlabListProjectsOptions) (proj
 	return projectPaths, nil
 }
 
+func (g *GitlabGroup) MustListProjects(listProjectOptions *GitlabListProjectsOptions) (projects []*GitlabProject) {
+	projects, err := g.ListProjects(listProjectOptions)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return projects
+}
+
+func (g *GitlabGroup) ListProjects(listProjectOptions *GitlabListProjectsOptions) (projects []*GitlabProject, err error) {
+	if listProjectOptions == nil {
+		return nil, tracederrors.TracedErrorNil("listProjectOptions")
+	}
+
+	projectPaths, err := g.ListProjectPaths(listProjectOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	gitlab, err := g.GetGitlab()
+	if err != nil {
+		return nil, err
+	}
+
+	projects = []*GitlabProject{}
+	for _, path := range projectPaths {
+		toAdd, err := gitlab.GetGitlabProjectByPath(path, listProjectOptions.Verbose)
+		if err != nil {
+			return nil, err
+		}
+
+		projects = append(projects, toAdd)
+	}
+
+	return projects, nil
+}
+
 func (g *GitlabGroup) MustCreate(createOptions *GitlabCreateGroupOptions) {
 	err := g.Create(createOptions)
 	if err != nil {

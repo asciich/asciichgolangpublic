@@ -1,0 +1,9 @@
+diff a/defaultclicommands/DefaultCliCommands.go b/defaultclicommands/DefaultCliCommands.go	(rejected hunks)
+@@ -4,6 +4,7 @@ import (
+ 	"github.com/spf13/cobra"
+ 	dns_cmd "github.com/asciich/asciichgolangpublic/defaultclicommands/dns"
+ 	errors_cmd "github.com/asciich/asciichgolangpublic/defaultclicommands/errors"
++	gitlab_cmd "github.com/asciich/asciichgolangpublic/defaultclicommands/gitlab"
+ 	"github.com/asciich/asciichgolangpublic/logging"
+ 	"github.com/asciich/asciichgolangpublic/tracederrors"
+ )

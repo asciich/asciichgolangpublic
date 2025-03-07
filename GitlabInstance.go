@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"fmt"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -499,6 +500,20 @@ func (g *GitlabInstance) GetGitlabProjects() (gitlabProjects *GitlabProjects, er
 	return gitlabProjects, nil
 }
 
+func (g *GitlabInstance) GetNativePipelineSchedulesClient() (nativeClient *gitlab.PipelineSchedulesService, err error) {
+	n, err := g.GetNativeClient()
+	if err != nil {
+		return nil, err
+	}
+
+	nativeClient = n.PipelineSchedules
+	if nativeClient == nil {
+		return nil, tracederrors.TracedError("nativeClient is nil after evaluation")
+	}
+
+	return nativeClient, nil
+}
+
 func (g *GitlabInstance) GetGitlabRunners() (gitlabRunners *GitlabRunnersService, err error) {
 	gitlabRunners = NewGitlabRunners()
 	err = gitlabRunners.SetGitlab(g)
@@ -541,6 +556,70 @@ func (g *GitlabInstance) GetGroupById(id int, verbose bool) (gitlabGroup *Gitlab
 	}
 
 	return gitlabGroup, nil
+}
+
+func (g *GitlabInstance) GetNativeVersionsClient() (versionsClient *gitlab.VersionService, err error) {
+	nativeClient, err := g.GetNativeClient()
+	if err != nil {
+		return nil, err
+	}
+
+	versionsClient = nativeClient.Version
+
+	if versionsClient == nil {
+		return nil, tracederrors.TracedError("versionsClient is nil after evaluation")
+	}
+
+	return versionsClient, nil
+}
+
+func (g *GitlabInstance) GetVersionAnRevisionAsString(ctx context.Context) (version string, revision string, err error) {
+	versionsClient, err := g.GetNativeVersionsClient()
+	if err != nil {
+		return "", "", err
+	}
+
+	v, _, err := versionsClient.GetVersion(nil)
+	if err != nil {
+		return "", "", err
+	}
+
+	version = v.Version
+	if version == "" {
+		return "", "", tracederrors.TracedError("version is empty string after evaluation.")
+	}
+
+	revision = v.Revision
+	if revision == "" {
+		return "", "", tracederrors.TracedError("revision is empty string after evaluation.")
+	}
+
+	fqdn, err := g.GetFqdn()
+	if err != nil {
+		return "", "", err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Gitlab '%s' has version '%v' and revision '%s'.", fqdn, version, revision)
+
+	return version, revision, nil
+}
+
+func (g *GitlabInstance) GetRevisionAsString(ctx context.Context) (revision string, err error) {
+	_, revision, err = g.GetVersionAnRevisionAsString(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	return revision, nil
+}
+
+func (g *GitlabInstance) GetVersionAsString(ctx context.Context) (version string, err error) {
+	version, _, err = g.GetVersionAnRevisionAsString(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	return version, nil
 }
 
 func (g *GitlabInstance) GetGroupByPath(groupPath string, verbose bool) (gitlabGroup *GitlabGroup, err error) {

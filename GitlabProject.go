@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 
@@ -130,6 +131,15 @@ func (g *GitlabProject) Create(verbose bool) (err error) {
 	return err
 }
 
+func (g *GitlabProject) GetNativePipelineSchedulesClient() (nativeClient *gitlab.PipelineSchedulesService, err error) {
+	gitlab, err := g.GetGitlab()
+	if err != nil {
+		return nil, err
+	}
+
+	return gitlab.GetNativePipelineSchedulesClient()
+}
+
 func (g *GitlabProject) CreateBranchFromDefaultBranch(branchName string, verbose bool) (createdBranch *GitlabBranch, err error) {
 	branches, err := g.GetBranches()
 	if err != nil {
@@ -156,6 +166,24 @@ func (g *GitlabProject) CreateEmptyFile(fileName string, ref string, verbose boo
 	}
 
 	return createdFile, nil
+}
+
+func (g *GitlabProject) ListScheduledPipelineNames(ctx context.Context) (scheduledPipelineNames []string, err error) {
+	schedules, err := g.GetPipelineSchedules()
+	if err != nil {
+		return nil, err
+	}
+
+	return schedules.ListScheduledPipelineNames(ctx)
+}
+
+func (g *GitlabProject) MustListScheduledPipelineNames(ctx context.Context) (scheduledPipelineNames []string) {
+	scheduledPipelineNames, err := g.ListScheduledPipelineNames(ctx)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return scheduledPipelineNames
 }
 
 func (g *GitlabProject) CreateMergeRequest(options *GitlabCreateMergeRequestOptions) (createdMergeRequest *GitlabMergeRequest, err error) {
@@ -1193,6 +1221,26 @@ func (g *GitlabProject) MustExists(verbose bool) (projectExists bool) {
 	}
 
 	return projectExists
+}
+
+func (g *GitlabProject) GetPipelineSchedules() (scheduledPipelines *GitlabPipelineSchedules, err error) {
+	scheduledPipelines = NewGitlabPipelineSchedules()
+
+	err = scheduledPipelines.SetGitlabProject(g)
+	if err != nil {
+		return nil, err
+	}
+
+	return scheduledPipelines, err
+}
+
+func (g *GitlabProject) ListScheduledPipelines(ctx context.Context) (scheduledPipelines []*GitlabPipelineSchedule, err error) {
+	scheduled, err := g.GetPipelineSchedules()
+	if err != nil {
+		return nil, err
+	}
+
+	return scheduled.ListPipelineSchedules(ctx)
 }
 
 func (g *GitlabProject) MustGetBranchByName(branchName string) (branch *GitlabBranch) {
