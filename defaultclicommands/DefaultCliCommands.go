@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	dns_cmd "github.com/asciich/asciichgolangpublic/defaultclicommands/dns"
 	errors_cmd "github.com/asciich/asciichgolangpublic/defaultclicommands/errors"
+	gitlab_cmd "github.com/asciich/asciichgolangpublic/defaultclicommands/gitlab"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -24,6 +25,11 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 	}
 
 	err = errors_cmd.AddErrorsCommand(rootCmd)
+	if err != nil {
+		return err
+	}
+
+	err = gitlab_cmd.AddGitlabCommand(rootCmd)
 	if err != nil {
 		return err
 	}

@@ -357,6 +357,12 @@ func LogGood(logmessage string) {
 	LogInfo(logmessage)
 }
 
+func LogGoodByCtxf(ctx context.Context, logmessage string, args ...interface{}) {
+	if contextutils.GetVerboseFromContext(ctx) {
+		LogGoodf(logmessage, args...)
+	}
+}
+
 func LogGoodf(logmessage string, args ...interface{}) {
 	message := fmt.Sprintf(logmessage, args...)
 	LogGood(message)
