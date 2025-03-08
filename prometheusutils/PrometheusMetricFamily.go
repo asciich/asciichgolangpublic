@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package prometheusutils
 
 import (
 	dto "github.com/prometheus/client_model/go"
@@ -29,6 +29,7 @@ func GetPrometheusMetricFamilyFromNativeMetricFamily(metricFamily *dto.MetricFam
 
 		untyped := metric.GetUntyped()
 		gauge := metric.GetGauge()
+		counter := metric.GetCounter()
 		if untyped != nil {
 			err = toAdd.SetValueByFloat64(untyped.GetValue())
 			if err != nil {
@@ -36,6 +37,11 @@ func GetPrometheusMetricFamilyFromNativeMetricFamily(metricFamily *dto.MetricFam
 			}
 		} else if gauge != nil {
 			err = toAdd.SetValueByFloat64(gauge.GetValue())
+			if err != nil {
+				return nil, err
+			}
+		} else if counter != nil {
+			err = toAdd.SetValueByFloat64(counter.GetValue())
 			if err != nil {
 				return nil, err
 			}
