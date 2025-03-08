@@ -1,10 +1,12 @@
 package files
 
 import (
+	"context"
 	"sort"
 	"strconv"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/contextutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
@@ -71,13 +73,13 @@ func (c *DirectoryBase) WriteBytesToFile(content []byte, verbose bool, path ...s
 	return file, nil
 }
 
-func (d *DirectoryBase) CheckExists(verbose bool) (err error) {
+func (d *DirectoryBase) CheckExists(ctx context.Context) (err error) {
 	parent, err := d.GetParentDirectoryForBaseClass()
 	if err != nil {
 		return err
 	}
 
-	exists, err := parent.Exists(verbose)
+	exists, err := parent.Exists(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
@@ -363,8 +365,8 @@ func (d *DirectoryBase) ListSubDirectoryPaths(options *parameteroptions.ListDire
 	return subDirectoryPaths, nil
 }
 
-func (d *DirectoryBase) MustCheckExists(verbose bool) {
-	err := d.CheckExists(verbose)
+func (d *DirectoryBase) MustCheckExists(ctx context.Context) {
+	err := d.CheckExists(ctx)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}

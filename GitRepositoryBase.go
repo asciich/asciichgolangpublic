@@ -1,8 +1,10 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"slices"
 
+	"github.com/asciich/asciichgolangpublic/contextutils"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
@@ -16,6 +18,38 @@ type GitRepositoryBase struct {
 
 func NewGitRepositoryBase() (g *GitRepositoryBase) {
 	return new(GitRepositoryBase)
+}
+
+func (g *GitRepositoryBase) MustCheckExists(ctx context.Context) {
+	err := g.CheckExists(ctx)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+}
+
+func (g *GitRepositoryBase) CheckExists(ctx context.Context) (err error) {
+	parent, err := g.GetParentRepositoryForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	exists, err := parent.Exists(contextutils.GetVerboseFromContext(ctx))
+	if err != nil {
+		return err
+	}
+
+	path, err := parent.GetPath()
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return tracederrors.TracedErrorf("Local git repository '%s' does not exist.", path)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Local git repository '%s' exists.", path)
+
+	return nil
 }
 
 func (g *GitRepositoryBase) AddFilesByPath(pathsToAdd []string, verbose bool) (err error) {

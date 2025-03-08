@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -146,6 +147,7 @@ type GitRepository interface {
 	// All methods below this line can be implemented by embedding the `GitRepositoryBase` struct:
 	AddFilesByPath(pathsToAdd []string, verbose bool) (err error)
 	BranchByNameExists(branchName string, verbose bool) (branchExists bool, err error)
+	CheckExists(ctx context.Context) (err error)
 	CheckHasNoUncommittedChanges(verbose bool) (err error)
 	CheckIsGolangApplication(verbose bool) (err error)
 	CheckIsGolangPackage(verbose bool) (err error)
@@ -171,6 +173,7 @@ type GitRepository interface {
 	ListVersionTags(verbose bool) (versionTags []GitTag, err error)
 	MustAddFilesByPath(pathsToAdd []string, verbose bool)
 	MustBranchByNameExists(branchName string, verbose bool) (branchExists bool)
+	MustCheckExists(ctx context.Context)
 	MustCheckHasNoUncommittedChanges(verbose bool)
 	MustCheckIsGolangApplication(verbose bool)
 	MustCheckIsGolangPackage(verbose bool)
