@@ -72,3 +72,17 @@ func TestSshPublicKeySetFromStringUserCorrect(t *testing.T) {
 		)
 	}
 }
+
+func Test_SetFromString(t *testing.T) {
+	t.Run("empty string", func(t *testing.T) {
+		key := NewSSHPublicKey()
+		require.Error(t, key.SetFromString(""))
+	})
+
+	t.Run("ed25519", func(t *testing.T) {
+		key := NewSSHPublicKey()
+		require.NoError(t, key.SetFromString("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEB7W3jJgHEzL4kteQ4MlLPosP2zaqRRKEydm7ic5HKN user@host1234"))
+		require.EqualValues(t, "user", key.MustGetKeyUserName())
+		require.EqualValues(t, "host1234", key.MustGetKeyUserHost())
+	})
+}

@@ -169,10 +169,11 @@ func (k *SSHPublicKey) SetFromString(keyMaterial string) (err error) {
 	numberOfSpacesInKeyMaterial := strings.Count(keyMaterial, " ")
 	if numberOfSpacesInKeyMaterial == 0 {
 		k.keyMaterial = keyMaterial
-	} else if slicesutils.ContainsInt([]int{1, 2, 3}, numberOfSpacesInKeyMaterial) {
+	} else if numberOfSpacesInKeyMaterial > 0 && numberOfSpacesInKeyMaterial <= 3 {
 		splittedAllElements := strings.Split(keyMaterial, " ")
 		splitted := slicesutils.TrimSpace(splittedAllElements)
 		splitted = slicesutils.RemoveMatchingStrings(splitted, "ssh-rsa")
+		splitted = slicesutils.RemoveMatchingStrings(splitted, "ssh-ed25519")
 		splitted, err = slicesutils.RemoveStringsWhichContains(splitted, "@")
 		if err != nil {
 			return err
@@ -187,8 +188,9 @@ func (k *SSHPublicKey) SetFromString(keyMaterial string) (err error) {
 				keyMaterialToAdd = splitted[0]
 			} else {
 				return tracederrors.TracedErrorf(
-					"unable to extract key material. len(splitted) = '%v' != 1 as expected. splitted is '%v'",
+					"unable to extract key material. len(splitted) = '%v' != 1 as expected. key material is '%s' and splitted is '%v'",
 					len(splitted),
+					keyMaterial,
 					splitted,
 				)
 			}
