@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package prometheusutils
 
 import (
 	dto "github.com/prometheus/client_model/go"
