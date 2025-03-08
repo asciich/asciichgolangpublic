@@ -1,6 +1,10 @@
 package files
 
-import "github.com/asciich/asciichgolangpublic/parameteroptions"
+import (
+	"context"
+
+	"github.com/asciich/asciichgolangpublic/parameteroptions"
+)
 
 type Directory interface {
 	Chmod(chmodOptions *parameteroptions.ChmodOptions) (err error)
@@ -44,7 +48,7 @@ type Directory interface {
 	MustListSubDirectories(options *parameteroptions.ListDirectoryOptions) (subDirectories []Directory)
 
 	// All methods below this line can be implemented by embedding the `DirectoryBase` struct:
-	CheckExists(verbose bool) (err error)
+	CheckExists(ctx context.Context) (err error)
 	CreateFileInDirectory(verbose bool, path ...string) (createdFile File, err error)
 	GetFilePathInDirectory(path ...string) (filePath string, err error)
 	GetPathAndHostDescription() (dirPath string, hostDescription string, err error)
@@ -52,7 +56,7 @@ type Directory interface {
 	FileInDirectoryExists(verbose bool, path ...string) (exists bool, err error)
 	ListFilePaths(listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error)
 	ListSubDirectoryPaths(options *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string, err error)
-	MustCheckExists(verbose bool)
+	MustCheckExists(ctx context.Context)
 	MustCreateFileInDirectory(verbose bool, path ...string) (createdFile File)
 	MustDeleteFilesMatching(listFileOptons *parameteroptions.ListFileOptions)
 	MustGetFilePathInDirectory(path ...string) (filePath string)

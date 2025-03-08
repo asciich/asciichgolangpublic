@@ -1,6 +1,7 @@
 package files
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"sync"
@@ -468,15 +469,16 @@ func TestDirectory_CheckExists(t *testing.T) {
 				require := require.New(t)
 
 				const verbose = true
+				ctx := context.TODO()
 
 				temporaryDirectory := getDirectoryToTest("localDirectory")
 				defer temporaryDirectory.Delete(verbose)
 
-				require.Nil(temporaryDirectory.CheckExists(verbose))
+				require.Nil(temporaryDirectory.CheckExists(ctx))
 
 				temporaryDirectory.MustDelete(verbose)
 
-				require.NotNil(temporaryDirectory.CheckExists(verbose))
+				require.NotNil(temporaryDirectory.CheckExists(ctx))
 			},
 		)
 	}
