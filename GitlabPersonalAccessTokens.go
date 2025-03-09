@@ -462,7 +462,10 @@ func (p *GitlabPersonalAccessTokenService) RecreateToken(tokenOptions *GitlabCre
 	}
 
 	if exists {
-		p.RevokeTokenByName(tokenName, tokenOptions.Verbose)
+		err = p.RevokeTokenByName(tokenName, tokenOptions.Verbose)
+		if err != nil {
+			return "", err
+		}
 
 		nativeService, err := p.GetNativePersonalTokenService()
 		if err != nil {
