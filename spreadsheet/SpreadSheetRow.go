@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package spreadsheet
 
 import (
 	"strings"
@@ -206,6 +206,15 @@ func (s *SpreadSheetRow) RenderAsString(options *SpreadSheetRenderRowOptions) (r
 	}
 
 	rendered = strings.Join(entries, delimiter)
+
+	if options.Prefix != "" {
+		rendered = options.Prefix + " " + rendered
+	}
+
+	if options.Suffix != "" {
+		rendered += " " + options.Suffix
+	}
+
 	return rendered, nil
 }
 

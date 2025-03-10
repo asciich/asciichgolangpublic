@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package spreadsheet
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"
@@ -10,6 +10,9 @@ type SpreadSheetRenderOptions struct {
 	StringDelimiter           string
 	Verbose                   bool
 	SameColumnWidthForAllRows bool
+	Prefix                    string
+	Suffix                    string
+	TitleUnderline            string
 }
 
 func NewSpreadSheetRenderOptions() (s *SpreadSheetRenderOptions) {

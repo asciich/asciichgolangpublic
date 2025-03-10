@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package spreadsheet
 
 import (
 	"testing"
@@ -18,12 +18,11 @@ func TestSpreadSheetNoRowsAndColumns(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				spreadSheet := NewSpreadSheet()
 
-				require.EqualValues(0, spreadSheet.MustGetNumberOfColumns())
-				require.EqualValues(0, spreadSheet.MustGetNumberOfRows())
+				require.EqualValues(t, 0, spreadSheet.MustGetNumberOfColumns())
+				require.EqualValues(t, 0, spreadSheet.MustGetNumberOfRows())
+				require.True(t, spreadSheet.MustIsEmpty())
 			},
 		)
 	}
@@ -133,6 +132,192 @@ func TestSpreadSheetRenderStringWithoutTitleAndDelimiter(t *testing.T) {
 			},
 		)
 	}
+}
+
+func TestSpreadSheetRenderStringWithTitleAndWithoutDelimiter(t *testing.T) {
+	t.Run("without prefix and suffix", func(t *testing.T) {
+		require := require.New(t)
+
+		const verbose bool = true
+
+		spreadSheet := NewSpreadSheet()
+		spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+		spreadSheet.MustAddRow([]string{"z", "hello"})
+		spreadSheet.MustAddRow([]string{"a", "world"})
+
+		require.EqualValues(2, spreadSheet.MustGetNumberOfColumns())
+		require.EqualValues(2, spreadSheet.MustGetNumberOfRows())
+
+		rendered := spreadSheet.MustRenderAsString(
+			&SpreadSheetRenderOptions{
+				SkipTitle: false,
+				Verbose:   verbose,
+			},
+		)
+
+		expectedRendered := "title1 title2\nz hello\na world\n"
+		require.EqualValues(expectedRendered, rendered)
+	})
+
+	t.Run("with prefix and suffix", func(t *testing.T) {
+		require := require.New(t)
+
+		const verbose bool = true
+
+		spreadSheet := NewSpreadSheet()
+		spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+		spreadSheet.MustAddRow([]string{"z", "hello"})
+		spreadSheet.MustAddRow([]string{"a", "world"})
+
+		require.EqualValues(2, spreadSheet.MustGetNumberOfColumns())
+		require.EqualValues(2, spreadSheet.MustGetNumberOfRows())
+
+		rendered := spreadSheet.MustRenderAsString(
+			&SpreadSheetRenderOptions{
+				SkipTitle: false,
+				Verbose:   verbose,
+				Prefix:    "|",
+				Suffix:    "|",
+			},
+		)
+
+		expectedRendered := "| title1 title2 |\n| z hello |\n| a world |\n"
+		require.EqualValues(expectedRendered, rendered)
+	})
+}
+
+func TestSpreadSheetRenderStringWithTitleAndDelimiter(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				require := require.New(t)
+
+				const verbose bool = true
+
+				spreadSheet := NewSpreadSheet()
+				spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+				spreadSheet.MustAddRow([]string{"z", "hello"})
+				spreadSheet.MustAddRow([]string{"a", "world"})
+
+				require.EqualValues(2, spreadSheet.MustGetNumberOfColumns())
+				require.EqualValues(2, spreadSheet.MustGetNumberOfRows())
+
+				rendered := spreadSheet.MustRenderAsString(
+					&SpreadSheetRenderOptions{
+						SkipTitle:       false,
+						Verbose:         verbose,
+						StringDelimiter: "|",
+					},
+				)
+
+				expectedRendered := "title1 | title2\nz | hello\na | world\n"
+				require.EqualValues(expectedRendered, rendered)
+			},
+		)
+	}
+}
+
+func TestSpreadSheetRenderStringOnlyTitle(t *testing.T) {
+	t.Run("only title", func(t *testing.T) {
+		require := require.New(t)
+
+		const verbose bool = true
+
+		spreadSheet := NewSpreadSheet()
+		spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+
+		require.EqualValues(2, spreadSheet.MustGetNumberOfColumns())
+
+		rendered := spreadSheet.MustRenderAsString(
+			&SpreadSheetRenderOptions{
+				SkipTitle:       false,
+				Verbose:         verbose,
+				StringDelimiter: "|",
+			},
+		)
+
+		expectedRendered := "title1 | title2\n"
+		require.EqualValues(expectedRendered, rendered)
+	})
+
+	t.Run("only title SameColumnWidthForAllRows", func(t *testing.T) {
+		require := require.New(t)
+
+		const verbose bool = true
+
+		spreadSheet := NewSpreadSheet()
+		spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+
+		require.EqualValues(2, spreadSheet.MustGetNumberOfColumns())
+
+		rendered := spreadSheet.MustRenderAsString(
+			&SpreadSheetRenderOptions{
+				SkipTitle:                 false,
+				Verbose:                   verbose,
+				SameColumnWidthForAllRows: true,
+				StringDelimiter:           "|",
+			},
+		)
+
+		expectedRendered := "title1 | title2\n"
+		require.EqualValues(expectedRendered, rendered)
+	})
+
+	t.Run("only title with left and right marker", func(t *testing.T) {
+		require := require.New(t)
+
+		const verbose bool = true
+
+		spreadSheet := NewSpreadSheet()
+		spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+
+		require.EqualValues(2, spreadSheet.MustGetNumberOfColumns())
+
+		rendered := spreadSheet.MustRenderAsString(
+			&SpreadSheetRenderOptions{
+				SkipTitle:       false,
+				Verbose:         verbose,
+				StringDelimiter: "|",
+				Prefix:          "|",
+				Suffix:          "|",
+			},
+		)
+
+		expectedRendered := "| title1 | title2 |\n"
+		require.EqualValues(expectedRendered, rendered)
+	})
+
+	t.Run("only title with left and right marker and underline title without cross", func(t *testing.T) {
+		require := require.New(t)
+
+		const verbose bool = true
+
+		spreadSheet := NewSpreadSheet()
+		spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+
+		require.EqualValues(2, spreadSheet.MustGetNumberOfColumns())
+
+		rendered := spreadSheet.MustRenderAsString(
+			&SpreadSheetRenderOptions{
+				SkipTitle:       false,
+				TitleUnderline:  "-",
+				Verbose:         verbose,
+				StringDelimiter: "|",
+				Prefix:          "|",
+				Suffix:          "|",
+			},
+		)
+
+		expectedRendered := "| title1 | title2 |\n| ------ | ------ |\n"
+		require.EqualValues(expectedRendered, rendered)
+	})
 }
 
 func TestSpreadSheetRemoveColumnByName_title1(t *testing.T) {

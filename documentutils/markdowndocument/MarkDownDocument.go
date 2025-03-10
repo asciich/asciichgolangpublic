@@ -31,7 +31,7 @@ func (m MarkDownDocument) RenderAsString() (rendered string, err error) {
 			return "", err
 		}
 
-		switch e.(type) {
+		switch e := e.(type) {
 		case *documentbase.Text:
 			rendered = extendRendered(rendered) + stringsutils.EnsureEndsWithExactlyOneLineBreak(plainTest)
 		case *documentbase.Title:
@@ -42,6 +42,12 @@ func (m MarkDownDocument) RenderAsString() (rendered string, err error) {
 			rendered = extendRendered(rendered) + "### " + stringsutils.EnsureEndsWithExactlyOneLineBreak(plainTest)
 		case *documentbase.SubSubSubTitle:
 			rendered = extendRendered(rendered) + "#### " + stringsutils.EnsureEndsWithExactlyOneLineBreak(plainTest)
+		case *documentbase.Table:
+			table, err := e.RenderAsMarkDownString()
+			if err != nil {
+				return "", err
+			}
+			rendered = extendRendered(rendered) + stringsutils.EnsureEndsWithExactlyOneLineBreak(table)
 		default:
 			return "", tracederrors.TracedErrorf("Unknown element type to render: %s", reflect.TypeOf(e))
 		}

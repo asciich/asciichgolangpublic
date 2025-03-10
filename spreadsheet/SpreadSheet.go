@@ -1,9 +1,10 @@
-package asciichgolangpublic
+package spreadsheet
 
 import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
@@ -46,6 +47,37 @@ func MustGetSpreadsheetWithNColumns(nColumns int) (s *SpreadSheet) {
 
 func NewSpreadSheet() (s *SpreadSheet) {
 	return new(SpreadSheet)
+}
+
+func (s *SpreadSheet) MustIsEmpty() (isEmpty bool) {
+	isEmpty, err := s.IsEmpty()
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return isEmpty
+}
+
+func (s *SpreadSheet) IsEmpty() (isEmpty bool, err error) {
+	ncols, err := s.GetNumberOfColumns()
+	if err != nil {
+		return false, err
+	}
+
+	if ncols > 0 {
+		return false, nil
+	}
+
+	nrows, err := s.GetNumberOfRows()
+	if err != nil {
+		return false, err
+	}
+
+	if nrows > 0 {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func (s *SpreadSheet) AddRow(rowEntries []string) (err error) {
@@ -157,20 +189,27 @@ func (s *SpreadSheet) GetMaxColumnWidths() (columnWitdhs []int, err error) {
 		return []int{}, nil
 	}
 
-	rows, err := s.GetRows()
+	columnWidths := slicesutils.GetIntSliceInitializedWithZeros(nColumns)
+
+	nRows, err := s.GetNumberOfRows()
 	if err != nil {
 		return nil, err
 	}
 
-	columnWidths := slicesutils.GetIntSliceInitializedWithZeros(nColumns)
-
-	for _, row := range rows {
-		rowColumnWidths, err := row.GetColumnWidths()
+	if nRows > 0 {
+		rows, err := s.GetRows()
 		if err != nil {
 			return nil, err
 		}
 
-		columnWidths = slicesutils.MaxIntValuePerIndex(columnWidths, rowColumnWidths)
+		for _, row := range rows {
+			rowColumnWidths, err := row.GetColumnWidths()
+			if err != nil {
+				return nil, err
+			}
+
+			columnWidths = slicesutils.MaxIntValuePerIndex(columnWidths, rowColumnWidths)
+		}
 	}
 
 	return columnWidths, nil
@@ -552,6 +591,9 @@ func (s *SpreadSheet) RenderAsString(options *SpreadSheetRenderOptions) (rendere
 	renderRowOptions.Verbose = options.Verbose
 	renderRowOptions.MinColumnWidths = minColumnWidths
 	renderRowOptions.StringDelimiter = options.StringDelimiter
+	renderRowOptions.Prefix = options.Prefix
+	renderRowOptions.Suffix = options.Suffix
+	renderRowOptions.TitleUnderline = options.TitleUnderline
 
 	rendered = ""
 	if !options.SkipTitle {
@@ -561,20 +603,74 @@ func (s *SpreadSheet) RenderAsString(options *SpreadSheetRenderOptions) (rendere
 		}
 
 		rendered += toAdd + "\n"
+
+		if renderRowOptions.TitleUnderline != "" {
+			toAdd, err := s.RenderTitleUnderlineAsString(renderRowOptions)
+			if err != nil {
+				return "", err
+			}
+
+			rendered += toAdd + "\n"
+		}
 	}
 
-	rows, err := s.GetRows()
+	nRows, err := s.GetNumberOfRows()
 	if err != nil {
 		return "", err
 	}
 
-	for _, row := range rows {
-		toAdd, err := row.RenderAsString(renderRowOptions)
+	if nRows > 0 {
+		rows, err := s.GetRows()
 		if err != nil {
 			return "", err
 		}
 
-		rendered += toAdd + "\n"
+		for _, row := range rows {
+			toAdd, err := row.RenderAsString(renderRowOptions)
+			if err != nil {
+				return "", err
+			}
+
+			rendered += toAdd + "\n"
+		}
+	}
+
+	return rendered, nil
+}
+
+func (s *SpreadSheet) RenderTitleUnderlineAsString(options *SpreadSheetRenderRowOptions) (rendered string, err error) {
+	if options == nil {
+		return "", tracederrors.TracedError("options is nil")
+	}
+
+	titleRow, err := s.GetTitleRow()
+	if err != nil {
+		return "", err
+	}
+
+	if options.Prefix != "" {
+		rendered += options.Prefix + " "
+	}
+
+	entries, err := titleRow.GetEntries()
+	if err != nil {
+		return "", err
+	}
+
+	for i, e := range entries {
+		if i > 0 {
+			if options.StringDelimiter == "" {
+				rendered += " "
+			} else {
+				rendered += " " + options.StringDelimiter + " "
+			}
+		}
+
+		rendered += strings.Repeat("-", len(e))
+	}
+
+	if options.Suffix != "" {
+		rendered += " " + options.Suffix
 	}
 
 	return rendered, nil
