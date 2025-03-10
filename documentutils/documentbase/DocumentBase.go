@@ -1,6 +1,9 @@
 package documentbase
 
-import "github.com/asciich/asciichgolangpublic/tracederrors"
+import (
+	"github.com/asciich/asciichgolangpublic/spreadsheet"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
+)
 
 type DocumentBase struct {
 	elements []Element
@@ -22,6 +25,20 @@ func (d *DocumentBase) AddElement(element Element) (err error) {
 	d.elements = append(d.elements, element)
 
 	return nil
+}
+
+func (d *DocumentBase) AddTable() (spreadsheet *spreadsheet.SpreadSheet, err error) {
+	toAdd, err := GetNewTable()
+	if err != nil {
+		return nil, err
+	}
+
+	err = d.AddElement(toAdd)
+	if err != nil {
+		return nil, err
+	}
+
+	return toAdd.GetSpreadSheet()
 }
 
 func (d *DocumentBase) AddTitleByString(title string) (err error) {

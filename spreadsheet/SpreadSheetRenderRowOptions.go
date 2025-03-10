@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package spreadsheet
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"
@@ -9,6 +9,9 @@ type SpreadSheetRenderRowOptions struct {
 	MinColumnWidths []int
 	StringDelimiter string
 	Verbose         bool
+	Prefix          string
+	Suffix          string
+	TitleUnderline  string
 }
 
 func NewSpreadSheetRenderRowOptions() (s *SpreadSheetRenderRowOptions) {
