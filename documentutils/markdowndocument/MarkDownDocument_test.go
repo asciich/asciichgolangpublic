@@ -49,7 +49,6 @@ func Test_Render(t *testing.T) {
 		require.EqualValues(t, "#### example title\n", rendered)
 	})
 
-
 	t.Run("title and text", func(t *testing.T) {
 		d := NewMarkDownDocument()
 		require.NoError(t, d.AddTitleByString("example title"))
@@ -81,6 +80,19 @@ func Test_Render(t *testing.T) {
 		rendered, err := d.RenderAsString()
 		require.NoError(t, err)
 		require.EqualValues(t, "# example title\n\nexample text.\n\n# example title2\n\nexample text2.\n", rendered)
+	})
+
+	t.Run("title, table", func(t *testing.T) {
+		d := NewMarkDownDocument()
+		require.NoError(t, d.AddTitleByString("example title"))
+		spreadsheet, err := d.AddTable()
+		require.NoError(t, err)
+
+		require.NoError(t, spreadsheet.SetColumnTitles([]string{"col1", "col nr 2"}))
+
+		rendered, err := d.RenderAsString()
+		require.NoError(t, err)
+		require.EqualValues(t, "# example title\n\n", rendered)
 	})
 
 }
