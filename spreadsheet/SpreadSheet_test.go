@@ -385,3 +385,146 @@ func TestSpreadSheetRemoveColumnByName_title2(t *testing.T) {
 		)
 	}
 }
+
+func Test_GetRowByFirstColumnValue(t *testing.T) {
+	t.Run("empty table", func(t *testing.T) {
+		spreadSheet := NewSpreadSheet()
+		_, err := spreadSheet.GetRowByFirstColumnValue("a")
+		require.Error(t, err)
+	})
+
+	t.Run("no rows", func(t *testing.T) {
+		spreadSheet := NewSpreadSheet()
+		spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+
+		_, err := spreadSheet.GetRowByFirstColumnValue("a")
+		require.Error(t, err)
+	})
+
+	t.Run("Entry not found", func(t *testing.T) {
+		spreadSheet := NewSpreadSheet()
+		spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+		spreadSheet.MustAddRow([]string{"b", "c"})
+
+		_, err := spreadSheet.GetRowByFirstColumnValue("a")
+		require.Error(t, err)
+	})
+
+	t.Run("Entry found", func(t *testing.T) {
+		spreadSheet := NewSpreadSheet()
+		spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+		spreadSheet.MustAddRow([]string{"b", "c"})
+		spreadSheet.MustAddRow([]string{"a", "d"})
+
+		row, err := spreadSheet.GetRowByFirstColumnValue("a")
+		require.NoError(t, err)
+
+		entries, err := row.GetEntries()
+		require.NoError(t, err)
+		require.EqualValues(t, []string{"a", "d"}, entries)
+	})
+
+	t.Run("Entry found", func(t *testing.T) {
+		spreadSheet := NewSpreadSheet()
+		spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+		spreadSheet.MustAddRow([]string{"b", "c"})
+		spreadSheet.MustAddRow([]string{"a", "d"})
+		spreadSheet.MustAddRow([]string{"", "only second cell contains value"})
+
+		row, err := spreadSheet.GetRowByFirstColumnValue("")
+		require.NoError(t, err)
+
+		entries, err := row.GetEntries()
+		require.NoError(t, err)
+		require.EqualValues(t, []string{"", "only second cell contains value"}, entries)
+	})
+}
+
+func Test_UpdateRowFoundByFirstColumnValue(t *testing.T) {
+	t.Run("empty table", func(t *testing.T) {
+		spreadSheet := NewSpreadSheet()
+		err := spreadSheet.UpdateRowFoundByFirstColumnValue("a", 1, "updated value")
+		require.Error(t, err)
+	})
+
+	t.Run("no rows", func(t *testing.T) {
+		spreadSheet := NewSpreadSheet()
+		spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+
+		err := spreadSheet.UpdateRowFoundByFirstColumnValue("a", 1, "updated value")
+		require.Error(t, err)
+	})
+
+	t.Run("Entry not found", func(t *testing.T) {
+		spreadSheet := NewSpreadSheet()
+		spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+		spreadSheet.MustAddRow([]string{"b", "c"})
+
+		err := spreadSheet.UpdateRowFoundByFirstColumnValue("a", 1, "updated value")
+		require.Error(t, err)
+	})
+
+	t.Run("Invalid index", func(t *testing.T) {
+		spreadSheet := NewSpreadSheet()
+		spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+		spreadSheet.MustAddRow([]string{"b", "c"})
+		spreadSheet.MustAddRow([]string{"a", "b"})
+
+		err := spreadSheet.UpdateRowFoundByFirstColumnValue("a", -1, "updated value")
+		require.Error(t, err)
+	})
+
+	t.Run("Update first cell", func(t *testing.T) {
+		spreadSheet := NewSpreadSheet()
+		spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+		spreadSheet.MustAddRow([]string{"b", "c"})
+		spreadSheet.MustAddRow([]string{"a", "b"})
+
+		err := spreadSheet.UpdateRowFoundByFirstColumnValue("a", 0, "updated value")
+		require.NoError(t, err)
+
+		require.EqualValues(
+			t,
+			[]string{"b", "c"},
+			spreadSheet.MustGetRowByIndexAsStringSlice(0),
+		)
+
+		require.EqualValues(
+			t,
+			[]string{"updated value", "b"},
+			spreadSheet.MustGetRowByIndexAsStringSlice(1),
+		)
+	})
+
+	t.Run("Update second cell", func(t *testing.T) {
+		spreadSheet := NewSpreadSheet()
+		spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+		spreadSheet.MustAddRow([]string{"b", "c"})
+		spreadSheet.MustAddRow([]string{"a", "b"})
+
+		err := spreadSheet.UpdateRowFoundByFirstColumnValue("a", 1, "updated value")
+		require.NoError(t, err)
+
+		require.EqualValues(
+			t,
+			[]string{"b", "c"},
+			spreadSheet.MustGetRowByIndexAsStringSlice(0),
+		)
+
+		require.EqualValues(
+			t,
+			[]string{"a", "updated value"},
+			spreadSheet.MustGetRowByIndexAsStringSlice(1),
+		)
+	})
+
+	t.Run("Too hight index", func(t *testing.T) {
+		spreadSheet := NewSpreadSheet()
+		spreadSheet.MustSetColumnTitles([]string{"title1", "title2"})
+		spreadSheet.MustAddRow([]string{"b", "c"})
+		spreadSheet.MustAddRow([]string{"a", "b"})
+
+		err := spreadSheet.UpdateRowFoundByFirstColumnValue("a", 2, "updated value")
+		require.Error(t, err)
+	})
+}
