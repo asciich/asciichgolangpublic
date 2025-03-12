@@ -215,6 +215,20 @@ func (s *SpreadSheet) GetMaxColumnWidths() (columnWitdhs []int, err error) {
 	return columnWidths, nil
 }
 
+func (s *SpreadSheet) GetRowByFirstColumnValue(value string) (row *SpreadSheetRow, err error) {
+	for _, r := range s.rows {
+		if len(r.entries) <= 0 {
+			continue
+		}
+
+		if r.entries[0] == value {
+			return r, nil
+		}
+	}
+
+	return nil, tracederrors.TracedErrorf("No row found with '%s' as first column value", value)
+}
+
 func (s *SpreadSheet) GetMinColumnWithsAsSelectedInOptions(options *SpreadSheetRenderOptions) (columnWidths []int, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedError("options is nil")
@@ -796,4 +810,47 @@ func (s *SpreadSheet) SortByColumnByName(columnName string) (err error) {
 	}
 
 	return nil
+}
+
+func (s *SpreadSheet) UpdateRowFoundByFirstColumnValue(searchValue string, cellIndex int, newValue string) (err error) {
+	if cellIndex < 0 {
+		return tracederrors.TracedErrorf("Invalid cellIndex '%d' to update", cellIndex)
+	}
+
+	row, err := s.GetRowByFirstColumnValue(searchValue)
+	if err != nil {
+		return err
+	}
+
+	entries, err := row.GetEntries()
+	if err != nil {
+		return err
+	}
+
+	nEntries := len(entries)
+	if nEntries <= cellIndex {
+		return tracederrors.TracedErrorf("cellIndex to update '%d' is to high. There are only '%d' elements in the row.", cellIndex, nEntries)
+	}
+
+	entries[cellIndex] = newValue
+
+	return nil
+}
+
+func (s *SpreadSheet) MustGetRowByIndexAsStringSlice(index int) (values []string) {
+	values, err := s.GetRowByIndexAsStringSlice(index)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return values
+}
+
+func (s *SpreadSheet) GetRowByIndexAsStringSlice(index int) (values []string, err error) {
+	row, err := s.GetRowByIndex(index)
+	if err != nil {
+		return nil, err
+	}
+
+	return row.GetEntries()
 }
