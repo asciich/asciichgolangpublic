@@ -23,25 +23,6 @@ type KubeConfigCluster struct {
 	Cluster KubeConfigClusterCluster `yaml:"cluster"`
 }
 
-type KubeConfigContext struct {
-	Name    string `yaml:"name"`
-	Context struct {
-		Cluster   string `yaml:"cluster"`
-		Namespace string `yaml:"namespace"`
-		User      string `yaml:"user"`
-	} `yaml:"context"`
-}
-
-type KubeConfigUser struct {
-	Name string `yaml:"name"`
-	User struct {
-		ClientCertificateData string `yaml:"client-certificate-data"`
-		ClientKeyData         string `yaml:"client-key-data"`
-		Username              string `yaml:"username"`
-		Password              string `yaml:"password"`
-	} `yaml:"user"`
-}
-
 type KubeConfig struct {
 	APIVersion string              `yaml:"apiVersion"`
 	Kind       string              `yaml:"kind"`
@@ -99,6 +80,24 @@ func LoadFromFile(file files.File, verbose bool) (config *KubeConfig, err error)
 	}
 
 	return config, nil
+}
+
+func (k *KubeConfig) GetUserNameByContextName(contextName string) (userName string, err error) {
+	if contextName == "" {
+		return "", tracederrors.TracedErrorEmptyString("contextName")
+	}
+
+	contextEntry, err := k.GetContextEntryByName(contextName)
+	if err != nil {
+		return "", err
+	}
+
+	userName, err = contextEntry.GetUserName()
+	if err != nil {
+		return "", err
+	}
+
+	return userName, nil
 }
 
 func (k *KubeConfig) MustGetServerNames() (serverNames []string) {
@@ -254,7 +253,12 @@ func (k *KubeConfig) GetClusterAndContextAndUserEntryByName(name string) (cluste
 		return nil, nil, nil, err
 	}
 
-	user, err = k.GetUserEntryByName(name)
+	userName, err := context.GetUserName()
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	user, err = k.GetUserEntryByName(userName)
 	if err != nil {
 		return nil, nil, nil, err
 	}
