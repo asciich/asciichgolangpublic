@@ -1,6 +1,7 @@
 package files
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/os/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pathsutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -311,6 +313,36 @@ func TestFile_Chmod(t *testing.T) {
 					unixfilepermissionsutils.MustGetPermissionsValue(tt.expectedPermissionString),
 					toTest.MustGetAccessPermissions(),
 				)
+			},
+		)
+	}
+}
+
+func TestFile_String(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localFile"},
+		{"localCommandExecutorFile"},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				const verbose bool = true
+
+				toTest := getFileToTest(tt.implementationName)
+				defer toTest.Delete(verbose)
+
+				path := toTest.MustGetPath()
+				stringOutput := toTest.String()
+				sprintf := fmt.Sprintf("'%s'", toTest)
+
+				require.True(t, pathsutils.IsAbsolutePath(path))
+				require.EqualValues(t, path, stringOutput)
+				require.EqualValues(t, "'" + path + "'", sprintf)
 			},
 		)
 	}

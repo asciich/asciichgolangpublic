@@ -89,6 +89,14 @@ func NewLocalFileByPath(localPath string) (l *LocalFile, err error) {
 	return l, nil
 }
 
+func (l *LocalFile) String() string {
+	if l.path == "" {
+		return "<LocalFile.path NOT SET>"
+	}
+
+	return l.path
+}
+
 // Delete a file if it exists.
 // If the file is already absent this function does nothing.
 func (l *LocalFile) Delete(verbose bool) (err error) {
