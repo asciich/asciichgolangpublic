@@ -8,6 +8,71 @@ import (
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
+func Test_GetUserEntryByUserName(t *testing.T) {
+	tests := []struct {
+		path     string
+		userName string
+	}{
+		{"./testdata/cluster-a.yaml", "kind-cluster-a"},
+		{"./testdata/cluster-b.yaml", "kind-cluster-b"},
+		{"./testdata/cluster-c.yaml", "clusteruser"},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				kubeConfig := MustLoadFromFilePath(tt.path, true)
+
+				entry, err := kubeConfig.GetUserEntryByName(tt.userName)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.userName, entry.Name)
+			},
+		)
+	}
+
+	t.Run("Unknown user name", func(t *testing.T) {
+		kubeConfig := MustLoadFromFilePath("./testdata/cluster-c.yaml", true)
+		entry, err := kubeConfig.GetUserEntryByName("this-user-does-not-exist")
+		require.Error(t, err)
+		require.Nil(t, entry)
+	})
+}
+
+func Test_GetUserNameByContextName(t *testing.T) {
+	tests := []struct {
+		path             string
+		contextName      string
+		expectedUserName string
+	}{
+		{"./testdata/cluster-a.yaml", "kind-cluster-a", "kind-cluster-a"},
+		{"./testdata/cluster-b.yaml", "kind-cluster-b", "kind-cluster-b"},
+		{"./testdata/cluster-c.yaml", "kind-cluster-c", "clusteruser"},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				kubeConfig := MustLoadFromFilePath(tt.path, true)
+
+				userName, err := kubeConfig.GetUserNameByContextName(tt.contextName)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedUserName, userName)
+			},
+		)
+	}
+
+	t.Run("Unknown context name", func(t *testing.T) {
+		kubeConfig := MustLoadFromFilePath("./testdata/cluster-c.yaml", true)
+		entry, err := kubeConfig.GetUserNameByContextName("this-context-does-not-exist")
+		require.Error(t, err)
+		require.EqualValues(t, entry, "")
+	})
+}
+
 func TestKubeConfig_LoadFromPath(t *testing.T) {
 
 	tests := []struct {
