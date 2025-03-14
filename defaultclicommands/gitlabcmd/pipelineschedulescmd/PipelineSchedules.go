@@ -1,4 +1,4 @@
-package pipelineschedules
+package pipelineschedulescmd
 
 import "github.com/spf13/cobra"
 

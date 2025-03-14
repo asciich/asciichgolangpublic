@@ -1,9 +1,9 @@
-package gitlab
+package gitlabcmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/gitlab/metrics"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/gitlab/pipelineschedules"
+	"github.com/asciich/asciichgolangpublic/defaultclicommands/gitlabcmd/gitlabmetricscmd"
+	"github.com/asciich/asciichgolangpublic/defaultclicommands/gitlabcmd/pipelineschedulescmd"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -13,8 +13,8 @@ func NewGitlabCommand() (cmd *cobra.Command) {
 		Short: "Gitlab related commands",
 	}
 
-	cmd.AddCommand(metrics.NewMetricsCommand())
-	cmd.AddCommand(pipelineschedules.NewPipelineSchedulesCmd())
+	cmd.AddCommand(gitlabmetricscmd.NewMetricsCommand())
+	cmd.AddCommand(pipelineschedulescmd.NewPipelineSchedulesCmd())
 
 	return cmd
 }

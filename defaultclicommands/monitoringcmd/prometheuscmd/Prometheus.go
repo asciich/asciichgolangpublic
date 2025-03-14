@@ -1,4 +1,4 @@
-package prometheus
+package prometheuscmd
 
 import "github.com/spf13/cobra"
 

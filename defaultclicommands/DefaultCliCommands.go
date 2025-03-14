@@ -2,10 +2,10 @@ package defaultclicommands
 
 import (
 	"github.com/spf13/cobra"
-	dns_cmd "github.com/asciich/asciichgolangpublic/defaultclicommands/dns"
-	errors_cmd "github.com/asciich/asciichgolangpublic/defaultclicommands/errors"
-	gitlab_cmd "github.com/asciich/asciichgolangpublic/defaultclicommands/gitlab"
-	monitoring_cmd "github.com/asciich/asciichgolangpublic/defaultclicommands/monitoring"
+	"github.com/asciich/asciichgolangpublic/defaultclicommands/dnscmd"
+	"github.com/asciich/asciichgolangpublic/defaultclicommands/errorscmd"
+	"github.com/asciich/asciichgolangpublic/defaultclicommands/gitlabcmd"
+	"github.com/asciich/asciichgolangpublic/defaultclicommands/monitoringcmd"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -20,22 +20,22 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 		rootCmd.PersistentFlags().Bool(verbose_flag_name, false, "Enable verbose output")
 	}
 
-	err = dns_cmd.AddDnsCommand(rootCmd)
+	err = dnscmd.AddDnsCommand(rootCmd)
 	if err != nil {
 		return err
 	}
 
-	err = errors_cmd.AddErrorsCommand(rootCmd)
+	err = errorscmd.AddErrorsCommand(rootCmd)
 	if err != nil {
 		return err
 	}
 
-	err = gitlab_cmd.AddGitlabCommand(rootCmd)
+	err = gitlabcmd.AddGitlabCommand(rootCmd)
 	if err != nil {
 		return err
 	}
 
-	err = monitoring_cmd.AddMonitoringGommand(rootCmd)
+	err = monitoringcmd.AddMonitoringGommand(rootCmd)
 	if err != nil {
 		return err
 	}
