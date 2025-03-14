@@ -1,8 +1,8 @@
-package errors
+package errorscmd
 
 import (
 	"github.com/spf13/cobra"
-	tracederrors_cmd "github.com/asciich/asciichgolangpublic/defaultclicommands/errors/tracederrors"
+	"github.com/asciich/asciichgolangpublic/defaultclicommands/errorscmd/tracederrorscmd"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -12,7 +12,7 @@ func NewErrorsCommand() (errorsCmd *cobra.Command) {
 		Short: "Error and Error handling related commands",
 	}
 
-	tracederrors_cmd.AddTracedErrorsCommand(errorsCmd)
+	tracederrorscmd.AddTracedErrorsCommand(errorsCmd)
 
 	return errorsCmd
 }

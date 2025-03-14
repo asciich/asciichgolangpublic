@@ -1,4 +1,4 @@
-package metrics
+package gitlabmetricscmd
 
 import (
 	"github.com/spf13/cobra"

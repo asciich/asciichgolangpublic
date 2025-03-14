@@ -1,4 +1,4 @@
-package tracederrors
+package tracederrorscmd
 
 import (
 	"github.com/spf13/cobra"

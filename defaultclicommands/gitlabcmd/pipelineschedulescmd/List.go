@@ -1,4 +1,4 @@
-package pipelineschedules
+package pipelineschedulescmd
 
 import (
 	"context"

@@ -1,4 +1,4 @@
-package dns
+package dnscmd
 
 import (
 	"fmt"
