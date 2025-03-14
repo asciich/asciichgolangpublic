@@ -36,6 +36,14 @@ func NewCommandExecutorFile() (c *CommandExecutorFile) {
 	return c
 }
 
+func (c *CommandExecutorFile) String() string {
+	if c.filePath == "" {
+		return "<LocalFile.path NOT SET>"
+	}
+
+	return c.filePath
+}
+
 func (c *CommandExecutorFile) AppendBytes(toWrite []byte, verbose bool) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
 }

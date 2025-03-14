@@ -57,6 +57,7 @@ type File interface {
 	MustWriteBytes(toWrite []byte, verbose bool)
 	ReadAsBytes() (content []byte, err error)
 	SecurelyDelete(verbose bool) (err error)
+	String() (path string)
 	Truncate(newSizeBytes int64, verbose bool) (err error)
 	WriteBytes(toWrite []byte, verbose bool) (err error)
 
