@@ -1,9 +1,11 @@
 package sshutils
 
 import (
+	"context"
 	"path/filepath"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/contextutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/files"
@@ -232,7 +234,7 @@ func (k *SSHPublicKey) SetFromString(keyMaterial string) (err error) {
 	return nil
 }
 
-func (k *SSHPublicKey) WriteToFile(outputFile files.File, verbose bool) (err error) {
+func (k *SSHPublicKey) WriteToFile(ctx context.Context, outputFile files.File) (err error) {
 	if outputFile == nil {
 		return tracederrors.TracedError("outputFile is nil")
 	}
@@ -243,7 +245,7 @@ func (k *SSHPublicKey) WriteToFile(outputFile files.File, verbose bool) (err err
 	}
 
 	sshKeyLine = stringsutils.EnsureEndsWithExactlyOneLineBreak(sshKeyLine)
-	err = outputFile.WriteString(sshKeyLine, verbose)
+	err = outputFile.WriteString(sshKeyLine, contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
@@ -331,8 +333,8 @@ func (s *SSHPublicKey) MustSetKeyUserName(keyUserName string) {
 	}
 }
 
-func (s *SSHPublicKey) MustWriteToFile(outputFile files.File, verbose bool) {
-	err := s.WriteToFile(outputFile, verbose)
+func (s *SSHPublicKey) MustWriteToFile(ctx context.Context, outputFile files.File) {
+	err := s.WriteToFile(ctx, outputFile)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -368,7 +370,7 @@ func (s *SSHPublicKey) SetKeyUserName(keyUserName string) (err error) {
 	return nil
 }
 
-func LoadPublicKeysFromFile(sshKeysFile files.File, verbose bool) (sshKeys []*SSHPublicKey, err error) {
+func LoadPublicKeysFromFile(ctx context.Context, sshKeysFile files.File) (sshKeys []*SSHPublicKey, err error) {
 	if sshKeysFile == nil {
 		return nil, tracederrors.TracedError("sshKeysFile is nil")
 	}
@@ -378,9 +380,7 @@ func LoadPublicKeysFromFile(sshKeysFile files.File, verbose bool) (sshKeys []*SS
 		return nil, err
 	}
 
-	if verbose {
-		logging.LogInfof("Load SSH public keys from file '%s' started.", filePath)
-	}
+	logging.LogInfoByCtxf(ctx, "Load SSH public keys from file '%s' started.", filePath)
 
 	lines, err := sshKeysFile.ReadAsLinesWithoutComments()
 	if err != nil {
@@ -403,15 +403,13 @@ func LoadPublicKeysFromFile(sshKeysFile files.File, verbose bool) (sshKeys []*SS
 		sshKeys = append(sshKeys, keyToAdd)
 	}
 
-	if verbose {
-		logging.LogInfof("Load SSH public keys from file '%s' finished.", filePath)
-	}
+	logging.LogInfoByCtxf(ctx, "Load SSH public keys from file '%s' finished.", filePath)
 
 	return sshKeys, nil
 }
 
-func MustLoadPublicKeysFromFile(sshKeysFile files.File, verbose bool) (sshKeys []*SSHPublicKey) {
-	sshKeys, err := LoadPublicKeysFromFile(sshKeysFile, verbose)
+func MustLoadPublicKeysFromFile(ctx context.Context, sshKeysFile files.File) (sshKeys []*SSHPublicKey) {
+	sshKeys, err := LoadPublicKeysFromFile(ctx, sshKeysFile)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -420,7 +418,7 @@ func MustLoadPublicKeysFromFile(sshKeysFile files.File, verbose bool) (sshKeys [
 }
 
 func MustLoadPublicKeyFromString(keyMaterial string) (key *SSHPublicKey) {
-	key, err := LoadPublicKeyFromFile(keyMaterial)
+	key, err := LoadPublicKeyFromString(keyMaterial)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -428,7 +426,7 @@ func MustLoadPublicKeyFromString(keyMaterial string) (key *SSHPublicKey) {
 	return key
 }
 
-func LoadPublicKeyFromFile(keyMaterial string) (key *SSHPublicKey, err error) {
+func LoadPublicKeyFromString(keyMaterial string) (key *SSHPublicKey, err error) {
 	if keyMaterial == "" {
 		return nil, tracederrors.TracedErrorEmptyString("keyMaterial")
 	}

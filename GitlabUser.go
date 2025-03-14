@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"github.com/asciich/asciichgolangpublic/contextutils"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/sshutils"
@@ -299,7 +300,7 @@ func (u *GitlabUser) AddSshKeysFromFile(sshKeysFile files.File, verbose bool) (e
 		return err
 	}
 
-	sshKeys, err := sshutils.LoadPublicKeysFromFile(sshKeysFile, verbose)
+	sshKeys, err := sshutils.LoadPublicKeysFromFile(contextutils.GetVerbosityContextByBool(verbose), sshKeysFile)
 	if err != nil {
 		return err
 	}
