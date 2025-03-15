@@ -15,6 +15,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
+// TODO remove this one since obsolete....
 type X509Certificate struct {
 	nativeX509Certificate *x509.Certificate
 }
