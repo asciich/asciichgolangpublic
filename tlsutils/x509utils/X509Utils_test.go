@@ -3,8 +3,10 @@ package x509utils
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/x509"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/mustutils"
@@ -165,4 +167,24 @@ func TestX509Utils_EndcodeAndDecodePrivateKeyAsPem(t *testing.T) {
 			},
 		)
 	}
+}
+
+func Test_GetValidityDuration(t *testing.T) {
+	t.Run("nil", func(t *testing.T) {
+		vd, err := GetValidityDuration(nil)
+		require.Error(t, err)
+		require.Nil(t, vd)
+	})
+
+	t.Run("1day", func(t *testing.T) {
+		start := time.Now()
+		cert := &x509.Certificate{
+			NotBefore: start,
+			NotAfter:  start.Add(time.Hour * 24),
+		}
+		vd, err := GetValidityDuration(cert)
+		require.NoError(t, err)
+		require.EqualValues(t, time.Hour*24, *vd)
+	})
+
 }

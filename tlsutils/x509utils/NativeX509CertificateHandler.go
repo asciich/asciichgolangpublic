@@ -173,11 +173,23 @@ func (n *NativeX509CertificateHandler) CreateEndEndityCertificate(options *X509C
 		return nil, nil, err
 	}
 
+	serialNumber, err := options.GetSerialNumberOrDefaultIfUnsetAsStringBigInt()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	validityDuration, err := options.GetValidityDuration()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	notBefore := time.Now()
+
 	ca := &x509.Certificate{
-		SerialNumber:          big.NewInt(1),
+		SerialNumber:          serialNumber,
 		Subject:               *subject,
-		NotBefore:             time.Now(),
-		NotAfter:              time.Now().AddDate(1, 0, 0),
+		NotBefore:             notBefore,
+		NotAfter:              notBefore.Add(*validityDuration),
 		IsCA:                  false,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
@@ -202,11 +214,18 @@ func (n *NativeX509CertificateHandler) CreateIntermediateCertificate(options *X5
 		return nil, nil, err
 	}
 
+	validityDuration, err := options.GetValidityDuration()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	notBefore := time.Now()
+
 	ca := &x509.Certificate{
 		SerialNumber:          big.NewInt(1),
 		Subject:               *subject,
-		NotBefore:             time.Now(),
-		NotAfter:              time.Now().AddDate(1, 0, 0),
+		NotBefore:             notBefore,
+		NotAfter:              notBefore.Add(*validityDuration),
 		IsCA:                  true,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
@@ -236,11 +255,18 @@ func (n *NativeX509CertificateHandler) CreateRootCaCertificate(options *X509Crea
 		return nil, nil, err
 	}
 
+	validityDuration, err := options.GetValidityDuration()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	notBefore := time.Now()
+
 	ca := &x509.Certificate{
 		SerialNumber:          serialNumber,
 		Subject:               *subject,
-		NotBefore:             time.Now(),
-		NotAfter:              time.Now().AddDate(1, 0, 0),
+		NotBefore:             notBefore,
+		NotAfter:              notBefore.Add(*validityDuration),
 		IsCA:                  true,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
@@ -270,11 +296,18 @@ func (n *NativeX509CertificateHandler) CreateSelfSignedCertificate(options *X509
 		return nil, nil, err
 	}
 
+	validityDuration, err := options.GetValidityDuration()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	notBefore := time.Now()
+
 	selfSigned := &x509.Certificate{
 		SerialNumber:          serialNumber,
 		Subject:               *subject,
-		NotBefore:             time.Now(),
-		NotAfter:              time.Now().AddDate(1, 0, 0),
+		NotBefore:             notBefore,
+		NotAfter:              notBefore.Add(*validityDuration),
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
 		BasicConstraintsValid: true,
