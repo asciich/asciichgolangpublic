@@ -24,8 +24,23 @@ func NewSSHPublicKey() (sshPublicKey *SSHPublicKey) {
 }
 
 func (k *SSHPublicKey) Equals(other *SSHPublicKey) (isEqual bool) {
-	logging.LogFatalf("SSHPublicKey.Equals NOT implemented")
-	return false
+	if other == nil {
+		return false
+	}
+
+	if k.keyMaterial != other.keyMaterial {
+		return false
+	}
+
+	if k.keyUserName != other.keyUserName {
+		return false
+	}
+
+	if k.keyUserHost != other.keyUserHost {
+		return false
+	}
+
+	return true
 }
 
 func (k *SSHPublicKey) GetAsPublicKeyLine() (publicKeyLine string, err error) {
@@ -375,12 +390,7 @@ func LoadPublicKeysFromFile(ctx context.Context, sshKeysFile files.File) (sshKey
 		return nil, tracederrors.TracedError("sshKeysFile is nil")
 	}
 
-	filePath, err := sshKeysFile.GetLocalPath()
-	if err != nil {
-		return nil, err
-	}
-
-	logging.LogInfoByCtxf(ctx, "Load SSH public keys from file '%s' started.", filePath)
+	logging.LogInfoByCtxf(ctx, "Load SSH public keys from file '%s' started.", sshKeysFile)
 
 	lines, err := sshKeysFile.ReadAsLinesWithoutComments()
 	if err != nil {
@@ -403,7 +413,7 @@ func LoadPublicKeysFromFile(ctx context.Context, sshKeysFile files.File) (sshKey
 		sshKeys = append(sshKeys, keyToAdd)
 	}
 
-	logging.LogInfoByCtxf(ctx, "Load SSH public keys from file '%s' finished.", filePath)
+	logging.LogInfoByCtxf(ctx, "Load SSH public keys from file '%s' finished.", sshKeysFile)
 
 	return sshKeys, nil
 }

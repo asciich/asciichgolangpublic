@@ -86,3 +86,76 @@ func Test_SetFromString(t *testing.T) {
 		require.EqualValues(t, "host1234", key.MustGetKeyUserHost())
 	})
 }
+
+func Test_Equals(t *testing.T) {
+	t.Run("nil", func(t *testing.T) {
+		key1 := NewSSHPublicKey()
+		require.False(t, key1.Equals(nil))
+	})
+	t.Run("empty equals", func(t *testing.T) {
+		key1 := NewSSHPublicKey()
+		key2 := NewSSHPublicKey()
+		require.True(t, key1.Equals(key2))
+	})
+
+	t.Run("keyMaterial differ", func(t *testing.T) {
+		key1 := NewSSHPublicKey()
+		key1.keyMaterial = "AAAabc"
+		key2 := NewSSHPublicKey()
+		require.False(t, key1.Equals(key2))
+	})
+
+	t.Run("keyUserName differ", func(t *testing.T) {
+		key1 := NewSSHPublicKey()
+		key1.keyMaterial = "username"
+		key2 := NewSSHPublicKey()
+		require.False(t, key1.Equals(key2))
+	})
+
+	t.Run("keyUserHost differ", func(t *testing.T) {
+		key1 := NewSSHPublicKey()
+		key1.keyUserName = "host"
+		key2 := NewSSHPublicKey()
+		require.False(t, key1.Equals(key2))
+	})
+
+	t.Run("Only key material set and equal", func(t *testing.T) {
+		key1 := NewSSHPublicKey()
+		key1.keyMaterial = "AAAabc"
+		key2 := NewSSHPublicKey()
+		key2.keyMaterial = "AAAabc"
+		require.True(t, key1.Equals(key2))
+	})
+
+	t.Run("Key materual and user set equal", func(t *testing.T) {
+		key1 := NewSSHPublicKey()
+		key1.keyMaterial = "AAAabc"
+		key1.keyUserHost = "user"
+		key2 := NewSSHPublicKey()
+		key2.keyMaterial = "AAAabc"
+		key2.keyUserHost = "user"
+		require.True(t, key1.Equals(key2))
+	})
+
+	t.Run("Key materual and host set equal", func(t *testing.T) {
+		key1 := NewSSHPublicKey()
+		key1.keyMaterial = "AAAabc"
+		key1.keyUserHost = "host"
+		key2 := NewSSHPublicKey()
+		key2.keyMaterial = "AAAabc"
+		key2.keyUserHost = "host"
+		require.True(t, key1.Equals(key2))
+	})
+
+	t.Run("Key materual, user and host set equal", func(t *testing.T) {
+		key1 := NewSSHPublicKey()
+		key1.keyMaterial = "AAAabc"
+		key1.keyUserHost = "user"
+		key1.keyUserHost = "host"
+		key2 := NewSSHPublicKey()
+		key2.keyMaterial = "AAAabc"
+		key2.keyUserHost = "user"
+		key2.keyUserHost = "host"
+		require.True(t, key1.Equals(key2))
+	})
+}
