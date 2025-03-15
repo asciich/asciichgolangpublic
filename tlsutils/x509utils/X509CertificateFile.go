@@ -1,5 +1,8 @@
 package x509utils
 
+// TODO remove this obsolete implementation.
+
+/*
 import (
 	"fmt"
 	"strings"
@@ -269,3 +272,4 @@ func (x *X509CertificateFile) MustIsX509v3() (isX509v3 bool) {
 
 	return isX509v3
 }
+*/

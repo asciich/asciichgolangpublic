@@ -7,44 +7,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
-func TestX509CertificatesCreateRootCaIntoTemporaryDirectory(t *testing.T) {
-	tests := []struct {
-		testcase string
-	}{
-		{"testcase"},
-	}
-
-	for _, tt := range tests {
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				require := require.New(t)
-
-				const verbose bool = true
-
-				certificates := X509Certificates()
-				tempDirectory := certificates.MustCreateRootCaIntoDirectory(&X509CreateCertificateOptions{
-					UseTemporaryDirectory: true,
-					Verbose:               verbose,
-					CommonName:            "test-ca.asciich.ch",
-					CountryName:           "CH",
-					Locality:              "Zurich",
-				})
-
-				require.True(tempDirectory.MustExists(verbose))
-				crtFile := tempDirectory.MustGetFileInDirectory("rootCA.crt")
-				crtCertFile := MustGetX509CertificateFileFromFile(crtFile)
-				require.True(crtFile.MustExists(verbose))
-				require.True(crtCertFile.MustIsX509Certificate(verbose))
-				require.True(crtCertFile.MustIsX509RootCertificate(verbose))
-
-				keyFile := tempDirectory.MustGetFileInDirectory("rootCA.key")
-				require.True(keyFile.MustExists(verbose))
-			},
-		)
-	}
-}
-
 func TestX509CertificatesCreateIntermediateCertificateIntoTemporaryDirectory(t *testing.T) {
 	tests := []struct {
 		testcase string

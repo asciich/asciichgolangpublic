@@ -659,6 +659,7 @@ func (c *X509CertificatesService) GetNextCaSerialNumberAsStringFromGopass(verbos
 	*/
 }
 
+/*
 func (c *X509CertificatesService) IsCertificateFileSignedByCertificateFile(thisCertificateFile *X509CertificateFile, isSignedByThisCertificateFile files.File, verbose bool) (isSignedBy bool, err error) {
 	if thisCertificateFile == nil {
 		return false, tracederrors.TracedError("thisCertificateFile is nil")
@@ -680,6 +681,7 @@ func (c *X509CertificatesService) IsCertificateFileSignedByCertificateFile(thisC
 
 	return isSignedBy, err
 }
+*/
 
 func (c *X509CertificatesService) MustCreateIntermediateCertificateIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey files.Directory) {
 	directoryContianingCreatedCertAndKey, err := c.CreateIntermediateCertificateIntoDirectory(createOptions)
@@ -850,14 +852,4 @@ func (x *X509CertificatesService) MustCreateSigningRequestFile(signOptions *X509
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
-}
-
-
-func (x *X509CertificatesService) MustIsCertificateFileSignedByCertificateFile(thisCertificateFile *X509CertificateFile, isSignedByThisCertificateFile files.File, verbose bool) (isSignedBy bool) {
-	isSignedBy, err := x.IsCertificateFileSignedByCertificateFile(thisCertificateFile, isSignedByThisCertificateFile, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isSignedBy
 }
