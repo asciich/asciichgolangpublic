@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package datetime
 
 import (
 	"time"
@@ -155,7 +155,7 @@ func (t *TicToc) Toc(verbose bool) (elapsedTime *time.Duration, err error) {
 	title := t.GetTitleOrDefaultIfUnset()
 
 	if verbose {
-		elapsedDurationString, err := DurationFormatter().ToString(elapsedDuration)
+		elapsedDurationString, err := FormatDurationAsString(elapsedDuration)
 		if err != nil {
 			return nil, err
 		}

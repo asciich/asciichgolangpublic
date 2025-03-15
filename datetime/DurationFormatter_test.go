@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package datetime
 
 import (
 	"testing"
@@ -26,7 +26,7 @@ func TestDurationFormatterToString(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				durationString := DurationFormatter().MustToString(&tt.duration)
+				durationString := MustFormatDurationAsString(&tt.duration)
 				require.EqualValues(tt.expectedDuration, durationString)
 			},
 		)
