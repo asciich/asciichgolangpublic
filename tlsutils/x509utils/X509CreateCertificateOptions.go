@@ -4,8 +4,10 @@ import (
 	"crypto/x509/pkix"
 	"math/big"
 	"strings"
+	"time"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/bigints"
+	"github.com/asciich/asciichgolangpublic/datetime"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -33,6 +35,19 @@ type X509CreateCertificateOptions struct {
 
 func NewX509CreateCertificateOptions() (x *X509CreateCertificateOptions) {
 	return new(X509CreateCertificateOptions)
+}
+
+func (o *X509CreateCertificateOptions) GetValidityDuration() (validityDuration *time.Duration, err error) {
+	return datetime.DurationParser().ToSecondsAsTimeDuration("45days")
+}
+
+func (o *X509CreateCertificateOptions) GetValidityDurationAsString() (validityDuration string, err error) {
+	validity, err := o.GetValidityDuration()
+	if err != nil {
+		return "", err
+	}
+
+	return datetime.FormatDurationAsString(validity)
 }
 
 func (o *X509CreateCertificateOptions) GetSubjectAsPkixName() (subject *pkix.Name, err error) {

@@ -2,7 +2,6 @@ package datetime
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/logging"
@@ -23,10 +22,34 @@ func FormatDurationAsString(duration *time.Duration) (durationString string, err
 		return "", tracederrors.TracedError("duration is nil")
 	}
 
-	durationString = fmt.Sprintf("%v", *duration)
+	rest := int64(*duration)
+	if rest == 0 {
+		return "0s", nil
+	}
 
-	if durationString != "0s" {
-		durationString = strings.TrimSuffix(durationString, "0s")
+	type timeUnits struct {
+		Unit           string
+		SecondsPerUnit int64
+	}
+
+	units := []timeUnits{
+		{"year", int64(time.Second * 60 * 60 * 24 * 364)},
+		{"months", int64(time.Second * 60 * 60 * 24 * 30)},
+		{"d", int64(time.Second * 60 * 60 * 24)},
+		{"h", int64(time.Second * 60 * 60)},
+		{"m", int64(time.Second * 60)},
+	}
+
+	for _, u := range units {
+		if rest >= u.SecondsPerUnit {
+			v := rest / u.SecondsPerUnit
+			rest = rest % u.SecondsPerUnit
+			durationString += fmt.Sprintf("%d%s", v, u.Unit)
+		}
+	}
+
+	if rest != 0 {
+		durationString += fmt.Sprintf("%v", time.Duration(rest))
 	}
 
 	return durationString, nil

@@ -8,6 +8,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
@@ -421,4 +422,15 @@ func TlsCertToX509Cert(tlsCert *tls.Certificate) (cert *x509.Certificate, err er
 	}
 
 	return x509Cert, nil
+}
+
+// Returns the duration = notAfter - notBefore.
+func GetValidityDuration(cert *x509.Certificate) (validityDuration *time.Duration, err error) {
+	if cert == nil {
+		return nil, tracederrors.TracedErrorNil("cert")
+	}
+
+	diff := cert.NotAfter.Sub(cert.NotBefore)
+
+	return &diff, nil
 }
