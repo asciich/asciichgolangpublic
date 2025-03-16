@@ -8,6 +8,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io"
+	"slices"
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
@@ -313,6 +314,19 @@ func GetCommonName(cert *x509.Certificate) (commonName string, err error) {
 	return cert.Subject.CommonName, nil
 }
 
+func GetSans(cert *x509.Certificate) (sans []string, err error) {
+	if cert == nil {
+		return nil, tracederrors.TracedErrorNil("cert")
+	}
+
+	sans = cert.DNSNames
+	if sans == nil {
+		sans = []string{}
+	}
+
+	return sans, nil
+}
+
 func IsSubjectCountryName(cert *x509.Certificate, expectedCountryName string) (isMatchingExpectedCountryName bool, err error) {
 	if cert == nil {
 		return false, tracederrors.TracedErrorNil("cert")
@@ -381,6 +395,19 @@ func IsCommonName(cert *x509.Certificate, expectedCommonName string) (isMatching
 	}
 
 	return commonName == expectedCommonName, nil
+}
+
+func IsAdditionalSANs(cert *x509.Certificate, expectedSANs []string) (isMatchingexpectedSANs bool, err error) {
+	if cert == nil {
+		return false, tracederrors.TracedErrorNil("cert")
+	}
+
+	sans, err := GetSans(cert)
+	if err != nil {
+		return false, err
+	}
+
+	return slices.Equal(sans, expectedSANs), nil
 }
 
 func IsSubjectOrganizationName(cert *x509.Certificate, expectedOrganizationName string) (isMatchingExpectedOrganizationName bool, err error) {

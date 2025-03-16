@@ -45,6 +45,11 @@ func getCertTemplate(options *X509CreateCertificateOptions) (certTemplate *x509.
 		return nil, err
 	}
 
+	sans, err := options.GetAdditionalSansOrEmptySliceIfUnset()
+	if err != nil {
+		return nil, err
+	}
+
 	notBefore := time.Now()
 
 	certTemplate = &x509.Certificate{
@@ -54,6 +59,7 @@ func getCertTemplate(options *X509CreateCertificateOptions) (certTemplate *x509.
 		NotAfter:              notBefore.Add(*validityDuration),
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
+		DNSNames:              sans,
 		BasicConstraintsValid: true,
 	}
 
@@ -266,7 +272,6 @@ func (n *NativeX509CertificateHandler) CreateSelfSignedCertificate(options *X509
 	if err != nil {
 		return nil, nil, err
 	}
-
 
 	selfSignedCert, selfSignedCertPrivateKey, err = n.generateAndAddKey(certTemplate)
 	if err != nil {
