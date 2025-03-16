@@ -13,7 +13,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
-func TestX509Utils_GetPublicKeyFromPrivateKey(t *testing.T) {
+func Test_GetPublicKeyFromPrivateKey(t *testing.T) {
 	generatedKey := mustutils.Must(rsa.GenerateKey(rand.Reader, 4096))
 	generatedKey2 := mustutils.Must(rsa.GenerateKey(rand.Reader, 4096))
 
@@ -27,7 +27,7 @@ func TestX509Utils_GetPublicKeyFromPrivateKey(t *testing.T) {
 	require.False(t, generatedKey2.PublicKey.Equal(publicKey))
 }
 
-func TestX509Utils_IsCertificateMatchingPrivateKey(t *testing.T) {
+func Test_IsCertificateMatchingPrivateKey(t *testing.T) {
 	tests := []struct {
 		implementationName string
 	}{
@@ -61,7 +61,7 @@ func TestX509Utils_IsCertificateMatchingPrivateKey(t *testing.T) {
 	}
 }
 
-func TestX509Utils_EndcodeAndDecodeAsDER(t *testing.T) {
+func Test_EndcodeAndDecodeAsDER(t *testing.T) {
 	tests := []struct {
 		implementationName string
 	}{
@@ -95,7 +95,7 @@ func TestX509Utils_EndcodeAndDecodeAsDER(t *testing.T) {
 	}
 }
 
-func TestX509Utils_EndcodeAndDecodeAsPEM(t *testing.T) {
+func Test_EndcodeAndDecodeAsPEM(t *testing.T) {
 	tests := []struct {
 		implementationName string
 	}{
@@ -132,7 +132,7 @@ func TestX509Utils_EndcodeAndDecodeAsPEM(t *testing.T) {
 	}
 }
 
-func TestX509Utils_EndcodeAndDecodePrivateKeyAsPem(t *testing.T) {
+func Test_EndcodeAndDecodePrivateKeyAsPem(t *testing.T) {
 	tests := []struct {
 		implementationName string
 	}{

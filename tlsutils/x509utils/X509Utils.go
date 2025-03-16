@@ -305,6 +305,14 @@ func GetSubjectOrganizationName(cert *x509.Certificate) (organizationName string
 	)
 }
 
+func GetCommonName(cert *x509.Certificate) (commonName string, err error) {
+	if cert == nil {
+		return "", tracederrors.TracedErrorNil("cert")
+	}
+
+	return cert.Subject.CommonName, nil
+}
+
 func IsSubjectCountryName(cert *x509.Certificate, expectedCountryName string) (isMatchingExpectedCountryName bool, err error) {
 	if cert == nil {
 		return false, tracederrors.TracedErrorNil("cert")
@@ -360,6 +368,19 @@ func IsSerialNumber(cert *x509.Certificate, expectedSerialNumber string) (isSeri
 	}
 
 	return serialNumber == expectedSerialNumber, nil
+}
+
+func IsCommonName(cert *x509.Certificate, expectedCommonName string) (isMatchingExpectedCommonName bool, err error) {
+	if cert == nil {
+		return false, tracederrors.TracedErrorNil("cert")
+	}
+
+	commonName, err := GetCommonName(cert)
+	if err != nil {
+		return false, err
+	}
+
+	return commonName == expectedCommonName, nil
 }
 
 func IsSubjectOrganizationName(cert *x509.Certificate, expectedOrganizationName string) (isMatchingExpectedOrganizationName bool, err error) {

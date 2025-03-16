@@ -16,12 +16,11 @@ type X509CreateCertificateOptions struct {
 	UseTemporaryDirectory bool
 
 	// Certificate Attributes
-	CommonName     string // the CN field
+	CommonName     string // the CN field. The Common Name (CN) represents the server name protected by the SSL certificate.
 	CountryName    string // the C field
 	Organization   string
-	Locality       string // the L field
-	AdditionalSans []string
-
+	Locality       string   // the L field
+	AdditionalSans []string // Subject Alternative Name (SAN) allows a single certificate to secure multiple domain names, subdomains, or IP addresses.
 	// Serial number of the certificate.
 	// To ensure big serial numbers are handled correctly a string is used instead of an int type.
 	SerialNumber string
@@ -67,6 +66,7 @@ func (o *X509CreateCertificateOptions) GetSubjectAsPkixName() (subject *pkix.Nam
 	}
 
 	subject = &pkix.Name{
+		CommonName:   o.CommonName,
 		Organization: []string{organization},
 		Country:      []string{countryName},
 		Province:     []string{""},
