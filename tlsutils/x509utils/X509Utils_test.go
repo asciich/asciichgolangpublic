@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/contextutils"
 	"github.com/asciich/asciichgolangpublic/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -59,6 +60,63 @@ func Test_IsCertificateMatchingPrivateKey(t *testing.T) {
 			},
 		)
 	}
+}
+
+func Test_IsCertificateSignedBy(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"NativeX509CertificateHandler"},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				handler := getX509CertificateHandlerToTest(tt.implementationName)
+				rootCa, rootCaKey := mustutils.Must2(handler.CreateRootCaCertificate(
+					&X509CreateCertificateOptions{
+						CountryName:  "CH",
+						Locality:     "Zurich",
+						Organization: "RootOrg",
+
+						Verbose: true,
+					},
+				))
+
+				intermediateCa, _ := mustutils.Must2(handler.CreateSignedIntermediateCertificate(
+					&X509CreateCertificateOptions{
+						CountryName:  "CH",
+						Locality:     "Zurich",
+						Organization: "IntermediateOrg",
+
+						Verbose: true,
+					},
+					rootCa,
+					rootCaKey,
+					true,
+				))
+
+				selfSigned, _ := mustutils.Must2(handler.CreateSelfSignedCertificate(
+					&X509CreateCertificateOptions{
+						CountryName:  "CH",
+						Locality:     "Zurich",
+						Organization: "SelfSignedOrg",
+
+						Verbose: true,
+					},
+				))
+
+				ctx := contextutils.ContextVerbose()
+
+				require.True(t, mustutils.Must(IsCertSignedBy(ctx, intermediateCa, rootCa)))
+				require.False(t, mustutils.Must(IsCertSignedBy(ctx, intermediateCa, selfSigned)))
+				require.False(t, mustutils.Must(IsCertSignedBy(ctx, rootCa, intermediateCa)))
+			},
+		)
+	}
+
 }
 
 func Test_EndcodeAndDecodeAsDER(t *testing.T) {

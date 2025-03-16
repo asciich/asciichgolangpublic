@@ -2,10 +2,12 @@ package x509utils
 
 import (
 	"bytes"
+	"context"
 	"crypto"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"io"
 	"slices"
@@ -481,4 +483,34 @@ func GetValidityDuration(cert *x509.Certificate) (validityDuration *time.Duratio
 	diff := cert.NotAfter.Sub(cert.NotBefore)
 
 	return &diff, nil
+}
+
+func IsCertSignedBy(ctx context.Context, cert *x509.Certificate, issuerCert *x509.Certificate) (isSigned bool, err error) {
+	if cert == nil {
+		return false, tracederrors.TracedErrorNil("cert")
+	}
+
+	if issuerCert == nil {
+		return false, tracederrors.TracedErrorNil("issuerCert")
+	}
+
+	roots := x509.NewCertPool()
+	roots.AddCert(issuerCert)
+
+	_, err = cert.Verify(
+		x509.VerifyOptions{
+			Roots: roots,
+		},
+	)
+	if err != nil {
+		if errors.As(err, &x509.UnknownAuthorityError{}) {
+			logging.LogInfoByCtxf(ctx, "Certificate '%s' is not signed by '%s'.", cert.Subject, issuerCert.Subject)
+			return false, nil
+		}
+
+		return false, tracederrors.TracedErrorf("Cert '%s' signed by '%s' failed: %w", cert.Subject, issuerCert.Subject, err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Certificate '%s' is signed by '%s'.", cert.Subject, issuerCert.Subject)
+	return true, nil
 }
