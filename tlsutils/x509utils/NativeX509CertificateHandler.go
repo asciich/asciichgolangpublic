@@ -6,7 +6,6 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"math/big"
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/logging"
@@ -22,6 +21,43 @@ func NewNativeX509CertificateHandler() (handler *NativeX509CertificateHandler) {
 
 func GetNativeX509CertificateHandler() (Handler X509CertificateHandler) {
 	return NewNativeX509CertificateHandler()
+}
+
+// To generate certificates the cert library provided by golang uses a cert struct as a template for the cert to create.
+// This function will generate this template by the given options.
+func getCertTemplate(options *X509CreateCertificateOptions) (certTemplate *x509.Certificate, err error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	subject, err := options.GetSubjectAsPkixName()
+	if err != nil {
+		return nil, err
+	}
+
+	serialNumber, err := options.GetSerialNumberOrDefaultIfUnsetAsStringBigInt()
+	if err != nil {
+		return nil, err
+	}
+
+	validityDuration, err := options.GetValidityDuration()
+	if err != nil {
+		return nil, err
+	}
+
+	notBefore := time.Now()
+
+	certTemplate = &x509.Certificate{
+		SerialNumber:          serialNumber,
+		Subject:               *subject,
+		NotBefore:             notBefore,
+		NotAfter:              notBefore.Add(*validityDuration),
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
+		BasicConstraintsValid: true,
+	}
+
+	return certTemplate, nil
 }
 
 func (n *NativeX509CertificateHandler) SignCertificate(certToSign *x509.Certificate, certWhichSigns *x509.Certificate, certToSignKey crypto.PublicKey, certWhichSignsPrivateKey crypto.PrivateKey, verbose bool) (signedCert *x509.Certificate, err error) {
@@ -168,35 +204,12 @@ func (n *NativeX509CertificateHandler) CreateEndEndityCertificate(options *X509C
 		return nil, nil, tracederrors.TracedErrorNil("options")
 	}
 
-	subject, err := options.GetSubjectAsPkixName()
+	certTemplate, err := getCertTemplate(options)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	serialNumber, err := options.GetSerialNumberOrDefaultIfUnsetAsStringBigInt()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	validityDuration, err := options.GetValidityDuration()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	notBefore := time.Now()
-
-	ca := &x509.Certificate{
-		SerialNumber:          serialNumber,
-		Subject:               *subject,
-		NotBefore:             notBefore,
-		NotAfter:              notBefore.Add(*validityDuration),
-		IsCA:                  false,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
-		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
-		BasicConstraintsValid: true,
-	}
-
-	cert, privateKey, err = n.generateAndAddKey(ca)
+	cert, privateKey, err = n.generateAndAddKey(certTemplate)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -209,30 +222,14 @@ func (n *NativeX509CertificateHandler) CreateIntermediateCertificate(options *X5
 		return nil, nil, tracederrors.TracedErrorNil("options")
 	}
 
-	subject, err := options.GetSubjectAsPkixName()
+	certTemplate, err := getCertTemplate(options)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	validityDuration, err := options.GetValidityDuration()
-	if err != nil {
-		return nil, nil, err
-	}
+	certTemplate.IsCA = true
 
-	notBefore := time.Now()
-
-	ca := &x509.Certificate{
-		SerialNumber:          big.NewInt(1),
-		Subject:               *subject,
-		NotBefore:             notBefore,
-		NotAfter:              notBefore.Add(*validityDuration),
-		IsCA:                  true,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
-		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
-		BasicConstraintsValid: true,
-	}
-
-	cert, privateKey, err = n.generateAndAddKey(ca)
+	cert, privateKey, err = n.generateAndAddKey(certTemplate)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -245,35 +242,14 @@ func (n *NativeX509CertificateHandler) CreateRootCaCertificate(options *X509Crea
 		return nil, nil, tracederrors.TracedErrorNil("options")
 	}
 
-	subject, err := options.GetSubjectAsPkixName()
+	certTemplate, err := getCertTemplate(options)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	serialNumber, err := options.GetSerialNumberOrDefaultIfUnsetAsStringBigInt()
-	if err != nil {
-		return nil, nil, err
-	}
+	certTemplate.IsCA = true
 
-	validityDuration, err := options.GetValidityDuration()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	notBefore := time.Now()
-
-	ca := &x509.Certificate{
-		SerialNumber:          serialNumber,
-		Subject:               *subject,
-		NotBefore:             notBefore,
-		NotAfter:              notBefore.Add(*validityDuration),
-		IsCA:                  true,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
-		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
-		BasicConstraintsValid: true,
-	}
-
-	cert, privateKey, err = n.generateAndAddKey(ca)
+	cert, privateKey, err = n.generateAndAddKey(certTemplate)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -286,34 +262,13 @@ func (n *NativeX509CertificateHandler) CreateSelfSignedCertificate(options *X509
 		return nil, nil, tracederrors.TracedErrorNil("options")
 	}
 
-	subject, err := options.GetSubjectAsPkixName()
+	certTemplate, err := getCertTemplate(options)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	serialNumber, err := options.GetSerialNumberOrDefaultIfUnsetAsStringBigInt()
-	if err != nil {
-		return nil, nil, err
-	}
 
-	validityDuration, err := options.GetValidityDuration()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	notBefore := time.Now()
-
-	selfSigned := &x509.Certificate{
-		SerialNumber:          serialNumber,
-		Subject:               *subject,
-		NotBefore:             notBefore,
-		NotAfter:              notBefore.Add(*validityDuration),
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
-		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
-		BasicConstraintsValid: true,
-	}
-
-	selfSignedCert, selfSignedCertPrivateKey, err = n.generateAndAddKey(selfSigned)
+	selfSignedCert, selfSignedCertPrivateKey, err = n.generateAndAddKey(certTemplate)
 	if err != nil {
 		return nil, nil, err
 	}
