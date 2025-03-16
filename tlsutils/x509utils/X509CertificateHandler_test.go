@@ -162,6 +162,7 @@ func TestX509Handler_CreateEndEndityCertificate(t *testing.T) {
 
 				endEndityCertificate, endEndityKey := mustutils.Must2(handler.CreateSignedEndEndityCertificate(
 					&X509CreateCertificateOptions{
+						CommonName:   "mytestcn.example.net",
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "myOrg endEndity",
@@ -198,6 +199,7 @@ func TestX509Handler_CreateEndEndityCertificate(t *testing.T) {
 				require.True(t, mustutils.Must(IsSubjectCountryName(endEndityCertificate, "CH")))
 				require.True(t, mustutils.Must(IsSubjectLocalityName(endEndityCertificate, "Zurich")))
 				require.True(t, mustutils.Must(IsSubjectOrganizationName(endEndityCertificate, "myOrg endEndity")))
+				require.True(t, mustutils.Must(IsCommonName(endEndityCertificate, "mytestcn.example.net")))
 				require.EqualValues(t, time.Hour*24*45, *mustutils.Must(GetValidityDuration(endEndityCertificate)))
 			},
 		)
