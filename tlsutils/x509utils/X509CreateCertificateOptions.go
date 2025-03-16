@@ -206,6 +206,14 @@ func (o *X509CreateCertificateOptions) IsCertificateOutputFilePathSet() (isSet b
 	return len(o.CertificateOutputFilePath) > 0
 }
 
+func (x *X509CreateCertificateOptions) GetAdditionalSansOrEmptySliceIfUnset() (additionalSans []string, err error) {
+	if x.AdditionalSans == nil {
+		return []string{}, nil
+	}
+
+	return x.GetAdditionalSans()
+}
+
 func (x *X509CreateCertificateOptions) GetAdditionalSans() (additionalSans []string, err error) {
 	if x.AdditionalSans == nil {
 		return nil, tracederrors.TracedErrorf("AdditionalSans not set")
