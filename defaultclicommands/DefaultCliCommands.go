@@ -5,6 +5,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/defaultclicommands/dnscmd"
 	"github.com/asciich/asciichgolangpublic/defaultclicommands/errorscmd"
 	"github.com/asciich/asciichgolangpublic/defaultclicommands/gitlabcmd"
+	"github.com/asciich/asciichgolangpublic/defaultclicommands/loggingcmd"
 	"github.com/asciich/asciichgolangpublic/defaultclicommands/monitoringcmd"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -20,25 +21,13 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 		rootCmd.PersistentFlags().Bool(verbose_flag_name, false, "Enable verbose output")
 	}
 
-	err = dnscmd.AddDnsCommand(rootCmd)
-	if err != nil {
-		return err
-	}
-
-	err = errorscmd.AddErrorsCommand(rootCmd)
-	if err != nil {
-		return err
-	}
-
-	err = gitlabcmd.AddGitlabCommand(rootCmd)
-	if err != nil {
-		return err
-	}
-
-	err = monitoringcmd.AddMonitoringGommand(rootCmd)
-	if err != nil {
-		return err
-	}
+	rootCmd.AddCommand(
+		dnscmd.NewDnsCommand(),
+		errorscmd.NewErrorsCommand(),
+		gitlabcmd.NewGitlabCommand(),
+		loggingcmd.NewLoggingCmd(),
+		monitoringcmd.NewMonitoringCommand(),
+	)
 
 	return nil
 }
