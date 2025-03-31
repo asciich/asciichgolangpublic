@@ -16,6 +16,8 @@ func WithVerbosityContextByBool(ctx context.Context, verbose bool) (ctxWithVerbo
 	return context.WithValue(ctx, "verbose", verbose)
 }
 
+
+
 func GetVerbosityContextByCobraCmd(cmd *cobra.Command) (ctx context.Context) {
 	if cmd == nil {
 		return ContextSilent()

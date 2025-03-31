@@ -8,6 +8,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/changesummary"
 	"github.com/asciich/asciichgolangpublic/contextutils"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/shell/terminalcolors"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -385,7 +386,12 @@ func LogInfoByCtx(ctx context.Context, logmessage string) {
 		return
 	}
 
-	LogInfo(logmessage)
+	logLinePrefix := contextutils.GetLogLinePrefixFromCtx(ctx)
+	if logLinePrefix == "" {
+		LogInfo(logmessage)
+	} else {
+		LogInfoWithLinePrefix(logmessage, logLinePrefix)
+	}
 }
 
 func LogInfoByCtxf(ctx context.Context, logmessage string, args ...interface{}) {
@@ -394,6 +400,10 @@ func LogInfoByCtxf(ctx context.Context, logmessage string, args ...interface{}) 
 	}
 
 	LogInfof(logmessage, args...)
+}
+
+func LogInfoWithLinePrefix(logmessage string, logLinePrefix string) {
+	LogInfo(stringsutils.AddLinePrefix(logmessage, logLinePrefix))
 }
 
 func LogInfo(logmessage string) {

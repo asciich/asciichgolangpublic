@@ -4,10 +4,13 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/asciich/asciichgolangpublic/contextutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 )
 
 func NewLogInfoMultilineCmd() *cobra.Command {
+	const linePrefix = "lineprefix"
+
 	const logMessage = "This is the example log message\nwith multiple lines."
 	const short = "Logs the multiline example message unsing 'logging.LogInfo'."
 	long := fmt.Sprintf(
@@ -21,9 +24,26 @@ func NewLogInfoMultilineCmd() *cobra.Command {
 		Short: short,
 		Long:  long,
 		Run: func(cmd *cobra.Command, args []string) {
-			logging.LogInfo(logMessage)
+			lineprefix, err := cmd.Flags().GetBool("lineprefix")
+			if err != nil {
+				logging.LogGoErrorFatalWithTrace(err)
+			}
+
+			if lineprefix {
+				ctx := contextutils.ContextVerbose()
+				ctx = contextutils.WithLogLinePrefix(ctx, linePrefix)
+				logging.LogInfoByCtx(ctx, logMessage)
+			} else {
+				logging.LogInfo(logMessage)
+			}
 		},
 	}
+
+	cmd.PersistentFlags().Bool(
+		"lineprefix",
+		false,
+		fmt.Sprintf("Additionally use line prefix '%s'.", linePrefix),
+	)
 
 	return cmd
 }
