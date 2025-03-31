@@ -847,3 +847,15 @@ func IsBeforeInAlphabeth(s1 string, s2 string) (isBefore bool) {
 
 	return true
 }
+
+func AddLinePrefix(context string, linePrefix string) (output string) {
+	if linePrefix == "" {
+		return context
+	}
+
+	for _, l := range SplitLines(context, true) {
+		output += linePrefix + ": " + l + "\n"
+	}
+
+	return output
+}
