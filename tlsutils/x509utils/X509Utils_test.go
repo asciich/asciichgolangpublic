@@ -1,6 +1,7 @@
 package x509utils
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -13,6 +14,10 @@ import (
 	"github.com/asciich/asciichgolangpublic/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func Test_GetPublicKeyFromPrivateKey(t *testing.T) {
 	generatedKey := mustutils.Must(rsa.GenerateKey(rand.Reader, 4096))
@@ -40,29 +45,30 @@ func Test_IsCertificateMatchingPrivateKey(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				handler := getX509CertificateHandlerToTest(tt.implementationName)
-				cert, realKey := mustutils.Must2(handler.CreateRootCaCertificate(
+				rootCaCertAndKey, err := handler.CreateRootCaCertificate(
+					getCtx(),
 					&X509CreateCertificateOptions{
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "RootOrg",
-
-						Verbose: true,
 					},
-				))
+				)
+				require.NoError(t, err)
 
-				anotherKey := mustutils.Must(handler.GeneratePrivateKey())
+				anotherKey, err := handler.GeneratePrivateKey(getCtx())
+				require.NoError(t, err)
 
-				require.True(mustutils.Must(IsCertificateMatchingPrivateKey(cert, realKey)))
-				require.False(mustutils.Must(IsCertificateMatchingPrivateKey(cert, anotherKey)))
+				require.True(t, mustutils.Must(IsCertificateMatchingPrivateKey(rootCaCertAndKey.Cert, rootCaCertAndKey.Key)))
+				require.False(t, mustutils.Must(IsCertificateMatchingPrivateKey(rootCaCertAndKey.Cert, anotherKey)))
 			},
 		)
 	}
 }
 
 func Test_IsCertificateSignedBy(t *testing.T) {
+	ctx := getCtx()
+
 	tests := []struct {
 		implementationName string
 	}{
@@ -75,44 +81,42 @@ func Test_IsCertificateSignedBy(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				handler := getX509CertificateHandlerToTest(tt.implementationName)
-				rootCa, rootCaKey := mustutils.Must2(handler.CreateRootCaCertificate(
+				rootCaCertAndKey, err := handler.CreateRootCaCertificate(
+					ctx,
 					&X509CreateCertificateOptions{
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "RootOrg",
-
-						Verbose: true,
 					},
-				))
+				)
+				require.NoError(t, err)
 
-				intermediateCa, _ := mustutils.Must2(handler.CreateSignedIntermediateCertificate(
+				intermediateCertAndKey, err := handler.CreateSignedIntermediateCertificate(
+					ctx,
 					&X509CreateCertificateOptions{
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "IntermediateOrg",
-
-						Verbose: true,
 					},
-					rootCa,
-					rootCaKey,
-					true,
-				))
+					rootCaCertAndKey,
+				)
+				require.NoError(t, err)
 
-				selfSigned, _ := mustutils.Must2(handler.CreateSelfSignedCertificate(
+				selfSignedCertAndKey, err := handler.CreateSelfSignedCertificate(
+					ctx,
 					&X509CreateCertificateOptions{
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "SelfSignedOrg",
-
-						Verbose: true,
 					},
-				))
+				)
+				require.NoError(t, err)
 
 				ctx := contextutils.ContextVerbose()
 
-				require.True(t, mustutils.Must(IsCertSignedBy(ctx, intermediateCa, rootCa)))
-				require.False(t, mustutils.Must(IsCertSignedBy(ctx, intermediateCa, selfSigned)))
-				require.False(t, mustutils.Must(IsCertSignedBy(ctx, rootCa, intermediateCa)))
+				require.True(t, mustutils.Must(IsCertSignedBy(ctx, intermediateCertAndKey.Cert, rootCaCertAndKey.Cert)))
+				require.False(t, mustutils.Must(IsCertSignedBy(ctx, intermediateCertAndKey.Cert, selfSignedCertAndKey.Cert)))
+				require.False(t, mustutils.Must(IsCertSignedBy(ctx, rootCaCertAndKey.Cert, intermediateCertAndKey.Cert)))
 			},
 		)
 	}
@@ -120,6 +124,8 @@ func Test_IsCertificateSignedBy(t *testing.T) {
 }
 
 func Test_EndcodeAndDecodeAsDER(t *testing.T) {
+	ctx := getCtx()
+
 	tests := []struct {
 		implementationName string
 	}{
@@ -131,29 +137,29 @@ func Test_EndcodeAndDecodeAsDER(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				handler := getX509CertificateHandlerToTest(tt.implementationName)
-				cert, _ := mustutils.Must2(handler.CreateRootCaCertificate(
+				rootCaCertAndKey, err := handler.CreateRootCaCertificate(
+					ctx,
 					&X509CreateCertificateOptions{
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "RootOrg",
-
-						Verbose: true,
 					},
-				))
+				)
+				require.NoError(t, err)
 
-				derEncoded := mustutils.Must(EncodeCertificateAsDerBytes(cert))
+				derEncoded := mustutils.Must(EncodeCertificateAsDerBytes(rootCaCertAndKey.Cert))
 				cert2 := mustutils.Must(LoadCertificateFromDerBytes(derEncoded))
 
-				require.True(cert.Equal(cert2))
+				require.True(t, rootCaCertAndKey.Cert.Equal(cert2))
 			},
 		)
 	}
 }
 
 func Test_EndcodeAndDecodeAsPEM(t *testing.T) {
+	ctx := getCtx()
+
 	tests := []struct {
 		implementationName string
 	}{
@@ -165,32 +171,32 @@ func Test_EndcodeAndDecodeAsPEM(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				handler := getX509CertificateHandlerToTest(tt.implementationName)
-				cert, _ := mustutils.Must2(handler.CreateRootCaCertificate(
+				rootCaCertAndKey, err := handler.CreateRootCaCertificate(
+					ctx,
 					&X509CreateCertificateOptions{
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "RootOrg",
-
-						Verbose: true,
 					},
-				))
+				)
+				require.NoError(t, err)
 
-				derEncoded := mustutils.Must(EncodeCertificateAsPEMString(cert))
-				require.True(strings.HasPrefix(derEncoded, "-----BEGIN CERTIFICATE-----\n"))
-				require.True(strings.HasSuffix(derEncoded, "\n-----END CERTIFICATE-----\n"))
+				derEncoded := mustutils.Must(EncodeCertificateAsPEMString(rootCaCertAndKey.Cert))
+				require.True(t, strings.HasPrefix(derEncoded, "-----BEGIN CERTIFICATE-----\n"))
+				require.True(t, strings.HasSuffix(derEncoded, "\n-----END CERTIFICATE-----\n"))
 
 				cert2 := mustutils.Must(LoadCertificateFromPEMString(derEncoded))
 
-				require.True(cert.Equal(cert2))
+				require.True(t, rootCaCertAndKey.Cert.Equal(cert2))
 			},
 		)
 	}
 }
 
 func Test_EndcodeAndDecodePrivateKeyAsPem(t *testing.T) {
+	ctx := getCtx()
+
 	tests := []struct {
 		implementationName string
 	}{
@@ -202,26 +208,24 @@ func Test_EndcodeAndDecodePrivateKeyAsPem(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				handler := getX509CertificateHandlerToTest(tt.implementationName)
-				_, key := mustutils.Must2(handler.CreateRootCaCertificate(
+				rootCaCertAndKey, err := handler.CreateRootCaCertificate(
+					ctx,
 					&X509CreateCertificateOptions{
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "RootOrg",
-
-						Verbose: true,
 					},
-				))
+				)
+				require.NoError(t, err)
 
-				derEncoded := mustutils.Must(EncodePrivateKeyAsPEMString(key))
-				require.True(strings.HasPrefix(derEncoded, "-----BEGIN PRIVATE KEY-----\n"))
-				require.True(strings.HasSuffix(derEncoded, "\n-----END PRIVATE KEY-----\n"))
+				derEncoded := mustutils.Must(EncodePrivateKeyAsPEMString(rootCaCertAndKey.Key))
+				require.True(t, strings.HasPrefix(derEncoded, "-----BEGIN PRIVATE KEY-----\n"))
+				require.True(t, strings.HasSuffix(derEncoded, "\n-----END PRIVATE KEY-----\n"))
 
 				key2 := mustutils.Must(LoadPrivateKeyFromPEMString(derEncoded))
 
-				require.True(mustutils.Must(IsPrivateKeyEqual(key, key2)))
+				require.True(t, mustutils.Must(IsPrivateKeyEqual(rootCaCertAndKey.Key, key2)))
 			},
 		)
 	}
@@ -245,4 +249,37 @@ func Test_GetValidityDuration(t *testing.T) {
 		require.EqualValues(t, time.Hour*24, *vd)
 	})
 
+}
+
+func Test_GetSubjectAndSerialString(t *testing.T) {
+	ctx := getCtx()
+
+	tests := []struct {
+		implementationName string
+	}{
+		{"NativeX509CertificateHandler"},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				handler := getX509CertificateHandlerToTest(tt.implementationName)
+				rootCaCertAndKey, err := handler.CreateRootCaCertificate(
+					ctx,
+					&X509CreateCertificateOptions{
+						CountryName:  "CH",
+						Locality:     "Zurich",
+						Organization: "RootOrg",
+					},
+				)
+				require.NoError(t, err)
+
+				out, err := GetSubjectAndSerialString(rootCaCertAndKey.Cert)
+				require.NoError(t, err)
+				require.EqualValues(t, "O=RootOrg,L=Zurich,ST=,C=CH serial: 01", out)
+			},
+		)
+	}
 }

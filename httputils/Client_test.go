@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/checksums"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/mustutils"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -320,12 +321,13 @@ func TestClient_GetRequestUsingTls_insecure(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
+				ctx := getCtx()
 				require := require.New(t)
 
 				const verbose bool = true
 				const port int = 9123
 
-				testServer := MustGetTlsTestWebServer(port, verbose)
+				testServer := mustutils.Must(GetTlsTestWebServer(ctx, port))
 				defer testServer.Stop(verbose)
 
 				testServer.MustStartInBackground(verbose)

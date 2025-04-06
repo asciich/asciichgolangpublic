@@ -29,7 +29,6 @@ type X509CreateCertificateOptions struct {
 	CertificateOutputFilePath string
 
 	OverwriteExistingCertificateInGopass bool // Will be removed soon!
-	Verbose                              bool
 }
 
 func NewX509CreateCertificateOptions() (x *X509CreateCertificateOptions) {
@@ -249,11 +248,6 @@ func (x *X509CreateCertificateOptions) GetOverwriteExistingCertificateInGopass()
 	return x.OverwriteExistingCertificateInGopass, nil
 }
 
-func (x *X509CreateCertificateOptions) GetVerbose() (verbose bool, err error) {
-
-	return x.Verbose, nil
-}
-
 func (x *X509CreateCertificateOptions) MustGetAdditionalSans() (additionalSans []string) {
 	additionalSans, err := x.GetAdditionalSans()
 	if err != nil {
@@ -368,15 +362,6 @@ func (x *X509CreateCertificateOptions) MustGetSubjectStringForOpenssl() (subject
 	return subjectString
 }
 
-func (x *X509CreateCertificateOptions) MustGetVerbose() (verbose bool) {
-	verbose, err := x.GetVerbose()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return verbose
-}
-
 func (x *X509CreateCertificateOptions) MustSetAdditionalSans(additionalSans []string) {
 	err := x.SetAdditionalSans(additionalSans)
 	if err != nil {
@@ -437,13 +422,6 @@ func (x *X509CreateCertificateOptions) MustSetOverwriteExistingCertificateInGopa
 
 func (x *X509CreateCertificateOptions) MustSetUseTemporaryDirectory(useTemporaryDirectory bool) {
 	err := x.SetUseTemporaryDirectory(useTemporaryDirectory)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (x *X509CreateCertificateOptions) MustSetVerbose(verbose bool) {
-	err := x.SetVerbose(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -532,12 +510,6 @@ func (x *X509CreateCertificateOptions) SetOverwriteExistingCertificateInGopass(o
 
 func (x *X509CreateCertificateOptions) SetUseTemporaryDirectory(useTemporaryDirectory bool) (err error) {
 	x.UseTemporaryDirectory = useTemporaryDirectory
-
-	return nil
-}
-
-func (x *X509CreateCertificateOptions) SetVerbose(verbose bool) (err error) {
-	x.Verbose = verbose
 
 	return nil
 }

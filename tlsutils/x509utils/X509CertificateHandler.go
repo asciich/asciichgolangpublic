@@ -1,16 +1,16 @@
 package x509utils
 
 import (
+	"context"
 	"crypto"
-	"crypto/x509"
 )
 
 type X509CertificateHandler interface {
-	CreateRootCaCertificate(options *X509CreateCertificateOptions) (caCert *x509.Certificate, caPrivateKey crypto.PrivateKey, err error)
-	CreateIntermediateCertificate(options *X509CreateCertificateOptions) (intermediateCert *x509.Certificate, intermediateCertPrivateKey crypto.PrivateKey, err error)
-	CreateSelfSignedCertificate(options *X509CreateCertificateOptions) (selfSignesCert *x509.Certificate, selfSignedCertPrivateKey crypto.PrivateKey, err error)
-	CreateSignedIntermediateCertificate(options *X509CreateCertificateOptions, caCert *x509.Certificate, caPrivateKey crypto.PrivateKey, verbose bool) (intermediateCert *x509.Certificate, intermediateCertPrivateKey crypto.PrivateKey, err error)
-	CreateSignedEndEndityCertificate(options *X509CreateCertificateOptions, caCert *x509.Certificate, caPrivateKey crypto.PrivateKey, verbose bool) (endEndityCert *x509.Certificate, endEndityCertPrivateKey crypto.PrivateKey, err error)
+	CreateRootCaCertificate(ctx context.Context, options *X509CreateCertificateOptions) (caCertAndKey *X509CertKeyPair, err error)
+	CreateIntermediateCertificate(ctx context.Context, options *X509CreateCertificateOptions) (intermediateCert *X509CertKeyPair, err error)
+	CreateSelfSignedCertificate(ctx context.Context, options *X509CreateCertificateOptions) (selfSignesCertAndKey *X509CertKeyPair, err error)
+	CreateSignedIntermediateCertificate(ctx context.Context, options *X509CreateCertificateOptions, rootCaCertAndKey *X509CertKeyPair) (intermediateCertAndKey *X509CertKeyPair, err error)
+	CreateSignedEndEndityCertificate(ctx context.Context, options *X509CreateCertificateOptions, caCertAndKey *X509CertKeyPair) (endEndityCertAndKey *X509CertKeyPair, err error)
 
-	GeneratePrivateKey() (privateKey crypto.PrivateKey, err error)
+	GeneratePrivateKey(ctx context.Context) (privateKey crypto.PrivateKey, err error)
 }

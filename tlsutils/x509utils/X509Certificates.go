@@ -1,8 +1,7 @@
 package x509utils
 
 import (
-	"crypto"
-	"crypto/x509"
+	"context"
 	"fmt"
 	"path/filepath"
 
@@ -19,22 +18,8 @@ func GetDefaultHandler() (certHandler X509CertificateHandler) {
 	return GetNativeX509CertificateHandler()
 }
 
-func MustCreateSignedEndEndityCertificate(options *X509CreateCertificateOptions, caCert *x509.Certificate, caPrivateKey crypto.PrivateKey, verbose bool) (endEndityCert *x509.Certificate, privateKey crypto.PrivateKey) {
-	endEndityCert, privateKey, err := CreateSignedEndEndityCertificate(options, caCert, caPrivateKey, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return endEndityCert, privateKey
-}
-
-func CreateSignedEndEndityCertificate(options *X509CreateCertificateOptions, caCert *x509.Certificate, caPrivateKey crypto.PrivateKey, verbose bool) (endEndityCert *x509.Certificate, privateKey crypto.PrivateKey, err error) {
-	return GetDefaultHandler().CreateSignedEndEndityCertificate(
-		options,
-		caCert,
-		caPrivateKey,
-		verbose,
-	)
+func CreateSignedEndEndityCertificate(ctx context.Context, options *X509CreateCertificateOptions, caCertAndKey *X509CertKeyPair) (endEndityCertAndKey *X509CertKeyPair, err error) {
+	return GetDefaultHandler().CreateSignedEndEndityCertificate(ctx, options, caCertAndKey)
 }
 
 // ================================
@@ -60,7 +45,7 @@ func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(cre
 		return nil, tracederrors.TracedError("Only implemented for temporary directory")
 	}
 
-	directoryToUse, err := tempfiles.CreateEmptyTemporaryDirectory(createOptions.Verbose)
+	directoryToUse, err := tempfiles.CreateEmptyTemporaryDirectory(true)
 	if err != nil {
 		return nil, err
 	}
@@ -75,9 +60,7 @@ func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(cre
 		return nil, err
 	}
 
-	if createOptions.Verbose {
-		logging.LogInfof("Going to create new intermediate certificate for '%v'", subjectString)
-	}
+	logging.LogInfof("Going to create new intermediate certificate for '%v'", subjectString)
 
 	sslCommand := []string{
 		"openssl",
@@ -89,15 +72,13 @@ func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(cre
 
 	_, err = commandexecutor.Bash().RunCommand(&parameteroptions.RunCommandOptions{
 		Command: sslCommand,
-		Verbose: createOptions.Verbose,
+		Verbose: true,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	if createOptions.Verbose {
-		logging.LogInfof("Created intermediate certificate in temporary directory: '%v'", directoryPathToUse)
-	}
+	logging.LogInfof("Created intermediate certificate in temporary directory: '%v'", directoryPathToUse)
 
 	return directoryToUse, nil
 }
@@ -111,7 +92,7 @@ func (c *X509CertificatesService) CreateRootCaIntoDirectory(createOptions *X509C
 		return nil, tracederrors.TracedError("Only implemented for temporary directory")
 	}
 
-	directoryToUse, err := tempfiles.CreateEmptyTemporaryDirectory(createOptions.Verbose)
+	directoryToUse, err := tempfiles.CreateEmptyTemporaryDirectory(true)
 	if err != nil {
 		return nil, err
 	}
@@ -126,9 +107,7 @@ func (c *X509CertificatesService) CreateRootCaIntoDirectory(createOptions *X509C
 		return nil, err
 	}
 
-	if createOptions.Verbose {
-		logging.LogInfof("Going to create new RootCA for '%v'", subjectString)
-	}
+	logging.LogInfof("Going to create new RootCA for '%v'", subjectString)
 
 	sslCommand := []string{
 		"openssl",
@@ -162,16 +141,14 @@ func (c *X509CertificatesService) CreateRootCaIntoDirectory(createOptions *X509C
 	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command: createCommand,
-			Verbose: createOptions.Verbose,
+			Verbose: true,
 		},
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	if createOptions.Verbose {
-		logging.LogInfof("Created root ca in temporary directory: '%v'", directoryPathToUse)
-	}
+	logging.LogInfof("Created root ca in temporary directory: '%v'", directoryPathToUse)
 
 	return directoryToUse, nil
 }
