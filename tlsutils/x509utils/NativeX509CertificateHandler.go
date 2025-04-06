@@ -1,6 +1,7 @@
 package x509utils
 
 import (
+	"context"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
@@ -66,26 +67,48 @@ func getCertTemplate(options *X509CreateCertificateOptions) (certTemplate *x509.
 	return certTemplate, nil
 }
 
-func (n *NativeX509CertificateHandler) SignCertificate(certToSign *x509.Certificate, certWhichSigns *x509.Certificate, certToSignKey crypto.PublicKey, certWhichSignsPrivateKey crypto.PrivateKey, verbose bool) (signedCert *x509.Certificate, err error) {
-	if certToSign == nil {
-		return nil, tracederrors.TracedErrorNil("certToSign")
+func (n *NativeX509CertificateHandler) SignCertificate(ctx context.Context, certToSignAndKey *X509CertKeyPair, signingCertAndKey *X509CertKeyPair) (signedCert *x509.Certificate, err error) {
+	if certToSignAndKey == nil {
+		return nil, tracederrors.TracedErrorNil("certToSignAndKey")
 	}
 
-	if certWhichSigns == nil {
-		return nil, tracederrors.TracedErrorNil("certWhichSigns")
+	if signingCertAndKey == nil {
+		return nil, tracederrors.TracedErrorNil("signingCertAndKey")
 	}
 
-	if certToSignKey == nil {
-		return nil, tracederrors.TracedErrorNil("certToSignKey")
+	err = certToSignAndKey.CheckKeyMatchingCert()
+	if err != nil {
+		return nil, err
 	}
 
-	if certWhichSignsPrivateKey == nil {
-		return nil, tracederrors.TracedErrorNil("certWhichSignsPrivateKey")
+	err = signingCertAndKey.CheckKeyMatchingCert()
+	if err != nil {
+		return nil, err
+	}
+
+	certToSign, err := certToSignAndKey.GetX509Certificate()
+	if err != nil {
+		return nil, err
 	}
 
 	certToSign.Issuer = pkix.Name{}
 
-	signedCertData, err := x509.CreateCertificate(rand.Reader, certToSign, certWhichSigns, certToSignKey, certWhichSignsPrivateKey)
+	certWhichSigns, err := signingCertAndKey.GetX509Certificate()
+	if err != nil {
+		return nil, err
+	}
+
+	certToSignPublicKey, err := certToSignAndKey.GetPublicKey()
+	if err != nil {
+		return nil, err
+	}
+
+	certWhichSignsPrivateKey, err := signingCertAndKey.GetPrivateKey()
+	if err != nil {
+		return nil, err
+	}
+
+	signedCertData, err := x509.CreateCertificate(rand.Reader, certToSign, certWhichSigns, certToSignPublicKey, certWhichSignsPrivateKey)
 	if err != nil {
 		return nil, tracederrors.TracedErrorf("Unable to sign cert: %w", err)
 	}
@@ -95,18 +118,12 @@ func (n *NativeX509CertificateHandler) SignCertificate(certToSign *x509.Certific
 		return nil, err
 	}
 
-	if verbose {
-		logging.LogChangedf(
-			"Signed certificate '%s' by '%s'.",
-			certToSign.Subject,
-			certWhichSigns.Subject,
-		)
-	}
+	logging.LogChangedByCtxf(ctx, "Signed certificate '%s' by '%s'.", FormatForLogging(certToSign), FormatForLogging(certWhichSigns))
 
 	return signedCert, nil
 }
 
-func (n *NativeX509CertificateHandler) GeneratePrivateKey() (privateKey crypto.PrivateKey, err error) {
+func (n *NativeX509CertificateHandler) GeneratePrivateKey(ctx context.Context) (privateKey crypto.PrivateKey, err error) {
 	privateKey, err = rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
 		return nil, tracederrors.TracedErrorf("Unable to create private key: %w", err)
@@ -115,168 +132,173 @@ func (n *NativeX509CertificateHandler) GeneratePrivateKey() (privateKey crypto.P
 	return privateKey, nil
 }
 
-func (n *NativeX509CertificateHandler) generateAndAddKey(cert *x509.Certificate) (certWithKey *x509.Certificate, privateKey crypto.PrivateKey, err error) {
+func (n *NativeX509CertificateHandler) generateAndAddKey(ctx context.Context, cert *x509.Certificate) (certKeyPair *X509CertKeyPair, err error) {
 	if cert == nil {
-		return nil, nil, tracederrors.TracedErrorNil("cert")
+		return nil, tracederrors.TracedErrorNil("cert")
 	}
 
-	generatedKey, err := n.GeneratePrivateKey()
+	generatedKey, err := n.GeneratePrivateKey(ctx)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	publicKey, err := GetPublicKeyFromPrivateKey(generatedKey)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	certBytes, err := x509.CreateCertificate(rand.Reader, cert, cert, publicKey, generatedKey)
 	if err != nil {
-		return nil, nil, tracederrors.TracedErrorf("Unable to create private key: %w", err)
+		return nil, tracederrors.TracedErrorf("Unable to create private key: %w", err)
 	}
 
-	certWithKey, err = LoadCertificateFromDerBytes(certBytes)
+	certWithKey, err := LoadCertificateFromDerBytes(certBytes)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return certWithKey, generatedKey, nil
+	certKeyPair = &X509CertKeyPair{
+		Cert: certWithKey,
+		Key:  generatedKey,
+	}
+
+	err = certKeyPair.CheckKeyMatchingCert()
+	if err != nil {
+		return nil, err
+	}
+
+	return certKeyPair, nil
 }
 
-func (n *NativeX509CertificateHandler) CreateSignedEndEndityCertificate(options *X509CreateCertificateOptions, intermediateCert *x509.Certificate, intermediatePrivateKey crypto.PrivateKey, verbose bool) (endEndityCert *x509.Certificate, endEndityKey crypto.PrivateKey, err error) {
+func (n *NativeX509CertificateHandler) CreateSignedEndEndityCertificate(ctx context.Context, options *X509CreateCertificateOptions, intermediateCertAndKey *X509CertKeyPair) (certKeyPair *X509CertKeyPair, err error) {
 	if options == nil {
-		return nil, nil, tracederrors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	if intermediateCert == nil {
-		return nil, nil, tracederrors.TracedErrorNil("intermediateCert")
+	if intermediateCertAndKey == nil {
+		return nil, tracederrors.TracedErrorNil("intermediateCertAndKey")
 	}
 
-	if intermediatePrivateKey == nil {
-		return nil, nil, tracederrors.TracedErrorNil("intermediatePrivateKey")
-	}
-
-	endEndityCert, endEndityKey, err = n.CreateEndEndityCertificate(options)
+	err = intermediateCertAndKey.CheckKeyMatchingCert()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	pubKey, err := GetPublicKeyFromPrivateKey(endEndityKey)
+	endEndityCertAndKey, err := n.CreateEndEndityCertificate(ctx, options)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	endEndityCert, err = n.SignCertificate(endEndityCert, intermediateCert, pubKey, intermediatePrivateKey, verbose)
+	endEndityCertAndKey.Cert, err = n.SignCertificate(ctx, endEndityCertAndKey, intermediateCertAndKey)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return endEndityCert, endEndityKey, err
+	return endEndityCertAndKey, err
 }
 
-func (n *NativeX509CertificateHandler) CreateSignedIntermediateCertificate(options *X509CreateCertificateOptions, caCert *x509.Certificate, caPrivateKey crypto.PrivateKey, verbose bool) (intermediateCert *x509.Certificate, intermediateCertPrivateKey crypto.PrivateKey, err error) {
+func (n *NativeX509CertificateHandler) CreateSignedIntermediateCertificate(ctx context.Context, options *X509CreateCertificateOptions, caCertAndKey *X509CertKeyPair) (intermediateCertAndKey *X509CertKeyPair, err error) {
 	if options == nil {
-		return nil, nil, tracederrors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	if caCert == nil {
-		return nil, nil, tracederrors.TracedErrorNil("caCert")
+	if caCertAndKey == nil {
+		return nil, tracederrors.TracedErrorNil("caCertAndKey")
 	}
 
-	if caPrivateKey == nil {
-		return nil, nil, tracederrors.TracedErrorNil("caPrivateKey")
-	}
-
-	intermediateCert, intermediateCertPrivateKey, err = n.CreateIntermediateCertificate(options)
+	intermediateCertAndKey, err = n.CreateIntermediateCertificate(ctx, options)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	pubKey, err := GetPublicKeyFromPrivateKey(intermediateCertPrivateKey)
+	intermediateCertAndKey.Cert, err = n.SignCertificate(ctx, intermediateCertAndKey, caCertAndKey)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	intermediateCert, err = n.SignCertificate(intermediateCert, caCert, pubKey, caPrivateKey, verbose)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return intermediateCert, intermediateCertPrivateKey, err
+	return intermediateCertAndKey, err
 }
 
-func (n *NativeX509CertificateHandler) CreateEndEndityCertificate(options *X509CreateCertificateOptions) (cert *x509.Certificate, privateKey crypto.PrivateKey, err error) {
+func (n *NativeX509CertificateHandler) CreateEndEndityCertificate(ctx context.Context, options *X509CreateCertificateOptions) (endEndityCertAndKey *X509CertKeyPair, err error) {
 	if options == nil {
-		return nil, nil, tracederrors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	certTemplate, err := getCertTemplate(options)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	cert, privateKey, err = n.generateAndAddKey(certTemplate)
+	endEndityCertAndKey, err = n.generateAndAddKey(ctx, certTemplate)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return cert, privateKey, nil
+	logging.LogChangedByCtxf(ctx, "Generated root CA certificate '%s'", FormatForLogging(endEndityCertAndKey.Cert))
+
+	return endEndityCertAndKey, nil
 }
 
-func (n *NativeX509CertificateHandler) CreateIntermediateCertificate(options *X509CreateCertificateOptions) (cert *x509.Certificate, privateKey crypto.PrivateKey, err error) {
+func (n *NativeX509CertificateHandler) CreateIntermediateCertificate(ctx context.Context, options *X509CreateCertificateOptions) (intermediateCertAndKey *X509CertKeyPair, err error) {
 	if options == nil {
-		return nil, nil, tracederrors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	certTemplate, err := getCertTemplate(options)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	certTemplate.IsCA = true
 
-	cert, privateKey, err = n.generateAndAddKey(certTemplate)
+	intermediateCertAndKey, err = n.generateAndAddKey(ctx, certTemplate)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return cert, privateKey, nil
+	logging.LogChangedByCtxf(ctx, "Generated root CA certificate '%s'", FormatForLogging(intermediateCertAndKey.Cert))
+
+	return intermediateCertAndKey, nil
 }
 
-func (n *NativeX509CertificateHandler) CreateRootCaCertificate(options *X509CreateCertificateOptions) (cert *x509.Certificate, privateKey crypto.PrivateKey, err error) {
+func (n *NativeX509CertificateHandler) CreateRootCaCertificate(ctx context.Context, options *X509CreateCertificateOptions) (rootCaCertAndKey *X509CertKeyPair, err error) {
 	if options == nil {
-		return nil, nil, tracederrors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	certTemplate, err := getCertTemplate(options)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	certTemplate.IsCA = true
 
-	cert, privateKey, err = n.generateAndAddKey(certTemplate)
+	rootCaCertAndKey, err = n.generateAndAddKey(ctx, certTemplate)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return cert, privateKey, nil
+	logging.LogChangedByCtxf(ctx, "Generated root CA certificate '%s'", FormatForLogging(rootCaCertAndKey.Cert))
+
+	return rootCaCertAndKey, nil
 }
 
-func (n *NativeX509CertificateHandler) CreateSelfSignedCertificate(options *X509CreateCertificateOptions) (selfSignedCert *x509.Certificate, selfSignedCertPrivateKey crypto.PrivateKey, err error) {
+func (n *NativeX509CertificateHandler) CreateSelfSignedCertificate(ctx context.Context, options *X509CreateCertificateOptions) (selfSignedCertAndKey *X509CertKeyPair, err error) {
 	if options == nil {
-		return nil, nil, tracederrors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	certTemplate, err := getCertTemplate(options)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	selfSignedCert, selfSignedCertPrivateKey, err = n.generateAndAddKey(certTemplate)
+	selfSignedCertAndKey, err = n.generateAndAddKey(ctx, certTemplate)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return selfSignedCert, selfSignedCertPrivateKey, nil
+	logging.LogChangedByCtxf(ctx, "Generated self signed certificate '%s'", FormatForLogging(selfSignedCertAndKey.Cert))
+
+	return selfSignedCertAndKey, nil
 }
