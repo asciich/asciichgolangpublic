@@ -28,10 +28,12 @@ func CreateSignedEndEndityCertificate(ctx context.Context, options *X509CreateCe
 type X509CertificatesService struct {
 }
 
+// Deprecated: Is reimplemented without additional X509CertificatesService struct.
 func NewX509CertificatesService() (x *X509CertificatesService) {
 	return new(X509CertificatesService)
 }
 
+// Deprecated: Is reimplemented without additional X509CertificatesService struct.
 func X509Certificates() (x509Certificaets *X509CertificatesService) {
 	return new(X509CertificatesService)
 }

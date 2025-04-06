@@ -34,20 +34,19 @@ func TestTypes_GetTypeName(t *testing.T) {
 			func(t *testing.T) {
 				input := tt.input
 
-				if input == "&ErrForTesting" {
-					input = &ErrForTesting
+				errorsToTest := map[string]interface{}{
+					"&ErrForTesting":       &ErrForTesting,
+					"ErrForTesting":        ErrForTesting,
+					"&ErrGlobalForTesting": &ErrGlobalForTesting,
+					"ErrGlobalForTesting":  ErrGlobalForTesting,
 				}
 
-				if input == "ErrForTesting" {
-					input = ErrForTesting
-				}
-
-				if input == "&ErrGlobalForTesting" {
-					input = &ErrGlobalForTesting
-				}
-
-				if input == "ErrGlobalForTesting" {
-					input = ErrGlobalForTesting
+				inputStr, ok := input.(string)
+				if ok {
+					got, ok := errorsToTest[inputStr]
+					if ok {
+						input = got
+					}
 				}
 
 				require.EqualValues(

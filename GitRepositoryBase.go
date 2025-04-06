@@ -279,7 +279,7 @@ func (g *GitRepositoryBase) CommitAndPush(commitOptions *GitCommitOptions) (crea
 		return nil, err
 	}
 
-	err = parent.Push(commitOptions.Verbose)
+	err = parent.Push(contextutils.GetVerbosityContextByBool(commitOptions.Verbose))
 	if err != nil {
 		return nil, err
 	}
