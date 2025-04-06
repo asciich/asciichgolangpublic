@@ -4,11 +4,11 @@ import (
 	"context"
 	"slices"
 
-	"github.com/asciich/asciichgolangpublic/contextutils"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -279,7 +279,7 @@ func (g *GitRepositoryBase) CommitAndPush(commitOptions *GitCommitOptions) (crea
 		return nil, err
 	}
 
-	err = parent.Push(commitOptions.Verbose)
+	err = parent.Push(contextutils.GetVerbosityContextByBool(commitOptions.Verbose))
 	if err != nil {
 		return nil, err
 	}

@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/asciich/asciichgolangpublic/changesummary"
-	"github.com/asciich/asciichgolangpublic/contextutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/shell/terminalcolors"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )

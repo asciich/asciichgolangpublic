@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -1857,13 +1859,6 @@ func (c *CommandExecutorGitRepository) MustPullFromRemote(pullOptions *GitPullFr
 	}
 }
 
-func (c *CommandExecutorGitRepository) MustPush(verbose bool) {
-	err := c.Push(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (c *CommandExecutorGitRepository) MustPushTagsToRemote(remoteName string, verbose bool) {
 	err := c.PushTagsToRemote(remoteName, verbose)
 	if err != nil {
@@ -2039,35 +2034,23 @@ func (c *CommandExecutorGitRepository) PullFromRemote(pullOptions *GitPullFromRe
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) Push(verbose bool) (err error) {
+func (c *CommandExecutorGitRepository) Push(ctx context.Context) (err error) {
 	path, hostDescription, err := c.GetPathAndHostDescription()
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Push git repository '%s' on '%s' started.",
-			path,
-			hostDescription,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Push git repository '%s' on '%s' started.", path, hostDescription)
 
 	_, err = c.RunGitCommand(
 		[]string{"push"},
-		verbose,
+		contextutils.GetVerboseFromContext(ctx),
 	)
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Push git repository '%s' on '%s' finished.",
-			path,
-			hostDescription,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Push git repository '%s' on '%s' finished.", path, hostDescription)
 
 	return
 }

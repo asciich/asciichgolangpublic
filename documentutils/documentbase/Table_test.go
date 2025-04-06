@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/mustutils"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
 
 func Test_GetSpreadsheetFromTable(t *testing.T) {
