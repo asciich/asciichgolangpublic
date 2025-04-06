@@ -2,7 +2,6 @@ package httputils
 
 import (
 	"context"
-	"crypto"
 	"crypto/tls"
 	"crypto/x509"
 	"io"
@@ -25,29 +24,20 @@ type TestWebServer struct {
 	tlsConfig          *tls.Config
 }
 
-func MustGetTlsTestWebServer(port int, verbose bool) (webServer Server) {
-	webServer, err := GetTlsTestWebServer(port, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return webServer
-}
-
-func generateCertAndKeyForTestWebserver() (cert *x509.Certificate, privateKey crypto.PrivateKey, err error) {
+func generateCertAndKeyForTestWebserver(ctx context.Context) (certAndKeyPair *x509utils.X509CertKeyPair, err error) {
 	return x509utils.CreateSelfSignedCertificate(
+		ctx,
 		&x509utils.X509CreateCertificateOptions{
 			Organization:   "localorg",
 			CommonName:     "localhost",
 			CountryName:    "CH",
 			Locality:       "Zurich",
 			AdditionalSans: []string{"localhost"},
-			Verbose:        true,
 		},
 	)
 }
 
-func GetTlsTestWebServer(port int, verbose bool) (webServer Server, err error) {
+func GetTlsTestWebServer(ctx context.Context, port int) (webServer Server, err error) {
 	toReturn := NewTestWebServer()
 
 	err = toReturn.SetPort(port)
@@ -55,12 +45,12 @@ func GetTlsTestWebServer(port int, verbose bool) (webServer Server, err error) {
 		return nil, err
 	}
 
-	cert, key, err := generateCertAndKeyForTestWebserver()
+	certAndKey, err := generateCertAndKeyForTestWebserver(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetTlsCertAndKey(cert, key)
+	err = toReturn.SetTlsCertAndKey(ctx, certAndKey)
 	if err != nil {
 		return nil, err
 	}
@@ -319,18 +309,19 @@ func (t *TestWebServer) StartInBackground(verbose bool) (err error) {
 	return nil
 }
 
-func (t *TestWebServer) SetTlsCertAndKey(cert *x509.Certificate, privateKey crypto.PrivateKey) (err error) {
-	if cert == nil {
-		return tracederrors.TracedErrorNil("cert")
+func (t *TestWebServer) SetTlsCertAndKey(ctx context.Context, certAndKey *x509utils.X509CertKeyPair) (err error) {
+	if certAndKey == nil {
+		return tracederrors.TracedErrorNil("certAndKey")
 	}
 
-	if privateKey == nil {
-		return tracederrors.TracedErrorNil("privateKey")
+	err = certAndKey.CheckKeyMatchingCert()
+	if err != nil {
+		return err
 	}
 
 	tlsCert := tls.Certificate{
-		Certificate: [][]byte{cert.Raw},
-		PrivateKey:  privateKey,
+		Certificate: [][]byte{certAndKey.Cert.Raw},
+		PrivateKey:  certAndKey.Key,
 	}
 
 	t.tlsConfig = &tls.Config{Certificates: []tls.Certificate{tlsCert}}

@@ -1,6 +1,7 @@
 package gopass
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strings"
@@ -588,14 +589,7 @@ func WriteSecretIntoTemporaryFile(getOptions *parameteroptions.GopassSecretOptio
 	return temporaryFile, nil
 }
 
-func MustCreateRootCaAndAddToGopass(createOptions *x509utils.X509CreateCertificateOptions, gopassOptions *parameteroptions.GopassSecretOptions) {
-	err := CreateRootCaAndAddToGopass(createOptions, gopassOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func CreateRootCaAndAddToGopass(createOptions *x509utils.X509CreateCertificateOptions, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
+func CreateRootCaAndAddToGopass(ctx context.Context, createOptions *x509utils.X509CreateCertificateOptions, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
 	if createOptions == nil {
 		return tracederrors.TracedError("createOptions is nil")
 	}
@@ -604,23 +598,21 @@ func CreateRootCaAndAddToGopass(createOptions *x509utils.X509CreateCertificateOp
 		return tracederrors.TracedError("gopassOptions is nil")
 	}
 
-	if createOptions.Verbose {
-		logging.LogInfo("Create root CA and add to gopass started.")
-	}
+	logging.LogInfoByCtx(ctx, "Create root CA and add to gopass started.")
 
 	certHandler := x509utils.GetNativeX509CertificateHandler()
 
-	caCert, caKey, err := certHandler.CreateRootCaCertificate(createOptions)
+	rootCaCertAndKey, err := certHandler.CreateRootCaCertificate(ctx, createOptions)
 	if err != nil {
 		return err
 	}
 
-	ceCertPem, err := x509utils.EncodeCertificateAsPEMString(caCert)
+	ceCertPem, err := x509utils.EncodeCertificateAsPEMString(rootCaCertAndKey.Cert)
 	if err != nil {
 		return err
 	}
 
-	caKeyPem, err := x509utils.EncodePrivateKeyAsPEMString(caKey)
+	caKeyPem, err := x509utils.EncodePrivateKeyAsPEMString(rootCaCertAndKey.Key)
 	if err != nil {
 		return err
 	}
@@ -647,9 +639,7 @@ func CreateRootCaAndAddToGopass(createOptions *x509utils.X509CreateCertificateOp
 		return err
 	}
 
-	if createOptions.Verbose {
-		logging.LogInfo("Create root CA and add to gopass finished.")
-	}
+	logging.LogInfoByCtx(ctx, "Create root CA and add to gopass finished.")	
 
 	return nil
 }

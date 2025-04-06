@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
@@ -444,12 +445,12 @@ func IsPrivateKeyEqual(key1 crypto.PrivateKey, key2 crypto.PrivateKey) (isEqual 
 	return withEqual.Equal(key2), nil
 }
 
-func CreateSelfSignedCertificate(options *X509CreateCertificateOptions) (selfSignedCert *x509.Certificate, selfSignedCertKey crypto.PrivateKey, err error) {
+func CreateSelfSignedCertificate(ctx context.Context, options *X509CreateCertificateOptions) (selfSignedCertAndKey *X509CertKeyPair, err error) {
 	if options == nil {
-		return nil, nil, tracederrors.TracedErrorNil("options")
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	return GetNativeX509CertificateHandler().CreateSelfSignedCertificate(options)
+	return GetNativeX509CertificateHandler().CreateSelfSignedCertificate(ctx, options)
 }
 
 func MustTlsCertToX509Cert(tlsCert *tls.Certificate) (cert *x509.Certificate) {
@@ -513,4 +514,58 @@ func IsCertSignedBy(ctx context.Context, cert *x509.Certificate, issuerCert *x50
 
 	logging.LogInfoByCtxf(ctx, "Certificate '%s' is signed by '%s'.", cert.Subject, issuerCert.Subject)
 	return true, nil
+}
+
+func GetX509CertificateDeepCopy(in *x509.Certificate) (out *x509.Certificate) {
+	if in == nil {
+		return nil
+	}
+
+	out = new(x509.Certificate)
+	*out = *in
+
+	return out
+}
+
+func FormatForLogging(cert *x509.Certificate) (string) {
+	if cert == nil {
+		return "cert is nil"
+	}
+
+	out, err := GetSubjectAndSerialString(cert)
+	if err != nil {
+		return "ERROR: " + err.Error()
+	}
+
+	return out
+}
+
+func GetSubjectAndSerialString(cert *x509.Certificate) (string, error) {
+	if cert == nil {
+		return "", tracederrors.TracedErrorNil("in")
+	}
+
+	serial, err := GetSerialNumberAsHexColonSeparated(cert)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf(
+		"%s serial: %s",
+		cert.Subject,
+		serial,
+	), nil
+}
+
+func GetSerialNumberAsHexColonSeparated(cert *x509.Certificate) (string, error) {
+	if cert == nil {
+		return "", tracederrors.TracedErrorNil("in")
+	}
+
+	serialBytes := cert.SerialNumber.Bytes()
+	hexStrings := make([]string, len(serialBytes))
+	for i, b := range serialBytes {
+		hexStrings[i] = fmt.Sprintf("%02X", b)
+	}
+	return strings.Join(hexStrings, ":"), nil
 }

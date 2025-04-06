@@ -25,7 +25,6 @@ func TestX509CertificatesCreateIntermediateCertificateIntoTemporaryDirectory(t *
 				certificates := X509Certificates()
 				tempDirectory := certificates.MustCreateIntermediateCertificateIntoDirectory(&X509CreateCertificateOptions{
 					UseTemporaryDirectory: true,
-					Verbose:               verbose,
 					CommonName:            "test-intermediata.asciich.ch",
 					CountryName:           "CH",
 					Locality:              "Zurich",
