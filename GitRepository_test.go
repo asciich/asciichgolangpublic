@@ -1,17 +1,23 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/contextutils"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func getGitRepositoryToTest(implementationName string) (repo GitRepository) {
 	const verbose = true
@@ -567,6 +573,8 @@ func TestGitRepository_CloneRepository_idempotence(t *testing.T) {
 }
 
 func TestGitRepository_PullAndPush(t *testing.T) {
+	ctx := getCtx()
+
 	tests := []struct {
 		implementationUpstream string
 		implementationCloned   string
@@ -652,7 +660,7 @@ func TestGitRepository_PullAndPush(t *testing.T) {
 					clonedRepo2.MustGetCurrentCommitHash(verbose),
 				)
 
-				clonedRepo2.MustPush(verbose)
+				mustutils.Must0(clonedRepo2.Push(ctx))
 				require.EqualValues(
 					upstreamRepo.MustGetCurrentCommitHash(verbose),
 					clonedRepo2.MustGetCurrentCommitHash(verbose),
@@ -677,6 +685,8 @@ func TestGitRepository_PullAndPush(t *testing.T) {
 }
 
 func TestGitRepository_AddFilesByPath(t *testing.T) {
+	ctx := getCtx()
+
 	tests := []struct {
 		implementationUpstream string
 		implementationCloned   string
@@ -744,7 +754,7 @@ func TestGitRepository_AddFilesByPath(t *testing.T) {
 						Verbose: verbose,
 					},
 				)
-				clonedRepo.MustPush(verbose)
+				mustutils.Must0(clonedRepo.Push(ctx))
 
 				require.False(clonedRepo2.MustFileByPathExists(fileName, verbose))
 				require.False(clonedRepo2.MustFileByPathExists(fileName2, verbose))

@@ -1,9 +1,10 @@
-package mustutils
+package mustutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
 
 func functionReturningOneValueAndAnError() (string, error) {
@@ -26,19 +27,19 @@ func TestMustUtils_Must(t *testing.T) {
 	require.EqualValues(
 		t,
 		"",
-		Must(functionReturningOneValueAndAnError()),
+		mustutils.Must(functionReturningOneValueAndAnError()),
 	)
 }
 
 func TestMustUtils_Must2(t *testing.T) {
-	v1, v2 := Must2(functionReturningTwoValuesAndAnError())
+	v1, v2 := mustutils.Must2(functionReturningTwoValuesAndAnError())
 
 	require.EqualValues(t, "", v1)
 	require.EqualValues(t, 123, v2)
 }
 
 func TestMustUtils_Must3(t *testing.T) {
-	v1, v2, v3 := Must3(functionReturningThreeValuesAndAnError())
+	v1, v2, v3 := mustutils.Must3(functionReturningThreeValuesAndAnError())
 
 	require.EqualValues(t, "", v1)
 	require.EqualValues(t, 123, v2)
@@ -46,7 +47,7 @@ func TestMustUtils_Must3(t *testing.T) {
 }
 
 func TestMustUtils_Must4(t *testing.T) {
-	v1, v2, v3, v4 := Must4(functionReturningFourValuesAndAnError())
+	v1, v2, v3, v4 := mustutils.Must4(functionReturningFourValuesAndAnError())
 
 	require.EqualValues(t, "", v1)
 	require.EqualValues(t, 123, v2)

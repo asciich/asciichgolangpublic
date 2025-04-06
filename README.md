@@ -10,11 +10,9 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 	* Function which return an error must not panic.
 	* Use `Set` and `Get` functions which allows to validate input and output on every access:
 		* Especially when using the provided functions to quickly automatize some stuff validating all inputs as a first step in every function helps to avoid unwanted side effects.
-	* Provide `MustAbc` functions which call `Abc` but exit fatal if `Abc` is not sucessfull. This allows to write every line a new instruction what to do without dealing with errors which is useful for CLI's:
-		* For CLI's most of the time he only option in case of an error is to abort the execution.
-		* In case you want/ can handle the error on your own just use the `Abc` function directly and you get the error returned.
+	* While there were a lot of `MustABC` functions introduced this project moves towards removing them except in favor of using `mustutils.Must`
 	* `CheckAbc` functions evaluate if `Abc` is given. If given `nil`, otherwise an error is returned.
-	* Silent/ no log output by default but provide `verbose` boolean to most functions to change this behavior. Silent CLI's are easier to handle if glued together e.g. in Bash scripts.
+	* As default there is no log output as silent CLI's are easier to handle if glued together e.g. in Bash scripts. While verbosity was initialy set by `verbose` bool this is projects moves towards replacing it in favor of using `context.Context`. See [`contextutils`](pkg/contextutils)
 	* Short cuts and code hacks are not nice but still better than doing things by hand. They are at least a good starting point of what functionality is needed and can be improved over time.
 * Releasing:
 	* Release often: Every (small) improvement is an improvemnt and will be released as soon as possible.

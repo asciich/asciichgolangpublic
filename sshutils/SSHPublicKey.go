@@ -3,18 +3,25 @@ package sshutils
 import (
 	"context"
 	"path/filepath"
+	"slices"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/contextutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type SSHPublicKey struct {
+	// Type. E.g. "ssh-ras" or "ssh-ed25519"
+	keyType string
+
+	// The effective key material
 	keyMaterial string
+
+	// Name and host usually added in "user@hoast" form at the end of a line in the *.pup key file.
 	keyUserName string
 	keyUserHost string
 }
@@ -25,6 +32,10 @@ func NewSSHPublicKey() (sshPublicKey *SSHPublicKey) {
 
 func (k *SSHPublicKey) Equals(other *SSHPublicKey) (isEqual bool) {
 	if other == nil {
+		return false
+	}
+
+	if k.keyType != other.keyType {
 		return false
 	}
 
@@ -44,7 +55,12 @@ func (k *SSHPublicKey) Equals(other *SSHPublicKey) (isEqual bool) {
 }
 
 func (k *SSHPublicKey) GetAsPublicKeyLine() (publicKeyLine string, err error) {
-	publicKeyLine = "ssh-rsa"
+	keyType, err := k.GetKeyType()
+	if err != nil {
+		return "", err
+	}
+
+	publicKeyLine += keyType
 
 	keyMaterial, err := k.GetKeyMaterialAsString()
 	if err != nil {
@@ -189,8 +205,15 @@ func (k *SSHPublicKey) SetFromString(keyMaterial string) (err error) {
 	} else if numberOfSpacesInKeyMaterial > 0 && numberOfSpacesInKeyMaterial <= 3 {
 		splittedAllElements := strings.Split(keyMaterial, " ")
 		splitted := slicesutils.TrimSpace(splittedAllElements)
-		splitted = slicesutils.RemoveMatchingStrings(splitted, "ssh-rsa")
-		splitted = slicesutils.RemoveMatchingStrings(splitted, "ssh-ed25519")
+
+		for _, possibleKeyType := range []string{"ssh-rsa", "ssh-ed25519", "ecdsa-sha2-nistp256"} {
+			if slices.Contains(splitted, possibleKeyType) {
+				k.keyType = possibleKeyType
+				splitted = slicesutils.RemoveMatchingStrings(splitted, possibleKeyType)
+				break
+			}
+		}
+
 		splitted, err = slicesutils.RemoveStringsWhichContains(splitted, "@")
 		if err != nil {
 			return err
@@ -276,6 +299,15 @@ func (s *SSHPublicKey) GetKeyMaterial() (keyMaterial string, err error) {
 	return s.keyMaterial, nil
 }
 
+// Key type like "ssh-rsa" or "ssh-ed25519"
+func (s *SSHPublicKey) GetKeyType() (keyType string, err error) {
+	if s.keyType == "" {
+		return "", tracederrors.TracedError("keyType not set")
+	}
+
+	return s.keyType, nil
+}
+
 func (s *SSHPublicKey) GetKeyUserHost() (keyUserHost string, err error) {
 	if s.keyUserHost == "" {
 		return "", tracederrors.TracedErrorf("keyUserHost not set")
@@ -309,15 +341,6 @@ func (s *SSHPublicKey) MustGetKeyUserAtHost() (userAtHost string) {
 	}
 
 	return userAtHost
-}
-
-func (s *SSHPublicKey) MustGetKeyUserHost() (keyUserHost string) {
-	keyUserHost, err := s.GetKeyUserHost()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return keyUserHost
 }
 
 func (s *SSHPublicKey) MustLoadFromSshDir(sshDirectory files.Directory, verbose bool) {

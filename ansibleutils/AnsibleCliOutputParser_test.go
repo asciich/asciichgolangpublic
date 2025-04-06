@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 )
 
 func ctx() context.Context {

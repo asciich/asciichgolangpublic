@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/logging"
-	"github.com/asciich/asciichgolangpublic/mustutils"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 

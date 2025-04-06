@@ -12,8 +12,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic"
-	"github.com/asciich/asciichgolangpublic/contextutils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 )
 
 func NewExposeMetricsCommand() (cmd *cobra.Command) {

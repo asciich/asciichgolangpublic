@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -2321,13 +2322,6 @@ func (l *LocalGitRepository) MustPullUsingGitCli(verbose bool) {
 	}
 }
 
-func (l *LocalGitRepository) MustPush(verbose bool) {
-	err := l.Push(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (l *LocalGitRepository) MustPushTagsToRemote(remoteName string, verbose bool) {
 	err := l.PushTagsToRemote(remoteName, verbose)
 	if err != nil {
@@ -2480,15 +2474,31 @@ func (l *LocalGitRepository) PullUsingGitCli(verbose bool) (err error) {
 	return nil
 }
 
-func (l *LocalGitRepository) Push(verbose bool) (err error) {
+func (l *LocalGitRepository) Push(ctx context.Context) (err error) {
 	goGitRepo, err := l.GetAsGoGitRepository()
 	if err != nil {
 		return err
 	}
 
 	err = goGitRepo.Push(&git.PushOptions{})
+	alreadyUpToDate := false
 	if err != nil {
-		return tracederrors.TracedErrorf("%w", err)
+		if errors.Is(err, git.NoErrAlreadyUpToDate) {
+			alreadyUpToDate = true
+		} else {
+			return tracederrors.TracedErrorf("local git repository push failed: %w", err)
+		}
+	}
+
+	repoPath, err := l.GetPath()
+	if err != nil {
+		return err
+	}
+
+	if alreadyUpToDate {
+		logging.LogInfoByCtxf(ctx, "Push git repository '%s'. Already up to date.", repoPath)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Pushed git repository '%s'.", repoPath)
 	}
 
 	return nil

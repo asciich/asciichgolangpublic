@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/contextutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
