@@ -670,7 +670,8 @@ func TestGitRepository_PullAndPush(t *testing.T) {
 					clonedRepo.MustGetCurrentCommitHash(verbose),
 				)
 
-				clonedRepo.MustPull(verbose)
+				err := clonedRepo.Pull(ctx)
+				require.NoError(err)
 				require.EqualValues(
 					upstreamRepo.MustGetCurrentCommitHash(verbose),
 					clonedRepo2.MustGetCurrentCommitHash(verbose),
@@ -700,8 +701,6 @@ func TestGitRepository_AddFilesByPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				upstreamRepo := getGitRepositoryToTest(tt.implementationUpstream)
@@ -756,12 +755,13 @@ func TestGitRepository_AddFilesByPath(t *testing.T) {
 				)
 				mustutils.Must0(clonedRepo.Push(ctx))
 
-				require.False(clonedRepo2.MustFileByPathExists(fileName, verbose))
-				require.False(clonedRepo2.MustFileByPathExists(fileName2, verbose))
+				require.False(t, clonedRepo2.MustFileByPathExists(fileName, verbose))
+				require.False(t, clonedRepo2.MustFileByPathExists(fileName2, verbose))
 
-				clonedRepo2.MustPull(verbose)
-				require.True(clonedRepo2.MustFileByPathExists(fileName, verbose))
-				require.True(clonedRepo2.MustFileByPathExists(fileName2, verbose))
+				err := clonedRepo2.Pull(ctx)
+				require.NoError(t, err)
+				require.True(t, clonedRepo2.MustFileByPathExists(fileName, verbose))
+				require.True(t, clonedRepo2.MustFileByPathExists(fileName2, verbose))
 			},
 		)
 	}

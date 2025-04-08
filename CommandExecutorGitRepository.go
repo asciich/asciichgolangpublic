@@ -1845,13 +1845,6 @@ func (c *CommandExecutorGitRepository) MustListTagsForCommitHash(hash string, ve
 	return tags
 }
 
-func (c *CommandExecutorGitRepository) MustPull(verbose bool) {
-	err := c.Pull(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (c *CommandExecutorGitRepository) MustPullFromRemote(pullOptions *GitPullFromRemoteOptions) {
 	err := c.PullFromRemote(pullOptions)
 	if err != nil {
@@ -1960,35 +1953,23 @@ func (c *CommandExecutorGitRepository) MustSetUserName(name string, verbose bool
 	}
 }
 
-func (c *CommandExecutorGitRepository) Pull(verbose bool) (err error) {
+func (c *CommandExecutorGitRepository) Pull(ctx context.Context) (err error) {
 	path, hostDescription, err := c.GetPathAndHostDescription()
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Pull git repository '%s' on '%s' started.",
-			path,
-			hostDescription,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Pull git repository '%s' on '%s' started.", path, hostDescription)
 
 	_, err = c.RunGitCommand(
 		[]string{"pull"},
-		verbose,
+		contextutils.GetVerboseFromContext(ctx),
 	)
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Pull git repository '%s' on '%s' finished.",
-			path,
-			hostDescription,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Pull git repository '%s' on '%s' finished.", path, hostDescription)
 
 	return
 }
