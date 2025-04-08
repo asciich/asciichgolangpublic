@@ -2301,13 +2301,6 @@ func (l *LocalGitRepository) MustListTagsForCommitHash(hash string, verbose bool
 	return tags
 }
 
-func (l *LocalGitRepository) MustPull(verbose bool) {
-	err := l.Pull(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (l *LocalGitRepository) MustPullFromRemote(pullOptions *GitPullFromRemoteOptions) {
 	err := l.PullFromRemote(pullOptions)
 	if err != nil {
@@ -2409,15 +2402,31 @@ func (l *LocalGitRepository) MustSetRemoteUrl(remoteUrl string, verbose bool) {
 	}
 }
 
-func (l *LocalGitRepository) Pull(verbose bool) (err error) {
+func (l *LocalGitRepository) Pull(ctx context.Context) (err error) {
 	worktree, err := l.GetGoGitWorktree()
 	if err != nil {
 		return err
 	}
 
+	alreadyUpToDate := false
 	err = worktree.Pull(&git.PullOptions{})
 	if err != nil {
-		return tracederrors.TracedErrorf("%w", err)
+		if errors.Is(err, git.NoErrAlreadyUpToDate) {
+			alreadyUpToDate = true
+		} else {
+			return tracederrors.TracedErrorf("%w", err)
+		}
+	}
+
+	repoPath, err := l.GetPath()
+	if err != nil {
+		return err
+	}
+
+	if alreadyUpToDate {
+		logging.LogInfoByCtxf(ctx, "Pull git repository '%s'. Already up to date.", repoPath)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Pulled git repository '%s'.", repoPath)
 	}
 
 	return nil
