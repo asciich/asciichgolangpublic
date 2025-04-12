@@ -2,6 +2,8 @@ package gopass
 
 import (
 	"context"
+	"crypto"
+	"crypto/x509"
 	"fmt"
 	"slices"
 	"strings"
@@ -12,6 +14,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
 	"github.com/asciich/asciichgolangpublic/randomgenerator"
 	"github.com/asciich/asciichgolangpublic/tlsutils/x509utils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -32,7 +36,7 @@ func CredentialExists(fullCredentialPath string) (credentialExists bool, err err
 	return slices.Contains(credentailList, fullCredentialPath), nil
 }
 
-func Generate(credentialName string, verbose bool) (generatedCredential *GopassCredential, err error) {
+func Generate(ctx context.Context, credentialName string) (generatedCredential *GopassCredential, err error) {
 	if credentialName == "" {
 		return nil, tracederrors.TracedError("credentailName is empty string")
 	}
@@ -52,9 +56,7 @@ func Generate(credentialName string, verbose bool) (generatedCredential *GopassC
 		return nil, err
 	}
 
-	if verbose {
-		logging.LogInfof("Gopass credentail '%s' generated.", credentialName)
-	}
+	logging.LogInfoByCtxf(ctx, "Gopass credentail '%s' generated.", credentialName)
 
 	return credential, nil
 }
@@ -192,17 +194,35 @@ func GetCredentialValueOrEmptyIfUnsetAsStringByPath(secretPath string) (credenti
 	return credentialValue, nil
 }
 
-func GetSslCertificate(getOptions *parameteroptions.GopassSecretOptions) (cert *x509utils.X509Certificate, err error) {
+func GetPrivateKey(ctx context.Context, getOptions *parameteroptions.GopassSecretOptions) (crypto.PrivateKey, error) {
 	if getOptions == nil {
 		return nil, tracederrors.TracedError("getOptions is nil")
 	}
 
-	credential, err := GetCredential(getOptions)
+	credential, err := GetCredentialValueAsString(getOptions)
 	if err != nil {
 		return nil, err
 	}
 
-	cert, err = credential.GetSslCertificate()
+	key, err := cryptoutils.LoadPrivateKeyFromPEMString(credential)
+	if err != nil {
+		return nil, err
+	}
+
+	return key, nil
+}
+
+func GetSslCertificate(ctx context.Context, getOptions *parameteroptions.GopassSecretOptions) (cert *x509.Certificate, err error) {
+	if getOptions == nil {
+		return nil, tracederrors.TracedError("getOptions is nil")
+	}
+
+	credential, err := GetCredentialValueAsString(getOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	cert, err = x509utils.LoadCertificateFromPEMString(credential)
 	if err != nil {
 		return nil, err
 	}
@@ -210,7 +230,7 @@ func GetSslCertificate(getOptions *parameteroptions.GopassSecretOptions) (cert *
 	return cert, nil
 }
 
-func InsertFileByString(fileContent string, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
+func InsertFileByString(ctx context.Context, fileContent string, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
 	if gopassOptions == nil {
 		return tracederrors.TracedErrorNil("gopassOptions")
 	}
@@ -252,14 +272,12 @@ func InsertFileByString(fileContent string, gopassOptions *parameteroptions.Gopa
 		return err
 	}
 
-	if gopassOptions.Verbose {
-		logging.LogChangedf("Added file content to gopass as '%s'", gopassPath)
-	}
+	logging.LogChangedByCtxf(ctx, "Added file content to gopass as '%s'", gopassPath)
 
 	return nil
 }
 
-func InsertFile(fileToInsert files.File, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
+func InsertFile(ctx context.Context, fileToInsert files.File, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
 	if fileToInsert == nil {
 		return tracederrors.TracedError("fileToInsert is nil")
 	}
@@ -273,7 +291,7 @@ func InsertFile(fileToInsert files.File, gopassOptions *parameteroptions.GopassS
 		return err
 	}
 
-	fileExists, err := fileToInsert.Exists(gopassOptions.Verbose)
+	fileExists, err := fileToInsert.Exists(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
@@ -318,20 +336,53 @@ func InsertFile(fileToInsert files.File, gopassOptions *parameteroptions.GopassS
 		return err
 	}
 
-	if gopassOptions.Verbose {
-		logging.LogInfof("Added file '%v' to gopass as '%v'", fileToInsertPath, gopassPath)
-	}
+	logging.LogInfoByCtxf(ctx, "Added file '%v' to gopass as '%v'", fileToInsertPath, gopassPath)
 
 	return nil
 }
 
-func InsertSecret(secretToInsert string, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
-	if len(secretToInsert) <= 0 {
-		return tracederrors.TracedError("secretToInsert is empty string")
+func InsertPrivateKey(ctx context.Context, privateKey crypto.PrivateKey, gopassOptions *parameteroptions.GopassSecretOptions) error {
+	if privateKey == nil {
+		return tracederrors.TracedErrorNil("privateKey")
 	}
 
 	if gopassOptions == nil {
-		return tracederrors.TracedError("gopassOptions is nil")
+		return tracederrors.TracedErrorNil("gopassOptions")
+	}
+
+	encodedKey, err := cryptoutils.EncodePrivateKeyAsPEMString(privateKey)
+	if err != nil {
+		return err
+	}
+
+	return InsertSecret(ctx, encodedKey, gopassOptions)
+}
+
+func InsertX509Certificate(ctx context.Context, cert *x509.Certificate, gopassOptions *parameteroptions.GopassSecretOptions) error {
+	if cert == nil {
+		return tracederrors.TracedErrorNil("cert")
+	}
+
+	if gopassOptions == nil {
+		return tracederrors.TracedErrorNil("gopassOptions")
+	}
+
+	encodedCert, err := x509utils.EncodeCertificateAsPEMString(cert)
+	if err != nil {
+		return err
+	}
+
+	return InsertSecret(ctx, encodedCert, gopassOptions)
+}
+
+
+func InsertSecret(ctx context.Context, secretToInsert string, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
+	if len(secretToInsert) <= 0 {
+		return tracederrors.TracedErrorEmptyString("secretToInsert")
+	}
+
+	if gopassOptions == nil {
+		return tracederrors.TracedErrorNil("gopassOptions")
 	}
 
 	gopassPath, err := gopassOptions.GetSecretPath()
@@ -370,147 +421,9 @@ func InsertSecret(secretToInsert string, gopassOptions *parameteroptions.GopassS
 		return err
 	}
 
-	if gopassOptions.Verbose {
-		logging.LogInfof("Added credentail '%v' to gopass.", gopassPath)
-	}
+	logging.LogInfoByCtxf(ctx, "Added credentail '%v' to gopass.", gopassPath)
 
 	return nil
-}
-
-func MustCredentialExists(fullCredentialPath string) (credentialExists bool) {
-	credentialExists, err := CredentialExists(fullCredentialPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return credentialExists
-}
-
-func MustGenerate(credentialName string, verbose bool) (generatedCredential *GopassCredential) {
-	generatedCredential, err := Generate(credentialName, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return generatedCredential
-}
-
-func MustGetCredential(getOptions *parameteroptions.GopassSecretOptions) (credential *GopassCredential) {
-	credential, err := GetCredential(getOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return credential
-}
-
-func MustGetCredentialList() (credentials []*GopassCredential) {
-	credentials, err := GetCredentialList()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return credentials
-}
-
-func MustGetCredentialNameList() (credentialNames []string) {
-	credentialNames, err := GetCredentialNameList()
-	if err != nil {
-		logging.LogFatalf("gopass.GetCredentialNameList failed: '%v'", err)
-	}
-
-	return credentialNames
-}
-
-func MustGetCredentialValue(getOptions *parameteroptions.GopassSecretOptions) (credentialValue string) {
-	credentialValue, err := GetCredentialValueAsString(getOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return credentialValue
-}
-
-func MustGetCredentialValueAsString(getOptions *parameteroptions.GopassSecretOptions) (credentialValue string) {
-	credentialValue, err := GetCredentialValueAsString(getOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return credentialValue
-}
-
-func MustGetCredentialValueAsStringByPath(secretPath string) (secretValue string) {
-	secretValue, err := GetCredentialValueAsStringByPath(secretPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return secretValue
-}
-
-func MustGetCredentialValueOrEmptyIfUnsetAsStringByPath(secretPath string) (credentialValue string) {
-	credentialValue, err := GetCredentialValueOrEmptyIfUnsetAsStringByPath(secretPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return credentialValue
-}
-
-func MustGetSslCertificate(getOptions *parameteroptions.GopassSecretOptions) (cert *x509utils.X509Certificate) {
-	cert, err := GetSslCertificate(getOptions)
-	if err != nil {
-		logging.LogFatalf("Gopass.GetSslCertificate: '%v'", err)
-	}
-
-	return cert
-}
-
-func MustInsertFile(fileToInsert files.File, gopassOptions *parameteroptions.GopassSecretOptions) {
-	err := InsertFile(fileToInsert, gopassOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func MustInsertSecret(secretToInsert string, gopassOptions *parameteroptions.GopassSecretOptions) {
-	err := InsertSecret(secretToInsert, gopassOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func MustSecretNameExist(secretName string) (secretExists bool) {
-	secretExists, err := SecretNameExist(secretName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return secretExists
-}
-
-func MustSync(verbose bool) {
-	err := Sync(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func MustWriteInfoToGopass(gopassPath string) {
-	err := WriteInfoToGopass(gopassPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func MustWriteSecretIntoTemporaryFile(getOptions *parameteroptions.GopassSecretOptions) (temporaryFile files.File) {
-	temporaryFile, err := WriteSecretIntoTemporaryFile(getOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return temporaryFile
 }
 
 func SecretNameExist(secretName string) (secretExists bool, err error) {
@@ -527,12 +440,12 @@ func SecretNameExist(secretName string) (secretExists bool, err error) {
 	return slicesutils.ContainsString(secretNames, secretName), nil
 }
 
-func Sync(verbose bool) (err error) {
+func Sync(ctx context.Context) (err error) {
 	_, err = commandexecutor.Bash().RunCommand(
 		&parameteroptions.RunCommandOptions{
 			Command:            []string{"gopass", "sync"},
-			Verbose:            verbose,
-			LiveOutputOnStdout: verbose,
+			Verbose:            contextutils.GetVerboseFromContext(ctx),
+			LiveOutputOnStdout: contextutils.GetVerboseFromContext(ctx),
 		},
 	)
 	if err != nil {
@@ -571,7 +484,7 @@ func WriteInfoToGopass(gopassPath string) (err error) {
 	return nil
 }
 
-func WriteSecretIntoTemporaryFile(getOptions *parameteroptions.GopassSecretOptions) (temporaryFile files.File, err error) {
+func WriteSecretIntoTemporaryFile(ctx context.Context, getOptions *parameteroptions.GopassSecretOptions) (temporaryFile files.File, err error) {
 	if getOptions == nil {
 		return nil, tracederrors.TracedError("getOptions is nil")
 	}
@@ -581,7 +494,7 @@ func WriteSecretIntoTemporaryFile(getOptions *parameteroptions.GopassSecretOptio
 		return nil, err
 	}
 
-	temporaryFile, err = credential.WriteIntoTemporaryFile(getOptions.Verbose)
+	temporaryFile, err = credential.WriteIntoTemporaryFile(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -589,6 +502,7 @@ func WriteSecretIntoTemporaryFile(getOptions *parameteroptions.GopassSecretOptio
 	return temporaryFile, nil
 }
 
+// Deprecated: Too specific implementation
 func CreateRootCaAndAddToGopass(ctx context.Context, createOptions *x509utils.X509CreateCertificateOptions, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
 	if createOptions == nil {
 		return tracederrors.TracedError("createOptions is nil")
@@ -612,7 +526,7 @@ func CreateRootCaAndAddToGopass(ctx context.Context, createOptions *x509utils.X5
 		return err
 	}
 
-	caKeyPem, err := x509utils.EncodePrivateKeyAsPEMString(rootCaCertAndKey.Key)
+	caKeyPem, err := cryptoutils.EncodePrivateKeyAsPEMString(rootCaCertAndKey.Key)
 	if err != nil {
 		return err
 	}
@@ -623,7 +537,7 @@ func CreateRootCaAndAddToGopass(ctx context.Context, createOptions *x509utils.X5
 		return err
 	}
 
-	err = InsertFileByString(ceCertPem, certOptions)
+	err = InsertFileByString(ctx, ceCertPem, certOptions)
 	if err != nil {
 		return err
 	}
@@ -634,12 +548,12 @@ func CreateRootCaAndAddToGopass(ctx context.Context, createOptions *x509utils.X5
 		return err
 	}
 
-	err = InsertFileByString(caKeyPem, keyOptions)
+	err = InsertFileByString(ctx, caKeyPem, keyOptions)
 	if err != nil {
 		return err
 	}
 
-	logging.LogInfoByCtx(ctx, "Create root CA and add to gopass finished.")	
+	logging.LogInfoByCtx(ctx, "Create root CA and add to gopass finished.")
 
 	return nil
 }

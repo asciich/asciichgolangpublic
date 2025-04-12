@@ -4,6 +4,7 @@ import (
 	"crypto"
 	"crypto/x509"
 
+	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -18,6 +19,15 @@ func (x *X509CertKeyPair) GetX509Certificate() (*x509.Certificate, error) {
 	}
 
 	return GetX509CertificateDeepCopy(x.Cert), nil
+}
+
+func (x *X509CertKeyPair) GetPrivateKeyAsPEMString() (string, error) {
+	privateKey, err := x.GetPrivateKey()
+	if err != nil {
+		return "", err
+	}
+
+	return cryptoutils.EncodePrivateKeyAsPEMString(privateKey)
 }
 
 func (x *X509CertKeyPair) GetPrivateKey() (crypto.PrivateKey, error) {
@@ -66,5 +76,5 @@ func (x *X509CertKeyPair) GetPublicKey() (crypto.PublicKey, error) {
 		return nil, err
 	}
 
-	return GetPublicKeyFromPrivateKey(privateKey)
+	return cryptoutils.GetPublicKeyFromPrivateKey(privateKey)
 }

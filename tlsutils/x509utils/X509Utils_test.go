@@ -10,7 +10,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/datatypes/bigintutils"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -23,8 +25,8 @@ func Test_GetPublicKeyFromPrivateKey(t *testing.T) {
 	generatedKey := mustutils.Must(rsa.GenerateKey(rand.Reader, 4096))
 	generatedKey2 := mustutils.Must(rsa.GenerateKey(rand.Reader, 4096))
 
-	publicKey := mustutils.Must(GetPublicKeyFromPrivateKey(generatedKey))
-	publicKey2 := mustutils.Must(GetPublicKeyFromPrivateKey(generatedKey2))
+	publicKey := mustutils.Must(cryptoutils.GetPublicKeyFromPrivateKey(generatedKey))
+	publicKey2 := mustutils.Must(cryptoutils.GetPublicKeyFromPrivateKey(generatedKey2))
 
 	require.True(t, generatedKey.PublicKey.Equal(publicKey))
 	require.True(t, generatedKey2.PublicKey.Equal(publicKey2))
@@ -219,11 +221,11 @@ func Test_EndcodeAndDecodePrivateKeyAsPem(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				derEncoded := mustutils.Must(EncodePrivateKeyAsPEMString(rootCaCertAndKey.Key))
+				derEncoded := mustutils.Must(cryptoutils.EncodePrivateKeyAsPEMString(rootCaCertAndKey.Key))
 				require.True(t, strings.HasPrefix(derEncoded, "-----BEGIN PRIVATE KEY-----\n"))
 				require.True(t, strings.HasSuffix(derEncoded, "\n-----END PRIVATE KEY-----\n"))
 
-				key2 := mustutils.Must(LoadPrivateKeyFromPEMString(derEncoded))
+				key2 := mustutils.Must(cryptoutils.LoadPrivateKeyFromPEMString(derEncoded))
 
 				require.True(t, mustutils.Must(IsPrivateKeyEqual(rootCaCertAndKey.Key, key2)))
 			},
@@ -282,4 +284,13 @@ func Test_GetSubjectAndSerialString(t *testing.T) {
 			},
 		)
 	}
+}
+
+func Test_GenerateSerialNumber(t *testing.T) {
+	generated, err := GenerateCertificateSerialNumber(getCtx())
+	require.NoError(t, err)
+
+	generatedStr, err := bigintutils.ToHexStringColonSeparated(generated)
+	require.NoError(t, err)
+	require.True(t, len(generatedStr) > 4)
 }
