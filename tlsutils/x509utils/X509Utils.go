@@ -522,3 +522,17 @@ func GenerateCertificateSerialNumber(ctx context.Context) (serialNumber *big.Int
 
 	return serialNumber, nil
 }
+
+func GenerateCertificateSerialNumberAsString(ctx context.Context) (string, error) {
+	serial, err := GenerateCertificateSerialNumber(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	ret, err := bigintutils.ToDecimalString(serial)
+	if err != nil {
+		return "", err
+	}
+
+	return ret, nil
+}
