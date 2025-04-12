@@ -274,6 +274,7 @@ func Test_GetSubjectAndSerialString(t *testing.T) {
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "RootOrg",
+						SerialNumber: "1",
 					},
 				)
 				require.NoError(t, err)

@@ -27,7 +27,7 @@ func GetNativeX509CertificateHandler() (Handler X509CertificateHandler) {
 
 // To generate certificates the cert library provided by golang uses a cert struct as a template for the cert to create.
 // This function will generate this template by the given options.
-func getCertTemplate(options *X509CreateCertificateOptions) (certTemplate *x509.Certificate, err error) {
+func getCertTemplate(ctx context.Context, options *X509CreateCertificateOptions) (certTemplate *x509.Certificate, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -37,7 +37,7 @@ func getCertTemplate(options *X509CreateCertificateOptions) (certTemplate *x509.
 		return nil, err
 	}
 
-	serialNumber, err := options.GetSerialNumberOrDefaultIfUnsetAsStringBigInt()
+	serialNumber, err := options.GetSerialNumberOrGenerateIfUnsetBigInt(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +225,7 @@ func (n *NativeX509CertificateHandler) CreateEndEndityCertificate(ctx context.Co
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	certTemplate, err := getCertTemplate(options)
+	certTemplate, err := getCertTemplate(ctx, options)
 	if err != nil {
 		return nil, err
 	}
@@ -245,7 +245,7 @@ func (n *NativeX509CertificateHandler) CreateIntermediateCertificate(ctx context
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	certTemplate, err := getCertTemplate(options)
+	certTemplate, err := getCertTemplate(ctx, options)
 	if err != nil {
 		return nil, err
 	}
@@ -267,7 +267,7 @@ func (n *NativeX509CertificateHandler) CreateRootCaCertificate(ctx context.Conte
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	certTemplate, err := getCertTemplate(options)
+	certTemplate, err := getCertTemplate(ctx, options)
 	if err != nil {
 		return nil, err
 	}
@@ -289,7 +289,7 @@ func (n *NativeX509CertificateHandler) CreateSelfSignedCertificate(ctx context.C
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	certTemplate, err := getCertTemplate(options)
+	certTemplate, err := getCertTemplate(ctx, options)
 	if err != nil {
 		return nil, err
 	}
