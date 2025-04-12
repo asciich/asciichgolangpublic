@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/bigints"
+	"github.com/asciich/asciichgolangpublic/datatypes/bigintutils"
 	"github.com/asciich/asciichgolangpublic/datetime"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -206,7 +206,7 @@ func (o *X509CreateCertificateOptions) IsCertificateOutputFilePathSet() (isSet b
 }
 
 func (x *X509CreateCertificateOptions) GetAdditionalSansOrEmptySliceIfUnset() (additionalSans []string, err error) {
-	if x.AdditionalSans == nil {
+	if len(x.AdditionalSans) <= 0 {
 		return []string{}, nil
 	}
 
@@ -601,7 +601,7 @@ func (x *X509CreateCertificateOptions) GetSerialNumberAsBigInt() (serialNumber *
 		return nil, err
 	}
 
-	serialNumber, err = bigints.GetFromDecimalString(serialString)
+	serialNumber, err = bigintutils.GetFromDecimalString(serialString)
 	if err != nil {
 		return nil, tracederrors.TracedErrorf("parse serial number '%s' as big int failed: %w", serialNumber, err)
 	}

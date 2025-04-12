@@ -1,6 +1,7 @@
 package gopass
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -10,6 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/tlsutils/x509utils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -216,7 +218,7 @@ func (c *GopassCredential) SetName(name string) (err error) {
 	return nil
 }
 
-func (c *GopassCredential) WriteIntoFile(outputFile files.File, verbose bool) (err error) {
+func (c *GopassCredential) WriteIntoFile(ctx context.Context, outputFile files.File) (err error) {
 	if outputFile == nil {
 		return tracederrors.TracedError("outputFile is nil")
 	}
@@ -226,127 +228,36 @@ func (c *GopassCredential) WriteIntoFile(outputFile files.File, verbose bool) (e
 		return err
 	}
 
-	err = outputFile.WriteBytes(contentBytes, verbose)
+	err = outputFile.WriteBytes(contentBytes, contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		filePath, err := outputFile.GetLocalPath()
-		if err != nil {
-			return err
-		}
-
-		credentialName, err := c.GetName()
-		if err != nil {
-			return err
-		}
-
-		logging.LogInfof("Wrote credential from gopass '%v' to file '%v'.", credentialName, filePath)
+	filePath, err := outputFile.GetLocalPath()
+	if err != nil {
+		return err
 	}
+
+	credentialName, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Wrote credential from gopass '%v' to file '%v'.", credentialName, filePath)
 
 	return nil
 }
 
-func (c *GopassCredential) WriteIntoTemporaryFile(verbose bool) (temporaryFile files.File, err error) {
-	temporaryFile, err = tempfiles.CreateEmptyTemporaryFile(verbose)
+func (c *GopassCredential) WriteIntoTemporaryFile(ctx context.Context) (temporaryFile files.File, err error) {
+	temporaryFile, err = tempfiles.CreateEmptyTemporaryFile(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.WriteIntoFile(temporaryFile, verbose)
+	err = c.WriteIntoFile(ctx, temporaryFile)
 	if err != nil {
 		return nil, err
 	}
 
 	return temporaryFile, nil
-}
-
-func (g *GopassCredential) MustExists() (exists bool) {
-	exists, err := g.Exists()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return exists
-}
-
-func (g *GopassCredential) MustGetAsBytes() (credential []byte) {
-	credential, err := g.GetAsBytes()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return credential
-}
-
-func (g *GopassCredential) MustGetAsInt() (value int) {
-	value, err := g.GetAsInt()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return value
-}
-
-func (g *GopassCredential) MustGetAsString() (credential string) {
-	credential, err := g.GetAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return credential
-}
-
-func (g *GopassCredential) MustGetSslCertificate() (sslCert *x509utils.X509Certificate) {
-	sslCert, err := g.GetSslCertificate()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return sslCert
-}
-
-func (g *GopassCredential) MustIncrementIntValue() {
-	err := g.IncrementIntValue()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GopassCredential) MustSetByInt(newValue int) {
-	err := g.SetByInt(newValue)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GopassCredential) MustSetByString(newValue string) {
-	err := g.SetByString(newValue)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GopassCredential) MustSetName(name string) {
-	err := g.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GopassCredential) MustWriteIntoFile(outputFile files.File, verbose bool) {
-	err := g.WriteIntoFile(outputFile, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GopassCredential) MustWriteIntoTemporaryFile(verbose bool) (temporaryFile files.File) {
-	temporaryFile, err := g.WriteIntoTemporaryFile(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return temporaryFile
 }

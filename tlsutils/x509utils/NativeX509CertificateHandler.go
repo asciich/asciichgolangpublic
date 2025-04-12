@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -142,7 +143,7 @@ func (n *NativeX509CertificateHandler) generateAndAddKey(ctx context.Context, ce
 		return nil, err
 	}
 
-	publicKey, err := GetPublicKeyFromPrivateKey(generatedKey)
+	publicKey, err := cryptoutils.GetPublicKeyFromPrivateKey(generatedKey)
 	if err != nil {
 		return nil, err
 	}

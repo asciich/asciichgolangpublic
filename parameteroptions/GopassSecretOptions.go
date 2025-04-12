@@ -21,7 +21,6 @@ type GopassSecretOptions struct {
 	SecretPath string
 
 	Overwrite bool
-	Verbose   bool
 }
 
 func NewGopassSecretOptions() (g *GopassSecretOptions) {
@@ -90,11 +89,6 @@ func (g *GopassSecretOptions) GetSecretPath() (secretPath string, err error) {
 	}
 
 	return secretPath, nil
-}
-
-func (g *GopassSecretOptions) GetVerbose() (verbose bool) {
-
-	return g.Verbose
 }
 
 func (g *GopassSecretOptions) MustGetBaseName() (baseName string) {
@@ -187,8 +181,4 @@ func (g *GopassSecretOptions) SetSecretPath(secretPath string) (err error) {
 	g.SecretPath = secretPath
 
 	return nil
-}
-
-func (g *GopassSecretOptions) SetVerbose(verbose bool) {
-	g.Verbose = verbose
 }
