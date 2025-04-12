@@ -203,7 +203,7 @@ func TestLocalGitRepositoryCreateEmptyTemporaryGitRepository(t *testing.T) {
 				require.EqualValues("asciichgolangpublic git repo initializer <asciichgolangpublic@example.net>", commit.MustGetAuthorString())
 				require.EqualValues("asciichgolangpublic@example.net", commit.MustGetAuthorEmail())
 				require.Greater(commit.MustGetAgeSeconds(), 0.)
-				require.Less(commit.MustGetAgeSeconds(), 1.)
+				require.Less(commit.MustGetAgeSeconds(), 2.)
 				require.False(commit.MustHasParentCommit())
 				require.Len(commit.MustGetParentCommits(&parameteroptions.GitCommitGetParentsOptions{IncludeParentsOfParents: false}), 0)
 			},

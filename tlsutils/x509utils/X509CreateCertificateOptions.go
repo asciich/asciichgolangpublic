@@ -1,6 +1,7 @@
 package x509utils
 
 import (
+	"context"
 	"crypto/x509/pkix"
 	"math/big"
 	"strings"
@@ -27,8 +28,6 @@ type X509CreateCertificateOptions struct {
 
 	KeyOutputFilePath         string
 	CertificateOutputFilePath string
-
-	OverwriteExistingCertificateInGopass bool // Will be removed soon!
 }
 
 func NewX509CreateCertificateOptions() (x *X509CreateCertificateOptions) {
@@ -243,11 +242,6 @@ func (x *X509CreateCertificateOptions) GetLocality() (locality string, err error
 	return x.Locality, nil
 }
 
-func (x *X509CreateCertificateOptions) GetOverwriteExistingCertificateInGopass() (overwriteExistingCertificateInGopass bool, err error) {
-
-	return x.OverwriteExistingCertificateInGopass, nil
-}
-
 func (x *X509CreateCertificateOptions) MustGetAdditionalSans() (additionalSans []string) {
 	additionalSans, err := x.GetAdditionalSans()
 	if err != nil {
@@ -344,15 +338,6 @@ func (x *X509CreateCertificateOptions) MustGetLocallity() (locality string) {
 	return locality
 }
 
-func (x *X509CreateCertificateOptions) MustGetOverwriteExistingCertificateInGopass() (overwriteExistingCertificateInGopass bool) {
-	overwriteExistingCertificateInGopass, err := x.GetOverwriteExistingCertificateInGopass()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return overwriteExistingCertificateInGopass
-}
-
 func (x *X509CreateCertificateOptions) MustGetSubjectStringForOpenssl() (subjectString string) {
 	subjectString, err := x.GetSubjectStringForOpenssl()
 	if err != nil {
@@ -408,13 +393,6 @@ func (x *X509CreateCertificateOptions) MustSetKeyOutputFilePath(keyOutputFilePat
 
 func (x *X509CreateCertificateOptions) MustSetLocality(locality string) {
 	err := x.SetLocality(locality)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (x *X509CreateCertificateOptions) MustSetOverwriteExistingCertificateInGopass(overwriteExistingCertificateInGopass bool) {
-	err := x.SetOverwriteExistingCertificateInGopass(overwriteExistingCertificateInGopass)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -502,12 +480,6 @@ func (x *X509CreateCertificateOptions) SetLocality(locality string) (err error) 
 	return nil
 }
 
-func (x *X509CreateCertificateOptions) SetOverwriteExistingCertificateInGopass(overwriteExistingCertificateInGopass bool) (err error) {
-	x.OverwriteExistingCertificateInGopass = overwriteExistingCertificateInGopass
-
-	return nil
-}
-
 func (x *X509CreateCertificateOptions) SetUseTemporaryDirectory(useTemporaryDirectory bool) (err error) {
 	x.UseTemporaryDirectory = useTemporaryDirectory
 
@@ -587,12 +559,17 @@ func (x *X509CreateCertificateOptions) IsSerialNumberSet() (isSet bool) {
 	return x.SerialNumber != ""
 }
 
-func (x *X509CreateCertificateOptions) GetSerialNumberOrDefaultIfUnsetAsStringBigInt() (serialNumber *big.Int, err error) {
-	if x.IsSerialNumberSet() {
-		return x.GetSerialNumberAsBigInt()
+func (x *X509CreateCertificateOptions) GetSerialNumberOrGenerateIfUnsetBigInt(ctx context.Context) (serialNumber *big.Int, err error) {
+	if !x.IsSerialNumberSet() {
+		serial, err := GenerateCertificateSerialNumberAsString(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		x.SerialNumber = serial
 	}
 
-	return big.NewInt(1), nil
+	return x.GetSerialNumberAsBigInt()
 }
 
 func (x *X509CreateCertificateOptions) GetSerialNumberAsBigInt() (serialNumber *big.Int, err error) {
