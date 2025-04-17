@@ -1,10 +1,11 @@
-package x509utils
+package x509utils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/testutils"
+	"github.com/asciich/asciichgolangpublic/tlsutils/x509utils"
 )
 
 func Test_CertKeyPairMatches(t *testing.T) {
@@ -23,7 +24,7 @@ func Test_CertKeyPairMatches(t *testing.T) {
 
 				certKeyPair, err := handler.CreateRootCaCertificate(
 					getCtx(),
-					&X509CreateCertificateOptions{
+					&x509utils.X509CreateCertificateOptions{
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "myOrg root",

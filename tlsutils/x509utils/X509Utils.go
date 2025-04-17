@@ -21,6 +21,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
+var ErrNoValidCertificateChain = errors.New("no valid certificate chain")
+
 func IsIntermediateCertificate(cert *x509.Certificate) (isIntermediateCertificate bool, err error) {
 	if cert == nil {
 		return false, tracederrors.TracedErrorNil("cert")
@@ -535,4 +537,53 @@ func GenerateCertificateSerialNumberAsString(ctx context.Context) (string, error
 	}
 
 	return ret, nil
+}
+
+func ValidateCertificateChain(ctx context.Context, certToValidate *x509.Certificate, trustedList []*x509.Certificate, intermediatesList []*x509.Certificate) (chains [][]*x509.Certificate, err error) {
+	if certToValidate == nil {
+		return nil, tracederrors.TracedErrorNil("certToValidate")
+	}
+
+	if trustedList == nil {
+		return nil, tracederrors.TracedErrorNil("trustedList")
+	}
+
+	if len(trustedList) == 0 {
+		return nil, tracederrors.TracedError("trustedList has no entries.")
+	}
+
+	if intermediatesList == nil {
+		return nil, tracederrors.TracedErrorNil("intermediatesList")
+	}
+
+	rootCAPool := x509.NewCertPool()
+	for _, rootCert := range trustedList {
+		if rootCert == nil {
+			return nil, tracederrors.TracedErrorf("Nil pointer found in trustedList '%v'", trustedList)
+		}
+		rootCAPool.AddCert(rootCert)
+	}
+
+	intermediateCAPool := x509.NewCertPool()
+	for _, intCert := range intermediatesList {
+		if intCert == nil {
+			return nil, tracederrors.TracedErrorf("Nil pointer found in intermediatesList '%v'", trustedList)
+		}
+		intermediateCAPool.AddCert(intCert)
+	}
+
+	verifyOptions := x509.VerifyOptions{
+		Roots:         rootCAPool,
+		Intermediates: intermediateCAPool,
+		CurrentTime:   time.Now(),
+	}
+
+	chains, err = certToValidate.Verify(verifyOptions)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("%w: %w", ErrNoValidCertificateChain, err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Found %d certificate chains to '%s'.", len(chains), FormatForLogging(certToValidate))
+
+	return chains, nil
 }
