@@ -133,9 +133,14 @@ func (n *NativeX509CertificateHandler) GeneratePrivateKey(ctx context.Context) (
 	return privateKey, nil
 }
 
-func (n *NativeX509CertificateHandler) generateAndAddKey(ctx context.Context, cert *x509.Certificate) (certKeyPair *X509CertKeyPair, err error) {
+func (n *NativeX509CertificateHandler) generateAndAddKey(ctx context.Context, cert *x509.Certificate, keySize int) (certKeyPair *X509CertKeyPair, err error) {
 	if cert == nil {
 		return nil, tracederrors.TracedErrorNil("cert")
+	}
+
+	const minKeySize = 1024
+	if keySize < minKeySize {
+		return nil, tracederrors.TracedErrorf("Invalid key size '%d'. Minimal key site is '%d'.", keySize, minKeySize)
 	}
 
 	generatedKey, err := n.GeneratePrivateKey(ctx)
@@ -230,12 +235,12 @@ func (n *NativeX509CertificateHandler) CreateEndEndityCertificate(ctx context.Co
 		return nil, err
 	}
 
-	endEndityCertAndKey, err = n.generateAndAddKey(ctx, certTemplate)
+	endEndityCertAndKey, err = n.generateAndAddKey(ctx, certTemplate, options.GetPrivateKeySizeOrDefaultIfUnset(ctx))
 	if err != nil {
 		return nil, err
 	}
 
-	logging.LogChangedByCtxf(ctx, "Generated root CA certificate '%s'", FormatForLogging(endEndityCertAndKey.Cert))
+	logging.LogChangedByCtxf(ctx, "Generated end endity certificate '%s'", FormatForLogging(endEndityCertAndKey.Cert))
 
 	return endEndityCertAndKey, nil
 }
@@ -252,12 +257,12 @@ func (n *NativeX509CertificateHandler) CreateIntermediateCertificate(ctx context
 
 	certTemplate.IsCA = true
 
-	intermediateCertAndKey, err = n.generateAndAddKey(ctx, certTemplate)
+	intermediateCertAndKey, err = n.generateAndAddKey(ctx, certTemplate, options.GetPrivateKeySizeOrDefaultIfUnset(ctx))
 	if err != nil {
 		return nil, err
 	}
 
-	logging.LogChangedByCtxf(ctx, "Generated root CA certificate '%s'", FormatForLogging(intermediateCertAndKey.Cert))
+	logging.LogChangedByCtxf(ctx, "Generated intermediate certificate '%s'", FormatForLogging(intermediateCertAndKey.Cert))
 
 	return intermediateCertAndKey, nil
 }
@@ -274,7 +279,7 @@ func (n *NativeX509CertificateHandler) CreateRootCaCertificate(ctx context.Conte
 
 	certTemplate.IsCA = true
 
-	rootCaCertAndKey, err = n.generateAndAddKey(ctx, certTemplate)
+	rootCaCertAndKey, err = n.generateAndAddKey(ctx, certTemplate, options.GetPrivateKeySizeOrDefaultIfUnset(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -294,7 +299,7 @@ func (n *NativeX509CertificateHandler) CreateSelfSignedCertificate(ctx context.C
 		return nil, err
 	}
 
-	selfSignedCertAndKey, err = n.generateAndAddKey(ctx, certTemplate)
+	selfSignedCertAndKey, err = n.generateAndAddKey(ctx, certTemplate, options.GetPrivateKeySizeOrDefaultIfUnset(ctx))
 	if err != nil {
 		return nil, err
 	}

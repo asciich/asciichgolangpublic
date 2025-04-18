@@ -1,7 +1,6 @@
-package x509utils
+package x509utils_test
 
 import (
-	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -15,11 +14,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
+	"github.com/asciich/asciichgolangpublic/tlsutils/x509utils"
 )
-
-func getCtx() context.Context {
-	return contextutils.ContextVerbose()
-}
 
 func Test_GetPublicKeyFromPrivateKey(t *testing.T) {
 	generatedKey := mustutils.Must(rsa.GenerateKey(rand.Reader, 4096))
@@ -50,7 +46,7 @@ func Test_IsCertificateMatchingPrivateKey(t *testing.T) {
 				handler := getX509CertificateHandlerToTest(tt.implementationName)
 				rootCaCertAndKey, err := handler.CreateRootCaCertificate(
 					getCtx(),
-					&X509CreateCertificateOptions{
+					&x509utils.X509CreateCertificateOptions{
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "RootOrg",
@@ -61,8 +57,8 @@ func Test_IsCertificateMatchingPrivateKey(t *testing.T) {
 				anotherKey, err := handler.GeneratePrivateKey(getCtx())
 				require.NoError(t, err)
 
-				require.True(t, mustutils.Must(IsCertificateMatchingPrivateKey(rootCaCertAndKey.Cert, rootCaCertAndKey.Key)))
-				require.False(t, mustutils.Must(IsCertificateMatchingPrivateKey(rootCaCertAndKey.Cert, anotherKey)))
+				require.True(t, mustutils.Must(x509utils.IsCertificateMatchingPrivateKey(rootCaCertAndKey.Cert, rootCaCertAndKey.Key)))
+				require.False(t, mustutils.Must(x509utils.IsCertificateMatchingPrivateKey(rootCaCertAndKey.Cert, anotherKey)))
 			},
 		)
 	}
@@ -85,20 +81,22 @@ func Test_IsCertificateSignedBy(t *testing.T) {
 				handler := getX509CertificateHandlerToTest(tt.implementationName)
 				rootCaCertAndKey, err := handler.CreateRootCaCertificate(
 					ctx,
-					&X509CreateCertificateOptions{
-						CountryName:  "CH",
-						Locality:     "Zurich",
-						Organization: "RootOrg",
+					&x509utils.X509CreateCertificateOptions{
+						CountryName:    "CH",
+						Locality:       "Zurich",
+						Organization:   "RootOrg",
+						PrivateKeySize: 1024,
 					},
 				)
 				require.NoError(t, err)
 
 				intermediateCertAndKey, err := handler.CreateSignedIntermediateCertificate(
 					ctx,
-					&X509CreateCertificateOptions{
-						CountryName:  "CH",
-						Locality:     "Zurich",
-						Organization: "IntermediateOrg",
+					&x509utils.X509CreateCertificateOptions{
+						CountryName:    "CH",
+						Locality:       "Zurich",
+						Organization:   "IntermediateOrg",
+						PrivateKeySize: 1024,
 					},
 					rootCaCertAndKey,
 				)
@@ -106,19 +104,20 @@ func Test_IsCertificateSignedBy(t *testing.T) {
 
 				selfSignedCertAndKey, err := handler.CreateSelfSignedCertificate(
 					ctx,
-					&X509CreateCertificateOptions{
-						CountryName:  "CH",
-						Locality:     "Zurich",
-						Organization: "SelfSignedOrg",
+					&x509utils.X509CreateCertificateOptions{
+						CountryName:    "CH",
+						Locality:       "Zurich",
+						Organization:   "SelfSignedOrg",
+						PrivateKeySize: 1024,
 					},
 				)
 				require.NoError(t, err)
 
 				ctx := contextutils.ContextVerbose()
 
-				require.True(t, mustutils.Must(IsCertSignedBy(ctx, intermediateCertAndKey.Cert, rootCaCertAndKey.Cert)))
-				require.False(t, mustutils.Must(IsCertSignedBy(ctx, intermediateCertAndKey.Cert, selfSignedCertAndKey.Cert)))
-				require.False(t, mustutils.Must(IsCertSignedBy(ctx, rootCaCertAndKey.Cert, intermediateCertAndKey.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsCertSignedBy(ctx, intermediateCertAndKey.Cert, rootCaCertAndKey.Cert)))
+				require.False(t, mustutils.Must(x509utils.IsCertSignedBy(ctx, intermediateCertAndKey.Cert, selfSignedCertAndKey.Cert)))
+				require.False(t, mustutils.Must(x509utils.IsCertSignedBy(ctx, rootCaCertAndKey.Cert, intermediateCertAndKey.Cert)))
 			},
 		)
 	}
@@ -142,16 +141,17 @@ func Test_EndcodeAndDecodeAsDER(t *testing.T) {
 				handler := getX509CertificateHandlerToTest(tt.implementationName)
 				rootCaCertAndKey, err := handler.CreateRootCaCertificate(
 					ctx,
-					&X509CreateCertificateOptions{
-						CountryName:  "CH",
-						Locality:     "Zurich",
-						Organization: "RootOrg",
+					&x509utils.X509CreateCertificateOptions{
+						CountryName:    "CH",
+						Locality:       "Zurich",
+						Organization:   "RootOrg",
+						PrivateKeySize: 1024,
 					},
 				)
 				require.NoError(t, err)
 
-				derEncoded := mustutils.Must(EncodeCertificateAsDerBytes(rootCaCertAndKey.Cert))
-				cert2 := mustutils.Must(LoadCertificateFromDerBytes(derEncoded))
+				derEncoded := mustutils.Must(x509utils.EncodeCertificateAsDerBytes(rootCaCertAndKey.Cert))
+				cert2 := mustutils.Must(x509utils.LoadCertificateFromDerBytes(derEncoded))
 
 				require.True(t, rootCaCertAndKey.Cert.Equal(cert2))
 			},
@@ -176,19 +176,20 @@ func Test_EndcodeAndDecodeAsPEM(t *testing.T) {
 				handler := getX509CertificateHandlerToTest(tt.implementationName)
 				rootCaCertAndKey, err := handler.CreateRootCaCertificate(
 					ctx,
-					&X509CreateCertificateOptions{
-						CountryName:  "CH",
-						Locality:     "Zurich",
-						Organization: "RootOrg",
+					&x509utils.X509CreateCertificateOptions{
+						CountryName:    "CH",
+						Locality:       "Zurich",
+						Organization:   "RootOrg",
+						PrivateKeySize: 1024,
 					},
 				)
 				require.NoError(t, err)
 
-				derEncoded := mustutils.Must(EncodeCertificateAsPEMString(rootCaCertAndKey.Cert))
+				derEncoded := mustutils.Must(x509utils.EncodeCertificateAsPEMString(rootCaCertAndKey.Cert))
 				require.True(t, strings.HasPrefix(derEncoded, "-----BEGIN CERTIFICATE-----\n"))
 				require.True(t, strings.HasSuffix(derEncoded, "\n-----END CERTIFICATE-----\n"))
 
-				cert2 := mustutils.Must(LoadCertificateFromPEMString(derEncoded))
+				cert2 := mustutils.Must(x509utils.LoadCertificateFromPEMString(derEncoded))
 
 				require.True(t, rootCaCertAndKey.Cert.Equal(cert2))
 			},
@@ -213,10 +214,11 @@ func Test_EndcodeAndDecodePrivateKeyAsPem(t *testing.T) {
 				handler := getX509CertificateHandlerToTest(tt.implementationName)
 				rootCaCertAndKey, err := handler.CreateRootCaCertificate(
 					ctx,
-					&X509CreateCertificateOptions{
-						CountryName:  "CH",
-						Locality:     "Zurich",
-						Organization: "RootOrg",
+					&x509utils.X509CreateCertificateOptions{
+						CountryName:    "CH",
+						Locality:       "Zurich",
+						Organization:   "RootOrg",
+						PrivateKeySize: 1024,
 					},
 				)
 				require.NoError(t, err)
@@ -227,7 +229,7 @@ func Test_EndcodeAndDecodePrivateKeyAsPem(t *testing.T) {
 
 				key2 := mustutils.Must(cryptoutils.LoadPrivateKeyFromPEMString(derEncoded))
 
-				require.True(t, mustutils.Must(IsPrivateKeyEqual(rootCaCertAndKey.Key, key2)))
+				require.True(t, mustutils.Must(x509utils.IsPrivateKeyEqual(rootCaCertAndKey.Key, key2)))
 			},
 		)
 	}
@@ -235,7 +237,7 @@ func Test_EndcodeAndDecodePrivateKeyAsPem(t *testing.T) {
 
 func Test_GetValidityDuration(t *testing.T) {
 	t.Run("nil", func(t *testing.T) {
-		vd, err := GetValidityDuration(nil)
+		vd, err := x509utils.GetValidityDuration(nil)
 		require.Error(t, err)
 		require.Nil(t, vd)
 	})
@@ -246,7 +248,7 @@ func Test_GetValidityDuration(t *testing.T) {
 			NotBefore: start,
 			NotAfter:  start.Add(time.Hour * 24),
 		}
-		vd, err := GetValidityDuration(cert)
+		vd, err := x509utils.GetValidityDuration(cert)
 		require.NoError(t, err)
 		require.EqualValues(t, time.Hour*24, *vd)
 	})
@@ -270,16 +272,17 @@ func Test_GetSubjectAndSerialString(t *testing.T) {
 				handler := getX509CertificateHandlerToTest(tt.implementationName)
 				rootCaCertAndKey, err := handler.CreateRootCaCertificate(
 					ctx,
-					&X509CreateCertificateOptions{
-						CountryName:  "CH",
-						Locality:     "Zurich",
-						Organization: "RootOrg",
-						SerialNumber: "1",
+					&x509utils.X509CreateCertificateOptions{
+						CountryName:    "CH",
+						Locality:       "Zurich",
+						Organization:   "RootOrg",
+						SerialNumber:   "1",
+						PrivateKeySize: 1024,
 					},
 				)
 				require.NoError(t, err)
 
-				out, err := GetSubjectAndSerialString(rootCaCertAndKey.Cert)
+				out, err := x509utils.GetSubjectAndSerialString(rootCaCertAndKey.Cert)
 				require.NoError(t, err)
 				require.EqualValues(t, "O=RootOrg,L=Zurich,ST=,C=CH serial: 01", out)
 			},
@@ -288,10 +291,200 @@ func Test_GetSubjectAndSerialString(t *testing.T) {
 }
 
 func Test_GenerateSerialNumber(t *testing.T) {
-	generated, err := GenerateCertificateSerialNumber(getCtx())
+	generated, err := x509utils.GenerateCertificateSerialNumber(getCtx())
 	require.NoError(t, err)
 
 	generatedStr, err := bigintutils.ToHexStringColonSeparated(generated)
 	require.NoError(t, err)
 	require.True(t, len(generatedStr) > 4)
+}
+
+func Test_ValidateCertificateChain(t *testing.T) {
+	ctx := getCtx()
+
+	handler := x509utils.GetDefaultHandler()
+
+	rootCeCertAndKey, err := handler.CreateRootCaCertificate(
+		ctx,
+		&x509utils.X509CreateCertificateOptions{
+			CountryName:    "CH",
+			Locality:       "Zurich",
+			Organization:   "myOrg root",
+			PrivateKeySize: 1024,
+		},
+	)
+	require.NoError(t, err)
+
+	intermediateCertAndKey, err := handler.CreateSignedIntermediateCertificate(
+		ctx,
+		&x509utils.X509CreateCertificateOptions{
+			CountryName:    "CH",
+			Locality:       "Zurich",
+			Organization:   "myOrg intermediate",
+			PrivateKeySize: 1024,
+		},
+		rootCeCertAndKey,
+	)
+	require.NoError(t, err)
+
+	endEndityCertAndKey, err := handler.CreateSignedEndEndityCertificate(
+		ctx,
+		&x509utils.X509CreateCertificateOptions{
+			CommonName:     "mytestcn.example.net",
+			CountryName:    "CH",
+			Locality:       "Zurich",
+			Organization:   "myOrg endEndity",
+			AdditionalSans: []string{"mytestsan1.example.net", "mytestsan2.example.net"},
+			PrivateKeySize: 1024,
+		},
+		intermediateCertAndKey,
+	)
+	require.NoError(t, err)
+
+	rootCeCertAndKey2, err := handler.CreateRootCaCertificate(
+		ctx,
+		&x509utils.X509CreateCertificateOptions{
+			CountryName:    "CH",
+			Locality:       "Zurich",
+			Organization:   "myOrg root2",
+			PrivateKeySize: 1024,
+		},
+	)
+	require.NoError(t, err)
+
+	intermediateCertAndKey2, err := handler.CreateSignedIntermediateCertificate(
+		ctx,
+		&x509utils.X509CreateCertificateOptions{
+			CountryName:    "CH",
+			Locality:       "Zurich",
+			Organization:   "myOrg intermediate2",
+			PrivateKeySize: 1024,
+		},
+		rootCeCertAndKey2,
+	)
+	require.NoError(t, err)
+
+	endEndityCertAndKey2, err := handler.CreateSignedEndEndityCertificate(
+		ctx,
+		&x509utils.X509CreateCertificateOptions{
+			CommonName:     "mytestcn.example.net",
+			CountryName:    "CH",
+			Locality:       "Zurich",
+			Organization:   "myOrg endEndity2",
+			AdditionalSans: []string{"mytestsan21.example.net", "mytestsan22.example.net"},
+			PrivateKeySize: 1024,
+		},
+		intermediateCertAndKey2,
+	)
+	require.NoError(t, err)
+
+	t.Run("all nil", func(t *testing.T) {
+		chains, err := x509utils.ValidateCertificateChain(ctx, nil, nil, nil)
+		require.Error(t, err)
+		require.Nil(t, chains)
+	})
+
+	t.Run("all nil but certToValidate given", func(t *testing.T) {
+		chains, err := x509utils.ValidateCertificateChain(ctx, endEndityCertAndKey2.Cert, nil, nil)
+		require.Error(t, err)
+		require.Nil(t, chains)
+	})
+
+	t.Run("all nil but certToValidate and cert and trusted given", func(t *testing.T) {
+		chains, err := x509utils.ValidateCertificateChain(ctx, endEndityCertAndKey2.Cert, []*x509.Certificate{rootCeCertAndKey.Cert}, nil)
+		require.Error(t, err)
+		require.Nil(t, chains)
+	})
+
+	t.Run("valid chain 1", func(t *testing.T) {
+		chains, err := x509utils.ValidateCertificateChain(
+			ctx,
+			endEndityCertAndKey.Cert,
+			[]*x509.Certificate{rootCeCertAndKey.Cert},
+			[]*x509.Certificate{intermediateCertAndKey.Cert})
+		require.NoError(t, err)
+		require.NotNil(t, chains)
+		require.Len(t, chains, 1)
+		require.EqualValues(t, chains[0][0], endEndityCertAndKey.Cert)
+		require.EqualValues(t, chains[0][1], intermediateCertAndKey.Cert)
+		require.EqualValues(t, chains[0][2], rootCeCertAndKey.Cert)
+	})
+
+	t.Run("valid chain 2", func(t *testing.T) {
+		chains, err := x509utils.ValidateCertificateChain(
+			ctx,
+			endEndityCertAndKey2.Cert,
+			[]*x509.Certificate{rootCeCertAndKey2.Cert},
+			[]*x509.Certificate{intermediateCertAndKey2.Cert})
+		require.NoError(t, err)
+		require.NotNil(t, chains)
+		require.Len(t, chains, 1)
+		require.EqualValues(t, chains[0][0], endEndityCertAndKey2.Cert)
+		require.EqualValues(t, chains[0][1], intermediateCertAndKey2.Cert)
+		require.EqualValues(t, chains[0][2], rootCeCertAndKey2.Cert)
+	})
+
+	t.Run("two root CAs", func(t *testing.T) {
+		chains, err := x509utils.ValidateCertificateChain(
+			ctx,
+			endEndityCertAndKey2.Cert,
+			[]*x509.Certificate{rootCeCertAndKey2.Cert, rootCeCertAndKey.Cert},
+			[]*x509.Certificate{intermediateCertAndKey2.Cert})
+		require.NoError(t, err)
+		require.NotNil(t, chains)
+		require.Len(t, chains, 1)
+		require.EqualValues(t, chains[0][0], endEndityCertAndKey2.Cert)
+		require.EqualValues(t, chains[0][1], intermediateCertAndKey2.Cert)
+		require.EqualValues(t, chains[0][2], rootCeCertAndKey2.Cert)
+	})
+
+	t.Run("two root CAs and intermediates", func(t *testing.T) {
+		chains, err := x509utils.ValidateCertificateChain(
+			ctx,
+			endEndityCertAndKey2.Cert,
+			[]*x509.Certificate{rootCeCertAndKey2.Cert, rootCeCertAndKey.Cert},
+			[]*x509.Certificate{intermediateCertAndKey.Cert, intermediateCertAndKey2.Cert})
+		require.NoError(t, err)
+		require.NotNil(t, chains)
+		require.Len(t, chains, 1)
+		require.EqualValues(t, chains[0][0], endEndityCertAndKey2.Cert)
+		require.EqualValues(t, chains[0][1], intermediateCertAndKey2.Cert)
+		require.EqualValues(t, chains[0][2], rootCeCertAndKey2.Cert)
+	})
+
+	t.Run("Invalid root", func(t *testing.T) {
+		chains, err := x509utils.ValidateCertificateChain(
+			ctx,
+			endEndityCertAndKey2.Cert,
+			[]*x509.Certificate{rootCeCertAndKey.Cert},
+			[]*x509.Certificate{intermediateCertAndKey2.Cert},
+		)
+		require.ErrorIs(t, err, x509utils.ErrNoValidCertificateChain)
+		require.Len(t, chains, 0)
+		require.Nil(t, chains)
+	})
+
+	t.Run("Invalid intermediate", func(t *testing.T) {
+		chains, err := x509utils.ValidateCertificateChain(
+			ctx,
+			endEndityCertAndKey2.Cert,
+			[]*x509.Certificate{rootCeCertAndKey2.Cert},
+			[]*x509.Certificate{intermediateCertAndKey.Cert},
+		)
+		require.ErrorIs(t, err, x509utils.ErrNoValidCertificateChain)
+		require.Len(t, chains, 0)
+		require.Nil(t, chains)
+	})
+
+	t.Run("Invalid endEndity", func(t *testing.T) {
+		chains, err := x509utils.ValidateCertificateChain(
+			ctx,
+			endEndityCertAndKey.Cert,
+			[]*x509.Certificate{rootCeCertAndKey2.Cert},
+			[]*x509.Certificate{intermediateCertAndKey2.Cert},
+		)
+		require.ErrorIs(t, err, x509utils.ErrNoValidCertificateChain)
+		require.Len(t, chains, 0)
+		require.Nil(t, chains)
+	})
 }

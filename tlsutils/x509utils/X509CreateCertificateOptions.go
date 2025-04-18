@@ -26,6 +26,9 @@ type X509CreateCertificateOptions struct {
 	// To ensure big serial numbers are handled correctly a string is used instead of an int type.
 	SerialNumber string
 
+	// Private key options
+	PrivateKeySize int // eg. 1024, 2048, 4096
+
 	KeyOutputFilePath         string
 	CertificateOutputFilePath string
 }
@@ -45,6 +48,16 @@ func (o *X509CreateCertificateOptions) GetValidityDurationAsString() (validityDu
 	}
 
 	return datetime.FormatDurationAsString(validity)
+}
+
+func (o *X509CreateCertificateOptions) GetPrivateKeySizeOrDefaultIfUnset(ctx context.Context) (keySize int) {
+	if o.PrivateKeySize <= 0 {
+		const defaultKeySize = 4096
+		logging.LogInfoByCtxf(ctx, "Using default private key size of '%d'.", defaultKeySize)
+		return defaultKeySize
+	}
+
+	return o.PrivateKeySize
 }
 
 func (o *X509CreateCertificateOptions) GetSubjectAsPkixName() (subject *pkix.Name, err error) {

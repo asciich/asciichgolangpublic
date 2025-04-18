@@ -1,4 +1,4 @@
-package x509utils
+package x509utils_test
 
 import (
 	"testing"
@@ -8,11 +8,12 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
+	"github.com/asciich/asciichgolangpublic/tlsutils/x509utils"
 )
 
-func getX509CertificateHandlerToTest(implementationName string) (handler X509CertificateHandler) {
+func getX509CertificateHandlerToTest(implementationName string) (handler x509utils.X509CertificateHandler) {
 	if implementationName == "NativeX509CertificateHandler" {
-		return GetNativeX509CertificateHandler()
+		return x509utils.GetNativeX509CertificateHandler()
 	}
 
 	logging.LogFatalWithTracef("Unknown implementationName '%s'", implementationName)
@@ -38,7 +39,7 @@ func TestX509Handler_CreateRootCaCertificate(t *testing.T) {
 
 				caCertKeyPair, err := handler.CreateRootCaCertificate(
 					ctx,
-					&X509CreateCertificateOptions{
+					&x509utils.X509CreateCertificateOptions{
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "myOrg root",
@@ -47,20 +48,20 @@ func TestX509Handler_CreateRootCaCertificate(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.True(t, mustutils.Must(IsCertificateRootCa(caCertKeyPair.Cert)))
-				require.True(t, mustutils.Must(IsSelfSignedCertificate(caCertKeyPair.Cert)))
-				require.False(t, mustutils.Must(IsIntermediateCertificate(caCertKeyPair.Cert)))
-				require.False(t, mustutils.Must(IsEndEndityCertificate(caCertKeyPair.Cert)))
-				require.True(t, mustutils.Must(IsSubjectCountryName(caCertKeyPair.Cert, "CH")))
-				require.True(t, mustutils.Must(IsSubjectLocalityName(caCertKeyPair.Cert, "Zurich")))
-				require.True(t, mustutils.Must(IsSubjectOrganizationName(caCertKeyPair.Cert, "myOrg root")))
-				require.True(t, mustutils.Must(IsSerialNumber(caCertKeyPair.Cert, "12345")))
+				require.True(t, mustutils.Must(x509utils.IsCertificateRootCa(caCertKeyPair.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsSelfSignedCertificate(caCertKeyPair.Cert)))
+				require.False(t, mustutils.Must(x509utils.IsIntermediateCertificate(caCertKeyPair.Cert)))
+				require.False(t, mustutils.Must(x509utils.IsEndEndityCertificate(caCertKeyPair.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsSubjectCountryName(caCertKeyPair.Cert, "CH")))
+				require.True(t, mustutils.Must(x509utils.IsSubjectLocalityName(caCertKeyPair.Cert, "Zurich")))
+				require.True(t, mustutils.Must(x509utils.IsSubjectOrganizationName(caCertKeyPair.Cert, "myOrg root")))
+				require.True(t, mustutils.Must(x509utils.IsSerialNumber(caCertKeyPair.Cert, "12345")))
 
 				require.EqualValues(t, []string{"CH"}, caCertKeyPair.Cert.Issuer.Country)
 				require.EqualValues(t, []string{"Zurich"}, caCertKeyPair.Cert.Issuer.Locality)
-				require.EqualValues(t, time.Hour*24*45, *mustutils.Must(GetValidityDuration(caCertKeyPair.Cert)))
+				require.EqualValues(t, time.Hour*24*45, *mustutils.Must(x509utils.GetValidityDuration(caCertKeyPair.Cert)))
 
-				require.True(t, mustutils.Must(IsCertificateMatchingPrivateKey(caCertKeyPair.Cert, caCertKeyPair.Key)))
+				require.True(t, mustutils.Must(x509utils.IsCertificateMatchingPrivateKey(caCertKeyPair.Cert, caCertKeyPair.Key)))
 			},
 		)
 	}
@@ -84,7 +85,7 @@ func TestX509Handler_CreateIntermediateCertificate(t *testing.T) {
 
 				caCertKeyPair, err := handler.CreateRootCaCertificate(
 					ctx,
-					&X509CreateCertificateOptions{
+					&x509utils.X509CreateCertificateOptions{
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "myOrg root",
@@ -94,7 +95,7 @@ func TestX509Handler_CreateIntermediateCertificate(t *testing.T) {
 
 				intermediateCertAndKey, err := handler.CreateSignedIntermediateCertificate(
 					ctx,
-					&X509CreateCertificateOptions{
+					&x509utils.X509CreateCertificateOptions{
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "myOrg intermediate",
@@ -103,23 +104,23 @@ func TestX509Handler_CreateIntermediateCertificate(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.True(t, mustutils.Must(IsCertificateMatchingPrivateKey(caCertKeyPair.Cert, caCertKeyPair.Key)))
-				require.True(t, mustutils.Must(IsCertificateRootCa(caCertKeyPair.Cert)))
-				require.False(t, mustutils.Must(IsIntermediateCertificate(caCertKeyPair.Cert)))
-				require.False(t, mustutils.Must(IsEndEndityCertificate(caCertKeyPair.Cert)))
-				require.True(t, mustutils.Must(IsSubjectCountryName(caCertKeyPair.Cert, "CH")))
-				require.True(t, mustutils.Must(IsSubjectLocalityName(caCertKeyPair.Cert, "Zurich")))
-				require.True(t, mustutils.Must(IsSubjectOrganizationName(caCertKeyPair.Cert, "myOrg root")))
-				require.EqualValues(t, time.Hour*24*45, *mustutils.Must(GetValidityDuration(caCertKeyPair.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsCertificateMatchingPrivateKey(caCertKeyPair.Cert, caCertKeyPair.Key)))
+				require.True(t, mustutils.Must(x509utils.IsCertificateRootCa(caCertKeyPair.Cert)))
+				require.False(t, mustutils.Must(x509utils.IsIntermediateCertificate(caCertKeyPair.Cert)))
+				require.False(t, mustutils.Must(x509utils.IsEndEndityCertificate(caCertKeyPair.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsSubjectCountryName(caCertKeyPair.Cert, "CH")))
+				require.True(t, mustutils.Must(x509utils.IsSubjectLocalityName(caCertKeyPair.Cert, "Zurich")))
+				require.True(t, mustutils.Must(x509utils.IsSubjectOrganizationName(caCertKeyPair.Cert, "myOrg root")))
+				require.EqualValues(t, time.Hour*24*45, *mustutils.Must(x509utils.GetValidityDuration(caCertKeyPair.Cert)))
 
-				require.True(t, mustutils.Must(IsCertificateMatchingPrivateKey(intermediateCertAndKey.Cert, intermediateCertAndKey.Key)))
-				require.False(t, mustutils.Must(IsCertificateRootCa(intermediateCertAndKey.Cert)))
-				require.True(t, mustutils.Must(IsIntermediateCertificate(intermediateCertAndKey.Cert)))
-				require.False(t, mustutils.Must(IsEndEndityCertificate(intermediateCertAndKey.Cert)))
-				require.True(t, mustutils.Must(IsSubjectCountryName(intermediateCertAndKey.Cert, "CH")))
-				require.True(t, mustutils.Must(IsSubjectLocalityName(intermediateCertAndKey.Cert, "Zurich")))
-				require.True(t, mustutils.Must(IsSubjectOrganizationName(intermediateCertAndKey.Cert, "myOrg intermediate")))
-				require.EqualValues(t, time.Hour*24*45, *mustutils.Must(GetValidityDuration(intermediateCertAndKey.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsCertificateMatchingPrivateKey(intermediateCertAndKey.Cert, intermediateCertAndKey.Key)))
+				require.False(t, mustutils.Must(x509utils.IsCertificateRootCa(intermediateCertAndKey.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsIntermediateCertificate(intermediateCertAndKey.Cert)))
+				require.False(t, mustutils.Must(x509utils.IsEndEndityCertificate(intermediateCertAndKey.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsSubjectCountryName(intermediateCertAndKey.Cert, "CH")))
+				require.True(t, mustutils.Must(x509utils.IsSubjectLocalityName(intermediateCertAndKey.Cert, "Zurich")))
+				require.True(t, mustutils.Must(x509utils.IsSubjectOrganizationName(intermediateCertAndKey.Cert, "myOrg intermediate")))
+				require.EqualValues(t, time.Hour*24*45, *mustutils.Must(x509utils.GetValidityDuration(intermediateCertAndKey.Cert)))
 			},
 		)
 	}
@@ -143,7 +144,7 @@ func TestX509Handler_CreateEndEndityCertificate(t *testing.T) {
 
 				rootCeCertAndKey, err := handler.CreateRootCaCertificate(
 					ctx,
-					&X509CreateCertificateOptions{
+					&x509utils.X509CreateCertificateOptions{
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "myOrg root",
@@ -153,7 +154,7 @@ func TestX509Handler_CreateEndEndityCertificate(t *testing.T) {
 
 				intermediateCertAndKey, err := handler.CreateSignedIntermediateCertificate(
 					ctx,
-					&X509CreateCertificateOptions{
+					&x509utils.X509CreateCertificateOptions{
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "myOrg intermediate",
@@ -164,7 +165,7 @@ func TestX509Handler_CreateEndEndityCertificate(t *testing.T) {
 
 				endEndityCertAndKey, err := handler.CreateSignedEndEndityCertificate(
 					ctx,
-					&X509CreateCertificateOptions{
+					&x509utils.X509CreateCertificateOptions{
 						CommonName:     "mytestcn.example.net",
 						CountryName:    "CH",
 						Locality:       "Zurich",
@@ -175,34 +176,34 @@ func TestX509Handler_CreateEndEndityCertificate(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.True(t, mustutils.Must(IsCertificateMatchingPrivateKey(rootCeCertAndKey.Cert, rootCeCertAndKey.Key)))
-				require.True(t, mustutils.Must(IsCertificateRootCa(rootCeCertAndKey.Cert)))
-				require.False(t, mustutils.Must(IsIntermediateCertificate(rootCeCertAndKey.Cert)))
-				require.False(t, mustutils.Must(IsEndEndityCertificate(rootCeCertAndKey.Cert)))
-				require.True(t, mustutils.Must(IsSubjectCountryName(rootCeCertAndKey.Cert, "CH")))
-				require.True(t, mustutils.Must(IsSubjectLocalityName(rootCeCertAndKey.Cert, "Zurich")))
-				require.True(t, mustutils.Must(IsSubjectOrganizationName(rootCeCertAndKey.Cert, "myOrg root")))
-				require.EqualValues(t, time.Hour*24*45, *mustutils.Must(GetValidityDuration(rootCeCertAndKey.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsCertificateMatchingPrivateKey(rootCeCertAndKey.Cert, rootCeCertAndKey.Key)))
+				require.True(t, mustutils.Must(x509utils.IsCertificateRootCa(rootCeCertAndKey.Cert)))
+				require.False(t, mustutils.Must(x509utils.IsIntermediateCertificate(rootCeCertAndKey.Cert)))
+				require.False(t, mustutils.Must(x509utils.IsEndEndityCertificate(rootCeCertAndKey.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsSubjectCountryName(rootCeCertAndKey.Cert, "CH")))
+				require.True(t, mustutils.Must(x509utils.IsSubjectLocalityName(rootCeCertAndKey.Cert, "Zurich")))
+				require.True(t, mustutils.Must(x509utils.IsSubjectOrganizationName(rootCeCertAndKey.Cert, "myOrg root")))
+				require.EqualValues(t, time.Hour*24*45, *mustutils.Must(x509utils.GetValidityDuration(rootCeCertAndKey.Cert)))
 
-				require.True(t, mustutils.Must(IsCertificateMatchingPrivateKey(intermediateCertAndKey.Cert, intermediateCertAndKey.Key)))
-				require.False(t, mustutils.Must(IsCertificateRootCa(intermediateCertAndKey.Cert)))
-				require.True(t, mustutils.Must(IsIntermediateCertificate(intermediateCertAndKey.Cert)))
-				require.False(t, mustutils.Must(IsEndEndityCertificate(intermediateCertAndKey.Cert)))
-				require.True(t, mustutils.Must(IsSubjectCountryName(intermediateCertAndKey.Cert, "CH")))
-				require.True(t, mustutils.Must(IsSubjectLocalityName(intermediateCertAndKey.Cert, "Zurich")))
-				require.True(t, mustutils.Must(IsSubjectOrganizationName(intermediateCertAndKey.Cert, "myOrg intermediate")))
-				require.EqualValues(t, time.Hour*24*45, *mustutils.Must(GetValidityDuration(intermediateCertAndKey.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsCertificateMatchingPrivateKey(intermediateCertAndKey.Cert, intermediateCertAndKey.Key)))
+				require.False(t, mustutils.Must(x509utils.IsCertificateRootCa(intermediateCertAndKey.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsIntermediateCertificate(intermediateCertAndKey.Cert)))
+				require.False(t, mustutils.Must(x509utils.IsEndEndityCertificate(intermediateCertAndKey.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsSubjectCountryName(intermediateCertAndKey.Cert, "CH")))
+				require.True(t, mustutils.Must(x509utils.IsSubjectLocalityName(intermediateCertAndKey.Cert, "Zurich")))
+				require.True(t, mustutils.Must(x509utils.IsSubjectOrganizationName(intermediateCertAndKey.Cert, "myOrg intermediate")))
+				require.EqualValues(t, time.Hour*24*45, *mustutils.Must(x509utils.GetValidityDuration(intermediateCertAndKey.Cert)))
 
-				require.True(t, mustutils.Must(IsCertificateMatchingPrivateKey(endEndityCertAndKey.Cert, endEndityCertAndKey.Key)))
-				require.False(t, mustutils.Must(IsCertificateRootCa(endEndityCertAndKey.Cert)))
-				require.False(t, mustutils.Must(IsIntermediateCertificate(endEndityCertAndKey.Cert)))
-				require.True(t, mustutils.Must(IsEndEndityCertificate(endEndityCertAndKey.Cert)))
-				require.True(t, mustutils.Must(IsSubjectCountryName(endEndityCertAndKey.Cert, "CH")))
-				require.True(t, mustutils.Must(IsSubjectLocalityName(endEndityCertAndKey.Cert, "Zurich")))
-				require.True(t, mustutils.Must(IsSubjectOrganizationName(endEndityCertAndKey.Cert, "myOrg endEndity")))
-				require.True(t, mustutils.Must(IsCommonName(endEndityCertAndKey.Cert, "mytestcn.example.net")))
-				require.True(t, mustutils.Must(IsAdditionalSANs(endEndityCertAndKey.Cert, []string{"mytestsan1.example.net", "mytestsan2.example.net"})))
-				require.EqualValues(t, time.Hour*24*45, *mustutils.Must(GetValidityDuration(endEndityCertAndKey.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsCertificateMatchingPrivateKey(endEndityCertAndKey.Cert, endEndityCertAndKey.Key)))
+				require.False(t, mustutils.Must(x509utils.IsCertificateRootCa(endEndityCertAndKey.Cert)))
+				require.False(t, mustutils.Must(x509utils.IsIntermediateCertificate(endEndityCertAndKey.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsEndEndityCertificate(endEndityCertAndKey.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsSubjectCountryName(endEndityCertAndKey.Cert, "CH")))
+				require.True(t, mustutils.Must(x509utils.IsSubjectLocalityName(endEndityCertAndKey.Cert, "Zurich")))
+				require.True(t, mustutils.Must(x509utils.IsSubjectOrganizationName(endEndityCertAndKey.Cert, "myOrg endEndity")))
+				require.True(t, mustutils.Must(x509utils.IsCommonName(endEndityCertAndKey.Cert, "mytestcn.example.net")))
+				require.True(t, mustutils.Must(x509utils.IsAdditionalSANs(endEndityCertAndKey.Cert, []string{"mytestsan1.example.net", "mytestsan2.example.net"})))
+				require.EqualValues(t, time.Hour*24*45, *mustutils.Must(x509utils.GetValidityDuration(endEndityCertAndKey.Cert)))
 			},
 		)
 	}
@@ -226,7 +227,7 @@ func TestX509Handler_CreateSelfSignedCertificate(t *testing.T) {
 
 				rootCaCertAndKey, err := handler.CreateSelfSignedCertificate(
 					ctx,
-					&X509CreateCertificateOptions{
+					&x509utils.X509CreateCertificateOptions{
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "myOrg root",
@@ -235,20 +236,20 @@ func TestX509Handler_CreateSelfSignedCertificate(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.False(t, mustutils.Must(IsCertificateRootCa(rootCaCertAndKey.Cert)))
-				require.True(t, mustutils.Must(IsSelfSignedCertificate(rootCaCertAndKey.Cert)))
-				require.False(t, mustutils.Must(IsIntermediateCertificate(rootCaCertAndKey.Cert)))
-				require.True(t, mustutils.Must(IsEndEndityCertificate(rootCaCertAndKey.Cert)))
-				require.True(t, mustutils.Must(IsSubjectCountryName(rootCaCertAndKey.Cert, "CH")))
-				require.True(t, mustutils.Must(IsSubjectLocalityName(rootCaCertAndKey.Cert, "Zurich")))
-				require.True(t, mustutils.Must(IsSubjectOrganizationName(rootCaCertAndKey.Cert, "myOrg root")))
-				require.True(t, mustutils.Must(IsSerialNumber(rootCaCertAndKey.Cert, "12345")))
+				require.False(t, mustutils.Must(x509utils.IsCertificateRootCa(rootCaCertAndKey.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsSelfSignedCertificate(rootCaCertAndKey.Cert)))
+				require.False(t, mustutils.Must(x509utils.IsIntermediateCertificate(rootCaCertAndKey.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsEndEndityCertificate(rootCaCertAndKey.Cert)))
+				require.True(t, mustutils.Must(x509utils.IsSubjectCountryName(rootCaCertAndKey.Cert, "CH")))
+				require.True(t, mustutils.Must(x509utils.IsSubjectLocalityName(rootCaCertAndKey.Cert, "Zurich")))
+				require.True(t, mustutils.Must(x509utils.IsSubjectOrganizationName(rootCaCertAndKey.Cert, "myOrg root")))
+				require.True(t, mustutils.Must(x509utils.IsSerialNumber(rootCaCertAndKey.Cert, "12345")))
 
 				require.EqualValues(t, []string{"CH"}, rootCaCertAndKey.Cert.Issuer.Country)
 				require.EqualValues(t, []string{"Zurich"}, rootCaCertAndKey.Cert.Issuer.Locality)
-				require.EqualValues(t, time.Hour*24*45, *mustutils.Must(GetValidityDuration(rootCaCertAndKey.Cert)))
+				require.EqualValues(t, time.Hour*24*45, *mustutils.Must(x509utils.GetValidityDuration(rootCaCertAndKey.Cert)))
 
-				require.True(t, mustutils.Must(IsCertificateMatchingPrivateKey(rootCaCertAndKey.Cert, rootCaCertAndKey.Key)))
+				require.True(t, mustutils.Must(x509utils.IsCertificateMatchingPrivateKey(rootCaCertAndKey.Cert, rootCaCertAndKey.Key)))
 			},
 		)
 	}
