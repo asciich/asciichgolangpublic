@@ -1,10 +1,11 @@
-package commandexecutor
+package commandexecutor_test
 
 import (
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -23,30 +24,31 @@ func TestBashRunCommandAndGetStdoutAsString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
-
-				var bash CommandExecutor = Bash()
-				output := bash.MustRunCommandAndGetStdoutAsString(
+				var bash commandexecutor.CommandExecutor = commandexecutor.Bash()
+				output, err := bash.RunCommandAndGetStdoutAsString(
+					ctx,
 					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
-						Verbose: verbose,
 					},
 				)
-				output2 := bash.MustRunCommandAndGetStdoutAsString(
-					&parameteroptions.RunCommandOptions{
-						Command:            tt.command,
-						Verbose:            verbose,
-						LiveOutputOnStdout: true,
-					},
-				)
+				require.NoError(t, err)
 
-				require.EqualValues(tt.expectedOutput, output)
-				require.EqualValues(tt.expectedOutput, output2)
+				output2, err := bash.RunCommandAndGetStdoutAsString(
+					commandexecutor.WithLiveOutputOnStdout(ctx),
+					&parameteroptions.RunCommandOptions{
+						Command: tt.command,
+					},
+				)
+				require.NoError(t, err)
+
+				require.EqualValues(t, tt.expectedOutput, output)
+				require.EqualValues(t, tt.expectedOutput, output2)
 			},
 		)
 	}
@@ -66,35 +68,34 @@ func TestBashRunCommand(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
-
-				output := Bash().MustRunCommand(
+				output, err := commandexecutor.Bash().RunCommand(
+					ctx,
 					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
-						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(tt.expectedStdout, output.MustGetStdoutAsString())
-				require.EqualValues(tt.expectedStderr, output.MustGetStderrAsString())
-				require.EqualValues(0, output.MustGetReturnCode())
+				require.EqualValues(t, tt.expectedStdout, output.MustGetStdoutAsString())
+				require.EqualValues(t, tt.expectedStderr, output.MustGetStderrAsString())
+				require.EqualValues(t, 0, output.MustGetReturnCode())
 
-				output2 := Bash().MustRunCommand(
+				output2, err := commandexecutor.Bash().RunCommand(
+					commandexecutor.WithLiveOutputOnStdout(ctx),
 					&parameteroptions.RunCommandOptions{
-						Command:            tt.command,
-						Verbose:            verbose,
-						LiveOutputOnStdout: true,
+						Command: tt.command,
 					},
 				)
 
-				require.EqualValues(tt.expectedStdout, output2.MustGetStdoutAsString())
-				require.EqualValues(tt.expectedStderr, output2.MustGetStderrAsString())
-				require.EqualValues(0, output2.MustGetReturnCode())
+				require.EqualValues(t, tt.expectedStdout, output2.MustGetStdoutAsString())
+				require.EqualValues(t, tt.expectedStderr, output2.MustGetStderrAsString())
+				require.EqualValues(t, 0, output2.MustGetReturnCode())
 			},
 		)
 	}
@@ -112,29 +113,30 @@ func TestBashRunCommandAndGetStdoutAsFloat64(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
-
-				output := Bash().MustRunCommandAndGetStdoutAsFloat64(
+				output, err := commandexecutor.Bash().RunCommandAndGetStdoutAsFloat64(
+					ctx,
 					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
-						Verbose: verbose,
 					},
 				)
-				output2 := Bash().MustRunCommandAndGetStdoutAsFloat64(
-					&parameteroptions.RunCommandOptions{
-						Command:            tt.command,
-						Verbose:            verbose,
-						LiveOutputOnStdout: true,
-					},
-				)
+				require.NoError(t, err)
 
-				require.EqualValues(tt.expectedFloat64, output)
-				require.EqualValues(tt.expectedFloat64, output2)
+				output2, err := commandexecutor.Bash().RunCommandAndGetStdoutAsFloat64(
+					commandexecutor.WithLiveOutputOnStdout(ctx),
+					&parameteroptions.RunCommandOptions{
+						Command: tt.command,
+					},
+				)
+				require.NoError(t, err)
+
+				require.EqualValues(t, tt.expectedFloat64, output)
+				require.EqualValues(t, tt.expectedFloat64, output2)
 			},
 		)
 	}
@@ -155,19 +157,19 @@ func TestBashRunCommandExitCode(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				output := Bash().MustRunCommand(
+				output, err := commandexecutor.Bash().RunCommand(
+					getCtx(),
 					&parameteroptions.RunCommandOptions{
 						Command:           tt.command,
 						AllowAllExitCodes: true,
 					},
 				)
-
-				require.EqualValues(tt.expectedExitCode, output.MustGetReturnCode())
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedExitCode, output.MustGetReturnCode())
 			},
 		)
 	}
@@ -184,29 +186,30 @@ func TestBashRunCommandAndGetStdoutAsLines(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
-
-				output := Bash().MustRunCommandAndGetStdoutAsLines(
+				output, err := commandexecutor.Bash().RunCommandAndGetStdoutAsLines(
+					ctx,
 					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
-						Verbose: verbose,
 					},
 				)
-				output2 := Bash().MustRunCommandAndGetStdoutAsLines(
-					&parameteroptions.RunCommandOptions{
-						Command:            tt.command,
-						Verbose:            verbose,
-						LiveOutputOnStdout: true,
-					},
-				)
+				require.NoError(t, err)
 
-				require.EqualValues(tt.expectedLines, output)
-				require.EqualValues(tt.expectedLines, output2)
+				output2, err := commandexecutor.Bash().RunCommandAndGetStdoutAsLines(
+					commandexecutor.WithLiveOutputOnStdout(ctx),
+					&parameteroptions.RunCommandOptions{
+						Command: tt.command,
+					},
+				)
+				require.NoError(t, err)
+
+				require.EqualValues(t, tt.expectedLines, output)
+				require.EqualValues(t, tt.expectedLines, output2)
 			},
 		)
 	}
@@ -222,10 +225,12 @@ func TestBashRunOneLinerAndGetStdoutAsString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				output := Bash().MustRunOneLinerAndGetStdoutAsString(tt.oneLiner, true)
+				output, err := commandexecutor.Bash().RunOneLinerAndGetStdoutAsString(getCtx(), tt.oneLiner)
+				require.NoError(t, err)
 				require.EqualValues(t, tt.expectedOutput, output)
 			},
 		)
@@ -243,15 +248,17 @@ func TestBashCommandAndGetFirstLineOfStdoutAsString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
-
-				output := Bash().MustRunCommand(&parameteroptions.RunCommandOptions{
-					Command: tt.command,
-					Verbose: verbose,
-				})
+				output, err := commandexecutor.Bash().RunCommand(
+					getCtx(),
+					&parameteroptions.RunCommandOptions{
+						Command: tt.command,
+					},
+				)
+				require.NoError(t, err)
 
 				require.EqualValues(
 					t,
@@ -264,11 +271,9 @@ func TestBashCommandAndGetFirstLineOfStdoutAsString(t *testing.T) {
 }
 
 func TestBashGetHostDescription(t *testing.T) {
-	require.EqualValues(
-		t,
-		"localhost",
-		Bash().MustGetHostDescription(),
-	)
+	description, err := commandexecutor.Bash().GetHostDescription()
+	require.NoError(t, err)
+	require.EqualValues(t, "localhost", description)
 }
 
 func TestBashRunCommandStdin(t *testing.T) {
@@ -292,33 +297,33 @@ func TestBashRunCommandStdin(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
-
-				var bash CommandExecutor = Bash()
-				output := bash.MustRunCommandAndGetStdoutAsBytes(
+				var bash commandexecutor.CommandExecutor = commandexecutor.Bash()
+				output, err := bash.RunCommandAndGetStdoutAsBytes(
+					ctx,
 					&parameteroptions.RunCommandOptions{
 						Command:     tt.command,
-						Verbose:     verbose,
 						StdinString: tt.stdin,
 					},
 				)
+				require.NoError(t, err)
 
-				output2 := bash.MustRunCommandAndGetStdoutAsString(
+				output2, err := bash.RunCommandAndGetStdoutAsString(
+					commandexecutor.WithLiveOutputOnStdout(ctx),
 					&parameteroptions.RunCommandOptions{
-						Command:            tt.command,
-						Verbose:            verbose,
-						LiveOutputOnStdout: true,
-						StdinString:        tt.stdin,
+						Command:     tt.command,
+						StdinString: tt.stdin,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues([]byte(tt.expectedOutput), output)
-				require.EqualValues(tt.expectedOutput, output2)
+				require.EqualValues(t, []byte(tt.expectedOutput), output)
+				require.EqualValues(t, tt.expectedOutput, output2)
 			},
 		)
 	}

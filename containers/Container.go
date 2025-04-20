@@ -1,8 +1,8 @@
 package containers
 
+import "context"
+
 type Container interface {
-	IsRunning(verbose bool) (isRunning bool, err error)
-	Kill(verbose bool) (err error)
-	MustIsRunning(verbose bool) (isRunning bool)
-	MustKill(verbose bool)
+	IsRunning(ctx context.Context) (isRunning bool, err error)
+	Kill(ctx context.Context) (err error)
 }

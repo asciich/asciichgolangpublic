@@ -1,12 +1,14 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -21,16 +23,15 @@ func NewGitService() (g *GitService) {
 	return new(GitService)
 }
 
-func (g *GitService) GetRepositoryRootPathByPath(path string, verbose bool) (repoRootPath string, err error) {
+func (g *GitService) GetRepositoryRootPathByPath(ctx context.Context, path string) (repoRootPath string, err error) {
 	if path == "" {
 		return "", tracederrors.TracedErrorEmptyString("path")
 	}
 
 	repoRootPath, err = commandexecutor.Bash().RunCommandAndGetStdoutAsString(
+		ctx,
 		&parameteroptions.RunCommandOptions{
-			Command:            []string{"git", "-C", path, "rev-parse", "--show-toplevel"},
-			Verbose:            verbose,
-			LiveOutputOnStdout: verbose,
+			Command: []string{"git", "-C", path, "rev-parse", "--show-toplevel"},
 		},
 	)
 	if err != nil {
@@ -44,7 +45,7 @@ func (g *GitService) GetRepositoryRootPathByPath(path string, verbose bool) (rep
 		return "", err
 	}
 
-	exists, err := repoRootDir.Exists(verbose)
+	exists, err := repoRootDir.Exists(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return "", err
 	}
@@ -56,22 +57,12 @@ func (g *GitService) GetRepositoryRootPathByPath(path string, verbose bool) (rep
 		)
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Found git repository root directory '%s' for local path '%s'.",
-			repoRootPath,
-			path,
-		)
-	}
+	logging.LogInfoByCtxf(
+		ctx,
+		"Found git repository root directory '%s' for local path '%s'.",
+		repoRootPath,
+		path,
+	)
 
 	return repoRootPath, nil
-}
-
-func (g *GitService) MustGetRepositoryRootPathByPath(path string, verbose bool) (repoRootPath string) {
-	repoRootPath, err := g.GetRepositoryRootPathByPath(path, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return repoRootPath
 }

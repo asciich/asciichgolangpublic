@@ -20,6 +20,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -133,12 +134,12 @@ func NewLocalGitRepository() (l *LocalGitRepository) {
 }
 
 // TODO remove: LocalGitRepository should purely base on goGit, not by calling the git binary.
-func (l *LocalGitRepository) RunGitCommand(gitCommand []string, verbose bool) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (l *LocalGitRepository) RunGitCommand(ctx context.Context, gitCommand []string) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if gitCommand == nil {
 		return nil, tracederrors.TracedErrorEmptyString("gitCommand")
 	}
 
-	repoRootPath, err := l.GetRootDirectoryPath(verbose)
+	repoRootPath, err := l.GetRootDirectoryPath(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +155,7 @@ func (l *LocalGitRepository) RunGitCommand(gitCommand []string, verbose bool) (c
 		gitCommandString,
 	)
 
-	commandOutput, err = commandexecutor.Bash().RunOneLiner(command, verbose)
+	commandOutput, err = commandexecutor.Bash().RunOneLiner(ctx, command)
 	if err != nil {
 		return nil, err
 	}
@@ -253,7 +254,10 @@ func (l *LocalGitRepository) AddRemote(remoteOptions *GitRemoteAddOptions) (err 
 		}
 
 		// TODO reimplement without calling the git command.
-		_, err = l.RunGitCommand([]string{"remote", "add", remoteName, remoteUrl}, remoteOptions.Verbose)
+		_, err = l.RunGitCommand(
+			contextutils.GetVerbosityContextByBool(remoteOptions.Verbose),
+			[]string{"remote", "add", remoteName, remoteUrl},
+		)
 		if err != nil {
 			return err
 		}
@@ -292,8 +296,8 @@ func (l *LocalGitRepository) CheckoutBranchByName(name string, verbose bool) (er
 		}
 	} else {
 		_, err := l.RunGitCommand(
+			contextutils.GetVerbosityContextByBool(verbose),
 			[]string{"checkout", name},
-			verbose,
 		)
 		if err != nil {
 			return err
@@ -535,8 +539,8 @@ func (l *LocalGitRepository) CreateBranch(createOptions *parameteroptions.Create
 		}
 		*/
 		l.RunGitCommand(
+			contextutils.GetVerbosityContextByBool(createOptions.Verbose),
 			[]string{"checkout", "-b", name},
-			createOptions.Verbose,
 		)
 
 		if createOptions.Verbose {
@@ -657,8 +661,8 @@ func (l *LocalGitRepository) DeleteBranchByName(name string, verbose bool) (err 
 
 	if branchExists {
 		_, err := l.RunGitCommand(
+			contextutils.GetVerbosityContextByBool(verbose),
 			[]string{"branch", "-D", name},
-			verbose,
 		)
 		if err != nil {
 			return err
@@ -707,8 +711,8 @@ func (l *LocalGitRepository) DeleteBranchByName(name string, verbose bool) (err 
 
 func (l *LocalGitRepository) Fetch(verbose bool) (err error) {
 	_, err = l.RunGitCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
 		[]string{"fetch"},
-		verbose,
 	)
 	if err != nil {
 		return err
@@ -1275,7 +1279,10 @@ func (l *LocalGitRepository) GetHashByTagName(tagName string) (hash string, err 
 
 func (l *LocalGitRepository) GetRemoteConfigs(verbose bool) (remoteConfigs []*GitRemoteConfig, err error) {
 	// TODO reimplement without calling the git binary.
-	output, err := l.RunGitCommand([]string{"remote", "-v"}, verbose)
+	output, err := l.RunGitCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
+		[]string{"remote", "-v"},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -2354,15 +2361,6 @@ func (l *LocalGitRepository) MustRemoveRemoteByName(remoteNameToRemove string, v
 	}
 }
 
-func (l *LocalGitRepository) MustRunGitCommand(gitCommand []string, verbose bool) (commandOutput *commandexecutor.CommandOutput) {
-	commandOutput, err := l.RunGitCommand(gitCommand, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandOutput
-}
-
 func (l *LocalGitRepository) MustRunGitCommandAndGetStdout(gitCommand []string, verbose bool) (commandOutput string) {
 	commandOutput, err := l.RunGitCommandAndGetStdout(gitCommand, verbose)
 	if err != nil {
@@ -2457,7 +2455,10 @@ func (l *LocalGitRepository) PullFromRemote(pullOptions *GitPullFromRemoteOption
 	}
 
 	// TODO implement without calling the git binary.
-	_, err = l.RunGitCommand([]string{"pull", remoteName, branchName}, pullOptions.Verbose)
+	_, err = l.RunGitCommand(
+		contextutils.GetVerbosityContextByBool(pullOptions.Verbose),
+		[]string{"pull", remoteName, branchName},
+	)
 	if err != nil {
 		return err
 	}
@@ -2475,7 +2476,10 @@ func (l *LocalGitRepository) PullFromRemote(pullOptions *GitPullFromRemoteOption
 }
 
 func (l *LocalGitRepository) PullUsingGitCli(verbose bool) (err error) {
-	_, err = l.RunGitCommand([]string{"pull"}, verbose)
+	_, err = l.RunGitCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
+		[]string{"pull"},
+	)
 	if err != nil {
 		return err
 	}
@@ -2524,7 +2528,10 @@ func (l *LocalGitRepository) PushTagsToRemote(remoteName string, verbose bool) (
 	}
 
 	// TODO: Implemnet without calling git binary
-	_, err = l.RunGitCommand([]string{"push", remoteName, "--tags"}, verbose)
+	_, err = l.RunGitCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
+		[]string{"push", remoteName, "--tags"},
+	)
 	if err != nil {
 		return err
 	}
@@ -2547,7 +2554,10 @@ func (l *LocalGitRepository) PushToRemote(remoteName string, verbose bool) (err 
 	}
 
 	// TODO: Implement without calling git binary
-	_, err = l.RunGitCommand([]string{"push", remoteName}, verbose)
+	_, err = l.RunGitCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
+		[]string{"push", remoteName},
+	)
 	if err != nil {
 		return err
 	}
@@ -2625,8 +2635,8 @@ func (l *LocalGitRepository) RemoveRemoteByName(remoteNameToRemove string, verbo
 	if remoteExists {
 		// TODO: reimplement without calling the git binary.
 		_, err := l.RunGitCommand(
+			contextutils.GetVerbosityContextByBool(verbose),
 			[]string{"remote", "remove", remoteNameToRemove},
-			verbose,
 		)
 		if err != nil {
 			return err
@@ -2649,7 +2659,10 @@ func (l *LocalGitRepository) RunGitCommandAndGetStdout(gitCommand []string, verb
 		return "", tracederrors.TracedError("gitCommand is empty")
 	}
 
-	output, err := l.RunGitCommand(gitCommand, verbose)
+	output, err := l.RunGitCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
+		gitCommand,
+	)
 	if err != nil {
 		return "", err
 	}
@@ -2804,7 +2817,10 @@ func (l *LocalGitRepository) SetRemoteUrl(remoteUrl string, verbose bool) (err e
 	name := "origin"
 
 	// TODO: Implement without calling the git binary
-	_, err = l.RunGitCommand([]string{"remote", "set-url", name, remoteUrl}, verbose)
+	_, err = l.RunGitCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
+		[]string{"remote", "set-url", name, remoteUrl},
+	)
 	if err != nil {
 		return err
 	}

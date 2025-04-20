@@ -1,6 +1,7 @@
 package files
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -14,8 +15,13 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func TestLocalFileImplementsFileInterface(t *testing.T) {
 	var file File = MustNewLocalFileByPath("/example/path")
@@ -50,6 +56,7 @@ func TestLocalFileGetUriAsString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -76,6 +83,7 @@ func TestLocalFileReadAndWriteAsBytes(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -108,6 +116,7 @@ func TestLocalFileReadAndWriteAsInt64(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -138,6 +147,7 @@ func TestLocalFileReadAndWriteAsString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -171,6 +181,7 @@ func TestLocalFileGetBaseName(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -195,6 +206,7 @@ func TestLocalFileGetSha256Sum(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -229,6 +241,7 @@ func TestLocalFileIsMatchingSha256Sum(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -258,6 +271,7 @@ func TestLocalFileGetParentDirectory(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -295,6 +309,7 @@ func TestLocalFileIsContentEqualByComparingSha256Sum(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -328,6 +343,7 @@ func TestLocalFileGetLocalPathIsAbsolute(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -352,6 +368,7 @@ func TestFileGetTextBlocksGolangWithCommentAboveFunction(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -386,6 +403,7 @@ func TestFileGetTextBlocksYamlWithoutLeadingThreeMinuses(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -416,6 +434,7 @@ func TestFileGetTextBlocksYamlWithLeadingThreeMinuses(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -447,6 +466,7 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -490,6 +510,7 @@ func TestFileReplaceLineAfterLine(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -523,6 +544,7 @@ func TestLocalFile_GetPathReturnsAbsoluteValue(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -568,8 +590,9 @@ func TestLocalFile_GetPathReturnsAbsoluteValue(t *testing.T) {
 	}
 }
 
-func getRepoRootDir() (repoRoot Directory) {
-	path := commandexecutor.Bash().MustRunOneLinerAndGetStdoutAsString("git rev-parse --show-toplevel", false)
+func getRepoRootDir(ctx context.Context, t *testing.T) (repoRoot Directory) {
+	path, err := commandexecutor.Bash().RunOneLinerAndGetStdoutAsString(ctx, "git rev-parse --show-toplevel")
+	require.NoError(t, err)
 	path = strings.TrimSpace(path)
 
 	return MustGetLocalDirectoryByPath(path)
@@ -582,13 +605,15 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 	}
 
 	tests := []TestCase{}
+	ctx := getCtx()
 
-	testDataDirectory := getRepoRootDir().MustGetSubDirectory("testdata", "File", "SortBlocksInFile")
+	testDataDirectory := getRepoRootDir(ctx, t).MustGetSubDirectory("testdata", "File", "SortBlocksInFile")
 	for _, testDirectory := range testDataDirectory.MustListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false}) {
 		tests = append(tests, TestCase{testDirectory.MustGetLocalPath()})
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -634,6 +659,7 @@ func TestLocalFileGetLastCharAsString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -668,6 +694,7 @@ func TestLocalFileGetAsFloat64(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -702,6 +729,7 @@ func TestFileGetAsInt64(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -736,6 +764,7 @@ func TestFileGetAsInt(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -768,6 +797,7 @@ func TestFileGetParentDirectoryPath(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -794,6 +824,7 @@ func TestFileIsPgpEncrypted_Case1_unencrypted(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -820,11 +851,13 @@ func TestFileIsPgpEncrypted_Case2_encryptedBinary(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				require := require.New(t)
 
+				ctx := getCtx()
 				const verbose bool = true
 
 				temporaryFile := getFileToTest("localFile")
@@ -838,10 +871,10 @@ func TestFileIsPgpEncrypted_Case2_encryptedBinary(t *testing.T) {
 						temporaryFile.MustGetLocalPath(),
 					),
 				}
-				commandexecutor.Bash().MustRunCommand(
+				commandexecutor.Bash().RunCommand(
+					ctx,
 					&parameteroptions.RunCommandOptions{
 						Command: createCommand,
-						Verbose: verbose,
 					},
 				)
 
@@ -860,11 +893,11 @@ func TestFileIsPgpEncrypted_Case3_encryptedAsciiArmor(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
+				ctx := getCtx()
 				const verbose bool = true
 
 				temporaryFile := getFileToTest("localFile")
@@ -878,14 +911,15 @@ func TestFileIsPgpEncrypted_Case3_encryptedAsciiArmor(t *testing.T) {
 						temporaryFile.MustGetLocalPath(),
 					),
 				}
-				commandexecutor.Bash().MustRunCommand(
+				_, err := commandexecutor.Bash().RunCommand(
+					ctx,
 					&parameteroptions.RunCommandOptions{
 						Command: createCommand,
-						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.True(temporaryFile.MustIsPgpEncrypted(verbose))
+				require.True(t, temporaryFile.MustIsPgpEncrypted(verbose))
 			},
 		)
 	}
@@ -900,6 +934,7 @@ func TestFileGetMimeTypeOfEmptyFile(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -934,6 +969,7 @@ func TestFileGetCreationDateByFileName(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -971,6 +1007,7 @@ func TestFileHasYYYYmmdd_HHMMSSPrefix(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -999,6 +1036,7 @@ func TestFileGetSizeBytes(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -1025,6 +1063,7 @@ func TestFileEnsureEndsWithLineBreakOnEmptyFile(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -1055,6 +1094,7 @@ func TestFileEnsureEndsWithLineBreakOnNonExitistingFile(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -1095,6 +1135,7 @@ func TestFileTrimSpacesAtBeginningOfFile(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -1198,6 +1239,7 @@ func TestLocalFileGetNumberOfNonEmptyLines(t *testing.T) {
 		{"testcase\n\na", 2},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {

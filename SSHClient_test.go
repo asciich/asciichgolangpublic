@@ -11,9 +11,12 @@ func TestSshClient_SshClientIsCommandExecutor(t *testing.T) {
 	var sshClient commandexecutor.CommandExecutor = MustGetSshClientByHostName("abc")
 	require.NotNil(t, sshClient)
 
+	description, err := sshClient.GetHostDescription()
+	require.NoError(t, err)
+
 	require.EqualValues(
 		t,
 		"abc",
-		sshClient.MustGetHostDescription(),
+		description,
 	)
 }

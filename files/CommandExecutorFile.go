@@ -11,6 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/os/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -55,6 +56,7 @@ func (c *CommandExecutorFile) AppendString(toWrite string, verbose bool) (err er
 	}
 
 	_, err = commandExecutor.RunCommand(
+		contextutils.ContextSilent(), // Would potentially expose the content to write.
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
@@ -64,7 +66,6 @@ func (c *CommandExecutorFile) AppendString(toWrite string, verbose bool) (err er
 					filePath,
 				),
 			},
-			Verbose:     false, // Would potentially expose the content to write.
 			StdinString: toWrite,
 		},
 	)
@@ -91,9 +92,9 @@ func (c *CommandExecutorFile) Chmod(chmodOptions *parameteroptions.ChmodOptions)
 	}
 
 	_, err = commandExecutor.RunCommand(
+		contextutils.GetVerbosityContextByBool(chmodOptions.Verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"chmod", permissionsString, filePath},
-			Verbose: chmodOptions.Verbose,
 		},
 	)
 	if err != nil {
@@ -139,6 +140,7 @@ func (c *CommandExecutorFile) Chown(options *parameteroptions.ChownOptions) (err
 	}
 
 	_, err = commandExecutor.RunCommand(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: command,
 		},
@@ -190,6 +192,7 @@ func (c *CommandExecutorFile) CopyToFile(destFile File, verbose bool) (err error
 	}
 
 	_, err = commandexecutor.RunCommand(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"cp", srcPath, destPath},
 		},
@@ -229,9 +232,9 @@ func (c *CommandExecutorFile) Create(verbose bool) (err error) {
 		)
 	} else {
 		_, err = commandExecutor.RunCommand(
+			contextutils.GetVerbosityContextByBool(verbose),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"touch", filePath},
-				Verbose: verbose,
 			},
 		)
 		if err != nil {
@@ -268,9 +271,9 @@ func (c *CommandExecutorFile) Delete(verbose bool) (err error) {
 
 	if exists {
 		_, err = commandExecutor.RunCommand(
+			contextutils.GetVerbosityContextByBool(verbose),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"rm", filePath},
-				Verbose: verbose,
 			},
 		)
 		if err != nil {
@@ -300,6 +303,7 @@ func (c *CommandExecutorFile) Exists(verbose bool) (exists bool, err error) {
 	}
 
 	output, err := commandExecutor.RunCommandAndGetStdoutAsString(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
@@ -401,7 +405,12 @@ func (c *CommandExecutorFile) GetDeepCopy() (deepCopy File) {
 	*d = *c
 
 	if c.commandExecutor != nil {
-		d.commandExecutor = commandexecutor.MustGetDeepCopyOfCommandExecutor(c.commandExecutor)
+		cmde, err := commandexecutor.GetDeepCopyOfCommandExecutor(c.commandExecutor)
+		if err != nil {
+			logging.LogGoErrorFatal(err)
+		}
+
+		d.commandExecutor = cmde
 	}
 
 	return d
@@ -537,11 +546,11 @@ func (c *CommandExecutorFile) GetSizeBytes() (fileSize int64, err error) {
 	}
 
 	fileSize, err = commandExecutor.RunCommandAndGetStdoutAsInt64(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"stat", "--printf=%s", filePath,
 			},
-			Verbose: false,
 		},
 	)
 	if err != nil {
@@ -612,6 +621,7 @@ func (c *CommandExecutorFile) MoveToPath(path string, useSudo bool, verbose bool
 	}
 
 	_, err = commandExecutor.RunCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: commandToUse,
 		},
@@ -885,9 +895,9 @@ func (c *CommandExecutorFile) ReadAsBytes() (content []byte, err error) {
 	}
 
 	content, err = commandExecutor.RunCommandAndGetStdoutAsBytes(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"cat", filePath},
-			Verbose: false,
 		},
 	)
 	if err != nil {
@@ -908,6 +918,7 @@ func (c *CommandExecutorFile) ReadFirstNBytes(numberOfBytesToRead int) (firstByt
 	}
 
 	firstBytes, err = commandExecutor.RunCommandAndGetStdoutAsBytes(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"head",
@@ -939,9 +950,9 @@ func (c *CommandExecutorFile) SecurelyDelete(verbose bool) (err error) {
 
 	if exits {
 		_, err = commandExecutor.RunCommand(
+			contextutils.GetVerbosityContextByBool(verbose),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"shred", "-u", filePath},
-				Verbose: verbose,
 			},
 		)
 		if err != nil {
@@ -1015,15 +1026,15 @@ func (c *CommandExecutorFile) Truncate(newSizeBytes int64, verbose bool) (err er
 			return err
 		}
 
+		ctx := contextutils.GetVerbosityContextByBool(verbose)
 		_, err = commandExecutor.RunCommand(
+			commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{
 					"truncate",
 					fmt.Sprintf("-s%d", newSizeBytes),
 					path,
 				},
-				Verbose:            verbose,
-				LiveOutputOnStdout: verbose,
 			},
 		)
 		if err != nil {
@@ -1052,6 +1063,7 @@ func (c *CommandExecutorFile) WriteBytes(toWrite []byte, verbose bool) (err erro
 	}
 
 	_, err = commandExecutor.RunCommand(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
@@ -1110,6 +1122,7 @@ func (c *CommandExecutorFile) GetAccessPermissions() (permissions int, err error
 	}
 
 	output, err := commandexecutor.RunCommandAndGetStdoutAsString(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"stat", "-c", "%a", path},
 		},

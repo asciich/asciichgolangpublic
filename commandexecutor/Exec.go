@@ -3,6 +3,7 @@ package commandexecutor
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -25,7 +26,10 @@ func Exec() (e *ExecService) {
 
 func NewExec() (e *ExecService) {
 	e = new(ExecService)
-	e.MustSetParentCommandExecutorForBaseClass(e)
+	err := e.SetParentCommandExecutorForBaseClass(e)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
 	return e
 }
 
@@ -47,25 +51,7 @@ func (e *ExecService) GetHostDescription() (hostDescription string, err error) {
 	return "localhost", nil
 }
 
-func (e *ExecService) MustGetHostDescription() (hostDescription string) {
-	hostDescription, err := e.GetHostDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hostDescription
-}
-
-func (e *ExecService) MustRunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput) {
-	commandOutput, err := e.RunCommand(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandOutput
-}
-
-func (e *ExecService) RunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput, err error) {
+func (e *ExecService) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -168,7 +154,7 @@ func (e *ExecService) RunCommand(options *parameteroptions.RunCommandOptions) (c
 		}
 
 		if goOn {
-			if options.LiveOutputOnStdout {
+			if IsLiveOutputOnStdoutEnabled(ctx) {
 				mOutput := line
 
 				if osutils.IsRunningOnWindows() {
@@ -241,13 +227,12 @@ func (e *ExecService) RunCommand(options *parameteroptions.RunCommandOptions) (c
 
 	if !commandOutput.IsExitSuccess() {
 		if options.AllowAllExitCodes {
-			if options.Verbose {
-				logging.LogInfof(
-					"Command '%v' has exit code '%d' != 0 but all exit codes are allowed by runOptions.AllowAllExitCodes.",
-					commandJoined,
-					returnCode,
-				)
-			}
+			logging.LogInfoByCtxf(
+				ctx,
+				"Command '%v' has exit code '%d' != 0 but all exit codes are allowed by runOptions.AllowAllExitCodes.",
+				commandJoined,
+				returnCode,
+			)
 		} else {
 			errorMessage := fmt.Sprintf(
 				"Command failed: '%v', %v\n%v",
@@ -255,9 +240,6 @@ func (e *ExecService) RunCommand(options *parameteroptions.RunCommandOptions) (c
 				commandOutput.GetCmdRunErrorStringOrEmptyStringIfUnset(),
 				commandOutput.GetStderrAsStringOrEmptyIfUnset(),
 			)
-			if options.Verbose {
-				logging.LogError(errorMessage)
-			}
 			return commandOutput, tracederrors.TracedError(errorMessage)
 		}
 	}

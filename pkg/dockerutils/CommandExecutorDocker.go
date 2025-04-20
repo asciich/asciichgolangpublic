@@ -1,6 +1,7 @@
-package docker
+package dockerutils
 
 import (
+	"context"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
@@ -174,7 +175,7 @@ func (c *CommandExecutorDocker) IsHostSet() (isSet bool) {
 	return c.host != nil
 }
 
-func (c *CommandExecutorDocker) KillContainerByName(name string, verbose bool) (err error) {
+func (c *CommandExecutorDocker) KillContainerByName(ctx context.Context, name string) (err error) {
 	name = strings.TrimSpace(name)
 	if len(name) <= 0 {
 		return tracederrors.TracedError("name is empty string")
@@ -185,7 +186,7 @@ func (c *CommandExecutorDocker) KillContainerByName(name string, verbose bool) (
 		return err
 	}
 
-	err = container.Kill(verbose)
+	err = container.Kill(ctx)
 	if err != nil {
 		return err
 	}
@@ -193,84 +194,7 @@ func (c *CommandExecutorDocker) KillContainerByName(name string, verbose bool) (
 	return nil
 }
 
-func (c *CommandExecutorDocker) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
-	commandExecutor, err := c.GetCommandExecutor()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandExecutor
-}
-
-func (c *CommandExecutorDocker) MustGetContainerByName(containerName string) (dockerContainer containers.Container) {
-	dockerContainer, err := c.GetContainerByName(containerName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return dockerContainer
-}
-
-func (c *CommandExecutorDocker) MustGetHost() (host hosts.Host) {
-	host, err := c.GetHost()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return host
-}
-
-func (c *CommandExecutorDocker) MustGetHostDescription() (hostDescription string) {
-	hostDescription, err := c.GetHostDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hostDescription
-}
-
-func (c *CommandExecutorDocker) MustKillContainerByName(name string, verbose bool) {
-	err := c.KillContainerByName(name, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorDocker) MustRunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput) {
-	commandOutput, err := c.RunCommand(runOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandOutput
-}
-
-func (c *CommandExecutorDocker) MustRunCommandAndGetStdoutAsString(runOptions *parameteroptions.RunCommandOptions) (stdout string) {
-	stdout, err := c.RunCommandAndGetStdoutAsString(runOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return stdout
-}
-
-func (c *CommandExecutorDocker) MustRunContainer(runOptions *DockerRunContainerOptions) (startedContainer containers.Container) {
-	startedContainer, err := c.RunContainer(runOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return startedContainer
-}
-
-func (c *CommandExecutorDocker) MustSetHost(host hosts.Host) {
-	err := c.SetHost(host)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorDocker) RunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (c *CommandExecutorDocker) RunCommand(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runOptions")
 	}
@@ -280,10 +204,10 @@ func (c *CommandExecutorDocker) RunCommand(runOptions *parameteroptions.RunComma
 		return nil, err
 	}
 
-	return commandExecutor.RunCommand(runOptions)
+	return commandExecutor.RunCommand(ctx, runOptions)
 }
 
-func (c *CommandExecutorDocker) RunCommandAndGetStdoutAsString(runOptions *parameteroptions.RunCommandOptions) (stdout string, err error) {
+func (c *CommandExecutorDocker) RunCommandAndGetStdoutAsString(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (stdout string, err error) {
 	if runOptions == nil {
 		return "", tracederrors.TracedErrorNil("runOptions")
 	}
@@ -293,10 +217,10 @@ func (c *CommandExecutorDocker) RunCommandAndGetStdoutAsString(runOptions *param
 		return "", err
 	}
 
-	return commandExecutor.RunCommandAndGetStdoutAsString(runOptions)
+	return commandExecutor.RunCommandAndGetStdoutAsString(ctx, runOptions)
 }
 
-func (c *CommandExecutorDocker) RunContainer(runOptions *DockerRunContainerOptions) (startedContainer containers.Container, err error) {
+func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *DockerRunContainerOptions) (startedContainer containers.Container, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedError("runOptions is nil")
 	}
@@ -319,7 +243,7 @@ func (c *CommandExecutorDocker) RunContainer(runOptions *DockerRunContainerOptio
 		)
 	}
 
-	err = c.KillContainerByName(containerName, runOptions.Verbose)
+	err = c.KillContainerByName(ctx, containerName)
 	if err != nil {
 		return nil, err
 	}
@@ -356,9 +280,9 @@ func (c *CommandExecutorDocker) RunContainer(runOptions *DockerRunContainerOptio
 	}
 
 	stdout, err := c.RunCommandAndGetStdoutAsString(
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: startCommand,
-			Verbose: runOptions.Verbose,
 		},
 	)
 	if err != nil {

@@ -18,6 +18,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/datetime"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/signalmessenger"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -245,9 +246,9 @@ func (f *FileBase) GetFileTypeDescription(verbose bool) (fileTypeDescription str
 	}
 
 	stdoutLines, err := commandexecutor.Bash().RunCommandAndGetStdoutAsLines(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"file", path},
-			Verbose: verbose,
 		},
 	)
 

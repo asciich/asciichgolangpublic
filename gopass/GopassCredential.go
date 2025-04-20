@@ -56,6 +56,7 @@ func (c *GopassCredential) Exists() (exists bool, err error) {
 	}
 
 	output, err := commandexecutor.Bash().RunCommand(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
@@ -86,6 +87,7 @@ func (c *GopassCredential) GetAsBytes() (credential []byte, err error) {
 	}
 
 	credential, err = commandexecutor.Bash().RunCommandAndGetStdoutAsBytes(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"gopass", "cat", name},
 		})
@@ -196,6 +198,7 @@ func (c *GopassCredential) SetByString(newValue string) (err error) {
 	}
 
 	_, err = commandexecutor.Bash().RunCommand(
+		contextutils.ContextVerbose(),
 		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,
 		},

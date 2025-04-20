@@ -12,6 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/os/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -188,9 +189,9 @@ func (l *LocalFile) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err erro
 	}
 
 	_, err = commandexecutor.Bash().RunCommand(
+		contextutils.GetVerbosityContextByBool(chmodOptions.Verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"chmod", chmodString, localPath},
-			Verbose: chmodOptions.Verbose,
 		},
 	)
 	if err != nil {
@@ -235,6 +236,7 @@ func (l *LocalFile) Chown(options *parameteroptions.ChownOptions) (err error) {
 	}
 
 	_, err = commandexecutor.Bash().RunCommand(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: command,
 		},
@@ -457,6 +459,7 @@ func (l *LocalFile) MoveToPath(path string, useSudo bool, verbose bool) (movedFi
 
 	if useSudo {
 		_, err = commandexecutor.Bash().RunCommand(
+			contextutils.ContextSilent(),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"sudo", "mv", srcPath, path},
 			},
@@ -738,10 +741,12 @@ func (l *LocalFile) SecurelyDelete(verbose bool) (err error) {
 	}
 
 	deleteCommand := []string{"shred", "-u", pathToDelete}
-	_, err = commandexecutor.Bash().RunCommand(&parameteroptions.RunCommandOptions{
-		Command: deleteCommand,
-		Verbose: verbose,
-	})
+	_, err = commandexecutor.Bash().RunCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
+		&parameteroptions.RunCommandOptions{
+			Command: deleteCommand,
+		},
+	)
 	if err != nil {
 		return err
 	}

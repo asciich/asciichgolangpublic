@@ -7,6 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/hosts"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -82,9 +83,9 @@ func (k *KubernetesNodeHost) CheckIsKubernetesNode(verbose bool) (isKubernetesNo
 
 func (k *KubernetesNodeHost) IsKubernetesNode(verbose bool) (isKubernetesNode bool, err error) {
 	stdout, err := k.RunCommandAndGetStdoutAsString(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"ctr", "--namespace", "k8s.io", "containers", "list"},
-			Verbose: verbose,
 		},
 	)
 	if err != nil {

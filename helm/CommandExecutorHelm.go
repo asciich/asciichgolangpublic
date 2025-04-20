@@ -4,6 +4,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -76,6 +77,7 @@ func (c *commandExecutorHelm) AddRepositoryByName(name string, url string, verbo
 	}
 
 	_, err = commandExecutor.RunCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"helm",
@@ -84,7 +86,6 @@ func (c *commandExecutorHelm) AddRepositoryByName(name string, url string, verbo
 				name,
 				url,
 			},
-			Verbose: verbose,
 		},
 	)
 	if err != nil {

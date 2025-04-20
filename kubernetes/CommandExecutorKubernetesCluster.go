@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"context"
 	"slices"
 	"sort"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -111,6 +113,7 @@ func (c *CommandExecutorKubernetes) CreateNamespaceByName(name string, verbose b
 		}
 
 		_, err = c.RunCommand(
+			contextutils.GetVerbosityContextByBool(verbose),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{
 					"kubectl",
@@ -161,6 +164,7 @@ func (c *CommandExecutorKubernetes) DeleteNamespaceByName(name string, verbose b
 		}
 
 		_, err = c.RunCommand(
+			contextutils.GetVerbosityContextByBool(verbose),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{
 					"kubectl",
@@ -276,6 +280,7 @@ func (c *CommandExecutorKubernetes) GetKubectlContext(verbose bool) (context str
 
 func (c *CommandExecutorKubernetes) GetKubectlContexts() (contexts []KubectlContext, err error) {
 	lines, err := c.RunCommandAndGetStdoutAsLines(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"kubectl", "config", "get-contexts", "--no-headers"},
 		},
@@ -388,6 +393,7 @@ func (c *CommandExecutorKubernetes) ListNamespaces(verbose bool) (namespaces []N
 	}
 
 	lines, err := c.RunCommandAndGetStdoutAsLines(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"kubectl",
@@ -451,6 +457,7 @@ func (c *CommandExecutorKubernetes) ListResourceNames(options *parameteroptions.
 	}
 
 	output, err := commandExecutor.RunCommandAndGetStdoutAsLines(
+		contextutils.GetVerbosityContextByBool(options.Verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"kubectl",
@@ -645,24 +652,6 @@ func (c *CommandExecutorKubernetes) MustNamespaceByNameExists(name string, verbo
 	return exists
 }
 
-func (c *CommandExecutorKubernetes) MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput) {
-	commandOutput, err := c.RunCommand(runCommandOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandOutput
-}
-
-func (c *CommandExecutorKubernetes) MustRunCommandAndGetStdoutAsLines(runCommandOptions *parameteroptions.RunCommandOptions) (lines []string) {
-	lines, err := c.RunCommandAndGetStdoutAsLines(runCommandOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return lines
-}
-
 func (c *CommandExecutorKubernetes) MustSetCachedContextName(cachedContextName string) {
 	err := c.SetCachedContextName(cachedContextName)
 	if err != nil {
@@ -720,7 +709,7 @@ func (c *CommandExecutorKubernetes) NamespaceByNameExists(name string, verbose b
 	return exists, nil
 }
 
-func (c *CommandExecutorKubernetes) RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (c *CommandExecutorKubernetes) RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}
@@ -730,15 +719,15 @@ func (c *CommandExecutorKubernetes) RunCommand(runCommandOptions *parameteroptio
 		return nil, err
 	}
 
-	return commandExecutor.RunCommand(runCommandOptions)
+	return commandExecutor.RunCommand(ctx, runCommandOptions)
 }
 
-func (c *CommandExecutorKubernetes) RunCommandAndGetStdoutAsLines(runCommandOptions *parameteroptions.RunCommandOptions) (lines []string, err error) {
+func (c *CommandExecutorKubernetes) RunCommandAndGetStdoutAsLines(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (lines []string, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}
 
-	output, err := c.RunCommand(runCommandOptions)
+	output, err := c.RunCommand(ctx, runCommandOptions)
 	if err != nil {
 		return nil, err
 	}

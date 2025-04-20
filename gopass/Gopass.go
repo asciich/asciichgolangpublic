@@ -82,6 +82,7 @@ func GetCredential(getOptions *parameteroptions.GopassSecretOptions) (credential
 
 func GetCredentialList() (credentials []*GopassCredential, err error) {
 	outLines, err := commandexecutor.Bash().RunCommandAndGetStdoutAsLines(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"gopass", "list", "-f"},
 		},
@@ -258,6 +259,7 @@ func InsertFileByString(ctx context.Context, fileContent string, gopassOptions *
 	}
 
 	_, err = commandexecutor.Bash().RunCommand(
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command:     insertCommand,
 			StdinString: fileContent,
@@ -323,6 +325,7 @@ func InsertFile(ctx context.Context, fileToInsert files.File, gopassOptions *par
 	}
 
 	_, err = commandexecutor.Bash().RunCommand(
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,
 		},
@@ -408,6 +411,7 @@ func InsertSecret(ctx context.Context, secretToInsert string, gopassOptions *par
 	}
 
 	_, err = commandexecutor.Bash().RunCommand(
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,
 		},
@@ -442,10 +446,9 @@ func SecretNameExist(secretName string) (secretExists bool, err error) {
 
 func Sync(ctx context.Context) (err error) {
 	_, err = commandexecutor.Bash().RunCommand(
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command:            []string{"gopass", "sync"},
-			Verbose:            contextutils.GetVerboseFromContext(ctx),
-			LiveOutputOnStdout: contextutils.GetVerboseFromContext(ctx),
 		},
 	)
 	if err != nil {
@@ -473,6 +476,7 @@ func WriteInfoToGopass(gopassPath string) (err error) {
 	}
 
 	_, err = commandexecutor.Bash().RunCommand(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,
 		},

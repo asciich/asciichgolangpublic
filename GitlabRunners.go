@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -300,9 +301,9 @@ func (s *GitlabRunnersService) AddRunner(newRunnerOptions *GitlabAddRunnerOption
 		}
 
 		_, err = commandexecutor.Bash().RunCommand(
+			contextutils.GetVerbosityContextByBool(newRunnerOptions.Verbose),
 			&parameteroptions.RunCommandOptions{
 				Command: addRunnerCommand,
-				Verbose: newRunnerOptions.Verbose,
 			},
 		)
 		if err != nil {

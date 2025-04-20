@@ -1,11 +1,17 @@
 package x509utils
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func TestX509CertificatesCreateIntermediateCertificateIntoTemporaryDirectory(t *testing.T) {
 	tests := []struct {
@@ -18,22 +24,25 @@ func TestX509CertificatesCreateIntermediateCertificateIntoTemporaryDirectory(t *
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
+				ctx := getCtx()
 				const verbose bool = true
 
 				certificates := X509Certificates()
-				tempDirectory := certificates.MustCreateIntermediateCertificateIntoDirectory(&X509CreateCertificateOptions{
-					UseTemporaryDirectory: true,
-					CommonName:            "test-intermediata.asciich.ch",
-					CountryName:           "CH",
-					Locality:              "Zurich",
-				})
+				tempDirectory, err := certificates.CreateIntermediateCertificateIntoDirectory(
+					ctx,
+					&X509CreateCertificateOptions{
+						UseTemporaryDirectory: true,
+						CommonName:            "test-intermediata.asciich.ch",
+						CountryName:           "CH",
+						Locality:              "Zurich",
+					},
+				)
+				require.NoError(t, err)
 
-				require.True(tempDirectory.MustExists(verbose))
+				require.True(t, tempDirectory.MustExists(verbose))
 
 				keyFile := tempDirectory.MustGetFileInDirectory("intermediateCertificate.key")
-				require.True(keyFile.MustExists(verbose))
+				require.True(t, keyFile.MustExists(verbose))
 			},
 		)
 	}

@@ -1,6 +1,7 @@
 package hosts
 
 import (
+	"context"
 	"strings"
 	"testing"
 
@@ -8,8 +9,14 @@ import (
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func TestHost_CheckReachable(t *testing.T) {
 	testutils.SkipIfRunningInGithub(t)
@@ -29,7 +36,8 @@ func TestHost_CheckReachable(t *testing.T) {
 				const verbose = true
 
 				host := MustGetHostByHostname(tt.hostname)
-				host.MustCheckReachable(verbose)
+				err := host.CheckReachable(verbose)
+				require.NoError(t, err)
 			},
 		)
 	}
@@ -55,7 +63,7 @@ func TestHostGetHostName(t *testing.T) {
 				host := MustGetHostByHostname(tt.hostname)
 				require.EqualValues(
 					tt.hostname,
-					host.MustGetHostName(),
+					mustutils.Must(host.GetHostName()),
 				)
 			},
 		)
@@ -81,7 +89,7 @@ func TestHostGetHostDescripion(t *testing.T) {
 				host := MustGetHostByHostname(tt.hostname)
 				require.EqualValues(
 					tt.hostname,
-					host.MustGetHostDescription(),
+					mustutils.Must(host.GetHostDescription()),
 				)
 			},
 		)
@@ -103,24 +111,18 @@ func TestHostRunCommand(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				const verbose = true
-
 				host := MustGetHostByHostname(tt.hostname)
-				ipsString := host.MustRunCommandAndGetStdoutAsString(
+				ipsString, err := host.RunCommandAndGetStdoutAsString(
+					getCtx(),
 					&parameteroptions.RunCommandOptions{
 						Command: []string{"hostname", "-i"},
-						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
 				ips := strings.Split(strings.TrimSpace(ipsString), " ")
 
-				require.Contains(
-					ips,
-					"192.168.10.32",
-				)
+				require.Contains(t, ips, "192.168.10.32")
 			},
 		)
 	}
@@ -143,20 +145,16 @@ func TestHost_GetDirectoryByPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose = true
 
 				host := MustGetHostByHostname(tt.hostname)
-				directory := host.MustGetDirectoryByPath(tt.dirPath)
+				directory, err := host.GetDirectoryByPath(tt.dirPath)
+				require.NoError(t, err)
 
 				_, ok := directory.(*files.CommandExecutorDirectory)
-				require.True(ok)
+				require.True(t, ok)
 
-				require.EqualValues(
-					tt.expectedExists,
-					directory.MustExists(verbose),
-				)
+				require.EqualValues(t, tt.expectedExists, directory.MustExists(verbose))
 			},
 		)
 	}

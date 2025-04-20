@@ -1,12 +1,14 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -51,21 +53,7 @@ func (p *PreCommitService) MustGetAsPreCommitConfigFileOrNilIfContentIsInvalid(f
 	return preCommitConfigFile
 }
 
-func (p *PreCommitService) MustRunInDirectory(directoy files.Directory, options *PreCommitRunOptions) {
-	err := p.RunInDirectory(directoy, options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (p *PreCommitService) MustRunInGitRepository(gitRepo GitRepository, options *PreCommitRunOptions) {
-	err := p.RunInGitRepository(gitRepo, options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (p *PreCommitService) RunInDirectory(directoy files.Directory, options *PreCommitRunOptions) (err error) {
+func (p *PreCommitService) RunInDirectory(ctx context.Context, directoy files.Directory, options *PreCommitRunOptions) (err error) {
 	if directoy == nil {
 		return tracederrors.TracedErrorNil("directoy")
 	}
@@ -89,24 +77,21 @@ func (p *PreCommitService) RunInDirectory(directoy files.Directory, options *Pre
 	}
 
 	_, err = commandexecutor.Bash().RunCommand(
+		commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
-			Command:            preCommitCommand,
-			Verbose:            options.Verbose,
-			LiveOutputOnStdout: options.Verbose,
+			Command: preCommitCommand,
 		},
 	)
 	if err != nil {
 		return err
 	}
 
-	if options.Verbose {
-		logging.LogInfof("Pre commit successfully run in '%s'.", path)
-	}
+	logging.LogInfoByCtxf(ctx, "Pre commit successfully run in '%s'.", path)
 
 	return nil
 }
 
-func (p *PreCommitService) RunInGitRepository(gitRepo GitRepository, options *PreCommitRunOptions) (err error) {
+func (p *PreCommitService) RunInGitRepository(ctx context.Context, gitRepo GitRepository, options *PreCommitRunOptions) (err error) {
 	if gitRepo == nil {
 		return tracederrors.TracedErrorNil("gitRepo")
 	}
@@ -120,7 +105,7 @@ func (p *PreCommitService) RunInGitRepository(gitRepo GitRepository, options *Pr
 		return err
 	}
 
-	err = p.RunInDirectory(gitRepoDir, options)
+	err = p.RunInDirectory(ctx, gitRepoDir, options)
 	if err != nil {
 		return err
 	}
@@ -130,18 +115,17 @@ func (p *PreCommitService) RunInGitRepository(gitRepo GitRepository, options *Pr
 		return err
 	}
 
-	if options.Verbose {
-		gitStatusOutput, err := gitRepo.GetGitStatusOutput(options.Verbose)
-		if err != nil {
-			return err
-		}
-
-		logging.LogInfof(
-			"Git status of repository '%s' after running pre-commit:\n%s",
-			path,
-			gitStatusOutput,
-		)
+	gitStatusOutput, err := gitRepo.GetGitStatusOutput(contextutils.GetVerboseFromContext(ctx))
+	if err != nil {
+		return err
 	}
+
+	logging.LogInfoByCtxf(
+		ctx,
+		"Git status of repository '%s' after running pre-commit:\n%s",
+		path,
+		gitStatusOutput,
+	)
 
 	return nil
 }

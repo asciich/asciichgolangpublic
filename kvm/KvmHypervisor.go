@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/hosts"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -788,9 +789,9 @@ func (k *KVMHypervisor) RunKvmCommand(kvmCommand []string, verbose bool) (comman
 
 	if k.useLocalhost {
 		commandOutput, err = commandexecutor.Bash().RunCommand(
+			contextutils.GetVerbosityContextByBool(verbose),
 			&parameteroptions.RunCommandOptions{
 				Command: command,
-				Verbose: verbose,
 			},
 		)
 		if err != nil {
@@ -803,9 +804,9 @@ func (k *KVMHypervisor) RunKvmCommand(kvmCommand []string, verbose bool) (comman
 		}
 
 		commandOutput, err = host.RunCommand(
+			contextutils.GetVerbosityContextByBool(verbose),
 			&parameteroptions.RunCommandOptions{
 				Command: command,
-				Verbose: verbose,
 			},
 		)
 		if err != nil {

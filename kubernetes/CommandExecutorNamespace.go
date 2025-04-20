@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -112,6 +114,7 @@ func (c *CommandExecutorNamespace) CreateRole(createOptions *CreateRoleOptions) 
 		}
 
 		_, err = c.RunCommand(
+			contextutils.GetVerbosityContextByBool(createOptions.Verbose),
 			&parameteroptions.RunCommandOptions{
 				Command: command,
 			},
@@ -151,6 +154,7 @@ func (c *CommandExecutorNamespace) DeleteRoleByName(name string, verbose bool) (
 		}
 
 		_, err = c.RunCommand(
+			contextutils.GetVerbosityContextByBool(verbose),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{
 					"kubectl",
@@ -314,6 +318,7 @@ func (c *CommandExecutorNamespace) ListRoleNames(verbose bool) (roleNames []stri
 	}
 
 	lines, err := c.RunCommandAndGetStdoutAsLines(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"kubectl",
@@ -474,24 +479,6 @@ func (c *CommandExecutorNamespace) MustRoleByNameExists(name string, verbose boo
 	return exists
 }
 
-func (c *CommandExecutorNamespace) MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput) {
-	commandOutput, err := c.RunCommand(runCommandOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandOutput
-}
-
-func (c *CommandExecutorNamespace) MustRunCommandAndGetStdoutAsLines(runCommandOptions *parameteroptions.RunCommandOptions) (lines []string) {
-	lines, err := c.RunCommandAndGetStdoutAsLines(runCommandOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return lines
-}
-
 func (c *CommandExecutorNamespace) MustSetKubernetesCluster(kubernetesCluster KubernetesCluster) {
 	err := c.SetKubernetesCluster(kubernetesCluster)
 	if err != nil {
@@ -542,7 +529,7 @@ func (c *CommandExecutorNamespace) RoleByNameExists(name string, verbose bool) (
 	return exists, nil
 }
 
-func (c *CommandExecutorNamespace) RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (c *CommandExecutorNamespace) RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}
@@ -552,15 +539,15 @@ func (c *CommandExecutorNamespace) RunCommand(runCommandOptions *parameteroption
 		return nil, err
 	}
 
-	return commandExecutor.RunCommand(runCommandOptions)
+	return commandExecutor.RunCommand(ctx, runCommandOptions)
 }
 
-func (c *CommandExecutorNamespace) RunCommandAndGetStdoutAsLines(runCommandOptions *parameteroptions.RunCommandOptions) (lines []string, err error) {
+func (c *CommandExecutorNamespace) RunCommandAndGetStdoutAsLines(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (lines []string, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}
 
-	commandOutput, err := c.RunCommand(runCommandOptions)
+	commandOutput, err := c.RunCommand(ctx, runCommandOptions)
 	if err != nil {
 		return nil, err
 	}

@@ -1,4 +1,4 @@
-package docker
+package dockerutils
 
 import (
 	"github.com/asciich/asciichgolangpublic/containers"
@@ -10,8 +10,6 @@ import (
 type Docker interface {
 	GetContainerByName(name string) (container containers.Container, err error)
 	GetHostDescription() (hostDescription string, err error)
-	MustGetContainerByName(name string) (container containers.Container)
-	MustGetHostDescription() (hostDescription string)
 }
 
 func GetDockerContainerOnHost(host hosts.Host, containerName string) (dockerContainer containers.Container, err error) {
