@@ -1,12 +1,14 @@
 package kind
 
 import (
+	"context"
 	"slices"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/kubernetes"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -128,11 +130,11 @@ func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bo
 			)
 		}
 
+		ctx := contextutils.GetVerbosityContextByBool(verbose)
 		_, err = commandExecutor.RunCommand(
+			commandexecutor.WithLiveOutputOnStdout(ctx),
 			&parameteroptions.RunCommandOptions{
-				Command:            []string{"kind", "create", "cluster", "--name", clusterName},
-				Verbose:            verbose,
-				LiveOutputOnStdout: verbose,
+				Command: []string{"kind", "create", "cluster", "--name", clusterName},
 			},
 		)
 		if err != nil {
@@ -172,11 +174,11 @@ func (c *CommandExecutorKind) DeleteClusterByName(clusterName string, verbose bo
 			return err
 		}
 
+		ctx := contextutils.GetVerbosityContextByBool(verbose)
 		_, err = commandExecutor.RunCommand(
+			commandexecutor.WithLiveOutputOnStdout(ctx),
 			&parameteroptions.RunCommandOptions{
-				Command:            []string{"kind", "delete", "cluster", "--name", clusterName},
-				Verbose:            verbose,
-				LiveOutputOnStdout: verbose,
+				Command: []string{"kind", "delete", "cluster", "--name", clusterName},
 			},
 		)
 		if err != nil {
@@ -252,9 +254,9 @@ func (c *CommandExecutorKind) GetHostDescription() (hostDescription string, err 
 
 func (c *CommandExecutorKind) ListClusterNames(verbose bool) (clusterNames []string, err error) {
 	return c.RunCommandAndGetStdoutAsLines(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"kind", "get", "clusters"},
-			Verbose: false,
 		},
 	)
 }
@@ -320,24 +322,6 @@ func (c *CommandExecutorKind) MustListClusterNames(verbose bool) (clusterNames [
 	return clusterNames
 }
 
-func (c *CommandExecutorKind) MustRunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput) {
-	commandOutput, err := c.RunCommand(runOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandOutput
-}
-
-func (c *CommandExecutorKind) MustRunCommandAndGetStdoutAsLines(runOptions *parameteroptions.RunCommandOptions) (lines []string) {
-	lines, err := c.RunCommandAndGetStdoutAsLines(runOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return lines
-}
-
 func (c *CommandExecutorKind) MustSetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) {
 	err := c.SetCommandExecutor(commandExecutor)
 	if err != nil {
@@ -345,7 +329,7 @@ func (c *CommandExecutorKind) MustSetCommandExecutor(commandExecutor commandexec
 	}
 }
 
-func (c *CommandExecutorKind) RunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (c *CommandExecutorKind) RunCommand(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runOptions")
 	}
@@ -355,15 +339,15 @@ func (c *CommandExecutorKind) RunCommand(runOptions *parameteroptions.RunCommand
 		return nil, err
 	}
 
-	return commandExecutor.RunCommand(runOptions)
+	return commandExecutor.RunCommand(ctx, runOptions)
 }
 
-func (c *CommandExecutorKind) RunCommandAndGetStdoutAsLines(runOptions *parameteroptions.RunCommandOptions) (lines []string, err error) {
+func (c *CommandExecutorKind) RunCommandAndGetStdoutAsLines(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (lines []string, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runOptions")
 	}
 
-	commandOutput, err := c.RunCommand(runOptions)
+	commandOutput, err := c.RunCommand(ctx, runOptions)
 	if err != nil {
 		return nil, err
 	}

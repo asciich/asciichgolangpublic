@@ -1,4 +1,4 @@
-package docker
+package dockerutils
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"

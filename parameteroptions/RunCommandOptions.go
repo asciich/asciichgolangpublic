@@ -3,17 +3,14 @@ package parameteroptions
 import (
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datetime"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type RunCommandOptions struct {
-	Command            []string
-	TimeoutString      string
-	Verbose            bool
-	AllowAllExitCodes  bool
-	LiveOutputOnStdout bool
+	Command           []string
+	TimeoutString     string
+	AllowAllExitCodes bool
 
 	// If set this will be send to stdin of the command:
 	StdinString string
@@ -93,11 +90,6 @@ func (r *RunCommandOptions) GetAllowAllExitCodes() (allowAllExitCodes bool, err 
 	return r.AllowAllExitCodes, nil
 }
 
-func (r *RunCommandOptions) GetLiveOutputOnStdout() (liveOutputOnStdout bool, err error) {
-
-	return r.LiveOutputOnStdout, nil
-}
-
 func (r *RunCommandOptions) GetRemoveLastLineIfEmpty() (removeLastLineIfEmpty bool) {
 
 	return r.RemoveLastLineIfEmpty
@@ -124,125 +116,6 @@ func (r *RunCommandOptions) GetTimeoutString() (timeoutString string, err error)
 	return r.TimeoutString, nil
 }
 
-func (r *RunCommandOptions) GetVerbose() (verbose bool, err error) {
-
-	return r.Verbose, nil
-}
-
-func (r *RunCommandOptions) MustGetAllowAllExitCodes() (allowAllExitCodes bool) {
-	allowAllExitCodes, err := r.GetAllowAllExitCodes()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return allowAllExitCodes
-}
-
-func (r *RunCommandOptions) MustGetCommand() (command []string) {
-	command, err := r.GetCommand()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return command
-}
-
-func (r *RunCommandOptions) MustGetJoinedCommand() (joinedCommand string) {
-	joinedCommand, err := r.GetJoinedCommand()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return joinedCommand
-}
-
-func (r *RunCommandOptions) MustGetLiveOutputOnStdout() (liveOutputOnStdout bool) {
-	liveOutputOnStdout, err := r.GetLiveOutputOnStdout()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return liveOutputOnStdout
-}
-
-func (r *RunCommandOptions) MustGetStdinString() (stdinString string) {
-	stdinString, err := r.GetStdinString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return stdinString
-}
-
-func (r *RunCommandOptions) MustGetTimeoutSecondsAsString() (timeoutSeconds string) {
-	timeoutSeconds, err := r.GetTimeoutSecondsAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return timeoutSeconds
-}
-
-func (r *RunCommandOptions) MustGetTimeoutString() (timeoutString string) {
-	timeoutString, err := r.GetTimeoutString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return timeoutString
-}
-
-func (r *RunCommandOptions) MustGetVerbose() (verbose bool) {
-	verbose, err := r.GetVerbose()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return verbose
-}
-
-func (r *RunCommandOptions) MustSetAllowAllExitCodes(allowAllExitCodes bool) {
-	err := r.SetAllowAllExitCodes(allowAllExitCodes)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (r *RunCommandOptions) MustSetCommand(command []string) {
-	err := r.SetCommand(command)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (r *RunCommandOptions) MustSetLiveOutputOnStdout(liveOutputOnStdout bool) {
-	err := r.SetLiveOutputOnStdout(liveOutputOnStdout)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (r *RunCommandOptions) MustSetStdinString(stdinString string) {
-	err := r.SetStdinString(stdinString)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (r *RunCommandOptions) MustSetTimeoutString(timeoutString string) {
-	err := r.SetTimeoutString(timeoutString)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (r *RunCommandOptions) MustSetVerbose(verbose bool) {
-	err := r.SetVerbose(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (r *RunCommandOptions) SetAllowAllExitCodes(allowAllExitCodes bool) (err error) {
 	r.AllowAllExitCodes = allowAllExitCodes
 
@@ -259,12 +132,6 @@ func (r *RunCommandOptions) SetCommand(command []string) (err error) {
 	}
 
 	r.Command = command
-
-	return nil
-}
-
-func (r *RunCommandOptions) SetLiveOutputOnStdout(liveOutputOnStdout bool) (err error) {
-	r.LiveOutputOnStdout = liveOutputOnStdout
 
 	return nil
 }
@@ -293,12 +160,6 @@ func (r *RunCommandOptions) SetTimeoutString(timeoutString string) (err error) {
 	}
 
 	r.TimeoutString = timeoutString
-
-	return nil
-}
-
-func (r *RunCommandOptions) SetVerbose(verbose bool) (err error) {
-	r.Verbose = verbose
 
 	return nil
 }

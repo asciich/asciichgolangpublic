@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -38,7 +39,7 @@ func X509Certificates() (x509Certificaets *X509CertificatesService) {
 	return new(X509CertificatesService)
 }
 
-func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey files.Directory, err error) {
+func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(ctx context.Context, createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey files.Directory, err error) {
 	if createOptions == nil {
 		return nil, tracederrors.TracedError("createOptions is nil")
 	}
@@ -72,10 +73,12 @@ func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(cre
 		"4096",
 	}
 
-	_, err = commandexecutor.Bash().RunCommand(&parameteroptions.RunCommandOptions{
-		Command: sslCommand,
-		Verbose: true,
-	})
+	_, err = commandexecutor.Bash().RunCommand(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: sslCommand,
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +88,7 @@ func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(cre
 	return directoryToUse, nil
 }
 
-func (c *X509CertificatesService) CreateRootCaIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey files.Directory, err error) {
+func (c *X509CertificatesService) CreateRootCaIntoDirectory(ctx context.Context, createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey files.Directory, err error) {
 	if createOptions == nil {
 		return nil, tracederrors.TracedError("createOptions is nil")
 	}
@@ -141,9 +144,9 @@ func (c *X509CertificatesService) CreateRootCaIntoDirectory(createOptions *X509C
 	}
 
 	_, err = commandexecutor.Bash().RunCommand(
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: createCommand,
-			Verbose: true,
 		},
 	)
 	if err != nil {
@@ -584,9 +587,9 @@ func (c *X509CertificatesService) CreateSigningRequestFile(signOptions *X509Sign
 	}
 
 	_, err = commandexecutor.Bash().RunCommand(
+		contextutils.GetVerbosityContextByBool(signOptions.Verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: signCommand,
-			Verbose: signOptions.Verbose,
 		},
 	)
 	if err != nil {
@@ -661,45 +664,6 @@ func (c *X509CertificatesService) IsCertificateFileSignedByCertificateFile(thisC
 	return isSignedBy, err
 }
 */
-
-func (c *X509CertificatesService) MustCreateIntermediateCertificateIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey files.Directory) {
-	directoryContianingCreatedCertAndKey, err := c.CreateIntermediateCertificateIntoDirectory(createOptions)
-	if err != nil {
-		logging.LogFatalf("X509Certificates.CreateIntermediateCertificateInto: failed: '%v'", err)
-	}
-
-	return directoryContianingCreatedCertAndKey
-}
-
-func (c *X509CertificatesService) MustCreateRootCaIntoDirectory(createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey files.Directory) {
-	directoryContianingCreatedCertAndKey, err := c.CreateRootCaIntoDirectory(createOptions)
-	if err != nil {
-		logging.LogFatalf("X509Certificates.CreateRootCaIntoDirectory: failed: '%v'", err)
-	}
-
-	return directoryContianingCreatedCertAndKey
-}
-
-func (c *X509CertificatesService) MustCreateSignedCertificate(createOptions *X509CreateCertificateOptions) {
-	err := c.CreateSignedCertificate(createOptions)
-	if err != nil {
-		logging.LogFatalf("X509Certificates.CreateSignedCertificate failed: '%v'", err)
-	}
-}
-
-func (c *X509CertificatesService) MustCreateSignedIntermediateCertificateAndAddToGopass(createOptions *X509CreateCertificateOptions, rootCaInGopass *parameteroptions.GopassSecretOptions, intermediateGopassOptions *parameteroptions.GopassSecretOptions) {
-	err := c.CreateSignedIntermediateCertificateAndAddToGopass(createOptions, rootCaInGopass, intermediateGopassOptions)
-	if err != nil {
-		logging.LogFatalf("X509Certificates.CreateSignedIntermediateCertificateAndAddToGopass failed: '%v'", err)
-	}
-}
-
-func (c *X509CertificatesService) MustSignIntermediateCertificate(signOptions *X509SignCertificateOptions) {
-	err := c.SignIntermediateCertificate(signOptions)
-	if err != nil {
-		logging.LogFatalf("X509CertificatesService.SignIntermediateCertificate: '%v'", err)
-	}
-}
 
 func (c *X509CertificatesService) SignIntermediateCertificate(signOptions *X509SignCertificateOptions) (err error) {
 	if signOptions == nil {
@@ -810,9 +774,9 @@ func (c *X509CertificatesService) SignIntermediateCertificate(signOptions *X509S
 	}
 
 	_, err = commandexecutor.Bash().RunCommand(
+		contextutils.GetVerbosityContextByBool(signOptions.Verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: signCommand,
-			Verbose: signOptions.Verbose,
 		},
 	)
 	if err != nil {

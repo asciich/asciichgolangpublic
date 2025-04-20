@@ -319,11 +319,11 @@ func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClo
 			return err
 		}
 
+		ctx := contextutils.GetVerbosityContextByBool(verbose)
 		_, err = commandExecutor.RunCommand(
+			commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
 			&parameteroptions.RunCommandOptions{
-				Command:            []string{"git", "clone", pathOrUrlToClone, path},
-				Verbose:            verbose,
-				LiveOutputOnStdout: verbose,
+				Command: []string{"git", "clone", pathOrUrlToClone, path},
 			},
 		)
 		if err != nil {
@@ -1003,7 +1003,9 @@ func (c *CommandExecutorGitRepository) HasInitialCommit(verbose bool) (hasInitia
 		return false, err
 	}
 
+	ctx := contextutils.GetVerbosityContextByBool(verbose)
 	stdout, err := commandExecutor.RunCommandAndGetStdoutAsString(
+		commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
@@ -1013,8 +1015,6 @@ func (c *CommandExecutorGitRepository) HasInitialCommit(verbose bool) (hasInitia
 					path,
 				),
 			},
-			Verbose:            verbose,
-			LiveOutputOnStdout: verbose,
 		},
 	)
 	if err != nil {
@@ -1062,6 +1062,7 @@ func (c *CommandExecutorGitRepository) HasUncommittedChanges(verbose bool) (hasU
 	}
 
 	commandOutput, err := commandExecutor.RunCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
@@ -1071,7 +1072,6 @@ func (c *CommandExecutorGitRepository) HasUncommittedChanges(verbose bool) (hasU
 					path,
 				),
 			},
-			Verbose: verbose,
 		},
 	)
 	if err != nil {
@@ -1344,7 +1344,9 @@ func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialite
 		return false, nil
 	}
 
+	ctx := contextutils.GetVerbosityContextByBool(verbose)
 	stdout, err := commandExecutor.RunCommandAndGetStdoutAsString(
+		commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
@@ -1354,8 +1356,6 @@ func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialite
 					path,
 				),
 			},
-			Verbose:            verbose,
-			LiveOutputOnStdout: verbose,
 		},
 	)
 	if err != nil {
@@ -2181,11 +2181,11 @@ func (c *CommandExecutorGitRepository) RunGitCommand(gitCommand []string, verbos
 
 	commandToUse := append([]string{"git", "-C", path}, gitCommand...)
 
+	ctx := contextutils.GetVerbosityContextByBool(verbose)
 	return commandExecutor.RunCommand(
+		commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
 			Command:            commandToUse,
-			Verbose:            verbose,
-			LiveOutputOnStdout: verbose,
 		},
 	)
 }

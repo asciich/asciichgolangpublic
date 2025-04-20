@@ -122,14 +122,19 @@ func TestKubeConfig_IsLoadableByKubectl(t *testing.T) {
 			func(t *testing.T) {
 				const verbose bool = true
 
-				require.True(t, MustIsFilePathLoadableByKubectl(tt.path, verbose))
+				isLoadable, err := IsFilePathLoadableByKubectl(tt.path, verbose)
+				require.NoError(t, err)
+				require.True(t, isLoadable)
 
 				kubeConfig := MustLoadFromFilePath(tt.path, verbose)
 
 				tempFilePath := kubeConfig.MustWriteToTemporaryFileAndGetPath(verbose)
 				defer files.MustDeleteFileByPath(tempFilePath, verbose)
 
-				require.True(t, MustIsFilePathLoadableByKubectl(tempFilePath, verbose))
+				isLoadable, err = IsFilePathLoadableByKubectl(tt.path, verbose)
+				require.NoError(t, err)
+				require.True(t, isLoadable)
+
 			},
 		)
 	}

@@ -1,6 +1,7 @@
 package x509utils
 
 import (
+	"context"
 	"strings"
 	"testing"
 
@@ -12,14 +13,13 @@ import (
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
-func mustRepoRoot() (repoRootDir files.Directory) {
+func mustRepoRoot(ctx context.Context) (repoRootDir files.Directory) {
 	const verbose = true
 
 	repoRootPath, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
+		commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
 			Command:            []string{"git", "-C", ".", "rev-parse", "--show-toplevel"},
-			Verbose:            verbose,
-			LiveOutputOnStdout: verbose,
 		},
 	)
 	if err != nil {
@@ -37,7 +37,7 @@ func mustRepoRoot() (repoRootDir files.Directory) {
 }
 
 func TestX509CertificateLoadFromFilePath(t *testing.T) {
-	testDir := mustRepoRoot().MustGetSubDirectory("testdata", "X509Certificate", "LoadFromFilePath")
+	testDir := mustRepoRoot(getCtx()).MustGetSubDirectory("testdata", "X509Certificate", "LoadFromFilePath")
 
 	type TestCase struct {
 		testDir files.Directory
@@ -73,7 +73,7 @@ func TestX509CertificateLoadFromFilePath(t *testing.T) {
 }
 
 func TestX509CertificateGetAsPemString(t *testing.T) {
-	testDir := mustRepoRoot().MustGetSubDirectory("testdata", "X509Certificate", "GetAsPemString")
+	testDir := mustRepoRoot(getCtx()).MustGetSubDirectory("testdata", "X509Certificate", "GetAsPemString")
 
 	type TestCase struct {
 		testDir files.Directory
@@ -105,7 +105,7 @@ func TestX509CertificateGetAsPemString(t *testing.T) {
 }
 
 func TestX509CertificateIsRootCa(t *testing.T) {
-	testDir := mustRepoRoot().MustGetSubDirectory("testdata", "X509Certificate", "IsRootCa")
+	testDir := mustRepoRoot(getCtx()).MustGetSubDirectory("testdata", "X509Certificate", "IsRootCa")
 
 	type TestCase struct {
 		testDir files.Directory
@@ -139,7 +139,7 @@ func TestX509CertificateIsRootCa(t *testing.T) {
 }
 
 func TestX509CertificateIsV1(t *testing.T) {
-	testDir := mustRepoRoot().MustGetSubDirectory("testdata", "X509Certificate", "IsV1")
+	testDir := mustRepoRoot(getCtx()).MustGetSubDirectory("testdata", "X509Certificate", "IsV1")
 
 	type TestCase struct {
 		testDir files.Directory
@@ -171,7 +171,7 @@ func TestX509CertificateIsV1(t *testing.T) {
 }
 
 func TestX509CertificateIsV3(t *testing.T) {
-	testDir := mustRepoRoot().MustGetSubDirectory("testdata", "X509Certificate", "IsV3")
+	testDir := mustRepoRoot(getCtx()).MustGetSubDirectory("testdata", "X509Certificate", "IsV3")
 
 	type TestCase struct {
 		testDir files.Directory

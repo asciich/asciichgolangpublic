@@ -5,6 +5,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -33,9 +34,9 @@ func CheckSignatureValid(signatureFile files.File, verbose bool) (err error) {
 	}
 
 	_, err = commandexecutor.Bash().RunCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"gpg", "--verify", path},
-			Verbose: verbose,
 		},
 	)
 	if err != nil {
@@ -116,9 +117,9 @@ func SignFile(fileToSign files.File, options *GnuPGSignOptions) (err error) {
 	}
 
 	_, err = commandexecutor.Bash().RunCommand(
+		contextutils.GetVerbosityContextByBool(options.Verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: signCommand,
-			Verbose: options.Verbose,
 		},
 	)
 	if err != nil {

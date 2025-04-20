@@ -1,6 +1,7 @@
-package docker
+package dockerutils
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -51,7 +52,7 @@ func (c *CommandExecutorDockerContainer) GetName() (name string, err error) {
 	return c.name, nil
 }
 
-func (c *CommandExecutorDockerContainer) IsRunning(verbose bool) (isRunning bool, err error) {
+func (c *CommandExecutorDockerContainer) IsRunning(ctx context.Context) (isRunning bool, err error) {
 	containerName, err := c.GetName()
 	if err != nil {
 		return false, err
@@ -63,13 +64,13 @@ func (c *CommandExecutorDockerContainer) IsRunning(verbose bool) (isRunning bool
 	}
 
 	stdout, err := commandExecutor.RunCommandAndGetStdoutAsString(
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
 				"-c",
 				fmt.Sprintf("docker inspect '%s' &> /dev/null && echo yes || echo no", containerName),
 			},
-			Verbose: verbose,
 		},
 	)
 	if err != nil {
@@ -87,8 +88,8 @@ func (c *CommandExecutorDockerContainer) IsRunning(verbose bool) (isRunning bool
 	return false, tracederrors.TracedErrorf("Unexpected stdout to evaluate docker container running: '%s'", stdout)
 }
 
-func (c *CommandExecutorDockerContainer) Kill(verbose bool) (err error) {
-	isRunning, err := c.IsRunning(verbose)
+func (c *CommandExecutorDockerContainer) Kill(ctx context.Context) (err error) {
+	isRunning, err := c.IsRunning(ctx)
 	if err != nil {
 		return err
 	}
@@ -99,9 +100,7 @@ func (c *CommandExecutorDockerContainer) Kill(verbose bool) (err error) {
 	}
 
 	if isRunning {
-		if verbose {
-			logging.LogInfof("Going to kill running container '%s'.", containerName)
-		}
+		logging.LogInfoByCtxf(ctx, "Going to kill running container '%s'.", containerName)
 
 		commandExecutor, err := c.GetCommandExecutor()
 		if err != nil {
@@ -109,9 +108,9 @@ func (c *CommandExecutorDockerContainer) Kill(verbose bool) (err error) {
 		}
 
 		_, err = commandExecutor.RunCommand(
+			ctx,
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"docker", "kill", containerName},
-				Verbose: verbose,
 			},
 		)
 		if err != nil {
@@ -119,55 +118,23 @@ func (c *CommandExecutorDockerContainer) Kill(verbose bool) (err error) {
 		}
 
 		sleepDuration := time.Second * 2
-		if verbose {
-			logging.LogInfof(
-				"Wait %v until delete of docker container '%s' is settled to avoid race condition.",
-				sleepDuration,
-				containerName,
-			)
-		}
+		logging.LogInfoByCtxf(
+			ctx,
+			"Wait %v until delete of docker container '%s' is settled to avoid race condition.",
+			sleepDuration,
+			containerName,
+		)
 		time.Sleep(sleepDuration)
 
-		if verbose {
-			logging.LogChangedf("Killed container '%s'", containerName)
-		}
+		logging.LogChangedByCtxf(ctx, "Killed container '%s'", containerName)
 	} else {
-		if verbose {
-			logging.LogInfof("Container '%s' is already removed. Skip killing container.", containerName)
-		}
+		logging.LogInfoByCtxf(ctx, "Container '%s' is already removed. Skip killing container.", containerName)
 	}
 
 	return nil
 }
 
-func (c *CommandExecutorDockerContainer) MustGetCommandExecutor() (commandExectuor commandexecutor.CommandExecutor) {
-	commandExectuor, err := c.GetCommandExecutor()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandExectuor
-}
-
-func (c *CommandExecutorDockerContainer) MustRunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput) {
-	commandOutput, err := c.RunCommand(runOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandOutput
-}
-
-func (c *CommandExecutorDockerContainer) MustRunCommandAndGetStdoutAsString(runOptions *parameteroptions.RunCommandOptions) (stdout string) {
-	stdout, err := c.RunCommandAndGetStdoutAsString(runOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return stdout
-}
-
-func (c *CommandExecutorDockerContainer) RunCommand(runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (c *CommandExecutorDockerContainer) RunCommand(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runOptions")
 	}
@@ -177,10 +144,10 @@ func (c *CommandExecutorDockerContainer) RunCommand(runOptions *parameteroptions
 		return nil, err
 	}
 
-	return commandExecutor.RunCommand(runOptions)
+	return commandExecutor.RunCommand(ctx, runOptions)
 }
 
-func (c *CommandExecutorDockerContainer) RunCommandAndGetStdoutAsString(runOptions *parameteroptions.RunCommandOptions) (stdout string, err error) {
+func (c *CommandExecutorDockerContainer) RunCommandAndGetStdoutAsString(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (stdout string, err error) {
 	if runOptions == nil {
 		return "", tracederrors.TracedErrorNil("runOptions")
 	}
@@ -190,7 +157,7 @@ func (c *CommandExecutorDockerContainer) RunCommandAndGetStdoutAsString(runOptio
 		return "", err
 	}
 
-	return commandExecutor.RunCommandAndGetStdoutAsString(runOptions)
+	return commandExecutor.RunCommandAndGetStdoutAsString(ctx, runOptions)
 }
 
 func (c *CommandExecutorDockerContainer) SetName(name string) (err error) {
@@ -208,54 +175,6 @@ func (d *CommandExecutorDockerContainer) GetDocker() (docker Docker, err error) 
 		return nil, tracederrors.TracedError("docker is not set")
 	}
 	return d.docker, nil
-}
-
-func (d *CommandExecutorDockerContainer) MustGetDocker() (docker Docker) {
-	docker, err := d.GetDocker()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return docker
-}
-
-func (d *CommandExecutorDockerContainer) MustGetName() (name string) {
-	name, err := d.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (d *CommandExecutorDockerContainer) MustIsRunning(verbose bool) (isRunning bool) {
-	isRunning, err := d.IsRunning(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isRunning
-}
-
-func (d *CommandExecutorDockerContainer) MustKill(verbose bool) {
-	err := d.Kill(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (d *CommandExecutorDockerContainer) MustSetDocker(docker Docker) {
-	err := d.SetDocker(docker)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (d *CommandExecutorDockerContainer) MustSetName(name string) {
-	err := d.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (d *CommandExecutorDockerContainer) SetDocker(docker Docker) (err error) {

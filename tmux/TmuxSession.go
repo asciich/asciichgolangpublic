@@ -1,6 +1,7 @@
 package tmux
 
 import (
+	"context"
 	"slices"
 	"strings"
 
@@ -19,24 +20,19 @@ func NewTmuxSession() (t *TmuxSession) {
 	return new(TmuxSession)
 }
 
-func (t *TmuxSession) Create(verbose bool) (err error) {
+func (t *TmuxSession) Create(ctx context.Context) (err error) {
 	name, err := t.GetName()
 	if err != nil {
 		return err
 	}
 
-	exists, err := t.Exists(verbose)
+	exists, err := t.Exists(ctx)
 	if err != nil {
 		return err
 	}
 
 	if exists {
-		if verbose {
-			logging.LogInfof(
-				"Tmux session '%s' already exists. Skip creation.",
-				name,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Tmux session '%s' already exists. Skip creation.", name)
 	} else {
 		commandExecutor, err := t.GetCommandExecutor()
 		if err != nil {
@@ -44,6 +40,7 @@ func (t *TmuxSession) Create(verbose bool) (err error) {
 		}
 
 		_, err = commandExecutor.RunCommand(
+			commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{
 					"tmux",
@@ -52,27 +49,20 @@ func (t *TmuxSession) Create(verbose bool) (err error) {
 					"-s",
 					name,
 				},
-				Verbose:            verbose,
-				LiveOutputOnStdout: verbose,
 			},
 		)
 		if err != nil {
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf(
-				"Tmux session '%s' created.",
-				name,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "Tmux session '%s' created.", name)
 	}
 
 	return nil
 }
 
-func (t *TmuxSession) Delete(verbose bool) (err error) {
-	sessionExists, err := t.Exists(verbose)
+func (t *TmuxSession) Delete(ctx context.Context) (err error) {
+	sessionExists, err := t.Exists(ctx)
 	if err != nil {
 		return err
 	}
@@ -89,6 +79,7 @@ func (t *TmuxSession) Delete(verbose bool) (err error) {
 		}
 
 		_, err = commandExecutor.RunCommand(
+			ctx,
 			&parameteroptions.RunCommandOptions{
 				Command: []string{
 					"tmux",
@@ -102,25 +93,15 @@ func (t *TmuxSession) Delete(verbose bool) (err error) {
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf(
-				"Tmux session '%s' deleted.",
-				sessionName,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "Tmux session '%s' deleted.", sessionName)
 	} else {
-		if verbose {
-			logging.LogInfof(
-				"Session '%s' already absent. Skip delete.",
-				sessionName,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Session '%s' already absent. Skip delete.", sessionName)
 	}
 
 	return nil
 }
 
-func (t *TmuxSession) Exists(verbose bool) (exists bool, err error) {
+func (t *TmuxSession) Exists(ctx context.Context) (exists bool, err error) {
 	tmux, err := t.GetTmux()
 	if err != nil {
 		return false, err
@@ -131,7 +112,7 @@ func (t *TmuxSession) Exists(verbose bool) (exists bool, err error) {
 		return false, err
 	}
 
-	sessionNames, err := tmux.ListSessionNames(verbose)
+	sessionNames, err := tmux.ListSessionNames(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -139,19 +120,9 @@ func (t *TmuxSession) Exists(verbose bool) (exists bool, err error) {
 	exists = slices.Contains(sessionNames, name)
 
 	if exists {
-		if verbose {
-			logging.LogInfof(
-				"Tmux session '%s' exists.",
-				name,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Tmux session '%s' exists.", name)
 	} else {
-		if verbose {
-			logging.LogInfof(
-				"Tmux session '%s' does not exist.",
-				name,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Tmux session '%s' does not exist.", name)
 	}
 
 	return exists, nil
@@ -207,7 +178,7 @@ func (t *TmuxSession) GetWindowByName(windowName string) (window *TmuxWindow, er
 	return window, nil
 }
 
-func (t *TmuxSession) ListWindowNames(verbose bool) (windowsNames []string, err error) {
+func (t *TmuxSession) ListWindowNames(ctx context.Context) (windowsNames []string, err error) {
 	name, err := t.GetName()
 	if err != nil {
 		return nil, err
@@ -219,6 +190,7 @@ func (t *TmuxSession) ListWindowNames(verbose bool) (windowsNames []string, err 
 	}
 
 	lines, err := commandExecutor.RunCommandAndGetStdoutAsLines(
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"tmux", "list-windows", "-a"},
 		},
@@ -250,129 +222,35 @@ func (t *TmuxSession) ListWindowNames(verbose bool) (windowsNames []string, err 
 		}
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Found '%d' windows in tmux session '%s'.",
-			len(windowsNames),
-			name,
-		)
-	}
+	logging.LogInfoByCtxf(
+		ctx,
+		"Found '%d' windows in tmux session '%s'.",
+		len(windowsNames),
+		name,
+	)
 
 	return windowsNames, nil
 }
 
-func (t *TmuxSession) MustCreate(verbose bool) {
-	err := t.Create(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TmuxSession) MustDelete(verbose bool) {
-	err := t.Delete(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TmuxSession) MustExists(verbose bool) (exists bool) {
-	exists, err := t.Exists(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return exists
-}
-
-func (t *TmuxSession) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
-	commandExecutor, err := t.GetCommandExecutor()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandExecutor
-}
-
-func (t *TmuxSession) MustGetName() (name string) {
-	name, err := t.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (t *TmuxSession) MustGetTmux() (tmux *TmuxService) {
-	tmux, err := t.GetTmux()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return tmux
-}
-
-func (t *TmuxSession) MustGetWindowByName(windowName string) (window *TmuxWindow) {
-	window, err := t.GetWindowByName(windowName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return window
-}
-
-func (t *TmuxSession) MustListWindowNames(verbose bool) (windowsNames []string) {
-	windowsNames, err := t.ListWindowNames(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return windowsNames
-}
-
-func (t *TmuxSession) MustRecreate(verbose bool) {
-	err := t.Recreate(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TmuxSession) MustSetName(name string) {
-	err := t.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TmuxSession) MustSetTmux(tmux *TmuxService) {
-	err := t.SetTmux(tmux)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TmuxSession) Recreate(verbose bool) (err error) {
+func (t *TmuxSession) Recreate(ctx context.Context) (err error) {
 	name, err := t.GetName()
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof("Recreate tmux session '%s' started.", name)
-	}
+	logging.LogInfoByCtxf(ctx, "Recreate tmux session '%s' started.", name)
 
-	err = t.Delete(verbose)
+	err = t.Delete(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = t.Create(verbose)
+	err = t.Create(ctx)
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof("Recreate tmux session '%s' finished.", name)
-	}
+	logging.LogChangedByCtxf(ctx, "Recreate tmux session '%s' finished.", name)
 
 	return nil
 }

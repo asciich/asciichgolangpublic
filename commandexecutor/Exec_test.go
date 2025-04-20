@@ -1,9 +1,10 @@
-package commandexecutor
+package commandexecutor_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -18,31 +19,31 @@ func TestExecRunCommandAndGetStdoutAsString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
-
-				var exec CommandExecutor = Exec()
-				output := exec.MustRunCommandAndGetStdoutAsString(
+				var exec commandexecutor.CommandExecutor = commandexecutor.Exec()
+				output, err := exec.RunCommandAndGetStdoutAsString(
+					ctx,
 					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
-						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				output2 := exec.MustRunCommandAndGetStdoutAsString(
+				output2, err := exec.RunCommandAndGetStdoutAsString(
+					commandexecutor.WithLiveOutputOnStdout(ctx),
 					&parameteroptions.RunCommandOptions{
-						Command:            tt.command,
-						Verbose:            verbose,
-						LiveOutputOnStdout: true,
+						Command: tt.command,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(tt.expectedOutput, output)
-				require.EqualValues(tt.expectedOutput, output2)
+				require.EqualValues(t, tt.expectedOutput, output)
+				require.EqualValues(t, tt.expectedOutput, output2)
 			},
 		)
 	}
@@ -69,33 +70,32 @@ func TestExecRunCommandStdin(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
-
-				var exec CommandExecutor = Exec()
-				output := exec.MustRunCommandAndGetStdoutAsBytes(
+				var exec commandexecutor.CommandExecutor = commandexecutor.Exec()
+				output, err := exec.RunCommandAndGetStdoutAsBytes(
+					ctx,
 					&parameteroptions.RunCommandOptions{
 						Command:     tt.command,
-						Verbose:     verbose,
+						StdinString: tt.stdin,
+					},
+				)
+				require.NoError(t, err)
+
+				output2, err := exec.RunCommandAndGetStdoutAsString(
+					commandexecutor.WithLiveOutputOnStdout(ctx),
+					&parameteroptions.RunCommandOptions{
+						Command:     tt.command,
 						StdinString: tt.stdin,
 					},
 				)
 
-				output2 := exec.MustRunCommandAndGetStdoutAsString(
-					&parameteroptions.RunCommandOptions{
-						Command:            tt.command,
-						Verbose:            verbose,
-						LiveOutputOnStdout: true,
-						StdinString:        tt.stdin,
-					},
-				)
-
-				require.EqualValues([]byte(tt.expectedOutput), output)
-				require.EqualValues(tt.expectedOutput, output2)
+				require.EqualValues(t, []byte(tt.expectedOutput), output)
+				require.EqualValues(t, tt.expectedOutput, output2)
 			},
 		)
 	}

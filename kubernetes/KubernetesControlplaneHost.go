@@ -7,6 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/hosts"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -99,9 +100,9 @@ func (k *KubernetesControlplaneHost) GetJoinCommandAsString(verbose bool) (joinC
 	}
 
 	joinCommand, err = k.RunCommandAndGetStdoutAsString(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"kubeadm", "token", "create", "--print-join-command"},
-			Verbose: verbose,
 		},
 	)
 	if err != nil {
@@ -139,9 +140,9 @@ func (k *KubernetesControlplaneHost) GetJoinCommandAsStringSlice(verbose bool) (
 
 func (k *KubernetesControlplaneHost) IsKubernetesControlplane(verbose bool) (isKubernetesControlplane bool, err error) {
 	stdout, err := k.RunCommandAndGetStdoutAsString(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"ctr", "--namespace", "k8s.io", "containers", "list"},
-			Verbose: verbose,
 		},
 	)
 	if err != nil {

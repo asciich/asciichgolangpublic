@@ -1,6 +1,7 @@
 package tmux
 
 import (
+	"context"
 	"slices"
 	"strings"
 
@@ -85,13 +86,14 @@ func (t *TmuxService) GetWindowByNames(sessionName string, windowName string) (w
 	return window, nil
 }
 
-func (t *TmuxService) ListSessionNames(verbose bool) (sessionNames []string, err error) {
+func (t *TmuxService) ListSessionNames(ctx context.Context) (sessionNames []string, err error) {
 	commandExecutor, err := t.GetCommandExecutor()
 	if err != nil {
 		return nil, err
 	}
 
 	fullSessionLines, err := commandExecutor.RunCommandAndGetStdoutAsLines(
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"tmux", "ls"},
 		},
@@ -120,12 +122,7 @@ func (t *TmuxService) ListSessionNames(verbose bool) (sessionNames []string, err
 		sessionNames = append(sessionNames, toAdd)
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"There are '%d' tmux sessions.",
-			len(sessionNames),
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "There are '%d' tmux sessions.", len(sessionNames))
 
 	return sessionNames, nil
 }
@@ -155,15 +152,6 @@ func (t *TmuxService) MustGetWindowByNames(sessionName string, windowName string
 	}
 
 	return window
-}
-
-func (t *TmuxService) MustListSessionNames(verbose bool) (sessionNames []string) {
-	sessionNames, err := t.ListSessionNames(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return sessionNames
 }
 
 func (t *TmuxService) MustSetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) {

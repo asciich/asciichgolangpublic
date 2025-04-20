@@ -1,6 +1,7 @@
 package tmux
 
 import (
+	"context"
 	"errors"
 	"slices"
 	"strconv"
@@ -13,6 +14,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -30,7 +32,7 @@ func NewTmuxWindow() (t *TmuxWindow) {
 }
 
 // Default use case to send a command is using []string{"command to run", "enter"}. "enter" in this example is detected as enter key by tmux.
-func (t *TmuxWindow) SendKeys(toSend []string, verbose bool) (err error) {
+func (t *TmuxWindow) SendKeys(ctx context.Context, toSend []string) (err error) {
 	if len(toSend) <= 0 {
 		return tracederrors.TracedError("toSend has no elements")
 	}
@@ -57,9 +59,9 @@ func (t *TmuxWindow) SendKeys(toSend []string, verbose bool) (err error) {
 		}
 
 		_, err = commandExecutor.RunCommand(
+			ctx,
 			&parameteroptions.RunCommandOptions{
 				Command: commandToUse,
-				Verbose: verbose,
 			},
 		)
 		if err != nil {
@@ -67,26 +69,25 @@ func (t *TmuxWindow) SendKeys(toSend []string, verbose bool) (err error) {
 		}
 	}
 
-	if verbose {
-		logging.LogChangedf(
-			"Send keys to tmux window '%s' in session '%s'.",
-			windowName,
-			sessionName,
-		)
-	}
+	logging.LogChangedByCtxf(
+		ctx,
+		"Send keys to tmux window '%s' in session '%s'.",
+		windowName,
+		sessionName,
+	)
 
 	return nil
 }
 
 // Delete the tmux session this window belongs to.
 // Will implicitly also kill this window but also any other window in the session.
-func (t *TmuxWindow) DeleteSession(verbose bool) (err error) {
+func (t *TmuxWindow) DeleteSession(ctx context.Context) (err error) {
 	session, err := t.GetSession()
 	if err != nil {
 		return err
 	}
 
-	err = session.Delete(verbose)
+	err = session.Delete(ctx)
 	if err != nil {
 		return err
 	}
@@ -127,32 +128,31 @@ func (t *TmuxWindow) GetSecondLatestPaneLine() (paneLine string, err error) {
 	return paneLine, nil
 }
 
-func (t *TmuxWindow) Create(verbose bool) (err error) {
+func (t *TmuxWindow) Create(ctx context.Context) (err error) {
 	sessionName, windowName, err := t.GetSessionAndWindowName()
 	if err != nil {
 		return err
 	}
 
-	exists, err := t.Exists(verbose)
+	exists, err := t.Exists(ctx)
 	if err != nil {
 		return err
 	}
 
 	if exists {
-		if verbose {
-			logging.LogInfof(
-				"Tmux window '%s' in session '%s' already exists. Skip create.",
-				windowName,
-				sessionName,
-			)
-		}
+		logging.LogInfoByCtxf(
+			ctx,
+			"Tmux window '%s' in session '%s' already exists. Skip create.",
+			windowName,
+			sessionName,
+		)
 	} else {
 		session, err := t.GetSession()
 		if err != nil {
 			return err
 		}
 
-		err = session.Create(verbose)
+		err = session.Create(ctx)
 		if err != nil {
 			return err
 		}
@@ -163,34 +163,33 @@ func (t *TmuxWindow) Create(verbose bool) (err error) {
 		}
 
 		_, err = commandExecutor.RunCommand(
+			ctx,
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"tmux", "new-window", "-t", sessionName, "-n", windowName},
-				Verbose: verbose,
 			},
 		)
 		if err != nil {
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf(
-				"Tmux window '%s' in session '%s' created.",
-				windowName,
-				sessionName,
-			)
-		}
+		logging.LogChangedByCtxf(
+			ctx,
+			"Tmux window '%s' in session '%s' created.",
+			windowName,
+			sessionName,
+		)
 	}
 
 	return nil
 }
 
-func (t *TmuxWindow) Delete(verbose bool) (err error) {
+func (t *TmuxWindow) Delete(ctx context.Context) (err error) {
 	sessionName, windowName, err := t.GetSessionAndWindowName()
 	if err != nil {
 		return err
 	}
 
-	exists, err := t.Exists(verbose)
+	exists, err := t.Exists(ctx)
 	if err != nil {
 		return err
 	}
@@ -202,9 +201,9 @@ func (t *TmuxWindow) Delete(verbose bool) (err error) {
 		}
 
 		_, err = commandExecutor.RunCommand(
+			ctx,
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"tmux", "kill-window", "-t", sessionName + ":" + windowName},
-				Verbose: verbose,
 			},
 		)
 		if err != nil {
@@ -227,13 +226,13 @@ func (t *TmuxWindow) Delete(verbose bool) (err error) {
 	return nil
 }
 
-func (t *TmuxWindow) Exists(verbose bool) (exists bool, err error) {
+func (t *TmuxWindow) Exists(ctx context.Context) (exists bool, err error) {
 	windowName, err := t.GetName()
 	if err != nil {
 		return false, err
 	}
 
-	windowNames, err := t.ListWindowNames(verbose)
+	windowNames, err := t.ListWindowNames(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -245,20 +244,20 @@ func (t *TmuxWindow) Exists(verbose bool) (exists bool, err error) {
 		return false, err
 	}
 
-	if verbose {
-		if exists {
-			logging.LogInfof(
-				"Window '%s' exists in tmux session '%s'.",
-				windowName,
-				sessionName,
-			)
-		} else {
-			logging.LogInfof(
-				"Window '%s' does not exist in tmux session '%s'.",
-				windowName,
-				sessionName,
-			)
-		}
+	if exists {
+		logging.LogInfoByCtxf(
+			ctx,
+			"Window '%s' exists in tmux session '%s'.",
+			windowName,
+			sessionName,
+		)
+	} else {
+		logging.LogInfoByCtxf(
+			ctx,
+			"Window '%s' does not exist in tmux session '%s'.",
+			windowName,
+			sessionName,
+		)
 	}
 
 	return exists, nil
@@ -358,6 +357,7 @@ func (t *TmuxWindow) GetShownOutput() (output string, err error) {
 	}
 
 	output, err = commandExecutor.RunCommandAndGetStdoutAsString(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"tmux",
@@ -388,48 +388,18 @@ func (t *TmuxWindow) GetShownLines() (lines []string, err error) {
 	return lines, nil
 }
 
-func (t *TmuxWindow) ListWindowNames(verbose bool) (windowNames []string, err error) {
+func (t *TmuxWindow) ListWindowNames(ctx context.Context) (windowNames []string, err error) {
 	session, err := t.GetSession()
 	if err != nil {
 		return nil, err
 	}
 
-	windowNames, err = session.ListWindowNames(verbose)
+	windowNames, err = session.ListWindowNames(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return windowNames, nil
-}
-
-func (t *TmuxWindow) MustCreate(verbose bool) {
-	err := t.Create(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TmuxWindow) MustDelete(verbose bool) {
-	err := t.Delete(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TmuxWindow) MustDeleteSession(verbose bool) {
-	err := t.DeleteSession(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TmuxWindow) MustExists(verbose bool) (exists bool) {
-	exists, err := t.Exists(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return exists
 }
 
 func (t *TmuxWindow) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
@@ -502,31 +472,6 @@ func (t *TmuxWindow) MustGetShownLines() (lines []string) {
 	}
 
 	return lines
-}
-
-func (t *TmuxWindow) MustListWindowNames(verbose bool) (windowNames []string) {
-	windowNames, err := t.ListWindowNames(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return windowNames
-}
-
-func (t *TmuxWindow) MustRecreate(verbose bool) {
-	err := t.Recreate(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TmuxWindow) MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput) {
-	commandOutput, err := t.RunCommand(runCommandOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandOutput
 }
 
 func (t *TmuxWindow) WaitUntilOutputMatchesRegex(regex string, timeout time.Duration, verbose bool) (err error) {
@@ -650,13 +595,6 @@ func (t *TmuxWindow) MustWaitUntilOutputMatchesRegex(regex string, timeout time.
 	}
 }
 
-func (t *TmuxWindow) MustSendKeys(toSend []string, verbose bool) {
-	err := t.SendKeys(toSend, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (t *TmuxWindow) MustSetName(name string) {
 	err := t.SetName(name)
 	if err != nil {
@@ -671,41 +609,33 @@ func (t *TmuxWindow) MustSetSession(session *TmuxSession) {
 	}
 }
 
-func (t *TmuxWindow) MustWaitUntilCliPromptReady(verbose bool) {
-	err := t.WaitUntilCliPromptReady(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TmuxWindow) Recreate(verbose bool) (err error) {
+func (t *TmuxWindow) Recreate(ctx context.Context) (err error) {
 	sessionName, windowName, err := t.GetSessionAndWindowName()
 	if err != nil {
 		return err
 	}
 
-	err = t.Delete(verbose)
+	err = t.Delete(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = t.Create(verbose)
+	err = t.Create(ctx)
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		logging.LogChangedf(
-			"Tmux window '%s' in session '%s' recreated.",
-			windowName,
-			sessionName,
-		)
-	}
+	logging.LogChangedByCtxf(
+		ctx,
+		"Tmux window '%s' in session '%s' recreated.",
+		windowName,
+		sessionName,
+	)
 
 	return nil
 }
 
-func (t *TmuxWindow) RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (t *TmuxWindow) RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}
@@ -715,20 +645,19 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *parameteroptions.RunCommandOp
 		return nil, err
 	}
 
-	if runCommandOptions.Verbose {
-		logging.LogInfof(
-			"Run command in tmux window '%s' of tmux session '%s' started.",
-			windowName,
-			sessionName,
-		)
-	}
+	logging.LogInfoByCtxf(
+		ctx,
+		"Run command in tmux window '%s' of tmux session '%s' started.",
+		windowName,
+		sessionName,
+	)
 
-	err = t.Create(runCommandOptions.Verbose)
+	err = t.Create(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	captureFile, err := tempfiles.CreateEmptyTemporaryFile(runCommandOptions.Verbose)
+	captureFile, err := tempfiles.CreateEmptyTemporaryFile(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -743,13 +672,14 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *parameteroptions.RunCommandOp
 		return nil, err
 	}
 
-	err = t.WaitUntilCliPromptReady(runCommandOptions.Verbose)
+	err = t.WaitUntilCliPromptReady(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	// start output capture
 	_, err = commandExecutor.RunCommand(
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"tmux",
@@ -764,9 +694,7 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *parameteroptions.RunCommandOp
 		return nil, err
 	}
 
-	if runCommandOptions.Verbose {
-		logging.LogInfof("'%s' will be used to capture tmux output for command to run.", captureFilePath)
-	}
+	logging.LogInfoByCtxf(ctx, "'%s' will be used to capture tmux output for command to run.", captureFilePath)
 
 	commandToSend, err := runCommandOptions.GetJoinedCommand()
 	if err != nil {
@@ -775,8 +703,8 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *parameteroptions.RunCommandOp
 
 	const endCommandMarkerPrefix = "Last command ended exited with status code"
 	err = t.SendKeys(
+		ctx,
 		[]string{" " + commandToSend + "; echo -en \"\\n" + endCommandMarkerPrefix + " $?\\n\"", "enter"},
-		runCommandOptions.Verbose,
 	)
 	if err != nil {
 		return nil, err
@@ -791,32 +719,27 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *parameteroptions.RunCommandOp
 
 		if len(lines) > 0 {
 			if strings.HasPrefix(lines[len(lines)-1], endCommandMarkerPrefix) {
-				if runCommandOptions.Verbose {
-					logging.LogInfo("Found endCommandMarkerPrefix in latest line. Command is finished.")
-				}
+				logging.LogInfoByCtx(ctx, "Found endCommandMarkerPrefix in latest line. Command is finished.")
 				break
 			}
 		}
 
 		if len(lines) > 1 {
 			if strings.HasPrefix(lines[len(lines)-2], endCommandMarkerPrefix) {
-				if runCommandOptions.Verbose {
-					logging.LogInfo("Found endCommandMarkerPrefix in second last latest line. Command is finished.")
-				}
+				logging.LogInfoByCtx(ctx, "Found endCommandMarkerPrefix in second last latest line. Command is finished.")
 				break
 			}
 		}
 
 		waitTime := time.Millisecond * 200
-		if runCommandOptions.Verbose {
-			logging.LogInfof("Wait another '%v' until command is finished.", waitTime)
-		}
+		logging.LogInfoByCtxf(ctx, "Wait another '%v' until command is finished.", waitTime)
 
 		time.Sleep(waitTime)
 	}
 
 	// stop output capture
 	_, err = commandExecutor.RunCommand(
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"tmux",
@@ -908,13 +831,12 @@ func (t *TmuxWindow) RunCommand(runCommandOptions *parameteroptions.RunCommandOp
 		return nil, err
 	}
 
-	if runCommandOptions.Verbose {
-		logging.LogInfof(
-			"Run command in tmux window '%s' of tmux session '%s' finished.",
-			windowName,
-			sessionName,
-		)
-	}
+	logging.LogInfoByCtxf(
+		ctx,
+		"Run command in tmux window '%s' of tmux session '%s' finished.",
+		windowName,
+		sessionName,
+	)
 
 	return commandOutput, nil
 }
@@ -939,7 +861,7 @@ func (t *TmuxWindow) SetSession(session *TmuxSession) (err error) {
 	return nil
 }
 
-func (t *TmuxWindow) WaitUntilCliPromptReady(verbose bool) (err error) {
+func (t *TmuxWindow) WaitUntilCliPromptReady(ctx context.Context) (err error) {
 	sessionName, windowName, err := t.GetSessionAndWindowName()
 	if err != nil {
 		return err
@@ -956,13 +878,12 @@ func (t *TmuxWindow) WaitUntilCliPromptReady(verbose bool) (err error) {
 			lastLine := lines[len(lines)-1]
 
 			if commandlineinterface.IsLinePromptOnly(lastLine) {
-				if verbose {
-					logging.LogInfof(
-						"Tmux window '%s' in session '%s' shows CLI prompt and is ready to use.",
-						windowName,
-						sessionName,
-					)
-				}
+				logging.LogInfoByCtxf(
+					ctx,
+					"Tmux window '%s' in session '%s' shows CLI prompt and is ready to use.",
+					windowName,
+					sessionName,
+				)
 
 				return nil
 			}
@@ -970,16 +891,15 @@ func (t *TmuxWindow) WaitUntilCliPromptReady(verbose bool) (err error) {
 
 		delayTime := 100 * time.Millisecond
 
-		if verbose {
-			logging.LogInfof(
-				"Wait '%v' before tmux window '%s' in session '%s' becomes ready (%d/%d).",
-				delayTime,
-				windowName,
-				sessionName,
-				i+1,
-				nTries,
-			)
-		}
+		logging.LogInfoByCtxf(
+			ctx,
+			"Wait '%v' before tmux window '%s' in session '%s' becomes ready (%d/%d).",
+			delayTime,
+			windowName,
+			sessionName,
+			i+1,
+			nTries,
+		)
 
 		time.Sleep(delayTime)
 	}

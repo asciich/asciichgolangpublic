@@ -1,20 +1,27 @@
-package commandexecutor
+package commandexecutor_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
-func getCommandExecutorByImplementationName(implementationName string) (commandExecutor CommandExecutor) {
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
+
+func getCommandExecutorByImplementationName(implementationName string) (commandExecutor commandexecutor.CommandExecutor) {
 	if implementationName == "Bash" {
-		return Bash()
+		return commandexecutor.Bash()
 	}
 
 	if implementationName == "Exec" {
-		return Exec()
+		return commandexecutor.Exec()
 	}
 
 	logging.LogFatalf("Unnown implementation name: '%s'", implementationName)
@@ -35,17 +42,68 @@ func TestCommandExecutor_GetDeepCopyOfCommandExecutor(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				commandExecutor := getCommandExecutorByImplementationName(tt.implementationName)
 
-				copy := MustGetDeepCopyOfCommandExecutor(commandExecutor)
+				copy, err := commandexecutor.GetDeepCopyOfCommandExecutor(commandExecutor)
+				require.NoError(t, err)
+
+				expectedHostDescription, err := commandExecutor.GetHostDescription()
+				require.NoError(t, err)
+
+				hostDescription, err := copy.GetHostDescription()
+				require.NoError(t, err)
 
 				require.EqualValues(
-					commandExecutor.MustGetHostDescription(),
-					copy.MustGetHostDescription(),
+					t,
+					expectedHostDescription,
+					hostDescription,
 				)
 			},
 		)
 	}
+}
+
+func Test_WithLiveOutputOnStdout(t *testing.T) {
+	t.Run("nil", func(t *testing.T) {
+		require.False(t, commandexecutor.IsLiveOutputOnStdoutEnabled(nil))
+	})
+
+	t.Run("with nil", func(t *testing.T) {
+		ctx := commandexecutor.WithLiveOutputOnStdout(nil)
+		require.True(t, commandexecutor.IsLiveOutputOnStdoutEnabled(ctx))
+	})
+
+	t.Run("with silent", func(t *testing.T) {
+		ctx := commandexecutor.WithLiveOutputOnStdout(contextutils.ContextSilent())
+		require.True(t, commandexecutor.IsLiveOutputOnStdoutEnabled(ctx))
+	})
+
+	t.Run("with silent", func(t *testing.T) {
+		ctx := commandexecutor.WithLiveOutputOnStdout(contextutils.ContextVerbose())
+		require.True(t, commandexecutor.IsLiveOutputOnStdoutEnabled(ctx))
+	})
+
+	t.Run("silent context", func(t *testing.T) {
+		require.False(t, commandexecutor.IsLiveOutputOnStdoutEnabled(contextutils.ContextSilent()))
+	})
+
+	t.Run("verbose context", func(t *testing.T) {
+		require.False(t, commandexecutor.IsLiveOutputOnStdoutEnabled(contextutils.ContextVerbose()))
+	})
+
+	t.Run("if verbose", func(t *testing.T) {
+		require.False(
+			t,
+			commandexecutor.IsLiveOutputOnStdoutEnabled(
+				commandexecutor.WithLiveOutputOnStdoutIfVerbose(contextutils.ContextSilent()),
+			),
+		)
+
+		require.True(
+			t,
+			commandexecutor.IsLiveOutputOnStdoutEnabled(
+				commandexecutor.WithLiveOutputOnStdoutIfVerbose(contextutils.ContextVerbose()),
+			),
+		)
+	})
 }

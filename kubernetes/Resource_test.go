@@ -26,9 +26,10 @@ func TestKubernetesResource_CreateAndDelete(t *testing.T) {
 				require := require.New(t)
 
 				const verbose bool = true
+				ctx := getCtx()
 				const namespaceName = "testnamespace"
 
-				kubernetes := getKubernetesByImplementationName(tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(ctx, tt.implementationName)
 				kubernetes.MustDeleteNamespaceByName(namespaceName, verbose)
 				require.False(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
 
@@ -74,9 +75,11 @@ func TestKubernetesResource_ListResources(t *testing.T) {
 				require := require.New(t)
 
 				const verbose bool = true
+				ctx := getCtx()
+
 				const namespaceName = "testnamespace"
 
-				kubernetes := getKubernetesByImplementationName(tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(ctx, tt.implementationName)
 				kubernetes.MustDeleteNamespaceByName(namespaceName, verbose)
 				require.False(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
 
@@ -148,9 +151,11 @@ func TestKubernetesResource_GetAsYamlString(t *testing.T) {
 				require := require.New(t)
 
 				const verbose bool = true
+				ctx := getCtx()
+				
 				const namespaceName = "testnamespace"
 
-				kubernetes := getKubernetesByImplementationName(tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(ctx, tt.implementationName)
 				kubernetes.MustDeleteNamespaceByName(namespaceName, verbose)
 				require.False(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
 

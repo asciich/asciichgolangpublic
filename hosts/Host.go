@@ -21,17 +21,10 @@ type Host interface {
 	GetHostName() (hostName string, err error)
 	GetSshPublicKeyOfUserAsString(ctx context.Context, username string) (publicKey string, err error)
 	InstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile files.File, err error)
-	MustCheckReachable(verbose bool)
-	MustGetDirectoryByPath(path string) (directory files.Directory)
-	MustGetHostDescription() (hostDescription string)
-	MustGetHostName() (hostName string)
-	MustInstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile files.File)
-	MustRunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput)
-	RunCommand(runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error)
+	RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error)
 
 	// All methods below this line can be implemented by embedding the `CommandExecutorBase` struct:
-	RunCommandAndGetStdoutAsString(runCommandOptions *parameteroptions.RunCommandOptions) (stdout string, err error)
-	MustRunCommandAndGetStdoutAsString(runCommandOptions *parameteroptions.RunCommandOptions) (stdout string)
+	RunCommandAndGetStdoutAsString(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (stdout string, err error)
 }
 
 func GetHostByHostname(hostname string) (host Host, err error) {

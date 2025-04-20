@@ -1,7 +1,8 @@
 package commandexecutor
 
 import (
-	"github.com/asciich/asciichgolangpublic/logging"
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -35,52 +36,7 @@ func (b *BashService) GetHostDescription() (hostDescription string, err error) {
 	return "localhost", err
 }
 
-func (b *BashService) MustGetHostDescription() (hostDescription string) {
-	hostDescription, err := b.GetHostDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hostDescription
-}
-
-func (b *BashService) MustRunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput) {
-	commandOutput, err := b.RunCommand(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandOutput
-}
-
-func (b *BashService) MustRunOneLiner(oneLiner string, verbose bool) (output *CommandOutput) {
-	output, err := b.RunOneLiner(oneLiner, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return output
-}
-
-func (b *BashService) MustRunOneLinerAndGetStdoutAsLines(oneLiner string, verbose bool) (stdoutLines []string) {
-	stdoutLines, err := b.RunOneLinerAndGetStdoutAsLines(oneLiner, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return stdoutLines
-}
-
-func (b *BashService) MustRunOneLinerAndGetStdoutAsString(oneLiner string, verbose bool) (stdout string) {
-	stdout, err := b.RunOneLinerAndGetStdoutAsString(oneLiner, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return stdout
-}
-
-func (b *BashService) RunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput, err error) {
+func (b *BashService) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -99,7 +55,7 @@ func (b *BashService) RunCommand(options *parameteroptions.RunCommandOptions) (c
 	}
 	optionsToUse.Command = bashCommand
 
-	commandOutput, err = Exec().RunCommand(optionsToUse)
+	commandOutput, err = Exec().RunCommand(ctx, optionsToUse)
 	if err != nil {
 		return nil, err
 	}
@@ -107,16 +63,15 @@ func (b *BashService) RunCommand(options *parameteroptions.RunCommandOptions) (c
 	return commandOutput, nil
 }
 
-func (b *BashService) RunOneLiner(oneLiner string, verbose bool) (output *CommandOutput, err error) {
+func (b *BashService) RunOneLiner(ctx context.Context, oneLiner string) (output *CommandOutput, err error) {
 	if oneLiner == "" {
 		return nil, tracederrors.TracedErrorEmptyString("oneLiner")
 	}
 
 	output, err = b.RunCommand(
+		ctx,
 		&parameteroptions.RunCommandOptions{
-			Command:            []string{oneLiner},
-			Verbose:            verbose,
-			LiveOutputOnStdout: verbose,
+			Command: []string{oneLiner},
 		},
 	)
 	if err != nil {
@@ -126,8 +81,8 @@ func (b *BashService) RunOneLiner(oneLiner string, verbose bool) (output *Comman
 	return output, nil
 }
 
-func (b *BashService) RunOneLinerAndGetStdoutAsLines(oneLiner string, verbose bool) (stdoutLines []string, err error) {
-	output, err := b.RunOneLiner(oneLiner, verbose)
+func (b *BashService) RunOneLinerAndGetStdoutAsLines(ctx context.Context, oneLiner string) (stdoutLines []string, err error) {
+	output, err := b.RunOneLiner(ctx, oneLiner)
 	if err != nil {
 		return nil, err
 	}
@@ -140,8 +95,8 @@ func (b *BashService) RunOneLinerAndGetStdoutAsLines(oneLiner string, verbose bo
 	return stdoutLines, nil
 }
 
-func (b *BashService) RunOneLinerAndGetStdoutAsString(oneLiner string, verbose bool) (stdout string, err error) {
-	output, err := b.RunOneLiner(oneLiner, verbose)
+func (b *BashService) RunOneLinerAndGetStdoutAsString(ctx context.Context, oneLiner string) (stdout string, err error) {
+	output, err := b.RunOneLiner(ctx, oneLiner)
 	if err != nil {
 		return "", err
 	}

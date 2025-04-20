@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
@@ -44,13 +45,13 @@ func NewSSHClient() (s *SSHClient) {
 	return s
 }
 
-func (s *SSHClient) CheckReachable(verbose bool) (err error) {
+func (s *SSHClient) CheckReachable(ctx context.Context) (err error) {
 	hostname, err := s.GetHostName()
 	if err != nil {
 		return err
 	}
 
-	isReachable, err := s.IsReachable(verbose)
+	isReachable, err := s.IsReachable(ctx)
 	if err != nil {
 		return err
 	}
@@ -67,7 +68,10 @@ func (s *SSHClient) GetDeepCopy() (copy commandexecutor.CommandExecutor) {
 
 	*toReturn = *s
 
-	toReturn.MustSetParentCommandExecutorForBaseClass(toReturn)
+	err := toReturn.SetParentCommandExecutorForBaseClass(toReturn)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
 
 	return toReturn
 }
@@ -92,18 +96,18 @@ func (s *SSHClient) GetSshUserName() (sshUserName string, err error) {
 	return s.sshUserName, nil
 }
 
-func (s *SSHClient) IsReachable(verbose bool) (isReachable bool, err error) {
+func (s *SSHClient) IsReachable(ctx context.Context) (isReachable bool, err error) {
 	hostname, err := s.GetHostName()
 	if err != nil {
 		return false, err
 	}
 
 	commandOutput, err := s.RunCommand(
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command:           []string{"echo", "hello"},
 			TimeoutString:     "5 seconds",
 			AllowAllExitCodes: true,
-			Verbose:           verbose,
 		},
 	)
 	if err != nil {
@@ -117,9 +121,7 @@ func (s *SSHClient) IsReachable(verbose bool) (isReachable bool, err error) {
 		}
 
 		if isTimedOut {
-			if verbose {
-				logging.LogInfof("'%v' is NOT reachable by SSH.", hostname)
-			}
+			logging.LogInfoByCtxf(ctx, "'%v' is NOT reachable by SSH.", hostname)
 			return false, nil
 		}
 
@@ -151,21 +153,12 @@ func (s *SSHClient) IsReachable(verbose bool) (isReachable bool, err error) {
 		)
 	}
 
-	if verbose {
-		logging.LogInfof("'%v' is reachable by SSH.", hostname)
-	}
+	logging.LogInfoByCtxf(ctx, "'%v' is reachable by SSH.", hostname)
 	return true, nil
 }
 
 func (s *SSHClient) IsSshUserNameSet() (isSet bool) {
 	return len(s.sshUserName) > 0
-}
-
-func (s *SSHClient) MustCheckReachable(verbose bool) {
-	err := s.CheckReachable(verbose)
-	if err != nil {
-		logging.LogFatalf("SshClient.CheckReachableBySsh failed: '%v'", err)
-	}
 }
 
 func (s *SSHClient) MustGetHostDescription() (hostDescription string) {
@@ -195,24 +188,6 @@ func (s *SSHClient) MustGetSshUserName() (sshUserName string) {
 	return sshUserName
 }
 
-func (s *SSHClient) MustIsReachable(verbose bool) (isReachavble bool) {
-	isReachavble, err := s.IsReachable(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isReachavble
-}
-
-func (s *SSHClient) MustRunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput) {
-	commandOutput, err := s.RunCommand(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandOutput
-}
-
 func (s *SSHClient) MustSetHostName(hostName string) {
 	err := s.SetHostName(hostName)
 	if err != nil {
@@ -227,7 +202,7 @@ func (s *SSHClient) MustSetSshUserName(sshUserName string) {
 	}
 }
 
-func (s *SSHClient) RunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (s *SSHClient) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
 	userAtHost, err := s.GetHostName()
 	if err != nil {
 		return nil, err
@@ -254,7 +229,7 @@ func (s *SSHClient) RunCommand(options *parameteroptions.RunCommandOptions) (com
 		commandString,
 	}
 
-	commandOutput, err = commandexecutor.Exec().RunCommand(commandToUse)
+	commandOutput, err = commandexecutor.Exec().RunCommand(ctx, commandToUse)
 	if err != nil {
 		return nil, err
 	}

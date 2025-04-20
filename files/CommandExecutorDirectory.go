@@ -11,6 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -124,9 +125,9 @@ func (c *CommandExecutorDirectory) Chmod(chmodOptions *parameteroptions.ChmodOpt
 	}
 
 	_, err = commandExecutor.RunCommand(
+		contextutils.GetVerbosityContextByBool(chmodOptions.Verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: command,
-			Verbose: chmodOptions.Verbose,
 		},
 	)
 	if err != nil {
@@ -173,11 +174,11 @@ func (c *CommandExecutorDirectory) CopyContentToDirectory(destinationDir Directo
 		return err
 	}
 
+	ctx := contextutils.GetVerbosityContextByBool(verbose)
 	_, err = commandExecutor.RunCommand(
+		commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
-			Command:            []string{"cp", "-r", "-v", srcDirPath, destDirPath},
-			LiveOutputOnStdout: verbose,
-			Verbose:            verbose,
+			Command: []string{"cp", "-r", "-v", srcDirPath, destDirPath},
 		},
 	)
 	if err != nil {
@@ -216,9 +217,9 @@ func (c *CommandExecutorDirectory) Create(verbose bool) (err error) {
 		)
 	} else {
 		_, err = commandExecutor.RunCommand(
+			contextutils.GetVerbosityContextByBool(verbose),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"mkdir", "-p", dirPath},
-				Verbose: verbose,
 			},
 		)
 		if err != nil {
@@ -273,9 +274,9 @@ func (c *CommandExecutorDirectory) Delete(verbose bool) (err error) {
 
 	if exists {
 		_, err = commandExecutor.RunCommand(
+			contextutils.GetVerbosityContextByBool(verbose),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"rm", "-rf", dirPath},
-				Verbose: verbose,
 			},
 		)
 		if err != nil {
@@ -305,6 +306,7 @@ func (c *CommandExecutorDirectory) Exists(verbose bool) (exists bool, err error)
 	}
 
 	output, err := commandExecutor.RunCommandAndGetStdoutAsString(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
@@ -591,6 +593,7 @@ func (c *CommandExecutorDirectory) ListFilePaths(listFileOptions *parameteroptio
 	}
 
 	foundPaths, err := commandExecutor.RunCommandAndGetStdoutAsLines(
+		contextutils.GetVerbosityContextByBool(listFileOptions.Verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: commandToUse,
 		},
@@ -666,6 +669,7 @@ func (c *CommandExecutorDirectory) ListSubDirectories(options *parameteroptions.
 	}
 
 	stdoutLines, err := commandExecutor.RunCommandAndGetStdoutAsLines(
+		contextutils.GetVerbosityContextByBool(options.Verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: findCommand,
 		},

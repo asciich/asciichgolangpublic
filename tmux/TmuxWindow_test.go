@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -24,32 +25,44 @@ func TestTemuxWindow_CreateAndDeleteWindow(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				const verbose bool = true
+				ctx := getCtx()
 
 				tmux := MustGetTmuxOnLocalMachine()
 
 				session := tmux.MustGetSessionByName("sessionName")
-				defer session.MustDelete(verbose)
+				defer session.Delete(ctx)
 
-				session.MustRecreate(verbose)
+				err := session.Recreate(ctx)
+				require.NoError(t, err)
 
-				window := session.MustGetWindowByName("windowName")
+				window, err := session.GetWindowByName("windowName")
+				require.NoError(t, err)
 
 				for i := 0; i < 2; i++ {
-					window.MustDelete(verbose)
-					require.False(window.MustExists(verbose))
+					err = window.Delete(ctx)
+					require.NoError(t, err)
+
+					windowExists, err := window.Exists(ctx)
+					require.NoError(t, err)
+					require.False(t, windowExists)
 				}
 
 				for i := 0; i < 2; i++ {
-					window.MustCreate(verbose)
-					require.True(window.MustExists(verbose))
+					err = window.Create(ctx)
+					require.NoError(t, err)
+
+					windowExists, err := window.Exists(ctx)
+					require.NoError(t, err)
+					require.True(t, windowExists)
 				}
 
 				for i := 0; i < 2; i++ {
-					window.MustDelete(verbose)
-					require.False(window.MustExists(verbose))
+					err = window.Delete(ctx)
+					require.NoError(t, err)
+
+					windowExists, err := window.Exists(ctx)
+					require.NoError(t, err)
+					require.False(t, windowExists)
 				}
 			},
 		)
@@ -72,28 +85,33 @@ func TestTemuxWindow_ReadLastLine(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				const verbose bool = true
+				ctx := getCtx()
 
 				tmux := MustGetTmuxOnLocalMachine()
 
 				session := tmux.MustGetSessionByName("sessionName")
-				defer session.MustDelete(verbose)
+				defer session.Delete(ctx)
 
-				session.MustRecreate(verbose)
+				err := session.Recreate(ctx)
+				require.NoError(t, err)
 
-				window := session.MustGetWindowByName("windowName")
+				window, err := session.GetWindowByName("windowName")
+				require.NoError(t, err)
 
-				window.MustCreate(verbose)
+				err = window.Create(ctx)
+				require.NoError(t, err)
 
-				window.MustWaitUntilCliPromptReady(verbose)
+				err = window.WaitUntilCliPromptReady(ctx)
+				require.NoError(t, err)
 
-				window.MustSendKeys([]string{"echo '" + tt.testmessage + "'", "enter"}, verbose)
+				err = window.SendKeys(ctx, []string{"echo '" + tt.testmessage + "'", "enter"})
+				require.NoError(t, err)
 
-				window.MustWaitUntilCliPromptReady(verbose)
+				err = window.WaitUntilCliPromptReady(ctx)
+				require.NoError(t, err)
 
 				require.EqualValues(
+					t,
 					tt.testmessage,
 					window.MustGetSecondLatestPaneLine(),
 				)
@@ -117,25 +135,27 @@ func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				const verbose bool = true
+				ctx := getCtx()
 
 				tmux := MustGetTmuxOnLocalMachine()
 
 				session := tmux.MustGetSessionByName("sessionName")
-				defer session.MustDelete(verbose)
+				defer session.Delete(ctx)
 
-				session.MustRecreate(verbose)
+				err := session.Recreate(ctx)
+				require.NoError(t, err)
 
-				window := session.MustGetWindowByName("windowName")
+				window, err := session.GetWindowByName("windowName")
+				require.NoError(t, err)
 
-				window.MustCreate(verbose)
+				err = window.Create(ctx)
+				require.NoError(t, err)
 
-				window.MustWaitUntilCliPromptReady(verbose)
+				err = window.WaitUntilCliPromptReady(ctx)
+				require.NoError(t, err)
 
-				outputPath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose)
-				defer files.MustDeleteFileByPath(outputPath, verbose)
+				outputPath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(contextutils.GetVerboseFromContext(ctx))
+				defer files.MustDeleteFileByPath(outputPath, contextutils.GetVerboseFromContext(ctx))
 
 				exampleScript := "#/usr/bin/env bash\n"
 				exampleScript += "\n"
@@ -150,26 +170,26 @@ func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
 				exampleScript += "sleep .75\n"
 				exampleScript += "echo finished\n"
 
-				exampleScriptPath := tempfiles.MustCreateFromStringAndGetPath(exampleScript, verbose)
-				defer files.MustDeleteFileByPath(exampleScriptPath, verbose)
+				exampleScriptPath := tempfiles.MustCreateFromStringAndGetPath(exampleScript, contextutils.GetVerboseFromContext(ctx))
+				defer files.MustDeleteFileByPath(exampleScriptPath, contextutils.GetVerboseFromContext(ctx))
 
-				window.MustSendKeys(
+				err = window.SendKeys(
+					ctx,
 					[]string{
 						"bash " + exampleScriptPath,
 						"enter",
 					},
-					verbose,
 				)
 
-				window.MustWaitUntilOutputMatchesRegex("Username:", 2*time.Second, verbose)
-				window.MustSendKeys([]string{tt.username, "enter"}, verbose)
-				window.MustWaitUntilOutputMatchesRegex("Password:", 2*time.Second, verbose)
-				window.MustSendKeys([]string{tt.password, "enter"}, verbose)
-				window.MustWaitUntilOutputMatchesRegex("finished", 2*time.Second, verbose)
+				window.MustWaitUntilOutputMatchesRegex("Username:", 2*time.Second, contextutils.GetVerboseFromContext(ctx))
+				err = window.SendKeys(ctx, []string{tt.username, "enter"})
+				window.MustWaitUntilOutputMatchesRegex("Password:", 2*time.Second, contextutils.GetVerboseFromContext(ctx))
+				err = window.SendKeys(ctx, []string{tt.password, "enter"})
+				window.MustWaitUntilOutputMatchesRegex("finished", 2*time.Second, contextutils.GetVerboseFromContext(ctx))
 
 				shownLines := window.MustGetShownLines()
-				require.EqualValues(tt.username+"\n"+tt.password+"\n", files.MustReadFileAsString(outputPath))
-				require.Contains(shownLines, "finished")
+				require.EqualValues(t, tt.username+"\n"+tt.password+"\n", files.MustReadFileAsString(outputPath))
+				require.Contains(t, shownLines, "finished")
 			},
 		)
 	}
@@ -195,28 +215,25 @@ func TestTemuxWindow_RunCommand(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				const verbose bool = true
+				ctx := getCtx()
 
 				tmux := MustGetTmuxOnLocalMachine()
 
 				window := tmux.MustGetWindowByNames("sessionName", "windowName")
-				defer window.MustDeleteSession(verbose)
+				defer window.DeleteSession(ctx)
 
-				window.MustRecreate(verbose)
+				err := window.Recreate(ctx)
+				require.NoError(t, err)
 
-				commandOutput := window.MustRunCommand(
+				commandOutput, err := window.RunCommand(
+					ctx,
 					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
-						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					tt.expectedStdout,
-					commandOutput.MustGetStdoutAsString(),
-				)
+				require.EqualValues(t, tt.expectedStdout, commandOutput.MustGetStdoutAsString())
 			},
 		)
 	}

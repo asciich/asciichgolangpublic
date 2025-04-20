@@ -7,12 +7,8 @@ import (
 )
 
 func TestCommandExecutorHost_HostnameOfLocalhost(t *testing.T) {
-	require := require.New(t)
-
 	host := MustGetLocalCommandExecutorHost()
-
-	require.EqualValues(
-		"localhost",
-		host.MustGetHostName(),
-	)
+	hostName, err := host.GetHostName()
+	require.NoError(t, err)
+	require.EqualValues(t, "localhost", hostName)
 }

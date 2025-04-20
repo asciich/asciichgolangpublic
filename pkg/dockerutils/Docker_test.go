@@ -1,16 +1,17 @@
-package docker
+package dockerutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/dockerutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
-func getDockerImplementationByName(implementationName string) (docker Docker) {
+func getDockerImplementationByName(implementationName string) (docker dockerutils.Docker) {
 	if implementationName == "commandExecutorDocker" {
-		return MustGetLocalCommandExecutorDocker()
+		return dockerutils.MustGetLocalCommandExecutorDocker()
 	}
 
 	logging.LogFatalWithTracef("Unknown implementation name '%s'", implementationName)
@@ -29,14 +30,12 @@ func TestDocker_GetHostName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				docker := getDockerImplementationByName(tt.implementationName)
 
-				require.EqualValues(
-					"localhost",
-					docker.MustGetHostDescription(),
-				)
+				hostDesciption, err := docker.GetHostDescription()
+				require.NoError(t, err)
+
+				require.EqualValues(t, "localhost", hostDesciption)
 			},
 		)
 	}

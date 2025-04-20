@@ -7,6 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/fileformats/yamlutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -118,6 +119,7 @@ func (c *CommandExecutorResource) CreateByYamlString(yamlString string, verbose 
 	}
 
 	_, err = commandExecutor.RunCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command:     []string{"kubectl", "--context", context, "apply", "-f", "-"},
 			StdinString: yamlString,
@@ -183,6 +185,7 @@ func (c *CommandExecutorResource) Delete(verbose bool) (err error) {
 		}
 
 		_, err = commandExecutor.RunCommand(
+			contextutils.GetVerbosityContextByBool(verbose),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"kubectl", "--context", contextName, "--namespace", namespaceName, "delete", resourceTypeName, resourceName},
 			},
@@ -239,6 +242,7 @@ func (c *CommandExecutorResource) Exists(verbose bool) (exists bool, err error) 
 	}
 
 	_, err = commandExecutor.RunCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"kubectl", "get", "--context", context, "--namespace", namespaceName, resourceType, resourceName},
 		},
@@ -293,6 +297,7 @@ func (c *CommandExecutorResource) GetAsYamlString() (yamlString string, err erro
 	}
 
 	yamlString, err = commandExecutor.RunCommandAndGetStdoutAsString(
+		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"kubectl",

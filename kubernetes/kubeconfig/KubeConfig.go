@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	"gopkg.in/yaml.v3"
@@ -379,15 +380,6 @@ func (k *KubeConfig) AddClusterAndContextAndUserEntry(cluster *KubeConfigCluster
 	return nil
 }
 
-func MustIsFilePathLoadableByKubectl(path string, verbose bool) (isLoadable bool) {
-	isLoadable, err := IsFilePathLoadableByKubectl(path, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isLoadable
-}
-
 // This function does an exex to "kubectl" using the given config file "path".
 // Useful to validate if a written config "path" is understood by "kubectl".
 func IsFilePathLoadableByKubectl(path string, verbose bool) (isLoadable bool, err error) {
@@ -396,6 +388,7 @@ func IsFilePathLoadableByKubectl(path string, verbose bool) (isLoadable bool, er
 	}
 
 	stdout, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"KUBECONFIG=" + path, "bash", "-c", "kubectl config get-contexts &> /dev/null && echo YES || echo NO"},
 		},
@@ -516,6 +509,7 @@ func ListContextNamesUsingKubectl(path string, verbose bool) (contextNames []str
 	}
 
 	contextNames, err = commandexecutor.Bash().RunCommandAndGetStdoutAsLines(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"KUBECONFIG=" + path, "bash", "-c", "kubectl config get-contexts -o name"},
 		},

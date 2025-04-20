@@ -52,7 +52,11 @@ func MustGetCommandExecutorHostByCommandExecutor(commandExecutor commandexecutor
 
 func NewCommandExecutorHost() (c *CommandExecutorHost) {
 	c = new(CommandExecutorHost)
-	c.MustSetParentCommandExecutorForBaseClass(c)
+
+	err := c.SetParentCommandExecutorForBaseClass(c)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
 	return c
 }
 
@@ -151,15 +155,6 @@ func (c *CommandExecutorHost) MustIsReachable(verbose bool) (isReachable bool) {
 	return isReachable
 }
 
-func (c *CommandExecutorHost) MustRunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput) {
-	commandOutput, err := c.RunCommand(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandOutput
-}
-
 func (c *CommandExecutorHost) MustSetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) {
 	err := c.SetCommandExecutor(commandExecutor)
 	if err != nil {
@@ -174,7 +169,7 @@ func (c *CommandExecutorHost) MustWaitUntilReachable(renewHostKey bool, verbose 
 	}
 }
 
-func (c *CommandExecutorHost) RunCommand(options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (c *CommandExecutorHost) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -184,7 +179,7 @@ func (c *CommandExecutorHost) RunCommand(options *parameteroptions.RunCommandOpt
 		return nil, err
 	}
 
-	return commandExecutor.RunCommand(options)
+	return commandExecutor.RunCommand(ctx, options)
 }
 
 func (c *CommandExecutorHost) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
@@ -200,6 +195,7 @@ func (h *CommandExecutorHost) AddSshHostKeyToKnownHosts(verbose bool) (err error
 	}
 
 	_, err = commandexecutor.Bash().RunCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				fmt.Sprintf("ssh-keyscan -H '%s' >> ${HOME}/.ssh/known_hosts", hostname),
@@ -406,6 +402,7 @@ func (h *CommandExecutorHost) IsPingable(verbose bool) (isPingable bool, err err
 	}
 
 	stdout, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"bash", "-c", fmt.Sprintf("ping -c 1 '%s' &>/dev/null && echo yes || echo no", hostname)},
 		},
@@ -427,6 +424,7 @@ func (h *CommandExecutorHost) IsPingable(verbose bool) (isPingable bool, err err
 
 func (h *CommandExecutorHost) IsReachable(verbose bool) (isReachable bool, err error) {
 	_, err = h.RunCommandAndGetStdoutAsString(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"echo", "hello"},
 		},
@@ -584,6 +582,7 @@ func (h *CommandExecutorHost) RemoveSshHostKeyFromKnownHosts(verbose bool) (err 
 	}
 
 	_, err = commandexecutor.Bash().RunCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"ssh-keygen", "-R", hostname},
 		},

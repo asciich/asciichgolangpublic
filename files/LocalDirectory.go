@@ -12,6 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -69,9 +70,9 @@ func (l *LocalDirectory) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err
 	}
 
 	_, err = commandexecutor.Bash().RunCommand(
+		contextutils.GetVerbosityContextByBool(chmodOptions.Verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"chmod", chmodString, localPath},
-			Verbose: chmodOptions.Verbose,
 		},
 	)
 	if err != nil {
@@ -107,11 +108,11 @@ func (l *LocalDirectory) CopyContentToDirectory(destinationDir Directory, verbos
 		destPath + "/.",
 	}
 
+	ctx := contextutils.GetVerbosityContextByBool(verbose)
 	stdout, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
+		commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
-			Command:            copyCommand,
-			Verbose:            verbose,
-			LiveOutputOnStdout: verbose,
+			Command: copyCommand,
 		},
 	)
 	if err != nil {
@@ -154,11 +155,11 @@ func (l *LocalDirectory) CopyContentToLocalDirectory(destDirectory *LocalDirecto
 		return tracederrors.TracedErrorf("Unable to copy content to local directory, '%s' does not exist.", srcPath)
 	}
 
+	ctx := contextutils.GetVerbosityContextByBool(verbose)
 	_, err = commandexecutor.Bash().RunCommand(
+		commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
-			Command:            []string{"cp", "-r", "-v", srcPath + "/.", destPath + "/."},
-			Verbose:            verbose,
-			LiveOutputOnStdout: verbose,
+			Command: []string{"cp", "-r", "-v", srcPath + "/.", destPath + "/."},
 		},
 	)
 	if err != nil {
