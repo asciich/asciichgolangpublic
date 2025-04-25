@@ -228,7 +228,10 @@ func (f *FileBase) EnsureLineInFile(line string, verbose bool) (err error) {
 		if err != nil {
 			return err
 		}
-		logging.LogChangedf("Wrote line '%s' into '%s'.", line, localPath)
+
+		if verbose {
+			logging.LogChangedf("Wrote line '%s' into '%s'.", line, localPath)
+		}
 	}
 
 	return nil
