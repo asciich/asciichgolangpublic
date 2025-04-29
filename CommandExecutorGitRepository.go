@@ -126,10 +126,7 @@ func (c *CommandExecutorGitRepository) AddFileByPath(pathToAdd string, verbose b
 		return tracederrors.TracedErrorEmptyString("pathToAdd")
 	}
 
-	_, err = c.RunGitCommand(
-		[]string{"add", pathToAdd},
-		verbose,
-	)
+	_, err = c.RunGitCommand(contextutils.GetVerbosityContextByBool(verbose), []string{"add", pathToAdd})
 	if err != nil {
 		return err
 	}
@@ -193,7 +190,7 @@ func (c *CommandExecutorGitRepository) AddRemote(remoteOptions *GitRemoteAddOpti
 			return err
 		}
 
-		_, err = c.RunGitCommand([]string{"remote", "add", remoteName, remoteUrl}, remoteOptions.Verbose)
+		_, err = c.RunGitCommand(contextutils.GetVerbosityContextByBool(remoteOptions.Verbose), []string{"remote", "add", remoteName, remoteUrl})
 		if err != nil {
 			return err
 		}
@@ -232,8 +229,8 @@ func (c *CommandExecutorGitRepository) CheckoutBranchByName(name string, verbose
 		}
 	} else {
 		_, err := c.RunGitCommand(
+			contextutils.GetVerbosityContextByBool(verbose),
 			[]string{"checkout", name},
-			verbose,
 		)
 		if err != nil {
 			return err
@@ -366,8 +363,8 @@ func (c *CommandExecutorGitRepository) Commit(commitOptions *GitCommitOptions) (
 	commitCommand = append(commitCommand, "-m", message)
 
 	_, err = c.RunGitCommand(
+		contextutils.GetVerbosityContextByBool(commitOptions.Verbose),
 		commitCommand,
-		commitOptions.Verbose,
 	)
 	if err != nil {
 		return nil, err
@@ -433,8 +430,8 @@ func (c *CommandExecutorGitRepository) CreateBranch(createOptions *parameteropti
 		)
 	} else {
 		_, err = c.RunGitCommand(
+			contextutils.GetVerbosityContextByBool(createOptions.Verbose),
 			[]string{"checkout", "-b", name},
-			createOptions.Verbose,
 		)
 		if err != nil {
 			return err
@@ -483,8 +480,8 @@ func (c *CommandExecutorGitRepository) CreateTag(options *GitRepositoryCreateTag
 	}
 
 	_, err = c.RunGitCommand(
+		contextutils.GetVerbosityContextByBool(options.Verbose),
 		[]string{"tag", "-a", tagName, hashToTag, "-m", tagMessage},
-		options.Verbose,
 	)
 	if err != nil {
 		return nil, err
@@ -530,8 +527,8 @@ func (c *CommandExecutorGitRepository) DeleteBranchByName(name string, verbose b
 
 	if branchExists {
 		_, err := c.RunGitCommand(
+			contextutils.GetVerbosityContextByBool(verbose),
 			[]string{"branch", "-D", name},
-			verbose,
 		)
 		if err != nil {
 			return err
@@ -562,8 +559,8 @@ func (c *CommandExecutorGitRepository) DeleteBranchByName(name string, verbose b
 
 func (c *CommandExecutorGitRepository) Fetch(verbose bool) (err error) {
 	_, err = c.RunGitCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
 		[]string{"fetch"},
-		verbose,
 	)
 	if err != nil {
 		return err
@@ -635,8 +632,8 @@ func (c *CommandExecutorGitRepository) GetCommitMessageByCommitHash(hash string)
 	}
 
 	stdout, err := c.RunGitCommandAndGetStdoutAsString(
+		contextutils.ContextSilent(),
 		[]string{"log", "-n", "1", "--pretty=format:%s", hash},
-		false,
 	)
 	if err != nil {
 		return "", err
@@ -671,8 +668,8 @@ func (c *CommandExecutorGitRepository) GetCommitTimeByCommitHash(hash string) (c
 
 func (c *CommandExecutorGitRepository) GetCurrentBranchName(verbose bool) (branchName string, err error) {
 	stdout, err := c.RunGitCommandAndGetStdoutAsString(
+		contextutils.GetVerbosityContextByBool(verbose),
 		[]string{"rev-parse", "--abbrev-ref", "HEAD"},
-		verbose,
 	)
 	if err != nil {
 		return "", err
@@ -735,8 +732,8 @@ func (c *CommandExecutorGitRepository) GetCurrentCommit(verbose bool) (currentCo
 
 func (c *CommandExecutorGitRepository) GetCurrentCommitHash(verbose bool) (currentCommitHash string, err error) {
 	currentCommitHash, err = c.RunGitCommandAndGetStdoutAsString(
+		contextutils.GetVerbosityContextByBool(verbose),
 		[]string{"rev-parse", "HEAD"},
-		false,
 	)
 	if err != nil {
 		return "", err
@@ -765,8 +762,8 @@ func (c *CommandExecutorGitRepository) GetHashByTagName(tagName string) (hash st
 	}
 
 	stdoutLines, err := c.RunGitCommandAndGetStdoutAsLines(
+		contextutils.ContextSilent(),
 		[]string{"show-ref", "--dereference", tagName},
-		false,
 	)
 	if err != nil {
 		return "", err
@@ -789,7 +786,7 @@ func (c *CommandExecutorGitRepository) GetHashByTagName(tagName string) (hash st
 }
 
 func (c *CommandExecutorGitRepository) GetRemoteConfigs(verbose bool) (remoteConfigs []*GitRemoteConfig, err error) {
-	output, err := c.RunGitCommand([]string{"remote", "-v"}, verbose)
+	output, err := c.RunGitCommand(contextutils.GetVerbosityContextByBool(verbose), []string{"remote", "-v"})
 	if err != nil {
 		return nil, err
 	}
@@ -843,13 +840,13 @@ func (c *CommandExecutorGitRepository) GetRemoteConfigs(verbose bool) (remoteCon
 	return remoteConfigs, nil
 }
 
-func (c *CommandExecutorGitRepository) GetRootDirectory(verbose bool) (rootDirectory files.Directory, err error) {
+func (c *CommandExecutorGitRepository) GetRootDirectory(ctx context.Context) (rootDirectory files.Directory, err error) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
 		return nil, err
 	}
 
-	rootDirPath, err := c.GetRootDirectoryPath(verbose)
+	rootDirPath, err := c.GetRootDirectoryPath(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -865,13 +862,13 @@ func (c *CommandExecutorGitRepository) GetRootDirectory(verbose bool) (rootDirec
 	return rootDirectory, nil
 }
 
-func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootDirectoryPath string, err error) {
+func (c *CommandExecutorGitRepository) GetRootDirectoryPath(ctx context.Context) (rootDirectoryPath string, err error) {
 	path, hostDescription, err := c.GetPathAndHostDescription()
 	if err != nil {
 		return "", err
 	}
 
-	isBareRepository, err := c.IsBareRepository(verbose)
+	isBareRepository, err := c.IsBareRepository(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -894,9 +891,9 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootD
 
 		for {
 			filePaths, err := cwd.ListFilePaths(
+				ctx,
 				&parameteroptions.ListFileOptions{
 					NonRecursive:        true,
-					Verbose:             verbose,
 					ReturnRelativePaths: true,
 				},
 			)
@@ -922,8 +919,8 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootD
 		}
 	} else {
 		stdout, err := c.RunGitCommandAndGetStdoutAsString(
+			ctx,
 			[]string{"rev-parse", "--show-toplevel"},
-			verbose,
 		)
 		if err != nil {
 			return "", err
@@ -940,13 +937,7 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(verbose bool) (rootD
 		)
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Git repo root directory is '%s' on host '%s'.",
-			rootDirectoryPath,
-			hostDescription,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Git repo root directory is '%s' on host '%s'.", rootDirectoryPath, hostDescription)
 
 	return rootDirectoryPath, nil
 }
@@ -1142,8 +1133,8 @@ func (c *CommandExecutorGitRepository) Init(options *parameteroptions.CreateRepo
 		}
 
 		_, err = c.RunGitCommand(
+			contextutils.GetVerbosityContextByBool(options.Verbose),
 			commandToUse,
-			options.Verbose,
 		)
 		if err != nil {
 			return err
@@ -1239,16 +1230,13 @@ func (c *CommandExecutorGitRepository) Init(options *parameteroptions.CreateRepo
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) IsBareRepository(verbose bool) (isBare bool, err error) {
+func (c *CommandExecutorGitRepository) IsBareRepository(ctx context.Context) (isBare bool, err error) {
 	path, hostDescription, err := c.GetPathAndHostDescription()
 	if err != nil {
 		return false, err
 	}
 
-	stdout, err := c.RunGitCommandAndGetStdoutAsString(
-		[]string{"rev-parse", "--is-bare-repository"},
-		verbose,
-	)
+	stdout, err := c.RunGitCommandAndGetStdoutAsString(ctx, []string{"rev-parse", "--is-bare-repository"})
 	if err != nil {
 		return false, err
 	}
@@ -1266,20 +1254,10 @@ func (c *CommandExecutorGitRepository) IsBareRepository(verbose bool) (isBare bo
 		)
 	}
 
-	if verbose {
-		if isBare {
-			logging.LogInfof(
-				"Git repository '%s' on host '%s' is a bare repository.",
-				path,
-				hostDescription,
-			)
-		} else {
-			logging.LogInfof(
-				"Git repository '%s' on host '%s' is not a bare repository.",
-				path,
-				hostDescription,
-			)
-		}
+	if isBare {
+		logging.LogInfoByCtxf(ctx, "Git repository '%s' on host '%s' is a bare repository.", path, hostDescription)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Git repository '%s' on host '%s' is not a bare repository.", path, hostDescription)
 	}
 
 	return isBare, nil
@@ -1397,10 +1375,7 @@ func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialite
 }
 
 func (c *CommandExecutorGitRepository) ListBranchNames(verbose bool) (branchNames []string, err error) {
-	lines, err := c.RunGitCommandAndGetStdoutAsLines(
-		[]string{"branch"},
-		false,
-	)
+	lines, err := c.RunGitCommandAndGetStdoutAsLines(contextutils.GetVerbosityContextByBool(verbose), []string{"branch"})
 	if err != nil {
 		return nil, err
 	}
@@ -1435,8 +1410,8 @@ func (c *CommandExecutorGitRepository) ListBranchNames(verbose bool) (branchName
 
 func (c *CommandExecutorGitRepository) ListTagNames(verbose bool) (tagNames []string, err error) {
 	return c.RunGitCommandAndGetStdoutAsLines(
+		contextutils.ContextSilent(), // Do not clutter output by pritning all tags.
 		[]string{"tag"},
-		false, // Do not clutter output by pritning all tags.
 	)
 }
 
@@ -1465,8 +1440,8 @@ func (c *CommandExecutorGitRepository) ListTagsForCommitHash(hash string, verbos
 	}
 
 	tagNames, err := c.RunGitCommandAndGetStdoutAsLines(
+		contextutils.ContextSilent(),
 		[]string{"tag", "--points-at", "HEAD"},
-		false,
 	)
 	if err != nil {
 		return nil, err
@@ -1730,24 +1705,6 @@ func (c *CommandExecutorGitRepository) MustGetRemoteConfigs(verbose bool) (remot
 	return remoteConfigs
 }
 
-func (c *CommandExecutorGitRepository) MustGetRootDirectory(verbose bool) (rootDirectory files.Directory) {
-	rootDirectory, err := c.GetRootDirectory(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return rootDirectory
-}
-
-func (c *CommandExecutorGitRepository) MustGetRootDirectoryPath(verbose bool) (rootDirectoryPath string) {
-	rootDirectoryPath, err := c.GetRootDirectoryPath(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return rootDirectoryPath
-}
-
 func (c *CommandExecutorGitRepository) MustGetTagByName(name string) (tag GitTag) {
 	tag, err := c.GetTagByName(name)
 	if err != nil {
@@ -1780,15 +1737,6 @@ func (c *CommandExecutorGitRepository) MustInit(options *parameteroptions.Create
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
-}
-
-func (c *CommandExecutorGitRepository) MustIsBareRepository(verbose bool) (isBare bool) {
-	isBare, err := c.IsBareRepository(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isBare
 }
 
 func (c *CommandExecutorGitRepository) MustIsGitRepository(verbose bool) (isRepository bool) {
@@ -1891,33 +1839,6 @@ func (c *CommandExecutorGitRepository) MustRemoveRemoteByName(remoteNameToRemove
 	}
 }
 
-func (c *CommandExecutorGitRepository) MustRunGitCommand(gitCommand []string, verbose bool) (commandOutput *commandexecutor.CommandOutput) {
-	commandOutput, err := c.RunGitCommand(gitCommand, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandOutput
-}
-
-func (c *CommandExecutorGitRepository) MustRunGitCommandAndGetStdoutAsLines(command []string, verbose bool) (lines []string) {
-	lines, err := c.RunGitCommandAndGetStdoutAsLines(command, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return lines
-}
-
-func (c *CommandExecutorGitRepository) MustRunGitCommandAndGetStdoutAsString(command []string, verbose bool) (stdout string) {
-	stdout, err := c.RunGitCommandAndGetStdoutAsString(command, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return stdout
-}
-
 func (c *CommandExecutorGitRepository) MustSetDefaultAuthor(verbose bool) {
 	err := c.SetDefaultAuthor(verbose)
 	if err != nil {
@@ -1962,8 +1883,8 @@ func (c *CommandExecutorGitRepository) Pull(ctx context.Context) (err error) {
 	logging.LogInfoByCtxf(ctx, "Pull git repository '%s' on '%s' started.", path, hostDescription)
 
 	_, err = c.RunGitCommand(
+		ctx,
 		[]string{"pull"},
-		contextutils.GetVerboseFromContext(ctx),
 	)
 	if err != nil {
 		return err
@@ -1998,7 +1919,7 @@ func (c *CommandExecutorGitRepository) PullFromRemote(pullOptions *GitPullFromRe
 		return err
 	}
 
-	_, err = c.RunGitCommand([]string{"pull", remoteName, branchName}, pullOptions.Verbose)
+	_, err = c.RunGitCommand(contextutils.GetVerbosityContextByBool(pullOptions.Verbose), []string{"pull", remoteName, branchName})
 	if err != nil {
 		return err
 	}
@@ -2024,8 +1945,8 @@ func (c *CommandExecutorGitRepository) Push(ctx context.Context) (err error) {
 	logging.LogInfoByCtxf(ctx, "Push git repository '%s' on '%s' started.", path, hostDescription)
 
 	_, err = c.RunGitCommand(
+		ctx,
 		[]string{"push"},
-		contextutils.GetVerboseFromContext(ctx),
 	)
 	if err != nil {
 		return err
@@ -2046,7 +1967,10 @@ func (c *CommandExecutorGitRepository) PushTagsToRemote(remoteName string, verbo
 		return err
 	}
 
-	_, err = c.RunGitCommand([]string{"push", remoteName, "--tags"}, verbose)
+	_, err = c.RunGitCommand(
+		contextutils.GetVerbosityContextByBool(verbose),
+		[]string{"push", remoteName, "--tags"},
+	)
 	if err != nil {
 		return err
 	}
@@ -2068,7 +1992,7 @@ func (c *CommandExecutorGitRepository) PushToRemote(remoteName string, verbose b
 		return tracederrors.TracedError("remoteName is empty string")
 	}
 
-	_, err = c.RunGitCommand([]string{"push", remoteName}, verbose)
+	_, err = c.RunGitCommand(contextutils.GetVerbosityContextByBool(verbose), []string{"push", remoteName})
 	if err != nil {
 		return err
 	}
@@ -2144,10 +2068,7 @@ func (c *CommandExecutorGitRepository) RemoveRemoteByName(remoteNameToRemove str
 	}
 
 	if remoteExists {
-		_, err := c.RunGitCommand(
-			[]string{"remote", "remove", remoteNameToRemove},
-			verbose,
-		)
+		_, err := c.RunGitCommand(contextutils.GetVerbosityContextByBool(verbose), []string{"remote", "remove", remoteNameToRemove})
 		if err != nil {
 			return err
 		}
@@ -2164,7 +2085,7 @@ func (c *CommandExecutorGitRepository) RemoveRemoteByName(remoteNameToRemove str
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) RunGitCommand(gitCommand []string, verbose bool) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (c *CommandExecutorGitRepository) RunGitCommand(ctx context.Context, gitCommand []string) (commandOutput *commandexecutor.CommandOutput, err error) {
 	if len(gitCommand) <= 0 {
 		return nil, tracederrors.TracedError("gitCommand has no elements")
 	}
@@ -2181,21 +2102,20 @@ func (c *CommandExecutorGitRepository) RunGitCommand(gitCommand []string, verbos
 
 	commandToUse := append([]string{"git", "-C", path}, gitCommand...)
 
-	ctx := contextutils.GetVerbosityContextByBool(verbose)
 	return commandExecutor.RunCommand(
 		commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
-			Command:            commandToUse,
+			Command: commandToUse,
 		},
 	)
 }
 
-func (c *CommandExecutorGitRepository) RunGitCommandAndGetStdoutAsLines(command []string, verbose bool) (lines []string, err error) {
+func (c *CommandExecutorGitRepository) RunGitCommandAndGetStdoutAsLines(ctx context.Context, command []string) (lines []string, err error) {
 	if command == nil {
 		return nil, tracederrors.TracedErrorNil("command")
 	}
 
-	output, err := c.RunGitCommand(command, verbose)
+	output, err := c.RunGitCommand(ctx, command)
 	if err != nil {
 		return nil, err
 	}
@@ -2208,8 +2128,8 @@ func (c *CommandExecutorGitRepository) RunGitCommandAndGetStdoutAsLines(command 
 	return lines, nil
 }
 
-func (c *CommandExecutorGitRepository) RunGitCommandAndGetStdoutAsString(command []string, verbose bool) (stdout string, err error) {
-	commandOutput, err := c.RunGitCommand(command, verbose)
+func (c *CommandExecutorGitRepository) RunGitCommandAndGetStdoutAsString(ctx context.Context, command []string) (stdout string, err error) {
+	commandOutput, err := c.RunGitCommand(ctx, command)
 	if err != nil {
 		return "", err
 	}
@@ -2274,7 +2194,7 @@ func (c *CommandExecutorGitRepository) SetRemoteUrl(remoteUrl string, verbose bo
 
 	name := "origin"
 
-	_, err = c.RunGitCommand([]string{"remote", "set-url", name, remoteUrl}, verbose)
+	_, err = c.RunGitCommand(contextutils.GetVerbosityContextByBool(verbose), []string{"remote", "set-url", name, remoteUrl})
 	if err != nil {
 		return err
 	}
@@ -2302,10 +2222,7 @@ func (c *CommandExecutorGitRepository) SetUserEmail(email string, verbose bool) 
 		return tracederrors.TracedErrorEmptyString("email")
 	}
 
-	_, err = c.RunGitCommand(
-		[]string{"config", "user.email", email},
-		verbose,
-	)
+	_, err = c.RunGitCommand(contextutils.GetVerbosityContextByBool(verbose), []string{"config", "user.email", email})
 	if err != nil {
 		return err
 	}
@@ -2332,10 +2249,7 @@ func (c *CommandExecutorGitRepository) SetUserName(name string, verbose bool) (e
 		return tracederrors.TracedErrorEmptyString("name")
 	}
 
-	_, err = c.RunGitCommand(
-		[]string{"config", "user.name", name},
-		verbose,
-	)
+	_, err = c.RunGitCommand(contextutils.GetVerbosityContextByBool(verbose), []string{"config", "user.name", name})
 	if err != nil {
 		return err
 	}

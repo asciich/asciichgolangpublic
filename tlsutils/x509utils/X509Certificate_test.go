@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -19,7 +20,7 @@ func mustRepoRoot(ctx context.Context) (repoRootDir files.Directory) {
 	repoRootPath, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
 		commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
-			Command:            []string{"git", "-C", ".", "rev-parse", "--show-toplevel"},
+			Command: []string{"git", "-C", ".", "rev-parse", "--show-toplevel"},
 		},
 	)
 	if err != nil {
@@ -44,7 +45,7 @@ func TestX509CertificateLoadFromFilePath(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range testDir.MustListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
+	for _, testCaseDir := range mustutils.Must(testDir.ListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true})) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
@@ -80,7 +81,7 @@ func TestX509CertificateGetAsPemString(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range testDir.MustListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
+	for _, testCaseDir := range mustutils.Must(testDir.ListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true})) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
@@ -112,7 +113,7 @@ func TestX509CertificateIsRootCa(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range testDir.MustListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
+	for _, testCaseDir := range mustutils.Must(testDir.ListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true})) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
@@ -146,7 +147,7 @@ func TestX509CertificateIsV1(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range testDir.MustListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
+	for _, testCaseDir := range mustutils.Must(testDir.ListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true})) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
@@ -178,7 +179,7 @@ func TestX509CertificateIsV3(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range testDir.MustListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true}) {
+	for _, testCaseDir := range mustutils.Must(testDir.ListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true})) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 

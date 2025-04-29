@@ -22,6 +22,7 @@ func TestLocalDirectoryExists(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -63,6 +64,7 @@ func TestLocalDirectoryGetFileInDirectory(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -92,6 +94,7 @@ func TestLocalDirectoryGetFilePathInDirectory(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -122,6 +125,7 @@ func TestLocalDirectoryGetSubDirectory(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -152,6 +156,7 @@ func TestLocalDirectoryParentForBaseClassSet(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -175,6 +180,7 @@ func TestLocalDirectoryCreateFileInDirectoryFromString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -209,6 +215,7 @@ func TestLocalDirectoryGetLocalPathIsAbsolute(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -224,54 +231,6 @@ func TestLocalDirectoryGetLocalPathIsAbsolute(t *testing.T) {
 	}
 }
 
-/* TODO remove or move
-func TestLocalDirectoryGetGitRepositories(t *testing.T) {
-	tests := []struct {
-		testcase string
-	}{
-		{"testcase"},
-	}
-
-	for _, tt := range tests {
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				require := require.New(t)
-
-				const verbose = true
-
-				testDirectory := TemporaryDirectories().MustCreateEmptyTemporaryDirectory(verbose)
-
-				test1 := testDirectory.MustCreateSubDirectory("test1", verbose)
-				test2 := testDirectory.MustCreateSubDirectory("test2", verbose)
-
-				test2.MustCreateSubDirectory("a", verbose)
-				test2.MustCreateSubDirectory("b", verbose)
-				c := test2.MustCreateSubDirectory("c", verbose)
-
-				test1GitRepo := MustGetLocalGitReposioryFromDirectory(test1)
-				test1GitRepo.MustInit(&CreateRepositoryOptions{
-					Verbose: true,
-				})
-
-				cGitRepo := MustGetLocalGitReposioryFromDirectory(c)
-				cGitRepo.MustInit(&CreateRepositoryOptions{
-					Verbose: true,
-				})
-
-				gitRepos := testDirectory.MustGetGitRepositoriesAsLocalGitRepositories(verbose)
-
-				require.Len(gitRepos, 2)
-				require.EqualValues("test1", gitRepos[0].MustGetBaseName(), "test1")
-				require.EqualValues("c", gitRepos[1].MustGetBaseName(), "c")
-				require.EqualValues(testDirectory.MustGetLocalPath(), gitRepos[0].MustGetDirName())
-				require.EqualValues(filepath.Join(testDirectory.MustGetLocalPath(), "test2"), gitRepos[1].MustGetDirName())
-			},
-		)
-	}
-}
-*/
-
 func TestLocalDirectoryWriteStringToFile(t *testing.T) {
 	tests := []struct {
 		fileName string
@@ -282,6 +241,7 @@ func TestLocalDirectoryWriteStringToFile(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -328,21 +288,23 @@ func TestDirectoryListFilesInDirectory(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
 				const verbose = true
-				tt.listOptions.Verbose = verbose
 
 				tempDirPath, err := os.MkdirTemp("", "tempToTest")
-				require.Nil(err)
+				require.Nil(t, err)
 
 				temporaryDirectory := MustGetLocalDirectoryByPath(tempDirPath)
 				temporaryDirectory.MustCreateFilesInDirectory(tt.fileNames, verbose)
-				listedFiles := temporaryDirectory.MustListFilePaths(&tt.listOptions)
-				require.EqualValues(tt.expectedPaths, listedFiles)
+
+				listedFiles, err := temporaryDirectory.ListFilePaths(ctx, &tt.listOptions)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedPaths, listedFiles)
 			},
 		)
 	}
@@ -357,6 +319,7 @@ func TestLocalDirectoryCreate(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -384,6 +347,7 @@ func TestDirectoryGetPathReturnsAbsoluteValue(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -437,6 +401,7 @@ func TestDirectoryIsEmptyDirectory(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -463,6 +428,7 @@ func TestDirectory_CheckExists(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {

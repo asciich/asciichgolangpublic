@@ -139,7 +139,7 @@ func (l *LocalGitRepository) RunGitCommand(ctx context.Context, gitCommand []str
 		return nil, tracederrors.TracedErrorEmptyString("gitCommand")
 	}
 
-	repoRootPath, err := l.GetRootDirectoryPath(contextutils.GetVerboseFromContext(ctx))
+	repoRootPath, err := l.GetRootDirectoryPath(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -1336,8 +1336,8 @@ func (l *LocalGitRepository) GetRemoteConfigs(verbose bool) (remoteConfigs []*Gi
 	return remoteConfigs, nil
 }
 
-func (l *LocalGitRepository) GetRootDirectory(verbose bool) (rootDirectory files.Directory, err error) {
-	rootDirectoryPath, err := l.GetRootDirectoryPath(verbose)
+func (l *LocalGitRepository) GetRootDirectory(ctx context.Context) (rootDirectory files.Directory, err error) {
+	rootDirectoryPath, err := l.GetRootDirectoryPath(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -1350,7 +1350,7 @@ func (l *LocalGitRepository) GetRootDirectory(verbose bool) (rootDirectory files
 	return rootDirectory, nil
 }
 
-func (l *LocalGitRepository) GetRootDirectoryPath(verbose bool) (rootDirectoryPath string, err error) {
+func (l *LocalGitRepository) GetRootDirectoryPath(ctx context.Context) (rootDirectoryPath string, err error) {
 	pathToCheck, err := l.GetLocalPath()
 	if err != nil {
 		return "", err
@@ -1610,7 +1610,7 @@ func (l *LocalGitRepository) Init(options *parameteroptions.CreateRepositoryOpti
 	return nil
 }
 
-func (l *LocalGitRepository) IsBareRepository(verbose bool) (isBareRepository bool, err error) {
+func (l *LocalGitRepository) IsBareRepository(ctx context.Context) (isBareRepository bool, err error) {
 
 	config, err := l.GetGoGitConfig()
 	if err != nil {
@@ -1619,17 +1619,15 @@ func (l *LocalGitRepository) IsBareRepository(verbose bool) (isBareRepository bo
 
 	isBareRepository = config.Core.IsBare
 
-	if verbose {
-		repoRoot, err := l.GetPath()
-		if err != nil {
-			return false, err
-		}
+	repoRoot, err := l.GetPath()
+	if err != nil {
+		return false, err
+	}
 
-		if isBareRepository {
-			logging.LogInfof("Git repository '%s' is a bare repository.", repoRoot)
-		} else {
-			logging.LogInfof("Git repository '%s' is not a bare repository.", repoRoot)
-		}
+	if isBareRepository {
+		logging.LogInfoByCtxf(ctx, "Git repository '%s' is a bare repository.", repoRoot)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Git repository '%s' is not a bare repository.", repoRoot)
 	}
 
 	return isBareRepository, nil
@@ -2175,24 +2173,6 @@ func (l *LocalGitRepository) MustGetRemoteConfigs(verbose bool) (remoteConfigs [
 	return remoteConfigs
 }
 
-func (l *LocalGitRepository) MustGetRootDirectory(verbose bool) (rootDirectory files.Directory) {
-	rootDirectory, err := l.GetRootDirectory(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return rootDirectory
-}
-
-func (l *LocalGitRepository) MustGetRootDirectoryPath(verbose bool) (rootDirectoryPath string) {
-	rootDirectoryPath, err := l.GetRootDirectoryPath(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return rootDirectoryPath
-}
-
 func (l *LocalGitRepository) MustGetTagByName(tagName string) (tag GitTag) {
 	tag, err := l.GetTagByName(tagName)
 	if err != nil {
@@ -2243,15 +2223,6 @@ func (l *LocalGitRepository) MustInit(options *parameteroptions.CreateRepository
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
-}
-
-func (l *LocalGitRepository) MustIsBareRepository(verbose bool) (isBareRepository bool) {
-	isBareRepository, err := l.IsBareRepository(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isBareRepository
 }
 
 func (l *LocalGitRepository) MustIsGitRepository(verbose bool) (isGitRepository bool) {

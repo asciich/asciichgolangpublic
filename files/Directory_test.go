@@ -244,8 +244,6 @@ func TestDirectory_ListSubDirectories(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose = true
 
 				testDirectory := getDirectoryToTest(tt.implementationName)
@@ -258,35 +256,37 @@ func TestDirectory_ListSubDirectories(t *testing.T) {
 				test2.MustCreateSubDirectory("b", verbose)
 				test2.MustCreateSubDirectory("c", verbose)
 
-				subDirectoryList := testDirectory.MustListSubDirectories(
+				subDirectoryList, err := testDirectory.ListSubDirectories(
 					&parameteroptions.ListDirectoryOptions{
 						Recursive: false,
 					},
 				)
+				require.NoError(t, err)
 
-				require.Len(subDirectoryList, 2)
-				require.EqualValues("test1", subDirectoryList[0].MustGetBaseName())
-				require.EqualValues("test2", subDirectoryList[1].MustGetBaseName())
-				require.EqualValues(testDirectory.MustGetLocalPath(), subDirectoryList[0].MustGetDirName())
-				require.EqualValues(testDirectory.MustGetLocalPath(), subDirectoryList[1].MustGetDirName())
+				require.Len(t, subDirectoryList, 2)
+				require.EqualValues(t, "test1", subDirectoryList[0].MustGetBaseName())
+				require.EqualValues(t, "test2", subDirectoryList[1].MustGetBaseName())
+				require.EqualValues(t, testDirectory.MustGetLocalPath(), subDirectoryList[0].MustGetDirName())
+				require.EqualValues(t, testDirectory.MustGetLocalPath(), subDirectoryList[1].MustGetDirName())
 
-				subDirectoryList = testDirectory.MustListSubDirectories(
+				subDirectoryList, err = testDirectory.ListSubDirectories(
 					&parameteroptions.ListDirectoryOptions{
 						Recursive: true,
 					},
 				)
+				require.NoError(t, err)
 
-				require.Len(subDirectoryList, 5)
-				require.EqualValues(subDirectoryList[0].MustGetBaseName(), "test1")
-				require.EqualValues(subDirectoryList[1].MustGetBaseName(), "test2")
-				require.EqualValues(subDirectoryList[2].MustGetBaseName(), "a")
-				require.EqualValues(subDirectoryList[3].MustGetBaseName(), "b")
-				require.EqualValues(subDirectoryList[4].MustGetBaseName(), "c")
-				require.EqualValues(subDirectoryList[0].MustGetDirName(), testDirectory.MustGetLocalPath())
-				require.EqualValues(subDirectoryList[1].MustGetDirName(), testDirectory.MustGetLocalPath())
-				require.EqualValues(subDirectoryList[2].MustGetDirName(), filepath.Join(testDirectory.MustGetLocalPath(), "test2"))
-				require.EqualValues(subDirectoryList[3].MustGetDirName(), filepath.Join(testDirectory.MustGetLocalPath(), "test2"))
-				require.EqualValues(subDirectoryList[4].MustGetDirName(), filepath.Join(testDirectory.MustGetLocalPath(), "test2"))
+				require.Len(t, subDirectoryList, 5)
+				require.EqualValues(t, subDirectoryList[0].MustGetBaseName(), "test1")
+				require.EqualValues(t, subDirectoryList[1].MustGetBaseName(), "test2")
+				require.EqualValues(t, subDirectoryList[2].MustGetBaseName(), "a")
+				require.EqualValues(t, subDirectoryList[3].MustGetBaseName(), "b")
+				require.EqualValues(t, subDirectoryList[4].MustGetBaseName(), "c")
+				require.EqualValues(t, subDirectoryList[0].MustGetDirName(), testDirectory.MustGetLocalPath())
+				require.EqualValues(t, subDirectoryList[1].MustGetDirName(), testDirectory.MustGetLocalPath())
+				require.EqualValues(t, subDirectoryList[2].MustGetDirName(), filepath.Join(testDirectory.MustGetLocalPath(), "test2"))
+				require.EqualValues(t, subDirectoryList[3].MustGetDirName(), filepath.Join(testDirectory.MustGetLocalPath(), "test2"))
+				require.EqualValues(t, subDirectoryList[4].MustGetDirName(), filepath.Join(testDirectory.MustGetLocalPath(), "test2"))
 			},
 		)
 	}
