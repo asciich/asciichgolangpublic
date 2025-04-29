@@ -1,8 +1,10 @@
 package logging
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/shell/terminalcolors"
 )
 
@@ -33,6 +35,22 @@ func OverrideLogWarnf(overrideFunction func(logmessage string, args ...interface
 func LogWarnf(logmessage string, args ...interface{}) {
 	if overrideFunctionLogWarnf != nil {
 		overrideFunctionLogWarnf(logmessage, args...)
+		return
+	}
+
+	message := fmt.Sprintf(logmessage, args...)
+	LogWarn(message)
+}
+
+var overrideFunctionLogWarnByCtxf func(ctx context.Context, logmessage string, args ...interface{})
+
+func LogWarnByCtxf(ctx context.Context, logmessage string, args ...interface{}) {
+	if overrideFunctionLogWarnByCtxf != nil {
+		overrideFunctionLogWarnByCtxf(ctx, logmessage, args...)
+		return
+	}
+
+	if !contextutils.GetVerboseFromContext(ctx) {
 		return
 	}
 
