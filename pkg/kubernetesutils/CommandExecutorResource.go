@@ -1,6 +1,7 @@
 package kubernetesutils
 
 import (
+	"context"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
@@ -73,7 +74,7 @@ func NewCommandExecutorResource() (c *CommandExecutorResource) {
 	return new(CommandExecutorResource)
 }
 
-func (c *CommandExecutorResource) CreateByYamlString(yamlString string, verbose bool) (err error) {
+func (c *CommandExecutorResource) CreateByYamlString(ctx context.Context, yamlString string) (err error) {
 	if yamlString == "" {
 		return tracederrors.TracedErrorEmptyString("yamlString")
 	}
@@ -83,15 +84,14 @@ func (c *CommandExecutorResource) CreateByYamlString(yamlString string, verbose 
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Create kubernetes resource by yaml '%s/%s' in namespace '%s' in cluster '%s' started.",
-			resourceType,
-			resourceName,
-			namespaceName,
-			clusterName,
-		)
-	}
+	logging.LogInfoByCtxf(
+		ctx,
+		"Create kubernetes resource by yaml '%s/%s' in namespace '%s' in cluster '%s' started.",
+		resourceType,
+		resourceName,
+		namespaceName,
+		clusterName,
+	)
 
 	yamlString, err = yamlutils.RunYqQueryAginstYamlStringAsString(yamlString, ".metadata.name=\""+resourceName+"\"")
 	if err != nil {
@@ -108,20 +108,29 @@ func (c *CommandExecutorResource) CreateByYamlString(yamlString string, verbose 
 		return err
 	}
 
-	context, err := c.GetKubectlContext(verbose)
+	kubectlContext, err := c.GetKubectlContext(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = c.EnsureNamespaceExists(verbose)
+	err = c.EnsureNamespaceExists(ctx)
 	if err != nil {
 		return err
 	}
+
+	cmd := []string{"kubectl"}
+	if IsInClusterAuthenticationAvailable(ctx) {
+		logging.LogInfoByCtxf(ctx, "Kubernetes in cluster authentication is used. Skip validation of kubectlContext '%s'", kubectlContext)
+	} else {
+		cmd = append(cmd, "--context", kubectlContext)
+	}
+
+	cmd = append(cmd, "apply", "-f", "-")
 
 	_, err = commandExecutor.RunCommand(
-		contextutils.GetVerbosityContextByBool(verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
-			Command:     []string{"kubectl", "--context", context, "apply", "-f", "-"},
+			Command:     cmd,
 			StdinString: yamlString,
 		},
 	)
@@ -129,80 +138,85 @@ func (c *CommandExecutorResource) CreateByYamlString(yamlString string, verbose 
 		return err
 	}
 
-	if verbose {
-		logging.LogChangedf(
-			"kubernetes resource '%s/%s' by yam in namespace '%s' in cluster '%s' created and updated.",
-			resourceType,
-			resourceName,
-			namespaceName,
-			clusterName,
-		)
-	}
+	logging.LogChangedByCtxf(
+		ctx,
+		"kubernetes resource '%s/%s' by yam in namespace '%s' in cluster '%s' created and updated.",
+		resourceType,
+		resourceName,
+		namespaceName,
+		clusterName,
+	)
 
-	if verbose {
-		logging.LogInfof(
-			"Create kubernetes resource '%s/%s' by yaml in namespace '%s' in cluster '%s' finished.",
-			resourceType,
-			resourceName,
-			namespaceName,
-			clusterName,
-		)
-	}
+	logging.LogInfoByCtxf(
+		ctx,
+		"Create kubernetes resource '%s/%s' by yaml in namespace '%s' in cluster '%s' finished.",
+		resourceType,
+		resourceName,
+		namespaceName,
+		clusterName,
+	)
 
 	return nil
 }
 
-func (c *CommandExecutorResource) Delete(verbose bool) (err error) {
+func (c *CommandExecutorResource) Delete(ctx context.Context) (err error) {
 	resourceName, resourceTypeName, namespaceName, clusterName, err := c.GetResourceAndTypeAndNamespaceAndClusterName()
 	if err != nil {
 		return err
 	}
 
-	exists, err := c.Exists(verbose)
+	exists, err := c.Exists(ctx)
 	if err != nil {
 		return err
 	}
 
 	if exists {
-		if verbose {
-			logging.LogInfof(
-				"Going to delete '%s/%s' in namespace '%s' on kubernetes cluster '%s'.",
-				resourceName,
-				resourceTypeName,
-				namespaceName,
-				clusterName,
-			)
-		}
+		logging.LogInfoByCtxf(
+			ctx,
+			"Going to delete '%s/%s' in namespace '%s' on kubernetes cluster '%s'.",
+			resourceName,
+			resourceTypeName,
+			namespaceName,
+			clusterName,
+		)
 
 		commandExecutor, err := c.GetCommandExecutor()
 		if err != nil {
 			return err
 		}
 
-		contextName, err := c.GetKubectlContext(verbose)
+		kubectlContext, err := c.GetKubectlContext(ctx)
 		if err != nil {
 			return err
 		}
 
+		cmd := []string{"kubectl"}
+		if IsInClusterAuthenticationAvailable(ctx) {
+			logging.LogInfoByCtxf(ctx, "Kubernetes in cluster authentication is used. Skip validation of kubectlContext '%s'", kubectlContext)
+		} else {
+			cmd = append(cmd, "--context", kubectlContext)
+		}
+
+		cmd = append(cmd, "--namespace", namespaceName, "delete", resourceTypeName, resourceName)
+
 		_, err = commandExecutor.RunCommand(
-			contextutils.GetVerbosityContextByBool(verbose),
+			ctx,
 			&parameteroptions.RunCommandOptions{
-				Command: []string{"kubectl", "--context", contextName, "--namespace", namespaceName, "delete", resourceTypeName, resourceName},
+				Command: cmd,
 			},
 		)
 		if err != nil {
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf(
-				"Delete '%s/%s' in namespace '%s' on kubernetes cluster '%s'.",
-				resourceName,
-				resourceTypeName,
-				namespaceName,
-				clusterName,
-			)
-		}
+		logging.LogChangedByCtxf(
+			ctx,
+			"Delete '%s/%s' in namespace '%s' on kubernetes cluster '%s'.",
+			resourceName,
+			resourceTypeName,
+			namespaceName,
+			clusterName,
+		)
 	} else {
 		logging.LogInfof(
 			"Resource '%s/%s' already absent in namespace '%s' on kubernetes cluster '%s'.",
@@ -216,16 +230,16 @@ func (c *CommandExecutorResource) Delete(verbose bool) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorResource) EnsureNamespaceExists(verbose bool) (err error) {
+func (c *CommandExecutorResource) EnsureNamespaceExists(ctx context.Context) (err error) {
 	namespace, err := c.GetNamespace()
 	if err != nil {
 		return err
 	}
 
-	return namespace.Create(verbose)
+	return namespace.Create(ctx)
 }
 
-func (c *CommandExecutorResource) Exists(verbose bool) (exists bool, err error) {
+func (c *CommandExecutorResource) Exists(ctx context.Context) (exists bool, err error) {
 	resourceName, resourceType, namespaceName, clusterName, err := c.GetResourceAndTypeAndNamespaceAndClusterName()
 	if err != nil {
 		return false, err
@@ -236,15 +250,23 @@ func (c *CommandExecutorResource) Exists(verbose bool) (exists bool, err error) 
 		return false, err
 	}
 
-	context, err := c.GetKubectlContext(verbose)
+	kubectlContext, err := c.GetKubectlContext(ctx)
 	if err != nil {
 		return false, err
 	}
 
+	cmd := []string{"kubectl", "get"}
+	if IsInClusterAuthenticationAvailable(ctx) {
+		logging.LogInfoByCtxf(ctx, "Kubernetes in cluster authentication is used. Skip validation of kubectlContext '%s'", kubectlContext)
+	} else {
+		cmd = append(cmd, "--context", kubectlContext)
+	}
+	cmd = append(cmd, "--namespace", namespaceName, resourceType, resourceName)
+
 	_, err = commandExecutor.RunCommand(
-		contextutils.GetVerbosityContextByBool(verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
-			Command: []string{"kubectl", "get", "--context", context, "--namespace", namespaceName, resourceType, resourceName},
+			Command: cmd,
 		},
 	)
 	if err != nil {
@@ -257,24 +279,24 @@ func (c *CommandExecutorResource) Exists(verbose bool) (exists bool, err error) 
 		exists = true
 	}
 
-	if verbose {
-		if exists {
-			logging.LogInfof(
-				"Kubernetes resource '%s/%s' in namespace '%s' in cluster '%s' exists.",
-				resourceType,
-				resourceName,
-				namespaceName,
-				clusterName,
-			)
-		} else {
-			logging.LogInfof(
-				"Kubernetes resource '%s/%s' in namespace '%s' in cluster '%s' does not exist.",
-				resourceType,
-				resourceName,
-				namespaceName,
-				clusterName,
-			)
-		}
+	if exists {
+		logging.LogInfoByCtxf(
+			ctx,
+			"Kubernetes resource '%s/%s' in namespace '%s' in cluster '%s' exists.",
+			resourceType,
+			resourceName,
+			namespaceName,
+			clusterName,
+		)
+	} else {
+		logging.LogInfoByCtxf(
+			ctx,
+			"Kubernetes resource '%s/%s' in namespace '%s' in cluster '%s' does not exist.",
+			resourceType,
+			resourceName,
+			namespaceName,
+			clusterName,
+		)
 	}
 
 	return exists, nil
@@ -286,7 +308,7 @@ func (c *CommandExecutorResource) GetAsYamlString() (yamlString string, err erro
 		return "", err
 	}
 
-	contextName, err := c.GetKubectlContext(false)
+	contextName, err := c.GetKubectlContext(contextutils.ContextSilent())
 	if err != nil {
 		return "", err
 	}
@@ -344,13 +366,13 @@ func (c *CommandExecutorResource) GetCommandExecutor() (commandExecutor commande
 	return c.commandExecutor, nil
 }
 
-func (c *CommandExecutorResource) GetKubectlContext(verbose bool) (contextName string, err error) {
+func (c *CommandExecutorResource) GetKubectlContext(ctx context.Context) (contextName string, err error) {
 	namespace, err := c.GetNamespace()
 	if err != nil {
 		return "", err
 	}
 
-	return namespace.GetKubectlContext(verbose)
+	return namespace.GetKubectlContext(ctx)
 }
 
 func (c *CommandExecutorResource) GetName() (name string, err error) {
@@ -410,36 +432,6 @@ func (c *CommandExecutorResource) GetTypeName() (typeName string, err error) {
 	return c.typeName, nil
 }
 
-func (c *CommandExecutorResource) MustCreateByYamlString(yamlString string, verbose bool) {
-	err := c.CreateByYamlString(yamlString, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorResource) MustDelete(verbose bool) {
-	err := c.Delete(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorResource) MustEnsureNamespaceExists(verbose bool) {
-	err := c.EnsureNamespaceExists(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorResource) MustExists(verbose bool) (exists bool) {
-	exists, err := c.Exists(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return exists
-}
-
 func (c *CommandExecutorResource) MustGetAsYamlString() (yamlString string) {
 	yamlString, err := c.GetAsYamlString()
 	if err != nil {
@@ -465,15 +457,6 @@ func (c *CommandExecutorResource) MustGetCommandExecutor() (commandExecutor comm
 	}
 
 	return commandExecutor
-}
-
-func (c *CommandExecutorResource) MustGetKubectlContext(verbose bool) (contextName string) {
-	contextName, err := c.GetKubectlContext(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return contextName
 }
 
 func (c *CommandExecutorResource) MustGetName() (name string) {
