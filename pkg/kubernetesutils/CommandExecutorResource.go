@@ -108,11 +108,6 @@ func (c *CommandExecutorResource) CreateByYamlString(ctx context.Context, yamlSt
 		return err
 	}
 
-	kubectlContext, err := c.GetKubectlContext(ctx)
-	if err != nil {
-		return err
-	}
-
 	err = c.EnsureNamespaceExists(ctx)
 	if err != nil {
 		return err
@@ -120,8 +115,13 @@ func (c *CommandExecutorResource) CreateByYamlString(ctx context.Context, yamlSt
 
 	cmd := []string{"kubectl"}
 	if IsInClusterAuthenticationAvailable(ctx) {
-		logging.LogInfoByCtxf(ctx, "Kubernetes in cluster authentication is used. Skip validation of kubectlContext '%s'", kubectlContext)
+		logging.LogInfoByCtxf(ctx, "Kubernetes in cluster authentication is used. Skip validation of kubectlContext.")
 	} else {
+		kubectlContext, err := c.GetKubectlContext(ctx)
+		if err != nil {
+			return err
+		}
+
 		cmd = append(cmd, "--context", kubectlContext)
 	}
 
