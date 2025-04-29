@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -30,23 +31,25 @@ func TestRole_CreateAndDeleteRole(t *testing.T) {
 				kubernetes := getKubernetesByImplementationName(ctx, tt.implementationName)
 				namespace := kubernetes.MustCreateNamespaceByName(namespaceName, verbose)
 
-				namespace.MustDeleteRoleByName(roleName, verbose)
-				require.False(namespace.MustRoleByNameExists(roleName, verbose))
+				mustutils.Must0(namespace.DeleteRoleByName(roleName, verbose))
+				require.False(mustutils.Must(namespace.RoleByNameExists(roleName, verbose)))
 
 				for i := 0; i < 2; i++ {
-					namespace.MustCreateRole(
+					_, err := namespace.CreateRole(
 						&kubernetesutils.CreateRoleOptions{
 							Name:     roleName,
 							Verbs:    []string{"get"},
 							Resorces: []string{"pod"},
 						},
 					)
-					require.True(namespace.MustRoleByNameExists(roleName, verbose))
+					require.NoError(err)
+					require.True(mustutils.Must(namespace.RoleByNameExists(roleName, verbose)))
 				}
 
 				for i := 0; i < 2; i++ {
-					namespace.MustDeleteRoleByName(roleName, verbose)
-					require.False(namespace.MustRoleByNameExists(roleName, verbose))
+					err := namespace.DeleteRoleByName(roleName, verbose)
+					require.NoError(err)
+					require.False(mustutils.Must(namespace.RoleByNameExists(roleName, verbose)))
 				}
 			},
 		)
