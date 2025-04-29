@@ -16,6 +16,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pathsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -608,7 +609,7 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 	ctx := getCtx()
 
 	testDataDirectory := getRepoRootDir(ctx, t).MustGetSubDirectory("testdata", "File", "SortBlocksInFile")
-	for _, testDirectory := range testDataDirectory.MustListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false}) {
+	for _, testDirectory := range mustutils.Must(testDataDirectory.ListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false})) {
 		tests = append(tests, TestCase{testDirectory.MustGetLocalPath()})
 	}
 

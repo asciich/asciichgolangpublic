@@ -154,7 +154,7 @@ func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose 
 	return createdFile, nil
 }
 
-func (d *DirectoryBase) DeleteFilesMatching(listFileOptions *parameteroptions.ListFileOptions) (err error) {
+func (d *DirectoryBase) DeleteFilesMatching(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (err error) {
 	if listFileOptions == nil {
 		return tracederrors.TracedErrorNil("listFileOptions")
 	}
@@ -164,13 +164,13 @@ func (d *DirectoryBase) DeleteFilesMatching(listFileOptions *parameteroptions.Li
 		return err
 	}
 
-	toDelete, err := parent.ListFiles(listFileOptions)
+	toDelete, err := parent.ListFiles(ctx, listFileOptions)
 	if err != nil {
 		return err
 	}
 
 	for _, d := range toDelete {
-		err = d.Delete(listFileOptions.Verbose)
+		err = d.Delete(contextutils.GetVerboseFromContext(ctx))
 		if err != nil {
 			return err
 		}
@@ -186,14 +186,7 @@ func (d *DirectoryBase) DeleteFilesMatching(listFileOptions *parameteroptions.Li
 		return err
 	}
 
-	if listFileOptions.Verbose {
-		logging.LogInfof(
-			"Deleted '%d' in directoy '%s' on '%s'",
-			len(toDelete),
-			path,
-			hostDescription,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Deleted '%d' in directoy '%s' on '%s'", len(toDelete), path, hostDescription)
 
 	return err
 }
@@ -270,7 +263,7 @@ func (d *DirectoryBase) GetPathAndHostDescription() (path string, hostDescriptio
 	return path, hostDescription, nil
 }
 
-func (d *DirectoryBase) ListFilePaths(listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error) {
+func (d *DirectoryBase) ListFilePaths(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error) {
 	if listFileOptions == nil {
 		return nil, tracederrors.TracedErrorNil("listFileOptions")
 	}
@@ -280,7 +273,7 @@ func (d *DirectoryBase) ListFilePaths(listFileOptions *parameteroptions.ListFile
 		return nil, err
 	}
 
-	files, err := parent.ListFiles(listFileOptions)
+	files, err := parent.ListFiles(ctx, listFileOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -390,13 +383,6 @@ func (d *DirectoryBase) MustCreateFileInDirectoryFromString(content string, verb
 	return createdFile
 }
 
-func (d *DirectoryBase) MustDeleteFilesMatching(listFileOptions *parameteroptions.ListFileOptions) {
-	err := d.DeleteFilesMatching(listFileOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (d *DirectoryBase) MustFileInDirectoryExists(verbose bool, path ...string) (fileExists bool) {
 	fileExists, err := d.FileInDirectoryExists(verbose, path...)
 	if err != nil {
@@ -431,15 +417,6 @@ func (d *DirectoryBase) MustGetPathAndHostDescription() (path string, hostDescri
 	}
 
 	return path, hostDescription
-}
-
-func (d *DirectoryBase) MustListFilePaths(listFileOptions *parameteroptions.ListFileOptions) (filePaths []string) {
-	filePaths, err := d.ListFilePaths(listFileOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return filePaths
 }
 
 func (d *DirectoryBase) MustListSubDirectoryPaths(options *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string) {

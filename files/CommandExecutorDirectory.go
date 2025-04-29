@@ -1,6 +1,7 @@
 package files
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"sort"
@@ -572,7 +573,7 @@ func (c *CommandExecutorDirectory) IsLocalDirectory() (isLocalDirectory bool, er
 	return isLocalDirectory, nil
 }
 
-func (c *CommandExecutorDirectory) ListFilePaths(listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error) {
+func (c *CommandExecutorDirectory) ListFilePaths(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error) {
 	if listFileOptions == nil {
 		return nil, tracederrors.TracedErrorNil("listFileOptions")
 	}
@@ -593,7 +594,7 @@ func (c *CommandExecutorDirectory) ListFilePaths(listFileOptions *parameteroptio
 	}
 
 	foundPaths, err := commandExecutor.RunCommandAndGetStdoutAsLines(
-		contextutils.GetVerbosityContextByBool(listFileOptions.Verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: commandToUse,
 		},
@@ -619,7 +620,7 @@ func (c *CommandExecutorDirectory) ListFilePaths(listFileOptions *parameteroptio
 	return filePaths, nil
 }
 
-func (c *CommandExecutorDirectory) ListFiles(listFileOptions *parameteroptions.ListFileOptions) (files []File, err error) {
+func (c *CommandExecutorDirectory) ListFiles(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (files []File, err error) {
 	if listFileOptions == nil {
 		return nil, tracederrors.TracedErrorNil("listFileOptions")
 	}
@@ -628,7 +629,7 @@ func (c *CommandExecutorDirectory) ListFiles(listFileOptions *parameteroptions.L
 
 	optionsToUse.ReturnRelativePaths = true
 
-	paths, err := c.ListFilePaths(optionsToUse)
+	paths, err := c.ListFilePaths(ctx, optionsToUse)
 	if err != nil {
 		return nil, err
 	}
@@ -875,24 +876,6 @@ func (c *CommandExecutorDirectory) MustIsLocalDirectory() (isLocalDirectory bool
 	}
 
 	return isLocalDirectory
-}
-
-func (c *CommandExecutorDirectory) MustListFilePaths(listFileOptions *parameteroptions.ListFileOptions) (filePaths []string) {
-	filePaths, err := c.ListFilePaths(listFileOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return filePaths
-}
-
-func (c *CommandExecutorDirectory) MustListFiles(listFileOptions *parameteroptions.ListFileOptions) (files []File) {
-	files, err := c.ListFiles(listFileOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return files
 }
 
 func (c *CommandExecutorDirectory) MustListSubDirectories(options *parameteroptions.ListDirectoryOptions) (subDirectories []Directory) {

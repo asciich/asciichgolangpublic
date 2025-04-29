@@ -5,6 +5,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -201,7 +202,7 @@ func (g *GitCommit) GetRepoRootPathAndHostDescription() (repoRootPath string, ho
 		return "", "", err
 	}
 
-	repoRootPath, err = repo.GetRootDirectoryPath(false)
+	repoRootPath, err = repo.GetRootDirectoryPath(contextutils.ContextSilent())
 	if err != nil {
 		return "", "", err
 	}

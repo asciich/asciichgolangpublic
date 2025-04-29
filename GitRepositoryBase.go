@@ -354,6 +354,7 @@ func (g *GitRepositoryBase) ContainsGoSourceFileOfMainPackageWithMainFunction(ve
 	}
 
 	goFiles, err := parent.ListFiles(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.ListFileOptions{
 			NonRecursive:                  true,
 			MatchBasenamePattern:          []string{".*.go"},
@@ -570,7 +571,7 @@ func (g *GitRepositoryBase) GetFileByPath(path ...string) (file files.File, err 
 		return nil, err
 	}
 
-	rootDir, err := parent.GetRootDirectory(false)
+	rootDir, err := parent.GetRootDirectory(contextutils.ContextSilent())
 	if err != nil {
 		return nil, err
 	}

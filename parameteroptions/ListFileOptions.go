@@ -13,7 +13,6 @@ type ListFileOptions struct {
 	OnlyFiles                     bool
 	NonRecursive                  bool
 	AllowEmptyListIfNoFileIsFound bool
-	Verbose                       bool
 }
 
 func NewListFileOptions() (l *ListFileOptions) {
@@ -92,11 +91,6 @@ func (l *ListFileOptions) GetReturnRelativePaths() (returnRelativePaths bool, er
 	return l.ReturnRelativePaths, nil
 }
 
-func (l *ListFileOptions) GetVerbose() (verbose bool, err error) {
-
-	return l.Verbose, nil
-}
-
 func (l *ListFileOptions) IsExcludeBasenamePatternSet() (isSet bool) {
 	return len(l.ExcludeBasenamePattern) > 0
 }
@@ -172,15 +166,6 @@ func (l *ListFileOptions) MustGetReturnRelativePaths() (returnRelativePaths bool
 	return returnRelativePaths
 }
 
-func (l *ListFileOptions) MustGetVerbose() (verbose bool) {
-	verbose, err := l.GetVerbose()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return verbose
-}
-
 func (l *ListFileOptions) MustSetAllowEmptyListIfNoFileIsFound(allowEmptyListIfNoFileIsFound bool) {
 	err := l.SetAllowEmptyListIfNoFileIsFound(allowEmptyListIfNoFileIsFound)
 	if err != nil {
@@ -239,13 +224,6 @@ func (l *ListFileOptions) MustSetOnlyFiles(onlyFiles bool) {
 
 func (l *ListFileOptions) MustSetReturnRelativePaths(returnRelativePaths bool) {
 	err := l.SetReturnRelativePaths(returnRelativePaths)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (l *ListFileOptions) MustSetVerbose(verbose bool) {
-	err := l.SetVerbose(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -341,12 +319,6 @@ func (l *ListFileOptions) SetOnlyFiles(onlyFiles bool) (err error) {
 
 func (l *ListFileOptions) SetReturnRelativePaths(returnRelativePaths bool) (err error) {
 	l.ReturnRelativePaths = returnRelativePaths
-
-	return nil
-}
-
-func (l *ListFileOptions) SetVerbose(verbose bool) (err error) {
-	l.Verbose = verbose
 
 	return nil
 }

@@ -61,8 +61,7 @@ func TestGitRepository_Init_minimal(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
+				ctx := getCtx()
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
@@ -70,9 +69,9 @@ func TestGitRepository_Init_minimal(t *testing.T) {
 
 				repo.MustDelete(verbose)
 
-				require.False(repo.MustExists(verbose))
-				require.False(repo.MustIsInitialized(verbose))
-				require.False(repo.MustHasInitialCommit(verbose))
+				require.False(t, repo.MustExists(verbose))
+				require.False(t, repo.MustIsInitialized(verbose))
+				require.False(t, repo.MustHasInitialCommit(verbose))
 
 				for i := 0; i < 2; i++ {
 					repo.MustInit(
@@ -81,13 +80,12 @@ func TestGitRepository_Init_minimal(t *testing.T) {
 							BareRepository: tt.bareRepository,
 						},
 					)
-					require.True(repo.MustExists(verbose))
-					require.True(repo.MustIsInitialized(verbose))
-					require.False(repo.MustHasInitialCommit(verbose))
-					require.EqualValues(
-						tt.bareRepository,
-						repo.MustIsBareRepository(verbose),
-					)
+					require.True(t, repo.MustExists(verbose))
+					require.True(t, repo.MustIsInitialized(verbose))
+					require.False(t, repo.MustHasInitialCommit(verbose))
+					isBare, err := repo.IsBareRepository(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, tt.bareRepository, isBare)
 				}
 			},
 		)
@@ -226,8 +224,7 @@ func TestGitRepository_Init_fullInOneStep(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
+				ctx := getCtx()
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
@@ -243,13 +240,12 @@ func TestGitRepository_Init_fullInOneStep(t *testing.T) {
 							BareRepository:              tt.bare,
 						},
 					)
-					require.True(repo.MustExists(verbose))
-					require.True(repo.MustIsInitialized(verbose))
-					require.True(repo.MustHasInitialCommit(verbose))
-					require.EqualValues(
-						tt.bare,
-						repo.MustIsBareRepository(verbose),
-					)
+					require.True(t, repo.MustExists(verbose))
+					require.True(t, repo.MustIsInitialized(verbose))
+					require.True(t, repo.MustHasInitialCommit(verbose))
+					isBare, err := repo.IsBareRepository(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, tt.bare, isBare)
 				}
 			},
 		)
@@ -406,7 +402,7 @@ func TestGitRepository_GetRootDirectoryPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
 				const verbose bool = true
 
@@ -422,9 +418,12 @@ func TestGitRepository_GetRootDirectoryPath(t *testing.T) {
 					},
 				)
 
+				rootDirPath, err := repo.GetRootDirectoryPath(ctx)
+				require.NoError(t, err)
 				require.EqualValues(
+					t,
 					repo.MustGetPath(),
-					repo.MustGetRootDirectoryPath(verbose),
+					rootDirPath,
 				)
 			},
 		)
@@ -450,6 +449,7 @@ func TestGitRepository_GetRootDirectory(t *testing.T) {
 				require := require.New(t)
 
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
@@ -465,7 +465,7 @@ func TestGitRepository_GetRootDirectory(t *testing.T) {
 
 				require.EqualValues(
 					repo.MustGetPath(),
-					repo.MustGetRootDirectory(verbose).MustGetPath(),
+					mustutils.Must(repo.GetRootDirectory(ctx)).MustGetPath(),
 				)
 			},
 		)
@@ -491,6 +491,7 @@ func TestGitRepository_GetRootDirectory_from_subdirectory(t *testing.T) {
 				require := require.New(t)
 
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
@@ -512,14 +513,14 @@ func TestGitRepository_GetRootDirectory_from_subdirectory(t *testing.T) {
 
 				require.EqualValues(
 					expectedRootDirectory,
-					repoUsingSubDir1.MustGetRootDirectoryPath(verbose),
+					mustutils.Must(repoUsingSubDir1.GetRootDirectoryPath(ctx)),
 				)
 
 				repoUsingSubDir2 := MustGetLocalGitReposioryFromDirectory(subDir)
 
 				require.EqualValues(
 					expectedRootDirectory,
-					repoUsingSubDir2.MustGetRootDirectoryPath(verbose),
+					mustutils.Must(repoUsingSubDir2.GetRootDirectoryPath(ctx)),
 				)
 			},
 		)
@@ -811,39 +812,37 @@ func TestGitRepository_ListFiles(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
-				require.False(repo.MustHasUncommittedChanges(verbose))
+				require.False(t, repo.MustHasUncommittedChanges(verbose))
 
 				repo.MustCreateFileInDirectory(verbose, "a.txt")
 				repo.MustCreateFileInDirectory(verbose, "b.txt")
 				repo.MustCreateFileInDirectory(verbose, "c.txt")
 				repo.MustCreateFileInDirectory(verbose, "cb.txt")
 
-				files := repo.MustListFiles(
+				files, err := repo.ListFiles(
+					ctx,
 					&parameteroptions.ListFileOptions{
 						MatchBasenamePattern: []string{"^b\\.txt$"},
-						Verbose:              verbose,
 					},
 				)
-				require.Len(files, 1)
-				require.EqualValues(
-					"b.txt",
-					files[0].MustGetBaseName(),
-				)
+				require.NoError(t, err)
+				require.Len(t, files, 1)
+				require.EqualValues(t, "b.txt", files[0].MustGetBaseName())
 
-				files = repo.MustListFiles(
+				files, err = repo.ListFiles(
+					ctx,
 					&parameteroptions.ListFileOptions{
 						MatchBasenamePattern: []string{"^.*b\\.txt$"},
-						Verbose:              verbose,
 					},
 				)
-				require.Len(files, 2)
+				require.NoError(t, err)
+				require.Len(t, files, 2)
 			},
 		)
 	}
@@ -862,45 +861,40 @@ func TestGitRepository_ListFilePaths(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
+				ctx := getCtx()
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
-				require.False(repo.MustHasUncommittedChanges(verbose))
+				require.False(t, repo.MustHasUncommittedChanges(verbose))
 
 				repo.MustCreateFileInDirectory(verbose, "a.txt")
 				repo.MustCreateFileInDirectory(verbose, "b.txt")
 				repo.MustCreateFileInDirectory(verbose, "c.txt")
 				repo.MustCreateFileInDirectory(verbose, "cb.txt")
 
-				files := repo.MustListFilePaths(
+				files, err := repo.ListFilePaths(
+					ctx,
 					&parameteroptions.ListFileOptions{
 						MatchBasenamePattern: []string{"^b\\.txt$"},
-						Verbose:              verbose,
 						ReturnRelativePaths:  true,
 					},
 				)
-				require.Len(files, 1)
-				require.EqualValues(
-					"b.txt",
-					files[0],
-				)
+				require.NoError(t, err)
+				require.Len(t, files, 1)
+				require.EqualValues(t, "b.txt", files[0])
 
-				files = repo.MustListFilePaths(
+				files, err = repo.ListFilePaths(
+					ctx,
 					&parameteroptions.ListFileOptions{
 						MatchBasenamePattern: []string{"^.*b\\.txt$"},
-						Verbose:              verbose,
 						ReturnRelativePaths:  true,
 					},
 				)
-				require.Len(files, 2)
-				require.EqualValues(
-					[]string{"b.txt", "cb.txt"},
-					files,
-				)
+				require.NoError(t, err)
+				require.Len(t, files, 2)
+				require.EqualValues(t, []string{"b.txt", "cb.txt"}, files)
 			},
 		)
 	}
@@ -1737,29 +1731,26 @@ func TestGitRepository_GetGitRepositoryByDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				repoRootDirectory := gitRepo.MustGetRootDirectory(verbose)
+				repoRootDirectory, err := gitRepo.GetRootDirectory(ctx)
+				require.NoError(t, err)
 
 				gitRepo2 := MustGetGitRepositoryByDirectory(repoRootDirectory)
 
 				require.EqualValues(
-					gitRepo.MustGetRootDirectoryPath(verbose),
-					gitRepo2.MustGetRootDirectoryPath(verbose),
+					t,
+					mustutils.Must(gitRepo.GetRootDirectoryPath(ctx)),
+					mustutils.Must(gitRepo2.GetRootDirectoryPath(ctx)),
 				)
 
-				require.Nil(
-					gitRepo.CheckHasNoUncommittedChanges(verbose),
-				)
+				require.Nil(t, gitRepo.CheckHasNoUncommittedChanges(verbose))
 
-				require.Nil(
-					gitRepo2.CheckHasNoUncommittedChanges(verbose),
-				)
+				require.Nil(t, gitRepo2.CheckHasNoUncommittedChanges(verbose))
 			},
 		)
 	}

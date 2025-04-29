@@ -1,6 +1,7 @@
 package files
 
 import (
+	"context"
 	"errors"
 	"os"
 	"path/filepath"
@@ -635,8 +636,8 @@ func (l *LocalDirectory) IsEmptyDirectory(verbose bool) (isEmpty bool, err error
 	}
 
 	files, err := l.ListFiles(
+		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.ListFileOptions{
-			Verbose:                       verbose,
 			AllowEmptyListIfNoFileIsFound: true,
 		},
 	)
@@ -655,7 +656,7 @@ func (l *LocalDirectory) IsLocalDirectory() (isLocalDirectory bool, err error) {
 	return true, nil
 }
 
-func (l *LocalDirectory) ListFilePaths(listOptions *parameteroptions.ListFileOptions) (filePathList []string, err error) {
+func (l *LocalDirectory) ListFilePaths(ctx context.Context, listOptions *parameteroptions.ListFileOptions) (filePathList []string, err error) {
 	if listOptions == nil {
 		return nil, tracederrors.TracedError("listOptions is nil")
 	}
@@ -713,7 +714,7 @@ func (l *LocalDirectory) ListFilePaths(listOptions *parameteroptions.ListFileOpt
 	return filePathList, nil
 }
 
-func (l *LocalDirectory) ListFiles(options *parameteroptions.ListFileOptions) (files []File, err error) {
+func (l *LocalDirectory) ListFiles(ctx context.Context, options *parameteroptions.ListFileOptions) (files []File, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedError("options is nil")
 	}
@@ -721,7 +722,7 @@ func (l *LocalDirectory) ListFiles(options *parameteroptions.ListFileOptions) (f
 	optionsToUse := options.GetDeepCopy()
 	optionsToUse.ReturnRelativePaths = true
 
-	filePathList, err := l.ListFilePaths(optionsToUse)
+	filePathList, err := l.ListFilePaths(ctx, optionsToUse)
 	if err != nil {
 		return nil, err
 	}
@@ -1006,33 +1007,6 @@ func (l *LocalDirectory) MustIsLocalDirectory() (isLocalDirectory bool) {
 	}
 
 	return isLocalDirectory
-}
-
-func (l *LocalDirectory) MustListFilePaths(listOptions *parameteroptions.ListFileOptions) (filePathList []string) {
-	filePathList, err := l.ListFilePaths(listOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return filePathList
-}
-
-func (l *LocalDirectory) MustListFilePathsns(listOptions *parameteroptions.ListFileOptions) (filePathList []string) {
-	filePathList, err := l.ListFilePaths(listOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return filePathList
-}
-
-func (l *LocalDirectory) MustListFiles(options *parameteroptions.ListFileOptions) (files []File) {
-	files, err := l.ListFiles(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return files
 }
 
 func (l *LocalDirectory) MustListSubDirectories(listDirectoryOptions *parameteroptions.ListDirectoryOptions) (subDirectories []Directory) {

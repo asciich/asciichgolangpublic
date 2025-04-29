@@ -54,9 +54,8 @@ func TestDirectoryBase_ListFiles_withoutFilter(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				const verbose bool = true
+				ctx := getCtx()
+				const verbose = true
 
 				directory := getDirectoryToTest(tt.fileImplementationToTest)
 
@@ -67,13 +66,16 @@ func TestDirectoryBase_ListFiles_withoutFilter(t *testing.T) {
 				directory.MustCreateFileInDirectory(verbose, "a.toc")
 				directory.MustCreateFileInDirectory(verbose, "b.toc")
 
-				fileList := directory.MustListFilePaths(
+				fileList, err := directory.ListFilePaths(
+					ctx,
 					&parameteroptions.ListFileOptions{
 						ReturnRelativePaths: true,
 					},
 				)
+				require.NoError(t, err)
 
 				require.EqualValues(
+					t,
 					[]string{"a.log", "a.toc", "a.txt", "b.toc"},
 					fileList,
 				)
@@ -95,8 +97,7 @@ func TestDirectoryBase_ListFiles(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
+				ctx := getCtx()
 				const verbose bool = true
 
 				directory := getDirectoryToTest(tt.fileImplementationToTest)
@@ -108,14 +109,17 @@ func TestDirectoryBase_ListFiles(t *testing.T) {
 				directory.MustCreateFileInDirectory(verbose, "a.toc")
 				directory.MustCreateFileInDirectory(verbose, "b.toc")
 
-				fileList := directory.MustListFilePaths(
+				fileList, err := directory.ListFilePaths(
+					ctx,
 					&parameteroptions.ListFileOptions{
 						MatchBasenamePattern: []string{".*.log", ".*.toc"},
 						ReturnRelativePaths:  true,
 					},
 				)
+				require.NoError(t, err)
 
 				require.EqualValues(
+					t,
 					[]string{"a.log", "a.toc", "b.toc"},
 					fileList,
 				)
@@ -137,7 +141,7 @@ func TestDirectoryBase_DeleteFilesMatching(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
 				const verbose bool = true
 
@@ -148,16 +152,17 @@ func TestDirectoryBase_DeleteFilesMatching(t *testing.T) {
 				tocFile := directory.MustCreateFileInDirectory(verbose, "a.toc")
 				toc2File := directory.MustCreateFileInDirectory(verbose, "b.toc")
 
-				directory.MustDeleteFilesMatching(
+				directory.DeleteFilesMatching(
+					ctx,
 					&parameteroptions.ListFileOptions{
 						MatchBasenamePattern: []string{".*.log", ".*.toc"},
 					},
 				)
 
-				require.True(txtFile.MustExists(verbose))
-				require.False(locFile.MustExists(verbose))
-				require.False(tocFile.MustExists(verbose))
-				require.False(toc2File.MustExists(verbose))
+				require.True(t, txtFile.MustExists(verbose))
+				require.False(t, locFile.MustExists(verbose))
+				require.False(t, tocFile.MustExists(verbose))
+				require.False(t, toc2File.MustExists(verbose))
 			},
 		)
 	}
