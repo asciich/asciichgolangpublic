@@ -1,13 +1,13 @@
 package kind
 
 import (
-	"github.com/asciich/asciichgolangpublic/kubernetes"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type CommandExecutorKindCluster struct {
-	kubernetes.CommandExecutorKubernetes
+	kubernetesutils.CommandExecutorKubernetes
 	kind Kind
 }
 
