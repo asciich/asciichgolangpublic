@@ -107,22 +107,27 @@ func (c *CommandExecutorKubernetes) CreateNamespaceByName(name string, verbose b
 			)
 		}
 	} else {
-		context, err := c.GetCachedKubectlContext(verbose)
-		if err != nil {
-			return nil, err
+		ctx := contextutils.GetVerbosityContextByBool(verbose)
+
+		cmd := []string{"kubectl"}
+
+		if IsInClusterAuthenticationAvailable(ctx) {
+			logging.LogInfoByCtxf(ctx, "Kubernetes in cluster authentication is used. cluster context is not used.")
+		} else {
+			kubectlContext, err := c.GetCachedKubectlContext(verbose)
+			if err != nil {
+				return nil, err
+			}
+
+			cmd = append(cmd, "--context", kubectlContext)
 		}
+
+		cmd = append(cmd, "create", "namespace", name)
 
 		_, err = c.RunCommand(
 			contextutils.GetVerbosityContextByBool(verbose),
 			&parameteroptions.RunCommandOptions{
-				Command: []string{
-					"kubectl",
-					"--context",
-					context,
-					"create",
-					"namespace",
-					name,
-				},
+				Command: cmd,
 			},
 		)
 		if err != nil {
