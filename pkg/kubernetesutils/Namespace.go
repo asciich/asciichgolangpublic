@@ -1,4 +1,4 @@
-package kubernetes
+package kubernetesutils
 
 type Namespace interface {
 	Create(verbose bool) (err error)

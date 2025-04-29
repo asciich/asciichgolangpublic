@@ -1,4 +1,4 @@
-package kubernetes
+package kubernetesutils
 
 // a generic representation of a kubernetes resource like a pod, ingress, role...
 type Resource interface {

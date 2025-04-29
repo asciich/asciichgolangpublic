@@ -5,10 +5,10 @@ import (
 	"slices"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/kubernetes"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -93,7 +93,7 @@ func (c *CommandExecutorKind) ClusterByNameExists(clusterName string, verbose bo
 	return exists, nil
 }
 
-func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bool) (cluster kubernetes.KubernetesCluster, err error) {
+func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bool) (cluster kubernetesutils.KubernetesCluster, err error) {
 	if clusterName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("clusterName")
 	}
@@ -206,7 +206,7 @@ func (c *CommandExecutorKind) DeleteClusterByName(clusterName string, verbose bo
 	return nil
 }
 
-func (c *CommandExecutorKind) GetClusterByName(clusterName string) (cluster kubernetes.KubernetesCluster, err error) {
+func (c *CommandExecutorKind) GetClusterByName(clusterName string) (cluster kubernetesutils.KubernetesCluster, err error) {
 	if clusterName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("clusterName")
 	}
@@ -270,7 +270,7 @@ func (c *CommandExecutorKind) MustClusterByNameExists(clusterName string, verbos
 	return exists
 }
 
-func (c *CommandExecutorKind) MustCreateClusterByName(clusterName string, verbose bool) (cluster kubernetes.KubernetesCluster) {
+func (c *CommandExecutorKind) MustCreateClusterByName(clusterName string, verbose bool) (cluster kubernetesutils.KubernetesCluster) {
 	cluster, err := c.CreateClusterByName(clusterName, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -286,7 +286,7 @@ func (c *CommandExecutorKind) MustDeleteClusterByName(clusterName string, verbos
 	}
 }
 
-func (c *CommandExecutorKind) MustGetClusterByName(clusterName string) (cluster kubernetes.KubernetesCluster) {
+func (c *CommandExecutorKind) MustGetClusterByName(clusterName string) (cluster kubernetesutils.KubernetesCluster) {
 	cluster, err := c.GetClusterByName(clusterName)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

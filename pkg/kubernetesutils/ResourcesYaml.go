@@ -1,4 +1,4 @@
-package kubernetes
+package kubernetesutils
 
 import (
 	"sort"
@@ -85,7 +85,7 @@ func (r *ResourceYamlEntry) Namespace() (namespace string) {
 	return toParse.Metadata.Namespace
 }
 
-func unmarshalResourceYaml(resourceYaml string) (resources []*ResourceYamlEntry, err error) {
+func UnmarshalResourceYaml(resourceYaml string) (resources []*ResourceYamlEntry, err error) {
 	splitted := yamlutils.SplitMultiYaml(resourceYaml)
 
 	resources = []*ResourceYamlEntry{}
@@ -137,7 +137,7 @@ func marshalResourceYaml(resources []*ResourceYamlEntry) (marshalled string, err
 //  2. Resource name
 //  3. Kind
 func SortResourcesYaml(resourcesYaml string) (sortedResourcesYaml string, err error) {
-	parsed, err := unmarshalResourceYaml(resourcesYaml)
+	parsed, err := UnmarshalResourceYaml(resourcesYaml)
 	if err != nil {
 		return "", err
 	}

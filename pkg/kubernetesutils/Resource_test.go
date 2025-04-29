@@ -1,4 +1,4 @@
-package kubernetes
+package kubernetesutils_test
 
 import (
 	"strconv"

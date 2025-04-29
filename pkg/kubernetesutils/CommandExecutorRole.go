@@ -1,4 +1,4 @@
-package kubernetes
+package kubernetesutils
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"

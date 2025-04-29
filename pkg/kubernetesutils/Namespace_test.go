@@ -1,4 +1,4 @@
-package kubernetes
+package kubernetesutils_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -15,12 +16,12 @@ func getCtx() context.Context {
 	return contextutils.ContextVerbose()
 }
 
-func getKubernetesByImplementationName(ctx context.Context, implementationName string) (kubernetes KubernetesCluster) {
+func getKubernetesByImplementationName(ctx context.Context, implementationName string) kubernetesutils.KubernetesCluster {
 	if implementationName == "commandExecutorKubernetes" {
 		// Directly call kind binary to avoid cyclic import...
 		commandexecutor.Bash().RunOneLiner(ctx, "kind create cluster -n kind || true")
 
-		return MustGetLocalCommandExecutorKubernetesByName("kind-kind")
+		return kubernetesutils.MustGetLocalCommandExecutorKubernetesByName("kind-kind")
 	}
 
 	logging.LogFatalWithTracef(

@@ -1,9 +1,10 @@
-package kubernetes
+package kubernetesutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -34,7 +35,7 @@ func TestRole_CreateAndDeleteRole(t *testing.T) {
 
 				for i := 0; i < 2; i++ {
 					namespace.MustCreateRole(
-						&CreateRoleOptions{
+						&kubernetesutils.CreateRoleOptions{
 							Name:     roleName,
 							Verbs:    []string{"get"},
 							Resorces: []string{"pod"},
