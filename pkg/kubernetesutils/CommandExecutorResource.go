@@ -61,22 +61,18 @@ func GetCommandExecutorResource(commandExectutor commandexecutor.CommandExecutor
 	return toReturn, nil
 }
 
-func MustGetCommandExecutorResource(commandExectutor commandexecutor.CommandExecutor, namespace Namespace, resourceName string, resourceType string) (resource Resource) {
-	resource, err := GetCommandExecutorResource(commandExectutor, namespace, resourceName, resourceType)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return resource
-}
-
 func NewCommandExecutorResource() (c *CommandExecutorResource) {
 	return new(CommandExecutorResource)
 }
 
-func (c *CommandExecutorResource) CreateByYamlString(ctx context.Context, yamlString string) (err error) {
-	if yamlString == "" {
-		return tracederrors.TracedErrorEmptyString("yamlString")
+func (c *CommandExecutorResource) CreateByYamlString(ctx context.Context, options *CreateResourceOptions) (err error) {
+	if options == nil {
+		return tracederrors.TracedErrorNil("options")
+	}
+	
+	yamlString, err := options.GetYamlString()
+	if err != nil {
+		return err
 	}
 
 	resourceName, resourceType, namespaceName, clusterName, err := c.GetResourceAndTypeAndNamespaceAndClusterName()
@@ -108,10 +104,14 @@ func (c *CommandExecutorResource) CreateByYamlString(ctx context.Context, yamlSt
 		return err
 	}
 
-	err = c.EnsureNamespaceExists(ctx)
-	if err != nil {
-		return err
-	}
+	if options.SkipNamespaceCreation {
+		logging.LogInfoByCtx(ctx, "Skip ensure namespace exists when creating resource by yaml string.")
+	} else {
+		err = c.EnsureNamespaceExists(ctx)
+		if err != nil {
+			return err
+		}
+	} 
 
 	cmd := []string{"kubectl"}
 	if IsInClusterAuthenticationAvailable(ctx) {
