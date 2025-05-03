@@ -34,7 +34,7 @@ func (c *CommandExecutorNamespace) Create(ctx context.Context) (err error) {
 		return err
 	}
 
-	_, err = cluster.CreateNamespaceByName(name, contextutils.GetVerboseFromContext(ctx))
+	_, err = cluster.CreateNamespaceByName(ctx, name)
 	if err != nil {
 		return err
 	}
@@ -62,12 +62,12 @@ func (c *CommandExecutorNamespace) CreateRole(createOptions *CreateRoleOptions) 
 		return nil, err
 	}
 
-	context, err := c.GetCachedKubectlContext(createOptions.Verbose)
+	context, err := c.GetCachedKubectlContext(contextutils.GetVerbosityContextByBool(createOptions.Verbose))
 	if err != nil {
 		return nil, err
 	}
 
-	exists, err := c.RoleByNameExists(roleName, createOptions.Verbose)
+	exists, err := c.RoleByNameExists(contextutils.GetVerbosityContextByBool(createOptions.Verbose), roleName)
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +127,7 @@ func (c *CommandExecutorNamespace) CreateRole(createOptions *CreateRoleOptions) 
 	return c.GetRoleByName(roleName)
 }
 
-func (c *CommandExecutorNamespace) DeleteRoleByName(name string, verbose bool) (err error) {
+func (c *CommandExecutorNamespace) DeleteRoleByName(ctx context.Context, name string) (err error) {
 	if name == "" {
 		return tracederrors.TracedErrorEmptyString("name")
 	}
@@ -137,7 +137,7 @@ func (c *CommandExecutorNamespace) DeleteRoleByName(name string, verbose bool) (
 		return err
 	}
 
-	exists, err := c.RoleByNameExists(name, verbose)
+	exists, err := c.RoleByNameExists(ctx, name)
 	if err != nil {
 		return err
 	}
@@ -148,13 +148,13 @@ func (c *CommandExecutorNamespace) DeleteRoleByName(name string, verbose bool) (
 	}
 
 	if exists {
-		context, err := c.GetCachedKubectlContext(verbose)
+		context, err := c.GetCachedKubectlContext(ctx)
 		if err != nil {
 			return err
 		}
 
 		_, err = c.RunCommand(
-			contextutils.GetVerbosityContextByBool(verbose),
+			ctx,
 			&parameteroptions.RunCommandOptions{
 				Command: []string{
 					"kubectl",
@@ -172,29 +172,15 @@ func (c *CommandExecutorNamespace) DeleteRoleByName(name string, verbose bool) (
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf(
-				"Role '%s' in namespace '%s' in kubernetes cluster '%s' deleted.",
-				name,
-				namespaceName,
-				clusterName,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "Role '%s' in namespace '%s' in kubernetes cluster '%s' deleted.", name, namespaceName, clusterName)
 	} else {
-		if verbose {
-			logging.LogChangedf(
-				"Role '%s' in namespace '%s' in kubernetes cluster '%s' already absent.",
-				name,
-				namespaceName,
-				clusterName,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "Role '%s' in namespace '%s' in kubernetes cluster '%s' already absent.", name, namespaceName, clusterName)
 	}
 
 	return nil
 }
 
-func (c *CommandExecutorNamespace) GetCachedKubectlContext(verbose bool) (context string, err error) {
+func (c *CommandExecutorNamespace) GetCachedKubectlContext(ctx context.Context) (context string, err error) {
 	kubernetes, err := c.GetKubernetesCluster()
 	if err != nil {
 		return "", err
@@ -213,7 +199,7 @@ func (c *CommandExecutorNamespace) GetCachedKubectlContext(verbose bool) (contex
 		)
 	}
 
-	return commandExecutorKubernetes.GetCachedKubectlContext(verbose)
+	return commandExecutorKubernetes.GetCachedKubectlContext(ctx)
 }
 
 func (c *CommandExecutorNamespace) GetClusterName() (clusterName string, err error) {
@@ -253,7 +239,7 @@ func (c *CommandExecutorNamespace) GetKubectlContext(ctx context.Context) (conte
 		return "", err
 	}
 
-	return cluster.GetKubectlContext(contextutils.GetVerboseFromContext(ctx))
+	return cluster.GetKubectlContext(ctx)
 }
 
 func (c *CommandExecutorNamespace) GetKubernetesCluster() (kubernetesCluster KubernetesCluster, err error) {
@@ -306,8 +292,8 @@ func (c *CommandExecutorNamespace) GetRoleByName(name string) (role Role, err er
 	return toReturn, nil
 }
 
-func (c *CommandExecutorNamespace) ListRoleNames(verbose bool) (roleNames []string, err error) {
-	context, err := c.GetCachedKubectlContext(verbose)
+func (c *CommandExecutorNamespace) ListRoleNames(ctx context.Context) (roleNames []string, err error) {
+	context, err := c.GetCachedKubectlContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -318,7 +304,7 @@ func (c *CommandExecutorNamespace) ListRoleNames(verbose bool) (roleNames []stri
 	}
 
 	lines, err := c.RunCommandAndGetStdoutAsLines(
-		contextutils.GetVerbosityContextByBool(verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"kubectl",
@@ -366,139 +352,27 @@ func (c *CommandExecutorNamespace) ListRoleNames(verbose bool) (roleNames []stri
 	return roleNames, nil
 }
 
-func (c *CommandExecutorNamespace) MustDeleteRoleByName(name string, verbose bool) {
-	err := c.DeleteRoleByName(name, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorNamespace) MustGetCachedKubectlContext(verbose bool) (context string) {
-	context, err := c.GetCachedKubectlContext(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return context
-}
-
-func (c *CommandExecutorNamespace) MustGetClusterName() (clusterName string) {
-	clusterName, err := c.GetClusterName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return clusterName
-}
-
-func (c *CommandExecutorNamespace) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
-	commandExecutor, err := c.GetCommandExecutor()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandExecutor
-}
-
-func (c *CommandExecutorNamespace) MustGetKubernetesCluster() (kubernetesCluster KubernetesCluster) {
-	kubernetesCluster, err := c.GetKubernetesCluster()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return kubernetesCluster
-}
-
-func (c *CommandExecutorNamespace) MustGetName() (name string) {
-	name, err := c.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (c *CommandExecutorNamespace) MustGetResourceByNames(resourceName string, resourceType string) (resource Resource) {
-	resource, err := c.GetResourceByNames(resourceName, resourceType)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return resource
-}
-
-func (c *CommandExecutorNamespace) MustGetRoleByName(name string) (role Role) {
-	role, err := c.GetRoleByName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return role
-}
-
-func (c *CommandExecutorNamespace) MustListRoleNames(verbose bool) (roleNames []string) {
-	roleNames, err := c.ListRoleNames(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return roleNames
-}
-
-func (c *CommandExecutorNamespace) MustRoleByNameExists(name string, verbose bool) (exists bool) {
-	exists, err := c.RoleByNameExists(name, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return exists
-}
-
-func (c *CommandExecutorNamespace) MustSetKubernetesCluster(kubernetesCluster KubernetesCluster) {
-	err := c.SetKubernetesCluster(kubernetesCluster)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorNamespace) MustSetName(name string) {
-	err := c.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorNamespace) RoleByNameExists(name string, verbose bool) (exists bool, err error) {
+func (c *CommandExecutorNamespace) RoleByNameExists(ctx context.Context, name string) (exists bool, err error) {
 	if name == "" {
 		return false, tracederrors.TracedErrorEmptyString("name")
 	}
 
-	roleNames, err := c.ListRoleNames(false)
+	roleNames, err := c.ListRoleNames(contextutils.WithVerbosityContextByBool(ctx, false))
 	if err != nil {
 		return false, err
 	}
 
 	exists = slices.Contains(roleNames, name)
 
-	if verbose {
-		clusterName, err := c.GetClusterName()
-		if err != nil {
-			return false, err
-		}
+	clusterName, err := c.GetClusterName()
+	if err != nil {
+		return false, err
+	}
 
-		if exists {
-			logging.LogInfof(
-				"Role '%s' in kubernetes cluster '%s' exists.",
-				name,
-				clusterName,
-			)
-		} else {
-			logging.LogInfof(
-				"Role '%s' in kubernetes cluster '%s' does not exist.",
-				name,
-				clusterName,
-			)
-		}
+	if exists {
+		logging.LogInfoByCtxf(ctx, "Role '%s' in kubernetes cluster '%s' exists.", name, clusterName)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Role '%s' in kubernetes cluster '%s' does not exist.", name, clusterName)
 	}
 
 	return exists, nil

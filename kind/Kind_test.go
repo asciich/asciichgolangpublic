@@ -1,12 +1,19 @@
 package kind
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func getClusterName() (clusterName string) {
 	return "kind-ci-test"
@@ -71,9 +78,8 @@ func TestKind_CreateNamespace(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				const verbose bool = true
+				const verbose = true
+				ctx := getCtx()
 				clusterName := getClusterName()
 
 				kind := getKindByImplementationName(tt.implementationName)
@@ -82,17 +88,20 @@ func TestKind_CreateNamespace(t *testing.T) {
 
 				namespaceName := "test-namespace"
 
-				cluster.MustDeleteNamespaceByName(namespaceName, verbose)
-				require.False(cluster.MustNamespaceByNameExists(namespaceName, verbose))
+				err := cluster.DeleteNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+				require.False(t, mustutils.Must(cluster.NamespaceByNameExists(ctx, namespaceName)))
 
 				for i := 0; i < 2; i++ {
-					cluster.MustCreateNamespaceByName(namespaceName, verbose)
-					require.True(cluster.MustNamespaceByNameExists(namespaceName, verbose))
+					_, err := cluster.CreateNamespaceByName(ctx, namespaceName)
+					require.NoError(t, err)
+					require.True(t, mustutils.Must(cluster.NamespaceByNameExists(ctx, namespaceName)))
 				}
 
 				for i := 0; i < 2; i++ {
-					cluster.MustDeleteNamespaceByName(namespaceName, verbose)
-					require.False(cluster.MustNamespaceByNameExists(namespaceName, verbose))
+					err := cluster.DeleteNamespaceByName(ctx, namespaceName)
+					require.NoError(t, err)
+					require.False(t, mustutils.Must(cluster.NamespaceByNameExists(ctx, namespaceName)))
 				}
 			},
 		)

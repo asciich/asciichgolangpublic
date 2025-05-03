@@ -158,11 +158,7 @@ func SortResourcesYaml(resourcesYaml string) (sortedResourcesYaml string, err er
 
 		kind_i := parsed[i].Kind()
 		kind_j := parsed[j].Kind()
-		if stringsutils.IsBeforeInAlphabeth(kind_i, kind_j) {
-			return true
-		}
-
-		return false
+		return stringsutils.IsBeforeInAlphabeth(kind_i, kind_j)
 	})
 
 	sortedResourcesYaml, err = marshalResourceYaml(parsed)
