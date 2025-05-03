@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -43,24 +44,25 @@ func TestNamespace_CreateAndDeleteNamespace(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				const verbose bool = true
+				ctx := getCtx()
 				const namespaceName = "testnamespace"
 
 				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
 
-				kubernetes.MustDeleteNamespaceByName(namespaceName, verbose)
-				require.False(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
+				err := kubernetes.DeleteNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+				require.False(t, mustutils.Must(kubernetes.NamespaceByNameExists(ctx, namespaceName)))
 
 				for i := 0; i < 2; i++ {
-					kubernetes.MustCreateNamespaceByName(namespaceName, verbose)
-					require.True(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
+					_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+					require.NoError(t, err)
+					require.True(t, mustutils.Must(kubernetes.NamespaceByNameExists(ctx, namespaceName)))
 				}
 
 				for i := 0; i < 2; i++ {
-					kubernetes.MustDeleteNamespaceByName(namespaceName, verbose)
-					require.False(kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
+					err := kubernetes.DeleteNamespaceByName(ctx, namespaceName)
+					require.NoError(t, err)
+					require.False(t, mustutils.Must(kubernetes.NamespaceByNameExists(ctx, namespaceName)))
 				}
 			},
 		)

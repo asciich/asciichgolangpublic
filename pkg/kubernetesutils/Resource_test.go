@@ -24,16 +24,17 @@ func TestKubernetesResource_CreateAndDelete(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 				const namespaceName = "testnamespace"
 
 				kubernetes := getKubernetesByImplementationName(ctx, tt.implementationName)
-				kubernetes.MustDeleteNamespaceByName(namespaceName, verbose)
-				require.False(t, kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
+				err := kubernetes.DeleteNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+				require.False(t, mustutils.Must(kubernetes.NamespaceByNameExists(ctx, namespaceName)))
 
-				k8sResource := kubernetes.MustGetResourceByNames(tt.resourceName, tt.resourceType, namespaceName)
-				err := k8sResource.Delete(ctx)
+				k8sResource, err := kubernetes.GetResourceByNames(tt.resourceName, tt.resourceType, namespaceName)
+				require.NoError(t, err)
+				err = k8sResource.Delete(ctx)
 				require.NoError(t, err)
 
 				require.False(t, mustutils.Must(k8sResource.Exists(ctx)))
@@ -75,23 +76,23 @@ func TestKubernetesResource_ListResources(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				const namespaceName = "testnamespace"
 
 				kubernetes := getKubernetesByImplementationName(ctx, tt.implementationName)
-				kubernetes.MustDeleteNamespaceByName(namespaceName, verbose)
-				require.False(t, kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
+				err := kubernetes.DeleteNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+				require.False(t, mustutils.Must(kubernetes.NamespaceByNameExists(ctx, namespaceName)))
 
 				require.Len(
 					t,
-					kubernetes.MustListResources(
+					mustutils.Must(kubernetes.ListResources(
 						&parameteroptions.ListKubernetesResourcesOptions{
 							Namespace:    namespaceName,
 							ResourceType: tt.resourceType,
 						},
-					),
+					)),
 					0,
 				)
 
@@ -103,20 +104,21 @@ func TestKubernetesResource_ListResources(t *testing.T) {
 				roleYaml += "  namespace: " + namespaceName + "\n"
 
 				for i := 0; i < 3; i++ {
-					k8sResource := kubernetes.MustGetResourceByNames(tt.resourceName+strconv.Itoa(i), tt.resourceType, namespaceName)
-					err := k8sResource.CreateByYamlString(ctx, roleYaml)
+					k8sResource, err := kubernetes.GetResourceByNames(tt.resourceName+strconv.Itoa(i), tt.resourceType, namespaceName)
+					require.NoError(t, err)
+					err = k8sResource.CreateByYamlString(ctx, roleYaml)
 					require.NoError(t, err)
 					require.True(t, mustutils.Must(k8sResource.Exists(ctx)))
 				}
 
 				require.Len(
 					t,
-					kubernetes.MustListResources(
+					mustutils.Must(kubernetes.ListResources(
 						&parameteroptions.ListKubernetesResourcesOptions{
 							Namespace:    namespaceName,
 							ResourceType: tt.resourceType,
 						},
-					),
+					)),
 					3,
 				)
 
@@ -128,12 +130,12 @@ func TestKubernetesResource_ListResources(t *testing.T) {
 				require.EqualValues(
 					t,
 					expectedNames,
-					kubernetes.MustListResourceNames(
+					mustutils.Must(kubernetes.ListResourceNames(
 						&parameteroptions.ListKubernetesResourcesOptions{
 							Namespace:    namespaceName,
 							ResourceType: tt.resourceType,
 						},
-					),
+					)),
 				)
 			},
 		)
@@ -153,17 +155,18 @@ func TestKubernetesResource_GetAsYamlString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				verbose := true
 				ctx := getCtx()
 
 				const namespaceName = "testnamespace"
 
 				kubernetes := getKubernetesByImplementationName(ctx, tt.implementationName)
-				kubernetes.MustDeleteNamespaceByName(namespaceName, verbose)
-				require.False(t, kubernetes.MustNamespaceByNameExists(namespaceName, verbose))
+				err := kubernetes.DeleteNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+				require.False(t, mustutils.Must(kubernetes.NamespaceByNameExists(ctx, namespaceName)))
 
-				k8sResource := kubernetes.MustGetResourceByNames(tt.resourceName, tt.resourceType, namespaceName)
-				err := k8sResource.Delete(ctx)
+				k8sResource, err := kubernetes.GetResourceByNames(tt.resourceName, tt.resourceType, namespaceName)
+				require.NoError(t, err)
+				err = k8sResource.Delete(ctx)
 				require.NoError(t, err)
 
 				require.False(t, mustutils.Must(k8sResource.Exists(ctx)))
