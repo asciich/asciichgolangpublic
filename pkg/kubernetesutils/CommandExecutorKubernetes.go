@@ -83,12 +83,12 @@ func (c *CommandExecutorKubernetes) GetName() (name string, err error) {
 	return c.name, nil
 }
 
-func (c *CommandExecutorKubernetes) CreateNamespaceByName(name string, verbose bool) (createdNamespace Namespace, err error) {
+func (c *CommandExecutorKubernetes) CreateNamespaceByName(ctx context.Context, name string) (createdNamespace Namespace, err error) {
 	if name == "" {
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
 
-	exists, err := c.NamespaceByNameExists(name, verbose)
+	exists, err := c.NamespaceByNameExists(ctx, name)
 	if err != nil {
 		return nil, err
 	}
@@ -99,22 +99,14 @@ func (c *CommandExecutorKubernetes) CreateNamespaceByName(name string, verbose b
 	}
 
 	if exists {
-		if verbose {
-			logging.LogInfof(
-				"Namespace '%s' already exists in cluster '%s'.",
-				name,
-				clusterName,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Namespace '%s' already exists in cluster '%s'.", name, clusterName)
 	} else {
-		ctx := contextutils.GetVerbosityContextByBool(verbose)
-
 		cmd := []string{"kubectl"}
 
 		if IsInClusterAuthenticationAvailable(ctx) {
 			logging.LogInfoByCtxf(ctx, "Kubernetes in cluster authentication is used. cluster context is not used.")
 		} else {
-			kubectlContext, err := c.GetCachedKubectlContext(verbose)
+			kubectlContext, err := c.GetCachedKubectlContext(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -125,7 +117,7 @@ func (c *CommandExecutorKubernetes) CreateNamespaceByName(name string, verbose b
 		cmd = append(cmd, "create", "namespace", name)
 
 		_, err = c.RunCommand(
-			contextutils.GetVerbosityContextByBool(verbose),
+			ctx,
 			&parameteroptions.RunCommandOptions{
 				Command: cmd,
 			},
@@ -134,24 +126,18 @@ func (c *CommandExecutorKubernetes) CreateNamespaceByName(name string, verbose b
 			return nil, err
 		}
 
-		if verbose {
-			logging.LogChangedf(
-				"Namespace '%s' in cluster '%s' created.",
-				name,
-				clusterName,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "Namespace '%s' in cluster '%s' created.", name, clusterName)
 	}
 
 	return c.GetNamespaceByName(name)
 }
 
-func (c *CommandExecutorKubernetes) DeleteNamespaceByName(name string, verbose bool) (err error) {
+func (c *CommandExecutorKubernetes) DeleteNamespaceByName(ctx context.Context, name string) (err error) {
 	if name == "" {
 		return tracederrors.TracedErrorEmptyString("name")
 	}
 
-	exists, err := c.NamespaceByNameExists(name, verbose)
+	exists, err := c.NamespaceByNameExists(ctx, name)
 	if err != nil {
 		return err
 	}
@@ -163,13 +149,13 @@ func (c *CommandExecutorKubernetes) DeleteNamespaceByName(name string, verbose b
 
 	if exists {
 
-		context, err := c.GetCachedKubectlContext(verbose)
+		context, err := c.GetCachedKubectlContext(ctx)
 		if err != nil {
 			return err
 		}
 
 		_, err = c.RunCommand(
-			contextutils.GetVerbosityContextByBool(verbose),
+			ctx,
 			&parameteroptions.RunCommandOptions{
 				Command: []string{
 					"kubectl",
@@ -185,21 +171,9 @@ func (c *CommandExecutorKubernetes) DeleteNamespaceByName(name string, verbose b
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf(
-				"Namespace '%s' in cluster '%s' deleted.",
-				name,
-				clusterName,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "Namespace '%s' in cluster '%s' deleted.", name, clusterName)
 	} else {
-		if verbose {
-			logging.LogInfof(
-				"Namespace '%s' already absent in cluster '%s'.",
-				name,
-				clusterName,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Namespace '%s' already absent in cluster '%s'.", name, clusterName)
 	}
 
 	return nil
@@ -213,9 +187,9 @@ func (c *CommandExecutorKubernetes) GetCachedContextName() (cachedContextName st
 	return c.cachedContextName, nil
 }
 
-func (c *CommandExecutorKubernetes) GetCachedKubectlContext(verbose bool) (context string, err error) {
+func (c *CommandExecutorKubernetes) GetCachedKubectlContext(ctx context.Context) (context string, err error) {
 	if c.cachedContextName == "" {
-		return c.GetKubectlContext(verbose)
+		return c.GetKubectlContext(ctx)
 	}
 
 	context = c.cachedContextName
@@ -242,7 +216,7 @@ func (c *CommandExecutorKubernetes) GetCommandExecutor() (commandExecutor comman
 	return c.commandExecutor, nil
 }
 
-func (c *CommandExecutorKubernetes) GetKubectlContext(verbose bool) (context string, err error) {
+func (c *CommandExecutorKubernetes) GetKubectlContext(ctx context.Context) (context string, err error) {
 	contexts, err := c.GetKubectlContexts()
 	if err != nil {
 		return "", err
@@ -265,13 +239,7 @@ func (c *CommandExecutorKubernetes) GetKubectlContext(verbose bool) (context str
 				return "", err
 			}
 
-			if verbose {
-				logging.LogInfof(
-					"Kubectl context for cluster '%s' is '%s'.",
-					clusterName,
-					context,
-				)
-			}
+			logging.LogInfoByCtxf(ctx, "Kubectl context for cluster '%s' is '%s'.", clusterName, context)
 
 			return context, nil
 		}
@@ -372,8 +340,8 @@ func (c *CommandExecutorKubernetes) GetResourceByNames(resourceName string, reso
 	return namespace.GetResourceByNames(resourceName, resourceType)
 }
 
-func (c *CommandExecutorKubernetes) ListNamespaceNames(verbose bool) (namespaceNames []string, err error) {
-	namespaces, err := c.ListNamespaces(verbose)
+func (c *CommandExecutorKubernetes) ListNamespaceNames(ctx context.Context) (namespaceNames []string, err error) {
+	namespaces, err := c.ListNamespaces(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -391,24 +359,27 @@ func (c *CommandExecutorKubernetes) ListNamespaceNames(verbose bool) (namespaceN
 	return namespaceNames, nil
 }
 
-func (c *CommandExecutorKubernetes) ListNamespaces(verbose bool) (namespaces []Namespace, err error) {
-	context, err := c.GetCachedKubectlContext(verbose)
-	if err != nil {
-		return nil, err
+func (c *CommandExecutorKubernetes) ListNamespaces(ctx context.Context) (namespaces []Namespace, err error) {
+
+	cmd := []string{"kubectl"}
+
+	if IsInClusterAuthenticationAvailable(ctx) {
+		logging.LogInfoByCtxf(ctx, "Kubernetes in cluster authentication is used. Skip validation of kubectlContext for ListNamespaces.")
+	} else {
+		context, err := c.GetCachedKubectlContext(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		cmd = append(cmd, "--context", context)
 	}
 
+	cmd = append(cmd, "get", "namespaces", "-o", "name")
+
 	lines, err := c.RunCommandAndGetStdoutAsLines(
-		contextutils.GetVerbosityContextByBool(verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
-			Command: []string{
-				"kubectl",
-				"--context",
-				context,
-				"get",
-				"namespaces",
-				"-o",
-				"name",
-			},
+			Command: cmd,
 		},
 	)
 	if err != nil {
@@ -451,7 +422,7 @@ func (c *CommandExecutorKubernetes) ListResourceNames(options *parameteroptions.
 		return nil, err
 	}
 
-	context, err := c.GetKubectlContext(options.Verbose)
+	context, err := c.GetKubectlContext(contextutils.GetVerbosityContextByBool(options.Verbose))
 	if err != nil {
 		return nil, err
 	}
@@ -524,191 +495,27 @@ func (c *CommandExecutorKubernetes) ListResources(options *parameteroptions.List
 	return resources, nil
 }
 
-func (c *CommandExecutorKubernetes) MustCreateNamespaceByName(name string, verbose bool) (createdNamespace Namespace) {
-	createdNamespace, err := c.CreateNamespaceByName(name, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return createdNamespace
-}
-
-func (c *CommandExecutorKubernetes) MustDeleteNamespaceByName(name string, verbose bool) {
-	err := c.DeleteNamespaceByName(name, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorKubernetes) MustGetCachedContextName() (cachedContextName string) {
-	cachedContextName, err := c.GetCachedContextName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return cachedContextName
-}
-
-func (c *CommandExecutorKubernetes) MustGetCachedKubectlContext(verbose bool) (context string) {
-	context, err := c.GetCachedKubectlContext(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return context
-}
-
-func (c *CommandExecutorKubernetes) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
-	commandExecutor, err := c.GetCommandExecutor()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandExecutor
-}
-
-func (c *CommandExecutorKubernetes) MustGetKubectlContext(verbose bool) (context string) {
-	context, err := c.GetKubectlContext(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return context
-}
-
-func (c *CommandExecutorKubernetes) MustGetKubectlContexts() (contexts []KubectlContext) {
-	contexts, err := c.GetKubectlContexts()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return contexts
-}
-
-func (c *CommandExecutorKubernetes) MustGetName() (name string) {
-	name, err := c.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (c *CommandExecutorKubernetes) MustGetNamespaceByName(name string) (namespace Namespace) {
-	namespace, err := c.GetNamespaceByName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return namespace
-}
-
-func (c *CommandExecutorKubernetes) MustGetResourceByNames(resourceName string, resourceType string, namespaceName string) (resource Resource) {
-	resource, err := c.GetResourceByNames(resourceName, resourceType, namespaceName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return resource
-}
-
-func (c *CommandExecutorKubernetes) MustListNamespaceNames(verbose bool) (namespaceNames []string) {
-	namespaceNames, err := c.ListNamespaceNames(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return namespaceNames
-}
-
-func (c *CommandExecutorKubernetes) MustListNamespaces(verbose bool) (namespaces []Namespace) {
-	namespaces, err := c.ListNamespaces(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return namespaces
-}
-
-func (c *CommandExecutorKubernetes) MustListResourceNames(options *parameteroptions.ListKubernetesResourcesOptions) (resourceNames []string) {
-	resourceNames, err := c.ListResourceNames(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return resourceNames
-}
-
-func (c *CommandExecutorKubernetes) MustListResources(options *parameteroptions.ListKubernetesResourcesOptions) (resources []Resource) {
-	resources, err := c.ListResources(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return resources
-}
-
-func (c *CommandExecutorKubernetes) MustNamespaceByNameExists(name string, verbose bool) (exists bool) {
-	exists, err := c.NamespaceByNameExists(name, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return exists
-}
-
-func (c *CommandExecutorKubernetes) MustSetCachedContextName(cachedContextName string) {
-	err := c.SetCachedContextName(cachedContextName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorKubernetes) MustSetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) {
-	err := c.SetCommandExecutor(commandExecutor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorKubernetes) MustSetName(name string) {
-	err := c.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorKubernetes) NamespaceByNameExists(name string, verbose bool) (exists bool, err error) {
+func (c *CommandExecutorKubernetes) NamespaceByNameExists(ctx context.Context, name string) (exists bool, err error) {
 	if name == "" {
 		return false, tracederrors.TracedErrorEmptyString("name")
 	}
 
-	namespaces, err := c.ListNamespaceNames(verbose)
+	namespaces, err := c.ListNamespaceNames(ctx)
 	if err != nil {
 		return false, err
 	}
 
 	exists = slices.Contains(namespaces, name)
 
-	if verbose {
-		clusterName, err := c.GetName()
-		if err != nil {
-			return false, err
-		}
+	clusterName, err := c.GetName()
+	if err != nil {
+		return false, err
+	}
 
-		if exists {
-			logging.LogInfof(
-				"Namespace '%s' exists in kubernetes cluster '%s'.",
-				name,
-				clusterName,
-			)
-		} else {
-			logging.LogInfof(
-				"Namespace '%s' does not exist in kubernetes cluster '%s'.",
-				name,
-				clusterName,
-			)
-		}
+	if exists {
+		logging.LogInfoByCtxf(ctx, "Namespace '%s' exists in kubernetes cluster '%s'.", name, clusterName)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Namespace '%s' does not exist in kubernetes cluster '%s'.", name, clusterName)
 	}
 
 	return exists, nil

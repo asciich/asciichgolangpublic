@@ -20,19 +20,17 @@ func TestRole_CreateAndDeleteRole(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				ctx := getCtx()
 
-				const verbose bool = true
 				const namespaceName = "testnamespace"
 				const roleName = "testrole"
 
 				kubernetes := getKubernetesByImplementationName(ctx, tt.implementationName)
-				namespace := kubernetes.MustCreateNamespaceByName(namespaceName, verbose)
+				namespace, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
 
-				mustutils.Must0(namespace.DeleteRoleByName(roleName, verbose))
-				require.False(mustutils.Must(namespace.RoleByNameExists(roleName, verbose)))
+				mustutils.Must0(namespace.DeleteRoleByName(ctx, roleName))
+				require.False(t, mustutils.Must(namespace.RoleByNameExists(ctx, roleName)))
 
 				for i := 0; i < 2; i++ {
 					_, err := namespace.CreateRole(
@@ -42,14 +40,14 @@ func TestRole_CreateAndDeleteRole(t *testing.T) {
 							Resorces: []string{"pod"},
 						},
 					)
-					require.NoError(err)
-					require.True(mustutils.Must(namespace.RoleByNameExists(roleName, verbose)))
+					require.NoError(t, err)
+					require.True(t, mustutils.Must(namespace.RoleByNameExists(ctx, roleName)))
 				}
 
 				for i := 0; i < 2; i++ {
-					err := namespace.DeleteRoleByName(roleName, verbose)
-					require.NoError(err)
-					require.False(mustutils.Must(namespace.RoleByNameExists(roleName, verbose)))
+					err := namespace.DeleteRoleByName(ctx, roleName)
+					require.NoError(t, err)
+					require.False(t, mustutils.Must(namespace.RoleByNameExists(ctx, roleName)))
 				}
 			},
 		)
