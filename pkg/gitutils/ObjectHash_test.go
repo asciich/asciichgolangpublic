@@ -1,4 +1,4 @@
-package git
+package gitutils_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils"
 )
 
 func getCtx() context.Context {
@@ -19,5 +20,5 @@ func Test_GetBlobObjectHashFromString(t *testing.T) {
 	require.NoError(t, err)
 	expected = strings.TrimSpace(expected)
 
-	require.EqualValues(t, expected, GetBlobOjectHashFromString("hello world"))
+	require.EqualValues(t, expected, gitutils.GetBlobOjectHashFromString("hello world"))
 }
