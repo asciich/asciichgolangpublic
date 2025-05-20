@@ -41,30 +41,29 @@ func TestClient_GetRequest_RootPage_PortInUrl(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 				const port int = 9123
 
-				testServer := MustGetTestWebServer(port)
+				testServer, err := GetTestWebServer(port)
+				require.NoError(t, err)
 				defer testServer.Stop(verbose)
 
-				testServer.MustStartInBackground(verbose)
+				err = testServer.StartInBackground(verbose)
+				require.NoError(t, err)
 
 				var client Client = getClientByImplementationName(tt.implementationName)
-				var response Response = client.MustSendRequest(
+				var response Response
+				response, err = client.SendRequest(
 					&RequestOptions{
-						Url:     "http://localhost:" + strconv.Itoa(testServer.MustGetPort()),
+						Url:     "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())),
 						Verbose: verbose,
 						Method:  tt.method,
 					},
 				)
+				require.NoError(t, err)
 
-				require.True(response.MustIsStatusCodeOk())
-				require.Contains(
-					response.MustGetBodyAsString(),
-					"TestWebServer",
-				)
+				require.True(t, mustutils.Must(response.IsStatusCodeOk()))
+				require.Contains(t, mustutils.Must(response.GetBodyAsString()), "TestWebServer")
 			},
 		)
 	}
@@ -86,29 +85,26 @@ func TestClient_GetRequestBodyAsString_RootPage_PortInUrl(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 				const port int = 9123
 
-				testServer := MustGetTestWebServer(port)
+				testServer, err := GetTestWebServer(port)
+				require.NoError(t, err)
 				defer testServer.Stop(verbose)
 
-				testServer.MustStartInBackground(verbose)
+				err = testServer.StartInBackground(verbose)
+				require.NoError(t, err)
 
 				var client Client = getClientByImplementationName(tt.implementationName)
-				responseBody := client.MustSendRequestAndGetBodyAsString(
+				responseBody, err := client.SendRequestAndGetBodyAsString(
 					&RequestOptions{
-						Url:     "http://localhost:" + strconv.Itoa(testServer.MustGetPort()),
+						Url:     "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())),
 						Verbose: verbose,
 						Method:  tt.method,
 					},
 				)
-
-				require.Contains(
-					responseBody,
-					"TestWebServer",
-				)
+				require.NoError(t, err)
+				require.Contains(t, responseBody, "TestWebServer")
 			},
 		)
 	}
@@ -126,15 +122,15 @@ func TestClient_DownloadAsFile_ChecksumMismatch(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 				const port int = 9123
 
-				testServer := MustGetTestWebServer(port)
+				testServer, err := GetTestWebServer(port)
+				require.NoError(t, err)
 				defer testServer.Stop(verbose)
 
-				testServer.MustStartInBackground(verbose)
+				err = testServer.StartInBackground(verbose)
+				require.NoError(t, err)
 
 				tempFile := tempfiles.MustCreateEmptyTemporaryFile(verbose)
 				defer tempFile.MustDelete(verbose)
@@ -142,10 +138,10 @@ func TestClient_DownloadAsFile_ChecksumMismatch(t *testing.T) {
 				const expectedOutput = "hello world\n"
 
 				var client Client = getClientByImplementationName(tt.implementationName)
-				_, err := client.DownloadAsFile(
+				_, err = client.DownloadAsFile(
 					&DownloadAsFileOptions{
 						RequestOptions: &RequestOptions{
-							Url:     "http://localhost:" + strconv.Itoa(testServer.MustGetPort()) + "/hello_world.txt",
+							Url:     "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
 							Verbose: verbose,
 							Method:  tt.method,
 						},
@@ -153,7 +149,7 @@ func TestClient_DownloadAsFile_ChecksumMismatch(t *testing.T) {
 						Sha256Sum:  "a" + checksums.GetSha256SumFromString(expectedOutput),
 					},
 				)
-				require.Error(err)
+				require.Error(t, err)
 			},
 		)
 	}
@@ -171,15 +167,15 @@ func TestClient_DownloadAsFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 				const port int = 9123
 
-				testServer := MustGetTestWebServer(port)
+				testServer, err := GetTestWebServer(port)
+				require.NoError(t, err)
 				defer testServer.Stop(verbose)
 
-				testServer.MustStartInBackground(verbose)
+				err = testServer.StartInBackground(verbose)
+				require.NoError(t, err)
 
 				tempFile := tempfiles.MustCreateEmptyTemporaryFile(verbose)
 				defer tempFile.MustDelete(verbose)
@@ -187,10 +183,10 @@ func TestClient_DownloadAsFile(t *testing.T) {
 				const expectedOutput = "hello world\n"
 
 				var client Client = getClientByImplementationName(tt.implementationName)
-				downloadedFile := client.MustDownloadAsFile(
+				downloadedFile, err := client.DownloadAsFile(
 					&DownloadAsFileOptions{
 						RequestOptions: &RequestOptions{
-							Url:    "http://localhost:" + strconv.Itoa(testServer.MustGetPort()) + "/hello_world.txt",
+							Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
 							Method: tt.method,
 						},
 						OutputPath: tempFile.MustGetPath(),
@@ -198,17 +194,15 @@ func TestClient_DownloadAsFile(t *testing.T) {
 						Verbose:    verbose,
 					},
 				)
+				require.NoError(t, err)
 				defer downloadedFile.MustDelete(verbose)
 
-				require.EqualValues(
-					expectedOutput,
-					downloadedFile.MustReadAsString(),
-				)
+				require.EqualValues(t, expectedOutput, downloadedFile.MustReadAsString())
 
-				downloadedFile = client.MustDownloadAsFile(
+				downloadedFile, err = client.DownloadAsFile(
 					&DownloadAsFileOptions{
 						RequestOptions: &RequestOptions{
-							Url:    "http://localhost:" + strconv.Itoa(testServer.MustGetPort()) + "/hello_world.txt",
+							Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
 							Method: tt.method,
 						},
 						OutputPath: tempFile.MustGetPath(),
@@ -216,10 +210,8 @@ func TestClient_DownloadAsFile(t *testing.T) {
 						Verbose:    verbose,
 					},
 				)
-				require.EqualValues(
-					expectedOutput,
-					downloadedFile.MustReadAsString(),
-				)
+				require.NoError(t, err)
+				require.EqualValues(t, expectedOutput, downloadedFile.MustReadAsString())
 			},
 		)
 	}
@@ -237,32 +229,30 @@ func TestClient_DownloadAsTempraryFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 				const port int = 9123
 
-				testServer := MustGetTestWebServer(port)
+				testServer, err := GetTestWebServer(port)
+				require.NoError(t, err)
 				defer testServer.Stop(verbose)
 
-				testServer.MustStartInBackground(verbose)
+				err = testServer.StartInBackground(verbose)
+				require.NoError(t, err)
 
 				var client Client = getClientByImplementationName(tt.implementationName)
-				downloadedFile := client.MustDownloadAsTemporaryFile(
+				downloadedFile, err := client.DownloadAsTemporaryFile(
 					&DownloadAsFileOptions{
 						RequestOptions: &RequestOptions{
-							Url:     "http://localhost:" + strconv.Itoa(testServer.MustGetPort()) + "/hello_world.txt",
+							Url:     "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
 							Verbose: verbose,
 							Method:  tt.method,
 						},
 					},
 				)
+				require.NoError(t, err)
 				defer downloadedFile.MustDelete(verbose)
 
-				require.Contains(
-					"hello world\n",
-					downloadedFile.MustReadAsString(),
-				)
+				require.Contains(t, "hello world\n", downloadedFile.MustReadAsString())
 			},
 		)
 	}
@@ -280,30 +270,28 @@ func TestClient_GetRequestAndRunYqQuery(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 				const port int = 9123
 
-				testServer := MustGetTestWebServer(port)
+				testServer, err := GetTestWebServer(port)
+				require.NoError(t, err)
 				defer testServer.Stop(verbose)
 
-				testServer.MustStartInBackground(verbose)
+				err = testServer.StartInBackground(verbose)
+				require.NoError(t, err)
 
 				var client Client = getClientByImplementationName(tt.implementationName)
-				output := client.MustSendRequestAndRunYqQueryAgainstBody(
+				output, err := client.SendRequestAndRunYqQueryAgainstBody(
 					&RequestOptions{
-						Url:     "http://localhost:" + strconv.Itoa(testServer.MustGetPort()) + "/example1.yaml",
+						Url:     "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/example1.yaml",
 						Verbose: verbose,
 						Method:  tt.method,
 					},
 					".hello",
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					"world",
-					output,
-				)
+				require.EqualValues(t, "world", output)
 			},
 		)
 	}
@@ -322,7 +310,6 @@ func TestClient_GetRequestUsingTls_insecure(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-				require := require.New(t)
 
 				const verbose bool = true
 				const port int = 9123
@@ -330,19 +317,20 @@ func TestClient_GetRequestUsingTls_insecure(t *testing.T) {
 				testServer := mustutils.Must(GetTlsTestWebServer(ctx, port))
 				defer testServer.Stop(verbose)
 
-				testServer.MustStartInBackground(verbose)
+				err := testServer.StartInBackground(verbose)
+				require.NoError(t, err)
 
 				var client Client = getClientByImplementationName(tt.implementationName)
-				output := client.MustSendRequestAndGetBodyAsString(
+				output, err := client.SendRequestAndGetBodyAsString(
 					&RequestOptions{
-						Url:               "https://localhost:" + strconv.Itoa(testServer.MustGetPort()) + "/hello_world.txt",
+						Url:               "https://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
 						Verbose:           verbose,
 						Method:            tt.method,
 						SkipTLSvalidation: true,
 					},
 				)
-
-				require.Contains(output, "hello world")
+				require.NoError(t, err)
+				require.Contains(t, output, "hello world")
 			},
 		)
 	}

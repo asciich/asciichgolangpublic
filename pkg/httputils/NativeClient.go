@@ -27,15 +27,6 @@ func NewNativeClient() (n *NativeClient) {
 	return new(NativeClient)
 }
 
-func (c *NativeClient) MustSendRequestAndRunYqQueryAgainstBody(requestOptions *RequestOptions, query string) (result string) {
-	result, err := c.SendRequestAndRunYqQueryAgainstBody(requestOptions, query)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return result
-}
-
 func (c *NativeClient) SendRequestAndRunYqQueryAgainstBody(requestOptions *RequestOptions, query string) (result string, err error) {
 	if requestOptions == nil {
 		return "", tracederrors.TracedErrorNil("requestOptions")
@@ -251,40 +242,4 @@ func (n *NativeClient) DownloadAsTemporaryFile(downloadOptions *DownloadAsFileOp
 	toUse.OverwriteExisting = true
 
 	return n.DownloadAsFile(toUse)
-}
-
-func (n *NativeClient) MustDownloadAsFile(downloadOptions *DownloadAsFileOptions) (downloadedFile files.File) {
-	downloadedFile, err := n.DownloadAsFile(downloadOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return downloadedFile
-}
-
-func (n *NativeClient) MustDownloadAsTemporaryFile(downloadOptions *DownloadAsFileOptions) (downloadedFile files.File) {
-	downloadedFile, err := n.DownloadAsTemporaryFile(downloadOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return downloadedFile
-}
-
-func (n *NativeClient) MustSendRequest(requestOptions *RequestOptions) (response Response) {
-	response, err := n.SendRequest(requestOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return response
-}
-
-func (n *NativeClient) MustSendRequestAndGetBodyAsString(requestOptions *RequestOptions) (responseBody string) {
-	responseBody, err := n.SendRequestAndGetBodyAsString(requestOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return responseBody
 }

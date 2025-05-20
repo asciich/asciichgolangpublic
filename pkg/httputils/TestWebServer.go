@@ -83,15 +83,6 @@ func GetTestWebServer(port int) (webServer Server, err error) {
 	return toReturn, nil
 }
 
-func MustGetTestWebServer(port int) (webServer Server) {
-	webServer, err := GetTestWebServer(port)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return webServer
-}
-
 func NewTestWebServer() (t *TestWebServer) {
 	return new(TestWebServer)
 }
@@ -126,84 +117,6 @@ func (t *TestWebServer) GetWebServerWaitGroup() (webServerWaitGroup *sync.WaitGr
 	}
 
 	return t.webServerWaitGroup, nil
-}
-
-func (t *TestWebServer) MustGetMux() (mux *http.ServeMux) {
-	mux, err := t.GetMux()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return mux
-}
-
-func (t *TestWebServer) MustGetPort() (port int) {
-	port, err := t.GetPort()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return port
-}
-
-func (t *TestWebServer) MustGetServer() (server *http.Server) {
-	server, err := t.GetServer()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return server
-}
-
-func (t *TestWebServer) MustGetWebServerWaitGroup() (webServerWaitGroup *sync.WaitGroup) {
-	webServerWaitGroup, err := t.GetWebServerWaitGroup()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return webServerWaitGroup
-}
-
-func (t *TestWebServer) MustSetMux(mux *http.ServeMux) {
-	err := t.SetMux(mux)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TestWebServer) MustSetPort(port int) {
-	err := t.SetPort(port)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TestWebServer) MustSetServer(server *http.Server) {
-	err := t.SetServer(server)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TestWebServer) MustSetWebServerWaitGroup(webServerWaitGroup *sync.WaitGroup) {
-	err := t.SetWebServerWaitGroup(webServerWaitGroup)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TestWebServer) MustStartInBackground(verbose bool) {
-	err := t.StartInBackground(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TestWebServer) MustStop(verbose bool) {
-	err := t.Stop(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (t *TestWebServer) SetMux(mux *http.ServeMux) (err error) {

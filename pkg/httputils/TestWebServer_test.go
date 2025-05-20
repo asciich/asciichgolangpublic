@@ -18,7 +18,8 @@ func Test_TestWebServer_SetAndGetCertificate(t *testing.T) {
 	const port int = 9123
 
 	testServer := NewTestWebServer()
-	testServer.MustSetPort(port)
+	err := testServer.SetPort(port)
+	require.NoError(t, err)
 
 	certAndKey := mustutils.Must(generateCertAndKeyForTestWebserver(getCtx()))
 
