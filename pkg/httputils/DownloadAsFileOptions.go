@@ -1,7 +1,6 @@
 package httputils
 
 import (
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -14,7 +13,7 @@ type DownloadAsFileOptions struct {
 	// If Sha256Sum is set:
 	// - The download will be skipped if OutputPath has already the expected content.
 	// - The download is validated.
-	Sha256Sum         string
+	Sha256Sum string
 }
 
 func NewDownloadAsFileOptions() (d *DownloadAsFileOptions) {
@@ -56,38 +55,6 @@ func (d *DownloadAsFileOptions) GetRequestOptions() (requestOptions *RequestOpti
 func (d *DownloadAsFileOptions) GetVerbose() (verbose bool) {
 
 	return d.Verbose
-}
-
-func (d *DownloadAsFileOptions) MustGetOutputPath() (outputPath string) {
-	outputPath, err := d.GetOutputPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return outputPath
-}
-
-func (d *DownloadAsFileOptions) MustGetRequestOptions() (requestOptions *RequestOptions) {
-	requestOptions, err := d.GetRequestOptions()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return requestOptions
-}
-
-func (d *DownloadAsFileOptions) MustSetOutputPath(outputPath string) {
-	err := d.SetOutputPath(outputPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (d *DownloadAsFileOptions) MustSetRequestOptions(requestOptions *RequestOptions) {
-	err := d.SetRequestOptions(requestOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (d *DownloadAsFileOptions) SetOutputPath(outputPath string) (err error) {

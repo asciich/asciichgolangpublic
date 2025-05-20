@@ -2,7 +2,6 @@ package httputils
 
 import (
 	"github.com/asciich/asciichgolangpublic/fileformats/yamlutils"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -62,56 +61,6 @@ func (g *GenericResponse) IsStatusCodeOk() (isStatusCodeOk bool, err error) {
 	}
 
 	return statusCode == STATUS_CODE_OK, nil
-}
-
-func (g *GenericResponse) MustGetBody() (body []byte) {
-	body, err := g.GetBody()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return body
-}
-
-func (g *GenericResponse) MustGetBodyAsString() (body string) {
-	body, err := g.GetBodyAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return body
-}
-
-func (g *GenericResponse) MustGetStatusCode() (statusCode int) {
-	statusCode, err := g.GetStatusCode()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return statusCode
-}
-
-func (g *GenericResponse) MustIsStatusCodeOk() (isStatusCodeOk bool) {
-	isStatusCodeOk, err := g.IsStatusCodeOk()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isStatusCodeOk
-}
-
-func (g *GenericResponse) MustSetBody(body []byte) {
-	err := g.SetBody(body)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GenericResponse) MustSetStatusCode(statusCode int) {
-	err := g.SetStatusCode(statusCode)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GenericResponse) SetBody(body []byte) (err error) {

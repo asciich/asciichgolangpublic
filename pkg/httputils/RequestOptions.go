@@ -3,7 +3,6 @@ package httputils
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -81,63 +80,6 @@ func (r *RequestOptions) GetVerbose() (verbose bool) {
 
 func (r *RequestOptions) IsMethodSet() (isSet bool) {
 	return r.Method != ""
-}
-
-func (r *RequestOptions) MustGetMethod() (method string) {
-	method, err := r.GetMethod()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return method
-}
-
-func (r *RequestOptions) MustGetMethodOrDefault() (method string) {
-	method, err := r.GetMethodOrDefault()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return method
-}
-
-func (r *RequestOptions) MustGetPort() (port int) {
-	port, err := r.GetPort()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return port
-}
-
-func (r *RequestOptions) MustGetUrl() (url string) {
-	url, err := r.GetUrl()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return url
-}
-
-func (r *RequestOptions) MustSetMethod(method string) {
-	err := r.SetMethod(method)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (r *RequestOptions) MustSetPort(port int) {
-	err := r.SetPort(port)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (r *RequestOptions) MustSetUrl(url string) {
-	err := r.SetUrl(url)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (r *RequestOptions) SetMethod(method string) (err error) {
