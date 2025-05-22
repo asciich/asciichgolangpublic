@@ -7,6 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	"github.com/asciich/asciichgolangpublic/urlsutils"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -703,18 +704,18 @@ func (g *GitlabProject) GetMergeRequests() (mergeRequestes *GitlabProjectMergeRe
 	return mergeRequestes, nil
 }
 
-func (g *GitlabProject) GetNewestSemanticVersion(verbose bool) (newestSemanticVersion *VersionSemanticVersion, err error) {
+func (g *GitlabProject) GetNewestSemanticVersion(verbose bool) (newestSemanticVersion *versionutils.VersionSemanticVersion, err error) {
 	semanticVersions, err := g.GetSemanticVersions(verbose)
 	if err != nil {
 		return nil, err
 	}
 
-	newestVersion, err := Versions().GetLatestVersionFromSlice(semanticVersions)
+	newestVersion, err := versionutils.Versions().GetLatestVersionFromSlice(semanticVersions)
 	if err != nil {
 		return nil, err
 	}
 
-	newestSemanticVersion, ok := newestVersion.(*VersionSemanticVersion)
+	newestSemanticVersion, ok := newestVersion.(*versionutils.VersionSemanticVersion)
 	if !ok {
 		return nil, tracederrors.TracedErrorf(
 			"Unable to get newest semantiv version from '%v'",
@@ -725,7 +726,7 @@ func (g *GitlabProject) GetNewestSemanticVersion(verbose bool) (newestSemanticVe
 	return newestSemanticVersion, nil
 }
 
-func (g *GitlabProject) GetNewestVersion(verbose bool) (newestVersion Version, err error) {
+func (g *GitlabProject) GetNewestVersion(verbose bool) (newestVersion versionutils.Version, err error) {
 	availableVersions, err := g.GetVersions(verbose)
 	if err != nil {
 		return nil, err
@@ -735,7 +736,7 @@ func (g *GitlabProject) GetNewestVersion(verbose bool) (newestVersion Version, e
 		return nil, tracederrors.TracedError("No versionTags returned")
 	}
 
-	newestVersion, err = Versions().GetLatestVersionFromSlice(availableVersions)
+	newestVersion, err = versionutils.Versions().GetLatestVersionFromSlice(availableVersions)
 	if err != nil {
 		return nil, err
 	}
@@ -975,13 +976,13 @@ func (g *GitlabProject) GetRepositoryFiles() (repositoryFiles *GitlabRepositoryF
 	return repositoryFiles, nil
 }
 
-func (g *GitlabProject) GetSemanticVersions(verbose bool) (semanticVersions []Version, err error) {
+func (g *GitlabProject) GetSemanticVersions(verbose bool) (semanticVersions []versionutils.Version, err error) {
 	versions, err := g.GetVersions(verbose)
 	if err != nil {
 		return nil, err
 	}
 
-	semanticVersions = []Version{}
+	semanticVersions = []versionutils.Version{}
 	for _, toAdd := range versions {
 		if toAdd.IsSemanticVersion() {
 			semanticVersions = append(semanticVersions, toAdd)
@@ -1034,13 +1035,13 @@ func (g *GitlabProject) GetVersionTags(verbose bool) (versionTags []*GitlabTag, 
 	return versionTags, nil
 }
 
-func (g *GitlabProject) GetVersions(verbose bool) (versions []Version, err error) {
+func (g *GitlabProject) GetVersions(verbose bool) (versions []versionutils.Version, err error) {
 	versionTags, err := g.GetVersionTags(verbose)
 	if err != nil {
 		return nil, err
 	}
 
-	versions = []Version{}
+	versions = []versionutils.Version{}
 
 	for _, tag := range versionTags {
 		versionName, err := tag.GetName()
@@ -1048,7 +1049,7 @@ func (g *GitlabProject) GetVersions(verbose bool) (versions []Version, err error
 			return nil, err
 		}
 
-		toAdd, err := Versions().GetNewVersionByString(versionName)
+		toAdd, err := versionutils.Versions().GetNewVersionByString(versionName)
 		if err != nil {
 			return nil, err
 		}
@@ -1486,7 +1487,7 @@ func (g *GitlabProject) MustGetNativeProjectsService() (nativeGitlabProject *git
 	return nativeGitlabProject
 }
 
-func (g *GitlabProject) MustGetNewestSemanticVersion(verbose bool) (newestSemanticVersion *VersionSemanticVersion) {
+func (g *GitlabProject) MustGetNewestSemanticVersion(verbose bool) (newestSemanticVersion *versionutils.VersionSemanticVersion) {
 	newestSemanticVersion, err := g.GetNewestSemanticVersion(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1495,7 +1496,7 @@ func (g *GitlabProject) MustGetNewestSemanticVersion(verbose bool) (newestSemant
 	return newestSemanticVersion
 }
 
-func (g *GitlabProject) MustGetNewestVersion(verbose bool) (newestVersion Version) {
+func (g *GitlabProject) MustGetNewestVersion(verbose bool) (newestVersion versionutils.Version) {
 	newestVersion, err := g.GetNewestVersion(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1621,7 +1622,7 @@ func (g *GitlabProject) MustGetRepositoryFiles() (repositoryFiles *GitlabReposit
 	return repositoryFiles
 }
 
-func (g *GitlabProject) MustGetSemanticVersions(verbose bool) (semanticVersions []Version) {
+func (g *GitlabProject) MustGetSemanticVersions(verbose bool) (semanticVersions []versionutils.Version) {
 	semanticVersions, err := g.GetSemanticVersions(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1657,7 +1658,7 @@ func (g *GitlabProject) MustGetVersionTags(verbose bool) (versionTags []*GitlabT
 	return versionTags
 }
 
-func (g *GitlabProject) MustGetVersions(verbose bool) (versions []Version) {
+func (g *GitlabProject) MustGetVersions(verbose bool) (versions []versionutils.Version) {
 	versions, err := g.GetVersions(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

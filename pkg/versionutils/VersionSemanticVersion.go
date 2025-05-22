@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package versionutils
 
 import (
 	"fmt"

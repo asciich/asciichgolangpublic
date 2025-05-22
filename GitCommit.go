@@ -6,6 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -136,7 +137,7 @@ func (g *GitCommit) GetHash() (hash string, err error) {
 	return g.hash, nil
 }
 
-func (g *GitCommit) GetNewestTagVersion(verbose bool) (newestVersion Version, err error) {
+func (g *GitCommit) GetNewestTagVersion(verbose bool) (newestVersion versionutils.Version, err error) {
 	newestVersion, err = g.GetNewestTagVersionOrNilIfUnset(verbose)
 	if err != nil {
 		return nil, err
@@ -164,7 +165,7 @@ func (g *GitCommit) GetNewestTagVersion(verbose bool) (newestVersion Version, er
 	return newestVersion, nil
 }
 
-func (g *GitCommit) GetNewestTagVersionOrNilIfUnset(verbose bool) (newestVersion Version, err error) {
+func (g *GitCommit) GetNewestTagVersionOrNilIfUnset(verbose bool) (newestVersion versionutils.Version, err error) {
 	versions, err := g.ListVersionTagVersions(verbose)
 	if err != nil {
 		return nil, err
@@ -174,7 +175,7 @@ func (g *GitCommit) GetNewestTagVersionOrNilIfUnset(verbose bool) (newestVersion
 		return nil, err
 	}
 
-	return Versions().GetLatestVersionFromSlice(versions)
+	return versionutils.Versions().GetLatestVersionFromSlice(versions)
 }
 
 func (g *GitCommit) GetParentCommits(options *parameteroptions.GitCommitGetParentsOptions) (parentCommit []*GitCommit, err error) {
@@ -294,7 +295,7 @@ func (g *GitCommit) ListVersionTagNames(verbose bool) (tagNames []string, err er
 		tagNames = append(tagNames, toAdd)
 	}
 
-	tagNames, err = Versions().SortStringSlice(tagNames)
+	tagNames, err = versionutils.Versions().SortStringSlice(tagNames)
 	if err != nil {
 		return nil, err
 	}
@@ -302,13 +303,13 @@ func (g *GitCommit) ListVersionTagNames(verbose bool) (tagNames []string, err er
 	return tagNames, nil
 }
 
-func (g *GitCommit) ListVersionTagVersions(verbose bool) (versions []Version, err error) {
+func (g *GitCommit) ListVersionTagVersions(verbose bool) (versions []versionutils.Version, err error) {
 	versionTags, err := g.ListVersionTags(verbose)
 	if err != nil {
 		return nil, err
 	}
 
-	versions = []Version{}
+	versions = []versionutils.Version{}
 	for _, v := range versionTags {
 		toAdd, err := v.GetVersion()
 		if err != nil {
@@ -405,7 +406,7 @@ func (g *GitCommit) MustGetHash() (hash string) {
 	return hash
 }
 
-func (g *GitCommit) MustGetNewestTagVersion(verbose bool) (newestVersion Version) {
+func (g *GitCommit) MustGetNewestTagVersion(verbose bool) (newestVersion versionutils.Version) {
 	newestVersion, err := g.GetNewestTagVersion(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -414,7 +415,7 @@ func (g *GitCommit) MustGetNewestTagVersion(verbose bool) (newestVersion Version
 	return newestVersion
 }
 
-func (g *GitCommit) MustGetNewestTagVersionOrNilIfUnset(verbose bool) (newestVersion Version) {
+func (g *GitCommit) MustGetNewestTagVersionOrNilIfUnset(verbose bool) (newestVersion versionutils.Version) {
 	newestVersion, err := g.GetNewestTagVersionOrNilIfUnset(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -486,7 +487,7 @@ func (g *GitCommit) MustListVersionTagNames(verbose bool) (tagNames []string) {
 	return tagNames
 }
 
-func (g *GitCommit) MustListVersionTagVersions(verbose bool) (versions []Version) {
+func (g *GitCommit) MustListVersionTagVersions(verbose bool) (versions []versionutils.Version) {
 	versions, err := g.ListVersionTagVersions(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

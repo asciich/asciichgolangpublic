@@ -6,6 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -38,7 +39,7 @@ func (d *DependencyGitRepository) GetName() (name string, err error) {
 	return d.GetUrl()
 }
 
-func (d *DependencyGitRepository) GetNewestVersion(authOptions []authenticationoptions.AuthenticationOption, verbose bool) (newestVersion Version, err error) {
+func (d *DependencyGitRepository) GetNewestVersion(authOptions []authenticationoptions.AuthenticationOption, verbose bool) (newestVersion versionutils.Version, err error) {
 	url, err := d.GetUrl()
 	if err != nil {
 		return nil, err
@@ -129,13 +130,13 @@ func (d *DependencyGitRepository) GetSourceFiles() (sourceFiles []files.File, er
 	return d.sourceFiles, nil
 }
 
-func (d *DependencyGitRepository) GetTargetVersion() (targetVersion Version, err error) {
+func (d *DependencyGitRepository) GetTargetVersion() (targetVersion versionutils.Version, err error) {
 	targetVersionString, err := d.GetTargetVersionString()
 	if err != nil {
 		return nil, err
 	}
 
-	targetVersion, err = GetVersionByString(targetVersionString)
+	targetVersion, err = versionutils.GetVersionByString(targetVersionString)
 	if err != nil {
 		return nil, err
 	}
@@ -159,13 +160,13 @@ func (d *DependencyGitRepository) GetUrl() (url string, err error) {
 	return d.url, nil
 }
 
-func (d *DependencyGitRepository) GetVersion() (version Version, err error) {
+func (d *DependencyGitRepository) GetVersion() (version versionutils.Version, err error) {
 	versionString, err := d.GetVersionString()
 	if err != nil {
 		return nil, err
 	}
 
-	version, err = GetVersionByString(versionString)
+	version, err = versionutils.GetVersionByString(versionString)
 	if err != nil {
 		return nil, err
 	}
@@ -252,7 +253,7 @@ func (d *DependencyGitRepository) MustGetName() (name string) {
 	return name
 }
 
-func (d *DependencyGitRepository) MustGetNewestVersion(authOptions []authenticationoptions.AuthenticationOption, verbose bool) (newestVersion Version) {
+func (d *DependencyGitRepository) MustGetNewestVersion(authOptions []authenticationoptions.AuthenticationOption, verbose bool) (newestVersion versionutils.Version) {
 	newestVersion, err := d.GetNewestVersion(authOptions, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -279,7 +280,7 @@ func (d *DependencyGitRepository) MustGetSourceFiles() (sourceFiles []files.File
 	return sourceFiles
 }
 
-func (d *DependencyGitRepository) MustGetTargetVersion() (targeVersion Version) {
+func (d *DependencyGitRepository) MustGetTargetVersion() (targeVersion versionutils.Version) {
 	targeVersion, err := d.GetTargetVersion()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -306,7 +307,7 @@ func (d *DependencyGitRepository) MustGetUrl() (url string) {
 	return url
 }
 
-func (d *DependencyGitRepository) MustGetVersion() (version Version) {
+func (d *DependencyGitRepository) MustGetVersion() (version versionutils.Version) {
 	version, err := d.GetVersion()
 	if err != nil {
 		logging.LogGoErrorFatal(err)

@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
@@ -337,7 +338,7 @@ func (g *GitlabTags) ListVersionTagNames(verbose bool) (tagNames []string, err e
 
 	tagNames = []string{}
 	for _, toAdd := range allTagNames {
-		if Versions().IsVersionString(toAdd) {
+		if versionutils.Versions().IsVersionString(toAdd) {
 			tagNames = append(tagNames, toAdd)
 		}
 	}

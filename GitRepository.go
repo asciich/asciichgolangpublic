@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -151,12 +152,12 @@ type GitRepository interface {
 	CreateAndInit(options *parameteroptions.CreateRepositoryOptions) (err error)
 	EnsureMainReadmeMdExists(verbose bool) (err error)
 	GetCurrentCommitMessage(verbose bool) (currentCommitMessage string, err error)
-	GetCurrentCommitsNewestVersion(verbose bool) (newestVersion Version, err error)
-	GetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose bool) (newestVersion Version, err error)
+	GetCurrentCommitsNewestVersion(verbose bool) (newestVersion versionutils.Version, err error)
+	GetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose bool) (newestVersion versionutils.Version, err error)
 	GetFileByPath(path ...string) (fileInRepo files.File, err error)
-	GetLatestTagVersion(verbose bool) (latestTagVersion Version, err error)
+	GetLatestTagVersion(verbose bool) (latestTagVersion versionutils.Version, err error)
 	GetLatestTagVersionAsString(verbose bool) (latestTagVersion string, err error)
-	GetLatestTagVersionOrNilIfNotFound(verbose bool) (latestTagVersion Version, err error)
+	GetLatestTagVersionOrNilIfNotFound(verbose bool) (latestTagVersion versionutils.Version, err error)
 	GetPathAndHostDescription() (path string, hostDescription string, err error)
 	HasNoUncommittedChanges(verbose bool) (noUncommitedChnages bool, err error)
 	IsGolangApplication(verbose bool) (isGolangApplication bool, err error)
@@ -177,12 +178,12 @@ type GitRepository interface {
 	MustCreateAndInit(options *parameteroptions.CreateRepositoryOptions)
 	MustEnsureMainReadmeMdExists(verbose bool)
 	MustGetCurrentCommitMessage(verbose bool) (currentCommitMessage string)
-	MustGetCurrentCommitsNewestVersion(verbose bool) (newestVersion Version)
-	MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose bool) (newestVersion Version)
+	MustGetCurrentCommitsNewestVersion(verbose bool) (newestVersion versionutils.Version)
+	MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose bool) (newestVersion versionutils.Version)
 	MustGetFileByPath(path ...string) (fileInRepo files.File)
-	MustGetLatestTagVersion(verbose bool) (latestTagVersion Version)
+	MustGetLatestTagVersion(verbose bool) (latestTagVersion versionutils.Version)
 	MustGetLatestTagVersionAsString(verbose bool) (latestTagVersion string)
-	MustGetLatestTagVersionOrNilIfNotFound(verbose bool) (latestTagVersion Version)
+	MustGetLatestTagVersionOrNilIfNotFound(verbose bool) (latestTagVersion versionutils.Version)
 	MustGetPathAndHostDescription() (path string, hostDescription string)
 	MustHasNoUncommittedChanges(verbose bool) (noUncommitedChnages bool)
 	MustIsGolangApplication(verbose bool) (isGolangApplication bool)
