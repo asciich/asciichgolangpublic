@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -104,13 +105,13 @@ func (g *GitRepositoryTag) GetName() (name string, err error) {
 	return g.name, nil
 }
 
-func (g *GitRepositoryTag) GetVersion() (version Version, err error) {
+func (g *GitRepositoryTag) GetVersion() (version versionutils.Version, err error) {
 	name, err := g.GetName()
 	if err != nil {
 		return nil, err
 	}
 
-	version, err = GetVersionByString(name)
+	version, err = versionutils.GetVersionByString(name)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +125,7 @@ func (g *GitRepositoryTag) IsVersionTag() (isVersionTag bool, err error) {
 		return false, err
 	}
 
-	return Versions().IsVersionString(name), nil
+	return versionutils.Versions().IsVersionString(name), nil
 }
 
 func (g *GitRepositoryTag) MustGetGitRepository() (gitRepository GitRepository) {
@@ -154,7 +155,7 @@ func (g *GitRepositoryTag) MustGetName() (name string) {
 	return name
 }
 
-func (g *GitRepositoryTag) MustGetVersion() (version Version) {
+func (g *GitRepositoryTag) MustGetVersion() (version versionutils.Version) {
 	version, err := g.GetVersion()
 	if err != nil {
 		logging.LogGoErrorFatal(err)

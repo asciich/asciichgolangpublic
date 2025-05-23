@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package versionutils
 
 type Version interface {
 	Equals(other Version) (isEqual bool)

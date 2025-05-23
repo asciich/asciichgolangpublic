@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -291,7 +292,7 @@ func (g *GitlabTag) IsVersionTag() (isVersionTag bool, err error) {
 		return false, err
 	}
 
-	return Versions().IsVersionString(tagName), nil
+	return versionutils.Versions().IsVersionString(tagName), nil
 }
 
 func (g *GitlabTag) MustDelete(verbose bool) {
