@@ -1,6 +1,7 @@
 package httputils
 
 import (
+	"context"
 	"crypto/tls"
 	"io"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -27,7 +29,7 @@ func NewNativeClient() (n *NativeClient) {
 	return new(NativeClient)
 }
 
-func (c *NativeClient) SendRequestAndRunYqQueryAgainstBody(requestOptions *RequestOptions, query string) (result string, err error) {
+func (c *NativeClient) SendRequestAndRunYqQueryAgainstBody(ctx context.Context, requestOptions *RequestOptions, query string) (result string, err error) {
 	if requestOptions == nil {
 		return "", tracederrors.TracedErrorNil("requestOptions")
 	}
@@ -36,7 +38,7 @@ func (c *NativeClient) SendRequestAndRunYqQueryAgainstBody(requestOptions *Reque
 		return "", tracederrors.TracedErrorEmptyString("query")
 	}
 
-	response, err := c.SendRequest(requestOptions)
+	response, err := c.SendRequest(ctx, requestOptions)
 	if err != nil {
 		return "", err
 	}
@@ -44,7 +46,7 @@ func (c *NativeClient) SendRequestAndRunYqQueryAgainstBody(requestOptions *Reque
 	return response.RunYqQueryAgainstBody(query)
 }
 
-func (c *NativeClient) SendRequest(requestOptions *RequestOptions) (response Response, err error) {
+func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *RequestOptions) (response Response, err error) {
 	if requestOptions == nil {
 		return nil, tracederrors.TracedErrorNil("requestOptions")
 	}
@@ -93,12 +95,12 @@ func (c *NativeClient) SendRequest(requestOptions *RequestOptions) (response Res
 	return response, err
 }
 
-func (c *NativeClient) SendRequestAndGetBodyAsString(requestOptions *RequestOptions) (responseBody string, err error) {
+func (c *NativeClient) SendRequestAndGetBodyAsString(ctx context.Context, requestOptions *RequestOptions) (responseBody string, err error) {
 	if requestOptions == nil {
 		return "", tracederrors.TracedErrorNil("requestOptions")
 	}
 
-	response, err := c.SendRequest(requestOptions)
+	response, err := c.SendRequest(ctx, requestOptions)
 	if err != nil {
 		return "", err
 	}
@@ -106,7 +108,7 @@ func (c *NativeClient) SendRequestAndGetBodyAsString(requestOptions *RequestOpti
 	return response.GetBodyAsString()
 }
 
-func (n *NativeClient) DownloadAsFile(downloadOptions *DownloadAsFileOptions) (downloadedFile files.File, err error) {
+func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *DownloadAsFileOptions) (downloadedFile files.File, err error) {
 	if downloadOptions == nil {
 		return nil, tracederrors.TracedErrorNil("downloadOptions")
 	}
@@ -155,13 +157,7 @@ func (n *NativeClient) DownloadAsFile(downloadOptions *DownloadAsFileOptions) (d
 			}
 
 			if sha256 == downloadOptions.Sha256Sum {
-				if downloadOptions.Verbose {
-					logging.LogInfof(
-						"File '%s' already exists and matches sha256sum '%s'. Skip download.",
-						outputFilePath,
-						sha256,
-					)
-				}
+				logging.LogInfoByCtxf(ctx, "File '%s' already exists and matches sha256sum '%s'. Skip download.", outputFilePath, sha256)
 
 				return downloadedFile, nil
 			}
@@ -169,16 +165,14 @@ func (n *NativeClient) DownloadAsFile(downloadOptions *DownloadAsFileOptions) (d
 	}
 
 	if downloadOptions.OverwriteExisting {
-		logging.LogInfof("Going to ensure '%s' is absent before download starts", outputFilePath)
-		err = downloadedFile.Delete(requestOptions.Verbose)
+		logging.LogInfoByCtxf(ctx, "Going to ensure '%s' is absent before download starts", outputFilePath)
+		err = downloadedFile.Delete(contextutils.GetVerboseFromContext(ctx))
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if downloadOptions.Verbose {
-		logging.LogInfof("Going to download: '%s' as file '%s'.", url, outputFilePath)
-	}
+	logging.LogInfoByCtxf(ctx, "Going to download: '%s' as file '%s'.", url, outputFilePath)
 
 	outFd, err := os.Create(outputFilePath)
 	if err != nil {
@@ -187,20 +181,12 @@ func (n *NativeClient) DownloadAsFile(downloadOptions *DownloadAsFileOptions) (d
 	defer outFd.Close()
 	outFd.ReadFrom(request.Body)
 
-	if requestOptions.Verbose {
-		logging.LogInfof("Downloaded '%v' as file '%v'.", url, outputFilePath)
-	}
+	logging.LogInfoByCtxf(ctx, "Downloaded '%v' as file '%v'.", url, outputFilePath)
 
 	if downloadOptions.Sha256Sum != "" {
 		expectedSha256 := downloadOptions.Sha256Sum
 
-		if downloadOptions.Verbose {
-			logging.LogInfof(
-				"Going to validate downloaded file '%s' using expected sha256sum %s",
-				outputFilePath,
-				expectedSha256,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Going to validate downloaded file '%s' using expected sha256sum %s", outputFilePath, expectedSha256)
 
 		sha256, err := downloadedFile.GetSha256Sum()
 		if err != nil {
@@ -208,13 +194,7 @@ func (n *NativeClient) DownloadAsFile(downloadOptions *DownloadAsFileOptions) (d
 		}
 
 		if expectedSha256 == sha256 {
-			if downloadOptions.Verbose {
-				logging.LogInfof(
-					"Downloaded file '%s' matches expected sha256sum %s",
-					outputFilePath,
-					expectedSha256,
-				)
-			}
+			logging.LogInfoByCtxf(ctx, "Downloaded file '%s' matches expected sha256sum %s", outputFilePath, expectedSha256)
 		} else {
 			return nil, tracederrors.TracedErrorf(
 				"Downloaded file '%s' has checksum '%s' and is not matching expected '%s'.",
@@ -228,7 +208,7 @@ func (n *NativeClient) DownloadAsFile(downloadOptions *DownloadAsFileOptions) (d
 	return downloadedFile, nil
 }
 
-func (n *NativeClient) DownloadAsTemporaryFile(downloadOptions *DownloadAsFileOptions) (downloadedFile files.File, err error) {
+func (n *NativeClient) DownloadAsTemporaryFile(ctx context.Context, downloadOptions *DownloadAsFileOptions) (downloadedFile files.File, err error) {
 	if downloadOptions == nil {
 		return nil, tracederrors.TracedErrorNil("downloadOptions")
 	}
@@ -241,5 +221,5 @@ func (n *NativeClient) DownloadAsTemporaryFile(downloadOptions *DownloadAsFileOp
 	}
 	toUse.OverwriteExisting = true
 
-	return n.DownloadAsFile(toUse)
+	return n.DownloadAsFile(ctx, toUse)
 }

@@ -1,4 +1,4 @@
-package httputils
+package httputils_test
 
 import (
 	"strconv"
@@ -7,14 +7,16 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/checksums"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
-func getClientByImplementationName(implementationName string) (client Client) {
+func getClientByImplementationName(implementationName string) (client httputils.Client) {
 	if implementationName == "nativeClient" {
-		return NewNativeClient()
+		return httputils.NewNativeClient()
 	}
 
 	logging.LogFatalWithTracef(
@@ -41,23 +43,23 @@ func TestClient_GetRequest_RootPage_PortInUrl(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				const port int = 9123
+				ctx := getCtx()
 
-				testServer, err := GetTestWebServer(port)
+				testServer, err := httputils.GetTestWebServer(port)
 				require.NoError(t, err)
-				defer testServer.Stop(verbose)
+				defer testServer.Stop(ctx)
 
-				err = testServer.StartInBackground(verbose)
+				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client Client = getClientByImplementationName(tt.implementationName)
-				var response Response
+				var client httputils.Client = getClientByImplementationName(tt.implementationName)
+				var response httputils.Response
 				response, err = client.SendRequest(
-					&RequestOptions{
-						Url:     "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())),
-						Verbose: verbose,
-						Method:  tt.method,
+					ctx,
+					&httputils.RequestOptions{
+						Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())),
+						Method: tt.method,
 					},
 				)
 				require.NoError(t, err)
@@ -85,22 +87,22 @@ func TestClient_GetRequestBodyAsString_RootPage_PortInUrl(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
+				ctx := getCtx()
 				const port int = 9123
 
-				testServer, err := GetTestWebServer(port)
+				testServer, err := httputils.GetTestWebServer(port)
 				require.NoError(t, err)
-				defer testServer.Stop(verbose)
+				defer testServer.Stop(ctx)
 
-				err = testServer.StartInBackground(verbose)
+				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client Client = getClientByImplementationName(tt.implementationName)
+				var client httputils.Client = getClientByImplementationName(tt.implementationName)
 				responseBody, err := client.SendRequestAndGetBodyAsString(
-					&RequestOptions{
-						Url:     "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())),
-						Verbose: verbose,
-						Method:  tt.method,
+					ctx,
+					&httputils.RequestOptions{
+						Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())),
+						Method: tt.method,
 					},
 				)
 				require.NoError(t, err)
@@ -122,28 +124,28 @@ func TestClient_DownloadAsFile_ChecksumMismatch(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
+				ctx := getCtx()
 				const port int = 9123
 
-				testServer, err := GetTestWebServer(port)
+				testServer, err := httputils.GetTestWebServer(port)
 				require.NoError(t, err)
-				defer testServer.Stop(verbose)
+				defer testServer.Stop(ctx)
 
-				err = testServer.StartInBackground(verbose)
+				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				tempFile := tempfiles.MustCreateEmptyTemporaryFile(verbose)
-				defer tempFile.MustDelete(verbose)
+				tempFile := tempfiles.MustCreateEmptyTemporaryFile(contextutils.GetVerboseFromContext(ctx))
+				defer tempFile.MustDelete(contextutils.GetVerboseFromContext(ctx))
 
 				const expectedOutput = "hello world\n"
 
-				var client Client = getClientByImplementationName(tt.implementationName)
+				var client httputils.Client = getClientByImplementationName(tt.implementationName)
 				_, err = client.DownloadAsFile(
-					&DownloadAsFileOptions{
-						RequestOptions: &RequestOptions{
-							Url:     "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
-							Verbose: verbose,
-							Method:  tt.method,
+					ctx,
+					&httputils.DownloadAsFileOptions{
+						RequestOptions: &httputils.RequestOptions{
+							Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
+							Method: tt.method,
 						},
 						OutputPath: tempFile.MustGetPath(),
 						Sha256Sum:  "a" + checksums.GetSha256SumFromString(expectedOutput),
@@ -169,12 +171,13 @@ func TestClient_DownloadAsFile(t *testing.T) {
 			func(t *testing.T) {
 				const verbose bool = true
 				const port int = 9123
+				ctx := getCtx()
 
-				testServer, err := GetTestWebServer(port)
+				testServer, err := httputils.GetTestWebServer(port)
 				require.NoError(t, err)
-				defer testServer.Stop(verbose)
+				defer testServer.Stop(ctx)
 
-				err = testServer.StartInBackground(verbose)
+				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
 				tempFile := tempfiles.MustCreateEmptyTemporaryFile(verbose)
@@ -182,16 +185,16 @@ func TestClient_DownloadAsFile(t *testing.T) {
 
 				const expectedOutput = "hello world\n"
 
-				var client Client = getClientByImplementationName(tt.implementationName)
+				var client httputils.Client = getClientByImplementationName(tt.implementationName)
 				downloadedFile, err := client.DownloadAsFile(
-					&DownloadAsFileOptions{
-						RequestOptions: &RequestOptions{
+					ctx,
+					&httputils.DownloadAsFileOptions{
+						RequestOptions: &httputils.RequestOptions{
 							Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
 							Method: tt.method,
 						},
 						OutputPath: tempFile.MustGetPath(),
 						Sha256Sum:  checksums.GetSha256SumFromString(expectedOutput),
-						Verbose:    verbose,
 					},
 				)
 				require.NoError(t, err)
@@ -200,14 +203,14 @@ func TestClient_DownloadAsFile(t *testing.T) {
 				require.EqualValues(t, expectedOutput, downloadedFile.MustReadAsString())
 
 				downloadedFile, err = client.DownloadAsFile(
-					&DownloadAsFileOptions{
-						RequestOptions: &RequestOptions{
+					ctx,
+					&httputils.DownloadAsFileOptions{
+						RequestOptions: &httputils.RequestOptions{
 							Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
 							Method: tt.method,
 						},
 						OutputPath: tempFile.MustGetPath(),
 						Sha256Sum:  checksums.GetSha256SumFromString(expectedOutput),
-						Verbose:    verbose,
 					},
 				)
 				require.NoError(t, err)
@@ -229,28 +232,28 @@ func TestClient_DownloadAsTempraryFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
+				ctx := getCtx()
 				const port int = 9123
 
-				testServer, err := GetTestWebServer(port)
+				testServer, err := httputils.GetTestWebServer(port)
 				require.NoError(t, err)
-				defer testServer.Stop(verbose)
+				defer testServer.Stop(ctx)
 
-				err = testServer.StartInBackground(verbose)
+				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client Client = getClientByImplementationName(tt.implementationName)
+				var client httputils.Client = getClientByImplementationName(tt.implementationName)
 				downloadedFile, err := client.DownloadAsTemporaryFile(
-					&DownloadAsFileOptions{
-						RequestOptions: &RequestOptions{
-							Url:     "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
-							Verbose: verbose,
-							Method:  tt.method,
+					ctx,
+					&httputils.DownloadAsFileOptions{
+						RequestOptions: &httputils.RequestOptions{
+							Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
+							Method: tt.method,
 						},
 					},
 				)
 				require.NoError(t, err)
-				defer downloadedFile.MustDelete(verbose)
+				defer downloadedFile.MustDelete(contextutils.GetVerboseFromContext(ctx))
 
 				require.Contains(t, "hello world\n", downloadedFile.MustReadAsString())
 			},
@@ -270,22 +273,22 @@ func TestClient_GetRequestAndRunYqQuery(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
+				ctx := getCtx()
 				const port int = 9123
 
-				testServer, err := GetTestWebServer(port)
+				testServer, err := httputils.GetTestWebServer(port)
 				require.NoError(t, err)
-				defer testServer.Stop(verbose)
+				defer testServer.Stop(ctx)
 
-				err = testServer.StartInBackground(verbose)
+				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client Client = getClientByImplementationName(tt.implementationName)
+				var client httputils.Client = getClientByImplementationName(tt.implementationName)
 				output, err := client.SendRequestAndRunYqQueryAgainstBody(
-					&RequestOptions{
-						Url:     "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/example1.yaml",
-						Verbose: verbose,
-						Method:  tt.method,
+					ctx,
+					&httputils.RequestOptions{
+						Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/example1.yaml",
+						Method: tt.method,
 					},
 					".hello",
 				)
@@ -310,21 +313,19 @@ func TestClient_GetRequestUsingTls_insecure(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-
-				const verbose bool = true
 				const port int = 9123
 
-				testServer := mustutils.Must(GetTlsTestWebServer(ctx, port))
-				defer testServer.Stop(verbose)
+				testServer := mustutils.Must(httputils.GetTlsTestWebServer(ctx, port))
+				defer testServer.Stop(ctx)
 
-				err := testServer.StartInBackground(verbose)
+				err := testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client Client = getClientByImplementationName(tt.implementationName)
+				var client httputils.Client = getClientByImplementationName(tt.implementationName)
 				output, err := client.SendRequestAndGetBodyAsString(
-					&RequestOptions{
+					ctx,
+					&httputils.RequestOptions{
 						Url:               "https://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
-						Verbose:           verbose,
 						Method:            tt.method,
 						SkipTLSvalidation: true,
 					},

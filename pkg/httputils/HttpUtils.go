@@ -1,23 +1,23 @@
 package httputils
 
 import (
-	"github.com/asciich/asciichgolangpublic/logging"
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-func MustSendRequestAndGetBodyAsString(requestOptions *RequestOptions) (response string) {
-	response, err := SendRequestAndGetBodyAsString(requestOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
+func SendRequest(ctx context.Context, requestOptions *RequestOptions) (Response, error) {
+	if requestOptions == nil {
+		return nil, tracederrors.TracedErrorNil("requestOptions")
 	}
 
-	return response
+	return GetNativeClient().SendRequest(ctx, requestOptions)
 }
 
-func SendRequestAndGetBodyAsString(requestOptions *RequestOptions) (response string, err error) {
+func SendRequestAndGetBodyAsString(ctx context.Context, requestOptions *RequestOptions) (response string, err error) {
 	if requestOptions == nil {
 		return "", tracederrors.TracedErrorNil("requestOptions")
 	}
 
-	return GetNativeClient().SendRequestAndGetBodyAsString(requestOptions)
+	return GetNativeClient().SendRequestAndGetBodyAsString(ctx, requestOptions)
 }

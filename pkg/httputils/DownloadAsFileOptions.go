@@ -8,7 +8,6 @@ type DownloadAsFileOptions struct {
 	RequestOptions    *RequestOptions
 	OutputPath        string
 	OverwriteExisting bool
-	Verbose           bool
 
 	// If Sha256Sum is set:
 	// - The download will be skipped if OutputPath has already the expected content.
@@ -52,11 +51,6 @@ func (d *DownloadAsFileOptions) GetRequestOptions() (requestOptions *RequestOpti
 	return d.RequestOptions, nil
 }
 
-func (d *DownloadAsFileOptions) GetVerbose() (verbose bool) {
-
-	return d.Verbose
-}
-
 func (d *DownloadAsFileOptions) SetOutputPath(outputPath string) (err error) {
 	if outputPath == "" {
 		return tracederrors.TracedErrorf("outputPath is empty string")
@@ -79,8 +73,4 @@ func (d *DownloadAsFileOptions) SetRequestOptions(requestOptions *RequestOptions
 	d.RequestOptions = requestOptions
 
 	return nil
-}
-
-func (d *DownloadAsFileOptions) SetVerbose(verbose bool) {
-	d.Verbose = verbose
 }
