@@ -1,4 +1,4 @@
-package httputils
+package httputils_test
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
 
@@ -17,11 +18,11 @@ func Test_TestWebServer_SetAndGetCertificate(t *testing.T) {
 	ctx := getCtx()
 	const port int = 9123
 
-	testServer := NewTestWebServer()
+	testServer := httputils.NewTestWebServer()
 	err := testServer.SetPort(port)
 	require.NoError(t, err)
 
-	certAndKey := mustutils.Must(generateCertAndKeyForTestWebserver(getCtx()))
+	certAndKey := mustutils.Must(httputils.GenerateCertAndKeyForTestWebserver(getCtx()))
 
 	mustutils.Must0(testServer.SetTlsCertAndKey(ctx, certAndKey))
 

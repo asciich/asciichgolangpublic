@@ -3,9 +3,8 @@ package prometheusutils
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/httputils"
 	"github.com/asciich/asciichgolangpublic/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -52,10 +51,10 @@ func GetParsedMetricPage(ctx context.Context, url string) (metrics *PrometheusPa
 	}
 
 	m, err := httputils.SendRequestAndGetBodyAsString(
+		ctx,
 		&httputils.RequestOptions{
-			Url:     url,
-			Method:  "GET",
-			Verbose: contextutils.GetVerboseFromContext(ctx),
+			Url:    url,
+			Method: "GET",
 		},
 	)
 	if err != nil {

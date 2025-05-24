@@ -24,7 +24,7 @@ type TestWebServer struct {
 	tlsConfig          *tls.Config
 }
 
-func generateCertAndKeyForTestWebserver(ctx context.Context) (certAndKeyPair *x509utils.X509CertKeyPair, err error) {
+func GenerateCertAndKeyForTestWebserver(ctx context.Context) (certAndKeyPair *x509utils.X509CertKeyPair, err error) {
 	return x509utils.CreateSelfSignedCertificate(
 		ctx,
 		&x509utils.X509CreateCertificateOptions{
@@ -45,7 +45,7 @@ func GetTlsTestWebServer(ctx context.Context, port int) (webServer Server, err e
 		return nil, err
 	}
 
-	certAndKey, err := generateCertAndKeyForTestWebserver(ctx)
+	certAndKey, err := GenerateCertAndKeyForTestWebserver(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -159,18 +159,13 @@ func (t *TestWebServer) SetWebServerWaitGroup(webServerWaitGroup *sync.WaitGroup
 	return nil
 }
 
-func (t *TestWebServer) StartInBackground(verbose bool) (err error) {
+func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 	port, err := t.GetPort()
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Start testWebServer in background on port %d started.",
-			port,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Start testWebServer in background on port %d started.", port)
 
 	if t.webServerWaitGroup == nil {
 		t.webServerWaitGroup = new(sync.WaitGroup)
@@ -212,12 +207,7 @@ func (t *TestWebServer) StartInBackground(verbose bool) (err error) {
 		}
 	}()
 
-	if verbose {
-		logging.LogInfof(
-			"Start testWebServer in background on port %d finished.",
-			port,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Start testWebServer in background on port %d finished.", port)
 
 	return nil
 }
@@ -242,17 +232,11 @@ func (t *TestWebServer) SetTlsCertAndKey(ctx context.Context, certAndKey *x509ut
 	return nil
 }
 
-func (t *TestWebServer) Stop(verbose bool) (err error) {
-	if verbose {
-		logging.LogInfo(
-			"Stop TestWebServer started.",
-		)
-	}
+func (t *TestWebServer) Stop(ctx context.Context) (err error) {
+	logging.LogInfoByCtx(ctx, "Stop TestWebServer started.")
 
 	if t.webServerWaitGroup == nil {
-		if verbose {
-			logging.LogInfof("TestWebServer already stopped")
-		}
+		logging.LogInfoByCtxf(ctx, "TestWebServer already stopped")
 		return nil
 	}
 
@@ -271,11 +255,7 @@ func (t *TestWebServer) Stop(verbose bool) (err error) {
 	t.webServerWaitGroup.Wait()
 	t.webServerWaitGroup = nil
 
-	if verbose {
-		logging.LogInfo(
-			"Stop TestWebServer finished.",
-		)
-	}
+	logging.LogInfoByCtx(ctx, "Stop TestWebServer finished.")
 
 	return nil
 }

@@ -19,9 +19,6 @@ type RequestOptions struct {
 
 	// Skip TLS validation
 	SkipTLSvalidation bool
-
-	// Enable verbose output
-	Verbose bool
 }
 
 func NewRequestOptions() (r *RequestOptions) {
@@ -73,11 +70,6 @@ func (r *RequestOptions) GetUrl() (url string, err error) {
 	return r.Url, nil
 }
 
-func (r *RequestOptions) GetVerbose() (verbose bool) {
-
-	return r.Verbose
-}
-
 func (r *RequestOptions) IsMethodSet() (isSet bool) {
 	return r.Method != ""
 }
@@ -114,8 +106,4 @@ func (r *RequestOptions) SetUrl(url string) (err error) {
 	r.Url = url
 
 	return nil
-}
-
-func (r *RequestOptions) SetVerbose(verbose bool) {
-	r.Verbose = verbose
 }
