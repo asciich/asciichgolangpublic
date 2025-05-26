@@ -40,24 +40,6 @@ func GetKubernetesNodeByHostname(hostname string) (kubernetesNodeHost *Kubernete
 	return GetKubernetesNodeByHost(host)
 }
 
-func MustGetKubernetesNodeByHost(host hosts.Host) (kubernetesNodeHost *KubernetesNodeHost) {
-	kubernetesNodeHost, err := GetKubernetesNodeByHost(host)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return kubernetesNodeHost
-}
-
-func MustGetKubernetesNodeByHostname(hostname string) (kubernetesNodeHost *KubernetesNodeHost) {
-	kubernetesNodeHost, err := GetKubernetesNodeByHostname(hostname)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return kubernetesNodeHost
-}
-
 func NewKubernetesNodeHost() (kubernetesNodeHost *KubernetesNodeHost) {
 	kubernetesNodeHost = new(KubernetesNodeHost)
 	return kubernetesNodeHost
@@ -123,22 +105,4 @@ func (k *KubernetesNodeHost) IsKubernetesNode(verbose bool) (isKubernetesNode bo
 	}
 
 	return isKubernetesNode, nil
-}
-
-func (k *KubernetesNodeHost) MustCheckIsKubernetesNode(verbose bool) (isKubernetesNode bool) {
-	isKubernetesNode, err := k.CheckIsKubernetesNode(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isKubernetesNode
-}
-
-func (k *KubernetesNodeHost) MustIsKubernetesNode(verbose bool) (isKubernetesNode bool) {
-	isKubernetesNode, err := k.IsKubernetesNode(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isKubernetesNode
 }

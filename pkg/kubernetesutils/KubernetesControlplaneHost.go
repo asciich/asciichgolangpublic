@@ -40,24 +40,6 @@ func GetKubernetesControlplaneByHostname(hostname string) (kubernetesControlplan
 	return GetKubernetesControlplaneByHost(host)
 }
 
-func MustGetKubernetesControlplaneByHost(host hosts.Host) (kubernetesControlplaneHost *KubernetesControlplaneHost) {
-	kubernetesControlplaneHost, err := GetKubernetesControlplaneByHost(host)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return kubernetesControlplaneHost
-}
-
-func MustGetKubernetesControlplaneByHostname(hostname string) (kubernetesControlplaneHost *KubernetesControlplaneHost) {
-	kubernetesControlplaneHost, err := GetKubernetesControlplaneByHostname(hostname)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return kubernetesControlplaneHost
-}
-
 func NewKubernetesControlplaneHost() (kubernetesControlplaneHost *KubernetesControlplaneHost) {
 	kubernetesControlplaneHost = new(KubernetesControlplaneHost)
 	return kubernetesControlplaneHost
@@ -180,40 +162,4 @@ func (k *KubernetesControlplaneHost) IsKubernetesControlplane(verbose bool) (isK
 	}
 
 	return isKubernetesControlplane, nil
-}
-
-func (k *KubernetesControlplaneHost) MustCheckIsKubernetesControlplane(verbose bool) (isKubernetesControlplane bool) {
-	isKubernetesControlplane, err := k.CheckIsKubernetesControlplane(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isKubernetesControlplane
-}
-
-func (k *KubernetesControlplaneHost) MustGetJoinCommandAsString(verbose bool) (joinCommand string) {
-	joinCommand, err := k.GetJoinCommandAsString(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return joinCommand
-}
-
-func (k *KubernetesControlplaneHost) MustGetJoinCommandAsStringSlice(verbose bool) (joinCommand []string) {
-	joinCommand, err := k.GetJoinCommandAsStringSlice(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return joinCommand
-}
-
-func (k *KubernetesControlplaneHost) MustIsKubernetesControlplane(verbose bool) (isKubernetesControlplane bool) {
-	isKubernetesControlplane, err := k.IsKubernetesControlplane(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isKubernetesControlplane
 }
