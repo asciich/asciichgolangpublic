@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -237,8 +238,6 @@ func TestGitCommit_GetNewestTagVersion(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
@@ -254,10 +253,7 @@ func TestGitCommit_GetNewestTagVersion(t *testing.T) {
 
 				currentCommit := repo.MustGetCurrentCommit(verbose)
 
-				require.EqualValues(
-					[]GitTag{},
-					currentCommit.MustListTags(verbose),
-				)
+				require.EqualValues(t, []GitTag{}, currentCommit.MustListTags(verbose))
 
 				currentCommit.MustCreateTag(
 					&GitRepositoryCreateTagOptions{
@@ -287,10 +283,7 @@ func TestGitCommit_GetNewestTagVersion(t *testing.T) {
 					},
 				)
 
-				require.EqualValues(
-					"v1.0.0",
-					currentCommit.MustGetNewestTagVersion(verbose).MustGetAsString(),
-				)
+				require.EqualValues(t, "v1.0.0", mustutils.Must(currentCommit.MustGetNewestTagVersion(verbose).GetAsString()))
 			},
 		)
 	}
@@ -308,8 +301,6 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
@@ -325,13 +316,8 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 
 				currentCommit := repo.MustGetCurrentCommit(verbose)
 
-				require.EqualValues(
-					[]GitTag{},
-					currentCommit.MustListTags(verbose),
-				)
-				require.Nil(
-					currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose),
-				)
+				require.EqualValues(t, []GitTag{}, currentCommit.MustListTags(verbose))
+				require.Nil(t, currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose))
 
 				currentCommit.MustCreateTag(
 					&GitRepositoryCreateTagOptions{
@@ -340,9 +326,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 					},
 				)
 
-				require.Nil(
-					currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose),
-				)
+				require.Nil(t, currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose))
 
 				currentCommit.MustCreateTag(
 					&GitRepositoryCreateTagOptions{
@@ -351,10 +335,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 					},
 				)
 
-				require.EqualValues(
-					"v1.0.0",
-					currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).MustGetAsString(),
-				)
+				require.EqualValues(t, "v1.0.0", mustutils.Must(currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).GetAsString()))
 
 				currentCommit.MustCreateTag(
 					&GitRepositoryCreateTagOptions{
@@ -363,10 +344,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 					},
 				)
 
-				require.EqualValues(
-					"v1.0.0",
-					currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).MustGetAsString(),
-				)
+				require.EqualValues(t, "v1.0.0", mustutils.Must(currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).GetAsString()))
 
 				currentCommit.MustCreateTag(
 					&GitRepositoryCreateTagOptions{
@@ -375,10 +353,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 					},
 				)
 
-				require.EqualValues(
-					"v1.0.0",
-					currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).MustGetAsString(),
-				)
+				require.EqualValues(t, "v1.0.0", mustutils.Must(currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).GetAsString()))
 			},
 		)
 	}

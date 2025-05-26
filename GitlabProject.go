@@ -704,18 +704,18 @@ func (g *GitlabProject) GetMergeRequests() (mergeRequestes *GitlabProjectMergeRe
 	return mergeRequestes, nil
 }
 
-func (g *GitlabProject) GetNewestSemanticVersion(verbose bool) (newestSemanticVersion *versionutils.VersionSemanticVersion, err error) {
+func (g *GitlabProject) GetNewestSemanticVersion(verbose bool) (newestSemanticVersion *versionutils.SemanticVersion, err error) {
 	semanticVersions, err := g.GetSemanticVersions(verbose)
 	if err != nil {
 		return nil, err
 	}
 
-	newestVersion, err := versionutils.Versions().GetLatestVersionFromSlice(semanticVersions)
+	newestVersion, err := versionutils.GetLatestVersionFromSlice(semanticVersions)
 	if err != nil {
 		return nil, err
 	}
 
-	newestSemanticVersion, ok := newestVersion.(*versionutils.VersionSemanticVersion)
+	newestSemanticVersion, ok := newestVersion.(*versionutils.SemanticVersion)
 	if !ok {
 		return nil, tracederrors.TracedErrorf(
 			"Unable to get newest semantiv version from '%v'",
@@ -736,7 +736,7 @@ func (g *GitlabProject) GetNewestVersion(verbose bool) (newestVersion versionuti
 		return nil, tracederrors.TracedError("No versionTags returned")
 	}
 
-	newestVersion, err = versionutils.Versions().GetLatestVersionFromSlice(availableVersions)
+	newestVersion, err = versionutils.GetLatestVersionFromSlice(availableVersions)
 	if err != nil {
 		return nil, err
 	}
@@ -1049,7 +1049,7 @@ func (g *GitlabProject) GetVersions(verbose bool) (versions []versionutils.Versi
 			return nil, err
 		}
 
-		toAdd, err := versionutils.Versions().GetNewVersionByString(versionName)
+		toAdd, err := versionutils.ReadFromString(versionName)
 		if err != nil {
 			return nil, err
 		}
@@ -1487,7 +1487,7 @@ func (g *GitlabProject) MustGetNativeProjectsService() (nativeGitlabProject *git
 	return nativeGitlabProject
 }
 
-func (g *GitlabProject) MustGetNewestSemanticVersion(verbose bool) (newestSemanticVersion *versionutils.VersionSemanticVersion) {
+func (g *GitlabProject) MustGetNewestSemanticVersion(verbose bool) (newestSemanticVersion *versionutils.SemanticVersion) {
 	newestSemanticVersion, err := g.GetNewestSemanticVersion(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

@@ -338,7 +338,7 @@ func (g *GitlabTags) ListVersionTagNames(verbose bool) (tagNames []string, err e
 
 	tagNames = []string{}
 	for _, toAdd := range allTagNames {
-		if versionutils.Versions().IsVersionString(toAdd) {
+		if versionutils.IsVersionString(toAdd) {
 			tagNames = append(tagNames, toAdd)
 		}
 	}
