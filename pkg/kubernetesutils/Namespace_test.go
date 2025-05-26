@@ -22,7 +22,7 @@ func getKubernetesByImplementationName(ctx context.Context, implementationName s
 		// Directly call kind binary to avoid cyclic import...
 		commandexecutor.Bash().RunOneLiner(ctx, "kind create cluster -n kind || true")
 
-		return kubernetesutils.MustGetLocalCommandExecutorKubernetesByName("kind-kind")
+		return mustutils.Must(kubernetesutils.GetLocalCommandExecutorKubernetesByName("kind-kind"))
 	}
 
 	logging.LogFatalWithTracef(

@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/files"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -23,7 +24,8 @@ func Test_GetUserEntryByUserName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				kubeConfig := MustLoadFromFilePath(tt.path, true)
+				kubeConfig, err := LoadFromFilePath(tt.path, true)
+				require.NoError(t, err)
 
 				entry, err := kubeConfig.GetUserEntryByName(tt.userName)
 				require.NoError(t, err)
@@ -33,7 +35,9 @@ func Test_GetUserEntryByUserName(t *testing.T) {
 	}
 
 	t.Run("Unknown user name", func(t *testing.T) {
-		kubeConfig := MustLoadFromFilePath("./testdata/cluster-c.yaml", true)
+		kubeConfig, err := LoadFromFilePath("./testdata/cluster-c.yaml", true)
+		require.NoError(t, err)
+
 		entry, err := kubeConfig.GetUserEntryByName("this-user-does-not-exist")
 		require.Error(t, err)
 		require.Nil(t, entry)
@@ -56,7 +60,8 @@ func Test_GetUserNameByContextName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				kubeConfig := MustLoadFromFilePath(tt.path, true)
+				kubeConfig, err := LoadFromFilePath(tt.path, true)
+				require.NoError(t, err)
 
 				userName, err := kubeConfig.GetUserNameByContextName(tt.contextName)
 				require.NoError(t, err)
@@ -66,7 +71,9 @@ func Test_GetUserNameByContextName(t *testing.T) {
 	}
 
 	t.Run("Unknown context name", func(t *testing.T) {
-		kubeConfig := MustLoadFromFilePath("./testdata/cluster-c.yaml", true)
+		kubeConfig, err := LoadFromFilePath("./testdata/cluster-c.yaml", true)
+		require.NoError(t, err)
+
 		entry, err := kubeConfig.GetUserNameByContextName("this-context-does-not-exist")
 		require.Error(t, err)
 		require.EqualValues(t, entry, "")
@@ -89,18 +96,19 @@ func TestKubeConfig_LoadFromPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				kubeConfig := MustLoadFromFilePath(tt.path, true)
+				kubeConfig, err := LoadFromFilePath(tt.path, true)
+				require.NoError(t, err)
 
 				require.EqualValues(
 					t,
 					[]string{tt.expectedClusterName},
-					kubeConfig.MustGetClusterNames(),
+					mustutils.Must(kubeConfig.GetClusterNames()),
 				)
 
 				require.EqualValues(
 					t,
 					tt.expectedServerNames,
-					kubeConfig.MustGetServerNames(),
+					mustutils.Must(kubeConfig.GetServerNames()),
 				)
 			},
 		)
@@ -126,9 +134,11 @@ func TestKubeConfig_IsLoadableByKubectl(t *testing.T) {
 				require.NoError(t, err)
 				require.True(t, isLoadable)
 
-				kubeConfig := MustLoadFromFilePath(tt.path, verbose)
+				kubeConfig, err := LoadFromFilePath(tt.path, verbose)
+				require.NoError(t, err)
 
-				tempFilePath := kubeConfig.MustWriteToTemporaryFileAndGetPath(verbose)
+				tempFilePath, err := kubeConfig.WriteToTemporaryFileAndGetPath(verbose)
+				require.NoError(t, err)
 				defer files.MustDeleteFileByPath(tempFilePath, verbose)
 
 				isLoadable, err = IsFilePathLoadableByKubectl(tt.path, verbose)
@@ -156,22 +166,16 @@ func TestKubeConfig_CheckContextsUsingKubectl(t *testing.T) {
 			func(t *testing.T) {
 				const verbose bool = true
 
-				require.EqualValues(
-					t,
-					tt.expectedContextNames,
-					MustListContextNamesUsingKubectl(tt.path, verbose),
-				)
+				require.EqualValues(t, tt.expectedContextNames, mustutils.Must(ListContextNamesUsingKubectl(tt.path, verbose)))
 
-				kubeConfig := MustLoadFromFilePath(tt.path, verbose)
+				kubeConfig, err := LoadFromFilePath(tt.path, verbose)
+				require.NoError(t, err)
 
-				tempFilePath := kubeConfig.MustWriteToTemporaryFileAndGetPath(verbose)
+				tempFilePath, err := kubeConfig.WriteToTemporaryFileAndGetPath(verbose)
+				require.NoError(t, err)
 				defer files.MustDeleteFileByPath(tempFilePath, verbose)
 
-				require.EqualValues(
-					t,
-					tt.expectedContextNames,
-					MustListContextNamesUsingKubectl(tempFilePath, verbose),
-				)
+				require.EqualValues(t, tt.expectedContextNames, mustutils.Must(ListContextNamesUsingKubectl(tempFilePath, verbose)))
 
 			},
 		)
@@ -198,25 +202,23 @@ func TestKubeConfig_MergeTwoConfigs(t *testing.T) {
 			func(t *testing.T) {
 				const verbose = true
 
-				kubeConfig1 := MustLoadFromFilePath(tt.path1, true)
-				kubeConfig2 := MustLoadFromFilePath(tt.path2, true)
+				kubeConfig1, err := LoadFromFilePath(tt.path1, true)
+				require.NoError(t, err)
 
-				merged := MustMergeConfig(kubeConfig1, kubeConfig2)
+				kubeConfig2, err := LoadFromFilePath(tt.path2, true)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					t,
-					tt.expectedNames,
-					merged.MustGetClusterNames(),
-				)
+				merged, err := MergeConfig(kubeConfig1, kubeConfig2)
+				require.NoError(t, err)
 
-				tempFilePath := merged.MustWriteToTemporaryFileAndGetPath(verbose)
+				require.EqualValues(t, tt.expectedNames, mustutils.Must(merged.GetClusterNames()))
+
+				tempFilePath, err := merged.WriteToTemporaryFileAndGetPath(verbose)
+				require.NoError(t, err)
+
 				defer files.MustDeleteFileByPath(tempFilePath, verbose)
 
-				require.EqualValues(
-					t,
-					tt.expectedNames,
-					MustListContextNamesUsingKubectl(tempFilePath, verbose),
-				)
+				require.EqualValues(t, tt.expectedNames, mustutils.Must(ListContextNamesUsingKubectl(tempFilePath, verbose)))
 			},
 		)
 	}
@@ -225,31 +227,36 @@ func TestKubeConfig_MergeTwoConfigs(t *testing.T) {
 func TestKubeConfig_MergeThreeConfigs(t *testing.T) {
 	const verbose = true
 
-	kubeConfig1 := MustLoadFromFilePath("./testdata/cluster-a.yaml", true)
-	kubeConfig2 := MustLoadFromFilePath("./testdata/cluster-b.yaml", true)
-	kubeConfig3 := MustLoadFromFilePath("./testdata/cluster-c.yaml", true)
+	kubeConfig1, err := LoadFromFilePath("./testdata/cluster-a.yaml", true)
+	require.NoError(t, err)
 
-	merged1 := MustMergeConfig(kubeConfig2, kubeConfig3)
+	kubeConfig2, err := LoadFromFilePath("./testdata/cluster-b.yaml", true)
+	require.NoError(t, err)
 
-	require.EqualValues(
-		t,
-		[]string{"kind-cluster-b", "kind-cluster-c"},
-		merged1.MustGetClusterNames(),
-	)
+	kubeConfig3, err := LoadFromFilePath("./testdata/cluster-c.yaml", true)
+	require.NoError(t, err)
 
-	merged2 := MustMergeConfig(merged1, kubeConfig2, kubeConfig3, kubeConfig1)
+	merged1, err := MergeConfig(kubeConfig2, kubeConfig3)
+	require.NoError(t, err)
+
+	require.EqualValues(t, []string{"kind-cluster-b", "kind-cluster-c"}, mustutils.Must(merged1.GetClusterNames()))
+
+	merged2, err := MergeConfig(merged1, kubeConfig2, kubeConfig3, kubeConfig1)
+	require.NoError(t, err)
+
 	require.EqualValues(
 		t,
 		[]string{"kind-cluster-a", "kind-cluster-b", "kind-cluster-c"},
-		merged2.MustGetClusterNames(),
+		mustutils.Must(merged2.GetClusterNames()),
 	)
 
-	tempFilePath := merged2.MustWriteToTemporaryFileAndGetPath(verbose)
+	tempFilePath, err := merged2.WriteToTemporaryFileAndGetPath(verbose)
+	require.NoError(t, err)
 	defer files.MustDeleteFileByPath(tempFilePath, verbose)
 
 	require.EqualValues(
 		t,
 		[]string{"kind-cluster-a", "kind-cluster-b", "kind-cluster-c"},
-		MustListContextNamesUsingKubectl(tempFilePath, verbose),
+		mustutils.Must(ListContextNamesUsingKubectl(tempFilePath, verbose)),
 	)
 }

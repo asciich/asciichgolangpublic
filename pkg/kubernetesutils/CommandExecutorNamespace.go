@@ -42,7 +42,7 @@ func (c *CommandExecutorNamespace) Create(ctx context.Context) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorNamespace) CreateRole(createOptions *CreateRoleOptions) (createdRole Role, err error) {
+func (c *CommandExecutorNamespace) CreateRole(ctx context.Context, createOptions *CreateRoleOptions) (createdRole Role, err error) {
 	if createOptions == nil {
 		return nil, tracederrors.TracedErrorNil("createOptions")
 	}
@@ -62,12 +62,12 @@ func (c *CommandExecutorNamespace) CreateRole(createOptions *CreateRoleOptions) 
 		return nil, err
 	}
 
-	context, err := c.GetCachedKubectlContext(contextutils.GetVerbosityContextByBool(createOptions.Verbose))
+	context, err := c.GetCachedKubectlContext(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	exists, err := c.RoleByNameExists(contextutils.GetVerbosityContextByBool(createOptions.Verbose), roleName)
+	exists, err := c.RoleByNameExists(ctx, roleName)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (c *CommandExecutorNamespace) CreateRole(createOptions *CreateRoleOptions) 
 		}
 
 		_, err = c.RunCommand(
-			contextutils.GetVerbosityContextByBool(createOptions.Verbose),
+			ctx,
 			&parameteroptions.RunCommandOptions{
 				Command: command,
 			},

@@ -110,16 +110,16 @@ func Test_unmarshalNginxDeplyoments(t *testing.T) {
 
 func TestSortResourcesYaml(t *testing.T) {
 	t.Run("empty string", func(t *testing.T) {
-		require.EqualValues(
-			t,
-			"\n",
-			kubernetesutils.MustSortResourcesYaml(""),
-		)
+		sorted, err := kubernetesutils.SortResourcesYaml("")
+		require.NoError(t, err)
+
+		require.EqualValues(t, "\n", sorted)
 	})
 
 	t.Run("single deployment", func(t *testing.T) {
 		exampleDeployment := getNginxDeployment("example", "")
-		sorted := kubernetesutils.MustSortResourcesYaml(exampleDeployment)
+		sorted, err := kubernetesutils.SortResourcesYaml(exampleDeployment)
+		require.NoError(t, err)
 
 		require.EqualValues(t, exampleDeployment, sorted)
 	})
@@ -128,7 +128,8 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment := getNginxDeployment("example", "")
 		exampleDeployment1 := getNginxDeployment("example1", "")
 
-		sorted := kubernetesutils.MustSortResourcesYaml(exampleDeployment + "\n---\n" + exampleDeployment1)
+		sorted, err := kubernetesutils.SortResourcesYaml(exampleDeployment + "\n---\n" + exampleDeployment1)
+		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
 
@@ -139,7 +140,8 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment := getNginxDeployment("a", "")
 		exampleDeployment1 := getNginxDeployment("b", "")
 
-		sorted := kubernetesutils.MustSortResourcesYaml(exampleDeployment + "\n---\n" + exampleDeployment1)
+		sorted, err := kubernetesutils.SortResourcesYaml(exampleDeployment + "\n---\n" + exampleDeployment1)
+		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
 
@@ -150,7 +152,8 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment := getNginxDeployment("example", "")
 		exampleDeployment1 := getNginxDeployment("example1", "")
 
-		sorted := kubernetesutils.MustSortResourcesYaml(exampleDeployment1 + "\n---\n" + exampleDeployment)
+		sorted, err := kubernetesutils.SortResourcesYaml(exampleDeployment1 + "\n---\n" + exampleDeployment)
+		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
 
@@ -161,7 +164,8 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment := getNginxDeployment("a", "")
 		exampleDeployment1 := getNginxDeployment("b", "")
 
-		sorted := kubernetesutils.MustSortResourcesYaml(exampleDeployment1 + "\n---\n" + exampleDeployment)
+		sorted, err := kubernetesutils.SortResourcesYaml(exampleDeployment1 + "\n---\n" + exampleDeployment)
+		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
 
@@ -173,7 +177,8 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment1 := getNginxDeployment("example", "")
 		exampleDeployment2 := getNginxDeployment("example", "aaaa")
 
-		sorted := kubernetesutils.MustSortResourcesYaml(exampleDeployment + "\n---\n" + exampleDeployment1 + "\n---\n" + exampleDeployment2)
+		sorted, err := kubernetesutils.SortResourcesYaml(exampleDeployment + "\n---\n" + exampleDeployment1 + "\n---\n" + exampleDeployment2)
+		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
 
@@ -188,7 +193,8 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment := getNginxDeployment("example", "namespace")
 		exampleReplicaSet := getReplicaSet("example", "namespace")
 
-		sorted := kubernetesutils.MustSortResourcesYaml(exampleDeployment + "\n---\n" + exampleReplicaSet)
+		sorted, err := kubernetesutils.SortResourcesYaml(exampleDeployment + "\n---\n" + exampleReplicaSet)
+		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
 
@@ -203,7 +209,8 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment := getNginxDeployment("example", "namespace")
 		exampleReplicaSet := getReplicaSet("example", "namespace")
 
-		sorted := kubernetesutils.MustSortResourcesYaml(exampleReplicaSet + "\n---\n" + exampleDeployment)
+		sorted, err := kubernetesutils.SortResourcesYaml(exampleReplicaSet + "\n---\n" + exampleDeployment)
+		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
 
@@ -218,7 +225,8 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment := getNginxDeployment("example", "namespace")
 		exampleReplicaSet := getReplicaSet("example", "")
 
-		sorted := kubernetesutils.MustSortResourcesYaml(exampleReplicaSet + "\n---\n" + exampleDeployment)
+		sorted, err := kubernetesutils.SortResourcesYaml(exampleReplicaSet + "\n---\n" + exampleDeployment)
+		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
 
@@ -235,7 +243,8 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment2 := getNginxDeployment("example", "aaaa")
 		exampleReplicaSet := getReplicaSet("example", "aaaa")
 
-		sorted := kubernetesutils.MustSortResourcesYaml(exampleDeployment + "\n---\n" + exampleDeployment1 + "\n---\n" + exampleDeployment2 + "\n---\n" + exampleReplicaSet)
+		sorted, err := kubernetesutils.SortResourcesYaml(exampleDeployment + "\n---\n" + exampleDeployment1 + "\n---\n" + exampleDeployment2 + "\n---\n" + exampleReplicaSet)
+		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
 

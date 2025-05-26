@@ -6,7 +6,6 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/fileformats/yamlutils"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	"gopkg.in/yaml.v3"
 )
@@ -167,14 +166,4 @@ func SortResourcesYaml(resourcesYaml string) (sortedResourcesYaml string, err er
 	}
 
 	return sortedResourcesYaml, nil
-}
-
-// Same as SortResourcesYaml but panics on any error.
-func MustSortResourcesYaml(resourcesYaml string) (sortedResourcesYaml string) {
-	sortedResourcesYaml, err := SortResourcesYaml(resourcesYaml)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return sortedResourcesYaml
 }

@@ -1,7 +1,6 @@
 package kubernetesutils
 
 import (
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -25,38 +24,6 @@ func (c *CommandExecutorRole) GetName() (name string, err error) {
 func (c *CommandExecutorRole) GetNamespace() (namespace Namespace, err error) {
 
 	return c.namespace, nil
-}
-
-func (c *CommandExecutorRole) MustGetName() (name string) {
-	name, err := c.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (c *CommandExecutorRole) MustGetNamespace() (namespace Namespace) {
-	namespace, err := c.GetNamespace()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return namespace
-}
-
-func (c *CommandExecutorRole) MustSetName(name string) {
-	err := c.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorRole) MustSetNamespace(namespace Namespace) {
-	err := c.SetNamespace(namespace)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (c *CommandExecutorRole) SetName(name string) (err error) {

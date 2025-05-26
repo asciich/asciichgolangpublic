@@ -1,7 +1,6 @@
 package kubernetesutils
 
 import (
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -28,38 +27,6 @@ func (k *KubectlContext) GetName() (name string, err error) {
 	}
 
 	return k.name, nil
-}
-
-func (k *KubectlContext) MustGetCluster() (cluster string) {
-	cluster, err := k.GetCluster()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return cluster
-}
-
-func (k *KubectlContext) MustGetName() (name string) {
-	name, err := k.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (k *KubectlContext) MustSetCluster(cluster string) {
-	err := k.SetCluster(cluster)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (k *KubectlContext) MustSetName(name string) {
-	err := k.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (k *KubectlContext) SetCluster(cluster string) (err error) {

@@ -32,15 +32,6 @@ type KubeConfig struct {
 	Users      []KubeConfigUser    `yaml:"users"`
 }
 
-func MustLoadFromFilePath(path string, verbose bool) (config *KubeConfig) {
-	config, err := LoadFromFilePath(path, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return config
-}
-
 func LoadFromFilePath(path string, verbose bool) (config *KubeConfig, err error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString("path")
@@ -101,24 +92,6 @@ func (k *KubeConfig) GetUserNameByContextName(contextName string) (userName stri
 	return userName, nil
 }
 
-func (k *KubeConfig) MustGetServerNames() (serverNames []string) {
-	serverNames, err := k.GetServerNames()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return serverNames
-}
-
-func (k *KubeConfig) MustGetClusterNames() (clusterNames []string) {
-	clusterNames, err := k.GetClusterNames()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return clusterNames
-}
-
 func (k *KubeConfig) GetClusterNames() (clusterNames []string, err error) {
 	for _, entry := range k.Clusters {
 		toAdd := entry.Name
@@ -155,15 +128,6 @@ func (k *KubeConfig) GetServerNames() (serverNames []string, err error) {
 	}
 
 	return serverNames, nil
-}
-
-func MustMergeConfig(configs ...*KubeConfig) (merged *KubeConfig) {
-	merged, err := MergeConfig(configs...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return merged
 }
 
 func MergeConfig(configs ...*KubeConfig) (merged *KubeConfig, err error) {
@@ -417,15 +381,6 @@ func IsFilePathLoadableByKubectl(path string, verbose bool) (isLoadable bool, er
 	return isLoadable, nil
 }
 
-func (k *KubeConfig) MustWriteToTemporaryFileAndGetPath(verbose bool) (tempFilePath string) {
-	tempFilePath, err := k.WriteToTemporaryFileAndGetPath(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return tempFilePath
-}
-
 func (k *KubeConfig) WriteToTemporaryFileAndGetPath(verbose bool) (tempFilePath string, err error) {
 	tempFilePath, err = tempfiles.CreateEmptyTemporaryFileAndGetPath(verbose)
 	if err != nil {
@@ -490,15 +445,6 @@ func (k *KubeConfig) WriteToFile(outFile files.File, verbose bool) (err error) {
 	}
 
 	return nil
-}
-
-func MustListContextNamesUsingKubectl(path string, verbose bool) (contextNames []string) {
-	contextNames, err := ListContextNamesUsingKubectl(path, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return contextNames
 }
 
 // Use exec to invoke a "kubectl config get-context" with the given config "path".

@@ -52,24 +52,6 @@ func GetLocalCommandExecutorKubernetesByName(clusterName string) (kubernetes Kub
 	return GetCommandExecutorKubernetsByName(commandexecutor.Bash(), clusterName)
 }
 
-func MustGetCommandExecutorKubernetsByName(commandExecutor commandexecutor.CommandExecutor, clusterName string) (kubernetes KubernetesCluster) {
-	kubernetes, err := GetCommandExecutorKubernetsByName(commandExecutor, clusterName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return kubernetes
-}
-
-func MustGetLocalCommandExecutorKubernetesByName(clusterName string) (kubernetes KubernetesCluster) {
-	kubernetes, err := GetLocalCommandExecutorKubernetesByName(clusterName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return kubernetes
-}
-
 func NewCommandExecutorKubernetes() (c *CommandExecutorKubernetes) {
 	return new(CommandExecutorKubernetes)
 }
