@@ -34,6 +34,7 @@ func TestRole_CreateAndDeleteRole(t *testing.T) {
 
 				for i := 0; i < 2; i++ {
 					_, err := namespace.CreateRole(
+						ctx,
 						&kubernetesutils.CreateRoleOptions{
 							Name:     roleName,
 							Verbs:    []string{"get"},

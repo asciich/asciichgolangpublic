@@ -27,6 +27,7 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 ## Provided functionality
 
 * [httputils](pkg/httputils/): High level easy to use HTTP client and testserver.
+* [kubernetesutils](pkg/kubernetesutils/): Work with K8s/ Kubernetes.
 * [versionutils](pkg/versionutils/): Handle versions.
 
 ## Logging

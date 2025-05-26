@@ -4,7 +4,7 @@ import "context"
 
 type Namespace interface {
 	Create(ctx context.Context) (err error)
-	CreateRole(createOptions *CreateRoleOptions) (createdRole Role, err error)
+	CreateRole(ctx context.Context, createOptions *CreateRoleOptions) (createdRole Role, err error)
 	DeleteRoleByName(ctx context.Context, name string) (err error)
 	GetClusterName() (clusterName string, err error)
 	GetKubectlContext(ctx context.Context) (contextName string, err error)
