@@ -1,51 +1,32 @@
-package versionutils
+package versionutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func TestVersions_GetDateVersionString(t *testing.T) {
-	tests := []struct {
-		testmessage string
-	}{
-		{"testcase"},
-	}
+	t.Run("happy path", func(t *testing.T) {
+		dateVersion := versionutils.NewCurrentDateVersion()
 
-	for _, tt := range tests {
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				require := require.New(t)
+		dateVersionString, err := dateVersion.GetAsString()
+		require.NoError(t, err)
 
-				dateVersion := Versions().MustGetNewDateVersionString()
-				require.Len(dateVersion, len("YYYYmmdd_HHMMSS"))
-
-				require.True(Versions().MustCheckDateVersionString(dateVersion))
-			},
-		)
-	}
+		require.Len(t, dateVersionString, len("YYYYmmdd_HHMMSS"))
+		require.NoError(t, versionutils.CheckIsDateVersionString(dateVersionString))
+	})
 }
 
 func TestVersions_GetSoftwareVersionEnvVarName(t *testing.T) {
-	tests := []struct {
-		testmessage string
-	}{
-		{"testcase"},
-	}
+	t.Run("happy path", func(t *testing.T) {
+		require := require.New(t)
 
-	for _, tt := range tests {
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues("SOFTWARE_VERSION", Versions().GetSoftwareVersionEnvVarName())
-			},
-		)
-	}
+		require.EqualValues("SOFTWARE_VERSION", versionutils.GetSoftwareVersionEnvVarName())
+	})
 }
 
 func TestVersions_IsDateVersionString(t *testing.T) {
@@ -68,12 +49,7 @@ func TestVersions_IsDateVersionString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedIsVersionString,
-					Versions().IsDateVersionString(tt.versionString),
-				)
+				require.EqualValues(t, tt.expectedIsVersionString, versionutils.IsDateVersionString(tt.versionString))
 			},
 		)
 	}
@@ -131,12 +107,7 @@ func TestVersions_IsVersionString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedIsVersionString,
-					Versions().IsVersionString(tt.versionString),
-				)
+				require.EqualValues(t, tt.expectedIsVersionString, versionutils.IsVersionString(tt.versionString))
 			},
 		)
 	}
@@ -190,14 +161,13 @@ func TestVersions_IsSemanticVersion(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				var version versionutils.Version
+				var err error
 
-				var version Version = Versions().MustGetNewVersionByString(tt.versionString)
+				version, err = versionutils.ReadFromString(tt.versionString)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					tt.expectedIsSemanticVersion,
-					version.IsSemanticVersion(),
-				)
+				require.EqualValues(t, tt.expectedIsSemanticVersion, version.IsSemanticVersion())
 			},
 		)
 	}
@@ -228,15 +198,16 @@ func TestVersions_GetLatestVersionFromSlice(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				versions, err := versionutils.GetVersionsFromStringSlice(tt.versionStrings)
+				require.NoError(t, err)
 
-				versions := Versions().MustGetVersionsFromStringSlice(tt.versionStrings)
+				latestVersion, err := versionutils.GetLatestVersionFromSlice(versions)
+				require.NoError(t, err)
 
-				latestVersion := Versions().MustGetLatestVersionFromSlice(versions)
+				expectedNewestVersion, err := versionutils.ReadFromString(tt.expectedNewest)
+				require.NoError(t, err)
 
-				expectedNewestVersion := MustGetVersionByString(tt.expectedNewest)
-
-				require.True(latestVersion.Equals(expectedNewestVersion))
+				require.True(t, latestVersion.Equals(expectedNewestVersion))
 			},
 		)
 	}
@@ -255,12 +226,7 @@ func TestVersions_SortStringSlice(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedSorted,
-					Versions().MustSortStringSlice(tt.versionStrings),
-				)
+				require.EqualValues(t, tt.expectedSorted, mustutils.Must(versionutils.SortStringSlice(tt.versionStrings)))
 			},
 		)
 	}

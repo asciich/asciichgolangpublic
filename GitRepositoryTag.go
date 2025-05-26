@@ -111,7 +111,7 @@ func (g *GitRepositoryTag) GetVersion() (version versionutils.Version, err error
 		return nil, err
 	}
 
-	version, err = versionutils.GetVersionByString(name)
+	version, err = versionutils.ReadFromString(name)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func (g *GitRepositoryTag) IsVersionTag() (isVersionTag bool, err error) {
 		return false, err
 	}
 
-	return versionutils.Versions().IsVersionString(name), nil
+	return versionutils.IsVersionString(name), nil
 }
 
 func (g *GitRepositoryTag) MustGetGitRepository() (gitRepository GitRepository) {

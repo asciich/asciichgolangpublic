@@ -642,7 +642,7 @@ func (g *GitRepositoryBase) GetLatestTagVersionOrNilIfNotFound(verbose bool) (la
 			latestTagVersion = toCheck
 		}
 
-		latestTagVersion, err = versionutils.Versions().ReturnNewerVersion(latestTagVersion, toCheck)
+		latestTagVersion, err = versionutils.ReturnNewerVersion(latestTagVersion, toCheck)
 		if err != nil {
 			return nil, err
 		}

@@ -175,7 +175,7 @@ func (g *GitCommit) GetNewestTagVersionOrNilIfUnset(verbose bool) (newestVersion
 		return nil, err
 	}
 
-	return versionutils.Versions().GetLatestVersionFromSlice(versions)
+	return versionutils.GetLatestVersionFromSlice(versions)
 }
 
 func (g *GitCommit) GetParentCommits(options *parameteroptions.GitCommitGetParentsOptions) (parentCommit []*GitCommit, err error) {
@@ -295,7 +295,7 @@ func (g *GitCommit) ListVersionTagNames(verbose bool) (tagNames []string, err er
 		tagNames = append(tagNames, toAdd)
 	}
 
-	tagNames, err = versionutils.Versions().SortStringSlice(tagNames)
+	tagNames, err = versionutils.SortStringSlice(tagNames)
 	if err != nil {
 		return nil, err
 	}
