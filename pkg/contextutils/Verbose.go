@@ -68,3 +68,21 @@ func GetVerboseFromContext(ctx context.Context) (verbose bool) {
 
 	return verbose
 }
+
+// Returns a child context with verbosity enabled.
+func WithVerbose(ctx context.Context) context.Context {
+	if ctx == nil {
+		return nil
+	}
+
+	return WithVerbosityContextByBool(ctx, true)
+}
+
+// Returns a child context with verbosity disabled.
+func WithSilent(ctx context.Context) context.Context {
+	if ctx == nil {
+		return nil
+	}
+
+	return WithVerbosityContextByBool(ctx, false)
+}

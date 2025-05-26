@@ -1,9 +1,10 @@
-package versionutils
+package versionutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -29,15 +30,13 @@ func TestVersionEquals(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				version1, err := versionutils.ReadFromString(tt.version1)
+				require.NoError(t, err)
 
-				version1 := Versions().MustGetNewVersionByString(tt.version1)
-				version2 := Versions().MustGetNewVersionByString(tt.version2)
+				version2, err := versionutils.ReadFromString(tt.version2)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					tt.expectedEquals,
-					version1.Equals(version2),
-				)
+				require.EqualValues(t, tt.expectedEquals, version1.Equals(version2))
 			},
 		)
 	}

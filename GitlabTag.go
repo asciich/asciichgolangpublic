@@ -292,7 +292,7 @@ func (g *GitlabTag) IsVersionTag() (isVersionTag bool, err error) {
 		return false, err
 	}
 
-	return versionutils.Versions().IsVersionString(tagName), nil
+	return versionutils.IsVersionString(tagName), nil
 }
 
 func (g *GitlabTag) MustDelete(verbose bool) {

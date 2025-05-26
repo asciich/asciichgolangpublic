@@ -29,7 +29,7 @@ func (g *GitTagBase) GetVersion() (version versionutils.Version, err error) {
 		return nil, err
 	}
 
-	return versionutils.Versions().GetNewVersionByString(name)
+	return versionutils.ReadFromString(name)
 }
 
 func (g *GitTagBase) MustGetParentGitTagForBaseClass() (parentGitTagForBaseClass GitTag) {

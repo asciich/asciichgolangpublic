@@ -6,26 +6,35 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-type VersionSemanticVersion struct {
+type SemanticVersion struct {
 	major int
 	minor int
 	patch int
 }
 
-func NewVersionSemanticVersion() (v *VersionSemanticVersion) {
-	return new(VersionSemanticVersion)
+func ReadSemanticVersionFormString(versionString string) (*SemanticVersion, error) {
+	semanticVersion := NewVersionSemanticVersion()
+	err := semanticVersion.SetVersionByString(versionString)
+	if err != nil {
+		return nil, err
+	}
+
+	return semanticVersion, nil
 }
 
-func (v *VersionSemanticVersion) Equals(other Version) (isEqual bool) {
+func NewVersionSemanticVersion() (v *SemanticVersion) {
+	return new(SemanticVersion)
+}
+
+func (v *SemanticVersion) Equals(other Version) (isEqual bool) {
 	if other == nil {
 		return false
 	}
 
-	otherSemanticVersion, ok := other.(*VersionSemanticVersion)
+	otherSemanticVersion, ok := other.(*SemanticVersion)
 	if !ok {
 		return false
 	}
@@ -45,7 +54,7 @@ func (v *VersionSemanticVersion) Equals(other Version) (isEqual bool) {
 	return true
 }
 
-func (v *VersionSemanticVersion) GetAsString() (versionString string, err error) {
+func (v *SemanticVersion) GetAsString() (versionString string, err error) {
 	versionString, err = v.GetAsStringWithoutLeadingV()
 	if err != nil {
 		return "", err
@@ -54,7 +63,7 @@ func (v *VersionSemanticVersion) GetAsString() (versionString string, err error)
 	return "v" + versionString, nil
 }
 
-func (v *VersionSemanticVersion) GetAsStringWithoutLeadingV() (versionString string, err error) {
+func (v *SemanticVersion) GetAsStringWithoutLeadingV() (versionString string, err error) {
 	major, minor, patch, err := v.GetMajorMinorPatch()
 	if err != nil {
 		return "", err
@@ -65,7 +74,7 @@ func (v *VersionSemanticVersion) GetAsStringWithoutLeadingV() (versionString str
 	return versionString, nil
 }
 
-func (v *VersionSemanticVersion) GetMajor() (major int, err error) {
+func (v *SemanticVersion) GetMajor() (major int, err error) {
 	if v.major < 0 {
 		return -1, tracederrors.TracedError("major not set")
 	}
@@ -73,7 +82,7 @@ func (v *VersionSemanticVersion) GetMajor() (major int, err error) {
 	return v.major, nil
 }
 
-func (v *VersionSemanticVersion) GetMajorMinorPatch() (major int, minor int, patch int, err error) {
+func (v *SemanticVersion) GetMajorMinorPatch() (major int, minor int, patch int, err error) {
 	major, err = v.GetMajor()
 	if err != nil {
 		return -1, -1, -1, err
@@ -92,7 +101,7 @@ func (v *VersionSemanticVersion) GetMajorMinorPatch() (major int, minor int, pat
 	return major, minor, patch, nil
 }
 
-func (v *VersionSemanticVersion) GetMinor() (minor int, err error) {
+func (v *SemanticVersion) GetMinor() (minor int, err error) {
 	if v.minor < 0 {
 		return -1, tracederrors.TracedError("minor not set")
 	}
@@ -100,7 +109,7 @@ func (v *VersionSemanticVersion) GetMinor() (minor int, err error) {
 	return v.minor, nil
 }
 
-func (v *VersionSemanticVersion) GetNextVersion(versionType string) (nextVersion Version, err error) {
+func (v *SemanticVersion) GetNextVersion(versionType string) (nextVersion Version, err error) {
 	if versionType == "" {
 		return nil, tracederrors.TracedErrorEmptyString("versionType")
 	}
@@ -135,7 +144,7 @@ func (v *VersionSemanticVersion) GetNextVersion(versionType string) (nextVersion
 	return nextSemanticVersion, nil
 }
 
-func (v *VersionSemanticVersion) GetPatch() (patch int, err error) {
+func (v *SemanticVersion) GetPatch() (patch int, err error) {
 	if v.patch < 0 {
 		return -1, tracederrors.TracedError("patch not set")
 	}
@@ -143,12 +152,12 @@ func (v *VersionSemanticVersion) GetPatch() (patch int, err error) {
 	return v.patch, nil
 }
 
-func (v *VersionSemanticVersion) IsNewerThan(other Version) (isNewerThan bool, err error) {
+func (v *SemanticVersion) IsNewerThan(other Version) (isNewerThan bool, err error) {
 	if other == nil {
 		return false, tracederrors.TracedErrorNil("other")
 	}
 
-	otherSemanticVersion, ok := other.(*VersionSemanticVersion)
+	otherSemanticVersion, ok := other.(*SemanticVersion)
 	if !ok {
 		return false, tracederrors.TracedErrorf(
 			"Non compareable versions '%v' and '%v'",
@@ -188,125 +197,11 @@ func (v *VersionSemanticVersion) IsNewerThan(other Version) (isNewerThan bool, e
 	return false, nil
 }
 
-func (v *VersionSemanticVersion) IsSemanticVersion() (isSemanticVersion bool) {
+func (v *SemanticVersion) IsSemanticVersion() (isSemanticVersion bool) {
 	return true
 }
 
-func (v *VersionSemanticVersion) MustGetAsString() (versionString string) {
-	versionString, err := v.GetAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return versionString
-}
-
-func (v *VersionSemanticVersion) MustGetAsStringWithoutLeadingV() (versionString string) {
-	versionString, err := v.GetAsStringWithoutLeadingV()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return versionString
-}
-
-func (v *VersionSemanticVersion) MustGetMajor() (major int) {
-	major, err := v.GetMajor()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return major
-}
-
-func (v *VersionSemanticVersion) MustGetMajorMinorPatch() (major int, minor int, patch int) {
-	major, minor, patch, err := v.GetMajorMinorPatch()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return major, minor, patch
-}
-
-func (v *VersionSemanticVersion) MustGetMinor() (minor int) {
-	minor, err := v.GetMinor()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return minor
-}
-
-func (v *VersionSemanticVersion) MustGetNextVersion(versionType string) (nextVersion Version) {
-	nextVersion, err := v.GetNextVersion(versionType)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nextVersion
-}
-
-func (v *VersionSemanticVersion) MustGetPatch() (patch int) {
-	patch, err := v.GetPatch()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return patch
-}
-
-func (v *VersionSemanticVersion) MustIsNewerThan(other Version) (isNewerThan bool) {
-	isNewerThan, err := v.IsNewerThan(other)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isNewerThan
-}
-
-func (v *VersionSemanticVersion) MustSet(major int, minor int, patch int) {
-	err := v.Set(major, minor, patch)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (v *VersionSemanticVersion) MustSetMajor(major int) {
-	err := v.SetMajor(major)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (v *VersionSemanticVersion) MustSetMajorMinorPatch(major int, minor int, patch int) {
-	err := v.SetMajorMinorPatch(major, minor, patch)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (v *VersionSemanticVersion) MustSetMinor(minor int) {
-	err := v.SetMinor(minor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (v *VersionSemanticVersion) MustSetPatch(patch int) {
-	err := v.SetPatch(patch)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (v *VersionSemanticVersion) MustSetVersionByString(version string) {
-	err := v.SetVersionByString(version)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (v *VersionSemanticVersion) Set(major int, minor int, patch int) (err error) {
+func (v *SemanticVersion) Set(major int, minor int, patch int) (err error) {
 	err = v.SetMajor(major)
 	if err != nil {
 		return err
@@ -325,7 +220,7 @@ func (v *VersionSemanticVersion) Set(major int, minor int, patch int) (err error
 	return nil
 }
 
-func (v *VersionSemanticVersion) SetMajor(major int) (err error) {
+func (v *SemanticVersion) SetMajor(major int) (err error) {
 	if major < 0 {
 		return tracederrors.TracedErrorf("Invalid value '%d' for major", major)
 	}
@@ -335,7 +230,7 @@ func (v *VersionSemanticVersion) SetMajor(major int) (err error) {
 	return nil
 }
 
-func (v *VersionSemanticVersion) SetMajorMinorPatch(major int, minor int, patch int) (err error) {
+func (v *SemanticVersion) SetMajorMinorPatch(major int, minor int, patch int) (err error) {
 	err = v.SetMajor(major)
 	if err != nil {
 		return err
@@ -354,7 +249,7 @@ func (v *VersionSemanticVersion) SetMajorMinorPatch(major int, minor int, patch 
 	return nil
 }
 
-func (v *VersionSemanticVersion) SetMinor(minor int) (err error) {
+func (v *SemanticVersion) SetMinor(minor int) (err error) {
 	if minor < 0 {
 		return tracederrors.TracedErrorf("Invalid value '%d' for minor", minor)
 	}
@@ -364,7 +259,7 @@ func (v *VersionSemanticVersion) SetMinor(minor int) (err error) {
 	return nil
 }
 
-func (v *VersionSemanticVersion) SetPatch(patch int) (err error) {
+func (v *SemanticVersion) SetPatch(patch int) (err error) {
 	if patch < 0 {
 		return tracederrors.TracedErrorf("Invalid value '%d' for patch", patch)
 	}
@@ -374,7 +269,7 @@ func (v *VersionSemanticVersion) SetPatch(patch int) (err error) {
 	return nil
 }
 
-func (v *VersionSemanticVersion) SetVersionByString(version string) (err error) {
+func (v *SemanticVersion) SetVersionByString(version string) (err error) {
 	version = strings.TrimSpace(version)
 	if version == "" {
 		return tracederrors.TracedErrorEmptyString("version")

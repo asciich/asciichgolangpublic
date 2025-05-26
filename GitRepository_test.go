@@ -1075,8 +1075,6 @@ func TestGitRepository_GetLatestTagVersion(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
@@ -1106,10 +1104,7 @@ func TestGitRepository_GetLatestTagVersion(t *testing.T) {
 
 				latestVersion := gitRepo.MustGetLatestTagVersion(verbose)
 
-				require.EqualValues(
-					"v1.0.0",
-					latestVersion.MustGetAsString(),
-				)
+				require.EqualValues(t, "v1.0.0", mustutils.Must(latestVersion.GetAsString()))
 			},
 		)
 	}
@@ -1179,8 +1174,6 @@ func TestGitRepository_GetCurrentCommitsNewestVersion(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
@@ -1201,10 +1194,7 @@ func TestGitRepository_GetCurrentCommitsNewestVersion(t *testing.T) {
 					},
 				)
 
-				require.EqualValues(
-					"v0.1.2",
-					gitRepo.MustGetCurrentCommitsNewestVersion(verbose).MustGetAsString(),
-				)
+				require.EqualValues(t, "v0.1.2", mustutils.Must(gitRepo.MustGetCurrentCommitsNewestVersion(verbose).GetAsString()))
 
 				gitRepo.MustCreateTag(
 					&GitRepositoryCreateTagOptions{
@@ -1213,10 +1203,7 @@ func TestGitRepository_GetCurrentCommitsNewestVersion(t *testing.T) {
 					},
 				)
 
-				require.EqualValues(
-					"v1.0.0",
-					gitRepo.MustGetCurrentCommitsNewestVersion(verbose).MustGetAsString(),
-				)
+				require.EqualValues(t, "v1.0.0", mustutils.Must(gitRepo.MustGetCurrentCommitsNewestVersion(verbose).GetAsString()))
 			},
 		)
 	}
@@ -1235,8 +1222,6 @@ func TestGitRepository_GetCurrentCommitsNewestVersionOrNilIfUnset(t *testing.T) 
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
@@ -1250,10 +1235,7 @@ func TestGitRepository_GetCurrentCommitsNewestVersionOrNilIfUnset(t *testing.T) 
 					},
 				)
 
-				require.EqualValues(
-					nil,
-					gitRepo.MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose),
-				)
+				require.Nil(t, gitRepo.MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose))
 
 				gitRepo.MustCreateTag(
 					&GitRepositoryCreateTagOptions{
@@ -1262,10 +1244,7 @@ func TestGitRepository_GetCurrentCommitsNewestVersionOrNilIfUnset(t *testing.T) 
 					},
 				)
 
-				require.EqualValues(
-					"v0.1.2",
-					gitRepo.MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose).MustGetAsString(),
-				)
+				require.EqualValues(t, "v0.1.2", mustutils.Must(gitRepo.MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose).GetAsString()))
 
 				gitRepo.MustCreateTag(
 					&GitRepositoryCreateTagOptions{
@@ -1274,10 +1253,7 @@ func TestGitRepository_GetCurrentCommitsNewestVersionOrNilIfUnset(t *testing.T) 
 					},
 				)
 
-				require.EqualValues(
-					"v1.0.0",
-					gitRepo.MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose).MustGetAsString(),
-				)
+				require.EqualValues(t, "v1.0.0", mustutils.Must(gitRepo.MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose).GetAsString()))
 			},
 		)
 	}
