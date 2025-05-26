@@ -1,10 +1,12 @@
-package pathsutils
+package pathsutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -37,7 +39,7 @@ func TestPathsIsRelativePath(t *testing.T) {
 
 				require.EqualValues(
 					tt.expectedIsRelative,
-					IsRelativePath(tt.path),
+					pathsutils.IsRelativePath(tt.path),
 				)
 			},
 		)
@@ -73,7 +75,7 @@ func TestPathsIsAbsolutePath(t *testing.T) {
 
 				require.EqualValues(
 					tt.expectedIsRelative,
-					IsAbsolutePath(tt.path),
+					pathsutils.IsAbsolutePath(tt.path),
 				)
 			},
 		)
@@ -112,7 +114,7 @@ func TestPaths_MatchBaseNamePattern(t *testing.T) {
 
 				require.EqualValues(
 					tt.expectedFileList,
-					MustFilterPaths(input, tt.pathFilterOptions),
+					mustutils.Must(pathsutils.FilterPaths(input, tt.pathFilterOptions)),
 				)
 			},
 		)
@@ -155,7 +157,7 @@ func TestPaths_MatchBaseNamePattern_recursive(t *testing.T) {
 
 				require.EqualValues(
 					tt.expectedFileList,
-					MustFilterPaths(input, tt.pathFilterOptions),
+					mustutils.Must(pathsutils.FilterPaths(input, tt.pathFilterOptions)),
 				)
 			},
 		)
@@ -194,7 +196,7 @@ func TestPaths_ExcludeBasenamePattern_recursive(t *testing.T) {
 
 				require.EqualValues(
 					tt.expectedFileList,
-					MustFilterPaths(input, tt.pathFilterOptions),
+					mustutils.Must(pathsutils.FilterPaths(input, tt.pathFilterOptions)),
 				)
 			},
 		)
@@ -229,7 +231,7 @@ func TestPaths_ExcludeWholepathPattern_recursive(t *testing.T) {
 
 				require.EqualValues(
 					tt.expectedFileList,
-					MustFilterPaths(input, tt.pathFilterOptions),
+					mustutils.Must(pathsutils.FilterPaths(input, tt.pathFilterOptions)),
 				)
 			},
 		)
@@ -255,7 +257,7 @@ func TestPaths_GetRelativePathTo(t *testing.T) {
 
 				require.EqualValues(
 					tt.expectedOutput,
-					MustGetRelativePathTo(tt.input, tt.relativeTo),
+					mustutils.Must(pathsutils.GetRelativePathTo(tt.input, tt.relativeTo)),
 				)
 			},
 		)
@@ -281,7 +283,7 @@ func TestPaths_GetRelativePathsTo(t *testing.T) {
 
 				require.EqualValues(
 					tt.expectedOutput,
-					MustGetRelativePathsTo(tt.input, tt.relativeTo),
+					mustutils.Must(pathsutils.GetRelativePathsTo(tt.input, tt.relativeTo)),
 				)
 			},
 		)
