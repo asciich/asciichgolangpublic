@@ -10,7 +10,6 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -253,63 +252,4 @@ func GetRelativePathsTo(absolutePaths []string, relativeTo string) (relativePath
 	}
 
 	return relativePaths, nil
-}
-
-func MustCheckAbsolutePath(path string) {
-	err := CheckAbsolutePath(path)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func MustCheckRelativePath(path string) {
-	err := CheckRelativePath(path)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func MustFilterPaths(pathList []string, pathFilterOptions parameteroptions.PathFilterOptions) (filtered []string) {
-	filtered, err := FilterPaths(pathList, pathFilterOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return filtered
-}
-
-func MustGetAbsolutePath(path string) (absolutePath string) {
-	absolutePath, err := GetAbsolutePath(path)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return absolutePath
-}
-
-func MustGetDirPath(inputPath string) (dirPath string) {
-	dirPath, err := GetDirPath(inputPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return dirPath
-}
-
-func MustGetRelativePathTo(absolutePath string, relativeTo string) (relativePath string) {
-	relativePath, err := GetRelativePathTo(absolutePath, relativeTo)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return relativePath
-}
-
-func MustGetRelativePathsTo(absolutePaths []string, relativeTo string) (relativePaths []string) {
-	relativePaths, err := GetRelativePathsTo(absolutePaths, relativeTo)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return relativePaths
 }
