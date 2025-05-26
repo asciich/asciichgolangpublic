@@ -24,6 +24,10 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 	* Currently this is a one man show.
 	* It bases purely on some code I wrote at home in my free time used for automating my personal homelab.
 
+## Provided functionality
+
+* [httputils](pkg/httputils/): High level easy to use HTTP client and testserver.
+
 ## Logging
 
 To provide easy readable CLI output its recommended to use the provided logging functions:
