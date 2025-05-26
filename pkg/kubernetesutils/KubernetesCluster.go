@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type KubernetesCluster interface {
@@ -18,4 +19,12 @@ type KubernetesCluster interface {
 	ListResources(options *parameteroptions.ListKubernetesResourcesOptions) (resources []Resource, err error)
 	ListResourceNames(options *parameteroptions.ListKubernetesResourcesOptions) (resourceNames []string, err error)
 	NamespaceByNameExists(ctx context.Context, namespaceName string) (exist bool, err error)
+}
+
+func GetClusterByName(ctx context.Context, clusterName string) (KubernetesCluster, error) {
+	if clusterName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("clusterName")
+	}
+
+	return GetNativeKubernetesClusterByName(ctx, clusterName)
 }

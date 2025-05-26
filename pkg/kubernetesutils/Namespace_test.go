@@ -25,6 +25,14 @@ func getKubernetesByImplementationName(ctx context.Context, implementationName s
 		return mustutils.Must(kubernetesutils.GetLocalCommandExecutorKubernetesByName("kind-kind"))
 	}
 
+	if implementationName == "nativeKubernetes" {
+		// Directly call kind binary to avoid cyclic import...
+		commandexecutor.Bash().RunOneLiner(ctx, "kind create cluster -n kind || true")
+
+		return mustutils.Must(kubernetesutils.GetNativeKubernetesClusterByName(getCtx(), "kind-kind"))
+
+	}
+
 	logging.LogFatalWithTracef(
 		"Unknown implmentation name '%s'",
 		implementationName,
@@ -37,6 +45,7 @@ func TestNamespace_CreateAndDeleteNamespace(t *testing.T) {
 	tests := []struct {
 		implementationName string
 	}{
+		{"nativeKubernetes"},
 		{"commandExecutorKubernetes"},
 	}
 
