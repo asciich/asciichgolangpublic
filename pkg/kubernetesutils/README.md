@@ -4,4 +4,4 @@ Work with kubernetes.
 
 ## Examples
 
-- [List namespace names](Example_ListNamespaceNames.go)
+- [List namespace names](Example_ListNamespaceNames_test.go)
