@@ -7,7 +7,7 @@ import (
 
 var ErrKeyNotFound = errors.New("key not found in map")
 
-func GetKeysOfStringMapAsSlice(input map[string]string) (keys []string) {
+func GetKeysOfStringMap(input map[string]string) (keys []string) {
 	if len(input) <= 0 {
 		return []string{}
 	}
@@ -17,11 +17,23 @@ func GetKeysOfStringMapAsSlice(input map[string]string) (keys []string) {
 		keys = append(keys, k)
 	}
 
+	sort.Strings(keys)
+
 	return keys
 }
 
-func GetKeysOfStringMapAsSliceSorted(input map[string]string) (keys []string) {
-	keys = GetKeysOfStringMapAsSlice(input)
-	sort.Strings(keys)
-	return keys
+func DeepCopyBytesMap(originalMap map[string][]byte) map[string][]byte {
+	if originalMap == nil {
+		return nil
+	}
+	
+	newMap := make(map[string][]byte, len(originalMap))
+
+	for key, value := range originalMap {
+		newValue := make([]byte, len(value))
+		copy(newValue, value)
+		newMap[key] = newValue
+	}
+
+	return newMap
 }

@@ -419,3 +419,19 @@ func (c *CommandExecutorNamespace) SetName(name string) (err error) {
 
 	return nil
 }
+
+func (c *CommandExecutorNamespace) DeleteSecretByName(ctx context.Context, name string) (err error) {
+	return tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorNamespace) SecretByNameExists(ctx context.Context, name string) (bool, error) {
+	return false, tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorNamespace) GetSecretByName(name string) (secret Secret, err error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorNamespace) CreateSecret(ctx context.Context, name string, options *CreateSecretOptions) (createdSecret Secret, err error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}
