@@ -554,3 +554,15 @@ func (c *CommandExecutorKubernetes) SetName(name string) (err error) {
 
 	return nil
 }
+
+func (c *CommandExecutorKubernetes) CreateSecret(ctx context.Context, namespaceName string, secretName string, options *CreateSecretOptions) (createdSecret Secret, err error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorKubernetes) SecretByNameExists(ctx context.Context, namespaceName string, secretName string) (exists bool, err error) {
+	return false, tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorKubernetes) DeleteSecretByName(ctx context.Context, namespaceName string, secretName string) (err error) {
+	return tracederrors.TracedErrorNotImplemented()
+}

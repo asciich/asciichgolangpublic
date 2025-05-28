@@ -9,7 +9,9 @@ import (
 
 type KubernetesCluster interface {
 	CreateNamespaceByName(ctx context.Context, namespaceName string) (createdNamespace Namespace, err error)
+	CreateSecret(ctx context.Context, namespaceName string, secretName string, options *CreateSecretOptions) (createdSecret Secret, err error)
 	DeleteNamespaceByName(ctx context.Context, namespaceName string) (err error)
+	DeleteSecretByName(ctx context.Context, namespaceName string, secretName string) (err error)
 	GetKubectlContext(ctx context.Context) (contextName string, err error)
 	GetName() (name string, err error)
 	GetNamespaceByName(name string) (namespace Namespace, err error)
@@ -18,7 +20,8 @@ type KubernetesCluster interface {
 	ListNamespaceNames(ctx context.Context) (namespaceNames []string, err error)
 	ListResources(options *parameteroptions.ListKubernetesResourcesOptions) (resources []Resource, err error)
 	ListResourceNames(options *parameteroptions.ListKubernetesResourcesOptions) (resourceNames []string, err error)
-	NamespaceByNameExists(ctx context.Context, namespaceName string) (exist bool, err error)
+	NamespaceByNameExists(ctx context.Context, namespaceName string) (exists bool, err error)
+	SecretByNameExists(ctx context.Context, namespaceName string, secretName string) (exists bool, err error)
 }
 
 func GetClusterByName(ctx context.Context, clusterName string) (KubernetesCluster, error) {

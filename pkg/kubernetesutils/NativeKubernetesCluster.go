@@ -325,3 +325,30 @@ func (n *NativeKubernetesCluster) WaitUntilNamespaceCreated(ctx context.Context,
 
 	return nil
 }
+
+func (n *NativeKubernetesCluster) CreateSecret(ctx context.Context, namespaceName string, secretName string, options *CreateSecretOptions) (createdSecret Secret, err error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.CreateSecret(ctx, secretName, options)
+}
+
+func (n *NativeKubernetesCluster) SecretByNameExists(ctx context.Context, namespaceName string, secretName string) (exists bool, err error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return false, err
+	}
+
+	return namespace.SecretByNameExists(ctx, secretName)
+}
+
+func (n *NativeKubernetesCluster) DeleteSecretByName(ctx context.Context, namespaceName string, secretName string) (err error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+
+	return namespace.DeleteSecretByName(ctx, secretName)
+}
