@@ -9,6 +9,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/commandexecutorkubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -22,14 +24,14 @@ func getKubernetesByImplementationName(ctx context.Context, implementationName s
 		// Directly call kind binary to avoid cyclic import...
 		commandexecutor.Bash().RunOneLiner(ctx, "kind create cluster -n kind || true")
 
-		return mustutils.Must(kubernetesutils.GetLocalCommandExecutorKubernetesByName("kind-kind"))
+		return mustutils.Must(commandexecutorkubernetes.GetClusterByName("kind-kind"))
 	}
 
 	if implementationName == "nativeKubernetes" {
 		// Directly call kind binary to avoid cyclic import...
 		commandexecutor.Bash().RunOneLiner(ctx, "kind create cluster -n kind || true")
 
-		return mustutils.Must(kubernetesutils.GetNativeKubernetesClusterByName(getCtx(), "kind-kind"))
+		return mustutils.Must(nativekubernetes.GetClusterByName(getCtx(), "kind-kind"))
 
 	}
 

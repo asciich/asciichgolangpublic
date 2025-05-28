@@ -1,4 +1,4 @@
-package kubernetesutils
+package commandexecutorkubernetes
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -16,10 +17,10 @@ type CommandExecutorResource struct {
 	commandExecutor commandexecutor.CommandExecutor
 	name            string
 	typeName        string
-	namespace       Namespace
+	namespace       kubernetesutils.Namespace
 }
 
-func GetCommandExecutorResource(commandExectutor commandexecutor.CommandExecutor, namespace Namespace, resourceName string, resourceType string) (resource Resource, err error) {
+func GetCommandExecutorResource(commandExectutor commandexecutor.CommandExecutor, namespace kubernetesutils.Namespace, resourceName string, resourceType string) (resource kubernetesutils.Resource, err error) {
 	if commandExectutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExectutor")
 	}
@@ -65,11 +66,11 @@ func NewCommandExecutorResource() (c *CommandExecutorResource) {
 	return new(CommandExecutorResource)
 }
 
-func (c *CommandExecutorResource) CreateByYamlString(ctx context.Context, options *CreateResourceOptions) (err error) {
+func (c *CommandExecutorResource) CreateByYamlString(ctx context.Context, options *kubernetesutils.CreateResourceOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
-	
+
 	yamlString, err := options.GetYamlString()
 	if err != nil {
 		return err
@@ -111,10 +112,10 @@ func (c *CommandExecutorResource) CreateByYamlString(ctx context.Context, option
 		if err != nil {
 			return err
 		}
-	} 
+	}
 
 	cmd := []string{"kubectl"}
-	if IsInClusterAuthenticationAvailable(ctx) {
+	if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
 		logging.LogInfoByCtxf(ctx, "Kubernetes in cluster authentication is used. Skip validation of kubectlContext.")
 	} else {
 		kubectlContext, err := c.GetKubectlContext(ctx)
@@ -191,7 +192,7 @@ func (c *CommandExecutorResource) Delete(ctx context.Context) (err error) {
 		}
 
 		cmd := []string{"kubectl"}
-		if IsInClusterAuthenticationAvailable(ctx) {
+		if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
 			logging.LogInfoByCtxf(ctx, "Kubernetes in cluster authentication is used. Skip validation of kubectlContext '%s'", kubectlContext)
 		} else {
 			cmd = append(cmd, "--context", kubectlContext)
@@ -256,7 +257,7 @@ func (c *CommandExecutorResource) Exists(ctx context.Context) (exists bool, err 
 	}
 
 	cmd := []string{"kubectl", "get"}
-	if IsInClusterAuthenticationAvailable(ctx) {
+	if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
 		logging.LogInfoByCtxf(ctx, "Kubernetes in cluster authentication is used. Skip validation of kubectlContext '%s'", kubectlContext)
 	} else {
 		cmd = append(cmd, "--context", kubectlContext)
@@ -383,7 +384,7 @@ func (c *CommandExecutorResource) GetName() (name string, err error) {
 	return c.name, nil
 }
 
-func (c *CommandExecutorResource) GetNamespace() (namespace Namespace, err error) {
+func (c *CommandExecutorResource) GetNamespace() (namespace kubernetesutils.Namespace, err error) {
 	if c.namespace == nil {
 		return nil, err
 	}
@@ -448,7 +449,7 @@ func (c *CommandExecutorResource) SetName(name string) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorResource) SetNamespace(namespace Namespace) (err error) {
+func (c *CommandExecutorResource) SetNamespace(namespace kubernetesutils.Namespace) (err error) {
 	c.namespace = namespace
 
 	return nil

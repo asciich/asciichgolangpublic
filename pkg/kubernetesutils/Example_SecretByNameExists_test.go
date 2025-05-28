@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 )
 
 func Test_Example_SecretByNameExists(t *testing.T) {
@@ -23,7 +24,7 @@ func Test_Example_SecretByNameExists(t *testing.T) {
 	require.NoError(t, err)
 
 	// Get Kubernetes cluster:
-	cluster, err := kubernetesutils.GetClusterByName(ctx, clusterName)
+	cluster, err := nativekubernetes.GetClusterByName(ctx, clusterName)
 	require.NoError(t, err)
 
 	// Create an example secret. This implicitly generates the namespace if it does not exist.
