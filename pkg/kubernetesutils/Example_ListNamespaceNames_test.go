@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 )
 
 func Test_Example_ListNamespaceNames(t *testing.T) {
@@ -25,7 +25,7 @@ func Test_Example_ListNamespaceNames(t *testing.T) {
 	// ... prepare finished.
 
 	// Get Kubernetes cluster:
-	cluster, err := kubernetesutils.GetClusterByName(ctx, clusterName)
+	cluster, err := nativekubernetes.GetClusterByName(ctx, clusterName)
 	require.NoError(t, err)
 
 	// List all namespace names:

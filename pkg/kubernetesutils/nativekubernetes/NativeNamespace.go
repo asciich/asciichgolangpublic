@@ -1,9 +1,10 @@
-package kubernetesutils
+package nativekubernetes
 
 import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -37,7 +38,7 @@ func (n *NativeNamespace) Create(ctx context.Context) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
 }
 
-func (n *NativeNamespace) CreateRole(ctx context.Context, createOptions *CreateRoleOptions) (createdRole Role, err error) {
+func (n *NativeNamespace) CreateRole(ctx context.Context, createOptions *kubernetesutils.CreateRoleOptions) (createdRole kubernetesutils.Role, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
@@ -61,11 +62,11 @@ func (n *NativeNamespace) GetName() (name string, err error) {
 	return n.name, nil
 }
 
-func (n *NativeNamespace) GetResourceByNames(resourceName string, resourceType string) (resource Resource, err error) {
+func (n *NativeNamespace) GetResourceByNames(resourceName string, resourceType string) (resource kubernetesutils.Resource, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
-func (n *NativeNamespace) GetRoleByName(name string) (role Role, err error) {
+func (n *NativeNamespace) GetRoleByName(name string) (role kubernetesutils.Role, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
@@ -96,12 +97,12 @@ func (n *NativeNamespace) SecretByNameExists(ctx context.Context, secretName str
 	_, err = clientset.CoreV1().Secrets(namespaceName).Get(ctx, secretName, metav1.GetOptions{})
 	if err == nil {
 		exists = true
-	} else{
+	} else {
 		if !errors.IsNotFound(err) {
 			return false, tracederrors.TracedErrorf("failed to get secret '%s' in namespace '%s': %w", secretName, namespaceName, err)
 		}
 	}
-	
+
 	if exists {
 		logging.LogInfoByCtxf(ctx, "Secret '%s' in namespace '%s' exists.", secretName, namespaceName)
 	} else {
@@ -145,7 +146,7 @@ func (n *NativeNamespace) DeleteSecretByName(ctx context.Context, secretName str
 	return nil
 }
 
-func (n *NativeNamespace) GetSecretByName(name string) (secret Secret, err error) {
+func (n *NativeNamespace) GetSecretByName(name string) (secret kubernetesutils.Secret, err error) {
 	if name == "" {
 		return nil, tracederrors.TracedErrorEmptyString("secret")
 	}
@@ -156,7 +157,7 @@ func (n *NativeNamespace) GetSecretByName(name string) (secret Secret, err error
 	}, nil
 }
 
-func (n *NativeNamespace) CreateSecret(ctx context.Context, secretName string, options *CreateSecretOptions) (createdSecret Secret, err error) {
+func (n *NativeNamespace) CreateSecret(ctx context.Context, secretName string, options *kubernetesutils.CreateSecretOptions) (createdSecret kubernetesutils.Secret, err error) {
 	if secretName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("secret")
 	}

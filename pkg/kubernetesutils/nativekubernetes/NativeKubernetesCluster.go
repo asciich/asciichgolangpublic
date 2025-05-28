@@ -1,4 +1,4 @@
-package kubernetesutils
+package nativekubernetes
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -69,14 +70,14 @@ func GetInClusterClientSet(ctx context.Context) (*kubernetes.Clientset, error) {
 //
 // Otherwise a clientset based on ~/.kube/config is returned.
 func GetClientSet(ctx context.Context) (*kubernetes.Clientset, error) {
-	if IsInClusterAuthenticationAvailable(ctx) {
+	if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
 		return GetInClusterClientSet(ctx)
 	}
 
 	return GetClientSetFromKubeconfig(ctx)
 }
 
-func GetNativeKubernetesClusterByName(ctx context.Context, clusterName string) (*NativeKubernetesCluster, error) {
+func GetClusterByName(ctx context.Context, clusterName string) (*NativeKubernetesCluster, error) {
 	if clusterName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("clusterName")
 	}
@@ -91,7 +92,7 @@ func GetNativeKubernetesClusterByName(ctx context.Context, clusterName string) (
 	}, nil
 }
 
-func (n *NativeKubernetesCluster) CreateNamespaceByName(ctx context.Context, namespaceName string) (createdNamespace Namespace, err error) {
+func (n *NativeKubernetesCluster) CreateNamespaceByName(ctx context.Context, namespaceName string) (createdNamespace kubernetesutils.Namespace, err error) {
 	if namespaceName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
 	}
@@ -186,7 +187,7 @@ func (n *NativeKubernetesCluster) GetKubectlContext(ctx context.Context) (contex
 func (n *NativeKubernetesCluster) GetName() (name string, err error) {
 	return "", tracederrors.TracedErrorNotImplemented()
 }
-func (n *NativeKubernetesCluster) GetNamespaceByName(name string) (namespace Namespace, err error) {
+func (n *NativeKubernetesCluster) GetNamespaceByName(name string) (namespace kubernetesutils.Namespace, err error) {
 	if name == "" {
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
@@ -196,10 +197,10 @@ func (n *NativeKubernetesCluster) GetNamespaceByName(name string) (namespace Nam
 		kubernetesCluster: n,
 	}, nil
 }
-func (n *NativeKubernetesCluster) GetResourceByNames(resourceName string, resourceType string, namespaceName string) (resource Resource, err error) {
+func (n *NativeKubernetesCluster) GetResourceByNames(resourceName string, resourceType string, namespaceName string) (resource kubernetesutils.Resource, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
-func (n *NativeKubernetesCluster) ListNamespaces(ctx context.Context) (namespaces []Namespace, err error) {
+func (n *NativeKubernetesCluster) ListNamespaces(ctx context.Context) (namespaces []kubernetesutils.Namespace, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 func (n *NativeKubernetesCluster) ListNamespaceNames(ctx context.Context) (namespaceNames []string, err error) {
@@ -225,7 +226,7 @@ func (n *NativeKubernetesCluster) ListNamespaceNames(ctx context.Context) (names
 
 	return namespaceNames, nil
 }
-func (n *NativeKubernetesCluster) ListResources(options *parameteroptions.ListKubernetesResourcesOptions) (resources []Resource, err error) {
+func (n *NativeKubernetesCluster) ListResources(options *parameteroptions.ListKubernetesResourcesOptions) (resources []kubernetesutils.Resource, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 func (n *NativeKubernetesCluster) ListResourceNames(options *parameteroptions.ListKubernetesResourcesOptions) (resourceNames []string, err error) {
@@ -326,7 +327,7 @@ func (n *NativeKubernetesCluster) WaitUntilNamespaceCreated(ctx context.Context,
 	return nil
 }
 
-func (n *NativeKubernetesCluster) CreateSecret(ctx context.Context, namespaceName string, secretName string, options *CreateSecretOptions) (createdSecret Secret, err error) {
+func (n *NativeKubernetesCluster) CreateSecret(ctx context.Context, namespaceName string, secretName string, options *kubernetesutils.CreateSecretOptions) (createdSecret kubernetesutils.Secret, err error) {
 	namespace, err := n.CreateNamespaceByName(ctx, namespaceName)
 	if err != nil {
 		return nil, err

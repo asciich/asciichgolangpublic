@@ -1,4 +1,4 @@
-package kubernetesutils
+package nativekubernetes
 
 import (
 	"context"
@@ -25,7 +25,7 @@ func (n *NativeSecret) GetName() (string, error) {
 	}
 
 	return n.name, nil
-} 
+}
 
 func (n *NativeSecret) Exists(ctx context.Context) (bool, error) {
 	secretName, err := n.GetName()
