@@ -148,7 +148,7 @@ func (n *NativeNamespace) DeleteSecretByName(ctx context.Context, secretName str
 
 func (n *NativeNamespace) GetSecretByName(name string) (secret kubernetesutils.Secret, err error) {
 	if name == "" {
-		return nil, tracederrors.TracedErrorEmptyString("secret")
+		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
 
 	return &NativeSecret{
@@ -207,4 +207,134 @@ func (n *NativeNamespace) CreateSecret(ctx context.Context, secretName string, o
 	}
 
 	return n.GetSecretByName(secretName)
+}
+
+func (n *NativeNamespace) ConfigMapByNameExists(ctx context.Context, configmapName string) (bool, error) {
+	if configmapName == "" {
+		return false, tracederrors.TracedErrorEmptyString("name")
+	}
+
+	clientset, err := n.GetClientSet()
+	if err != nil {
+		return false, err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return false, err
+	}
+
+	var exists bool
+	_, err = clientset.CoreV1().ConfigMaps(namespaceName).Get(ctx, configmapName, metav1.GetOptions{})
+	if err == nil {
+		exists = true
+	} else {
+		if !errors.IsNotFound(err) {
+			return false, tracederrors.TracedErrorf("failed to get configmap '%s' in namespace '%s': %w", configmapName, namespaceName, err)
+		}
+	}
+
+	if exists {
+		logging.LogInfoByCtxf(ctx, "ConfigMap '%s' in namespace '%s' exists.", configmapName, namespaceName)
+	} else {
+		logging.LogInfoByCtxf(ctx, "ConfigMap '%s' in namespace '%s' does not exist.", configmapName, namespaceName)
+	}
+
+	return exists, nil
+}
+
+func (n *NativeNamespace) CreateConfigMap(ctx context.Context, configmapName string, options *kubernetesutils.CreateConfigMapOptions) (createdConfigMap kubernetesutils.ConfigMap, err error) {
+	if configmapName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("configmap")
+	}
+
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	exists, err := n.ConfigMapByNameExists(ctx, configmapName)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	if exists {
+		return nil, tracederrors.TracedError("Update existing configmap not implemented")
+	} else {
+		clientset, err := n.GetClientSet()
+		if err != nil {
+			return nil, err
+		}
+
+		configmapData, err := options.GetConfigMapData()
+		if err != nil {
+			return nil, err
+		}
+
+		configmap := &v1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:   configmapName,
+				Labels: map[string]string{},
+			},
+			Data: configmapData,
+		}
+
+		_, err = clientset.CoreV1().ConfigMaps(namespaceName).Create(ctx, configmap, metav1.CreateOptions{})
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("failed to create configmap '%s' in namespace '%s': %w", configmapName, namespaceName, err)
+		}
+
+		logging.LogChangedByCtxf(ctx, "Created configmap '%s' in kubernetes namespace '%s'.", configmapName, namespaceName)
+	}
+
+	return n.GetConfigMapByName(configmapName)
+}
+
+func (n *NativeNamespace) GetConfigMapByName(name string) (configMap kubernetesutils.ConfigMap, err error) {
+	if name == "" {
+		return nil, tracederrors.TracedErrorEmptyString("name")
+	}
+
+	return &NativeConfigMap{
+		namespace: n,
+		name:      name,
+	}, nil
+}
+
+func (n *NativeNamespace) DeleteConfigMapByName(ctx context.Context, configmapName string) (err error) {
+	if configmapName == "" {
+		return tracederrors.TracedErrorEmptyString("name")
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return err
+	}
+
+	exists, err := n.ConfigMapByNameExists(ctx, configmapName)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		clientset, err := n.GetClientSet()
+		if err != nil {
+			return err
+		}
+
+		err = clientset.CoreV1().ConfigMaps(namespaceName).Delete(ctx, configmapName, metav1.DeleteOptions{})
+		if err != nil {
+			return tracederrors.TracedErrorf("Failed to delete configmap '%s' in namespace '%s'.", configmapName, namespaceName)
+		}
+
+		logging.LogChangedByCtxf(ctx, "ConfigMap '%s' in namespace '%s' deleted.", configmapName, namespaceName)
+	} else {
+		logging.LogInfoByCtxf(ctx, "ConfigMap '%s' in namespace '%s' does not exist. Skip delete.", configmapName, namespaceName)
+	}
+
+	return nil
 }

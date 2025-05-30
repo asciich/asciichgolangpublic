@@ -567,3 +567,16 @@ func (c *CommandExecutorKubernetes) SecretByNameExists(ctx context.Context, name
 func (c *CommandExecutorKubernetes) DeleteSecretByName(ctx context.Context, namespaceName string, secretName string) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
 }
+
+
+func (c *CommandExecutorKubernetes) CreateConfigMap(ctx context.Context, namespaceName string, configMapName string, options *kubernetesutils.CreateConfigMapOptions) (createdConfigMap kubernetesutils.ConfigMap, err error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorKubernetes) ConfigMapByNameExists(ctx context.Context, namespaceName string, configmapName string) (exists bool, err error) {
+	return false, tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorKubernetes) DeleteConfigMapByName(ctx context.Context, namespaceName string, configmapName string) (err error) {
+	return tracederrors.TracedErrorNotImplemented()
+}

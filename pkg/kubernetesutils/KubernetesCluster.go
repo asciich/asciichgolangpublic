@@ -7,6 +7,8 @@ import (
 )
 
 type KubernetesCluster interface {
+	ConfigMapByNameExists(ctx context.Context, namespaceName string, configMapName string) (exists bool, err error)
+	CreateConfigMap(ctx context.Context, namespaceName string, configMapName string, options *CreateConfigMapOptions) (createdConfigMap ConfigMap, err error)
 	CreateNamespaceByName(ctx context.Context, namespaceName string) (createdNamespace Namespace, err error)
 	CreateSecret(ctx context.Context, namespaceName string, secretName string, options *CreateSecretOptions) (createdSecret Secret, err error)
 	DeleteNamespaceByName(ctx context.Context, namespaceName string) (err error)

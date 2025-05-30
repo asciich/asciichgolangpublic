@@ -436,3 +436,21 @@ func (c *CommandExecutorNamespace) GetSecretByName(name string) (secret kubernet
 func (c *CommandExecutorNamespace) CreateSecret(ctx context.Context, name string, options *kubernetesutils.CreateSecretOptions) (createdSecret kubernetesutils.Secret, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
+
+
+
+func (c *CommandExecutorNamespace) DeleteConfigMapByName(ctx context.Context, name string) (err error) {
+	return tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorNamespace) ConfigMapByNameExists(ctx context.Context, name string) (bool, error) {
+	return false, tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorNamespace) GetConfigMapByName(name string) (secret kubernetesutils.ConfigMap, err error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorNamespace) CreateConfigMap(ctx context.Context, name string, options *kubernetesutils.CreateConfigMapOptions) (createdConfigMap kubernetesutils.ConfigMap, err error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}

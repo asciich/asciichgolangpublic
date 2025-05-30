@@ -9,9 +9,4 @@ type Kind interface {
 	DeleteClusterByName(clusterName string, verbose bool) (err error)
 	GetClusterByName(clusterName string) (cluster kubernetesutils.KubernetesCluster, err error)
 	ListClusterNames(verbose bool) (clusterNames []string, err error)
-	MustClusterByNameExists(clusterName string, verbose bool) (exists bool)
-	MustCreateClusterByName(clusterName string, verbose bool) (cluster kubernetesutils.KubernetesCluster)
-	MustDeleteClusterByName(clusterName string, verbose bool)
-	MustGetClusterByName(clusterName string) (cluster kubernetesutils.KubernetesCluster)
-	MustListClusterNames(verbose bool) (clusterNames []string)
 }
