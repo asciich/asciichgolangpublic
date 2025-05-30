@@ -186,6 +186,10 @@ func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 		io.WriteString(w, "---\nhello: world\n")
 	})
 
+	t.mux.HandleFunc("/example1.json", func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, `{"hello": "world"}`)
+	})
+
 	t.server = &http.Server{
 		Addr:      ":" + strconv.Itoa(port),
 		Handler:   t.mux,

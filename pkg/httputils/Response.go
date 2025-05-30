@@ -5,5 +5,6 @@ type Response interface {
 	IsStatusCodeOk() (isStatusCodeOK bool, err error)
 	SetBody(body []byte) (err error)
 	SetStatusCode(statusCode int) (err error)
+	RunJqQueryAgainstBody(query string) (result string, err error)
 	RunYqQueryAgainstBody(query string) (result string, err error)
 }
