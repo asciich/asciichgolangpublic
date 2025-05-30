@@ -327,6 +327,14 @@ func (n *NativeKubernetesCluster) WaitUntilNamespaceCreated(ctx context.Context,
 	return nil
 }
 
+func (n *NativeKubernetesCluster) CreateConfigMap(ctx context.Context, namespaceName string, configMapName string, options *kubernetesutils.CreateConfigMapOptions) (createdSecret kubernetesutils.ConfigMap, err error) {
+	namespace, err := n.CreateNamespaceByName(ctx, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+	return namespace.CreateConfigMap(ctx, configMapName, options)
+}
+
 func (n *NativeKubernetesCluster) CreateSecret(ctx context.Context, namespaceName string, secretName string, options *kubernetesutils.CreateSecretOptions) (createdSecret kubernetesutils.Secret, err error) {
 	namespace, err := n.CreateNamespaceByName(ctx, namespaceName)
 	if err != nil {
@@ -352,4 +360,22 @@ func (n *NativeKubernetesCluster) DeleteSecretByName(ctx context.Context, namesp
 	}
 
 	return namespace.DeleteSecretByName(ctx, secretName)
+}
+
+func (n *NativeKubernetesCluster) ConfigMapByNameExists(ctx context.Context, namespaceName string, configmapName string) (exists bool, err error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return false, err
+	}
+
+	return namespace.ConfigMapByNameExists(ctx, configmapName)
+}
+
+func (n *NativeKubernetesCluster) DeleteConfigMapByName(ctx context.Context, namespaceName string, configmapName string) (err error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+
+	return namespace.DeleteConfigMapByName(ctx, configmapName)
 }

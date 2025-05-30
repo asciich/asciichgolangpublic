@@ -58,3 +58,25 @@ func Test_DeepCopyBytesMap(t *testing.T) {
 		require.EqualValues(t, originalMap["abc"], []byte("entry"))
 	})
 }
+
+func Test_DeepCopyStringsMap(t *testing.T) {
+	t.Run("nil", func(t *testing.T) {
+		copy := mapsutils.DeepCopyStringsMap(nil)
+		require.Nil(t, copy)
+	})
+
+	t.Run("one entry", func(t *testing.T) {
+		originalMap := map[string]string{
+			"abc": "entry",
+		}
+
+		copy := mapsutils.DeepCopyStringsMap(originalMap)
+
+		require.Len(t, copy, 1)
+		require.EqualValues(t, originalMap, copy)
+
+		copy["abc"] = "new text"
+		require.NotEqualValues(t, originalMap, copy)
+		require.EqualValues(t, originalMap["abc"], "entry")
+	})
+}

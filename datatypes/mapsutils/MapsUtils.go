@@ -37,3 +37,18 @@ func DeepCopyBytesMap(originalMap map[string][]byte) map[string][]byte {
 
 	return newMap
 }
+
+
+func DeepCopyStringsMap(originalMap map[string]string) map[string]string {
+	if originalMap == nil {
+		return nil
+	}
+	
+	newMap := make(map[string]string, len(originalMap))
+
+	for key, value := range originalMap {
+		newMap[key] = value
+	}
+
+	return newMap
+}

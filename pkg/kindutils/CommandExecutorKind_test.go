@@ -9,7 +9,8 @@ import (
 func TestCommandExeuctorKind_GetClusterByName(t *testing.T) {
 	kind := MustGetLocalCommandExecutorKind()
 
-	cluster := kind.MustGetClusterByName("abc")
+	cluster, err := kind.GetClusterByName("abc")
+	require.NoError(t, err)
 
 	nativeCluster, ok := cluster.(*CommandExecutorKindCluster)
 	require.True(t, ok)
