@@ -1,6 +1,7 @@
 package httputils
 
 import (
+	"github.com/asciich/asciichgolangpublic/fileformats/jsonutils"
 	"github.com/asciich/asciichgolangpublic/fileformats/yamlutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -27,6 +28,19 @@ func (g *GenericResponse) RunYqQueryAgainstBody(query string) (result string, er
 	}
 
 	return yamlutils.RunYqQueryAginstYamlStringAsString(body, query)
+}
+
+func (g *GenericResponse) RunJqQueryAgainstBody(query string) (result string, err error) {
+	if query == "" {
+		return "", tracederrors.TracedErrorEmptyString("query")
+	}
+
+	body, err := g.GetBodyAsString()
+	if err != nil {
+		return "", err
+	}
+
+	return jsonutils.RunJqAgainstJsonStringAsString(body, query)
 }
 
 func (g *GenericResponse) GetBody() (body []byte, err error) {
