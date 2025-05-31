@@ -71,15 +71,6 @@ func ParseInventoryJson(ctx context.Context, jsonData string) (inventory *Ansibl
 	return inventory, nil
 }
 
-func MustParseInventoryJson(ctx context.Context, jsonData string) (inventory *AnsibleInventory) {
-	inventory, err := ParseInventoryJson(ctx, jsonData)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return inventory
-}
-
 func (a *AnsibleInventory) GetHostByName(hostName string) (ansibleHost *AnsibleHost, err error) {
 	if hostName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("hostName")
@@ -97,15 +88,6 @@ func (a *AnsibleInventory) GetHostByName(hostName string) (ansibleHost *AnsibleH
 	}
 
 	return nil, tracederrors.TracedErrorf("Ansible host '%s' not found in inventory '%s'", hostName, a.Name())
-}
-
-func (a *AnsibleInventory) MustCreateHostByName(ctx context.Context, hostName string) (addedHost *AnsibleHost) {
-	addedHost, err := a.CreateHostByName(ctx, hostName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return addedHost
 }
 
 func (a *AnsibleInventory) CreateHostByName(ctx context.Context, hostName string) (addedHost *AnsibleHost, err error) {
@@ -180,15 +162,6 @@ func (a *AnsibleInventory) ensureAllGroupPresent() (allGroup *AnsibleGroup, err 
 	return toAdd, nil
 }
 
-func (a *AnsibleInventory) MustGroupByNameExists(ctx context.Context, groupName string) (groupExists bool) {
-	groupExists, err := a.GroupByNameExists(ctx, groupName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return groupExists
-}
-
 func (a *AnsibleInventory) GroupByNameExists(ctx context.Context, groupName string) (groupExists bool, err error) {
 	for _, group := range a.groups {
 		n, err := group.GetGroupName()
@@ -209,24 +182,6 @@ func (a *AnsibleInventory) GroupByNameExists(ctx context.Context, groupName stri
 	}
 
 	return groupExists, nil
-}
-
-func (a *AnsibleInventory) MustGetNumberOfHosts(ctx context.Context) (numberOfHosts int) {
-	numberOfHosts, err := a.GetNumberOfHosts(ctx)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return numberOfHosts
-}
-
-func (a *AnsibleInventory) MustListHostNames() (hostNames []string) {
-	hostNames, err := a.ListHostNames()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hostNames
 }
 
 func (a *AnsibleInventory) ListHostNames() (hostNames []string, err error) {
@@ -274,24 +229,6 @@ func (a *AnsibleInventory) ListGroupNames() (groupNames []string, err error) {
 	groupNames = slicesutils.SortStringSliceAndRemoveDuplicates(groupNames)
 
 	return groupNames, nil
-}
-
-func (a *AnsibleInventory) MustListGroupNames() (groupNames []string) {
-	groupNames, err := a.ListGroupNames()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return groupNames
-}
-
-func (a *AnsibleInventory) MustCreateGroupByName(ctx context.Context, groupName string) (createdGroup *AnsibleGroup) {
-	createdGroup, err := a.CreateGroupByName(ctx, groupName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return createdGroup
 }
 
 func (a *AnsibleInventory) GetGroupByName(groupName string) (group *AnsibleGroup, err error) {

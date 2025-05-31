@@ -15,7 +15,7 @@ var ErrUnknwnAnsibleCliOutput = errors.New("unknown ansible CLI output")
 
 var regexListHostsOutput = regexp.MustCompile(`^\s*hosts \(\d+\):`)
 
-func isListHostsOutput(toCheck string) (isOutput bool) {
+func IsListHostsOutput(toCheck string) (isOutput bool) {
 	return regexListHostsOutput.Match([]byte(toCheck))
 }
 
@@ -26,7 +26,7 @@ func parseListHostsCliOutput(ctx context.Context, cliOutput string) (ansibleOutp
 	addCounter := 0
 	for i, line := range stringsutils.SplitLines(cliOutput, true) {
 		if i == 0 {
-			if !isListHostsOutput(line) {
+			if !IsListHostsOutput(line) {
 				return nil, tracederrors.TracedErrorf("%w, Unknown first line to parse as ansible --list-hosts output: '%s'", ErrUnknwnAnsibleCliOutput, line)
 			}
 			continue
@@ -61,7 +61,7 @@ func ParseCliOutput(ctx context.Context, cliOutput string) (ansibleOutput *Ansib
 		return nil, tracederrors.TracedErrorEmptyString("cliOutput")
 	}
 
-	if isListHostsOutput(cliOutput) {
+	if IsListHostsOutput(cliOutput) {
 		ansibleOutput, err = parseListHostsCliOutput(ctx, cliOutput)
 		if err != nil {
 			return nil, err
