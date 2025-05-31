@@ -8,7 +8,7 @@ import (
 )
 
 func Test_DateVersion_GetAsString(t *testing.T) {
-	t.Run("happy path", func(t *testing.T) {
+	t.Run("new version with current date", func(t *testing.T) {
 		var version versionutils.Version
 		var err error
 
