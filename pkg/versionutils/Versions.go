@@ -51,6 +51,9 @@ func GetLatestVersionFromSlice(versions []Version) (latestVersion Version, err e
 	return latestVersion, nil
 }
 
+// Get the current date and time formated as version string 'YYYYmmdd_HHMMSS'.
+//
+// To get the current date and time as `versionutils.Version` use `versionutils.NewCurrentDateVersion()`.
 func GetNewDateVersionString() (versionString string) {
 	versionString = time.Now().Format("20060102_150405")
 	return versionString

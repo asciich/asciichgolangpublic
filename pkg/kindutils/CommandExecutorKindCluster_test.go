@@ -1,15 +1,16 @@
-package kind
+package kindutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
 )
 
 func TestCommandExecutorKindCluster_MustGetLocalCommandExecutorKind(t *testing.T) {
-	k := MustGetLocalCommandExecutorKind()
+	k := kindutils.MustGetLocalCommandExecutorKind()
 
-	kind, ok := k.(*CommandExecutorKind)
+	kind, ok := k.(*kindutils.CommandExecutorKind)
 	require.True(t, ok)
 
 	c, err := kind.GetCommandExecutor()

@@ -1,18 +1,19 @@
-package kind
+package kindutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
 )
 
 func TestCommandExeuctorKind_GetClusterByName(t *testing.T) {
-	kind := MustGetLocalCommandExecutorKind()
+	kind := kindutils.MustGetLocalCommandExecutorKind()
 
 	cluster, err := kind.GetClusterByName("abc")
 	require.NoError(t, err)
 
-	nativeCluster, ok := cluster.(*CommandExecutorKindCluster)
+	nativeCluster, ok := cluster.(*kindutils.CommandExecutorKindCluster)
 	require.True(t, ok)
 
 	commandExecutor, err := nativeCluster.GetCommandExecutor()
