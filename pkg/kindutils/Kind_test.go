@@ -1,4 +1,4 @@
-package kind
+package kindutils_test
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -19,9 +20,9 @@ func getClusterName() (clusterName string) {
 	return "kind-ci-test"
 }
 
-func getKindByImplementationName(implementationName string) (kind Kind) {
+func getKindByImplementationName(implementationName string) (kind kindutils.Kind) {
 	if implementationName == "commandExecutorKind" {
-		return MustGetLocalCommandExecutorKind()
+		return kindutils.MustGetLocalCommandExecutorKind()
 	}
 
 	logging.LogFatalWithTracef(

@@ -1,4 +1,4 @@
-package kind
+package kindutils
 
 import (
 	"context"
