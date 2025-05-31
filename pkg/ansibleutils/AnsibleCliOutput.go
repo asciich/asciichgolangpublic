@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type AnsibleCliOuput struct {
@@ -20,21 +21,20 @@ func NewAnsibleCliOutput() (a *AnsibleCliOuput) {
 	return a
 }
 
+func (a *AnsibleCliOuput) ListHostNames() ([]string, error) {
+	if a.inventory == nil {
+		return nil, tracederrors.TracedError("Inventory is not set.")
+	}
+
+	return a.inventory.ListHostNames()
+}
+
 func (a *AnsibleCliOuput) Name() (name string) {
 	return a.name
 }
 
 func (a *AnsibleCliOuput) Inventory() (inventory *AnsibleInventory) {
 	return a.inventory
-}
-
-func (a *AnsibleCliOuput) MustGetNumberOfHosts(ctx context.Context) (nHosts int) {
-	nHosts, err := a.GetNumberOfHosts(ctx)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nHosts
 }
 
 func (a *AnsibleCliOuput) GetNumberOfHosts(ctx context.Context) (nHosts int, err error) {
