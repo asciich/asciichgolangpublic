@@ -261,3 +261,93 @@ func TestKubeConfig_MergeThreeConfigs(t *testing.T) {
 		mustutils.Must(kubeconfigutils.ListContextNamesUsingKubectl(tempFilePath, verbose)),
 	)
 }
+
+func TestKubeConfig_UpdateUserByMerge(t *testing.T) {
+	t.Run("Update user token and cert by merge", func(t *testing.T) {
+		kubeConfig, err := kubeconfigutils.LoadFromFilePath("./testdata/cluster-a.yaml", true)
+		require.NoError(t, err)
+
+		clientKeyData, err := kubeConfig.GetClientKeyDataForUser("kind-cluster-a")
+		require.NoError(t, err)
+		require.NotEqualValues(t, "NewToken", clientKeyData)
+
+		kubeConfigUpdate, err := kubeconfigutils.LoadFromFilePath("./testdata/cluster-a_update_user.yaml", true)
+		require.NoError(t, err)
+
+		clientKeyData, err = kubeConfigUpdate.GetClientKeyDataForUser("kind-cluster-a")
+		require.NoError(t, err)
+		require.EqualValues(t, "NewToken", clientKeyData)
+
+		merged, err := kubeconfigutils.MergeConfig(kubeConfig, kubeConfigUpdate)
+		require.NoError(t, err)
+		require.NotNil(t, merged)
+
+		user, err := merged.GetUserEntryByName("kind-cluster-a")
+		require.NoError(t, err)
+		require.NotNil(t, user)
+
+		clientKeyData, err = user.GetClientKeyData()
+		require.NoError(t, err)
+		require.EqualValues(t, "NewToken", clientKeyData)
+	})
+}
+
+func TestKubeConfig_UpdateContextByMerge(t *testing.T) {
+	t.Run("Update context by merge", func(t *testing.T) {
+		kubeConfig, err := kubeconfigutils.LoadFromFilePath("./testdata/cluster-a.yaml", true)
+		require.NoError(t, err)
+
+		username, err := kubeConfig.GetUserNameByContextName("kind-cluster-a")
+		require.NoError(t, err)
+		require.NotEqualValues(t, "kind-cluster-b", username)
+
+		kubeConfigUpdate, err := kubeconfigutils.LoadFromFilePath("./testdata/cluster-a_update_context.yaml", true)
+		require.NoError(t, err)
+
+		username, err = kubeConfigUpdate.GetUserNameByContextName("kind-cluster-a")
+		require.NoError(t, err)
+		require.EqualValues(t, "kind-cluster-new-name", username)
+
+		merged, err := kubeconfigutils.MergeConfig(kubeConfig, kubeConfigUpdate)
+		require.NoError(t, err)
+		require.NotNil(t, merged)
+
+		kubeConfigContext, err := merged.GetContextEntryByName("kind-cluster-a")
+		require.NoError(t, err)
+		require.NotNil(t, kubeConfigContext)
+
+		username, err = kubeConfigContext.GetUserName()
+		require.NoError(t, err)
+		require.EqualValues(t, "kind-cluster-new-name", username)
+	})
+}
+
+func TestKubeConfig_UpdateClusterByMerge(t *testing.T) {
+	t.Run("Update cluster by merge", func(t *testing.T) {
+		kubeConfig, err := kubeconfigutils.LoadFromFilePath("./testdata/cluster-a.yaml", true)
+		require.NoError(t, err)
+
+		serverUrl, err := kubeConfig.GetClusterServerUrlAsString("kind-cluster-a")
+		require.NoError(t, err)
+		require.NotEqualValues(t, "https://127.0.0.1:36436", serverUrl)
+
+		kubeConfigUpdate, err := kubeconfigutils.LoadFromFilePath("./testdata/cluster-a_update_server.yaml", true)
+		require.NoError(t, err)
+
+		serverUrl, err = kubeConfigUpdate.GetClusterServerUrlAsString("kind-cluster-a")
+		require.NoError(t, err)
+		require.EqualValues(t, "https://127.0.0.1:36436", serverUrl)
+
+		merged, err := kubeconfigutils.MergeConfig(kubeConfig, kubeConfigUpdate)
+		require.NoError(t, err)
+		require.NotNil(t, merged)
+
+		kubeCluster, err := merged.GetClusterEntryByName("kind-cluster-a")
+		require.NoError(t, err)
+		require.NotNil(t, kubeCluster)
+
+		serverUrl, err = kubeCluster.GetServerUrlAsString()
+		require.NoError(t, err)
+		require.EqualValues(t, "https://127.0.0.1:36436", serverUrl)
+	})
+}

@@ -74,6 +74,15 @@ func LoadFromFile(file files.File, verbose bool) (config *KubeConfig, err error)
 	return config, nil
 }
 
+func (k *KubeConfig) GetClusterServerUrlAsString(clusterName string) (string, error) {
+	cluster, err := k.GetClusterEntryByName(clusterName)
+	if err != nil {
+		return "", err
+	}
+
+	return cluster.GetServerUrlAsString()
+}
+
 func (k *KubeConfig) GetUserNameByContextName(contextName string) (userName string, err error) {
 	if contextName == "" {
 		return "", tracederrors.TracedErrorEmptyString("contextName")
@@ -171,39 +180,39 @@ func (k *KubeConfig) GetClusterEntryByName(name string) (cluster *KubeConfigClus
 	return nil, tracederrors.TracedErrorf("Cluster by name '%s' not found.", name)
 }
 
-func (k *KubeConfig) GetContextEntryByName(name string) (context *KubeConfigContext, err error) {
+func (k *KubeConfig) GetContextEntryByName(name string) (kubeConfigContext *KubeConfigContext, err error) {
 	if name == "" {
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
 
 	for _, c := range k.Contexts {
 		if c.Name == name {
-			context = new(KubeConfigContext)
-			*context = c
-			return context, nil
+			kubeConfigContext = new(KubeConfigContext)
+			*kubeConfigContext = c
+			return kubeConfigContext, nil
 		}
 	}
 
 	return nil, tracederrors.TracedErrorf("Context by name '%s' not found.", name)
 }
 
-func (k *KubeConfig) GetUserEntryByName(name string) (context *KubeConfigUser, err error) {
+func (k *KubeConfig) GetUserEntryByName(name string) (kubeConfigContext *KubeConfigUser, err error) {
 	if name == "" {
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
 
 	for _, c := range k.Users {
 		if c.Name == name {
-			context = new(KubeConfigUser)
-			*context = c
-			return context, nil
+			kubeConfigContext = new(KubeConfigUser)
+			*kubeConfigContext = c
+			return kubeConfigContext, nil
 		}
 	}
 
 	return nil, tracederrors.TracedErrorf("User by name '%s' not found.", name)
 }
 
-func (k *KubeConfig) GetClusterAndContextAndUserEntryByName(name string) (cluster *KubeConfigCluster, context *KubeConfigContext, user *KubeConfigUser, err error) {
+func (k *KubeConfig) GetClusterAndContextAndUserEntryByName(name string) (cluster *KubeConfigCluster, kubeConfigContext *KubeConfigContext, user *KubeConfigUser, err error) {
 	if name == "" {
 		return nil, nil, nil, tracederrors.TracedErrorEmptyString("name")
 	}
@@ -213,12 +222,12 @@ func (k *KubeConfig) GetClusterAndContextAndUserEntryByName(name string) (cluste
 		return nil, nil, nil, err
 	}
 
-	context, err = k.GetContextEntryByName(name)
+	kubeConfigContext, err = k.GetContextEntryByName(name)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	userName, err := context.GetUserName()
+	userName, err := kubeConfigContext.GetUserName()
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -228,7 +237,7 @@ func (k *KubeConfig) GetClusterAndContextAndUserEntryByName(name string) (cluste
 		return nil, nil, nil, err
 	}
 
-	return cluster, context, user, nil
+	return cluster, kubeConfigContext, user, nil
 }
 
 func (k *KubeConfig) AddConfig(toAdd *KubeConfig) (err error) {
@@ -263,9 +272,9 @@ func (k *KubeConfig) AddClusterEntry(cluster *KubeConfigCluster) (err error) {
 
 	nameToAdd := cluster.Name
 
-	for _, c := range k.Clusters {
+	for i, c := range k.Clusters {
 		if c.Name == nameToAdd {
-			c = *cluster
+			k.Clusters[i] = *cluster
 			return nil
 		}
 	}
@@ -275,21 +284,21 @@ func (k *KubeConfig) AddClusterEntry(cluster *KubeConfigCluster) (err error) {
 	return nil
 }
 
-func (k *KubeConfig) AddContextEntry(context *KubeConfigContext) (err error) {
-	if context == nil {
+func (k *KubeConfig) AddContextEntry(kubeConfigContext *KubeConfigContext) (err error) {
+	if kubeConfigContext == nil {
 		return tracederrors.TracedErrorNil("context")
 	}
 
-	nameToAdd := context.Name
+	nameToAdd := kubeConfigContext.Name
 
-	for _, c := range k.Contexts {
+	for i, c := range k.Contexts {
 		if c.Name == nameToAdd {
-			c = *context
+			k.Contexts[i] = *kubeConfigContext
 			return nil
 		}
 	}
 
-	k.Contexts = append(k.Contexts, *context)
+	k.Contexts = append(k.Contexts, *kubeConfigContext)
 
 	return nil
 }
@@ -301,9 +310,9 @@ func (k *KubeConfig) AddUserEntry(user *KubeConfigUser) (err error) {
 
 	nameToAdd := user.Name
 
-	for _, c := range k.Users {
+	for i, c := range k.Users {
 		if c.Name == nameToAdd {
-			c = *user
+			k.Users[i] = *user
 			return nil
 		}
 	}
@@ -313,12 +322,12 @@ func (k *KubeConfig) AddUserEntry(user *KubeConfigUser) (err error) {
 	return nil
 }
 
-func (k *KubeConfig) AddClusterAndContextAndUserEntry(cluster *KubeConfigCluster, context *KubeConfigContext, user *KubeConfigUser) (err error) {
+func (k *KubeConfig) AddClusterAndContextAndUserEntry(cluster *KubeConfigCluster, kubeConfigContext *KubeConfigContext, user *KubeConfigUser) (err error) {
 	if cluster == nil {
 		return tracederrors.TracedErrorNil("cluster")
 	}
 
-	if context == nil {
+	if kubeConfigContext == nil {
 		return tracederrors.TracedErrorNil("context")
 	}
 
@@ -331,7 +340,7 @@ func (k *KubeConfig) AddClusterAndContextAndUserEntry(cluster *KubeConfigCluster
 		return err
 	}
 
-	err = k.AddContextEntry(context)
+	err = k.AddContextEntry(kubeConfigContext)
 	if err != nil {
 		return err
 	}
@@ -467,4 +476,21 @@ func ListContextNamesUsingKubectl(path string, verbose bool) (contextNames []str
 	sort.Strings(contextNames)
 
 	return contextNames, nil
+}
+
+func (k *KubeConfig) GetClientKeyDataForUser(name string) (string, error) {
+	user, err := k.GetUserEntryByName(name)
+	if err != nil {
+		return "", err
+	}
+
+	return user.GetClientKeyData()
+}
+
+func (k *KubeConfigCluster) GetServerUrlAsString() (string, error) {
+	if k.Cluster.Server == "" {
+		return "", tracederrors.TracedError("Kluster.Server not set")
+	}
+
+	return k.Cluster.Server, nil
 }
