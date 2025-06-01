@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/defaultclicommands"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
 
 var rootCmd = &cobra.Command{
@@ -14,7 +15,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	defaultclicommands.MustAddDefaultCommands(rootCmd)
+	mustutils.Must0(defaultclicommands.AddDefaultCommands(rootCmd))
 }
 
 func Execute() {
