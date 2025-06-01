@@ -1,4 +1,4 @@
-package kubeconfig
+package kubeconfigutils
 
 import "github.com/asciich/asciichgolangpublic/tracederrors"
 

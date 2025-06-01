@@ -1,4 +1,4 @@
-package kubeconfig
+package kubeconfigutils
 
 import (
 	"sort"

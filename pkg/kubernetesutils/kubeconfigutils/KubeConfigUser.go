@@ -1,4 +1,4 @@
-package kubeconfig
+package kubeconfigutils
 
 type KubeConfigUser struct {
 	Name string `yaml:"name"`
