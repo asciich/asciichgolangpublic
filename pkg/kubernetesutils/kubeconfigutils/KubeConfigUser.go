@@ -1,5 +1,7 @@
 package kubeconfigutils
 
+import "github.com/asciich/asciichgolangpublic/tracederrors"
+
 type KubeConfigUser struct {
 	Name string `yaml:"name"`
 	User struct {
@@ -8,4 +10,12 @@ type KubeConfigUser struct {
 		Username              string `yaml:"username"`
 		Password              string `yaml:"password"`
 	} `yaml:"user"`
+}
+
+func (k *KubeConfigUser) GetClientKeyData() (string, error) {
+	if k.User.ClientKeyData == "" {
+		return "", tracederrors.TracedError("ClientKeyData not set")
+	}
+
+	return k.User.ClientKeyData, nil
 }
