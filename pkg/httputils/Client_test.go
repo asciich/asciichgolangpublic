@@ -64,8 +64,7 @@ func TestClient_GetRequest_RootPage_PortInUrl(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.True(t, mustutils.Must(response.IsStatusCodeOk()))
-				require.Contains(t, mustutils.Must(response.GetBodyAsString()), "TestWebServer")
+				require.True(t, response.IsStatusCode200Ok())
 			},
 		)
 	}
@@ -107,6 +106,51 @@ func TestClient_GetRequestBodyAsString_RootPage_PortInUrl(t *testing.T) {
 				)
 				require.NoError(t, err)
 				require.Contains(t, responseBody, "TestWebServer")
+			},
+		)
+	}
+}
+
+func TestClient_GetRequest_404_PortInUrl(t *testing.T) {
+	tests := []struct {
+		implementationName string
+		method             string
+	}{
+		{"nativeClient", "get"},
+		{"nativeClient", "Get"},
+		{"nativeClient", "GET"},
+		{"nativeClient", "GeT"},
+		{"nativeClient", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const port int = 9123
+
+				testServer, err := httputils.GetTestWebServer(port)
+				require.NoError(t, err)
+				defer testServer.Stop(ctx)
+
+				err = testServer.StartInBackground(ctx)
+				require.NoError(t, err)
+
+				var client httputils.Client = getClientByImplementationName(tt.implementationName)
+				response, err := client.SendRequest(
+					ctx,
+					&httputils.RequestOptions{
+						Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/this-page-does-not-exist",
+						Method: tt.method,
+					},
+				)
+				require.Error(t, err)
+				require.ErrorIs(t, err, httputils.ErrUnexpectedStatusCode)
+
+				require.NotNil(t, response)
+				require.False(t, response.IsStatusCode200Ok())
+				require.True(t, response.IsStatusCode(404))
 			},
 		)
 	}

@@ -68,13 +68,25 @@ func (g *GenericResponse) GetStatusCode() (statusCode int, err error) {
 	return g.statusCode, nil
 }
 
-func (g *GenericResponse) IsStatusCodeOk() (isStatusCodeOk bool, err error) {
-	statusCode, err := g.GetStatusCode()
-	if err != nil {
-		return false, err
+func (g *GenericResponse) CheckStatusCode(expectedStatusCode int) error {
+	if !g.IsStatusCode(expectedStatusCode) {
+		return tracederrors.TracedErrorf("%w: %d does not match expected status code %d", ErrUnexpectedStatusCode, g.statusCode, expectedStatusCode)
 	}
 
-	return statusCode == STATUS_CODE_OK, nil
+	return nil
+}
+
+func (g *GenericResponse) IsStatusCode(expectedStatusCode int) bool {
+	statusCode, err := g.GetStatusCode()
+	if err != nil {
+		return false
+	}
+
+	return statusCode == expectedStatusCode
+}
+
+func (g *GenericResponse) IsStatusCode200Ok() bool {
+	return g.IsStatusCode(STATUS_CODE_OK)
 }
 
 func (g *GenericResponse) SetBody(body []byte) (err error) {
