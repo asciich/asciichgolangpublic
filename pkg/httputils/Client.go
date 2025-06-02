@@ -2,9 +2,12 @@ package httputils
 
 import (
 	"context"
+	"errors"
 
 	"github.com/asciich/asciichgolangpublic/files"
 )
+
+var ErrUnexpectedStatusCode = errors.New("unexpected status code")
 
 type Client interface {
 	DownloadAsFile(ctx context.Context, downloadOptions *DownloadAsFileOptions) (downloadedFile files.File, err error)

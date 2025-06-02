@@ -92,6 +92,11 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *RequestO
 		return nil, err
 	}
 
+	err = response.CheckStatusCode(STATUS_CODE_OK)
+	if err != nil {
+		return response, err
+	}
+
 	return response, err
 }
 

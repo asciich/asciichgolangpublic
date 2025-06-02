@@ -175,6 +175,23 @@ func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 
 	t.mux = http.NewServeMux()
 	t.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r == nil {
+			logging.LogWarn("r is nil")
+			http.Error(w, "500 internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		if r.URL == nil {
+			logging.LogWarn("r.URL is nil")
+			http.Error(w, "500 internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		if r.URL.Path != "" {
+			http.NotFound(w, r)
+			return
+		}
+
 		io.WriteString(w, "TestWebServer main page\n")
 	})
 
