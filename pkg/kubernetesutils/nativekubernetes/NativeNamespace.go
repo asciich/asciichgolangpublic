@@ -2,6 +2,7 @@ package nativekubernetes
 
 import (
 	"context"
+	"reflect"
 
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
@@ -243,8 +244,8 @@ func (n *NativeNamespace) ConfigMapByNameExists(ctx context.Context, configmapNa
 	return exists, nil
 }
 
-func (n *NativeNamespace) CreateConfigMap(ctx context.Context, configmapName string, options *kubernetesutils.CreateConfigMapOptions) (createdConfigMap kubernetesutils.ConfigMap, err error) {
-	if configmapName == "" {
+func (n *NativeNamespace) CreateConfigMap(ctx context.Context, configMapName string, options *kubernetesutils.CreateConfigMapOptions) (createdConfigMap kubernetesutils.ConfigMap, err error) {
+	if configMapName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("configmap")
 	}
 
@@ -252,7 +253,7 @@ func (n *NativeNamespace) CreateConfigMap(ctx context.Context, configmapName str
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	exists, err := n.ConfigMapByNameExists(ctx, configmapName)
+	exists, err := n.ConfigMapByNameExists(ctx, configMapName)
 	if err != nil {
 		return nil, err
 	}
@@ -262,36 +263,62 @@ func (n *NativeNamespace) CreateConfigMap(ctx context.Context, configmapName str
 		return nil, err
 	}
 
-	if exists {
-		return nil, tracederrors.TracedError("Update existing configmap not implemented")
-	} else {
-		clientset, err := n.GetClientSet()
-		if err != nil {
-			return nil, err
-		}
-
-		configmapData, err := options.GetConfigMapData()
-		if err != nil {
-			return nil, err
-		}
-
-		configmap := &v1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   configmapName,
-				Labels: map[string]string{},
-			},
-			Data: configmapData,
-		}
-
-		_, err = clientset.CoreV1().ConfigMaps(namespaceName).Create(ctx, configmap, metav1.CreateOptions{})
-		if err != nil {
-			return nil, tracederrors.TracedErrorf("failed to create configmap '%s' in namespace '%s': %w", configmapName, namespaceName, err)
-		}
-
-		logging.LogChangedByCtxf(ctx, "Created configmap '%s' in kubernetes namespace '%s'.", configmapName, namespaceName)
+	configmapData, err := options.GetConfigMapData()
+	if err != nil {
+		return nil, err
 	}
 
-	return n.GetConfigMapByName(configmapName)
+	labels := options.GetLabels()
+
+	clientset, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	configmap := &v1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   configMapName,
+			Labels: labels,
+		},
+		Data: configmapData,
+	}
+
+	if exists {
+		configMap, err := n.GetConfigMapByName(configMapName)
+		if err != nil {
+			return nil, err
+		}
+
+		nativeConfigMap, ok := configMap.(*NativeConfigMap)
+		if !ok {
+			return nil, tracederrors.TracedError("Returned config map is not a nativeConfigMap")
+		}
+
+		rawResponse, err := nativeConfigMap.GetRawResponse(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		if reflect.DeepEqual(rawResponse.Data, configmapData) && reflect.DeepEqual(rawResponse.Labels, labels) {
+			logging.LogInfoByCtxf(ctx, "ConfigMap '%s' already exists in namespace '%s' and is up to date.", configMapName, namespaceName)
+		} else {
+			_, err := clientset.CoreV1().ConfigMaps(namespaceName).Update(ctx, configmap, metav1.UpdateOptions{})
+			if err != nil {
+				return nil, tracederrors.TracedErrorf("failed to create configmap '%s' in namespace '%s': %w", configMapName, namespaceName, err)
+			}
+
+			logging.LogChangedByCtxf(ctx, "Updated configmap '%s' in kubernetes namespace '%s'.", configMapName, namespaceName)
+		}
+	} else {
+		_, err = clientset.CoreV1().ConfigMaps(namespaceName).Create(ctx, configmap, metav1.CreateOptions{})
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("failed to create configmap '%s' in namespace '%s': %w", configMapName, namespaceName, err)
+		}
+
+		logging.LogChangedByCtxf(ctx, "Created configmap '%s' in kubernetes namespace '%s'.", configMapName, namespaceName)
+	}
+
+	return n.GetConfigMapByName(configMapName)
 }
 
 func (n *NativeNamespace) GetConfigMapByName(name string) (configMap kubernetesutils.ConfigMap, err error) {
