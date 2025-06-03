@@ -446,7 +446,7 @@ func (h *CommandExecutorHost) IsTcpPortOpen(portNumber int, verbose bool) (isOpe
 		return false, err
 	}
 
-	isOpen, err = netutils.IsTcpPortOpen(hostname, portNumber, verbose)
+	isOpen, err = netutils.IsTcpPortOpen(contextutils.GetVerbosityContextByBool(verbose), hostname, portNumber)
 	if err != nil {
 		return false, err
 	}

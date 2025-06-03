@@ -22,14 +22,10 @@ func TestTcpPortsIsPortOpen(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				isOpen, err := IsTcpPortOpen(getCtx(), tt.hostname, tt.portNumber)
+				require.NoError(t, err)
 
-				const verbose bool = true
-
-				require.EqualValues(
-					tt.expectedIsOpen,
-					MustIsTcpPortOpen(tt.hostname, tt.portNumber, verbose),
-				)
+				require.EqualValues(t, tt.expectedIsOpen, isOpen)
 			},
 		)
 	}
