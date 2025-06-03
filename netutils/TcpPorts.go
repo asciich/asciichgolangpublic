@@ -1,6 +1,7 @@
 package netutils
 
 import (
+	"context"
 	"net"
 	"strconv"
 	"strings"
@@ -12,7 +13,7 @@ import (
 
 // Check if a TCP port on the given hostnameOrIp with given portNumber is open.
 // The evaluation is done by opening a TCP socket and close it again.
-func IsTcpPortOpen(hostnameOrIp string, port int, verbose bool) (isOpen bool, err error) {
+func IsTcpPortOpen(ctx context.Context, hostnameOrIp string, port int) (isOpen bool, err error) {
 	hostnameOrIp = strings.TrimSpace(hostnameOrIp)
 	if hostnameOrIp == "" {
 		return false, tracederrors.TracedErrorEmptyString("hostnameOrIp")
@@ -41,22 +42,11 @@ func IsTcpPortOpen(hostnameOrIp string, port int, verbose bool) (isOpen bool, er
 		}
 	}
 
-	if verbose {
-		if isOpen {
-			logging.LogInfof("Port '%d' on host '%s' is open.", port, hostnameOrIp)
-		} else {
-			logging.LogInfof("Port '%d' on host '%s' is NOT open.", port, hostnameOrIp)
-		}
+	if isOpen {
+		logging.LogInfoByCtxf(ctx, "Port '%d' on host '%s' is open.", port, hostnameOrIp)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Port '%d' on host '%s' is NOT open.", port, hostnameOrIp)
 	}
 
 	return isOpen, nil
-}
-
-func MustIsTcpPortOpen(hostnameOrIp string, port int, verbose bool) (isOpen bool) {
-	isOpen, err := IsTcpPortOpen(hostnameOrIp, port, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isOpen
 }

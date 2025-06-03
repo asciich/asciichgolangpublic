@@ -183,7 +183,6 @@ func Test_ReadAndWriteConfigMap(t *testing.T) {
 					require.EqualValues(t, labels2, currentLabels)
 				}
 
-
 				for i := 0; i < 2; i++ {
 					configMap, err := kubernetes.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesutils.CreateConfigMapOptions{
 						ConfigMapData: content,
