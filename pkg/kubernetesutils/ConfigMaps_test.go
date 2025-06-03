@@ -103,3 +103,103 @@ func Test_CreateConfigMapInNonExistentNamespace(t *testing.T) {
 		)
 	}
 }
+
+func Test_ReadAndWriteConfigMap(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		// {"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "testnamespace"
+				const configmapName = "configmapname"
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+
+				labels := map[string]string{"label1": "value1"}
+				content := map[string]string{"file.txt": "hello_world"}
+
+				for i := 0; i < 2; i++ {
+					configMap, err := kubernetes.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesutils.CreateConfigMapOptions{
+						ConfigMapData: content,
+						Labels:        labels,
+					})
+					require.NoError(t, err)
+
+					currentContent, err := configMap.GetAllData(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, content, currentContent)
+
+					currentLabels, err := configMap.GetAllLabels(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, labels, currentLabels)
+				}
+
+				labels2 := map[string]string{
+					"label2": "value2",
+					"label3": "value3",
+				}
+
+				for i := 0; i < 2; i++ {
+					configMap, err := kubernetes.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesutils.CreateConfigMapOptions{
+						ConfigMapData: content,
+						Labels:        labels2,
+					})
+					require.NoError(t, err)
+
+					currentContent, err := configMap.GetAllData(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, content, currentContent)
+
+					currentLabels, err := configMap.GetAllLabels(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, labels2, currentLabels)
+				}
+
+				content2 := map[string]string{
+					"file.txt":  "hello_world",
+					"file2.txt": "hello_world2",
+				}
+
+				for i := 0; i < 2; i++ {
+					configMap, err := kubernetes.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesutils.CreateConfigMapOptions{
+						ConfigMapData: content2,
+						Labels:        labels2,
+					})
+					require.NoError(t, err)
+
+					currentContent, err := configMap.GetAllData(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, content2, currentContent)
+
+					currentLabels, err := configMap.GetAllLabels(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, labels2, currentLabels)
+				}
+
+
+				for i := 0; i < 2; i++ {
+					configMap, err := kubernetes.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesutils.CreateConfigMapOptions{
+						ConfigMapData: content,
+						Labels:        labels,
+					})
+					require.NoError(t, err)
+
+					currentContent, err := configMap.GetAllData(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, content, currentContent)
+
+					currentLabels, err := configMap.GetAllLabels(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, labels, currentLabels)
+				}
+			},
+		)
+	}
+}
