@@ -399,7 +399,7 @@ func (n *NativeNamespace) WatchConfigMap(ctx context.Context, configMapName stri
 	informer := cache.NewSharedIndexInformer(
 		listWatcher,
 		&v1.ConfigMap{},
-		5*60*time.Second,
+		5*time.Minute,
 		cache.Indexers{},
 	)
 
