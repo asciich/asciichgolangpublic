@@ -65,6 +65,8 @@ func WatchEvents(ctx context.Context, options *kubernetesutils.WatchEventOptions
 		return tracederrors.TracedErrorNil("options")
 	}
 
+	tStart := time.Now()
+
 	logging.LogInfoByCtxf(ctx, "Watch kubernetes events with options='%s' setup started.", options)
 
 	clientset, err := GetClientSet(ctx)
@@ -86,6 +88,10 @@ func WatchEvents(ctx context.Context, options *kubernetesutils.WatchEventOptions
 				return
 			}
 
+			if event.LastTimestamp.Time.Before(tStart) {
+				return
+			}
+
 			notifyCallbackWithEvent(event, options, onCreate)
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
@@ -95,6 +101,10 @@ func WatchEvents(ctx context.Context, options *kubernetesutils.WatchEventOptions
 
 			event, ok := newObj.(*corev1.Event)
 			if !ok {
+				return
+			}
+
+			if event.LastTimestamp.Time.Before(tStart) {
 				return
 			}
 
@@ -108,6 +118,10 @@ func WatchEvents(ctx context.Context, options *kubernetesutils.WatchEventOptions
 
 			event, ok := obj.(*corev1.Event)
 			if !ok {
+				return
+			}
+
+			if event.LastTimestamp.Time.Before(tStart) {
 				return
 			}
 
