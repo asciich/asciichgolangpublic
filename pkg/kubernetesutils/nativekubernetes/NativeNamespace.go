@@ -3,14 +3,18 @@ package nativekubernetes
 import (
 	"context"
 	"reflect"
+	"time"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/cache"
 )
 
 type NativeNamespace struct {
@@ -362,6 +366,120 @@ func (n *NativeNamespace) DeleteConfigMapByName(ctx context.Context, configmapNa
 	} else {
 		logging.LogInfoByCtxf(ctx, "ConfigMap '%s' in namespace '%s' does not exist. Skip delete.", configmapName, namespaceName)
 	}
+
+	return nil
+}
+
+func (n *NativeNamespace) WatchConfigMap(ctx context.Context, configMapName string, onCreate func(kubernetesutils.ConfigMap), onUpdate func(kubernetesutils.ConfigMap), onDelete func(kubernetesutils.ConfigMap)) error {
+	if configMapName == "" {
+		return tracederrors.TracedErrorEmptyString("configMapName")
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Watch ConfigMap '%s' in namespace '%s' started.", configMapName, namespaceName)
+
+	clientset, err := n.GetClientSet()
+	if err != nil {
+		return err
+	}
+
+	fieldSelector := fields.OneTermEqualSelector("metadata.name", configMapName)
+
+	listWatcher := cache.NewListWatchFromClient(
+		clientset.CoreV1().RESTClient(),
+		"configmaps",
+		v1.NamespaceAll,
+		fieldSelector,
+	)
+
+	informer := cache.NewSharedIndexInformer(
+		listWatcher,
+		&v1.ConfigMap{},
+		5*60*time.Second,
+		cache.Indexers{},
+	)
+
+	_, err = informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			nativeConfigMap, ok := obj.(*v1.ConfigMap)
+			if !ok {
+				tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
+				if !ok {
+					return
+				}
+				nativeConfigMap, ok = tombstone.Obj.(*v1.ConfigMap)
+				if !ok {
+					return
+				}
+			}
+			cm, err := n.GetConfigMapByName(nativeConfigMap.Name)
+			if err != nil {
+				return
+			}
+			onCreate(cm)
+		},
+		UpdateFunc: func(oldObj interface{}, newObj interface{}) {
+			nativeConfigMap, ok := newObj.(*v1.ConfigMap)
+			if !ok {
+				tombstone, ok := newObj.(cache.DeletedFinalStateUnknown)
+				if !ok {
+					return
+				}
+				nativeConfigMap, ok = tombstone.Obj.(*v1.ConfigMap)
+				if !ok {
+					return
+				}
+			}
+			cm, err := n.GetConfigMapByName(nativeConfigMap.Name)
+			if err != nil {
+				return
+			}
+			onUpdate(cm)
+		},
+		DeleteFunc: func(obj interface{}) {
+			nativeConfigMap, ok := obj.(*v1.ConfigMap)
+			if !ok {
+				tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
+				if !ok {
+					return
+				}
+				nativeConfigMap, ok = tombstone.Obj.(*v1.ConfigMap)
+				if !ok {
+					return
+				}
+			}
+			cm, err := n.GetConfigMapByName(nativeConfigMap.Name)
+			if err != nil {
+				return
+			}
+			onDelete(cm)
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	go informer.Run(ctx.Done())
+
+	go func() {
+		verbose := contextutils.GetVerboseFromContext(ctx)
+		select {
+		case <-ctx.Done():
+			if verbose {
+				logging.LogInfof("Watch ConfigMap '%s' in namespace '%s' canceled.", configMapName, namespaceName)
+			}
+		}
+	}()
+
+	if !cache.WaitForCacheSync(ctx.Done(), informer.HasSynced) {
+		return tracederrors.TracedErrorf("Failed to sync cache for watching ConfigMap '%s' in namespace '%s'.", configMapName, namespaceName)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Watch ConfigMap '%s' in namespace '%s' set up. Create, update and delete are now watched.", configMapName, namespaceName)
 
 	return nil
 }
