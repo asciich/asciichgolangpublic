@@ -437,8 +437,6 @@ func (c *CommandExecutorNamespace) CreateSecret(ctx context.Context, name string
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
-
-
 func (c *CommandExecutorNamespace) DeleteConfigMapByName(ctx context.Context, name string) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
 }
@@ -453,4 +451,12 @@ func (c *CommandExecutorNamespace) GetConfigMapByName(name string) (secret kuber
 
 func (c *CommandExecutorNamespace) CreateConfigMap(ctx context.Context, name string, options *kubernetesutils.CreateConfigMapOptions) (createdConfigMap kubernetesutils.ConfigMap, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorNamespace) WatchConfigMap(ctx context.Context, name string, onCreate func(kubernetesutils.ConfigMap), onUpdate func(kubernetesutils.ConfigMap), onDelete func(kubernetesutils.ConfigMap)) error {
+	if name == "" {
+		return tracederrors.TracedErrorEmptyString("name")
+	}
+
+	return tracederrors.TracedErrorNotImplemented()
 }
