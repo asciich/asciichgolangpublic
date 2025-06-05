@@ -49,7 +49,7 @@ func Test_EventMatchesOptions(t *testing.T) {
 
 		require.True(t, nativekubernetes.EventMatchesOptions(
 			event,
-			&kubernetesutils.WatchEventOptions{Kind: "abc"},
+			&kubernetesutils.WatchEventOptions{InvolvedObjectKind: "abc"},
 		))
 	})
 
@@ -59,7 +59,7 @@ func Test_EventMatchesOptions(t *testing.T) {
 
 		require.True(t, nativekubernetes.EventMatchesOptions(
 			event,
-			&kubernetesutils.WatchEventOptions{Kind: "abc"},
+			&kubernetesutils.WatchEventOptions{InvolvedObjectKind: "abc"},
 		))
 	})
 }

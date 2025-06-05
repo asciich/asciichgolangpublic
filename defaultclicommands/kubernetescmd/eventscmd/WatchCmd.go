@@ -41,10 +41,10 @@ func NewWatchCmd() *cobra.Command {
 			err = nativekubernetes.WatchEvents(
 				ctx,
 				&kubernetesutils.WatchEventOptions{
-					Namespace:  namespace,
-					Name:       name,
-					APIVersion: apiversion,
-					Kind:       kind,
+					Namespace:                namespace,
+					InvolvedObjectName:       name,
+					InvolvedObjectAPIVersion: apiversion,
+					InvolvedObjectKind:       kind,
 				},
 				onCreate,
 				onDelete,
