@@ -18,7 +18,8 @@ func Test_Example_WatchConfigMap(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.WithVerbose(context.TODO())
 
-	// Prepare start ...
+	// -----
+	// Prepare test environment start ...
 	const clusterName = "kind"
 
 	// Ensure a local kind cluster is available for testing:
@@ -33,13 +34,15 @@ func Test_Example_WatchConfigMap(t *testing.T) {
 	const namespaceName = "testnamespace"
 	namespace, err := cluster.CreateNamespaceByName(ctx, namespaceName)
 	require.NoError(t, err)
+	// ... prepare test environment finished.
+	// -----
 
 	// Ensure ConfigMap under test is absent:
 	const configmapName = "example-configmap"
 	err = namespace.DeleteConfigMapByName(ctx, configmapName)
 	require.NoError(t, err)
 
-	// define Methot counter and watch config map
+	// define counters and watch config map
 	var cmCreateCounter, cmUpdateCounter, cmDeleteCounter int
 	ctxWatch, cancel := context.WithCancel(ctx) // ensure we can cancel the watching
 	err = namespace.WatchConfigMap(
@@ -106,7 +109,7 @@ func Test_Example_WatchConfigMap(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		// Check cmUpdateCounter is unchanged sinc watch was deactivated
+		// Check cmUpdateCounter is unchanged since watch was deactivated
 		time.Sleep(100 * time.Millisecond)
 		require.EqualValues(t, 1, cmCreateCounter)
 		require.EqualValues(t, nUpdates, cmUpdateCounter)
@@ -117,7 +120,7 @@ func Test_Example_WatchConfigMap(t *testing.T) {
 	err = cluster.DeleteConfigMapByName(ctx, namespaceName, configmapName)
 	require.NoError(t, err)
 
-	// Check cmUpdateCounter is unchanged sinc watch was deactivated
+	// Check cmUpdateCounter is unchanged since watch was deactivated
 	time.Sleep(100 * time.Millisecond)
 	require.EqualValues(t, 1, cmCreateCounter)
 	require.EqualValues(t, nUpdates, cmUpdateCounter)

@@ -7,15 +7,15 @@ type WatchEventOptions struct {
 	Namespace string
 
 	// InvolvedObject API version, e.g apiextensions.k8s.io/v1 :
-	APIVersion string
+	InvolvedObjectAPIVersion string
 
-	// InvolvedObject Kind:
-	Kind string
+	// InvolvedObject InvolvedObjectKind:
+	InvolvedObjectKind string
 
-	// InvolvedObject Name:
-	Name string
+	// InvolvedObject InvolvedObjectName:
+	InvolvedObjectName string
 }
 
 func (w *WatchEventOptions) String() string {
-	return fmt.Sprintf("Name='%s' Kind='%s' APIVersion='%s' Namespace='%s'", w.Name, w.Kind, w.APIVersion, w.Namespace)
+	return fmt.Sprintf("Name='%s' Kind='%s' APIVersion='%s' Namespace='%s'", w.InvolvedObjectName, w.InvolvedObjectKind, w.InvolvedObjectAPIVersion, w.Namespace)
 }

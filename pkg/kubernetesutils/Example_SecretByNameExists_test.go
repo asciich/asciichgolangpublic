@@ -16,7 +16,8 @@ func Test_Example_SecretByNameExists(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.WithVerbose(context.TODO())
 
-	// Prepare start ...
+	// -----
+	// Prepare test environment start ...
 	const clusterName = "kind"
 
 	// Ensure a local kind cluster is available for testing:
@@ -34,7 +35,8 @@ func Test_Example_SecretByNameExists(t *testing.T) {
 		SecretData: map[string][]byte{"my-secret": []byte("very-secret")},
 	})
 	require.NoError(t, err)
-	// ... prepare finished.
+	// ... prepare test environment finished.
+	// -----
 
 	// Our created secret exists:
 	exists, err := cluster.SecretByNameExists(ctx, namespaceName, secretName)

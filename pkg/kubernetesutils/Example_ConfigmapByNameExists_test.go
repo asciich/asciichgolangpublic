@@ -16,7 +16,8 @@ func Test_Example_ConfigMapByNameExists(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.WithVerbose(context.TODO())
 
-	// Prepare start ...
+	// -----
+	// Prepare test environment start ...
 	const clusterName = "kind"
 
 	// Ensure a local kind cluster is available for testing:
@@ -34,7 +35,8 @@ func Test_Example_ConfigMapByNameExists(t *testing.T) {
 		ConfigMapData: map[string]string{"my-configmap": "configmap content"},
 	})
 	require.NoError(t, err)
-	// ... prepare finished.
+	// ... prepare test environment finished.
+	// -----
 
 	// Our created configmap exists:
 	exists, err := cluster.ConfigMapByNameExists(ctx, namespaceName, configmapName)

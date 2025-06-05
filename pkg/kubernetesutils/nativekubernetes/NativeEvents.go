@@ -29,20 +29,20 @@ func EventMatchesOptions(event *corev1.Event, options *kubernetesutils.WatchEven
 		}
 	}
 
-	if options.APIVersion != "" {
-		if !strings.EqualFold(event.InvolvedObject.APIVersion, options.APIVersion) {
+	if options.InvolvedObjectAPIVersion != "" {
+		if !strings.EqualFold(event.InvolvedObject.APIVersion, options.InvolvedObjectAPIVersion) {
 			return false
 		}
 	}
 
-	if options.Kind != "" {
-		if !strings.EqualFold(event.InvolvedObject.Kind, options.Kind) {
+	if options.InvolvedObjectKind != "" {
+		if !strings.EqualFold(event.InvolvedObject.Kind, options.InvolvedObjectKind) {
 			return false
 		}
 	}
 
-	if options.Name != "" {
-		if !strings.EqualFold(event.InvolvedObject.Name, options.Name) {
+	if options.InvolvedObjectName != "" {
+		if !strings.EqualFold(event.InvolvedObject.Name, options.InvolvedObjectName) {
 			return false
 		}
 	}
