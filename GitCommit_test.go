@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -45,7 +46,7 @@ func TestGitCommit_CreateTag(t *testing.T) {
 
 				// Add a newer commit to validate the given commit is tagged NOT the latest one
 				newerCommit := repo.MustCommit(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						AllowEmpty: true,
 						Verbose:    verbose,
 						Message:    "this commit should not be tagged",
@@ -53,7 +54,7 @@ func TestGitCommit_CreateTag(t *testing.T) {
 				)
 
 				createdTag := commitToTag.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "first_tag",
 						Verbose: verbose,
 					},
@@ -108,7 +109,7 @@ func TestGitCommit_ListTagsNames(t *testing.T) {
 				)
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "first_tag",
 						Verbose: verbose,
 					},
@@ -124,7 +125,7 @@ func TestGitCommit_ListTagsNames(t *testing.T) {
 				)
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "second_tag",
 						Verbose: verbose,
 					},
@@ -182,28 +183,28 @@ func TestGitCommit_ListVersionTagNames(t *testing.T) {
 				)
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "first_tag",
 						Verbose: verbose,
 					},
 				)
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
 				)
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},
 				)
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "another_tag",
 						Verbose: verbose,
 					},
@@ -256,28 +257,28 @@ func TestGitCommit_GetNewestTagVersion(t *testing.T) {
 				require.EqualValues(t, []GitTag{}, currentCommit.MustListTags(verbose))
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "first_tag",
 						Verbose: verbose,
 					},
 				)
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
 				)
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},
 				)
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "another_tag",
 						Verbose: verbose,
 					},
@@ -320,7 +321,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 				require.Nil(t, currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose))
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "first_tag",
 						Verbose: verbose,
 					},
@@ -329,7 +330,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 				require.Nil(t, currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose))
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
@@ -338,7 +339,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 				require.EqualValues(t, "v1.0.0", mustutils.Must(currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).GetAsString()))
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},
@@ -347,7 +348,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 				require.EqualValues(t, "v1.0.0", mustutils.Must(currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).GetAsString()))
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "another_tag",
 						Verbose: verbose,
 					},
@@ -393,7 +394,7 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 				)
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "first_tag",
 						Verbose: verbose,
 					},
@@ -404,7 +405,7 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 				)
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
@@ -415,7 +416,7 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 				)
 
 				currentCommit.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},

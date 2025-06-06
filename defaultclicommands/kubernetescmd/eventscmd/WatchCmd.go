@@ -47,8 +47,8 @@ func NewWatchCmd() *cobra.Command {
 					InvolvedObjectKind:       kind,
 				},
 				onCreate,
-				onDelete,
 				onUpdate,
+				onDelete,
 			)
 			if err != nil {
 				logging.LogGoErrorFatalWithTrace(err)

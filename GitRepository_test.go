@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -613,7 +614,7 @@ func TestGitRepository_PullAndPush(t *testing.T) {
 				clonedRepo.MustCloneRepository(upstreamRepo, verbose)
 
 				clonedRepo.MustSetGitConfig(
-					&GitConfigSetOptions{
+					&gitparameteroptions.GitConfigSetOptions{
 						Name:  "Test User",
 						Email: "user@example.com",
 					},
@@ -625,7 +626,7 @@ func TestGitRepository_PullAndPush(t *testing.T) {
 				clonedRepo2.MustCloneRepository(upstreamRepo, verbose)
 
 				clonedRepo2.MustSetGitConfig(
-					&GitConfigSetOptions{
+					&gitparameteroptions.GitConfigSetOptions{
 						Name:  "Test User2",
 						Email: "user2@example.com",
 					},
@@ -645,7 +646,7 @@ func TestGitRepository_PullAndPush(t *testing.T) {
 				clonedRepo2.MustCreateFileInDirectory(verbose, fileName)
 				clonedRepo2.MustAddFileByPath(fileName, verbose)
 				clonedRepo2.MustCommit(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message: "another commit",
 						Verbose: verbose,
 					},
@@ -722,7 +723,7 @@ func TestGitRepository_AddFilesByPath(t *testing.T) {
 				clonedRepo.MustCloneRepository(upstreamRepo, verbose)
 
 				clonedRepo.MustSetGitConfig(
-					&GitConfigSetOptions{
+					&gitparameteroptions.GitConfigSetOptions{
 						Name:  "Test User",
 						Email: "user@example.com",
 					},
@@ -734,7 +735,7 @@ func TestGitRepository_AddFilesByPath(t *testing.T) {
 				clonedRepo2.MustCloneRepository(upstreamRepo, verbose)
 
 				clonedRepo2.MustSetGitConfig(
-					&GitConfigSetOptions{
+					&gitparameteroptions.GitConfigSetOptions{
 						Name:  "Test User2",
 						Email: "user2@example.com",
 					},
@@ -749,7 +750,7 @@ func TestGitRepository_AddFilesByPath(t *testing.T) {
 					verbose,
 				)
 				clonedRepo.MustCommit(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message: "another commit",
 						Verbose: verbose,
 					},
@@ -921,7 +922,7 @@ func TestGitRepository_CreateTag(t *testing.T) {
 				defer gitRepo.Delete(verbose)
 
 				gitRepo.MustCommit(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message:    "initial empty commit",
 						AllowEmpty: true,
 						Verbose:    verbose,
@@ -937,7 +938,7 @@ func TestGitRepository_CreateTag(t *testing.T) {
 					tagNameToAdd := "ExampleTag" + strconv.Itoa(i)
 
 					gitRepo.MustCreateTag(
-						&GitRepositoryCreateTagOptions{
+						&gitparameteroptions.GitRepositoryCreateTagOptions{
 							TagName: tagNameToAdd,
 							Verbose: verbose,
 						},
@@ -974,7 +975,7 @@ func TestGitRepository_ListTags(t *testing.T) {
 				defer gitRepo.Delete(verbose)
 
 				gitRepo.MustCommit(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message:    "initial empty commit",
 						AllowEmpty: true,
 						Verbose:    verbose,
@@ -982,14 +983,14 @@ func TestGitRepository_ListTags(t *testing.T) {
 				)
 
 				gitRepo.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "abc",
 						Verbose: verbose,
 					},
 				)
 
 				gitRepo.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "abcd",
 						Verbose: verbose,
 					},
@@ -1031,7 +1032,7 @@ func TestGitRepository_GetLatestTagVersionOrNilIfNotFound(t *testing.T) {
 				defer gitRepo.Delete(verbose)
 
 				gitRepo.MustCommit(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message:    "initial empty commit",
 						AllowEmpty: true,
 						Verbose:    verbose,
@@ -1041,7 +1042,7 @@ func TestGitRepository_GetLatestTagVersionOrNilIfNotFound(t *testing.T) {
 				require.Nil(gitRepo.MustGetLatestTagVersionOrNilIfNotFound(verbose))
 
 				gitRepo.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
@@ -1050,7 +1051,7 @@ func TestGitRepository_GetLatestTagVersionOrNilIfNotFound(t *testing.T) {
 				require.NotNil(gitRepo.MustGetLatestTagVersionOrNilIfNotFound(verbose))
 
 				gitRepo.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},
@@ -1081,7 +1082,7 @@ func TestGitRepository_GetLatestTagVersion(t *testing.T) {
 				defer gitRepo.Delete(verbose)
 
 				gitRepo.MustCommit(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message:    "initial empty commit",
 						AllowEmpty: true,
 						Verbose:    verbose,
@@ -1089,14 +1090,14 @@ func TestGitRepository_GetLatestTagVersion(t *testing.T) {
 				)
 
 				gitRepo.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
 				)
 
 				gitRepo.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},
@@ -1131,7 +1132,7 @@ func TestGitRepository_GetLatestTagVersionAsString(t *testing.T) {
 				defer gitRepo.Delete(verbose)
 
 				gitRepo.MustCommit(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message:    "initial empty commit",
 						AllowEmpty: true,
 						Verbose:    verbose,
@@ -1139,14 +1140,14 @@ func TestGitRepository_GetLatestTagVersionAsString(t *testing.T) {
 				)
 
 				gitRepo.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
 				)
 
 				gitRepo.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},
@@ -1180,7 +1181,7 @@ func TestGitRepository_GetCurrentCommitsNewestVersion(t *testing.T) {
 				defer gitRepo.Delete(verbose)
 
 				gitRepo.MustCommit(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message:    "initial empty commit",
 						AllowEmpty: true,
 						Verbose:    verbose,
@@ -1188,7 +1189,7 @@ func TestGitRepository_GetCurrentCommitsNewestVersion(t *testing.T) {
 				)
 
 				gitRepo.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},
@@ -1197,7 +1198,7 @@ func TestGitRepository_GetCurrentCommitsNewestVersion(t *testing.T) {
 				require.EqualValues(t, "v0.1.2", mustutils.Must(gitRepo.MustGetCurrentCommitsNewestVersion(verbose).GetAsString()))
 
 				gitRepo.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
@@ -1228,7 +1229,7 @@ func TestGitRepository_GetCurrentCommitsNewestVersionOrNilIfUnset(t *testing.T) 
 				defer gitRepo.Delete(verbose)
 
 				gitRepo.MustCommit(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message:    "initial empty commit",
 						AllowEmpty: true,
 						Verbose:    verbose,
@@ -1238,7 +1239,7 @@ func TestGitRepository_GetCurrentCommitsNewestVersionOrNilIfUnset(t *testing.T) 
 				require.Nil(t, gitRepo.MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose))
 
 				gitRepo.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},
@@ -1247,7 +1248,7 @@ func TestGitRepository_GetCurrentCommitsNewestVersionOrNilIfUnset(t *testing.T) 
 				require.EqualValues(t, "v0.1.2", mustutils.Must(gitRepo.MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose).GetAsString()))
 
 				gitRepo.MustCreateTag(
-					&GitRepositoryCreateTagOptions{
+					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
@@ -1838,7 +1839,7 @@ func TestGitRepository_GetCurrentCommitMessage(t *testing.T) {
 				defer gitRepo.Delete(verbose)
 
 				gitRepo.MustCommit(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						AllowEmpty: true,
 						Message:    "commit message",
 						Verbose:    verbose,
@@ -1875,7 +1876,7 @@ func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
 				defer gitRepo.Delete(verbose)
 
 				gitRepo.MustCommit(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						AllowEmpty: true,
 						Message:    "commit before testing",
 						Verbose:    verbose,
@@ -1888,7 +1889,7 @@ func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
 				)
 
 				gitRepo.MustCommitIfUncommittedChanges(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message: "This should not trigger a commit",
 						Verbose: verbose,
 					},
@@ -1903,7 +1904,7 @@ func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
 				gitRepo.MustAddFileByPath("world.txt", verbose)
 
 				gitRepo.MustCommitIfUncommittedChanges(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message: "This should trigger a commit",
 						Verbose: verbose,
 					},
@@ -1919,7 +1920,7 @@ func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
 				// No need to explicitly add world.txt again.
 
 				gitRepo.MustCommitIfUncommittedChanges(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message: "This should trigger again a commit",
 						Verbose: verbose,
 					},
@@ -1960,7 +1961,7 @@ func TestGitRepository_AddAndRemoveRemote(t *testing.T) {
 
 				for i := 0; i < 2; i++ {
 					gitRepo.MustAddRemote(
-						&GitRemoteAddOptions{
+						&gitparameteroptions.GitRemoteAddOptions{
 							RemoteName: "example",
 							RemoteUrl:  "https://remote.url.example.com",
 							Verbose:    verbose,

@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -107,7 +108,7 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 				defer repo.Delete(verbose)
 
 				repo.MustSetGitConfig(
-					&GitConfigSetOptions{
+					&gitparameteroptions.GitConfigSetOptions{
 						Name:    "a",
 						Email:   "b@example.net",
 						Verbose: true,
@@ -116,7 +117,7 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 
 				// First commit
 				repo.MustCommit(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message:    "message 1",
 						AllowEmpty: true,
 					},
@@ -134,7 +135,7 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 
 				// Second commit
 				repo.MustCommit(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message:    "message 2",
 						AllowEmpty: true,
 					},
@@ -153,7 +154,7 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 
 				// Third Commit
 				repo.MustCommit(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message:    "message 3",
 						AllowEmpty: true,
 					},

@@ -21,6 +21,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -211,7 +212,7 @@ func (l *LocalGitRepository) AddFileByPath(pathToAdd string, verbose bool) (err 
 	return nil
 }
 
-func (l *LocalGitRepository) AddRemote(remoteOptions *GitRemoteAddOptions) (err error) {
+func (l *LocalGitRepository) AddRemote(remoteOptions *gitparameteroptions.GitRemoteAddOptions) (err error) {
 	if remoteOptions == nil {
 		return tracederrors.TracedError("remoteOptions is nil")
 	}
@@ -425,7 +426,7 @@ func (l *LocalGitRepository) CloneRepositoryByPathOrUrl(urlOrPathToClone string,
 	return nil
 }
 
-func (l *LocalGitRepository) Commit(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
+func (l *LocalGitRepository) Commit(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit, err error) {
 	if commitOptions == nil {
 		return nil, tracederrors.TracedErrorNil("commitOptions")
 	}
@@ -556,7 +557,7 @@ func (l *LocalGitRepository) CreateBranch(createOptions *parameteroptions.Create
 	return nil
 }
 
-func (l *LocalGitRepository) CreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
+func (l *LocalGitRepository) CreateTag(options *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -1531,7 +1532,7 @@ func (l *LocalGitRepository) Init(options *parameteroptions.CreateRepositoryOpti
 				defer temporaryRepository.Delete(options.Verbose)
 
 				err = temporaryRepository.SetGitConfig(
-					&GitConfigSetOptions{
+					&gitparameteroptions.GitConfigSetOptions{
 						Name:    "asciichgolangpublic git repo initializer",
 						Email:   "asciichgolangpublic@example.net",
 						Verbose: options.Verbose,
@@ -1542,7 +1543,7 @@ func (l *LocalGitRepository) Init(options *parameteroptions.CreateRepositoryOpti
 				}
 
 				_, err = temporaryRepository.CommitAndPush(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message:    "Initial empty commit during repo initialization",
 						AllowEmpty: true,
 						Verbose:    true,
@@ -1558,7 +1559,7 @@ func (l *LocalGitRepository) Init(options *parameteroptions.CreateRepositoryOpti
 			} else {
 				if options.InitializeWithDefaultAuthor {
 					err = l.SetGitConfig(
-						&GitConfigSetOptions{
+						&gitparameteroptions.GitConfigSetOptions{
 							Name:    GitRepositryDefaultAuthorName(),
 							Email:   GitRepositryDefaultAuthorEmail(),
 							Verbose: options.Verbose,
@@ -1571,7 +1572,7 @@ func (l *LocalGitRepository) Init(options *parameteroptions.CreateRepositoryOpti
 
 				if options.InitializeWithEmptyCommit {
 					_, err = l.Commit(
-						&GitCommitOptions{
+						&gitparameteroptions.GitCommitOptions{
 							Message:    GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit(),
 							AllowEmpty: true,
 							Verbose:    true,
@@ -1595,7 +1596,7 @@ func (l *LocalGitRepository) Init(options *parameteroptions.CreateRepositoryOpti
 	if !options.BareRepository {
 		if options.InitializeWithDefaultAuthor {
 			err = l.SetGitConfig(
-				&GitConfigSetOptions{
+				&gitparameteroptions.GitConfigSetOptions{
 					Name:    "asciichgolangpublic git repo initializer",
 					Email:   "asciichgolangpublic@example.net",
 					Verbose: options.Verbose,
@@ -1836,7 +1837,7 @@ func (l *LocalGitRepository) MustAddFileByPath(pathToAdd string, verbose bool) {
 	}
 }
 
-func (l *LocalGitRepository) MustAddRemote(remoteOptions *GitRemoteAddOptions) {
+func (l *LocalGitRepository) MustAddRemote(remoteOptions *gitparameteroptions.GitRemoteAddOptions) {
 	err := l.AddRemote(remoteOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1864,7 +1865,7 @@ func (l *LocalGitRepository) MustCloneRepositoryByPathOrUrl(pathToClone string, 
 	}
 }
 
-func (l *LocalGitRepository) MustCommit(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
+func (l *LocalGitRepository) MustCommit(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit) {
 	createdCommit, err := l.Commit(commitOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1889,7 +1890,7 @@ func (l *LocalGitRepository) MustCreateBranch(createOptions *parameteroptions.Cr
 	}
 }
 
-func (l *LocalGitRepository) MustCreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag) {
+func (l *LocalGitRepository) MustCreateTag(options *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag) {
 	createdTag, err := l.CreateTag(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -2341,7 +2342,7 @@ func (l *LocalGitRepository) MustRunGitCommandAndGetStdout(gitCommand []string, 
 	return commandOutput
 }
 
-func (l *LocalGitRepository) MustSetGitConfig(options *GitConfigSetOptions) {
+func (l *LocalGitRepository) MustSetGitConfig(options *gitparameteroptions.GitConfigSetOptions) {
 	err := l.SetGitConfig(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -2646,7 +2647,7 @@ func (l *LocalGitRepository) RunGitCommandAndGetStdout(gitCommand []string, verb
 	return commandOutput, nil
 }
 
-func (l *LocalGitRepository) SetGitConfig(options *GitConfigSetOptions) (err error) {
+func (l *LocalGitRepository) SetGitConfig(options *gitparameteroptions.GitConfigSetOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}

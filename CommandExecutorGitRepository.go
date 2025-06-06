@@ -15,6 +15,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -148,7 +149,7 @@ func (c *CommandExecutorGitRepository) AddFileByPath(pathToAdd string, verbose b
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) AddRemote(remoteOptions *GitRemoteAddOptions) (err error) {
+func (c *CommandExecutorGitRepository) AddRemote(remoteOptions *gitparameteroptions.GitRemoteAddOptions) (err error) {
 	if remoteOptions == nil {
 		return tracederrors.TracedError("remoteOptions is nil")
 	}
@@ -340,7 +341,7 @@ func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClo
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) Commit(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
+func (c *CommandExecutorGitRepository) Commit(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit, err error) {
 	if commitOptions == nil {
 		return nil, tracederrors.TracedErrorNil("commitOptions")
 	}
@@ -448,7 +449,7 @@ func (c *CommandExecutorGitRepository) CreateBranch(createOptions *parameteropti
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) CreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
+func (c *CommandExecutorGitRepository) CreateTag(options *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -1186,7 +1187,7 @@ func (c *CommandExecutorGitRepository) Init(options *parameteroptions.CreateRepo
 
 				if options.InitializeWithDefaultAuthor {
 					temporaryClone.SetGitConfig(
-						&GitConfigSetOptions{
+						&gitparameteroptions.GitConfigSetOptions{
 							Name:    GitRepositryDefaultAuthorName(),
 							Email:   GitRepositryDefaultAuthorEmail(),
 							Verbose: options.Verbose,
@@ -1195,7 +1196,7 @@ func (c *CommandExecutorGitRepository) Init(options *parameteroptions.CreateRepo
 				}
 
 				_, err = temporaryClone.CommitAndPush(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message:    GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit(),
 						AllowEmpty: true,
 						Verbose:    true,
@@ -1206,7 +1207,7 @@ func (c *CommandExecutorGitRepository) Init(options *parameteroptions.CreateRepo
 				}
 			} else {
 				_, err = c.Commit(
-					&GitCommitOptions{
+					&gitparameteroptions.GitCommitOptions{
 						Message:    GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit(),
 						AllowEmpty: true,
 						Verbose:    true,
@@ -1467,7 +1468,7 @@ func (c *CommandExecutorGitRepository) MustAddFileByPath(pathToAdd string, verbo
 	}
 }
 
-func (c *CommandExecutorGitRepository) MustAddRemote(remoteOptions *GitRemoteAddOptions) {
+func (c *CommandExecutorGitRepository) MustAddRemote(remoteOptions *gitparameteroptions.GitRemoteAddOptions) {
 	err := c.AddRemote(remoteOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1495,7 +1496,7 @@ func (c *CommandExecutorGitRepository) MustCloneRepositoryByPathOrUrl(pathOrUrlT
 	}
 }
 
-func (c *CommandExecutorGitRepository) MustCommit(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
+func (c *CommandExecutorGitRepository) MustCommit(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit) {
 	createdCommit, err := c.Commit(commitOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1520,7 +1521,7 @@ func (c *CommandExecutorGitRepository) MustCreateBranch(createOptions *parameter
 	}
 }
 
-func (c *CommandExecutorGitRepository) MustCreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag) {
+func (c *CommandExecutorGitRepository) MustCreateTag(options *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag) {
 	createdTag, err := c.CreateTag(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1846,7 +1847,7 @@ func (c *CommandExecutorGitRepository) MustSetDefaultAuthor(verbose bool) {
 	}
 }
 
-func (c *CommandExecutorGitRepository) MustSetGitConfig(options *GitConfigSetOptions) {
+func (c *CommandExecutorGitRepository) MustSetGitConfig(options *gitparameteroptions.GitConfigSetOptions) {
 	err := c.SetGitConfig(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -2164,7 +2165,7 @@ func (c *CommandExecutorGitRepository) SetDefaultAuthor(verbose bool) (err error
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) SetGitConfig(options *GitConfigSetOptions) (err error) {
+func (c *CommandExecutorGitRepository) SetGitConfig(options *gitparameteroptions.GitConfigSetOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
