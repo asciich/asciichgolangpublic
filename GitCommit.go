@@ -6,6 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -19,7 +20,7 @@ func NewGitCommit() (g *GitCommit) {
 	return new(GitCommit)
 }
 
-func (g *GitCommit) CreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
+func (g *GitCommit) CreateTag(options *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -343,7 +344,7 @@ func (g *GitCommit) ListVersionTags(verbose bool) (tags []GitTag, err error) {
 	return tags, nil
 }
 
-func (g *GitCommit) MustCreateTag(options *GitRepositoryCreateTagOptions) (createdTag GitTag) {
+func (g *GitCommit) MustCreateTag(options *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag) {
 	createdTag, err := g.CreateTag(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
