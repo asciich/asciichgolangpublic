@@ -33,6 +33,11 @@ type TestSshServer struct {
 func (t *TestSshServer) StartSshServerInBackground(ctx context.Context) error {
 	logging.LogInfoByCtxf(ctx, "Start TestSshServer in background started.")
 
+	err := t.WaitUntilPortUnused(ctx)
+	if err != nil {
+		return err
+	}
+
 	var finished bool
 	go func() {
 		err := t.StartSshServer(ctx)
@@ -45,7 +50,6 @@ func (t *TestSshServer) StartSshServerInBackground(ctx context.Context) error {
 	}()
 
 	var isOpen bool
-	var err error
 	for i := 0; i < 10; i++ {
 		isOpen, err = netutils.IsTcpPortOpen(contextutils.WithSilent(ctx), "localhost", t.Port)
 		if err != nil {
@@ -123,9 +127,47 @@ func (t *TestSshServer) Stop(ctx context.Context) error {
 	return nil
 }
 
+func (t *TestSshServer) WaitUntilPortUnused(ctx context.Context) error {
+	const hostname = "localhost"
+
+	nRetry := 10
+	var isOpen bool
+	var err error
+	for i := 0; i < nRetry; i++ {
+		isOpen, err = netutils.IsTcpPortOpen(contextutils.WithSilent(ctx), hostname, t.Port)
+		if err != nil {
+			return err
+		}
+
+		if !isOpen {
+			break
+		}
+
+		if i+1 == nRetry {
+			break
+		}
+
+		waitDuration := time.Millisecond * 100
+		logging.LogInfoByCtxf(ctx, "Port '%d' is not free to listen on '%s', wait another '%s' (%d/%d).", t.Port, hostname, waitDuration, i+1, nRetry)
+		time.Sleep(waitDuration)
+	}
+
+	if !isOpen {
+		logging.LogInfoByCtxf(ctx, "Port '%d' on '%s' is unused.", t.Port, hostname)
+		return nil
+	}
+
+	return tracederrors.TracedErrorf("Port '%d' on '%s' is not free to use.", t.Port, hostname)
+}
+
 func (t *TestSshServer) StartSshServer(ctx context.Context) error {
 	if t.cancel != nil {
 		return tracederrors.TracedError("TestSshServer already running")
+	}
+
+	err := t.WaitUntilPortUnused(ctx)
+	if err != nil {
+		return err
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
