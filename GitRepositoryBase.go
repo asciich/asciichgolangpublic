@@ -7,8 +7,9 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -265,7 +266,7 @@ func (g *GitRepositoryBase) CheckIsPreCommitRepository(verbose bool) (err error)
 	return nil
 }
 
-func (g *GitRepositoryBase) CommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
+func (g *GitRepositoryBase) CommitAndPush(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit, err error) {
 	if commitOptions == nil {
 		return nil, tracederrors.TracedErrorNil("commitOptions")
 	}
@@ -288,7 +289,7 @@ func (g *GitRepositoryBase) CommitAndPush(commitOptions *GitCommitOptions) (crea
 	return createdCommit, nil
 }
 
-func (g *GitRepositoryBase) CommitIfUncommittedChanges(commitOptions *GitCommitOptions) (createdCommit *GitCommit, err error) {
+func (g *GitRepositoryBase) CommitIfUncommittedChanges(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit, err error) {
 	if commitOptions == nil {
 		return nil, tracederrors.TracedErrorNil("commitOptions")
 	}
@@ -969,7 +970,7 @@ func (g *GitRepositoryBase) MustCheckIsPreCommitRepository(verbose bool) {
 	}
 }
 
-func (g *GitRepositoryBase) MustCommitAndPush(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
+func (g *GitRepositoryBase) MustCommitAndPush(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit) {
 	createdCommit, err := g.CommitAndPush(commitOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -978,7 +979,7 @@ func (g *GitRepositoryBase) MustCommitAndPush(commitOptions *GitCommitOptions) (
 	return createdCommit
 }
 
-func (g *GitRepositoryBase) MustCommitIfUncommittedChanges(commitOptions *GitCommitOptions) (createdCommit *GitCommit) {
+func (g *GitRepositoryBase) MustCommitIfUncommittedChanges(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit) {
 	createdCommit, err := g.CommitIfUncommittedChanges(commitOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
