@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -36,7 +36,7 @@ func Test_ConfigMapByNameExists(t *testing.T) {
 				require.NoError(t, err)
 				require.False(t, exists)
 
-				configmap, err := namespace.CreateConfigMap(ctx, configmapName, &kubernetesutils.CreateConfigMapOptions{ConfigMapData: map[string]string{}})
+				configmap, err := namespace.CreateConfigMap(ctx, configmapName, &kubernetesparameteroptions.CreateConfigMapOptions{ConfigMapData: map[string]string{}})
 				require.NoError(t, err)
 
 				exists, err = configmap.Exists(ctx)
@@ -87,7 +87,7 @@ func Test_CreateConfigMapInNonExistentNamespace(t *testing.T) {
 				require.False(t, exists)
 
 				// create the configmap in the absent namespace:
-				_, err = kubernetes.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesutils.CreateConfigMapOptions{ConfigMapData: map[string]string{"my-configmap": "value"}})
+				_, err = kubernetes.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesparameteroptions.CreateConfigMapOptions{ConfigMapData: map[string]string{"my-configmap": "value"}})
 				require.NoError(t, err)
 
 				// Namespace is implicitly generated:
@@ -126,7 +126,7 @@ func Test_ReadAndWriteConfigMap(t *testing.T) {
 				content := map[string]string{"file.txt": "hello_world"}
 
 				for i := 0; i < 2; i++ {
-					configMap, err := kubernetes.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesutils.CreateConfigMapOptions{
+					configMap, err := kubernetes.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesparameteroptions.CreateConfigMapOptions{
 						ConfigMapData: content,
 						Labels:        labels,
 					})
@@ -147,7 +147,7 @@ func Test_ReadAndWriteConfigMap(t *testing.T) {
 				}
 
 				for i := 0; i < 2; i++ {
-					configMap, err := kubernetes.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesutils.CreateConfigMapOptions{
+					configMap, err := kubernetes.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesparameteroptions.CreateConfigMapOptions{
 						ConfigMapData: content,
 						Labels:        labels2,
 					})
@@ -168,7 +168,7 @@ func Test_ReadAndWriteConfigMap(t *testing.T) {
 				}
 
 				for i := 0; i < 2; i++ {
-					configMap, err := kubernetes.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesutils.CreateConfigMapOptions{
+					configMap, err := kubernetes.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesparameteroptions.CreateConfigMapOptions{
 						ConfigMapData: content2,
 						Labels:        labels2,
 					})
@@ -184,7 +184,7 @@ func Test_ReadAndWriteConfigMap(t *testing.T) {
 				}
 
 				for i := 0; i < 2; i++ {
-					configMap, err := kubernetes.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesutils.CreateConfigMapOptions{
+					configMap, err := kubernetes.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesparameteroptions.CreateConfigMapOptions{
 						ConfigMapData: content,
 						Labels:        labels,
 					})

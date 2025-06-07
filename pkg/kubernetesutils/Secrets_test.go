@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -36,7 +36,7 @@ func Test_SecretByNameExists(t *testing.T) {
 				require.NoError(t, err)
 				require.False(t, exists)
 
-				secret, err := namespace.CreateSecret(ctx, secretName, &kubernetesutils.CreateSecretOptions{SecretData: map[string][]byte{}})
+				secret, err := namespace.CreateSecret(ctx, secretName, &kubernetesparameteroptions.CreateSecretOptions{SecretData: map[string][]byte{}})
 				require.NoError(t, err)
 
 				exists, err = secret.Exists(ctx)
@@ -59,7 +59,6 @@ func Test_SecretByNameExists(t *testing.T) {
 		)
 	}
 }
-
 
 func Test_CreateSecretInNonExistentNamespace(t *testing.T) {
 	tests := []struct {
@@ -88,7 +87,7 @@ func Test_CreateSecretInNonExistentNamespace(t *testing.T) {
 				require.False(t, exists)
 
 				// create the secret in the absent namespace:
-				_, err = kubernetes.CreateSecret(ctx, namespaceName, secretName, &kubernetesutils.CreateSecretOptions{SecretData: map[string][]byte{"my-secret": []byte("value")}})
+				_, err = kubernetes.CreateSecret(ctx, namespaceName, secretName, &kubernetesparameteroptions.CreateSecretOptions{SecretData: map[string][]byte{"my-secret": []byte("value")}})
 				require.NoError(t, err)
 
 				// Namespace is implicitly generated:

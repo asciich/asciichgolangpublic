@@ -10,6 +10,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -17,10 +19,10 @@ type CommandExecutorResource struct {
 	commandExecutor commandexecutor.CommandExecutor
 	name            string
 	typeName        string
-	namespace       kubernetesutils.Namespace
+	namespace       kubernetesinterfaces.Namespace
 }
 
-func GetCommandExecutorResource(commandExectutor commandexecutor.CommandExecutor, namespace kubernetesutils.Namespace, resourceName string, resourceType string) (resource kubernetesutils.Resource, err error) {
+func GetCommandExecutorResource(commandExectutor commandexecutor.CommandExecutor, namespace kubernetesinterfaces.Namespace, resourceName string, resourceType string) (resource kubernetesinterfaces.Resource, err error) {
 	if commandExectutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExectutor")
 	}
@@ -66,7 +68,7 @@ func NewCommandExecutorResource() (c *CommandExecutorResource) {
 	return new(CommandExecutorResource)
 }
 
-func (c *CommandExecutorResource) CreateByYamlString(ctx context.Context, options *kubernetesutils.CreateResourceOptions) (err error) {
+func (c *CommandExecutorResource) CreateByYamlString(ctx context.Context, options *kubernetesparameteroptions.CreateResourceOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
@@ -384,7 +386,7 @@ func (c *CommandExecutorResource) GetName() (name string, err error) {
 	return c.name, nil
 }
 
-func (c *CommandExecutorResource) GetNamespace() (namespace kubernetesutils.Namespace, err error) {
+func (c *CommandExecutorResource) GetNamespace() (namespace kubernetesinterfaces.Namespace, err error) {
 	if c.namespace == nil {
 		return nil, err
 	}
@@ -449,7 +451,7 @@ func (c *CommandExecutorResource) SetName(name string) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorResource) SetNamespace(namespace kubernetesutils.Namespace) (err error) {
+func (c *CommandExecutorResource) SetNamespace(namespace kubernetesinterfaces.Namespace) (err error) {
 	c.namespace = namespace
 
 	return nil

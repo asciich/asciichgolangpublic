@@ -8,7 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -93,7 +93,7 @@ func (c *CommandExecutorKind) ClusterByNameExists(clusterName string, verbose bo
 	return exists, nil
 }
 
-func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bool) (cluster kubernetesutils.KubernetesCluster, err error) {
+func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bool) (cluster kubernetesinterfaces.KubernetesCluster, err error) {
 	if clusterName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("clusterName")
 	}
@@ -206,7 +206,7 @@ func (c *CommandExecutorKind) DeleteClusterByName(clusterName string, verbose bo
 	return nil
 }
 
-func (c *CommandExecutorKind) GetClusterByName(clusterName string) (cluster kubernetesutils.KubernetesCluster, err error) {
+func (c *CommandExecutorKind) GetClusterByName(clusterName string) (cluster kubernetesinterfaces.KubernetesCluster, err error) {
 	if clusterName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("clusterName")
 	}

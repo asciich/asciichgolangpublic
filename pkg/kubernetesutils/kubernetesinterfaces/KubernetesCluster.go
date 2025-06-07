@@ -1,16 +1,17 @@
-package kubernetesutils
+package kubernetesinterfaces
 
 import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 )
 
 type KubernetesCluster interface {
 	ConfigMapByNameExists(ctx context.Context, namespaceName string, configMapName string) (exists bool, err error)
-	CreateConfigMap(ctx context.Context, namespaceName string, configMapName string, options *CreateConfigMapOptions) (createdConfigMap ConfigMap, err error)
+	CreateConfigMap(ctx context.Context, namespaceName string, configMapName string, options *kubernetesparameteroptions.CreateConfigMapOptions) (createdConfigMap ConfigMap, err error)
 	CreateNamespaceByName(ctx context.Context, namespaceName string) (createdNamespace Namespace, err error)
-	CreateSecret(ctx context.Context, namespaceName string, secretName string, options *CreateSecretOptions) (createdSecret Secret, err error)
+	CreateSecret(ctx context.Context, namespaceName string, secretName string, options *kubernetesparameteroptions.CreateSecretOptions) (createdSecret Secret, err error)
 	DeleteNamespaceByName(ctx context.Context, namespaceName string) (err error)
 	DeleteSecretByName(ctx context.Context, namespaceName string, secretName string) (err error)
 	GetKubectlContext(ctx context.Context) (contextName string, err error)

@@ -1,4 +1,4 @@
-package kubernetesutils
+package kubernetesinterfaces
 
 import "context"
 

@@ -9,6 +9,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -92,7 +94,7 @@ func GetClusterByName(ctx context.Context, clusterName string) (*NativeKubernete
 	}, nil
 }
 
-func (n *NativeKubernetesCluster) CreateNamespaceByName(ctx context.Context, namespaceName string) (createdNamespace kubernetesutils.Namespace, err error) {
+func (n *NativeKubernetesCluster) CreateNamespaceByName(ctx context.Context, namespaceName string) (createdNamespace kubernetesinterfaces.Namespace, err error) {
 	if namespaceName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
 	}
@@ -187,7 +189,7 @@ func (n *NativeKubernetesCluster) GetKubectlContext(ctx context.Context) (contex
 func (n *NativeKubernetesCluster) GetName() (name string, err error) {
 	return "", tracederrors.TracedErrorNotImplemented()
 }
-func (n *NativeKubernetesCluster) GetNamespaceByName(name string) (namespace kubernetesutils.Namespace, err error) {
+func (n *NativeKubernetesCluster) GetNamespaceByName(name string) (namespace kubernetesinterfaces.Namespace, err error) {
 	if name == "" {
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
@@ -197,10 +199,10 @@ func (n *NativeKubernetesCluster) GetNamespaceByName(name string) (namespace kub
 		kubernetesCluster: n,
 	}, nil
 }
-func (n *NativeKubernetesCluster) GetResourceByNames(resourceName string, resourceType string, namespaceName string) (resource kubernetesutils.Resource, err error) {
+func (n *NativeKubernetesCluster) GetResourceByNames(resourceName string, resourceType string, namespaceName string) (resource kubernetesinterfaces.Resource, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
-func (n *NativeKubernetesCluster) ListNamespaces(ctx context.Context) (namespaces []kubernetesutils.Namespace, err error) {
+func (n *NativeKubernetesCluster) ListNamespaces(ctx context.Context) (namespaces []kubernetesinterfaces.Namespace, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 func (n *NativeKubernetesCluster) ListNamespaceNames(ctx context.Context) (namespaceNames []string, err error) {
@@ -226,7 +228,7 @@ func (n *NativeKubernetesCluster) ListNamespaceNames(ctx context.Context) (names
 
 	return namespaceNames, nil
 }
-func (n *NativeKubernetesCluster) ListResources(options *parameteroptions.ListKubernetesResourcesOptions) (resources []kubernetesutils.Resource, err error) {
+func (n *NativeKubernetesCluster) ListResources(options *parameteroptions.ListKubernetesResourcesOptions) (resources []kubernetesinterfaces.Resource, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 func (n *NativeKubernetesCluster) ListResourceNames(options *parameteroptions.ListKubernetesResourcesOptions) (resourceNames []string, err error) {
@@ -327,7 +329,7 @@ func (n *NativeKubernetesCluster) WaitUntilNamespaceCreated(ctx context.Context,
 	return nil
 }
 
-func (n *NativeKubernetesCluster) CreateConfigMap(ctx context.Context, namespaceName string, configMapName string, options *kubernetesutils.CreateConfigMapOptions) (createdSecret kubernetesutils.ConfigMap, err error) {
+func (n *NativeKubernetesCluster) CreateConfigMap(ctx context.Context, namespaceName string, configMapName string, options *kubernetesparameteroptions.CreateConfigMapOptions) (createdSecret kubernetesinterfaces.ConfigMap, err error) {
 	namespace, err := n.CreateNamespaceByName(ctx, namespaceName)
 	if err != nil {
 		return nil, err
@@ -335,7 +337,7 @@ func (n *NativeKubernetesCluster) CreateConfigMap(ctx context.Context, namespace
 	return namespace.CreateConfigMap(ctx, configMapName, options)
 }
 
-func (n *NativeKubernetesCluster) CreateSecret(ctx context.Context, namespaceName string, secretName string, options *kubernetesutils.CreateSecretOptions) (createdSecret kubernetesutils.Secret, err error) {
+func (n *NativeKubernetesCluster) CreateSecret(ctx context.Context, namespaceName string, secretName string, options *kubernetesparameteroptions.CreateSecretOptions) (createdSecret kubernetesinterfaces.Secret, err error) {
 	namespace, err := n.CreateNamespaceByName(ctx, namespaceName)
 	if err != nil {
 		return nil, err
