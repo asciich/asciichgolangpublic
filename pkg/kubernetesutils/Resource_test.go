@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/fileformats/yamlutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -48,7 +48,7 @@ func TestKubernetesResource_CreateAndDelete(t *testing.T) {
 				roleYaml += "  namespace: " + namespaceName + "\n"
 
 				for i := 0; i < 2; i++ {
-					err = k8sResource.CreateByYamlString(ctx, &kubernetesutils.CreateResourceOptions{YamlString: roleYaml})
+					err = k8sResource.CreateByYamlString(ctx, &kubernetesparameteroptions.CreateResourceOptions{YamlString: roleYaml})
 					require.NoError(t, err)
 
 					require.True(t, mustutils.Must(k8sResource.Exists(ctx)))
@@ -107,7 +107,7 @@ func TestKubernetesResource_ListResources(t *testing.T) {
 				for i := 0; i < 3; i++ {
 					k8sResource, err := kubernetes.GetResourceByNames(tt.resourceName+strconv.Itoa(i), tt.resourceType, namespaceName)
 					require.NoError(t, err)
-					err = k8sResource.CreateByYamlString(ctx, &kubernetesutils.CreateResourceOptions{YamlString: roleYaml})
+					err = k8sResource.CreateByYamlString(ctx, &kubernetesparameteroptions.CreateResourceOptions{YamlString: roleYaml})
 					require.NoError(t, err)
 					require.True(t, mustutils.Must(k8sResource.Exists(ctx)))
 				}
@@ -179,7 +179,7 @@ func TestKubernetesResource_GetAsYamlString(t *testing.T) {
 				roleYaml += "  name: " + tt.resourceName + "\n"
 				roleYaml += "  namespace: " + namespaceName + "\n"
 
-				err = k8sResource.CreateByYamlString(ctx, &kubernetesutils.CreateResourceOptions{YamlString: roleYaml})
+				err = k8sResource.CreateByYamlString(ctx, &kubernetesparameteroptions.CreateResourceOptions{YamlString: roleYaml})
 				require.NoError(t, err)
 				defer k8sResource.Delete(ctx)
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
@@ -22,6 +23,7 @@ func Test_Example_ListNamespaceNames(t *testing.T) {
 	// Ensure a local kind cluster is available for testing:
 	_, err := commandexecutor.Bash().RunOneLiner(ctx, fmt.Sprintf("kind create cluster -n '%s' || true", clusterName))
 	require.NoError(t, err)
+	time.Sleep(1 * time.Second)
 	// ... prepare test environment finished.
 	// -----
 

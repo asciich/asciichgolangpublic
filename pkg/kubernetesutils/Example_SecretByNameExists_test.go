@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 )
 
@@ -23,6 +24,7 @@ func Test_Example_SecretByNameExists(t *testing.T) {
 	// Ensure a local kind cluster is available for testing:
 	_, err := commandexecutor.Bash().RunOneLiner(ctx, fmt.Sprintf("kind create cluster -n '%s' || true", clusterName))
 	require.NoError(t, err)
+	time.Sleep(1 * time.Second)
 
 	// Get Kubernetes cluster:
 	cluster, err := nativekubernetes.GetClusterByName(ctx, clusterName)
@@ -31,7 +33,7 @@ func Test_Example_SecretByNameExists(t *testing.T) {
 	// Create an example secret. This implicitly generates the namespace if it does not exist.
 	const namespaceName = "testnamespace"
 	const secretName = "example-secret"
-	_, err = cluster.CreateSecret(ctx, namespaceName, secretName, &kubernetesutils.CreateSecretOptions{
+	_, err = cluster.CreateSecret(ctx, namespaceName, secretName, &kubernetesparameteroptions.CreateSecretOptions{
 		SecretData: map[string][]byte{"my-secret": []byte("very-secret")},
 	})
 	require.NoError(t, err)

@@ -10,7 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 )
 
@@ -25,6 +26,7 @@ func Test_Example_WatchConfigMap(t *testing.T) {
 	// Ensure a local kind cluster is available for testing:
 	_, err := commandexecutor.Bash().RunOneLiner(ctx, fmt.Sprintf("kind create cluster -n '%s' || true", clusterName))
 	require.NoError(t, err)
+	time.Sleep(1 * time.Second)
 
 	// Get Kubernetes cluster:
 	cluster, err := nativekubernetes.GetClusterByName(ctx, clusterName)
@@ -48,9 +50,9 @@ func Test_Example_WatchConfigMap(t *testing.T) {
 	err = namespace.WatchConfigMap(
 		ctxWatch,
 		configmapName,
-		func(kubernetesutils.ConfigMap) { cmCreateCounter++ },
-		func(kubernetesutils.ConfigMap) { cmUpdateCounter++ },
-		func(kubernetesutils.ConfigMap) { cmDeleteCounter++ },
+		func(kubernetesinterfaces.ConfigMap) { cmCreateCounter++ },
+		func(kubernetesinterfaces.ConfigMap) { cmUpdateCounter++ },
+		func(kubernetesinterfaces.ConfigMap) { cmDeleteCounter++ },
 	)
 	require.NoError(t, err)
 	defer cancel()
@@ -62,7 +64,7 @@ func Test_Example_WatchConfigMap(t *testing.T) {
 	require.EqualValues(t, 0, cmDeleteCounter)
 
 	// create config map
-	_, err = cluster.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesutils.CreateConfigMapOptions{
+	_, err = cluster.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesparameteroptions.CreateConfigMapOptions{
 		ConfigMapData: map[string]string{"my-configmap": "configmap content"},
 	})
 	require.NoError(t, err)
@@ -76,7 +78,7 @@ func Test_Example_WatchConfigMap(t *testing.T) {
 	var nUpdates = 3
 	for i := 0; i < nUpdates; i++ {
 		// update config map
-		_, err = cluster.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesutils.CreateConfigMapOptions{
+		_, err = cluster.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesparameteroptions.CreateConfigMapOptions{
 			ConfigMapData: map[string]string{"my-configmap": "configmap content" + strconv.Itoa(i)},
 		})
 		require.NoError(t, err)
@@ -104,7 +106,7 @@ func Test_Example_WatchConfigMap(t *testing.T) {
 	// Do further updates
 	for i := 0; i < nUpdates; i++ {
 		// update config map
-		_, err = cluster.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesutils.CreateConfigMapOptions{
+		_, err = cluster.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesparameteroptions.CreateConfigMapOptions{
 			ConfigMapData: map[string]string{"my-configmap": "configmap content"},
 		})
 		require.NoError(t, err)

@@ -12,6 +12,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -21,7 +23,7 @@ type CommandExecutorKubernetes struct {
 	cachedContextName string
 }
 
-func GetCommandExecutorKubernetsByName(commandExecutor commandexecutor.CommandExecutor, clusterName string) (kubernetes kubernetesutils.KubernetesCluster, err error) {
+func GetCommandExecutorKubernetsByName(commandExecutor commandexecutor.CommandExecutor, clusterName string) (kubernetes kubernetesinterfaces.KubernetesCluster, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -45,7 +47,7 @@ func GetCommandExecutorKubernetsByName(commandExecutor commandexecutor.CommandEx
 	return toReturn, nil
 }
 
-func GetClusterByName(clusterName string) (kubernetes kubernetesutils.KubernetesCluster, err error) {
+func GetClusterByName(clusterName string) (kubernetes kubernetesinterfaces.KubernetesCluster, err error) {
 	if clusterName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("clusterName")
 	}
@@ -66,7 +68,7 @@ func (c *CommandExecutorKubernetes) GetName() (name string, err error) {
 	return c.name, nil
 }
 
-func (c *CommandExecutorKubernetes) CreateNamespaceByName(ctx context.Context, name string) (createdNamespace kubernetesutils.Namespace, err error) {
+func (c *CommandExecutorKubernetes) CreateNamespaceByName(ctx context.Context, name string) (createdNamespace kubernetesinterfaces.Namespace, err error) {
 	if name == "" {
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
@@ -282,7 +284,7 @@ func (c *CommandExecutorKubernetes) GetKubectlContexts() (contexts []kubernetesu
 	return contexts, nil
 }
 
-func (c *CommandExecutorKubernetes) GetNamespaceByName(name string) (namespace kubernetesutils.Namespace, err error) {
+func (c *CommandExecutorKubernetes) GetNamespaceByName(name string) (namespace kubernetesinterfaces.Namespace, err error) {
 	if name == "" {
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
@@ -302,7 +304,7 @@ func (c *CommandExecutorKubernetes) GetNamespaceByName(name string) (namespace k
 	return toReturn, nil
 }
 
-func (c *CommandExecutorKubernetes) GetResourceByNames(resourceName string, resourceType string, namespaceName string) (resource kubernetesutils.Resource, err error) {
+func (c *CommandExecutorKubernetes) GetResourceByNames(resourceName string, resourceType string, namespaceName string) (resource kubernetesinterfaces.Resource, err error) {
 	if resourceName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("resourceName")
 	}
@@ -342,7 +344,7 @@ func (c *CommandExecutorKubernetes) ListNamespaceNames(ctx context.Context) (nam
 	return namespaceNames, nil
 }
 
-func (c *CommandExecutorKubernetes) ListNamespaces(ctx context.Context) (namespaces []kubernetesutils.Namespace, err error) {
+func (c *CommandExecutorKubernetes) ListNamespaces(ctx context.Context) (namespaces []kubernetesinterfaces.Namespace, err error) {
 
 	cmd := []string{"kubectl"}
 
@@ -369,7 +371,7 @@ func (c *CommandExecutorKubernetes) ListNamespaces(ctx context.Context) (namespa
 		return nil, err
 	}
 
-	namespaces = []kubernetesutils.Namespace{}
+	namespaces = []kubernetesinterfaces.Namespace{}
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 
@@ -445,7 +447,7 @@ func (c *CommandExecutorKubernetes) ListResourceNames(options *parameteroptions.
 	return resourceNames, nil
 }
 
-func (c *CommandExecutorKubernetes) ListResources(options *parameteroptions.ListKubernetesResourcesOptions) (resources []kubernetesutils.Resource, err error) {
+func (c *CommandExecutorKubernetes) ListResources(options *parameteroptions.ListKubernetesResourcesOptions) (resources []kubernetesinterfaces.Resource, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -465,7 +467,7 @@ func (c *CommandExecutorKubernetes) ListResources(options *parameteroptions.List
 		return nil, err
 	}
 
-	resources = []kubernetesutils.Resource{}
+	resources = []kubernetesinterfaces.Resource{}
 	for _, name := range resourceNames {
 		toAdd, err := c.GetResourceByNames(name, resourceType, namespaceName)
 		if err != nil {
@@ -556,7 +558,7 @@ func (c *CommandExecutorKubernetes) SetName(name string) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorKubernetes) CreateSecret(ctx context.Context, namespaceName string, secretName string, options *kubernetesutils.CreateSecretOptions) (createdSecret kubernetesutils.Secret, err error) {
+func (c *CommandExecutorKubernetes) CreateSecret(ctx context.Context, namespaceName string, secretName string, options *kubernetesparameteroptions.CreateSecretOptions) (createdSecret kubernetesinterfaces.Secret, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
@@ -568,8 +570,7 @@ func (c *CommandExecutorKubernetes) DeleteSecretByName(ctx context.Context, name
 	return tracederrors.TracedErrorNotImplemented()
 }
 
-
-func (c *CommandExecutorKubernetes) CreateConfigMap(ctx context.Context, namespaceName string, configMapName string, options *kubernetesutils.CreateConfigMapOptions) (createdConfigMap kubernetesutils.ConfigMap, err error) {
+func (c *CommandExecutorKubernetes) CreateConfigMap(ctx context.Context, namespaceName string, configMapName string, options *kubernetesparameteroptions.CreateConfigMapOptions) (createdConfigMap kubernetesinterfaces.ConfigMap, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 

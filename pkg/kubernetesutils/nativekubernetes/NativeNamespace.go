@@ -7,7 +7,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -43,7 +44,7 @@ func (n *NativeNamespace) Create(ctx context.Context) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
 }
 
-func (n *NativeNamespace) CreateRole(ctx context.Context, createOptions *kubernetesutils.CreateRoleOptions) (createdRole kubernetesutils.Role, err error) {
+func (n *NativeNamespace) CreateRole(ctx context.Context, createOptions *kubernetesparameteroptions.CreateRoleOptions) (createdRole kubernetesinterfaces.Role, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
@@ -67,11 +68,11 @@ func (n *NativeNamespace) GetName() (name string, err error) {
 	return n.name, nil
 }
 
-func (n *NativeNamespace) GetResourceByNames(resourceName string, resourceType string) (resource kubernetesutils.Resource, err error) {
+func (n *NativeNamespace) GetResourceByNames(resourceName string, resourceType string) (resource kubernetesinterfaces.Resource, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
-func (n *NativeNamespace) GetRoleByName(name string) (role kubernetesutils.Role, err error) {
+func (n *NativeNamespace) GetRoleByName(name string) (role kubernetesinterfaces.Role, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
@@ -151,7 +152,7 @@ func (n *NativeNamespace) DeleteSecretByName(ctx context.Context, secretName str
 	return nil
 }
 
-func (n *NativeNamespace) GetSecretByName(name string) (secret kubernetesutils.Secret, err error) {
+func (n *NativeNamespace) GetSecretByName(name string) (secret kubernetesinterfaces.Secret, err error) {
 	if name == "" {
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
@@ -162,7 +163,7 @@ func (n *NativeNamespace) GetSecretByName(name string) (secret kubernetesutils.S
 	}, nil
 }
 
-func (n *NativeNamespace) CreateSecret(ctx context.Context, secretName string, options *kubernetesutils.CreateSecretOptions) (createdSecret kubernetesutils.Secret, err error) {
+func (n *NativeNamespace) CreateSecret(ctx context.Context, secretName string, options *kubernetesparameteroptions.CreateSecretOptions) (createdSecret kubernetesinterfaces.Secret, err error) {
 	if secretName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("secret")
 	}
@@ -248,7 +249,7 @@ func (n *NativeNamespace) ConfigMapByNameExists(ctx context.Context, configmapNa
 	return exists, nil
 }
 
-func (n *NativeNamespace) CreateConfigMap(ctx context.Context, configMapName string, options *kubernetesutils.CreateConfigMapOptions) (createdConfigMap kubernetesutils.ConfigMap, err error) {
+func (n *NativeNamespace) CreateConfigMap(ctx context.Context, configMapName string, options *kubernetesparameteroptions.CreateConfigMapOptions) (createdConfigMap kubernetesinterfaces.ConfigMap, err error) {
 	if configMapName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("configmap")
 	}
@@ -325,7 +326,7 @@ func (n *NativeNamespace) CreateConfigMap(ctx context.Context, configMapName str
 	return n.GetConfigMapByName(configMapName)
 }
 
-func (n *NativeNamespace) GetConfigMapByName(name string) (configMap kubernetesutils.ConfigMap, err error) {
+func (n *NativeNamespace) GetConfigMapByName(name string) (configMap kubernetesinterfaces.ConfigMap, err error) {
 	if name == "" {
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
@@ -370,7 +371,7 @@ func (n *NativeNamespace) DeleteConfigMapByName(ctx context.Context, configmapNa
 	return nil
 }
 
-func (n *NativeNamespace) WatchConfigMap(ctx context.Context, configMapName string, onCreate func(kubernetesutils.ConfigMap), onUpdate func(kubernetesutils.ConfigMap), onDelete func(kubernetesutils.ConfigMap)) error {
+func (n *NativeNamespace) WatchConfigMap(ctx context.Context, configMapName string, onCreate func(kubernetesinterfaces.ConfigMap), onUpdate func(kubernetesinterfaces.ConfigMap), onDelete func(kubernetesinterfaces.ConfigMap)) error {
 	if configMapName == "" {
 		return tracederrors.TracedErrorEmptyString("configMapName")
 	}
