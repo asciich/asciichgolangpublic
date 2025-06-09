@@ -2,14 +2,18 @@ package dockerutils
 
 import (
 	"context"
+	"encoding/json"
+	"reflect"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/containers"
 	"github.com/asciich/asciichgolangpublic/datatypes"
+	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/hosts"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockerinterfaces"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -17,7 +21,7 @@ type CommandExecutorDocker struct {
 	host hosts.Host
 }
 
-func GetCommandExecutorDocker(commandExecutor commandexecutor.CommandExecutor) (docker Docker, err error) {
+func GetCommandExecutorDocker(commandExecutor commandexecutor.CommandExecutor) (docker dockerinterfaces.Docker, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -54,7 +58,7 @@ func GetCommandExecutorDocker(commandExecutor commandexecutor.CommandExecutor) (
 	return toReturn, err
 }
 
-func GetCommandExecutorDockerOnHost(host hosts.Host) (docker Docker, err error) {
+func GetCommandExecutorDockerOnHost(host hosts.Host) (docker dockerinterfaces.Docker, err error) {
 	if host == nil {
 		return nil, tracederrors.TracedErrorNil("host")
 	}
@@ -69,11 +73,11 @@ func GetCommandExecutorDockerOnHost(host hosts.Host) (docker Docker, err error) 
 	return toReturn, nil
 }
 
-func GetLocalCommandExecutorDocker() (docker Docker, err error) {
+func GetLocalCommandExecutorDocker() (docker dockerinterfaces.Docker, err error) {
 	return GetCommandExecutorDocker(commandexecutor.Bash())
 }
 
-func MustGetCommandExecutorDocker(commandExecutor commandexecutor.CommandExecutor) (docker Docker) {
+func MustGetCommandExecutorDocker(commandExecutor commandexecutor.CommandExecutor) (docker dockerinterfaces.Docker) {
 	docker, err := GetCommandExecutorDocker(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -82,7 +86,7 @@ func MustGetCommandExecutorDocker(commandExecutor commandexecutor.CommandExecuto
 	return docker
 }
 
-func MustGetCommandExecutorDockerOnHost(host hosts.Host) (docker Docker) {
+func MustGetCommandExecutorDockerOnHost(host hosts.Host) (docker dockerinterfaces.Docker) {
 	docker, err := GetCommandExecutorDockerOnHost(host)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -91,7 +95,7 @@ func MustGetCommandExecutorDockerOnHost(host hosts.Host) (docker Docker) {
 	return docker
 }
 
-func MustGetLocalCommandExecutorDocker() (docker Docker) {
+func MustGetLocalCommandExecutorDocker() (docker dockerinterfaces.Docker) {
 	docker, err := GetLocalCommandExecutorDocker()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -100,7 +104,7 @@ func MustGetLocalCommandExecutorDocker() (docker Docker) {
 	return docker
 }
 
-func MustGetcommandExecutorDocker(commandExecutor commandexecutor.CommandExecutor) (docker Docker) {
+func MustGetcommandExecutorDocker(commandExecutor commandexecutor.CommandExecutor) (docker dockerinterfaces.Docker) {
 	docker, err := GetCommandExecutorDocker(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -135,7 +139,26 @@ func (c *CommandExecutorDocker) GetCommandExecutor() (commandExecutor commandexe
 	return commandExecutorHost, nil
 }
 
-func (c *CommandExecutorDocker) GetContainerByName(containerName string) (dockerContainer containers.Container, err error) {
+func (c *CommandExecutorDocker) GetContainerById(id string) (containerinterfaces.Container, error) {
+	if id == "" {
+		return nil, tracederrors.TracedErrorEmptyString("id")
+	}
+
+	toReturn := NewCommandExecutorDockerContainer()
+	err := toReturn.SetId(id)
+	if err != nil {
+		return nil, err
+	}
+
+	err = toReturn.SetDocker(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return toReturn, nil
+}
+
+func (c *CommandExecutorDocker) GetContainerByName(containerName string) (dockerContainer containerinterfaces.Container, err error) {
 	if len(containerName) <= 0 {
 		return nil, tracederrors.TracedError("containerName is empty string")
 	}
@@ -220,7 +243,7 @@ func (c *CommandExecutorDocker) RunCommandAndGetStdoutAsString(ctx context.Conte
 	return commandExecutor.RunCommandAndGetStdoutAsString(ctx, runOptions)
 }
 
-func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *DockerRunContainerOptions) (startedContainer containers.Container, err error) {
+func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *DockerRunContainerOptions) (startedContainer containerinterfaces.Container, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedError("runOptions is nil")
 	}
@@ -309,4 +332,86 @@ func (c *CommandExecutorDocker) SetHost(host hosts.Host) (err error) {
 	c.host = host
 
 	return nil
+}
+
+func (c *CommandExecutorDocker) ListContainers(ctx context.Context) ([]containerinterfaces.Container, error) {
+	executor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	hostDescription, err := c.GetHostDescription()
+	if err != nil {
+		return nil, err
+	}
+
+	output, err := executor.RunCommandAndGetStdoutAsString(ctx, &parameteroptions.RunCommandOptions{
+		Command: []string{"docker", "ps", "-a", "--no-trunc", "--format=json"},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	type OutputEntry struct {
+		Names string `json:"Names"`
+		Id    string `json:"ID"`
+	}
+
+	parsed := []*OutputEntry{}
+
+	for _, line := range stringsutils.SplitLines(output, true) {
+		toAdd := new(OutputEntry)
+
+		err = json.Unmarshal([]byte(line), toAdd)
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Unable to parse docker ps output: %w", err)
+		}
+
+		parsed = append(parsed, toAdd)
+	}
+
+	list := []containerinterfaces.Container{}
+	for _, entry := range parsed {
+		toAdd := NewCommandExecutorDockerContainer()
+
+		err = toAdd.SetId(entry.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		err = toAdd.SetCachedName(entry.Names)
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, toAdd)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Listed '%d' containers on host '%s'", len(list), hostDescription)
+
+	return list, nil
+}
+
+func (c *CommandExecutorDocker) ListContainerNames(ctx context.Context) ([]string, error) {
+	containers, err := c.ListContainers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	names := []string{}
+	for _, c := range containers {
+		cec, ok := c.(*CommandExecutorDockerContainer)
+		if !ok {
+			return nil, tracederrors.TracedErrorf("Unsupported type to get container name: %s", reflect.TypeOf(c))
+		}
+
+		name, err := cec.GetCachedName()
+		if err != nil {
+			return nil, err
+		}
+
+		names = append(names, name)
+	}
+
+	return names, nil
 }

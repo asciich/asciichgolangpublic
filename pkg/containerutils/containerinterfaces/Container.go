@@ -1,4 +1,4 @@
-package containers
+package containerinterfaces
 
 import "context"
 
