@@ -1,6 +1,9 @@
 package kubeconfigutils
 
 import (
+	"context"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -353,7 +356,7 @@ func (k *KubeConfig) AddClusterAndContextAndUserEntry(cluster *KubeConfigCluster
 	return nil
 }
 
-// This function does an exex to "kubectl" using the given config file "path".
+// This function does an exec to "kubectl" using the given config file "path".
 // Useful to validate if a written config "path" is understood by "kubectl".
 func IsFilePathLoadableByKubectl(path string, verbose bool) (isLoadable bool, err error) {
 	if path == "" {
@@ -493,4 +496,17 @@ func (k *KubeConfigCluster) GetServerUrlAsString() (string, error) {
 	}
 
 	return k.Cluster.Server, nil
+}
+
+func GetDefaultKubeConfigPath(ctx context.Context) (string, error) {
+	dirname, err := os.UserHomeDir()
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Unable to get users home: %s", err)
+	}
+
+	kubeConfigPath := filepath.Join(dirname, ".kube", "config")
+
+	logging.LogInfoByCtxf(ctx, "Default kube config path is: '%s'.", kubeConfigPath)
+
+	return kubeConfigPath, nil
 }
