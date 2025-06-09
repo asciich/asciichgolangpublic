@@ -14,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 )
@@ -38,6 +39,15 @@ func (n *NativeNamespace) GetClientSet() (*kubernetes.Clientset, error) {
 	}
 
 	return cluster.GetClientSet()
+}
+
+func (n *NativeNamespace) GetDynamicClient() (*dynamic.DynamicClient, error) {
+	cluster, err := n.GetKubernetesCluster()
+	if err != nil {
+		return nil, err
+	}
+
+	return cluster.GetDynamicClient()
 }
 
 func (n *NativeNamespace) Create(ctx context.Context) (err error) {
