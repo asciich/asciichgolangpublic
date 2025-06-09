@@ -1,6 +1,7 @@
 package dockerutils
 
 import (
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/containers"
 	"github.com/asciich/asciichgolangpublic/hosts"
 	"github.com/asciich/asciichgolangpublic/logging"
@@ -54,3 +55,8 @@ func MustGetDockerOnHost(host hosts.Host) (docker Docker) {
 
 	return docker
 }
+
+func GetDockerOnLocalHost() (Docker, error) {
+	return GetCommandExecutorDocker(commandexecutor.Bash())
+}
+
