@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 )
 
 type KubernetesCluster interface {
+	CheckAccessible(ctx context.Context) error
 	ConfigMapByNameExists(ctx context.Context, namespaceName string, configMapName string) (exists bool, err error)
 	CreateConfigMap(ctx context.Context, namespaceName string, configMapName string, options *kubernetesparameteroptions.CreateConfigMapOptions) (createdConfigMap ConfigMap, err error)
 	CreateNamespaceByName(ctx context.Context, namespaceName string) (createdNamespace Namespace, err error)
@@ -24,4 +26,5 @@ type KubernetesCluster interface {
 	ListResourceNames(options *parameteroptions.ListKubernetesResourcesOptions) (resourceNames []string, err error)
 	NamespaceByNameExists(ctx context.Context, namespaceName string) (exists bool, err error)
 	SecretByNameExists(ctx context.Context, namespaceName string, secretName string) (exists bool, err error)
+	WhoAmI(ctx context.Context) (*kubernetesimplementationindependend.UserInfo, error)
 }

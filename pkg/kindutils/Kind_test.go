@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
@@ -14,10 +15,6 @@ import (
 
 func getCtx() context.Context {
 	return contextutils.ContextVerbose()
-}
-
-func getClusterName() (clusterName string) {
-	return "kind-ci-test"
 }
 
 func getKindByImplementationName(implementationName string) (kind kindutils.Kind) {
@@ -44,28 +41,30 @@ func TestKind_CreateAndDeleteCluster(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
-				clusterName := getClusterName()
+				ctx := getCtx()
+				clusterName := continuousintegration.GetDefaultKindClusterName()
 
 				kind := getKindByImplementationName(tt.implementationName)
 
-				err := kind.DeleteClusterByName(clusterName, verbose)
+				err := kind.DeleteClusterByName(ctx, clusterName)
 				require.NoError(t, err)
 
-				require.False(t, mustutils.Must(kind.ClusterByNameExists(clusterName, verbose)))
+				require.False(t, mustutils.Must(kind.ClusterByNameExists(ctx, clusterName)))
 
 				for i := 0; i < 2; i++ {
-					_, err := kind.CreateClusterByName(clusterName, verbose)
+					kindCluster, err := kind.CreateClusterByName(ctx, clusterName)
 					require.NoError(t, err)
 
-					require.True(t, mustutils.Must(kind.ClusterByNameExists(clusterName, verbose)))
+					require.True(t, mustutils.Must(kind.ClusterByNameExists(ctx, clusterName)))
+
+					require.EqualValues(t, "kind-"+clusterName, mustutils.Must(kindCluster.GetName()))
 				}
 
 				for i := 0; i < 2; i++ {
-					err = kind.DeleteClusterByName(clusterName, verbose)
+					err = kind.DeleteClusterByName(ctx, clusterName)
 					require.NoError(t, err)
 
-					require.False(t, mustutils.Must(kind.ClusterByNameExists(clusterName, verbose)))
+					require.False(t, mustutils.Must(kind.ClusterByNameExists(ctx, clusterName)))
 				}
 			},
 		)
@@ -85,11 +84,11 @@ func TestKind_CreateNamespace(t *testing.T) {
 			func(t *testing.T) {
 				const verbose = true
 				ctx := getCtx()
-				clusterName := getClusterName()
+				clusterName := continuousintegration.GetDefaultKindClusterName()
 
 				kind := getKindByImplementationName(tt.implementationName)
 
-				cluster, err := kind.CreateClusterByName(clusterName, verbose)
+				cluster, err := kind.CreateClusterByName(ctx, clusterName)
 				require.NoError(t, err)
 
 				namespaceName := "test-namespace"

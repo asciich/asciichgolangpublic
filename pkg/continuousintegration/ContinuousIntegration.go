@@ -40,3 +40,7 @@ func IsRunningInGitlab() (isRunningInGitlab bool) {
 func IsRunningInTravis() (isRunningInGitlab bool) {
 	return strings.ToLower(os.Getenv("TRAVIS")) != ""
 }
+
+func GetDefaultKindClusterName() string {
+	return "kind-ci-cluster"
+}

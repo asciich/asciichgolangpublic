@@ -1,6 +1,9 @@
 package kubeconfigutils
 
 import (
+	"context"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -83,7 +86,7 @@ func (k *KubeConfig) GetClusterServerUrlAsString(clusterName string) (string, er
 	return cluster.GetServerUrlAsString()
 }
 
-func (k *KubeConfig) GetUserNameByContextName(contextName string) (userName string, err error) {
+func (k *KubeConfig) GetUserNameByContextName(ctx context.Context, contextName string) (userName string, err error) {
 	if contextName == "" {
 		return "", tracederrors.TracedErrorEmptyString("contextName")
 	}
@@ -97,6 +100,8 @@ func (k *KubeConfig) GetUserNameByContextName(contextName string) (userName stri
 	if err != nil {
 		return "", err
 	}
+
+	logging.LogInfoByCtxf(ctx, "User name for kubernetes context '%s' is '%s'.", contextName, userName)
 
 	return userName, nil
 }
@@ -353,7 +358,7 @@ func (k *KubeConfig) AddClusterAndContextAndUserEntry(cluster *KubeConfigCluster
 	return nil
 }
 
-// This function does an exex to "kubectl" using the given config file "path".
+// This function does an exec to "kubectl" using the given config file "path".
 // Useful to validate if a written config "path" is understood by "kubectl".
 func IsFilePathLoadableByKubectl(path string, verbose bool) (isLoadable bool, err error) {
 	if path == "" {
@@ -493,4 +498,81 @@ func (k *KubeConfigCluster) GetServerUrlAsString() (string, error) {
 	}
 
 	return k.Cluster.Server, nil
+}
+
+func GetDefaultKubeConfigPath(ctx context.Context) (string, error) {
+	dirname, err := os.UserHomeDir()
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Unable to get users home: %s", err)
+	}
+
+	kubeConfigPath := filepath.Join(dirname, ".kube", "config")
+
+	logging.LogInfoByCtxf(ctx, "Default kube config path is: '%s'.", kubeConfigPath)
+
+	return kubeConfigPath, nil
+}
+
+func (k *KubeConfig) GetContextNameByClusterName(ctx context.Context, clusterName string) (string, error) {
+	if clusterName == "" {
+		return "", tracederrors.TracedErrorEmptyString("clusterName")
+	}
+
+	if len(k.Contexts) <= 0 {
+		return "", tracederrors.TracedError("No contexts loaded")
+	}
+
+	var contextName string
+	for _, kubeContext := range k.Contexts {
+		if kubeContext.Context.Cluster == clusterName {
+			contextName = kubeContext.Name
+		}
+	}
+
+	if contextName == "" {
+		return "", tracederrors.TracedErrorf("No context for cluster '%s' found.", clusterName)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Kubernetes context '%s' uses the cluster '%s'.", contextName, clusterName)
+
+	return contextName, nil
+}
+
+func GetKubeConfigPath(ctx context.Context) (string, error) {
+	const envVarName = "KUBECONFIG"
+	envContent := os.Getenv("envVarName")
+
+	if envContent == "" {
+		return GetDefaultKubeConfigPath(ctx)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Kubeconfig path '%s' is set by env var '%s'.", envContent, envVarName)
+	return envContent, nil
+}
+
+func LoadKubeConfig(ctx context.Context) (*KubeConfig, error) {
+	path, err := GetKubeConfigPath(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return LoadFromFilePath(path, contextutils.GetVerboseFromContext(ctx))
+}
+
+func GetContextNameByClusterName(ctx context.Context, clusterName string) (string, error) {
+	kubeConfig, err := LoadKubeConfig(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	return kubeConfig.GetContextNameByClusterName(ctx, clusterName)
+}
+
+func GetUserNameByContextName(ctx context.Context, userName string) (string, error) {
+	kubeConfig, err := LoadKubeConfig(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	return kubeConfig.GetUserNameByContextName(ctx, userName)
 }
