@@ -16,6 +16,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/discovery"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -23,11 +25,14 @@ import (
 )
 
 type NativeKubernetesCluster struct {
-	clientset *kubernetes.Clientset
+	config *rest.Config
+
+	// client caches:
+	clientSetCache     *kubernetes.Clientset
+	dynamicClientCache *dynamic.DynamicClient
 }
 
-// Get a client set based on the ~/.kube/config
-func GetClientSetFromKubeconfig(ctx context.Context) (*kubernetes.Clientset, error) {
+func GetConfigFromKubeconfig(ctx context.Context) (*rest.Config, error) {
 	var kubeconfig string
 	if home := homedir.HomeDir(); home != "" {
 		kubeconfig = filepath.Join(home, ".kube", "config")
@@ -40,30 +45,29 @@ func GetClientSetFromKubeconfig(ctx context.Context) (*kubernetes.Clientset, err
 		return nil, tracederrors.TracedErrorf("Error building kubeconfig: %w", err)
 	}
 
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("Error creating Kubernetes clientset: %w", err)
-	}
-
-	logging.LogInfoByCtx(ctx, "Created kubernetes clientset from ~/.kube/config")
-
-	return clientset, nil
+	return config, nil
 }
 
-func GetInClusterClientSet(ctx context.Context) (*kubernetes.Clientset, error) {
+func GetInClusterConfig(ctx context.Context) (*rest.Config, error) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, tracederrors.TracedErrorf("Error getting in-cluster config: %w", err)
 	}
 
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("Error creating clientset: %w", err)
+	return config, nil
+}
+
+// Get the rest.Config to communicate with the kubernetes cluster.
+//
+// If in cluster authentication is available (e.g. running in a pod in the cluster) the returned config uses this method.
+//
+// Otherwise a config based on ~/.kube/config is returned.
+func GetConfig(ctx context.Context) (*rest.Config, error) {
+	if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
+		return GetInClusterConfig(ctx)
 	}
 
-	logging.LogInfoByCtx(ctx, "Created kubernetes in cluster clientset")
-
-	return clientset, nil
+	return GetConfigFromKubeconfig(ctx)
 }
 
 // Get the kubernetes.Clientset to communicate with the kubernetes cluster.
@@ -72,11 +76,17 @@ func GetInClusterClientSet(ctx context.Context) (*kubernetes.Clientset, error) {
 //
 // Otherwise a clientset based on ~/.kube/config is returned.
 func GetClientSet(ctx context.Context) (*kubernetes.Clientset, error) {
-	if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
-		return GetInClusterClientSet(ctx)
+	config, err := GetConfig(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	return GetClientSetFromKubeconfig(ctx)
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to create kubernetes clientset: %w", err)
+	}
+
+	return clientset, nil
 }
 
 func GetClusterByName(ctx context.Context, clusterName string) (*NativeKubernetesCluster, error) {
@@ -84,13 +94,24 @@ func GetClusterByName(ctx context.Context, clusterName string) (*NativeKubernete
 		return nil, tracederrors.TracedErrorEmptyString("clusterName")
 	}
 
-	clientSet, err := GetClientSet(ctx)
+	config, err := GetConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return &NativeKubernetesCluster{
-		clientset: clientSet,
+		config: config,
+	}, nil
+}
+
+func GetDefaultCluster(ctx context.Context) (*NativeKubernetesCluster, error) {
+	config, err := GetConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &NativeKubernetesCluster{
+		config: config,
 	}, nil
 }
 
@@ -135,12 +156,48 @@ func (n *NativeKubernetesCluster) CreateNamespaceByName(ctx context.Context, nam
 	return n.GetNamespaceByName(namespaceName)
 }
 
-func (n *NativeKubernetesCluster) GetClientSet() (*kubernetes.Clientset, error) {
-	if n.clientset == nil {
-		return nil, tracederrors.TracedError("Clientset not set")
+func (n *NativeKubernetesCluster) GetDynamicClient() (*dynamic.DynamicClient, error) {
+	config, err := n.GetConfig()
+	if err != nil {
+		return nil, err
 	}
 
-	return n.clientset, nil
+	if n.dynamicClientCache == nil {
+		var err error
+		n.dynamicClientCache, err = dynamic.NewForConfig(config)
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Error creating kubernetes dynamic client: %w", err)
+		}
+
+	}
+
+	return n.dynamicClientCache, nil
+}
+
+func (n *NativeKubernetesCluster) GetConfig() (*rest.Config, error) {
+	if n.config == nil {
+		return nil, tracederrors.TracedError("config not set")
+	}
+
+	return n.config, nil
+}
+
+func (n *NativeKubernetesCluster) GetClientSet() (*kubernetes.Clientset, error) {
+	config, err := n.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	if n.clientSetCache == nil {
+		var err error
+		n.clientSetCache, err = kubernetes.NewForConfig(config)
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Error creating Kubernetes clientset: %w", err)
+		}
+
+	}
+
+	return n.clientSetCache, nil
 }
 
 func (n *NativeKubernetesCluster) DeleteNamespaceByName(ctx context.Context, namespaceName string) (err error) {
@@ -380,4 +437,36 @@ func (n *NativeKubernetesCluster) DeleteConfigMapByName(ctx context.Context, nam
 	}
 
 	return namespace.DeleteConfigMapByName(ctx, configmapName)
+}
+
+func (n *NativeKubernetesCluster) GetDiscoveryClient() (discovery.DiscoveryInterface, error) {
+	clientset, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	return clientset.Discovery(), nil
+}
+
+func (n *NativeKubernetesCluster) ListKindNames(ctx context.Context) ([]string, error) {
+	discoveryClient, err := n.GetDiscoveryClient()
+	if err != nil {
+		return nil, err
+	}
+
+	apiResourceLists, err := discoveryClient.ServerPreferredResources()
+	if err != nil {
+		return nil, err
+	}
+
+	apiKinds := []string{}
+	for _, apiResourceList := range apiResourceLists {
+		for _, apiResource := range apiResourceList.APIResources {
+			apiKinds = append(apiKinds, apiResource.Kind)
+		}
+	}
+
+	sort.Strings(apiKinds)
+
+	return apiKinds, nil
 }
