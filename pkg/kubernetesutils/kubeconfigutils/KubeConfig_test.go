@@ -1,14 +1,22 @@
 package kubeconfigutils_test
 
 import (
+	"context"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/files"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubeconfigutils"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func Test_GetUserEntryByUserName(t *testing.T) {
 	tests := []struct {
@@ -64,7 +72,7 @@ func Test_GetUserNameByContextName(t *testing.T) {
 				kubeConfig, err := kubeconfigutils.LoadFromFilePath(tt.path, true)
 				require.NoError(t, err)
 
-				userName, err := kubeConfig.GetUserNameByContextName(tt.contextName)
+				userName, err := kubeConfig.GetUserNameByContextName(getCtx(), tt.contextName)
 				require.NoError(t, err)
 				require.EqualValues(t, tt.expectedUserName, userName)
 			},
@@ -72,10 +80,12 @@ func Test_GetUserNameByContextName(t *testing.T) {
 	}
 
 	t.Run("Unknown context name", func(t *testing.T) {
+		ctx := getCtx()
+
 		kubeConfig, err := kubeconfigutils.LoadFromFilePath("./testdata/cluster-c.yaml", true)
 		require.NoError(t, err)
 
-		entry, err := kubeConfig.GetUserNameByContextName("this-context-does-not-exist")
+		entry, err := kubeConfig.GetUserNameByContextName(ctx, "this-context-does-not-exist")
 		require.Error(t, err)
 		require.EqualValues(t, entry, "")
 	})
@@ -294,17 +304,19 @@ func TestKubeConfig_UpdateUserByMerge(t *testing.T) {
 
 func TestKubeConfig_UpdateContextByMerge(t *testing.T) {
 	t.Run("Update context by merge", func(t *testing.T) {
+		ctx := getCtx()
+
 		kubeConfig, err := kubeconfigutils.LoadFromFilePath("./testdata/cluster-a.yaml", true)
 		require.NoError(t, err)
 
-		username, err := kubeConfig.GetUserNameByContextName("kind-cluster-a")
+		username, err := kubeConfig.GetUserNameByContextName(ctx, "kind-cluster-a")
 		require.NoError(t, err)
 		require.NotEqualValues(t, "kind-cluster-b", username)
 
 		kubeConfigUpdate, err := kubeconfigutils.LoadFromFilePath("./testdata/cluster-a_update_context.yaml", true)
 		require.NoError(t, err)
 
-		username, err = kubeConfigUpdate.GetUserNameByContextName("kind-cluster-a")
+		username, err = kubeConfigUpdate.GetUserNameByContextName(ctx, "kind-cluster-a")
 		require.NoError(t, err)
 		require.EqualValues(t, "kind-cluster-new-name", username)
 
@@ -349,5 +361,25 @@ func TestKubeConfig_UpdateClusterByMerge(t *testing.T) {
 		serverUrl, err = kubeCluster.GetServerUrlAsString()
 		require.NoError(t, err)
 		require.EqualValues(t, "https://127.0.0.1:36436", serverUrl)
+	})
+}
+
+func Test_GetDefaultKubeConfigPath(t *testing.T) {
+	t.Run("default", func(t *testing.T) {
+		path, err := kubeconfigutils.GetDefaultKubeConfigPath(getCtx())
+		require.NoError(t, err)
+		require.True(t, strings.HasSuffix(path, "/.kube/config"))
+		require.True(t, pathsutils.IsAbsolutePath(path))
+	})
+}
+
+func Test_GetContextNameByClusterName(t *testing.T) {
+	t.Run("cluster-a", func(t *testing.T) {
+		kubeConfig, err := kubeconfigutils.LoadFromFilePath("./testdata/cluster-a.yaml", true)
+		require.NoError(t, err)
+
+		contextName, err := kubeConfig.GetContextNameByClusterName(getCtx(), "kind-cluster-a")
+		require.NoError(t, err)
+		require.EqualValues(t, "kind-cluster-a", contextName)
 	})
 }
