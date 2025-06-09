@@ -69,7 +69,7 @@ func WatchEvents(ctx context.Context, options *kubernetesutils.WatchEventOptions
 
 	logging.LogInfoByCtxf(ctx, "Watch kubernetes events with options='%s' setup started.", options)
 
-	clientset, err := GetClientSet(ctx)
+	clientset, err := GetClientSet(ctx, options.ClusterName)
 	if err != nil {
 		return err
 	}
