@@ -1,15 +1,17 @@
-package helm
+package helmutils_test
 
 import (
 	"testing"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/helmutils"
+	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helminterfaces"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
-func getHelmImplementationByName(implementationName string) (helm Helm) {
+func getHelmImplementationByName(implementationName string) (helm helminterfaces.Helm) {
 	if implementationName == "commandExecutorHelm" {
-		return MustGetLocalCommandExecutorHelm()
+		return helmutils.MustGetLocalCommandExecutorHelm()
 	}
 
 	logging.LogFatalf("Unknown implementation name '%s'", implementationName)
@@ -28,8 +30,6 @@ func TestRole_AddHelmRepo(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				// require := require.New(t)
-
 				const verbose bool = true
 
 				kubernetes := getHelmImplementationByName(tt.implementationName)

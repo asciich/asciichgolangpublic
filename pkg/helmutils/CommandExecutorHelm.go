@@ -1,10 +1,11 @@
-package helm
+package helmutils
 
 import (
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helminterfaces"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -12,7 +13,7 @@ type commandExecutorHelm struct {
 	commandExecutor commandexecutor.CommandExecutor
 }
 
-func GetCommandExecutorHelm(executor commandexecutor.CommandExecutor) (helm Helm, err error) {
+func GetCommandExecutorHelm(executor commandexecutor.CommandExecutor) (helm helminterfaces.Helm, err error) {
 	if executor == nil {
 		return nil, tracederrors.TracedErrorNil("executor")
 	}
@@ -27,11 +28,11 @@ func GetCommandExecutorHelm(executor commandexecutor.CommandExecutor) (helm Helm
 	return toReturn, nil
 }
 
-func GetLocalCommandExecutorHelm() (helm Helm, err error) {
+func GetLocalCommandExecutorHelm() (helm helminterfaces.Helm, err error) {
 	return GetCommandExecutorHelm(commandexecutor.Bash())
 }
 
-func MustGetCommandExecutorHelm(executor commandexecutor.CommandExecutor) (helm Helm) {
+func MustGetCommandExecutorHelm(executor commandexecutor.CommandExecutor) (helm helminterfaces.Helm) {
 	helm, err := GetCommandExecutorHelm(executor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -40,7 +41,7 @@ func MustGetCommandExecutorHelm(executor commandexecutor.CommandExecutor) (helm 
 	return helm
 }
 
-func MustGetLocalCommandExecutorHelm() (helm Helm) {
+func MustGetLocalCommandExecutorHelm() (helm helminterfaces.Helm) {
 	helm, err := GetLocalCommandExecutorHelm()
 	if err != nil {
 		logging.LogGoErrorFatal(err)

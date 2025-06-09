@@ -1,4 +1,4 @@
-package helm
+package helminterfaces
 
 type Helm interface {
 	AddRepositoryByName(name string, url string, verbose bool) (err error)
