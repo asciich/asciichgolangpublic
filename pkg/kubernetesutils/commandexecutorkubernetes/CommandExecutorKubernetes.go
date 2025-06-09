@@ -8,10 +8,12 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/fileformats/jsonutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -580,4 +582,55 @@ func (c *CommandExecutorKubernetes) ConfigMapByNameExists(ctx context.Context, n
 
 func (c *CommandExecutorKubernetes) DeleteConfigMapByName(ctx context.Context, namespaceName string, configmapName string) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorKubernetes) CheckAccessible(ctx context.Context) error {
+	clusterName, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	_, err = c.WhoAmI(ctx)
+	if err != nil {
+		return tracederrors.TracedErrorf("Cluster '%s' is not reachable.", clusterName)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Cluster '%s' is reachable.", clusterName)
+
+	return err
+}
+
+func (c *CommandExecutorKubernetes) WhoAmI(ctx context.Context) (*kubernetesimplementationindependend.UserInfo, error) {
+	executor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	kubeContext, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	stdout, err := executor.RunCommandAndGetStdoutAsString(ctx, &parameteroptions.RunCommandOptions{
+		Command: []string{"kubectl", "--context", kubeContext, "auth", "whoami", "-ojson"},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	userName, err := jsonutils.RunJqAgainstJsonStringAsString(stdout, ".status.userInfo.username")
+	if err != nil {
+		return nil, err
+	}
+
+	clusterName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Whoami: Kube context '%s' uses user '%s' to log in to cluster '%s'.", kubeContext, userName, clusterName)
+
+	return &kubernetesimplementationindependend.UserInfo{
+		Username: userName,
+	}, nil
 }

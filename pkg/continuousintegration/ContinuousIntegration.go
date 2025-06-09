@@ -3,6 +3,8 @@ package continuousintegration
 import (
 	"os"
 	"strings"
+
+	"github.com/asciich/asciichgolangpublic/randomgenerator"
 )
 
 func IsRunningInCircleCi() (isRunningInGitlab bool) {
@@ -39,4 +41,8 @@ func IsRunningInGitlab() (isRunningInGitlab bool) {
 
 func IsRunningInTravis() (isRunningInGitlab bool) {
 	return strings.ToLower(os.Getenv("TRAVIS")) != ""
+}
+
+func GetDefaultKindClusterName() string {
+	return "kind-ci-cluster-" + strings.ToLower(randomgenerator.MustGetRandomString(5))
 }

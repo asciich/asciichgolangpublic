@@ -10,16 +10,26 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockerinterfaces"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type CommandExecutorDockerContainer struct {
-	docker Docker
+	docker dockerinterfaces.Docker
 	name   string
+	id     string
+
+	// caching
+	cachedName string
 }
 
 func NewCommandExecutorDockerContainer() (c *CommandExecutorDockerContainer) {
 	return new(CommandExecutorDockerContainer)
+}
+
+func (c *CommandExecutorDockerContainer) SetCachedName(cachedName string) (err error) {
+	c.cachedName = cachedName
+	return nil
 }
 
 func (c *CommandExecutorDockerContainer) GetCommandExecutor() (commandExectuor commandexecutor.CommandExecutor, err error) {
@@ -170,14 +180,37 @@ func (c *CommandExecutorDockerContainer) SetName(name string) (err error) {
 	return nil
 }
 
-func (d *CommandExecutorDockerContainer) GetDocker() (docker Docker, err error) {
+func (c *CommandExecutorDockerContainer) SetId(id string) (err error) {
+	if len(id) <= 0 {
+		return tracederrors.TracedError("id is empty string")
+	}
+
+	c.id = id
+
+	return nil
+}
+
+func (d *CommandExecutorDockerContainer) GetDocker() (docker dockerinterfaces.Docker, err error) {
 	if d.docker == nil {
 		return nil, tracederrors.TracedError("docker is not set")
 	}
 	return d.docker, nil
 }
 
-func (d *CommandExecutorDockerContainer) SetDocker(docker Docker) (err error) {
+func (d *CommandExecutorDockerContainer) GetCachedName() (string, error) {
+	if d.cachedName == "" {
+		name, err := d.GetName()
+		if err != nil {
+			return "", err
+		}
+
+		d.cachedName = name
+	}
+
+	return d.cachedName, nil
+}
+
+func (d *CommandExecutorDockerContainer) SetDocker(docker dockerinterfaces.Docker) (err error) {
 	if docker == nil {
 		return tracederrors.TracedErrorNil("docker")
 	}

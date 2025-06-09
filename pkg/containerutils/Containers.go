@@ -1,4 +1,4 @@
-package containers
+package containerutils
 
 import (
 	"slices"
@@ -50,14 +50,4 @@ func IsRunningInsideContainer(verbose bool) (isRunningInContainer bool, err erro
 	}
 
 	return false, nil
-}
-
-// Returns true if running in a container like docker container.
-func MustIsRunningInsideContainer(verbose bool) (isRunningInContainer bool) {
-	isRunningInContainer, err := IsRunningInsideContainer(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isRunningInContainer
 }
