@@ -3,6 +3,8 @@ package kubernetesutils
 import "fmt"
 
 type WatchEventOptions struct {
+	ClusterName string
+
 	// Namespace to watch events. If not set all namespaces are watched:
 	Namespace string
 

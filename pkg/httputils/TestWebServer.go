@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tlsutils/x509utils"
@@ -227,6 +228,8 @@ func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 			}
 		}
 	}()
+
+	time.Sleep(1 * time.Second)
 
 	logging.LogInfoByCtxf(ctx, "Start testWebServer in background on port %d finished.", port)
 
