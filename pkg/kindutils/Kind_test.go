@@ -44,28 +44,28 @@ func TestKind_CreateAndDeleteCluster(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
+				ctx := getCtx()
 				clusterName := getClusterName()
 
 				kind := getKindByImplementationName(tt.implementationName)
 
-				err := kind.DeleteClusterByName(clusterName, verbose)
+				err := kind.DeleteClusterByName(ctx, clusterName)
 				require.NoError(t, err)
 
-				require.False(t, mustutils.Must(kind.ClusterByNameExists(clusterName, verbose)))
+				require.False(t, mustutils.Must(kind.ClusterByNameExists(ctx, clusterName)))
 
 				for i := 0; i < 2; i++ {
-					_, err := kind.CreateClusterByName(clusterName, verbose)
+					_, err := kind.CreateClusterByName(ctx, clusterName)
 					require.NoError(t, err)
 
-					require.True(t, mustutils.Must(kind.ClusterByNameExists(clusterName, verbose)))
+					require.True(t, mustutils.Must(kind.ClusterByNameExists(ctx, clusterName)))
 				}
 
 				for i := 0; i < 2; i++ {
-					err = kind.DeleteClusterByName(clusterName, verbose)
+					err = kind.DeleteClusterByName(ctx, clusterName)
 					require.NoError(t, err)
 
-					require.False(t, mustutils.Must(kind.ClusterByNameExists(clusterName, verbose)))
+					require.False(t, mustutils.Must(kind.ClusterByNameExists(ctx, clusterName)))
 				}
 			},
 		)
@@ -89,7 +89,7 @@ func TestKind_CreateNamespace(t *testing.T) {
 
 				kind := getKindByImplementationName(tt.implementationName)
 
-				cluster, err := kind.CreateClusterByName(clusterName, verbose)
+				cluster, err := kind.CreateClusterByName(ctx, clusterName)
 				require.NoError(t, err)
 
 				namespaceName := "test-namespace"

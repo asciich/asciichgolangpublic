@@ -57,48 +57,38 @@ func NewCommandExecutorKind() (c *CommandExecutorKind) {
 	return new(CommandExecutorKind)
 }
 
-func (c *CommandExecutorKind) ClusterByNameExists(clusterName string, verbose bool) (exists bool, err error) {
+func (c *CommandExecutorKind) ClusterByNameExists(ctx context.Context, clusterName string) (exists bool, err error) {
 	if clusterName == "" {
 		return false, tracederrors.TracedErrorEmptyString("clusterName")
 	}
 
-	clusterNames, err := c.ListClusterNames(false)
+	clusterNames, err := c.ListClusterNames(contextutils.WithSilent(ctx))
 	if err != nil {
 		return false, err
 	}
 
 	exists = slices.Contains(clusterNames, clusterName)
 
-	if verbose {
-		hostDescription, err := c.GetHostDescription()
-		if err != nil {
-			return false, err
-		}
+	hostDescription, err := c.GetHostDescription()
+	if err != nil {
+		return false, err
+	}
 
-		if exists {
-			logging.LogInfof(
-				"Kind cluster '%s' on host '%s' exists.",
-				clusterName,
-				hostDescription,
-			)
-		} else {
-			logging.LogInfof(
-				"Kind cluster '%s' on host '%s' does not exist.",
-				clusterName,
-				hostDescription,
-			)
-		}
+	if exists {
+		logging.LogInfoByCtxf(ctx, "Kind cluster '%s' on host '%s' exists.", clusterName, hostDescription)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Kind cluster '%s' on host '%s' does not exist.", clusterName, hostDescription)
 	}
 
 	return exists, nil
 }
 
-func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bool) (cluster kubernetesinterfaces.KubernetesCluster, err error) {
+func (c *CommandExecutorKind) CreateClusterByName(ctx context.Context, clusterName string) (cluster kubernetesinterfaces.KubernetesCluster, err error) {
 	if clusterName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("clusterName")
 	}
 
-	exists, err := c.ClusterByNameExists(clusterName, false)
+	exists, err := c.ClusterByNameExists(ctx, clusterName)
 	if err != nil {
 		return nil, err
 	}
@@ -109,28 +99,15 @@ func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bo
 	}
 
 	if exists {
-		if verbose {
-			logging.LogInfof(
-				"Kind cluster '%s' on host '%s' already exists.",
-				clusterName,
-				hostDescription,
-			)
-
-		}
+		logging.LogInfoByCtxf(ctx, "Kind cluster '%s' on host '%s' already exists.", clusterName, hostDescription)
 	} else {
 		commandExecutor, err := c.GetCommandExecutor()
 		if err != nil {
 			return nil, err
 		}
 
-		if verbose {
-			logging.LogInfof(
-				"Going to create kind cluster '%s'. This may take a while...",
-				clusterName,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Going to create kind cluster '%s'. This may take a while...", clusterName)
 
-		ctx := contextutils.GetVerbosityContextByBool(verbose)
 		_, err = commandExecutor.RunCommand(
 			commandexecutor.WithLiveOutputOnStdout(ctx),
 			&parameteroptions.RunCommandOptions{
@@ -141,24 +118,18 @@ func (c *CommandExecutorKind) CreateClusterByName(clusterName string, verbose bo
 			return nil, err
 		}
 
-		if verbose {
-			logging.LogChangedf(
-				"Kind cluster '%s' on host '%s' created.",
-				clusterName,
-				hostDescription,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "Kind cluster '%s' on host '%s' created.", clusterName, hostDescription)
 	}
 
 	return c.GetClusterByName(clusterName)
 }
 
-func (c *CommandExecutorKind) DeleteClusterByName(clusterName string, verbose bool) (err error) {
+func (c *CommandExecutorKind) DeleteClusterByName(ctx context.Context, clusterName string) (err error) {
 	if clusterName == "" {
 		return tracederrors.TracedErrorEmptyString("clusterName")
 	}
 
-	exists, err := c.ClusterByNameExists(clusterName, false)
+	exists, err := c.ClusterByNameExists(ctx, clusterName)
 	if err != nil {
 		return err
 	}
@@ -174,7 +145,6 @@ func (c *CommandExecutorKind) DeleteClusterByName(clusterName string, verbose bo
 			return err
 		}
 
-		ctx := contextutils.GetVerbosityContextByBool(verbose)
 		_, err = commandExecutor.RunCommand(
 			commandexecutor.WithLiveOutputOnStdout(ctx),
 			&parameteroptions.RunCommandOptions{
@@ -185,22 +155,9 @@ func (c *CommandExecutorKind) DeleteClusterByName(clusterName string, verbose bo
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf(
-				"Kind cluster '%s' on host '%s' deleted.",
-				clusterName,
-				hostDescription,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "Kind cluster '%s' on host '%s' deleted.", clusterName, hostDescription)
 	} else {
-		if verbose {
-			logging.LogInfof(
-				"Kind cluster '%s' on host '%s' already absent.",
-				clusterName,
-				hostDescription,
-			)
-
-		}
+		logging.LogInfoByCtxf(ctx, "Kind cluster '%s' on host '%s' already absent.", clusterName, hostDescription)
 	}
 
 	return nil
@@ -252,7 +209,7 @@ func (c *CommandExecutorKind) GetHostDescription() (hostDescription string, err 
 	return commandExector.GetHostDescription()
 }
 
-func (c *CommandExecutorKind) ListClusterNames(verbose bool) (clusterNames []string, err error) {
+func (c *CommandExecutorKind) ListClusterNames(ctx context.Context) (clusterNames []string, err error) {
 	return c.RunCommandAndGetStdoutAsLines(
 		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{

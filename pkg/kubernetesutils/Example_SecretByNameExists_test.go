@@ -2,13 +2,11 @@ package kubernetesutils_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 )
@@ -22,9 +20,8 @@ func Test_Example_SecretByNameExists(t *testing.T) {
 	const clusterName = "kind"
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := commandexecutor.Bash().RunOneLiner(ctx, fmt.Sprintf("kind create cluster -n '%s' || true", clusterName))
+	_, err := kindutils.CreateCluster(ctx, "kind")
 	require.NoError(t, err)
-	time.Sleep(1 * time.Second)
 
 	// Get Kubernetes cluster:
 	cluster, err := nativekubernetes.GetClusterByName(ctx, clusterName)
