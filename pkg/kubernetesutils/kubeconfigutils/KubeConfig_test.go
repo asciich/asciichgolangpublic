@@ -1,14 +1,22 @@
 package kubeconfigutils_test
 
 import (
+	"context"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/files"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubeconfigutils"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func Test_GetUserEntryByUserName(t *testing.T) {
 	tests := []struct {
@@ -349,5 +357,14 @@ func TestKubeConfig_UpdateClusterByMerge(t *testing.T) {
 		serverUrl, err = kubeCluster.GetServerUrlAsString()
 		require.NoError(t, err)
 		require.EqualValues(t, "https://127.0.0.1:36436", serverUrl)
+	})
+}
+
+func Test_GetDefaultKubeConfigPath(t *testing.T) {
+	t.Run("default", func(t *testing.T) {
+		path, err := kubeconfigutils.GetDefaultKubeConfigPath(getCtx())
+		require.NoError(t, err)
+		require.True(t, strings.HasSuffix(path, "/.kube/config"))
+		require.True(t, pathsutils.IsAbsolutePath(path))
 	})
 }
