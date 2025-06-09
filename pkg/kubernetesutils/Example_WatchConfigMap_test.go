@@ -2,14 +2,14 @@ package kubernetesutils_test
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
+	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
@@ -21,15 +21,15 @@ func Test_Example_WatchConfigMap(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	const clusterName = "kind"
+	clusterName := continuousintegration.GetDefaultKindClusterName()
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := commandexecutor.Bash().RunOneLiner(ctx, fmt.Sprintf("kind create cluster -n '%s' || true", clusterName))
+	_, err := kindutils.CreateCluster(ctx, clusterName)
 	require.NoError(t, err)
-	time.Sleep(1 * time.Second)
+	defer kindutils.DeleteClusterByName(ctx, clusterName)
 
 	// Get Kubernetes cluster:
-	cluster, err := nativekubernetes.GetClusterByName(ctx, clusterName)
+	cluster, err := nativekubernetes.GetClusterByName(ctx, "kind-"+clusterName)
 	require.NoError(t, err)
 
 	// Ensure namespace exists

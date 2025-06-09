@@ -1,12 +1,43 @@
 package kindutils
 
-import "github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
+import (
+	"context"
+
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
+	"github.com/asciich/asciichgolangpublic/tracederrors"
+)
 
 // Kubernetes in Docker
 type Kind interface {
-	ClusterByNameExists(clusterName string, verbose bool) (exists bool, err error)
-	CreateClusterByName(clusterName string, verbose bool) (cluster kubernetesinterfaces.KubernetesCluster, err error)
-	DeleteClusterByName(clusterName string, verbose bool) (err error)
+	ClusterByNameExists(ctx context.Context, clusterName string) (exists bool, err error)
+	CreateClusterByName(ctx context.Context, clusterName string) (cluster kubernetesinterfaces.KubernetesCluster, err error)
+	DeleteClusterByName(ctx context.Context, clusterName string) (err error)
 	GetClusterByName(clusterName string) (cluster kubernetesinterfaces.KubernetesCluster, err error)
-	ListClusterNames(verbose bool) (clusterNames []string, err error)
+	ListClusterNames(ctx context.Context) (clusterNames []string, err error)
+}
+
+func CreateCluster(ctx context.Context, clusterName string) (kubernetesinterfaces.KubernetesCluster, error) {
+	if clusterName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("clusterName")
+	}
+
+	kind, err := GetLocalCommandExecutorKind()
+	if err != nil {
+		return nil, err
+	}
+
+	return kind.CreateClusterByName(ctx, clusterName)
+}
+
+func DeleteClusterByName(ctx context.Context, clusterName string) error {
+	if clusterName == "" {
+		return tracederrors.TracedErrorEmptyString("clusterName")
+	}
+
+	kind, err := GetLocalCommandExecutorKind()
+	if err != nil {
+		return err
+	}
+
+	return kind.DeleteClusterByName(ctx, clusterName)
 }
