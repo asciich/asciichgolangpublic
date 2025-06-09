@@ -13,6 +13,7 @@ func NewKubernetesCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		eventscmd.NewEventsCmd(),
+		ListKindNamesCmd(),
 	)
 
 	return cmd

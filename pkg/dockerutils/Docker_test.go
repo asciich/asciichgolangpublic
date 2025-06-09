@@ -6,10 +6,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils"
+	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockerinterfaces"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
-func getDockerImplementationByName(implementationName string) (docker dockerutils.Docker) {
+func getDockerImplementationByName(implementationName string) (docker dockerinterfaces.Docker) {
 	if implementationName == "commandExecutorDocker" {
 		return dockerutils.MustGetLocalCommandExecutorDocker()
 	}

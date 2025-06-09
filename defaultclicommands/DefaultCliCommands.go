@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/defaultclicommands/ansiblecmd"
 	"github.com/asciich/asciichgolangpublic/defaultclicommands/dnscmd"
+	"github.com/asciich/asciichgolangpublic/defaultclicommands/dockercmd"
 	"github.com/asciich/asciichgolangpublic/defaultclicommands/errorscmd"
 	"github.com/asciich/asciichgolangpublic/defaultclicommands/gitlabcmd"
 	"github.com/asciich/asciichgolangpublic/defaultclicommands/kubernetescmd"
@@ -25,6 +26,7 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 	rootCmd.AddCommand(
 		ansiblecmd.NewAnsibleCmd(),
 		dnscmd.NewDnsCommand(),
+		dockercmd.NewDockerCmd(),
 		errorscmd.NewErrorsCommand(),
 		gitlabcmd.NewGitlabCommand(),
 		kubernetescmd.NewKubernetesCmd(),
