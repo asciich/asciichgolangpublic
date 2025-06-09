@@ -3,12 +3,11 @@ package kubernetesutils_test
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/commandexecutorkubernetes"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
@@ -22,17 +21,15 @@ func getCtx() context.Context {
 
 func getKubernetesByImplementationName(ctx context.Context, implementationName string) kubernetesinterfaces.KubernetesCluster {
 	if implementationName == "commandExecutorKubernetes" {
-		// Directly call kind binary to avoid cyclic import...
-		commandexecutor.Bash().RunOneLiner(ctx, "kind create cluster -n kind || true")
-		time.Sleep(1 * time.Second)
+		// Ensure a local kind cluster is available for testing:
+		mustutils.Must(kindutils.CreateCluster(ctx, "kind"))
 
 		return mustutils.Must(commandexecutorkubernetes.GetClusterByName("kind-kind"))
 	}
 
 	if implementationName == "nativeKubernetes" {
-		// Directly call kind binary to avoid cyclic import...
-		commandexecutor.Bash().RunOneLiner(ctx, "kind create cluster -n kind || true")
-		time.Sleep(1 * time.Second)
+		// Ensure a local kind cluster is available for testing:
+		mustutils.Must(kindutils.CreateCluster(ctx, "kind"))
 
 		return mustutils.Must(nativekubernetes.GetClusterByName(getCtx(), "kind-kind"))
 
