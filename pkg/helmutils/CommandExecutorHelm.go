@@ -1,11 +1,13 @@
 package helmutils
 
 import (
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helminterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helmparameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -32,29 +34,11 @@ func GetLocalCommandExecutorHelm() (helm helminterfaces.Helm, err error) {
 	return GetCommandExecutorHelm(commandexecutor.Bash())
 }
 
-func MustGetCommandExecutorHelm(executor commandexecutor.CommandExecutor) (helm helminterfaces.Helm) {
-	helm, err := GetCommandExecutorHelm(executor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return helm
-}
-
-func MustGetLocalCommandExecutorHelm() (helm helminterfaces.Helm) {
-	helm, err := GetLocalCommandExecutorHelm()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return helm
-}
-
 func NewcommandExecutorHelm() (c *commandExecutorHelm) {
 	return new(commandExecutorHelm)
 }
 
-func (c *commandExecutorHelm) AddRepositoryByName(name string, url string, verbose bool) (err error) {
+func (c *commandExecutorHelm) AddRepositoryByName(ctx context.Context, name string, url string) (err error) {
 	if name == "" {
 		return tracederrors.TracedErrorEmptyString("name")
 	}
@@ -68,17 +52,10 @@ func (c *commandExecutorHelm) AddRepositoryByName(name string, url string, verbo
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Add helm repository '%s' with url '%s' on host '%s' started.",
-			name,
-			url,
-			hostDescription,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Add helm repository '%s' with url '%s' on host '%s' started.", name, url, hostDescription)
 
 	_, err = commandExecutor.RunCommand(
-		contextutils.GetVerbosityContextByBool(verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"helm",
@@ -93,23 +70,8 @@ func (c *commandExecutorHelm) AddRepositoryByName(name string, url string, verbo
 		return err
 	}
 
-	if verbose {
-		logging.LogChangedf(
-			"Added helm repository '%s' with url '%s' on host '%s'.",
-			name,
-			url,
-			hostDescription,
-		)
-	}
-
-	if verbose {
-		logging.LogInfof(
-			"Add helm repository '%s' with url '%s' on host '%s' finished.",
-			name,
-			url,
-			hostDescription,
-		)
-	}
+	logging.LogChangedByCtxf(ctx, "Added helm repository '%s' with url '%s' on host '%s'.", name, url, hostDescription)
+	logging.LogInfoByCtxf(ctx, "Add helm repository '%s' with url '%s' on host '%s' finished.", name, url, hostDescription)
 
 	return nil
 }
@@ -142,49 +104,61 @@ func (c *commandExecutorHelm) GetHostDescription() (hostDescription string, err 
 	return commandExecutor.GetHostDescription()
 }
 
-func (c *commandExecutorHelm) MustAddRepositoryByName(name string, url string, verbose bool) {
-	err := c.AddRepositoryByName(name, url, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *commandExecutorHelm) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
-	commandExecutor, err := c.GetCommandExecutor()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandExecutor
-}
-
-func (c *commandExecutorHelm) MustGetCommandExecutorAndHostDescription() (commandExecutor commandexecutor.CommandExecutor, hostDescription string) {
-	commandExecutor, hostDescription, err := c.GetCommandExecutorAndHostDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandExecutor, hostDescription
-}
-
-func (c *commandExecutorHelm) MustGetHostDescription() (hostDescription string) {
-	hostDescription, err := c.GetHostDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hostDescription
-}
-
-func (c *commandExecutorHelm) MustSetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) {
-	err := c.SetCommandExecutor(commandExecutor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (c *commandExecutorHelm) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
 	c.commandExecutor = commandExecutor
+
+	return nil
+}
+
+func (c *commandExecutorHelm) InstallHelmChart(ctx context.Context, options *helmparameteroptions.InstallHelmChartOptions) error {
+	if options == nil {
+		return tracederrors.TracedErrorNil("options")
+	}
+
+	cluster, err := options.GetKubernetesCluster()
+	if err != nil {
+		return err
+	}
+
+	kubeContext, err := cluster.GetKubectlContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	chartReference, err := options.GetChartReference()
+	if err != nil {
+		return err
+	}
+
+	chartUri, err := options.GetChartUri()
+	if err != nil {
+		return err
+	}
+
+	namespace, err := options.GetNamespace()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Install helm chart '%s' as '%s' in namespace '%s' using kube context '%s' started.", chartUri, chartReference, namespace, kubeContext)
+
+	cmd := []string{"helm", "install", "--kube-context", kubeContext, chartReference, chartUri, "--namespace", namespace, "--create-namespace"}
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return err
+	}
+
+	_, err = commandExecutor.RunCommand(
+		commandexecutor.WithLiveOutputOnStdout(ctx),
+		&parameteroptions.RunCommandOptions{
+			Command: cmd,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Install helm chart '%s' as '%s' in namespace '%s' using kube context '%s' finished.", chartUri, chartReference, namespace, kubeContext)
 
 	return nil
 }

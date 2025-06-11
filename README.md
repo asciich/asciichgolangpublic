@@ -4,6 +4,15 @@ This module helps to write infrastructure and/or automation related microservice
 By providing a lot of convenience functions, sanity checks during runtime and detailed error messages it can be used to write easy to understand software to automate repeatable work.
 The focus is on ease of use and developer speed instead of algorithm speed and computer resource efficiency. 
 
+
+## Provided functionality
+
+* [helmutils](pkg/helmutils/): Work with helm and helmcharts.
+* [httputils](pkg/httputils/): High level easy to use HTTP client and testserver.
+* [kindutils](pkg/kindutils/): Handle KinD/ Kubernetes in Docker.
+* [kubernetesutils](pkg/kubernetesutils/): Work with K8s/ Kubernetes.
+* [versionutils](pkg/versionutils/): Handle versions.
+
 ## Design choices, principles and background information
 
 * Design choices:
@@ -24,12 +33,6 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 	* Currently this is a one man show.
 	* It bases purely on some code I wrote at home in my free time used for automating my personal homelab.
 
-## Provided functionality
-
-* [httputils](pkg/httputils/): High level easy to use HTTP client and testserver.
-* [kindutils](pkg/kindutils/): Handle KinD/ Kubernetes in Docker.
-* [kubernetesutils](pkg/kubernetesutils/): Work with K8s/ Kubernetes.
-* [versionutils](pkg/versionutils/): Handle versions.
 
 ## Logging
 

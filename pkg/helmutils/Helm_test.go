@@ -1,17 +1,24 @@
 package helmutils_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helminterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
+
 func getHelmImplementationByName(implementationName string) (helm helminterfaces.Helm) {
 	if implementationName == "commandExecutorHelm" {
-		return helmutils.MustGetLocalCommandExecutorHelm()
+		return mustutils.Must(helmutils.GetLocalCommandExecutorHelm())
 	}
 
 	logging.LogFatalf("Unknown implementation name '%s'", implementationName)
@@ -30,10 +37,10 @@ func TestRole_AddHelmRepo(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
+				ctx := getCtx()
 
 				kubernetes := getHelmImplementationByName(tt.implementationName)
-				kubernetes.MustAddRepositoryByName("argo", "https://argoproj.github.io/argo-helm", verbose)
+				mustutils.Must0(kubernetes.AddRepositoryByName(ctx, "argo", "https://argoproj.github.io/argo-helm"))
 			},
 		)
 	}

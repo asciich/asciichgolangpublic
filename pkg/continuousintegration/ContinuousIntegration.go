@@ -44,5 +44,13 @@ func IsRunningInTravis() (isRunningInGitlab bool) {
 }
 
 func GetDefaultKindClusterName() string {
-	return "kind-ci-cluster-" + strings.ToLower(randomgenerator.MustGetRandomString(5))
+	const defaultClusterName = "kind-ci-cluster"
+
+	if IsRunningInContinuousIntegration() {
+		// On Github multiple create and delete of the same cluster lead to errors (unable to create cluster again).
+		// Therefore we generate a new name for every test.
+		return defaultClusterName + "-" + strings.ToLower(randomgenerator.MustGetRandomString(5))
+	}
+
+	return defaultClusterName
 }
