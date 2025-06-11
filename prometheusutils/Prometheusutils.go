@@ -5,6 +5,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -52,7 +53,7 @@ func GetParsedMetricPage(ctx context.Context, url string) (metrics *PrometheusPa
 
 	m, err := httputils.SendRequestAndGetBodyAsString(
 		ctx,
-		&httputils.RequestOptions{
+		&httputilsparameteroptions.RequestOptions{
 			Url:    url,
 			Method: "GET",
 		},

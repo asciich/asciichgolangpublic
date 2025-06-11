@@ -34,6 +34,8 @@ type NativeKubernetesCluster struct {
 	dynamicClientCache *dynamic.DynamicClient
 }
 
+
+
 func GetConfigFromKubeconfig(ctx context.Context, clusterName string) (*rest.Config, error) {
 	kubeconfig, err := kubeconfigutils.GetDefaultKubeConfigPath(ctx)
 	if err != nil {
