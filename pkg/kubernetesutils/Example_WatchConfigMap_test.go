@@ -26,7 +26,9 @@ func Test_Example_WatchConfigMap(t *testing.T) {
 	// Ensure a local kind cluster is available for testing:
 	_, err := kindutils.CreateCluster(ctx, clusterName)
 	require.NoError(t, err)
-	defer kindutils.DeleteClusterByName(ctx, clusterName)
+	defer kindutils.DeleteClusterByNameIfInContinuousIntegration(ctx, clusterName)
+	// ... prepare test environment finished.
+	// -----
 
 	// Get Kubernetes cluster:
 	cluster, err := nativekubernetes.GetClusterByName(ctx, "kind-"+clusterName)

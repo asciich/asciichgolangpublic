@@ -3,6 +3,8 @@ package kindutils
 import (
 	"context"
 
+	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -40,4 +42,18 @@ func DeleteClusterByName(ctx context.Context, clusterName string) error {
 	}
 
 	return kind.DeleteClusterByName(ctx, clusterName)
+}
+
+func DeleteClusterByNameIfInContinuousIntegration(ctx context.Context, clusterName string) error {
+	if clusterName == "" {
+		return tracederrors.TracedErrorEmptyString("clusterName")
+	}
+
+	if continuousintegration.IsRunningInContinuousIntegration() {
+		return DeleteClusterByName(ctx, clusterName)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Skip deletion of cluster '%s' since not running in continuous integration.", clusterName)
+
+	return nil
 }
