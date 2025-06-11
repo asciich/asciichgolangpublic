@@ -14,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
@@ -494,3 +495,108 @@ func (n *NativeNamespace) WatchConfigMap(ctx context.Context, configMapName stri
 
 	return nil
 }
+
+func (n *NativeNamespace) GetDiscoveryClient() (discovery.DiscoveryInterface, error) {
+	cluster, err := n.GetKubernetesCluster()
+	if err != nil {
+		return nil, err
+	}
+
+	return cluster.GetDiscoveryClient()
+}
+
+/*
+func (n *NativeNamespace) WatchCreateUpdateDelete(ctx context.Context) error {
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Watch resources for create, update, delete in namespace '%s' started.", namespaceName)
+
+	dynamicClient, err := n.GetDynamicClient()
+	if err != nil {
+		return err
+	}
+
+	discoveryClient, err := n.GetDiscoveryClient()
+	if err != nil {
+		return err
+	}
+
+	resourceLists, err := discoveryClient.ServerPreferredResources()
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to discover resourceList: %w", err)
+	}
+
+	dynamicInformerFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicClient, 0, namespaceName, nil)
+
+	for _, list := range resourceLists {
+		if len(list.APIResources) == 0 {
+			logging.LogInfoByCtx(ctx, "Empty group skipped.")
+			continue
+		}
+
+		gv, err := schema.ParseGroupVersion(list.GroupVersion)
+		if err != nil {
+			return tracederrors.TracedErrorf("Error parsing GroupVersion %s: %v", list.GroupVersion, err)
+		}
+
+		for _, resource := range list.APIResources {
+			if len(resource.Verbs) == 0 || !containsVerb(resource.Verbs, "watch") {
+				logging.LogInfoByCtxf(ctx, "Group version '%s' can not be watched.", list.GroupVersion)
+				continue
+			}
+
+			gvr := schema.GroupVersionResource{Group: gv.Group, Version: gv.Version, Resource: resource.Name}
+			logging.LogInfoByCtxf(ctx, "Registering informer for GVR: %s", gvr.String())
+
+			informer := dynamicInformerFactory.ForResource(gvr)
+
+			_, err := informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+				AddFunc: func(obj interface{}) {
+					// Convert the runtime.Object to an unstructured.Unstructured.
+					unstructuredObj, err := meta.Accessor(obj)
+					if err != nil {
+						logging.LogErrorByCtxf(ctx, "Error converting object to unstructured in AddFunc: %v", err)
+						return
+					}
+					logging.LogInfoByCtxf(ctx, "ADDED: %s %s/%s", gvr.String(), unstructuredObj.GetNamespace(), unstructuredObj.GetName())
+				},
+				UpdateFunc: func(oldObj, newObj interface{}) {
+					newUnstructuredObj, err := meta.Accessor(newObj)
+					if err != nil {
+						logging.LogErrorByCtxf(ctx, "Error converting new object to unstructured in UpdateFunc: %v", err)
+						return
+					}
+
+					logging.LogInfoByCtxf(ctx, "UPDATED: %s %s/%s", gvr.String(), newUnstructuredObj.GetNamespace(), newUnstructuredObj.GetName())
+				},
+				DeleteFunc: func(obj interface{}) {
+					// Convert the runtime.Object to an unstructured.Unstructured.
+					// Handle tombstone objects for deleted resources.
+					if deletedObj, ok := obj.(cache.DeletedFinalStateUnknown); ok {
+						obj = deletedObj.Obj
+					}
+					unstructuredObj, err := meta.Accessor(obj)
+					if err != nil {
+						logging.LogErrorByCtxf(ctx, "Error converting object to unstructured in DeleteFunc: %v", err)
+						return
+					}
+					logging.LogInfoByCtxf(ctx, "DELETED: %s %s/%s", gvr.String(), unstructuredObj.GetNamespace(), unstructuredObj.GetName())
+				},
+			})
+			if err != nil {
+				return tracederrors.TracedErrorf("Error adding event handler for GVR %s: %v", gvr.String(), err)
+			}
+		}
+	}
+
+	dynamicInformerFactory.Start(ctx.Done())
+
+
+	if !dynamicInformerFactory.WaitForCacheSync(stopCh) {
+		return tracederrors.TracedError("Wait for cache sync failed")
+	}
+}
+*/

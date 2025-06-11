@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/tlsutils/x509utils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -38,7 +40,7 @@ func GenerateCertAndKeyForTestWebserver(ctx context.Context) (certAndKeyPair *x5
 	)
 }
 
-func GetTlsTestWebServer(ctx context.Context, port int) (webServer Server, err error) {
+func GetTlsTestWebServer(ctx context.Context, port int) (webServer httputilsinterfaces.Server, err error) {
 	toReturn := NewTestWebServer()
 
 	err = toReturn.SetPort(port)
@@ -73,7 +75,7 @@ func (t *TestWebServer) GetTlsCert() (cert *x509.Certificate, err error) {
 	return x509utils.TlsCertToX509Cert(&tlsCert)
 }
 
-func GetTestWebServer(port int) (webServer Server, err error) {
+func GetTestWebServer(port int) (webServer httputilsinterfaces.Server, err error) {
 	toReturn := NewTestWebServer()
 
 	err = toReturn.SetPort(port)
@@ -171,7 +173,7 @@ func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 	if t.webServerWaitGroup == nil {
 		t.webServerWaitGroup = new(sync.WaitGroup)
 	} else {
-		return tracederrors.TracedError(ErrWebServerAlreadyRunning)
+		return tracederrors.TracedError(httputilsimplementationindependend.ErrWebServerAlreadyRunning)
 	}
 
 	t.mux = http.NewServeMux()

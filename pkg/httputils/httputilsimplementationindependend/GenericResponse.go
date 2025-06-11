@@ -1,4 +1,4 @@
-package httputils
+package httputilsimplementationindependend
 
 import (
 	"github.com/asciich/asciichgolangpublic/fileformats/jsonutils"
