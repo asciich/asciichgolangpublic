@@ -9,12 +9,15 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
-func getClientByImplementationName(implementationName string) (client httputils.Client) {
+func getClientByImplementationName(implementationName string) (client httputilsinterfaces.Client) {
 	if implementationName == "nativeClient" {
 		return httputils.NewNativeClient()
 	}
@@ -53,11 +56,11 @@ func TestClient_GetRequest_RootPage_PortInUrl(t *testing.T) {
 				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client httputils.Client = getClientByImplementationName(tt.implementationName)
-				var response httputils.Response
+				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				var response httputilsinterfaces.Response
 				response, err = client.SendRequest(
 					ctx,
-					&httputils.RequestOptions{
+					&httputilsparameteroptions.RequestOptions{
 						Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())),
 						Method: tt.method,
 					},
@@ -96,10 +99,10 @@ func TestClient_GetRequestBodyAsString_RootPage_PortInUrl(t *testing.T) {
 				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client httputils.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
 				responseBody, err := client.SendRequestAndGetBodyAsString(
 					ctx,
-					&httputils.RequestOptions{
+					&httputilsparameteroptions.RequestOptions{
 						Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())),
 						Method: tt.method,
 					},
@@ -137,16 +140,16 @@ func TestClient_GetRequest_404_PortInUrl(t *testing.T) {
 				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client httputils.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
 				response, err := client.SendRequest(
 					ctx,
-					&httputils.RequestOptions{
+					&httputilsparameteroptions.RequestOptions{
 						Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/this-page-does-not-exist",
 						Method: tt.method,
 					},
 				)
 				require.Error(t, err)
-				require.ErrorIs(t, err, httputils.ErrUnexpectedStatusCode)
+				require.ErrorIs(t, err, httputilsimplementationindependend.ErrUnexpectedStatusCode)
 
 				require.NotNil(t, response)
 				require.False(t, response.IsStatusCode200Ok())
@@ -183,11 +186,11 @@ func TestClient_DownloadAsFile_ChecksumMismatch(t *testing.T) {
 
 				const expectedOutput = "hello world\n"
 
-				var client httputils.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
 				_, err = client.DownloadAsFile(
 					ctx,
-					&httputils.DownloadAsFileOptions{
-						RequestOptions: &httputils.RequestOptions{
+					&httputilsparameteroptions.DownloadAsFileOptions{
+						RequestOptions: &httputilsparameteroptions.RequestOptions{
 							Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
 							Method: tt.method,
 						},
@@ -229,11 +232,11 @@ func TestClient_DownloadAsFile(t *testing.T) {
 
 				const expectedOutput = "hello world\n"
 
-				var client httputils.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
 				downloadedFile, err := client.DownloadAsFile(
 					ctx,
-					&httputils.DownloadAsFileOptions{
-						RequestOptions: &httputils.RequestOptions{
+					&httputilsparameteroptions.DownloadAsFileOptions{
+						RequestOptions: &httputilsparameteroptions.RequestOptions{
 							Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
 							Method: tt.method,
 						},
@@ -248,8 +251,8 @@ func TestClient_DownloadAsFile(t *testing.T) {
 
 				downloadedFile, err = client.DownloadAsFile(
 					ctx,
-					&httputils.DownloadAsFileOptions{
-						RequestOptions: &httputils.RequestOptions{
+					&httputilsparameteroptions.DownloadAsFileOptions{
+						RequestOptions: &httputilsparameteroptions.RequestOptions{
 							Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
 							Method: tt.method,
 						},
@@ -286,11 +289,11 @@ func TestClient_DownloadAsTempraryFile(t *testing.T) {
 				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client httputils.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
 				downloadedFile, err := client.DownloadAsTemporaryFile(
 					ctx,
-					&httputils.DownloadAsFileOptions{
-						RequestOptions: &httputils.RequestOptions{
+					&httputilsparameteroptions.DownloadAsFileOptions{
+						RequestOptions: &httputilsparameteroptions.RequestOptions{
 							Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
 							Method: tt.method,
 						},
@@ -327,10 +330,10 @@ func TestClient_GetRequestAndRunYqQuery(t *testing.T) {
 				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client httputils.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
 				output, err := client.SendRequestAndRunYqQueryAgainstBody(
 					ctx,
-					&httputils.RequestOptions{
+					&httputilsparameteroptions.RequestOptions{
 						Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/example1.yaml",
 						Method: tt.method,
 					},
@@ -365,10 +368,10 @@ func TestClient_GetRequestUsingTls_insecure(t *testing.T) {
 				err := testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client httputils.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
 				output, err := client.SendRequestAndGetBodyAsString(
 					ctx,
-					&httputils.RequestOptions{
+					&httputilsparameteroptions.RequestOptions{
 						Url:               "https://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
 						Method:            tt.method,
 						SkipTLSvalidation: true,

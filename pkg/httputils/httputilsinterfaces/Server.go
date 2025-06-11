@@ -1,11 +1,8 @@
-package httputils
+package httputilsinterfaces
 
 import (
 	"context"
-	"errors"
 )
-
-var ErrWebServerAlreadyRunning = errors.New("web server already running")
 
 type Server interface {
 	GetPort() (port int, err error)

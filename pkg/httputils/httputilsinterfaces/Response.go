@@ -1,4 +1,4 @@
-package httputils
+package httputilsinterfaces
 
 type Response interface {
 	CheckStatusCode(expectedStatusCode int) error 

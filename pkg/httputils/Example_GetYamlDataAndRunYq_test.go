@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
 )
 
 // Example how to perform a get request and work with the received yaml data.
@@ -32,7 +33,7 @@ func Test_Example_GetYamlDataAndRunYq(t *testing.T) {
 	// Use a get request to receive the YAML data:
 	response, err := httputils.SendRequest(
 		ctx,
-		&httputils.RequestOptions{
+		&httputilsparameteroptions.RequestOptions{
 			// Add the URL to request here:
 			Url: "http://localhost:9123/example1.yaml",
 
