@@ -42,7 +42,7 @@ func TestKind_CreateAndDeleteCluster(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-				clusterName := continuousintegration.GetDefaultKindClusterName()
+				clusterName := continuousintegration.GetUniqKindClusterNameInCi()
 
 				kind := getKindByImplementationName(tt.implementationName)
 
@@ -85,11 +85,13 @@ func TestKind_CreateNamespace(t *testing.T) {
 				const verbose = true
 				ctx := getCtx()
 				clusterName := continuousintegration.GetDefaultKindClusterName()
+				defer kindutils.DeleteClusterByNameIfInContinuousIntegration(ctx, clusterName)
 
 				kind := getKindByImplementationName(tt.implementationName)
 
 				cluster, err := kind.CreateClusterByName(ctx, clusterName)
 				require.NoError(t, err)
+				defer kindutils.DeleteClusterByNameIfInContinuousIntegration(ctx, clusterName)
 
 				namespaceName := "test-namespace"
 

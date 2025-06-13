@@ -22,8 +22,9 @@ func TestListKindNames(t *testing.T) {
 		// Ensure a local kind cluster is available for testing:
 		clusterName := continuousintegration.GetDefaultKindClusterName()
 		_, err := kindutils.CreateCluster(ctx, clusterName)
+
 		require.NoError(t, err)
-		defer kindutils.DeleteClusterByName(ctx, clusterName)
+		defer kindutils.DeleteClusterByNameIfInContinuousIntegration(ctx, clusterName)
 
 		cluster, err := nativekubernetes.GetDefaultCluster(ctx)
 		require.NoError(t, err)

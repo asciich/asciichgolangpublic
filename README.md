@@ -7,6 +7,7 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 
 ## Provided functionality
 
+* [fluxutils](pkg/fluxutils/): Work with FluxCD.
 * [helmutils](pkg/helmutils/): Work with helm and helmcharts.
 * [httputils](pkg/httputils/): High level easy to use HTTP client and testserver.
 * [kindutils](pkg/kindutils/): Handle KinD/ Kubernetes in Docker.
