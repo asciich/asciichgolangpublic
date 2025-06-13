@@ -34,8 +34,6 @@ type NativeKubernetesCluster struct {
 	dynamicClientCache *dynamic.DynamicClient
 }
 
-
-
 func GetConfigFromKubeconfig(ctx context.Context, clusterName string) (*rest.Config, error) {
 	kubeconfig, err := kubeconfigutils.GetDefaultKubeConfigPath(ctx)
 	if err != nil {
@@ -297,7 +295,24 @@ func (n *NativeKubernetesCluster) GetNamespaceByName(name string) (namespace kub
 	}, nil
 }
 func (n *NativeKubernetesCluster) GetResourceByNames(resourceName string, resourceType string, namespaceName string) (resource kubernetesinterfaces.Resource, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	if resourceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("resourceName")
+	}
+
+	if resourceType == "" {
+		return nil, tracederrors.TracedErrorEmptyString("resourceType")
+	}
+
+	if namespaceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
+	}
+
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.GetResourceByNames(resourceName, resourceType)
 }
 func (n *NativeKubernetesCluster) ListNamespaces(ctx context.Context) (namespaces []kubernetesinterfaces.Namespace, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
@@ -564,5 +579,18 @@ func (n *NativeKubernetesCluster) WhoAmI(ctx context.Context) (*kubernetesimplem
 	return &kubernetesimplementationindependend.UserInfo{
 		Username: username,
 	}, nil
+}
+
+func (n *NativeKubernetesCluster) WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.WaitForPodsOptions) error {
+	if namespaceName == "" {
+		return tracederrors.TracedErrorEmptyString("namespaceName")
+	}
+
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+
+	return namespace.WaitUntilAllPodsInNamespaceAreRunning(ctx, options)
 
 }

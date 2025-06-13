@@ -52,7 +52,22 @@ func (n *NativeNamespace) GetDynamicClient() (*dynamic.DynamicClient, error) {
 }
 
 func (n *NativeNamespace) Create(ctx context.Context) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+	cluster, err := n.GetKubernetesCluster()
+	if err != nil {
+		return err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return err
+	}
+
+	_, err = cluster.CreateNamespaceByName(ctx, namespaceName)
+	if err != nil {
+		return err
+	}
+
+	return err
 }
 
 func (n *NativeNamespace) CreateRole(ctx context.Context, createOptions *kubernetesparameteroptions.CreateRoleOptions) (createdRole kubernetesinterfaces.Role, err error) {
@@ -80,7 +95,19 @@ func (n *NativeNamespace) GetName() (name string, err error) {
 }
 
 func (n *NativeNamespace) GetResourceByNames(resourceName string, resourceType string) (resource kubernetesinterfaces.Resource, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	if resourceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("resourceName")
+	}
+
+	if resourceType == "" {
+		return nil, tracederrors.TracedErrorEmptyString("resourceType")
+	}
+
+	return &NativeResource{
+		name:      resourceName,
+		kind:      resourceType,
+		namespace: n,
+	}, nil
 }
 
 func (n *NativeNamespace) GetRoleByName(name string) (role kubernetesinterfaces.Role, err error) {
@@ -505,98 +532,64 @@ func (n *NativeNamespace) GetDiscoveryClient() (discovery.DiscoveryInterface, er
 	return cluster.GetDiscoveryClient()
 }
 
-/*
-func (n *NativeNamespace) WatchCreateUpdateDelete(ctx context.Context) error {
-	namespaceName, err := n.GetName()
+func (n *NativeNamespace) WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, options *kubernetesparameteroptions.WaitForPodsOptions) error {
+	if options == nil {
+		return tracederrors.TracedErrorNil("options")
+	}
+
+	namspaceName, err := n.GetName()
 	if err != nil {
 		return err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Watch resources for create, update, delete in namespace '%s' started.", namespaceName)
+	logging.LogInfoByCtxf(ctx, "Wait until all pods in namespace '%s' are running started.", namspaceName)
 
-	dynamicClient, err := n.GetDynamicClient()
+	clientset, err := n.GetClientSet()
 	if err != nil {
 		return err
 	}
 
-	discoveryClient, err := n.GetDiscoveryClient()
-	if err != nil {
-		return err
-	}
-
-	resourceLists, err := discoveryClient.ServerPreferredResources()
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to discover resourceList: %w", err)
-	}
-
-	dynamicInformerFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicClient, 0, namespaceName, nil)
-
-	for _, list := range resourceLists {
-		if len(list.APIResources) == 0 {
-			logging.LogInfoByCtx(ctx, "Empty group skipped.")
-			continue
-		}
-
-		gv, err := schema.ParseGroupVersion(list.GroupVersion)
+	var nPods int
+	for {
+		err := ctx.Err()
 		if err != nil {
-			return tracederrors.TracedErrorf("Error parsing GroupVersion %s: %v", list.GroupVersion, err)
+			return err
 		}
 
-		for _, resource := range list.APIResources {
-			if len(resource.Verbs) == 0 || !containsVerb(resource.Verbs, "watch") {
-				logging.LogInfoByCtxf(ctx, "Group version '%s' can not be watched.", list.GroupVersion)
-				continue
-			}
+		pods, err := clientset.CoreV1().Pods(namspaceName).List(ctx, metav1.ListOptions{})
+		if err != nil {
+			return tracederrors.TracedErrorf("Failed to list pods to wait for: %w", err)
+		}
 
-			gvr := schema.GroupVersionResource{Group: gv.Group, Version: gv.Version, Resource: resource.Name}
-			logging.LogInfoByCtxf(ctx, "Registering informer for GVR: %s", gvr.String())
-
-			informer := dynamicInformerFactory.ForResource(gvr)
-
-			_, err := informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-				AddFunc: func(obj interface{}) {
-					// Convert the runtime.Object to an unstructured.Unstructured.
-					unstructuredObj, err := meta.Accessor(obj)
-					if err != nil {
-						logging.LogErrorByCtxf(ctx, "Error converting object to unstructured in AddFunc: %v", err)
-						return
-					}
-					logging.LogInfoByCtxf(ctx, "ADDED: %s %s/%s", gvr.String(), unstructuredObj.GetNamespace(), unstructuredObj.GetName())
-				},
-				UpdateFunc: func(oldObj, newObj interface{}) {
-					newUnstructuredObj, err := meta.Accessor(newObj)
-					if err != nil {
-						logging.LogErrorByCtxf(ctx, "Error converting new object to unstructured in UpdateFunc: %v", err)
-						return
-					}
-
-					logging.LogInfoByCtxf(ctx, "UPDATED: %s %s/%s", gvr.String(), newUnstructuredObj.GetNamespace(), newUnstructuredObj.GetName())
-				},
-				DeleteFunc: func(obj interface{}) {
-					// Convert the runtime.Object to an unstructured.Unstructured.
-					// Handle tombstone objects for deleted resources.
-					if deletedObj, ok := obj.(cache.DeletedFinalStateUnknown); ok {
-						obj = deletedObj.Obj
-					}
-					unstructuredObj, err := meta.Accessor(obj)
-					if err != nil {
-						logging.LogErrorByCtxf(ctx, "Error converting object to unstructured in DeleteFunc: %v", err)
-						return
-					}
-					logging.LogInfoByCtxf(ctx, "DELETED: %s %s/%s", gvr.String(), unstructuredObj.GetNamespace(), unstructuredObj.GetName())
-				},
-			})
-			if err != nil {
-				return tracederrors.TracedErrorf("Error adding event handler for GVR %s: %v", gvr.String(), err)
+		allRunning := true
+		nPods = 0
+		for _, pod := range pods.Items {
+			nPods++
+			if pod.Status.Phase != v1.PodRunning {
+				allRunning = false
+				logging.LogInfoByCtxf(ctx, "Pod %s is in phase '%s' and not 'running' yet.", pod.Name, pod.Status.Phase)
+				break
 			}
 		}
+
+		if options.MinNumberOfPods > 0 {
+			minPods := options.MinNumberOfPods
+			if nPods < minPods {
+				allRunning = false
+				logging.LogInfoByCtxf(ctx, "Only %d pods present in namespace '%s'. Waiting until minimum required pods of %d are present.", nPods, namspaceName, minPods)
+			}
+		}
+
+		if allRunning {
+			break
+		}
+
+		delay := time.Second * 3
+		logging.LogInfoByCtxf(ctx, "Wait '%s' before checking again if all pods in namespace '%s are running.'", delay, namspaceName)
+		time.Sleep(delay)
 	}
 
-	dynamicInformerFactory.Start(ctx.Done())
+	logging.LogInfoByCtxf(ctx, "Wait until all pods in namespace '%s' are running finished. There are now '%s' pods running.", namspaceName, nPods)
 
-
-	if !dynamicInformerFactory.WaitForCacheSync(stopCh) {
-		return tracederrors.TracedError("Wait for cache sync failed")
-	}
+	return nil
 }
-*/
