@@ -26,4 +26,5 @@ type Namespace interface {
 	RoleByNameExists(ctx context.Context, name string) (exists bool, err error)
 	SecretByNameExists(ctx context.Context, name string) (exits bool, err error)
 	WatchConfigMap(ctx context.Context, name string, onCreate func(ConfigMap), onUpdate func(ConfigMap), onDelete func(ConfigMap)) error
+	WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, options *kubernetesparameteroptions.WaitForPodsOptions) error
 }

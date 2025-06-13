@@ -1,4 +1,4 @@
-package helmutils_test
+package fluxutils_test
 
 import (
 	"context"
@@ -7,17 +7,18 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
-	"github.com/asciich/asciichgolangpublic/pkg/helmutils"
-	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helmparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/fluxutils"
+	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 )
 
-// Example how to install a hemlchart.
-// For this example the flux operator is installed.
+// This example shows how flux can be installed using the flux-operator.
 //
-//	Source: https://fluxcd.io/flux/installation/#install-the-flux-operator
-func Test_InstallHelmchart_FluxOperator(t *testing.T) {
+// To start this test use:
+//
+//	bash -c "cd pkg/fluxutils && go test -v -run Test_InstallFluxOperator"
+func Test_InstallFluxOperator(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.WithVerbose(context.TODO())
 
@@ -34,27 +35,23 @@ func Test_InstallHelmchart_FluxOperator(t *testing.T) {
 	cluster, err := nativekubernetes.GetClusterByName(ctx, "kind-"+clusterName)
 	require.NoError(t, err)
 
-	// Ensure flux/ the namespace which contains flux is absent.
+	// Ensure flux is absent/ The namespace containg flux is deleted to showcase an installation:
 	err = cluster.DeleteNamespaceByName(ctx, "flux-system")
 	require.NoError(t, err)
 
-	// Check namespace is absent
+	// Check if the "flux-system" namespace is absent:
 	exists, err := cluster.NamespaceByNameExists(ctx, "flux-system")
 	require.NoError(t, err)
 	require.False(t, exists)
 
-	// Deploy flux operator using helm
-	// Equvalent helm command:
-	// helm install flux-operator oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator --namespace flux-system --create-namespace
-	err = helmutils.InstallHelmChart(ctx, &helmparameteroptions.InstallHelmChartOptions{
+	// Install flux using flux-operator
+	_, err = fluxutils.InstallFlux(ctx, &fluxparameteroptions.InstalFluxOptions{
 		KubernetesCluster: cluster,
-		ChartReference:    "flux-operator",
-		ChartUri:          "oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator",
 		Namespace:         "flux-system",
 	})
 	require.NoError(t, err)
 
-	// Check namespace was created
+	// Check if the "flux-system" namespace is prsent:
 	exists, err = cluster.NamespaceByNameExists(ctx, "flux-system")
 	require.NoError(t, err)
 	require.True(t, exists)

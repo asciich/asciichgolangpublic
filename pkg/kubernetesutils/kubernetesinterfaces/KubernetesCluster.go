@@ -19,12 +19,13 @@ type KubernetesCluster interface {
 	GetKubectlContext(ctx context.Context) (contextName string, err error)
 	GetName() (name string, err error)
 	GetNamespaceByName(name string) (namespace Namespace, err error)
-	GetResourceByNames(resourceName string, resourceType string, namespaceName string) (resource Resource, err error)
+	GetResourceByNames(resourceName string, kind string, namespaceName string) (resource Resource, err error)
 	ListNamespaces(ctx context.Context) (namespaces []Namespace, err error)
 	ListNamespaceNames(ctx context.Context) (namespaceNames []string, err error)
 	ListResources(options *parameteroptions.ListKubernetesResourcesOptions) (resources []Resource, err error)
 	ListResourceNames(options *parameteroptions.ListKubernetesResourcesOptions) (resourceNames []string, err error)
 	NamespaceByNameExists(ctx context.Context, namespaceName string) (exists bool, err error)
 	SecretByNameExists(ctx context.Context, namespaceName string, secretName string) (exists bool, err error)
+	WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.WaitForPodsOptions) error
 	WhoAmI(ctx context.Context) (*kubernetesimplementationindependend.UserInfo, error)
 }
