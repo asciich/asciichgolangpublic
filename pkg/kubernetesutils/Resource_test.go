@@ -15,10 +15,11 @@ import (
 func TestKubernetesResource_CreateAndDelete(t *testing.T) {
 	tests := []struct {
 		implementationName string
-		resourceType       string
+		resourceKind       string
 		resourceName       string
 	}{
 		{"commandExecutorKubernetes", "secret", "resource-test-secret"},
+		{"nativeKubernetes", "secret", "resource-test-secret"},
 	}
 
 	for _, tt := range tests {
@@ -33,7 +34,7 @@ func TestKubernetesResource_CreateAndDelete(t *testing.T) {
 				require.NoError(t, err)
 				require.False(t, mustutils.Must(kubernetes.NamespaceByNameExists(ctx, namespaceName)))
 
-				k8sResource, err := kubernetes.GetResourceByNames(tt.resourceName, tt.resourceType, namespaceName)
+				k8sResource, err := kubernetes.GetResourceByNames(tt.resourceName, tt.resourceKind, namespaceName)
 				require.NoError(t, err)
 				err = k8sResource.Delete(ctx)
 				require.NoError(t, err)
