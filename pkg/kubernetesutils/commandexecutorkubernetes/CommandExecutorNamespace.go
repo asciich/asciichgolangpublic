@@ -461,3 +461,7 @@ func (c *CommandExecutorNamespace) WatchConfigMap(ctx context.Context, name stri
 
 	return tracederrors.TracedErrorNotImplemented()
 }
+
+func (c *CommandExecutorNamespace) WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, options *kubernetesparameteroptions.WaitForPodsOptions) error {
+	return tracederrors.TracedErrorNotImplemented()
+}
