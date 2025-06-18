@@ -35,13 +35,13 @@ func getGitRepositoryToTest(implementationName string) (repo GitRepository) {
 		logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)
 	}
 
-	repo.MustInit(
+	mustutils.Must0(repo.Init(
 		&parameteroptions.CreateRepositoryOptions{
 			Verbose:                     verbose,
 			InitializeWithEmptyCommit:   true,
 			InitializeWithDefaultAuthor: true,
 		},
-	)
+	))
 
 	return repo
 }
@@ -68,22 +68,23 @@ func TestGitRepository_Init_minimal(t *testing.T) {
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
-				repo.MustDelete(verbose)
+				err := repo.Delete(verbose)
+				require.NoError(t, err)
 
-				require.False(t, repo.MustExists(verbose))
-				require.False(t, repo.MustIsInitialized(verbose))
-				require.False(t, repo.MustHasInitialCommit(verbose))
+				require.False(t, mustutils.Must(repo.Exists(verbose)))
+				require.False(t, mustutils.Must(repo.IsInitialized(verbose)))
+				require.False(t, mustutils.Must(repo.HasInitialCommit(verbose)))
 
 				for i := 0; i < 2; i++ {
-					repo.MustInit(
+					err = repo.Init(
 						&parameteroptions.CreateRepositoryOptions{
 							Verbose:        verbose,
 							BareRepository: tt.bareRepository,
 						},
 					)
-					require.True(t, repo.MustExists(verbose))
-					require.True(t, repo.MustIsInitialized(verbose))
-					require.False(t, repo.MustHasInitialCommit(verbose))
+					require.True(t, mustutils.Must(repo.Exists(verbose)))
+					require.True(t, mustutils.Must(repo.IsInitialized(verbose)))
+					require.False(t, mustutils.Must(repo.HasInitialCommit(verbose)))
 					isBare, err := repo.IsBareRepository(ctx)
 					require.NoError(t, err)
 					require.EqualValues(t, tt.bareRepository, isBare)
@@ -109,31 +110,38 @@ func TestGitRepository_IsGitRepository(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
-				repo.MustDelete(verbose)
+				err := repo.Delete(verbose)
+				require.NoError(t, err)
 
 				// An non existing directory is not a git repository:
-				require.False(repo.MustIsGitRepository(verbose))
+				isRepo, err := repo.IsGitRepository(verbose)
+				require.NoError(t, err)
+				require.False(t, isRepo)
 
-				files.Directories().MustCreateLocalDirectoryByPath(repo.MustGetPath(), verbose)
+				path, err := repo.GetPath()
+				require.NoError(t, err)
+				files.Directories().MustCreateLocalDirectoryByPath(path, verbose)
 
 				// The directory exists but is empty which is not a git directory:
-				require.False(repo.MustIsGitRepository(verbose))
+				isRepo, err = repo.IsGitRepository(verbose)
+				require.NoError(t, err)
+				require.False(t, isRepo)
 
 				for i := 0; i < 2; i++ {
-					repo.MustInit(
+					mustutils.Must0(repo.Init(
 						&parameteroptions.CreateRepositoryOptions{
 							Verbose:        verbose,
 							BareRepository: tt.bareRepository,
 						},
-					)
-					require.True(repo.MustIsGitRepository(verbose))
+					))
+					isRepo, err = repo.IsGitRepository(verbose)
+					require.NoError(t, err)
+					require.True(t, isRepo)
 				}
 			},
 		)
@@ -153,56 +161,59 @@ func TestGitRepository_Init(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
 				for i := 0; i < 2; i++ {
-					repo.MustDelete(verbose)
-					require.False(repo.MustExists(verbose))
-					require.False(repo.MustIsInitialized(verbose))
-					require.False(repo.MustHasInitialCommit(verbose))
+					err := repo.Delete(verbose)
+					require.NoError(t, err)
+					require.False(t, mustutils.Must(repo.Exists(verbose)))
+					require.False(t, mustutils.Must(repo.IsInitialized(verbose)))
+					require.False(t, mustutils.Must(repo.HasInitialCommit(verbose)))
 				}
 
 				for i := 0; i < 2; i++ {
-					repo.MustCreate(verbose)
-					require.True(repo.MustExists(verbose))
-					require.False(repo.MustIsInitialized(verbose))
-					require.False(repo.MustHasInitialCommit(verbose))
+					err := repo.Create(verbose)
+					require.NoError(t, err)
+					require.True(t, mustutils.Must(repo.Exists(verbose)))
+					require.False(t, mustutils.Must(repo.IsInitialized(verbose)))
+					require.False(t, mustutils.Must(repo.HasInitialCommit(verbose)))
 				}
 
 				for i := 0; i < 2; i++ {
-					repo.MustInit(
+					err := repo.Init(
 						&parameteroptions.CreateRepositoryOptions{
 							Verbose: verbose,
 						},
 					)
-					require.True(repo.MustExists(verbose))
-					require.True(repo.MustIsInitialized(verbose))
-					require.False(repo.MustHasInitialCommit(verbose))
+					require.NoError(t, err)
+					require.True(t, mustutils.Must(repo.Exists(verbose)))
+					require.True(t, mustutils.Must(repo.IsInitialized(verbose)))
+					require.False(t, mustutils.Must(repo.HasInitialCommit(verbose)))
 				}
 
 				for i := 0; i < 2; i++ {
-					repo.MustInit(
+					err := repo.Init(
 						&parameteroptions.CreateRepositoryOptions{
 							Verbose:                     verbose,
 							InitializeWithEmptyCommit:   true,
 							InitializeWithDefaultAuthor: true,
 						},
 					)
-					require.True(repo.MustExists(verbose))
-					require.True(repo.MustIsInitialized(verbose))
-					require.True(repo.MustHasInitialCommit(verbose))
+					require.NoError(t, err)
+					require.True(t, mustutils.Must(repo.Exists(verbose)))
+					require.True(t, mustutils.Must(repo.IsInitialized(verbose)))
+					require.True(t, mustutils.Must(repo.HasInitialCommit(verbose)))
 				}
 
 				for i := 0; i < 2; i++ {
-					repo.MustDelete(verbose)
-					require.False(repo.MustExists(verbose))
-					require.False(repo.MustIsInitialized(verbose))
-					require.False(repo.MustHasInitialCommit(verbose))
+					err := repo.Delete(verbose)
+					require.NoError(t, err)
+					require.False(t, mustutils.Must(repo.Exists(verbose)))
+					require.False(t, mustutils.Must(repo.IsInitialized(verbose)))
+					require.False(t, mustutils.Must(repo.HasInitialCommit(verbose)))
 				}
 			},
 		)
@@ -233,7 +244,7 @@ func TestGitRepository_Init_fullInOneStep(t *testing.T) {
 				repo.Delete(verbose)
 
 				for i := 0; i < 2; i++ {
-					repo.MustInit(
+					err := repo.Init(
 						&parameteroptions.CreateRepositoryOptions{
 							Verbose:                     verbose,
 							InitializeWithDefaultAuthor: true,
@@ -241,9 +252,10 @@ func TestGitRepository_Init_fullInOneStep(t *testing.T) {
 							BareRepository:              tt.bare,
 						},
 					)
-					require.True(t, repo.MustExists(verbose))
-					require.True(t, repo.MustIsInitialized(verbose))
-					require.True(t, repo.MustHasInitialCommit(verbose))
+					require.NoError(t, err)
+					require.True(t, mustutils.Must(repo.Exists(verbose)))
+					require.True(t, mustutils.Must(repo.IsInitialized(verbose)))
+					require.True(t, mustutils.Must(repo.HasInitialCommit(verbose)))
 					isBare, err := repo.IsBareRepository(ctx)
 					require.NoError(t, err)
 					require.EqualValues(t, tt.bare, isBare)
@@ -266,33 +278,34 @@ func TestGitRepository_CreateAndDeleteRepository(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
 				for i := 0; i < 2; i++ {
-					repo.MustDelete(verbose)
-					require.False(repo.MustExists(verbose))
+					err := repo.Delete(verbose)
+					require.NoError(t, err)
+					require.False(t, mustutils.Must(repo.Exists(verbose)))
 				}
 
 				for i := 0; i < 2; i++ {
-					repo.MustCreateAndInit(
+					err := repo.CreateAndInit(
 						&parameteroptions.CreateRepositoryOptions{
 							InitializeWithEmptyCommit:   true,
 							InitializeWithDefaultAuthor: true,
 							Verbose:                     verbose,
 						},
 					)
-					require.True(repo.MustExists(verbose))
-					require.True(repo.MustIsInitialized(verbose))
+					require.NoError(t, err)
+					require.True(t, mustutils.Must(repo.Exists(verbose)))
+					require.True(t, mustutils.Must(repo.IsInitialized(verbose)))
 				}
 
 				for i := 0; i < 2; i++ {
-					repo.MustDelete(verbose)
-					require.False(repo.MustExists(verbose))
+					err := repo.Delete(verbose)
+					require.NoError(t, err)
+					require.False(t, mustutils.Must(repo.Exists(verbose)))
 				}
 
 			},
@@ -313,17 +326,16 @@ func TestGitRepository_HasNoUncommittedChanges(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
-				require.True(repo.MustHasNoUncommittedChanges(verbose))
+				require.True(t, mustutils.Must(repo.HasNoUncommittedChanges(verbose)))
 
-				repo.MustCreateFileInDirectory(verbose, "hello.txt")
-				require.False(repo.MustHasNoUncommittedChanges(verbose))
+				_, err := repo.CreateFileInDirectory(verbose, "hello.txt")
+				require.NoError(t, err)
+				require.False(t, mustutils.Must(repo.HasNoUncommittedChanges(verbose)))
 			},
 		)
 	}
@@ -342,17 +354,16 @@ func TestGitRepository_HasUncommittedChanges(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
-				require.False(repo.MustHasUncommittedChanges(verbose))
+				require.False(t, mustutils.Must(repo.HasUncommittedChanges(verbose)))
 
-				repo.MustCreateFileInDirectory(verbose, "hello.txt")
-				require.True(repo.MustHasUncommittedChanges(verbose))
+				_, err := repo.CreateFileInDirectory(verbose, "hello.txt")
+				require.NoError(t, err)
+				require.True(t, mustutils.Must(repo.HasUncommittedChanges(verbose)))
 			},
 		)
 	}
@@ -371,17 +382,16 @@ func TestGitRepository_CheckHasNoUncommittedChanges(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
-				require.Nil(repo.CheckHasNoUncommittedChanges(verbose))
+				require.Nil(t, repo.CheckHasNoUncommittedChanges(verbose))
 
-				repo.MustCreateFileInDirectory(verbose, "hello.txt")
-				require.NotNil(repo.CheckHasNoUncommittedChanges(verbose))
+				_, err := repo.CreateFileInDirectory(verbose, "hello.txt")
+				require.NoError(t, err)
+				require.NotNil(t, repo.CheckHasNoUncommittedChanges(verbose))
 			},
 		)
 	}
@@ -404,28 +414,25 @@ func TestGitRepository_GetRootDirectoryPath(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
-				repo.MustDelete(verbose)
+				err := repo.Delete(verbose)
+				require.NoError(t, err)
 
-				repo.MustInit(
+				err = repo.Init(
 					&parameteroptions.CreateRepositoryOptions{
 						Verbose:        verbose,
 						BareRepository: tt.bareRepository,
 					},
 				)
+				require.NoError(t, err)
 
 				rootDirPath, err := repo.GetRootDirectoryPath(ctx)
 				require.NoError(t, err)
-				require.EqualValues(
-					t,
-					repo.MustGetPath(),
-					rootDirPath,
-				)
+				require.EqualValues(t, mustutils.Must(repo.GetPath()), rootDirPath)
 			},
 		)
 	}
@@ -447,27 +454,24 @@ func TestGitRepository_GetRootDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
-				repo.MustDelete(verbose)
+				err := repo.Delete(verbose)
+				require.NoError(t, err)
 
-				repo.MustInit(
+				err = repo.Init(
 					&parameteroptions.CreateRepositoryOptions{
 						Verbose:        verbose,
 						BareRepository: tt.bareRepository,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					repo.MustGetPath(),
-					mustutils.Must(repo.GetRootDirectory(ctx)).MustGetPath(),
-				)
+				require.EqualValues(t, mustutils.Must(repo.GetPath()), mustutils.Must(repo.GetRootDirectory(ctx)).MustGetPath())
 			},
 		)
 	}
@@ -489,40 +493,36 @@ func TestGitRepository_GetRootDirectory_from_subdirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
-				repo.MustDelete(verbose)
+				err := repo.Delete(verbose)
+				require.NoError(t, err)
 
-				repo.MustInit(
+				err = repo.Init(
 					&parameteroptions.CreateRepositoryOptions{
 						Verbose:        verbose,
 						BareRepository: tt.bareRepository,
 					},
 				)
+				require.NoError(t, err)
 
-				expectedRootDirectory := repo.MustGetPath()
+				expectedRootDirectory, err := repo.GetPath()
+				require.NoError(t, err)
 
-				subDir := repo.MustCreateSubDirectory("sub_directory", verbose)
+				subDir, err := repo.CreateSubDirectory("sub_directory", verbose)
+				require.NoError(t, err)
 
 				repoUsingSubDir1 := MustGetCommandExecutorGitRepositoryFromDirectory(subDir)
 
-				require.EqualValues(
-					expectedRootDirectory,
-					mustutils.Must(repoUsingSubDir1.GetRootDirectoryPath(ctx)),
-				)
+				require.EqualValues(t, expectedRootDirectory, mustutils.Must(repoUsingSubDir1.GetRootDirectoryPath(ctx)))
 
 				repoUsingSubDir2 := MustGetLocalGitReposioryFromDirectory(subDir)
 
-				require.EqualValues(
-					expectedRootDirectory,
-					mustutils.Must(repoUsingSubDir2.GetRootDirectoryPath(ctx)),
-				)
+				require.EqualValues(t, expectedRootDirectory, mustutils.Must(repoUsingSubDir2.GetRootDirectoryPath(ctx)))
 			},
 		)
 	}
@@ -541,14 +541,14 @@ func TestGitRepository_CloneRepository_idempotence(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				upstreamRepo := getGitRepositoryToTest(tt.implementationName)
-				defer upstreamRepo.MustDelete(verbose)
-				upstreamRepo.MustDelete(verbose)
-				upstreamRepo.MustInit(
+				defer upstreamRepo.Delete(verbose)
+				err := upstreamRepo.Delete(verbose)
+				require.NoError(t, err)
+
+				err = upstreamRepo.Init(
 					&parameteroptions.CreateRepositoryOptions{
 						BareRepository:              true,
 						InitializeWithEmptyCommit:   true,
@@ -556,18 +556,21 @@ func TestGitRepository_CloneRepository_idempotence(t *testing.T) {
 						Verbose:                     verbose,
 					},
 				)
+				require.NoError(t, err)
 
 				clonedRepo := getGitRepositoryToTest(tt.implementationName)
-				defer clonedRepo.MustDelete(verbose)
-				clonedRepo.MustDelete(verbose)
+				defer clonedRepo.Delete(verbose)
+				err = clonedRepo.Delete(verbose)
+				require.NoError(t, err)
 
 				for i := 0; i < 2; i++ {
-					clonedRepo.MustCloneRepository(upstreamRepo, verbose)
+					err = clonedRepo.CloneRepository(upstreamRepo, verbose)
+					require.NoError(t, err)
 				}
 
-				require.EqualValues(
-					upstreamRepo.MustGetCurrentCommitHash(verbose),
-					clonedRepo.MustGetCurrentCommitHash(verbose),
+				require.EqualValues(t,
+					mustutils.Must(upstreamRepo.GetCurrentCommitHash(verbose)),
+					mustutils.Must(clonedRepo.GetCurrentCommitHash(verbose)),
 				)
 			},
 		)
@@ -592,14 +595,13 @@ func TestGitRepository_PullAndPush(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				upstreamRepo := getGitRepositoryToTest(tt.implementationUpstream)
-				defer upstreamRepo.MustDelete(verbose)
-				upstreamRepo.MustDelete(verbose)
-				upstreamRepo.MustInit(
+				defer upstreamRepo.Delete(verbose)
+				err := upstreamRepo.Delete(verbose)
+				require.NoError(t, err)
+				err = upstreamRepo.Init(
 					&parameteroptions.CreateRepositoryOptions{
 						BareRepository:              true,
 						InitializeWithEmptyCommit:   true,
@@ -607,80 +609,95 @@ func TestGitRepository_PullAndPush(t *testing.T) {
 						Verbose:                     verbose,
 					},
 				)
+				require.NoError(t, err)
 
 				clonedRepo := getGitRepositoryToTest(tt.implementationCloned)
-				defer clonedRepo.MustDelete(verbose)
-				clonedRepo.MustDelete(verbose)
-				clonedRepo.MustCloneRepository(upstreamRepo, verbose)
+				defer clonedRepo.Delete(verbose)
+				err = clonedRepo.Delete(verbose)
+				require.NoError(t, err)
 
-				clonedRepo.MustSetGitConfig(
+				err = clonedRepo.CloneRepository(upstreamRepo, verbose)
+				require.NoError(t, err)
+
+				err = clonedRepo.SetGitConfig(
 					&gitparameteroptions.GitConfigSetOptions{
 						Name:  "Test User",
 						Email: "user@example.com",
 					},
 				)
+				require.NoError(t, err)
 
 				clonedRepo2 := getGitRepositoryToTest(tt.implementationCloned2)
-				defer clonedRepo2.MustDelete(verbose)
-				clonedRepo2.MustDelete(verbose)
-				clonedRepo2.MustCloneRepository(upstreamRepo, verbose)
+				defer clonedRepo2.Delete(verbose)
+				err = clonedRepo2.Delete(verbose)
+				require.NoError(t, err)
+				err = clonedRepo2.CloneRepository(upstreamRepo, verbose)
+				require.NoError(t, err)
 
-				clonedRepo2.MustSetGitConfig(
+				err = clonedRepo2.SetGitConfig(
 					&gitparameteroptions.GitConfigSetOptions{
 						Name:  "Test User2",
 						Email: "user2@example.com",
 					},
 				)
+				require.NoError(t, err)
 
 				require.EqualValues(
-					upstreamRepo.MustGetCurrentCommitHash(verbose),
-					clonedRepo.MustGetCurrentCommitHash(verbose),
+					t,
+					mustutils.Must(upstreamRepo.GetCurrentCommitHash(verbose)),
+					mustutils.Must(clonedRepo.GetCurrentCommitHash(verbose)),
 				)
 
 				require.EqualValues(
-					upstreamRepo.MustGetCurrentCommitHash(verbose),
-					clonedRepo2.MustGetCurrentCommitHash(verbose),
+					t,
+					mustutils.Must(upstreamRepo.GetCurrentCommitHash(verbose)),
+					mustutils.Must(clonedRepo2.GetCurrentCommitHash(verbose)),
 				)
 
 				fileName := "abc.txt"
-				clonedRepo2.MustCreateFileInDirectory(verbose, fileName)
-				clonedRepo2.MustAddFileByPath(fileName, verbose)
-				clonedRepo2.MustCommit(
+				_, err = clonedRepo2.CreateFileInDirectory(verbose, fileName)
+				require.NoError(t, err)
+
+				err = clonedRepo2.AddFileByPath(fileName, verbose)
+				require.NoError(t, err)
+
+				_, err = clonedRepo2.Commit(
 					&gitparameteroptions.GitCommitOptions{
 						Message: "another commit",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.NotEqualValues(
-					upstreamRepo.MustGetCurrentCommitHash(verbose),
-					clonedRepo2.MustGetCurrentCommitHash(verbose),
+				require.NotEqualValues(t,
+					mustutils.Must(upstreamRepo.GetCurrentCommitHash(verbose)),
+					mustutils.Must(clonedRepo2.GetCurrentCommitHash(verbose)),
 				)
 
-				require.NotEqualValues(
-					clonedRepo.MustGetCurrentCommitHash(verbose),
-					clonedRepo2.MustGetCurrentCommitHash(verbose),
+				require.NotEqualValues(t,
+					mustutils.Must(clonedRepo.GetCurrentCommitHash(verbose)),
+					mustutils.Must(clonedRepo2.GetCurrentCommitHash(verbose)),
 				)
 
 				mustutils.Must0(clonedRepo2.Push(ctx))
-				require.EqualValues(
-					upstreamRepo.MustGetCurrentCommitHash(verbose),
-					clonedRepo2.MustGetCurrentCommitHash(verbose),
+				require.EqualValues(t,
+					mustutils.Must(upstreamRepo.GetCurrentCommitHash(verbose)),
+					mustutils.Must(clonedRepo2.GetCurrentCommitHash(verbose)),
 				)
-				require.NotEqualValues(
-					upstreamRepo.MustGetCurrentCommitHash(verbose),
-					clonedRepo.MustGetCurrentCommitHash(verbose),
+				require.NotEqualValues(t,
+					mustutils.Must(upstreamRepo.GetCurrentCommitHash(verbose)),
+					mustutils.Must(clonedRepo.GetCurrentCommitHash(verbose)),
 				)
 
-				err := clonedRepo.Pull(ctx)
-				require.NoError(err)
-				require.EqualValues(
-					upstreamRepo.MustGetCurrentCommitHash(verbose),
-					clonedRepo2.MustGetCurrentCommitHash(verbose),
+				err = clonedRepo.Pull(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t,
+					mustutils.Must(upstreamRepo.GetCurrentCommitHash(verbose)),
+					mustutils.Must(clonedRepo2.GetCurrentCommitHash(verbose)),
 				)
-				require.EqualValues(
-					upstreamRepo.MustGetCurrentCommitHash(verbose),
-					clonedRepo.MustGetCurrentCommitHash(verbose),
+				require.EqualValues(t,
+					mustutils.Must(upstreamRepo.GetCurrentCommitHash(verbose)),
+					mustutils.Must(clonedRepo.GetCurrentCommitHash(verbose)),
 				)
 			},
 		)
@@ -706,9 +723,11 @@ func TestGitRepository_AddFilesByPath(t *testing.T) {
 				const verbose bool = true
 
 				upstreamRepo := getGitRepositoryToTest(tt.implementationUpstream)
-				defer upstreamRepo.MustDelete(verbose)
-				upstreamRepo.MustDelete(verbose)
-				upstreamRepo.MustInit(
+				defer upstreamRepo.Delete(verbose)
+				err := upstreamRepo.Delete(verbose)
+				require.NoError(t, err)
+
+				err = upstreamRepo.Init(
 					&parameteroptions.CreateRepositoryOptions{
 						BareRepository:              true,
 						InitializeWithEmptyCommit:   true,
@@ -716,54 +735,72 @@ func TestGitRepository_AddFilesByPath(t *testing.T) {
 						Verbose:                     verbose,
 					},
 				)
+				require.NoError(t, err)
 
 				clonedRepo := getGitRepositoryToTest(tt.implementationCloned)
-				defer clonedRepo.MustDelete(verbose)
-				clonedRepo.MustDelete(verbose)
-				clonedRepo.MustCloneRepository(upstreamRepo, verbose)
+				defer clonedRepo.Delete(verbose)
+				err = clonedRepo.Delete(verbose)
+				require.NoError(t, err)
 
-				clonedRepo.MustSetGitConfig(
+				err = clonedRepo.CloneRepository(upstreamRepo, verbose)
+				require.NoError(t, err)
+
+				err = clonedRepo.SetGitConfig(
 					&gitparameteroptions.GitConfigSetOptions{
 						Name:  "Test User",
 						Email: "user@example.com",
 					},
 				)
+				require.NoError(t, err)
 
 				clonedRepo2 := getGitRepositoryToTest(tt.implementationCloned)
-				defer clonedRepo2.MustDelete(verbose)
-				clonedRepo2.MustDelete(verbose)
-				clonedRepo2.MustCloneRepository(upstreamRepo, verbose)
+				defer clonedRepo2.Delete(verbose)
+				err = clonedRepo2.Delete(verbose)
+				require.NoError(t, err)
 
-				clonedRepo2.MustSetGitConfig(
+				err = clonedRepo2.CloneRepository(upstreamRepo, verbose)
+				require.NoError(t, err)
+
+				err = clonedRepo2.SetGitConfig(
 					&gitparameteroptions.GitConfigSetOptions{
 						Name:  "Test User2",
 						Email: "user2@example.com",
 					},
 				)
+				require.NoError(t, err)
 
 				fileName := "abc.txt"
 				fileName2 := "abc.txt"
-				clonedRepo.MustCreateFileInDirectory(verbose, fileName)
-				clonedRepo.MustCreateFileInDirectory(verbose, fileName2)
-				clonedRepo.MustAddFilesByPath(
+				_, err = clonedRepo.CreateFileInDirectory(verbose, fileName)
+				require.NoError(t, err)
+
+				_, err = clonedRepo.CreateFileInDirectory(verbose, fileName2)
+				require.NoError(t, err)
+
+				err = clonedRepo.AddFilesByPath(
 					[]string{fileName, fileName2},
 					verbose,
 				)
-				clonedRepo.MustCommit(
+				require.NoError(t, err)
+
+				_, err = clonedRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
 						Message: "another commit",
 						Verbose: verbose,
 					},
 				)
-				mustutils.Must0(clonedRepo.Push(ctx))
-
-				require.False(t, clonedRepo2.MustFileByPathExists(fileName, verbose))
-				require.False(t, clonedRepo2.MustFileByPathExists(fileName2, verbose))
-
-				err := clonedRepo2.Pull(ctx)
 				require.NoError(t, err)
-				require.True(t, clonedRepo2.MustFileByPathExists(fileName, verbose))
-				require.True(t, clonedRepo2.MustFileByPathExists(fileName2, verbose))
+
+				err = clonedRepo.Push(ctx)
+				require.NoError(t, err)
+
+				require.False(t, mustutils.Must(clonedRepo2.FileByPathExists(fileName, verbose)))
+				require.False(t, mustutils.Must(clonedRepo2.FileByPathExists(fileName2, verbose)))
+
+				err = clonedRepo2.Pull(ctx)
+				require.NoError(t, err)
+				require.True(t, mustutils.Must(clonedRepo2.FileByPathExists(fileName, verbose)))
+				require.True(t, mustutils.Must(clonedRepo2.FileByPathExists(fileName2, verbose)))
 			},
 		)
 	}
@@ -782,19 +819,18 @@ func TestGitRepository_FileByPathExists(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
-				require.False(repo.MustHasUncommittedChanges(verbose))
+				require.False(t, mustutils.Must(repo.HasUncommittedChanges(verbose)))
+				require.False(t, mustutils.Must(repo.FileByPathExists("hello.txt", verbose)))
 
-				require.False(repo.MustFileByPathExists("hello.txt", verbose))
+				_, err := repo.CreateFileInDirectory(verbose, "hello.txt")
+				require.NoError(t, err)
 
-				repo.MustCreateFileInDirectory(verbose, "hello.txt")
-				require.True(repo.MustFileByPathExists("hello.txt", verbose))
+				require.True(t, mustutils.Must(repo.FileByPathExists("hello.txt", verbose)))
 			},
 		)
 	}
@@ -819,12 +855,16 @@ func TestGitRepository_ListFiles(t *testing.T) {
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
-				require.False(t, repo.MustHasUncommittedChanges(verbose))
+				require.False(t, mustutils.Must(repo.HasUncommittedChanges(verbose)))
 
-				repo.MustCreateFileInDirectory(verbose, "a.txt")
-				repo.MustCreateFileInDirectory(verbose, "b.txt")
-				repo.MustCreateFileInDirectory(verbose, "c.txt")
-				repo.MustCreateFileInDirectory(verbose, "cb.txt")
+				_, err := repo.CreateFileInDirectory(verbose, "a.txt")
+				require.NoError(t, err)
+				_, err = repo.CreateFileInDirectory(verbose, "b.txt")
+				require.NoError(t, err)
+				_, err = repo.CreateFileInDirectory(verbose, "c.txt")
+				require.NoError(t, err)
+				_, err = repo.CreateFileInDirectory(verbose, "cb.txt")
+				require.NoError(t, err)
 
 				files, err := repo.ListFiles(
 					ctx,
@@ -868,12 +908,16 @@ func TestGitRepository_ListFilePaths(t *testing.T) {
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
-				require.False(t, repo.MustHasUncommittedChanges(verbose))
+				require.False(t, mustutils.Must(repo.HasUncommittedChanges(verbose)))
 
-				repo.MustCreateFileInDirectory(verbose, "a.txt")
-				repo.MustCreateFileInDirectory(verbose, "b.txt")
-				repo.MustCreateFileInDirectory(verbose, "c.txt")
-				repo.MustCreateFileInDirectory(verbose, "cb.txt")
+				_, err := repo.CreateFileInDirectory(verbose, "a.txt")
+				require.NoError(t, err)
+				_, err = repo.CreateFileInDirectory(verbose, "b.txt")
+				require.NoError(t, err)
+				_, err = repo.CreateFileInDirectory(verbose, "c.txt")
+				require.NoError(t, err)
+				_, err = repo.CreateFileInDirectory(verbose, "cb.txt")
+				require.NoError(t, err)
 
 				files, err := repo.ListFilePaths(
 					ctx,
@@ -914,40 +958,42 @@ func TestGitRepository_CreateTag(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustCommit(
+				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
 						Message:    "initial empty commit",
 						AllowEmpty: true,
 						Verbose:    verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				tagList := gitRepo.MustListTagNames(verbose)
-				require.Len(tagList, 0)
+				tagList, err := gitRepo.ListTagNames(verbose)
+				require.NoError(t, err)
+				require.Len(t, tagList, 0)
 
 				expectedTags := []string{}
 				for i := 0; i < 5; i++ {
 
 					tagNameToAdd := "ExampleTag" + strconv.Itoa(i)
 
-					gitRepo.MustCreateTag(
+					_, err = gitRepo.CreateTag(
 						&gitparameteroptions.GitRepositoryCreateTagOptions{
 							TagName: tagNameToAdd,
 							Verbose: verbose,
 						},
 					)
+					require.NoError(t, err)
 					expectedTags = append(expectedTags, tagNameToAdd)
 
-					tagList := gitRepo.MustListTagNames(verbose)
+					tagList, err := gitRepo.ListTagNames(verbose)
+					require.NoError(t, err)
 
-					require.EqualValues(expectedTags, tagList)
+					require.EqualValues(t, expectedTags, tagList)
 				}
 			},
 		)
@@ -967,45 +1013,41 @@ func TestGitRepository_ListTags(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustCommit(
+				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
 						Message:    "initial empty commit",
 						AllowEmpty: true,
 						Verbose:    verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				gitRepo.MustCreateTag(
+				_, err = gitRepo.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "abc",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				gitRepo.MustCreateTag(
+				_, err = gitRepo.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "abcd",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				tags := gitRepo.MustListTags(verbose)
+				tags, err := gitRepo.ListTags(verbose)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					"abc",
-					tags[0].MustGetName(),
-				)
-				require.EqualValues(
-					"abcd",
-					tags[1].MustGetName(),
-				)
+				require.EqualValues(t, "abc", tags[0].MustGetName())
+				require.EqualValues(t, "abcd", tags[1].MustGetName())
 			},
 		)
 	}
@@ -1024,40 +1066,41 @@ func TestGitRepository_GetLatestTagVersionOrNilIfNotFound(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustCommit(
+				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
 						Message:    "initial empty commit",
 						AllowEmpty: true,
 						Verbose:    verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.Nil(gitRepo.MustGetLatestTagVersionOrNilIfNotFound(verbose))
+				require.Nil(t, mustutils.Must(gitRepo.GetLatestTagVersionOrNilIfNotFound(verbose)))
 
-				gitRepo.MustCreateTag(
+				_, err = gitRepo.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.NotNil(gitRepo.MustGetLatestTagVersionOrNilIfNotFound(verbose))
+				require.NotNil(t, mustutils.Must(gitRepo.GetLatestTagVersionOrNilIfNotFound(verbose)))
 
-				gitRepo.MustCreateTag(
+				_, err = gitRepo.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.NotNil(gitRepo.MustGetLatestTagVersionOrNilIfNotFound(verbose))
+				require.NotNil(t, mustutils.Must(gitRepo.GetLatestTagVersionOrNilIfNotFound(verbose)))
 			},
 		)
 	}
@@ -1081,29 +1124,33 @@ func TestGitRepository_GetLatestTagVersion(t *testing.T) {
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustCommit(
+				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
 						Message:    "initial empty commit",
 						AllowEmpty: true,
 						Verbose:    verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				gitRepo.MustCreateTag(
+				_, err = gitRepo.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				gitRepo.MustCreateTag(
+				_, err = gitRepo.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				latestVersion := gitRepo.MustGetLatestTagVersion(verbose)
+				latestVersion, err := gitRepo.GetLatestTagVersion(verbose)
+				require.NoError(t, err)
 
 				require.EqualValues(t, "v1.0.0", mustutils.Must(latestVersion.GetAsString()))
 			},
@@ -1124,39 +1171,37 @@ func TestGitRepository_GetLatestTagVersionAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustCommit(
+				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
 						Message:    "initial empty commit",
 						AllowEmpty: true,
 						Verbose:    verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				gitRepo.MustCreateTag(
+				_, err = gitRepo.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				gitRepo.MustCreateTag(
+				_, err = gitRepo.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					"v1.0.0",
-					gitRepo.MustGetLatestTagVersionAsString(verbose),
-				)
+				require.EqualValues(t, "v1.0.0", mustutils.Must(gitRepo.GetLatestTagVersionAsString(verbose)))
 			},
 		)
 	}
@@ -1180,31 +1225,42 @@ func TestGitRepository_GetCurrentCommitsNewestVersion(t *testing.T) {
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustCommit(
+				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
 						Message:    "initial empty commit",
 						AllowEmpty: true,
 						Verbose:    verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				gitRepo.MustCreateTag(
+				_, err = gitRepo.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(t, "v0.1.2", mustutils.Must(gitRepo.MustGetCurrentCommitsNewestVersion(verbose).GetAsString()))
+				newestVersion, err := gitRepo.GetCurrentCommitsNewestVersion(verbose)
+				require.NoError(t, err)
+				newestVersionString, err := newestVersion.GetAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, "v0.1.2", newestVersionString)
 
-				gitRepo.MustCreateTag(
+				_, err = gitRepo.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(t, "v1.0.0", mustutils.Must(gitRepo.MustGetCurrentCommitsNewestVersion(verbose).GetAsString()))
+				newestVersion, err = gitRepo.GetCurrentCommitsNewestVersion(verbose)
+				require.NoError(t, err)
+				newestVersionString, err = newestVersion.GetAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, "v1.0.0", newestVersionString)
 			},
 		)
 	}
@@ -1228,33 +1284,40 @@ func TestGitRepository_GetCurrentCommitsNewestVersionOrNilIfUnset(t *testing.T) 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustCommit(
+				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
 						Message:    "initial empty commit",
 						AllowEmpty: true,
 						Verbose:    verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.Nil(t, gitRepo.MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose))
+				require.Nil(t, mustutils.Must(gitRepo.GetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose)))
 
-				gitRepo.MustCreateTag(
+				_, err = gitRepo.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(t, "v0.1.2", mustutils.Must(gitRepo.MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose).GetAsString()))
+				newestVersion, err := gitRepo.GetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, "v0.1.2", mustutils.Must(newestVersion.GetAsString()))
 
-				gitRepo.MustCreateTag(
+				_, err = gitRepo.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(t, "v1.0.0", mustutils.Must(gitRepo.MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose).GetAsString()))
+				newestVersion, err = gitRepo.GetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, "v1.0.0", mustutils.Must(newestVersion.GetAsString()))
 			},
 		)
 	}
@@ -1273,14 +1336,12 @@ func TestGitRepository_IsGolangApplication_emptyRepo(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				require.False(gitRepo.MustIsGolangApplication(verbose))
+				require.False(t, mustutils.Must(gitRepo.IsGolangApplication(verbose)))
 			},
 		)
 	}
@@ -1299,14 +1360,12 @@ func TestGitRepository_CheckIsGolangApplication_emptyRepo(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				require.NotNil(gitRepo.CheckIsGolangApplication(verbose))
+				require.NotNil(t, gitRepo.CheckIsGolangApplication(verbose))
 			},
 		)
 	}
@@ -1325,16 +1384,15 @@ func TestGitRepository_IsGolangApplication_onlyGoMod(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustWriteStringToFile("module example\n", verbose, "go.mod")
+				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				t.Error(t, err)
 
-				require.False(gitRepo.MustIsGolangApplication(verbose))
+				require.False(t, mustutils.Must(gitRepo.IsGolangApplication(verbose)))
 			},
 		)
 	}
@@ -1353,16 +1411,15 @@ func TestGitRepository_CheckIsGolangApplication_onlyGoMod(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustWriteStringToFile("module example\n", verbose, "go.mod")
+				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				require.NoError(t, err)
 
-				require.NotNil(gitRepo.CheckIsGolangApplication(verbose))
+				require.NotNil(t, gitRepo.CheckIsGolangApplication(verbose))
 			},
 		)
 	}
@@ -1381,17 +1438,18 @@ func TestGitRepository_CheckIsGolangApplication_NoMainFunction(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustWriteStringToFile("module example\n", verbose, "go.mod")
-				gitRepo.MustWriteStringToFile("package main\nfunc abc() bool {\n\treturn true\n}\n", verbose, "main.go")
+				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				require.NoError(t, err)
 
-				require.NotNil(gitRepo.CheckIsGolangApplication(verbose))
+				_, err = gitRepo.WriteStringToFile("package main\nfunc abc() bool {\n\treturn true\n}\n", verbose, "main.go")
+				require.NoError(t, err)
+
+				require.NotNil(t, gitRepo.CheckIsGolangApplication(verbose))
 			},
 		)
 	}
@@ -1410,17 +1468,17 @@ func TestGitRepository_IsGolangApplication_NoMainFunction(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustWriteStringToFile("module example\n", verbose, "go.mod")
-				gitRepo.MustWriteStringToFile("package main\nfunc abc() bool {\n\treturn true\n}\n", verbose, "main.go")
+				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				require.NoError(t, err)
+				_, err = gitRepo.WriteStringToFile("package main\nfunc abc() bool {\n\treturn true\n}\n", verbose, "main.go")
+				require.NoError(t, err)
 
-				require.False(gitRepo.MustIsGolangApplication(verbose))
+				require.False(t, mustutils.Must(gitRepo.IsGolangApplication(verbose)))
 			},
 		)
 	}
@@ -1439,17 +1497,17 @@ func TestGitRepository_IsGolangApplication(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustWriteStringToFile("module example\n", verbose, "go.mod")
-				gitRepo.MustWriteStringToFile("package main\nfunc main() {\n\treturn\n}\n", verbose, "main.go")
+				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				require.NoError(t, err)
+				_, err = gitRepo.WriteStringToFile("package main\nfunc main() {\n\treturn\n}\n", verbose, "main.go")
+				require.NoError(t, err)
 
-				require.True(gitRepo.MustIsGolangApplication(verbose))
+				require.True(t, mustutils.Must(gitRepo.IsGolangApplication(verbose)))
 			},
 		)
 	}
@@ -1468,17 +1526,18 @@ func TestGitRepository_CheckIsGolangApplication(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustWriteStringToFile("module example\n", verbose, "go.mod")
-				gitRepo.MustWriteStringToFile("package main\nfunc main() {\n\treturn\n}\n", verbose, "main.go")
+				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				require.NoError(t, err)
 
-				require.Nil(gitRepo.CheckIsGolangApplication(verbose))
+				_, err = gitRepo.WriteStringToFile("package main\nfunc main() {\n\treturn\n}\n", verbose, "main.go")
+				require.NoError(t, err)
+
+				require.Nil(t, gitRepo.CheckIsGolangApplication(verbose))
 			},
 		)
 	}
@@ -1497,21 +1556,18 @@ func TestGitRepository_GetFileByPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustWriteStringToFile("hello world\n", verbose, "test.txt")
+				_, err := gitRepo.WriteStringToFile("hello world\n", verbose, "test.txt")
+				require.NoError(t, err)
 
-				testTxtFile := gitRepo.MustGetFileByPath("test.txt")
+				testTxtFile, err := gitRepo.GetFileByPath("test.txt")
+				require.NoError(t, err)
 
-				require.EqualValues(
-					"hello world\n",
-					testTxtFile.MustReadAsString(),
-				)
+				require.EqualValues(t, "hello world\n", testTxtFile.MustReadAsString())
 			},
 		)
 	}
@@ -1530,16 +1586,12 @@ func TestGitRepository_IsGolangPackage_emptyRepo(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				require.False(
-					gitRepo.MustIsGolangPackage(verbose),
-				)
+				require.False(t, mustutils.Must(gitRepo.IsGolangPackage(verbose)))
 			},
 		)
 	}
@@ -1558,18 +1610,15 @@ func TestGitRepository_IsGolangPackage_onlyGoMod(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustWriteStringToFile("module example\n", verbose, "go.mod")
+				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				require.NoError(t, err)
 
-				require.True(
-					gitRepo.MustIsGolangPackage(verbose),
-				)
+				require.True(t, mustutils.Must(gitRepo.IsGolangPackage(verbose)))
 			},
 		)
 	}
@@ -1588,19 +1637,17 @@ func TestGitRepository_IsGolangPackage_mainFunctionIsNotAPackage(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustWriteStringToFile("module example\n", verbose, "go.mod")
-				gitRepo.MustWriteStringToFile("package main\nfunc main() {\n\treturn\n}\n", verbose, "main.go")
+				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				require.NoError(t, err)
+				_, err = gitRepo.WriteStringToFile("package main\nfunc main() {\n\treturn\n}\n", verbose, "main.go")
+				require.NoError(t, err)
 
-				require.False(
-					gitRepo.MustIsGolangPackage(verbose),
-				)
+				require.False(t, mustutils.Must(gitRepo.IsGolangPackage(verbose)))
 			},
 		)
 	}
@@ -1647,18 +1694,15 @@ func TestGitRepository_CheckIsGolangPackage_onlyGoMod(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustWriteStringToFile("module example\n", verbose, "go.mod")
+				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				require.NoError(t, err)
 
-				require.Nil(
-					gitRepo.CheckIsGolangPackage(verbose),
-				)
+				require.Nil(t, gitRepo.CheckIsGolangPackage(verbose))
 			},
 		)
 	}
@@ -1677,19 +1721,17 @@ func TestGitRepository_CheckIsGolangPackage_mainFunctionIsNotAPackage(t *testing
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustWriteStringToFile("module example\n", verbose, "go.mod")
-				gitRepo.MustWriteStringToFile("package main\nfunc main() {\n\treturn\n}\n", verbose, "main.go")
+				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				require.NoError(t, err)
+				_, err = gitRepo.WriteStringToFile("package main\nfunc main() {\n\treturn\n}\n", verbose, "main.go")
+				require.NoError(t, err)
 
-				require.NotNil(
-					gitRepo.CheckIsGolangPackage(verbose),
-				)
+				require.NotNil(t, gitRepo.CheckIsGolangPackage(verbose))
 			},
 		)
 	}
@@ -1746,32 +1788,35 @@ func TestGitRepository_CreateAndDeleteBranch(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				defaultBranchName := gitRepo.MustGetCurrentBranchName(verbose)
+				defaultBranchName, err := gitRepo.GetCurrentBranchName(verbose)
+				require.NoError(t, err)
 
-				require.False(gitRepo.MustBranchByNameExists("testbranch", verbose))
+				require.False(t, mustutils.Must(gitRepo.BranchByNameExists("testbranch", verbose)))
 
 				for i := 0; i < 2; i++ {
-					gitRepo.MustCreateBranch(
+					err = gitRepo.CreateBranch(
 						&parameteroptions.CreateBranchOptions{
 							Name:    "testbranch",
 							Verbose: verbose,
 						},
 					)
-					require.True(gitRepo.MustBranchByNameExists("testbranch", verbose))
+					require.NoError(t, err)
+					require.True(t, mustutils.Must(gitRepo.BranchByNameExists("testbranch", verbose)))
 				}
 
-				gitRepo.MustCheckoutBranchByName(defaultBranchName, verbose)
+				err = gitRepo.CheckoutBranchByName(defaultBranchName, verbose)
+				require.NoError(t, err)
 
 				for i := 0; i < 2; i++ {
-					gitRepo.MustDeleteBranchByName("testbranch", verbose)
-					require.False(gitRepo.MustBranchByNameExists("testbranch", verbose))
+					err = gitRepo.DeleteBranchByName("testbranch", verbose)
+					require.NoError(t, err)
+
+					require.False(t, mustutils.Must(gitRepo.BranchByNameExists("testbranch", verbose)))
 				}
 			},
 		)
@@ -1791,27 +1836,24 @@ func TestGitRepository_CheckoutBranch(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
 				for _, branchName := range []string{"testbranch1", "testbranch2"} {
-					gitRepo.MustCreateBranch(
+					err := gitRepo.CreateBranch(
 						&parameteroptions.CreateBranchOptions{
 							Name:    branchName,
 							Verbose: verbose,
 						},
 					)
-					require.True(gitRepo.MustBranchByNameExists(branchName, verbose))
+					require.NoError(t, err)
+					require.True(t, mustutils.Must(gitRepo.BranchByNameExists(branchName, verbose)))
 
-					gitRepo.MustCheckoutBranchByName(branchName, verbose)
-					require.EqualValues(
-						branchName,
-						gitRepo.MustGetCurrentBranchName(verbose),
-					)
+					err = gitRepo.CheckoutBranchByName(branchName, verbose)
+					require.NoError(t, err)
+					require.EqualValues(t, branchName, mustutils.Must(gitRepo.GetCurrentBranchName(verbose)))
 				}
 			},
 		)
@@ -1831,25 +1873,21 @@ func TestGitRepository_GetCurrentCommitMessage(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustCommit(
+				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
 						AllowEmpty: true,
 						Message:    "commit message",
 						Verbose:    verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					"commit message",
-					gitRepo.MustGetCurrentCommitMessage(verbose),
-				)
+				require.EqualValues(t, "commit message", mustutils.Must(gitRepo.GetCurrentCommitMessage(verbose)))
 			},
 		)
 	}
@@ -1868,68 +1906,65 @@ func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustCommit(
+				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
 						AllowEmpty: true,
 						Message:    "commit before testing",
 						Verbose:    verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(
+				require.EqualValues(t,
 					"commit before testing",
-					gitRepo.MustGetCurrentCommitMessage(verbose),
+					mustutils.Must(gitRepo.GetCurrentCommitMessage(verbose)),
 				)
 
-				gitRepo.MustCommitIfUncommittedChanges(
+				_, err = gitRepo.CommitIfUncommittedChanges(
 					&gitparameteroptions.GitCommitOptions{
 						Message: "This should not trigger a commit",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					"commit before testing",
-					gitRepo.MustGetCurrentCommitMessage(verbose),
-				)
+				require.EqualValues(t, "commit before testing", mustutils.Must(gitRepo.GetCurrentCommitMessage(verbose)))
 
-				gitRepo.MustWriteStringToFile("hello", verbose, "world.txt")
-				gitRepo.MustAddFileByPath("world.txt", verbose)
+				_, err = gitRepo.WriteStringToFile("hello", verbose, "world.txt")
+				require.NoError(t, err)
 
-				gitRepo.MustCommitIfUncommittedChanges(
+				err = gitRepo.AddFileByPath("world.txt", verbose)
+				require.NoError(t, err)
+
+				_, err = gitRepo.CommitIfUncommittedChanges(
 					&gitparameteroptions.GitCommitOptions{
 						Message: "This should trigger a commit",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					"This should trigger a commit",
-					gitRepo.MustGetCurrentCommitMessage(verbose),
-				)
+				require.EqualValues(t, "This should trigger a commit", mustutils.Must(gitRepo.GetCurrentCommitMessage(verbose)))
 
-				gitRepo.MustWriteStringToFile("world", verbose, "world.txt")
+				_, err = gitRepo.WriteStringToFile("world", verbose, "world.txt")
+				require.NoError(t, err)
+
 				// world.txt is already known in the git repo.
 				// No need to explicitly add world.txt again.
 
-				gitRepo.MustCommitIfUncommittedChanges(
+				_, err = gitRepo.CommitIfUncommittedChanges(
 					&gitparameteroptions.GitCommitOptions{
 						Message: "This should trigger again a commit",
 						Verbose: verbose,
 					},
 				)
 
-				require.EqualValues(
-					"This should trigger again a commit",
-					gitRepo.MustGetCurrentCommitMessage(verbose),
-				)
+				require.EqualValues(t, "This should trigger again a commit", mustutils.Must(gitRepo.GetCurrentCommitMessage(verbose)))
 			},
 		)
 	}
@@ -1948,36 +1983,30 @@ func TestGitRepository_AddAndRemoveRemote(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				require.False(
-					gitRepo.MustRemoteByNameExists("example", verbose),
-				)
+				require.False(t, mustutils.Must(gitRepo.RemoteByNameExists("example", verbose)))
 
 				for i := 0; i < 2; i++ {
-					gitRepo.MustAddRemote(
+					err := gitRepo.AddRemote(
 						&gitparameteroptions.GitRemoteAddOptions{
 							RemoteName: "example",
 							RemoteUrl:  "https://remote.url.example.com",
 							Verbose:    verbose,
 						},
 					)
+					require.NoError(t, err)
 
-					require.True(
-						gitRepo.MustRemoteByNameExists("example", verbose),
-					)
+					require.True(t, mustutils.Must(gitRepo.RemoteByNameExists("example", verbose)))
 				}
 
 				for i := 0; i < 2; i++ {
-					gitRepo.MustRemoveRemoteByName("example", verbose)
-					require.False(
-						gitRepo.MustRemoteByNameExists("example", verbose),
-					)
+					err := gitRepo.RemoveRemoteByName("example", verbose)
+					require.NoError(t, err)
+					require.False(t, mustutils.Must(gitRepo.RemoteByNameExists("example", verbose)))
 				}
 			},
 		)
@@ -1997,22 +2026,17 @@ func TestGitRepository_IsPreCommitRepository(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				require.False(
-					gitRepo.MustIsPreCommitRepository(verbose),
-				)
+				require.False(t, mustutils.Must(gitRepo.IsPreCommitRepository(verbose)))
 
-				gitRepo.MustCreateSubDirectory("pre_commit_hooks", verbose)
+				_, err := gitRepo.CreateSubDirectory("pre_commit_hooks", verbose)
+				require.NoError(t, err)
 
-				require.True(
-					gitRepo.MustIsPreCommitRepository(verbose),
-				)
+				require.True(t, mustutils.Must(gitRepo.IsPreCommitRepository(verbose)))
 			},
 		)
 	}
@@ -2031,22 +2055,17 @@ func TestGitRepository_CheckIsPreCommitRepository(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				require.NotNil(
-					gitRepo.CheckIsPreCommitRepository(verbose),
-				)
+				require.NotNil(t, gitRepo.CheckIsPreCommitRepository(verbose))
 
-				gitRepo.MustCreateSubDirectory("pre_commit_hooks", verbose)
+				_, err := gitRepo.CreateSubDirectory("pre_commit_hooks", verbose)
+				require.NoError(t, err)
 
-				require.Nil(
-					gitRepo.CheckIsPreCommitRepository(verbose),
-				)
+				require.Nil(t, gitRepo.CheckIsPreCommitRepository(verbose))
 			},
 		)
 	}
@@ -2072,7 +2091,8 @@ func Test_CheckExists(t *testing.T) {
 
 				require.NoError(t, gitRepo.CheckExists(ctx))
 
-				gitRepo.MustDelete(true)
+				err := gitRepo.Delete(true)
+				require.NoError(t, err)
 
 				require.Error(t, gitRepo.CheckExists(ctx))
 			},
