@@ -20,8 +20,6 @@ func TestGetCurrentCommitGoGitHash(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				repo := TemporaryGitRepositories().MustCreateEmptyTemporaryGitRepository(
@@ -34,12 +32,11 @@ func TestGetCurrentCommitGoGitHash(t *testing.T) {
 				defer repo.Delete(verbose)
 
 				localGitRepo, ok := repo.(*LocalGitRepository)
-				require.True(ok)
+				require.True(t, ok)
 
-				require.EqualValues(
-					repo.MustGetCurrentCommitHash(verbose),
-					localGitRepo.MustGetCurrentCommitGoGitHash(verbose).String(),
-				)
+				hash, err := repo.GetCurrentCommitHash(verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, hash, localGitRepo.MustGetCurrentCommitGoGitHash(verbose).String())
 			},
 		)
 	}
@@ -55,29 +52,22 @@ func TestLocalGitRepository_GetLocalGitReposioryFromDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				directory := tempfiles.MustCreateEmptyTemporaryDirectory(verbose)
 				defer directory.Delete(verbose)
 
-				require.EqualValues(
-					"localhost",
-					directory.MustGetHostDescription(),
-				)
+				require.EqualValues(t, "localhost", directory.MustGetHostDescription())
 
 				repo := MustGetLocalGitReposioryFromDirectory(directory)
 
-				require.EqualValues(
-					directory.MustGetPath(),
-					repo.MustGetPath(),
-				)
+				repoPath, err := repo.GetPath()
+				require.NoError(t, err)
+				require.EqualValues(t, directory.MustGetPath(), repoPath)
 
-				require.EqualValues(
-					"localhost",
-					repo.MustGetHostDescription(),
-				)
+				hostDescription, err := repo.GetHostDescription()
+				require.NoError(t, err)
+				require.EqualValues(t, "localhost", hostDescription)
 			},
 		)
 	}
@@ -94,8 +84,6 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				repo := TemporaryGitRepositories().MustCreateEmptyTemporaryGitRepository(
@@ -107,70 +95,75 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 					})
 				defer repo.Delete(verbose)
 
-				repo.MustSetGitConfig(
+				err := repo.SetGitConfig(
 					&gitparameteroptions.GitConfigSetOptions{
 						Name:    "a",
 						Email:   "b@example.net",
 						Verbose: true,
 					},
 				)
+				require.NoError(t, err)
 
 				// First commit
-				repo.MustCommit(
+				_, err = repo.Commit(
 					&gitparameteroptions.GitCommitOptions{
 						Message:    "message 1",
 						AllowEmpty: true,
 					},
 				)
+				require.NoError(t, err)
 
-				firstCommit := repo.MustGetCurrentCommit(verbose)
-				require.EqualValues("message 1", firstCommit.MustGetCommitMessage())
-				require.False(firstCommit.MustHasParentCommit())
+				firstCommit, err := repo.GetCurrentCommit(verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, "message 1", firstCommit.MustGetCommitMessage())
+				require.False(t, firstCommit.MustHasParentCommit())
 
 				firstCommitDirectParents := firstCommit.MustGetParentCommits(&parameteroptions.GitCommitGetParentsOptions{IncludeParentsOfParents: false})
-				require.Len(firstCommitDirectParents, 0)
+				require.Len(t, firstCommitDirectParents, 0)
 
 				firstCommitAllParents := firstCommit.MustGetParentCommits(&parameteroptions.GitCommitGetParentsOptions{IncludeParentsOfParents: true})
-				require.Len(firstCommitAllParents, 0)
+				require.Len(t, firstCommitAllParents, 0)
 
 				// Second commit
-				repo.MustCommit(
+				_, err = repo.Commit(
 					&gitparameteroptions.GitCommitOptions{
 						Message:    "message 2",
 						AllowEmpty: true,
 					},
 				)
-				secondCommit := repo.MustGetCurrentCommit(verbose)
-				require.EqualValues("message 2", secondCommit.MustGetCommitMessage())
-				require.True(secondCommit.MustHasParentCommit())
+				secondCommit, err := repo.GetCurrentCommit(verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, "message 2", secondCommit.MustGetCommitMessage())
+				require.True(t, secondCommit.MustHasParentCommit())
 
 				secondCommitDirectParents := secondCommit.MustGetParentCommits(&parameteroptions.GitCommitGetParentsOptions{IncludeParentsOfParents: false})
-				require.Len(secondCommitDirectParents, 1)
-				require.EqualValues("message 1", secondCommitDirectParents[0].MustGetCommitMessage())
+				require.Len(t, secondCommitDirectParents, 1)
+				require.EqualValues(t, "message 1", secondCommitDirectParents[0].MustGetCommitMessage())
 
 				secondCommitAllParents := secondCommit.MustGetParentCommits(&parameteroptions.GitCommitGetParentsOptions{IncludeParentsOfParents: true})
-				require.Len(secondCommitAllParents, 1)
-				require.EqualValues("message 1", secondCommitAllParents[0].MustGetCommitMessage())
+				require.Len(t, secondCommitAllParents, 1)
+				require.EqualValues(t, "message 1", secondCommitAllParents[0].MustGetCommitMessage())
 
 				// Third Commit
-				repo.MustCommit(
+				_, err = repo.Commit(
 					&gitparameteroptions.GitCommitOptions{
 						Message:    "message 3",
 						AllowEmpty: true,
 					},
 				)
-				thirdCommit := repo.MustGetCurrentCommit(verbose)
-				require.EqualValues("message 3", thirdCommit.MustGetCommitMessage())
-				require.True(thirdCommit.MustHasParentCommit())
+				thirdCommit, err := repo.GetCurrentCommit(verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, "message 3", thirdCommit.MustGetCommitMessage())
+				require.True(t, thirdCommit.MustHasParentCommit())
 
 				thirdCommitDirectParents := thirdCommit.MustGetParentCommits(&parameteroptions.GitCommitGetParentsOptions{IncludeParentsOfParents: false})
-				require.Len(thirdCommitDirectParents, 1)
-				require.EqualValues("message 2", thirdCommitDirectParents[0].MustGetCommitMessage())
+				require.Len(t, thirdCommitDirectParents, 1)
+				require.EqualValues(t, "message 2", thirdCommitDirectParents[0].MustGetCommitMessage())
 
 				thirdCommitAllParents := thirdCommit.MustGetParentCommits(&parameteroptions.GitCommitGetParentsOptions{IncludeParentsOfParents: true})
-				require.Len(thirdCommitAllParents, 2)
-				require.EqualValues("message 2", thirdCommitAllParents[0].MustGetCommitMessage())
-				require.EqualValues("message 1", thirdCommitAllParents[1].MustGetCommitMessage())
+				require.Len(t, thirdCommitAllParents, 2)
+				require.EqualValues(t, "message 2", thirdCommitAllParents[0].MustGetCommitMessage())
+				require.EqualValues(t, "message 1", thirdCommitAllParents[1].MustGetCommitMessage())
 			},
 		)
 	}
@@ -187,8 +180,6 @@ func TestLocalGitRepositoryCreateEmptyTemporaryGitRepository(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				repo := TemporaryGitRepositories().MustCreateEmptyTemporaryGitRepository(
@@ -199,14 +190,15 @@ func TestLocalGitRepositoryCreateEmptyTemporaryGitRepository(t *testing.T) {
 						InitializeWithDefaultAuthor: true,
 					})
 
-				commit := repo.MustGetCurrentCommit(verbose)
-				require.EqualValues("Initial empty commit during repo initialization", commit.MustGetCommitMessage())
-				require.EqualValues("asciichgolangpublic git repo initializer <asciichgolangpublic@example.net>", commit.MustGetAuthorString())
-				require.EqualValues("asciichgolangpublic@example.net", commit.MustGetAuthorEmail())
-				require.Greater(commit.MustGetAgeSeconds(), 0.)
-				require.Less(commit.MustGetAgeSeconds(), 2.)
-				require.False(commit.MustHasParentCommit())
-				require.Len(commit.MustGetParentCommits(&parameteroptions.GitCommitGetParentsOptions{IncludeParentsOfParents: false}), 0)
+				commit, err := repo.GetCurrentCommit(verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, "Initial empty commit during repo initialization", commit.MustGetCommitMessage())
+				require.EqualValues(t, "asciichgolangpublic git repo initializer <asciichgolangpublic@example.net>", commit.MustGetAuthorString())
+				require.EqualValues(t, "asciichgolangpublic@example.net", commit.MustGetAuthorEmail())
+				require.Greater(t, commit.MustGetAgeSeconds(), 0.)
+				require.Less(t, commit.MustGetAgeSeconds(), 2.)
+				require.False(t, commit.MustHasParentCommit())
+				require.Len(t, commit.MustGetParentCommits(&parameteroptions.GitCommitGetParentsOptions{IncludeParentsOfParents: false}), 0)
 			},
 		)
 	}
