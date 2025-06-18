@@ -88,18 +88,18 @@ func TestPreCommitConfigFile_GetPreCommitConfigInGitRepository(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
-				gitRepo.MustWriteStringToFile("# placeholder", verbose, ".pre-commit-config.yaml")
+				outFile, err := gitRepo.WriteStringToFile("# placeholder", verbose, ".pre-commit-config.yaml")
+				require.NoError(t, err)
+				require.NotNil(t, outFile)
 
 				preCommitConfigFile := MustGetPreCommitConfigFileInGitRepository(gitRepo)
-				require.True(preCommitConfigFile.MustExists(verbose))
-				require.True(strings.HasSuffix(preCommitConfigFile.MustGetPath(), "/.pre-commit-config.yaml"))
+				require.True(t, preCommitConfigFile.MustExists(verbose))
+				require.True(t, strings.HasSuffix(preCommitConfigFile.MustGetPath(), "/.pre-commit-config.yaml"))
 			},
 		)
 	}
