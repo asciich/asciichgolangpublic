@@ -1,11 +1,11 @@
-package kubernetesutils_test
+package kubernetesimplementationindependend_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/fileformats/yamlutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
 )
 
 func getReplicaSet(name string, namespace string) (yaml string) {
@@ -70,27 +70,29 @@ func getNginxDeployment(name string, namespace string) (yaml string) {
 
 func Test_unmarshalReplicaset(t *testing.T) {
 	t.Run("namespace", func(t *testing.T) {
-		u, err := kubernetesutils.UnmarshalResourceYaml(getReplicaSet("abc", "def"))
+		u, err := kubernetesimplementationindependend.UnmarshalResourceYaml(getReplicaSet("abc", "def"))
 		require.NoError(t, err)
 		require.Len(t, u, 1)
 		require.EqualValues(t, "abc", u[0].Name())
 		require.EqualValues(t, "def", u[0].Namespace())
 		require.EqualValues(t, "ReplicaSet", u[0].Kind())
+		require.EqualValues(t, "apps/v1", u[0].ApiVersion())
 	})
 
 	t.Run("no namespace", func(t *testing.T) {
-		u, err := kubernetesutils.UnmarshalResourceYaml(getReplicaSet("abc", ""))
+		u, err := kubernetesimplementationindependend.UnmarshalResourceYaml(getReplicaSet("abc", ""))
 		require.NoError(t, err)
 		require.Len(t, u, 1)
 		require.EqualValues(t, "abc", u[0].Name())
 		require.EqualValues(t, "", u[0].Namespace())
 		require.EqualValues(t, "ReplicaSet", u[0].Kind())
+		require.EqualValues(t, "apps/v1", u[0].ApiVersion())
 	})
 }
 
 func Test_unmarshalNginxDeplyoments(t *testing.T) {
 	t.Run("namespace", func(t *testing.T) {
-		u, err := kubernetesutils.UnmarshalResourceYaml(getNginxDeployment("abc", "def"))
+		u, err := kubernetesimplementationindependend.UnmarshalResourceYaml(getNginxDeployment("abc", "def"))
 		require.NoError(t, err)
 		require.Len(t, u, 1)
 		require.EqualValues(t, "abc", u[0].Name())
@@ -99,7 +101,7 @@ func Test_unmarshalNginxDeplyoments(t *testing.T) {
 	})
 
 	t.Run("no namespace", func(t *testing.T) {
-		u, err := kubernetesutils.UnmarshalResourceYaml(getNginxDeployment("abc", ""))
+		u, err := kubernetesimplementationindependend.UnmarshalResourceYaml(getNginxDeployment("abc", ""))
 		require.NoError(t, err)
 		require.Len(t, u, 1)
 		require.EqualValues(t, "abc", u[0].Name())
@@ -110,7 +112,7 @@ func Test_unmarshalNginxDeplyoments(t *testing.T) {
 
 func TestSortResourcesYaml(t *testing.T) {
 	t.Run("empty string", func(t *testing.T) {
-		sorted, err := kubernetesutils.SortResourcesYaml("")
+		sorted, err := kubernetesimplementationindependend.SortResourcesYaml("")
 		require.NoError(t, err)
 
 		require.EqualValues(t, "\n", sorted)
@@ -118,7 +120,7 @@ func TestSortResourcesYaml(t *testing.T) {
 
 	t.Run("single deployment", func(t *testing.T) {
 		exampleDeployment := getNginxDeployment("example", "")
-		sorted, err := kubernetesutils.SortResourcesYaml(exampleDeployment)
+		sorted, err := kubernetesimplementationindependend.SortResourcesYaml(exampleDeployment)
 		require.NoError(t, err)
 
 		require.EqualValues(t, exampleDeployment, sorted)
@@ -128,7 +130,7 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment := getNginxDeployment("example", "")
 		exampleDeployment1 := getNginxDeployment("example1", "")
 
-		sorted, err := kubernetesutils.SortResourcesYaml(exampleDeployment + "\n---\n" + exampleDeployment1)
+		sorted, err := kubernetesimplementationindependend.SortResourcesYaml(exampleDeployment + "\n---\n" + exampleDeployment1)
 		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
@@ -140,7 +142,7 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment := getNginxDeployment("a", "")
 		exampleDeployment1 := getNginxDeployment("b", "")
 
-		sorted, err := kubernetesutils.SortResourcesYaml(exampleDeployment + "\n---\n" + exampleDeployment1)
+		sorted, err := kubernetesimplementationindependend.SortResourcesYaml(exampleDeployment + "\n---\n" + exampleDeployment1)
 		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
@@ -152,7 +154,7 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment := getNginxDeployment("example", "")
 		exampleDeployment1 := getNginxDeployment("example1", "")
 
-		sorted, err := kubernetesutils.SortResourcesYaml(exampleDeployment1 + "\n---\n" + exampleDeployment)
+		sorted, err := kubernetesimplementationindependend.SortResourcesYaml(exampleDeployment1 + "\n---\n" + exampleDeployment)
 		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
@@ -164,7 +166,7 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment := getNginxDeployment("a", "")
 		exampleDeployment1 := getNginxDeployment("b", "")
 
-		sorted, err := kubernetesutils.SortResourcesYaml(exampleDeployment1 + "\n---\n" + exampleDeployment)
+		sorted, err := kubernetesimplementationindependend.SortResourcesYaml(exampleDeployment1 + "\n---\n" + exampleDeployment)
 		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
@@ -177,7 +179,7 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment1 := getNginxDeployment("example", "")
 		exampleDeployment2 := getNginxDeployment("example", "aaaa")
 
-		sorted, err := kubernetesutils.SortResourcesYaml(exampleDeployment + "\n---\n" + exampleDeployment1 + "\n---\n" + exampleDeployment2)
+		sorted, err := kubernetesimplementationindependend.SortResourcesYaml(exampleDeployment + "\n---\n" + exampleDeployment1 + "\n---\n" + exampleDeployment2)
 		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
@@ -193,7 +195,7 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment := getNginxDeployment("example", "namespace")
 		exampleReplicaSet := getReplicaSet("example", "namespace")
 
-		sorted, err := kubernetesutils.SortResourcesYaml(exampleDeployment + "\n---\n" + exampleReplicaSet)
+		sorted, err := kubernetesimplementationindependend.SortResourcesYaml(exampleDeployment + "\n---\n" + exampleReplicaSet)
 		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
@@ -209,7 +211,7 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment := getNginxDeployment("example", "namespace")
 		exampleReplicaSet := getReplicaSet("example", "namespace")
 
-		sorted, err := kubernetesutils.SortResourcesYaml(exampleReplicaSet + "\n---\n" + exampleDeployment)
+		sorted, err := kubernetesimplementationindependend.SortResourcesYaml(exampleReplicaSet + "\n---\n" + exampleDeployment)
 		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
@@ -225,7 +227,7 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment := getNginxDeployment("example", "namespace")
 		exampleReplicaSet := getReplicaSet("example", "")
 
-		sorted, err := kubernetesutils.SortResourcesYaml(exampleReplicaSet + "\n---\n" + exampleDeployment)
+		sorted, err := kubernetesimplementationindependend.SortResourcesYaml(exampleReplicaSet + "\n---\n" + exampleDeployment)
 		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
@@ -243,7 +245,7 @@ func TestSortResourcesYaml(t *testing.T) {
 		exampleDeployment2 := getNginxDeployment("example", "aaaa")
 		exampleReplicaSet := getReplicaSet("example", "aaaa")
 
-		sorted, err := kubernetesutils.SortResourcesYaml(exampleDeployment + "\n---\n" + exampleDeployment1 + "\n---\n" + exampleDeployment2 + "\n---\n" + exampleReplicaSet)
+		sorted, err := kubernetesimplementationindependend.SortResourcesYaml(exampleDeployment + "\n---\n" + exampleDeployment1 + "\n---\n" + exampleDeployment2 + "\n---\n" + exampleReplicaSet)
 		require.NoError(t, err)
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
