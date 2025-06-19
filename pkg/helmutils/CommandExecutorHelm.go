@@ -142,7 +142,7 @@ func (c *commandExecutorHelm) InstallHelmChart(ctx context.Context, options *hel
 
 	logging.LogInfoByCtxf(ctx, "Install helm chart '%s' as '%s' in namespace '%s' using kube context '%s' started.", chartUri, chartReference, namespace, kubeContext)
 
-	cmd := []string{"helm", "install", "--kube-context", kubeContext, chartReference, chartUri, "--namespace", namespace, "--create-namespace", "--wait"}
+	cmd := []string{"helm", "upgrade", "--install", "--kube-context", kubeContext, chartReference, chartUri, "--namespace", namespace, "--create-namespace", "--wait"}
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
 		return err
