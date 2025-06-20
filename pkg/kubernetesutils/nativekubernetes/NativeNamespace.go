@@ -7,6 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -94,18 +95,18 @@ func (n *NativeNamespace) GetName() (name string, err error) {
 	return n.name, nil
 }
 
-func (n *NativeNamespace) GetResourceByNames(resourceName string, resourceType string) (resource kubernetesinterfaces.Resource, err error) {
+func (n *NativeNamespace) GetResourceByNames(resourceName string, resourceKind string) (resource kubernetesinterfaces.Resource, err error) {
 	if resourceName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("resourceName")
 	}
 
-	if resourceType == "" {
+	if resourceKind == "" {
 		return nil, tracederrors.TracedErrorEmptyString("resourceType")
 	}
 
 	return &NativeResource{
 		name:      resourceName,
-		kind:      resourceType,
+		kind:      resourceKind,
 		namespace: n,
 	}, nil
 }
@@ -592,4 +593,50 @@ func (n *NativeNamespace) WaitUntilAllPodsInNamespaceAreRunning(ctx context.Cont
 	logging.LogInfoByCtxf(ctx, "Wait until all pods in namespace '%s' are running finished. There are now '%d' pods running.", namspaceName, nPods)
 
 	return nil
+}
+
+func (n *NativeNamespace) GetResourceByYamlString(yaml string) (kubernetesinterfaces.Resource, error) {
+	if yaml == "" {
+		return nil, tracederrors.TracedErrorEmptyString("yaml")
+	}
+
+	resourceYamls, err := kubernetesimplementationindependend.UnmarshalResourceYaml(yaml)
+	if err != nil {
+		return nil, err
+	}
+
+	nResources := len(resourceYamls)
+	if nResources != 1 {
+		return nil, tracederrors.TracedErrorf("Exepected one yaml document to get resouce by yaml string but got '%d'.", nResources)
+	}
+
+	ret, err := n.GetResourceByNames(resourceYamls[0].Name(), resourceYamls[0].Kind())
+	if err != nil {
+		return nil, err
+	}
+
+	err = ret.SetApiVersion(resourceYamls[0].ApiVersion())
+	if err != nil {
+		return nil, err
+	}
+
+	return ret, nil
+}
+
+func (n *NativeNamespace) CreateResource(ctx context.Context, options *kubernetesparameteroptions.CreateResourceOptions) (kubernetesinterfaces.Resource, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	resource, err := n.GetResourceByYamlString(options.YamlString)
+	if err != nil {
+		return nil, err
+	}
+
+	err = resource.CreateByYamlString(ctx, options)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource, nil
 }
