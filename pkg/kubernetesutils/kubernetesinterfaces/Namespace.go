@@ -12,6 +12,7 @@ type Namespace interface {
 	CreateConfigMap(ctx context.Context, name string, options *kubernetesparameteroptions.CreateConfigMapOptions) (createdConfigMap ConfigMap, err error)
 	CreateRole(ctx context.Context, createOptions *kubernetesparameteroptions.CreateRoleOptions) (createdRole Role, err error)
 	CreateSecret(ctx context.Context, name string, options *kubernetesparameteroptions.CreateSecretOptions) (createdSecret Secret, err error)
+	CreateResource(ctx context.Context, options *kubernetesparameteroptions.CreateResourceOptions) (Resource, error)
 	DeleteConfigMapByName(ctx context.Context, name string) (err error)
 	DeleteRoleByName(ctx context.Context, name string) (err error)
 	DeleteSecretByName(ctx context.Context, name string) (err error)
