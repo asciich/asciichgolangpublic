@@ -344,7 +344,7 @@ func (n *NativeResource) SetKind(kind string) error {
 	return nil
 }
 
-func (n *NativeResource) SetAPIVersion(apiVersion string) error {
+func (n *NativeResource) SetApiVersion(apiVersion string) error {
 	if apiVersion == "" {
 		return tracederrors.TracedErrorEmptyString("apiVersion")
 	}
