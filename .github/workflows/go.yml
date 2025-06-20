@@ -14,6 +14,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: Free up space
+      run: ./.github/free_space.sh
+
     - uses: actions/checkout@v3
 
     - name: Set up Go
