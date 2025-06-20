@@ -138,12 +138,12 @@ func (c *CommandExecutorFlux) ConfigureFluxInstance(ctx context.Context, cluster
 
 	os.WriteFile("debug.yaml", []byte(resourceYaml), 0644)
 
-	resource, err := cluster.GetResourceByNames("flux", "FluxInstance", namespaceName)
+	resource, err := cluster.GetObjectByNames("flux", "FluxInstance", namespaceName)
 	if err != nil {
 		return err
 	}
 
-	err = resource.CreateByYamlString(ctx, &kubernetesparameteroptions.CreateResourceOptions{
+	err = resource.CreateByYamlString(ctx, &kubernetesparameteroptions.CreateObjectOptions{
 		YamlString: resourceYaml,
 	})
 	if err != nil {
