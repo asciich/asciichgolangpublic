@@ -12,4 +12,5 @@ type Resource interface {
 	Delete(ctx context.Context) (err error)
 	Exists(ctx context.Context) (exists bool, err error)
 	GetAsYamlString() (yamlString string, err error)
+	SetApiVersion(string) error
 }

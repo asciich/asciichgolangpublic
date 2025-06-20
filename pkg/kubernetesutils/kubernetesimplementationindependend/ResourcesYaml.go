@@ -1,4 +1,4 @@
-package kubernetesutils
+package kubernetesimplementationindependend
 
 import (
 	"sort"
@@ -65,6 +65,21 @@ func (r *ResourceYamlEntry) Kind() (name string) {
 	}
 
 	return toParse.Kind
+}
+
+func (r *ResourceYamlEntry) ApiVersion() string {
+	type ToParse struct {
+		ApiVersion string `yaml:"apiVersion"`
+	}
+
+	toParse := new(ToParse)
+
+	err := yaml.Unmarshal([]byte(r.Content), toParse)
+	if err != nil {
+		return ""
+	}
+
+	return toParse.ApiVersion
 }
 
 func (r *ResourceYamlEntry) Namespace() (namespace string) {
