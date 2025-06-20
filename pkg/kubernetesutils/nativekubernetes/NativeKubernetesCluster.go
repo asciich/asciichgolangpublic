@@ -592,5 +592,36 @@ func (n *NativeKubernetesCluster) WaitUntilAllPodsInNamespaceAreRunning(ctx cont
 	}
 
 	return namespace.WaitUntilAllPodsInNamespaceAreRunning(ctx, options)
+}
 
+func (n *NativeKubernetesCluster) GetNamespaceByYamlString(yaml string) (kubernetesinterfaces.Namespace, error) {
+
+	if yaml == "" {
+		return nil, tracederrors.TracedErrorEmptyString("yaml")
+	}
+
+	resourceYamls, err := kubernetesimplementationindependend.UnmarshalResourceYaml(yaml)
+	if err != nil {
+		return nil, err
+	}
+
+	nResources := len(resourceYamls)
+	if nResources != 1 {
+		return nil, tracederrors.TracedErrorf("Exepected one yaml document to get namespace by yaml string but got '%d'.", nResources)
+	}
+
+	return n.GetNamespaceByName(resourceYamls[0].Namespace())
+}
+
+func (n *NativeKubernetesCluster) CreateResource(ctx context.Context, options *kubernetesparameteroptions.CreateResourceOptions) (kubernetesinterfaces.Resource, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	namespace, err := n.GetNamespaceByYamlString(options.YamlString)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.CreateResource(ctx, options)
 }
