@@ -465,3 +465,7 @@ func (c *CommandExecutorNamespace) WatchConfigMap(ctx context.Context, name stri
 func (c *CommandExecutorNamespace) WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, options *kubernetesparameteroptions.WaitForPodsOptions) error {
 	return tracederrors.TracedErrorNotImplemented()
 }
+
+func (c *CommandExecutorNamespace) CreateResource(ctx context.Context, options *kubernetesparameteroptions.CreateResourceOptions) (kubernetesinterfaces.Resource, error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}

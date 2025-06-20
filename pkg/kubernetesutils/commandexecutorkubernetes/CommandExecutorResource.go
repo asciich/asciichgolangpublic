@@ -466,3 +466,7 @@ func (c *CommandExecutorResource) SetTypeName(typeName string) (err error) {
 
 	return nil
 }
+
+func (c *CommandExecutorResource) SetApiVersion(apiVersion string) (error) {
+	return tracederrors.TracedErrorNotImplemented()
+}
