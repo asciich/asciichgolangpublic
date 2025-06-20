@@ -9,14 +9,14 @@ import (
 
 func Test_NativeResurce_GetApiVersion(t *testing.T) {
 	t.Run("default", func(t *testing.T) {
-		r := &nativekubernetes.NativeResource{}
+		r := &nativekubernetes.NativeObject{}
 		apiVersion, err := r.GetApiVersion(getCtx())
 		require.NoError(t, err)
 		require.EqualValues(t, "v1", apiVersion)
 	})
 
 	t.Run("default", func(t *testing.T) {
-		r := &nativekubernetes.NativeResource{}
+		r := &nativekubernetes.NativeObject{}
 
 		err := r.SetKind("FluxInstance")
 		require.NoError(t, err)
@@ -26,5 +26,3 @@ func Test_NativeResurce_GetApiVersion(t *testing.T) {
 		require.EqualValues(t, "fluxcd.controlplane.io/v1", apiVersion)
 	})
 }
-
-

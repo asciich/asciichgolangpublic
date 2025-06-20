@@ -10,11 +10,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type ResourceYamlEntry struct {
+type ObjectYamlEntry struct {
 	Content string
 }
 
-func (r *ResourceYamlEntry) Name() (name string) {
+func (r *ObjectYamlEntry) Name() (name string) {
 	type ToParse struct {
 		Metadata struct {
 			Name string `yaml:"name"`
@@ -31,7 +31,7 @@ func (r *ResourceYamlEntry) Name() (name string) {
 	return toParse.Metadata.Name
 }
 
-func (r *ResourceYamlEntry) Validate() (err error) {
+func (r *ObjectYamlEntry) Validate() (err error) {
 	if r.Content == "" {
 		return tracederrors.TracedError("Content not set")
 	}
@@ -42,17 +42,17 @@ func (r *ResourceYamlEntry) Validate() (err error) {
 	}
 
 	if r.Name() == "" {
-		return tracederrors.TracedError("Kubernetes resource YAML without a name are not valid")
+		return tracederrors.TracedError("Kubernetes object YAML without a name are not valid")
 	}
 
 	if r.Kind() == "" {
-		return tracederrors.TracedError("Kubernetes resource YAML without a kind are not valid")
+		return tracederrors.TracedError("Kubernetes object YAML without a kind are not valid")
 	}
 
 	return nil
 }
 
-func (r *ResourceYamlEntry) Kind() (name string) {
+func (r *ObjectYamlEntry) Kind() (name string) {
 	type ToParse struct {
 		Kind string `yaml:"kind"`
 	}
@@ -67,7 +67,7 @@ func (r *ResourceYamlEntry) Kind() (name string) {
 	return toParse.Kind
 }
 
-func (r *ResourceYamlEntry) ApiVersion() string {
+func (r *ObjectYamlEntry) ApiVersion() string {
 	type ToParse struct {
 		ApiVersion string `yaml:"apiVersion"`
 	}
@@ -82,7 +82,7 @@ func (r *ResourceYamlEntry) ApiVersion() string {
 	return toParse.ApiVersion
 }
 
-func (r *ResourceYamlEntry) Namespace() (namespace string) {
+func (r *ObjectYamlEntry) Namespace() (namespace string) {
 	type ToParse struct {
 		Metadata struct {
 			Namespace string `yaml:"namespace"`
@@ -99,33 +99,33 @@ func (r *ResourceYamlEntry) Namespace() (namespace string) {
 	return toParse.Metadata.Namespace
 }
 
-func UnmarshalResourceYaml(resourceYaml string) (resources []*ResourceYamlEntry, err error) {
-	splitted := yamlutils.SplitMultiYaml(resourceYaml)
+func UnmarshalObjectYaml(objectYaml string) (objects []*ObjectYamlEntry, err error) {
+	splitted := yamlutils.SplitMultiYaml(objectYaml)
 
-	resources = []*ResourceYamlEntry{}
+	objects = []*ObjectYamlEntry{}
 
 	for _, s := range splitted {
-		toAdd := &ResourceYamlEntry{Content: s}
+		toAdd := &ObjectYamlEntry{Content: s}
 
 		err = toAdd.Validate()
 		if err != nil {
 			return nil, err
 		}
 
-		resources = append(resources, toAdd)
+		objects = append(objects, toAdd)
 	}
 
-	return resources, nil
+	return objects, nil
 }
 
-func marshalResourceYaml(resources []*ResourceYamlEntry) (marshalled string, err error) {
-	if resources == nil {
-		return "", tracederrors.TracedErrorNil("resources")
+func marshalObjectYaml(objects []*ObjectYamlEntry) (marshalled string, err error) {
+	if objects == nil {
+		return "", tracederrors.TracedErrorNil("objects")
 	}
 
 	splitted := []string{}
 
-	for _, r := range resources {
+	for _, r := range objects {
 		toAdd := r.Content
 
 		toAdd = strings.TrimSpace(toAdd)
@@ -145,13 +145,13 @@ func marshalResourceYaml(resources []*ResourceYamlEntry) (marshalled string, err
 	return stringsutils.EnsureEndsWithExactlyOneLineBreak(marshalled), err
 }
 
-// Sort resources in given multi yaml string.
-// Resources are sorted by:
+// Sort objects in given multi yaml string.
+// Objects are sorted by:
 //  1. Namespace
-//  2. Resource name
+//  2. Object name
 //  3. Kind
-func SortResourcesYaml(resourcesYaml string) (sortedResourcesYaml string, err error) {
-	parsed, err := UnmarshalResourceYaml(resourcesYaml)
+func SortObjectsYaml(objectsYaml string) (sortedObjectsYaml string, err error) {
+	parsed, err := UnmarshalObjectYaml(objectsYaml)
 	if err != nil {
 		return "", err
 	}
@@ -175,10 +175,10 @@ func SortResourcesYaml(resourcesYaml string) (sortedResourcesYaml string, err er
 		return stringsutils.IsBeforeInAlphabeth(kind_i, kind_j)
 	})
 
-	sortedResourcesYaml, err = marshalResourceYaml(parsed)
+	sortedObjectsYaml, err = marshalObjectYaml(parsed)
 	if err != nil {
 		return "", err
 	}
 
-	return sortedResourcesYaml, nil
+	return sortedObjectsYaml, nil
 }

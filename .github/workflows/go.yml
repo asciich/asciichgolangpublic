@@ -19,8 +19,6 @@ jobs:
     - name: Free up space
       run: .github/free_space.sh
 
-
-
     - name: Set up Go
       uses: actions/setup-go@v4
       with:

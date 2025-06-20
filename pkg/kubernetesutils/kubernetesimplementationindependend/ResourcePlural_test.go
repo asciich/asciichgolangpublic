@@ -7,7 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
 )
 
-func Test_GetResourcePlural(t *testing.T) {
+func Test_GetObjectPlural(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected string
@@ -22,7 +22,7 @@ func Test_GetResourcePlural(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
-			plural, err := kubernetesimplementationindependend.GetResourcePlural(tt.input)
+			plural, err := kubernetesimplementationindependend.GetObjectPlural(tt.input)
 			require.NoError(t, err)
 			require.EqualValues(t, tt.expected, plural)
 		})
