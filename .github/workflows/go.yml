@@ -17,9 +17,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Free up space
-      run: .github/free_space.sh
-
-
+      run: .github/free_space.shConvenience functions to create K8s resources
 
     - name: Set up Go
       uses: actions/setup-go@v4
