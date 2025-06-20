@@ -15,14 +15,14 @@ import (
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-type CommandExecutorResource struct {
+type CommandExecutorObject struct {
 	commandExecutor commandexecutor.CommandExecutor
 	name            string
 	typeName        string
 	namespace       kubernetesinterfaces.Namespace
 }
 
-func GetCommandExecutorResource(commandExectutor commandexecutor.CommandExecutor, namespace kubernetesinterfaces.Namespace, resourceName string, resourceType string) (resource kubernetesinterfaces.Resource, err error) {
+func GetCommandExecutorObject(commandExectutor commandexecutor.CommandExecutor, namespace kubernetesinterfaces.Namespace, objectName string, objectType string) (object kubernetesinterfaces.Object, err error) {
 	if commandExectutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExectutor")
 	}
@@ -31,15 +31,15 @@ func GetCommandExecutorResource(commandExectutor commandexecutor.CommandExecutor
 		return nil, tracederrors.TracedErrorNil("namespace")
 	}
 
-	if resourceName == "" {
-		return nil, tracederrors.TracedErrorEmptyString("resourceName")
+	if objectName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("objectName")
 	}
 
-	if resourceType == "" {
-		return nil, tracederrors.TracedErrorEmptyString("resourceType")
+	if objectType == "" {
+		return nil, tracederrors.TracedErrorEmptyString("objectType")
 	}
 
-	toReturn := NewCommandExecutorResource()
+	toReturn := NewCommandExecutorObject()
 
 	err = toReturn.SetCommandExecutor(commandExectutor)
 	if err != nil {
@@ -51,12 +51,12 @@ func GetCommandExecutorResource(commandExectutor commandexecutor.CommandExecutor
 		return nil, err
 	}
 
-	err = toReturn.SetName(resourceName)
+	err = toReturn.SetName(objectName)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetTypeName(resourceType)
+	err = toReturn.SetTypeName(objectType)
 	if err != nil {
 		return nil, err
 	}
@@ -64,11 +64,11 @@ func GetCommandExecutorResource(commandExectutor commandexecutor.CommandExecutor
 	return toReturn, nil
 }
 
-func NewCommandExecutorResource() (c *CommandExecutorResource) {
-	return new(CommandExecutorResource)
+func NewCommandExecutorObject() (c *CommandExecutorObject) {
+	return new(CommandExecutorObject)
 }
 
-func (c *CommandExecutorResource) CreateByYamlString(ctx context.Context, options *kubernetesparameteroptions.CreateResourceOptions) (err error) {
+func (c *CommandExecutorObject) CreateByYamlString(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
@@ -78,21 +78,21 @@ func (c *CommandExecutorResource) CreateByYamlString(ctx context.Context, option
 		return err
 	}
 
-	resourceName, resourceType, namespaceName, clusterName, err := c.GetResourceAndTypeAndNamespaceAndClusterName()
+	objectName, objectType, namespaceName, clusterName, err := c.GetObjectAndTypeAndNamespaceAndClusterName()
 	if err != nil {
 		return err
 	}
 
 	logging.LogInfoByCtxf(
 		ctx,
-		"Create kubernetes resource by yaml '%s/%s' in namespace '%s' in cluster '%s' started.",
-		resourceType,
-		resourceName,
+		"Create kubernetes object by yaml '%s/%s' in namespace '%s' in cluster '%s' started.",
+		objectType,
+		objectName,
 		namespaceName,
 		clusterName,
 	)
 
-	yamlString, err = yamlutils.RunYqQueryAginstYamlStringAsString(yamlString, ".metadata.name=\""+resourceName+"\"")
+	yamlString, err = yamlutils.RunYqQueryAginstYamlStringAsString(yamlString, ".metadata.name=\""+objectName+"\"")
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,7 @@ func (c *CommandExecutorResource) CreateByYamlString(ctx context.Context, option
 	}
 
 	if options.SkipNamespaceCreation {
-		logging.LogInfoByCtx(ctx, "Skip ensure namespace exists when creating resource by yaml string.")
+		logging.LogInfoByCtx(ctx, "Skip ensure namespace exists when creating object by yaml string.")
 	} else {
 		err = c.EnsureNamespaceExists(ctx)
 		if err != nil {
@@ -143,18 +143,18 @@ func (c *CommandExecutorResource) CreateByYamlString(ctx context.Context, option
 
 	logging.LogChangedByCtxf(
 		ctx,
-		"kubernetes resource '%s/%s' by yam in namespace '%s' in cluster '%s' created and updated.",
-		resourceType,
-		resourceName,
+		"kubernetes object '%s/%s' by yam in namespace '%s' in cluster '%s' created and updated.",
+		objectType,
+		objectName,
 		namespaceName,
 		clusterName,
 	)
 
 	logging.LogInfoByCtxf(
 		ctx,
-		"Create kubernetes resource '%s/%s' by yaml in namespace '%s' in cluster '%s' finished.",
-		resourceType,
-		resourceName,
+		"Create kubernetes object '%s/%s' by yaml in namespace '%s' in cluster '%s' finished.",
+		objectType,
+		objectName,
 		namespaceName,
 		clusterName,
 	)
@@ -162,8 +162,8 @@ func (c *CommandExecutorResource) CreateByYamlString(ctx context.Context, option
 	return nil
 }
 
-func (c *CommandExecutorResource) Delete(ctx context.Context) (err error) {
-	resourceName, resourceTypeName, namespaceName, clusterName, err := c.GetResourceAndTypeAndNamespaceAndClusterName()
+func (c *CommandExecutorObject) Delete(ctx context.Context) (err error) {
+	objectName, objectTypeName, namespaceName, clusterName, err := c.GetObjectAndTypeAndNamespaceAndClusterName()
 	if err != nil {
 		return err
 	}
@@ -177,8 +177,8 @@ func (c *CommandExecutorResource) Delete(ctx context.Context) (err error) {
 		logging.LogInfoByCtxf(
 			ctx,
 			"Going to delete '%s/%s' in namespace '%s' on kubernetes cluster '%s'.",
-			resourceName,
-			resourceTypeName,
+			objectName,
+			objectTypeName,
 			namespaceName,
 			clusterName,
 		)
@@ -200,7 +200,7 @@ func (c *CommandExecutorResource) Delete(ctx context.Context) (err error) {
 			cmd = append(cmd, "--context", kubectlContext)
 		}
 
-		cmd = append(cmd, "--namespace", namespaceName, "delete", resourceTypeName, resourceName)
+		cmd = append(cmd, "--namespace", namespaceName, "delete", objectTypeName, objectName)
 
 		_, err = commandExecutor.RunCommand(
 			ctx,
@@ -215,16 +215,16 @@ func (c *CommandExecutorResource) Delete(ctx context.Context) (err error) {
 		logging.LogChangedByCtxf(
 			ctx,
 			"Delete '%s/%s' in namespace '%s' on kubernetes cluster '%s'.",
-			resourceName,
-			resourceTypeName,
+			objectName,
+			objectTypeName,
 			namespaceName,
 			clusterName,
 		)
 	} else {
 		logging.LogInfof(
-			"Resource '%s/%s' already absent in namespace '%s' on kubernetes cluster '%s'.",
-			resourceName,
-			resourceTypeName,
+			"Object '%s/%s' already absent in namespace '%s' on kubernetes cluster '%s'.",
+			objectName,
+			objectTypeName,
 			namespaceName,
 			clusterName,
 		)
@@ -233,7 +233,7 @@ func (c *CommandExecutorResource) Delete(ctx context.Context) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorResource) EnsureNamespaceExists(ctx context.Context) (err error) {
+func (c *CommandExecutorObject) EnsureNamespaceExists(ctx context.Context) (err error) {
 	namespace, err := c.GetNamespace()
 	if err != nil {
 		return err
@@ -242,8 +242,8 @@ func (c *CommandExecutorResource) EnsureNamespaceExists(ctx context.Context) (er
 	return namespace.Create(ctx)
 }
 
-func (c *CommandExecutorResource) Exists(ctx context.Context) (exists bool, err error) {
-	resourceName, resourceType, namespaceName, clusterName, err := c.GetResourceAndTypeAndNamespaceAndClusterName()
+func (c *CommandExecutorObject) Exists(ctx context.Context) (exists bool, err error) {
+	objectName, objectType, namespaceName, clusterName, err := c.GetObjectAndTypeAndNamespaceAndClusterName()
 	if err != nil {
 		return false, err
 	}
@@ -264,7 +264,7 @@ func (c *CommandExecutorResource) Exists(ctx context.Context) (exists bool, err 
 	} else {
 		cmd = append(cmd, "--context", kubectlContext)
 	}
-	cmd = append(cmd, "--namespace", namespaceName, resourceType, resourceName)
+	cmd = append(cmd, "--namespace", namespaceName, objectType, objectName)
 
 	_, err = commandExecutor.RunCommand(
 		ctx,
@@ -285,18 +285,18 @@ func (c *CommandExecutorResource) Exists(ctx context.Context) (exists bool, err 
 	if exists {
 		logging.LogInfoByCtxf(
 			ctx,
-			"Kubernetes resource '%s/%s' in namespace '%s' in cluster '%s' exists.",
-			resourceType,
-			resourceName,
+			"Kubernetes object '%s/%s' in namespace '%s' in cluster '%s' exists.",
+			objectType,
+			objectName,
 			namespaceName,
 			clusterName,
 		)
 	} else {
 		logging.LogInfoByCtxf(
 			ctx,
-			"Kubernetes resource '%s/%s' in namespace '%s' in cluster '%s' does not exist.",
-			resourceType,
-			resourceName,
+			"Kubernetes object '%s/%s' in namespace '%s' in cluster '%s' does not exist.",
+			objectType,
+			objectName,
 			namespaceName,
 			clusterName,
 		)
@@ -305,7 +305,7 @@ func (c *CommandExecutorResource) Exists(ctx context.Context) (exists bool, err 
 	return exists, nil
 }
 
-func (c *CommandExecutorResource) GetAsYamlString() (yamlString string, err error) {
+func (c *CommandExecutorObject) GetAsYamlString() (yamlString string, err error) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
 		return "", err
@@ -316,7 +316,7 @@ func (c *CommandExecutorResource) GetAsYamlString() (yamlString string, err erro
 		return "", err
 	}
 
-	resourceName, resourceType, namspaceName, clusterName, err := c.GetResourceAndTypeAndNamespaceAndClusterName()
+	objectName, objectType, namspaceName, clusterName, err := c.GetObjectAndTypeAndNamespaceAndClusterName()
 	if err != nil {
 		return "", err
 	}
@@ -331,8 +331,8 @@ func (c *CommandExecutorResource) GetAsYamlString() (yamlString string, err erro
 				contextName,
 				"--namespace",
 				namspaceName,
-				resourceType,
-				resourceName,
+				objectType,
+				objectName,
 				"-o",
 				"yaml",
 			},
@@ -344,9 +344,9 @@ func (c *CommandExecutorResource) GetAsYamlString() (yamlString string, err erro
 
 	if yamlString == "" {
 		return "", tracederrors.TracedErrorf(
-			"yamlString is empty string after evaluation. Tried to get resource type '%s' named '%s' in namespace '%s' in cluster '%s'.",
-			resourceType,
-			resourceName,
+			"yamlString is empty string after evaluation. Tried to get object type '%s' named '%s' in namespace '%s' in cluster '%s'.",
+			objectType,
+			objectName,
 			namspaceName,
 			clusterName,
 		)
@@ -355,7 +355,7 @@ func (c *CommandExecutorResource) GetAsYamlString() (yamlString string, err erro
 	return yamlString, nil
 }
 
-func (c *CommandExecutorResource) GetClusterName() (clusterName string, err error) {
+func (c *CommandExecutorObject) GetClusterName() (clusterName string, err error) {
 	namespace, err := c.GetNamespace()
 	if err != nil {
 		return "", err
@@ -364,12 +364,12 @@ func (c *CommandExecutorResource) GetClusterName() (clusterName string, err erro
 	return namespace.GetClusterName()
 }
 
-func (c *CommandExecutorResource) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
+func (c *CommandExecutorObject) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
 
 	return c.commandExecutor, nil
 }
 
-func (c *CommandExecutorResource) GetKubectlContext(ctx context.Context) (contextName string, err error) {
+func (c *CommandExecutorObject) GetKubectlContext(ctx context.Context) (contextName string, err error) {
 	namespace, err := c.GetNamespace()
 	if err != nil {
 		return "", err
@@ -378,7 +378,7 @@ func (c *CommandExecutorResource) GetKubectlContext(ctx context.Context) (contex
 	return namespace.GetKubectlContext(ctx)
 }
 
-func (c *CommandExecutorResource) GetName() (name string, err error) {
+func (c *CommandExecutorObject) GetName() (name string, err error) {
 	if c.name == "" {
 		return "", tracederrors.TracedErrorf("name not set")
 	}
@@ -386,7 +386,7 @@ func (c *CommandExecutorResource) GetName() (name string, err error) {
 	return c.name, nil
 }
 
-func (c *CommandExecutorResource) GetNamespace() (namespace kubernetesinterfaces.Namespace, err error) {
+func (c *CommandExecutorObject) GetNamespace() (namespace kubernetesinterfaces.Namespace, err error) {
 	if c.namespace == nil {
 		return nil, err
 	}
@@ -394,7 +394,7 @@ func (c *CommandExecutorResource) GetNamespace() (namespace kubernetesinterfaces
 	return c.namespace, nil
 }
 
-func (c *CommandExecutorResource) GetNamespaceName() (namsepaceName string, err error) {
+func (c *CommandExecutorObject) GetNamespaceName() (namsepaceName string, err error) {
 	namespace, err := c.GetNamespace()
 	if err != nil {
 		return "", err
@@ -403,13 +403,13 @@ func (c *CommandExecutorResource) GetNamespaceName() (namsepaceName string, err 
 	return namespace.GetName()
 }
 
-func (c *CommandExecutorResource) GetResourceAndTypeAndNamespaceAndClusterName() (resourceName string, resourceTypeName string, namespaceName string, clusterName string, err error) {
-	resourceName, err = c.GetName()
+func (c *CommandExecutorObject) GetObjectAndTypeAndNamespaceAndClusterName() (objectName string, objectTypeName string, namespaceName string, clusterName string, err error) {
+	objectName, err = c.GetName()
 	if err != nil {
 		return "", "", "", "", err
 	}
 
-	resourceTypeName, err = c.GetTypeName()
+	objectTypeName, err = c.GetTypeName()
 	if err != nil {
 		return "", "", "", "", err
 	}
@@ -424,10 +424,10 @@ func (c *CommandExecutorResource) GetResourceAndTypeAndNamespaceAndClusterName()
 		return "", "", "", "", err
 	}
 
-	return resourceName, resourceTypeName, namespaceName, clusterName, err
+	return objectName, objectTypeName, namespaceName, clusterName, err
 }
 
-func (c *CommandExecutorResource) GetTypeName() (typeName string, err error) {
+func (c *CommandExecutorObject) GetTypeName() (typeName string, err error) {
 	if c.typeName == "" {
 		return "", tracederrors.TracedErrorf("typeName not set")
 	}
@@ -435,13 +435,13 @@ func (c *CommandExecutorResource) GetTypeName() (typeName string, err error) {
 	return c.typeName, nil
 }
 
-func (c *CommandExecutorResource) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
+func (c *CommandExecutorObject) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
 	c.commandExecutor = commandExecutor
 
 	return nil
 }
 
-func (c *CommandExecutorResource) SetName(name string) (err error) {
+func (c *CommandExecutorObject) SetName(name string) (err error) {
 	if name == "" {
 		return tracederrors.TracedErrorf("name is empty string")
 	}
@@ -451,13 +451,13 @@ func (c *CommandExecutorResource) SetName(name string) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorResource) SetNamespace(namespace kubernetesinterfaces.Namespace) (err error) {
+func (c *CommandExecutorObject) SetNamespace(namespace kubernetesinterfaces.Namespace) (err error) {
 	c.namespace = namespace
 
 	return nil
 }
 
-func (c *CommandExecutorResource) SetTypeName(typeName string) (err error) {
+func (c *CommandExecutorObject) SetTypeName(typeName string) (err error) {
 	if typeName == "" {
 		return tracederrors.TracedErrorf("typeName is empty string")
 	}
@@ -467,6 +467,6 @@ func (c *CommandExecutorResource) SetTypeName(typeName string) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorResource) SetApiVersion(apiVersion string) (error) {
+func (c *CommandExecutorObject) SetApiVersion(apiVersion string) error {
 	return tracederrors.TracedErrorNotImplemented()
 }
