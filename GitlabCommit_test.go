@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
-	"github.com/asciich/asciichgolangpublic/randomgenerator"
+	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -23,8 +23,6 @@ func TestCommitGetHash(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
@@ -40,7 +38,8 @@ func TestCommitGetHash(t *testing.T) {
 				}
 
 				for _, branchName := range branchNames {
-					content := randomgenerator.MustGetRandomString(16)
+					content, err := randomgenerator.GetRandomString(16)
+					require.NoError(t, err)
 					testProject.MustWriteFileContent(
 						&GitlabWriteFileOptions{
 							Path:          "testfile",
@@ -57,8 +56,8 @@ func TestCommitGetHash(t *testing.T) {
 					hashes = append(hashes, testProject.MustGetLatestCommitHashAsString(branchName, verbose))
 				}
 
-				require.True(slicesutils.ContainsOnlyUniqeStrings(hashes))
-				require.True(slicesutils.ContainsNoEmptyStrings(hashes))
+				require.True(t, slicesutils.ContainsOnlyUniqeStrings(hashes))
+				require.True(t, slicesutils.ContainsNoEmptyStrings(hashes))
 			},
 		)
 	}

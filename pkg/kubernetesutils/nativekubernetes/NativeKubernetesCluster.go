@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/logging"
-	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubeconfigutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
@@ -294,13 +293,13 @@ func (n *NativeKubernetesCluster) GetNamespaceByName(name string) (namespace kub
 		kubernetesCluster: n,
 	}, nil
 }
-func (n *NativeKubernetesCluster) GetResourceByNames(resourceName string, resourceType string, namespaceName string) (resource kubernetesinterfaces.Resource, err error) {
-	if resourceName == "" {
-		return nil, tracederrors.TracedErrorEmptyString("resourceName")
+func (n *NativeKubernetesCluster) GetObjectByNames(objectName string, objectType string, namespaceName string) (object kubernetesinterfaces.Object, err error) {
+	if objectName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("objectName")
 	}
 
-	if resourceType == "" {
-		return nil, tracederrors.TracedErrorEmptyString("resourceType")
+	if objectType == "" {
+		return nil, tracederrors.TracedErrorEmptyString("objectType")
 	}
 
 	if namespaceName == "" {
@@ -312,7 +311,7 @@ func (n *NativeKubernetesCluster) GetResourceByNames(resourceName string, resour
 		return nil, err
 	}
 
-	return namespace.GetResourceByNames(resourceName, resourceType)
+	return namespace.GetObjectByNames(objectName, objectType)
 }
 func (n *NativeKubernetesCluster) ListNamespaces(ctx context.Context) (namespaces []kubernetesinterfaces.Namespace, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
@@ -340,10 +339,10 @@ func (n *NativeKubernetesCluster) ListNamespaceNames(ctx context.Context) (names
 
 	return namespaceNames, nil
 }
-func (n *NativeKubernetesCluster) ListResources(options *parameteroptions.ListKubernetesResourcesOptions) (resources []kubernetesinterfaces.Resource, err error) {
+func (n *NativeKubernetesCluster) ListObjects(options *kubernetesparameteroptions.ListKubernetesObjectsOptions) (objects []kubernetesinterfaces.Object, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
-func (n *NativeKubernetesCluster) ListResourceNames(options *parameteroptions.ListKubernetesResourcesOptions) (resourceNames []string, err error) {
+func (n *NativeKubernetesCluster) ListObjectNames(options *kubernetesparameteroptions.ListKubernetesObjectsOptions) (objectNames []string, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 func (n *NativeKubernetesCluster) NamespaceByNameExists(ctx context.Context, namespaceName string) (exist bool, err error) {
@@ -515,9 +514,9 @@ func (n *NativeKubernetesCluster) ListKindNames(ctx context.Context) ([]string, 
 	}
 
 	apiKinds := []string{}
-	for _, apiResourceList := range apiResourceLists {
-		for _, apiResource := range apiResourceList.APIResources {
-			apiKinds = append(apiKinds, apiResource.Kind)
+	for _, apiObjectList := range apiResourceLists {
+		for _, apiObject := range apiObjectList.APIResources {
+			apiKinds = append(apiKinds, apiObject.Kind)
 		}
 	}
 
@@ -600,20 +599,20 @@ func (n *NativeKubernetesCluster) GetNamespaceByYamlString(yaml string) (kuberne
 		return nil, tracederrors.TracedErrorEmptyString("yaml")
 	}
 
-	resourceYamls, err := kubernetesimplementationindependend.UnmarshalResourceYaml(yaml)
+	objectYamls, err := kubernetesimplementationindependend.UnmarshalObjectYaml(yaml)
 	if err != nil {
 		return nil, err
 	}
 
-	nResources := len(resourceYamls)
-	if nResources != 1 {
-		return nil, tracederrors.TracedErrorf("Exepected one yaml document to get namespace by yaml string but got '%d'.", nResources)
+	nObjects := len(objectYamls)
+	if nObjects != 1 {
+		return nil, tracederrors.TracedErrorf("Exepected one yaml document to get namespace by yaml string but got '%d'.", nObjects)
 	}
 
-	return n.GetNamespaceByName(resourceYamls[0].Namespace())
+	return n.GetNamespaceByName(objectYamls[0].Namespace())
 }
 
-func (n *NativeKubernetesCluster) CreateResource(ctx context.Context, options *kubernetesparameteroptions.CreateResourceOptions) (kubernetesinterfaces.Resource, error) {
+func (n *NativeKubernetesCluster) CreateObject(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (kubernetesinterfaces.Object, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -623,5 +622,5 @@ func (n *NativeKubernetesCluster) CreateResource(ctx context.Context, options *k
 		return nil, err
 	}
 
-	return namespace.CreateResource(ctx, options)
+	return namespace.CreateObject(ctx, options)
 }

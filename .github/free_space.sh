@@ -23,12 +23,27 @@ function remove_unused_packages() {
     echo "remove_unused_packages finished."
 }
 
+function remove_unused_directories() {
+    echo "remove_unused_packages started."
+
+    DOT_NET_DIR="/usr/share/dotnet/"
+    if [ -e "${DOT_NET_DIR}" ] ; then
+        rm -rf "${DOT_NET_DIR}"
+        echo "${DOT_NET_DIR} deleted."
+    else
+        echo "${DOT_NET_DIR} already absent. Skip delete."
+    fi
+
+    echo "remove_unused_packages finished."
+}
+
 function main() {
     cd "${SCRIPT_DIR}"
 
     show_space_info
 
     remove_unused_packages
+    remove_unused_directories
 
     show_space_info
 }

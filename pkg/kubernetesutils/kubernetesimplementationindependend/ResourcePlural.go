@@ -6,8 +6,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 )
 
-func GetResourcePlural(resourceName string) (string, error) {
-	ret := strings.ToLower(resourceName)
+func GetObjectPlural(objectName string) (string, error) {
+	ret := strings.ToLower(objectName)
 
 	if ret == "gitrepository" {
 		return "gitrepositories", nil
