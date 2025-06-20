@@ -95,18 +95,18 @@ func (n *NativeNamespace) GetName() (name string, err error) {
 	return n.name, nil
 }
 
-func (n *NativeNamespace) GetResourceByNames(resourceName string, resourceKind string) (resource kubernetesinterfaces.Resource, err error) {
-	if resourceName == "" {
-		return nil, tracederrors.TracedErrorEmptyString("resourceName")
+func (n *NativeNamespace) GetObjectByNames(objectName string, objectKind string) (object kubernetesinterfaces.Object, err error) {
+	if objectName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("objectName")
 	}
 
-	if resourceKind == "" {
-		return nil, tracederrors.TracedErrorEmptyString("resourceType")
+	if objectKind == "" {
+		return nil, tracederrors.TracedErrorEmptyString("objectType")
 	}
 
-	return &NativeResource{
-		name:      resourceName,
-		kind:      resourceKind,
+	return &NativeObject{
+		name:      objectName,
+		kind:      objectKind,
 		namespace: n,
 	}, nil
 }
@@ -595,27 +595,27 @@ func (n *NativeNamespace) WaitUntilAllPodsInNamespaceAreRunning(ctx context.Cont
 	return nil
 }
 
-func (n *NativeNamespace) GetResourceByYamlString(yaml string) (kubernetesinterfaces.Resource, error) {
+func (n *NativeNamespace) GetObjectByYamlString(yaml string) (kubernetesinterfaces.Object, error) {
 	if yaml == "" {
 		return nil, tracederrors.TracedErrorEmptyString("yaml")
 	}
 
-	resourceYamls, err := kubernetesimplementationindependend.UnmarshalResourceYaml(yaml)
+	objectYamls, err := kubernetesimplementationindependend.UnmarshalObjectYaml(yaml)
 	if err != nil {
 		return nil, err
 	}
 
-	nResources := len(resourceYamls)
-	if nResources != 1 {
-		return nil, tracederrors.TracedErrorf("Exepected one yaml document to get resouce by yaml string but got '%d'.", nResources)
+	nObjects := len(objectYamls)
+	if nObjects != 1 {
+		return nil, tracederrors.TracedErrorf("Exepected one yaml document to get resouce by yaml string but got '%d'.", nObjects)
 	}
 
-	ret, err := n.GetResourceByNames(resourceYamls[0].Name(), resourceYamls[0].Kind())
+	ret, err := n.GetObjectByNames(objectYamls[0].Name(), objectYamls[0].Kind())
 	if err != nil {
 		return nil, err
 	}
 
-	err = ret.SetApiVersion(resourceYamls[0].ApiVersion())
+	err = ret.SetApiVersion(objectYamls[0].ApiVersion())
 	if err != nil {
 		return nil, err
 	}
@@ -623,20 +623,20 @@ func (n *NativeNamespace) GetResourceByYamlString(yaml string) (kubernetesinterf
 	return ret, nil
 }
 
-func (n *NativeNamespace) CreateResource(ctx context.Context, options *kubernetesparameteroptions.CreateResourceOptions) (kubernetesinterfaces.Resource, error) {
+func (n *NativeNamespace) CreateObject(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (kubernetesinterfaces.Object, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	resource, err := n.GetResourceByYamlString(options.YamlString)
+	object, err := n.GetObjectByYamlString(options.YamlString)
 	if err != nil {
 		return nil, err
 	}
 
-	err = resource.CreateByYamlString(ctx, options)
+	err = object.CreateByYamlString(ctx, options)
 	if err != nil {
 		return nil, err
 	}
 
-	return resource, nil
+	return object, nil
 }

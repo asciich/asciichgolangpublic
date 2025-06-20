@@ -59,6 +59,6 @@ func Test_HandleFluxResources(t *testing.T) {
 	gitRepoYaml += "  url: https://asciich.ch/example/repo\n"
 	gitRepoYaml += "  ref:\n"
 	gitRepoYaml += "    branch: master\n"
-	_, err = namespace.CreateResource(ctx, &kubernetesparameteroptions.CreateResourceOptions{YamlString: gitRepoYaml})
+	_, err = namespace.CreateObject(ctx, &kubernetesparameteroptions.CreateObjectOptions{YamlString: gitRepoYaml})
 	require.NoError(t, err)
 }
