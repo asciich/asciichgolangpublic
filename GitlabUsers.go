@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/logging"
-	"github.com/asciich/asciichgolangpublic/randomgenerator"
+	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
