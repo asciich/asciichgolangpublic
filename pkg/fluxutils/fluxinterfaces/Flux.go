@@ -7,5 +7,5 @@ import (
 )
 
 type Flux interface {
-	InstallFlux(ctx context.Context, options *fluxparameteroptions.InstalFluxOptions) (DeployedFlux, error)
+	InstallFlux(ctx context.Context, options *fluxparameteroptions.InstalFluxOptions) (FluxDeployment, error)
 }

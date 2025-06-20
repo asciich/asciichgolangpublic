@@ -1,14 +1,16 @@
 package commandexecutorflux
 
 import (
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type CommandExecutorDeployedFlux struct {
-	commandExecutor   commandexecutor.CommandExecutor
-	kubernetesCluster kubernetesinterfaces.KubernetesCluster
+	commandExecutor commandexecutor.CommandExecutor
+	cluster         kubernetesinterfaces.KubernetesCluster
 }
 
 func (c *CommandExecutorDeployedFlux) GetCommandExecutor() (commandexecutor.CommandExecutor, error) {
@@ -17,4 +19,9 @@ func (c *CommandExecutorDeployedFlux) GetCommandExecutor() (commandexecutor.Comm
 	}
 
 	return c.commandExecutor, nil
+
+}
+
+func (c *CommandExecutorDeployedFlux) GitRepositoryExists(ctx context.Context, name string, namespace string) (bool, error) {
+	return false, tracederrors.TracedErrorNotImplemented()
 }

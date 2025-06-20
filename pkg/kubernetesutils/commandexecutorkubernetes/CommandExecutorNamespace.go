@@ -257,13 +257,13 @@ func (c *CommandExecutorNamespace) GetName() (name string, err error) {
 	return c.name, nil
 }
 
-func (c *CommandExecutorNamespace) GetResourceByNames(resourceName string, resourceType string) (resource kubernetesinterfaces.Resource, err error) {
-	if resourceName == "" {
-		return nil, tracederrors.TracedErrorEmptyString("resourceName")
+func (c *CommandExecutorNamespace) GetObjectByNames(objectName string, objectType string) (object kubernetesinterfaces.Object, err error) {
+	if objectName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("objectName")
 	}
 
-	if resourceType == "" {
-		return nil, tracederrors.TracedErrorEmptyString("resourceType")
+	if objectType == "" {
+		return nil, tracederrors.TracedErrorEmptyString("objectType")
 	}
 
 	commandExecutor, err := c.GetCommandExecutor()
@@ -271,7 +271,7 @@ func (c *CommandExecutorNamespace) GetResourceByNames(resourceName string, resou
 		return nil, err
 	}
 
-	return GetCommandExecutorResource(commandExecutor, c, resourceName, resourceType)
+	return GetCommandExecutorObject(commandExecutor, c, objectName, objectType)
 }
 
 func (c *CommandExecutorNamespace) GetRoleByName(name string) (role kubernetesinterfaces.Role, err error) {
@@ -466,6 +466,6 @@ func (c *CommandExecutorNamespace) WaitUntilAllPodsInNamespaceAreRunning(ctx con
 	return tracederrors.TracedErrorNotImplemented()
 }
 
-func (c *CommandExecutorNamespace) CreateResource(ctx context.Context, options *kubernetesparameteroptions.CreateResourceOptions) (kubernetesinterfaces.Resource, error) {
+func (c *CommandExecutorNamespace) CreateObject(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (kubernetesinterfaces.Object, error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }

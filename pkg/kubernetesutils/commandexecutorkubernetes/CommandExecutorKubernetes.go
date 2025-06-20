@@ -306,13 +306,13 @@ func (c *CommandExecutorKubernetes) GetNamespaceByName(name string) (namespace k
 	return toReturn, nil
 }
 
-func (c *CommandExecutorKubernetes) GetResourceByNames(resourceName string, resourceType string, namespaceName string) (resource kubernetesinterfaces.Resource, err error) {
-	if resourceName == "" {
-		return nil, tracederrors.TracedErrorEmptyString("resourceName")
+func (c *CommandExecutorKubernetes) GetObjectByNames(objectName string, objectType string, namespaceName string) (object kubernetesinterfaces.Object, err error) {
+	if objectName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("objectName")
 	}
 
-	if resourceType == "" {
-		return nil, tracederrors.TracedErrorEmptyString("resourceType")
+	if objectType == "" {
+		return nil, tracederrors.TracedErrorEmptyString("objectType")
 	}
 
 	if namespaceName == "" {
@@ -324,7 +324,7 @@ func (c *CommandExecutorKubernetes) GetResourceByNames(resourceName string, reso
 		return nil, err
 	}
 
-	return namespace.GetResourceByNames(resourceName, resourceType)
+	return namespace.GetObjectByNames(objectName, objectType)
 }
 
 func (c *CommandExecutorKubernetes) ListNamespaceNames(ctx context.Context) (namespaceNames []string, err error) {
@@ -394,7 +394,7 @@ func (c *CommandExecutorKubernetes) ListNamespaces(ctx context.Context) (namespa
 	return namespaces, nil
 }
 
-func (c *CommandExecutorKubernetes) ListResourceNames(options *parameteroptions.ListKubernetesResourcesOptions) (resourceNames []string, err error) {
+func (c *CommandExecutorKubernetes) ListObjectNames(options *kubernetesparameteroptions.ListKubernetesObjectsOptions) (objectNames []string, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -414,7 +414,7 @@ func (c *CommandExecutorKubernetes) ListResourceNames(options *parameteroptions.
 		return nil, err
 	}
 
-	resourceType, err := options.GetResourceType()
+	objectType, err := options.GetObjectType()
 	if err != nil {
 		return nil, err
 	}
@@ -431,7 +431,7 @@ func (c *CommandExecutorKubernetes) ListResourceNames(options *parameteroptions.
 				namespaceName,
 				"-o",
 				"name",
-				resourceType,
+				objectType,
 			},
 		},
 	)
@@ -439,22 +439,22 @@ func (c *CommandExecutorKubernetes) ListResourceNames(options *parameteroptions.
 		return nil, err
 	}
 
-	resourceNames = []string{}
+	objectNames = []string{}
 	for _, name := range output {
-		resourceNames = append(resourceNames, strings.TrimPrefix(name, resourceType+"/"))
+		objectNames = append(objectNames, strings.TrimPrefix(name, objectType+"/"))
 	}
 
-	sort.Strings(resourceNames)
+	sort.Strings(objectNames)
 
-	return resourceNames, nil
+	return objectNames, nil
 }
 
-func (c *CommandExecutorKubernetes) ListResources(options *parameteroptions.ListKubernetesResourcesOptions) (resources []kubernetesinterfaces.Resource, err error) {
+func (c *CommandExecutorKubernetes) ListObjects(options *kubernetesparameteroptions.ListKubernetesObjectsOptions) (objects []kubernetesinterfaces.Object, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	resourceNames, err := c.ListResourceNames(options)
+	objectNames, err := c.ListObjectNames(options)
 	if err != nil {
 		return nil, err
 	}
@@ -464,22 +464,22 @@ func (c *CommandExecutorKubernetes) ListResources(options *parameteroptions.List
 		return nil, err
 	}
 
-	resourceType, err := options.GetResourceType()
+	objectType, err := options.GetObjectType()
 	if err != nil {
 		return nil, err
 	}
 
-	resources = []kubernetesinterfaces.Resource{}
-	for _, name := range resourceNames {
-		toAdd, err := c.GetResourceByNames(name, resourceType, namespaceName)
+	objects = []kubernetesinterfaces.Object{}
+	for _, name := range objectNames {
+		toAdd, err := c.GetObjectByNames(name, objectType, namespaceName)
 		if err != nil {
 			return nil, err
 		}
 
-		resources = append(resources, toAdd)
+		objects = append(objects, toAdd)
 	}
 
-	return resources, nil
+	return objects, nil
 }
 
 func (c *CommandExecutorKubernetes) NamespaceByNameExists(ctx context.Context, name string) (exists bool, err error) {
@@ -639,6 +639,6 @@ func (c *CommandExecutorKubernetes) WaitUntilAllPodsInNamespaceAreRunning(ctx co
 	return tracederrors.TracedErrorNotImplemented()
 }
 
-func (c *CommandExecutorKubernetes) CreateResource(ctx context.Context, options *kubernetesparameteroptions.CreateResourceOptions) (kubernetesinterfaces.Resource, error) {
+func (c *CommandExecutorKubernetes) CreateObject(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (kubernetesinterfaces.Object, error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
