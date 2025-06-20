@@ -13,6 +13,7 @@ type KubernetesCluster interface {
 	ConfigMapByNameExists(ctx context.Context, namespaceName string, configMapName string) (exists bool, err error)
 	CreateConfigMap(ctx context.Context, namespaceName string, configMapName string, options *kubernetesparameteroptions.CreateConfigMapOptions) (createdConfigMap ConfigMap, err error)
 	CreateNamespaceByName(ctx context.Context, namespaceName string) (createdNamespace Namespace, err error)
+	CreateResource(ctx context.Context, options *kubernetesparameteroptions.CreateResourceOptions) (Resource, error)
 	CreateSecret(ctx context.Context, namespaceName string, secretName string, options *kubernetesparameteroptions.CreateSecretOptions) (createdSecret Secret, err error)
 	DeleteNamespaceByName(ctx context.Context, namespaceName string) (err error)
 	DeleteSecretByName(ctx context.Context, namespaceName string, secretName string) (err error)
