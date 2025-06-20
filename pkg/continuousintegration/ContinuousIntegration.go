@@ -4,7 +4,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/randomgenerator"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
 )
 
 func IsRunningInCircleCi() (isRunningInGitlab bool) {
@@ -49,7 +50,7 @@ func GetDefaultKindClusterName() string {
 	if IsRunningInContinuousIntegration() {
 		// On Github multiple create and delete of the same cluster lead to errors (unable to create cluster again).
 		// Therefore we generate a new name for every test.
-		return name + "-" + strings.ToLower(randomgenerator.MustGetRandomString(5))
+		return name + "-" + strings.ToLower(mustutils.Must(randomgenerator.GetRandomString(5)))
 	}
 
 	return name
