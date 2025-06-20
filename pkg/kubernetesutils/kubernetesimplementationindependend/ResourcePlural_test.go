@@ -16,6 +16,8 @@ func Test_GetResourcePlural(t *testing.T) {
 		{"Secret", "secrets"},
 		{"secrets", "secrets"},
 		{"Secrets", "secrets"},
+		{"GitRepository", "gitrepositories"},
+		{"gitrepositories", "gitrepositories"},
 	}
 
 	for _, tt := range tests {

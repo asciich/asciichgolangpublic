@@ -638,3 +638,7 @@ func (c *CommandExecutorKubernetes) WhoAmI(ctx context.Context) (*kubernetesimpl
 func (c *CommandExecutorKubernetes) WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.WaitForPodsOptions) error {
 	return tracederrors.TracedErrorNotImplemented()
 }
+
+func (c *CommandExecutorKubernetes) CreateResource(ctx context.Context, options *kubernetesparameteroptions.CreateResourceOptions) (kubernetesinterfaces.Resource, error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}
