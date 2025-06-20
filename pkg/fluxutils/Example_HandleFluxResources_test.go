@@ -43,9 +43,9 @@ func Test_HandleFluxResources(t *testing.T) {
 	// ... prepare test environment finished.
 	// -----
 
-	// Get the namespace where flux is installed.
-	namespace, err := cluster.GetNamespaceByName(namespaceName)
-	require.NoError(t, err)
+	// Get the deployed flux
+	//fluxDeployment, err := fluxutils.GetFluxDeployment(cluster, namespaceName)
+	//require.NoError(t, err)
 
 	// Define a fluxcd GitRepository:
 	gitRepoYaml := "---\n"
@@ -59,6 +59,8 @@ func Test_HandleFluxResources(t *testing.T) {
 	gitRepoYaml += "  url: https://asciich.ch/example/repo\n"
 	gitRepoYaml += "  ref:\n"
 	gitRepoYaml += "    branch: master\n"
-	_, err = namespace.CreateResource(ctx, &kubernetesparameteroptions.CreateResourceOptions{YamlString: gitRepoYaml})
+	_, err = cluster.CreateObject(ctx, &kubernetesparameteroptions.CreateObjectOptions{YamlString: gitRepoYaml})
 	require.NoError(t, err)
+
+	// Check
 }

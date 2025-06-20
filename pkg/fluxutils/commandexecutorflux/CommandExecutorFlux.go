@@ -138,12 +138,12 @@ func (c *CommandExecutorFlux) ConfigureFluxInstance(ctx context.Context, cluster
 
 	os.WriteFile("debug.yaml", []byte(resourceYaml), 0644)
 
-	resource, err := cluster.GetResourceByNames("flux", "FluxInstance", namespaceName)
+	resource, err := cluster.GetObjectByNames("flux", "FluxInstance", namespaceName)
 	if err != nil {
 		return err
 	}
 
-	err = resource.CreateByYamlString(ctx, &kubernetesparameteroptions.CreateResourceOptions{
+	err = resource.CreateByYamlString(ctx, &kubernetesparameteroptions.CreateObjectOptions{
 		YamlString: resourceYaml,
 	})
 	if err != nil {
@@ -161,7 +161,7 @@ func (c *CommandExecutorFlux) ConfigureFluxInstance(ctx context.Context, cluster
 	return nil
 }
 
-func (c *CommandExecutorFlux) InstallFlux(ctx context.Context, options *fluxparameteroptions.InstalFluxOptions) (fluxinterfaces.DeployedFlux, error) {
+func (c *CommandExecutorFlux) InstallFlux(ctx context.Context, options *fluxparameteroptions.InstalFluxOptions) (fluxinterfaces.FluxDeployment, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -198,7 +198,7 @@ func (c *CommandExecutorFlux) InstallFlux(ctx context.Context, options *fluxpara
 	return c.GetDeployedFlux(cluster)
 }
 
-func (c *CommandExecutorFlux) GetDeployedFlux(cluster kubernetesinterfaces.KubernetesCluster) (fluxinterfaces.DeployedFlux, error) {
+func (c *CommandExecutorFlux) GetDeployedFlux(cluster kubernetesinterfaces.KubernetesCluster) (fluxinterfaces.FluxDeployment, error) {
 	if cluster == nil {
 		return nil, tracederrors.TracedErrorNil("cluster")
 	}
@@ -210,7 +210,7 @@ func (c *CommandExecutorFlux) GetDeployedFlux(cluster kubernetesinterfaces.Kuber
 
 	toReturn := new(CommandExecutorDeployedFlux)
 	toReturn.commandExecutor = commandExecutor
-	toReturn.kubernetesCluster = cluster
+	toReturn.cluster = cluster
 
 	return toReturn, nil
 }

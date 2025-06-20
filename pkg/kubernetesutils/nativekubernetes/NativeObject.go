@@ -15,14 +15,14 @@ import (
 	sigyaml "sigs.k8s.io/yaml"
 )
 
-type NativeResource struct {
+type NativeObject struct {
 	name       string
 	kind       string
 	apiVersion string
 	namespace  *NativeNamespace
 }
 
-func (n *NativeResource) GetApiVersion(ctx context.Context) (string, error) {
+func (n *NativeObject) GetApiVersion(ctx context.Context) (string, error) {
 	const defaultVersion = "v1"
 
 	if n.apiVersion == "" {
@@ -40,7 +40,7 @@ func (n *NativeResource) GetApiVersion(ctx context.Context) (string, error) {
 	return n.apiVersion, nil
 }
 
-func (n *NativeResource) GetName() (string, error) {
+func (n *NativeObject) GetName() (string, error) {
 	if n.name == "" {
 		return "", tracederrors.TracedError("name not set")
 	}
@@ -48,7 +48,7 @@ func (n *NativeResource) GetName() (string, error) {
 	return n.name, nil
 }
 
-func (n *NativeResource) GetKind() (string, error) {
+func (n *NativeObject) GetKind() (string, error) {
 	if n.kind == "" {
 		return "", tracederrors.TracedError("kind not set")
 	}
@@ -61,7 +61,7 @@ func (n *NativeResource) GetKind() (string, error) {
 	return ret, nil
 }
 
-func (n *NativeResource) GetGroupVersionKind(ctx context.Context) (*schema.GroupVersionKind, error) {
+func (n *NativeObject) GetGroupVersionKind(ctx context.Context) (*schema.GroupVersionKind, error) {
 	groupVersion, err := n.GetGroupVersion(ctx)
 	if err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func (n *NativeResource) GetGroupVersionKind(ctx context.Context) (*schema.Group
 	return &gvk, nil
 }
 
-func (n *NativeResource) EnsureNamespaceExists(ctx context.Context) error {
+func (n *NativeObject) EnsureNamespaceExists(ctx context.Context) error {
 	namespace, err := n.GetNamespace()
 	if err != nil {
 		return err
@@ -90,7 +90,7 @@ func (n *NativeResource) EnsureNamespaceExists(ctx context.Context) error {
 	return namespace.Create(ctx)
 }
 
-func (n *NativeResource) CreateByYamlString(ctx context.Context, options *kubernetesparameteroptions.CreateResourceOptions) (err error) {
+func (n *NativeObject) CreateByYamlString(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
@@ -115,7 +115,7 @@ func (n *NativeResource) CreateByYamlString(ctx context.Context, options *kubern
 		return err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Create kubernetes resource by yaml '%s/%s' in namespace '%s' started.", kind, name, namespaceName)
+	logging.LogInfoByCtxf(ctx, "Create kubernetes object by yaml '%s/%s' in namespace '%s' started.", kind, name, namespaceName)
 
 	exists, err := n.Exists(ctx)
 	if err != nil {
@@ -123,7 +123,7 @@ func (n *NativeResource) CreateByYamlString(ctx context.Context, options *kubern
 	}
 
 	if exists {
-		logging.LogInfoByCtxf(ctx, "Resource '%s' named '%s' in namespace '%s' already exists, skip creation.", kind, name, namespaceName)
+		logging.LogInfoByCtxf(ctx, "Object '%s' named '%s' in namespace '%s' already exists, skip creation.", kind, name, namespaceName)
 	} else {
 		err = n.EnsureNamespaceExists(ctx)
 		if err != nil {
@@ -143,25 +143,25 @@ func (n *NativeResource) CreateByYamlString(ctx context.Context, options *kubern
 		unstructuredObj.SetGroupVersionKind(*gvk)
 		unstructuredObj.SetNamespace(namespaceName)
 
-		resourceInterface, err := n.GetResourceInterface(ctx)
+		objectInterface, err := n.GetObjectInterface(ctx)
 		if err != nil {
 			return err
 		}
 
-		_, err = resourceInterface.Create(ctx, &unstructuredObj, v1.CreateOptions{})
+		_, err = objectInterface.Create(ctx, &unstructuredObj, v1.CreateOptions{})
 		if err != nil {
-			return tracederrors.TracedErrorf("Failed to create resource '%s' names '%s' in namespace '%s': %w", kind, name, namespaceName, err)
+			return tracederrors.TracedErrorf("Failed to create object '%s' names '%s' in namespace '%s': %w", kind, name, namespaceName, err)
 		}
 
-		logging.LogChangedByCtxf(ctx, "Created resource '%s' named '%s' in namespace '%s'.", kind, name, namespaceName)
+		logging.LogChangedByCtxf(ctx, "Created object '%s' named '%s' in namespace '%s'.", kind, name, namespaceName)
 	}
 
-	logging.LogInfoByCtxf(ctx, "Create kubernetes resource by yaml '%s/%s' in namespace '%s' finished.", kind, name, namespaceName)
+	logging.LogInfoByCtxf(ctx, "Create kubernetes object by yaml '%s/%s' in namespace '%s' finished.", kind, name, namespaceName)
 
 	return nil
 }
 
-func (n *NativeResource) GetNamespace() (*NativeNamespace, error) {
+func (n *NativeObject) GetNamespace() (*NativeNamespace, error) {
 	if n.namespace == nil {
 		return nil, tracederrors.TracedErrorNil("namespace")
 	}
@@ -169,7 +169,7 @@ func (n *NativeResource) GetNamespace() (*NativeNamespace, error) {
 	return n.namespace, nil
 }
 
-func (n *NativeResource) GetNamespaceName() (string, error) {
+func (n *NativeObject) GetNamespaceName() (string, error) {
 	namespace, err := n.GetNamespace()
 	if err != nil {
 		return "", err
@@ -178,7 +178,7 @@ func (n *NativeResource) GetNamespaceName() (string, error) {
 	return namespace.GetName()
 }
 
-func (n *NativeResource) GetDynamicClient() (*dynamic.DynamicClient, error) {
+func (n *NativeObject) GetDynamicClient() (*dynamic.DynamicClient, error) {
 	namespace, err := n.GetNamespace()
 	if err != nil {
 		return nil, err
@@ -187,7 +187,7 @@ func (n *NativeResource) GetDynamicClient() (*dynamic.DynamicClient, error) {
 	return namespace.GetDynamicClient()
 }
 
-func (n *NativeResource) GetGroupVersion(ctx context.Context) (*schema.GroupVersion, error) {
+func (n *NativeObject) GetGroupVersion(ctx context.Context) (*schema.GroupVersion, error) {
 	apiVersion, err := n.GetApiVersion(ctx)
 	if err != nil {
 		return nil, err
@@ -201,22 +201,22 @@ func (n *NativeResource) GetGroupVersion(ctx context.Context) (*schema.GroupVers
 	return &groupVersion, nil
 }
 
-func (n *NativeResource) GetResourcePlural() (string, error) {
+func (n *NativeObject) GetObjectPlural() (string, error) {
 	kind, err := n.GetKind()
 	if err != nil {
 		return "", err
 	}
 
-	return kubernetesimplementationindependend.GetResourcePlural(kind)
+	return kubernetesimplementationindependend.GetObjectPlural(kind)
 }
 
-func (n *NativeResource) GetGroupVersionResource(ctx context.Context) (*schema.GroupVersionResource, error) {
+func (n *NativeObject) GetGroupVersionObject(ctx context.Context) (*schema.GroupVersionResource, error) {
 	groupVersion, err := n.GetGroupVersion(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	resourcePlural, err := n.GetResourcePlural()
+	objectPlural, err := n.GetObjectPlural()
 	if err != nil {
 		return nil, err
 	}
@@ -224,14 +224,14 @@ func (n *NativeResource) GetGroupVersionResource(ctx context.Context) (*schema.G
 	gvr := schema.GroupVersionResource{
 		Group:    groupVersion.Group,
 		Version:  groupVersion.Version,
-		Resource: resourcePlural,
+		Resource: objectPlural,
 	}
 
 	return &gvr, nil
 }
 
-func (n *NativeResource) GetResourceInterface(ctx context.Context) (dynamic.ResourceInterface, error) {
-	groupVersionResource, err := n.GetGroupVersionResource(ctx)
+func (n *NativeObject) GetObjectInterface(ctx context.Context) (dynamic.ResourceInterface, error) {
+	groupVersionObject, err := n.GetGroupVersionObject(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -246,13 +246,13 @@ func (n *NativeResource) GetResourceInterface(ctx context.Context) (dynamic.Reso
 		return nil, err
 	}
 
-	resourceInterface := dynamicClient.Resource(*groupVersionResource).Namespace(namspaceName)
+	objectInterface := dynamicClient.Resource(*groupVersionObject).Namespace(namspaceName)
 
-	return resourceInterface, nil
+	return objectInterface, nil
 }
 
-func (n *NativeResource) Exists(ctx context.Context) (bool, error) {
-	resourceInterface, err := n.GetResourceInterface(ctx)
+func (n *NativeObject) Exists(ctx context.Context) (bool, error) {
+	objectInterface, err := n.GetObjectInterface(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -273,25 +273,25 @@ func (n *NativeResource) Exists(ctx context.Context) (bool, error) {
 	}
 
 	var exists bool
-	_, err = resourceInterface.Get(ctx, name, v1.GetOptions{})
+	_, err = objectInterface.Get(ctx, name, v1.GetOptions{})
 	if err == nil {
 		exists = true
 	} else {
 		if !errors.IsNotFound(err) {
-			return false, tracederrors.TracedErrorf("failed to get resource '%s' named '%s' in namespace '%s': %w", kind, name, namespaceName, err)
+			return false, tracederrors.TracedErrorf("failed to get object '%s' named '%s' in namespace '%s': %w", kind, name, namespaceName, err)
 		}
 	}
 
 	if exists {
-		logging.LogInfoByCtxf(ctx, "Resource '%s' named '%s' in namespace '%s' exists.", kind, name, namespaceName)
+		logging.LogInfoByCtxf(ctx, "Object '%s' named '%s' in namespace '%s' exists.", kind, name, namespaceName)
 	} else {
-		logging.LogInfoByCtxf(ctx, "Resource '%s' named '%s' in namespace '%s' does not exist.", kind, name, namespaceName)
+		logging.LogInfoByCtxf(ctx, "Object '%s' named '%s' in namespace '%s' does not exist.", kind, name, namespaceName)
 	}
 
 	return exists, nil
 }
 
-func (n *NativeResource) Delete(ctx context.Context) error {
+func (n *NativeObject) Delete(ctx context.Context) error {
 	exists, err := n.Exists(ctx)
 	if err != nil {
 		return err
@@ -313,28 +313,28 @@ func (n *NativeResource) Delete(ctx context.Context) error {
 	}
 
 	if exists {
-		resourceInterface, err := n.GetResourceInterface(ctx)
+		objectInterface, err := n.GetObjectInterface(ctx)
 		if err != nil {
 			return err
 		}
 
-		err = resourceInterface.Delete(ctx, name, v1.DeleteOptions{})
+		err = objectInterface.Delete(ctx, name, v1.DeleteOptions{})
 		if err != nil {
-			return tracederrors.TracedErrorf("Failed to delete resource '%s' named '%s' in namespace '%s': %w", kind, name, namespaceName, err)
+			return tracederrors.TracedErrorf("Failed to delete object '%s' named '%s' in namespace '%s': %w", kind, name, namespaceName, err)
 		}
-		logging.LogChangedByCtxf(ctx, "Resource '%s' named '%s' in namespace '%s' deleted.", kind, name, namespaceName)
+		logging.LogChangedByCtxf(ctx, "Object '%s' named '%s' in namespace '%s' deleted.", kind, name, namespaceName)
 	} else {
-		logging.LogInfoByCtxf(ctx, "Resource '%s' named '%s' in namespace '%s' already absent. Skip delete.", kind, name, namespaceName)
+		logging.LogInfoByCtxf(ctx, "Object '%s' named '%s' in namespace '%s' already absent. Skip delete.", kind, name, namespaceName)
 	}
 
 	return nil
 }
 
-func (n *NativeResource) GetAsYamlString() (yamlString string, err error) {
+func (n *NativeObject) GetAsYamlString() (yamlString string, err error) {
 	return "", tracederrors.TracedErrorNotImplemented()
 }
 
-func (n *NativeResource) SetKind(kind string) error {
+func (n *NativeObject) SetKind(kind string) error {
 	if kind == "" {
 		return tracederrors.TracedErrorEmptyString("kind")
 	}
@@ -344,7 +344,7 @@ func (n *NativeResource) SetKind(kind string) error {
 	return nil
 }
 
-func (n *NativeResource) SetApiVersion(apiVersion string) error {
+func (n *NativeObject) SetApiVersion(apiVersion string) error {
 	if apiVersion == "" {
 		return tracederrors.TracedErrorEmptyString("apiVersion")
 	}

@@ -2,7 +2,7 @@ package kubernetesparameteroptions
 
 import "github.com/asciich/asciichgolangpublic/tracederrors"
 
-type CreateResourceOptions struct {
+type CreateObjectOptions struct {
 	YamlString string
 
 	// Do not check nor try to create missing namespaces.
@@ -10,7 +10,7 @@ type CreateResourceOptions struct {
 	SkipNamespaceCreation bool
 }
 
-func (c CreateResourceOptions) GetYamlString() (string, error) {
+func (c CreateObjectOptions) GetYamlString() (string, error) {
 	if c.YamlString == "" {
 		return "", tracederrors.TracedError("YamlString not set")
 	}

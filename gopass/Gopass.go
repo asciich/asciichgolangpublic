@@ -16,7 +16,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
-	"github.com/asciich/asciichgolangpublic/randomgenerator"
+	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
 	"github.com/asciich/asciichgolangpublic/tlsutils/x509utils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -378,7 +378,6 @@ func InsertX509Certificate(ctx context.Context, cert *x509.Certificate, gopassOp
 	return InsertSecret(ctx, encodedCert, gopassOptions)
 }
 
-
 func InsertSecret(ctx context.Context, secretToInsert string, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
 	if len(secretToInsert) <= 0 {
 		return tracederrors.TracedErrorEmptyString("secretToInsert")
@@ -448,7 +447,7 @@ func Sync(ctx context.Context) (err error) {
 	_, err = commandexecutor.Bash().RunCommand(
 		ctx,
 		&parameteroptions.RunCommandOptions{
-			Command:            []string{"gopass", "sync"},
+			Command: []string{"gopass", "sync"},
 		},
 	)
 	if err != nil {

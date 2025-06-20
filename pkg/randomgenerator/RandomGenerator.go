@@ -3,11 +3,10 @@ package randomgenerator
 import (
 	"math/rand"
 
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-func GetRandomString(lenght int) (random string, err error) {
+func GetRandomString(lenght int) (string, error) {
 	if lenght <= 0 {
 		return "", tracederrors.TracedErrorf("Invalid lenght '%d' to generate random string", lenght)
 	}
@@ -18,13 +17,4 @@ func GetRandomString(lenght int) (random string, err error) {
 		b[i] = letters[rand.Intn(len(letters))]
 	}
 	return string(b), nil
-}
-
-func MustGetRandomString(length int) (random string) {
-	random, err := GetRandomString(length)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return random
 }
