@@ -23,7 +23,19 @@ func (c *CommandExecutorDeployedFlux) GetCommandExecutor() (commandexecutor.Comm
 
 }
 
+func (c *CommandExecutorDeployedFlux) DeleteGitRepository(ctx context.Context, name string, namespace string) error {
+	return tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorDeployedFlux) DeleteKustomization(ctx context.Context, name string, namespace string) error {
+	return tracederrors.TracedErrorNotImplemented()
+}
+
 func (c *CommandExecutorDeployedFlux) GitRepositoryExists(ctx context.Context, name string, namespace string) (bool, error) {
+	return false, tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorDeployedFlux) KustomizationExists(ctx context.Context, name string, namespace string) (bool, error) {
 	return false, tracederrors.TracedErrorNotImplemented()
 }
 
@@ -31,10 +43,14 @@ func (c *CommandExecutorDeployedFlux) GetGitRepositoryStatusMessage(ctx context.
 	return "", tracederrors.TracedErrorNotImplemented()
 }
 
-func (c *CommandExecutorDeployedFlux) DeleteGitRepository(ctx context.Context, name string, namespace string) error {
-	return tracederrors.TracedErrorNotImplemented()
+func (c *CommandExecutorDeployedFlux) GetKustomizationStatusMessage(ctx context.Context, name string, namespace string) (string, error) {
+	return "", tracederrors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorDeployedFlux) WatchGitRepository(ctx context.Context, name string, namespace string, create func(*unstructured.Unstructured), update func(*unstructured.Unstructured), delete func(*unstructured.Unstructured)) error {
+	return tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorDeployedFlux) WatchKustomization(ctx context.Context, name string, namespace string, create func(*unstructured.Unstructured), update func(*unstructured.Unstructured), delete func(*unstructured.Unstructured)) error {
 	return tracederrors.TracedErrorNotImplemented()
 }
