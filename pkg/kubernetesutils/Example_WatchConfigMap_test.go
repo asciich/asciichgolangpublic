@@ -46,8 +46,10 @@ func Test_Example_WatchConfigMap(t *testing.T) {
 	err = namespace.DeleteConfigMapByName(ctx, configmapName)
 	require.NoError(t, err)
 
-	// define counters and watch config map
+	// define counters to watch config map
 	var cmCreateCounter, cmUpdateCounter, cmDeleteCounter int
+
+	// Register ConfigMap callback functions
 	ctxWatch, cancel := context.WithCancel(ctx) // ensure we can cancel the watching
 	err = namespace.WatchConfigMap(
 		ctxWatch,
