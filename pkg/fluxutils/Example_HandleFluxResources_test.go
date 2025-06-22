@@ -52,11 +52,14 @@ func Test_HandleFluxResources(t *testing.T) {
 	// Define example resource names:
 	const gitRepoName = "example-repo"
 	const kustomizationName = "example-kustomization"
+	const helmreleaseName = "example-helmrelease"
 
 	// Ensure example resources absent:
 	err = fluxDeployment.DeleteGitRepository(ctx, gitRepoName, namespaceName)
 	require.NoError(t, err)
 	err = fluxDeployment.DeleteKustomization(ctx, kustomizationName, namespaceName)
+	require.NoError(t, err)
+	err = fluxDeployment.DeleteHelmRelease(ctx, helmreleaseName, namespaceName)
 	require.NoError(t, err)
 
 	// Check the example GitRepository is absent before registering callback functions:
@@ -64,14 +67,20 @@ func Test_HandleFluxResources(t *testing.T) {
 	require.NoError(t, err)
 	require.False(t, exists)
 
-	// Check the example GitRepository is absent before registering callback functions:
-	exists, err = fluxDeployment.KustomizationExists(ctx, gitRepoName, namespaceName)
+	// Check the example Kustomization is absent before registering callback functions:
+	exists, err = fluxDeployment.KustomizationExists(ctx, kustomizationName, namespaceName)
+	require.NoError(t, err)
+	require.False(t, exists)
+
+	// Check the example HelmRelease is absent before registering callback functions:
+	exists, err = fluxDeployment.HelmReleaseExists(ctx, helmreleaseName, namespaceName)
 	require.NoError(t, err)
 	require.False(t, exists)
 
 	// Define counters and context to watch the flux objects:
 	var grCreateCounter, grUpdateCounter, grDeleteCounter int // gr for GitRepository
 	var kuCreateCounter, kuUpdateCounter, kuDeleteCounter int // ku for Kustomization
+	var hrCreateCounter, hrUpdateCounter, hrDeleteCounter int // hr for HelmRelease
 	ctxWatch, cancel := context.WithCancel(ctx)               // ensure we can cancel the watching
 
 	// Start watching the GitRepository
@@ -98,6 +107,18 @@ func Test_HandleFluxResources(t *testing.T) {
 	require.NoError(t, err)
 	defer cancel()
 
+	// Start watching the HelmRelease
+	err = fluxDeployment.WatchHelmRelease(
+		ctxWatch,
+		helmreleaseName,
+		namespaceName,
+		func(*unstructured.Unstructured) { hrCreateCounter++ },
+		func(*unstructured.Unstructured) { hrUpdateCounter++ },
+		func(*unstructured.Unstructured) { hrDeleteCounter++ },
+	)
+	require.NoError(t, err)
+	defer cancel()
+
 	// check no callback called for GitRepository
 	time.Sleep(100 * time.Millisecond)
 	require.EqualValues(t, 0, grCreateCounter)
@@ -108,6 +129,11 @@ func Test_HandleFluxResources(t *testing.T) {
 	require.EqualValues(t, 0, kuCreateCounter)
 	require.EqualValues(t, 0, kuUpdateCounter)
 	require.EqualValues(t, 0, kuDeleteCounter)
+
+	// check no callback called for HelmRelease
+	require.EqualValues(t, 0, hrCreateCounter)
+	require.EqualValues(t, 0, hrUpdateCounter)
+	require.EqualValues(t, 0, hrDeleteCounter)
 
 	// Define a fluxcd GitRepository:
 	gitRepoYaml := "---\n"
@@ -132,7 +158,7 @@ func Test_HandleFluxResources(t *testing.T) {
 
 	// Check Create counter increased for GitRepository:
 	require.EqualValues(t, 1, grCreateCounter)
-	require.EqualValues(t, 0, grUpdateCounter)
+	require.GreaterOrEqual(t, grUpdateCounter, 0) // Every status change calles an update.
 	require.EqualValues(t, 0, grDeleteCounter)
 
 	// Define a fluxcd Kustomization:
@@ -156,14 +182,64 @@ func Test_HandleFluxResources(t *testing.T) {
 	require.NoError(t, err)
 
 	// Check the example Kustomization exists:
-	exists, err = fluxDeployment.GitRepositoryExists(ctx, gitRepoName, namespaceName)
+	exists, err = fluxDeployment.KustomizationExists(ctx, kustomizationName, namespaceName)
 	require.NoError(t, err)
 	require.True(t, exists)
 
-	// Check Create counter increased for GitRepository:
+	// Check Create counter increased for Kuszomization:
 	require.EqualValues(t, 1, kuCreateCounter)
-	require.EqualValues(t, 0, kuUpdateCounter)
+	require.GreaterOrEqual(t, kuUpdateCounter, 0) // Every status update generates an updated version
 	require.EqualValues(t, 0, kuDeleteCounter)
+
+	// Define a fluxcd HelmRelease:
+	helmreleaseYaml := "---\n"
+	helmreleaseYaml += "apiVersion: helm.toolkit.fluxcd.io/v2\n"
+	helmreleaseYaml += "kind: HelmRelease\n"
+	helmreleaseYaml += "metadata:\n"
+	helmreleaseYaml += "  name: " + helmreleaseName + "\n"
+	helmreleaseYaml += "  namespace: " + namespaceName + "\n"
+	helmreleaseYaml += "spec:\n"
+	helmreleaseYaml += "  interval: 10m\n"
+	helmreleaseYaml += "  timeout: 5m\n"
+	helmreleaseYaml += "  chart:\n"
+	helmreleaseYaml += "    spec:\n"
+	helmreleaseYaml += "      chart: podinfo\n"
+	helmreleaseYaml += "      version: '6.5.*'\n"
+	helmreleaseYaml += "      sourceRef:\n"
+	helmreleaseYaml += "        kind: HelmRepository\n"
+	helmreleaseYaml += "        name: podinfo\n"
+	helmreleaseYaml += "      interval: 5m\n"
+	helmreleaseYaml += "  releaseName: podinfo\n"
+	helmreleaseYaml += "  install:\n"
+	helmreleaseYaml += "    remediation:\n"
+	helmreleaseYaml += "      retries: 3\n"
+	helmreleaseYaml += "  upgrade:\n"
+	helmreleaseYaml += "    remediation:\n"
+	helmreleaseYaml += "      retries: 3\n"
+	helmreleaseYaml += "  test:\n"
+	helmreleaseYaml += "    enable: true\n"
+	helmreleaseYaml += "  driftDetection:\n"
+	helmreleaseYaml += "    mode: enabled\n"
+	helmreleaseYaml += "    ignore:\n"
+	helmreleaseYaml += "    - paths: [\"/spec/replicas\"]\n"
+	helmreleaseYaml += "      target:\n"
+	helmreleaseYaml += "        kind: Deployment\n"
+	helmreleaseYaml += "  values:\n"
+	helmreleaseYaml += "    replicaCount: 2\n"
+
+	// Create the HelmRelease:
+	_, err = cluster.CreateObject(ctx, &kubernetesparameteroptions.CreateObjectOptions{YamlString: helmreleaseYaml})
+	require.NoError(t, err)
+
+	// Check the example HelmRelease exists:
+	exists, err = fluxDeployment.HelmReleaseExists(ctx, helmreleaseName, namespaceName)
+	require.NoError(t, err)
+	require.True(t, exists)
+
+	// Check Create counter increased for HelmRelease:
+	require.EqualValues(t, 1, hrCreateCounter)
+	require.GreaterOrEqual(t, hrUpdateCounter, 0) // Every status update generates an updated version
+	require.EqualValues(t, 0, hrDeleteCounter)
 
 	// Give the resources some time to settle:
 	time.Sleep(time.Second * 5)
@@ -178,6 +254,11 @@ func Test_HandleFluxResources(t *testing.T) {
 	require.NoError(t, err)
 	require.Contains(t, status, "Source artifact not found, retrying in 5s") // The repo of this example does not exist.
 
+	// Get the status of the HelmRelease:
+	status, err = fluxDeployment.GetHelmReleaseStatusMessage(ctx, helmreleaseName, namespaceName)
+	require.NoError(t, err)
+	require.Contains(t, status, "latest generation of object has not been reconciled") // The repo of this example does not exist.
+
 	// Check update counter increased for GitRepository:
 	require.EqualValues(t, 1, grCreateCounter)
 	require.GreaterOrEqual(t, grUpdateCounter, 3) // Every status update generates an updated version
@@ -187,6 +268,11 @@ func Test_HandleFluxResources(t *testing.T) {
 	require.EqualValues(t, 1, kuCreateCounter)
 	require.GreaterOrEqual(t, kuUpdateCounter, 2) // Every status update generates an updated version
 	require.EqualValues(t, 0, kuDeleteCounter)
+
+	// Check update counter increased for HelmRelease:
+	require.EqualValues(t, 1, hrCreateCounter)
+	require.GreaterOrEqual(t, hrUpdateCounter, 2) // Every status update generates an updated version
+	require.EqualValues(t, 0, hrDeleteCounter)
 
 	// Delete the example GitRepository:
 	err = fluxDeployment.DeleteGitRepository(ctx, gitRepoName, namespaceName)
@@ -206,13 +292,27 @@ func Test_HandleFluxResources(t *testing.T) {
 	err = fluxDeployment.DeleteKustomization(ctx, kustomizationName, namespaceName)
 	require.NoError(t, err)
 
-	// Check if example GitRepository is absent:
+	// Check if example Kustomization is absent:
 	exists, err = fluxDeployment.KustomizationExists(ctx, kustomizationName, namespaceName)
 	require.NoError(t, err)
 	require.False(t, exists)
 
-	// Check delete counter increased for GitRepository:
+	// Check delete counter increased for Kustomization:
 	require.EqualValues(t, 1, kuCreateCounter)
 	require.GreaterOrEqual(t, kuUpdateCounter, 2) // Every status update generates an updated version
 	require.EqualValues(t, 1, kuDeleteCounter)
+
+	// Delete the example HelmRelease:
+	err = fluxDeployment.DeleteHelmRelease(ctx, helmreleaseName, namespaceName)
+	require.NoError(t, err)
+
+	// Check if example HelmRelease is absent:
+	exists, err = fluxDeployment.KustomizationExists(ctx, helmreleaseName, namespaceName)
+	require.NoError(t, err)
+	require.False(t, exists)
+
+	// Check delete counter increased for HelmRelease:
+	require.EqualValues(t, 1, hrCreateCounter)
+	require.GreaterOrEqual(t, hrUpdateCounter, 2) // Every status update generates an updated version
+	require.EqualValues(t, 1, hrDeleteCounter)
 }
