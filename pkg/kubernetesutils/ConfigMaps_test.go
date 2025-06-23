@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -36,12 +37,23 @@ func Test_ConfigMapByNameExists(t *testing.T) {
 				require.NoError(t, err)
 				require.False(t, exists)
 
-				configmap, err := namespace.CreateConfigMap(ctx, configmapName, &kubernetesparameteroptions.CreateConfigMapOptions{ConfigMapData: map[string]string{}})
-				require.NoError(t, err)
+				for i := 0; i < 2; i++ {
+					ctx := contextutils.WithChangeIndicator(ctx)
+					configmap, err := namespace.CreateConfigMap(ctx, configmapName, &kubernetesparameteroptions.CreateConfigMapOptions{ConfigMapData: map[string]string{}})
+					require.NoError(t, err)
 
-				exists, err = configmap.Exists(ctx)
-				require.NoError(t, err)
-				require.True(t, exists)
+					if i == 0 {
+						// Creating the config map is considered a change:
+						require.True(t, contextutils.IsChanged(ctx))
+					} else {
+						// Update the same ConfigMap again and again with the same values must be idempotent and not indicate a change:
+						require.False(t, contextutils.IsChanged(ctx))
+					}
+
+					exists, err = configmap.Exists(ctx)
+					require.NoError(t, err)
+					require.True(t, exists)
+				}
 
 				exists, err = namespace.ConfigMapByNameExists(ctx, configmapName)
 				require.NoError(t, err)

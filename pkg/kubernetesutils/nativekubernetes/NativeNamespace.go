@@ -2,7 +2,6 @@ package nativekubernetes
 
 import (
 	"context"
-	"reflect"
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/logging"
@@ -343,15 +342,15 @@ func (n *NativeNamespace) CreateConfigMap(ctx context.Context, configMapName str
 			return nil, err
 		}
 
-		if reflect.DeepEqual(rawResponse.Data, configmapData) && reflect.DeepEqual(rawResponse.Labels, labels) {
+		if IsConfigMapContentEqual(rawResponse.Data, configmapData) && IsConfigMapLabelsEqual(rawResponse.Labels, labels) {
 			logging.LogInfoByCtxf(ctx, "ConfigMap '%s' already exists in namespace '%s' and is up to date.", configMapName, namespaceName)
 		} else {
 			_, err := clientset.CoreV1().ConfigMaps(namespaceName).Update(ctx, configmap, metav1.UpdateOptions{})
 			if err != nil {
-				return nil, tracederrors.TracedErrorf("failed to create configmap '%s' in namespace '%s': %w", configMapName, namespaceName, err)
+				return nil, tracederrors.TracedErrorf("failed to create ConfigMap '%s' in namespace '%s': %w", configMapName, namespaceName, err)
 			}
 
-			logging.LogChangedByCtxf(ctx, "Updated configmap '%s' in kubernetes namespace '%s'.", configMapName, namespaceName)
+			logging.LogChangedByCtxf(ctx, "Updated ConfigMap '%s' in kubernetes namespace '%s'.", configMapName, namespaceName)
 		}
 	} else {
 		_, err = clientset.CoreV1().ConfigMaps(namespaceName).Create(ctx, configmap, metav1.CreateOptions{})
@@ -359,7 +358,7 @@ func (n *NativeNamespace) CreateConfigMap(ctx context.Context, configMapName str
 			return nil, tracederrors.TracedErrorf("failed to create configmap '%s' in namespace '%s': %w", configMapName, namespaceName, err)
 		}
 
-		logging.LogChangedByCtxf(ctx, "Created configmap '%s' in kubernetes namespace '%s'.", configMapName, namespaceName)
+		logging.LogChangedByCtxf(ctx, "Created ConfigMap '%s' in kubernetes namespace '%s'.", configMapName, namespaceName)
 	}
 
 	return n.GetConfigMapByName(configMapName)
