@@ -35,8 +35,20 @@ func OverrideLogChangedf(overrideFunction func(logmessage string, arg ...interfa
 func LogChangedByCtxf(ctx context.Context, logmessage string, args ...interface{}) {
 	verbose := contextutils.GetVerboseFromContext(ctx)
 
+	contextutils.SetChangeIndicator(ctx, true)
+
 	if verbose {
 		LogChangedf(logmessage, args...)
+	}
+}
+
+func LogChangedByCtx(ctx context.Context, logmessage string) {
+	verbose := contextutils.GetVerboseFromContext(ctx)
+
+	contextutils.SetChangeIndicator(ctx, true)
+
+	if verbose {
+		LogChanged(logmessage)
 	}
 }
 
