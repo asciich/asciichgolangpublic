@@ -2,6 +2,7 @@ package nativekubernetes
 
 import (
 	"context"
+	"reflect"
 
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	v1 "k8s.io/api/core/v1"
@@ -130,4 +131,20 @@ func (n *NativeConfigMap) GetData(ctx context.Context, fieldName string) (string
 	}
 
 	return fieldData, nil
+}
+
+func IsConfigMapContentEqual(configMap1 map[string]string, configMap2 map[string]string) bool {
+	if len(configMap1) <= 0 && len(configMap2) <= 0 {
+		return true
+	}
+
+	return reflect.DeepEqual(configMap1, configMap2)
+}
+
+func IsConfigMapLabelsEqual(labels1 map[string]string, labels2 map[string]string) bool {
+	if len(labels1) <= 0 && len(labels2) <= 0 {
+		return true
+	}
+
+	return reflect.DeepEqual(labels1, labels2)
 }
