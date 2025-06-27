@@ -13,6 +13,7 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 * [kindutils](pkg/kindutils/): Handle KinD/ Kubernetes in Docker.
 * [kubernetesutils](pkg/kubernetesutils/): Work with K8s/ Kubernetes.
 * [versionutils](pkg/versionutils/): Handle versions.
+* [x509utils](pkg/tlsutils/x509utils/): Handle X509 certificates used for TLS/SSL.
 
 ## Design choices, principles and background information
 

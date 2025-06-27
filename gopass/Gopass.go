@@ -17,7 +17,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
 	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
-	"github.com/asciich/asciichgolangpublic/tlsutils/x509utils"
+	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 

@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/tlsutils/x509utils"
+	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
 )
 
 func getCtx() context.Context {
