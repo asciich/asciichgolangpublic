@@ -162,10 +162,27 @@ func LoadCertificateFromPEMString(pemEncoded string) (cert *x509.Certificate, er
 	return LoadCertificateFromDerBytes(blockBytes)
 }
 
+func CheckExpired(ctx context.Context, cert *x509.Certificate) error {
+	if cert == nil {
+		return tracederrors.TracedErrorNil("cert")
+	}
+
+	name := FormatForLogging(cert)
+
+	if cert.NotAfter.Before(time.Now()) {
+		return tracederrors.TracedErrorf("%s is not valid anymore. Not after is %s", name, cert.NotAfter.String())
+	}
+
+	logging.LogInfoByCtxf(ctx, "%s is still valid until %s.", name, cert.NotAfter.String())
+	return nil
+}
+
 func CheckCertificateChainString(ctx context.Context, chain string) error {
 	if chain == "" {
 		return tracederrors.TracedErrorEmptyString(chain)
 	}
+
+	logging.LogInfoByCtx(ctx, "Check x509 certificate chain in string started.")
 
 	certs, err := LoadCertificatesFromPEMString(chain)
 	if err != nil {
@@ -176,19 +193,37 @@ func CheckCertificateChainString(ctx context.Context, chain string) error {
 		return tracederrors.TracedErrorf("Expected a root, intermediate and endendity certificate but got '%d' certs.", len(certs))
 	}
 
-	intermediate := []*x509.Certificate{certs[1]}
-	root := []*x509.Certificate{certs[2]}
+	endEndityCert := certs[0]
+	intermediateCert := certs[1]
+	rootCaCert := certs[2]
 
-	chains, err := ValidateCertificateChain(ctx, certs[0], root, intermediate)
+	err = CheckExpired(ctx, endEndityCert)
 	if err != nil {
 		return err
 	}
 
-	if len(chains) == 1 {
-		logging.LogInfoByCtxf(ctx, "Found valid certificate chain in string to validate.")
-	} else {
+	err = CheckExpired(ctx, intermediateCert)
+	if err != nil {
+		return err
+	}
+
+	err = CheckExpired(ctx, rootCaCert)
+	if err != nil {
+		return err
+	}
+
+	chains, err := ValidateCertificateChain(ctx, certs[0], []*x509.Certificate{rootCaCert}, []*x509.Certificate{intermediateCert})
+	if err != nil {
+		return err
+	}
+
+	if len(chains) != 1 {
 		return tracederrors.TracedErrorf("No valid certificate chain found in string to validate.")
 	}
+
+	logging.LogInfoByCtxf(ctx, "Found valid certificate chain in string to validate.")
+
+	logging.LogInfoByCtx(ctx, "Check x509 certificate chain in string finished.")
 
 	return nil
 }
@@ -541,6 +576,33 @@ func FormatForLogging(cert *x509.Certificate) string {
 	if err != nil {
 		return "ERROR: " + err.Error()
 	}
+
+	var certType = "<Unknown cert type>"
+	isRootCa, err := IsCertificateRootCa(cert)
+	if err != nil {
+		return "ERROR: " + err.Error()
+	}
+	if isRootCa {
+		certType = "RootCa"
+	}
+
+	isIntermediateCertificate, err := IsIntermediateCertificate(cert)
+	if err != nil {
+		return "ERROR: " + err.Error()
+	}
+	if isIntermediateCertificate {
+		certType = "Intermediate"
+	}
+
+	isEndEndityCert, err := IsEndEndityCertificate(cert)
+	if err != nil {
+		return "ERROR: " + err.Error()
+	}
+	if isEndEndityCert {
+		certType = "end endity"
+	}
+
+	out = "x509 " + certType + " certificate " + out
 
 	return out
 }
