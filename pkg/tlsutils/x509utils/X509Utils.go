@@ -107,6 +107,41 @@ func IsCertificateMatchingPrivateKey(cert *x509.Certificate, privateKey crypto.P
 	return certPublicKeyWithEqual.Equal(publicKey), nil
 }
 
+func LoadCertificatesFromPEMString(pemEncoded string) ([]*x509.Certificate, error) {
+	if pemEncoded == "" {
+		return nil, tracederrors.TracedErrorEmptyString("pemEncoded")
+	}
+
+	rest := []byte(pemEncoded)
+
+	ret := []*x509.Certificate{}
+	for {
+		var block *pem.Block
+		block, rest = pem.Decode(rest)
+		if block == nil {
+			return nil, tracederrors.TracedError("Failed to parse certificate PEM")
+		} else {
+			if block.Bytes == nil {
+				return nil, tracederrors.TracedError("Decode returned block.Bytes as nil")
+			} else {
+				cert, err := LoadCertificateFromDerBytes(block.Bytes)
+				if err != nil {
+					return nil, err
+				}
+
+				ret = append(ret, cert)
+			}
+		}
+
+		bytes.TrimSpace(rest)
+		if len(rest) <= 0 {
+			break
+		}
+	}
+
+	return ret, nil
+}
+
 func LoadCertificateFromPEMString(pemEncoded string) (cert *x509.Certificate, err error) {
 	if pemEncoded == "" {
 		return nil, tracederrors.TracedErrorEmptyString("pemEncoded")
@@ -125,6 +160,37 @@ func LoadCertificateFromPEMString(pemEncoded string) (cert *x509.Certificate, er
 	}
 
 	return LoadCertificateFromDerBytes(blockBytes)
+}
+
+func CheckCertificateChainString(ctx context.Context, chain string) error {
+	if chain == "" {
+		return tracederrors.TracedErrorEmptyString(chain)
+	}
+
+	certs, err := LoadCertificatesFromPEMString(chain)
+	if err != nil {
+		return err
+	}
+
+	if len(certs) != 3 {
+		return tracederrors.TracedErrorf("Expected a root, intermediate and endendity certificate but got '%d' certs.", len(certs))
+	}
+
+	intermediate := []*x509.Certificate{certs[1]}
+	root := []*x509.Certificate{certs[2]}
+
+	chains, err := ValidateCertificateChain(ctx, certs[0], root, intermediate)
+	if err != nil {
+		return err
+	}
+
+	if len(chains) == 1 {
+		logging.LogInfoByCtxf(ctx, "Found valid certificate chain in string to validate.")
+	} else {
+		return tracederrors.TracedErrorf("No valid certificate chain found in string to validate.")
+	}
+
+	return nil
 }
 
 func EncodeCertificateAsPEMString(cert *x509.Certificate) (pemEncoded string, err error) {

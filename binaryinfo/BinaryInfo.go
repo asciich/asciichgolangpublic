@@ -40,7 +40,6 @@ func GetGitHashOrErrorMessageOnError() (gitHash string) {
 	gitHash, err := GetGitHash()
 	if err != nil {
 		errorMessage := fmt.Sprintf("BinaryInfo.LogInfo: '%v'", err)
-		logging.LogError(errorMessage)
 		gitHash = errorMessage
 	}
 
