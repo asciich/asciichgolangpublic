@@ -424,7 +424,7 @@ func InsertSecret(ctx context.Context, secretToInsert string, gopassOptions *par
 		return err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Added credentail '%v' to gopass.", gopassPath)
+	logging.LogChangedByCtxf(ctx, "Added credential '%v' to gopass.", gopassPath)
 
 	return nil
 }

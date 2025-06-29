@@ -23,6 +23,10 @@ func CreateRootCa(ctx context.Context, options *X509CreateCertificateOptions) (*
 	return GetDefaultHandler().CreateRootCaCertificate(ctx, options)
 }
 
+func CreateSignedIntermediateCertificate(ctx context.Context, options *X509CreateCertificateOptions, rootCaCertAndKey *X509CertKeyPair) (*X509CertKeyPair, error) {
+	return GetDefaultHandler().CreateSignedIntermediateCertificate(ctx, options, rootCaCertAndKey)
+}
+
 func CreateSignedEndEndityCertificate(ctx context.Context, options *X509CreateCertificateOptions, caCertAndKey *X509CertKeyPair) (endEndityCertAndKey *X509CertKeyPair, err error) {
 	return GetDefaultHandler().CreateSignedEndEndityCertificate(ctx, options, caCertAndKey)
 }
