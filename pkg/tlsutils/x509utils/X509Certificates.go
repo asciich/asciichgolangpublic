@@ -19,6 +19,10 @@ func GetDefaultHandler() (certHandler X509CertificateHandler) {
 	return GetNativeX509CertificateHandler()
 }
 
+func CreateRootCa(ctx context.Context, options *X509CreateCertificateOptions) (*X509CertKeyPair, error) {
+	return GetDefaultHandler().CreateRootCaCertificate(ctx, options)
+}
+
 func CreateSignedEndEndityCertificate(ctx context.Context, options *X509CreateCertificateOptions, caCertAndKey *X509CertKeyPair) (endEndityCertAndKey *X509CertKeyPair, err error) {
 	return GetDefaultHandler().CreateSignedEndEndityCertificate(ctx, options, caCertAndKey)
 }
