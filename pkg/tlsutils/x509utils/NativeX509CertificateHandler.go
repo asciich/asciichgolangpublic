@@ -52,6 +52,10 @@ func getCertTemplate(ctx context.Context, options *X509CreateCertificateOptions)
 		return nil, err
 	}
 
+	if options.CommonName != "" {
+		sans = append([]string{options.CommonName}, sans...)
+	}
+
 	notBefore := time.Now()
 
 	certTemplate = &x509.Certificate{
