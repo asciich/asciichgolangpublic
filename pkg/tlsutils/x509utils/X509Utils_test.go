@@ -13,8 +13,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/testutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func Test_GetPublicKeyFromPrivateKey(t *testing.T) {
