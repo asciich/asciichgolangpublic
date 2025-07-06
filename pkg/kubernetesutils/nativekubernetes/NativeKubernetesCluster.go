@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubeconfigutils"
@@ -623,4 +624,13 @@ func (n *NativeKubernetesCluster) CreateObject(ctx context.Context, options *kub
 	}
 
 	return namespace.CreateObject(ctx, options)
+}
+
+func (n *NativeKubernetesCluster) RunCommandInTemporaryPod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (*commandexecutor.CommandOutput, error) {
+	config, err := n.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	return RunCommandInTemporaryPod(ctx, config, options)
 }

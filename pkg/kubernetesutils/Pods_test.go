@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -28,6 +29,29 @@ func Test_PodsRunSingleCommand(t *testing.T) {
 				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
 
+				output, err := kubernetes.RunCommandInTemporaryPod(
+					ctx,
+					&kubernetesparameteroptions.RunCommandOptions{
+						Image:                    "ubuntu",
+						Namespace:                namespaceName,
+						PodName:                  podName,
+						DeleteAlreadyExistingPod: true,
+						Command:                  []string{"bash", "-c", "echo hello_world"},
+					},
+				)
+				require.NoError(t, err)
+
+				stdout, err := output.GetStdoutAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, "hello_world\n", stdout)
+
+				stderr, err := output.GetStderrAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, "", stderr)
+
+				retVal, err := output.GetReturnCode()
+				require.NoError(t, err)
+				require.EqualValues(t, 0, retVal)
 			},
 		)
 	}

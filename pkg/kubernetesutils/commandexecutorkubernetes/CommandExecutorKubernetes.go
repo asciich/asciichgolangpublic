@@ -642,3 +642,7 @@ func (c *CommandExecutorKubernetes) WaitUntilAllPodsInNamespaceAreRunning(ctx co
 func (c *CommandExecutorKubernetes) CreateObject(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (kubernetesinterfaces.Object, error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
+
+func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (*commandexecutor.CommandOutput, error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}
