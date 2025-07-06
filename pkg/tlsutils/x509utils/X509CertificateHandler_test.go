@@ -44,6 +44,7 @@ func TestX509Handler_CreateRootCaCertificate(t *testing.T) {
 						Locality:     "Zurich",
 						Organization: "myOrg root",
 						SerialNumber: "12345",
+						PrivateKeySize: 1024,
 					},
 				)
 				require.NoError(t, err)
@@ -89,6 +90,7 @@ func TestX509Handler_CreateIntermediateCertificate(t *testing.T) {
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "myOrg root",
+						PrivateKeySize: 1024,
 					},
 				)
 				require.NoError(t, err)
@@ -99,6 +101,7 @@ func TestX509Handler_CreateIntermediateCertificate(t *testing.T) {
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "myOrg intermediate",
+						PrivateKeySize: 1024,
 					},
 					caCertKeyPair,
 				)
@@ -148,6 +151,7 @@ func TestX509Handler_CreateEndEndityCertificate(t *testing.T) {
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "myOrg root",
+						PrivateKeySize: 1024,
 					},
 				)
 				require.NoError(t, err)
@@ -158,6 +162,7 @@ func TestX509Handler_CreateEndEndityCertificate(t *testing.T) {
 						CountryName:  "CH",
 						Locality:     "Zurich",
 						Organization: "myOrg intermediate",
+						PrivateKeySize: 1024,
 					},
 					rootCeCertAndKey,
 				)
@@ -171,6 +176,7 @@ func TestX509Handler_CreateEndEndityCertificate(t *testing.T) {
 						Locality:       "Zurich",
 						Organization:   "myOrg endEndity",
 						AdditionalSans: []string{"mytestsan1.example.net", "mytestsan2.example.net"},
+						PrivateKeySize: 1024,
 					},
 					intermediateCertAndKey,
 				)
@@ -202,7 +208,7 @@ func TestX509Handler_CreateEndEndityCertificate(t *testing.T) {
 				require.True(t, mustutils.Must(x509utils.IsSubjectLocalityName(endEndityCertAndKey.Cert, "Zurich")))
 				require.True(t, mustutils.Must(x509utils.IsSubjectOrganizationName(endEndityCertAndKey.Cert, "myOrg endEndity")))
 				require.True(t, mustutils.Must(x509utils.IsCommonName(endEndityCertAndKey.Cert, "mytestcn.example.net")))
-				require.True(t, mustutils.Must(x509utils.IsAdditionalSANs(endEndityCertAndKey.Cert, []string{"mytestsan1.example.net", "mytestsan2.example.net"})))
+				require.True(t, mustutils.Must(x509utils.IsAdditionalSANs(endEndityCertAndKey.Cert, []string{"mytestcn.example.net", "mytestsan1.example.net", "mytestsan2.example.net"})))
 				require.EqualValues(t, time.Hour*24*45, *mustutils.Must(x509utils.GetValidityDuration(endEndityCertAndKey.Cert)))
 			},
 		)
@@ -232,6 +238,7 @@ func TestX509Handler_CreateSelfSignedCertificate(t *testing.T) {
 						Locality:     "Zurich",
 						Organization: "myOrg root",
 						SerialNumber: "12345",
+						PrivateKeySize: 1024,
 					},
 				)
 				require.NoError(t, err)

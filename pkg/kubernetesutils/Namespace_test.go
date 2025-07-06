@@ -61,22 +61,36 @@ func TestNamespace_CreateAndDeleteNamespace(t *testing.T) {
 				ctx := getCtx()
 				const namespaceName = "testnamespace"
 
-				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				cluster := getKubernetesByImplementationName(getCtx(), tt.implementationName)
 
-				err := kubernetes.DeleteNamespaceByName(ctx, namespaceName)
+				err := cluster.DeleteNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
-				require.False(t, mustutils.Must(kubernetes.NamespaceByNameExists(ctx, namespaceName)))
+				require.False(t, mustutils.Must(cluster.NamespaceByNameExists(ctx, namespaceName)))
 
 				for i := 0; i < 2; i++ {
-					_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+					namespace, err := cluster.CreateNamespaceByName(ctx, namespaceName)
 					require.NoError(t, err)
-					require.True(t, mustutils.Must(kubernetes.NamespaceByNameExists(ctx, namespaceName)))
+
+					exists, err := namespace.Exists(ctx)
+					require.NoError(t, err)
+					require.True(t, exists)
+
+					exists, err = cluster.NamespaceByNameExists(ctx, namespaceName)
+					require.NoError(t, err)
+					require.True(t, exists)
 				}
 
 				for i := 0; i < 2; i++ {
-					err := kubernetes.DeleteNamespaceByName(ctx, namespaceName)
+					err := cluster.DeleteNamespaceByName(ctx, namespaceName)
 					require.NoError(t, err)
-					require.False(t, mustutils.Must(kubernetes.NamespaceByNameExists(ctx, namespaceName)))
+					require.False(t, mustutils.Must(cluster.NamespaceByNameExists(ctx, namespaceName)))
+
+					namespace, err := cluster.GetNamespaceByName(namespaceName)
+					require.NoError(t, err)
+
+					exists, err := namespace.Exists(ctx)
+					require.NoError(t, err)
+					require.False(t, exists)
 				}
 			},
 		)

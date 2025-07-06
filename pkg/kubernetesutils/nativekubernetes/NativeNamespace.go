@@ -622,6 +622,20 @@ func (n *NativeNamespace) GetObjectByYamlString(yaml string) (kubernetesinterfac
 	return ret, nil
 }
 
+func (n *NativeNamespace) Exists(ctx context.Context) (bool, error) {
+	namespaceName,err := n.GetName()
+	if err != nil {
+		return false, err
+	}
+
+	cluster, err := n.GetKubernetesCluster()
+	if err != nil {
+		return false, err
+	}
+
+	return cluster.NamespaceByNameExists(ctx, namespaceName)
+} 
+
 func (n *NativeNamespace) CreateObject(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (kubernetesinterfaces.Object, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
