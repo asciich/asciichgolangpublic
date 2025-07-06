@@ -469,3 +469,17 @@ func (c *CommandExecutorNamespace) WaitUntilAllPodsInNamespaceAreRunning(ctx con
 func (c *CommandExecutorNamespace) CreateObject(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (kubernetesinterfaces.Object, error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
+
+func (c *CommandExecutorNamespace) Exists(ctx context.Context) (bool, error) {
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return false, err
+	}
+
+	cluster, err := c.GetKubernetesCluster()
+	if err != nil {
+		return false, err
+	}
+
+	return cluster.NamespaceByNameExists(ctx, namespaceName)
+}
