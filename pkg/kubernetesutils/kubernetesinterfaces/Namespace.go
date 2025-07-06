@@ -16,6 +16,7 @@ type Namespace interface {
 	DeleteConfigMapByName(ctx context.Context, name string) (err error)
 	DeleteRoleByName(ctx context.Context, name string) (err error)
 	DeleteSecretByName(ctx context.Context, name string) (err error)
+	Exists(ctx context.Context) (bool, error)
 	GetClusterName() (clusterName string, err error)
 	GetConfigMapByName(name string) (configMap ConfigMap, err error)
 	GetKubectlContext(ctx context.Context) (contextName string, err error)
