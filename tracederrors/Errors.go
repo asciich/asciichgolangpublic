@@ -2,7 +2,6 @@ package tracederrors
 
 import (
 	"errors"
-	"log"
 )
 
 // Returns true if given error 'err' is a TracedError, false otherwise.
@@ -45,15 +44,6 @@ func GetAsTracedError(errorToConvert error) (tracedError *TracedErrorType, err e
 	}
 
 	return tracedError, nil
-}
-
-func MustGetAsTracedError(errorToConvert error) (tracedError *TracedErrorType) {
-	tracedError, err := GetAsTracedError(errorToConvert)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return tracedError
 }
 
 func IsEmptyStringError(err error) (isEmptyStringError bool) {

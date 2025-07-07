@@ -3,7 +3,6 @@ package tracederrors
 import (
 	"errors"
 	"fmt"
-	"log"
 	"runtime"
 	"strings"
 
@@ -151,63 +150,6 @@ func (t TracedErrorType) GetFunctionCalls() (functionCalls []string, err error) 
 	}
 
 	return t.functionCalls, nil
-}
-
-func (t TracedErrorType) MustGetErrorMessage() (errorMessage string) {
-	errorMessage, err := t.GetErrorMessage()
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return errorMessage
-}
-
-func (t TracedErrorType) MustGetErrorsToUnwrap() (errorsToUnwrap []error) {
-	errorsToUnwrap, err := t.GetErrorsToUnwrap()
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return errorsToUnwrap
-}
-
-func (t TracedErrorType) MustGetFormattedError() (formattedError error) {
-	formattedError, err := t.GetFormattedError()
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return formattedError
-}
-
-func (t TracedErrorType) MustGetFunctionCalls() (functionCalls []string) {
-	functionCalls, err := t.GetFunctionCalls()
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return functionCalls
-}
-
-func (t TracedErrorType) MustSetErrorsToUnwrap(errorsToUnwrap []error) {
-	err := t.SetErrorsToUnwrap(errorsToUnwrap)
-	if err != nil {
-		log.Panic(err)
-	}
-}
-
-func (t TracedErrorType) MustSetFormattedError(formattedError error) {
-	err := t.SetFormattedError(formattedError)
-	if err != nil {
-		log.Panic(err)
-	}
-}
-
-func (t TracedErrorType) MustSetFunctionCalls(functionCalls []string) {
-	err := t.SetFunctionCalls(functionCalls)
-	if err != nil {
-		log.Panic(err)
-	}
 }
 
 func (t *TracedErrorType) SetErrorsToUnwrap(errorsToUnwrap []error) (err error) {
