@@ -17,7 +17,7 @@ function remove_unused_packages() {
     echo "remove_unused_packages started."
 
     sudo apt-get remove -y google-chrome-stable firefox powershell mono-devel ruby-full
-    apt list --installed | grep "^php8" | cut -d '/' -f1 | sudo apt-get remove -y
+    sudo apt remove '^php8.*$'
     sudo apt-get autoremove -y
     sudo apt-get clean
 

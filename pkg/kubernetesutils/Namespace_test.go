@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/commandexecutorkubernetes"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
@@ -21,7 +20,7 @@ func getCtx() context.Context {
 }
 
 func getKubernetesByImplementationName(ctx context.Context, implementationName string) kubernetesinterfaces.KubernetesCluster {
-	clusterName := continuousintegration.GetDefaultKindClusterName()
+	clusterName := "kubernetesutils" // We use one kind cluster for all the tests here.
 
 	if implementationName == "commandExecutorKubernetes" {
 		// Ensure a local kind cluster is available for testing:
