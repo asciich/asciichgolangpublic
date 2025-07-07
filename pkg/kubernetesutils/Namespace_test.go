@@ -21,7 +21,7 @@ func getCtx() context.Context {
 }
 
 func getKubernetesByImplementationName(ctx context.Context, implementationName string) kubernetesinterfaces.KubernetesCluster {
-	clusterName := continuousintegration.GetDefaultKindClusterName()
+	clusterName := "kubernetesutils" // We use one kind cluster for all the tests here. 
 
 	if implementationName == "commandExecutorKubernetes" {
 		// Ensure a local kind cluster is available for testing:
