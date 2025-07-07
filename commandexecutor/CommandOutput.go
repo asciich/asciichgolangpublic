@@ -15,9 +15,9 @@ import (
 )
 
 type CommandOutput struct {
-	returnCode  *int
-	stdout      *[]byte
-	stderr      *[]byte
+	ReturnCode  *int
+	Stdout      *[]byte
+	Stderr      *[]byte
 	cmdRunError *error
 }
 
@@ -44,19 +44,19 @@ func (c *CommandOutput) GetFirstLineOfStdoutAsString() (firstLine string, err er
 }
 
 func (c *CommandOutput) GetStderr() (stderr *[]byte, err error) {
-	if c.stderr == nil {
+	if c.Stderr == nil {
 		return nil, tracederrors.TracedErrorf("stderr not set")
 	}
 
-	return c.stderr, nil
+	return c.Stderr, nil
 }
 
 func (c *CommandOutput) GetStdout() (stdout *[]byte, err error) {
-	if c.stdout == nil {
+	if c.Stdout == nil {
 		return nil, tracederrors.TracedErrorf("stdout not set")
 	}
 
-	return c.stdout, nil
+	return c.Stdout, nil
 }
 
 func (c *CommandOutput) GetStdoutAsFloat64() (stdout float64, err error) {
@@ -308,28 +308,28 @@ func (o *CommandOutput) GetCmdRunErrorStringOrEmptyStringIfUnset() (cmdRunErrorS
 	}
 
 	cmdRunErrorString = fmt.Sprintf("%v", *o.cmdRunError)
-	if len(*o.stderr) > 0 {
-		cmdRunErrorString += "\n" + string(*o.stderr)
+	if len(*o.Stderr) > 0 {
+		cmdRunErrorString += "\n" + string(*o.Stderr)
 	}
 
 	return cmdRunErrorString
 }
 
 func (o *CommandOutput) GetReturnCode() (returnCode int, err error) {
-	if o.returnCode == nil {
+	if o.ReturnCode == nil {
 		return -1, tracederrors.TracedError("returnCode not set")
 	}
 
-	return *o.returnCode, nil
+	return *o.ReturnCode, nil
 }
 
 func (o *CommandOutput) GetStderrAsString() (stderr string, err error) {
-	if o.stderr == nil {
+	if o.Stderr == nil {
 		return "", tracederrors.TracedError("stderr is not set")
 	}
 
 	if osutils.IsRunningOnWindows() {
-		stderr, err = utf16utils.DecodeAsString(*o.stderr)
+		stderr, err = utf16utils.DecodeAsString(*o.Stderr)
 		if err != nil {
 			return "", err
 		}
@@ -337,24 +337,24 @@ func (o *CommandOutput) GetStderrAsString() (stderr string, err error) {
 		stderr = strings.ReplaceAll(stderr, "\r\n", "\n")
 		return stderr, nil
 	} else {
-		return string(*o.stderr), nil
+		return string(*o.Stderr), nil
 	}
 }
 
 func (o *CommandOutput) GetStderrAsStringOrEmptyIfUnset() (stderr string) {
-	if o.stderr == nil {
+	if o.Stderr == nil {
 		return ""
 	}
 
-	return string(*o.stderr)
+	return string(*o.Stderr)
 }
 
 func (o *CommandOutput) GetStdoutAsBytes() (stdout []byte, err error) {
-	if o.stdout == nil {
+	if o.Stdout == nil {
 		return nil, tracederrors.TracedError("stdout is not set")
 	}
 
-	return *o.stdout, nil
+	return *o.Stdout, nil
 }
 
 func (o *CommandOutput) GetStdoutAsLines(removeLastLineIfEmpty bool) (stdoutLines []string, err error) {
@@ -370,12 +370,12 @@ func (o *CommandOutput) GetStdoutAsLines(removeLastLineIfEmpty bool) (stdoutLine
 }
 
 func (o *CommandOutput) GetStdoutAsString() (stdout string, err error) {
-	if o.stdout == nil {
+	if o.Stdout == nil {
 		return "", tracederrors.TracedError("stdout is not set")
 	}
 
 	if osutils.IsRunningOnWindows() {
-		stdout, err = utf16utils.DecodeAsString(*o.stdout)
+		stdout, err = utf16utils.DecodeAsString(*o.Stdout)
 		if err != nil {
 			return "", err
 		}
@@ -383,16 +383,16 @@ func (o *CommandOutput) GetStdoutAsString() (stdout string, err error) {
 		stdout = strings.ReplaceAll(stdout, "\r\n", "\n")
 		return stdout, nil
 	} else {
-		return string(*o.stdout), nil
+		return string(*o.Stdout), nil
 	}
 }
 
 func (o *CommandOutput) IsExitSuccess() (isSuccess bool) {
-	if o.returnCode == nil {
+	if o.ReturnCode == nil {
 		return false
 	}
 
-	return *o.returnCode == exitcodes.ExitCodeOK()
+	return *o.ReturnCode == exitcodes.ExitCodeOK()
 }
 
 func (o *CommandOutput) IsTimedOut() (IsTimedOut bool, err error) {
@@ -411,14 +411,14 @@ func (o *CommandOutput) SetCmdRunError(err error) {
 
 func (o *CommandOutput) SetReturnCode(returnCode int) (err error) {
 	returnCodeToAdd := returnCode
-	o.returnCode = &returnCodeToAdd
+	o.ReturnCode = &returnCodeToAdd
 
 	return nil
 }
 
 func (o *CommandOutput) SetStderr(stderr []byte) (err error) {
 	stderrToAdd := stderr
-	o.stderr = &stderrToAdd
+	o.Stderr = &stderrToAdd
 
 	return nil
 }
@@ -434,7 +434,7 @@ func (o *CommandOutput) SetStderrByString(stderr string) (err error) {
 
 func (o *CommandOutput) SetStdout(stdout []byte) (err error) {
 	stdoutToAdd := stdout
-	o.stdout = &stdoutToAdd
+	o.Stdout = &stdoutToAdd
 	return nil
 }
 
