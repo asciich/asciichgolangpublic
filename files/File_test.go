@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/logging"
-	"github.com/asciich/asciichgolangpublic/os/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -342,7 +342,7 @@ func TestFile_String(t *testing.T) {
 
 				require.True(t, pathsutils.IsAbsolutePath(path))
 				require.EqualValues(t, path, stringOutput)
-				require.EqualValues(t, "'" + path + "'", sprintf)
+				require.EqualValues(t, "'"+path+"'", sprintf)
 			},
 		)
 	}

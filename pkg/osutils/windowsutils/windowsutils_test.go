@@ -1,9 +1,10 @@
-package windows
+package windowsutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/osutils/windowsutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -20,7 +21,7 @@ func TestWindowsIsRunningOnWindows(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				require.False(IsRunningOnWindows())
+				require.False(windowsutils.IsRunningOnWindows())
 			},
 		)
 	}
@@ -42,12 +43,9 @@ func TestWindowsDecodeAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedOutput,
-					MustDecodeAsString(tt.inputUtf16),
-				)
+				out, err := windowsutils.DecodeAsString(tt.inputUtf16)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedOutput, out)
 			},
 		)
 	}

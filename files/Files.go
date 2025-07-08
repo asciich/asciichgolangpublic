@@ -2,7 +2,7 @@ package files
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"
-	"github.com/asciich/asciichgolangpublic/os/osutils"
+	"github.com/asciich/asciichgolangpublic/pkg/osutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
