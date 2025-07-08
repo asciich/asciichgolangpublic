@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/logging"
-	"github.com/asciich/asciichgolangpublic/netutils"
+	"github.com/asciich/asciichgolangpublic/pkg/netutils"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )

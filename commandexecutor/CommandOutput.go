@@ -10,7 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/encoding/utf16utils"
 	"github.com/asciich/asciichgolangpublic/exitcodes"
 	"github.com/asciich/asciichgolangpublic/logging"
-	"github.com/asciich/asciichgolangpublic/os/osutils"
+	"github.com/asciich/asciichgolangpublic/pkg/osutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 

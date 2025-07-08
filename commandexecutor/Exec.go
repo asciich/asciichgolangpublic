@@ -10,9 +10,9 @@ import (
 	"os/exec"
 
 	"github.com/asciich/asciichgolangpublic/logging"
-	"github.com/asciich/asciichgolangpublic/os/osutils"
-	"github.com/asciich/asciichgolangpublic/os/windows"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/osutils"
+	"github.com/asciich/asciichgolangpublic/pkg/osutils/windowsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -164,7 +164,7 @@ func (e *ExecService) RunCommand(ctx context.Context, options *parameteroptions.
 						}
 					}
 
-					mOutput, err = windows.DecodeStringAsString(mOutput)
+					mOutput, err = windowsutils.DecodeStringAsString(mOutput)
 					if err != nil {
 						return nil, err
 					}
@@ -196,7 +196,7 @@ func (e *ExecService) RunCommand(ctx context.Context, options *parameteroptions.
 
 	stderrBytes := stderr.Bytes()
 	if osutils.IsRunningOnWindows() {
-		stderrBytes, err = windows.DecodeAsBytes(stderrBytes)
+		stderrBytes, err = windowsutils.DecodeAsBytes(stderrBytes)
 		if err != nil {
 			return nil, err
 		}
