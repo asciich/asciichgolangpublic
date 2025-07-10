@@ -10,6 +10,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
+// Overwrite the file before deleting it to prevent data restore.
+// Like 'shred' on linux systems.
 func SecureDelete(ctx context.Context, path string) error {
 	if path == "" {
 		return tracederrors.TracedErrorEmptyString(path)
