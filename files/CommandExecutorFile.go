@@ -1,6 +1,7 @@
 package files
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"strconv"
@@ -853,13 +854,6 @@ func (c *CommandExecutorFile) MustReadFirstNBytes(numberOfBytesToRead int) (firs
 	return firstBytes
 }
 
-func (c *CommandExecutorFile) MustSecurelyDelete(verbose bool) {
-	err := c.SecurelyDelete(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (c *CommandExecutorFile) MustSetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) {
 	err := c.SetCommandExecutor(commandExecutor)
 	if err != nil {
@@ -937,20 +931,20 @@ func (c *CommandExecutorFile) ReadFirstNBytes(numberOfBytesToRead int) (firstByt
 	return firstBytes, nil
 }
 
-func (c *CommandExecutorFile) SecurelyDelete(verbose bool) (err error) {
+func (c *CommandExecutorFile) SecurelyDelete(ctx context.Context) (err error) {
 	commandExecutor, filePath, hostDescription, err := c.GetCommandExecutorAndFilePathAndHostDescription()
 	if err != nil {
 		return err
 	}
 
-	exits, err := c.Exists(verbose)
+	exits, err := c.Exists(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
 
 	if exits {
 		_, err = commandExecutor.RunCommand(
-			contextutils.GetVerbosityContextByBool(verbose),
+			ctx,
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"shred", "-u", filePath},
 			},
@@ -959,21 +953,9 @@ func (c *CommandExecutorFile) SecurelyDelete(verbose bool) (err error) {
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf(
-				"Securely deleted file '%s' on '%s'.",
-				filePath,
-				hostDescription,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "Securely deleted file '%s' on '%s'.", filePath, hostDescription)
 	} else {
-		if verbose {
-			logging.LogInfof(
-				"File '%s' on '%s' is alreay absent.",
-				filePath,
-				hostDescription,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "File '%s' on '%s' is alreay absent.", filePath, hostDescription)
 	}
 
 	return nil
