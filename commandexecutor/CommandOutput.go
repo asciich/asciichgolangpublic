@@ -8,8 +8,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/encoding/utf16utils"
-	"github.com/asciich/asciichgolangpublic/exitcodes"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/exitcodes"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -392,7 +392,7 @@ func (o *CommandOutput) IsExitSuccess() (isSuccess bool) {
 		return false
 	}
 
-	return *o.ReturnCode == exitcodes.ExitCodeOK()
+	return *o.ReturnCode == exitcodes.EXIT_CODE_OK
 }
 
 func (o *CommandOutput) IsTimedOut() (IsTimedOut bool, err error) {
@@ -401,7 +401,7 @@ func (o *CommandOutput) IsTimedOut() (IsTimedOut bool, err error) {
 		return false, err
 	}
 
-	return returnCode == exitcodes.ExitCodeTimeout(), nil
+	return returnCode == exitcodes.EXIT_CODE_TIMEOUT, nil
 }
 
 func (o *CommandOutput) SetCmdRunError(err error) {
