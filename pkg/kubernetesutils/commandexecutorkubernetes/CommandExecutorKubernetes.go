@@ -652,5 +652,32 @@ func (c *CommandExecutorKubernetes) ReadSecret(ctx context.Context, namespaceNam
 }
 
 func (c *CommandExecutorKubernetes) ListNodeNames(ctx context.Context) ([]string, error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	commandexecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	context, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	output, err := commandexecutor.RunCommandAndGetStdoutAsString(ctx, &parameteroptions.RunCommandOptions{Command: []string{"kubectl", "--context", context, "get", "nodes", "-o", "name"}})
+	if err != nil {
+		return nil, err
+	}
+
+	nodeNames := []string{}
+	for _, line := range stringsutils.SplitLines(output, true) {
+		toAdd := strings.TrimSpace(strings.TrimPrefix(line, "node/"))
+		if toAdd == "" {
+			continue
+		}
+
+		nodeNames = append(nodeNames, toAdd)
+	}
+
+	logging.LogInfoByCtxf(ctx, "The kubernetes cluster has '%d' nodes.", len(nodeNames))
+
+	return nodeNames, nil
 }
