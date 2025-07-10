@@ -25,7 +25,7 @@ func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 
 				const verbose bool = true
 
-				temporaryFilePath := createTemFileAndGetPath()
+				temporaryFilePath := createTempFileAndGetPath()
 
 				var fileToTest File = MustGetLocalCommandExecutorFileByPath(temporaryFilePath)
 				defer fileToTest.Delete(verbose)

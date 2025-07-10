@@ -1,12 +1,13 @@
 package tempfiles
 
 import (
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -84,12 +85,12 @@ func CreateNamedTemporaryFile(fileName string, verbose bool) (temporaryfile file
 		return nil, tracederrors.TracedErrorEmptyString("fileName")
 	}
 
-	osFile, err := os.CreateTemp("", fileName)
+	tmpPath, err := filesutils.CreateNamedTemporaryFile(contextutils.GetVerbosityContextByBool(verbose), fileName)
 	if err != nil {
 		return nil, err
 	}
 
-	temporaryfile, err = files.GetFileByOsFile(osFile)
+	temporaryfile, err = files.GetLocalFileByPath(tmpPath)
 	if err != nil {
 		return nil, err
 	}

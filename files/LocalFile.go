@@ -1,6 +1,7 @@
 package files
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -11,6 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -658,13 +660,6 @@ func (l *LocalFile) MustReadFirstNBytes(numberOfBytesToRead int) (firstBytes []b
 	return firstBytes
 }
 
-func (l *LocalFile) MustSecurelyDelete(verbose bool) {
-	err := l.SecurelyDelete(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (l *LocalFile) MustSetPath(path string) {
 	err := l.SetPath(path)
 	if err != nil {
@@ -730,7 +725,7 @@ func (l *LocalFile) ReadFirstNBytes(numberOfBytesToRead int) (firstBytes []byte,
 	return firstBytes, nil
 }
 
-func (l *LocalFile) SecurelyDelete(verbose bool) (err error) {
+func (l *LocalFile) SecurelyDelete(ctx context.Context) (err error) {
 	pathToDelete, err := l.GetLocalPath()
 	if err != nil {
 		return err
@@ -740,22 +735,7 @@ func (l *LocalFile) SecurelyDelete(verbose bool) (err error) {
 		return tracederrors.TracedErrorf("pathToDelete='%v' is not absolute", pathToDelete)
 	}
 
-	deleteCommand := []string{"shred", "-u", pathToDelete}
-	_, err = commandexecutor.Bash().RunCommand(
-		contextutils.GetVerbosityContextByBool(verbose),
-		&parameteroptions.RunCommandOptions{
-			Command: deleteCommand,
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	if verbose {
-		logging.LogInfof("Securely deleted file '%s'.", pathToDelete)
-	}
-
-	return nil
+	return filesutils.SecureDelete(ctx, pathToDelete)
 }
 
 func (l *LocalFile) SetPath(path string) (err error) {

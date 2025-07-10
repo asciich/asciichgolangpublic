@@ -14,9 +14,10 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/pointersutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -1257,4 +1258,27 @@ func TestLocalFileGetNumberOfNonEmptyLines(t *testing.T) {
 			},
 		)
 	}
+}
+
+func Test_SecureDelete(t *testing.T) {
+	ctx := getCtx()
+
+	t.Run("delete", func(t *testing.T) {
+		const verbose bool = true
+
+		testPath := createTempFileAndGetPath()
+		require.True(t, filesutils.IsFile(ctx, testPath))
+
+		localFile, err := GetLocalFileByPath(testPath)
+		require.NoError(t, err)
+		exists, err := localFile.Exists(verbose)
+		require.NoError(t, err)
+		require.True(t, exists)
+
+		err = localFile.SecurelyDelete(ctx)
+
+		exists, err = localFile.Exists(verbose)
+		require.NoError(t, err)
+		require.False(t, exists)
+	})
 }

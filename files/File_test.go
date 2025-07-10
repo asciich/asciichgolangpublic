@@ -13,7 +13,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
-func createTemFileAndGetPath() (path string) {
+func createTempFileAndGetPath() (path string) {
 	file, err := os.CreateTemp("", "file_for_testing")
 	if err != nil {
 		logging.LogGoErrorFatalWithTrace(err)
@@ -28,11 +28,11 @@ func createTemFileAndGetPath() (path string) {
 // the file is deleted after the test is over.
 func getFileToTest(implementationName string) (file File) {
 	if implementationName == "localFile" {
-		return MustGetLocalFileByPath(createTemFileAndGetPath())
+		return MustGetLocalFileByPath(createTempFileAndGetPath())
 	}
 
 	if implementationName == "localCommandExecutorFile" {
-		return MustGetLocalCommandExecutorFileByPath(createTemFileAndGetPath())
+		return MustGetLocalCommandExecutorFileByPath(createTempFileAndGetPath())
 	}
 
 	logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)
