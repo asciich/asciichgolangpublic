@@ -12,6 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kindutils/kindparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubeconfigutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -142,9 +143,14 @@ func (c *CommandExecutorKind) EnsureKubectlConfigPresent(ctx context.Context, cl
 	return nil
 }
 
-func (c *CommandExecutorKind) CreateClusterByName(ctx context.Context, clusterName string) (cluster kubernetesinterfaces.KubernetesCluster, err error) {
-	if clusterName == "" {
-		return nil, tracederrors.TracedErrorEmptyString("clusterName")
+func (c *CommandExecutorKind) CreateCluster(ctx context.Context, options *kindparameteroptions.CreateClusterOptions) (cluster kubernetesinterfaces.KubernetesCluster, err error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	clusterName, err := options.GetName()
+	if err != nil {
+		return nil, err
 	}
 
 	exists, err := c.ClusterByNameExists(ctx, clusterName)

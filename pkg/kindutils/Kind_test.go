@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kindutils/kindparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -52,7 +53,7 @@ func TestKind_CreateAndDeleteCluster(t *testing.T) {
 				require.False(t, mustutils.Must(kind.ClusterByNameExists(ctx, clusterName)))
 
 				for i := 0; i < 2; i++ {
-					kindCluster, err := kind.CreateClusterByName(ctx, clusterName)
+					kindCluster, err := kind.CreateCluster(ctx, &kindparameteroptions.CreateClusterOptions{Name: clusterName})
 					require.NoError(t, err)
 
 					require.True(t, mustutils.Must(kind.ClusterByNameExists(ctx, clusterName)))
@@ -89,7 +90,7 @@ func TestKind_CreateNamespace(t *testing.T) {
 
 				kind := getKindByImplementationName(tt.implementationName)
 
-				cluster, err := kind.CreateClusterByName(ctx, clusterName)
+				cluster, err := kind.CreateCluster(ctx, &kindparameteroptions.CreateClusterOptions{Name: clusterName})
 				require.NoError(t, err)
 				defer kindutils.DeleteClusterByNameIfInContinuousIntegration(ctx, clusterName)
 
@@ -114,6 +115,39 @@ func TestKind_CreateNamespace(t *testing.T) {
 				// cleanup
 				err = kind.DeleteClusterByName(ctx, clusterName)
 				require.NoError(t, err)
+			},
+		)
+	}
+}
+
+func TestKind_CreateMultipleWorkers(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"commandExecutorKind"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				const verbose = true
+				ctx := getCtx()
+				clusterName := continuousintegration.GetDefaultKindClusterName()
+				defer kindutils.DeleteClusterByNameIfInContinuousIntegration(ctx, clusterName)
+
+				kind := getKindByImplementationName(tt.implementationName)
+
+				// Default is to create a cluster with only one node/ no workers.
+				cluster, err := kind.CreateCluster(ctx, &kindparameteroptions.CreateClusterOptions{Name: clusterName})
+				require.NoError(t, err)
+				defer kindutils.DeleteClusterByNameIfInContinuousIntegration(ctx, clusterName)
+
+				nodeNames, err := cluster.ListNodeNames(ctx)
+				require.NoError(t, err)
+				require.Len(t, nodeNames, 1)
+
+				
 			},
 		)
 	}

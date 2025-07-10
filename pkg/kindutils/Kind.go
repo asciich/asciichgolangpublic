@@ -5,6 +5,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
+	"github.com/asciich/asciichgolangpublic/pkg/kindutils/kindparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -12,7 +13,7 @@ import (
 // Kubernetes in Docker
 type Kind interface {
 	ClusterByNameExists(ctx context.Context, clusterName string) (exists bool, err error)
-	CreateClusterByName(ctx context.Context, clusterName string) (cluster kubernetesinterfaces.KubernetesCluster, err error)
+	CreateCluster(ctx context.Context, options *kindparameteroptions.CreateClusterOptions) (cluster kubernetesinterfaces.KubernetesCluster, err error)
 	DeleteClusterByName(ctx context.Context, clusterName string) (err error)
 	GetClusterByName(clusterName string) (cluster kubernetesinterfaces.KubernetesCluster, err error)
 	ListClusterNames(ctx context.Context) (clusterNames []string, err error)
@@ -28,7 +29,7 @@ func CreateCluster(ctx context.Context, clusterName string) (kubernetesinterface
 		return nil, err
 	}
 
-	return kind.CreateClusterByName(ctx, clusterName)
+	return kind.CreateCluster(ctx, &kindparameteroptions.CreateClusterOptions{Name: clusterName})
 }
 
 func DeleteClusterByName(ctx context.Context, clusterName string) error {
