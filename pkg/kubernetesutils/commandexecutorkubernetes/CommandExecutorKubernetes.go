@@ -646,3 +646,7 @@ func (c *CommandExecutorKubernetes) CreateObject(ctx context.Context, options *k
 func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (*commandexecutor.CommandOutput, error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
+
+func (c *CommandExecutorKubernetes) ReadSecret(ctx context.Context, namespaceName string, secretName string) (map[string][]byte, error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}

@@ -2,6 +2,7 @@ package nativekubernetes
 
 import (
 	"context"
+	"reflect"
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/logging"
@@ -220,14 +221,35 @@ func (n *NativeNamespace) CreateSecret(ctx context.Context, secretName string, o
 		return nil, err
 	}
 
+	clientset, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
 	if exists {
-		return nil, tracederrors.TracedError("Update existing secret not implemented")
-	} else {
-		clientset, err := n.GetClientSet()
+		currentData, err := ReadSecret(ctx, clientset, namespaceName, secretName)
 		if err != nil {
 			return nil, err
 		}
 
+		if reflect.DeepEqual(currentData, options.SecretData) {
+			logging.LogInfoByCtxf(ctx, "Secret '%s' in namespace '%s' is already up to date. Skip creation and update.", secretName, namespaceName)
+		} else {
+			secret, err := clientset.CoreV1().Secrets(namespaceName).Get(ctx, secretName, metav1.GetOptions{})
+			if err != nil {
+				return nil, tracederrors.TracedErrorf("Failed to read secret '%s' in namespace '%s' to update it: %w", secretName, namespaceName, err)
+			}
+
+			secret.Data = options.SecretData
+
+			_, err = clientset.CoreV1().Secrets(namespaceName).Update(ctx, secret, metav1.UpdateOptions{})
+			if err != nil {
+				return nil, tracederrors.TracedErrorf("Failed to read update '%s' in namespace '%s': %w", secretName, namespaceName, err)
+			}
+
+			logging.LogChangedByCtxf(ctx, "Secret '%s' in namespace '%s' updated.", secretName, namespaceName)
+		}
+	} else {
 		secretData, err := options.GetSecretData()
 		if err != nil {
 			return nil, err
@@ -623,7 +645,7 @@ func (n *NativeNamespace) GetObjectByYamlString(yaml string) (kubernetesinterfac
 }
 
 func (n *NativeNamespace) Exists(ctx context.Context) (bool, error) {
-	namespaceName,err := n.GetName()
+	namespaceName, err := n.GetName()
 	if err != nil {
 		return false, err
 	}
@@ -634,7 +656,7 @@ func (n *NativeNamespace) Exists(ctx context.Context) (bool, error) {
 	}
 
 	return cluster.NamespaceByNameExists(ctx, namespaceName)
-} 
+}
 
 func (n *NativeNamespace) CreateObject(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (kubernetesinterfaces.Object, error) {
 	if options == nil {

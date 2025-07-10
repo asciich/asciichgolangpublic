@@ -634,3 +634,12 @@ func (n *NativeKubernetesCluster) RunCommandInTemporaryPod(ctx context.Context, 
 
 	return RunCommandInTemporaryPod(ctx, config, options)
 }
+
+func (n *NativeKubernetesCluster) ReadSecret(ctx context.Context, namespaceName string, secretName string) (map[string][]byte, error) {
+	clientset, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	return ReadSecret(ctx, clientset, namespaceName, secretName)
+}
