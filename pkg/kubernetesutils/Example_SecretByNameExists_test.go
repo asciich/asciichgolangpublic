@@ -6,7 +6,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
@@ -18,7 +17,7 @@ func Test_Example_SecretByNameExists(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := continuousintegration.GetDefaultKindClusterName()
+	clusterName := "kubernetesutils"
 
 	// Ensure a local kind cluster is available for testing:
 	_, err := kindutils.CreateCluster(ctx, clusterName)

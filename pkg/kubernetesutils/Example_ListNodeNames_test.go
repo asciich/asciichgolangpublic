@@ -10,14 +10,14 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 )
 
-func Test_Example_ListNamespaceNames(t *testing.T) {
+func Test_Example_ListNodeNames(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.WithVerbose(context.TODO())
 
 	// -----
 	// Prepare test environment start ...
 	clusterName := "kubernetesutils"
-	
+
 	// Ensure a local kind cluster is available for testing:
 	_, err := kindutils.CreateCluster(ctx, clusterName)
 	require.NoError(t, err)
@@ -28,13 +28,11 @@ func Test_Example_ListNamespaceNames(t *testing.T) {
 	cluster, err := nativekubernetes.GetClusterByName(ctx, "kind-"+clusterName)
 	require.NoError(t, err)
 
-	// List all namespace names:
-	namespaces, err := cluster.ListNamespaceNames(ctx)
+	// List all node names:
+	nodeNames, err := cluster.ListNodeNames(ctx)
 	require.NoError(t, err)
 
 	// We expect the "default" namespace to be present:
-	require.Contains(t, namespaces, "default")
+	require.Contains(t, nodeNames, "kubernetesutils-control-plane")
 
-	// We expect the "kube-system" namespace to be present:
-	require.Contains(t, namespaces, "kube-system")
 }
