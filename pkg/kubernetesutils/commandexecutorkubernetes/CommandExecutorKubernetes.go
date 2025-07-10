@@ -650,3 +650,7 @@ func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context
 func (c *CommandExecutorKubernetes) ReadSecret(ctx context.Context, namespaceName string, secretName string) (map[string][]byte, error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
+
+func (c *CommandExecutorKubernetes) ListNodeNames(ctx context.Context) ([]string, error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}

@@ -643,3 +643,12 @@ func (n *NativeKubernetesCluster) ReadSecret(ctx context.Context, namespaceName 
 
 	return ReadSecret(ctx, clientset, namespaceName, secretName)
 }
+
+func (n *NativeKubernetesCluster) ListNodeNames(ctx context.Context) ([]string, error) {
+	clientset, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	return ListNodeNames(ctx, clientset)
+}
