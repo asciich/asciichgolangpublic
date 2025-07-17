@@ -1,4 +1,4 @@
-package install
+package installutils
 
 import (
 	"github.com/asciich/asciichgolangpublic/logging"
