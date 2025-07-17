@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/prometheusutils"
+	"github.com/asciich/asciichgolangpublic/pkg/prometheusutils"
 )
 
 func NewReadMetricCmd() (cmd *cobra.Command) {
