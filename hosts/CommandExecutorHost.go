@@ -9,10 +9,10 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/files"
-	"github.com/asciich/asciichgolangpublic/ftp"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/ftputils"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -387,7 +387,7 @@ func (h *CommandExecutorHost) InstallBinary(installOptions *parameteroptions.Ins
 }
 
 func (h *CommandExecutorHost) IsFtpPortOpen(verbose bool) (isOpen bool, err error) {
-	isOpen, err = h.IsTcpPortOpen(ftp.GetDefaultPort(), verbose)
+	isOpen, err = h.IsTcpPortOpen(ftputils.DEFAUT_PORT, verbose)
 	if err != nil {
 		return false, err
 	}

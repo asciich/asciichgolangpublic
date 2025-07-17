@@ -1,10 +1,11 @@
-package install
+package installutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/files"
+	"github.com/asciich/asciichgolangpublic/pkg/installutils"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -34,8 +35,8 @@ func TestInstallFromPath(t *testing.T) {
 
 				require.NoFileExists(t, destFilePath)
 
-				MustInstall(
-					&InstallOptions{
+				installutils.MustInstall(
+					&installutils.InstallOptions{
 						SrcPath:     sourceFile,
 						InstallPath: destFilePath,
 						Mode:        tt.mode,
