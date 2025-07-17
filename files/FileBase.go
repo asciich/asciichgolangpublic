@@ -20,7 +20,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datetime"
-	"github.com/asciich/asciichgolangpublic/signalmessenger"
+	"github.com/asciich/asciichgolangpublic/pkg/signalmessenger"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
