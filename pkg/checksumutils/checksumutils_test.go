@@ -1,10 +1,11 @@
-package checksums
+package checksumutils_test
 
 import (
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
 )
 
 func TestChecksumsGetSha256SumFromString(t *testing.T) {
@@ -21,7 +22,7 @@ func TestChecksumsGetSha256SumFromString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				calculatedSum := GetSha256SumFromString(tt.input)
+				calculatedSum := checksumutils.GetSha256SumFromString(tt.input)
 				require.EqualValues(t, tt.expectedChecksum, calculatedSum)
 			},
 		)
@@ -42,7 +43,7 @@ func TestChecksumsGetSha256SumFromBytes(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				calculatedSum := GetSha256SumFromBytes(tt.input)
+				calculatedSum := checksumutils.GetSha256SumFromBytes(tt.input)
 				require.EqualValues(t, tt.expectedChecksum, calculatedSum)
 			},
 		)
@@ -63,7 +64,7 @@ func TestChecksumsGetSha1SumFromString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				calculatedSum := GetSha1SumFromString(tt.input)
+				calculatedSum := checksumutils.GetSha1SumFromString(tt.input)
 				require.EqualValues(t, tt.expectedChecksum, calculatedSum)
 			},
 		)
@@ -84,13 +85,12 @@ func TestChecksumsGetSha1SumFromBytes(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				calculatedSum := GetSha1SumFromBytes(tt.input)
+				calculatedSum := checksumutils.GetSha1SumFromBytes(tt.input)
 				require.EqualValues(t, tt.expectedChecksum, calculatedSum)
 			},
 		)
 	}
 }
-
 
 func TestChecksumsGetSha512SumFromString(t *testing.T) {
 	tests := []struct {
@@ -106,7 +106,7 @@ func TestChecksumsGetSha512SumFromString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				calculatedSum := GetSha512SumFromString(tt.input)
+				calculatedSum := checksumutils.GetSha512SumFromString(tt.input)
 				require.EqualValues(t, tt.expectedChecksum, calculatedSum)
 			},
 		)
@@ -127,7 +127,7 @@ func TestChecksumsGetSha512SumFromBytes(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				calculatedSum := GetSha512SumFromBytes(tt.input)
+				calculatedSum := checksumutils.GetSha512SumFromBytes(tt.input)
 				require.EqualValues(t, tt.expectedChecksum, calculatedSum)
 			},
 		)

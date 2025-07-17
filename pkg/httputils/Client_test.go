@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/checksums"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
@@ -195,7 +195,7 @@ func TestClient_DownloadAsFile_ChecksumMismatch(t *testing.T) {
 							Method: tt.method,
 						},
 						OutputPath: tempFile.MustGetPath(),
-						Sha256Sum:  "a" + checksums.GetSha256SumFromString(expectedOutput),
+						Sha256Sum:  "a" + checksumutils.GetSha256SumFromString(expectedOutput),
 					},
 				)
 				require.Error(t, err)
@@ -241,7 +241,7 @@ func TestClient_DownloadAsFile(t *testing.T) {
 							Method: tt.method,
 						},
 						OutputPath: tempFile.MustGetPath(),
-						Sha256Sum:  checksums.GetSha256SumFromString(expectedOutput),
+						Sha256Sum:  checksumutils.GetSha256SumFromString(expectedOutput),
 					},
 				)
 				require.NoError(t, err)
@@ -257,7 +257,7 @@ func TestClient_DownloadAsFile(t *testing.T) {
 							Method: tt.method,
 						},
 						OutputPath: tempFile.MustGetPath(),
-						Sha256Sum:  checksums.GetSha256SumFromString(expectedOutput),
+						Sha256Sum:  checksumutils.GetSha256SumFromString(expectedOutput),
 					},
 				)
 				require.NoError(t, err)

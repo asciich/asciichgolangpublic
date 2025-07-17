@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/asciich/asciichgolangpublic/checksums"
+	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
 )
 
 func GetBlobOjectHashFromString(content string) (hash string) {
@@ -16,5 +16,5 @@ func GetBlobObjectHashFromBytes(content []byte) (hash string) {
 	buf.WriteString(fmt.Sprintf("blob %d\x00", len(content)))
 	buf.Write(content)
 
-	return checksums.GetSha1SumFromBytes(buf.Bytes())
+	return checksumutils.GetSha1SumFromBytes(buf.Bytes())
 }

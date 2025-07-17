@@ -1,4 +1,4 @@
-package checksums
+package checksumutils
 
 import (
 	"crypto/sha1"
