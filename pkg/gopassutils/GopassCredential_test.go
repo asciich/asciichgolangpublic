@@ -1,9 +1,10 @@
-package gopass
+package gopassutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/gopassutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -20,10 +21,11 @@ func TestGopassCredentialSetAndGetName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				credential := MustGetGopassCredentialByName(tt.name)
-				require.EqualValues(tt.name, credential.MustGetName())
+				credential, err := gopassutils.GetGopassCredentialByName(tt.name)
+				require.NoError(t, err)
+				name, err := credential.GetName()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.name, name)
 			},
 		)
 	}

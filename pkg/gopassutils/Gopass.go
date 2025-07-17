@@ -1,4 +1,4 @@
-package gopass
+package gopassutils
 
 import (
 	"context"
