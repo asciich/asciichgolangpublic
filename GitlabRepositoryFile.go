@@ -6,8 +6,8 @@ import (
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
-	"github.com/asciich/asciichgolangpublic/encoding/base64"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/encodingutils/base64utils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -141,7 +141,7 @@ func (g *GitlabRepositoryFile) GetContentAsBytesAndCommitHash(verbose bool) (con
 
 	contentBase64 := nativeRepoFile.Content
 
-	content, err = base64.DecodeStringAsBytes(contentBase64)
+	content, err = base64utils.DecodeStringAsBytes(contentBase64)
 	if err != nil {
 		return nil, "", err
 	}

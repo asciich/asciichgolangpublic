@@ -1,7 +1,7 @@
 package windowsutils
 
 import (
-	"github.com/asciich/asciichgolangpublic/encoding/utf16utils"
+	"github.com/asciich/asciichgolangpublic/pkg/encodingutils/utf16utils"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils"
 )
 

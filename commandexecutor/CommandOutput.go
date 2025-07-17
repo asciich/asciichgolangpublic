@@ -7,8 +7,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/encoding/utf16utils"
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/encodingutils/utf16utils"
 	"github.com/asciich/asciichgolangpublic/pkg/exitcodes"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
