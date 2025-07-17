@@ -11,12 +11,13 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/changesummary"
-	"github.com/asciich/asciichgolangpublic/checksums"
+
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datetime"
 	"github.com/asciich/asciichgolangpublic/signalmessenger"
@@ -415,7 +416,7 @@ func (f *FileBase) GetSha256Sum() (sha256sum string, err error) {
 		return "", err
 	}
 
-	sha256sum = checksums.GetSha256SumFromString(content)
+	sha256sum = checksumutils.GetSha256SumFromString(content)
 
 	return sha256sum, nil
 }
