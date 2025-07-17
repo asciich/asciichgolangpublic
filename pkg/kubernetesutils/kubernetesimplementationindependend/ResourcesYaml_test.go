@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/fileformats/yamlutils"
+	"github.com/asciich/asciichgolangpublic/pkg/fileformats/yamlutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
 )
 

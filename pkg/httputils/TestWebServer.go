@@ -12,8 +12,10 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/netutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -216,6 +218,14 @@ func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 		TLSConfig: t.tlsConfig,
 	}
 
+	// Wait a short moment for the port to be available.
+	// This makes it more robust when frequently started and stopped on the same port like in CI.
+	ctxTimeout, _ := context.WithTimeout(ctx, time.Second*1)
+	err = netutils.WaitPortAvailableForListening(ctxTimeout, port)
+	if err != nil {
+		return err
+	}
+
 	t.webServerWaitGroup.Add(1)
 	go func() {
 		defer t.webServerWaitGroup.Done()
@@ -231,7 +241,16 @@ func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 		}
 	}()
 
-	time.Sleep(1 * time.Second)
+	// give webserver time to start in the background
+	time.Sleep(time.Millisecond * 200)
+
+	isAvailable, err := netutils.IsTcpPortAvailableForListening(contextutils.WithSilent(ctx), port)
+	if err != nil {
+		return err
+	}
+	if isAvailable {
+		return tracederrors.TracedErrorf("Failed to start testWebServer in background. Port '%d' is still open.", port)
+	}
 
 	logging.LogInfoByCtxf(ctx, "Start testWebServer in background on port %d finished.", port)
 
