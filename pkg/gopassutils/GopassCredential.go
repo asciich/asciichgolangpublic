@@ -1,4 +1,4 @@
-package gopass
+package gopassutils
 
 import (
 	"context"
@@ -12,8 +12,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
+	"github.com/asciich/asciichgolangpublic/tempfiles"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -34,15 +34,6 @@ func GetGopassCredentialByName(name string) (credential *GopassCredential, err e
 	}
 
 	return credential, nil
-}
-
-func MustGetGopassCredentialByName(name string) (credential *GopassCredential) {
-	credential, err := GetGopassCredentialByName(name)
-	if err != nil {
-		logging.LogFatalf("GetGopassCredentialByName failed: '%v'", err)
-	}
-
-	return credential
 }
 
 func NewGopassCredential() (gopassCredential *GopassCredential) {
@@ -160,15 +151,6 @@ func (c *GopassCredential) IncrementIntValue() (err error) {
 	}
 
 	return err
-}
-
-func (c *GopassCredential) MustGetName() (name string) {
-	name, err := c.GetName()
-	if err != nil {
-		logging.LogFatalf("gopassCredential.GetName failed: '%v'", err)
-	}
-
-	return name
 }
 
 func (c *GopassCredential) SetByInt(newValue int) (err error) {
