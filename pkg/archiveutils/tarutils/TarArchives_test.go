@@ -1,9 +1,10 @@
-package asciichgolangpublic
+package tarutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/archiveutils/tarutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -24,12 +25,12 @@ func TestTarArchiveAddAndGetFileOnTarBytes(t *testing.T) {
 
 				const fileName = "file_name.txt"
 
-				tarArchiveBytes := TarArchives().MustCreateTarArchiveFromFileContentStringAndGetAsBytes(
+				tarArchiveBytes := tarutils.TarArchives().MustCreateTarArchiveFromFileContentStringAndGetAsBytes(
 					fileName,
 					tt.content,
 				)
 
-				readContent := TarArchives().MustReadFileFromTarArchiveBytesAsString(
+				readContent := tarutils.TarArchives().MustReadFileFromTarArchiveBytesAsString(
 					tarArchiveBytes,
 					fileName,
 				)
@@ -61,12 +62,12 @@ func TestTarArchiveAddAndGetFileOnTarBytes_multipleFiles(t *testing.T) {
 				const fileName = "file_name.txt"
 				const fileName2 = "file_name2.txt"
 
-				tarArchiveBytes := TarArchives().MustCreateTarArchiveFromFileContentStringAndGetAsBytes(
+				tarArchiveBytes := tarutils.TarArchives().MustCreateTarArchiveFromFileContentStringAndGetAsBytes(
 					fileName,
 					tt.content,
 				)
 
-				tarArchiveBytes = TarArchives().MustAddFileFromFileContentStringToTarArchiveBytes(
+				tarArchiveBytes = tarutils.TarArchives().MustAddFileFromFileContentStringToTarArchiveBytes(
 					tarArchiveBytes,
 					fileName2,
 					tt.content+"2",
@@ -74,20 +75,20 @@ func TestTarArchiveAddAndGetFileOnTarBytes_multipleFiles(t *testing.T) {
 
 				require.EqualValues(
 					tt.content,
-					TarArchives().MustReadFileFromTarArchiveBytesAsString(
+					tarutils.TarArchives().MustReadFileFromTarArchiveBytesAsString(
 						tarArchiveBytes,
 						fileName,
 					),
 				)
 				require.EqualValues(
 					tt.content+"2",
-					TarArchives().MustReadFileFromTarArchiveBytesAsString(
+					tarutils.TarArchives().MustReadFileFromTarArchiveBytesAsString(
 						tarArchiveBytes,
 						fileName2,
 					),
 				)
 
-				fileList := TarArchives().MustListFileNamesFromTarArchiveBytes(tarArchiveBytes)
+				fileList := tarutils.TarArchives().MustListFileNamesFromTarArchiveBytes(tarArchiveBytes)
 				require.EqualValues(
 					[]string{"file_name.txt", "file_name2.txt"},
 					fileList,
