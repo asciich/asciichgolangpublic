@@ -10,8 +10,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/gopassutils"
+	"github.com/asciich/asciichgolangpublic/pkg/urlsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
-	"github.com/asciich/asciichgolangpublic/urlsutils"
 )
 
 type GitlabInstance struct {
