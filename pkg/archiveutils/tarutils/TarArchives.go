@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package tarutils
 
 import (
 	"archive/tar"
