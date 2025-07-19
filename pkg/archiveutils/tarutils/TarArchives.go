@@ -10,22 +10,10 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-type TarArchivesService struct {
-}
-
-func NewTarArchivesService() (t *TarArchivesService) {
-	return new(TarArchivesService)
-}
-
-func TarArchives() (t *TarArchivesService) {
-	return NewTarArchivesService()
-}
-
-func (t *TarArchivesService) AddFileFromFileContentBytesToTarArchiveBytes(archiveToExtend []byte, fileName string, content []byte) (tarBytes []byte, err error) {
+func AddFileFromFileContentBytesToTarArchiveBytes(archiveToExtend []byte, fileName string, content []byte) (tarBytes []byte, err error) {
 	if archiveToExtend == nil {
 		return nil, tracederrors.TracedErrorNil("archiveToExtend")
 	}
@@ -42,7 +30,7 @@ func (t *TarArchivesService) AddFileFromFileContentBytesToTarArchiveBytes(archiv
 
 	ioBuffer := bytes.NewBuffer(archiveToExtend)
 
-	err = t.WriteFileContentBytesIntoWriter(ioBuffer, fileName, content)
+	err = WriteFileContentBytesIntoWriter(ioBuffer, fileName, content)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +46,7 @@ func (t *TarArchivesService) AddFileFromFileContentBytesToTarArchiveBytes(archiv
 	return tarBytes, err
 }
 
-func (t *TarArchivesService) AddFileFromFileContentStringToTarArchiveBytes(archiveToExtend []byte, fileName string, content string) (tarBytes []byte, err error) {
+func AddFileFromFileContentStringToTarArchiveBytes(archiveToExtend []byte, fileName string, content string) (tarBytes []byte, err error) {
 	if archiveToExtend == nil {
 		return nil, tracederrors.TracedErrorNil("archiveToExtend")
 	}
@@ -71,7 +59,7 @@ func (t *TarArchivesService) AddFileFromFileContentStringToTarArchiveBytes(archi
 		return nil, tracederrors.TracedErrorEmptyString("content")
 	}
 
-	tarBytes, err = t.AddFileFromFileContentBytesToTarArchiveBytes(archiveToExtend, fileName, []byte(content))
+	tarBytes, err = AddFileFromFileContentBytesToTarArchiveBytes(archiveToExtend, fileName, []byte(content))
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +67,7 @@ func (t *TarArchivesService) AddFileFromFileContentStringToTarArchiveBytes(archi
 	return tarBytes, nil
 }
 
-func (t *TarArchivesService) CreateTarArchiveFromFileContentByteIntoWriter(ioWriter io.Writer, fileName string, content []byte) (err error) {
+func CreateTarArchiveFromFileContentByteIntoWriter(ioWriter io.Writer, fileName string, content []byte) (err error) {
 	if fileName == "" {
 		return tracederrors.TracedErrorEmptyString("fileName")
 	}
@@ -92,7 +80,7 @@ func (t *TarArchivesService) CreateTarArchiveFromFileContentByteIntoWriter(ioWri
 		return tracederrors.TracedErrorNil("tarWriter")
 	}
 
-	err = t.WriteFileContentBytesIntoWriter(ioWriter, fileName, content)
+	err = WriteFileContentBytesIntoWriter(ioWriter, fileName, content)
 	if err != nil {
 		return err
 	}
@@ -100,7 +88,7 @@ func (t *TarArchivesService) CreateTarArchiveFromFileContentByteIntoWriter(ioWri
 	return nil
 }
 
-func (t *TarArchivesService) CreateTarArchiveFromFileContentStringAndGetAsBytes(fileName string, content string) (tarBytes []byte, err error) {
+func CreateTarArchiveFromFileContentStringAndGetAsBytes(fileName string, content string) (tarBytes []byte, err error) {
 	if fileName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("fileName")
 	}
@@ -112,7 +100,7 @@ func (t *TarArchivesService) CreateTarArchiveFromFileContentStringAndGetAsBytes(
 	var b bytes.Buffer
 	tarWriter := bufio.NewWriter(&b)
 
-	err = t.CreateTarArchiveFromFileContentStringIntoWriter(fileName, content, tarWriter)
+	err = CreateTarArchiveFromFileContentStringIntoWriter(fileName, content, tarWriter)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +131,7 @@ func (t *TarArchivesService) CreateTarArchiveFromFileContentStringAndGetAsBytes(
 	return tarBytes, nil
 }
 
-func (t *TarArchivesService) CreateTarArchiveFromFileContentStringIntoWriter(fileName string, content string, ioWriter io.Writer) (err error) {
+func CreateTarArchiveFromFileContentStringIntoWriter(fileName string, content string, ioWriter io.Writer) (err error) {
 	if fileName == "" {
 		return tracederrors.TracedErrorEmptyString("fileName")
 	}
@@ -156,7 +144,7 @@ func (t *TarArchivesService) CreateTarArchiveFromFileContentStringIntoWriter(fil
 		return tracederrors.TracedErrorNil("tarWriter")
 	}
 
-	err = t.CreateTarArchiveFromFileContentByteIntoWriter(ioWriter, fileName, []byte(content))
+	err = CreateTarArchiveFromFileContentByteIntoWriter(ioWriter, fileName, []byte(content))
 	if err != nil {
 		return err
 	}
@@ -164,7 +152,7 @@ func (t *TarArchivesService) CreateTarArchiveFromFileContentStringIntoWriter(fil
 	return nil
 }
 
-func (t *TarArchivesService) ListFileNamesFromTarArchiveBytes(archiveBytes []byte) (fileNames []string, err error) {
+func ListFileNamesFromTarArchiveBytes(archiveBytes []byte) (fileNames []string, err error) {
 	if archiveBytes == nil {
 		return nil, tracederrors.TracedErrorNil("archiveBytes")
 	}
@@ -196,82 +184,7 @@ func (t *TarArchivesService) ListFileNamesFromTarArchiveBytes(archiveBytes []byt
 	return fileNames, nil
 }
 
-func (t *TarArchivesService) MustAddFileFromFileContentBytesToTarArchiveBytes(archiveToExtend []byte, fileName string, content []byte) (tarBytes []byte) {
-	tarBytes, err := t.AddFileFromFileContentBytesToTarArchiveBytes(archiveToExtend, fileName, content)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return tarBytes
-}
-
-func (t *TarArchivesService) MustAddFileFromFileContentStringToTarArchiveBytes(archiveToExtend []byte, fileName string, content string) (tarBytes []byte) {
-	tarBytes, err := t.AddFileFromFileContentStringToTarArchiveBytes(archiveToExtend, fileName, content)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return tarBytes
-}
-
-func (t *TarArchivesService) MustCreateTarArchiveFromFileContentByteIntoWriter(fileName string, content []byte, ioWriter io.Writer) {
-	err := t.CreateTarArchiveFromFileContentByteIntoWriter(ioWriter, fileName, content)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TarArchivesService) MustCreateTarArchiveFromFileContentStringAndGetAsBytes(fileName string, content string) (tarBytes []byte) {
-	tarBytes, err := t.CreateTarArchiveFromFileContentStringAndGetAsBytes(fileName, content)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return tarBytes
-}
-
-func (t *TarArchivesService) MustCreateTarArchiveFromFileContentStringIntoWriter(fileName string, content string, ioWriter io.Writer) {
-	err := t.CreateTarArchiveFromFileContentStringIntoWriter(fileName, content, ioWriter)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TarArchivesService) MustListFileNamesFromTarArchiveBytes(archiveBytes []byte) (fileNames []string) {
-	fileNames, err := t.ListFileNamesFromTarArchiveBytes(archiveBytes)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return fileNames
-}
-
-func (t *TarArchivesService) MustReadFileFromTarArchiveBytesAsBytes(archiveBytes []byte, fileNameToRead string) (content []byte) {
-	content, err := t.ReadFileFromTarArchiveBytesAsBytes(archiveBytes, fileNameToRead)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return content
-}
-
-func (t *TarArchivesService) MustReadFileFromTarArchiveBytesAsString(archiveBytes []byte, fileNameToRead string) (content string) {
-	content, err := t.ReadFileFromTarArchiveBytesAsString(archiveBytes, fileNameToRead)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return content
-}
-
-func (t *TarArchivesService) MustWriteFileContentBytesIntoWriter(ioWriter io.Writer, fileName string, content []byte) {
-	err := t.WriteFileContentBytesIntoWriter(ioWriter, fileName, content)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TarArchivesService) ReadFileFromTarArchiveBytesAsBytes(archiveBytes []byte, fileNameToRead string) (content []byte, err error) {
+func ReadFileFromTarArchiveBytesAsBytes(archiveBytes []byte, fileNameToRead string) (content []byte, err error) {
 	if archiveBytes == nil {
 		return nil, tracederrors.TracedErrorNil("archiveBytes")
 	}
@@ -343,8 +256,8 @@ func (t *TarArchivesService) ReadFileFromTarArchiveBytesAsBytes(archiveBytes []b
 	return content, nil
 }
 
-func (t *TarArchivesService) ReadFileFromTarArchiveBytesAsString(archiveBytes []byte, fileNameToRead string) (content string, err error) {
-	contentBytes, err := t.ReadFileFromTarArchiveBytesAsBytes(archiveBytes, fileNameToRead)
+func ReadFileFromTarArchiveBytesAsString(archiveBytes []byte, fileNameToRead string) (content string, err error) {
+	contentBytes, err := ReadFileFromTarArchiveBytesAsBytes(archiveBytes, fileNameToRead)
 	if err != nil {
 		return "", err
 	}
@@ -352,7 +265,7 @@ func (t *TarArchivesService) ReadFileFromTarArchiveBytesAsString(archiveBytes []
 	return string(contentBytes), nil
 }
 
-func (t *TarArchivesService) WriteFileContentBytesIntoWriter(ioWriter io.Writer, fileName string, content []byte) (err error) {
+func WriteFileContentBytesIntoWriter(ioWriter io.Writer, fileName string, content []byte) (err error) {
 	if fileName == "" {
 		return tracederrors.TracedErrorEmptyString("fileName")
 	}
