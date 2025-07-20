@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package commandexecutorsshclient
 
 import (
 	"context"
@@ -26,15 +26,6 @@ func GetSshClientByHostName(hostName string) (sshClient *SSHClient, err error) {
 	}
 
 	return sshClient, err
-}
-
-func MustGetSshClientByHostName(hostName string) (sshClient *SSHClient) {
-	sshClient, err := GetSshClientByHostName(hostName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return sshClient
 }
 
 func NewSSHClient() (s *SSHClient) {
@@ -159,47 +150,6 @@ func (s *SSHClient) IsReachable(ctx context.Context) (isReachable bool, err erro
 
 func (s *SSHClient) IsSshUserNameSet() (isSet bool) {
 	return len(s.sshUserName) > 0
-}
-
-func (s *SSHClient) MustGetHostDescription() (hostDescription string) {
-	hostDescription, err := s.GetHostDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hostDescription
-}
-
-func (s *SSHClient) MustGetHostName() (hostName string) {
-	hostName, err := s.GetHostName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hostName
-}
-
-func (s *SSHClient) MustGetSshUserName() (sshUserName string) {
-	sshUserName, err := s.GetSshUserName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return sshUserName
-}
-
-func (s *SSHClient) MustSetHostName(hostName string) {
-	err := s.SetHostName(hostName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SSHClient) MustSetSshUserName(sshUserName string) {
-	err := s.SetSshUserName(sshUserName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (s *SSHClient) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
