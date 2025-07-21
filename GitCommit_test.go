@@ -6,7 +6,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -38,7 +37,9 @@ func TestGitCommit_CreateTag(t *testing.T) {
 
 				commitToTag, err := repo.GetCurrentCommit(verbose)
 				require.NoError(t, err)
-				require.EqualValues(t, []GitTag{}, commitToTag.MustListTags(verbose))
+				tagList, err := commitToTag.ListTags(verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, []GitTag{}, tagList)
 
 				// Add a newer commit to validate the given commit is tagged NOT the latest one
 				newerCommit, err := repo.Commit(
@@ -50,15 +51,25 @@ func TestGitCommit_CreateTag(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				createdTag := commitToTag.MustCreateTag(
+				createdTag, err := commitToTag.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "first_tag",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(t, commitToTag.MustGetHash(), createdTag.MustGetHash())
-				require.NotEqualValues(t, newerCommit.MustGetHash(), createdTag.MustGetHash())
+				commitToTagHash, err := commitToTag.GetHash()
+				require.NoError(t, err)
+
+				createdTagHash, err := createdTag.GetHash()
+				require.NoError(t, err)
+
+				newerCommitHash, err := newerCommit.GetHash()
+				require.NoError(t, err)
+
+				require.EqualValues(t, commitToTagHash, createdTagHash)
+				require.NotEqualValues(t, newerCommitHash, createdTagHash)
 			},
 		)
 	}
@@ -93,28 +104,38 @@ func TestGitCommit_ListTagsNames(t *testing.T) {
 				currentCommit, err := repo.GetCurrentCommit(verbose)
 				require.NoError(t, err)
 
-				require.EqualValues(t, []GitTag{}, currentCommit.MustListTags(verbose))
+				tagList, err := currentCommit.ListTags(verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, []GitTag{}, tagList)
 
-				currentCommit.MustCreateTag(
+				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "first_tag",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(t, "first_tag", currentCommit.MustListTagNames(verbose)[0])
-				require.Len(t, currentCommit.MustListTagNames(verbose), 1)
+				tagNames, err := currentCommit.ListTagNames(verbose)
+				require.NoError(t, err)
 
-				currentCommit.MustCreateTag(
+				require.EqualValues(t, "first_tag", tagNames[0])
+				require.Len(t, tagNames, 1)
+
+				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "second_tag",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(t, "first_tag", currentCommit.MustListTagNames(verbose)[0])
-				require.EqualValues(t, "second_tag", currentCommit.MustListTagNames(verbose)[1])
-				require.Len(t, currentCommit.MustListTagNames(verbose), 2)
+				tagNames, err = currentCommit.ListTagNames(verbose)
+				require.NoError(t, err)
+
+				require.EqualValues(t, "first_tag", tagNames[0])
+				require.EqualValues(t, "second_tag", tagNames[1])
+				require.Len(t, tagNames, 2)
 			},
 		)
 	}
@@ -149,39 +170,49 @@ func TestGitCommit_ListVersionTagNames(t *testing.T) {
 				currentCommit, err := repo.GetCurrentCommit(verbose)
 				require.NoError(t, err)
 
-				require.EqualValues(t, []GitTag{}, currentCommit.MustListTags(verbose))
+				tagList, err := currentCommit.ListTags(verbose)
+				require.NoError(t, err)
 
-				currentCommit.MustCreateTag(
+				require.EqualValues(t, []GitTag{}, tagList)
+
+				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "first_tag",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				currentCommit.MustCreateTag(
+				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				currentCommit.MustCreateTag(
+				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				currentCommit.MustCreateTag(
+				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "another_tag",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(t, "v0.1.2", currentCommit.MustListVersionTagNames(verbose)[0])
-				require.EqualValues(t, "v1.0.0", currentCommit.MustListVersionTagNames(verbose)[1])
-				require.Len(t, currentCommit.MustListVersionTagNames(verbose), 2)
+				versionTagNames, err := currentCommit.ListVersionTagNames(verbose)
+				require.NoError(t, err)
+
+				require.EqualValues(t, "v0.1.2", versionTagNames[0])
+				require.EqualValues(t, "v1.0.0", versionTagNames[1])
+				require.Len(t, versionTagNames, 2)
 			},
 		)
 	}
@@ -216,37 +247,46 @@ func TestGitCommit_GetNewestTagVersion(t *testing.T) {
 				currentCommit, err := repo.GetCurrentCommit(verbose)
 				require.NoError(t, err)
 
-				require.EqualValues(t, []GitTag{}, currentCommit.MustListTags(verbose))
+				tags, err := currentCommit.ListTags(verbose)
+				require.NoError(t, err)
 
-				currentCommit.MustCreateTag(
+				require.EqualValues(t, []GitTag{}, tags)
+
+				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "first_tag",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				currentCommit.MustCreateTag(
+				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				currentCommit.MustCreateTag(
+				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				currentCommit.MustCreateTag(
+				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "another_tag",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(t, "v1.0.0", mustutils.Must(currentCommit.MustGetNewestTagVersion(verbose).GetAsString()))
+				newestTagVersion, err := currentCommit.GetNewestTagVersionString(verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, "v1.0.0", newestTagVersion)
 			},
 		)
 	}
@@ -281,44 +321,67 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 				currentCommit, err := repo.GetCurrentCommit(verbose)
 				require.NoError(t, err)
 
-				require.EqualValues(t, []GitTag{}, currentCommit.MustListTags(verbose))
-				require.Nil(t, currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose))
+				tagList, err := currentCommit.ListTags(verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, []GitTag{}, tagList)
 
-				currentCommit.MustCreateTag(
+				newestTagVersion, err := currentCommit.GetNewestTagVersionOrNilIfUnset(verbose)
+				require.NoError(t, err)
+				require.Nil(t, newestTagVersion)
+
+				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "first_tag",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.Nil(t, currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose))
+				newestTagVersion, err = currentCommit.GetNewestTagVersionOrNilIfUnset(verbose)
+				require.NoError(t, err)
+				require.Nil(t, newestTagVersion)
 
-				currentCommit.MustCreateTag(
+				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v1.0.0",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(t, "v1.0.0", mustutils.Must(currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).GetAsString()))
+				newestTagVersion, err = currentCommit.GetNewestTagVersionOrNilIfUnset(verbose)
+				require.NoError(t, err)
+				require.NotNil(t, newestTagVersion)
 
-				currentCommit.MustCreateTag(
+				require.EqualValues(t, "v1.0.0", newestTagVersion.String())
+
+				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "v0.1.2",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(t, "v1.0.0", mustutils.Must(currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).GetAsString()))
+				newestTagVersion, err = currentCommit.GetNewestTagVersionOrNilIfUnset(verbose)
+				require.NoError(t, err)
+				require.NotNil(t, newestTagVersion)
 
-				currentCommit.MustCreateTag(
+				require.EqualValues(t, "v1.0.0", newestTagVersion.String())
+
+				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "another_tag",
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(t, "v1.0.0", mustutils.Must(currentCommit.MustGetNewestTagVersionOrNilIfUnset(verbose).GetAsString()))
+				newestTagVersion, err = currentCommit.GetNewestTagVersionOrNilIfUnset(verbose)
+				require.NoError(t, err)
+				require.NotNil(t, newestTagVersion)
+
+				require.EqualValues(t, "v1.0.0", newestTagVersion.String())
 			},
 		)
 	}
@@ -352,7 +415,9 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 
 				currentCommit, err := repo.GetCurrentCommit(verbose)
 				require.NoError(t, err)
-				require.False(t, currentCommit.MustHasVersionTag(verbose))
+				hasVersionTag, err := currentCommit.HasVersionTag(verbose)
+				require.NoError(t, err)
+				require.False(t, hasVersionTag)
 
 				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
@@ -361,7 +426,9 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 					},
 				)
 				require.NoError(t, err)
-				require.False(t, currentCommit.MustHasVersionTag(verbose))
+				hasVersionTag, err = currentCommit.HasVersionTag(verbose)
+				require.NoError(t, err)
+				require.False(t, hasVersionTag)
 
 				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
@@ -370,7 +437,9 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 					},
 				)
 				require.NoError(t, err)
-				require.True(t, currentCommit.MustHasVersionTag(verbose))
+				hasVersionTag, err = currentCommit.HasVersionTag(verbose)
+				require.NoError(t, err)
+				require.True(t, hasVersionTag)
 
 				_, err = currentCommit.CreateTag(
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
@@ -378,7 +447,10 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 						Verbose: verbose,
 					},
 				)
-				require.True(t, currentCommit.MustHasVersionTag(verbose))
+				require.NoError(t, err)
+				hasVersionTag, err = currentCommit.HasVersionTag(verbose)
+				require.NoError(t, err)
+				require.True(t, hasVersionTag)
 			},
 		)
 	}

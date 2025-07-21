@@ -3,7 +3,6 @@ package asciichgolangpublic
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -40,81 +39,6 @@ func (g *GitlabAddRunnerOptions) GetRunnerTags() (runnerTags []string, err error
 func (g *GitlabAddRunnerOptions) GetVerbose() (verbose bool, err error) {
 
 	return g.Verbose, nil
-}
-
-func (g *GitlabAddRunnerOptions) MustGetName() (name string) {
-	name, err := g.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (g *GitlabAddRunnerOptions) MustGetRunnerName() (runnerName string) {
-	runnerName, err := g.GetRunnerName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return runnerName
-}
-
-func (g *GitlabAddRunnerOptions) MustGetRunnerTags() (runnerTags []string) {
-	runnerTags, err := g.GetRunnerTags()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return runnerTags
-}
-
-func (g *GitlabAddRunnerOptions) MustGetTags() (runnerTags []string) {
-	runnerTags, err := g.GetTags()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return runnerTags
-}
-
-func (g *GitlabAddRunnerOptions) MustGetTagsCommaSeparated() (tagsCommaSeperated string) {
-	tagsCommaSeperated, err := g.GetTagsCommaSeparated()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return tagsCommaSeperated
-}
-
-func (g *GitlabAddRunnerOptions) MustGetVerbose() (verbose bool) {
-	verbose, err := g.GetVerbose()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return verbose
-}
-
-func (g *GitlabAddRunnerOptions) MustSetName(name string) {
-	err := g.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabAddRunnerOptions) MustSetRunnerTags(runnerTags []string) {
-	err := g.SetRunnerTags(runnerTags)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabAddRunnerOptions) MustSetVerbose(verbose bool) {
-	err := g.SetVerbose(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GitlabAddRunnerOptions) SetName(name string) (err error) {

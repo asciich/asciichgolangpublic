@@ -67,24 +67,6 @@ func GetCommandExecutorGitRepositoryFromDirectory(directory files.Directory) (c 
 	)
 }
 
-func MustGetCommandExecutorGitRepositoryFromDirectory(directory files.Directory) (c *CommandExecutorGitRepository) {
-	c, err := GetCommandExecutorGitRepositoryFromDirectory(directory)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return c
-}
-
-func MustNewCommandExecutorGitRepository(commandExecutor commandexecutor.CommandExecutor) (c *CommandExecutorGitRepository) {
-	c, err := NewCommandExecutorGitRepository(commandExecutor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return c
-}
-
 func NewCommandExecutorGitRepository(commandExecutor commandexecutor.CommandExecutor) (c *CommandExecutorGitRepository, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")

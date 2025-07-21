@@ -3,7 +3,6 @@ package asciichgolangpublic
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -68,79 +67,6 @@ func (g *GitlabAuthenticationOptions) IsAuthenticatingAgainst(serviceName string
 
 func (g *GitlabAuthenticationOptions) IsVerbose() (isVerbose bool) {
 	return g.Verbose
-}
-
-func (g *GitlabAuthenticationOptions) MustGetAccessToken() (accessToken string) {
-	accessToken, err := g.GetAccessToken()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return accessToken
-}
-
-func (g *GitlabAuthenticationOptions) MustGetAccessTokensFromGopass() (accessTokensFromGopass []string) {
-	accessTokensFromGopass, err := g.GetAccessTokensFromGopass()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return accessTokensFromGopass
-}
-
-func (g *GitlabAuthenticationOptions) MustGetGitlabUrl() (gitlabUrl string) {
-	gitlabUrl, err := g.GetGitlabUrl()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabUrl
-}
-
-func (g *GitlabAuthenticationOptions) MustGetVerbose() (verbose bool) {
-	verbose, err := g.GetVerbose()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return verbose
-}
-
-func (g *GitlabAuthenticationOptions) MustIsAuthenticatingAgainst(serviceName string) (isAuthenticatingAgainst bool) {
-	isAuthenticatingAgainst, err := g.IsAuthenticatingAgainst(serviceName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isAuthenticatingAgainst
-}
-
-func (g *GitlabAuthenticationOptions) MustSetAccessToken(accessToken string) {
-	err := g.SetAccessToken(accessToken)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabAuthenticationOptions) MustSetAccessTokensFromGopass(accessTokensFromGopass []string) {
-	err := g.SetAccessTokensFromGopass(accessTokensFromGopass)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabAuthenticationOptions) MustSetGitlabUrl(gitlabUrl string) {
-	err := g.SetGitlabUrl(gitlabUrl)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabAuthenticationOptions) MustSetVerbose(verbose bool) {
-	err := g.SetVerbose(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GitlabAuthenticationOptions) SetAccessToken(accessToken string) (err error) {

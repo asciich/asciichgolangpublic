@@ -6,4 +6,5 @@ type Version interface {
 	IsNewerThan(other Version) (isNewerThan bool, err error)
 	GetAsString() (version string, err error)
 	GetNextVersion(versionType string) (version Version, err error)
+	String() string
 }

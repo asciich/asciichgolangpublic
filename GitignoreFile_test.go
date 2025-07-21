@@ -19,25 +19,24 @@ func TestGitignoreFileAddFileToIgnore(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitignoreFilePath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose)
 
-				gitignoreFile := MustGetGitignoreFileByPath(gitignoreFilePath)
+				gitignoreFile, err := GetGitignoreFileByPath(gitignoreFilePath)
+				require.NoError(t, err)
 				defer gitignoreFile.Delete(verbose)
 
 				for i := 0; i < 3; i++ {
-					gitignoreFile.MustAddFileToIgnore("test", "comment", verbose)
-
-					require.EqualValues(2, gitignoreFile.MustGetNumberOfNonEmptyLines())
+					err := gitignoreFile.AddFileToIgnore("test", "comment", verbose)
+					require.NoError(t, err)
+					require.EqualValues(t, 2, gitignoreFile.MustGetNumberOfNonEmptyLines())
 				}
 
 				for i := 0; i < 3; i++ {
-					gitignoreFile.MustAddFileToIgnore("test2", "comment2", verbose)
-
-					require.EqualValues(4, gitignoreFile.MustGetNumberOfNonEmptyLines())
+					err := gitignoreFile.AddFileToIgnore("test2", "comment2", verbose)
+					require.NoError(t, err)
+					require.EqualValues(t, 4, gitignoreFile.MustGetNumberOfNonEmptyLines())
 				}
 			},
 		)
@@ -55,19 +54,20 @@ func TestGitignoreFileContainsIgnoreOnNonExistingFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				nonExitstingFile := tempfiles.MustCreateEmptyTemporaryFile(verbose)
 				nonExitstingFile.MustDelete(verbose)
 
-				gitignoreFile := MustGetGitignoreFileByFile(nonExitstingFile)
+				gitignoreFile, err := GetGitignoreFileByFile(nonExitstingFile)
+				require.NoError(t, err)
 				defer gitignoreFile.Delete(verbose)
 
-				require.False(gitignoreFile.MustExists(verbose))
+				require.False(t, gitignoreFile.MustExists(verbose))
 
-				require.False(gitignoreFile.ContainsIgnore("abc"))
+				containsIgnore, err := gitignoreFile.ContainsIgnore("abc")
+				require.NoError(t, err)
+				require.False(t, containsIgnore)
 			},
 		)
 	}
@@ -84,18 +84,18 @@ func TestGitignoreFileContainsIgnoreOnEmptyFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				emptyFile := tempfiles.MustCreateEmptyTemporaryFile(verbose)
 
-				gitignoreFile := MustGetGitignoreFileByFile(emptyFile)
+				gitignoreFile, err := GetGitignoreFileByFile(emptyFile)
+				require.NoError(t, err)
 				defer gitignoreFile.Delete(verbose)
 
-				require.True(gitignoreFile.MustExists(verbose))
-
-				require.False(gitignoreFile.ContainsIgnore("abc"))
+				require.True(t, gitignoreFile.MustExists(verbose))
+				containsIgnore, err := gitignoreFile.ContainsIgnore("abc")
+				require.NoError(t, err)
+				require.False(t, containsIgnore)
 			},
 		)
 	}

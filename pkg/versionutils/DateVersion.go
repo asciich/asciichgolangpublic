@@ -111,3 +111,12 @@ func (v DateVersion) IsNewerThan(other Version) (isNewerThan bool, err error) {
 func (v DateVersion) IsSemanticVersion() (isSemanticVersion bool) {
 	return false
 }
+
+func (v DateVersion) String() string {
+	data, err := v.GetAsString()
+	if err != nil {
+		return fmt.Sprintf("<Unknown DateVersion '%s'>", v.version)
+	}
+
+	return data
+}
