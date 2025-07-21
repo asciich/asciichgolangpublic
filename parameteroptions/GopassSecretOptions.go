@@ -5,7 +5,6 @@ import (
 	"regexp"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -89,47 +88,6 @@ func (g *GopassSecretOptions) GetSecretPath() (secretPath string, err error) {
 	}
 
 	return secretPath, nil
-}
-
-func (g *GopassSecretOptions) MustGetBaseName() (baseName string) {
-	baseName, err := g.GetBaseName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return baseName
-}
-
-func (g *GopassSecretOptions) MustGetDirName() (dirName string) {
-	dirName, err := g.GetDirName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return dirName
-}
-
-func (g *GopassSecretOptions) MustGetSecretPath() (secretPath string) {
-	secretPath, err := g.GetSecretPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return secretPath
-}
-
-func (g *GopassSecretOptions) MustSetBaseName(newBaseName string) {
-	err := g.SetBaseName(newBaseName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GopassSecretOptions) MustSetSecretPath(secretPath string) {
-	err := g.SetSecretPath(secretPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GopassSecretOptions) SetBaseName(newBaseName string) (err error) {

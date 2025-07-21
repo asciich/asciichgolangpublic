@@ -1,7 +1,6 @@
 package parameteroptions
 
 import (
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -30,22 +29,6 @@ func (c *CreateBranchOptions) GetName() (name string, err error) {
 func (c *CreateBranchOptions) GetVerbose() (verbose bool) {
 
 	return c.Verbose
-}
-
-func (c *CreateBranchOptions) MustGetName() (name string) {
-	name, err := c.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (c *CreateBranchOptions) MustSetName(name string) {
-	err := c.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (c *CreateBranchOptions) SetName(name string) (err error) {

@@ -1,7 +1,6 @@
 package artifactparameteroptions
 
 import (
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -61,86 +60,6 @@ func (a *ArtifactDownloadOptions) IsOutputPathSet() (isSet bool) {
 
 func (a *ArtifactDownloadOptions) IsVersionToDownloadSet() (isSet bool) {
 	return a.VersionToDownload != ""
-}
-
-func (a *ArtifactDownloadOptions) MustGetArtifactName() (artifactName string) {
-	artifactName, err := a.GetArtifactName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return artifactName
-}
-
-func (a *ArtifactDownloadOptions) MustGetOutputPath() (outputPath string) {
-	outputPath, err := a.GetOutputPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return outputPath
-}
-
-func (a *ArtifactDownloadOptions) MustGetOverwriteExisting() (overwriteExisting bool) {
-	overwriteExisting, err := a.GetOverwriteExisting()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return overwriteExisting
-}
-
-func (a *ArtifactDownloadOptions) MustGetVerbose() (verbose bool) {
-	verbose, err := a.GetVerbose()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return verbose
-}
-
-func (a *ArtifactDownloadOptions) MustGetVersionToDownload() (versionToDownload string) {
-	versionToDownload, err := a.GetVersionToDownload()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return versionToDownload
-}
-
-func (a *ArtifactDownloadOptions) MustSetArtifactName(artifactName string) {
-	err := a.SetArtifactName(artifactName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (a *ArtifactDownloadOptions) MustSetOutputPath(outputPath string) {
-	err := a.SetOutputPath(outputPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (a *ArtifactDownloadOptions) MustSetOverwriteExisting(overwriteExisting bool) {
-	err := a.SetOverwriteExisting(overwriteExisting)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (a *ArtifactDownloadOptions) MustSetVerbose(verbose bool) {
-	err := a.SetVerbose(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (a *ArtifactDownloadOptions) MustSetVersionToDownload(versionToDownload string) {
-	err := a.SetVersionToDownload(versionToDownload)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (a *ArtifactDownloadOptions) SetArtifactName(artifactName string) (err error) {

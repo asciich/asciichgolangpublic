@@ -2,7 +2,6 @@ package parameteroptions
 
 import (
 	"github.com/asciich/asciichgolangpublic/artifacthandler"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -92,88 +91,6 @@ func (u *UpdateDependenciesOptions) GetLatestArtifactVersionAsString(softwareNam
 func (u *UpdateDependenciesOptions) GetVerbose() (verbose bool, err error) {
 
 	return u.Verbose, nil
-}
-
-func (u *UpdateDependenciesOptions) MustGetArtifactHandlerForSoftwareName(softwareName string) (artifactHandler artifacthandler.ArtifactHandler) {
-	artifactHandler, err := u.GetArtifactHandlerForSoftwareName(softwareName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return artifactHandler
-}
-
-func (u *UpdateDependenciesOptions) MustGetArtifactHandlers() (artifactHandlers []artifacthandler.ArtifactHandler) {
-	artifactHandlers, err := u.GetArtifactHandlers()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return artifactHandlers
-}
-
-func (u *UpdateDependenciesOptions) MustGetAuthenticationOptions() (authenticationOptions []authenticationoptions.AuthenticationOption) {
-	authenticationOptions, err := u.GetAuthenticationOptions()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return authenticationOptions
-}
-
-func (u *UpdateDependenciesOptions) MustGetCommit() (commit bool) {
-	commit, err := u.GetCommit()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commit
-}
-
-func (u *UpdateDependenciesOptions) MustGetLatestArtifactVersionAsString(softwareName string, verbose bool) (latestVersion string) {
-	latestVersion, err := u.GetLatestArtifactVersionAsString(softwareName, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return latestVersion
-}
-
-func (u *UpdateDependenciesOptions) MustGetVerbose() (verbose bool) {
-	verbose, err := u.GetVerbose()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return verbose
-}
-
-func (u *UpdateDependenciesOptions) MustSetArtifactHandlers(artifactHandlers []artifacthandler.ArtifactHandler) {
-	err := u.SetArtifactHandlers(artifactHandlers)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (u *UpdateDependenciesOptions) MustSetAuthenticationOptions(authenticationOptions []authenticationoptions.AuthenticationOption) {
-	err := u.SetAuthenticationOptions(authenticationOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (u *UpdateDependenciesOptions) MustSetCommit(commit bool) {
-	err := u.SetCommit(commit)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (u *UpdateDependenciesOptions) MustSetVerbose(verbose bool) {
-	err := u.SetVerbose(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (u *UpdateDependenciesOptions) SetArtifactHandlers(artifactHandlers []artifacthandler.ArtifactHandler) (err error) {

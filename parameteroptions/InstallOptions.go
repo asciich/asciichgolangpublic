@@ -3,7 +3,6 @@ package parameteroptions
 import (
 	"path/filepath"
 
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -72,63 +71,6 @@ func (i *InstallOptions) GetUseSudoToInstall() (useSudoToInstall bool) {
 func (i *InstallOptions) GetVerbose() (verbose bool) {
 
 	return i.Verbose
-}
-
-func (i *InstallOptions) MustGetBinaryName() (binaryName string) {
-	binaryName, err := i.GetBinaryName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return binaryName
-}
-
-func (i *InstallOptions) MustGetInstallationPath() (installationPath string) {
-	installationPath, err := i.GetInstallationPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return installationPath
-}
-
-func (i *InstallOptions) MustGetInstallationPathOrDefaultIfUnset() (installationPath string) {
-	installationPath, err := i.GetInstallationPathOrDefaultIfUnset()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return installationPath
-}
-
-func (i *InstallOptions) MustGetSourcePath() (sourcePath string) {
-	sourcePath, err := i.GetSourcePath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return sourcePath
-}
-
-func (i *InstallOptions) MustSetBinaryName(binaryName string) {
-	err := i.SetBinaryName(binaryName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (i *InstallOptions) MustSetInstallationPath(installationPath string) {
-	err := i.SetInstallationPath(installationPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (i *InstallOptions) MustSetSourcePath(sourcePath string) {
-	err := i.SetSourcePath(sourcePath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (i *InstallOptions) SetBinaryName(binaryName string) (err error) {

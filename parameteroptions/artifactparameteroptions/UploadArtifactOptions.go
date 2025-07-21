@@ -1,7 +1,6 @@
 package artifactparameteroptions
 
 import (
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -70,86 +69,6 @@ func (u *UploadArtifactOptions) GetSoftwareVersionString() (softwareVersionStrin
 func (u *UploadArtifactOptions) GetVerbose() (verbose bool) {
 
 	return u.Verbose
-}
-
-func (u *UploadArtifactOptions) MustGetArtifactName() (artifactName string) {
-	artifactName, err := u.GetArtifactName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return artifactName
-}
-
-func (u *UploadArtifactOptions) MustGetAuthOptions() (authOptions []authenticationoptions.AuthenticationOption) {
-	authOptions, err := u.GetAuthOptions()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return authOptions
-}
-
-func (u *UploadArtifactOptions) MustGetBinaryPath() (binaryPath string) {
-	binaryPath, err := u.GetBinaryPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return binaryPath
-}
-
-func (u *UploadArtifactOptions) MustGetSignaturePath() (signaturePath string) {
-	signaturePath, err := u.GetSignaturePath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return signaturePath
-}
-
-func (u *UploadArtifactOptions) MustGetSoftwareVersionString() (softwareVersionString string) {
-	softwareVersionString, err := u.GetSoftwareVersionString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return softwareVersionString
-}
-
-func (u *UploadArtifactOptions) MustSetArtifactName(artifactName string) {
-	err := u.SetArtifactName(artifactName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (u *UploadArtifactOptions) MustSetAuthOptions(authOptions []authenticationoptions.AuthenticationOption) {
-	err := u.SetAuthOptions(authOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (u *UploadArtifactOptions) MustSetBinaryPath(binaryPath string) {
-	err := u.SetBinaryPath(binaryPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (u *UploadArtifactOptions) MustSetSignaturePath(signaturePath string) {
-	err := u.SetSignaturePath(signaturePath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (u *UploadArtifactOptions) MustSetSoftwareVersionString(softwareVersionString string) {
-	err := u.SetSoftwareVersionString(softwareVersionString)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (u *UploadArtifactOptions) SetArtifactName(artifactName string) (err error) {

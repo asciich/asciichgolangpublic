@@ -1,7 +1,6 @@
 package parameteroptions
 
 import (
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -62,47 +61,6 @@ func (c *ChownOptions) GetVerbose() (verbose bool) {
 
 func (c *ChownOptions) IsGroupNameSet() (isSet bool) {
 	return c.GroupName != ""
-}
-
-func (c *ChownOptions) MustGetGroupName() (GroupName string) {
-	GroupName, err := c.GetGroupName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return GroupName
-}
-
-func (c *ChownOptions) MustGetUserAndOptionallyGroupForChownCommand() (userAndGroup string) {
-	userAndGroup, err := c.GetUserAndOptionallyGroupForChownCommand()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return userAndGroup
-}
-
-func (c *ChownOptions) MustGetUserName() (userName string) {
-	userName, err := c.GetUserName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return userName
-}
-
-func (c *ChownOptions) MustSetGroupName(GroupName string) {
-	err := c.SetGroupName(GroupName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *ChownOptions) MustSetUserName(userName string) {
-	err := c.SetUserName(userName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (c *ChownOptions) SetGroupName(GroupName string) (err error) {

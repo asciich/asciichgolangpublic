@@ -1,7 +1,6 @@
 package parameteroptions
 
 import (
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -36,22 +35,6 @@ func (c *ChmodOptions) GetUseSudo() (useSudo bool) {
 func (c *ChmodOptions) GetVerbose() (verbose bool) {
 
 	return c.Verbose
-}
-
-func (c *ChmodOptions) MustGetPermissionsString() (permissionsString string) {
-	permissionsString, err := c.GetPermissionsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return permissionsString
-}
-
-func (c *ChmodOptions) MustSetPermissionsString(permissionsString string) {
-	err := c.SetPermissionsString(permissionsString)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (c *ChmodOptions) SetPermissionsString(permissionsString string) (err error) {
