@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"errors"
 
-	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 

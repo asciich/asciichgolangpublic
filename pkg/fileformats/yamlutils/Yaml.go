@@ -9,7 +9,7 @@ import (
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/files"
-	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gologging "gopkg.in/op/go-logging.v1"
 	"gopkg.in/yaml.v3"

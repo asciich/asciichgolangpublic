@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
@@ -123,7 +123,7 @@ func Test_WaitPortAvailableForListening(t *testing.T) {
 
 		<-cWaitOpen
 
-		ctx, _ = context.WithTimeout(ctx, time.Millisecond * 100)
+		ctx, _ = context.WithTimeout(ctx, time.Millisecond*100)
 		err = netutils.WaitPortAvailableForListening(ctx, testport)
 		require.Error(t, err)
 		require.False(t, closed)

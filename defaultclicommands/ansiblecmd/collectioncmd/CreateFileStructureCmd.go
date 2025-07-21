@@ -4,9 +4,9 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/ansibleutils/ansiblegalaxyutils"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
 

@@ -5,8 +5,8 @@ import (
 
 	"github.com/lu4p/shred"
 
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -16,7 +16,7 @@ func SecureDelete(ctx context.Context, path string) error {
 	if path == "" {
 		return tracederrors.TracedErrorEmptyString(path)
 	}
-	
+
 	if Exists(contextutils.WithSilent(ctx), path) {
 		shredconf := shred.Conf{Times: 1, Zeros: true, Remove: true}
 		err := shredconf.Path(path)

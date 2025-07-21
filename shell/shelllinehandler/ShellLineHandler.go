@@ -6,9 +6,8 @@ import (
 	"github.com/google/shlex"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 )
-
 
 func Join(command []string) (joinedCommand string, err error) {
 	if len(command) == 1 {

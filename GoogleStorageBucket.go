@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"cloud.google.com/go/storage"
-	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 

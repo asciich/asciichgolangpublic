@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 )
 
 func Test_LogChangedSetsChangeIndicator(t *testing.T) {
@@ -24,7 +24,7 @@ func Test_LogChangedSetsChangeIndicator(t *testing.T) {
 		logging.LogChangedByCtx(ctx, "log a change")
 		require.True(t, contextutils.IsChanged(ctx))
 
-		// Repeat again to vailidate LogChangedByCtxf 
+		// Repeat again to vailidate LogChangedByCtxf
 		ctx = contextutils.WithChangeIndicator(contextutils.ContextVerbose())
 		require.False(t, contextutils.IsChanged(ctx))
 		logging.LogChangedByCtxf(ctx, "log a change: %d", 2)

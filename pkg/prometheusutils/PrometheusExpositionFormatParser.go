@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/prometheus/common/expfmt"
-	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 

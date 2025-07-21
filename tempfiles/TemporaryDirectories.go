@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/asciich/asciichgolangpublic/files"
-	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 )
 
 func CreateEmptyTemporaryDirectory(verbose bool) (temporaryDirectory *files.LocalDirectory, err error) {

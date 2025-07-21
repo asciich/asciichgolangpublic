@@ -3,9 +3,9 @@ package kubernetesutils
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 )
 
 func IsInClusterAuthenticationAvailable(ctx context.Context) bool {

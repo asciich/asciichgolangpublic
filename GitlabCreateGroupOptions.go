@@ -1,6 +1,6 @@
 package asciichgolangpublic
 
-import "github.com/asciich/asciichgolangpublic/logging"
+import "github.com/asciich/asciichgolangpublic/pkg/logging"
 
 type GitlabCreateGroupOptions struct {
 	Verbose bool
