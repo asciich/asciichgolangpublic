@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/informers"

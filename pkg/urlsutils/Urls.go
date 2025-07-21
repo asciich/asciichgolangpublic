@@ -2,10 +2,9 @@ package urlsutils
 
 import (
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
-
 
 func CheckIsUrl(url string) (isUrl bool, err error) {
 	isUrl = IsUrl(url)

@@ -5,9 +5,9 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/hosts"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockerinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 

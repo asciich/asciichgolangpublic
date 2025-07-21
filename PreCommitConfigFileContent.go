@@ -5,8 +5,8 @@ import (
 	"reflect"
 
 	"github.com/asciich/asciichgolangpublic/changesummary"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	"gopkg.in/yaml.v3"
 )

@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helminterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )

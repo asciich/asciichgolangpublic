@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 
 	"golang.org/x/crypto/ssh"

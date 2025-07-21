@@ -11,10 +11,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"

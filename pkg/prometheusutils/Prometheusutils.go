@@ -3,9 +3,9 @@ package prometheusutils
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 

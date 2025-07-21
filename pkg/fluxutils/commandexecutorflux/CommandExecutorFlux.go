@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils"
@@ -14,6 +13,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helmparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 

@@ -4,8 +4,8 @@ import (
 	"context"
 	"os"
 
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -60,7 +60,7 @@ func IsDir(ctx context.Context, pathToCheck string) bool {
 		logging.LogInfoByCtxf(ctx, "'%s' is a directory.", pathToCheck)
 		return true
 	}
-	
+
 	logging.LogInfoByCtxf(ctx, "'%s' is a file, not a directory.", pathToCheck)
 	return false
 }

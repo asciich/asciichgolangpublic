@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/testutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
+	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
 func getX509CertificateHandlerToTest(implementationName string) (handler x509utils.X509CertificateHandler) {
@@ -40,10 +40,10 @@ func TestX509Handler_CreateRootCaCertificate(t *testing.T) {
 				caCertKeyPair, err := handler.CreateRootCaCertificate(
 					ctx,
 					&x509utils.X509CreateCertificateOptions{
-						CountryName:  "CH",
-						Locality:     "Zurich",
-						Organization: "myOrg root",
-						SerialNumber: "12345",
+						CountryName:    "CH",
+						Locality:       "Zurich",
+						Organization:   "myOrg root",
+						SerialNumber:   "12345",
 						PrivateKeySize: 1024,
 					},
 				)
@@ -87,9 +87,9 @@ func TestX509Handler_CreateIntermediateCertificate(t *testing.T) {
 				caCertKeyPair, err := handler.CreateRootCaCertificate(
 					ctx,
 					&x509utils.X509CreateCertificateOptions{
-						CountryName:  "CH",
-						Locality:     "Zurich",
-						Organization: "myOrg root",
+						CountryName:    "CH",
+						Locality:       "Zurich",
+						Organization:   "myOrg root",
 						PrivateKeySize: 1024,
 					},
 				)
@@ -98,9 +98,9 @@ func TestX509Handler_CreateIntermediateCertificate(t *testing.T) {
 				intermediateCertAndKey, err := handler.CreateSignedIntermediateCertificate(
 					ctx,
 					&x509utils.X509CreateCertificateOptions{
-						CountryName:  "CH",
-						Locality:     "Zurich",
-						Organization: "myOrg intermediate",
+						CountryName:    "CH",
+						Locality:       "Zurich",
+						Organization:   "myOrg intermediate",
 						PrivateKeySize: 1024,
 					},
 					caCertKeyPair,
@@ -148,9 +148,9 @@ func TestX509Handler_CreateEndEndityCertificate(t *testing.T) {
 				rootCeCertAndKey, err := handler.CreateRootCaCertificate(
 					ctx,
 					&x509utils.X509CreateCertificateOptions{
-						CountryName:  "CH",
-						Locality:     "Zurich",
-						Organization: "myOrg root",
+						CountryName:    "CH",
+						Locality:       "Zurich",
+						Organization:   "myOrg root",
 						PrivateKeySize: 1024,
 					},
 				)
@@ -159,9 +159,9 @@ func TestX509Handler_CreateEndEndityCertificate(t *testing.T) {
 				intermediateCertAndKey, err := handler.CreateSignedIntermediateCertificate(
 					ctx,
 					&x509utils.X509CreateCertificateOptions{
-						CountryName:  "CH",
-						Locality:     "Zurich",
-						Organization: "myOrg intermediate",
+						CountryName:    "CH",
+						Locality:       "Zurich",
+						Organization:   "myOrg intermediate",
 						PrivateKeySize: 1024,
 					},
 					rootCeCertAndKey,
@@ -234,10 +234,10 @@ func TestX509Handler_CreateSelfSignedCertificate(t *testing.T) {
 				rootCaCertAndKey, err := handler.CreateSelfSignedCertificate(
 					ctx,
 					&x509utils.X509CreateCertificateOptions{
-						CountryName:  "CH",
-						Locality:     "Zurich",
-						Organization: "myOrg root",
-						SerialNumber: "12345",
+						CountryName:    "CH",
+						Locality:       "Zurich",
+						Organization:   "myOrg root",
+						SerialNumber:   "12345",
 						PrivateKeySize: 1024,
 					},
 				)

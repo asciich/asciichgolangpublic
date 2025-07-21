@@ -3,7 +3,7 @@ package base64utils
 import (
 	"encoding/base64"
 
-	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 

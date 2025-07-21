@@ -5,7 +5,7 @@ import (
 	"reflect"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/pointersutils"
-	"github.com/asciich/asciichgolangpublic/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
