@@ -11,19 +11,20 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/userutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type SSHPublicKey struct {
 	// Type. E.g. "ssh-ras" or "ssh-ed25519"
-	keyType string
+	KeyType string
 
 	// The effective key material
-	keyMaterial string
+	KeyMaterial string
 
 	// Name and host usually added in "user@hoast" form at the end of a line in the *.pup key file.
-	keyUserName string
-	keyUserHost string
+	KeyUserName string
+	KeyUserHost string
 }
 
 func NewSSHPublicKey() (sshPublicKey *SSHPublicKey) {
@@ -35,19 +36,19 @@ func (k *SSHPublicKey) Equals(other *SSHPublicKey) (isEqual bool) {
 		return false
 	}
 
-	if k.keyType != other.keyType {
+	if k.KeyType != other.KeyType {
 		return false
 	}
 
-	if k.keyMaterial != other.keyMaterial {
+	if k.KeyMaterial != other.KeyMaterial {
 		return false
 	}
 
-	if k.keyUserName != other.keyUserName {
+	if k.KeyUserName != other.KeyUserName {
 		return false
 	}
 
-	if k.keyUserHost != other.keyUserHost {
+	if k.KeyUserHost != other.KeyUserHost {
 		return false
 	}
 
@@ -78,19 +79,19 @@ func (k *SSHPublicKey) GetAsPublicKeyLine() (publicKeyLine string, err error) {
 }
 
 func (k *SSHPublicKey) GetKeyHostName() (hostName string, err error) {
-	if len(k.keyUserHost) <= 0 {
+	if len(k.KeyUserHost) <= 0 {
 		return "", err
 	}
 
-	return k.keyUserHost, nil
+	return k.KeyUserHost, nil
 }
 
 func (k *SSHPublicKey) GetKeyMaterialAsString() (keyMaterial string, err error) {
-	if len(k.keyMaterial) <= 0 {
+	if len(k.KeyMaterial) <= 0 {
 		return "", tracederrors.TracedError("key material not set")
 	}
 
-	return k.keyMaterial, nil
+	return k.KeyMaterial, nil
 }
 
 func (k *SSHPublicKey) GetKeyUserAtHost() (userAtHost string, err error) {
@@ -110,11 +111,11 @@ func (k *SSHPublicKey) GetKeyUserAtHost() (userAtHost string, err error) {
 }
 
 func (k *SSHPublicKey) GetKeyUserName() (keyUserName string, err error) {
-	if len(k.keyUserName) <= 0 {
+	if len(k.KeyUserName) <= 0 {
 		return "", tracederrors.TracedErrorf("keyUserName is empty string. Available data: '%v'", *k)
 	}
 
-	return k.keyUserName, nil
+	return k.KeyUserName, nil
 }
 
 func (k *SSHPublicKey) LoadFromSshDir(sshDirectory files.Directory, verbose bool) (err error) {
@@ -201,14 +202,14 @@ func (k *SSHPublicKey) SetFromString(keyMaterial string) (err error) {
 
 	numberOfSpacesInKeyMaterial := strings.Count(keyMaterial, " ")
 	if numberOfSpacesInKeyMaterial == 0 {
-		k.keyMaterial = keyMaterial
+		k.KeyMaterial = keyMaterial
 	} else if numberOfSpacesInKeyMaterial > 0 && numberOfSpacesInKeyMaterial <= 3 {
 		splittedAllElements := strings.Split(keyMaterial, " ")
 		splitted := slicesutils.TrimSpace(splittedAllElements)
 
 		for _, possibleKeyType := range []string{"ssh-rsa", "ssh-ed25519", "ecdsa-sha2-nistp256"} {
 			if slices.Contains(splitted, possibleKeyType) {
-				k.keyType = possibleKeyType
+				k.KeyType = possibleKeyType
 				splitted = slicesutils.RemoveMatchingStrings(splitted, possibleKeyType)
 				break
 			}
@@ -244,18 +245,18 @@ func (k *SSHPublicKey) SetFromString(keyMaterial string) (err error) {
 			)
 		}
 
-		k.keyMaterial = keyMaterialToAdd
+		k.KeyMaterial = keyMaterialToAdd
 
 		for _, part := range splittedAllElements {
 			if strings.Contains(part, "@") {
 				splitted := strings.Split(part, "@")
 
 				if len(splitted) >= 1 {
-					k.keyUserName = splitted[0]
+					k.KeyUserName = splitted[0]
 				}
 
 				if len(splitted) >= 2 {
-					k.keyUserHost = splitted[1]
+					k.KeyUserHost = splitted[1]
 				}
 
 				break
@@ -292,28 +293,28 @@ func (k *SSHPublicKey) WriteToFile(ctx context.Context, outputFile files.File) (
 }
 
 func (s *SSHPublicKey) GetKeyMaterial() (keyMaterial string, err error) {
-	if s.keyMaterial == "" {
+	if s.KeyMaterial == "" {
 		return "", tracederrors.TracedErrorf("keyMaterial not set")
 	}
 
-	return s.keyMaterial, nil
+	return s.KeyMaterial, nil
 }
 
 // Key type like "ssh-rsa" or "ssh-ed25519"
 func (s *SSHPublicKey) GetKeyType() (keyType string, err error) {
-	if s.keyType == "" {
+	if s.KeyType == "" {
 		return "", tracederrors.TracedError("keyType not set")
 	}
 
-	return s.keyType, nil
+	return s.KeyType, nil
 }
 
 func (s *SSHPublicKey) GetKeyUserHost() (keyUserHost string, err error) {
-	if s.keyUserHost == "" {
+	if s.KeyUserHost == "" {
 		return "", tracederrors.TracedErrorf("keyUserHost not set")
 	}
 
-	return s.keyUserHost, nil
+	return s.KeyUserHost, nil
 }
 
 func (s *SSHPublicKey) MustGetAsPublicKeyLine() (publicKeyLine string) {
@@ -383,7 +384,7 @@ func (s *SSHPublicKey) SetKeyMaterial(keyMaterial string) (err error) {
 		return tracederrors.TracedErrorf("keyMaterial is empty string")
 	}
 
-	s.keyMaterial = keyMaterial
+	s.KeyMaterial = keyMaterial
 
 	return nil
 }
@@ -393,7 +394,7 @@ func (s *SSHPublicKey) SetKeyUserHost(keyUserHost string) (err error) {
 		return tracederrors.TracedErrorf("keyUserHost is empty string")
 	}
 
-	s.keyUserHost = keyUserHost
+	s.KeyUserHost = keyUserHost
 
 	return nil
 }
@@ -403,7 +404,7 @@ func (s *SSHPublicKey) SetKeyUserName(keyUserName string) (err error) {
 		return tracederrors.TracedErrorf("keyUserName is empty string")
 	}
 
-	s.keyUserName = keyUserName
+	s.KeyUserName = keyUserName
 
 	return nil
 }
@@ -471,4 +472,33 @@ func LoadPublicKeyFromString(keyMaterial string) (key *SSHPublicKey, err error) 
 	}
 
 	return key, nil
+}
+
+func GetCurrentUsersSshDirectory() (sshDir files.Directory, err error) {
+	homeDir, err := userutils.GetHomeDirectory()
+	if err != nil {
+		return nil, err
+	}
+
+	sshDir, err = homeDir.GetSubDirectory(".ssh")
+	if err != nil {
+		return nil, err
+	}
+
+	return sshDir, nil
+}
+
+func GetSshPublicKey(verbose bool) (sshPublicKey *SSHPublicKey, err error) {
+	sshDirectory, err := GetCurrentUsersSshDirectory()
+	if err != nil {
+		return nil, err
+	}
+
+	sshPublicKey = new(SSHPublicKey)
+	err = sshPublicKey.LoadFromSshDir(sshDirectory, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	return sshPublicKey, nil
 }

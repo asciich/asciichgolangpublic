@@ -4,11 +4,11 @@ import (
 	"context"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/sshutils/commandexecutorsshclient"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -37,7 +37,7 @@ func GetHostByHostname(hostname string) (host Host, err error) {
 	if hostname == "localhost" {
 		commandExecutor = commandexecutor.Bash()
 	} else {
-		commandExecutor, err = asciichgolangpublic.GetSshClientByHostName(hostname)
+		commandExecutor, err = commandexecutorsshclient.GetSshClientByHostName(hostname)
 		if err != nil {
 			return nil, err
 		}
