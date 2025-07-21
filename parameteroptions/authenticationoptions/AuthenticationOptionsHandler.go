@@ -1,7 +1,6 @@
 package authenticationoptions
 
 import (
-	"github.com/asciich/asciichgolangpublic/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/urlsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -55,22 +54,4 @@ func (a *AuthenticationOptionsHandlerService) GetAuthenticationoptionsForService
 	}
 
 	return authOption, nil
-}
-
-func (a *AuthenticationOptionsHandlerService) MustGetAuthenticationoptionsForService(authentiationOptions []AuthenticationOption, serviceName string) (authOption AuthenticationOption) {
-	authOption, err := a.GetAuthenticationoptionsForService(authentiationOptions, serviceName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return authOption
-}
-
-func (a *AuthenticationOptionsHandlerService) MustGetAuthenticationoptionsForServiceByUrl(authenticationOptions []AuthenticationOption, url *urlsutils.URL) (authOption AuthenticationOption) {
-	authOption, err := a.GetAuthenticationoptionsForServiceByUrl(authenticationOptions, url)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return authOption
 }

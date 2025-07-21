@@ -31,11 +31,9 @@ func TestGopassSecretOptions_GetPath(t *testing.T) {
 					SecretPath: tt.path,
 				}
 
-				require.EqualValues(
-					t,
-					tt.expectedPath,
-					secretOptions.MustGetSecretPath(),
-				)
+				secretPath, err := secretOptions.GetSecretPath()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedPath, secretPath)
 			},
 		)
 	}
@@ -63,29 +61,25 @@ func TestGopassSecretOptions_SetAndGetBaseName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				secretOptions := &GopassSecretOptions{
 					SecretPath: tt.path,
 				}
 
-				require.EqualValues(
-					tt.expectedBaseName,
-					secretOptions.MustGetBaseName(),
-				)
+				baseName, err := secretOptions.GetBaseName()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedBaseName, baseName)
 
-				secretOptions.MustSetBaseName(tt.newBaseName)
+				err = secretOptions.SetBaseName(tt.newBaseName)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					tt.newBaseName,
-					secretOptions.MustGetBaseName(),
-				)
+				baseName, err = secretOptions.GetBaseName()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.newBaseName, baseName)
 
-				require.EqualValues(
-					tt.expectedPathWithNewBaseName,
-					secretOptions.MustGetSecretPath(),
-				)
+				path, err := secretOptions.GetSecretPath()
+				require.NoError(t, err)
 
+				require.EqualValues(t, tt.expectedPathWithNewBaseName, path)
 			},
 		)
 	}
