@@ -23,14 +23,13 @@ func TestCommandOutputGetAndSetReturnCode(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				commandOutput := commandexecutor.NewCommandOutput()
-				commandOutput.MustSetReturnCode(tt.returnCode)
-				require.EqualValues(
-					tt.returnCode,
-					commandOutput.MustGetReturnCode(),
-				)
+				err := commandOutput.SetReturnCode(tt.returnCode)
+				require.NoError(t, err)
+
+				returnCode, err := commandOutput.GetReturnCode()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.returnCode, returnCode)
 			},
 		)
 	}
