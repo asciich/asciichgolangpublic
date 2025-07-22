@@ -54,33 +54,6 @@ func GetGitlabCiYamlFileInGitRepository(gitRepository GitRepository) (gitlabCiYa
 	return GetGitlabCiYamlFileByFile(fileToUse)
 }
 
-func MustGetGitlabCiYamlFileByFile(file files.File) (gitlabCiYamlFile *GitlabCiYamlFile) {
-	gitlabCiYamlFile, err := GetGitlabCiYamlFileByFile(file)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabCiYamlFile
-}
-
-func MustGetGitlabCiYamlFileByPath(filePath string) (gitlabCiYamlFile *GitlabCiYamlFile) {
-	gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(filePath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabCiYamlFile
-}
-
-func MustGetGitlabCiYamlFileInGitRepository(gitRepository GitRepository) (gitlabCiYamlFile *GitlabCiYamlFile) {
-	gitlabCiYamlFile, err := GetGitlabCiYamlFileInGitRepository(gitRepository)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabCiYamlFile
-}
-
 func NewGitlabCiYamlFile() (g *GitlabCiYamlFile) {
 	return new(GitlabCiYamlFile)
 }
@@ -220,47 +193,6 @@ func (g *GitlabCiYamlFile) GetTextBlocksWithoutIncludes(verbose bool) (textBlock
 	}
 
 	return textBlocks, nil
-}
-
-func (g *GitlabCiYamlFile) MustAddInclude(include *GitlabCiYamlInclude, verbose bool) {
-	err := g.AddInclude(include, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabCiYamlFile) MustContainsInclude(include *GitlabCiYamlInclude, ignoreVersion bool, verbose bool) (containsInclude bool) {
-	containsInclude, err := g.ContainsInclude(include, ignoreVersion, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return containsInclude
-}
-
-func (g *GitlabCiYamlFile) MustGetIncludes(verbose bool) (includes []*GitlabCiYamlInclude) {
-	includes, err := g.GetIncludes(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return includes
-}
-
-func (g *GitlabCiYamlFile) MustGetTextBlocksWithoutIncludes(verbose bool) (textBlocks []string) {
-	textBlocks, err := g.GetTextBlocksWithoutIncludes(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return textBlocks
-}
-
-func (g *GitlabCiYamlFile) MustRewriteIncludes(includes []*GitlabCiYamlInclude, verbose bool) {
-	err := g.RewriteIncludes(includes, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GitlabCiYamlFile) RewriteIncludes(includes []*GitlabCiYamlInclude, verbose bool) (err error) {

@@ -20,8 +20,6 @@ func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitlabFQDN := "gitlab.asciich.ch"
@@ -34,14 +32,14 @@ func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
 				const projectPath string = "test_group/testproject"
 
 				gitlabProject := gitlab.MustGetGitlabProjectByPath(projectPath, verbose)
-				require.True(gitlabProject.MustExists(verbose))
+				require.True(t, gitlabProject.MustExists(verbose))
 
 				defaultBranch := gitlabProject.MustGetDefaultBranch()
 				syncBranch := gitlabProject.MustCreateBranchFromDefaultBranch("test_sync", verbose)
 
 				const filePath = "abc.txt"
 
-				defaultBranch.MustWriteFileContent(
+				_, err := defaultBranch.WriteFileContent(
 					&GitlabWriteFileOptions{
 						Path:          filePath,
 						Content:       []byte("hello"),
@@ -49,8 +47,9 @@ func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
 						CommitMessage: "TestGitlabProjectSyncFilesToBranch",
 					},
 				)
+				require.NoError(t, err)
 
-				syncBranch.MustWriteFileContent(
+				_, err = syncBranch.WriteFileContent(
 					&GitlabWriteFileOptions{
 						Path:          filePath,
 						Content:       []byte("world"),
@@ -58,30 +57,30 @@ func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
 						CommitMessage: "TestGitlabProjectSyncFilesToBranch",
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					"hello",
-					defaultBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
-				)
-				require.EqualValues(
-					"world",
-					syncBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
-				)
+				content, err := defaultBranch.ReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose})
+				require.NoError(t, err)
+				require.EqualValues(t, "hello", content)
 
-				syncBranch.MustSyncFilesToBranch(&GitlabSyncBranchOptions{
+				content, err = syncBranch.ReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose})
+				require.NoError(t, err)
+				require.EqualValues(t, "world", content)
+
+				err = syncBranch.SyncFilesToBranch(&GitlabSyncBranchOptions{
 					TargetBranch: defaultBranch,
 					Verbose:      verbose,
 					PathsToSync:  []string{filePath},
 				})
+				require.NoError(t, err)
 
-				require.EqualValues(
-					"world",
-					defaultBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
-				)
-				require.EqualValues(
-					"world",
-					syncBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
-				)
+				content, err = defaultBranch.ReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose})
+				require.NoError(t, err)
+				require.EqualValues(t, "world", content)
+
+				content, err = syncBranch.ReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose})
+				require.NoError(t, err)
+				require.EqualValues(t, "world", content)
 			},
 		)
 	}
@@ -100,8 +99,6 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitlabFQDN := "gitlab.asciich.ch"
@@ -114,20 +111,21 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile(t *testing.T) {
 				const projectPath string = "test_group/testproject"
 
 				gitlabProject := gitlab.MustGetGitlabProjectByPath(projectPath, verbose)
-				require.True(gitlabProject.MustExists(verbose))
+				require.True(t, gitlabProject.MustExists(verbose))
 
 				defaultBranch := gitlabProject.MustGetDefaultBranch()
 				syncBranch := gitlabProject.MustCreateBranchFromDefaultBranch("test_sync", verbose)
 
 				const filePath = "abc.txt"
 
-				defaultBranch.MustDeleteRepositoryFile(
+				err := defaultBranch.DeleteRepositoryFile(
 					filePath,
 					"Cleanup for testing TestGitlabProjectSyncFilesToBranch_notExistingTargetFile",
 					verbose,
 				)
+				require.NoError(t, err)
 
-				syncBranch.MustWriteFileContent(
+				_, err = syncBranch.WriteFileContent(
 					&GitlabWriteFileOptions{
 						Path:          filePath,
 						Content:       []byte("world"),
@@ -135,29 +133,30 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile(t *testing.T) {
 						CommitMessage: "TestGitlabProjectSyncFilesToBranch",
 					},
 				)
+				require.NoError(t, err)
 
-				require.False(
-					defaultBranch.MustRepositoryFileExists(filePath, verbose),
-				)
-				require.EqualValues(
-					"world",
-					syncBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
-				)
+				exists, err := defaultBranch.RepositoryFileExists(filePath, verbose)
+				require.NoError(t, err)
+				require.False(t, exists)
 
-				syncBranch.MustSyncFilesToBranch(&GitlabSyncBranchOptions{
+				content, err := syncBranch.ReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose})
+				require.NoError(t, err)
+				require.EqualValues(t, "world", content)
+
+				err = syncBranch.SyncFilesToBranch(&GitlabSyncBranchOptions{
 					TargetBranch: defaultBranch,
 					Verbose:      verbose,
 					PathsToSync:  []string{filePath},
 				})
+				require.NoError(t, err)
 
-				require.EqualValues(
-					"world",
-					defaultBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
-				)
-				require.EqualValues(
-					"world",
-					syncBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
-				)
+				content, err = defaultBranch.ReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose})
+				require.NoError(t, err)
+				require.EqualValues(t, "world", content)
+
+				content, err = syncBranch.ReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose})
+				require.NoError(t, err)
+				require.EqualValues(t, "world", content)
 			},
 		)
 	}
@@ -176,8 +175,6 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitlabFQDN := "gitlab.asciich.ch"
@@ -190,20 +187,21 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 				const projectPath string = "test_group/testproject"
 
 				gitlabProject := gitlab.MustGetGitlabProjectByPath(projectPath, verbose)
-				require.True(gitlabProject.MustExists(verbose))
+				require.True(t, gitlabProject.MustExists(verbose))
 
 				defaultBranch := gitlabProject.MustGetDefaultBranch()
 				syncBranch := gitlabProject.MustCreateBranchFromDefaultBranch("test_sync", verbose)
 
 				const filePath = "abc.txt"
 
-				defaultBranch.MustDeleteRepositoryFile(
+				err := defaultBranch.DeleteRepositoryFile(
 					filePath,
 					"Cleanup for testing TestGitlabProjectSyncFilesToBranch_notExistingTargetFile",
 					verbose,
 				)
+				require.NoError(t, err)
 
-				syncBranch.MustWriteFileContent(
+				_, err = syncBranch.WriteFileContent(
 					&GitlabWriteFileOptions{
 						Path:          filePath,
 						Content:       []byte("world"),
@@ -211,29 +209,31 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 						CommitMessage: "TestGitlabProjectSyncFilesToBranch",
 					},
 				)
+				require.NoError(t, err)
 
-				require.False(
-					defaultBranch.MustRepositoryFileExists(filePath, verbose),
-				)
-				require.EqualValues(
-					"world",
-					syncBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
-				)
+				exits, err := defaultBranch.RepositoryFileExists(filePath, verbose)
+				require.NoError(t, err)
+				require.False(t, exits)
 
-				mergeRequest := syncBranch.MustSyncFilesToBranchUsingMergeRequest(&GitlabSyncBranchOptions{
+				content, err := syncBranch.ReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose})
+				require.NoError(t, err)
+				require.EqualValues(t, "world", content)
+
+				mergeRequest, err := syncBranch.SyncFilesToBranchUsingMergeRequest(&GitlabSyncBranchOptions{
 					TargetBranch: defaultBranch,
 					Verbose:      verbose,
 					PathsToSync:  []string{filePath},
 				})
+				require.NoError(t, err)
 
-				require.True(mergeRequest.MustIsOpen())
-				require.False(
-					defaultBranch.MustRepositoryFileExists(filePath, verbose),
-				)
-				require.EqualValues(
-					"world",
-					syncBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
-				)
+				require.True(t, mergeRequest.MustIsOpen())
+
+				exists, err := defaultBranch.RepositoryFileExists(filePath, verbose)
+				require.NoError(t, err)
+				require.False(t, exists)
+
+				content, err = syncBranch.ReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose})
+				require.EqualValues(t, "world", content)
 
 				mergeRequest.MustMerge(
 					&GitlabMergeOptions{
@@ -241,15 +241,15 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 					},
 				)
 
-				require.True(mergeRequest.MustIsMerged())
-				require.EqualValues(
-					"world",
-					defaultBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
-				)
-				require.EqualValues(
-					"world",
-					syncBranch.MustReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose}),
-				)
+				require.True(t, mergeRequest.MustIsMerged())
+
+				content, err = defaultBranch.ReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose})
+				require.NoError(t, err)
+				require.EqualValues(t, "world", content)
+
+				content, err = syncBranch.ReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose})
+				require.NoError(t, err)
+				require.EqualValues(t, "world", content)
 			},
 		)
 	}

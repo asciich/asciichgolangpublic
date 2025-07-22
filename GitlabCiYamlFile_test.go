@@ -19,12 +19,11 @@ func TestGitlabCiYamlFileGetInclude(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				emptyFilePath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose)
-				gitlabCiYamlFile := MustGetGitlabCiYamlFileByPath(emptyFilePath)
+				gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(emptyFilePath)
+				require.NoError(t, err)
 
 				gitlabCiYamlFile.MustWriteString("---\n", verbose)
 				gitlabCiYamlFile.MustAppendString("include:\n", verbose)
@@ -32,13 +31,14 @@ func TestGitlabCiYamlFileGetInclude(t *testing.T) {
 				gitlabCiYamlFile.MustAppendString("    ref: b\n", verbose)
 				gitlabCiYamlFile.MustAppendString("    file: c.yaml\n", verbose)
 
-				includes := gitlabCiYamlFile.MustGetIncludes(verbose)
-				require.Len(includes, 1)
+				includes, err := gitlabCiYamlFile.GetIncludes(verbose)
+				require.NoError(t, err)
+				require.Len(t, includes, 1)
 
 				include := includes[0]
-				require.EqualValues("a", include.MustGetProject())
-				require.EqualValues("b", include.MustGetRef())
-				require.EqualValues("c.yaml", include.MustGetFile())
+				require.EqualValues(t, "a", include.MustGetProject())
+				require.EqualValues(t, "b", include.MustGetRef())
+				require.EqualValues(t, "c.yaml", include.MustGetFile())
 			},
 		)
 	}
@@ -55,12 +55,11 @@ func TestGitlabCiYamlFileGetInclude2(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				emptyFilePath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose)
-				gitlabCiYamlFile := MustGetGitlabCiYamlFileByPath(emptyFilePath)
+				gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(emptyFilePath)
+				require.NoError(t, err)
 
 				gitlabCiYamlFile.MustWriteString("---\n", verbose)
 				gitlabCiYamlFile.MustAppendString("include:\n", verbose)
@@ -69,14 +68,15 @@ func TestGitlabCiYamlFileGetInclude2(t *testing.T) {
 				gitlabCiYamlFile.MustAppendString("    file:\n", verbose)
 				gitlabCiYamlFile.MustAppendString("     - c.yaml\n", verbose)
 
-				includes := gitlabCiYamlFile.MustGetIncludes(verbose)
-				require.Len(includes, 1)
+				includes, err := gitlabCiYamlFile.GetIncludes(verbose)
+				require.NoError(t, err)
+				require.Len(t, includes, 1)
 
 				include := includes[0]
 
-				require.EqualValues("a", include.MustGetProject())
-				require.EqualValues("b", include.MustGetRef())
-				require.EqualValues("c.yaml", include.MustGetFile())
+				require.EqualValues(t, "a", include.MustGetProject())
+				require.EqualValues(t, "b", include.MustGetRef())
+				require.EqualValues(t, "c.yaml", include.MustGetFile())
 			},
 		)
 	}
@@ -94,12 +94,11 @@ func TestGitlabCiYamlFileGetIncludeIgnoreRules(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				emptyFilePath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose)
-				gitlabCiYamlFile := MustGetGitlabCiYamlFileByPath(emptyFilePath)
+				gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(emptyFilePath)
+				require.NoError(t, err)
 
 				gitlabCiYamlFile.MustWriteString("---\n", verbose)
 				gitlabCiYamlFile.MustAppendString("include:\n", verbose)
@@ -110,14 +109,15 @@ func TestGitlabCiYamlFileGetIncludeIgnoreRules(t *testing.T) {
 				gitlabCiYamlFile.MustAppendString("    rules:\n", verbose)
 				gitlabCiYamlFile.MustAppendString("     - if: $CI_PIPELINE_SOURCE != \"pipeline\"\n", verbose)
 
-				includes := gitlabCiYamlFile.MustGetIncludes(verbose)
-				require.Len(includes, 1)
+				includes, err := gitlabCiYamlFile.GetIncludes(verbose)
+				require.NoError(t, err)
+				require.Len(t, includes, 1)
 
 				include := includes[0]
 
-				require.EqualValues("a", include.MustGetProject())
-				require.EqualValues("b", include.MustGetRef())
-				require.EqualValues("c.yaml", include.MustGetFile())
+				require.EqualValues(t, "a", include.MustGetProject())
+				require.EqualValues(t, "b", include.MustGetRef())
+				require.EqualValues(t, "c.yaml", include.MustGetFile())
 			},
 		)
 	}
@@ -134,15 +134,14 @@ func TestGitlabCiYamlFileAddIncludes(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				emptyFilePath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose)
-				gitlabCiYamlFile := MustGetGitlabCiYamlFileByPath(emptyFilePath)
+				gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(emptyFilePath)
+				require.NoError(t, err)
 
 				for i := 0; i < 3; i++ {
-					gitlabCiYamlFile.MustAddInclude(
+					err = gitlabCiYamlFile.AddInclude(
 						&GitlabCiYamlInclude{
 							Project: "abc",
 							File:    "test.yml",
@@ -150,13 +149,15 @@ func TestGitlabCiYamlFileAddIncludes(t *testing.T) {
 						},
 						verbose,
 					)
+					require.NoError(t, err)
 
-					includes := gitlabCiYamlFile.MustGetIncludes(verbose)
-					require.Len(includes, 1)
+					includes, err := gitlabCiYamlFile.GetIncludes(verbose)
+					require.NoError(t, err)
+					require.Len(t, includes, 1)
 				}
 
 				for i := 0; i < 3; i++ {
-					gitlabCiYamlFile.MustAddInclude(
+					err = gitlabCiYamlFile.AddInclude(
 						&GitlabCiYamlInclude{
 							Project: "abc_other",
 							File:    "test2.yml",
@@ -164,9 +165,11 @@ func TestGitlabCiYamlFileAddIncludes(t *testing.T) {
 						},
 						verbose,
 					)
+					require.NoError(t, err)
 
-					includes := gitlabCiYamlFile.MustGetIncludes(verbose)
-					require.Len(includes, 2)
+					includes, err := gitlabCiYamlFile.GetIncludes(verbose)
+					require.NoError(t, err)
+					require.Len(t, includes, 2)
 				}
 			},
 		)

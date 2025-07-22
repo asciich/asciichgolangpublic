@@ -55,33 +55,6 @@ func GetGitignoreFileInGitRepository(gitRepository GitRepository) (gitignoreFile
 	return GetGitignoreFileByFile(fileToUse)
 }
 
-func MustGetGitignoreFileByFile(fileToUse files.File) (gitignoreFile *GitignoreFile) {
-	gitignoreFile, err := GetGitignoreFileByFile(fileToUse)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitignoreFile
-}
-
-func MustGetGitignoreFileByPath(filePath string) (gitignoreFile *GitignoreFile) {
-	gitignoreFile, err := GetGitignoreFileByPath(filePath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitignoreFile
-}
-
-func MustGetGitignoreFileInGitRepository(gitRepository GitRepository) (gitignoreFile *GitignoreFile) {
-	gitignoreFile, err := GetGitignoreFileInGitRepository(gitRepository)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitignoreFile
-}
-
 func NewGitignoreFile() (g *GitignoreFile) {
 	return new(GitignoreFile)
 }
@@ -222,45 +195,6 @@ func (g *GitignoreFile) GetIgnoredPaths() (ignoredPaths []string, err error) {
 	}
 
 	return ignoredPaths, nil
-}
-
-func (g *GitignoreFile) MustAddDirToIgnore(pathToIgnore string, comment string, verbose bool) {
-	err := g.AddDirToIgnore(pathToIgnore, comment, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitignoreFile) MustAddFileToIgnore(pathToIgnore string, comment string, verbose bool) {
-	err := g.AddFileToIgnore(pathToIgnore, comment, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitignoreFile) MustContainsIgnore(pathToCheck string) (containsIgnore bool) {
-	containsIgnore, err := g.ContainsIgnore(pathToCheck)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return containsIgnore
-}
-
-func (g *GitignoreFile) MustGetIgnoredPaths() (ignoredPaths []string) {
-	ignoredPaths, err := g.GetIgnoredPaths()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return ignoredPaths
-}
-
-func (g *GitignoreFile) MustReformat(verbose bool) {
-	err := g.Reformat(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GitignoreFile) Reformat(verbose bool) (err error) {

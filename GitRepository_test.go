@@ -516,7 +516,8 @@ func TestGitRepository_GetRootDirectory_from_subdirectory(t *testing.T) {
 				subDir, err := repo.CreateSubDirectory("sub_directory", verbose)
 				require.NoError(t, err)
 
-				repoUsingSubDir1 := MustGetCommandExecutorGitRepositoryFromDirectory(subDir)
+				repoUsingSubDir1, err := GetCommandExecutorGitRepositoryFromDirectory(subDir)
+				require.NoError(t, err)
 
 				require.EqualValues(t, expectedRootDirectory, mustutils.Must(repoUsingSubDir1.GetRootDirectoryPath(ctx)))
 

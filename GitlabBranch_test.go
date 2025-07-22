@@ -21,8 +21,6 @@ func TestGitlabProjectBranchCreateAndDelete(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
@@ -31,27 +29,35 @@ func TestGitlabProjectBranchCreateAndDelete(t *testing.T) {
 				})
 
 				gitlabProject := gitlab.MustGetGitlabProjectByPath("test_group/testproject", verbose)
-				require.True(gitlabProject.MustExists(verbose))
+				require.True(t, gitlabProject.MustExists(verbose))
 
 				branch := gitlabProject.MustGetBranchByName(tt.branchName)
 
-				branch.MustDelete(&GitlabDeleteBranchOptions{
+				err := branch.Delete(&GitlabDeleteBranchOptions{
 					SkipWaitForDeletion: false,
 					Verbose:             verbose,
 				})
-				require.False(branch.MustExists())
+				require.NoError(t, err)
+				exists, err := branch.Exists()
+				require.NoError(t, err)
+				require.False(t, exists)
 
 				for i := 0; i < 2; i++ {
 					branch.CreateFromDefaultBranch(verbose)
-					require.True(branch.MustExists())
+					exists, err := branch.Exists()
+					require.NoError(t, err)
+					require.True(t, exists)
 				}
 
 				for i := 0; i < 2; i++ {
-					branch.MustDelete(&GitlabDeleteBranchOptions{
+					err := branch.Delete(&GitlabDeleteBranchOptions{
 						SkipWaitForDeletion: false,
 						Verbose:             verbose,
 					})
-					require.False(branch.MustExists())
+					require.NoError(t, err)
+					exists, err := branch.Exists()
+					require.NoError(t, err)
+					require.False(t, exists)
 				}
 			},
 		)

@@ -127,8 +127,6 @@ func TestGitlabCommitGetIsMergeCommit(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
@@ -151,10 +149,13 @@ func TestGitlabCommitGetIsMergeCommit(t *testing.T) {
 				latestCommit := testProject.MustGetLatestCommitOfDefaultBranch(verbose)
 
 				branch := testProject.MustGetBranchByName("test_merge_commit")
-				branch.MustDelete(&GitlabDeleteBranchOptions{Verbose: verbose})
-				branch.MustCreateFromDefaultBranch(verbose)
+				err := branch.Delete(&GitlabDeleteBranchOptions{Verbose: verbose})
+				require.NoError(t, err)
 
-				branch.MustWriteFileContent(
+				err = branch.CreateFromDefaultBranch(verbose)
+				require.NoError(t, err)
+
+				_, err = branch.WriteFileContent(
 					&GitlabWriteFileOptions{
 						Path:          testFileName,
 						Content:       []byte("only test content."),
@@ -162,19 +163,20 @@ func TestGitlabCommitGetIsMergeCommit(t *testing.T) {
 						Verbose:       verbose,
 					},
 				)
-				latestCommitAfterWrite := branch.MustGetLatestCommit(verbose)
-				require.NotEqualValues(
-					latestCommit.MustGetCommitHash(),
-					latestCommitAfterWrite.MustGetCommitHash(),
-				)
+				require.NoError(t, err)
 
-				mergeRequest := branch.MustCreateMergeRequest(
+				latestCommitAfterWrite, err := branch.GetLatestCommit(verbose)
+				require.NotEqualValues(t, latestCommit.MustGetCommitHash(), latestCommitAfterWrite.MustGetCommitHash())
+				require.NoError(t, err)
+
+				mergeRequest, err := branch.CreateMergeRequest(
 					&GitlabCreateMergeRequestOptions{
 						Title:       "Merge for isMergeCommit test",
 						Description: "Merge for isMergeCommit test",
 						Verbose:     verbose,
 					},
 				)
+				require.NoError(t, err)
 
 				for i := 0; i < 2; i++ {
 					mergeRequest.MustMerge(
@@ -182,16 +184,16 @@ func TestGitlabCommitGetIsMergeCommit(t *testing.T) {
 							Verbose: verbose,
 						},
 					)
-					require.True(mergeRequest.MustIsMerged())
+					require.True(t, mergeRequest.MustIsMerged())
 				}
 
 				commitAfterMerge := testProject.MustGetLatestCommitOfDefaultBranch(verbose)
 
-				require.True(commitAfterMerge.MustIsMergeCommit(verbose))
-				require.False(latestCommitAfterWrite.MustIsMergeCommit(verbose))
+				require.True(t, commitAfterMerge.MustIsMergeCommit(verbose))
+				require.False(t, latestCommitAfterWrite.MustIsMergeCommit(verbose))
 
-				require.True(latestCommit.MustIsParentCommitOf(commitAfterMerge, verbose))
-				require.True(latestCommit.MustIsParentCommitOf(latestCommitAfterWrite, verbose))
+				require.True(t, latestCommit.MustIsParentCommitOf(commitAfterMerge, verbose))
+				require.True(t, latestCommit.MustIsParentCommitOf(latestCommitAfterWrite, verbose))
 			},
 		)
 	}
