@@ -2,7 +2,6 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/files"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -46,20 +45,4 @@ func (d *DependenciesSliceService) GetDependencyNames(dependencies []Dependency)
 	}
 
 	return dependencyNames, nil
-}
-
-func (d *DependenciesSliceService) MustAddSourceFileForEveryEntry(dependencies []Dependency, sourceFile files.File) {
-	err := d.AddSourceFileForEveryEntry(dependencies, sourceFile)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (d *DependenciesSliceService) MustGetDependencyNames(dependencies []Dependency) (dependencyNames []string) {
-	dependencyNames, err := d.GetDependencyNames(dependencies)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return dependencyNames
 }

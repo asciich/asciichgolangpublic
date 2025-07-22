@@ -308,3 +308,12 @@ func (v *SemanticVersion) SetVersionByString(version string) (err error) {
 
 	return nil
 }
+
+func (v SemanticVersion) String() string {
+	data, err := v.GetAsString()
+	if err != nil {
+		return fmt.Sprintf("<Unknown SemanticVersion major='%d', minor='%d', patch='%d'>", v.major, v.minor, v.patch)
+	}
+
+	return data
+}
