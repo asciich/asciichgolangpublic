@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"regexp"
 
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 func CheckStringIsAMacAddress(input string) (isMacAddress bool, err error) {

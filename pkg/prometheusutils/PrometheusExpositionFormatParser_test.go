@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/testutils"
 )
 
 func TestPrometheusExpositionFormatParserParseExample(t *testing.T) {

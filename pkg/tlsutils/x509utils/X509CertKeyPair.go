@@ -4,8 +4,8 @@ import (
 	"crypto"
 	"crypto/x509"
 
-	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/cryptoutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 type X509CertKeyPair struct {

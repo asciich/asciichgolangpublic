@@ -1,6 +1,6 @@
 package kubeconfigutils
 
-import "github.com/asciich/asciichgolangpublic/tracederrors"
+import "gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 
 type KubeConfigUser struct {
 	Name string `yaml:"name"`

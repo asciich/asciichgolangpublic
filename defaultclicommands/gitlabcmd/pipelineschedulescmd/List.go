@@ -6,10 +6,10 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic"
-	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/parameteroptions/authenticationoptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
 )
 
 func NewListCommand() (cmd *cobra.Command) {

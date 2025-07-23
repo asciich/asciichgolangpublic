@@ -3,8 +3,8 @@ package nativekubernetes
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )

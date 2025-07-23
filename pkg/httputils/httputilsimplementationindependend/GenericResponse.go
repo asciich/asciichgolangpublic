@@ -1,9 +1,9 @@
 package httputilsimplementationindependend
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/fileformats/jsonutils"
-	"github.com/asciich/asciichgolangpublic/pkg/fileformats/yamlutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/fileformats/jsonutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/fileformats/yamlutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 // This is the generic response type.

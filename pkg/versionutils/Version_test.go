@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/versionutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/testutils"
 )
 
 func TestVersionEquals(t *testing.T) {

@@ -4,8 +4,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/mustutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/randomgenerator"
 )
 
 func IsRunningInCircleCi() (isRunningInGitlab bool) {

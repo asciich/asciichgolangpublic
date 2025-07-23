@@ -1,6 +1,6 @@
 package gnupg
 
-import "github.com/asciich/asciichgolangpublic/pkg/logging"
+import "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
 
 type GnuPGSignOptions struct {
 	Verbose      bool

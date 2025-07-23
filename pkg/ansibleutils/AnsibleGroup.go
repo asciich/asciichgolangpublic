@@ -3,7 +3,7 @@ package ansibleutils
 import (
 	"errors"
 
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 var ErrAnsibleGroupNotFound = errors.New("ansible group not found")

@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"slices"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/slicesutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 type AnsibleInventory struct {

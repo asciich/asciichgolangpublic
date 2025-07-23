@@ -6,13 +6,13 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
-	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/files"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/userutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/slicesutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/stringsutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/files"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/userutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 type SSHPublicKey struct {

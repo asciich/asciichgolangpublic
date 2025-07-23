@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/fileformats/yamlutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/fileformats/yamlutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kubernetesutils/kubernetesimplementationindependend"
 )
 
 func getReplicaSet(name string, namespace string) (yaml string) {

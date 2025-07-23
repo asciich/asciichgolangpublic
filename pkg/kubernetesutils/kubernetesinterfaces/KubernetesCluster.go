@@ -3,9 +3,9 @@ package kubernetesinterfaces
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/commandexecutor"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kubernetesutils/kubernetesimplementationindependend"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kubernetesutils/kubernetesparameteroptions"
 )
 
 type KubernetesCluster interface {

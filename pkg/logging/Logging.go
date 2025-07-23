@@ -3,7 +3,7 @@ package logging
 import (
 	"log"
 
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 var globalLogSettings LogSettings

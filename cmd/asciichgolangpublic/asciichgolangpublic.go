@@ -1,6 +1,6 @@
 package main
 
-import "github.com/asciich/asciichgolangpublic/cmd/asciichgolangpublic/cmd"
+import "gitlab.asciich.ch/tools/asciichgolangpublic.git/cmd/asciichgolangpublic/cmd"
 
 func main() {
 	cmd.Execute()

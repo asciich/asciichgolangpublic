@@ -7,13 +7,13 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/files"
-	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tempfiles"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/commandexecutor"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/files"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/parameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tempfiles"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 	"gopkg.in/yaml.v3"
 )
 

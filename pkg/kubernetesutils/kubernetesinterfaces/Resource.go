@@ -3,7 +3,7 @@ package kubernetesinterfaces
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kubernetesutils/kubernetesparameteroptions"
 )
 
 // a generic representation of a kubernetes object like a pod, ingress, role...

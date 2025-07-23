@@ -3,7 +3,7 @@ package dockerinterfaces
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/containerutils/containerinterfaces"
 )
 
 type Docker interface {

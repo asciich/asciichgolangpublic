@@ -1,7 +1,7 @@
 package kubernetesutils
 
 import (
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 type KubectlContext struct {

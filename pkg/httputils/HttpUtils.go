@@ -3,10 +3,10 @@ package httputils
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/files"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/files"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/httputils/httputilsinterfaces"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/httputils/httputilsparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 func SendRequest(ctx context.Context, requestOptions *httputilsparameteroptions.RequestOptions) (httputilsinterfaces.Response, error) {

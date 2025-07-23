@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/encodingutils/utf16utils"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/encodingutils/utf16utils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/testutils"
 )
 
 func TestUTF16DecodeAsString(t *testing.T) {

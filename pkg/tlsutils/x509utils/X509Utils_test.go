@@ -9,12 +9,12 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/datatypes/bigintutils"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/bigintutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/cryptoutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/mustutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/tlsutils/x509utils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/testutils"
 )
 
 func Test_GetPublicKeyFromPrivateKey(t *testing.T) {

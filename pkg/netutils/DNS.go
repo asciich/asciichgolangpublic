@@ -5,8 +5,8 @@ import (
 	"net"
 	"sort"
 
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 func DnsLookupIpV4(ctx context.Context, fqdn string) (ipV4Addresses []string, err error) {

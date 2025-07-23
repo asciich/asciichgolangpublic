@@ -6,11 +6,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/ansibleutils/ansiblegalaxyutils"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/tempfiles"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/commandexecutor"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/parameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/ansibleutils/ansiblegalaxyutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tempfiles"
 )
 
 func getCtx() context.Context {

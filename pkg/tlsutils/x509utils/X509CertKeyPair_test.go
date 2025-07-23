@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/testutils"
-	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/testutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/tlsutils/x509utils"
 )
 
 func Test_CertKeyPairMatches(t *testing.T) {

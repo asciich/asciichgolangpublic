@@ -5,16 +5,16 @@ import (
 	"os"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/helmutils"
-	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helminterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helmparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/commandexecutor"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/fluxutils/fluxinterfaces"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/fluxutils/fluxparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/helmutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/helmutils/helminterfaces"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/helmutils/helmparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kubernetesutils/kubernetesinterfaces"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kubernetesutils/kubernetesparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 type CommandExecutorFlux struct {

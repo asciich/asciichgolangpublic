@@ -3,9 +3,9 @@ package markdowndocument
 import (
 	"reflect"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/documentutils/documentbase"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/stringsutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/documentutils/documentbase"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 type MarkDownDocument struct {

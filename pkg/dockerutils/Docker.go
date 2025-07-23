@@ -3,12 +3,12 @@ package dockerutils
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/hosts"
-	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockerinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/commandexecutor"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/hosts"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/containerutils/containerinterfaces"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/dockerutils/dockerinterfaces"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 func GetDockerContainerOnHost(host hosts.Host, containerName string) (dockerContainer containerinterfaces.Container, err error) {

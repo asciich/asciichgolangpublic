@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/encodingutils/base64utils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/encodingutils/base64utils"
 )
 
 func TestBase64_encodeAndDecode(t *testing.T) {

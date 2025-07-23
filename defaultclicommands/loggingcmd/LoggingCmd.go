@@ -2,7 +2,7 @@ package loggingcmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/loggingcmd/loggingexamplescmd"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/defaultclicommands/loggingcmd/loggingexamplescmd"
 )
 
 func NewLoggingCmd() *cobra.Command {

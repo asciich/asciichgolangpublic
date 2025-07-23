@@ -3,7 +3,7 @@ package httputilsparameteroptions
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 type RequestOptions struct {

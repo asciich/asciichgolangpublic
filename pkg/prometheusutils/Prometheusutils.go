@@ -3,10 +3,10 @@ package prometheusutils
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/httputils"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/httputils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/httputils/httputilsparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 func MustGetMetricValueFromMetricPage(ctx context.Context, url string, metricName string) (value float64) {

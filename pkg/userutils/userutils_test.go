@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/userutils"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/userutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/testutils"
 )
 
 func TestUserGetHomeDirectory(t *testing.T) {

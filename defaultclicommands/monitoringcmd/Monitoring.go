@@ -2,8 +2,8 @@ package monitoringcmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/monitoringcmd/prometheuscmd"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/defaultclicommands/monitoringcmd/prometheuscmd"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 func NewMonitoringCommand() (cmd *cobra.Command) {

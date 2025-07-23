@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/stringsutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 type SemanticVersion struct {

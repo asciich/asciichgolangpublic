@@ -14,11 +14,11 @@ import (
 	"slices"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/bigintutils"
-	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/bigintutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/stringsutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/cryptoutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 var ErrNoValidCertificateChain = errors.New("no valid certificate chain")

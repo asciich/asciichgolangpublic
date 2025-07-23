@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/helmutils"
-	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helminterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/helmutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/helmutils/helminterfaces"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/mustutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/testutils"
 )
 
 func getCtx() context.Context {

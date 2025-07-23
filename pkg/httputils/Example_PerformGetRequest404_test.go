@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/httputils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/httputils/httputilsimplementationindependend"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/httputils/httputilsparameteroptions"
 )
 
 // This example shows how a 404 response of the webserver is handled.

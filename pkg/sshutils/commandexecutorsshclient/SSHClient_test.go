@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/pkg/sshutils/commandexecutorsshclient"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/commandexecutor"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/sshutils/commandexecutorsshclient"
 )
 
 func TestSshClient_SshClientIsCommandExecutor(t *testing.T) {

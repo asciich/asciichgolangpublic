@@ -1,8 +1,8 @@
 package kubernetesparameteroptions
 
 import (
-	"github.com/asciich/asciichgolangpublic/datatypes/mapsutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/mapsutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 type CreateSecretOptions struct {

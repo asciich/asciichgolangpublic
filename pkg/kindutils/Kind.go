@@ -3,11 +3,11 @@ package kindutils
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
-	"github.com/asciich/asciichgolangpublic/pkg/kindutils/kindparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/continuousintegration"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kindutils/kindparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kubernetesutils/kubernetesinterfaces"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 // Kubernetes in Docker

@@ -1,8 +1,8 @@
 package windowsutils
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/encodingutils/utf16utils"
-	"github.com/asciich/asciichgolangpublic/pkg/osutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/encodingutils/utf16utils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/osutils"
 )
 
 func DecodeAsBytes(windowsUtf16 []byte) (decoded []byte, err error) {

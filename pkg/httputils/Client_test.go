@@ -5,16 +5,16 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/tempfiles"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/checksumutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/httputils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/httputils/httputilsimplementationindependend"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/httputils/httputilsinterfaces"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/httputils/httputilsparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/mustutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tempfiles"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/testutils"
 )
 
 func getClientByImplementationName(implementationName string) (client httputilsinterfaces.Client) {

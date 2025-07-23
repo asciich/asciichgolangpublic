@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/checksumutils"
 )
 
 func GetBlobOjectHashFromString(content string) (hash string) {

@@ -3,7 +3,7 @@ package fluxinterfaces
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/fluxutils/fluxparameteroptions"
 )
 
 type Flux interface {

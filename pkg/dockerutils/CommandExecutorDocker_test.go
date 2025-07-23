@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/dockerutils"
 )
 
 func Test_ListContainerNames(t *testing.T) {

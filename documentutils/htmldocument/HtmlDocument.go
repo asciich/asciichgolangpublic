@@ -1,6 +1,6 @@
 package htmldocument
 
-import "github.com/asciich/asciichgolangpublic/documentutils/documentbase"
+import "gitlab.asciich.ch/tools/asciichgolangpublic.git/documentutils/documentbase"
 
 type HtmlDocument struct {
 	documentbase.DocumentBase

@@ -5,13 +5,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
-	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kindutils/kindparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/continuousintegration"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kindutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kindutils/kindparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/mustutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/testutils"
 )
 
 func getCtx() context.Context {

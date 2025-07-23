@@ -3,7 +3,7 @@ package helminterfaces
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helmparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/helmutils/helmparameteroptions"
 )
 
 type Helm interface {

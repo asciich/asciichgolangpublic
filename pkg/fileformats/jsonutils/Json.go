@@ -8,11 +8,11 @@ import (
 
 	"github.com/itchyny/gojq"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/files"
-	"github.com/asciich/asciichgolangpublic/pkg/fileformats/yamlutils"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/stringsutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/files"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/fileformats/yamlutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 func DataToJsonBytes(data interface{}) (jsonBytes []byte, err error) {

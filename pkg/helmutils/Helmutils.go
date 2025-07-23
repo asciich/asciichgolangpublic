@@ -3,9 +3,9 @@ package helmutils
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helminterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helmparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/commandexecutor"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/helmutils/helminterfaces"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/helmutils/helmparameteroptions"
 )
 
 func GetDefaultHelmImplementation() (helminterfaces.Helm, error) {

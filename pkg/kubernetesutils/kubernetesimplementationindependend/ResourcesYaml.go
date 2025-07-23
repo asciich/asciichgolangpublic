@@ -4,9 +4,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/fileformats/yamlutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/stringsutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/fileformats/yamlutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 	"gopkg.in/yaml.v3"
 )
 

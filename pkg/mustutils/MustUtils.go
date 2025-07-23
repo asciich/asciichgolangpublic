@@ -1,6 +1,6 @@
 package mustutils
 
-import "github.com/asciich/asciichgolangpublic/pkg/logging"
+import "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
 
 // Used to apply the Must pattern to any function returning a value and an error:
 //

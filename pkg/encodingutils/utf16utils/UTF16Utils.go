@@ -1,8 +1,8 @@
 package utf16utils
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )

@@ -2,9 +2,9 @@ package gitlabcmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/gitlabcmd/gitlabmetricscmd"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/gitlabcmd/pipelineschedulescmd"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/defaultclicommands/gitlabcmd/gitlabmetricscmd"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/defaultclicommands/gitlabcmd/pipelineschedulescmd"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 func NewGitlabCommand() (cmd *cobra.Command) {

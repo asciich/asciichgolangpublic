@@ -15,3 +15,10 @@ To avoid exec calls on the local machine set the env var accordingly:
 ```bash
 export ASCIICHGOLANGPUBLIC_AVOID_EXEC=1
 ```
+
+## For developers
+
+To run all tests use:
+```bash
+bash -c "cd commandexecutor && go test -v ./..."
+```

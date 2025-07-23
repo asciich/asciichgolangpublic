@@ -1,9 +1,9 @@
 package kubernetesparameteroptions
 
 import (
-	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
-	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/slicesutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/parameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 type RunCommandOptions struct {

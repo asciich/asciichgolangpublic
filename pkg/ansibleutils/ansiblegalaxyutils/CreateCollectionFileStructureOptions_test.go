@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/ansibleutils/ansiblegalaxyutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/ansibleutils/ansiblegalaxyutils"
 )
 
 func Test_GetVersionAsString(t *testing.T) {

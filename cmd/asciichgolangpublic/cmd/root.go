@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands"
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/defaultclicommands"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/mustutils"
 )
 
 var rootCmd = &cobra.Command{

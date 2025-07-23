@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 func MustFormatDurationAsString(duration *time.Duration) (durationString string) {

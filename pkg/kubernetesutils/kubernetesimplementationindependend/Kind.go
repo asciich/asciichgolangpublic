@@ -3,7 +3,7 @@ package kubernetesimplementationindependend
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 func SanitizeKindName(name string) (string, error) {

@@ -6,13 +6,13 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
-	"github.com/asciich/asciichgolangpublic/pkg/fluxutils"
-	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/continuousintegration"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/fluxutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/fluxutils/fluxparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kindutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kubernetesutils/kubernetesparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kubernetesutils/nativekubernetes"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 

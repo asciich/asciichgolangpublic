@@ -1,7 +1,7 @@
 package logging
 
 import (
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 var overrideFunctionLogGoError func(err error)

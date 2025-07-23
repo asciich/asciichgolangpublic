@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/versionutils"
 )
 
 // Demonstrates how to get a new DateVersion with the current date and time set.

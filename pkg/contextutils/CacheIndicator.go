@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 type CacheIndicator struct {

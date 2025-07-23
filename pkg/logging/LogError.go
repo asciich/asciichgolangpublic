@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/shell/terminalcolors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/shell/terminalcolors"
 )
 
 var overrideFunctionLogError func(logmessage string)

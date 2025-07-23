@@ -1,6 +1,6 @@
 package ansibleutils
 
-import "github.com/asciich/asciichgolangpublic/tracederrors"
+import "gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 
 type AnsibleHost struct {
 	hostName string

@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/asciich/asciichgolangpublic/documentutils/markdowndocument"
-	"github.com/asciich/asciichgolangpublic/files"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/documentutils/markdowndocument"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/files"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 func WriteInitialCollectionReadme(ctx context.Context, outFile files.File, name string, namespace string) error {

@@ -2,7 +2,7 @@ package ansiblecmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/ansiblecmd/collectioncmd"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/defaultclicommands/ansiblecmd/collectioncmd"
 )
 
 func NewAnsibleCmd() *cobra.Command {

@@ -5,12 +5,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
-	"github.com/asciich/asciichgolangpublic/pkg/helmutils"
-	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helmparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/continuousintegration"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/helmutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/helmutils/helmparameteroptions"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kindutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kubernetesutils/nativekubernetes"
 )
 
 // Example how to install a hemlchart.

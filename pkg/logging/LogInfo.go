@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/stringsutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
 )
 
 var overrideFunctionLogInfo func(logmessage string)

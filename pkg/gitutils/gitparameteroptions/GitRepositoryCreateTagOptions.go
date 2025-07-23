@@ -3,9 +3,9 @@ package gitparameteroptions
 import (
 	"fmt"
 
-	"github.com/asciich/asciichgolangpublic/pkg/binaryinfo"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/binaryinfo"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 type GitRepositoryCreateTagOptions struct {

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/datatypes/bigintutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/bigintutils"
 )
 
 func TestBigIntes_FromAndToDecimalString(t *testing.T) {

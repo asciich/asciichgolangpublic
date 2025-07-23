@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/checksumutils"
 )
 
 func TestChecksumsGetSha256SumFromString(t *testing.T) {

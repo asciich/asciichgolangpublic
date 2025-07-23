@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/prometheus/common/expfmt"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 type PrometheusExpositionFormatParserService struct{}

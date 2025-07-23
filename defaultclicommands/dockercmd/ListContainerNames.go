@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils"
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/dockerutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/mustutils"
 )
 
 func NewListContainerNames() *cobra.Command {

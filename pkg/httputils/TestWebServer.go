@@ -11,13 +11,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/netutils"
-	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/httputils/httputilsimplementationindependend"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/httputils/httputilsinterfaces"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/netutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/tlsutils/x509utils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 // A simple webserver mostly used for testing.

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
 )
 
 func NewLogInfoCmd() *cobra.Command {

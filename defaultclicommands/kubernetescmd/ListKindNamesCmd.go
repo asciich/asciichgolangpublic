@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kubernetesutils/nativekubernetes"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/mustutils"
 )
 
 func ListKindNamesCmd() *cobra.Command {

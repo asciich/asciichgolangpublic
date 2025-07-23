@@ -2,8 +2,8 @@ package errorscmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/errorscmd/tracederrorscmd"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/defaultclicommands/errorscmd/tracederrorscmd"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 func NewErrorsCommand() (errorsCmd *cobra.Command) {

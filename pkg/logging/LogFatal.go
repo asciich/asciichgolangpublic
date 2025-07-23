@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/asciich/asciichgolangpublic/shell/terminalcolors"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/shell/terminalcolors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 var overrideFunctionLogFatal func(logmessage string)

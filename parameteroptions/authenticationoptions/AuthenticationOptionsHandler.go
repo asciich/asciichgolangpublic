@@ -1,8 +1,8 @@
 package authenticationoptions
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/urlsutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/urlsutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 type AuthenticationOptionsHandlerService struct{}

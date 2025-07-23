@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 func ReadDateVersionFromString(versionString string) (*DateVersion, error) {

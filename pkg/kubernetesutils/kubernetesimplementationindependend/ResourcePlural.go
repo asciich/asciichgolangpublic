@@ -3,7 +3,7 @@ package kubernetesimplementationindependend
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/stringsutils"
 )
 
 func GetObjectPlural(objectName string) (string, error) {

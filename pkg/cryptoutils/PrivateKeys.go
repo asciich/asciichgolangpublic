@@ -7,8 +7,8 @@ import (
 	"encoding/pem"
 	"io"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/datatypes/stringsutils"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/tracederrors"
 )
 
 func LoadPrivateKeyFromPEMString(pemEncoded string) (privateKey crypto.PrivateKey, err error) {
