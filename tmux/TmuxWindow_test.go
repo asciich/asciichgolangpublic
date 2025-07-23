@@ -233,7 +233,9 @@ func TestTemuxWindow_RunCommand(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.EqualValues(t, tt.expectedStdout, commandOutput.MustGetStdoutAsString())
+				stdout, err := commandOutput.GetStdoutAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedStdout, stdout)
 			},
 		)
 	}
