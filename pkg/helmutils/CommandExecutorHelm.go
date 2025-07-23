@@ -4,7 +4,8 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helminterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helmparameteroptions"
@@ -32,7 +33,7 @@ func GetCommandExecutorHelm(executor commandexecutorinterfaces.CommandExecutor) 
 }
 
 func GetLocalCommandExecutorHelm() (helm helminterfaces.Helm, err error) {
-	return GetCommandExecutorHelm(commandexecutor.Bash())
+	return GetCommandExecutorHelm(commandexecutorbashoo.Bash())
 }
 
 func NewcommandExecutorHelm() (c *commandExecutorHelm) {
@@ -150,7 +151,7 @@ func (c *commandExecutorHelm) InstallHelmChart(ctx context.Context, options *hel
 	}
 
 	_, err = commandExecutor.RunCommand(
-		commandexecutor.WithLiveOutputOnStdout(ctx),
+		commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
 		&parameteroptions.RunCommandOptions{
 			Command: cmd,
 		},

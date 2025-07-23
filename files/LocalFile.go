@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -190,7 +190,7 @@ func (l *LocalFile) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err erro
 		return err
 	}
 
-	_, err = commandexecutor.Bash().RunCommand(
+	_, err = commandexecutorbashoo.Bash().RunCommand(
 		contextutils.GetVerbosityContextByBool(chmodOptions.Verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"chmod", chmodString, localPath},
@@ -237,7 +237,7 @@ func (l *LocalFile) Chown(options *parameteroptions.ChownOptions) (err error) {
 		command = append([]string{"sudo"}, command...)
 	}
 
-	_, err = commandexecutor.Bash().RunCommand(
+	_, err = commandexecutorbashoo.Bash().RunCommand(
 		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: command,
@@ -460,7 +460,7 @@ func (l *LocalFile) MoveToPath(path string, useSudo bool, verbose bool) (movedFi
 	}
 
 	if useSudo {
-		_, err = commandexecutor.Bash().RunCommand(
+		_, err = commandexecutorbashoo.Bash().RunCommand(
 			contextutils.ContextSilent(),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"sudo", "mv", srcPath, path},

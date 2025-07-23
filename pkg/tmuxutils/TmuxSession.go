@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -41,7 +41,7 @@ func (t *TmuxSession) Create(ctx context.Context) (err error) {
 		}
 
 		_, err = commandExecutor.RunCommand(
-			commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
+			commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{
 					"tmux",

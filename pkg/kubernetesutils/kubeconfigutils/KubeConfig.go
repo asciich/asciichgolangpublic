@@ -9,7 +9,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
@@ -365,7 +365,7 @@ func IsFilePathLoadableByKubectl(path string, verbose bool) (isLoadable bool, er
 		return false, tracederrors.TracedErrorEmptyString(path)
 	}
 
-	stdout, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
+	stdout, err := commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsString(
 		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"KUBECONFIG=" + path, "bash", "-c", "kubectl config get-contexts &> /dev/null && echo YES || echo NO"},
@@ -468,7 +468,7 @@ func ListContextNamesUsingKubectl(path string, verbose bool) (contextNames []str
 		return nil, tracederrors.TracedErrorEmptyString(path)
 	}
 
-	contextNames, err = commandexecutor.Bash().RunCommandAndGetStdoutAsLines(
+	contextNames, err = commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsLines(
 		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"KUBECONFIG=" + path, "bash", "-c", "kubectl config get-contexts -o name"},

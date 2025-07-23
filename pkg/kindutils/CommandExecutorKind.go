@@ -7,9 +7,10 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils"
@@ -40,7 +41,7 @@ func GetCommandExecutorKind(commandExecutor commandexecutorinterfaces.CommandExe
 }
 
 func GetLocalCommandExecutorKind() (kind Kind, err error) {
-	return GetCommandExecutorKind(commandexecutor.Bash())
+	return GetCommandExecutorKind(commandexecutorbashoo.Bash())
 }
 
 func MustGetCommandExecutorKind(commandExecutor commandexecutorinterfaces.CommandExecutor) (kind Kind) {
@@ -176,7 +177,7 @@ func (c *CommandExecutorKind) CreateCluster(ctx context.Context, options *kindpa
 		logging.LogInfoByCtxf(ctx, "Going to create kind cluster '%s'. This may take a while...", clusterName)
 
 		_, err = commandExecutor.RunCommand(
-			commandexecutor.WithLiveOutputOnStdout(ctx),
+			commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"kind", "create", "cluster", "--name", clusterName, "2>&1"},
 			},
@@ -215,7 +216,7 @@ func (c *CommandExecutorKind) CreateCluster(ctx context.Context, options *kindpa
 				}
 
 				_, err = commandExecutor.RunCommand(
-					commandexecutor.WithLiveOutputOnStdout(ctx),
+					commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
 					&parameteroptions.RunCommandOptions{
 						Command: []string{"kind", "create", "cluster", "--name", clusterName, "2>&1"},
 					},
@@ -271,7 +272,7 @@ func (c *CommandExecutorKind) DeleteClusterByName(ctx context.Context, clusterNa
 		}
 
 		_, err = commandExecutor.RunCommand(
-			commandexecutor.WithLiveOutputOnStdout(ctx),
+			commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"kind", "delete", "cluster", "--name", clusterName},
 			},
@@ -343,7 +344,7 @@ func (c *CommandExecutorKind) ListClusterNames(ctx context.Context) (clusterName
 	)
 }
 
-func (c *CommandExecutorKind) RunCommand(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
+func (c *CommandExecutorKind) RunCommand(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runOptions")
 	}

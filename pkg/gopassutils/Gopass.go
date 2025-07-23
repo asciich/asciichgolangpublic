@@ -12,7 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/binaryinfo"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -81,7 +81,7 @@ func GetCredential(getOptions *parameteroptions.GopassSecretOptions) (credential
 }
 
 func GetCredentialList() (credentials []*GopassCredential, err error) {
-	outLines, err := commandexecutor.Bash().RunCommandAndGetStdoutAsLines(
+	outLines, err := commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsLines(
 		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"gopass", "list", "-f"},
@@ -258,7 +258,7 @@ func InsertFileByString(ctx context.Context, fileContent string, gopassOptions *
 		fmt.Sprintf("gpass cat '%s'", gopassPath),
 	}
 
-	_, err = commandexecutor.Bash().RunCommand(
+	_, err = commandexecutorbashoo.Bash().RunCommand(
 		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command:     insertCommand,
@@ -324,7 +324,7 @@ func InsertFile(ctx context.Context, fileToInsert files.File, gopassOptions *par
 		fmt.Sprintf("cat '%s' | gopass cat '%s'", fileToInsertPath, gopassPath),
 	}
 
-	_, err = commandexecutor.Bash().RunCommand(
+	_, err = commandexecutorbashoo.Bash().RunCommand(
 		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,
@@ -409,7 +409,7 @@ func InsertSecret(ctx context.Context, secretToInsert string, gopassOptions *par
 		fmt.Sprintf("echo '%s' | gopass insert -f '%s'", secretToInsert, gopassPath),
 	}
 
-	_, err = commandexecutor.Bash().RunCommand(
+	_, err = commandexecutorbashoo.Bash().RunCommand(
 		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,
@@ -444,7 +444,7 @@ func SecretNameExist(secretName string) (secretExists bool, err error) {
 }
 
 func Sync(ctx context.Context) (err error) {
-	_, err = commandexecutor.Bash().RunCommand(
+	_, err = commandexecutorbashoo.Bash().RunCommand(
 		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"gopass", "sync"},
@@ -474,7 +474,7 @@ func WriteInfoToGopass(gopassPath string) (err error) {
 		fmt.Sprintf("echo '%v' | gopass insert -f '%v'", infoString, gopassPath),
 	}
 
-	_, err = commandexecutor.Bash().RunCommand(
+	_, err = commandexecutorbashoo.Bash().RunCommand(
 		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,

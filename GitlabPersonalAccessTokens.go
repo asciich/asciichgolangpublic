@@ -7,7 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/fileformats/jsonutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -214,7 +214,7 @@ func (p *GitlabPersonalAccessTokenService) CreateToken(tokenOptions *GitlabCreat
 		"scopes[]=k8s_proxy",
 		apiV4Urt + "/user/personal_access_tokens",
 	}
-	stdout, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
+	stdout, err := commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsString(
 		contextutils.GetVerbosityContextByBool(tokenOptions.Verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: command,

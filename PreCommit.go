@@ -6,7 +6,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -76,8 +77,8 @@ func (p *PreCommitService) RunInDirectory(ctx context.Context, directoy files.Di
 		),
 	}
 
-	_, err = commandexecutor.Bash().RunCommand(
-		commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
+	_, err = commandexecutorbashoo.Bash().RunCommand(
+		commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
 			Command: preCommitCommand,
 		},

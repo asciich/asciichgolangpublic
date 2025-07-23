@@ -5,16 +5,17 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/shellutils/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type SSHClient struct {
-	commandexecutor.CommandExecutorBase
+	commandexecutorgeneric.CommandExecutorBase
 	hostName    string
 	sshUserName string
 }
@@ -154,7 +155,7 @@ func (s *SSHClient) IsSshUserNameSet() (isSet bool) {
 	return len(s.sshUserName) > 0
 }
 
-func (s *SSHClient) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
+func (s *SSHClient) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
 	userAtHost, err := s.GetHostName()
 	if err != nil {
 		return nil, err
@@ -181,7 +182,7 @@ func (s *SSHClient) RunCommand(ctx context.Context, options *parameteroptions.Ru
 		commandString,
 	}
 
-	commandOutput, err = commandexecutor.Exec().RunCommand(ctx, commandToUse)
+	commandOutput, err = commandexecutorexecoo.Exec().RunCommand(ctx, commandToUse)
 	if err != nil {
 		return nil, err
 	}

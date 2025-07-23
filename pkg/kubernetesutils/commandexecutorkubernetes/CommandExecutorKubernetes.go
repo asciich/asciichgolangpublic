@@ -8,9 +8,9 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/fileformats/jsonutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
@@ -56,7 +56,7 @@ func GetClusterByName(clusterName string) (kubernetes kubernetesinterfaces.Kuber
 		return nil, tracederrors.TracedErrorEmptyString("clusterName")
 	}
 
-	return GetCommandExecutorKubernetsByName(commandexecutor.Bash(), clusterName)
+	return GetCommandExecutorKubernetsByName(commandexecutorbashoo.Bash(), clusterName)
 }
 
 func NewCommandExecutorKubernetes() (c *CommandExecutorKubernetes) {
@@ -510,7 +510,7 @@ func (c *CommandExecutorKubernetes) NamespaceByNameExists(ctx context.Context, n
 	return exists, nil
 }
 
-func (c *CommandExecutorKubernetes) RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
+func (c *CommandExecutorKubernetes) RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}
@@ -645,7 +645,7 @@ func (c *CommandExecutorKubernetes) CreateObject(ctx context.Context, options *k
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
-func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (*commandexecutorgeneric.CommandOutput, error) {
+func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 

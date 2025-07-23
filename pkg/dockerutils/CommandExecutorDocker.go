@@ -10,9 +10,9 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/hosts"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockerinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -76,7 +76,7 @@ func GetCommandExecutorDockerOnHost(host hosts.Host) (docker dockerinterfaces.Do
 }
 
 func GetLocalCommandExecutorDocker() (docker dockerinterfaces.Docker, err error) {
-	return GetCommandExecutorDocker(commandexecutor.Bash())
+	return GetCommandExecutorDocker(commandexecutorbashoo.Bash())
 }
 
 func MustGetCommandExecutorDocker(commandExecutor commandexecutorinterfaces.CommandExecutor) (docker dockerinterfaces.Docker) {
@@ -219,7 +219,7 @@ func (c *CommandExecutorDocker) KillContainerByName(ctx context.Context, name st
 	return nil
 }
 
-func (c *CommandExecutorDocker) RunCommand(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
+func (c *CommandExecutorDocker) RunCommand(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runOptions")
 	}

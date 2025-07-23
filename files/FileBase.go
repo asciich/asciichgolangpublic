@@ -16,7 +16,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datetime"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -249,7 +249,7 @@ func (f *FileBase) GetFileTypeDescription(verbose bool) (fileTypeDescription str
 		return "", err
 	}
 
-	stdoutLines, err := commandexecutor.Bash().RunCommandAndGetStdoutAsLines(
+	stdoutLines, err := commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsLines(
 		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"file", path},

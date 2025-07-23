@@ -144,7 +144,7 @@ func TestX509Certificates_NoTestdataCertificateUnexpired(t *testing.T) {
 	tests := []TestCase{}
 
 	repoRoot := mustRepoRoot()
-	pathsToCheck := commandexecutor.Bash().MustRunOneLinerAndGetStdoutAsLines(
+	pathsToCheck := commandexecutorbashoo.Bash().MustRunOneLinerAndGetStdoutAsLines(
 		fmt.Sprintf(
 			"grep -l -r 'CERTIFICATE' '%s/testdata'",
 			repoRoot,

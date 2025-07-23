@@ -1,4 +1,4 @@
-package commandexecutor
+package commandexecutorgeneric
 
 import (
 	"context"
@@ -7,6 +7,24 @@ import (
 )
 
 type ContextKeyLiveOutputOnStdout struct{}
+
+func IsLiveOutputOnStdoutEnabled(ctx context.Context) bool {
+	if ctx == nil {
+		return false
+	}
+
+	val := ctx.Value(ContextKeyLiveOutputOnStdout{})
+	if val == nil {
+		return false
+	}
+
+	valBool, ok := val.(bool)
+	if !ok {
+		return false
+	}
+
+	return valBool
+}
 
 func WithLiveOutputOnStdoutIfVerbose(ctx context.Context) context.Context {
 	if ctx == nil {
@@ -30,22 +48,4 @@ func WithLiveOutputOnStdout(ctx context.Context) context.Context {
 	}
 
 	return WithLiveOutputOnStdoutEnabled(ctx, true)
-}
-
-func IsLiveOutputOnStdoutEnabled(ctx context.Context) bool {
-	if ctx == nil {
-		return false
-	}
-
-	val := ctx.Value(ContextKeyLiveOutputOnStdout{})
-	if val == nil {
-		return false
-	}
-
-	valBool, ok := val.(bool)
-	if !ok {
-		return false
-	}
-
-	return valBool
 }

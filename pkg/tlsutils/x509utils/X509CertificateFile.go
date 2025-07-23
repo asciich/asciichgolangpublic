@@ -111,7 +111,7 @@ func (x *X509CertificateFile) IsX509Certificate(verbose bool) (isX509Certificate
 		),
 	}
 
-	stdout, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
+	stdout, err := commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsString(
 		&parameteroptions.RunCommandOptions{
 			Command: checkCommand,
 		},

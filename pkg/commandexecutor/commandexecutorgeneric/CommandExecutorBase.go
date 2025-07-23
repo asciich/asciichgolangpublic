@@ -1,4 +1,4 @@
-package commandexecutor
+package commandexecutorgeneric
 
 import (
 	"context"
