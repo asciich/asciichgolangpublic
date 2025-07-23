@@ -3,7 +3,7 @@ package gnupg
 import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -32,7 +32,7 @@ func CheckSignatureValid(signatureFile files.File, verbose bool) (err error) {
 		)
 	}
 
-	_, err = commandexecutor.Bash().RunCommand(
+	_, err = commandexecutorbashoo.Bash().RunCommand(
 		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"gpg", "--verify", path},
@@ -115,7 +115,7 @@ func SignFile(fileToSign files.File, options *GnuPGSignOptions) (err error) {
 		path,
 	}
 
-	_, err = commandexecutor.Bash().RunCommand(
+	_, err = commandexecutorbashoo.Bash().RunCommand(
 		contextutils.GetVerbosityContextByBool(options.Verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: signCommand,

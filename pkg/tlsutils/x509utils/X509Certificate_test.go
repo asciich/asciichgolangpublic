@@ -8,7 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -17,8 +18,8 @@ import (
 func mustRepoRoot(ctx context.Context) (repoRootDir files.Directory) {
 	const verbose = true
 
-	repoRootPath, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
-		commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
+	repoRootPath, err := commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsString(
+		commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"git", "-C", ".", "rev-parse", "--show-toplevel"},
 		},

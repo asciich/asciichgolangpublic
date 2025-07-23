@@ -10,7 +10,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
@@ -70,7 +71,7 @@ func (l *LocalDirectory) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err
 		return err
 	}
 
-	_, err = commandexecutor.Bash().RunCommand(
+	_, err = commandexecutorbashoo.Bash().RunCommand(
 		contextutils.GetVerbosityContextByBool(chmodOptions.Verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"chmod", chmodString, localPath},
@@ -110,8 +111,8 @@ func (l *LocalDirectory) CopyContentToDirectory(destinationDir Directory, verbos
 	}
 
 	ctx := contextutils.GetVerbosityContextByBool(verbose)
-	stdout, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
-		commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
+	stdout, err := commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsString(
+		commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
 			Command: copyCommand,
 		},
@@ -157,8 +158,8 @@ func (l *LocalDirectory) CopyContentToLocalDirectory(destDirectory *LocalDirecto
 	}
 
 	ctx := contextutils.GetVerbosityContextByBool(verbose)
-	_, err = commandexecutor.Bash().RunCommand(
-		commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
+	_, err = commandexecutorbashoo.Bash().RunCommand(
+		commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"cp", "-r", "-v", srcPath + "/.", destPath + "/."},
 		},

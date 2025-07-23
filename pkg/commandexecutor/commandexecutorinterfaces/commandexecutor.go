@@ -4,13 +4,13 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 )
 
 // A CommandExecutor is able to run a command like Exec or bash does.
 type CommandExecutor interface {
 	GetHostDescription() (hostDescription string, err error)
-	RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error)
+	RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error)
 
 	// These Commands can be implemented by embedding the `CommandExecutorBase` struct:
 	IsRunningOnLocalhost() (isRunningOnLocalhost bool, err error)

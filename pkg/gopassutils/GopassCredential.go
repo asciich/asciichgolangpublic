@@ -9,7 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
@@ -46,7 +46,7 @@ func (c *GopassCredential) Exists() (exists bool, err error) {
 		return false, err
 	}
 
-	output, err := commandexecutor.Bash().RunCommand(
+	output, err := commandexecutorbashoo.Bash().RunCommand(
 		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
@@ -77,7 +77,7 @@ func (c *GopassCredential) GetAsBytes() (credential []byte, err error) {
 		return nil, err
 	}
 
-	credential, err = commandexecutor.Bash().RunCommandAndGetStdoutAsBytes(
+	credential, err = commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsBytes(
 		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"gopass", "cat", name},
@@ -179,7 +179,7 @@ func (c *GopassCredential) SetByString(newValue string) (err error) {
 		fmt.Sprintf("echo '%s' | gopass insert -f '%s'", newValue, name),
 	}
 
-	_, err = commandexecutor.Bash().RunCommand(
+	_, err = commandexecutorbashoo.Bash().RunCommand(
 		contextutils.ContextVerbose(),
 		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,

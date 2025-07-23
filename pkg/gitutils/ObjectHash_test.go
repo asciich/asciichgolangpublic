@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils"
 )
@@ -16,7 +16,7 @@ func getCtx() context.Context {
 }
 
 func Test_GetBlobObjectHashFromString(t *testing.T) {
-	expected, err := commandexecutor.Bash().RunOneLinerAndGetStdoutAsString(getCtx(), "echo -en 'hello world' | git hash-object --stdin")
+	expected, err := commandexecutorbashoo.Bash().RunOneLinerAndGetStdoutAsString(getCtx(), "echo -en 'hello world' | git hash-object --stdin")
 	require.NoError(t, err)
 	expected = strings.TrimSpace(expected)
 

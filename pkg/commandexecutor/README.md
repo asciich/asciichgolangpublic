@@ -7,7 +7,7 @@ CommandExecutors have an important role in this library since they allow us to:
 
 But it has downsides:
 - It's not real programming, it's abusing golang for scripting automation.
-- It's a security risk. Calling exce (especially with unchecked user input as parameter) leads to security issues.
+- It's a security risk. Calling exec (especially with unchecked user input as parameter) leads to security issues.
 
 ## Avoid exec calls.
 
@@ -20,5 +20,5 @@ export ASCIICHGOLANGPUBLIC_AVOID_EXEC=1
 
 To run all tests use:
 ```bash
-bash -c "cd commandexecutor && go test -v ./..."
+bash -c "cd $(git rev-parse --show-toplevel) && go test -v ./pkg/commandexecutor/..."
 ```

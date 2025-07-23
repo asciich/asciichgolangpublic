@@ -3,7 +3,7 @@ package fluxutils
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/commandexecutorflux"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxparameteroptions"
@@ -13,7 +13,7 @@ import (
 )
 
 func GetDefaultFluxImplementation() fluxinterfaces.Flux {
-	return commandexecutorflux.NewcommandExecutorFlux(commandexecutor.Bash())
+	return commandexecutorflux.NewcommandExecutorFlux(commandexecutorbashoo.Bash())
 }
 
 func InstallFlux(ctx context.Context, options *fluxparameteroptions.InstalFluxOptions) (fluxinterfaces.FluxDeployment, error) {

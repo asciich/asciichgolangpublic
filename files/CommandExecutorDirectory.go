@@ -9,7 +9,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -59,7 +60,7 @@ func GetLocalCommandExecutorDirectoryByPath(path string) (c *CommandExecutorDire
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
 
-	return GetCommandExecutorDirectoryByPath(commandexecutor.Bash(), path)
+	return GetCommandExecutorDirectoryByPath(commandexecutorbashoo.Bash(), path)
 }
 
 func MustGetCommandExecutorDirectoryByPath(commandExecutor commandexecutorinterfaces.CommandExecutor, path string) (c *CommandExecutorDirectory) {
@@ -178,7 +179,7 @@ func (c *CommandExecutorDirectory) CopyContentToDirectory(destinationDir Directo
 
 	ctx := contextutils.GetVerbosityContextByBool(verbose)
 	_, err = commandExecutor.RunCommand(
-		commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
+		commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"cp", "-r", "-v", srcDirPath, destDirPath},
 		},

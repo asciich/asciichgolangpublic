@@ -2,7 +2,7 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/files"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -66,7 +66,7 @@ func GetLocalCommandExecutorGitRepositoryByPath(path string) (gitRepo *CommandEx
 	}
 
 	return GetCommandExecutorGitRepositoryByPath(
-		commandexecutor.Bash(),
+		commandexecutorbashoo.Bash(),
 		path,
 	)
 }

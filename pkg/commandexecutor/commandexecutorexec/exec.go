@@ -1,4 +1,4 @@
-package commandexecutor
+package commandexecutorexec
 
 import (
 	"bufio"
@@ -11,49 +11,14 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/windowsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-type ExecService struct {
-	CommandExecutorBase
-}
-
-func Exec() (e *ExecService) {
-	return NewExec()
-}
-
-func NewExec() (e *ExecService) {
-	e = new(ExecService)
-	err := e.SetParentCommandExecutorForBaseClass(e)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-	return e
-}
-
-func NewExecService() (e *ExecService) {
-	return new(ExecService)
-}
-
-func (e *ExecService) GetDeepCopy() (deepCopy commandexecutorinterfaces.CommandExecutor) {
-	d := NewExec()
-
-	*d = *e
-
-	deepCopy = d
-
-	return deepCopy
-}
-
-func (e *ExecService) GetHostDescription() (hostDescription string, err error) {
-	return "localhost", nil
-}
-
-func (e *ExecService) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
+func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -92,7 +57,7 @@ func (e *ExecService) RunCommand(ctx context.Context, options *parameteroptions.
 	}
 	cmd.Stderr = &stderr
 
-	commandOutput = new(commandexecutorgeneric.CommandOutput)
+	commandOutput := new(commandoutput.CommandOutput)
 
 	writeStdin := options.IsStdinStringSet()
 
@@ -156,7 +121,7 @@ func (e *ExecService) RunCommand(ctx context.Context, options *parameteroptions.
 		}
 
 		if goOn {
-			if IsLiveOutputOnStdoutEnabled(ctx) {
+			if commandexecutorgeneric.IsLiveOutputOnStdoutEnabled(ctx) {
 				mOutput := line
 
 				if osutils.IsRunningOnWindows() {

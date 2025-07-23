@@ -1,7 +1,7 @@
 package files
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -59,7 +59,7 @@ func GetLocalCommandExecutorFileByPath(localPath string) (commandExecutorFile *C
 		return nil, tracederrors.TracedErrorEmptyString(localPath)
 	}
 
-	return GetCommandExecutorFileByPath(commandexecutor.Bash(), localPath)
+	return GetCommandExecutorFileByPath(commandexecutorbashoo.Bash(), localPath)
 }
 
 func MustGetCommandExecutorFileByPath(commandExector commandexecutorinterfaces.CommandExecutor, path string) (commandExecutorFile *CommandExecutorFile) {

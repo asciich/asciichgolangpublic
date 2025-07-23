@@ -1,15 +1,21 @@
-package commandexecutor_test
+package commandexecutorbash_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbash"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func TestBashRunCommandAndGetStdoutAsString(t *testing.T) {
 	tests := []struct {
@@ -31,8 +37,7 @@ func TestBashRunCommandAndGetStdoutAsString(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				var bash commandexecutorinterfaces.CommandExecutor = commandexecutor.Bash()
-				output, err := bash.RunCommandAndGetStdoutAsString(
+				output, err := commandexecutorbash.RunCommand(
 					ctx,
 					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
@@ -40,16 +45,9 @@ func TestBashRunCommandAndGetStdoutAsString(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				output2, err := bash.RunCommandAndGetStdoutAsString(
-					commandexecutor.WithLiveOutputOnStdout(ctx),
-					&parameteroptions.RunCommandOptions{
-						Command: tt.command,
-					},
-				)
+				stdout, err := output.GetStdoutAsString()
 				require.NoError(t, err)
-
-				require.EqualValues(t, tt.expectedOutput, output)
-				require.EqualValues(t, tt.expectedOutput, output2)
+				require.EqualValues(t, tt.expectedOutput, stdout)
 			},
 		)
 	}
@@ -75,7 +73,7 @@ func TestBashRunCommand(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				output, err := commandexecutor.Bash().RunCommand(
+				output, err := commandexecutorbash.RunCommand(
 					ctx,
 					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
@@ -95,8 +93,8 @@ func TestBashRunCommand(t *testing.T) {
 				require.NoError(t, err)
 				require.EqualValues(t, 0, returnCode)
 
-				output2, err := commandexecutor.Bash().RunCommand(
-					commandexecutor.WithLiveOutputOnStdout(ctx),
+				output2, err := commandexecutorbash.RunCommand(
+					commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
 					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
 					},
@@ -114,47 +112,6 @@ func TestBashRunCommand(t *testing.T) {
 				returnCode2, err := output2.GetReturnCode()
 				require.NoError(t, err)
 				require.EqualValues(t, 0, returnCode2)
-			},
-		)
-	}
-}
-
-func TestBashRunCommandAndGetStdoutAsFloat64(t *testing.T) {
-	tests := []struct {
-		command         []string
-		expectedFloat64 float64
-	}{
-		{[]string{"echo", "0"}, 0},
-		{[]string{"echo", "1"}, 1.0},
-		{[]string{"echo", "1.1"}, 1.1},
-		{[]string{"echo", "-11.1"}, -11.1},
-	}
-
-	for _, tt := range tests {
-		tt := tt
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				ctx := getCtx()
-
-				output, err := commandexecutor.Bash().RunCommandAndGetStdoutAsFloat64(
-					ctx,
-					&parameteroptions.RunCommandOptions{
-						Command: tt.command,
-					},
-				)
-				require.NoError(t, err)
-
-				output2, err := commandexecutor.Bash().RunCommandAndGetStdoutAsFloat64(
-					commandexecutor.WithLiveOutputOnStdout(ctx),
-					&parameteroptions.RunCommandOptions{
-						Command: tt.command,
-					},
-				)
-				require.NoError(t, err)
-
-				require.EqualValues(t, tt.expectedFloat64, output)
-				require.EqualValues(t, tt.expectedFloat64, output2)
 			},
 		)
 	}
@@ -179,7 +136,7 @@ func TestBashRunCommandExitCode(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				output, err := commandexecutor.Bash().RunCommand(
+				output, err := commandexecutorbash.RunCommand(
 					getCtx(),
 					&parameteroptions.RunCommandOptions{
 						Command:           tt.command,
@@ -191,46 +148,6 @@ func TestBashRunCommandExitCode(t *testing.T) {
 				returnCode, err := output.GetReturnCode()
 				require.NoError(t, err)
 				require.EqualValues(t, tt.expectedExitCode, returnCode)
-			},
-		)
-	}
-}
-
-func TestBashRunCommandAndGetStdoutAsLines(t *testing.T) {
-	tests := []struct {
-		command       []string
-		expectedLines []string
-	}{
-		{[]string{"echo", "0"}, []string{"0"}},
-		{[]string{"echo", "hello world"}, []string{"hello world"}},
-		{[]string{"echo -en 'hello\\nworld'"}, []string{"hello", "world"}},
-	}
-
-	for _, tt := range tests {
-		tt := tt
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				ctx := getCtx()
-
-				output, err := commandexecutor.Bash().RunCommandAndGetStdoutAsLines(
-					ctx,
-					&parameteroptions.RunCommandOptions{
-						Command: tt.command,
-					},
-				)
-				require.NoError(t, err)
-
-				output2, err := commandexecutor.Bash().RunCommandAndGetStdoutAsLines(
-					commandexecutor.WithLiveOutputOnStdout(ctx),
-					&parameteroptions.RunCommandOptions{
-						Command: tt.command,
-					},
-				)
-				require.NoError(t, err)
-
-				require.EqualValues(t, tt.expectedLines, output)
-				require.EqualValues(t, tt.expectedLines, output2)
 			},
 		)
 	}
@@ -250,7 +167,7 @@ func TestBashRunOneLinerAndGetStdoutAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				output, err := commandexecutor.Bash().RunOneLinerAndGetStdoutAsString(getCtx(), tt.oneLiner)
+				output, err := commandexecutorbash.RunOneLinerAndGetStdoutAsString(getCtx(), tt.oneLiner)
 				require.NoError(t, err)
 				require.EqualValues(t, tt.expectedOutput, output)
 			},
@@ -273,7 +190,7 @@ func TestBashCommandAndGetFirstLineOfStdoutAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				output, err := commandexecutor.Bash().RunCommand(
+				output, err := commandexecutorbash.RunCommand(
 					getCtx(),
 					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
@@ -287,12 +204,6 @@ func TestBashCommandAndGetFirstLineOfStdoutAsString(t *testing.T) {
 			},
 		)
 	}
-}
-
-func TestBashGetHostDescription(t *testing.T) {
-	description, err := commandexecutor.Bash().GetHostDescription()
-	require.NoError(t, err)
-	require.EqualValues(t, "localhost", description)
 }
 
 func TestBashRunCommandStdin(t *testing.T) {
@@ -322,8 +233,7 @@ func TestBashRunCommandStdin(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				var bash commandexecutorinterfaces.CommandExecutor = commandexecutor.Bash()
-				output, err := bash.RunCommandAndGetStdoutAsBytes(
+				output, err := commandexecutorbash.RunCommand(
 					ctx,
 					&parameteroptions.RunCommandOptions{
 						Command:     tt.command,
@@ -332,17 +242,9 @@ func TestBashRunCommandStdin(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				output2, err := bash.RunCommandAndGetStdoutAsString(
-					commandexecutor.WithLiveOutputOnStdout(ctx),
-					&parameteroptions.RunCommandOptions{
-						Command:     tt.command,
-						StdinString: tt.stdin,
-					},
-				)
+				stdout, err := output.GetStdoutAsBytes()
 				require.NoError(t, err)
-
-				require.EqualValues(t, []byte(tt.expectedOutput), output)
-				require.EqualValues(t, tt.expectedOutput, output2)
+				require.EqualValues(t, []byte(tt.expectedOutput), stdout)
 			},
 		)
 	}

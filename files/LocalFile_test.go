@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/datatypes/pointersutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -593,7 +593,7 @@ func TestLocalFile_GetPathReturnsAbsoluteValue(t *testing.T) {
 }
 
 func getRepoRootDir(ctx context.Context, t *testing.T) (repoRoot Directory) {
-	path, err := commandexecutor.Bash().RunOneLinerAndGetStdoutAsString(ctx, "git rev-parse --show-toplevel")
+	path, err := commandexecutorbashoo.Bash().RunOneLinerAndGetStdoutAsString(ctx, "git rev-parse --show-toplevel")
 	require.NoError(t, err)
 	path = strings.TrimSpace(path)
 
@@ -873,7 +873,7 @@ func TestFileIsPgpEncrypted_Case2_encryptedBinary(t *testing.T) {
 						temporaryFile.MustGetLocalPath(),
 					),
 				}
-				commandexecutor.Bash().RunCommand(
+				commandexecutorbashoo.Bash().RunCommand(
 					ctx,
 					&parameteroptions.RunCommandOptions{
 						Command: createCommand,
@@ -913,7 +913,7 @@ func TestFileIsPgpEncrypted_Case3_encryptedAsciiArmor(t *testing.T) {
 						temporaryFile.MustGetLocalPath(),
 					),
 				}
-				_, err := commandexecutor.Bash().RunCommand(
+				_, err := commandexecutorbashoo.Bash().RunCommand(
 					ctx,
 					&parameteroptions.RunCommandOptions{
 						Command: createCommand,

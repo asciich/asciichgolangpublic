@@ -3,7 +3,7 @@ package kubernetesinterfaces
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 )
@@ -28,7 +28,7 @@ type KubernetesCluster interface {
 	ListObjectNames(options *kubernetesparameteroptions.ListKubernetesObjectsOptions) (objectNames []string, err error)
 	NamespaceByNameExists(ctx context.Context, namespaceName string) (exists bool, err error)
 	ReadSecret(ctx context.Context, namespaceName string, secretName string) (map[string][]byte, error)
-	RunCommandInTemporaryPod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (*commandexecutorgeneric.CommandOutput, error)
+	RunCommandInTemporaryPod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error)
 	SecretByNameExists(ctx context.Context, namespaceName string, secretName string) (exists bool, err error)
 	WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.WaitForPodsOptions) error
 	WhoAmI(ctx context.Context) (*kubernetesimplementationindependend.UserInfo, error)
