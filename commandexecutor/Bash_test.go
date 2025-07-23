@@ -82,9 +82,17 @@ func TestBashRunCommand(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.EqualValues(t, tt.expectedStdout, output.MustGetStdoutAsString())
-				require.EqualValues(t, tt.expectedStderr, output.MustGetStderrAsString())
-				require.EqualValues(t, 0, output.MustGetReturnCode())
+				stdout, err := output.GetStdoutAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedStdout, stdout)
+
+				stderr, err := output.GetStderrAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedStderr, stderr)
+
+				returnCode, err := output.GetReturnCode()
+				require.NoError(t, err)
+				require.EqualValues(t, 0, returnCode)
 
 				output2, err := commandexecutor.Bash().RunCommand(
 					commandexecutor.WithLiveOutputOnStdout(ctx),
@@ -92,10 +100,19 @@ func TestBashRunCommand(t *testing.T) {
 						Command: tt.command,
 					},
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(t, tt.expectedStdout, output2.MustGetStdoutAsString())
-				require.EqualValues(t, tt.expectedStderr, output2.MustGetStderrAsString())
-				require.EqualValues(t, 0, output2.MustGetReturnCode())
+				stdout2, err := output2.GetStdoutAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedStdout, stdout2)
+
+				stderr2, err := output2.GetStderrAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedStderr, stderr2)
+
+				returnCode2, err := output2.GetReturnCode()
+				require.NoError(t, err)
+				require.EqualValues(t, 0, returnCode2)
 			},
 		)
 	}
@@ -169,7 +186,10 @@ func TestBashRunCommandExitCode(t *testing.T) {
 					},
 				)
 				require.NoError(t, err)
-				require.EqualValues(t, tt.expectedExitCode, output.MustGetReturnCode())
+
+				returnCode, err := output.GetReturnCode()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedExitCode, returnCode)
 			},
 		)
 	}
@@ -260,11 +280,9 @@ func TestBashCommandAndGetFirstLineOfStdoutAsString(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.EqualValues(
-					t,
-					output.MustGetFirstLineOfStdoutAsString(),
-					tt.expectedOutput,
-				)
+				firstLine, err := output.GetFirstLineOfStdoutAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, firstLine, tt.expectedOutput)
 			},
 		)
 	}
