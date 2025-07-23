@@ -7,7 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
 func TestGetCurrentCommitGoGitHash(t *testing.T) {

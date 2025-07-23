@@ -1,4 +1,4 @@
-# tmux
+# tmuxutils
 
 Helper functions to orchestrate [tmux](https://github.com/tmux/tmux/wiki).
 
@@ -9,5 +9,5 @@ An example usage to orchestrate the input to another binary can be found in the 
 Run tests:
 
 ```bash
-bash -c "cd '$(git rev-parse --show-toplevel)' && go test -v ./tmux/..."
+bash -c "cd '$(git rev-parse --show-toplevel)' && go test -v ./tmuxutils/..."
 ```

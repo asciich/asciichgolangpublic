@@ -9,7 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helminterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
 func getCtx() context.Context {

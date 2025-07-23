@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
 func TestLocalDirectoryExists(t *testing.T) {

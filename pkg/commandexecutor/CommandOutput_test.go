@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
 func TestCommandOutputGetAndSetReturnCode(t *testing.T) {

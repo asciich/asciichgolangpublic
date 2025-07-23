@@ -8,7 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/fileformats/yamlutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
 func TestKubernetesObject_CreateAndDelete(t *testing.T) {

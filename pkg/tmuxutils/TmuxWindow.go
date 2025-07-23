@@ -1,4 +1,4 @@
-package tmux
+package tmuxutils
 
 import (
 	"context"
@@ -402,78 +402,6 @@ func (t *TmuxWindow) ListWindowNames(ctx context.Context) (windowNames []string,
 	return windowNames, nil
 }
 
-func (t *TmuxWindow) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
-	commandExecutor, err := t.GetCommandExecutor()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandExecutor
-}
-
-func (t *TmuxWindow) MustGetLatestPaneLine() (paneLine string) {
-	paneLine, err := t.GetLatestPaneLine()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return paneLine
-}
-
-func (t *TmuxWindow) MustGetName() (name string) {
-	name, err := t.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (t *TmuxWindow) MustGetSecondLatestPaneLine() (paneLine string) {
-	paneLine, err := t.GetSecondLatestPaneLine()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return paneLine
-}
-
-func (t *TmuxWindow) MustGetSession() (session *TmuxSession) {
-	session, err := t.GetSession()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return session
-}
-
-func (t *TmuxWindow) MustGetSessionAndWindowName() (sessionName string, windowName string) {
-	sessionName, windowName, err := t.GetSessionAndWindowName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return sessionName, windowName
-}
-
-func (t *TmuxWindow) MustGetSessionName() (sessionName string) {
-	sessionName, err := t.GetSessionName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return sessionName
-}
-
-func (t *TmuxWindow) MustGetShownLines() (lines []string) {
-	lines, err := t.GetShownLines()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return lines
-}
-
 func (t *TmuxWindow) WaitUntilOutputMatchesRegex(regex string, timeout time.Duration, verbose bool) (err error) {
 	if regex == "" {
 		return tracederrors.TracedErrorEmptyString("regex")
@@ -577,36 +505,6 @@ func (t *TmuxWindow) IsOutputMatchingRegex(regex string, verbose bool) (isMatchi
 	}
 
 	return isMatching, nil
-}
-
-func (t *TmuxWindow) MustIsOutputMatchingRegex(regex string, verbose bool) (isMatching bool) {
-	isMatching, err := t.IsOutputMatchingRegex(regex, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isMatching
-}
-
-func (t *TmuxWindow) MustWaitUntilOutputMatchesRegex(regex string, timeout time.Duration, verbose bool) {
-	err := t.WaitUntilOutputMatchesRegex(regex, timeout, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TmuxWindow) MustSetName(name string) {
-	err := t.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (t *TmuxWindow) MustSetSession(session *TmuxSession) {
-	err := t.SetSession(session)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (t *TmuxWindow) Recreate(ctx context.Context) (err error) {

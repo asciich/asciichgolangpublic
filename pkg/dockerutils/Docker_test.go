@@ -7,7 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockerinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
 func getDockerImplementationByName(implementationName string) (docker dockerinterfaces.Docker) {

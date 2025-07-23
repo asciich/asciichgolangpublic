@@ -1,9 +1,10 @@
-package testutils
+package testutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
 func TestTestsFormatAsTestname(t *testing.T) {
@@ -17,13 +18,12 @@ func TestTestsFormatAsTestname(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(
-			MustFormatAsTestname(tt),
+			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				testname, err := testutils.FormatAsTestname(tt.objectToFormat)
+				require.NoError(t, err)
 
-				testname := MustFormatAsTestname(tt.objectToFormat)
-
-				require.EqualValues(tt.expectedTestname, testname)
+				require.EqualValues(t, tt.expectedTestname, testname)
 			},
 		)
 	}

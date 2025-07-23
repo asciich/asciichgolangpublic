@@ -7,7 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
 
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
 func TestGitlabReleaseCreateAndDelete(t *testing.T) {

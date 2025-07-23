@@ -1,4 +1,4 @@
-package tmux
+package tmuxutils
 
 import (
 	"context"
@@ -24,15 +24,6 @@ func GetTmuxOnLocalMachine() (tmux *TmuxService, err error) {
 	}
 
 	return tmux, nil
-}
-
-func MustGetTmuxOnLocalMachine() (tmux *TmuxService) {
-	tmux, err := GetTmuxOnLocalMachine()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return tmux
 }
 
 func NewTmuxService() (t *TmuxService) {
@@ -125,40 +116,6 @@ func (t *TmuxService) ListSessionNames(ctx context.Context) (sessionNames []stri
 	logging.LogInfoByCtxf(ctx, "There are '%d' tmux sessions.", len(sessionNames))
 
 	return sessionNames, nil
-}
-
-func (t *TmuxService) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
-	commandExecutor, err := t.GetCommandExecutor()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandExecutor
-}
-
-func (t *TmuxService) MustGetSessionByName(name string) (tmuxSession *TmuxSession) {
-	tmuxSession, err := t.GetSessionByName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return tmuxSession
-}
-
-func (t *TmuxService) MustGetWindowByNames(sessionName string, windowName string) (window *TmuxWindow) {
-	window, err := t.GetWindowByNames(sessionName, windowName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return window
-}
-
-func (t *TmuxService) MustSetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) {
-	err := t.SetCommandExecutor(commandExecutor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (t *TmuxService) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
