@@ -8,7 +8,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
@@ -213,7 +214,7 @@ func (c *CommandExecutorNamespace) GetClusterName() (clusterName string, err err
 	return kubernetesCluster.GetName()
 }
 
-func (c *CommandExecutorNamespace) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
+func (c *CommandExecutorNamespace) GetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor, err error) {
 	kubernetes, err := c.GetKubernetesCluster()
 	if err != nil {
 		return nil, err
@@ -380,7 +381,7 @@ func (c *CommandExecutorNamespace) RoleByNameExists(ctx context.Context, name st
 	return exists, nil
 }
 
-func (c *CommandExecutorNamespace) RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (c *CommandExecutorNamespace) RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}

@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -22,7 +24,7 @@ func NewBashService() (b *BashService) {
 	return b
 }
 
-func (b *BashService) GetDeepCopy() (deepCopy CommandExecutor) {
+func (b *BashService) GetDeepCopy() (deepCopy commandexecutorinterfaces.CommandExecutor) {
 	d := NewBashService()
 
 	*d = *b
@@ -36,7 +38,7 @@ func (b *BashService) GetHostDescription() (hostDescription string, err error) {
 	return "localhost", err
 }
 
-func (b *BashService) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput, err error) {
+func (b *BashService) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -63,7 +65,7 @@ func (b *BashService) RunCommand(ctx context.Context, options *parameteroptions.
 	return commandOutput, nil
 }
 
-func (b *BashService) RunOneLiner(ctx context.Context, oneLiner string) (output *CommandOutput, err error) {
+func (b *BashService) RunOneLiner(ctx context.Context, oneLiner string) (output *commandexecutorgeneric.CommandOutput, err error) {
 	if oneLiner == "" {
 		return nil, tracederrors.TracedErrorEmptyString("oneLiner")
 	}

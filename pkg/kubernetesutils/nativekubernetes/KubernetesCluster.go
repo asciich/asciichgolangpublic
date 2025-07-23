@@ -5,7 +5,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubeconfigutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
@@ -626,7 +626,7 @@ func (n *NativeKubernetesCluster) CreateObject(ctx context.Context, options *kub
 	return namespace.CreateObject(ctx, options)
 }
 
-func (n *NativeKubernetesCluster) RunCommandInTemporaryPod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (*commandexecutor.CommandOutput, error) {
+func (n *NativeKubernetesCluster) RunCommandInTemporaryPod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (*commandexecutorgeneric.CommandOutput, error) {
 	config, err := n.GetConfig()
 	if err != nil {
 		return nil, err

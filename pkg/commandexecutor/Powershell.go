@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/shellutils/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -24,7 +25,7 @@ func PowerShell() (p *PowerShellService) {
 	return NewPowerShell()
 }
 
-func (b *PowerShellService) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput, err error) {
+func (b *PowerShellService) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -69,7 +70,7 @@ func (b *PowerShellService) RunCommand(ctx context.Context, options *parameterop
 	return commandOutput, nil
 }
 
-func (p *PowerShellService) RunOneLiner(ctx context.Context, oneLiner string) (output *CommandOutput, err error) {
+func (p *PowerShellService) RunOneLiner(ctx context.Context, oneLiner string) (output *commandexecutorgeneric.CommandOutput, err error) {
 	if oneLiner == "" {
 		return nil, tracederrors.TracedErrorEmptyString("oneLiner")
 	}

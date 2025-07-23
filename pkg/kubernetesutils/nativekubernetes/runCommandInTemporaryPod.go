@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -15,7 +15,7 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-func RunCommandInTemporaryPod(ctx context.Context, config *rest.Config, options *kubernetesparameteroptions.RunCommandOptions) (*commandexecutor.CommandOutput, error) {
+func RunCommandInTemporaryPod(ctx context.Context, config *rest.Config, options *kubernetesparameteroptions.RunCommandOptions) (*commandexecutorgeneric.CommandOutput, error) {
 	if config == nil {
 		return nil, tracederrors.TracedErrorNil("config")
 	}
@@ -104,7 +104,7 @@ func RunCommandInTemporaryPod(ctx context.Context, config *rest.Config, options 
 	}
 
 	var retVal = 0
-	output := &commandexecutor.CommandOutput{
+	output := &commandexecutorgeneric.CommandOutput{
 		ReturnCode: &retVal,
 		Stdout:     &stdout,
 		Stderr:     &stderr,

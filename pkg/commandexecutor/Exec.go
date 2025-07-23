@@ -10,6 +10,8 @@ import (
 	"os/exec"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/windowsutils"
@@ -37,7 +39,7 @@ func NewExecService() (e *ExecService) {
 	return new(ExecService)
 }
 
-func (e *ExecService) GetDeepCopy() (deepCopy CommandExecutor) {
+func (e *ExecService) GetDeepCopy() (deepCopy commandexecutorinterfaces.CommandExecutor) {
 	d := NewExec()
 
 	*d = *e
@@ -51,7 +53,7 @@ func (e *ExecService) GetHostDescription() (hostDescription string, err error) {
 	return "localhost", nil
 }
 
-func (e *ExecService) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *CommandOutput, err error) {
+func (e *ExecService) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -90,7 +92,7 @@ func (e *ExecService) RunCommand(ctx context.Context, options *parameteroptions.
 	}
 	cmd.Stderr = &stderr
 
-	commandOutput = new(CommandOutput)
+	commandOutput = new(commandexecutorgeneric.CommandOutput)
 
 	writeStdin := options.IsStdinStringSet()
 

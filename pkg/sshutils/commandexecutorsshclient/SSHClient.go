@@ -6,6 +6,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/shellutils/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -54,7 +56,7 @@ func (s *SSHClient) CheckReachable(ctx context.Context) (err error) {
 	return tracederrors.TracedErrorf("host '%v' is not reachable", hostname)
 }
 
-func (s *SSHClient) GetDeepCopy() (copy commandexecutor.CommandExecutor) {
+func (s *SSHClient) GetDeepCopy() (copy commandexecutorinterfaces.CommandExecutor) {
 	toReturn := NewSSHClient()
 
 	*toReturn = *s
@@ -152,7 +154,7 @@ func (s *SSHClient) IsSshUserNameSet() (isSet bool) {
 	return len(s.sshUserName) > 0
 }
 
-func (s *SSHClient) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (s *SSHClient) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
 	userAtHost, err := s.GetHostName()
 	if err != nil {
 		return nil, err

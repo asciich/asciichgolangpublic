@@ -7,12 +7,13 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type TmuxService struct {
-	commandExecutor commandexecutor.CommandExecutor
+	commandExecutor commandexecutorinterfaces.CommandExecutor
 }
 
 func GetTmuxOnLocalMachine() (tmux *TmuxService, err error) {
@@ -30,7 +31,7 @@ func NewTmuxService() (t *TmuxService) {
 	return new(TmuxService)
 }
 
-func (t *TmuxService) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
+func (t *TmuxService) GetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor, err error) {
 
 	return t.commandExecutor, nil
 }
@@ -118,7 +119,7 @@ func (t *TmuxService) ListSessionNames(ctx context.Context) (sessionNames []stri
 	return sessionNames, nil
 }
 
-func (t *TmuxService) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
+func (t *TmuxService) SetCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) (err error) {
 	t.commandExecutor = commandExecutor
 
 	return nil

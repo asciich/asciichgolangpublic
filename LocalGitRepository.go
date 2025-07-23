@@ -19,6 +19,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -135,7 +136,7 @@ func NewLocalGitRepository() (l *LocalGitRepository) {
 }
 
 // TODO remove: LocalGitRepository should purely base on goGit, not by calling the git binary.
-func (l *LocalGitRepository) RunGitCommand(ctx context.Context, gitCommand []string) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (l *LocalGitRepository) RunGitCommand(ctx context.Context, gitCommand []string) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
 	if gitCommand == nil {
 		return nil, tracederrors.TracedErrorEmptyString("gitCommand")
 	}

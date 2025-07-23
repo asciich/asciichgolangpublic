@@ -9,6 +9,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/fileformats/jsonutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
@@ -21,11 +23,11 @@ import (
 
 type CommandExecutorKubernetes struct {
 	name              string
-	commandExecutor   commandexecutor.CommandExecutor
+	commandExecutor   commandexecutorinterfaces.CommandExecutor
 	cachedContextName string
 }
 
-func GetCommandExecutorKubernetsByName(commandExecutor commandexecutor.CommandExecutor, clusterName string) (kubernetes kubernetesinterfaces.KubernetesCluster, err error) {
+func GetCommandExecutorKubernetsByName(commandExecutor commandexecutorinterfaces.CommandExecutor, clusterName string) (kubernetes kubernetesinterfaces.KubernetesCluster, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -195,7 +197,7 @@ func (c *CommandExecutorKubernetes) GetCachedKubectlContext(ctx context.Context)
 	return
 }
 
-func (c *CommandExecutorKubernetes) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
+func (c *CommandExecutorKubernetes) GetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor, err error) {
 	if c.commandExecutor == nil {
 		return nil, tracederrors.TracedError("CommandExecutor not set")
 	}
@@ -508,7 +510,7 @@ func (c *CommandExecutorKubernetes) NamespaceByNameExists(ctx context.Context, n
 	return exists, nil
 }
 
-func (c *CommandExecutorKubernetes) RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (c *CommandExecutorKubernetes) RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}
@@ -544,7 +546,7 @@ func (c *CommandExecutorKubernetes) SetCachedContextName(cachedContextName strin
 	return nil
 }
 
-func (c *CommandExecutorKubernetes) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
+func (c *CommandExecutorKubernetes) SetCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) (err error) {
 	c.commandExecutor = commandExecutor
 
 	return nil
@@ -643,7 +645,7 @@ func (c *CommandExecutorKubernetes) CreateObject(ctx context.Context, options *k
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
-func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (*commandexecutor.CommandOutput, error) {
+func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (*commandexecutorgeneric.CommandOutput, error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
