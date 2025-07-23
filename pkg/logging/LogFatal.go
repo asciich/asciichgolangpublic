@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/asciich/asciichgolangpublic/shell/terminalcolors"
+	"github.com/asciich/asciichgolangpublic/shellutils/terminalcolors"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 

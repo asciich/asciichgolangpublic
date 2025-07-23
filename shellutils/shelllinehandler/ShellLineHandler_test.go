@@ -1,9 +1,10 @@
-package shelllinehandler
+package shelllinehandler_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/shellutils/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/testutils"
 )
 
@@ -21,10 +22,9 @@ func TestShellLineHandlerSplit(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				splitted := MustSplit(tt.commandString)
-				require.EqualValues(tt.expectedSplitted, splitted)
+				splitted, err := shelllinehandler.Split(tt.commandString)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedSplitted, splitted)
 			},
 		)
 	}
@@ -53,10 +53,9 @@ func TestShellLineHandlerJoin(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				joined := MustJoin(tt.command)
-				require.EqualValues(tt.expectedJoined, joined)
+				joined, err := shelllinehandler.Join(tt.command)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedJoined, joined)
 			},
 		)
 	}

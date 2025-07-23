@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
+	"github.com/asciich/asciichgolangpublic/shellutils/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -42,15 +42,20 @@ func (b *PowerShellService) RunCommand(ctx context.Context, options *parameterop
 	}
 
 	if optionsToUse.RunAsRoot {
+		joined, err := shelllinehandler.Join([]string{
+			"Start-Process",
+			"powershell",
+			"-Verb",
+			"runAs",
+			joinedCommand,
+		})
+		if err != nil {
+			return nil, err
+		}
+		
 		powerShellCommand = []string{
 			"powershell",
-			shelllinehandler.MustJoin([]string{
-				"Start-Process",
-				"powershell",
-				"-Verb",
-				"runAs",
-				joinedCommand,
-			}),
+			joined,
 		}
 	}
 
