@@ -1,4 +1,4 @@
-package tmux
+package tmuxutils_test
 
 import (
 	"testing"
@@ -8,8 +8,9 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/tmuxutils"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
 func TestTemuxWindow_CreateAndDeleteWindow(t *testing.T) {
@@ -27,12 +28,14 @@ func TestTemuxWindow_CreateAndDeleteWindow(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				tmux := MustGetTmuxOnLocalMachine()
+				tmux, err := tmuxutils.GetTmuxOnLocalMachine()
+				require.NoError(t, err)
 
-				session := tmux.MustGetSessionByName("sessionName")
+				session, err := tmux.GetSessionByName("sessionName")
+				require.NoError(t, err)
 				defer session.Delete(ctx)
 
-				err := session.Recreate(ctx)
+				err = session.Recreate(ctx)
 				require.NoError(t, err)
 
 				window, err := session.GetWindowByName("windowName")
@@ -87,12 +90,14 @@ func TestTemuxWindow_ReadLastLine(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				tmux := MustGetTmuxOnLocalMachine()
+				tmux, err := tmuxutils.GetTmuxOnLocalMachine()
+				require.NoError(t, err)
 
-				session := tmux.MustGetSessionByName("sessionName")
+				session, err := tmux.GetSessionByName("sessionName")
+				require.NoError(t, err)
 				defer session.Delete(ctx)
 
-				err := session.Recreate(ctx)
+				err = session.Recreate(ctx)
 				require.NoError(t, err)
 
 				window, err := session.GetWindowByName("windowName")
@@ -110,10 +115,12 @@ func TestTemuxWindow_ReadLastLine(t *testing.T) {
 				err = window.WaitUntilCliPromptReady(ctx)
 				require.NoError(t, err)
 
+				line, err := window.GetSecondLatestPaneLine()
+				require.NoError(t, err)
 				require.EqualValues(
 					t,
 					tt.testmessage,
-					window.MustGetSecondLatestPaneLine(),
+					line,
 				)
 			},
 		)
@@ -137,12 +144,14 @@ func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				tmux := MustGetTmuxOnLocalMachine()
+				tmux, err := tmuxutils.GetTmuxOnLocalMachine()
+				require.NoError(t, err)
 
-				session := tmux.MustGetSessionByName("sessionName")
+				session, err := tmux.GetSessionByName("sessionName")
+				require.NoError(t, err)
 				defer session.Delete(ctx)
 
-				err := session.Recreate(ctx)
+				err = session.Recreate(ctx)
 				require.NoError(t, err)
 
 				window, err := session.GetWindowByName("windowName")
@@ -180,14 +189,21 @@ func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
 						"enter",
 					},
 				)
+				require.NoError(t, err)
 
-				window.MustWaitUntilOutputMatchesRegex("Username:", 2*time.Second, contextutils.GetVerboseFromContext(ctx))
+				err = window.WaitUntilOutputMatchesRegex("Username:", 2*time.Second, contextutils.GetVerboseFromContext(ctx))
+				require.NoError(t, err)
 				err = window.SendKeys(ctx, []string{tt.username, "enter"})
-				window.MustWaitUntilOutputMatchesRegex("Password:", 2*time.Second, contextutils.GetVerboseFromContext(ctx))
+				require.NoError(t, err)
+				err = window.WaitUntilOutputMatchesRegex("Password:", 2*time.Second, contextutils.GetVerboseFromContext(ctx))
+				require.NoError(t, err)
 				err = window.SendKeys(ctx, []string{tt.password, "enter"})
-				window.MustWaitUntilOutputMatchesRegex("finished", 2*time.Second, contextutils.GetVerboseFromContext(ctx))
+				require.NoError(t, err)
+				err = window.WaitUntilOutputMatchesRegex("finished", 2*time.Second, contextutils.GetVerboseFromContext(ctx))
+				require.NoError(t, err)
 
-				shownLines := window.MustGetShownLines()
+				shownLines, err := window.GetShownLines()
+				require.NoError(t, err)
 				require.EqualValues(t, tt.username+"\n"+tt.password+"\n", files.MustReadFileAsString(outputPath))
 				require.Contains(t, shownLines, "finished")
 			},
@@ -217,12 +233,14 @@ func TestTemuxWindow_RunCommand(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				tmux := MustGetTmuxOnLocalMachine()
+				tmux, err := tmuxutils.GetTmuxOnLocalMachine()
+				require.NoError(t, err)
 
-				window := tmux.MustGetWindowByNames("sessionName", "windowName")
+				window, err := tmux.GetWindowByNames("sessionName", "windowName")
+				require.NoError(t, err)
 				defer window.DeleteSession(ctx)
 
-				err := window.Recreate(ctx)
+				err = window.Recreate(ctx)
 				require.NoError(t, err)
 
 				commandOutput, err := window.RunCommand(

@@ -1,4 +1,4 @@
-package tmux
+package tmuxutils_test
 
 import (
 	"context"
@@ -7,7 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/tmuxutils"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
 func getCtx() context.Context {
@@ -29,9 +30,11 @@ func TestTemuxSession_CreateAndDeleteSession(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				tmux := MustGetTmuxOnLocalMachine()
+				tmux, err := tmuxutils.GetTmuxOnLocalMachine()
+				require.NoError(t, err)
 
-				session := tmux.MustGetSessionByName("sessionName")
+				session, err := tmux.GetSessionByName("sessionName")
+				require.NoError(t, err)
 				defer session.Delete(ctx)
 
 				for i := 0; i < 2; i++ {

@@ -1,10 +1,11 @@
-package tmux
+package tmuxutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/tmuxutils"
 )
 
 func TestTemux_IsTmuxKey(t *testing.T) {
@@ -25,7 +26,7 @@ func TestTemux_IsTmuxKey(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require.EqualValues(t, tt.expectedIsKey, IsTmuxKey(tt.input))
+				require.EqualValues(t, tt.expectedIsKey, tmuxutils.IsTmuxKey(tt.input))
 			},
 		)
 	}
