@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/ftputils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"

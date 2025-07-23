@@ -3,7 +3,7 @@ package fluxutils
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/commandexecutorflux"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxparameteroptions"
