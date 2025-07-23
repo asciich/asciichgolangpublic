@@ -22,7 +22,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
+	"github.com/asciich/asciichgolangpublic/shellutils/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 

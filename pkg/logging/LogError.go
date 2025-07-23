@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/shell/terminalcolors"
+	"github.com/asciich/asciichgolangpublic/shellutils/terminalcolors"
 )
 
 var overrideFunctionLogError func(logmessage string)

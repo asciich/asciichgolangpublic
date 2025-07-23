@@ -6,7 +6,6 @@ import (
 	"github.com/google/shlex"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 )
 
 func Join(command []string) (joinedCommand string, err error) {
@@ -31,24 +30,6 @@ func Join(command []string) (joinedCommand string, err error) {
 
 	joinedCommand = strings.Join(commandToJoin, " ")
 	return joinedCommand, nil
-}
-
-func MustJoin(command []string) (joinedCommand string) {
-	joinedCommand, err := Join(command)
-	if err != nil {
-		logging.LogFatalf("shellLineHandler.Join failed: '%v'", err)
-	}
-
-	return joinedCommand
-}
-
-func MustSplit(command string) (splittedCommand []string) {
-	splittedCommand, err := Split(command)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return splittedCommand
 }
 
 func Split(command string) (splittedCommand []string, err error) {

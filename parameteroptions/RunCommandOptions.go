@@ -3,7 +3,7 @@ package parameteroptions
 import (
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datetime"
-	"github.com/asciich/asciichgolangpublic/shell/shelllinehandler"
+	"github.com/asciich/asciichgolangpublic/shellutils/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 

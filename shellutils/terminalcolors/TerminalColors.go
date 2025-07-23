@@ -5,7 +5,7 @@ package terminalcolors
 // Source: https://stackoverflow.com/questions/5947742/how-to-change-the-output-color-of-echo-in-linux
 // Source: https://en.wikipedia.org/wiki/ANSI_escape_code
 
-// This color code resets all color settings back default.
+// This color code resets all color settings back to default.
 func GetCodeNoColor() (code string) {
 	return "\033[0m"
 }
