@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/asciich/asciichgolangpublic/shellutils/terminalcolors"
+	"github.com/asciich/asciichgolangpublic/pkg/shellutils/terminalcolors"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -21,7 +21,7 @@ func LogFatal(logmessage string) {
 	}
 
 	if globalLogSettings.IsColorEnabled() {
-		logmessage = terminalcolors.GetCodeRed() + logmessage + terminalcolors.GetCodeNoColor()
+		logmessage = terminalcolors.CODE_RED + logmessage + terminalcolors.CODE_NO_COLOR
 	}
 	Log(logmessage)
 	os.Exit(1)

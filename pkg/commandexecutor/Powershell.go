@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/shellutils/shelllinehandler"
+	"github.com/asciich/asciichgolangpublic/pkg/shellutils/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -52,7 +52,7 @@ func (b *PowerShellService) RunCommand(ctx context.Context, options *parameterop
 		if err != nil {
 			return nil, err
 		}
-		
+
 		powerShellCommand = []string{
 			"powershell",
 			joined,

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/shellutils/terminalcolors"
+	"github.com/asciich/asciichgolangpublic/pkg/shellutils/terminalcolors"
 )
 
 var overrideFunctionLogWarn func(logmessage string)
@@ -21,7 +21,7 @@ func LogWarn(logmessage string) {
 	}
 
 	if globalLogSettings.IsColorEnabled() {
-		logmessage = terminalcolors.GetCodeYellow() + logmessage + terminalcolors.GetCodeNoColor()
+		logmessage = terminalcolors.CODE_YELLOW + logmessage + terminalcolors.CODE_NO_COLOR
 	}
 	Log(logmessage)
 }
