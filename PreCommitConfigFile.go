@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/changesummary"
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/dependencyutils/dependencyinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -121,7 +122,7 @@ func (p *PreCommitConfigFile) GetAbsolutePath() (absolutePath string, err error)
 	return path, nil
 }
 
-func (p *PreCommitConfigFile) GetDependencies(verbose bool) (dependencies []Dependency, err error) {
+func (p *PreCommitConfigFile) GetDependencies(verbose bool) (dependencies []dependencyinterfaces.Dependency, err error) {
 	preCommitConfigFileContent, err := p.GetPreCommitConfigFileContent(verbose)
 	if err != nil {
 		return nil, err
@@ -201,7 +202,7 @@ func (p *PreCommitConfigFile) MustGetAbsolutePath() (absolutePath string) {
 	return absolutePath
 }
 
-func (p *PreCommitConfigFile) MustGetDependencies(verbose bool) (dependencies []Dependency) {
+func (p *PreCommitConfigFile) MustGetDependencies(verbose bool) (dependencies []dependencyinterfaces.Dependency) {
 	dependencies, err := p.GetDependencies(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -255,7 +256,7 @@ func (p *PreCommitConfigFile) MustUpdateDependencies(options *parameteroptions.U
 	return changeSummary
 }
 
-func (p *PreCommitConfigFile) MustUpdateDependency(dependency Dependency, options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary) {
+func (p *PreCommitConfigFile) MustUpdateDependency(dependency dependencyinterfaces.Dependency, options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary) {
 	changeSummary, err := p.UpdateDependency(dependency, options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -311,7 +312,7 @@ func (p *PreCommitConfigFile) UpdateDependencies(options *parameteroptions.Updat
 	return changeSummary, nil
 }
 
-func (p *PreCommitConfigFile) UpdateDependency(dependency Dependency, options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
+func (p *PreCommitConfigFile) UpdateDependency(dependency dependencyinterfaces.Dependency, options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if dependency == nil {
 		return nil, tracederrors.TracedErrorNil("dependency")
 	}

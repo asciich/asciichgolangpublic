@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/files"
+	"github.com/asciich/asciichgolangpublic/pkg/dependencyutils/dependencyinterfaces"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
@@ -15,7 +16,7 @@ func NewDependenciesSliceService() (d *DependenciesSliceService) {
 	return new(DependenciesSliceService)
 }
 
-func (d *DependenciesSliceService) AddSourceFileForEveryEntry(dependencies []Dependency, sourceFile files.File) (err error) {
+func (d *DependenciesSliceService) AddSourceFileForEveryEntry(dependencies []dependencyinterfaces.Dependency, sourceFile files.File) (err error) {
 	if dependencies == nil {
 		return tracederrors.TracedErrorNil("dependencies")
 	}
@@ -34,7 +35,7 @@ func (d *DependenciesSliceService) AddSourceFileForEveryEntry(dependencies []Dep
 	return nil
 }
 
-func (d *DependenciesSliceService) GetDependencyNames(dependencies []Dependency) (dependencyNames []string, err error) {
+func (d *DependenciesSliceService) GetDependencyNames(dependencies []dependencyinterfaces.Dependency) (dependencyNames []string, err error) {
 	for _, toAdd := range dependencies {
 		nameToAdd, err := toAdd.GetName()
 		if err != nil {

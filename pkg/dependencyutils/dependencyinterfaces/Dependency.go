@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package dependencyinterfaces
 
 import (
 	"github.com/asciich/asciichgolangpublic/changesummary"
