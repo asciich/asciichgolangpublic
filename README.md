@@ -1,9 +1,10 @@
 # asciichgolangpublic
 
+**Disclamer: This is a single person project often adjusting to new findings and introducing new ideas fast without keeping backward compatibility.**
+
 This module helps to write infrastructure and/or automation related microservices and CLIs easier and faster.
 By providing a lot of convenience functions, sanity checks during runtime and detailed error messages it can be used to write easy to understand software to automate repeatable work.
 The focus is on ease of use and developer speed instead of algorithm speed and computer resource efficiency. 
-
 
 ## Provided functionality
 

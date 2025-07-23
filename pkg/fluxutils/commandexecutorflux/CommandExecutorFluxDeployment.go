@@ -3,7 +3,7 @@ package commandexecutorflux
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"

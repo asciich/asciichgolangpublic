@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils"
