@@ -8,8 +8,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/hosts"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
@@ -639,7 +639,7 @@ func (k *KVMHypervisor) MustRemoveVolumeByName(volumeName string, verbose bool) 
 	}
 }
 
-func (k *KVMHypervisor) MustRunKvmCommand(kvmCommand []string, verbose bool) (commandOutput *commandexecutorgeneric.CommandOutput) {
+func (k *KVMHypervisor) MustRunKvmCommand(kvmCommand []string, verbose bool) (commandOutput *commandoutput.CommandOutput) {
 	commandOutput, err := k.RunKvmCommand(kvmCommand, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -780,7 +780,7 @@ func (k *KVMHypervisor) RemoveVolumeByName(volumeName string, verbose bool) (err
 	return nil
 }
 
-func (k *KVMHypervisor) RunKvmCommand(kvmCommand []string, verbose bool) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
+func (k *KVMHypervisor) RunKvmCommand(kvmCommand []string, verbose bool) (commandOutput *commandoutput.CommandOutput, err error) {
 	if kvmCommand == nil {
 		return nil, tracederrors.TracedError("kvmCommand is nil")
 	}
@@ -789,7 +789,7 @@ func (k *KVMHypervisor) RunKvmCommand(kvmCommand []string, verbose bool) (comman
 	command = append(command, kvmCommand...)
 
 	if k.useLocalhost {
-		commandOutput, err = commandexecutor.Bash().RunCommand(
+		commandOutput, err = commandexecutorbashoo.Bash().RunCommand(
 			contextutils.GetVerbosityContextByBool(verbose),
 			&parameteroptions.RunCommandOptions{
 				Command: command,

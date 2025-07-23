@@ -1,10 +1,10 @@
-package commandexecutorgeneric_test
+package commandoutput_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -23,7 +23,7 @@ func TestCommandOutputGetAndSetReturnCode(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				commandOutput := commandexecutorgeneric.NewCommandOutput()
+				commandOutput := commandoutput.NewCommandOutput()
 				err := commandOutput.SetReturnCode(tt.returnCode)
 				require.NoError(t, err)
 

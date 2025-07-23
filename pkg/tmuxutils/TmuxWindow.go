@@ -12,8 +12,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
@@ -534,7 +534,7 @@ func (t *TmuxWindow) Recreate(ctx context.Context) (err error) {
 	return nil
 }
 
-func (t *TmuxWindow) RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
+func (t *TmuxWindow) RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")
 	}
@@ -713,7 +713,7 @@ func (t *TmuxWindow) RunCommand(ctx context.Context, runCommandOptions *paramete
 
 	stdout := strings.Join(outputLines, "\n")
 
-	commandOutput = commandexecutorgeneric.NewCommandOutput()
+	commandOutput = commandoutput.NewCommandOutput()
 
 	err = commandOutput.SetStdoutByString(stdout)
 	if err != nil {

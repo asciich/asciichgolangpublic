@@ -1,4 +1,5 @@
-package commandexecutorgeneric
+package commandoutput
+
 import (
 	"fmt"
 	"strconv"

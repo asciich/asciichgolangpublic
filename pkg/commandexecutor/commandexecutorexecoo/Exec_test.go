@@ -1,14 +1,21 @@
-package commandexecutor_test
+package commandexecutorexecoo_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func TestExecRunCommandAndGetStdoutAsString(t *testing.T) {
 	tests := []struct {
@@ -26,7 +33,7 @@ func TestExecRunCommandAndGetStdoutAsString(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				var exec commandexecutorinterfaces.CommandExecutor = commandexecutor.Exec()
+				var exec commandexecutorinterfaces.CommandExecutor = commandexecutorexecoo.Exec()
 				output, err := exec.RunCommandAndGetStdoutAsString(
 					ctx,
 					&parameteroptions.RunCommandOptions{
@@ -36,7 +43,7 @@ func TestExecRunCommandAndGetStdoutAsString(t *testing.T) {
 				require.NoError(t, err)
 
 				output2, err := exec.RunCommandAndGetStdoutAsString(
-					commandexecutor.WithLiveOutputOnStdout(ctx),
+					commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
 					&parameteroptions.RunCommandOptions{
 						Command: tt.command,
 					},
@@ -77,7 +84,7 @@ func TestExecRunCommandStdin(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				var exec commandexecutorinterfaces.CommandExecutor = commandexecutor.Exec()
+				var exec commandexecutorinterfaces.CommandExecutor = commandexecutorexecoo.Exec()
 				output, err := exec.RunCommandAndGetStdoutAsBytes(
 					ctx,
 					&parameteroptions.RunCommandOptions{
@@ -88,12 +95,13 @@ func TestExecRunCommandStdin(t *testing.T) {
 				require.NoError(t, err)
 
 				output2, err := exec.RunCommandAndGetStdoutAsString(
-					commandexecutor.WithLiveOutputOnStdout(ctx),
+					commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
 					&parameteroptions.RunCommandOptions{
 						Command:     tt.command,
 						StdinString: tt.stdin,
 					},
 				)
+				require.NoError(t, err)
 
 				require.EqualValues(t, []byte(tt.expectedOutput), output)
 				require.EqualValues(t, tt.expectedOutput, output2)

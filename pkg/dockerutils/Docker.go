@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/hosts"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockerinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -55,7 +55,7 @@ func MustGetDockerOnHost(host hosts.Host) (docker dockerinterfaces.Docker) {
 }
 
 func GetDockerOnLocalHost() (dockerinterfaces.Docker, error) {
-	return GetCommandExecutorDocker(commandexecutor.Bash())
+	return GetCommandExecutorDocker(commandexecutorbashoo.Bash())
 }
 
 func ListContainerNames(ctx context.Context) ([]string, error) {

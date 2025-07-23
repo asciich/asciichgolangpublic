@@ -8,8 +8,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockerinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -145,7 +145,7 @@ func (c *CommandExecutorDockerContainer) Kill(ctx context.Context) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorDockerContainer) RunCommand(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
+func (c *CommandExecutorDockerContainer) RunCommand(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runOptions")
 	}

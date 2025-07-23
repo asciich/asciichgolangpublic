@@ -8,7 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/ansibleutils/ansiblegalaxyutils"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 )
@@ -48,8 +49,8 @@ func Test_CreateFileStructure(t *testing.T) {
 
 		ansibleBin := os.Getenv("ANSIBLE_GALAXY_BIN")
 		if ansibleBin != "" {
-			_, err = commandexecutor.Bash().RunCommand(
-				commandexecutor.WithLiveOutputOnStdout(ctx),
+			_, err = commandexecutorbashoo.Bash().RunCommand(
+				commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
 				&parameteroptions.RunCommandOptions{
 					Command: []string{ansibleBin, "collection", "install", tempDirPath},
 				},

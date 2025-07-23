@@ -1,16 +1,18 @@
-package commandexecutor
+package commandexecutorpowershelloo
 
 import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/shellutils/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type PowerShellService struct {
-	CommandExecutorBase
+	commandexecutorgeneric.CommandExecutorBase
 }
 
 func NewPowerShell() (p *PowerShellService) {
@@ -25,7 +27,7 @@ func PowerShell() (p *PowerShellService) {
 	return NewPowerShell()
 }
 
-func (b *PowerShellService) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
+func (b *PowerShellService) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -62,7 +64,7 @@ func (b *PowerShellService) RunCommand(ctx context.Context, options *parameterop
 
 	optionsToUse.Command = powerShellCommand
 
-	commandOutput, err = Exec().RunCommand(ctx, optionsToUse)
+	commandOutput, err = commandexecutorexecoo.Exec().RunCommand(ctx, optionsToUse)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +72,7 @@ func (b *PowerShellService) RunCommand(ctx context.Context, options *parameterop
 	return commandOutput, nil
 }
 
-func (p *PowerShellService) RunOneLiner(ctx context.Context, oneLiner string) (output *commandexecutorgeneric.CommandOutput, err error) {
+func (p *PowerShellService) RunOneLiner(ctx context.Context, oneLiner string) (output *commandoutput.CommandOutput, err error) {
 	if oneLiner == "" {
 		return nil, tracederrors.TracedErrorEmptyString("oneLiner")
 	}

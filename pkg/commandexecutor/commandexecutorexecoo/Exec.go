@@ -1,4 +1,4 @@
-package commandexecutor
+package commandexecutorexecoo
 
 import (
 	"bufio"
@@ -12,6 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/windowsutils"
@@ -19,7 +20,7 @@ import (
 )
 
 type ExecService struct {
-	CommandExecutorBase
+	commandexecutorgeneric.CommandExecutorBase
 }
 
 func Exec() (e *ExecService) {
@@ -53,7 +54,7 @@ func (e *ExecService) GetHostDescription() (hostDescription string, err error) {
 	return "localhost", nil
 }
 
-func (e *ExecService) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
+func (e *ExecService) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -92,7 +93,7 @@ func (e *ExecService) RunCommand(ctx context.Context, options *parameteroptions.
 	}
 	cmd.Stderr = &stderr
 
-	commandOutput = new(commandexecutorgeneric.CommandOutput)
+	commandOutput = new(commandoutput.CommandOutput)
 
 	writeStdin := options.IsStdinStringSet()
 
@@ -156,7 +157,7 @@ func (e *ExecService) RunCommand(ctx context.Context, options *parameteroptions.
 		}
 
 		if goOn {
-			if IsLiveOutputOnStdoutEnabled(ctx) {
+			if commandexecutorgeneric.IsLiveOutputOnStdoutEnabled(ctx) {
 				mOutput := line
 
 				if osutils.IsRunningOnWindows() {

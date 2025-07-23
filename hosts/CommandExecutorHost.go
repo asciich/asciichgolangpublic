@@ -9,9 +9,10 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/ftputils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -21,7 +22,7 @@ import (
 )
 
 type CommandExecutorHost struct {
-	commandexecutor.CommandExecutorBase
+	commandexecutorgeneric.CommandExecutorBase
 	commandExecutor commandexecutorinterfaces.CommandExecutor
 	Comment         string
 }
@@ -171,7 +172,7 @@ func (c *CommandExecutorHost) MustWaitUntilReachable(renewHostKey bool, verbose 
 	}
 }
 
-func (c *CommandExecutorHost) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
+func (c *CommandExecutorHost) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -196,7 +197,7 @@ func (h *CommandExecutorHost) AddSshHostKeyToKnownHosts(verbose bool) (err error
 		return err
 	}
 
-	_, err = commandexecutor.Bash().RunCommand(
+	_, err = commandexecutorbashoo.Bash().RunCommand(
 		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
@@ -403,7 +404,7 @@ func (h *CommandExecutorHost) IsPingable(verbose bool) (isPingable bool, err err
 		return false, err
 	}
 
-	stdout, err := commandexecutor.Bash().RunCommandAndGetStdoutAsString(
+	stdout, err := commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsString(
 		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"bash", "-c", fmt.Sprintf("ping -c 1 '%s' &>/dev/null && echo yes || echo no", hostname)},
@@ -583,7 +584,7 @@ func (h *CommandExecutorHost) RemoveSshHostKeyFromKnownHosts(verbose bool) (err 
 		return err
 	}
 
-	_, err = commandexecutor.Bash().RunCommand(
+	_, err = commandexecutorbashoo.Bash().RunCommand(
 		contextutils.GetVerbosityContextByBool(verbose),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"ssh-keygen", "-R", hostname},

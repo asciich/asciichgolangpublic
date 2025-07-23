@@ -9,6 +9,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -1011,7 +1012,7 @@ func (c *CommandExecutorFile) Truncate(newSizeBytes int64, verbose bool) (err er
 
 		ctx := contextutils.GetVerbosityContextByBool(verbose)
 		_, err = commandExecutor.RunCommand(
-			commandexecutor.WithLiveOutputOnStdoutIfVerbose(ctx),
+			commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 			&parameteroptions.RunCommandOptions{
 				Command: []string{
 					"truncate",

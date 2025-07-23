@@ -1,16 +1,18 @@
-package commandexecutor
+package commandexecutorbashoo
 
 import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type BashService struct {
-	CommandExecutorBase
+	commandexecutorgeneric.CommandExecutorBase
 }
 
 // Can be used to run commands in bash on localhost.
@@ -38,7 +40,7 @@ func (b *BashService) GetHostDescription() (hostDescription string, err error) {
 	return "localhost", err
 }
 
-func (b *BashService) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
+func (b *BashService) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -57,7 +59,7 @@ func (b *BashService) RunCommand(ctx context.Context, options *parameteroptions.
 	}
 	optionsToUse.Command = bashCommand
 
-	commandOutput, err = Exec().RunCommand(ctx, optionsToUse)
+	commandOutput, err = commandexecutorexecoo.Exec().RunCommand(ctx, optionsToUse)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +67,7 @@ func (b *BashService) RunCommand(ctx context.Context, options *parameteroptions.
 	return commandOutput, nil
 }
 
-func (b *BashService) RunOneLiner(ctx context.Context, oneLiner string) (output *commandexecutorgeneric.CommandOutput, err error) {
+func (b *BashService) RunOneLiner(ctx context.Context, oneLiner string) (output *commandoutput.CommandOutput, err error) {
 	if oneLiner == "" {
 		return nil, tracederrors.TracedErrorEmptyString("oneLiner")
 	}

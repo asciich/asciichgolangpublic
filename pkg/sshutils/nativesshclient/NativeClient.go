@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 
@@ -21,7 +21,7 @@ type SshClient struct {
 	Password string
 }
 
-func (s *SshClient) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (*commandexecutorgeneric.CommandOutput, error) {
+func (s *SshClient) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -68,7 +68,7 @@ func (s *SshClient) RunCommand(ctx context.Context, options *parameteroptions.Ru
 		}
 	}
 
-	output := &commandexecutorgeneric.CommandOutput{}
+	output := &commandoutput.CommandOutput{}
 	err = output.SetReturnCode(0)
 	if err != nil {
 		return nil, err

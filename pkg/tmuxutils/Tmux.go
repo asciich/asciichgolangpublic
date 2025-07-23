@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
@@ -19,7 +19,7 @@ type TmuxService struct {
 func GetTmuxOnLocalMachine() (tmux *TmuxService, err error) {
 	tmux = NewTmuxService()
 
-	err = tmux.SetCommandExecutor(commandexecutor.Bash())
+	err = tmux.SetCommandExecutor(commandexecutorbashoo.Bash())
 	if err != nil {
 		return nil, err
 	}
