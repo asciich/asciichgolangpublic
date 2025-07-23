@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -15,7 +16,7 @@ func getCtx() context.Context {
 	return contextutils.ContextVerbose()
 }
 
-func getCommandExecutorByImplementationName(implementationName string) (commandExecutor commandexecutor.CommandExecutor) {
+func getCommandExecutorByImplementationName(implementationName string) (commandExecutor commandexecutorinterfaces.CommandExecutor) {
 	if implementationName == "Bash" {
 		return commandexecutor.Bash()
 	}

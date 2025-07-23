@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -30,7 +31,7 @@ func TestBashRunCommandAndGetStdoutAsString(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				var bash commandexecutor.CommandExecutor = commandexecutor.Bash()
+				var bash commandexecutorinterfaces.CommandExecutor = commandexecutor.Bash()
 				output, err := bash.RunCommandAndGetStdoutAsString(
 					ctx,
 					&parameteroptions.RunCommandOptions{
@@ -321,7 +322,7 @@ func TestBashRunCommandStdin(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				var bash commandexecutor.CommandExecutor = commandexecutor.Bash()
+				var bash commandexecutorinterfaces.CommandExecutor = commandexecutor.Bash()
 				output, err := bash.RunCommandAndGetStdoutAsBytes(
 					ctx,
 					&parameteroptions.RunCommandOptions{

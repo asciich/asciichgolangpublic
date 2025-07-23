@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
@@ -27,11 +28,11 @@ import (
 // in the process table which operations where done.
 type CommandExecutorDirectory struct {
 	DirectoryBase
-	commandExecutor commandexecutor.CommandExecutor
+	commandExecutor commandexecutorinterfaces.CommandExecutor
 	dirPath         string
 }
 
-func GetCommandExecutorDirectoryByPath(commandExecutor commandexecutor.CommandExecutor, path string) (c *CommandExecutorDirectory, err error) {
+func GetCommandExecutorDirectoryByPath(commandExecutor commandexecutorinterfaces.CommandExecutor, path string) (c *CommandExecutorDirectory, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -61,7 +62,7 @@ func GetLocalCommandExecutorDirectoryByPath(path string) (c *CommandExecutorDire
 	return GetCommandExecutorDirectoryByPath(commandexecutor.Bash(), path)
 }
 
-func MustGetCommandExecutorDirectoryByPath(commandExecutor commandexecutor.CommandExecutor, path string) (c *CommandExecutorDirectory) {
+func MustGetCommandExecutorDirectoryByPath(commandExecutor commandexecutorinterfaces.CommandExecutor, path string) (c *CommandExecutorDirectory) {
 	c, err := GetCommandExecutorDirectoryByPath(commandExecutor, path)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -79,7 +80,7 @@ func MustGetLocalCommandExecutorDirectoryByPath(path string) (c *CommandExecutor
 	return c
 }
 
-func MustNewCommandExecutorDirectory(commandExecutor commandexecutor.CommandExecutor) (c *CommandExecutorDirectory) {
+func MustNewCommandExecutorDirectory(commandExecutor commandexecutorinterfaces.CommandExecutor) (c *CommandExecutorDirectory) {
 	c, err := NewCommandExecutorDirectory(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -88,7 +89,7 @@ func MustNewCommandExecutorDirectory(commandExecutor commandexecutor.CommandExec
 	return c
 }
 
-func NewCommandExecutorDirectory(commandExecutor commandexecutor.CommandExecutor) (c *CommandExecutorDirectory, err error) {
+func NewCommandExecutorDirectory(commandExecutor commandexecutorinterfaces.CommandExecutor) (c *CommandExecutorDirectory, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -371,12 +372,11 @@ func (c *CommandExecutorDirectory) GetBaseName() (baseName string, err error) {
 	return baseName, nil
 }
 
-func (c *CommandExecutorDirectory) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
-
+func (c *CommandExecutorDirectory) GetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor, err error) {
 	return c.commandExecutor, nil
 }
 
-func (c *CommandExecutorDirectory) GetCommandExecutorAndDirPath() (commandExecutor commandexecutor.CommandExecutor, dirPath string, err error) {
+func (c *CommandExecutorDirectory) GetCommandExecutorAndDirPath() (commandExecutor commandexecutorinterfaces.CommandExecutor, dirPath string, err error) {
 	commandExecutor, err = c.GetCommandExecutor()
 	if err != nil {
 		return nil, "", err
@@ -390,7 +390,7 @@ func (c *CommandExecutorDirectory) GetCommandExecutorAndDirPath() (commandExecut
 	return commandExecutor, dirPath, nil
 }
 
-func (c *CommandExecutorDirectory) GetCommandExecutorAndDirPathAndHostDescription() (commandExecutor commandexecutor.CommandExecutor, dirPath string, hostDescription string, err error) {
+func (c *CommandExecutorDirectory) GetCommandExecutorAndDirPathAndHostDescription() (commandExecutor commandexecutorinterfaces.CommandExecutor, dirPath string, hostDescription string, err error) {
 	commandExecutor, dirPath, err = c.GetCommandExecutorAndDirPath()
 	if err != nil {
 		return nil, "", "", err
@@ -770,7 +770,7 @@ func (c *CommandExecutorDirectory) MustGetBaseName() (baseName string) {
 	return baseName
 }
 
-func (c *CommandExecutorDirectory) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
+func (c *CommandExecutorDirectory) MustGetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -779,7 +779,7 @@ func (c *CommandExecutorDirectory) MustGetCommandExecutor() (commandExecutor com
 	return commandExecutor
 }
 
-func (c *CommandExecutorDirectory) MustGetCommandExecutorAndDirPath() (commandExecutor commandexecutor.CommandExecutor, dirPath string) {
+func (c *CommandExecutorDirectory) MustGetCommandExecutorAndDirPath() (commandExecutor commandexecutorinterfaces.CommandExecutor, dirPath string) {
 	commandExecutor, dirPath, err := c.GetCommandExecutorAndDirPath()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -788,7 +788,7 @@ func (c *CommandExecutorDirectory) MustGetCommandExecutorAndDirPath() (commandEx
 	return commandExecutor, dirPath
 }
 
-func (c *CommandExecutorDirectory) MustGetCommandExecutorAndDirPathAndHostDescription() (commandExecutor commandexecutor.CommandExecutor, dirPath string, hostDescription string) {
+func (c *CommandExecutorDirectory) MustGetCommandExecutorAndDirPathAndHostDescription() (commandExecutor commandexecutorinterfaces.CommandExecutor, dirPath string, hostDescription string) {
 	commandExecutor, dirPath, hostDescription, err := c.GetCommandExecutorAndDirPathAndHostDescription()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -887,7 +887,7 @@ func (c *CommandExecutorDirectory) MustListSubDirectories(options *parameteropti
 	return subDirectories
 }
 
-func (c *CommandExecutorDirectory) MustSetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) {
+func (c *CommandExecutorDirectory) MustSetCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) {
 	err := c.SetCommandExecutor(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -901,7 +901,7 @@ func (c *CommandExecutorDirectory) MustSetDirPath(dirPath string) {
 	}
 }
 
-func (c *CommandExecutorDirectory) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
+func (c *CommandExecutorDirectory) SetCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) (err error) {
 	c.commandExecutor = commandExecutor
 
 	return nil

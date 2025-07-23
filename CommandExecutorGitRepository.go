@@ -13,6 +13,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -67,7 +69,7 @@ func GetCommandExecutorGitRepositoryFromDirectory(directory files.Directory) (c 
 	)
 }
 
-func NewCommandExecutorGitRepository(commandExecutor commandexecutor.CommandExecutor) (c *CommandExecutorGitRepository, err error) {
+func NewCommandExecutorGitRepository(commandExecutor commandexecutorinterfaces.CommandExecutor) (c *CommandExecutorGitRepository, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -1654,7 +1656,7 @@ func (c *CommandExecutorGitRepository) RemoveRemoteByName(remoteNameToRemove str
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) RunGitCommand(ctx context.Context, gitCommand []string) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (c *CommandExecutorGitRepository) RunGitCommand(ctx context.Context, gitCommand []string) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
 	if len(gitCommand) <= 0 {
 		return nil, tracederrors.TracedError("gitCommand has no elements")
 	}

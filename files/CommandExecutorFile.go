@@ -9,6 +9,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
@@ -27,7 +28,7 @@ import (
 // in the process table which operations where done.
 type CommandExecutorFile struct {
 	FileBase
-	commandExecutor commandexecutor.CommandExecutor
+	commandExecutor commandexecutorinterfaces.CommandExecutor
 	filePath        string
 }
 
@@ -367,12 +368,12 @@ func (c *CommandExecutorFile) GetBaseName() (baseName string, err error) {
 	return baseName, nil
 }
 
-func (c *CommandExecutorFile) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
+func (c *CommandExecutorFile) GetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor, err error) {
 
 	return c.commandExecutor, nil
 }
 
-func (c *CommandExecutorFile) GetCommandExecutorAndFilePath() (commandExecutor commandexecutor.CommandExecutor, filePath string, err error) {
+func (c *CommandExecutorFile) GetCommandExecutorAndFilePath() (commandExecutor commandexecutorinterfaces.CommandExecutor, filePath string, err error) {
 	commandExecutor, err = c.GetCommandExecutor()
 	if err != nil {
 		return nil, "", err
@@ -386,7 +387,7 @@ func (c *CommandExecutorFile) GetCommandExecutorAndFilePath() (commandExecutor c
 	return commandExecutor, filePath, nil
 }
 
-func (c *CommandExecutorFile) GetCommandExecutorAndFilePathAndHostDescription() (commandExecutor commandexecutor.CommandExecutor, filePath string, hostDescription string, err error) {
+func (c *CommandExecutorFile) GetCommandExecutorAndFilePathAndHostDescription() (commandExecutor commandexecutorinterfaces.CommandExecutor, filePath string, hostDescription string, err error) {
 	commandExecutor, filePath, err = c.GetCommandExecutorAndFilePath()
 	if err != nil {
 		return nil, "", "", err
@@ -710,7 +711,7 @@ func (c *CommandExecutorFile) MustGetBaseName() (baseName string) {
 	return baseName
 }
 
-func (c *CommandExecutorFile) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
+func (c *CommandExecutorFile) MustGetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -719,7 +720,7 @@ func (c *CommandExecutorFile) MustGetCommandExecutor() (commandExecutor commande
 	return commandExecutor
 }
 
-func (c *CommandExecutorFile) MustGetCommandExecutorAndFilePath() (commandExecutor commandexecutor.CommandExecutor, filePath string) {
+func (c *CommandExecutorFile) MustGetCommandExecutorAndFilePath() (commandExecutor commandexecutorinterfaces.CommandExecutor, filePath string) {
 	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -728,7 +729,7 @@ func (c *CommandExecutorFile) MustGetCommandExecutorAndFilePath() (commandExecut
 	return commandExecutor, filePath
 }
 
-func (c *CommandExecutorFile) MustGetCommandExecutorAndFilePathAndHostDescription() (commandExecutor commandexecutor.CommandExecutor, filePath string, hostDescription string) {
+func (c *CommandExecutorFile) MustGetCommandExecutorAndFilePathAndHostDescription() (commandExecutor commandexecutorinterfaces.CommandExecutor, filePath string, hostDescription string) {
 	commandExecutor, filePath, hostDescription, err := c.GetCommandExecutorAndFilePathAndHostDescription()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -854,7 +855,7 @@ func (c *CommandExecutorFile) MustReadFirstNBytes(numberOfBytesToRead int) (firs
 	return firstBytes
 }
 
-func (c *CommandExecutorFile) MustSetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) {
+func (c *CommandExecutorFile) MustSetCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) {
 	err := c.SetCommandExecutor(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -961,7 +962,7 @@ func (c *CommandExecutorFile) SecurelyDelete(ctx context.Context) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorFile) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
+func (c *CommandExecutorFile) SetCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) (err error) {
 	c.commandExecutor = commandExecutor
 
 	return nil

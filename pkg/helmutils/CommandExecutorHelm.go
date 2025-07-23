@@ -5,6 +5,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helminterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helmparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -12,10 +13,10 @@ import (
 )
 
 type commandExecutorHelm struct {
-	commandExecutor commandexecutor.CommandExecutor
+	commandExecutor commandexecutorinterfaces.CommandExecutor
 }
 
-func GetCommandExecutorHelm(executor commandexecutor.CommandExecutor) (helm helminterfaces.Helm, err error) {
+func GetCommandExecutorHelm(executor commandexecutorinterfaces.CommandExecutor) (helm helminterfaces.Helm, err error) {
 	if executor == nil {
 		return nil, tracederrors.TracedErrorNil("executor")
 	}
@@ -76,12 +77,12 @@ func (c *commandExecutorHelm) AddRepositoryByName(ctx context.Context, name stri
 	return nil
 }
 
-func (c *commandExecutorHelm) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
+func (c *commandExecutorHelm) GetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor, err error) {
 
 	return c.commandExecutor, nil
 }
 
-func (c *commandExecutorHelm) GetCommandExecutorAndHostDescription() (commandExecutor commandexecutor.CommandExecutor, hostDescription string, err error) {
+func (c *commandExecutorHelm) GetCommandExecutorAndHostDescription() (commandExecutor commandexecutorinterfaces.CommandExecutor, hostDescription string, err error) {
 	commandExecutor, err = c.GetCommandExecutor()
 	if err != nil {
 		return nil, "", err
@@ -104,7 +105,7 @@ func (c *commandExecutorHelm) GetHostDescription() (hostDescription string, err 
 	return commandExecutor.GetHostDescription()
 }
 
-func (c *commandExecutorHelm) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
+func (c *commandExecutorHelm) SetCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) (err error) {
 	c.commandExecutor = commandExecutor
 
 	return nil

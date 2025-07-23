@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils"
@@ -18,16 +18,16 @@ import (
 )
 
 type CommandExecutorFlux struct {
-	commandExecutor commandexecutor.CommandExecutor
+	commandExecutor commandexecutorinterfaces.CommandExecutor
 }
 
-func NewcommandExecutorFlux(executor commandexecutor.CommandExecutor) fluxinterfaces.Flux {
+func NewcommandExecutorFlux(executor commandexecutorinterfaces.CommandExecutor) fluxinterfaces.Flux {
 	return &CommandExecutorFlux{
 		commandExecutor: executor,
 	}
 }
 
-func (c *CommandExecutorFlux) GetCommandExecutor() (commandexecutor.CommandExecutor, error) {
+func (c *CommandExecutorFlux) GetCommandExecutor() (commandexecutorinterfaces.CommandExecutor, error) {
 	if c.commandExecutor == nil {
 		return nil, tracederrors.TracedError("commandExecutor not set")
 	}

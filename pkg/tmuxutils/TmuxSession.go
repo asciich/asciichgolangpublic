@@ -7,6 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
@@ -128,7 +129,7 @@ func (t *TmuxSession) Exists(ctx context.Context) (exists bool, err error) {
 	return exists, nil
 }
 
-func (t *TmuxSession) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
+func (t *TmuxSession) GetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor, err error) {
 	tmux, err := t.GetTmux()
 	if err != nil {
 		return nil, err

@@ -10,6 +10,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/ftputils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -20,13 +22,13 @@ import (
 
 type CommandExecutorHost struct {
 	commandexecutor.CommandExecutorBase
-	commandExecutor commandexecutor.CommandExecutor
+	commandExecutor commandexecutorinterfaces.CommandExecutor
 	Comment         string
 }
 
 // Get a Host by a CommandExecutor capable of executing commands on the Host.
 // E.g. for SSH a SSHCLient can be used.
-func GetCommandExecutorHostByCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (host Host, err error) {
+func GetCommandExecutorHostByCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) (host Host, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -41,7 +43,7 @@ func GetCommandExecutorHostByCommandExecutor(commandExecutor commandexecutor.Com
 	return toReturn, nil
 }
 
-func MustGetCommandExecutorHostByCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (host Host) {
+func MustGetCommandExecutorHostByCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) (host Host) {
 	host, err := GetCommandExecutorHostByCommandExecutor(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -110,7 +112,7 @@ func (c *CommandExecutorHost) GetSshPublicKeyOfUserAsString(ctx context.Context,
 	return "", tracederrors.TracedErrorf("No SSH public key for user '%s' on host '%s' found.", userName, hostDescription)
 }
 
-func (c *CommandExecutorHost) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
+func (c *CommandExecutorHost) GetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor, err error) {
 
 	return c.commandExecutor, nil
 }
@@ -137,7 +139,7 @@ func (c *CommandExecutorHost) GetHostDescription() (hostDescription string, err 
 	return commandExecutor.GetHostDescription()
 }
 
-func (c *CommandExecutorHost) MustGetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor) {
+func (c *CommandExecutorHost) MustGetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -155,7 +157,7 @@ func (c *CommandExecutorHost) MustIsReachable(verbose bool) (isReachable bool) {
 	return isReachable
 }
 
-func (c *CommandExecutorHost) MustSetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) {
+func (c *CommandExecutorHost) MustSetCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) {
 	err := c.SetCommandExecutor(commandExecutor)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -169,7 +171,7 @@ func (c *CommandExecutorHost) MustWaitUntilReachable(renewHostKey bool, verbose 
 	}
 }
 
-func (c *CommandExecutorHost) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutor.CommandOutput, err error) {
+func (c *CommandExecutorHost) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandexecutorgeneric.CommandOutput, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -182,7 +184,7 @@ func (c *CommandExecutorHost) RunCommand(ctx context.Context, options *parameter
 	return commandExecutor.RunCommand(ctx, options)
 }
 
-func (c *CommandExecutorHost) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
+func (c *CommandExecutorHost) SetCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) (err error) {
 	c.commandExecutor = commandExecutor
 
 	return nil

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/fileformats/yamlutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
@@ -16,13 +16,13 @@ import (
 )
 
 type CommandExecutorObject struct {
-	commandExecutor commandexecutor.CommandExecutor
+	commandExecutor commandexecutorinterfaces.CommandExecutor
 	name            string
 	typeName        string
 	namespace       kubernetesinterfaces.Namespace
 }
 
-func GetCommandExecutorObject(commandExectutor commandexecutor.CommandExecutor, namespace kubernetesinterfaces.Namespace, objectName string, objectType string) (object kubernetesinterfaces.Object, err error) {
+func GetCommandExecutorObject(commandExectutor commandexecutorinterfaces.CommandExecutor, namespace kubernetesinterfaces.Namespace, objectName string, objectType string) (object kubernetesinterfaces.Object, err error) {
 	if commandExectutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExectutor")
 	}
@@ -364,7 +364,7 @@ func (c *CommandExecutorObject) GetClusterName() (clusterName string, err error)
 	return namespace.GetClusterName()
 }
 
-func (c *CommandExecutorObject) GetCommandExecutor() (commandExecutor commandexecutor.CommandExecutor, err error) {
+func (c *CommandExecutorObject) GetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor, err error) {
 
 	return c.commandExecutor, nil
 }
@@ -435,7 +435,7 @@ func (c *CommandExecutorObject) GetTypeName() (typeName string, err error) {
 	return c.typeName, nil
 }
 
-func (c *CommandExecutorObject) SetCommandExecutor(commandExecutor commandexecutor.CommandExecutor) (err error) {
+func (c *CommandExecutorObject) SetCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) (err error) {
 	c.commandExecutor = commandExecutor
 
 	return nil

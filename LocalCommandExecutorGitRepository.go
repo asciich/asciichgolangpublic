@@ -3,11 +3,12 @@ package asciichgolangpublic
 import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
-func GetCommandExecutorGitRepositoryByPath(commandExecutor commandexecutor.CommandExecutor, path string) (gitRepo *CommandExecutorGitRepository, err error) {
+func GetCommandExecutorGitRepositoryByPath(commandExecutor commandexecutorinterfaces.CommandExecutor, path string) (gitRepo *CommandExecutorGitRepository, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecturo")
 	}
@@ -70,7 +71,7 @@ func GetLocalCommandExecutorGitRepositoryByPath(path string) (gitRepo *CommandEx
 	)
 }
 
-func MustGetCommandExecutorGitRepositoryByPath(commandExecutor commandexecutor.CommandExecutor, path string) (gitRepo *CommandExecutorGitRepository) {
+func MustGetCommandExecutorGitRepositoryByPath(commandExecutor commandexecutorinterfaces.CommandExecutor, path string) (gitRepo *CommandExecutorGitRepository) {
 	gitRepo, err := GetCommandExecutorGitRepositoryByPath(commandExecutor, path)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

@@ -3,18 +3,18 @@ package commandexecutorflux
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 type CommandExecutorDeployedFlux struct {
-	commandExecutor commandexecutor.CommandExecutor
+	commandExecutor commandexecutorinterfaces.CommandExecutor
 	cluster         kubernetesinterfaces.KubernetesCluster
 }
 
-func (c *CommandExecutorDeployedFlux) GetCommandExecutor() (commandexecutor.CommandExecutor, error) {
+func (c *CommandExecutorDeployedFlux) GetCommandExecutor() (commandexecutorinterfaces.CommandExecutor, error) {
 	if c.commandExecutor == nil {
 		return nil, tracederrors.TracedError("commandExecutor not set")
 	}

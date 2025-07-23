@@ -6,18 +6,19 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type CommandExecutorBase struct {
-	parentCommandExecutorForBaseClass CommandExecutor
+	parentCommandExecutorForBaseClass commandexecutorinterfaces.CommandExecutor
 }
 
 func NewCommandExecutorBase() (c *CommandExecutorBase) {
 	return new(CommandExecutorBase)
 }
 
-func (c *CommandExecutorBase) GetParentCommandExecutorForBaseClass() (parentCommandExecutorForBaseClass CommandExecutor, err error) {
+func (c *CommandExecutorBase) GetParentCommandExecutorForBaseClass() (parentCommandExecutorForBaseClass commandexecutorinterfaces.CommandExecutor, err error) {
 	if c.parentCommandExecutorForBaseClass == nil {
 		return nil, tracederrors.TracedError("parent for CommandExecutorBase not set")
 	}
@@ -144,7 +145,7 @@ func (c *CommandExecutorBase) RunCommandAndGetStdoutAsString(ctx context.Context
 	return stdout, nil
 }
 
-func (c *CommandExecutorBase) SetParentCommandExecutorForBaseClass(parentCommandExecutorForBaseClass CommandExecutor) (err error) {
+func (c *CommandExecutorBase) SetParentCommandExecutorForBaseClass(parentCommandExecutorForBaseClass commandexecutorinterfaces.CommandExecutor) (err error) {
 	c.parentCommandExecutorForBaseClass = parentCommandExecutorForBaseClass
 
 	return nil
