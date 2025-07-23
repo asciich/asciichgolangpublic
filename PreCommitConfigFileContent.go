@@ -6,6 +6,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/changesummary"
 	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/dependencyutils/dependencyinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tracederrors"
 	"gopkg.in/yaml.v3"
@@ -45,7 +46,7 @@ func (p *PreCommitConfigFileContent) GetConfig() (config *PreCommitConfigFileCon
 	return p.config, nil
 }
 
-func (p *PreCommitConfigFileContent) GetDependencies(verbose bool) (dependencies []Dependency, err error) {
+func (p *PreCommitConfigFileContent) GetDependencies(verbose bool) (dependencies []dependencyinterfaces.Dependency, err error) {
 	config, err := p.GetConfig()
 	if err != nil {
 		return nil, err
@@ -56,7 +57,7 @@ func (p *PreCommitConfigFileContent) GetDependencies(verbose bool) (dependencies
 		return nil, err
 	}
 
-	dependencies = []Dependency{}
+	dependencies = []dependencyinterfaces.Dependency{}
 	for _, repo := range repos {
 		repoUrl, err := repo.GetRepo()
 		if err != nil {
@@ -130,7 +131,7 @@ func (p *PreCommitConfigFileContent) MustGetConfig() (config *PreCommitConfigFil
 	return config
 }
 
-func (p *PreCommitConfigFileContent) MustGetDependencies(verbose bool) (dependencies []Dependency) {
+func (p *PreCommitConfigFileContent) MustGetDependencies(verbose bool) (dependencies []dependencyinterfaces.Dependency) {
 	dependencies, err := p.GetDependencies(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -153,7 +154,7 @@ func (p *PreCommitConfigFileContent) MustSetConfig(config *PreCommitConfigFileCo
 	}
 }
 
-func (p *PreCommitConfigFileContent) MustUpdateDependency(dependency Dependency, authOptions []authenticationoptions.AuthenticationOption, verbose bool) (changeSummary *changesummary.ChangeSummary) {
+func (p *PreCommitConfigFileContent) MustUpdateDependency(dependency dependencyinterfaces.Dependency, authOptions []authenticationoptions.AuthenticationOption, verbose bool) (changeSummary *changesummary.ChangeSummary) {
 	changeSummary, err := p.UpdateDependency(dependency, authOptions, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -172,7 +173,7 @@ func (p *PreCommitConfigFileContent) SetConfig(config *PreCommitConfigFileConfig
 	return nil
 }
 
-func (p *PreCommitConfigFileContent) UpdateDependency(dependency Dependency, authOptions []authenticationoptions.AuthenticationOption, verbose bool) (changeSummary *changesummary.ChangeSummary, err error) {
+func (p *PreCommitConfigFileContent) UpdateDependency(dependency dependencyinterfaces.Dependency, authOptions []authenticationoptions.AuthenticationOption, verbose bool) (changeSummary *changesummary.ChangeSummary, err error) {
 	if dependency == nil {
 		return nil, tracederrors.TracedErrorNil("dependency")
 	}
