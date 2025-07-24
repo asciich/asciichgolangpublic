@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/installutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
@@ -25,10 +25,12 @@ func TestInstallFromPath(t *testing.T) {
 			func(t *testing.T) {
 				const verbose = true
 
-				sourceFile := tempfiles.MustCreateFromStringAndGetPath(tt.content, verbose)
+				sourceFile, err := tempfilesoo.CreateFromStringAndGetPath(tt.content, verbose)
+				require.NoError(t, err)
 				defer files.MustDeleteFileByPath(sourceFile, verbose)
 
-				destFile := tempfiles.MustCreateEmptyTemporaryFile(verbose)
+				destFile, err := tempfilesoo.CreateEmptyTemporaryFile(verbose)
+				require.NoError(t, err)
 				destFilePath := destFile.MustGetPath()
 				defer destFile.MustDelete(verbose)
 				destFile.MustDelete(verbose)

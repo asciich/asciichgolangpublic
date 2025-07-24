@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -21,7 +21,8 @@ func TestGitignoreFileAddFileToIgnore(t *testing.T) {
 			func(t *testing.T) {
 				const verbose bool = true
 
-				gitignoreFilePath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose)
+				gitignoreFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)
+				require.NoError(t, err)
 
 				gitignoreFile, err := GetGitignoreFileByPath(gitignoreFilePath)
 				require.NoError(t, err)
@@ -56,7 +57,8 @@ func TestGitignoreFileContainsIgnoreOnNonExistingFile(t *testing.T) {
 			func(t *testing.T) {
 				const verbose bool = true
 
-				nonExitstingFile := tempfiles.MustCreateEmptyTemporaryFile(verbose)
+				nonExitstingFile, err := tempfilesoo.CreateEmptyTemporaryFile(verbose)
+				require.NoError(t, err)
 				nonExitstingFile.MustDelete(verbose)
 
 				gitignoreFile, err := GetGitignoreFileByFile(nonExitstingFile)
@@ -86,7 +88,8 @@ func TestGitignoreFileContainsIgnoreOnEmptyFile(t *testing.T) {
 			func(t *testing.T) {
 				const verbose bool = true
 
-				emptyFile := tempfiles.MustCreateEmptyTemporaryFile(verbose)
+				emptyFile, err := tempfilesoo.CreateEmptyTemporaryFile(verbose)
+				require.NoError(t, err)
 
 				gitignoreFile, err := GetGitignoreFileByFile(emptyFile)
 				require.NoError(t, err)

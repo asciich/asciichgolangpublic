@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -21,7 +21,8 @@ func TestGitlabCiYamlFileGetInclude(t *testing.T) {
 			func(t *testing.T) {
 				const verbose bool = true
 
-				emptyFilePath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose)
+				emptyFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)
+				require.NoError(t, err)
 				gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(emptyFilePath)
 				require.NoError(t, err)
 
@@ -57,7 +58,8 @@ func TestGitlabCiYamlFileGetInclude2(t *testing.T) {
 			func(t *testing.T) {
 				const verbose bool = true
 
-				emptyFilePath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose)
+				emptyFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)
+				require.NoError(t, err)
 				gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(emptyFilePath)
 				require.NoError(t, err)
 
@@ -96,7 +98,8 @@ func TestGitlabCiYamlFileGetIncludeIgnoreRules(t *testing.T) {
 			func(t *testing.T) {
 				const verbose bool = true
 
-				emptyFilePath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose)
+				emptyFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)
+				require.NoError(t, err)
 				gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(emptyFilePath)
 				require.NoError(t, err)
 
@@ -136,7 +139,8 @@ func TestGitlabCiYamlFileAddIncludes(t *testing.T) {
 			func(t *testing.T) {
 				const verbose bool = true
 
-				emptyFilePath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose)
+				emptyFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)
+				require.NoError(t, err)
 				gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(emptyFilePath)
 				require.NoError(t, err)
 

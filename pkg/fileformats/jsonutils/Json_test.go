@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -132,7 +132,8 @@ func TestJsonStringToYamlFileByPath(t *testing.T) {
 
 				const verbose bool = true
 
-				emptyFile := tempfiles.MustCreateEmptyTemporaryFile(verbose)
+				emptyFile, err := tempfilesoo.CreateEmptyTemporaryFile(verbose)
+				require.NoError(err)
 				defer emptyFile.MustDelete(verbose)
 
 				createdFile := MustJsonStringToYamlFileByPath(tt.jsonString, emptyFile.MustGetLocalPath(), verbose)
@@ -198,14 +199,14 @@ func TestJsonFileHas(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
-				tempFile := tempfiles.MustCreateFromString(tt.jsonString, verbose)
+				tempFile, err := tempfilesoo.CreateFromString(tt.jsonString, verbose)
+				require.NoError(t, err)
 				defer tempFile.Delete(verbose)
 
 				require.EqualValues(
+					t,
 					tt.expectedResult,
 					MustJsonFileByPathHas(tempFile.MustGetLocalPath(), tt.query, tt.keyToCheck),
 				)

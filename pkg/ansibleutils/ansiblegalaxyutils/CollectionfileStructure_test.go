@@ -10,7 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
@@ -29,7 +29,7 @@ func Test_CreateFileStructure(t *testing.T) {
 	t.Run("temp_dir", func(t *testing.T) {
 		const verbose = true
 
-		tempDir, err := tempfiles.CreateEmptyTemporaryDirectory(verbose)
+		tempDir, err := tempfilesoo.CreateEmptyTemporaryDirectory(verbose)
 		require.NoError(t, err)
 
 		tempDirPath, err := tempDir.GetPath()

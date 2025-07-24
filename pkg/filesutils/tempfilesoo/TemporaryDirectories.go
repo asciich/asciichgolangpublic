@@ -1,10 +1,9 @@
-package tempfiles
+package tempfilesoo
 
 import (
 	"os"
 
 	"github.com/asciich/asciichgolangpublic/pkg/files"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 )
 
 func CreateEmptyTemporaryDirectory(verbose bool) (temporaryDirectory *files.LocalDirectory, err error) {
@@ -33,21 +32,4 @@ func CreateEmptyTemporaryDirectoryAndGetPath(verbose bool) (TemporaryDirectoryPa
 	}
 
 	return TemporaryDirectoryPath, nil
-}
-
-func MustCreateEmptyTemporaryDirectory(verbose bool) (temporaryDirectory *files.LocalDirectory) {
-	temporaryDirectory, err := CreateEmptyTemporaryDirectory(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-	return temporaryDirectory
-}
-
-func MustCreateEmptyTemporaryDirectoryAndGetPath(verbose bool) (TemporaryDirectoryPath string) {
-	TemporaryDirectoryPath, err := CreateEmptyTemporaryDirectoryAndGetPath(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return TemporaryDirectoryPath
 }

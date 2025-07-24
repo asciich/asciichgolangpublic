@@ -8,7 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/shellutils/shelllinehandler"
@@ -56,7 +56,7 @@ func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(ctx
 		return nil, tracederrors.TracedError("Only implemented for temporary directory")
 	}
 
-	directoryToUse, err := tempfiles.CreateEmptyTemporaryDirectory(true)
+	directoryToUse, err := tempfilesoo.CreateEmptyTemporaryDirectory(true)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (c *X509CertificatesService) CreateRootCaIntoDirectory(ctx context.Context,
 		return nil, tracederrors.TracedError("Only implemented for temporary directory")
 	}
 
-	directoryToUse, err := tempfiles.CreateEmptyTemporaryDirectory(true)
+	directoryToUse, err := tempfilesoo.CreateEmptyTemporaryDirectory(true)
 	if err != nil {
 		return nil, err
 	}
@@ -548,7 +548,7 @@ func (c *X509CertificatesService) CreateSigningRequestFile(signOptions *X509Sign
 		return err
 	}
 
-	openSslConfigFile, err := tempfiles.CreateEmptyTemporaryFile(signOptions.Verbose)
+	openSslConfigFile, err := tempfilesoo.CreateEmptyTemporaryFile(signOptions.Verbose)
 	if err != nil {
 		return err
 	}
@@ -708,7 +708,7 @@ func (c *X509CertificatesService) SignIntermediateCertificate(signOptions *X509S
 		return err
 	}
 
-	singingRequestFile, err := tempfiles.CreateEmptyTemporaryFile(signOptions.Verbose)
+	singingRequestFile, err := tempfilesoo.CreateEmptyTemporaryFile(signOptions.Verbose)
 	if err != nil {
 		return err
 	}
@@ -725,7 +725,7 @@ func (c *X509CertificatesService) SignIntermediateCertificate(signOptions *X509S
 		return err
 	}
 
-	openSslConfigFile, err := tempfiles.CreateEmptyTemporaryFile(signOptions.Verbose)
+	openSslConfigFile, err := tempfilesoo.CreateEmptyTemporaryFile(signOptions.Verbose)
 	if err != nil {
 		return err
 	}

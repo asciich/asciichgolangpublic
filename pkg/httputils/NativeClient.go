@@ -9,7 +9,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
@@ -255,7 +255,7 @@ func (n *NativeClient) DownloadAsTemporaryFile(ctx context.Context, downloadOpti
 
 	toUse := downloadOptions.GetDeepCopy()
 
-	toUse.OutputPath, err = tempfiles.CreateEmptyTemporaryFileAndGetPath(false)
+	toUse.OutputPath, err = tempfilesoo.CreateEmptyTemporaryFileAndGetPath(false)
 	if err != nil {
 		return nil, err
 	}
