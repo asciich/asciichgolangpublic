@@ -4,7 +4,7 @@ import (
 	"reflect"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/documentutils/documentbase"
+	"github.com/asciich/asciichgolangpublic/pkg/documentutils/documentbase"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
