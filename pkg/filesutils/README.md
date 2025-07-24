@@ -1,6 +1,9 @@
-# filesutils
+# filesutils package
 
-## Tests
+Contains various implementations to work with files:
+* [tempfileoo](./tempfilesoo/): Create temporary files and directories in a object oriented way.
+
+## For developers
 
 To run the tests of filesutils use:
 ```bash

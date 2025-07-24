@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -54,7 +54,8 @@ func TestLocalGitRepository_GetLocalGitReposioryFromDirectory(t *testing.T) {
 			func(t *testing.T) {
 				const verbose bool = true
 
-				directory := tempfiles.MustCreateEmptyTemporaryDirectory(verbose)
+				directory, err := tempfilesoo.CreateEmptyTemporaryDirectory(verbose)
+				require.NoError(t, err)
 				defer directory.Delete(verbose)
 
 				require.EqualValues(t, "localhost", directory.MustGetHostDescription())

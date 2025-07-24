@@ -9,7 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/hosts"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -116,7 +116,7 @@ func (k *KVMHypervisor) CreateVm(createOptions *KvmCreateVmOptions) (createdVm *
 		return nil, tracederrors.TracedErrorf("Disk image '%s' does not exist to create VM.", diskImagePath)
 	}
 
-	vmXml, err := tempfiles.CreateEmptyTemporaryFile(createOptions.Verbose)
+	vmXml, err := tempfilesoo.CreateEmptyTemporaryFile(createOptions.Verbose)
 	if err != nil {
 		return nil, err
 	}

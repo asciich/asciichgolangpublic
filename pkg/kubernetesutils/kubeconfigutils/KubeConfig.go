@@ -10,7 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -396,7 +396,7 @@ func IsFilePathLoadableByKubectl(path string, verbose bool) (isLoadable bool, er
 }
 
 func (k *KubeConfig) WriteToTemporaryFileAndGetPath(verbose bool) (tempFilePath string, err error) {
-	tempFilePath, err = tempfiles.CreateEmptyTemporaryFileAndGetPath(verbose)
+	tempFilePath, err = tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)
 	if err != nil {
 		return "", err
 	}

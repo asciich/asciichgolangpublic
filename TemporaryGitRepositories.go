@@ -2,7 +2,7 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/files"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -20,7 +20,7 @@ func TemporaryGitRepositories() (temporaryDirectoriesService *TemporaryGitReposi
 }
 
 func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepository(verbose bool) (temporaryGitRepository GitRepository, err error) {
-	tempDir, err := tempfiles.CreateEmptyTemporaryDirectory(verbose)
+	tempDir, err := tempfilesoo.CreateEmptyTemporaryDirectory(verbose)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (t TemporaryGitRepositoriesService) CreateEmptyTemporaryGitRepository(creat
 		return nil, tracederrors.TracedErrorNil("createRepoOptions")
 	}
 
-	tempDirectory, err := tempfiles.CreateEmptyTemporaryDirectory(createRepoOptions.Verbose)
+	tempDirectory, err := tempfilesoo.CreateEmptyTemporaryDirectory(createRepoOptions.Verbose)
 	if err != nil {
 		return nil, err
 	}

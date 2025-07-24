@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
@@ -25,11 +25,11 @@ func getGitRepositoryToTest(implementationName string) (repo GitRepository) {
 
 	if implementationName == "localGitRepository" {
 		repo = MustGetLocalGitReposioryFromDirectory(
-			tempfiles.MustCreateEmptyTemporaryDirectory(verbose),
+			mustutils.Must(tempfilesoo.CreateEmptyTemporaryDirectory(verbose)),
 		)
 	} else if implementationName == "localCommandExecutorRepository" {
 		repo = MustGetLocalCommandExecutorGitRepositoryByDirectory(
-			tempfiles.MustCreateEmptyTemporaryDirectory(verbose),
+			mustutils.Must(tempfilesoo.CreateEmptyTemporaryDirectory(verbose)),
 		)
 	} else {
 		logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)

@@ -14,7 +14,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 
@@ -556,7 +556,7 @@ func (t *TmuxWindow) RunCommand(ctx context.Context, runCommandOptions *paramete
 		return nil, err
 	}
 
-	captureFile, err := tempfiles.CreateEmptyTemporaryFile(contextutils.GetVerboseFromContext(ctx))
+	captureFile, err := tempfilesoo.CreateEmptyTemporaryFile(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}

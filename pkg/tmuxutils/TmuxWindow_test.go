@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tmuxutils"
@@ -163,7 +163,8 @@ func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
 				err = window.WaitUntilCliPromptReady(ctx)
 				require.NoError(t, err)
 
-				outputPath := tempfiles.MustCreateEmptyTemporaryFileAndGetPath(contextutils.GetVerboseFromContext(ctx))
+				outputPath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(contextutils.GetVerboseFromContext(ctx))
+				require.NoError(t, err)
 				defer files.MustDeleteFileByPath(outputPath, contextutils.GetVerboseFromContext(ctx))
 
 				exampleScript := "#/usr/bin/env bash\n"
@@ -179,7 +180,8 @@ func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
 				exampleScript += "sleep .75\n"
 				exampleScript += "echo finished\n"
 
-				exampleScriptPath := tempfiles.MustCreateFromStringAndGetPath(exampleScript, contextutils.GetVerboseFromContext(ctx))
+				exampleScriptPath, err := tempfilesoo.CreateFromStringAndGetPath(exampleScript, contextutils.GetVerboseFromContext(ctx))
+				require.NoError(t, err)
 				defer files.MustDeleteFileByPath(exampleScriptPath, contextutils.GetVerboseFromContext(ctx))
 
 				err = window.SendKeys(

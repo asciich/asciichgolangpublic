@@ -1,4 +1,4 @@
-package tempfiles
+package tempfilesoo
 
 import (
 	"path/filepath"
@@ -211,93 +211,4 @@ func CreateTemporaryFileFromString(content string, verbose bool) (temporaryFile 
 	}
 
 	return temporaryFile, nil
-}
-
-func MustCreateEmptyTemporaryFile(verbose bool) (temporaryfile files.File) {
-	temporaryfile, err := CreateEmptyTemporaryFile(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-	return temporaryfile
-}
-
-func MustCreateEmptyTemporaryFileAndGetPath(verbose bool) (temporaryFilePath string) {
-	temporaryFilePath, err := CreateEmptyTemporaryFileAndGetPath(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return temporaryFilePath
-}
-
-func MustCreateFromBytes(content []byte, verbose bool) (temporaryFile files.File) {
-	temporaryFile, err := CreateFromBytes(content, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return temporaryFile
-}
-
-func MustCreateFromString(content string, verbose bool) (temporaryFile files.File) {
-	file, err := CreateFromString(content, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return file
-}
-
-func MustCreateFromStringAndGetPath(content string, verbose bool) (temporaryFilePath string) {
-	temporaryFilePath, err := CreateFromStringAndGetPath(content, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return temporaryFilePath
-}
-
-func MustCreateNamedTemporaryFile(fileName string, verbose bool) (temporaryfile files.File) {
-	temporaryfile, err := CreateNamedTemporaryFile(fileName, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return temporaryfile
-}
-
-func MustCreateTemporaryFileFromBytes(content []byte, verbose bool) (temporaryFile files.File) {
-	temporaryFile, err := CreateTemporaryFileFromBytes(content, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return temporaryFile
-}
-
-func MustCreateTemporaryFileFromFile(fileToCopyAsTemporaryFile files.File, verbose bool) (temporaryFile files.File) {
-	temporaryFile, err := CreateTemporaryFileFromFile(fileToCopyAsTemporaryFile, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return temporaryFile
-}
-
-func MustCreateTemporaryFileFromPath(verbose bool, filePathToCopyAsTemporaryFile ...string) (temporaryFile files.File) {
-	temporaryFile, err := CreateTemporaryFileFromPath(verbose, filePathToCopyAsTemporaryFile...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return temporaryFile
-}
-
-func MustCreateTemporaryFileFromString(content string, verbose bool) (temporaryFile files.File) {
-	temporaryFile, err := CreateTemporaryFileFromString(content, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return temporaryFile
 }

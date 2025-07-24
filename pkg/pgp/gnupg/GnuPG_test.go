@@ -5,8 +5,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -19,11 +20,11 @@ func getFileToTest(implementationName string) (file files.File) {
 
 	if implementationName == "localFile" {
 		file = files.MustGetLocalFileByPath(
-			tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose),
+			mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)),
 		)
 	} else if implementationName == "localCommandExecutorFile" {
 		file = files.MustGetLocalCommandExecutorFileByPath(
-			tempfiles.MustCreateEmptyTemporaryFileAndGetPath(verbose),
+			mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)),
 		)
 	} else {
 		logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)

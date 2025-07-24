@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -35,7 +35,7 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 				const verbose bool = true
 
 				inputFile := MustGetPreCommitConfigByLocalPath(filepath.Join(tt.testDataDir, "input"))
-				preCommitFile := MustGetPreCommitConfigByFile(tempfiles.MustCreateTemporaryFileFromFile(inputFile, verbose))
+				preCommitFile := MustGetPreCommitConfigByFile(mustutils.Must(tempfilesoo.CreateTemporaryFileFromFile(inputFile, verbose)))
 				defer preCommitFile.Delete(verbose)
 
 				expectedOutput := MustGetPreCommitConfigByLocalPath(filepath.Join(tt.testDataDir, "expected_output"))

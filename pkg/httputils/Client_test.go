@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
@@ -181,7 +181,8 @@ func TestClient_DownloadAsFile_ChecksumMismatch(t *testing.T) {
 				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				tempFile := tempfiles.MustCreateEmptyTemporaryFile(contextutils.GetVerboseFromContext(ctx))
+				tempFile, err := tempfilesoo.CreateEmptyTemporaryFile(contextutils.GetVerboseFromContext(ctx))
+				require.NoError(t, err)
 				defer tempFile.MustDelete(contextutils.GetVerboseFromContext(ctx))
 
 				const expectedOutput = "hello world\n"
@@ -227,7 +228,8 @@ func TestClient_DownloadAsFile(t *testing.T) {
 				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				tempFile := tempfiles.MustCreateEmptyTemporaryFile(verbose)
+				tempFile, err := tempfilesoo.CreateEmptyTemporaryFile(verbose)
+				require.NoError(t, err)
 				defer tempFile.MustDelete(verbose)
 
 				const expectedOutput = "hello world\n"

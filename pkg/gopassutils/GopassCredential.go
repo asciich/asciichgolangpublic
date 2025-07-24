@@ -10,7 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
@@ -234,7 +234,7 @@ func (c *GopassCredential) WriteIntoFile(ctx context.Context, outputFile files.F
 }
 
 func (c *GopassCredential) WriteIntoTemporaryFile(ctx context.Context) (temporaryFile files.File, err error) {
-	temporaryFile, err = tempfiles.CreateEmptyTemporaryFile(contextutils.GetVerboseFromContext(ctx))
+	temporaryFile, err = tempfilesoo.CreateEmptyTemporaryFile(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}

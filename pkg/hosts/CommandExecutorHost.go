@@ -13,7 +13,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/ftputils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils"
@@ -330,7 +330,7 @@ func (h *CommandExecutorHost) InstallBinary(installOptions *parameteroptions.Ins
 		)
 	}
 
-	tempCopy, err := tempfiles.CreateTemporaryFileFromFile(sourceFile, installOptions.Verbose)
+	tempCopy, err := tempfilesoo.CreateTemporaryFileFromFile(sourceFile, installOptions.Verbose)
 	if err != nil {
 		return nil, err
 	}
