@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
-	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	gologging "gopkg.in/op/go-logging.v1"

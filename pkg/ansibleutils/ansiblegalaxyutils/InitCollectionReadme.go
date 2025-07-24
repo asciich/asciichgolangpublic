@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/documentutils/markdowndocument"
+	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
