@@ -7,9 +7,9 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/changesummary"
 	"github.com/asciich/asciichgolangpublic/files"
-	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/dependencyutils/dependencyinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
