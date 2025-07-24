@@ -72,24 +72,6 @@ func MustGetCommandExecutorDirectoryByPath(commandExecutor commandexecutorinterf
 	return c
 }
 
-func MustGetLocalCommandExecutorDirectoryByPath(path string) (c *CommandExecutorDirectory) {
-	c, err := GetLocalCommandExecutorDirectoryByPath(path)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return c
-}
-
-func MustNewCommandExecutorDirectory(commandExecutor commandexecutorinterfaces.CommandExecutor) (c *CommandExecutorDirectory) {
-	c, err := NewCommandExecutorDirectory(commandExecutor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return c
-}
-
 func NewCommandExecutorDirectory(commandExecutor commandexecutorinterfaces.CommandExecutor) (c *CommandExecutorDirectory, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")

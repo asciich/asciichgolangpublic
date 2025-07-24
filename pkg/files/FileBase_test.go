@@ -1,9 +1,10 @@
-package files
+package files_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -21,11 +22,11 @@ func TestFileBase(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				fileBase := FileBase{}
+				fileBase := files.FileBase{}
 
 				parent, err := fileBase.GetParentFileForBaseClass()
 				require.Nil(parent)
-				require.ErrorIs(err, ErrFileBaseParentNotSet)
+				require.ErrorIs(err, files.ErrFileBaseParentNotSet)
 				require.ErrorIs(err, tracederrors.ErrTracedError)
 			},
 		)

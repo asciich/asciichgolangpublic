@@ -1,10 +1,11 @@
-package files
+package files_test
 
 import (
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
@@ -22,12 +23,12 @@ func TestDirectoryBase_SetAndGetParentDirectory(t *testing.T) {
 			func(t *testing.T) {
 				const verbose bool = true
 
-				directoryBase := NewDirectoryBase()
+				directoryBase := files.NewDirectoryBase()
 
 				tempDir, err := os.MkdirTemp("", "test_direcotry")
 				require.Nil(t, err)
 
-				directory := MustGetLocalDirectoryByPath(tempDir)
+				directory := files.MustGetLocalDirectoryByPath(tempDir)
 				defer directory.Delete(verbose)
 
 				directoryBase.MustSetParentDirectoryForBaseClass(directory)

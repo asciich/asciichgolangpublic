@@ -1,4 +1,4 @@
-package files
+package files_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -30,7 +31,7 @@ func TestLocalDirectoryExists(t *testing.T) {
 
 				const verbose bool = true
 
-				var directory Directory = getDirectoryToTest("localDirectory")
+				var directory files.Directory = getDirectoryToTest("localDirectory")
 				defer directory.Delete(verbose)
 
 				require.True(directory.MustExists(verbose))
@@ -70,7 +71,7 @@ func TestLocalDirectoryGetFileInDirectory(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				homeDir := MustGetLocalDirectoryByPath("/home/")
+				homeDir := files.MustGetLocalDirectoryByPath("/home/")
 
 				require.EqualValues(
 					"/home/testfile",
@@ -100,7 +101,7 @@ func TestLocalDirectoryGetFilePathInDirectory(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				homeDir := MustGetLocalDirectoryByPath("/home/")
+				homeDir := files.MustGetLocalDirectoryByPath("/home/")
 
 				require.EqualValues(
 					"/home/testfile",
@@ -131,7 +132,7 @@ func TestLocalDirectoryGetSubDirectory(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				homeDir := MustGetLocalDirectoryByPath("/home/")
+				homeDir := files.MustGetLocalDirectoryByPath("/home/")
 
 				require.EqualValues(
 					"/home/testfile",
@@ -162,7 +163,7 @@ func TestLocalDirectoryParentForBaseClassSet(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				dir := NewLocalDirectory()
+				dir := files.NewLocalDirectory()
 				require.NotNil(dir.MustGetParentDirectoryForBaseClass())
 			},
 		)
@@ -189,7 +190,7 @@ func TestLocalDirectoryCreateFileInDirectoryFromString(t *testing.T) {
 				tempDirPath, err := os.MkdirTemp("", "testDir")
 				require.Nil(t, err)
 
-				dir := MustGetLocalDirectoryByPath(tempDirPath)
+				dir := files.MustGetLocalDirectoryByPath(tempDirPath)
 				defer dir.Delete(verbose)
 
 				createdFile := dir.MustCreateFileInDirectoryFromString(tt.content, verbose, tt.filename...)
@@ -221,7 +222,7 @@ func TestLocalDirectoryGetLocalPathIsAbsolute(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				localDir := MustGetLocalDirectoryByPath(tt.pathToTest)
+				localDir := files.MustGetLocalDirectoryByPath(tt.pathToTest)
 
 				localPath := localDir.MustGetLocalPath()
 
@@ -252,7 +253,7 @@ func TestLocalDirectoryWriteStringToFile(t *testing.T) {
 				tempDirPath, err := os.MkdirTemp("", "testDir")
 				require.Nil(err)
 
-				testDirectory := MustGetLocalDirectoryByPath(tempDirPath)
+				testDirectory := files.MustGetLocalDirectoryByPath(tempDirPath)
 				defer testDirectory.Delete(verbose)
 
 				require.False(testDirectory.MustFileInDirectoryExists(verbose, tt.fileName))
@@ -299,7 +300,7 @@ func TestDirectoryListFilesInDirectory(t *testing.T) {
 				tempDirPath, err := os.MkdirTemp("", "tempToTest")
 				require.Nil(t, err)
 
-				temporaryDirectory := MustGetLocalDirectoryByPath(tempDirPath)
+				temporaryDirectory := files.MustGetLocalDirectoryByPath(tempDirPath)
 				temporaryDirectory.MustCreateFilesInDirectory(tt.fileNames, verbose)
 
 				listedFiles, err := temporaryDirectory.ListFilePaths(ctx, &tt.listOptions)
@@ -367,7 +368,7 @@ func TestDirectoryGetPathReturnsAbsoluteValue(t *testing.T) {
 					defer os.Chdir(startPath)
 					defer waitGroup.Done()
 
-					directory := MustGetLocalDirectoryByPath(tt.path)
+					directory := files.MustGetLocalDirectoryByPath(tt.path)
 					path1 = directory.MustGetLocalPath()
 					os.Chdir("..")
 					path2 = directory.MustGetLocalPath()
@@ -409,7 +410,7 @@ func TestDirectoryIsEmptyDirectory(t *testing.T) {
 
 				const verbose = true
 
-				tempDir := MustGetLocalDirectoryByPath(
+				tempDir := files.MustGetLocalDirectoryByPath(
 					getDirectoryToTest("localDirectory").MustGetPath(),
 				)
 				defer tempDir.Delete(verbose)

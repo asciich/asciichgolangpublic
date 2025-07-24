@@ -1,4 +1,4 @@
-package files
+package files_test
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -26,13 +27,13 @@ func createTempFileAndGetPath() (path string) {
 //
 // Use defer file.Delete(verbose) to after calling this function to ensure
 // the file is deleted after the test is over.
-func getFileToTest(implementationName string) (file File) {
+func getFileToTest(implementationName string) (file files.File) {
 	if implementationName == "localFile" {
-		return MustGetLocalFileByPath(createTempFileAndGetPath())
+		return files.MustGetLocalFileByPath(createTempFileAndGetPath())
 	}
 
 	if implementationName == "localCommandExecutorFile" {
-		return MustGetLocalCommandExecutorFileByPath(createTempFileAndGetPath())
+		return files.MustGetLocalCommandExecutorFileByPath(createTempFileAndGetPath())
 	}
 
 	logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)

@@ -1,4 +1,4 @@
-package files
+package files_test
 
 import (
 	"context"
@@ -13,6 +13,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/pointersutils"
+	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
@@ -26,18 +27,18 @@ func getCtx() context.Context {
 }
 
 func TestLocalFileImplementsFileInterface(t *testing.T) {
-	var file File = MustNewLocalFileByPath("/example/path")
+	var file files.File = files.MustNewLocalFileByPath("/example/path")
 	require.EqualValues(t, "/example/path", file.MustGetLocalPath())
 }
 
 func TestLocalFileIsPathSetOnEmptyFile(t *testing.T) {
-	require.EqualValues(t, false, NewLocalFile().IsPathSet())
+	require.EqualValues(t, false, files.NewLocalFile().IsPathSet())
 }
 
 func TestLocalFileSetAndGetPath(t *testing.T) {
 	require := require.New(t)
 
-	var localFile = LocalFile{}
+	var localFile = files.LocalFile{}
 
 	err := localFile.SetPath("testpath")
 	require.EqualValues(nil, err)
@@ -64,7 +65,7 @@ func TestLocalFileGetUriAsString(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				var file File = MustNewLocalFileByPath(tt.path)
+				var file files.File = files.MustNewLocalFileByPath(tt.path)
 
 				uri := file.MustGetUriAsString()
 
@@ -93,7 +94,7 @@ func TestLocalFileReadAndWriteAsBytes(t *testing.T) {
 
 				const verbose bool = false
 
-				var file File = getFileToTest("localFile")
+				var file files.File = getFileToTest("localFile")
 
 				require.EqualValues([]byte{}, file.MustReadAsBytes())
 
@@ -126,7 +127,7 @@ func TestLocalFileReadAndWriteAsInt64(t *testing.T) {
 
 				const verbose bool = false
 
-				var file File = getFileToTest("localFile")
+				var file files.File = getFileToTest("localFile")
 
 				for i := 0; i < 2; i++ {
 					file.MustWriteInt64(tt.content, verbose)
@@ -157,7 +158,7 @@ func TestLocalFileReadAndWriteAsString(t *testing.T) {
 
 				const verbose bool = false
 
-				var file File = getFileToTest("localFile")
+				var file files.File = getFileToTest("localFile")
 
 				require.EqualValues("", file.MustReadAsString())
 
@@ -189,7 +190,7 @@ func TestLocalFileGetBaseName(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				var file File = MustGetLocalFileByPath(tt.path)
+				var file files.File = files.MustGetLocalFileByPath(tt.path)
 
 				require.EqualValues(tt.expectedBaseName, file.MustGetBaseName())
 			},
@@ -351,7 +352,7 @@ func TestLocalFileGetLocalPathIsAbsolute(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				localFile := MustGetLocalFileByPath(tt.pathToTest)
+				localFile := files.MustGetLocalFileByPath(tt.pathToTest)
 
 				localPath := localFile.MustGetLocalPath()
 
@@ -476,15 +477,15 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 
 				const verbose bool = true
 
-				var testFile File = getFileToTest("localFile")
-				localTestFile := MustGetLocalFileByFile(testFile)
+				var testFile files.File = getFileToTest("localFile")
+				localTestFile := files.MustGetLocalFileByFile(testFile)
 
 				copy := testFile.GetDeepCopy()
 				require.EqualValues(
 					testFile.MustGetLocalPath(),
 					copy.MustGetLocalPath(),
 				)
-				localCopy := MustGetLocalFileByFile(copy)
+				localCopy := files.MustGetLocalFileByFile(copy)
 
 				require.False(pointersutils.MustPointersEqual(
 					localTestFile.MustGetParentFileForBaseClassAsLocalFile(),
@@ -566,7 +567,7 @@ func TestLocalFile_GetPathReturnsAbsoluteValue(t *testing.T) {
 					defer os.Chdir(startPath)
 					defer waitGroup.Done()
 
-					file := MustGetLocalFileByPath(tt.path)
+					file := files.MustGetLocalFileByPath(tt.path)
 					path1 = file.MustGetPath()
 					os.Chdir("..")
 					path2 = file.MustGetPath()
@@ -592,12 +593,12 @@ func TestLocalFile_GetPathReturnsAbsoluteValue(t *testing.T) {
 	}
 }
 
-func getRepoRootDir(ctx context.Context, t *testing.T) (repoRoot Directory) {
+func getRepoRootDir(ctx context.Context, t *testing.T) (repoRoot files.Directory) {
 	path, err := commandexecutorbashoo.Bash().RunOneLinerAndGetStdoutAsString(ctx, "git rev-parse --show-toplevel")
 	require.NoError(t, err)
 	path = strings.TrimSpace(path)
 
-	return MustGetLocalDirectoryByPath(path)
+	return files.MustGetLocalDirectoryByPath(path)
 }
 
 // TODO: Move to File_test.go and test for all File implementations.
@@ -623,7 +624,7 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 
 				const verbose = true
 
-				testDataDir := MustGetLocalDirectoryByPath(tt.testDataDir)
+				testDataDir := files.MustGetLocalDirectoryByPath(tt.testDataDir)
 				testInput := testDataDir.MustReadFileInDirectoryAsString("input")
 
 				testFile := getFileToTest("localFile")
@@ -805,7 +806,7 @@ func TestFileGetParentDirectoryPath(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				testFile := MustGetLocalFileByPath(tt.inputPath)
+				testFile := files.MustGetLocalFileByPath(tt.inputPath)
 				parentPath := testFile.MustGetParentDirectoryPath()
 				require.EqualValues(tt.expectedParentPath, parentPath)
 			},
@@ -1076,7 +1077,7 @@ func TestFileEnsureEndsWithLineBreakOnEmptyFile(t *testing.T) {
 				tempFile, err := os.CreateTemp("", "testfile")
 				require.Nil(err)
 
-				emptyFile := MustGetLocalFileByPath(tempFile.Name())
+				emptyFile := files.MustGetLocalFileByPath(tempFile.Name())
 				defer emptyFile.MustDelete(verbose)
 
 				emptyFile.MustEnsureEndsWithLineBreak(verbose)
@@ -1107,7 +1108,7 @@ func TestFileEnsureEndsWithLineBreakOnNonExitistingFile(t *testing.T) {
 				tempFile, err := os.CreateTemp("", "testfile")
 				require.Nil(err)
 
-				nonExistingFile := MustGetLocalFileByPath(tempFile.Name())
+				nonExistingFile := files.MustGetLocalFileByPath(tempFile.Name())
 				defer nonExistingFile.MustDelete(verbose)
 				nonExistingFile.MustDelete(verbose)
 
@@ -1269,13 +1270,14 @@ func Test_SecureDelete(t *testing.T) {
 		testPath := createTempFileAndGetPath()
 		require.True(t, filesutils.IsFile(ctx, testPath))
 
-		localFile, err := GetLocalFileByPath(testPath)
+		localFile, err := files.GetLocalFileByPath(testPath)
 		require.NoError(t, err)
 		exists, err := localFile.Exists(verbose)
 		require.NoError(t, err)
 		require.True(t, exists)
 
 		err = localFile.SecurelyDelete(ctx)
+		require.NoError(t, err)
 
 		exists, err = localFile.Exists(verbose)
 		require.NoError(t, err)
