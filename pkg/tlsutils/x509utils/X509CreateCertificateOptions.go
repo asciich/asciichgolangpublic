@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/bigintutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/bigintutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datetime"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"

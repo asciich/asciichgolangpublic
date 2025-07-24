@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )

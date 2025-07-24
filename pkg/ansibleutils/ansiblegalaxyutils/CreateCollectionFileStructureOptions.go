@@ -3,7 +3,7 @@ package ansiblegalaxyutils
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 )

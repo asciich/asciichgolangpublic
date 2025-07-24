@@ -4,7 +4,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"

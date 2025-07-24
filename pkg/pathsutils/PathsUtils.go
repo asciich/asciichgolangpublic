@@ -8,8 +8,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
-	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )

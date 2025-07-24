@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/datatypes"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"

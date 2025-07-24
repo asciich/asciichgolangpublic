@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/structsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/structsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )

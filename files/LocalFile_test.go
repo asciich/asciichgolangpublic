@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/datatypes/pointersutils"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/pointersutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"

@@ -1,7 +1,7 @@
 package kubernetesparameteroptions
 
 import (
-	"github.com/asciich/asciichgolangpublic/datatypes/mapsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/mapsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 

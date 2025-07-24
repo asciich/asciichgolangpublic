@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )

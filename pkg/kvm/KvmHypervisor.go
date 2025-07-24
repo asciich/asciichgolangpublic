@@ -5,11 +5,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/hosts"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"

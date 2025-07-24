@@ -3,7 +3,7 @@ package urlsutils
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
