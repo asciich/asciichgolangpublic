@@ -2,14 +2,14 @@ package defaultclicommands
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/ansiblecmd"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/dnscmd"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/dockercmd"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/errorscmd"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/gitlabcmd"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/kubernetescmd"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/loggingcmd"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/monitoringcmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/ansiblecmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/dnscmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/dockercmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/errorscmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/gitlabcmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/loggingcmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/monitoringcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 

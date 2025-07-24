@@ -2,7 +2,7 @@ package kubernetescmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/kubernetescmd/eventscmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/eventscmd"
 )
 
 func NewKubernetesCmd() *cobra.Command {

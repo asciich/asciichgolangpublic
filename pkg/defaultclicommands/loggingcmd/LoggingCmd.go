@@ -2,12 +2,12 @@ package loggingcmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/loggingcmd/loggingexamplescmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/loggingcmd/loggingexamplescmd"
 )
 
 func NewLoggingCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "logging",
+		Use:   "logging",
 		Short: "logging related commands.",
 	}
 
