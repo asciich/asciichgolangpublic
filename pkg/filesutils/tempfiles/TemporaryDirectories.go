@@ -3,7 +3,7 @@ package tempfiles
 import (
 	"os"
 
-	"github.com/asciich/asciichgolangpublic/files"
+	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 )
 

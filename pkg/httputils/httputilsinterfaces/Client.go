@@ -3,7 +3,7 @@ package httputilsinterfaces
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/files"
+	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
 )
 
