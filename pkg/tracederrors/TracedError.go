@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/datatypes"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
 )
 
 var ErrTracedError = errors.New("asciichgolangpublic TracedError base")

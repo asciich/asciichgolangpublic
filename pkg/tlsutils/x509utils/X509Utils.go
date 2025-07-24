@@ -14,9 +14,9 @@ import (
 	"slices"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/bigintutils"
-	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/bigintutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )

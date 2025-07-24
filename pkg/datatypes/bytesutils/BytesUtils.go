@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/floatsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/floatsutils"
 )
 
 func GetSizeAsHumanReadableString(sizeBytes int64) (readableSize string, err error) {

@@ -7,7 +7,7 @@ import (
 	"encoding/pem"
 	"io"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 

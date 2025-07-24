@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/pointersutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/pointersutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )

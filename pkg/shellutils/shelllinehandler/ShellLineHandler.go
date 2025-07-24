@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/shlex"
 
-	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 )
 
 func Join(command []string) (joinedCommand string, err error) {
