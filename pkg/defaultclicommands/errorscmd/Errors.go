@@ -2,7 +2,7 @@ package errorscmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/defaultclicommands/errorscmd/tracederrorscmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/errorscmd/tracederrorscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 

@@ -2,7 +2,7 @@ package gitlabmetricscmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/tracederrors"
 )
 
 func NewMetricsCommand() (cmd *cobra.Command) {
