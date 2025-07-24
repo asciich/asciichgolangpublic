@@ -1,6 +1,6 @@
 package documentutils
 
-import "github.com/asciich/asciichgolangpublic/documentutils/documentbase"
+import "github.com/asciich/asciichgolangpublic/pkg/documentutils/documentbase"
 
 type Document interface {
 	AddTitleByString(title string) (err error)

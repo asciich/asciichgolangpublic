@@ -9,12 +9,12 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
-	"github.com/asciich/asciichgolangpublic/tempfiles"
 )
 
 // HTTP client written using native go http implementation.

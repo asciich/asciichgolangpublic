@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/documentutils/documentbase"
-	"github.com/asciich/asciichgolangpublic/documentutils/htmldocument"
-	"github.com/asciich/asciichgolangpublic/documentutils/markdowndocument"
+	"github.com/asciich/asciichgolangpublic/pkg/documentutils/documentbase"
+	"github.com/asciich/asciichgolangpublic/pkg/documentutils/htmldocument"
+	"github.com/asciich/asciichgolangpublic/pkg/documentutils/markdowndocument"
 )
 
 func Test_ImplementDocumentInterface(t *testing.T) {

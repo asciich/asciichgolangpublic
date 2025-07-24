@@ -2,8 +2,8 @@ package documentbase
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/spreadsheet"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
-	"github.com/asciich/asciichgolangpublic/spreadsheet"
 )
 
 type Table struct {
