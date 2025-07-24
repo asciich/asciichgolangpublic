@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/hosts"
+	"github.com/asciich/asciichgolangpublic/pkg/hosts"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"

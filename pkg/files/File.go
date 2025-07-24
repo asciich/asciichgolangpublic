@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/changesummary"
+	"github.com/asciich/asciichgolangpublic/pkg/changesummary"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"

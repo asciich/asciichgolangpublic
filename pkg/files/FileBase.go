@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/changesummary"
+	"github.com/asciich/asciichgolangpublic/pkg/changesummary"
 
 	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"

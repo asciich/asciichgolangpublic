@@ -3,7 +3,7 @@ package logging
 import (
 	"fmt"
 
-	"github.com/asciich/asciichgolangpublic/changesummary"
+	"github.com/asciich/asciichgolangpublic/pkg/changesummary"
 )
 
 var overrideFunctionLogByChangeSummary func(changeSummary *changesummary.ChangeSummary, message string)

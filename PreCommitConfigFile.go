@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/asciich/asciichgolangpublic/changesummary"
+	"github.com/asciich/asciichgolangpublic/pkg/changesummary"
 	"github.com/asciich/asciichgolangpublic/pkg/dependencyutils/dependencyinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
