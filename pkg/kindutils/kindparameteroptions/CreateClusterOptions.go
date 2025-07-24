@@ -1,6 +1,6 @@
 package kindparameteroptions
 
-import "github.com/asciich/asciichgolangpublic/tracederrors"
+import "github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 
 type CreateClusterOptions struct {
 	// Name of the cluster to create:

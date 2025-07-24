@@ -13,8 +13,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // HTTP client written using native go http implementation.

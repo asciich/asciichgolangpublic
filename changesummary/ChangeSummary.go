@@ -3,7 +3,7 @@ package changesummary
 import (
 	"log"
 
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 // A ChangeSummary is used to return details about if/what/how much was actually changed.

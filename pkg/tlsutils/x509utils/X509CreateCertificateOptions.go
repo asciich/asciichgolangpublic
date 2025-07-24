@@ -10,7 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/bigintutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datetime"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type X509CreateCertificateOptions struct {

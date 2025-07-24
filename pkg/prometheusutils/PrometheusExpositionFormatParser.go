@@ -5,7 +5,7 @@ import (
 
 	"github.com/prometheus/common/expfmt"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type PrometheusExpositionFormatParserService struct{}

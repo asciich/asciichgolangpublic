@@ -18,7 +18,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
 
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 var ErrTmuxWindowCliPromptNotReady = errors.New("tmux window CLI promptnot ready")

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 const SOFTWARE_NAME_UNDEFINED = "[software name not defined]"

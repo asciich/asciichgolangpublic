@@ -3,7 +3,7 @@ package ansiblegalaxyutils
 import (
 	"regexp"
 
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 var regexCollectionName = regexp.MustCompile(`^[a-z][a-z_]*[a-z]$`)

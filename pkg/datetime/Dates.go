@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type DatesService struct{}

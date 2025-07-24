@@ -1,7 +1,7 @@
 package parameteroptions
 
 import (
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 // TODO: This should become the generic "CreateBranchOptions" to use everywhere.

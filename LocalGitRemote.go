@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"github.com/go-git/go-git/v5"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type LocalGitRemote struct {

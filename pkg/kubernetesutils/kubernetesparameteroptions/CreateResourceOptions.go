@@ -1,6 +1,6 @@
 package kubernetesparameteroptions
 
-import "github.com/asciich/asciichgolangpublic/tracederrors"
+import "github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 
 type CreateObjectOptions struct {
 	YamlString string

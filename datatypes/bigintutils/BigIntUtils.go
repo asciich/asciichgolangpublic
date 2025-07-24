@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func Equals(i1 string, i2 string) (bool, error) {

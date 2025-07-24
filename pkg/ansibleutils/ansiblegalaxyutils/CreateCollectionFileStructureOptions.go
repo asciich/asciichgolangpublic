@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // Options to create a collection file structure

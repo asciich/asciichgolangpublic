@@ -6,7 +6,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/datetime"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func MustParseCreationDateFromSignalPictureBaseName(baseName string) (creationDate *time.Time) {

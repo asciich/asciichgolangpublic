@@ -6,8 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func TestTracedErrorIsError(t *testing.T) {
@@ -169,7 +168,9 @@ func TestTracedErrorGetErrorMessage(t *testing.T) {
 				tracedError, err := tracederrors.GetAsTracedError(tracederrors.TracedError(tt.errorMessage))
 				require.NoError(t, err)
 
-				require.EqualValues(t, tt.expectedErrorMessage, mustutils.Must(tracedError.GetErrorMessage()))
+				errMsg, err := tracedError.GetErrorMessage()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedErrorMessage, errMsg)
 			},
 		)
 	}

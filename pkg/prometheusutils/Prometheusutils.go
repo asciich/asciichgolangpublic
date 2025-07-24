@@ -6,7 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func MustGetMetricValueFromMetricPage(ctx context.Context, url string, metricName string) (value float64) {

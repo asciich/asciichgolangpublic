@@ -6,7 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func SendRequest(ctx context.Context, requestOptions *httputilsparameteroptions.RequestOptions) (httputilsinterfaces.Response, error) {
@@ -32,11 +32,11 @@ func DownloadAsFile(ctx context.Context, options *httputilsparameteroptions.Down
 type progressEveryNBytes struct{}
 
 func WithDownloadProgressEveryNMBytes(ctx context.Context, nMBytes int) context.Context {
-	return WithDownloadProgressEveryNkBytes(ctx, 1024 * nMBytes)
+	return WithDownloadProgressEveryNkBytes(ctx, 1024*nMBytes)
 }
 
 func WithDownloadProgressEveryNkBytes(ctx context.Context, nkBytes int) context.Context {
-	return WithDownloadProgressEveryNBytes(ctx, 1024 * nkBytes)
+	return WithDownloadProgressEveryNBytes(ctx, 1024*nkBytes)
 }
 
 func WithDownloadProgressEveryNBytes(ctx context.Context, nBytes int) context.Context {

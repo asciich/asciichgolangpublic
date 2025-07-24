@@ -11,7 +11,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type NativeX509CertificateHandler struct {

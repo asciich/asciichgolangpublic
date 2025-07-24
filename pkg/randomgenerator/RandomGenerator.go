@@ -3,7 +3,7 @@ package randomgenerator
 import (
 	"math/rand"
 
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func GetRandomString(lenght int) (string, error) {

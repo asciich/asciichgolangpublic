@@ -1,10 +1,11 @@
-package tracederrors
+package tracederrors_test
 
 import (
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func TestErrorsIsTracedError(t *testing.T) {
@@ -13,7 +14,7 @@ func TestErrorsIsTracedError(t *testing.T) {
 		expectedIsTracedError bool
 	}{
 		{fmt.Errorf("an error"), false},
-		{TracedError("an error"), true},
+		{tracederrors.TracedError("an error"), true},
 		{nil, false},
 	}
 
@@ -25,7 +26,7 @@ func TestErrorsIsTracedError(t *testing.T) {
 
 				require.EqualValues(
 					tt.expectedIsTracedError,
-					IsTracedError(tt.err),
+					tracederrors.IsTracedError(tt.err),
 				)
 			},
 		)

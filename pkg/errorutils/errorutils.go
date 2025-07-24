@@ -3,7 +3,7 @@ package errorutils
 import (
 	"fmt"
 
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func GetErrorMessage(e error) string {

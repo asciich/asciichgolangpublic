@@ -4,7 +4,7 @@ import (
 	"regexp"
 
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func CheckStringIsAMacAddress(input string) (isMacAddress bool, err error) {

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/asciich/asciichgolangpublic/pkg/shellutils/terminalcolors"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 var overrideFunctionLogFatal func(logmessage string)

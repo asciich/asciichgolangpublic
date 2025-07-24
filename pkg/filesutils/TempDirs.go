@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func CreateTempDir(ctx context.Context) (string, error) {

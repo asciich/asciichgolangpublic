@@ -3,7 +3,7 @@ package commandexecutor
 import (
 	"github.com/asciich/asciichgolangpublic/datatypes"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func GetDeepCopyOfCommandExecutor(commandExectuor commandexecutorinterfaces.CommandExecutor) (copy commandexecutorinterfaces.CommandExecutor, err error) {

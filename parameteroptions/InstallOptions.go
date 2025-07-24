@@ -3,7 +3,7 @@ package parameteroptions
 import (
 	"path/filepath"
 
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type InstallOptions struct {
