@@ -3,10 +3,10 @@ package commandexecutorpowershelloo
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorpowershell"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 type PowerShellService struct {

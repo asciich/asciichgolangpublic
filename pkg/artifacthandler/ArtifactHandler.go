@@ -1,7 +1,7 @@
 package artifacthandler
 
 import (
-	"github.com/asciich/asciichgolangpublic/parameteroptions/artifactparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions/artifactparameteroptions"
 )
 
 // An artifact handler is used to download or update artifacts.

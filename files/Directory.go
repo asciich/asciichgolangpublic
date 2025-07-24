@@ -3,7 +3,7 @@ package files
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 type Directory interface {

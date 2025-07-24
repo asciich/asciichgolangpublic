@@ -3,8 +3,8 @@ package dependencyinterfaces
 import (
 	"github.com/asciich/asciichgolangpublic/changesummary"
 	"github.com/asciich/asciichgolangpublic/files"
-	"github.com/asciich/asciichgolangpublic/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions/authenticationoptions"
 )
 
 // A Dependency is used to implement software and other dependencies like container images...

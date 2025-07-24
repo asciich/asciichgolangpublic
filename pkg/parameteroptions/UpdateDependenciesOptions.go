@@ -1,8 +1,8 @@
 package parameteroptions
 
 import (
-	"github.com/asciich/asciichgolangpublic/artifacthandler"
-	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/artifacthandler"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions/authenticationoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 

@@ -1,9 +1,10 @@
-package commandlineinterface
+package commandlineinterface_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/commandlineinterface"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -65,7 +66,7 @@ func TestCommandLineInterface_IsLinePromptOnly(t *testing.T) {
 
 				require.EqualValues(
 					tt.expectedIsPromptOnly,
-					IsLinePromptOnly(tt.line),
+					commandlineinterface.IsLinePromptOnly(tt.line),
 				)
 			},
 		)

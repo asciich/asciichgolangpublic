@@ -3,8 +3,8 @@ package commandexecutorinterfaces
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 // A CommandExecutor is able to run a command like Exec or bash does.

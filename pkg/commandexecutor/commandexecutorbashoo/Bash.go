@@ -3,11 +3,11 @@ package commandexecutorbashoo
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbash"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 type BashService struct {

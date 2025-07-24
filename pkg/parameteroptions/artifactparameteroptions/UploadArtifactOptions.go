@@ -1,7 +1,7 @@
 package artifactparameteroptions
 
 import (
-	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions/authenticationoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
