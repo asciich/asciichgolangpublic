@@ -1,9 +1,10 @@
-package files
+package files_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -30,11 +31,11 @@ func TestFilesWriteStringToFile(t *testing.T) {
 				tempFile2 := getFileToTest(tt.implementationName)
 				defer tempFile2.Delete(verbose)
 
-				Files().MustWriteStringToFile(tempFile.MustGetLocalPath(), tt.content, verbose)
+				files.Files().MustWriteStringToFile(tempFile.MustGetLocalPath(), tt.content, verbose)
 
 				// Since used often there is a convenience function to write a file by path:
 				content2 := tt.content + "2"
-				MustWriteStringToFile(tempFile2.MustGetLocalPath(), content2, verbose)
+				files.MustWriteStringToFile(tempFile2.MustGetLocalPath(), content2, verbose)
 
 				require.EqualValues(
 					tempFile.MustReadAsString(),
@@ -47,13 +48,13 @@ func TestFilesWriteStringToFile(t *testing.T) {
 				)
 
 				require.EqualValues(
-					Files().MustReadAsString(tempFile.MustGetLocalPath()),
+					files.Files().MustReadAsString(tempFile.MustGetLocalPath()),
 					tt.content,
 				)
 
 				// Since used often there is a convenience function to read a file by path:
 				require.EqualValues(
-					MustReadFileAsString(tempFile.MustGetLocalPath()),
+					files.MustReadFileAsString(tempFile.MustGetLocalPath()),
 					tt.content,
 				)
 			},

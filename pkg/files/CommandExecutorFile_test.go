@@ -1,9 +1,10 @@
-package files
+package files_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -27,7 +28,7 @@ func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 
 				temporaryFilePath := createTempFileAndGetPath()
 
-				var fileToTest File = MustGetLocalCommandExecutorFileByPath(temporaryFilePath)
+				var fileToTest files.File = files.MustGetLocalCommandExecutorFileByPath(temporaryFilePath)
 				defer fileToTest.Delete(verbose)
 
 				require.True(fileToTest.MustExists(verbose))

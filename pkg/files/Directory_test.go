@@ -1,4 +1,4 @@
-package files
+package files_test
 
 import (
 	"os"
@@ -6,23 +6,25 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
-func getDirectoryToTest(implementationName string) (directory Directory) {
+func getDirectoryToTest(implementationName string) (directory files.Directory) {
 	tempDir, err := os.MkdirTemp("", "test_dir")
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 
 	if implementationName == "localDirectory" {
-		return MustGetLocalDirectoryByPath(tempDir)
+		return files.MustGetLocalDirectoryByPath(tempDir)
 	}
 
 	if implementationName == "localCommandExecutorDirectory" {
-		return MustGetLocalCommandExecutorDirectoryByPath(tempDir)
+		return mustutils.Must(files.GetLocalCommandExecutorDirectoryByPath(tempDir))
 	}
 
 	logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)

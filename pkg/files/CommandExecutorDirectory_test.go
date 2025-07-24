@@ -1,4 +1,4 @@
-package files
+package files_test
 
 import (
 	"os"
@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -35,11 +36,9 @@ func TestCommandExecutorDirectoryRead_GetFileInDirectory(t *testing.T) {
 
 				parentDirPath := filepath.Dir(temporaryFile.Name())
 
-				dir := MustGetLocalCommandExecutorDirectoryByPath(parentDirPath)
-				require.NotNil(
-					t,
-					dir.MustGetCommandExecutor(),
-				)
+				dir, err := files.GetLocalCommandExecutorDirectoryByPath(parentDirPath)
+				require.NoError(t, err)
+				require.NotNil(t, dir.MustGetCommandExecutor())
 				defer dir.MustDelete(verbose)
 
 				commandExecutorFile := dir.MustGetFileInDirectory(filepath.Base(temporaryFile.Name()))
