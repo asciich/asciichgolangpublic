@@ -2,7 +2,7 @@ package artifactparameteroptions
 
 import (
 	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type UploadArtifactOptions struct {

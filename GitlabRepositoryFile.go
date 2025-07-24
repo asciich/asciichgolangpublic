@@ -8,7 +8,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/encodingutils/base64utils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 var ErrGitlabRepositoryFileDoesNotExist = errors.New("Gitlab repository file does not exist")

@@ -5,7 +5,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func GetCommandExecutorGitRepositoryByPath(commandExecutor commandexecutorinterfaces.CommandExecutor, path string) (gitRepo *CommandExecutorGitRepository, err error) {

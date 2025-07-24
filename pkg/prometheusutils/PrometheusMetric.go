@@ -2,7 +2,7 @@ package prometheusutils
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type PrometheusMetric struct {

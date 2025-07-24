@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func DecodeStringAsBytes(input string) (decoded []byte, err error) {

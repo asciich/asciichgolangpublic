@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func CreateNamedTemporaryFile(ctx context.Context, fileName string) (string, error) {

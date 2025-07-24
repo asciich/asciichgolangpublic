@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func MustFormatDurationAsString(duration *time.Duration) (durationString string) {

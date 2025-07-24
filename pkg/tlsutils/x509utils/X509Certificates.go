@@ -11,8 +11,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/shellutils/shelllinehandler"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 func GetDefaultHandler() (certHandler X509CertificateHandler) {

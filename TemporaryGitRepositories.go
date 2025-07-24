@@ -4,8 +4,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type TemporaryGitRepositoriesService struct {

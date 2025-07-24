@@ -2,8 +2,8 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 

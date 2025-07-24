@@ -3,7 +3,7 @@ package prometheusutils
 import (
 	dto "github.com/prometheus/client_model/go"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type PrometheusMetricFamily struct {

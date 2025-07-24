@@ -3,7 +3,7 @@ package tracederrorscmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func NewTracedErrorsCommand() (errorsCmd *cobra.Command) {

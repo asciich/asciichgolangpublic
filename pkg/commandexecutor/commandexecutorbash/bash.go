@@ -6,7 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
@@ -35,7 +35,6 @@ func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions
 
 	return commandOutput, nil
 }
-
 
 func RunOneLiner(ctx context.Context, oneLiner string) (output *commandoutput.CommandOutput, err error) {
 	if oneLiner == "" {

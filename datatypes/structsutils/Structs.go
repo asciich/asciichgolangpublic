@@ -6,7 +6,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/datatypes/pointersutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func GetFieldValuesAsString(structToGetFieldsFrom interface{}) (values []string, err error) {

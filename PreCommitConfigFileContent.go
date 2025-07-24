@@ -8,7 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/dependencyutils/dependencyinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"gopkg.in/yaml.v3"
 )
 

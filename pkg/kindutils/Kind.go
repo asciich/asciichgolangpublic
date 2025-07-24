@@ -7,7 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kindutils/kindparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 // Kubernetes in Docker

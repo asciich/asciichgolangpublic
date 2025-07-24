@@ -11,8 +11,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/userutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type SSHPublicKey struct {

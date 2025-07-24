@@ -8,7 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/datatypes/structsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func FormatAsTestname(objectToFormat interface{}) (testname string, err error) {

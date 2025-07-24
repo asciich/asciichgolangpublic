@@ -21,7 +21,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datetime"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/signalmessenger"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 var ErrFileBaseParentNotSet = errors.New("parent is not set")

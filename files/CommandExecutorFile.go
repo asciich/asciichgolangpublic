@@ -15,7 +15,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 // A CommandExecutorFile implements the functionality of a `File` by

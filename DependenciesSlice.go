@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"github.com/asciich/asciichgolangpublic/files"
 	"github.com/asciich/asciichgolangpublic/pkg/dependencyutils/dependencyinterfaces"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type DependenciesSliceService struct{}

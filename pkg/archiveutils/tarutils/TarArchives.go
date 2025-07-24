@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/slicesutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func AddFileFromFileContentBytesToTarArchiveBytes(archiveToExtend []byte, fileName string, content []byte) (tarBytes []byte, err error) {

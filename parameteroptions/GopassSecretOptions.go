@@ -5,7 +5,7 @@ import (
 	"regexp"
 
 	"github.com/asciich/asciichgolangpublic/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 const baseNameRegexString = "^[a-zA-Z0-9._-]*$"

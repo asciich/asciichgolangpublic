@@ -5,7 +5,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type GoogleStorageBucket struct {

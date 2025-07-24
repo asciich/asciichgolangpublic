@@ -17,8 +17,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/ftputils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/tempfiles"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 type CommandExecutorHost struct {

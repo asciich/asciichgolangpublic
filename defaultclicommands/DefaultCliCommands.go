@@ -10,7 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/defaultclicommands/kubernetescmd"
 	"github.com/asciich/asciichgolangpublic/defaultclicommands/loggingcmd"
 	"github.com/asciich/asciichgolangpublic/defaultclicommands/monitoringcmd"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func AddDefaultCommands(rootCmd *cobra.Command) (err error) {

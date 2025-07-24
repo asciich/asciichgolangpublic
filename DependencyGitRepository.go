@@ -6,8 +6,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/parameteroptions/authenticationoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
-	"github.com/asciich/asciichgolangpublic/tracederrors"
 )
 
 // Represents a dependency to (another) git repository.
