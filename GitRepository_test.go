@@ -125,7 +125,8 @@ func TestGitRepository_IsGitRepository(t *testing.T) {
 
 				path, err := repo.GetPath()
 				require.NoError(t, err)
-				files.Directories().MustCreateLocalDirectoryByPath(path, verbose)
+				_, err = files.Directories().CreateLocalDirectoryByPath(path, verbose)
+				require.NoError(t, err)
 
 				// The directory exists but is empty which is not a git directory:
 				isRepo, err = repo.IsGitRepository(verbose)
@@ -477,7 +478,7 @@ func TestGitRepository_GetRootDirectory(t *testing.T) {
 				rootDirPath, err := rootDir.GetPath()
 				require.NoError(t, err)
 
-				require.EqualValues(t, mustutils.Must(repo.GetPath()),rootDirPath)
+				require.EqualValues(t, mustutils.Must(repo.GetPath()), rootDirPath)
 			},
 		)
 	}

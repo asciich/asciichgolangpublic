@@ -47,7 +47,9 @@ func TestDirectoriesCreateLocalDirectoryByPath(t *testing.T) {
 				for i := 0; i < 2; i++ {
 					localPath, err := directory.GetLocalPath()
 					require.NoError(t, err)
-					createdDir := files.Directories().MustCreateLocalDirectoryByPath(localPath, verbose)
+
+					createdDir, err := files.Directories().CreateLocalDirectoryByPath(localPath, verbose)
+					require.NoError(t, err)
 
 					dirExists, err := directory.Exists(verbose)
 					require.NoError(t, err)

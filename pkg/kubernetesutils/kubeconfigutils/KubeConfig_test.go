@@ -150,7 +150,7 @@ func TestKubeConfig_IsLoadableByKubectl(t *testing.T) {
 
 				tempFilePath, err := kubeConfig.WriteToTemporaryFileAndGetPath(verbose)
 				require.NoError(t, err)
-				defer files.MustDeleteFileByPath(tempFilePath, verbose)
+				defer files.DeleteFileByPath(tempFilePath, verbose)
 
 				isLoadable, err = kubeconfigutils.IsFilePathLoadableByKubectl(tt.path, verbose)
 				require.NoError(t, err)
@@ -184,7 +184,7 @@ func TestKubeConfig_CheckContextsUsingKubectl(t *testing.T) {
 
 				tempFilePath, err := kubeConfig.WriteToTemporaryFileAndGetPath(verbose)
 				require.NoError(t, err)
-				defer files.MustDeleteFileByPath(tempFilePath, verbose)
+				defer files.DeleteFileByPath(tempFilePath, verbose)
 
 				require.EqualValues(t, tt.expectedContextNames, mustutils.Must(kubeconfigutils.ListContextNamesUsingKubectl(tempFilePath, verbose)))
 
@@ -227,7 +227,7 @@ func TestKubeConfig_MergeTwoConfigs(t *testing.T) {
 				tempFilePath, err := merged.WriteToTemporaryFileAndGetPath(verbose)
 				require.NoError(t, err)
 
-				defer files.MustDeleteFileByPath(tempFilePath, verbose)
+				defer files.DeleteFileByPath(tempFilePath, verbose)
 
 				require.EqualValues(t, tt.expectedNames, mustutils.Must(kubeconfigutils.ListContextNamesUsingKubectl(tempFilePath, verbose)))
 			},
@@ -263,7 +263,7 @@ func TestKubeConfig_MergeThreeConfigs(t *testing.T) {
 
 	tempFilePath, err := merged2.WriteToTemporaryFileAndGetPath(verbose)
 	require.NoError(t, err)
-	defer files.MustDeleteFileByPath(tempFilePath, verbose)
+	defer files.DeleteFileByPath(tempFilePath, verbose)
 
 	require.EqualValues(
 		t,

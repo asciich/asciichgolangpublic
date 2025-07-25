@@ -165,7 +165,7 @@ func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
 
 				outputPath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(contextutils.GetVerboseFromContext(ctx))
 				require.NoError(t, err)
-				defer files.MustDeleteFileByPath(outputPath, contextutils.GetVerboseFromContext(ctx))
+				defer files.DeleteFileByPath(outputPath, contextutils.GetVerboseFromContext(ctx))
 
 				exampleScript := "#/usr/bin/env bash\n"
 				exampleScript += "\n"
@@ -182,7 +182,7 @@ func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
 
 				exampleScriptPath, err := tempfilesoo.CreateFromStringAndGetPath(exampleScript, contextutils.GetVerboseFromContext(ctx))
 				require.NoError(t, err)
-				defer files.MustDeleteFileByPath(exampleScriptPath, contextutils.GetVerboseFromContext(ctx))
+				defer files.DeleteFileByPath(exampleScriptPath, contextutils.GetVerboseFromContext(ctx))
 
 				err = window.SendKeys(
 					ctx,
@@ -206,7 +206,10 @@ func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
 
 				shownLines, err := window.GetShownLines()
 				require.NoError(t, err)
-				require.EqualValues(t, tt.username+"\n"+tt.password+"\n", files.MustReadFileAsString(outputPath))
+
+				content, err := files.ReadFileAsString(outputPath)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.username+"\n"+tt.password+"\n", content)
 				require.Contains(t, shownLines, "finished")
 			},
 		)

@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -19,13 +18,4 @@ func GetFileByOsFile(osFile *os.File) (file filesinterfaces.File, err error) {
 	}
 
 	return file, nil
-}
-
-func MustGetFileByOsFile(osFile *os.File) (file filesinterfaces.File) {
-	file, err := GetFileByOsFile(osFile)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return file
 }

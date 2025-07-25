@@ -27,7 +27,7 @@ func TestInstallFromPath(t *testing.T) {
 
 				sourceFile, err := tempfilesoo.CreateFromStringAndGetPath(tt.content, verbose)
 				require.NoError(t, err)
-				defer files.MustDeleteFileByPath(sourceFile, verbose)
+				defer files.DeleteFileByPath(sourceFile, verbose)
 
 				destFile, err := tempfilesoo.CreateEmptyTemporaryFile(verbose)
 				require.NoError(t, err)
