@@ -7,6 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -29,8 +30,8 @@ type GitRepository interface {
 	CommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool, err error)
 	CreateBranch(createOptions *parameteroptions.CreateBranchOptions) (err error)
 	Create(verbose bool) (err error)
-	CreateFileInDirectory(verbose bool, filePath ...string) (createdFile files.File, err error)
-	CreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory files.Directory, err error)
+	CreateFileInDirectory(verbose bool, filePath ...string) (createdFile filesinterfaces.File, err error)
+	CreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory filesinterfaces.Directory, err error)
 	CreateTag(createOptions *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag, err error)
 	Delete(verbose bool) (err error)
 	DeleteBranchByName(name string, verbose bool) (err error)
@@ -44,7 +45,7 @@ type GitRepository interface {
 	GetAsLocalGitRepository() (localGitRepository *LocalGitRepository, err error)
 	GetAuthorEmailByCommitHash(hash string) (authorEmail string, err error)
 	GetAuthorStringByCommitHash(hash string) (authorString string, err error)
-	GetDirectoryByPath(pathToSubDir ...string) (subDir files.Directory, err error)
+	GetDirectoryByPath(pathToSubDir ...string) (subDir filesinterfaces.Directory, err error)
 	GetCommitAgeDurationByCommitHash(hash string) (ageDuration *time.Duration, err error)
 	GetCommitAgeSecondsByCommitHash(hash string) (ageSeconds float64, err error)
 	GetCommitMessageByCommitHash(hash string) (commitMessage string, err error)
@@ -58,7 +59,7 @@ type GitRepository interface {
 	GetHostDescription() (hostDescription string, err error)
 	GetPath() (path string, err error)
 	GetRemoteConfigs(verbose bool) (remoteConfigs []*GitRemoteConfig, err error)
-	GetRootDirectory(ctx context.Context) (directory files.Directory, err error)
+	GetRootDirectory(ctx context.Context) (directory filesinterfaces.Directory, err error)
 	GetRootDirectoryPath(ctx context.Context) (path string, err error)
 	HasInitialCommit(verbose bool) (hasInitialCommit bool, err error)
 	HasUncommittedChanges(verbose bool) (hasUncommitedChanges bool, err error)
@@ -69,7 +70,7 @@ type GitRepository interface {
 	IsInitialized(verbose bool) (isInitialited bool, err error)
 	ListBranchNames(verbose bool) (branchNames []string, err error)
 	ListFilePaths(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error)
-	ListFiles(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (files []files.File, err error)
+	ListFiles(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (files []filesinterfaces.File, err error)
 	ListTagNames(verbose bool) (tagNames []string, err error)
 	ListTags(verbose bool) (tags []GitTag, err error)
 	ListTagsForCommitHash(hash string, verbose bool) (tags []GitTag, err error)
@@ -100,7 +101,7 @@ type GitRepository interface {
 	GetCurrentCommitMessage(verbose bool) (currentCommitMessage string, err error)
 	GetCurrentCommitsNewestVersion(verbose bool) (newestVersion versionutils.Version, err error)
 	GetCurrentCommitsNewestVersionOrNilIfNotPresent(verbose bool) (newestVersion versionutils.Version, err error)
-	GetFileByPath(path ...string) (fileInRepo files.File, err error)
+	GetFileByPath(path ...string) (fileInRepo filesinterfaces.File, err error)
 	GetLatestTagVersion(verbose bool) (latestTagVersion versionutils.Version, err error)
 	GetLatestTagVersionAsString(verbose bool) (latestTagVersion string, err error)
 	GetLatestTagVersionOrNilIfNotFound(verbose bool) (latestTagVersion versionutils.Version, err error)
@@ -111,11 +112,11 @@ type GitRepository interface {
 	IsOnLocalhost(verbose bool) (isOnLocalhost bool, err error)
 	IsPreCommitRepository(verbose bool) (isPreCommitRepository bool, err error)
 	ListVersionTags(verbose bool) (versionTags []GitTag, err error)
-	WriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile files.File, err error)
-	WriteStringToFile(content string, verbose bool, path ...string) (writtenFile files.File, err error)
+	WriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile filesinterfaces.File, err error)
+	WriteStringToFile(content string, verbose bool, path ...string) (writtenFile filesinterfaces.File, err error)
 }
 
-func GetGitRepositoryByDirectory(directory files.Directory) (repository GitRepository, err error) {
+func GetGitRepositoryByDirectory(directory filesinterfaces.Directory) (repository GitRepository, err error) {
 	if directory == nil {
 		return nil, tracederrors.TracedErrorNil("directory")
 	}
@@ -153,7 +154,7 @@ func GitRepositryDefaultAuthorName() (name string) {
 	return "asciichgolangpublic git repo initializer"
 }
 
-func MustGetGitRepositoryByDirectory(directory files.Directory) (repository GitRepository) {
+func MustGetGitRepositoryByDirectory(directory filesinterfaces.Directory) (repository GitRepository) {
 	repository, err := GetGitRepositoryByDirectory(directory)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

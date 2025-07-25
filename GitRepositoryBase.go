@@ -5,7 +5,7 @@ import (
 	"slices"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -563,7 +563,7 @@ func (g *GitRepositoryBase) GetCurrentCommitsNewestVersionOrNilIfNotPresent(verb
 	return currentCommit.GetNewestTagVersionOrNilIfUnset(verbose)
 }
 
-func (g *GitRepositoryBase) GetFileByPath(path ...string) (file files.File, err error) {
+func (g *GitRepositoryBase) GetFileByPath(path ...string) (file filesinterfaces.File, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedError("path has no elements")
 	}
@@ -1047,7 +1047,7 @@ func (g *GitRepositoryBase) MustGetCurrentCommitsNewestVersionOrNilIfNotPresent(
 	return newestVersion
 }
 
-func (g *GitRepositoryBase) MustGetFileByPath(path ...string) (file files.File) {
+func (g *GitRepositoryBase) MustGetFileByPath(path ...string) (file filesinterfaces.File) {
 	file, err := g.GetFileByPath(path...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1162,7 +1162,7 @@ func (g *GitRepositoryBase) MustSetParentRepositoryForBaseClass(parentRepository
 	}
 }
 
-func (g *GitRepositoryBase) MustWriteStringToFile(content string, verbose bool, path ...string) (writtenFile files.File) {
+func (g *GitRepositoryBase) MustWriteStringToFile(content string, verbose bool, path ...string) (writtenFile filesinterfaces.File) {
 	writtenFile, err := g.WriteStringToFile(content, verbose, path...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1181,7 +1181,7 @@ func (g *GitRepositoryBase) SetParentRepositoryForBaseClass(parentRepositoryForB
 	return nil
 }
 
-func (g *GitRepositoryBase) WriteStringToFile(content string, verbose bool, path ...string) (writtenFile files.File, err error) {
+func (g *GitRepositoryBase) WriteStringToFile(content string, verbose bool, path ...string) (writtenFile filesinterfaces.File, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedError("path has no elements")
 	}

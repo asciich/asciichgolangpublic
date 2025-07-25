@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
@@ -13,7 +14,7 @@ import (
 
 // This test suite ensure the different implementations behave in the same way.
 
-func getFileToTest(implementationName string) (fileToTest files.File) {
+func getFileToTest(implementationName string) (fileToTest filesinterfaces.File) {
 	temporayFile := mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(false))
 
 	if implementationName == "localFile" {

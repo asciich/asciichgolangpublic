@@ -11,6 +11,7 @@ import (
 	"encoding/pem"
 
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -20,7 +21,7 @@ type X509Certificate struct {
 	nativeX509Certificate *x509.Certificate
 }
 
-func GetX509CertificateFromFile(certFile files.File) (cert *X509Certificate, err error) {
+func GetX509CertificateFromFile(certFile filesinterfaces.File) (cert *X509Certificate, err error) {
 	if certFile == nil {
 		return nil, err
 	}
@@ -53,7 +54,7 @@ func GetX509CertificateFromFilePath(certFilePath string) (cert *X509Certificate,
 	return cert, nil
 }
 
-func MustGetX509CertificateFromFile(certFile files.File) (cert *X509Certificate) {
+func MustGetX509CertificateFromFile(certFile filesinterfaces.File) (cert *X509Certificate) {
 	cert, err := GetX509CertificateFromFile(certFile)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -223,7 +224,7 @@ func (c *X509Certificate) IsRootCa(verbose bool) (isRootCa bool, err error) {
 	return isRootCa, nil
 }
 
-func (c *X509Certificate) IsSignedByCertificateFile(signingCertificate files.File, verbose bool) (isSignedBy bool, err error) {
+func (c *X509Certificate) IsSignedByCertificateFile(signingCertificate filesinterfaces.File, verbose bool) (isSignedBy bool, err error) {
 	if signingCertificate == nil {
 		return false, tracederrors.TracedError("signingCertificate is nil")
 	}
@@ -348,7 +349,7 @@ func (c *X509Certificate) LoadFromBytes(certBytes []byte) (err error) {
 	return nil
 }
 
-func (c *X509Certificate) LoadFromFile(loadFile files.File) (err error) {
+func (c *X509Certificate) LoadFromFile(loadFile filesinterfaces.File) (err error) {
 	if loadFile == nil {
 		return tracederrors.TracedError("loadFile is nil")
 	}
@@ -398,7 +399,7 @@ func (c *X509Certificate) LoadFromString(certString string) (err error) {
 	return nil
 }
 
-func (c *X509Certificate) WritePemToFile(outputFile files.File, verbose bool) (err error) {
+func (c *X509Certificate) WritePemToFile(outputFile filesinterfaces.File, verbose bool) (err error) {
 	if outputFile == nil {
 		return tracederrors.TracedError("outputFile is nil")
 	}
@@ -569,7 +570,7 @@ func (x *X509Certificate) MustIsRootCa(verbose bool) (isRootCa bool) {
 	return isRootCa
 }
 
-func (x *X509Certificate) MustIsSignedByCertificateFile(signingCertificate files.File, verbose bool) (isSignedBy bool) {
+func (x *X509Certificate) MustIsSignedByCertificateFile(signingCertificate filesinterfaces.File, verbose bool) (isSignedBy bool) {
 	isSignedBy, err := x.IsSignedByCertificateFile(signingCertificate, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -603,7 +604,7 @@ func (x *X509Certificate) MustLoadFromBytes(certBytes []byte) {
 	}
 }
 
-func (x *X509Certificate) MustLoadFromFile(loadFile files.File) {
+func (x *X509Certificate) MustLoadFromFile(loadFile filesinterfaces.File) {
 	err := x.LoadFromFile(loadFile)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -631,7 +632,7 @@ func (x *X509Certificate) MustSetNativeX509Certificate(nativeX509Certificate *x5
 	}
 }
 
-func (x *X509Certificate) MustWritePemToFile(outputFile files.File, verbose bool) {
+func (x *X509Certificate) MustWritePemToFile(outputFile filesinterfaces.File, verbose bool) {
 	err := x.WritePemToFile(outputFile, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

@@ -7,13 +7,14 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
-func getDirectoryToTest(implementationName string) (directory files.Directory) {
+func getDirectoryToTest(implementationName string) (directory filesinterfaces.Directory) {
 	tempDir, err := os.MkdirTemp("", "test_dir")
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -328,15 +329,15 @@ func TestDirectory_ListSubDirectories(t *testing.T) {
 
 				testDirPath, err := testDirectory.GetLocalPath()
 				require.NoError(t, err)
-				
+
 				dirName, err = subDirectoryList[0].GetDirName()
 				require.NoError(t, err)
 				require.EqualValues(t, dirName, testDirPath)
-				
+
 				dirName, err = subDirectoryList[1].GetDirName()
 				require.NoError(t, err)
 				require.EqualValues(t, dirName, testDirPath)
-			
+
 				dirName, err = subDirectoryList[2].GetDirName()
 				require.NoError(t, err)
 				require.EqualValues(t, dirName, filepath.Join(testDirPath, "test2"))

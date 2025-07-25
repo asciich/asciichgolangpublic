@@ -9,7 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -203,7 +203,7 @@ func (c *GopassCredential) SetName(name string) (err error) {
 	return nil
 }
 
-func (c *GopassCredential) WriteIntoFile(ctx context.Context, outputFile files.File) (err error) {
+func (c *GopassCredential) WriteIntoFile(ctx context.Context, outputFile filesinterfaces.File) (err error) {
 	if outputFile == nil {
 		return tracederrors.TracedError("outputFile is nil")
 	}
@@ -233,7 +233,7 @@ func (c *GopassCredential) WriteIntoFile(ctx context.Context, outputFile files.F
 	return nil
 }
 
-func (c *GopassCredential) WriteIntoTemporaryFile(ctx context.Context) (temporaryFile files.File, err error) {
+func (c *GopassCredential) WriteIntoTemporaryFile(ctx context.Context) (temporaryFile filesinterfaces.File, err error) {
 	temporaryFile, err = tempfilesoo.CreateEmptyTemporaryFile(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return nil, err

@@ -7,7 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/sshutils/commandexecutorsshclient"
@@ -18,11 +18,11 @@ import (
 type Host interface {
 	CheckReachable(verbose bool) (err error)
 
-	GetDirectoryByPath(path string) (directory files.Directory, err error)
+	GetDirectoryByPath(path string) (directory filesinterfaces.Directory, err error)
 	GetHostDescription() (hostDescription string, err error)
 	GetHostName() (hostName string, err error)
 	GetSshPublicKeyOfUserAsString(ctx context.Context, username string) (publicKey string, err error)
-	InstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile files.File, err error)
+	InstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile filesinterfaces.File, err error)
 	RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error)
 
 	// All methods below this line can be implemented by embedding the `CommandExecutorBase` struct:

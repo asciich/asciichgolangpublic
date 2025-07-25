@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"gopkg.in/yaml.v3"
 )
@@ -17,7 +17,7 @@ type GalaxyYaml struct {
 	Authors   []string `yaml:"authors"`
 }
 
-func WriteGalaxyYamlFromCreateCollectionOptions(ctx context.Context, outFile files.File, options *CreateCollectionFileStructureOptions) error {
+func WriteGalaxyYamlFromCreateCollectionOptions(ctx context.Context, outFile filesinterfaces.File, options *CreateCollectionFileStructureOptions) error {
 	if outFile == nil {
 		return tracederrors.TracedErrorNil("outFile")
 	}
@@ -59,7 +59,7 @@ func WriteGalaxyYamlFromCreateCollectionOptions(ctx context.Context, outFile fil
 	)
 }
 
-func WriteGalaxyYaml(ctx context.Context, outFile files.File, data *GalaxyYaml) error {
+func WriteGalaxyYaml(ctx context.Context, outFile filesinterfaces.File, data *GalaxyYaml) error {
 	if outFile == nil {
 		return tracederrors.TracedErrorNil("outFile")
 	}

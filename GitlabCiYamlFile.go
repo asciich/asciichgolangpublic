@@ -4,20 +4,21 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"gopkg.in/yaml.v3"
 )
 
 type GitlabCiYamlFile struct {
-	files.File
+	filesinterfaces.File
 }
 
 func GetGitlabCiYamlDefaultBaseName() (defaultBaseName string) {
 	return ".gitlab-ci.yml"
 }
 
-func GetGitlabCiYamlFileByFile(file files.File) (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
+func GetGitlabCiYamlFileByFile(file filesinterfaces.File) (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
 	if file == nil {
 		return nil, tracederrors.TracedErrorNil("file")
 	}

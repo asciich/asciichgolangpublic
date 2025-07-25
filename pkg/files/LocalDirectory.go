@@ -12,6 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
@@ -88,7 +89,7 @@ func (l *LocalDirectory) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err
 	return nil
 }
 
-func (l *LocalDirectory) CopyContentToDirectory(destinationDir Directory, verbose bool) (err error) {
+func (l *LocalDirectory) CopyContentToDirectory(destinationDir filesinterfaces.Directory, verbose bool) (err error) {
 	if destinationDir == nil {
 		return tracederrors.TracedError("destinationDir is empty string")
 	}
@@ -270,7 +271,7 @@ func (l *LocalDirectory) Create(verbose bool) (err error) {
 	return nil
 }
 
-func (l *LocalDirectory) CreateFileInDirectory(verbose bool, path ...string) (createdFile File, err error) {
+func (l *LocalDirectory) CreateFileInDirectory(verbose bool, path ...string) (createdFile filesinterfaces.File, err error) {
 	createdFile, err = l.GetFileInDirectory(path...)
 	if err != nil {
 		return nil, err
@@ -294,12 +295,12 @@ func (l *LocalDirectory) CreateFileInDirectory(verbose bool, path ...string) (cr
 	return createdFile, nil
 }
 
-func (l *LocalDirectory) CreateFilesInDirectory(filesToCreate []string, verbose bool) (createdFiles []File, err error) {
+func (l *LocalDirectory) CreateFilesInDirectory(filesToCreate []string, verbose bool) (createdFiles []filesinterfaces.File, err error) {
 	if filesToCreate == nil {
 		return nil, tracederrors.TracedErrorNil("filesToCreate")
 	}
 
-	createdFiles = []File{}
+	createdFiles = []filesinterfaces.File{}
 	for _, fileName := range filesToCreate {
 		toAdd, err := l.CreateFileInDirectory(verbose, fileName)
 		if err != nil {
@@ -321,7 +322,7 @@ func (l *LocalDirectory) CreateFilesInDirectory(filesToCreate []string, verbose 
 	return createdFiles, nil
 }
 
-func (l *LocalDirectory) CreateSubDirectory(subDirName string, verbose bool) (createdSubDir Directory, err error) {
+func (l *LocalDirectory) CreateSubDirectory(subDirName string, verbose bool) (createdSubDir filesinterfaces.Directory, err error) {
 	if subDirName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("subDirName")
 	}
@@ -437,7 +438,7 @@ func (l *LocalDirectory) GetDirName() (parentPath string, err error) {
 	return pathsutils.GetDirPath(path)
 }
 
-func (l *LocalDirectory) GetFileInDirectory(path ...string) (file File, err error) {
+func (l *LocalDirectory) GetFileInDirectory(path ...string) (file filesinterfaces.File, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedError("path has no elements")
 	}
@@ -562,7 +563,7 @@ func (l *LocalDirectory) GetLocalPath() (localPath string, err error) {
 	return l.localPath, nil
 }
 
-func (l *LocalDirectory) GetParentDirectory() (parentDirectory Directory, err error) {
+func (l *LocalDirectory) GetParentDirectory() (parentDirectory filesinterfaces.Directory, err error) {
 	parentPath, err := l.GetDirName()
 	if err != nil {
 		return nil, err
@@ -585,7 +586,7 @@ func (l *LocalDirectory) GetPath() (dirPath string, err error) {
 	return dirPath, nil
 }
 
-func (l *LocalDirectory) GetSubDirectory(path ...string) (subDirectory Directory, err error) {
+func (l *LocalDirectory) GetSubDirectory(path ...string) (subDirectory filesinterfaces.Directory, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedError("path has no elements")
 	}
@@ -608,7 +609,7 @@ func (l *LocalDirectory) GetSubDirectory(path ...string) (subDirectory Directory
 	return subDirectory, nil
 }
 
-func (l *LocalDirectory) GetSubDirectoryAndLocalPath(path ...string) (subDirectory Directory, subDirectoryPath string, err error) {
+func (l *LocalDirectory) GetSubDirectoryAndLocalPath(path ...string) (subDirectory filesinterfaces.Directory, subDirectoryPath string, err error) {
 	subDirectory, err = l.GetSubDirectory(path...)
 	if err != nil {
 		return nil, "", err
@@ -715,7 +716,7 @@ func (l *LocalDirectory) ListFilePaths(ctx context.Context, listOptions *paramet
 	return filePathList, nil
 }
 
-func (l *LocalDirectory) ListFiles(ctx context.Context, options *parameteroptions.ListFileOptions) (files []File, err error) {
+func (l *LocalDirectory) ListFiles(ctx context.Context, options *parameteroptions.ListFileOptions) (files []filesinterfaces.File, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedError("options is nil")
 	}
@@ -728,7 +729,7 @@ func (l *LocalDirectory) ListFiles(ctx context.Context, options *parameteroption
 		return nil, err
 	}
 
-	files = []File{}
+	files = []filesinterfaces.File{}
 	for _, name := range filePathList {
 		fileToAdd, err := l.GetFileInDirectory(name)
 		if err != nil {
@@ -741,7 +742,7 @@ func (l *LocalDirectory) ListFiles(ctx context.Context, options *parameteroption
 	return files, nil
 }
 
-func (l *LocalDirectory) ListSubDirectories(listDirectoryOptions *parameteroptions.ListDirectoryOptions) (subDirectories []Directory, err error) {
+func (l *LocalDirectory) ListSubDirectories(listDirectoryOptions *parameteroptions.ListDirectoryOptions) (subDirectories []filesinterfaces.Directory, err error) {
 	if listDirectoryOptions == nil {
 		return nil, tracederrors.TracedErrorNil("listDirectoryOptions")
 	}
@@ -816,7 +817,7 @@ func (l *LocalDirectory) MustChmod(chmodOptions *parameteroptions.ChmodOptions) 
 	}
 }
 
-func (l *LocalDirectory) MustCopyContentToDirectory(destinationDir Directory, verbose bool) {
+func (l *LocalDirectory) MustCopyContentToDirectory(destinationDir filesinterfaces.Directory, verbose bool) {
 	err := l.CopyContentToDirectory(destinationDir, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -837,7 +838,7 @@ func (l *LocalDirectory) MustCreate(verbose bool) {
 	}
 }
 
-func (l *LocalDirectory) MustCreateFileInDirectory(verbose bool, path ...string) (createdFile File) {
+func (l *LocalDirectory) MustCreateFileInDirectory(verbose bool, path ...string) (createdFile filesinterfaces.File) {
 	createdFile, err := l.CreateFileInDirectory(verbose, path...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -846,7 +847,7 @@ func (l *LocalDirectory) MustCreateFileInDirectory(verbose bool, path ...string)
 	return createdFile
 }
 
-func (l *LocalDirectory) MustCreateFilesInDirectory(filesToCreate []string, verbose bool) (createdFiles []File) {
+func (l *LocalDirectory) MustCreateFilesInDirectory(filesToCreate []string, verbose bool) (createdFiles []filesinterfaces.File) {
 	createdFiles, err := l.CreateFilesInDirectory(filesToCreate, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -855,7 +856,7 @@ func (l *LocalDirectory) MustCreateFilesInDirectory(filesToCreate []string, verb
 	return createdFiles
 }
 
-func (l *LocalDirectory) MustCreateSubDirectory(subDirName string, verbose bool) (createdSubDir Directory) {
+func (l *LocalDirectory) MustCreateSubDirectory(subDirName string, verbose bool) (createdSubDir filesinterfaces.Directory) {
 	createdSubDir, err := l.CreateSubDirectory(subDirName, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -898,7 +899,7 @@ func (l *LocalDirectory) MustGetDirName() (dirName string) {
 	return dirName
 }
 
-func (l *LocalDirectory) MustGetFileInDirectory(path ...string) (file File) {
+func (l *LocalDirectory) MustGetFileInDirectory(path ...string) (file filesinterfaces.File) {
 	file, err := l.GetFileInDirectory(path...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -956,7 +957,7 @@ func (l *LocalDirectory) MustGetLocalPath() (localPath string) {
 	return localPath
 }
 
-func (l *LocalDirectory) MustGetParentDirectory() (parentDirectory Directory) {
+func (l *LocalDirectory) MustGetParentDirectory() (parentDirectory filesinterfaces.Directory) {
 	parentDirectory, err := l.GetParentDirectory()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -974,7 +975,7 @@ func (l *LocalDirectory) MustGetPath() (dirPath string) {
 	return dirPath
 }
 
-func (l *LocalDirectory) MustGetSubDirectory(path ...string) (subDirectory Directory) {
+func (l *LocalDirectory) MustGetSubDirectory(path ...string) (subDirectory filesinterfaces.Directory) {
 	subDirectory, err := l.GetSubDirectory(path...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -983,7 +984,7 @@ func (l *LocalDirectory) MustGetSubDirectory(path ...string) (subDirectory Direc
 	return subDirectory
 }
 
-func (l *LocalDirectory) MustGetSubDirectoryAndLocalPath(path ...string) (subDirectory Directory, subDirectoryPath string) {
+func (l *LocalDirectory) MustGetSubDirectoryAndLocalPath(path ...string) (subDirectory filesinterfaces.Directory, subDirectoryPath string) {
 	subDirectory, subDirectoryPath, err := l.GetSubDirectoryAndLocalPath(path...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1010,7 +1011,7 @@ func (l *LocalDirectory) MustIsLocalDirectory() (isLocalDirectory bool) {
 	return isLocalDirectory
 }
 
-func (l *LocalDirectory) MustListSubDirectories(listDirectoryOptions *parameteroptions.ListDirectoryOptions) (subDirectories []Directory) {
+func (l *LocalDirectory) MustListSubDirectories(listDirectoryOptions *parameteroptions.ListDirectoryOptions) (subDirectories []filesinterfaces.Directory) {
 	subDirectories, err := l.ListSubDirectories(listDirectoryOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

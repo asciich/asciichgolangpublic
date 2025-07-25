@@ -12,6 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
@@ -122,7 +123,7 @@ func (c *CommandExecutorDirectory) Chmod(chmodOptions *parameteroptions.ChmodOpt
 	return nil
 }
 
-func (c *CommandExecutorDirectory) CopyContentToDirectory(destinationDir Directory, verbose bool) (err error) {
+func (c *CommandExecutorDirectory) CopyContentToDirectory(destinationDir filesinterfaces.Directory, verbose bool) (err error) {
 	if destinationDir == nil {
 		return tracederrors.TracedErrorNil("destinationDir")
 	}
@@ -212,7 +213,7 @@ func (c *CommandExecutorDirectory) Create(verbose bool) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorDirectory) CreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory Directory, err error) {
+func (c *CommandExecutorDirectory) CreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory filesinterfaces.Directory, err error) {
 	if subDirectoryName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("subDirectoryName")
 	}
@@ -395,7 +396,7 @@ func (c *CommandExecutorDirectory) GetDirPath() (dirPath string, err error) {
 	return c.dirPath, nil
 }
 
-func (c *CommandExecutorDirectory) GetFileInDirectory(pathToFile ...string) (file File, err error) {
+func (c *CommandExecutorDirectory) GetFileInDirectory(pathToFile ...string) (file filesinterfaces.File, err error) {
 	if len(pathToFile) <= 0 {
 		return nil, tracederrors.TracedErrorNil("pathToFile")
 	}
@@ -469,7 +470,7 @@ func (c *CommandExecutorDirectory) GetLocalPath() (localPath string, err error) 
 	}
 }
 
-func (c *CommandExecutorDirectory) GetParentDirectory() (parent Directory, err error) {
+func (c *CommandExecutorDirectory) GetParentDirectory() (parent filesinterfaces.Directory, err error) {
 	parentPath, err := c.GetDirName()
 	if err != nil {
 		return nil, err
@@ -499,7 +500,7 @@ func (c *CommandExecutorDirectory) GetPath() (path string, err error) {
 	return path, nil
 }
 
-func (c *CommandExecutorDirectory) GetSubDirectory(path ...string) (subDirectory Directory, err error) {
+func (c *CommandExecutorDirectory) GetSubDirectory(path ...string) (subDirectory filesinterfaces.Directory, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedErrorNil("path")
 	}
@@ -594,7 +595,7 @@ func (c *CommandExecutorDirectory) ListFilePaths(ctx context.Context, listFileOp
 	return filePaths, nil
 }
 
-func (c *CommandExecutorDirectory) ListFiles(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (files []File, err error) {
+func (c *CommandExecutorDirectory) ListFiles(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (files []filesinterfaces.File, err error) {
 	if listFileOptions == nil {
 		return nil, tracederrors.TracedErrorNil("listFileOptions")
 	}
@@ -608,7 +609,7 @@ func (c *CommandExecutorDirectory) ListFiles(ctx context.Context, listFileOption
 		return nil, err
 	}
 
-	files = []File{}
+	files = []filesinterfaces.File{}
 	for _, path := range paths {
 		toAdd, err := c.GetFileInDirectory(path)
 		if err != nil {
@@ -621,7 +622,7 @@ func (c *CommandExecutorDirectory) ListFiles(ctx context.Context, listFileOption
 	return files, nil
 }
 
-func (c *CommandExecutorDirectory) ListSubDirectories(options *parameteroptions.ListDirectoryOptions) (subDirectories []Directory, err error) {
+func (c *CommandExecutorDirectory) ListSubDirectories(options *parameteroptions.ListDirectoryOptions) (subDirectories []filesinterfaces.Directory, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -676,7 +677,7 @@ func (c *CommandExecutorDirectory) ListSubDirectories(options *parameteroptions.
 
 	sort.Strings(pathsToAdd)
 
-	subDirectories = []Directory{}
+	subDirectories = []filesinterfaces.Directory{}
 	for _, pathToAdd := range pathsToAdd {
 		toAdd, err := c.GetSubDirectory(pathToAdd)
 		if err != nil {

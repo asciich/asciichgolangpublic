@@ -1,6 +1,7 @@
 package files
 
 import (
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -16,7 +17,7 @@ func NewDirectoriesService() (d *DirectoriesService) {
 	return new(DirectoriesService)
 }
 
-func (d *DirectoriesService) CreateLocalDirectoryByPath(path string, verbose bool) (l Directory, err error) {
+func (d *DirectoriesService) CreateLocalDirectoryByPath(path string, verbose bool) (l filesinterfaces.Directory, err error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
@@ -34,7 +35,7 @@ func (d *DirectoriesService) CreateLocalDirectoryByPath(path string, verbose boo
 	return dir, nil
 }
 
-func (d *DirectoriesService) MustCreateLocalDirectoryByPath(path string, verbose bool) (l Directory) {
+func (d *DirectoriesService) MustCreateLocalDirectoryByPath(path string, verbose bool) filesinterfaces.Directory {
 	l, err := d.CreateLocalDirectoryByPath(path, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

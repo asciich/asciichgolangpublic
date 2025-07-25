@@ -3,7 +3,7 @@ package kvm
 import (
 	_ "embed"
 
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	libvirtxml "libvirt.org/libvirt-go-xml"
@@ -116,14 +116,14 @@ func (l *LibvirtXmlsService) MustGetMacAddressFromXmlString(libvirtXml string) (
 	return macAddress
 }
 
-func (l *LibvirtXmlsService) MustWriteXmlForVmOnLatopToFile(createOptions *KvmCreateVmOptions, outputFile files.File) {
+func (l *LibvirtXmlsService) MustWriteXmlForVmOnLatopToFile(createOptions *KvmCreateVmOptions, outputFile filesinterfaces.File) {
 	err := l.WriteXmlForVmOnLatopToFile(createOptions, outputFile)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (l *LibvirtXmlsService) WriteXmlForVmOnLatopToFile(createOptions *KvmCreateVmOptions, outputFile files.File) (err error) {
+func (l *LibvirtXmlsService) WriteXmlForVmOnLatopToFile(createOptions *KvmCreateVmOptions, outputFile filesinterfaces.File) (err error) {
 	if createOptions == nil {
 		return tracederrors.TracedError("createOptions is nil")
 	}

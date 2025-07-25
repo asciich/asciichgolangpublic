@@ -2,6 +2,7 @@ package installutils
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -14,7 +15,7 @@ func MustInstall(options *InstallOptions) {
 	}
 }
 
-func getSourceFileAndPathFromOptions(options *InstallOptions) (sourceFile files.File, sourcePath string, err error) {
+func getSourceFileAndPathFromOptions(options *InstallOptions) (sourceFile filesinterfaces.File, sourcePath string, err error) {
 	if options == nil {
 		return nil, "", tracederrors.TracedErrorNil("options")
 	}
@@ -32,7 +33,7 @@ func getSourceFileAndPathFromOptions(options *InstallOptions) (sourceFile files.
 	return sourceFile, sourcePath, nil
 }
 
-func getInstallFileFromOptions(options *InstallOptions) (installFile files.File, installPath string, err error) {
+func getInstallFileFromOptions(options *InstallOptions) (installFile filesinterfaces.File, installPath string, err error) {
 	if options == nil {
 		return nil, "", tracederrors.TracedErrorNil("options")
 	}
@@ -50,7 +51,7 @@ func getInstallFileFromOptions(options *InstallOptions) (installFile files.File,
 	return installFile, installPath, nil
 }
 
-func setInstallFileAccessByOptions(installFile files.File, options *InstallOptions) (err error) {
+func setInstallFileAccessByOptions(installFile filesinterfaces.File, options *InstallOptions) (err error) {
 	if installFile == nil {
 		tracederrors.TracedErrorNil("installFile")
 	}

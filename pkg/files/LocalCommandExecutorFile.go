@@ -3,6 +3,7 @@ package files
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -31,7 +32,7 @@ func GetCommandExecutorFileByPath(commandExector commandexecutorinterfaces.Comma
 	return commandExecutorFile, nil
 }
 
-func GetLocalCommandExecutorFileByFile(file File, verbose bool) (commandExecutorFile *CommandExecutorFile, err error) {
+func GetLocalCommandExecutorFileByFile(file filesinterfaces.File, verbose bool) (commandExecutorFile *CommandExecutorFile, err error) {
 	if file == nil {
 		return nil, tracederrors.TracedErrorEmptyString("file")
 	}
@@ -71,7 +72,7 @@ func MustGetCommandExecutorFileByPath(commandExector commandexecutorinterfaces.C
 	return commandExecutorFile
 }
 
-func MustGetLocalCommandExecutorFileByFile(file File, verbose bool) (commandExecutorFile *CommandExecutorFile) {
+func MustGetLocalCommandExecutorFileByFile(file filesinterfaces.File, verbose bool) (commandExecutorFile *CommandExecutorFile) {
 	commandExecutorFile, err := GetLocalCommandExecutorFileByFile(file, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/sshutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -45,7 +46,7 @@ func (g *GitlabUser) MustAddSshKey(sshKey *sshutils.SSHPublicKey, verbose bool) 
 	}
 }
 
-func (g *GitlabUser) MustAddSshKeysFromFile(sshKeysFile files.File, verbose bool) {
+func (g *GitlabUser) MustAddSshKeysFromFile(sshKeysFile filesinterfaces.File, verbose bool) {
 	err := g.AddSshKeysFromFile(sshKeysFile, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -290,7 +291,7 @@ func (u *GitlabUser) AddSshKey(sshKey *sshutils.SSHPublicKey, verbose bool) (err
 	return nil
 }
 
-func (u *GitlabUser) AddSshKeysFromFile(sshKeysFile files.File, verbose bool) (err error) {
+func (u *GitlabUser) AddSshKeysFromFile(sshKeysFile filesinterfaces.File, verbose bool) (err error) {
 	if sshKeysFile == nil {
 		return tracederrors.TracedError("sshKeysFile is nil")
 	}

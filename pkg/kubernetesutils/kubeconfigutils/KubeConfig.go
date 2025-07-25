@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -48,7 +49,7 @@ func LoadFromFilePath(path string, verbose bool) (config *KubeConfig, err error)
 	return LoadFromFile(file, verbose)
 }
 
-func LoadFromFile(file files.File, verbose bool) (config *KubeConfig, err error) {
+func LoadFromFile(file filesinterfaces.File, verbose bool) (config *KubeConfig, err error) {
 	if file == nil {
 		return nil, tracederrors.TracedErrorNil("file")
 	}
@@ -432,7 +433,7 @@ func (k *KubeConfig) WriteToFileByPath(path string, verbose bool) (err error) {
 	return k.WriteToFile(outFile, verbose)
 }
 
-func (k *KubeConfig) WriteToFile(outFile files.File, verbose bool) (err error) {
+func (k *KubeConfig) WriteToFile(outFile filesinterfaces.File, verbose bool) (err error) {
 	if outFile == nil {
 		return tracederrors.TracedErrorNil("outfile")
 	}

@@ -7,11 +7,12 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func CreateEmptyTemporaryFile(verbose bool) (temporaryfile files.File, err error) {
+func CreateEmptyTemporaryFile(verbose bool) (temporaryfile filesinterfaces.File, err error) {
 	temporaryfile, err = CreateNamedTemporaryFile("emptyFile", verbose)
 	if err != nil {
 		return nil, err
@@ -34,7 +35,7 @@ func CreateEmptyTemporaryFileAndGetPath(verbose bool) (temporaryFilePath string,
 	return temporaryFilePath, nil
 }
 
-func CreateFromBytes(content []byte, verbose bool) (temporaryFile files.File, err error) {
+func CreateFromBytes(content []byte, verbose bool) (temporaryFile filesinterfaces.File, err error) {
 	if content == nil {
 		return nil, tracederrors.TracedErrorNil("content")
 	}
@@ -52,7 +53,7 @@ func CreateFromBytes(content []byte, verbose bool) (temporaryFile files.File, er
 	return temporaryFile, nil
 }
 
-func CreateFromString(content string, verbose bool) (temporaryFile files.File, err error) {
+func CreateFromString(content string, verbose bool) (temporaryFile filesinterfaces.File, err error) {
 	temporaryFile, err = CreateEmptyTemporaryFile(verbose)
 	if err != nil {
 		return nil, err
@@ -80,7 +81,7 @@ func CreateFromStringAndGetPath(content string, verbose bool) (temporaryFilePath
 	return temporaryFilePath, nil
 }
 
-func CreateNamedTemporaryFile(fileName string, verbose bool) (temporaryfile files.File, err error) {
+func CreateNamedTemporaryFile(fileName string, verbose bool) (temporaryfile filesinterfaces.File, err error) {
 	if fileName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("fileName")
 	}
@@ -107,7 +108,7 @@ func CreateNamedTemporaryFile(fileName string, verbose bool) (temporaryfile file
 	return temporaryfile, nil
 }
 
-func CreateTemporaryFileFromBytes(content []byte, verbose bool) (temporaryFile files.File, err error) {
+func CreateTemporaryFileFromBytes(content []byte, verbose bool) (temporaryFile filesinterfaces.File, err error) {
 	if content == nil {
 		return nil, tracederrors.TracedErrorNil("content")
 	}
@@ -120,7 +121,7 @@ func CreateTemporaryFileFromBytes(content []byte, verbose bool) (temporaryFile f
 	return temporaryFile, nil
 }
 
-func CreateTemporaryFileFromFile(fileToCopyAsTemporaryFile files.File, verbose bool) (temporaryFile files.File, err error) {
+func CreateTemporaryFileFromFile(fileToCopyAsTemporaryFile filesinterfaces.File, verbose bool) (temporaryFile filesinterfaces.File, err error) {
 	if fileToCopyAsTemporaryFile == nil {
 		return nil, tracederrors.TracedErrorNil("fileToCopyAsTemporaryFile")
 	}
@@ -179,7 +180,7 @@ func CreateTemporaryFileFromFile(fileToCopyAsTemporaryFile files.File, verbose b
 	return temporaryFile, nil
 }
 
-func CreateTemporaryFileFromPath(verbose bool, filePathToCopyAsTemporaryFile ...string) (temporaryFile files.File, err error) {
+func CreateTemporaryFileFromPath(verbose bool, filePathToCopyAsTemporaryFile ...string) (temporaryFile filesinterfaces.File, err error) {
 	if len(filePathToCopyAsTemporaryFile) <= 0 {
 		return nil, tracederrors.TracedError("filePathToCopyAsTemporaryFile")
 	}
@@ -199,7 +200,7 @@ func CreateTemporaryFileFromPath(verbose bool, filePathToCopyAsTemporaryFile ...
 	return temporaryFile, nil
 }
 
-func CreateTemporaryFileFromString(content string, verbose bool) (temporaryFile files.File, err error) {
+func CreateTemporaryFileFromString(content string, verbose bool) (temporaryFile filesinterfaces.File, err error) {
 	temporaryFile, err = CreateNamedTemporaryFile("tempFile", verbose)
 	if err != nil {
 		return nil, err

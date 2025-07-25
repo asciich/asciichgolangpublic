@@ -9,6 +9,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
@@ -116,7 +117,7 @@ func (c *NativeClient) SendRequestAndGetBodyAsString(ctx context.Context, reques
 	return response.GetBodyAsString()
 }
 
-func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *httputilsparameteroptions.DownloadAsFileOptions) (downloadedFile files.File, err error) {
+func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *httputilsparameteroptions.DownloadAsFileOptions) (downloadedFile filesinterfaces.File, err error) {
 	if downloadOptions == nil {
 		return nil, tracederrors.TracedErrorNil("downloadOptions")
 	}
@@ -248,7 +249,7 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 	return downloadedFile, nil
 }
 
-func (n *NativeClient) DownloadAsTemporaryFile(ctx context.Context, downloadOptions *httputilsparameteroptions.DownloadAsFileOptions) (downloadedFile files.File, err error) {
+func (n *NativeClient) DownloadAsTemporaryFile(ctx context.Context, downloadOptions *httputilsparameteroptions.DownloadAsFileOptions) (downloadedFile filesinterfaces.File, err error) {
 	if downloadOptions == nil {
 		return nil, tracederrors.TracedErrorNil("downloadOptions")
 	}

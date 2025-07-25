@@ -9,15 +9,14 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
-func mustRepoRoot(ctx context.Context) (repoRootDir files.Directory) {
-	const verbose = true
-
+func mustRepoRoot(ctx context.Context) (repoRootDir filesinterfaces.Directory) {
 	repoRootPath, err := commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsString(
 		commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
@@ -43,7 +42,7 @@ func TestX509CertificateLoadFromFilePath(t *testing.T) {
 	require.NoError(t, err)
 
 	type TestCase struct {
-		testDir files.Directory
+		testDir filesinterfaces.Directory
 	}
 
 	tests := []TestCase{}
@@ -83,7 +82,7 @@ func TestX509CertificateGetAsPemString(t *testing.T) {
 	require.NoError(t, err)
 
 	type TestCase struct {
-		testDir files.Directory
+		testDir filesinterfaces.Directory
 	}
 
 	tests := []TestCase{}
@@ -117,7 +116,7 @@ func TestX509CertificateIsRootCa(t *testing.T) {
 	require.NoError(t, err)
 
 	type TestCase struct {
-		testDir files.Directory
+		testDir filesinterfaces.Directory
 	}
 
 	tests := []TestCase{}
@@ -153,7 +152,7 @@ func TestX509CertificateIsV1(t *testing.T) {
 	require.NoError(t, err)
 
 	type TestCase struct {
-		testDir files.Directory
+		testDir filesinterfaces.Directory
 	}
 
 	tests := []TestCase{}
@@ -187,7 +186,7 @@ func TestX509CertificateIsV3(t *testing.T) {
 	require.NoError(t, err)
 
 	type TestCase struct {
-		testDir files.Directory
+		testDir filesinterfaces.Directory
 	}
 
 	tests := []TestCase{}

@@ -20,6 +20,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -32,7 +33,7 @@ type LocalGitRepository struct {
 	GitRepositoryBase
 }
 
-func GetLocalGitReposioryFromDirectory(directory files.Directory) (repo GitRepository, err error) {
+func GetLocalGitReposioryFromDirectory(directory filesinterfaces.Directory) (repo GitRepository, err error) {
 	if directory == nil {
 		return nil, tracederrors.TracedErrorNil("directory")
 	}
@@ -92,7 +93,7 @@ func GetLocalGitRepositoryByPath(path string) (l *LocalGitRepository, err error)
 	return l, nil
 }
 
-func MustGetLocalGitReposioryFromDirectory(directory files.Directory) (repo GitRepository) {
+func MustGetLocalGitReposioryFromDirectory(directory filesinterfaces.Directory) (repo GitRepository) {
 	repo, err := GetLocalGitReposioryFromDirectory(directory)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1103,7 +1104,7 @@ func (l *LocalGitRepository) GetCurrentCommitHashAsBytes(verbose bool) (hash []b
 	return stringsutils.HexStringToBytes(currentHash)
 }
 
-func (l *LocalGitRepository) GetDirectoryByPath(pathToSubDir ...string) (subDir files.Directory, err error) {
+func (l *LocalGitRepository) GetDirectoryByPath(pathToSubDir ...string) (subDir filesinterfaces.Directory, err error) {
 	if len(pathToSubDir) <= 0 {
 		return nil, tracederrors.TracedError("pathToSubdir has no elements")
 	}
@@ -1338,7 +1339,7 @@ func (l *LocalGitRepository) GetRemoteConfigs(verbose bool) (remoteConfigs []*Gi
 	return remoteConfigs, nil
 }
 
-func (l *LocalGitRepository) GetRootDirectory(ctx context.Context) (rootDirectory files.Directory, err error) {
+func (l *LocalGitRepository) GetRootDirectory(ctx context.Context) (rootDirectory filesinterfaces.Directory, err error) {
 	rootDirectoryPath, err := l.GetRootDirectoryPath(ctx)
 	if err != nil {
 		return nil, err
@@ -2085,7 +2086,7 @@ func (l *LocalGitRepository) MustGetCurrentCommitHashAsBytes(verbose bool) (hash
 	return hash
 }
 
-func (l *LocalGitRepository) MustGetDirectoryByPath(pathToSubDir ...string) (subDir files.Directory) {
+func (l *LocalGitRepository) MustGetDirectoryByPath(pathToSubDir ...string) (subDir filesinterfaces.Directory) {
 	subDir, err := l.GetDirectoryByPath(pathToSubDir...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
