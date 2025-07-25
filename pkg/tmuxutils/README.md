@@ -9,5 +9,5 @@ An example usage to orchestrate the input to another binary can be found in the 
 Run tests:
 
 ```bash
-bash -c "cd '$(git rev-parse --show-toplevel)' && go test -v ./tmuxutils/..."
+bash -c "cd '$(git rev-parse --show-toplevel)' && go test -v ./pkg/tmuxutils/..."
 ```

@@ -193,15 +193,15 @@ func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				err = window.WaitUntilOutputMatchesRegex("Username:", 2*time.Second, contextutils.GetVerboseFromContext(ctx))
+				err = window.WaitUntilOutputMatchesRegex(ctx, "Username:", 2*time.Second)
 				require.NoError(t, err)
 				err = window.SendKeys(ctx, []string{tt.username, "enter"})
 				require.NoError(t, err)
-				err = window.WaitUntilOutputMatchesRegex("Password:", 2*time.Second, contextutils.GetVerboseFromContext(ctx))
+				err = window.WaitUntilOutputMatchesRegex(ctx, "Password:", 2*time.Second)
 				require.NoError(t, err)
 				err = window.SendKeys(ctx, []string{tt.password, "enter"})
 				require.NoError(t, err)
-				err = window.WaitUntilOutputMatchesRegex("finished", 2*time.Second, contextutils.GetVerboseFromContext(ctx))
+				err = window.WaitUntilOutputMatchesRegex(ctx, "finished", 2*time.Second)
 				require.NoError(t, err)
 
 				shownLines, err := window.GetShownLines()

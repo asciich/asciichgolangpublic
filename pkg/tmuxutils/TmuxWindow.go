@@ -403,7 +403,7 @@ func (t *TmuxWindow) ListWindowNames(ctx context.Context) (windowNames []string,
 	return windowNames, nil
 }
 
-func (t *TmuxWindow) WaitUntilOutputMatchesRegex(regex string, timeout time.Duration, verbose bool) (err error) {
+func (t *TmuxWindow) WaitUntilOutputMatchesRegex(ctx context.Context, regex string, timeout time.Duration) (err error) {
 	if regex == "" {
 		return tracederrors.TracedErrorEmptyString("regex")
 	}
@@ -441,33 +441,16 @@ func (t *TmuxWindow) WaitUntilOutputMatchesRegex(regex string, timeout time.Dura
 		}
 
 		retryDelay := time.Millisecond * 100
-
-		if verbose {
-			logging.LogInfof(
-				"Tmux output of '%s:%s' does not match regex '%s'. Going to retry in '%s'",
-				sessionName,
-				windowName,
-				regex,
-				retryDelay,
-			)
-		}
-
+		logging.LogInfoByCtxf(ctx, "Tmux output of '%s:%s' does not match regex '%s'. Going to retry in '%s'", sessionName, windowName, regex, retryDelay)
 		time.Sleep(retryDelay)
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Tmux terminal output of '%s:%s' now matches regex '%s'.",
-			sessionName,
-			windowName,
-			regex,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Tmux terminal output of '%s:%s' now matches regex '%s'.", sessionName, windowName, regex)
 
 	return nil
 }
 
-func (t *TmuxWindow) IsOutputMatchingRegex(regex string, verbose bool) (isMatching bool, err error) {
+func (t *TmuxWindow) IsOutputMatchingRegex(ctx context.Context, regex string) (isMatching bool, err error) {
 	if regex == "" {
 		return false, tracederrors.TracedErrorEmptyString("regex")
 	}
@@ -487,22 +470,10 @@ func (t *TmuxWindow) IsOutputMatchingRegex(regex string, verbose bool) (isMatchi
 		return false, err
 	}
 
-	if verbose {
-		if isMatching {
-			logging.LogInfof(
-				"Output of tmux window '%s:%s' matches regex '%s'.",
-				sessionName,
-				windowName,
-				regex,
-			)
-		} else {
-			logging.LogInfof(
-				"Output of tmux window '%s:%s' does not match regex '%s'.",
-				sessionName,
-				windowName,
-				regex,
-			)
-		}
+	if isMatching {
+		logging.LogInfoByCtxf(ctx, "Output of tmux window '%s:%s' matches regex '%s'.", sessionName, windowName, regex)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Output of tmux window '%s:%s' does not match regex '%s'.", sessionName, windowName, regex)
 	}
 
 	return isMatching, nil
