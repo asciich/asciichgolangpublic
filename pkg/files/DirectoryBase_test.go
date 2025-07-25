@@ -62,10 +62,14 @@ func TestDirectoryBase_ListFiles_withoutFilter(t *testing.T) {
 
 				defer directory.Delete(verbose)
 
-				directory.MustCreateFileInDirectory(verbose, "a.txt")
-				directory.MustCreateFileInDirectory(verbose, "a.log")
-				directory.MustCreateFileInDirectory(verbose, "a.toc")
-				directory.MustCreateFileInDirectory(verbose, "b.toc")
+				_, err := directory.CreateFileInDirectory(verbose, "a.txt")
+				require.NoError(t, err)
+				_, err = directory.CreateFileInDirectory(verbose, "a.log")
+				require.NoError(t, err)
+				_, err = directory.CreateFileInDirectory(verbose, "a.toc")
+				require.NoError(t, err)
+				_, err = directory.CreateFileInDirectory(verbose, "b.toc")
+				require.NoError(t, err)
 
 				fileList, err := directory.ListFilePaths(
 					ctx,
@@ -105,10 +109,14 @@ func TestDirectoryBase_ListFiles(t *testing.T) {
 
 				defer directory.Delete(verbose)
 
-				directory.MustCreateFileInDirectory(verbose, "a.txt")
-				directory.MustCreateFileInDirectory(verbose, "a.log")
-				directory.MustCreateFileInDirectory(verbose, "a.toc")
-				directory.MustCreateFileInDirectory(verbose, "b.toc")
+				_, err := directory.CreateFileInDirectory(verbose, "a.txt")
+				require.NoError(t, err)
+				_, err = directory.CreateFileInDirectory(verbose, "a.log")
+				require.NoError(t, err)
+				_, err = directory.CreateFileInDirectory(verbose, "a.toc")
+				require.NoError(t, err)
+				_, err = directory.CreateFileInDirectory(verbose, "b.toc")
+				require.NoError(t, err)
 
 				fileList, err := directory.ListFilePaths(
 					ctx,
@@ -148,10 +156,14 @@ func TestDirectoryBase_DeleteFilesMatching(t *testing.T) {
 
 				directory := getDirectoryToTest(tt.fileImplementationToTest)
 
-				txtFile := directory.MustCreateFileInDirectory(verbose, "a.txt")
-				locFile := directory.MustCreateFileInDirectory(verbose, "a.log")
-				tocFile := directory.MustCreateFileInDirectory(verbose, "a.toc")
-				toc2File := directory.MustCreateFileInDirectory(verbose, "b.toc")
+				txtFile, err := directory.CreateFileInDirectory(verbose, "a.txt")
+				require.NoError(t, err)
+				locFile, err := directory.CreateFileInDirectory(verbose, "a.log")
+				require.NoError(t, err)
+				tocFile, err := directory.CreateFileInDirectory(verbose, "a.toc")
+				require.NoError(t, err)
+				toc2File, err := directory.CreateFileInDirectory(verbose, "b.toc")
+				require.NoError(t, err)
 
 				directory.DeleteFilesMatching(
 					ctx,

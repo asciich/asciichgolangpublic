@@ -94,7 +94,8 @@ func TestGetDirectoryInHomeDirectory(t *testing.T) {
 				fileInHome, err := userutils.GetDirectoryInHomeDirectory(tt.filePath...)
 				require.NoError(t, err)
 
-				filePath := fileInHome.MustGetLocalPath()
+				filePath, err := fileInHome.GetLocalPath()
+				require.NoError(t, err)
 
 				require.True(t, strings.HasPrefix(filePath, "/home/"))
 

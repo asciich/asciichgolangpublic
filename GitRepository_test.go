@@ -471,7 +471,13 @@ func TestGitRepository_GetRootDirectory(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.EqualValues(t, mustutils.Must(repo.GetPath()), mustutils.Must(repo.GetRootDirectory(ctx)).MustGetPath())
+				rootDir, err := repo.GetRootDirectory(ctx)
+				require.NoError(t, err)
+
+				rootDirPath, err := rootDir.GetPath()
+				require.NoError(t, err)
+
+				require.EqualValues(t, mustutils.Must(repo.GetPath()),rootDirPath)
 			},
 		)
 	}

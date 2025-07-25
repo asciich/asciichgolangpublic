@@ -200,8 +200,12 @@ func Test_GetCurrentUsersSshDirectory(t *testing.T) {
 			func(t *testing.T) {
 				sshDir, err := sshutils.GetCurrentUsersSshDirectory()
 				require.NoError(t, err)
-				require.True(t, strings.HasSuffix(sshDir.MustGetLocalPath(), "/.ssh"))
-				require.True(t, pathsutils.IsAbsolutePath(sshDir.MustGetLocalPath()))
+
+				localPath, err := sshDir.GetLocalPath()
+				require.NoError(t, err)
+
+				require.True(t, strings.HasSuffix(localPath, "/.ssh"))
+				require.True(t, pathsutils.IsAbsolutePath(localPath))
 			},
 		)
 	}

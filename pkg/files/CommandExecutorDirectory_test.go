@@ -38,16 +38,16 @@ func TestCommandExecutorDirectoryRead_GetFileInDirectory(t *testing.T) {
 
 				dir, err := files.GetLocalCommandExecutorDirectoryByPath(parentDirPath)
 				require.NoError(t, err)
-				require.NotNil(t, dir.MustGetCommandExecutor())
-				defer dir.MustDelete(verbose)
 
-				commandExecutorFile := dir.MustGetFileInDirectory(filepath.Base(temporaryFile.Name()))
+				executor, err := dir.GetCommandExecutor()
+				require.NoError(t, err)
+				require.NotNil(t, executor)
+				defer dir.Delete(verbose)
 
-				require.EqualValues(
-					t,
-					tt.testContent,
-					commandExecutorFile.MustReadAsString(),
-				)
+				commandExecutorFile, err := dir.GetFileInDirectory(filepath.Base(temporaryFile.Name()))
+				require.NoError(t, err)
+
+				require.EqualValues(t, tt.testContent, commandExecutorFile.MustReadAsString())
 			},
 		)
 	}
