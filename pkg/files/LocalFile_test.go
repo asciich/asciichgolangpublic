@@ -14,8 +14,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/pointersutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -1269,7 +1269,7 @@ func Test_SecureDelete(t *testing.T) {
 		const verbose bool = true
 
 		testPath := createTempFileAndGetPath()
-		require.True(t, filesutils.IsFile(ctx, testPath))
+		require.True(t, nativefiles.IsFile(ctx, testPath))
 
 		localFile, err := files.GetLocalFileByPath(testPath)
 		require.NoError(t, err)

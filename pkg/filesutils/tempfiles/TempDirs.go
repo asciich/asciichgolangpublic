@@ -1,4 +1,4 @@
-package filesutils
+package tempfiles
 
 import (
 	"context"

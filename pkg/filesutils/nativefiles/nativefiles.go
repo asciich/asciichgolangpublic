@@ -1,4 +1,4 @@
-package filesutils
+package nativefiles
 
 import (
 	"context"
@@ -74,4 +74,53 @@ func Exists(ctx context.Context, pathToCheck string) bool {
 
 	logging.LogInfoByCtxf(ctx, "'%s' exist in file system.", pathToCheck)
 	return true
+}
+
+func Delete(ctx context.Context, pathToDelete string) error {
+	if pathToDelete == "" {
+		return tracederrors.TracedErrorEmptyString("pathToDelete")
+	}
+
+	if Exists(contextutils.WithSilent(ctx), pathToDelete) {
+		err := os.Remove(pathToDelete)
+		if err != nil {
+			return tracederrors.TracedErrorf("Delete file '%s' failed: %w", pathToDelete, err)
+		}
+
+		logging.LogChangedByCtxf(ctx, "Deleted file '%s'.", pathToDelete)
+	} else {
+		logging.LogInfoByCtxf(ctx, "File '%s' already absent. Skip delete.", pathToDelete)
+	}
+
+	return nil
+}
+
+func WriteString(ctx context.Context, pathToWrite string, content string) error {
+	if pathToWrite == "" {
+		return tracederrors.TracedErrorEmptyString("pathToWrite")
+	}
+
+	err := os.WriteFile(pathToWrite, []byte(content), 0644)
+	if err != nil {
+		return tracederrors.TracedErrorf("Unable to write to file '%s': %w", pathToWrite, err)
+	}
+
+	logging.LogChangedByCtxf(ctx, "Wrote content to file '%s'.", pathToWrite)
+
+	return nil
+}
+
+func ReadAsString(ctx context.Context, pathToRead string) (string, error) {
+	if pathToRead == "" {
+		return "", tracederrors.TracedErrorEmptyString("pathToRead")
+	}
+
+	content, err := os.ReadFile(pathToRead)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Unable to read file '%s': %w", pathToRead, err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Read content of file '%s'.", content)
+
+	return string(content), nil
 }

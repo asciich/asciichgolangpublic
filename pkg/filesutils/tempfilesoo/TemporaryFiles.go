@@ -6,8 +6,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -86,7 +86,7 @@ func CreateNamedTemporaryFile(fileName string, verbose bool) (temporaryfile file
 		return nil, tracederrors.TracedErrorEmptyString("fileName")
 	}
 
-	tmpPath, err := filesutils.CreateNamedTemporaryFile(contextutils.GetVerbosityContextByBool(verbose), fileName)
+	tmpPath, err := tempfiles.CreateNamedTemporaryFile(contextutils.GetVerbosityContextByBool(verbose), fileName)
 	if err != nil {
 		return nil, err
 	}

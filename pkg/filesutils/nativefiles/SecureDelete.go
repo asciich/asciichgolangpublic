@@ -1,4 +1,4 @@
-package filesutils
+package nativefiles
 
 import (
 	"context"
