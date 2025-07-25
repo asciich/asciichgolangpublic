@@ -91,18 +91,21 @@ func TestLocalFileReadAndWriteAsBytes(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = false
 
 				var file filesinterfaces.File = getFileToTest("localFile")
 
-				require.EqualValues([]byte{}, file.MustReadAsBytes())
+				content, err := file.ReadAsBytes()
+				require.NoError(t, err)
+				require.EqualValues(t, []byte{}, content)
 
 				for i := 0; i < 2; i++ {
-					file.MustWriteBytes(tt.content, verbose)
+					err = file.WriteBytes(tt.content, verbose)
+					require.NoError(t, err)
 
-					require.EqualValues(tt.content, file.MustReadAsBytes())
+					content, err := file.ReadAsBytes()
+					require.NoError(t, err)
+					require.EqualValues(t, tt.content, content)
 				}
 			},
 		)
@@ -1044,15 +1047,15 @@ func TestFileGetSizeBytes(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				testFile := getFileToTest("localFile")
-				testFile.MustWriteBytes(tt.content, verbose)
+				err := testFile.WriteBytes(tt.content, verbose)
+				require.NoError(t, err)
+
 				sizeBytes := testFile.MustGetSizeBytes()
 
-				require.EqualValues(tt.expectedSize, sizeBytes)
+				require.EqualValues(t, tt.expectedSize, sizeBytes)
 			},
 		)
 	}

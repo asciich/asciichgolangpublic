@@ -117,27 +117,20 @@ func TestFile_Truncate(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				fileToTest := getFileToTest(tt.implementationName)
 				defer fileToTest.Delete(verbose)
 
 				for i := 0; i < 10; i++ {
-					fileToTest.MustTruncate(int64(i), verbose)
-					require.EqualValues(
-						fileToTest.MustGetSizeBytes(),
-						int64(i),
-					)
+					err := fileToTest.Truncate(int64(i), verbose)
+					require.NoError(t, err)
+					require.EqualValues(t, fileToTest.MustGetSizeBytes(), int64(i))
 				}
 
-				fileToTest.MustTruncate(0, verbose)
-
-				require.EqualValues(
-					fileToTest.MustGetSizeBytes(),
-					0,
-				)
+				err := fileToTest.Truncate(0, verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, fileToTest.MustGetSizeBytes(), 0)
 			},
 		)
 	}
@@ -297,12 +290,13 @@ func TestFile_Chmod(t *testing.T) {
 				toTest := getFileToTest(tt.implementationName)
 				defer toTest.Delete(verbose)
 
-				toTest.MustChmod(
+				err := toTest.Chmod(
 					&parameteroptions.ChmodOptions{
 						PermissionsString: tt.permissionsString,
 						Verbose:           verbose,
 					},
 				)
+				require.NoError(t, err)
 
 				require.EqualValues(
 					t,
