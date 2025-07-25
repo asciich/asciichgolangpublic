@@ -39,9 +39,12 @@ func TestX509CertificatesCreateIntermediateCertificateIntoTemporaryDirectory(t *
 				)
 				require.NoError(t, err)
 
-				require.True(t, tempDirectory.MustExists(verbose))
+				exists, err := tempDirectory.Exists(verbose)
+				require.NoError(t, err)
+				require.True(t, exists)
 
-				keyFile := tempDirectory.MustGetFileInDirectory("intermediateCertificate.key")
+				keyFile, err := tempDirectory.GetFileInDirectory("intermediateCertificate.key")
+				require.NoError(t, err)
 				require.True(t, keyFile.MustExists(verbose))
 			},
 		)

@@ -27,30 +27,41 @@ func TestLocalDirectoryExists(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				var directory files.Directory = getDirectoryToTest("localDirectory")
 				defer directory.Delete(verbose)
 
-				require.True(directory.MustExists(verbose))
+				exists, err := directory.Exists(verbose)
+				require.NoError(t, err)
+				require.True(t, exists)
 
 				for i := 0; i < 2; i++ {
-					directory.MustDelete(verbose)
-					require.False(directory.MustExists(verbose))
+					err = directory.Delete(verbose)
+					require.NoError(t, err)
+
+					exists, err = directory.Exists(verbose)
+					require.NoError(t, err)
+					require.False(t, exists)
 				}
 
 				for i := 0; i < 2; i++ {
-					directory.MustCreate(verbose)
-					require.True(directory.MustExists(verbose))
+					err = directory.Create(verbose)
+					require.NoError(t, err)
+
+					exists, err = directory.Exists(verbose)
+					require.NoError(t, err)
+					require.True(t, exists)
 				}
 
 				for i := 0; i < 2; i++ {
-					directory.MustDelete(verbose)
-					require.False(directory.MustExists(verbose))
-				}
+					err = directory.Delete(verbose)
+					require.NoError(t, err)
 
+					exists, err = directory.Exists(verbose)
+					require.NoError(t, err)
+					require.False(t, exists)
+				}
 			},
 		)
 	}
@@ -118,34 +129,20 @@ func TestLocalDirectoryGetFilePathInDirectory(t *testing.T) {
 }
 
 func TestLocalDirectoryGetSubDirectory(t *testing.T) {
+	t.Run("single file", func(t *testing.T) {
+		homeDir := files.MustGetLocalDirectoryByPath("/home/")
+		localPath, err := homeDir.MustGetSubDirectory("testfile").GetLocalPath()
+		require.NoError(t, err)
+		require.EqualValues(t, "/home/testfile", localPath)
 
-	tests := []struct {
-		testcase string
-	}{
-		{"testcase"},
-	}
+	})
 
-	for _, tt := range tests {
-		tt := tt
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				require := require.New(t)
-
-				homeDir := files.MustGetLocalDirectoryByPath("/home/")
-
-				require.EqualValues(
-					"/home/testfile",
-					homeDir.MustGetSubDirectory("testfile").MustGetLocalPath(),
-				)
-
-				require.EqualValues(
-					"/home/subdir/another_file",
-					homeDir.MustGetSubDirectory("subdir", "another_file").MustGetLocalPath(),
-				)
-			},
-		)
-	}
+	t.Run("subdir and file", func(t *testing.T) {
+		homeDir := files.MustGetLocalDirectoryByPath("/home/")
+		localPath, err := homeDir.MustGetSubDirectory("subdir", "another_file").GetLocalPath()
+		require.NoError(t, err)
+		require.EqualValues(t, "/home/subdir/another_file", localPath)
+	})
 }
 
 func TestLocalDirectoryParentForBaseClassSet(t *testing.T) {
@@ -324,15 +321,22 @@ func TestLocalDirectoryCreate(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose = true
 
 				tempDir := getDirectoryToTest("localDirectory")
-				subDir := tempDir.MustGetSubDirectory(tt.subDirPath...)
-				require.False(subDir.MustExists(verbose))
-				subDir.MustCreate(verbose)
-				require.True(subDir.MustExists(verbose))
+				subDir, err := tempDir.GetSubDirectory(tt.subDirPath...)
+				require.NoError(t, err)
+
+				exists, err := subDir.Exists(verbose)
+				require.NoError(t, err)
+				require.False(t, exists)
+
+				err = subDir.Create(verbose)
+				require.NoError(t, err)
+
+				exists, err = subDir.Exists(verbose)
+				require.NoError(t, err)
+				require.True(t, exists)
 			},
 		)
 	}
@@ -406,16 +410,15 @@ func TestDirectoryIsEmptyDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose = true
 
-				tempDir := files.MustGetLocalDirectoryByPath(
-					getDirectoryToTest("localDirectory").MustGetPath(),
-				)
+				path, err := getDirectoryToTest("localDirectory").GetPath()
+				require.NoError(t, err)
+
+				tempDir := files.MustGetLocalDirectoryByPath(path)
 				defer tempDir.Delete(verbose)
 
-				require.True(tempDir.MustIsEmptyDirectory(verbose))
+				require.True(t, tempDir.MustIsEmptyDirectory(verbose))
 			},
 		)
 	}
@@ -433,19 +436,18 @@ func TestDirectory_CheckExists(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose = true
 				ctx := context.TODO()
 
 				temporaryDirectory := getDirectoryToTest("localDirectory")
 				defer temporaryDirectory.Delete(verbose)
 
-				require.Nil(temporaryDirectory.CheckExists(ctx))
+				require.Nil(t, temporaryDirectory.CheckExists(ctx))
 
-				temporaryDirectory.MustDelete(verbose)
+				err := temporaryDirectory.Delete(verbose)
+				require.NoError(t, err)
 
-				require.NotNil(temporaryDirectory.CheckExists(ctx))
+				require.NotNil(t, temporaryDirectory.CheckExists(ctx))
 			},
 		)
 	}

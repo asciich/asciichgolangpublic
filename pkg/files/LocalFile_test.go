@@ -278,20 +278,22 @@ func TestLocalFileGetParentDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				temporaryDir := getDirectoryToTest("localDirectory")
 				defer temporaryDir.Delete(verbose)
 
-				temporaryFile := temporaryDir.MustCreateFileInDirectory(verbose, "test.txt")
+				temporaryFile, err := temporaryDir.CreateFileInDirectory(verbose, "test.txt")
+				require.NoError(t, err)
 				parentDir := temporaryFile.MustGetParentDirectory()
 
-				require.EqualValues(
-					temporaryDir.MustGetLocalPath(),
-					parentDir.MustGetLocalPath(),
-				)
+				tmpPath, err := temporaryDir.GetLocalPath()
+				require.NoError(t, err)
+
+				parentPath, err := parentDir.GetLocalPath()
+				require.NoError(t, err)
+
+				require.EqualValues(t, tmpPath, parentPath)
 			},
 		)
 	}
@@ -610,9 +612,12 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 	tests := []TestCase{}
 	ctx := getCtx()
 
-	testDataDirectory := getRepoRootDir(ctx, t).MustGetSubDirectory("testdata", "File", "SortBlocksInFile")
+	testDataDirectory, err := getRepoRootDir(ctx, t).GetSubDirectory("testdata", "File", "SortBlocksInFile")
+	require.NoError(t, err)
 	for _, testDirectory := range mustutils.Must(testDataDirectory.ListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false})) {
-		tests = append(tests, TestCase{testDirectory.MustGetLocalPath()})
+		localPath, err := testDirectory.GetLocalPath()
+		require.NoError(t, err)
+		tests = append(tests, TestCase{localPath})
 	}
 
 	for _, tt := range tests {
@@ -976,20 +981,16 @@ func TestFileGetCreationDateByFileName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				temporaryDir := getDirectoryToTest("localDirectory")
 				defer temporaryDir.Delete(verbose)
 
-				file := temporaryDir.MustWriteStringToFileInDirectory("content", verbose, tt.filename)
+				file, err := temporaryDir.WriteStringToFileInDirectory("content", verbose, tt.filename)
+				require.NoError(t, err)
 				readDate := file.MustGetCreationDateByFileName(verbose)
 
-				require.EqualValues(
-					tt.expected,
-					*readDate,
-				)
+				require.EqualValues(t, tt.expected, *readDate)
 			},
 		)
 	}
@@ -1014,15 +1015,14 @@ func TestFileHasYYYYmmdd_HHMMSSPrefix(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				temporaryDir := getDirectoryToTest("localDirectory")
 				defer temporaryDir.Delete(verbose)
 
-				file := temporaryDir.MustWriteStringToFileInDirectory("content", verbose, tt.filename)
-				require.EqualValues(tt.expectedHasPrefix, file.MustIsYYYYmmdd_HHMMSSPrefix())
+				file, err := temporaryDir.WriteStringToFileInDirectory("content", verbose, tt.filename)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedHasPrefix, file.MustIsYYYYmmdd_HHMMSSPrefix())
 			},
 		)
 	}

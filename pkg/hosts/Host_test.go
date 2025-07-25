@@ -153,7 +153,9 @@ func TestHost_GetDirectoryByPath(t *testing.T) {
 				_, ok := directory.(*files.CommandExecutorDirectory)
 				require.True(t, ok)
 
-				require.EqualValues(t, tt.expectedExists, directory.MustExists(verbose))
+				exists, err := directory.Exists(verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedExists, exists)
 			},
 		)
 	}

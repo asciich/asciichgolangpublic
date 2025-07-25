@@ -30,17 +30,31 @@ func TestDirectoriesCreateLocalDirectoryByPath(t *testing.T) {
 				var directory files.Directory = files.MustGetLocalDirectoryByPath(tempDir)
 				defer directory.Delete(verbose)
 
-				require.True(t, directory.MustExists(verbose))
+				exists, err := directory.Exists(verbose)
+				require.NoError(t, err)
+				require.True(t, exists)
 
 				for i := 0; i < 2; i++ {
-					directory.MustDelete(verbose)
-					require.False(t, directory.MustExists(verbose))
+					err = directory.Delete(verbose)
+					require.NoError(t, err)
+
+					exists, err = directory.Exists(verbose)
+					require.NoError(t, err)
+					require.False(t, exists)
 				}
 
 				for i := 0; i < 2; i++ {
-					createdDir := files.Directories().MustCreateLocalDirectoryByPath(directory.MustGetLocalPath(), verbose)
-					require.True(t, directory.MustExists(verbose))
-					require.True(t, createdDir.MustExists(verbose))
+					localPath, err := directory.GetLocalPath()
+					require.NoError(t, err)
+					createdDir := files.Directories().MustCreateLocalDirectoryByPath(localPath, verbose)
+					
+					dirExists, err:= directory.Exists(verbose)
+					require.NoError(t, err)
+					require.True(t, dirExists)
+
+					createdExists, err := createdDir.Exists(verbose)
+					require.NoError(t, err)
+					require.True(t, createdExists)
 				}
 
 			},
