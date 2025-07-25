@@ -94,33 +94,3 @@ func Delete(ctx context.Context, pathToDelete string) error {
 
 	return nil
 }
-
-func WriteString(ctx context.Context, pathToWrite string, content string) error {
-	if pathToWrite == "" {
-		return tracederrors.TracedErrorEmptyString("pathToWrite")
-	}
-
-	err := os.WriteFile(pathToWrite, []byte(content), 0644)
-	if err != nil {
-		return tracederrors.TracedErrorf("Unable to write to file '%s': %w", pathToWrite, err)
-	}
-
-	logging.LogChangedByCtxf(ctx, "Wrote content to file '%s'.", pathToWrite)
-
-	return nil
-}
-
-func ReadAsString(ctx context.Context, pathToRead string) (string, error) {
-	if pathToRead == "" {
-		return "", tracederrors.TracedErrorEmptyString("pathToRead")
-	}
-
-	content, err := os.ReadFile(pathToRead)
-	if err != nil {
-		return "", tracederrors.TracedErrorf("Unable to read file '%s': %w", pathToRead, err)
-	}
-
-	logging.LogInfoByCtxf(ctx, "Read content of file '%s'.", content)
-
-	return string(content), nil
-}
