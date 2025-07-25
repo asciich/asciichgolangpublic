@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -51,7 +51,7 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 				dependency := &DependencyGitRepository{
 					url:                 "https://gitlab.asciich.ch/gitlab_management/pre-commit",
 					versionString:       "v0.1.0",
-					sourceFiles:         []files.File{preCommitFile},
+					sourceFiles:         []filesinterfaces.File{preCommitFile},
 					targetVersionString: "v0.10.0",
 				}
 

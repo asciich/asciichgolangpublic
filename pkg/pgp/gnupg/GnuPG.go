@@ -4,12 +4,13 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func CheckSignatureValid(signatureFile files.File, verbose bool) (err error) {
+func CheckSignatureValid(signatureFile filesinterfaces.File, verbose bool) (err error) {
 	if signatureFile == nil {
 		return tracederrors.TracedErrorNil("signatureFile")
 	}
@@ -53,21 +54,21 @@ func CheckSignatureValid(signatureFile files.File, verbose bool) (err error) {
 	return nil
 }
 
-func MustCheckSignatureValid(signatureFile files.File, verbose bool) {
+func MustCheckSignatureValid(signatureFile filesinterfaces.File, verbose bool) {
 	err := CheckSignatureValid(signatureFile, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func MustSignFile(fileToSign files.File, options *GnuPGSignOptions) {
+func MustSignFile(fileToSign filesinterfaces.File, options *GnuPGSignOptions) {
 	err := SignFile(fileToSign, options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func SignFile(fileToSign files.File, options *GnuPGSignOptions) (err error) {
+func SignFile(fileToSign filesinterfaces.File, options *GnuPGSignOptions) (err error) {
 	if fileToSign == nil {
 		return tracederrors.TracedError("fileToSign is nil")
 	}

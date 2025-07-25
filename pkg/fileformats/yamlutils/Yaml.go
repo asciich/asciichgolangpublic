@@ -8,7 +8,7 @@ import (
 
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	gologging "gopkg.in/op/go-logging.v1"
@@ -52,7 +52,7 @@ func DataToYamlBytes(input interface{}) (yamlBytes []byte, err error) {
 	return yamlBytes, nil
 }
 
-func DataToYamlFile(data interface{}, outputFile files.File, verbose bool) (err error) {
+func DataToYamlFile(data interface{}, outputFile filesinterfaces.File, verbose bool) (err error) {
 	if outputFile == nil {
 		return tracederrors.TracedErrorNil("outputFile")
 	}
@@ -90,7 +90,7 @@ func MustDataToYamlBytes(input interface{}) (yamlBytes []byte) {
 	return yamlBytes
 }
 
-func MustDataToYamlFile(jsonData interface{}, outputFile files.File, verbose bool) {
+func MustDataToYamlFile(jsonData interface{}, outputFile filesinterfaces.File, verbose bool) {
 	err := DataToYamlFile(jsonData, outputFile, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

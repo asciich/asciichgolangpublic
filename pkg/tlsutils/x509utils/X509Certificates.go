@@ -7,7 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -47,7 +47,7 @@ func X509Certificates() (x509Certificaets *X509CertificatesService) {
 	return new(X509CertificatesService)
 }
 
-func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(ctx context.Context, createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey files.Directory, err error) {
+func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(ctx context.Context, createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey filesinterfaces.Directory, err error) {
 	if createOptions == nil {
 		return nil, tracederrors.TracedError("createOptions is nil")
 	}
@@ -96,7 +96,7 @@ func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(ctx
 	return directoryToUse, nil
 }
 
-func (c *X509CertificatesService) CreateRootCaIntoDirectory(ctx context.Context, createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey files.Directory, err error) {
+func (c *X509CertificatesService) CreateRootCaIntoDirectory(ctx context.Context, createOptions *X509CreateCertificateOptions) (directoryContianingCreatedCertAndKey filesinterfaces.Directory, err error) {
 	if createOptions == nil {
 		return nil, tracederrors.TracedError("createOptions is nil")
 	}

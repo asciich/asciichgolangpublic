@@ -11,6 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -164,7 +165,7 @@ func (c *CommandExecutorFile) Chown(options *parameteroptions.ChownOptions) (err
 	return nil
 }
 
-func (c *CommandExecutorFile) CopyToFile(destFile File, verbose bool) (err error) {
+func (c *CommandExecutorFile) CopyToFile(destFile filesinterfaces.File, verbose bool) (err error) {
 	if destFile == nil {
 		return tracederrors.TracedErrorNil("destFile")
 	}
@@ -402,7 +403,7 @@ func (c *CommandExecutorFile) GetCommandExecutorAndFilePathAndHostDescription() 
 	return commandExecutor, filePath, hostDescription, nil
 }
 
-func (c *CommandExecutorFile) GetDeepCopy() (deepCopy File) {
+func (c *CommandExecutorFile) GetDeepCopy() (deepCopy filesinterfaces.File) {
 	d := NewCommandExecutorFile()
 
 	*d = *c
@@ -483,7 +484,7 @@ func (c *CommandExecutorFile) GetLocalPathOrEmptyStringIfUnset() (localPath stri
 	return "", tracederrors.TracedError("Not running on local host.")
 }
 
-func (c *CommandExecutorFile) GetParentDirectory() (parentDirectory Directory, err error) {
+func (c *CommandExecutorFile) GetParentDirectory() (parentDirectory filesinterfaces.Directory, err error) {
 	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
 	if err != nil {
 		return nil, err
@@ -603,7 +604,7 @@ func (c *CommandExecutorFile) IsRunningOnLocalhost() (isRunningOnLocalhost bool,
 	return isRunningOnLocalhost, nil
 }
 
-func (c *CommandExecutorFile) MoveToPath(path string, useSudo bool, verbose bool) (movedFile File, err error) {
+func (c *CommandExecutorFile) MoveToPath(path string, useSudo bool, verbose bool) (movedFile filesinterfaces.File, err error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
@@ -673,7 +674,7 @@ func (c *CommandExecutorFile) MustChown(options *parameteroptions.ChownOptions) 
 	}
 }
 
-func (c *CommandExecutorFile) MustCopyToFile(destFile File, verbose bool) {
+func (c *CommandExecutorFile) MustCopyToFile(destFile filesinterfaces.File, verbose bool) {
 	err := c.CopyToFile(destFile, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -775,7 +776,7 @@ func (c *CommandExecutorFile) MustGetLocalPathOrEmptyStringIfUnset() (localPath 
 	return localPath
 }
 
-func (c *CommandExecutorFile) MustGetParentDirectory() (parentDirectory Directory) {
+func (c *CommandExecutorFile) MustGetParentDirectory() (parentDirectory filesinterfaces.Directory) {
 	parentDirectory, err := c.GetParentDirectory()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -829,7 +830,7 @@ func (c *CommandExecutorFile) MustIsRunningOnLocalhost() (isRunningOnLocalhost b
 	return isRunningOnLocalhost
 }
 
-func (c *CommandExecutorFile) MustMoveToPath(path string, useSudo bool, verbose bool) (movedFile File) {
+func (c *CommandExecutorFile) MustMoveToPath(path string, useSudo bool, verbose bool) (movedFile filesinterfaces.File) {
 	movedFile, err := c.MoveToPath(path, useSudo, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

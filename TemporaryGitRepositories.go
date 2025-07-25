@@ -1,7 +1,7 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -44,7 +44,7 @@ func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepository(verbose b
 	return temporaryGitRepository, nil
 }
 
-func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepositoryAndAddDataFromDirectory(dataToAdd files.Directory, verbose bool) (temporaryRepository GitRepository, err error) {
+func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepositoryAndAddDataFromDirectory(dataToAdd filesinterfaces.Directory, verbose bool) (temporaryRepository GitRepository, err error) {
 	if dataToAdd == nil {
 		return nil, tracederrors.TracedError("dataToAdd is nil")
 	}
@@ -67,7 +67,7 @@ func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepositoryAndAddData
 	return temporaryRepository, nil
 }
 
-func (g *TemporaryGitRepositoriesService) MustCreateTemporaryGitRepositoryAndAddDataFromDirectory(dataToAdd files.Directory, verbose bool) (temporaryRepository GitRepository) {
+func (g *TemporaryGitRepositoriesService) MustCreateTemporaryGitRepositoryAndAddDataFromDirectory(dataToAdd filesinterfaces.Directory, verbose bool) (temporaryRepository GitRepository) {
 	temporaryRepository, err := g.CreateTemporaryGitRepositoryAndAddDataFromDirectory(dataToAdd, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

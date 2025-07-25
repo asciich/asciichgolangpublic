@@ -3,7 +3,7 @@ package httputils
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -25,7 +25,7 @@ func SendRequestAndGetBodyAsString(ctx context.Context, requestOptions *httputil
 	return GetNativeClient().SendRequestAndGetBodyAsString(ctx, requestOptions)
 }
 
-func DownloadAsFile(ctx context.Context, options *httputilsparameteroptions.DownloadAsFileOptions) (downloadedFile files.File, err error) {
+func DownloadAsFile(ctx context.Context, options *httputilsparameteroptions.DownloadAsFileOptions) (downloadedFile filesinterfaces.File, err error) {
 	return GetNativeClient().DownloadAsFile(ctx, options)
 }
 

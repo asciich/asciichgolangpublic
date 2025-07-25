@@ -15,6 +15,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -33,7 +34,7 @@ type CommandExecutorGitRepository struct {
 	GitRepositoryBase
 }
 
-func GetCommandExecutorGitRepositoryFromDirectory(directory files.Directory) (c *CommandExecutorGitRepository, err error) {
+func GetCommandExecutorGitRepositoryFromDirectory(directory filesinterfaces.Directory) (c *CommandExecutorGitRepository, err error) {
 	if directory == nil {
 		return nil, tracederrors.TracedErrorNil("directory")
 	}
@@ -729,7 +730,7 @@ func (c *CommandExecutorGitRepository) GetCurrentCommitHash(verbose bool) (curre
 	return currentCommitHash, nil
 }
 
-func (c *CommandExecutorGitRepository) GetDirectoryByPath(pathToSubDir ...string) (subDir files.Directory, err error) {
+func (c *CommandExecutorGitRepository) GetDirectoryByPath(pathToSubDir ...string) (subDir filesinterfaces.Directory, err error) {
 	if len(pathToSubDir) <= 0 {
 		return nil, tracederrors.TracedError("pathToSubdir has no elements")
 	}
@@ -825,7 +826,7 @@ func (c *CommandExecutorGitRepository) GetRemoteConfigs(verbose bool) (remoteCon
 	return remoteConfigs, nil
 }
 
-func (c *CommandExecutorGitRepository) GetRootDirectory(ctx context.Context) (rootDirectory files.Directory, err error) {
+func (c *CommandExecutorGitRepository) GetRootDirectory(ctx context.Context) (rootDirectory filesinterfaces.Directory, err error) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {
 		return nil, err
@@ -859,7 +860,7 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(ctx context.Context)
 	}
 
 	if isBareRepository {
-		var cwd files.Directory
+		var cwd filesinterfaces.Directory
 
 		commandExecutor, err := c.GetCommandExecutor()
 		if err != nil {

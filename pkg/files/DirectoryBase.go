@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
@@ -14,7 +15,7 @@ import (
 )
 
 type DirectoryBase struct {
-	parentDirectoryForBaseClass Directory
+	parentDirectoryForBaseClass filesinterfaces.Directory
 }
 
 func NewDirectoryBase() (d *DirectoryBase) {
@@ -23,7 +24,7 @@ func NewDirectoryBase() (d *DirectoryBase) {
 
 // TODO: Rename to WriteStringtoFile( to make it more generic.
 // This renaming is needed to bring GitRepository and Directory together.
-func (d *DirectoryBase) WriteStringToFileInDirectory(content string, verbose bool, path ...string) (writtenFile File, err error) {
+func (d *DirectoryBase) WriteStringToFileInDirectory(content string, verbose bool, path ...string) (writtenFile filesinterfaces.File, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedErrorf("Invalid path='%v'", path)
 	}
@@ -46,7 +47,7 @@ func (d *DirectoryBase) WriteStringToFileInDirectory(content string, verbose boo
 	return writtenFile, nil
 }
 
-func (c *DirectoryBase) WriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile File, err error) {
+func (c *DirectoryBase) WriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile filesinterfaces.File, err error) {
 	if content == nil {
 		return nil, tracederrors.TracedErrorNil("content")
 	}
@@ -98,7 +99,7 @@ func (d *DirectoryBase) CheckExists(ctx context.Context) (err error) {
 	)
 }
 
-func (d *DirectoryBase) CreateFileInDirectory(verbose bool, path ...string) (createdFile File, err error) {
+func (d *DirectoryBase) CreateFileInDirectory(verbose bool, path ...string) (createdFile filesinterfaces.File, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedError("path has no elements")
 	}
@@ -121,7 +122,7 @@ func (d *DirectoryBase) CreateFileInDirectory(verbose bool, path ...string) (cre
 	return createdFile, nil
 }
 
-func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose bool, pathToCreate ...string) (createdFile File, err error) {
+func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose bool, pathToCreate ...string) (createdFile filesinterfaces.File, err error) {
 	if len(pathToCreate) <= 0 {
 		return nil, tracederrors.TracedErrorf("Invalid pathToCreate='%v'", pathToCreate)
 	}
@@ -237,7 +238,7 @@ func (d *DirectoryBase) GetFilePathInDirectory(path ...string) (filePath string,
 	return filePath, nil
 }
 
-func (d *DirectoryBase) GetParentDirectoryForBaseClass() (parentDirectoryForBaseClass Directory, err error) {
+func (d *DirectoryBase) GetParentDirectoryForBaseClass() (parentDirectoryForBaseClass filesinterfaces.Directory, err error) {
 	if d.parentDirectoryForBaseClass == nil {
 		return nil, tracederrors.TracedError("parentDirectoryForBaseClass not set")
 	}
@@ -365,7 +366,7 @@ func (d *DirectoryBase) MustCheckExists(ctx context.Context) {
 	}
 }
 
-func (d *DirectoryBase) MustCreateFileInDirectory(verbose bool, path ...string) (createdFile File) {
+func (d *DirectoryBase) MustCreateFileInDirectory(verbose bool, path ...string) (createdFile filesinterfaces.File) {
 	createdFile, err := d.CreateFileInDirectory(verbose, path...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -374,7 +375,7 @@ func (d *DirectoryBase) MustCreateFileInDirectory(verbose bool, path ...string) 
 	return createdFile
 }
 
-func (d *DirectoryBase) MustCreateFileInDirectoryFromString(content string, verbose bool, pathToCreate ...string) (createdFile File) {
+func (d *DirectoryBase) MustCreateFileInDirectoryFromString(content string, verbose bool, pathToCreate ...string) (createdFile filesinterfaces.File) {
 	createdFile, err := d.CreateFileInDirectoryFromString(content, verbose, pathToCreate...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -401,7 +402,7 @@ func (d *DirectoryBase) MustGetFilePathInDirectory(path ...string) (filePath str
 	return filePath
 }
 
-func (d *DirectoryBase) MustGetParentDirectoryForBaseClass() (parentDirectoryForBaseClass Directory) {
+func (d *DirectoryBase) MustGetParentDirectoryForBaseClass() (parentDirectoryForBaseClass filesinterfaces.Directory) {
 	parentDirectoryForBaseClass, err := d.GetParentDirectoryForBaseClass()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -464,14 +465,14 @@ func (d *DirectoryBase) MustReadFirstLineOfFileInDirectoryAsString(path ...strin
 	return firstLine
 }
 
-func (d *DirectoryBase) MustSetParentDirectoryForBaseClass(parentDirectoryForBaseClass Directory) {
+func (d *DirectoryBase) MustSetParentDirectoryForBaseClass(parentDirectoryForBaseClass filesinterfaces.Directory) {
 	err := d.SetParentDirectoryForBaseClass(parentDirectoryForBaseClass)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (d *DirectoryBase) MustWriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile File) {
+func (d *DirectoryBase) MustWriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile filesinterfaces.File) {
 	writtenFile, err := d.WriteBytesToFile(content, verbose, path...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -480,7 +481,7 @@ func (d *DirectoryBase) MustWriteBytesToFile(content []byte, verbose bool, path 
 	return writtenFile
 }
 
-func (d *DirectoryBase) MustWriteStringToFileInDirectory(content string, verbose bool, path ...string) (writtenFile File) {
+func (d *DirectoryBase) MustWriteStringToFileInDirectory(content string, verbose bool, path ...string) (writtenFile filesinterfaces.File) {
 	writtenFile, err := d.WriteStringToFileInDirectory(content, verbose, path...)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -577,7 +578,7 @@ func (d *DirectoryBase) ReadFirstLineOfFileInDirectoryAsString(path ...string) (
 	return f.ReadFirstLine()
 }
 
-func (d *DirectoryBase) SetParentDirectoryForBaseClass(parentDirectoryForBaseClass Directory) (err error) {
+func (d *DirectoryBase) SetParentDirectoryForBaseClass(parentDirectoryForBaseClass filesinterfaces.Directory) (err error) {
 	if parentDirectoryForBaseClass == nil {
 		return tracederrors.TracedErrorNil("parentDirectoryForBaseClass")
 	}

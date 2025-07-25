@@ -6,6 +6,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -33,7 +34,7 @@ func GetContentToInsertDefinedInStartLineAsLines(line string, options *ReplaceBe
 	return lines, nil
 }
 
-func GetSourceFile(line string, options *ReplaceBetweenMarkersOptions) (sourceFile files.File, err error) {
+func GetSourceFile(line string, options *ReplaceBetweenMarkersOptions) (sourceFile filesinterfaces.File, err error) {
 	if line == "" {
 		return nil, tracederrors.TracedError("line is empty string")
 	}
@@ -122,7 +123,7 @@ func MustGetContentToInsertDefinedInStartLineAsLines(line string, options *Repla
 	return lines
 }
 
-func MustGetSourceFile(line string, options *ReplaceBetweenMarkersOptions) (sourceFile files.File) {
+func MustGetSourceFile(line string, options *ReplaceBetweenMarkersOptions) (sourceFile filesinterfaces.File) {
 	sourceFile, err := GetSourceFile(line, options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

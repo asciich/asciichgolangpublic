@@ -6,11 +6,11 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/documentutils/markdowndocument"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func WriteInitialCollectionReadme(ctx context.Context, outFile files.File, name string, namespace string) error {
+func WriteInitialCollectionReadme(ctx context.Context, outFile filesinterfaces.File, name string, namespace string) error {
 	if outFile == nil {
 		return tracederrors.TracedErrorNil("outFile")
 	}
@@ -38,7 +38,7 @@ func WriteInitialCollectionReadme(ctx context.Context, outFile files.File, name 
 	return outFile.WriteString(content, contextutils.GetVerboseFromContext(ctx))
 }
 
-func WriteInitialCollectionReadmeFromCreateCollectionOptions(ctx context.Context, outFile files.File, options *CreateCollectionFileStructureOptions) error {
+func WriteInitialCollectionReadmeFromCreateCollectionOptions(ctx context.Context, outFile filesinterfaces.File, options *CreateCollectionFileStructureOptions) error {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}

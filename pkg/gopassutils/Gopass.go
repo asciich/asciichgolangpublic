@@ -13,7 +13,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
@@ -279,7 +279,7 @@ func InsertFileByString(ctx context.Context, fileContent string, gopassOptions *
 	return nil
 }
 
-func InsertFile(ctx context.Context, fileToInsert files.File, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
+func InsertFile(ctx context.Context, fileToInsert filesinterfaces.File, gopassOptions *parameteroptions.GopassSecretOptions) (err error) {
 	if fileToInsert == nil {
 		return tracederrors.TracedError("fileToInsert is nil")
 	}
@@ -487,7 +487,7 @@ func WriteInfoToGopass(gopassPath string) (err error) {
 	return nil
 }
 
-func WriteSecretIntoTemporaryFile(ctx context.Context, getOptions *parameteroptions.GopassSecretOptions) (temporaryFile files.File, err error) {
+func WriteSecretIntoTemporaryFile(ctx context.Context, getOptions *parameteroptions.GopassSecretOptions) (temporaryFile filesinterfaces.File, err error) {
 	if getOptions == nil {
 		return nil, tracederrors.TracedError("getOptions is nil")
 	}

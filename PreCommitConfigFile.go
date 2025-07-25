@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/changesummary"
 	"github.com/asciich/asciichgolangpublic/pkg/dependencyutils/dependencyinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
@@ -18,7 +19,7 @@ type PreCommitConfigFile struct {
 	files.LocalFile
 }
 
-func GetPreCommitConfigByFile(file files.File) (preCommitConfigFile *PreCommitConfigFile, err error) {
+func GetPreCommitConfigByFile(file filesinterfaces.File) (preCommitConfigFile *PreCommitConfigFile, err error) {
 	if file == nil {
 		return nil, tracederrors.TracedErrorNil("file")
 	}
@@ -68,7 +69,7 @@ func GetPreCommitConfigFileInGitRepository(gitRepository GitRepository) (preComm
 	return GetPreCommitConfigByFile(fileInRepo)
 }
 
-func MustGetPreCommitConfigByFile(file files.File) (preCommitConfigFile *PreCommitConfigFile) {
+func MustGetPreCommitConfigByFile(file filesinterfaces.File) (preCommitConfigFile *PreCommitConfigFile) {
 	preCommitConfigFile, err := GetPreCommitConfigByFile(file)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

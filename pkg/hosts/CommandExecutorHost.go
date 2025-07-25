@@ -13,6 +13,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/ftputils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -63,7 +64,7 @@ func NewCommandExecutorHost() (c *CommandExecutorHost) {
 	return c
 }
 
-func (c *CommandExecutorHost) GetFileInUsersHome(ctx context.Context, userName string, path string) (file files.File, err error) {
+func (c *CommandExecutorHost) GetFileInUsersHome(ctx context.Context, userName string, path string) (file filesinterfaces.File, err error) {
 	if userName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("userName")
 	}
@@ -118,7 +119,7 @@ func (c *CommandExecutorHost) GetCommandExecutor() (commandExecutor commandexecu
 	return c.commandExecutor, nil
 }
 
-func (c *CommandExecutorHost) GetDirectoryByPath(path string) (directory files.Directory, err error) {
+func (c *CommandExecutorHost) GetDirectoryByPath(path string) (directory filesinterfaces.Directory, err error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
@@ -278,7 +279,7 @@ func (h *CommandExecutorHost) GetComment() (comment string, err error) {
 	return h.Comment, nil
 }
 
-func (h *CommandExecutorHost) GetFileByPath(path string) (file files.File, err error) {
+func (h *CommandExecutorHost) GetFileByPath(path string) (file filesinterfaces.File, err error) {
 	if path == "" {
 		return nil, err
 	}
@@ -296,7 +297,7 @@ func (h *CommandExecutorHost) GetFileByPath(path string) (file files.File, err e
 	return file, nil
 }
 
-func (h *CommandExecutorHost) InstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile files.File, err error) {
+func (h *CommandExecutorHost) InstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile filesinterfaces.File, err error) {
 	if installOptions == nil {
 		return nil, tracederrors.TracedErrorNil("installOptions")
 	}
@@ -487,7 +488,7 @@ func (h *CommandExecutorHost) MustGetComment() (comment string) {
 	return comment
 }
 
-func (h *CommandExecutorHost) MustGetDirectoryByPath(path string) (directory files.Directory) {
+func (h *CommandExecutorHost) MustGetDirectoryByPath(path string) (directory filesinterfaces.Directory) {
 	directory, err := h.GetDirectoryByPath(path)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -514,7 +515,7 @@ func (h *CommandExecutorHost) MustGetHostName() (hostname string) {
 	return hostname
 }
 
-func (h *CommandExecutorHost) MustInstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile files.File) {
+func (h *CommandExecutorHost) MustInstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile filesinterfaces.File) {
 	installedFile, err := h.InstallBinary(installOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

@@ -11,6 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -24,7 +25,7 @@ type LocalFile struct {
 	path string
 }
 
-func GetLocalFileByFile(inputFile File) (localFile *LocalFile, err error) {
+func GetLocalFileByFile(inputFile filesinterfaces.File) (localFile *LocalFile, err error) {
 	if inputFile == nil {
 		return nil, tracederrors.TracedErrorNil("inputFile")
 	}
@@ -41,7 +42,7 @@ func GetLocalFileByPath(localPath string) (l *LocalFile, err error) {
 	return NewLocalFileByPath(localPath)
 }
 
-func MustGetLocalFileByFile(inputFile File) (localFile *LocalFile) {
+func MustGetLocalFileByFile(inputFile filesinterfaces.File) (localFile *LocalFile) {
 	localFile, err := GetLocalFileByFile(inputFile)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -259,7 +260,7 @@ func (l *LocalFile) Chown(options *parameteroptions.ChownOptions) (err error) {
 	return nil
 }
 
-func (l *LocalFile) CopyToFile(destFile File, verbose bool) (err error) {
+func (l *LocalFile) CopyToFile(destFile filesinterfaces.File, verbose bool) (err error) {
 	if destFile == nil {
 		return tracederrors.TracedErrorNil("destFile")
 	}
@@ -356,7 +357,7 @@ func (l *LocalFile) GetBaseName() (baseName string, err error) {
 	return baseName, nil
 }
 
-func (l *LocalFile) GetDeepCopy() (deepCopy File) {
+func (l *LocalFile) GetDeepCopy() (deepCopy filesinterfaces.File) {
 	deepCopyLocalFile := NewLocalFile()
 	deepCopyLocalFile.path = l.path
 
@@ -377,7 +378,7 @@ func (l *LocalFile) GetLocalPathOrEmptyStringIfUnset() (localPath string, err er
 	return l.path, nil
 }
 
-func (l *LocalFile) GetParentDirectory() (parentDirectory Directory, err error) {
+func (l *LocalFile) GetParentDirectory() (parentDirectory filesinterfaces.Directory, err error) {
 	localPath, err := l.GetLocalPath()
 	if err != nil {
 		return nil, err
@@ -449,7 +450,7 @@ func (l *LocalFile) IsPathSet() (isSet bool) {
 	return false
 }
 
-func (l *LocalFile) MoveToPath(path string, useSudo bool, verbose bool) (movedFile File, err error) {
+func (l *LocalFile) MoveToPath(path string, useSudo bool, verbose bool) (movedFile filesinterfaces.File, err error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString(path)
 	}
@@ -522,7 +523,7 @@ func (l *LocalFile) MustChown(options *parameteroptions.ChownOptions) {
 	}
 }
 
-func (l *LocalFile) MustCopyToFile(destFile File, verbose bool) {
+func (l *LocalFile) MustCopyToFile(destFile filesinterfaces.File, verbose bool) {
 	err := l.CopyToFile(destFile, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -588,7 +589,7 @@ func (l *LocalFile) MustGetLocalPathOrEmptyStringIfUnset() (localPath string) {
 	return localPath
 }
 
-func (l *LocalFile) MustGetParentDirectory() (parentDirectory Directory) {
+func (l *LocalFile) MustGetParentDirectory() (parentDirectory filesinterfaces.Directory) {
 	parentDirectory, err := l.GetParentDirectory()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -633,7 +634,7 @@ func (l *LocalFile) MustGetUriAsString() (uri string) {
 	return uri
 }
 
-func (l *LocalFile) MustMoveToPath(path string, useSudo bool, verbose bool) (movedFile File) {
+func (l *LocalFile) MustMoveToPath(path string, useSudo bool, verbose bool) (movedFile filesinterfaces.File) {
 	movedFile, err := l.MoveToPath(path, useSudo, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

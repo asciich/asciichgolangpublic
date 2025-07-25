@@ -1,14 +1,14 @@
 package kvm
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type KvmCreateVmOptions struct {
 	VmName     string
-	DiskImage  files.File
+	DiskImage  filesinterfaces.File
 	Verbose    bool
 	MacAddress string
 }
@@ -17,7 +17,7 @@ func NewKvmCreateVmOptions() (k *KvmCreateVmOptions) {
 	return new(KvmCreateVmOptions)
 }
 
-func (k *KvmCreateVmOptions) GetDiskImage() (diskImage files.File, err error) {
+func (k *KvmCreateVmOptions) GetDiskImage() (diskImage filesinterfaces.File, err error) {
 	if k.DiskImage == nil {
 		return nil, tracederrors.TracedErrorf("DiskImage not set")
 	}
@@ -60,7 +60,7 @@ func (k *KvmCreateVmOptions) GetVmName() (vmName string, err error) {
 	return k.VmName, nil
 }
 
-func (k *KvmCreateVmOptions) MustGetDiskImage() (diskImage files.File) {
+func (k *KvmCreateVmOptions) MustGetDiskImage() (diskImage filesinterfaces.File) {
 	diskImage, err := k.GetDiskImage()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -105,7 +105,7 @@ func (k *KvmCreateVmOptions) MustGetVmName() (vmName string) {
 	return vmName
 }
 
-func (k *KvmCreateVmOptions) MustSetDiskImage(diskImage files.File) {
+func (k *KvmCreateVmOptions) MustSetDiskImage(diskImage filesinterfaces.File) {
 	err := k.SetDiskImage(diskImage)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -133,7 +133,7 @@ func (k *KvmCreateVmOptions) MustSetVmName(vmName string) {
 	}
 }
 
-func (k *KvmCreateVmOptions) SetDiskImage(diskImage files.File) (err error) {
+func (k *KvmCreateVmOptions) SetDiskImage(diskImage filesinterfaces.File) (err error) {
 	if diskImage == nil {
 		return tracederrors.TracedErrorf("diskImage is nil")
 	}

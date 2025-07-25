@@ -5,6 +5,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -24,7 +25,7 @@ func CreateFileStructure(ctx context.Context, path string, options *CreateCollec
 }
 
 // Creates the files structure as documented on https://docs.ansible.com/ansible/latest/dev_guide/developing_collections_structure.html .
-func CreateFileStructureInDir(ctx context.Context, dir files.Directory, options *CreateCollectionFileStructureOptions) error {
+func CreateFileStructureInDir(ctx context.Context, dir filesinterfaces.Directory, options *CreateCollectionFileStructureOptions) error {
 	if dir == nil {
 		return tracederrors.TracedErrorNil("dir")
 	}

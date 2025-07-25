@@ -5,19 +5,20 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type GitignoreFile struct {
-	files.File
+	filesinterfaces.File
 }
 
 func GetGitignoreDefaultBaseName() (defaultBaseName string) {
 	return ".gitignore"
 }
 
-func GetGitignoreFileByFile(fileToUse files.File) (gitignoreFile *GitignoreFile, err error) {
+func GetGitignoreFileByFile(fileToUse filesinterfaces.File) (gitignoreFile *GitignoreFile, err error) {
 	if fileToUse == nil {
 		return nil, tracederrors.TracedErrorEmptyString("fileToUse")
 	}

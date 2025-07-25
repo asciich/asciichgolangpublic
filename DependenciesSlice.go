@@ -2,7 +2,7 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/dependencyutils/dependencyinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -16,7 +16,7 @@ func NewDependenciesSliceService() (d *DependenciesSliceService) {
 	return new(DependenciesSliceService)
 }
 
-func (d *DependenciesSliceService) AddSourceFileForEveryEntry(dependencies []dependencyinterfaces.Dependency, sourceFile files.File) (err error) {
+func (d *DependenciesSliceService) AddSourceFileForEveryEntry(dependencies []dependencyinterfaces.Dependency, sourceFile filesinterfaces.File) (err error) {
 	if dependencies == nil {
 		return tracederrors.TracedErrorNil("dependencies")
 	}

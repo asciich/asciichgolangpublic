@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/changesummary"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 
 	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
@@ -28,7 +29,7 @@ var ErrFileBaseParentNotSet = errors.New("parent is not set")
 
 // This is the base for `File` providing most convenience functions for file operations.
 type FileBase struct {
-	parentFileForBaseClass File
+	parentFileForBaseClass filesinterfaces.File
 }
 
 func NewFileBase() (f *FileBase) {
@@ -379,7 +380,7 @@ func (f *FileBase) GetParentDirectoryPath() (parentDirectoryPath string, err err
 	return parentDirectoryPath, nil
 }
 
-func (f *FileBase) GetParentFileForBaseClass() (parentFileForBaseClass File, err error) {
+func (f *FileBase) GetParentFileForBaseClass() (parentFileForBaseClass filesinterfaces.File, err error) {
 	if f.parentFileForBaseClass == nil {
 		return nil, tracederrors.TracedErrorf("%w", ErrFileBaseParentNotSet)
 	}
@@ -527,7 +528,7 @@ func (f *FileBase) GetValueAsString(key string) (value string, err error) {
 	return stringsutils.GetValueAsString(content, key)
 }
 
-func (f *FileBase) IsContentEqualByComparingSha256Sum(otherFile File, verbose bool) (isEqual bool, err error) {
+func (f *FileBase) IsContentEqualByComparingSha256Sum(otherFile filesinterfaces.File, verbose bool) (isEqual bool, err error) {
 	if otherFile == nil {
 		return false, tracederrors.TracedErrorNil("otherFile")
 	}
@@ -744,7 +745,7 @@ func (f *FileBase) MustGetParentDirectoryPath() (parentDirectoryPath string) {
 	return parentDirectoryPath
 }
 
-func (f *FileBase) MustGetParentFileForBaseClass() (parentFileForBaseClass File) {
+func (f *FileBase) MustGetParentFileForBaseClass() (parentFileForBaseClass filesinterfaces.File) {
 	parentFileForBaseClass, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -798,7 +799,7 @@ func (f *FileBase) MustGetValueAsString(key string) (value string) {
 	return value
 }
 
-func (f *FileBase) MustIsContentEqualByComparingSha256Sum(otherFile File, verbose bool) (isEqual bool) {
+func (f *FileBase) MustIsContentEqualByComparingSha256Sum(otherFile filesinterfaces.File, verbose bool) (isEqual bool) {
 	isEqual, err := f.IsContentEqualByComparingSha256Sum(otherFile, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -983,7 +984,7 @@ func (f *FileBase) MustReplaceLineAfterLine(lineToFind string, replaceLineAfterW
 	return changeSummary
 }
 
-func (f *FileBase) MustSetParentFileForBaseClass(parentFileForBaseClass File) {
+func (f *FileBase) MustSetParentFileForBaseClass(parentFileForBaseClass filesinterfaces.File) {
 	err := f.SetParentFileForBaseClass(parentFileForBaseClass)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1432,7 +1433,7 @@ func (f *FileBase) ReplaceLineAfterLine(lineToFind string, replaceLineAfterWith 
 	return changeSummary, nil
 }
 
-func (f *FileBase) SetParentFileForBaseClass(parentFileForBaseClass File) (err error) {
+func (f *FileBase) SetParentFileForBaseClass(parentFileForBaseClass filesinterfaces.File) (err error) {
 	f.parentFileForBaseClass = parentFileForBaseClass
 
 	return nil

@@ -3,7 +3,7 @@ package asciichgolangpublic
 import (
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -11,7 +11,7 @@ import (
 type GitlabCreateDeployKeyOptions struct {
 	Name          string
 	WriteAccess   bool
-	PublicKeyFile files.File
+	PublicKeyFile filesinterfaces.File
 	Verbose       bool
 }
 
@@ -19,7 +19,7 @@ func NewGitlabCreateDeployKeyOptions() (g *GitlabCreateDeployKeyOptions) {
 	return new(GitlabCreateDeployKeyOptions)
 }
 
-func (g *GitlabCreateDeployKeyOptions) GetPublicKeyFile() (publicKeyFile files.File, err error) {
+func (g *GitlabCreateDeployKeyOptions) GetPublicKeyFile() (publicKeyFile filesinterfaces.File, err error) {
 	if g.PublicKeyFile == nil {
 		return nil, tracederrors.TracedErrorf("PublicKeyFile not set")
 	}
@@ -46,7 +46,7 @@ func (g *GitlabCreateDeployKeyOptions) MustGetName() (name string) {
 	return name
 }
 
-func (g *GitlabCreateDeployKeyOptions) MustGetPublicKeyFile() (publicKeyFile files.File) {
+func (g *GitlabCreateDeployKeyOptions) MustGetPublicKeyFile() (publicKeyFile filesinterfaces.File) {
 	publicKeyFile, err := g.GetPublicKeyFile()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -64,7 +64,7 @@ func (g *GitlabCreateDeployKeyOptions) MustGetPublicKeyMaterialString() (keyMate
 	return keyMaterial
 }
 
-func (g *GitlabCreateDeployKeyOptions) MustGetPublicKeyfile() (keyFile files.File) {
+func (g *GitlabCreateDeployKeyOptions) MustGetPublicKeyfile() (keyFile filesinterfaces.File) {
 	keyFile, err := g.GetPublicKeyfile()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -98,7 +98,7 @@ func (g *GitlabCreateDeployKeyOptions) MustSetName(name string) {
 	}
 }
 
-func (g *GitlabCreateDeployKeyOptions) MustSetPublicKeyFile(publicKeyFile files.File) {
+func (g *GitlabCreateDeployKeyOptions) MustSetPublicKeyFile(publicKeyFile filesinterfaces.File) {
 	err := g.SetPublicKeyFile(publicKeyFile)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -129,7 +129,7 @@ func (g *GitlabCreateDeployKeyOptions) SetName(name string) (err error) {
 	return nil
 }
 
-func (g *GitlabCreateDeployKeyOptions) SetPublicKeyFile(publicKeyFile files.File) (err error) {
+func (g *GitlabCreateDeployKeyOptions) SetPublicKeyFile(publicKeyFile filesinterfaces.File) (err error) {
 	if publicKeyFile == nil {
 		return tracederrors.TracedErrorf("publicKeyFile is nil")
 	}
@@ -186,7 +186,7 @@ func (o *GitlabCreateDeployKeyOptions) GetPublicKeyMaterialString() (keyMaterial
 	return keyMaterial, nil
 }
 
-func (o *GitlabCreateDeployKeyOptions) GetPublicKeyfile() (keyFile files.File, err error) {
+func (o *GitlabCreateDeployKeyOptions) GetPublicKeyfile() (keyFile filesinterfaces.File, err error) {
 	if o.PublicKeyFile == nil {
 		return nil, tracederrors.TracedError("PublicKeyFile is nil")
 	}

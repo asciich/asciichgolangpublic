@@ -15,6 +15,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/pointersutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -27,7 +28,7 @@ func getCtx() context.Context {
 }
 
 func TestLocalFileImplementsFileInterface(t *testing.T) {
-	var file files.File = files.MustNewLocalFileByPath("/example/path")
+	var file filesinterfaces.File = files.MustNewLocalFileByPath("/example/path")
 	require.EqualValues(t, "/example/path", file.MustGetLocalPath())
 }
 
@@ -65,7 +66,7 @@ func TestLocalFileGetUriAsString(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				var file files.File = files.MustNewLocalFileByPath(tt.path)
+				var file filesinterfaces.File = files.MustNewLocalFileByPath(tt.path)
 
 				uri := file.MustGetUriAsString()
 
@@ -94,7 +95,7 @@ func TestLocalFileReadAndWriteAsBytes(t *testing.T) {
 
 				const verbose bool = false
 
-				var file files.File = getFileToTest("localFile")
+				var file filesinterfaces.File = getFileToTest("localFile")
 
 				require.EqualValues([]byte{}, file.MustReadAsBytes())
 
@@ -127,7 +128,7 @@ func TestLocalFileReadAndWriteAsInt64(t *testing.T) {
 
 				const verbose bool = false
 
-				var file files.File = getFileToTest("localFile")
+				var file filesinterfaces.File = getFileToTest("localFile")
 
 				for i := 0; i < 2; i++ {
 					file.MustWriteInt64(tt.content, verbose)
@@ -158,7 +159,7 @@ func TestLocalFileReadAndWriteAsString(t *testing.T) {
 
 				const verbose bool = false
 
-				var file files.File = getFileToTest("localFile")
+				var file filesinterfaces.File = getFileToTest("localFile")
 
 				require.EqualValues("", file.MustReadAsString())
 
@@ -190,7 +191,7 @@ func TestLocalFileGetBaseName(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				var file files.File = files.MustGetLocalFileByPath(tt.path)
+				var file filesinterfaces.File = files.MustGetLocalFileByPath(tt.path)
 
 				require.EqualValues(tt.expectedBaseName, file.MustGetBaseName())
 			},
@@ -479,7 +480,7 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 
 				const verbose bool = true
 
-				var testFile files.File = getFileToTest("localFile")
+				var testFile filesinterfaces.File = getFileToTest("localFile")
 				localTestFile := files.MustGetLocalFileByFile(testFile)
 
 				copy := testFile.GetDeepCopy()
@@ -595,7 +596,7 @@ func TestLocalFile_GetPathReturnsAbsoluteValue(t *testing.T) {
 	}
 }
 
-func getRepoRootDir(ctx context.Context, t *testing.T) (repoRoot files.Directory) {
+func getRepoRootDir(ctx context.Context, t *testing.T) (repoRoot filesinterfaces.Directory) {
 	path, err := commandexecutorbashoo.Bash().RunOneLinerAndGetStdoutAsString(ctx, "git rev-parse --show-toplevel")
 	require.NoError(t, err)
 	path = strings.TrimSpace(path)

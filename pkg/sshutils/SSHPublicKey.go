@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/userutils"
@@ -118,7 +119,7 @@ func (k *SSHPublicKey) GetKeyUserName() (keyUserName string, err error) {
 	return k.KeyUserName, nil
 }
 
-func (k *SSHPublicKey) LoadFromSshDir(sshDirectory files.Directory, verbose bool) (err error) {
+func (k *SSHPublicKey) LoadFromSshDir(sshDirectory filesinterfaces.Directory, verbose bool) (err error) {
 	if sshDirectory == nil {
 		return tracederrors.TracedError("sshDirectory is nil")
 	}
@@ -273,7 +274,7 @@ func (k *SSHPublicKey) SetFromString(keyMaterial string) (err error) {
 	return nil
 }
 
-func (k *SSHPublicKey) WriteToFile(ctx context.Context, outputFile files.File) (err error) {
+func (k *SSHPublicKey) WriteToFile(ctx context.Context, outputFile filesinterfaces.File) (err error) {
 	if outputFile == nil {
 		return tracederrors.TracedError("outputFile is nil")
 	}
@@ -344,7 +345,7 @@ func (s *SSHPublicKey) MustGetKeyUserAtHost() (userAtHost string) {
 	return userAtHost
 }
 
-func (s *SSHPublicKey) MustLoadFromSshDir(sshDirectory files.Directory, verbose bool) {
+func (s *SSHPublicKey) MustLoadFromSshDir(sshDirectory filesinterfaces.Directory, verbose bool) {
 	err := s.LoadFromSshDir(sshDirectory, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -372,7 +373,7 @@ func (s *SSHPublicKey) MustSetKeyUserName(keyUserName string) {
 	}
 }
 
-func (s *SSHPublicKey) MustWriteToFile(ctx context.Context, outputFile files.File) {
+func (s *SSHPublicKey) MustWriteToFile(ctx context.Context, outputFile filesinterfaces.File) {
 	err := s.WriteToFile(ctx, outputFile)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -409,7 +410,7 @@ func (s *SSHPublicKey) SetKeyUserName(keyUserName string) (err error) {
 	return nil
 }
 
-func LoadPublicKeysFromFile(ctx context.Context, sshKeysFile files.File) (sshKeys []*SSHPublicKey, err error) {
+func LoadPublicKeysFromFile(ctx context.Context, sshKeysFile filesinterfaces.File) (sshKeys []*SSHPublicKey, err error) {
 	if sshKeysFile == nil {
 		return nil, tracederrors.TracedError("sshKeysFile is nil")
 	}
@@ -442,7 +443,7 @@ func LoadPublicKeysFromFile(ctx context.Context, sshKeysFile files.File) (sshKey
 	return sshKeys, nil
 }
 
-func MustLoadPublicKeysFromFile(ctx context.Context, sshKeysFile files.File) (sshKeys []*SSHPublicKey) {
+func MustLoadPublicKeysFromFile(ctx context.Context, sshKeysFile filesinterfaces.File) (sshKeys []*SSHPublicKey) {
 	sshKeys, err := LoadPublicKeysFromFile(ctx, sshKeysFile)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -474,7 +475,7 @@ func LoadPublicKeyFromString(keyMaterial string) (key *SSHPublicKey, err error) 
 	return key, nil
 }
 
-func GetCurrentUsersSshDirectory() (sshDir files.Directory, err error) {
+func GetCurrentUsersSshDirectory() (sshDir filesinterfaces.Directory, err error) {
 	homeDir, err := userutils.GetHomeDirectory()
 	if err != nil {
 		return nil, err

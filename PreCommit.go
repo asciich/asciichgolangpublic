@@ -7,7 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -23,7 +23,7 @@ func PreCommit() (p *PreCommitService) {
 	return NewPreCommitService()
 }
 
-func (p *PreCommitService) GetAsPreCommitConfigFileOrNilIfContentIsInvalid(file files.File, verbose bool) (preCommitConfigFile *PreCommitConfigFile, err error) {
+func (p *PreCommitService) GetAsPreCommitConfigFileOrNilIfContentIsInvalid(file filesinterfaces.File, verbose bool) (preCommitConfigFile *PreCommitConfigFile, err error) {
 	preCommitConfigFile, err = GetPreCommitConfigByFile(file)
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func (p *PreCommitService) GetDefaultConfigFileName() (preCommitDefaultName stri
 	return ".pre-commit-config.yaml"
 }
 
-func (p *PreCommitService) MustGetAsPreCommitConfigFileOrNilIfContentIsInvalid(file files.File, verbose bool) (preCommitConfigFile *PreCommitConfigFile) {
+func (p *PreCommitService) MustGetAsPreCommitConfigFileOrNilIfContentIsInvalid(file filesinterfaces.File, verbose bool) (preCommitConfigFile *PreCommitConfigFile) {
 	preCommitConfigFile, err := p.GetAsPreCommitConfigFileOrNilIfContentIsInvalid(file, verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -54,7 +54,7 @@ func (p *PreCommitService) MustGetAsPreCommitConfigFileOrNilIfContentIsInvalid(f
 	return preCommitConfigFile
 }
 
-func (p *PreCommitService) RunInDirectory(ctx context.Context, directoy files.Directory, options *PreCommitRunOptions) (err error) {
+func (p *PreCommitService) RunInDirectory(ctx context.Context, directoy filesinterfaces.Directory, options *PreCommitRunOptions) (err error) {
 	if directoy == nil {
 		return tracederrors.TracedErrorNil("directoy")
 	}

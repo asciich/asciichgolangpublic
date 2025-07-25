@@ -2,7 +2,7 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/changesummary"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions/authenticationoptions"
@@ -14,7 +14,7 @@ import (
 type DependencyGitRepository struct {
 	url           string
 	versionString string
-	sourceFiles   []files.File
+	sourceFiles   []filesinterfaces.File
 
 	// If defined the url will not be used to get the newest version automatically.
 	// Instead this targetVersionString will become the newest available version and will be set in the sourceFiles.
@@ -25,7 +25,7 @@ func NewDependencyGitRepository() (d *DependencyGitRepository) {
 	return new(DependencyGitRepository)
 }
 
-func (d *DependencyGitRepository) AddSourceFile(sourceFile files.File) (err error) {
+func (d *DependencyGitRepository) AddSourceFile(sourceFile filesinterfaces.File) (err error) {
 	if sourceFile == nil {
 		return tracederrors.TracedErrorNil("sourceFile")
 	}
@@ -118,7 +118,7 @@ func (d *DependencyGitRepository) GetNewestVersionAsString(authOptions []authent
 	return newestVersionString, nil
 }
 
-func (d *DependencyGitRepository) GetSourceFiles() (sourceFiles []files.File, err error) {
+func (d *DependencyGitRepository) GetSourceFiles() (sourceFiles []filesinterfaces.File, err error) {
 	if d.sourceFiles == nil {
 		return nil, tracederrors.TracedErrorf("sourceFiles not set")
 	}
@@ -237,7 +237,7 @@ func (d *DependencyGitRepository) IsVersionStringUnset() (isUnset bool) {
 	return d.versionString == ""
 }
 
-func (d *DependencyGitRepository) SetSourceFiles(sourceFiles []files.File) (err error) {
+func (d *DependencyGitRepository) SetSourceFiles(sourceFiles []filesinterfaces.File) (err error) {
 	if sourceFiles == nil {
 		return tracederrors.TracedErrorf("sourceFiles is nil")
 	}
@@ -333,7 +333,7 @@ func (d *DependencyGitRepository) Update(options *parameteroptions.UpdateDepende
 	return changeSummary, nil
 }
 
-func (d *DependencyGitRepository) UpdateVersionByStringInSourceFile(version string, sourceFile files.File, options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
+func (d *DependencyGitRepository) UpdateVersionByStringInSourceFile(version string, sourceFile filesinterfaces.File, options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if version == "" {
 		return nil, tracederrors.TracedErrorEmptyString("version")
 	}

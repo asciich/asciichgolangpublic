@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
@@ -15,7 +16,7 @@ import (
 //
 // Use defer file.Delete(verbose) to after calling this function to ensure
 // the file is deleted after the test is over.
-func getFileToTest(implementationName string) (file files.File) {
+func getFileToTest(implementationName string) (file filesinterfaces.File) {
 	const verbose = true
 
 	if implementationName == "localFile" {

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -29,7 +30,7 @@ func GetCurrentUserName(verbose bool) (currentUserName string, err error) {
 	return currentUserName, nil
 }
 
-func GetDirectoryInHomeDirectory(path ...string) (fileInUnsersHome files.Directory, err error) {
+func GetDirectoryInHomeDirectory(path ...string) (fileInUnsersHome filesinterfaces.Directory, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedError("path has no length")
 	}
@@ -47,7 +48,7 @@ func GetDirectoryInHomeDirectory(path ...string) (fileInUnsersHome files.Directo
 	return fileInUnsersHome, nil
 }
 
-func GetFileInHomeDirectory(path ...string) (fileInUnsersHome files.File, err error) {
+func GetFileInHomeDirectory(path ...string) (fileInUnsersHome filesinterfaces.File, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedError("path has no length")
 	}
@@ -96,7 +97,7 @@ func GetFilePathInHomeDirectory(path ...string) (string, error) {
 	return filepath.Join(append([]string{homePath}, path...)...), nil
 }
 
-func GetHomeDirectory() (homeDir files.Directory, err error) {
+func GetHomeDirectory() (homeDir filesinterfaces.Directory, err error) {
 	homeDirPath, err := GetHomeDirectoryPath()
 	if err != nil {
 		return nil, err

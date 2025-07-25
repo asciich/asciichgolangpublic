@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -29,7 +30,7 @@ func TestLocalDirectoryExists(t *testing.T) {
 			func(t *testing.T) {
 				const verbose bool = true
 
-				var directory files.Directory = getDirectoryToTest("localDirectory")
+				var directory filesinterfaces.Directory = getDirectoryToTest("localDirectory")
 				defer directory.Delete(verbose)
 
 				exists, err := directory.Exists(verbose)
