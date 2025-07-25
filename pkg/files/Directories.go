@@ -2,7 +2,6 @@ package files
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -33,13 +32,4 @@ func (d *DirectoriesService) CreateLocalDirectoryByPath(path string, verbose boo
 	}
 
 	return dir, nil
-}
-
-func (d *DirectoriesService) MustCreateLocalDirectoryByPath(path string, verbose bool) filesinterfaces.Directory {
-	l, err := d.CreateLocalDirectoryByPath(path, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return l
 }
