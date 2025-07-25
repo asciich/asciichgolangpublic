@@ -360,7 +360,7 @@ func (c *CommandExecutorNamespace) RoleByNameExists(ctx context.Context, name st
 		return false, tracederrors.TracedErrorEmptyString("name")
 	}
 
-	roleNames, err := c.ListRoleNames(contextutils.WithVerbosityContextByBool(ctx, false))
+	roleNames, err := c.ListRoleNames(contextutils.WithSilent(ctx))
 	if err != nil {
 		return false, err
 	}

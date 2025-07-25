@@ -10,8 +10,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -736,7 +736,7 @@ func (l *LocalFile) SecurelyDelete(ctx context.Context) (err error) {
 		return tracederrors.TracedErrorf("pathToDelete='%v' is not absolute", pathToDelete)
 	}
 
-	return filesutils.SecureDelete(ctx, pathToDelete)
+	return nativefiles.SecureDelete(ctx, pathToDelete)
 }
 
 func (l *LocalFile) SetPath(path string) (err error) {

@@ -1,4 +1,4 @@
-package filesutils_test
+package nativefiles_test
 
 import (
 	"context"
@@ -7,7 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 )
 
 func getCtx() context.Context {
@@ -18,23 +19,23 @@ func Test_IsFile(t *testing.T) {
 	ctx := getCtx()
 
 	t.Run("empty string", func(t *testing.T) {
-		require.False(t, filesutils.IsFile(ctx, ""))
+		require.False(t, nativefiles.IsFile(ctx, ""))
 	})
 
 	t.Run("nonexisting file", func(t *testing.T) {
-		require.False(t, filesutils.IsFile(ctx, "/this/file/does/not/exist"))
+		require.False(t, nativefiles.IsFile(ctx, "/this/file/does/not/exist"))
 	})
 
 	t.Run("existing file", func(t *testing.T) {
-		require.True(t, filesutils.IsFile(ctx, "/etc/hosts"))
+		require.True(t, nativefiles.IsFile(ctx, "/etc/hosts"))
 	})
 
 	t.Run("directory", func(t *testing.T) {
-		require.False(t, filesutils.IsFile(ctx, "/etc"))
+		require.False(t, nativefiles.IsFile(ctx, "/etc"))
 	})
 
 	t.Run("directory2", func(t *testing.T) {
-		require.False(t, filesutils.IsFile(ctx, "/etc/"))
+		require.False(t, nativefiles.IsFile(ctx, "/etc/"))
 	})
 }
 
@@ -42,23 +43,23 @@ func Test_IsDir(t *testing.T) {
 	ctx := getCtx()
 
 	t.Run("empty string", func(t *testing.T) {
-		require.False(t, filesutils.IsDir(ctx, ""))
+		require.False(t, nativefiles.IsDir(ctx, ""))
 	})
 
 	t.Run("nonexisting file", func(t *testing.T) {
-		require.False(t, filesutils.IsDir(ctx, "/this/file/does/not/exist"))
+		require.False(t, nativefiles.IsDir(ctx, "/this/file/does/not/exist"))
 	})
 
 	t.Run("existing file", func(t *testing.T) {
-		require.False(t, filesutils.IsDir(ctx, "/etc/hosts"))
+		require.False(t, nativefiles.IsDir(ctx, "/etc/hosts"))
 	})
 
 	t.Run("directory", func(t *testing.T) {
-		require.True(t, filesutils.IsDir(ctx, "/etc"))
+		require.True(t, nativefiles.IsDir(ctx, "/etc"))
 	})
 
 	t.Run("directory2", func(t *testing.T) {
-		require.True(t, filesutils.IsDir(ctx, "/etc/"))
+		require.True(t, nativefiles.IsDir(ctx, "/etc/"))
 	})
 }
 
@@ -66,23 +67,23 @@ func Test_Exists(t *testing.T) {
 	ctx := getCtx()
 
 	t.Run("empty string", func(t *testing.T) {
-		require.False(t, filesutils.Exists(ctx, ""))
+		require.False(t, nativefiles.Exists(ctx, ""))
 	})
 
 	t.Run("nonexisting file", func(t *testing.T) {
-		require.False(t, filesutils.Exists(ctx, "/this/file/does/not/exist"))
+		require.False(t, nativefiles.Exists(ctx, "/this/file/does/not/exist"))
 	})
 
 	t.Run("existing file", func(t *testing.T) {
-		require.True(t, filesutils.Exists(ctx, "/etc/hosts"))
+		require.True(t, nativefiles.Exists(ctx, "/etc/hosts"))
 	})
 
 	t.Run("directory", func(t *testing.T) {
-		require.True(t, filesutils.Exists(ctx, "/etc"))
+		require.True(t, nativefiles.Exists(ctx, "/etc"))
 	})
 
 	t.Run("directory2", func(t *testing.T) {
-		require.True(t, filesutils.Exists(ctx, "/etc/"))
+		require.True(t, nativefiles.Exists(ctx, "/etc/"))
 	})
 }
 
@@ -90,27 +91,27 @@ func Test_Create(t *testing.T) {
 	ctx := getCtx()
 
 	t.Run("empty string", func(t *testing.T) {
-		err := filesutils.Create(ctx, "")
+		err := nativefiles.Create(ctx, "")
 		require.Error(t, err)
 	})
 
 	t.Run("create", func(t *testing.T) {
-		tempDir, err := filesutils.CreateTempDir(ctx)
+		tempDir, err := tempfiles.CreateTempDir(ctx)
 		require.NoError(t, err)
 
 		testPath := filepath.Join(tempDir, "test.txt")
-		require.False(t, filesutils.IsFile(ctx, testPath))
+		require.False(t, nativefiles.IsFile(ctx, testPath))
 
 		ctx := contextutils.WithChangeIndicator(ctx)
-		err = filesutils.Create(ctx, testPath)
+		err = nativefiles.Create(ctx, testPath)
 		require.NoError(t, err)
-		require.True(t, filesutils.IsFile(ctx, testPath))
+		require.True(t, nativefiles.IsFile(ctx, testPath))
 		require.True(t, contextutils.IsChanged(ctx))
 
 		ctx = contextutils.WithChangeIndicator(ctx)
-		err = filesutils.Create(ctx, testPath)
+		err = nativefiles.Create(ctx, testPath)
 		require.NoError(t, err)
-		require.True(t, filesutils.IsFile(ctx, testPath))
+		require.True(t, nativefiles.IsFile(ctx, testPath))
 		require.False(t, contextutils.IsChanged(ctx))
 	})
 }

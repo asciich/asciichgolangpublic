@@ -1,42 +1,43 @@
-package filesutils_test
+package nativefiles_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 )
 
 func TestSecureDelete(t *testing.T) {
 	t.Run("empty path", func(t *testing.T) {
-		err := filesutils.SecureDelete(getCtx(), "")
+		err := nativefiles.SecureDelete(getCtx(), "")
 		require.Error(t, err)
 	})
 
 	t.Run("non existing path", func(t *testing.T) {
 		ctx := contextutils.WithChangeIndicator(getCtx())
-		err := filesutils.SecureDelete(ctx, "/this/path/does/not/exist")
+		err := nativefiles.SecureDelete(ctx, "/this/path/does/not/exist")
 		require.NoError(t, err)
 		require.False(t, contextutils.IsChanged(ctx))
 	})
 
 	t.Run("non existing path", func(t *testing.T) {
 		ctx := getCtx()
-		tempPath, err := filesutils.CreateTemporaryFile(ctx)
+		tempPath, err := tempfiles.CreateTemporaryFile(ctx)
 		require.NoError(t, err)
-		require.True(t, filesutils.IsFile(ctx, tempPath))
+		require.True(t, nativefiles.IsFile(ctx, tempPath))
 
 		ctx2 := contextutils.WithChangeIndicator(ctx)
-		err = filesutils.SecureDelete(ctx2, tempPath)
+		err = nativefiles.SecureDelete(ctx2, tempPath)
 		require.NoError(t, err)
 		require.True(t, contextutils.IsChanged(ctx2))
-		require.False(t, filesutils.IsFile(ctx, tempPath))
+		require.False(t, nativefiles.IsFile(ctx, tempPath))
 
 		ctx2 = contextutils.WithChangeIndicator(ctx)
-		err = filesutils.SecureDelete(ctx2, tempPath)
+		err = nativefiles.SecureDelete(ctx2, tempPath)
 		require.NoError(t, err)
 		require.False(t, contextutils.IsChanged(ctx2))
-		require.False(t, filesutils.IsFile(ctx, tempPath))
+		require.False(t, nativefiles.IsFile(ctx, tempPath))
 	})
 }
