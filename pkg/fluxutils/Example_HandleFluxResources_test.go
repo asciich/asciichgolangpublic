@@ -12,7 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -34,7 +34,7 @@ func Test_HandleFluxResources(t *testing.T) {
 	require.NoError(t, err)
 	defer kindutils.DeleteClusterByNameIfInContinuousIntegration(ctx, clusterName)
 	// Get Kubernetes cluster:
-	cluster, err := nativekubernetes.GetClusterByName(ctx, "kind-"+clusterName)
+	cluster, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+clusterName)
 	require.NoError(t, err)
 	// Install flux using flux-operator
 	_, err = fluxutils.InstallFlux(ctx, &fluxparameteroptions.InstalFluxOptions{

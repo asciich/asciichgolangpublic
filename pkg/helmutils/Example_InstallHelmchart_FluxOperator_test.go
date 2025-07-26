@@ -10,7 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helmparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 )
 
 // Example how to install a hemlchart.
@@ -36,7 +36,7 @@ func Test_InstallHelmchart_FluxOperator(t *testing.T) {
 	// -----
 
 	// Get Kubernetes cluster:
-	cluster, err := nativekubernetes.GetClusterByName(ctx, "kind-"+clusterName)
+	cluster, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+clusterName)
 	require.NoError(t, err)
 
 	// Ensure flux/ the namespace which contains flux is absent.
