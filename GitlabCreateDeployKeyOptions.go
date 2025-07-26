@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -35,88 +34,6 @@ func (g *GitlabCreateDeployKeyOptions) GetVerbose() (verbose bool, err error) {
 func (g *GitlabCreateDeployKeyOptions) GetWriteAccess() (writeAccess bool, err error) {
 
 	return g.WriteAccess, nil
-}
-
-func (g *GitlabCreateDeployKeyOptions) MustGetName() (name string) {
-	name, err := g.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (g *GitlabCreateDeployKeyOptions) MustGetPublicKeyFile() (publicKeyFile filesinterfaces.File) {
-	publicKeyFile, err := g.GetPublicKeyFile()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return publicKeyFile
-}
-
-func (g *GitlabCreateDeployKeyOptions) MustGetPublicKeyMaterialString() (keyMaterial string) {
-	keyMaterial, err := g.GetPublicKeyMaterialString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return keyMaterial
-}
-
-func (g *GitlabCreateDeployKeyOptions) MustGetPublicKeyfile() (keyFile filesinterfaces.File) {
-	keyFile, err := g.GetPublicKeyfile()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return keyFile
-}
-
-func (g *GitlabCreateDeployKeyOptions) MustGetVerbose() (verbose bool) {
-	verbose, err := g.GetVerbose()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return verbose
-}
-
-func (g *GitlabCreateDeployKeyOptions) MustGetWriteAccess() (writeAccess bool) {
-	writeAccess, err := g.GetWriteAccess()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return writeAccess
-}
-
-func (g *GitlabCreateDeployKeyOptions) MustSetName(name string) {
-	err := g.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabCreateDeployKeyOptions) MustSetPublicKeyFile(publicKeyFile filesinterfaces.File) {
-	err := g.SetPublicKeyFile(publicKeyFile)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabCreateDeployKeyOptions) MustSetVerbose(verbose bool) {
-	err := g.SetVerbose(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabCreateDeployKeyOptions) MustSetWriteAccess(writeAccess bool) {
-	err := g.SetWriteAccess(writeAccess)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GitlabCreateDeployKeyOptions) SetName(name string) (err error) {

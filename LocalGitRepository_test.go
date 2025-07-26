@@ -60,7 +60,8 @@ func TestLocalGitRepository_GetLocalGitReposioryFromDirectory(t *testing.T) {
 
 				require.EqualValues(t, "localhost", directory.MustGetHostDescription())
 
-				repo := MustGetLocalGitReposioryFromDirectory(directory)
+				repo, err := GetLocalGitReposioryFromDirectory(directory)
+				require.NoError(t, err)
 
 				repoPath, err := repo.GetPath()
 				require.NoError(t, err)
