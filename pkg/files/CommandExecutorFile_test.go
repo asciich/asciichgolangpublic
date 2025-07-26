@@ -23,8 +23,6 @@ func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				temporaryFilePath := createTempFileAndGetPath()
@@ -32,21 +30,26 @@ func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 				var fileToTest filesinterfaces.File = files.MustGetLocalCommandExecutorFileByPath(temporaryFilePath)
 				defer fileToTest.Delete(verbose)
 
-				require.True(fileToTest.MustExists(verbose))
-				require.EqualValues(
-					"",
-					fileToTest.MustReadAsString(),
-				)
+				exists, err := fileToTest.Exists(verbose)
+				require.NoError(t, err)
+				require.True(t, exists)
+
+				require.EqualValues(t, "", fileToTest.MustReadAsString())
 
 				fileToTest.WriteString(tt.testContent, verbose)
-				require.True(fileToTest.MustExists(verbose))
-				require.EqualValues(
-					tt.testContent,
-					fileToTest.MustReadAsString(),
-				)
 
-				fileToTest.MustDelete(verbose)
-				require.False(fileToTest.MustExists(verbose))
+				exists, err = fileToTest.Exists(verbose)
+				require.NoError(t, err)
+				require.True(t, exists)
+
+				require.EqualValues(t, tt.testContent, fileToTest.MustReadAsString())
+
+				err = fileToTest.Delete(verbose)
+				require.NoError(t, err)
+
+				exists, err = fileToTest.Exists(verbose)
+				require.NoError(t, err)
+				require.False(t, exists)
 			},
 		)
 	}

@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
@@ -87,18 +88,21 @@ func TestFile_Exists(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				fileToTest := getFileToTest(tt.implementationName)
 				defer fileToTest.Delete(verbose)
 
-				require.True(fileToTest.MustExists(verbose))
+				exists, err := fileToTest.Exists(verbose)
+				require.NoError(t, err)
+				require.True(t, exists)
 
-				fileToTest.MustDelete(verbose)
+				err = fileToTest.Delete(verbose)
+				require.NoError(t, err)
 
-				require.False(fileToTest.MustExists(verbose))
+				exists, err = fileToTest.Exists(verbose)
+				require.NoError(t, err)
+				require.False(t, exists)
 			},
 		)
 	}
@@ -125,12 +129,18 @@ func TestFile_Truncate(t *testing.T) {
 				for i := 0; i < 10; i++ {
 					err := fileToTest.Truncate(int64(i), verbose)
 					require.NoError(t, err)
-					require.EqualValues(t, fileToTest.MustGetSizeBytes(), int64(i))
+
+					sizeBytes, err := fileToTest.GetSizeBytes()
+					require.NoError(t, err)
+					require.EqualValues(t, sizeBytes, int64(i))
 				}
 
 				err := fileToTest.Truncate(0, verbose)
 				require.NoError(t, err)
-				require.EqualValues(t, fileToTest.MustGetSizeBytes(), 0)
+
+				sizeBytes, err := fileToTest.GetSizeBytes()
+				require.NoError(t, err)
+				require.EqualValues(t, sizeBytes, 0)
 			},
 		)
 	}
@@ -189,8 +199,6 @@ func TestFile_MoveToPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				fileToTest := getFileToTest(tt.implementationName)
@@ -200,23 +208,41 @@ func TestFile_MoveToPath(t *testing.T) {
 				defer destFile.Delete(verbose)
 				destFile.Delete(verbose)
 
-				require.True(fileToTest.MustExists(verbose))
-				require.False(destFile.MustExists(verbose))
+				exists, err := fileToTest.Exists(verbose)
+				require.NoError(t, err)
+				require.True(t, exists)
 
-				movedFile := fileToTest.MustMoveToPath(destFile.MustGetPath(), false, verbose)
+				exists, err = destFile.Exists(verbose)
+				require.NoError(t, err)
+				require.False(t, exists)
 
-				require.EqualValues(
-					movedFile.MustGetPath(),
-					destFile.MustGetPath(),
-				)
+				destFilePath, err := destFile.GetPath()
+				require.NoError(t, err)
 
-				require.EqualValues(
-					movedFile.MustGetHostDescription(),
-					destFile.MustGetHostDescription(),
-				)
+				movedFile, err := fileToTest.MoveToPath(destFilePath, false, verbose)
+				require.NoError(t, err)
 
-				require.False(fileToTest.MustExists(verbose))
-				require.True(destFile.MustExists(verbose))
+				movedFilePath, err := movedFile.GetPath()
+				require.NoError(t, err)
+				destFilePath, err = destFile.GetPath()
+				require.NoError(t, err)
+
+				require.EqualValues(t, movedFilePath, destFilePath)
+
+				movedHostDescription, err := movedFile.GetHostDescription()
+				require.NoError(t, err)
+				destHostDescription, err := destFile.GetHostDescription()
+				require.NoError(t, err)
+
+				require.EqualValues(t, movedHostDescription, destHostDescription)
+
+				exists, err = fileToTest.Exists(verbose)
+				require.NoError(t, err)
+				require.False(t, exists)
+
+				exists, err = destFile.Exists(verbose)
+				require.NoError(t, err)
+				require.True(t, exists)
 			},
 		)
 	}
@@ -236,8 +262,6 @@ func TestFile_CopyToFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				srcFile := getFileToTest(tt.implementationName)
@@ -248,23 +272,18 @@ func TestFile_CopyToFile(t *testing.T) {
 				defer destFile.Delete(verbose)
 				destFile.Delete(verbose)
 
-				require.True(srcFile.MustExists(verbose))
-				require.False(destFile.MustExists(verbose))
+				require.True(t, mustutils.Must(srcFile.Exists(verbose)))
+				require.False(t, mustutils.Must(destFile.Exists(verbose)))
 
-				srcFile.MustCopyToFile(destFile, verbose)
+				err := srcFile.CopyToFile(destFile, verbose)
+				require.NoError(t, err)
 
-				require.True(srcFile.MustExists(verbose))
-				require.True(destFile.MustExists(verbose))
+				require.True(t, mustutils.Must(srcFile.Exists(verbose)))
+				require.True(t, mustutils.Must(destFile.Exists(verbose)))
 
-				require.EqualValues(
-					tt.content,
-					srcFile.MustReadAsString(),
-				)
+				require.EqualValues(t, tt.content, srcFile.MustReadAsString())
 
-				require.EqualValues(
-					tt.content,
-					destFile.MustReadAsString(),
-				)
+				require.EqualValues(t, tt.content, destFile.MustReadAsString())
 			},
 		)
 	}
@@ -298,17 +317,13 @@ func TestFile_Chmod(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.EqualValues(
-					t,
-					tt.expectedPermissionString,
-					toTest.MustGetAccessPermissionsString(),
-				)
+				accessPermissionsString, err := toTest.GetAccessPermissionsString()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedPermissionString, accessPermissionsString)
 
-				require.EqualValues(
-					t,
-					unixfilepermissionsutils.MustGetPermissionsValue(tt.expectedPermissionString),
-					toTest.MustGetAccessPermissions(),
-				)
+				accessPermissions, err := toTest.GetAccessPermissions()
+				require.NoError(t, err)
+				require.EqualValues(t, unixfilepermissionsutils.MustGetPermissionsValue(tt.expectedPermissionString), accessPermissions)
 			},
 		)
 	}
@@ -332,7 +347,8 @@ func TestFile_String(t *testing.T) {
 				toTest := getFileToTest(tt.implementationName)
 				defer toTest.Delete(verbose)
 
-				path := toTest.MustGetPath()
+				path, err := toTest.GetPath()
+				require.NoError(t, err)
 				stringOutput := toTest.String()
 				sprintf := fmt.Sprintf("'%s'", toTest)
 

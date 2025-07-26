@@ -55,14 +55,14 @@ func TestGnuPg_SignAndValidate(t *testing.T) {
 				toTest := getFileToTest(tt.implementationName)
 				defer toTest.Delete(verbose)
 
-				signatureFile, err := toTest.MustGetParentDirectory().GetFileInDirectory(
-					toTest.MustGetBaseName() + ".asc",
+				signatureFile, err := mustutils.Must(toTest.GetParentDirectory()).GetFileInDirectory(
+					mustutils.Must(toTest.GetBaseName()) + ".asc",
 				)
 				require.NoError(t, err)
 				defer signatureFile.Delete(verbose)
 
-				require.True(t, toTest.MustExists(verbose))
-				require.False(t, signatureFile.MustExists(verbose))
+				require.True(t, mustutils.Must(toTest.Exists(verbose)))
+				require.False(t, mustutils.Must(signatureFile.Exists(verbose)))
 
 				MustSignFile(
 					toTest,
@@ -73,8 +73,8 @@ func TestGnuPg_SignAndValidate(t *testing.T) {
 					},
 				)
 
-				require.True(t, toTest.MustExists(verbose))
-				require.True(t, signatureFile.MustExists(verbose))
+				require.True(t, mustutils.Must(toTest.Exists(verbose)))
+				require.True(t, mustutils.Must(signatureFile.Exists(verbose)))
 
 				MustCheckSignatureValid(signatureFile, verbose)
 			},

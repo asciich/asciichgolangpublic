@@ -69,34 +69,23 @@ func TestLocalDirectoryExists(t *testing.T) {
 }
 
 func TestLocalDirectoryGetFileInDirectory(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
+		homeDir := files.MustGetLocalDirectoryByPath("/home/")
 
-	tests := []struct {
-		testcase string
-	}{
-		{"testcase"},
-	}
+		localPath, err := homeDir.MustGetFileInDirectory("testfile").GetLocalPath()
+		require.NoError(t, err)
 
-	for _, tt := range tests {
-		tt := tt
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				require := require.New(t)
+		require.EqualValues(t, "/home/testfile", localPath)
+	})
 
-				homeDir := files.MustGetLocalDirectoryByPath("/home/")
+	t.Run("with sub path", func(t *testing.T) {
+		homeDir := files.MustGetLocalDirectoryByPath("/home/")
 
-				require.EqualValues(
-					"/home/testfile",
-					homeDir.MustGetFileInDirectory("testfile").MustGetLocalPath(),
-				)
+		localPath, err := homeDir.MustGetFileInDirectory("subdir", "another_file").GetLocalPath()
+		require.NoError(t, err)
 
-				require.EqualValues(
-					"/home/subdir/another_file",
-					homeDir.MustGetFileInDirectory("subdir", "another_file").MustGetLocalPath(),
-				)
-			},
-		)
-	}
+		require.EqualValues(t, "/home/subdir/another_file", localPath)
+	})
 }
 
 func TestLocalDirectoryGetFilePathInDirectory(t *testing.T) {
@@ -197,7 +186,9 @@ func TestLocalDirectoryCreateFileInDirectoryFromString(t *testing.T) {
 				pathElements = append(pathElements, tt.filename...)
 				expectedFileName := filepath.Join(pathElements...)
 
-				require.EqualValues(t, expectedFileName, createdFile.MustGetLocalPath())
+				localPath, err := createdFile.GetLocalPath()
+				require.NoError(t, err)
+				require.EqualValues(t, expectedFileName, localPath)
 				require.EqualValues(t, tt.content, createdFile.MustReadAsString())
 			},
 		)

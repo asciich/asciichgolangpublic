@@ -50,7 +50,7 @@ func TestFileBaseEnsureLineInFile_testcase1(t *testing.T) {
 				require := require.New(t)
 
 				fileToTest := getFileToTest(tt.implementationName)
-				defer fileToTest.MustDelete(verbose)
+				defer fileToTest.Delete(verbose)
 
 				const testContent string = "hello\nworld\n"
 				fileToTest.MustWriteString(testContent, verbose)
@@ -124,19 +124,15 @@ func TestFileBase_EnsureLineInFile_testcaseWriteToNonexstingString(t *testing.T)
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				fileToTest := getFileToTest(tt.implementationName)
-				defer fileToTest.MustDelete(true)
+				defer fileToTest.Delete(true)
 
-				fileToTest.MustDelete(verbose)
+				err := fileToTest.Delete(verbose)
+				require.NoError(t, err)
 
 				for i := 0; i < 2; i++ {
 					fileToTest.MustEnsureLineInFile(tt.line, verbose)
-					require.EqualValues(
-						tt.expected,
-						fileToTest.MustReadAsString(),
-					)
+					require.EqualValues(t, tt.expected, fileToTest.MustReadAsString())
 				}
 			},
 		)

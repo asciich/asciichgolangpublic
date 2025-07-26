@@ -29,7 +29,9 @@ func getCtx() context.Context {
 
 func TestLocalFileImplementsFileInterface(t *testing.T) {
 	var file filesinterfaces.File = files.MustNewLocalFileByPath("/example/path")
-	require.EqualValues(t, "/example/path", file.MustGetLocalPath())
+	localPath, err := file.GetLocalPath()
+	require.NoError(t, err)
+	require.EqualValues(t, "/example/path", localPath)
 }
 
 func TestLocalFileIsPathSetOnEmptyFile(t *testing.T) {
@@ -64,13 +66,12 @@ func TestLocalFileGetUriAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				var file filesinterfaces.File = files.MustNewLocalFileByPath(tt.path)
 
-				uri := file.MustGetUriAsString()
+				uri, err := file.GetUriAsString()
+				require.NoError(t, err)
 
-				require.EqualValues(tt.expectedUri, uri)
+				require.EqualValues(t, tt.expectedUri, uri)
 			},
 		)
 	}
@@ -192,11 +193,11 @@ func TestLocalFileGetBaseName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				var file filesinterfaces.File = files.MustGetLocalFileByPath(tt.path)
 
-				require.EqualValues(tt.expectedBaseName, file.MustGetBaseName())
+				baseName, err := file.GetBaseName()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedBaseName, baseName)
 			},
 		)
 	}
@@ -289,7 +290,8 @@ func TestLocalFileGetParentDirectory(t *testing.T) {
 
 				temporaryFile, err := temporaryDir.CreateFileInDirectory(verbose, "test.txt")
 				require.NoError(t, err)
-				parentDir := temporaryFile.MustGetParentDirectory()
+				parentDir, err := temporaryFile.GetParentDirectory()
+				require.NoError(t, err)
 
 				tmpPath, err := temporaryDir.GetLocalPath()
 				require.NoError(t, err)
@@ -479,8 +481,6 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				var testFile filesinterfaces.File = getFileToTest("localFile")
@@ -488,18 +488,19 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 
 				copy := testFile.GetDeepCopy()
 				require.EqualValues(
-					testFile.MustGetLocalPath(),
-					copy.MustGetLocalPath(),
+					t,
+					mustutils.Must(testFile.GetLocalPath()),
+					mustutils.Must(copy.GetLocalPath()),
 				)
 				localCopy := files.MustGetLocalFileByFile(copy)
 
-				require.False(pointersutils.MustPointersEqual(
+				require.False(t, pointersutils.MustPointersEqual(
 					localTestFile.MustGetParentFileForBaseClassAsLocalFile(),
 					localCopy.MustGetParentFileForBaseClassAsLocalFile(),
 				))
 
-				require.True(testFile.MustExists(verbose))
-				require.True(copy.MustExists(verbose))
+				require.True(t, mustutils.Must(testFile.Exists(verbose)))
+				require.True(t, mustutils.Must(copy.Exists(verbose)))
 			},
 		)
 	}
@@ -629,8 +630,6 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose = true
 
 				testDataDir := files.MustGetLocalDirectoryByPath(tt.testDataDir)
@@ -646,10 +645,11 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 				expectedChecksum := expectedFile.MustGetSha256Sum()
 
 				if os.Getenv("UPDATE_EXPECTED") == "1" {
-					testFile.MustCopyToFile(expectedFile, verbose)
+					err = testFile.CopyToFile(expectedFile, verbose)
+					require.NoError(t, err)
 				}
 
-				require.EqualValues(expectedChecksum, sortedChecksum)
+				require.EqualValues(t, expectedChecksum, sortedChecksum)
 			},
 		)
 	}
@@ -867,20 +867,21 @@ func TestFileIsPgpEncrypted_Case2_encryptedBinary(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				ctx := getCtx()
 				const verbose bool = true
 
 				temporaryFile := getFileToTest("localFile")
 				defer temporaryFile.Delete(verbose)
 
+				localPath, err := temporaryFile.GetLocalPath()
+				require.NoError(t, err)
+
 				createCommand := []string{
 					"bash",
 					"-c",
 					fmt.Sprintf(
 						"exec 3<<<$(echo hallo) ; echo test | gpg --batch --symmetric --passphrase-fd=3 > '%s'",
-						temporaryFile.MustGetLocalPath(),
+						localPath,
 					),
 				}
 				commandexecutorbashoo.Bash().RunCommand(
@@ -890,7 +891,7 @@ func TestFileIsPgpEncrypted_Case2_encryptedBinary(t *testing.T) {
 					},
 				)
 
-				require.True(temporaryFile.MustIsPgpEncrypted(verbose))
+				require.True(t, temporaryFile.MustIsPgpEncrypted(verbose))
 			},
 		)
 	}
@@ -915,15 +916,18 @@ func TestFileIsPgpEncrypted_Case3_encryptedAsciiArmor(t *testing.T) {
 				temporaryFile := getFileToTest("localFile")
 				defer temporaryFile.Delete(verbose)
 
+				localPath, err := temporaryFile.GetLocalPath()
+				require.NoError(t, err)
+
 				createCommand := []string{
 					"bash",
 					"-c",
 					fmt.Sprintf(
 						"exec 3<<<$(echo hallo) ; echo test | gpg --batch --symmetric --passphrase-fd=3 -a > '%s'",
-						temporaryFile.MustGetLocalPath(),
+						localPath,
 					),
 				}
-				_, err := commandexecutorbashoo.Bash().RunCommand(
+				_, err = commandexecutorbashoo.Bash().RunCommand(
 					ctx,
 					&parameteroptions.RunCommandOptions{
 						Command: createCommand,
@@ -1053,7 +1057,8 @@ func TestFileGetSizeBytes(t *testing.T) {
 				err := testFile.WriteBytes(tt.content, verbose)
 				require.NoError(t, err)
 
-				sizeBytes := testFile.MustGetSizeBytes()
+				sizeBytes, err := testFile.GetSizeBytes()
+				require.NoError(t, err)
 
 				require.EqualValues(t, tt.expectedSize, sizeBytes)
 			},

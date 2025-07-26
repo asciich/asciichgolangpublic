@@ -128,17 +128,17 @@ func TestJsonStringToYamlFileByPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				emptyFile, err := tempfilesoo.CreateEmptyTemporaryFile(verbose)
-				require.NoError(err)
-				defer emptyFile.MustDelete(verbose)
+				require.NoError(t, err)
+				defer emptyFile.Delete(verbose)
 
-				createdFile := MustJsonStringToYamlFileByPath(tt.jsonString, emptyFile.MustGetLocalPath(), verbose)
+				localPath, err := emptyFile.GetLocalPath()
+				require.NoError(t, err)
+				createdFile := MustJsonStringToYamlFileByPath(tt.jsonString, localPath, verbose)
 
-				require.EqualValues(tt.expectedResult, createdFile.MustReadAsString())
+				require.EqualValues(t, tt.expectedResult, createdFile.MustReadAsString())
 			},
 		)
 	}
@@ -205,11 +205,10 @@ func TestJsonFileHas(t *testing.T) {
 				require.NoError(t, err)
 				defer tempFile.Delete(verbose)
 
-				require.EqualValues(
-					t,
-					tt.expectedResult,
-					MustJsonFileByPathHas(tempFile.MustGetLocalPath(), tt.query, tt.keyToCheck),
-				)
+				localPath, err := tempFile.GetLocalPath()
+				require.NoError(t, err)
+
+				require.EqualValues(t, tt.expectedResult, MustJsonFileByPathHas(localPath, tt.query, tt.keyToCheck))
 			},
 		)
 	}

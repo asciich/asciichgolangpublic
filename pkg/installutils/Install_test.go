@@ -31,9 +31,11 @@ func TestInstallFromPath(t *testing.T) {
 
 				destFile, err := tempfilesoo.CreateEmptyTemporaryFile(verbose)
 				require.NoError(t, err)
-				destFilePath := destFile.MustGetPath()
-				defer destFile.MustDelete(verbose)
-				destFile.MustDelete(verbose)
+				destFilePath, err := destFile.GetPath()
+				require.NoError(t, err)
+				defer destFile.Delete(verbose)
+				err = destFile.Delete(verbose)
+				require.NoError(t, err)
 
 				require.NoFileExists(t, destFilePath)
 
@@ -47,11 +49,10 @@ func TestInstallFromPath(t *testing.T) {
 				)
 
 				require.FileExists(t, destFilePath)
-				require.EqualValues(
-					t,
-					tt.mode,
-					destFile.MustGetAccessPermissionsString(),
-				)
+
+				accessPermissions, err := destFile.GetAccessPermissionsString()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.mode, accessPermissions)
 			},
 		)
 	}
