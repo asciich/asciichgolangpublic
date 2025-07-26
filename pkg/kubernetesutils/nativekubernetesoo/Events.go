@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	corev1 "k8s.io/api/core/v1"
@@ -69,7 +70,7 @@ func WatchEvents(ctx context.Context, options *kubernetesutils.WatchEventOptions
 
 	logging.LogInfoByCtxf(ctx, "Watch kubernetes events with options='%s' setup started.", options)
 
-	clientset, err := GetClientSet(ctx, options.ClusterName)
+	clientset, err := nativekubernetes.GetClientSet(ctx, options.ClusterName)
 	if err != nil {
 		return err
 	}
