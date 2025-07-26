@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 )
 
 func Test_Example_ListNodeNames(t *testing.T) {
@@ -25,7 +25,7 @@ func Test_Example_ListNodeNames(t *testing.T) {
 	// -----
 
 	// Get Kubernetes cluster:
-	cluster, err := nativekubernetes.GetClusterByName(ctx, "kind-"+clusterName)
+	cluster, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+clusterName)
 	require.NoError(t, err)
 
 	// List all node names:

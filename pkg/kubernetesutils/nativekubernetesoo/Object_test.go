@@ -1,22 +1,22 @@
-package nativekubernetes_test
+package nativekubernetesoo_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 )
 
 func Test_NativeResurce_GetApiVersion(t *testing.T) {
 	t.Run("default", func(t *testing.T) {
-		r := &nativekubernetes.NativeObject{}
+		r := &nativekubernetesoo.NativeObject{}
 		apiVersion, err := r.GetApiVersion(getCtx())
 		require.NoError(t, err)
 		require.EqualValues(t, "v1", apiVersion)
 	})
 
 	t.Run("default", func(t *testing.T) {
-		r := &nativekubernetes.NativeObject{}
+		r := &nativekubernetesoo.NativeObject{}
 
 		err := r.SetKind("FluxInstance")
 		require.NoError(t, err)

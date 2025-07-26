@@ -10,7 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 )
 
 // This example shows how flux can be installed using the flux-operator.
@@ -33,7 +33,7 @@ func Test_InstallFluxOperator(t *testing.T) {
 	// -----
 
 	// Get Kubernetes cluster:
-	cluster, err := nativekubernetes.GetClusterByName(ctx, "kind-"+clusterName)
+	cluster, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+clusterName)
 	require.NoError(t, err)
 
 	// Ensure flux is absent/ The namespace containg flux is deleted to showcase an installation:

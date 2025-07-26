@@ -6,7 +6,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,7 +19,7 @@ import (
 )
 
 type FluxDeployment struct {
-	cluster *nativekubernetes.NativeKubernetesCluster
+	cluster *nativekubernetesoo.NativeKubernetesCluster
 
 	namespace string
 }
@@ -29,7 +29,7 @@ func GetFluxDeployment(cluster kubernetesinterfaces.KubernetesCluster, namespace
 		return nil, tracederrors.TracedErrorNil("cluster")
 	}
 
-	nativeCluster, ok := cluster.(*nativekubernetes.NativeKubernetesCluster)
+	nativeCluster, ok := cluster.(*nativekubernetesoo.NativeKubernetesCluster)
 	if !ok {
 		return nil, tracederrors.TracedErrorf("cluster is not a native kubernetes cluster, it is of type: '%s'", datatypes.MustGetTypeName(cluster))
 	}
@@ -44,7 +44,7 @@ func GetFluxDeployment(cluster kubernetesinterfaces.KubernetesCluster, namespace
 	}, nil
 }
 
-func (f *FluxDeployment) GetKubernetesCluster() (*nativekubernetes.NativeKubernetesCluster, error) {
+func (f *FluxDeployment) GetKubernetesCluster() (*nativekubernetesoo.NativeKubernetesCluster, error) {
 	if f.cluster == nil {
 		return nil, tracederrors.TracedError("kubernetes cluster not set")
 	}

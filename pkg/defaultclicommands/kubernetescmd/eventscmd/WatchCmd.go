@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	v1 "k8s.io/api/core/v1"
 )
@@ -38,7 +38,7 @@ func NewWatchCmd() *cobra.Command {
 				logging.LogGoErrorFatalWithTrace(err)
 			}
 
-			err = nativekubernetes.WatchEvents(
+			err = nativekubernetesoo.WatchEvents(
 				ctx,
 				&kubernetesutils.WatchEventOptions{
 					Namespace:                namespace,
@@ -67,13 +67,13 @@ func NewWatchCmd() *cobra.Command {
 }
 
 func onCreate(event *v1.Event) {
-	fmt.Println("create: " + nativekubernetes.EventToString(event))
+	fmt.Println("create: " + nativekubernetesoo.EventToString(event))
 }
 
 func onUpdate(event *v1.Event) {
-	fmt.Println("update: " + nativekubernetes.EventToString(event))
+	fmt.Println("update: " + nativekubernetesoo.EventToString(event))
 }
 
 func onDelete(event *v1.Event) {
-	fmt.Println("delete: " + nativekubernetes.EventToString(event))
+	fmt.Println("delete: " + nativekubernetesoo.EventToString(event))
 }

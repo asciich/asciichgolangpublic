@@ -8,7 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 )
 
 func Test_Example_ReadAndWriteSecret(t *testing.T) {
@@ -26,7 +26,7 @@ func Test_Example_ReadAndWriteSecret(t *testing.T) {
 	// -----
 
 	// Get Kubernetes cluster:
-	cluster, err := nativekubernetes.GetClusterByName(ctx, "kind-"+clusterName)
+	cluster, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+clusterName)
 	require.NoError(t, err)
 
 	// define the namespace and secret name we use for testing

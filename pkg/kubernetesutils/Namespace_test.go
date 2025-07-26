@@ -9,7 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/commandexecutorkubernetes"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -33,7 +33,7 @@ func getKubernetesByImplementationName(ctx context.Context, implementationName s
 		// Ensure a local kind cluster is available for testing:
 		mustutils.Must(kindutils.CreateCluster(ctx, clusterName))
 
-		return mustutils.Must(nativekubernetes.GetClusterByName(getCtx(), "kind-"+clusterName))
+		return mustutils.Must(nativekubernetesoo.GetClusterByName(getCtx(), "kind-"+clusterName))
 
 	}
 

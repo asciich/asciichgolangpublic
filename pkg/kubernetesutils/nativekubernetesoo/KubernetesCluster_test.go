@@ -1,4 +1,4 @@
-package nativekubernetes_test
+package nativekubernetesoo_test
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 )
 
 func getCtx() context.Context {
@@ -26,7 +26,7 @@ func TestListKindNames(t *testing.T) {
 		require.NoError(t, err)
 		defer kindutils.DeleteClusterByNameIfInContinuousIntegration(ctx, clusterName)
 
-		cluster, err := nativekubernetes.GetDefaultCluster(ctx)
+		cluster, err := nativekubernetesoo.GetDefaultCluster(ctx)
 		require.NoError(t, err)
 
 		apiVersions, err := cluster.ListKindNames(ctx)

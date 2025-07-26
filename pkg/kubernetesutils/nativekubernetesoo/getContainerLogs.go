@@ -1,4 +1,4 @@
-package nativekubernetes
+package nativekubernetesoo
 
 import (
 	"bytes"
