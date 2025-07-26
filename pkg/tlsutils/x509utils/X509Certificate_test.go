@@ -63,7 +63,9 @@ func TestX509CertificateLoadFromFilePath(t *testing.T) {
 				expectedIssuerStringFile, err := tt.testDir.GetFileInDirectory("expected_issuer_string")
 				require.NoError(t, err)
 
-				cert := MustGetX509CertificateFromFilePath(inputFile.MustGetLocalPath())
+				localPath, err := inputFile.GetLocalPath()
+				require.NoError(t, err)
+				cert := MustGetX509CertificateFromFilePath(localPath)
 
 				subject := cert.MustGetSubjectString()
 				expectedSubject := expectedSubjectFile.MustReadFirstLineAndTrimSpace()
@@ -100,7 +102,9 @@ func TestX509CertificateGetAsPemString(t *testing.T) {
 				expectedSubjectFile, err := tt.testDir.GetFileInDirectory("expected_pem")
 				require.NoError(t, err)
 
-				cert := MustGetX509CertificateFromFilePath(inputFile.MustGetLocalPath())
+				localPath, err := inputFile.GetLocalPath()
+				require.NoError(t, err)
+				cert := MustGetX509CertificateFromFilePath(localPath)
 
 				pemString := cert.MustGetAsPemString()
 				expectedPemString := expectedSubjectFile.MustReadAsString()
@@ -136,7 +140,9 @@ func TestX509CertificateIsRootCa(t *testing.T) {
 				expectedSubjectFile, err := tt.testDir.GetFileInDirectory("expected_is_root_ca")
 				require.NoError(t, err)
 
-				cert := MustGetX509CertificateFromFilePath(inputFile.MustGetLocalPath())
+				localPath, err := inputFile.GetLocalPath()
+				require.NoError(t, err)
+				cert := MustGetX509CertificateFromFilePath(localPath)
 
 				isRootCa := cert.MustIsRootCa(verbose)
 				expectedIsRootCa := expectedSubjectFile.MustReadAsBool()
@@ -170,7 +176,9 @@ func TestX509CertificateIsV1(t *testing.T) {
 				expectedSubjectFile, err := tt.testDir.GetFileInDirectory("expected_is_v1")
 				require.NoError(t, err)
 
-				cert := MustGetX509CertificateFromFilePath(inputFile.MustGetLocalPath())
+				localPath, err := inputFile.GetLocalPath()
+				require.NoError(t, err)
+				cert := MustGetX509CertificateFromFilePath(localPath)
 
 				isV1 := cert.MustIsV1()
 				expectedIsV1 := expectedSubjectFile.MustReadAsBool()
@@ -204,7 +212,9 @@ func TestX509CertificateIsV3(t *testing.T) {
 				expectedSubjectFile, err := tt.testDir.GetFileInDirectory("expected_is_v3")
 				require.NoError(t, err)
 
-				cert := MustGetX509CertificateFromFilePath(inputFile.MustGetLocalPath())
+				localPath, err := inputFile.GetLocalPath()
+				require.NoError(t, err)
+				cert := MustGetX509CertificateFromFilePath(localPath)
 
 				isV3 := cert.MustIsV3()
 				expectedIsV3 := expectedSubjectFile.MustReadAsBool()

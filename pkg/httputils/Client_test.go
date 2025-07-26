@@ -183,7 +183,7 @@ func TestClient_DownloadAsFile_ChecksumMismatch(t *testing.T) {
 
 				tempFile, err := tempfilesoo.CreateEmptyTemporaryFile(contextutils.GetVerboseFromContext(ctx))
 				require.NoError(t, err)
-				defer tempFile.MustDelete(contextutils.GetVerboseFromContext(ctx))
+				defer tempFile.Delete(contextutils.GetVerboseFromContext(ctx))
 
 				const expectedOutput = "hello world\n"
 
@@ -195,7 +195,7 @@ func TestClient_DownloadAsFile_ChecksumMismatch(t *testing.T) {
 							Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
 							Method: tt.method,
 						},
-						OutputPath: tempFile.MustGetPath(),
+						OutputPath: mustutils.Must(tempFile.GetPath()),
 						Sha256Sum:  "a" + checksumutils.GetSha256SumFromString(expectedOutput),
 					},
 				)
@@ -230,7 +230,7 @@ func TestClient_DownloadAsFile(t *testing.T) {
 
 				tempFile, err := tempfilesoo.CreateEmptyTemporaryFile(verbose)
 				require.NoError(t, err)
-				defer tempFile.MustDelete(verbose)
+				defer tempFile.Delete(verbose)
 
 				const expectedOutput = "hello world\n"
 
@@ -242,12 +242,12 @@ func TestClient_DownloadAsFile(t *testing.T) {
 							Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
 							Method: tt.method,
 						},
-						OutputPath: tempFile.MustGetPath(),
+						OutputPath: mustutils.Must(tempFile.GetPath()),
 						Sha256Sum:  checksumutils.GetSha256SumFromString(expectedOutput),
 					},
 				)
 				require.NoError(t, err)
-				defer downloadedFile.MustDelete(verbose)
+				defer downloadedFile.Delete(verbose)
 
 				require.EqualValues(t, expectedOutput, downloadedFile.MustReadAsString())
 
@@ -258,7 +258,7 @@ func TestClient_DownloadAsFile(t *testing.T) {
 							Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
 							Method: tt.method,
 						},
-						OutputPath: tempFile.MustGetPath(),
+						OutputPath: mustutils.Must(tempFile.GetPath()),
 						Sha256Sum:  checksumutils.GetSha256SumFromString(expectedOutput),
 					},
 				)
@@ -302,7 +302,7 @@ func TestClient_DownloadAsTempraryFile(t *testing.T) {
 					},
 				)
 				require.NoError(t, err)
-				defer downloadedFile.MustDelete(contextutils.GetVerboseFromContext(ctx))
+				defer downloadedFile.Delete(contextutils.GetVerboseFromContext(ctx))
 
 				require.Contains(t, "hello world\n", downloadedFile.MustReadAsString())
 			},

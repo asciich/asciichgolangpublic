@@ -882,7 +882,10 @@ func TestGitRepository_ListFiles(t *testing.T) {
 				)
 				require.NoError(t, err)
 				require.Len(t, files, 1)
-				require.EqualValues(t, "b.txt", files[0].MustGetBaseName())
+
+				baseName, err := files[0].GetBaseName()
+				require.NoError(t, err)
+				require.EqualValues(t, "b.txt", baseName)
 
 				files, err = repo.ListFiles(
 					ctx,

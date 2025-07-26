@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -59,13 +60,14 @@ func TestGitignoreFileContainsIgnoreOnNonExistingFile(t *testing.T) {
 
 				nonExitstingFile, err := tempfilesoo.CreateEmptyTemporaryFile(verbose)
 				require.NoError(t, err)
-				nonExitstingFile.MustDelete(verbose)
+				err = nonExitstingFile.Delete(verbose)
+				require.NoError(t, err)
 
 				gitignoreFile, err := GetGitignoreFileByFile(nonExitstingFile)
 				require.NoError(t, err)
 				defer gitignoreFile.Delete(verbose)
 
-				require.False(t, gitignoreFile.MustExists(verbose))
+				require.False(t, mustutils.Must(gitignoreFile.Exists(verbose)))
 
 				containsIgnore, err := gitignoreFile.ContainsIgnore("abc")
 				require.Error(t, err)
@@ -95,7 +97,7 @@ func TestGitignoreFileContainsIgnoreOnEmptyFile(t *testing.T) {
 				require.NoError(t, err)
 				defer gitignoreFile.Delete(verbose)
 
-				require.True(t, gitignoreFile.MustExists(verbose))
+				require.True(t, mustutils.Must(gitignoreFile.Exists(verbose)))
 				containsIgnore, err := gitignoreFile.ContainsIgnore("abc")
 				require.NoError(t, err)
 				require.False(t, containsIgnore)

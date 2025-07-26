@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -45,7 +46,7 @@ func TestX509CertificatesCreateIntermediateCertificateIntoTemporaryDirectory(t *
 
 				keyFile, err := tempDirectory.GetFileInDirectory("intermediateCertificate.key")
 				require.NoError(t, err)
-				require.True(t, keyFile.MustExists(verbose))
+				require.True(t, mustutils.Must(keyFile.Exists(verbose)))
 			},
 		)
 	}

@@ -29,7 +29,10 @@ func TestCreateTemporaryFile(t *testing.T) {
 				require.NoError(t, err)
 				defer file.Delete(verbose)
 
-				require.True(t, file.MustExists(verbose))
+				exists, err := file.Exists(verbose)
+				require.NoError(t, err)
+
+				require.True(t, exists)
 				require.EqualValues(t, tt.content, file.MustReadAsString())
 			},
 		)
@@ -43,9 +46,15 @@ func TestCreateEmptyTemporaryFile(t *testing.T) {
 	require.NoError(t, err)
 	defer file.Delete(verbose)
 
-	require.True(t, file.MustExists(verbose))
+	exists, err := file.Exists(verbose)
+	require.NoError(t, err)
+	require.True(t, exists)
+
 	require.EqualValues(t, "", file.MustReadAsString())
-	require.True(t, strings.HasPrefix(file.MustGetLocalPath(), "/tmp/"))
+
+	localPath, err := file.GetLocalPath()
+	require.NoError(t, err)
+	require.True(t, strings.HasPrefix(localPath, "/tmp/"))
 }
 
 func TestCreateEmptyTemporaryFileAndGetPath(t *testing.T) {

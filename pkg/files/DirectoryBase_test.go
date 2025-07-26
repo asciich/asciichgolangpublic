@@ -172,10 +172,21 @@ func TestDirectoryBase_DeleteFilesMatching(t *testing.T) {
 					},
 				)
 
-				require.True(t, txtFile.MustExists(verbose))
-				require.False(t, locFile.MustExists(verbose))
-				require.False(t, tocFile.MustExists(verbose))
-				require.False(t, toc2File.MustExists(verbose))
+				exists, err := txtFile.Exists(verbose)
+				require.NoError(t, err)
+				require.True(t, exists)
+
+				exists, err = locFile.Exists(verbose)
+				require.NoError(t, err)
+				require.False(t, exists)
+
+				exists, err = tocFile.Exists(verbose)
+				require.NoError(t, err)
+				require.False(t, exists)
+
+				exists, err = toc2File.Exists(verbose)
+				require.NoError(t, err)
+				require.False(t, exists)
 			},
 		)
 	}
