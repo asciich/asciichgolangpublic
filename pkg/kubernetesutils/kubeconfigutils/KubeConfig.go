@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -11,7 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -29,14 +30,15 @@ type KubeConfigCluster struct {
 }
 
 type KubeConfig struct {
-	APIVersion string              `yaml:"apiVersion"`
-	Kind       string              `yaml:"kind"`
-	Clusters   []KubeConfigCluster `yaml:"clusters"`
-	Contexts   []KubeConfigContext `yaml:"contexts"`
-	Users      []KubeConfigUser    `yaml:"users"`
+	APIVersion     string              `yaml:"apiVersion"`
+	Kind           string              `yaml:"kind"`
+	Clusters       []KubeConfigCluster `yaml:"clusters"`
+	Contexts       []KubeConfigContext `yaml:"contexts"`
+	CurrentContext string              `yaml:"current-context"`
+	Users          []KubeConfigUser    `yaml:"users"`
 }
 
-func LoadFromFilePath(path string, verbose bool) (config *KubeConfig, err error) {
+func LoadFromFilePath(ctx context.Context, path string) (config *KubeConfig, err error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
@@ -46,10 +48,10 @@ func LoadFromFilePath(path string, verbose bool) (config *KubeConfig, err error)
 		return nil, err
 	}
 
-	return LoadFromFile(file, verbose)
+	return LoadFromFile(ctx, file)
 }
 
-func LoadFromFile(file filesinterfaces.File, verbose bool) (config *KubeConfig, err error) {
+func LoadFromFile(ctx context.Context, file filesinterfaces.File) (config *KubeConfig, err error) {
 	if file == nil {
 		return nil, tracederrors.TracedErrorNil("file")
 	}
@@ -71,9 +73,7 @@ func LoadFromFile(file filesinterfaces.File, verbose bool) (config *KubeConfig, 
 		return nil, tracederrors.TracedErrorf("Failed to load kubeConfig '%s' as yaml: %w", path, err)
 	}
 
-	if verbose {
-		logging.LogInfof("Loaded kubeConfig '%s'.", path)
-	}
+	logging.LogInfoByCtxf(ctx, "Loaded kubeConfig '%s'.", path)
 
 	return config, nil
 }
@@ -361,13 +361,13 @@ func (k *KubeConfig) AddClusterAndContextAndUserEntry(cluster *KubeConfigCluster
 
 // This function does an exec to "kubectl" using the given config file "path".
 // Useful to validate if a written config "path" is understood by "kubectl".
-func IsFilePathLoadableByKubectl(path string, verbose bool) (isLoadable bool, err error) {
+func IsFilePathLoadableByKubectl(ctx context.Context, path string) (isLoadable bool, err error) {
 	if path == "" {
 		return false, tracederrors.TracedErrorEmptyString(path)
 	}
 
 	stdout, err := commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsString(
-		contextutils.GetVerbosityContextByBool(verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"KUBECONFIG=" + path, "bash", "-c", "kubectl config get-contexts &> /dev/null && echo YES || echo NO"},
 		},
@@ -385,24 +385,22 @@ func IsFilePathLoadableByKubectl(path string, verbose bool) (isLoadable bool, er
 		return false, tracederrors.TracedErrorf("Unexpected output: '%s'", stdout)
 	}
 
-	if verbose {
-		if isLoadable {
-			logging.LogInfof("Kube config '%s' is loadable by kubectl.", path)
-		} else {
-			logging.LogInfof("Kube config '%s' is not loadable by kubectl.", path)
-		}
+	if isLoadable {
+		logging.LogInfoByCtxf(ctx, "Kube config '%s' is loadable by kubectl.", path)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Kube config '%s' is not loadable by kubectl.", path)
 	}
 
 	return isLoadable, nil
 }
 
-func (k *KubeConfig) WriteToTemporaryFileAndGetPath(verbose bool) (tempFilePath string, err error) {
-	tempFilePath, err = tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)
+func (k *KubeConfig) WriteToTemporaryFileAndGetPath(ctx context.Context) (tempFilePath string, err error) {
+	tempFilePath, err = tempfiles.CreateTemporaryFile(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	err = k.WriteToFileByPath(tempFilePath, verbose)
+	err = k.WriteToFileByPath(ctx, tempFilePath)
 	if err != nil {
 		return "", err
 	}
@@ -420,7 +418,7 @@ func (k *KubeConfig) GetAsYamlString() (yamlSring string, err error) {
 	return string(content), nil
 }
 
-func (k *KubeConfig) WriteToFileByPath(path string, verbose bool) (err error) {
+func (k *KubeConfig) WriteToFileByPath(ctx context.Context, path string) (err error) {
 	if path == "" {
 		return tracederrors.TracedErrorEmptyString(path)
 	}
@@ -430,10 +428,10 @@ func (k *KubeConfig) WriteToFileByPath(path string, verbose bool) (err error) {
 		return err
 	}
 
-	return k.WriteToFile(outFile, verbose)
+	return k.WriteToFile(ctx, outFile)
 }
 
-func (k *KubeConfig) WriteToFile(outFile filesinterfaces.File, verbose bool) (err error) {
+func (k *KubeConfig) WriteToFile(ctx context.Context, outFile filesinterfaces.File) (err error) {
 	if outFile == nil {
 		return tracederrors.TracedErrorNil("outfile")
 	}
@@ -448,29 +446,25 @@ func (k *KubeConfig) WriteToFile(outFile filesinterfaces.File, verbose bool) (er
 		return err
 	}
 
-	err = outFile.WriteString(content, verbose)
+	err = outFile.WriteString(content, contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		logging.LogChangedf(
-			"Wrote KubeConfig to '%s'", path,
-		)
-	}
+	logging.LogChangedByCtxf(ctx, "Wrote KubeConfig to '%s'", path)
 
 	return nil
 }
 
 // Use exec to invoke a "kubectl config get-context" with the given config "path".
 // Useful to validate if the config is understood correctly by kubectl.
-func ListContextNamesUsingKubectl(path string, verbose bool) (contextNames []string, err error) {
+func ListContextNamesUsingKubectl(ctx context.Context, path string) (contextNames []string, err error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString(path)
 	}
 
 	contextNames, err = commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsLines(
-		contextutils.GetVerbosityContextByBool(verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"KUBECONFIG=" + path, "bash", "-c", "kubectl config get-contexts -o name"},
 		},
@@ -557,7 +551,7 @@ func LoadKubeConfig(ctx context.Context) (*KubeConfig, error) {
 		return nil, err
 	}
 
-	return LoadFromFilePath(path, contextutils.GetVerboseFromContext(ctx))
+	return LoadFromFilePath(ctx, path)
 }
 
 func GetContextNameByClusterName(ctx context.Context, clusterName string) (string, error) {
@@ -576,4 +570,96 @@ func GetUserNameByContextName(ctx context.Context, userName string) (string, err
 	}
 
 	return kubeConfig.GetUserNameByContextName(ctx, userName)
+}
+
+func GetCurrentContext(ctx context.Context) (string, error) {
+	kubeConfig, err := LoadKubeConfig(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	return kubeConfig.GetCurrentContext(ctx)
+
+}
+
+func (k *KubeConfig) GetCurrentContext(ctx context.Context) (string, error) {
+	currentContext := k.CurrentContext
+
+	logging.LogInfoByCtxf(ctx, "Current kubernetes context is '%s'.", currentContext)
+
+	return currentContext, nil
+}
+
+func (k *KubeConfig) SetCurrentContext(ctx context.Context, contextToUse string) error {
+	if contextToUse == "" {
+		return tracederrors.TracedErrorEmptyString("contextToUse")
+	}
+
+	contextNames, err := k.ListContextNames(ctx)
+	if err != nil {
+		return err
+	}
+
+	if !slices.Contains(contextNames, contextToUse) {
+		return tracederrors.TracedErrorf("'%s' is not a known context in the KubeConfig. Known contexts are: '%v'", contextToUse, contextNames)
+	}
+
+	current, err := k.GetCurrentContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	if current == contextToUse {
+		logging.LogInfoByCtxf(ctx, "Current context already set to '%s'.", contextToUse)
+	} else {
+		k.CurrentContext = contextToUse
+		logging.LogChangedByCtxf(ctx, "Current context set to '%s'.", contextToUse)
+	}
+
+	return nil
+}
+
+func (k *KubeConfig) ListContextNames(ctx context.Context) ([]string, error) {
+	if k.Contexts == nil {
+		return nil, tracederrors.TracedError("Contexts is nil")
+	}
+
+	names := []string{}
+	for _, context := range k.Contexts {
+		names = append(names, context.Name)
+	}
+
+	return names, nil
+}
+
+func SetCurrentContext(ctx context.Context, contextToUse string) error {
+	if contextToUse == "" {
+		return tracederrors.TracedErrorEmptyString("contextToUse")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Set current kubernetes config to '%s' started.", contextToUse)
+
+	path, err := GetKubeConfigPath(ctx)
+	if err != nil {
+		return err
+	}
+
+	kubeConfig, err := LoadFromFilePath(ctx, path)
+	if err != nil {
+		return err
+	}
+
+	err = kubeConfig.SetCurrentContext(ctx, contextToUse)
+	if err != nil {
+		return err
+	}
+
+	err = kubeConfig.WriteToFileByPath(ctx, path)
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Set current kubernetes config to '%s' finished.", contextToUse)
+
+	return nil
 }
