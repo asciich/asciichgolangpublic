@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubeconfigutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 
@@ -22,7 +22,6 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 type NativeKubernetesCluster struct {
@@ -34,95 +33,12 @@ type NativeKubernetesCluster struct {
 	dynamicClientCache *dynamic.DynamicClient
 }
 
-func GetConfigFromKubeconfig(ctx context.Context, clusterName string) (*rest.Config, error) {
-	kubeconfig, err := kubeconfigutils.GetDefaultKubeConfigPath(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var config *rest.Config
-	if clusterName == "" {
-		logging.LogInfoByCtx(ctx, "clusterName not set. Loading config for default kubernetes cluster. If this fails the missing default cluster/ context could be the root cause.")
-		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
-		if err != nil {
-			return nil, tracederrors.TracedErrorf("Error building kubeconfig: %w", err)
-		}
-
-		logging.LogInfoByCtx(ctx, "clusterName not set. Loaded config for default kubernetes cluster.")
-	} else {
-		kubeContext, err := kubeconfigutils.GetContextNameByClusterName(ctx, clusterName)
-		if err != nil {
-			return nil, err
-		}
-
-		kubeContextPath, err := kubeconfigutils.GetKubeConfigPath(ctx)
-		if err != nil {
-			return nil, err
-		}
-
-		config, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-			&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeContextPath},
-			&clientcmd.ConfigOverrides{
-				CurrentContext: kubeContext,
-			},
-		).ClientConfig()
-		if err != nil {
-			return nil, tracederrors.TracedErrorf("Error building kubeconfig for cluster '%s': %w", clusterName, err)
-		}
-
-		logging.LogInfoByCtxf(ctx, "Loaded config for cluster '%s' kubernetes cluster.", clusterName)
-	}
-
-	return config, nil
-}
-
-func GetInClusterConfig(ctx context.Context) (*rest.Config, error) {
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("Error getting in-cluster config: %w", err)
-	}
-
-	return config, nil
-}
-
-// Get the rest.Config to communicate with the kubernetes cluster.
-//
-// If in cluster authentication is available (e.g. running in a pod in the cluster) the returned config uses this method.
-//
-// Otherwise a config based on ~/.kube/config is returned.
-func GetConfig(ctx context.Context, clusterName string) (*rest.Config, error) {
-	if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
-		return GetInClusterConfig(ctx)
-	}
-
-	return GetConfigFromKubeconfig(ctx, clusterName)
-}
-
-// Get the kubernetes.Clientset to communicate with the kubernetes cluster.
-//
-// If in cluster authentication is available (e.g. running in a pod in the cluster) the returned clientset uses this method.
-//
-// Otherwise a clientset based on ~/.kube/config is returned.
-func GetClientSet(ctx context.Context, clusterName string) (*kubernetes.Clientset, error) {
-	config, err := GetConfig(ctx, clusterName)
-	if err != nil {
-		return nil, err
-	}
-
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("Failed to create kubernetes clientset: %w", err)
-	}
-
-	return clientset, nil
-}
-
 func GetClusterByName(ctx context.Context, clusterName string) (*NativeKubernetesCluster, error) {
 	if clusterName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("clusterName")
 	}
 
-	config, err := GetConfig(ctx, clusterName)
+	config, err := nativekubernetes.GetConfig(ctx, clusterName)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +50,7 @@ func GetClusterByName(ctx context.Context, clusterName string) (*NativeKubernete
 }
 
 func GetDefaultCluster(ctx context.Context) (*NativeKubernetesCluster, error) {
-	config, err := GetConfig(ctx, "")
+	config, err := nativekubernetes.GetConfig(ctx, "")
 	if err != nil {
 		return nil, err
 	}
@@ -319,6 +235,9 @@ func (n *NativeKubernetesCluster) ListNamespaces(ctx context.Context) (namespace
 }
 func (n *NativeKubernetesCluster) ListNamespaceNames(ctx context.Context) (namespaceNames []string, err error) {
 	clientset, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
 
 	namespaces, err := clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
