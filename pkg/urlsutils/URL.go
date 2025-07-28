@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -34,15 +33,6 @@ func GetUrlFromString(urlString string) (url *URL, err error) {
 	}
 
 	return url, nil
-}
-
-func MustGetUrlFromString(urlString string) (url *URL) {
-	url, err := GetUrlFromString(urlString)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return url
 }
 
 func NewURL() (u *URL) {
@@ -181,101 +171,6 @@ func (u *URL) GetWithoutShemeAsString() (urlWithoutSheme string, err error) {
 	urlWithoutSheme = splitted[len(splitted)-1]
 
 	return urlWithoutSheme, nil
-}
-
-func (u *URL) MustGetAsString() (urlString string) {
-	urlString, err := u.GetAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return urlString
-}
-
-func (u *URL) MustGetFqdnAsString() (fqdn string) {
-	fqdn, err := u.GetFqdnAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return fqdn
-}
-
-func (u *URL) MustGetFqdnWitShemeAndPathAsString() (fqdnWithSheme string, path string) {
-	fqdnWithSheme, path, err := u.GetFqdnWitShemeAndPathAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return fqdnWithSheme, path
-}
-
-func (u *URL) MustGetFqdnWithShemeAsString() (fqdnWithSheme string) {
-	fqdnWithSheme, err := u.GetFqdnWithShemeAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return fqdnWithSheme
-}
-
-func (u *URL) MustGetPathAsString() (urlPath string) {
-	urlPath, err := u.GetPathAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return urlPath
-}
-
-func (u *URL) MustGetPathBasename() (basename string) {
-	basename, err := u.GetPathBasename()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return basename
-}
-
-func (u *URL) MustGetSheme() (sheme string) {
-	sheme, err := u.GetSheme()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return sheme
-}
-
-func (u *URL) MustGetUrlString() (urlString string) {
-	urlString, err := u.GetUrlString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return urlString
-}
-
-func (u *URL) MustGetWithoutShemeAsString() (urlWithoutSheme string) {
-	urlWithoutSheme, err := u.GetWithoutShemeAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return urlWithoutSheme
-}
-
-func (u *URL) MustSetByString(urlString string) {
-	err := u.SetByString(urlString)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (u *URL) MustSetUrlString(urlString string) {
-	err := u.SetUrlString(urlString)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (u *URL) SetByString(urlString string) (err error) {

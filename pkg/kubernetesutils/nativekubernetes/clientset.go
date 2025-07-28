@@ -17,6 +17,8 @@ import (
 // If in cluster authentication is available (e.g. running in a pod in the cluster) the returned config uses this method.
 //
 // Otherwise a config based on ~/.kube/config is returned.
+//
+// clusterName is optional. If not specified the default cluster is taken.
 func GetConfig(ctx context.Context, clusterName string) (*rest.Config, error) {
 	if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
 		return GetInClusterConfig(ctx)
@@ -81,6 +83,8 @@ func GetConfigFromKubeconfig(ctx context.Context, clusterName string) (*rest.Con
 // If in cluster authentication is available (e.g. running in a pod in the cluster) the returned clientset uses this method.
 //
 // Otherwise a clientset based on ~/.kube/config is returned.
+//
+// clusterName is optional. If not specified the default cluster is taken.
 func GetClientSet(ctx context.Context, clusterName string) (*kubernetes.Clientset, error) {
 	config, err := GetConfig(ctx, clusterName)
 	if err != nil {
