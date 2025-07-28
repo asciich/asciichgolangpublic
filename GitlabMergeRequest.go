@@ -436,13 +436,6 @@ func (g *GitlabMergeRequest) Merge(options *GitlabMergeOptions) (mergeCommit *Gi
 	return mergeCommit, nil
 }
 
-func (g *GitlabMergeRequest) MustClose(closeMessage string, verbose bool) {
-	err := g.Close(closeMessage, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (g *GitlabMergeRequest) Close(closeMessage string, verbose bool) (err error) {
 	if closeMessage == "" {
 		return tracederrors.TracedErrorEmptyString("closeMessage")

@@ -53,7 +53,8 @@ func TestMergeRequestCreateAndClose(t *testing.T) {
 
 				mergeRequest := testProject.MustGetOpenMergeRequestByTitle(tt.mergeRequestTitle, verbose)
 				for i := 0; i < 2; i++ {
-					mergeRequest.MustClose("closed for testing", verbose)
+					err := mergeRequest.Close("closed for testing", verbose)
+					require.NoError(t, err)
 					require.True(t, mergeRequest.MustIsClosed())
 				}
 			},
@@ -132,7 +133,8 @@ func TestMergeRequestCreateAndClose_withLabels(t *testing.T) {
 					verbose,
 				)
 				for i := 0; i < 2; i++ {
-					mergeRequest.MustClose("closed for testing", verbose)
+					err = mergeRequest.Close("closed for testing", verbose)
+					require.NoError(t, err)
 					require.True(t, mergeRequest.MustIsClosed())
 				}
 			},
