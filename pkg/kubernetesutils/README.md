@@ -2,6 +2,10 @@
 
 Work with kubernetes.
 
+The implementation using the official k8s client-go is available as:
+* [non object oriented implementation](/pkg/kubernetesutils/nativekubernetes/)
+* [object oriented implementation](/pkg/kubernetesutils/nativekubernetesoo/) which is on a higher abstraction layer than the non object oriented one.
+
 ## Examples
 
 - [ConfigMap by name exists](Example_ConfigmapByNameExists_test.go)

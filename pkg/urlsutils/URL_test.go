@@ -24,13 +24,14 @@ func TestUrlGetFqdnAndPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				url, err := GetUrlFromString(tt.url)
+				require.NoError(t, err)
 
-				url := MustGetUrlFromString(tt.url)
-				fqdn, path := url.MustGetFqdnWitShemeAndPathAsString()
+				fqdn, path, err := url.GetFqdnWitShemeAndPathAsString()
+				require.NoError(t, err)
 
-				require.EqualValues(tt.expectedFqdn, fqdn)
-				require.EqualValues(tt.expectedPath, path)
+				require.EqualValues(t, tt.expectedFqdn, fqdn)
+				require.EqualValues(t, tt.expectedPath, path)
 			},
 		)
 	}

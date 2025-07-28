@@ -2,7 +2,6 @@ package urlsutils
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -24,13 +23,4 @@ func IsUrl(url string) (isUrl bool) {
 		"https://",
 		"http://",
 	})
-}
-
-func MustCheckIsUrl(url string) (isUrl bool) {
-	isUrl, err := CheckIsUrl(url)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isUrl
 }
