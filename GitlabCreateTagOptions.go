@@ -1,7 +1,6 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -42,38 +41,6 @@ func (g *GitlabCreateTagOptions) GetRef() (ref string, err error) {
 func (g *GitlabCreateTagOptions) GetVerbose() (verbose bool) {
 
 	return g.Verbose
-}
-
-func (g *GitlabCreateTagOptions) MustGetName() (name string) {
-	name, err := g.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (g *GitlabCreateTagOptions) MustGetRef() (ref string) {
-	ref, err := g.GetRef()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return ref
-}
-
-func (g *GitlabCreateTagOptions) MustSetName(name string) {
-	err := g.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabCreateTagOptions) MustSetRef(ref string) {
-	err := g.SetRef(ref)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GitlabCreateTagOptions) SetName(name string) (err error) {
