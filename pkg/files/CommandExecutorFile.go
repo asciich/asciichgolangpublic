@@ -688,13 +688,6 @@ func (c *CommandExecutorFile) MustCreate(verbose bool) {
 	}
 }
 
-func (c *CommandExecutorFile) MustDelete(verbose bool) {
-	err := c.Delete(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (c *CommandExecutorFile) MustExists(verbose bool) (exist bool) {
 	exist, err := c.Exists(verbose)
 	if err != nil {

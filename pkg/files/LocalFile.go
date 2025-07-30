@@ -537,13 +537,6 @@ func (l *LocalFile) MustCreate(verbose bool) {
 	}
 }
 
-func (l *LocalFile) MustDelete(verbose bool) {
-	err := l.Delete(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (l *LocalFile) MustExists(verbose bool) (exists bool) {
 	exists, err := l.Exists(verbose)
 	if err != nil {

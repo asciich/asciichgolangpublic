@@ -1087,7 +1087,7 @@ func TestFileEnsureEndsWithLineBreakOnEmptyFile(t *testing.T) {
 				require.Nil(err)
 
 				emptyFile := files.MustGetLocalFileByPath(tempFile.Name())
-				defer emptyFile.MustDelete(verbose)
+				defer func() { _ = emptyFile.Delete(verbose) }()
 
 				emptyFile.MustEnsureEndsWithLineBreak(verbose)
 
@@ -1099,36 +1099,23 @@ func TestFileEnsureEndsWithLineBreakOnEmptyFile(t *testing.T) {
 
 // TODO: Move to File_test.go and test for all File implementations.
 func TestFileEnsureEndsWithLineBreakOnNonExitistingFile(t *testing.T) {
-	tests := []struct {
-		testcase string
-	}{
-		{"testcase"},
-	}
+	t.Run("happy path", func(t *testing.T) {
+		const verbose bool = true
 
-	for _, tt := range tests {
-		tt := tt
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				require := require.New(t)
+		tempFile, err := os.CreateTemp("", "testfile")
+		require.Nil(t, err)
 
-				const verbose bool = true
+		nonExistingFile := files.MustGetLocalFileByPath(tempFile.Name())
+		defer func() { _ = nonExistingFile.Delete(verbose) }()
+		err = nonExistingFile.Delete(verbose)
+		require.NoError(t, err)
 
-				tempFile, err := os.CreateTemp("", "testfile")
-				require.Nil(err)
+		require.False(t, nonExistingFile.MustExists(verbose))
 
-				nonExistingFile := files.MustGetLocalFileByPath(tempFile.Name())
-				defer nonExistingFile.MustDelete(verbose)
-				nonExistingFile.MustDelete(verbose)
+		nonExistingFile.MustEnsureEndsWithLineBreak(verbose)
 
-				require.False(nonExistingFile.MustExists(verbose))
-
-				nonExistingFile.MustEnsureEndsWithLineBreak(verbose)
-
-				require.EqualValues("\n", nonExistingFile.MustReadLastCharAsString())
-			},
-		)
-	}
+		require.EqualValues(t, "\n", nonExistingFile.MustReadLastCharAsString())
+	})
 }
 
 // TODO: Move to File_test.go and test for all File implementations.
