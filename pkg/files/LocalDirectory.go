@@ -865,13 +865,6 @@ func (l *LocalDirectory) MustCreateSubDirectory(subDirName string, verbose bool)
 	return createdSubDir
 }
 
-func (l *LocalDirectory) MustDelete(verbose bool) {
-	err := l.Delete(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (l *LocalDirectory) MustExists(verbose bool) (exists bool) {
 	exists, err := l.Exists(verbose)
 	if err != nil {

@@ -33,6 +33,24 @@ func Create(ctx context.Context, path string) error {
 	return nil
 }
 
+func CreateDirectory(ctx context.Context, path string) error {
+	if path == "" {
+		return tracederrors.TracedErrorEmptyString("path")
+	}
+
+	if IsDir(contextutils.WithSilent(ctx), path) {
+		logging.LogInfoByCtxf(ctx, "Directory '%s' already exists. Skip create.", path)
+	} else {
+		err := os.Mkdir(path, 0755)
+		if err != nil {
+			return tracederrors.TracedErrorf("Failed to create directory '%s': %w", path, err)
+		}
+		logging.LogChangedByCtxf(ctx, "Created file '%s'.", path)
+	}
+
+	return nil
+}
+
 func IsFile(ctx context.Context, pathToCheck string) bool {
 	stat, err := os.Stat(pathToCheck)
 	if err != nil {
@@ -76,18 +94,43 @@ func Exists(ctx context.Context, pathToCheck string) bool {
 	return true
 }
 
+// Delete a file or directory.
+// Directories are deleted recursively.
 func Delete(ctx context.Context, pathToDelete string) error {
 	if pathToDelete == "" {
 		return tracederrors.TracedErrorEmptyString("pathToDelete")
 	}
 
-	if Exists(contextutils.WithSilent(ctx), pathToDelete) {
-		err := os.Remove(pathToDelete)
-		if err != nil {
-			return tracederrors.TracedErrorf("Delete file '%s' failed: %w", pathToDelete, err)
+	ctxSilent := contextutils.WithSilent(ctx)
+	if Exists(ctxSilent, pathToDelete) {
+		isDir := IsDir(ctxSilent, pathToDelete)
+		var isFile bool
+		if !isDir {
+			isFile = IsFile(ctxSilent, pathToDelete)
+			if !isFile {
+				return tracederrors.TracedErrorf("Path to delete '%s' is pointing to something existing but not a file nor a directory.", pathToDelete)
+			}
 		}
 
-		logging.LogChangedByCtxf(ctx, "Deleted file '%s'.", pathToDelete)
+		if isDir {
+			err := os.RemoveAll(pathToDelete)
+			if err != nil {
+				return tracederrors.TracedErrorf("Delete '%s' failed: %w", pathToDelete, err)
+			}
+		} else {
+			err := os.Remove(pathToDelete)
+			if err != nil {
+				return tracederrors.TracedErrorf("Delete '%s' failed: %w", pathToDelete, err)
+			}
+		}
+
+		if isDir {
+			logging.LogChangedByCtxf(ctx, "Deleted directory '%s'.", pathToDelete)
+		} else if isFile {
+			logging.LogChangedByCtxf(ctx, "Deleted file '%s'.", pathToDelete)
+		} else {
+			return tracederrors.TracedErrorf("Unknown deletion for '%s'", pathToDelete)
+		}
 	} else {
 		logging.LogInfoByCtxf(ctx, "File '%s' already absent. Skip delete.", pathToDelete)
 	}
