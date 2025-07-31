@@ -26,14 +26,12 @@ func TestGitlabCiYamlFileGetInclude(t *testing.T) {
 				gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(emptyFilePath)
 				require.NoError(t, err)
 
-				gitlabCiYamlFile.MustWriteString("---\n", verbose)
-				err = gitlabCiYamlFile.AppendString("include:\n", verbose)
-				require.NoError(t, err)
-				err = gitlabCiYamlFile.AppendString("  - project: a\n", verbose)
-				require.NoError(t, err)
-				err = gitlabCiYamlFile.AppendString("    ref: b\n", verbose)
-				require.NoError(t, err)
-				err = gitlabCiYamlFile.AppendString("    file: c.yaml\n", verbose)
+				toWrite := "---\n"
+				toWrite += "include:\n"
+				toWrite += "  - project: a\n"
+				toWrite += "    ref: b\n"
+				toWrite += "    file: c.yaml\n"
+				err = gitlabCiYamlFile.WriteString(toWrite, verbose)
 				require.NoError(t, err)
 
 				includes, err := gitlabCiYamlFile.GetIncludes(verbose)
@@ -67,16 +65,13 @@ func TestGitlabCiYamlFileGetInclude2(t *testing.T) {
 				gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(emptyFilePath)
 				require.NoError(t, err)
 
-				gitlabCiYamlFile.MustWriteString("---\n", verbose)
-				err = gitlabCiYamlFile.AppendString("include:\n", verbose)
-				require.NoError(t, err)
-				err = gitlabCiYamlFile.AppendString("  - project: a\n", verbose)
-				require.NoError(t, err)
-				err = gitlabCiYamlFile.AppendString("    ref: b\n", verbose)
-				require.NoError(t, err)
-				err = gitlabCiYamlFile.AppendString("    file:\n", verbose)
-				require.NoError(t, err)
-				err = gitlabCiYamlFile.AppendString("     - c.yaml\n", verbose)
+				toWrite := "---\n"
+				toWrite += "include:\n"
+				toWrite += "  - project: a\n"
+				toWrite += "    ref: b\n"
+				toWrite += "    file:\n"
+				toWrite += "     - c.yaml\n"
+				err = gitlabCiYamlFile.WriteString(toWrite, verbose)
 				require.NoError(t, err)
 
 				includes, err := gitlabCiYamlFile.GetIncludes(verbose)
@@ -112,20 +107,15 @@ func TestGitlabCiYamlFileGetIncludeIgnoreRules(t *testing.T) {
 				gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(emptyFilePath)
 				require.NoError(t, err)
 
-				gitlabCiYamlFile.MustWriteString("---\n", verbose)
-				err = gitlabCiYamlFile.AppendString("include:\n", verbose)
-				require.NoError(t, err)
-				err = gitlabCiYamlFile.AppendString("  - project: a\n", verbose)
-				require.NoError(t, err)
-				err = gitlabCiYamlFile.AppendString("    ref: b\n", verbose)
-				require.NoError(t, err)
-				err = gitlabCiYamlFile.AppendString("    file:\n", verbose)
-				require.NoError(t, err)
-				err = gitlabCiYamlFile.AppendString("     - c.yaml\n", verbose)
-				require.NoError(t, err)
-				err = gitlabCiYamlFile.AppendString("    rules:\n", verbose)
-				require.NoError(t, err)
-				err = gitlabCiYamlFile.AppendString("     - if: $CI_PIPELINE_SOURCE != \"pipeline\"\n", verbose)
+				toWrite := "---\n"
+				toWrite += "include:\n"
+				toWrite += "  - project: a\n"
+				toWrite += "    ref: b\n"
+				toWrite += "    file:\n"
+				toWrite += "     - c.yaml\n"
+				toWrite += "    rules:\n"
+				toWrite += "     - if: $CI_PIPELINE_SOURCE != \"pipeline\"\n"
+				err = gitlabCiYamlFile.WriteString(toWrite, verbose)
 				require.NoError(t, err)
 
 				includes, err := gitlabCiYamlFile.GetIncludes(verbose)

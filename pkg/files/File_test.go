@@ -56,19 +56,15 @@ func TestFile_WriteString_ReadAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				fileToTest := getFileToTest(tt.implementationName)
 				defer fileToTest.Delete(verbose)
 
-				fileToTest.MustWriteString(tt.content, verbose)
+				err := fileToTest.WriteString(tt.content, verbose)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					tt.content,
-					fileToTest.MustReadAsString(),
-				)
+				require.EqualValues(t, tt.content, fileToTest.MustReadAsString())
 			},
 		)
 	}
@@ -163,24 +159,21 @@ func TestFile_ContainsLine(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				fileToTest := getFileToTest(tt.implementationName)
 				defer fileToTest.Delete(verbose)
 
-				fileToTest.MustWriteString(
+				err := fileToTest.WriteString(
 					"this is a\nhello world\nexample text.\n",
 					verbose,
 				)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					tt.expectedContains,
-					fileToTest.MustContainsLine(
-						tt.line,
-					),
-				)
+				containsLine, err := fileToTest.ContainsLine(tt.line)
+				require.NoError(t, err)
+
+				require.EqualValues(t, tt.expectedContains, containsLine)
 			},
 		)
 	}
@@ -265,7 +258,8 @@ func TestFile_CopyToFile(t *testing.T) {
 				const verbose bool = true
 
 				srcFile := getFileToTest(tt.implementationName)
-				srcFile.MustWriteString(tt.content, verbose)
+				err := srcFile.WriteString(tt.content, verbose)
+				require.NoError(t, err)
 				defer srcFile.Delete(verbose)
 
 				destFile := getFileToTest(tt.implementationName)
@@ -275,7 +269,7 @@ func TestFile_CopyToFile(t *testing.T) {
 				require.True(t, mustutils.Must(srcFile.Exists(verbose)))
 				require.False(t, mustutils.Must(destFile.Exists(verbose)))
 
-				err := srcFile.CopyToFile(destFile, verbose)
+				err = srcFile.CopyToFile(destFile, verbose)
 				require.NoError(t, err)
 
 				require.True(t, mustutils.Must(srcFile.Exists(verbose)))
