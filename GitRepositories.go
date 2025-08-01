@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -151,7 +152,7 @@ func (g *GitRepositoriesService) CloneToTemporaryDirectory(urlOrPath string, ver
 		return nil, tracederrors.TracedErrorEmptyString("urlOrPath")
 	}
 
-	destinationPath, err := tempfilesoo.CreateEmptyTemporaryDirectoryAndGetPath(verbose)
+	destinationPath, err := tempfilesoo.CreateEmptyTemporaryDirectoryAndGetPath(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +174,7 @@ func (g *GitRepositoriesService) CreateTemporaryInitializedRepository(options *p
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	repoPath, err := tempfilesoo.CreateEmptyTemporaryDirectoryAndGetPath(options.Verbose)
+	repoPath, err := tempfilesoo.CreateEmptyTemporaryDirectoryAndGetPath(contextutils.GetVerbosityContextByBool(options.Verbose))
 	if err != nil {
 		return nil, err
 	}

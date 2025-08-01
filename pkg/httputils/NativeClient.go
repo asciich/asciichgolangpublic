@@ -256,7 +256,7 @@ func (n *NativeClient) DownloadAsTemporaryFile(ctx context.Context, downloadOpti
 
 	toUse := downloadOptions.GetDeepCopy()
 
-	toUse.OutputPath, err = tempfilesoo.CreateEmptyTemporaryFileAndGetPath(false)
+	toUse.OutputPath, err = tempfilesoo.CreateEmptyTemporaryFileAndGetPath(contextutils.WithSilent(ctx))
 	if err != nil {
 		return nil, err
 	}

@@ -28,8 +28,9 @@ func Test_CreateFileStructure(t *testing.T) {
 
 	t.Run("temp_dir", func(t *testing.T) {
 		const verbose = true
+		ctx := getCtx()
 
-		tempDir, err := tempfilesoo.CreateEmptyTemporaryDirectory(verbose)
+		tempDir, err := tempfilesoo.CreateEmptyTemporaryDirectory(ctx)
 		require.NoError(t, err)
 
 		tempDirPath, err := tempDir.GetPath()

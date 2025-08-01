@@ -1,12 +1,13 @@
 package tempfilesoo
 
 import (
+	"context"
 	"os"
 
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 )
 
-func CreateEmptyTemporaryDirectory(verbose bool) (temporaryDirectory *files.LocalDirectory, err error) {
+func CreateEmptyTemporaryDirectory(ctx context.Context) (temporaryDirectory *files.LocalDirectory, err error) {
 	dirPath, err := os.MkdirTemp("", "empty")
 	if err != nil {
 		return nil, err
@@ -20,8 +21,8 @@ func CreateEmptyTemporaryDirectory(verbose bool) (temporaryDirectory *files.Loca
 	return temporaryDirectory, nil
 }
 
-func CreateEmptyTemporaryDirectoryAndGetPath(verbose bool) (TemporaryDirectoryPath string, err error) {
-	TemporaryDirectory, err := CreateEmptyTemporaryDirectory(verbose)
+func CreateEmptyTemporaryDirectoryAndGetPath(ctx context.Context) (TemporaryDirectoryPath string, err error) {
+	TemporaryDirectory, err := CreateEmptyTemporaryDirectory(ctx)
 	if err != nil {
 		return "", err
 	}

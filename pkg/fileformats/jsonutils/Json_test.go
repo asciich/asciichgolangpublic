@@ -1,12 +1,18 @@
 package jsonutils
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func TestJsonRunJqAgainstJsonStringAsString(t *testing.T) {
 	tests := []struct {
@@ -129,8 +135,9 @@ func TestJsonStringToYamlFileByPath(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
-				emptyFile, err := tempfilesoo.CreateEmptyTemporaryFile(verbose)
+				emptyFile, err := tempfilesoo.CreateEmptyTemporaryFile(ctx)
 				require.NoError(t, err)
 				defer emptyFile.Delete(verbose)
 
@@ -200,8 +207,9 @@ func TestJsonFileHas(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
-				tempFile, err := tempfilesoo.CreateFromString(tt.jsonString, verbose)
+				tempFile, err := tempfilesoo.CreateFromString(ctx, tt.jsonString)
 				require.NoError(t, err)
 				defer tempFile.Delete(verbose)
 

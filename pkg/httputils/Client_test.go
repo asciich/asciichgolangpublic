@@ -181,7 +181,7 @@ func TestClient_DownloadAsFile_ChecksumMismatch(t *testing.T) {
 				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				tempFile, err := tempfilesoo.CreateEmptyTemporaryFile(contextutils.GetVerboseFromContext(ctx))
+				tempFile, err := tempfilesoo.CreateEmptyTemporaryFile(ctx)
 				require.NoError(t, err)
 				defer tempFile.Delete(contextutils.GetVerboseFromContext(ctx))
 
@@ -228,7 +228,7 @@ func TestClient_DownloadAsFile(t *testing.T) {
 				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				tempFile, err := tempfilesoo.CreateEmptyTemporaryFile(verbose)
+				tempFile, err := tempfilesoo.CreateEmptyTemporaryFile(ctx)
 				require.NoError(t, err)
 				defer tempFile.Delete(verbose)
 

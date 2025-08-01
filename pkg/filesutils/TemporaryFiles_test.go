@@ -1,9 +1,11 @@
 package filesutils_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
@@ -12,10 +14,15 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
-// This test suite ensure the different implementations behave in the same way.
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
+// This test suite ensure the different implementations behave in the same way.
 func getFileToTest(implementationName string) (fileToTest filesinterfaces.File) {
-	temporayFile := mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(false))
+	ctxSilent := contextutils.WithSilent(getCtx())
+
+	temporayFile := mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctxSilent))
 
 	if implementationName == "localFile" {
 		return files.MustGetLocalFileByPath(temporayFile)
@@ -43,6 +50,7 @@ func TestTemporaryFilesCreateFromFile(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				sourceFile := getFileToTest(tt.implementationName)
 				err := sourceFile.WriteString(tt.content, verbose)
@@ -51,7 +59,7 @@ func TestTemporaryFilesCreateFromFile(t *testing.T) {
 
 				require.EqualValues(t, tt.content, sourceFile.MustReadAsString())
 
-				tempFile, err := tempfilesoo.CreateTemporaryFileFromFile(sourceFile, verbose)
+				tempFile, err := tempfilesoo.CreateTemporaryFileFromFile(ctx, sourceFile)
 				require.NoError(t, err)
 				defer tempFile.Delete(verbose)
 

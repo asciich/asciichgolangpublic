@@ -53,8 +53,9 @@ func TestLocalGitRepository_GetLocalGitReposioryFromDirectory(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
-				directory, err := tempfilesoo.CreateEmptyTemporaryDirectory(verbose)
+				directory, err := tempfilesoo.CreateEmptyTemporaryDirectory(ctx)
 				require.NoError(t, err)
 				defer directory.Delete(verbose)
 

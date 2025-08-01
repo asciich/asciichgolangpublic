@@ -527,7 +527,7 @@ func (t *TmuxWindow) RunCommand(ctx context.Context, runCommandOptions *paramete
 		return nil, err
 	}
 
-	captureFile, err := tempfilesoo.CreateEmptyTemporaryFile(contextutils.GetVerboseFromContext(ctx))
+	captureFile, err := tempfilesoo.CreateEmptyTemporaryFile(ctx)
 	if err != nil {
 		return nil, err
 	}

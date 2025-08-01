@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -20,7 +21,7 @@ func TemporaryGitRepositories() (temporaryDirectoriesService *TemporaryGitReposi
 }
 
 func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepository(verbose bool) (temporaryGitRepository GitRepository, err error) {
-	tempDir, err := tempfilesoo.CreateEmptyTemporaryDirectory(verbose)
+	tempDir, err := tempfilesoo.CreateEmptyTemporaryDirectory(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +91,7 @@ func (t TemporaryGitRepositoriesService) CreateEmptyTemporaryGitRepository(creat
 		return nil, tracederrors.TracedErrorNil("createRepoOptions")
 	}
 
-	tempDirectory, err := tempfilesoo.CreateEmptyTemporaryDirectory(createRepoOptions.Verbose)
+	tempDirectory, err := tempfilesoo.CreateEmptyTemporaryDirectory(contextutils.GetVerbosityContextByBool(createRepoOptions.Verbose))
 	if err != nil {
 		return nil, err
 	}

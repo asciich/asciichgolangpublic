@@ -20,8 +20,9 @@ func TestGitlabCiYamlFileGetInclude(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
-				emptyFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)
+				emptyFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)
 				require.NoError(t, err)
 				gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(emptyFilePath)
 				require.NoError(t, err)
@@ -59,8 +60,9 @@ func TestGitlabCiYamlFileGetInclude2(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
-				emptyFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)
+				emptyFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)
 				require.NoError(t, err)
 				gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(emptyFilePath)
 				require.NoError(t, err)
@@ -101,8 +103,9 @@ func TestGitlabCiYamlFileGetIncludeIgnoreRules(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
-				emptyFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)
+				emptyFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)
 				require.NoError(t, err)
 				gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(emptyFilePath)
 				require.NoError(t, err)
@@ -144,8 +147,9 @@ func TestGitlabCiYamlFileAddIncludes(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
-				emptyFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)
+				emptyFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)
 				require.NoError(t, err)
 				gitlabCiYamlFile, err := GetGitlabCiYamlFileByPath(emptyFilePath)
 				require.NoError(t, err)
