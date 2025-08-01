@@ -163,7 +163,7 @@ func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
 				err = window.WaitUntilCliPromptReady(ctx)
 				require.NoError(t, err)
 
-				outputPath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(contextutils.GetVerboseFromContext(ctx))
+				outputPath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)
 				require.NoError(t, err)
 				defer files.DeleteFileByPath(outputPath, contextutils.GetVerboseFromContext(ctx))
 
@@ -180,7 +180,7 @@ func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
 				exampleScript += "sleep .75\n"
 				exampleScript += "echo finished\n"
 
-				exampleScriptPath, err := tempfilesoo.CreateFromStringAndGetPath(exampleScript, contextutils.GetVerboseFromContext(ctx))
+				exampleScriptPath, err := tempfilesoo.CreateFromStringAndGetPath(ctx, exampleScript)
 				require.NoError(t, err)
 				defer files.DeleteFileByPath(exampleScriptPath, contextutils.GetVerboseFromContext(ctx))
 

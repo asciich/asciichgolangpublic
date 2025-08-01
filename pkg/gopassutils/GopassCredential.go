@@ -234,7 +234,7 @@ func (c *GopassCredential) WriteIntoFile(ctx context.Context, outputFile filesin
 }
 
 func (c *GopassCredential) WriteIntoTemporaryFile(ctx context.Context) (temporaryFile filesinterfaces.File, err error) {
-	temporaryFile, err = tempfilesoo.CreateEmptyTemporaryFile(contextutils.GetVerboseFromContext(ctx))
+	temporaryFile, err = tempfilesoo.CreateEmptyTemporaryFile(ctx)
 	if err != nil {
 		return nil, err
 	}

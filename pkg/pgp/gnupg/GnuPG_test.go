@@ -1,9 +1,11 @@
 package gnupg
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
@@ -12,20 +14,24 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
+
 // Return a temporary file of the given 'implementationName'.
 //
 // Use defer file.Delete(verbose) to after calling this function to ensure
 // the file is deleted after the test is over.
 func getFileToTest(implementationName string) (file filesinterfaces.File) {
-	const verbose = true
+	ctx := getCtx()
 
 	if implementationName == "localFile" {
 		file = files.MustGetLocalFileByPath(
-			mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)),
+			mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)),
 		)
 	} else if implementationName == "localCommandExecutorFile" {
 		file = files.MustGetLocalCommandExecutorFileByPath(
-			mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)),
+			mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)),
 		)
 	} else {
 		logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)

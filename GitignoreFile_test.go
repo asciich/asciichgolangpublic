@@ -21,8 +21,9 @@ func TestGitignoreFileAddFileToIgnore(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
-				gitignoreFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)
+				gitignoreFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)
 				require.NoError(t, err)
 
 				gitignoreFile, err := GetGitignoreFileByPath(gitignoreFilePath)
@@ -57,8 +58,9 @@ func TestGitignoreFileContainsIgnoreOnNonExistingFile(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
-				nonExitstingFile, err := tempfilesoo.CreateEmptyTemporaryFile(verbose)
+				nonExitstingFile, err := tempfilesoo.CreateEmptyTemporaryFile(ctx)
 				require.NoError(t, err)
 				err = nonExitstingFile.Delete(verbose)
 				require.NoError(t, err)
@@ -89,8 +91,9 @@ func TestGitignoreFileContainsIgnoreOnEmptyFile(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
-				emptyFile, err := tempfilesoo.CreateEmptyTemporaryFile(verbose)
+				emptyFile, err := tempfilesoo.CreateEmptyTemporaryFile(ctx)
 				require.NoError(t, err)
 
 				gitignoreFile, err := GetGitignoreFileByFile(emptyFile)

@@ -22,14 +22,15 @@ func getCtx() context.Context {
 
 func getGitRepositoryToTest(implementationName string) (repo GitRepository) {
 	const verbose = true
+	ctx := getCtx()
 
 	if implementationName == "localGitRepository" {
 		repo = MustGetLocalGitReposioryFromDirectory(
-			mustutils.Must(tempfilesoo.CreateEmptyTemporaryDirectory(verbose)),
+			mustutils.Must(tempfilesoo.CreateEmptyTemporaryDirectory(ctx)),
 		)
 	} else if implementationName == "localCommandExecutorRepository" {
 		repo = MustGetLocalCommandExecutorGitRepositoryByDirectory(
-			mustutils.Must(tempfilesoo.CreateEmptyTemporaryDirectory(verbose)),
+			mustutils.Must(tempfilesoo.CreateEmptyTemporaryDirectory(ctx)),
 		)
 	} else {
 		logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)

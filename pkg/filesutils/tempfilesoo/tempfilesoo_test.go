@@ -1,14 +1,20 @@
 package tempfilesoo_test
 
 import (
+	"context"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func TestCreateTemporaryFile(t *testing.T) {
 	tests := []struct {
@@ -23,9 +29,10 @@ func TestCreateTemporaryFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
+				ctx := getCtx()
 				const verbose = true
 
-				file, err := tempfilesoo.CreateFromString(tt.content, verbose)
+				file, err := tempfilesoo.CreateFromString(ctx, tt.content)
 				require.NoError(t, err)
 				defer file.Delete(verbose)
 
@@ -41,8 +48,9 @@ func TestCreateTemporaryFile(t *testing.T) {
 
 func TestCreateEmptyTemporaryFile(t *testing.T) {
 	const verbose bool = true
+	ctx := getCtx()
 
-	file, err := tempfilesoo.CreateEmptyTemporaryFile(verbose)
+	file, err := tempfilesoo.CreateEmptyTemporaryFile(ctx)
 	require.NoError(t, err)
 	defer file.Delete(verbose)
 
@@ -59,8 +67,9 @@ func TestCreateEmptyTemporaryFile(t *testing.T) {
 
 func TestCreateEmptyTemporaryFileAndGetPath(t *testing.T) {
 	const verbose bool = true
+	ctx := getCtx()
 
-	filePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(verbose)
+	filePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)
 	require.NoError(t, err)
 
 	file := files.MustNewLocalFileByPath(filePath)

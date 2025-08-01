@@ -1,14 +1,20 @@
 package installutils_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/installutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func TestInstallFromPath(t *testing.T) {
 	tests := []struct {
@@ -23,13 +29,14 @@ func TestInstallFromPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
+				ctx := getCtx()
 				const verbose = true
 
-				sourceFile, err := tempfilesoo.CreateFromStringAndGetPath(tt.content, verbose)
+				sourceFile, err := tempfilesoo.CreateFromStringAndGetPath(ctx, tt.content)
 				require.NoError(t, err)
 				defer files.DeleteFileByPath(sourceFile, verbose)
 
-				destFile, err := tempfilesoo.CreateEmptyTemporaryFile(verbose)
+				destFile, err := tempfilesoo.CreateEmptyTemporaryFile(ctx)
 				require.NoError(t, err)
 				destFilePath, err := destFile.GetPath()
 				require.NoError(t, err)

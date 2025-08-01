@@ -331,7 +331,8 @@ func (h *CommandExecutorHost) InstallBinary(installOptions *parameteroptions.Ins
 		)
 	}
 
-	tempCopy, err := tempfilesoo.CreateTemporaryFileFromFile(sourceFile, installOptions.Verbose)
+	ctx := contextutils.GetVerbosityContextByBool(installOptions.Verbose)
+	tempCopy, err := tempfilesoo.CreateTemporaryFileFromFile(ctx, sourceFile)
 	if err != nil {
 		return nil, err
 	}

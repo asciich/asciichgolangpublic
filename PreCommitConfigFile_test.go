@@ -35,9 +35,10 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 				require := require.New(t)
 
 				const verbose bool = true
+				ctx := getCtx()
 
 				inputFile := MustGetPreCommitConfigByLocalPath(filepath.Join(tt.testDataDir, "input"))
-				preCommitFile := MustGetPreCommitConfigByFile(mustutils.Must(tempfilesoo.CreateTemporaryFileFromFile(inputFile, verbose)))
+				preCommitFile := MustGetPreCommitConfigByFile(mustutils.Must(tempfilesoo.CreateTemporaryFileFromFile(ctx, inputFile)))
 				defer preCommitFile.Delete(verbose)
 
 				expectedOutput := MustGetPreCommitConfigByLocalPath(filepath.Join(tt.testDataDir, "expected_output"))

@@ -116,7 +116,8 @@ func (k *KVMHypervisor) CreateVm(createOptions *KvmCreateVmOptions) (createdVm *
 		return nil, tracederrors.TracedErrorf("Disk image '%s' does not exist to create VM.", diskImagePath)
 	}
 
-	vmXml, err := tempfilesoo.CreateEmptyTemporaryFile(createOptions.Verbose)
+	ctx := contextutils.GetVerbosityContextByBool(createOptions.Verbose)
+	vmXml, err := tempfilesoo.CreateEmptyTemporaryFile(ctx)
 	if err != nil {
 		return nil, err
 	}

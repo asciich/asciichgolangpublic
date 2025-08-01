@@ -1,6 +1,7 @@
 package tempfilesoo
 
 import (
+	"context"
 	"path/filepath"
 	"strings"
 
@@ -12,8 +13,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func CreateEmptyTemporaryFile(verbose bool) (temporaryfile filesinterfaces.File, err error) {
-	temporaryfile, err = CreateNamedTemporaryFile("emptyFile", verbose)
+func CreateEmptyTemporaryFile(ctx context.Context) (temporaryfile filesinterfaces.File, err error) {
+	temporaryfile, err = CreateNamedTemporaryFile(ctx, "emptyFile")
 	if err != nil {
 		return nil, err
 	}
@@ -21,8 +22,8 @@ func CreateEmptyTemporaryFile(verbose bool) (temporaryfile filesinterfaces.File,
 	return temporaryfile, nil
 }
 
-func CreateEmptyTemporaryFileAndGetPath(verbose bool) (temporaryFilePath string, err error) {
-	temporaryFile, err := CreateEmptyTemporaryFile(verbose)
+func CreateEmptyTemporaryFileAndGetPath(ctx context.Context) (temporaryFilePath string, err error) {
+	temporaryFile, err := CreateEmptyTemporaryFile(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -35,31 +36,17 @@ func CreateEmptyTemporaryFileAndGetPath(verbose bool) (temporaryFilePath string,
 	return temporaryFilePath, nil
 }
 
-func CreateFromBytes(content []byte, verbose bool) (temporaryFile filesinterfaces.File, err error) {
+func CreateFromBytes(ctx context.Context, content []byte) (temporaryFile filesinterfaces.File, err error) {
 	if content == nil {
 		return nil, tracederrors.TracedErrorNil("content")
 	}
 
-	temporaryFile, err = CreateEmptyTemporaryFile(verbose)
+	temporaryFile, err = CreateEmptyTemporaryFile(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	err = temporaryFile.WriteBytes(content, verbose)
-	if err != nil {
-		return nil, err
-	}
-
-	return temporaryFile, nil
-}
-
-func CreateFromString(content string, verbose bool) (temporaryFile filesinterfaces.File, err error) {
-	temporaryFile, err = CreateEmptyTemporaryFile(verbose)
-	if err != nil {
-		return nil, err
-	}
-
-	err = temporaryFile.WriteString(content, verbose)
+	err = temporaryFile.WriteBytes(content, contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -67,8 +54,22 @@ func CreateFromString(content string, verbose bool) (temporaryFile filesinterfac
 	return temporaryFile, nil
 }
 
-func CreateFromStringAndGetPath(content string, verbose bool) (temporaryFilePath string, err error) {
-	temporaryFile, err := CreateFromString(content, verbose)
+func CreateFromString(ctx context.Context, content string) (temporaryFile filesinterfaces.File, err error) {
+	temporaryFile, err = CreateEmptyTemporaryFile(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	err = temporaryFile.WriteString(content, contextutils.GetVerboseFromContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	return temporaryFile, nil
+}
+
+func CreateFromStringAndGetPath(ctx context.Context, content string) (temporaryFilePath string, err error) {
+	temporaryFile, err := CreateFromString(ctx, content)
 	if err != nil {
 		return "", err
 	}
@@ -81,12 +82,12 @@ func CreateFromStringAndGetPath(content string, verbose bool) (temporaryFilePath
 	return temporaryFilePath, nil
 }
 
-func CreateNamedTemporaryFile(fileName string, verbose bool) (temporaryfile filesinterfaces.File, err error) {
+func CreateNamedTemporaryFile(ctx context.Context, fileName string) (temporaryfile filesinterfaces.File, err error) {
 	if fileName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("fileName")
 	}
 
-	tmpPath, err := tempfiles.CreateNamedTemporaryFile(contextutils.GetVerbosityContextByBool(verbose), fileName)
+	tmpPath, err := tempfiles.CreateNamedTemporaryFile(ctx, fileName)
 	if err != nil {
 		return nil, err
 	}
@@ -96,24 +97,22 @@ func CreateNamedTemporaryFile(fileName string, verbose bool) (temporaryfile file
 		return nil, err
 	}
 
-	if verbose {
-		createdFilePath, err := temporaryfile.GetPath()
-		if err != nil {
-			return nil, err
-		}
-
-		logging.LogInfof("Created temporary file '%s'", createdFilePath)
+	createdFilePath, err := temporaryfile.GetPath()
+	if err != nil {
+		return nil, err
 	}
+
+	logging.LogInfoByCtxf(ctx, "Created temporary file '%s'", createdFilePath)
 
 	return temporaryfile, nil
 }
 
-func CreateTemporaryFileFromBytes(content []byte, verbose bool) (temporaryFile filesinterfaces.File, err error) {
+func CreateTemporaryFileFromBytes(ctx context.Context, content []byte) (temporaryFile filesinterfaces.File, err error) {
 	if content == nil {
 		return nil, tracederrors.TracedErrorNil("content")
 	}
 
-	temporaryFile, err = CreateTemporaryFileFromString(string(content), verbose)
+	temporaryFile, err = CreateTemporaryFileFromString(ctx, string(content))
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +120,7 @@ func CreateTemporaryFileFromBytes(content []byte, verbose bool) (temporaryFile f
 	return temporaryFile, nil
 }
 
-func CreateTemporaryFileFromFile(fileToCopyAsTemporaryFile filesinterfaces.File, verbose bool) (temporaryFile filesinterfaces.File, err error) {
+func CreateTemporaryFileFromFile(ctx context.Context, fileToCopyAsTemporaryFile filesinterfaces.File) (temporaryFile filesinterfaces.File, err error) {
 	if fileToCopyAsTemporaryFile == nil {
 		return nil, tracederrors.TracedErrorNil("fileToCopyAsTemporaryFile")
 	}
@@ -131,7 +130,7 @@ func CreateTemporaryFileFromFile(fileToCopyAsTemporaryFile filesinterfaces.File,
 		return nil, err
 	}
 
-	isLocalFile, err := fileToCopyAsTemporaryFile.IsLocalFile(verbose)
+	isLocalFile, err := fileToCopyAsTemporaryFile.IsLocalFile(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -148,39 +147,38 @@ func CreateTemporaryFileFromFile(fileToCopyAsTemporaryFile filesinterfaces.File,
 		return nil, err
 	}
 
-	temporaryFile, err = CreateNamedTemporaryFile(filepath.Base(fileToCopyAsTemporaryFilePath)+"_tmp", verbose)
+	temporaryFile, err = CreateNamedTemporaryFile(ctx, filepath.Base(fileToCopyAsTemporaryFilePath)+"_tmp")
 	if err != nil {
 		return nil, err
 	}
 
-	err = fileToCopyAsTemporaryFile.CopyToFile(temporaryFile, verbose)
+	err = fileToCopyAsTemporaryFile.CopyToFile(temporaryFile, contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}
 
-	if verbose {
-		temporaryfilePath, err := temporaryFile.GetPath()
-		if err != nil {
-			return nil, err
-		}
-
-		srcPath, err := fileToCopyAsTemporaryFile.GetPath()
-		if err != nil {
-			return nil, err
-		}
-
-		logging.LogChangedf(
-			"Created temporary file '%s' filed with content from '%s' on '%s'",
-			temporaryfilePath,
-			srcPath,
-			hostDescription,
-		)
+	temporaryfilePath, err := temporaryFile.GetPath()
+	if err != nil {
+		return nil, err
 	}
+
+	srcPath, err := fileToCopyAsTemporaryFile.GetPath()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogChangedByCtxf(
+		ctx,
+		"Created temporary file '%s' filed with content from '%s' on '%s'",
+		temporaryfilePath,
+		srcPath,
+		hostDescription,
+	)
 
 	return temporaryFile, nil
 }
 
-func CreateTemporaryFileFromPath(verbose bool, filePathToCopyAsTemporaryFile ...string) (temporaryFile filesinterfaces.File, err error) {
+func CreateTemporaryFileFromPath(ctx context.Context, filePathToCopyAsTemporaryFile ...string) (temporaryFile filesinterfaces.File, err error) {
 	if len(filePathToCopyAsTemporaryFile) <= 0 {
 		return nil, tracederrors.TracedError("filePathToCopyAsTemporaryFile")
 	}
@@ -192,7 +190,7 @@ func CreateTemporaryFileFromPath(verbose bool, filePathToCopyAsTemporaryFile ...
 		return nil, err
 	}
 
-	temporaryFile, err = CreateTemporaryFileFromFile(fileToCopy, verbose)
+	temporaryFile, err = CreateTemporaryFileFromFile(ctx, fileToCopy)
 	if err != nil {
 		return nil, err
 	}
@@ -200,13 +198,13 @@ func CreateTemporaryFileFromPath(verbose bool, filePathToCopyAsTemporaryFile ...
 	return temporaryFile, nil
 }
 
-func CreateTemporaryFileFromString(content string, verbose bool) (temporaryFile filesinterfaces.File, err error) {
-	temporaryFile, err = CreateNamedTemporaryFile("tempFile", verbose)
+func CreateTemporaryFileFromString(ctx context.Context, content string) (temporaryFile filesinterfaces.File, err error) {
+	temporaryFile, err = CreateNamedTemporaryFile(ctx, "tempFile")
 	if err != nil {
 		return nil, err
 	}
 
-	err = temporaryFile.WriteString(content, verbose)
+	err = temporaryFile.WriteString(content, contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}

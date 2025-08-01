@@ -56,7 +56,7 @@ func (c *X509CertificatesService) CreateIntermediateCertificateIntoDirectory(ctx
 		return nil, tracederrors.TracedError("Only implemented for temporary directory")
 	}
 
-	directoryToUse, err := tempfilesoo.CreateEmptyTemporaryDirectory(true)
+	directoryToUse, err := tempfilesoo.CreateEmptyTemporaryDirectory(contextutils.WithVerbose(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (c *X509CertificatesService) CreateRootCaIntoDirectory(ctx context.Context,
 		return nil, tracederrors.TracedError("Only implemented for temporary directory")
 	}
 
-	directoryToUse, err := tempfilesoo.CreateEmptyTemporaryDirectory(true)
+	directoryToUse, err := tempfilesoo.CreateEmptyTemporaryDirectory(contextutils.WithVerbose(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -548,7 +548,8 @@ func (c *X509CertificatesService) CreateSigningRequestFile(signOptions *X509Sign
 		return err
 	}
 
-	openSslConfigFile, err := tempfilesoo.CreateEmptyTemporaryFile(signOptions.Verbose)
+	ctx := contextutils.GetVerbosityContextByBool(signOptions.Verbose)
+	openSslConfigFile, err := tempfilesoo.CreateEmptyTemporaryFile(ctx)
 	if err != nil {
 		return err
 	}
@@ -708,7 +709,7 @@ func (c *X509CertificatesService) SignIntermediateCertificate(signOptions *X509S
 		return err
 	}
 
-	singingRequestFile, err := tempfilesoo.CreateEmptyTemporaryFile(signOptions.Verbose)
+	singingRequestFile, err := tempfilesoo.CreateEmptyTemporaryFile(contextutils.GetVerbosityContextByBool(signOptions.Verbose))
 	if err != nil {
 		return err
 	}
@@ -725,7 +726,7 @@ func (c *X509CertificatesService) SignIntermediateCertificate(signOptions *X509S
 		return err
 	}
 
-	openSslConfigFile, err := tempfilesoo.CreateEmptyTemporaryFile(signOptions.Verbose)
+	openSslConfigFile, err := tempfilesoo.CreateEmptyTemporaryFile(contextutils.GetVerbosityContextByBool(signOptions.Verbose))
 	if err != nil {
 		return err
 	}
