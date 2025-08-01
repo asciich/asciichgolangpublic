@@ -47,44 +47,34 @@ func TestFileBaseEnsureLineInFile_testcase1(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				fileToTest := getFileToTest(tt.implementationName)
 				defer fileToTest.Delete(verbose)
 
 				const testContent string = "hello\nworld\n"
-				fileToTest.MustWriteString(testContent, verbose)
+				err := fileToTest.WriteString(testContent, verbose)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					testContent,
-					fileToTest.MustReadAsString(),
-				)
+				require.EqualValues(t, testContent, fileToTest.MustReadAsString())
 
-				fileToTest.MustEnsureLineInFile("hello", verbose)
-				require.EqualValues(
-					testContent,
-					fileToTest.MustReadAsString(),
-				)
-				fileToTest.MustEnsureLineInFile("hello\n", verbose)
-				require.EqualValues(
-					testContent,
-					fileToTest.MustReadAsString(),
-				)
-				fileToTest.MustEnsureLineInFile("\nhello", verbose)
-				require.EqualValues(
-					testContent,
-					fileToTest.MustReadAsString(),
-				)
-				fileToTest.MustEnsureLineInFile("\nhello\n", verbose)
-				require.EqualValues(
-					testContent,
-					fileToTest.MustReadAsString(),
-				)
-				fileToTest.MustEnsureLineInFile("abc", verbose)
-				require.EqualValues(
-					testContent+"abc\n",
-					fileToTest.MustReadAsString(),
-				)
+				err = fileToTest.EnsureLineInFile("hello", verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, testContent, fileToTest.MustReadAsString())
+
+				err = fileToTest.EnsureLineInFile("hello\n", verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, testContent, fileToTest.MustReadAsString())
+
+				err = fileToTest.EnsureLineInFile("\nhello", verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, testContent, fileToTest.MustReadAsString())
+
+				err = fileToTest.EnsureLineInFile("\nhello\n", verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, testContent, fileToTest.MustReadAsString())
+
+				err = fileToTest.EnsureLineInFile("abc", verbose)
+				require.NoError(t, err)
+				require.EqualValues(t, testContent+"abc\n", fileToTest.MustReadAsString())
 			},
 		)
 	}
@@ -131,7 +121,9 @@ func TestFileBase_EnsureLineInFile_testcaseWriteToNonexstingString(t *testing.T)
 				require.NoError(t, err)
 
 				for i := 0; i < 2; i++ {
-					fileToTest.MustEnsureLineInFile(tt.line, verbose)
+					err = fileToTest.EnsureLineInFile(tt.line, verbose)
+					require.NoError(t, err)
+
 					require.EqualValues(t, tt.expected, fileToTest.MustReadAsString())
 				}
 			},
@@ -189,20 +181,16 @@ func TestFileBase_RemoveLinesWithPrefix(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose = true
 
 				toTest := getFileToTest(tt.implementationName)
 				defer toTest.Delete(verbose)
 
-				toTest.MustWriteString(tt.input, verbose)
+				err := toTest.WriteString(tt.input, verbose)
+				require.NoError(t, err)
 				toTest.MustRemoveLinesWithPrefix(tt.prefix, verbose)
 
-				require.EqualValues(
-					tt.expectedOutput,
-					toTest.MustReadAsString(),
-				)
+				require.EqualValues(t, tt.expectedOutput, toTest.MustReadAsString())
 			},
 		)
 	}
@@ -225,19 +213,15 @@ func TestFileBase_GetValueAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose = true
 
 				toTest := getFileToTest(tt.implementationName)
 				defer toTest.Delete(verbose)
 
-				toTest.MustWriteString(tt.input, verbose)
+				err := toTest.WriteString(tt.input, verbose)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					tt.expectedValue,
-					toTest.MustGetValueAsString(tt.key),
-				)
+				require.EqualValues(t, tt.expectedValue, toTest.MustGetValueAsString(tt.key))
 			},
 		)
 	}
@@ -262,19 +246,15 @@ func TestFileBase_GetValueAsInt(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose = true
 
 				toTest := getFileToTest(tt.implementationName)
 				defer toTest.Delete(verbose)
 
-				toTest.MustWriteString(tt.input, verbose)
+				err := toTest.WriteString(tt.input, verbose)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					tt.expectedValue,
-					toTest.MustGetValueAsInt(tt.key),
-				)
+				require.EqualValues(t, tt.expectedValue, toTest.MustGetValueAsInt(tt.key))
 			},
 		)
 	}

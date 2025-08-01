@@ -128,16 +128,15 @@ func TestLocalFileReadAndWriteAsInt64(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = false
 
 				var file filesinterfaces.File = getFileToTest("localFile")
 
 				for i := 0; i < 2; i++ {
-					file.MustWriteInt64(tt.content, verbose)
+					err := file.WriteInt64(tt.content, verbose)
+					require.NoError(t, err)
 
-					require.EqualValues(tt.content, file.MustReadAsInt64())
+					require.EqualValues(t, tt.content, file.MustReadAsInt64())
 				}
 			},
 		)
@@ -159,18 +158,17 @@ func TestLocalFileReadAndWriteAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = false
 
 				var file filesinterfaces.File = getFileToTest("localFile")
 
-				require.EqualValues("", file.MustReadAsString())
+				require.EqualValues(t, "", file.MustReadAsString())
 
 				for i := 0; i < 2; i++ {
-					file.MustWriteString(tt.content, verbose)
+					err := file.WriteString(tt.content, verbose)
+					require.NoError(t, err)
 
-					require.EqualValues(tt.content, file.MustReadAsString())
+					require.EqualValues(t, tt.content, file.MustReadAsString())
 				}
 			},
 		)
@@ -218,18 +216,14 @@ func TestLocalFileGetSha256Sum(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				temporaryFile := getFileToTest("localFile")
-				temporaryFile.MustWriteString(tt.input, verbose)
+				err := temporaryFile.WriteString(tt.input, verbose)
+				require.NoError(t, err)
 				defer temporaryFile.Delete(verbose)
 
-				require.EqualValues(
-					tt.expectedChecksum,
-					temporaryFile.MustGetSha256Sum(),
-				)
+				require.EqualValues(t, tt.expectedChecksum, temporaryFile.MustGetSha256Sum())
 			},
 		)
 	}
@@ -253,18 +247,14 @@ func TestLocalFileIsMatchingSha256Sum(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				temporaryFile := getFileToTest("localFile")
-				temporaryFile.MustWriteString(tt.input, verbose)
+				err := temporaryFile.WriteString(tt.input, verbose)
+				require.NoError(t, err)
 				defer temporaryFile.Delete(verbose)
 
-				require.EqualValues(
-					tt.expectedIsMatching,
-					temporaryFile.MustIsMatchingSha256Sum(tt.sha256sum),
-				)
+				require.EqualValues(t, tt.expectedIsMatching, temporaryFile.MustIsMatchingSha256Sum(tt.sha256sum))
 			},
 		)
 	}
@@ -324,20 +314,20 @@ func TestLocalFileIsContentEqualByComparingSha256Sum(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				tempFile1 := getFileToTest("localFile")
-				tempFile1.MustWriteString(tt.contentFile1, verbose)
+				err := tempFile1.WriteString(tt.contentFile1, verbose)
+				require.NoError(t, err)
 				defer tempFile1.Delete(verbose)
 
 				tempFile2 := getFileToTest("localFile")
-				tempFile2.MustWriteString(tt.contentFile2, verbose)
+				err = tempFile2.WriteString(tt.contentFile2, verbose)
+				require.NoError(t, err)
 				defer tempFile2.Delete(verbose)
 
-				require.EqualValues(tt.expectedIsEqual, tempFile1.MustIsContentEqualByComparingSha256Sum(tempFile2, verbose))
-				require.EqualValues(tt.expectedIsEqual, tempFile2.MustIsContentEqualByComparingSha256Sum(tempFile1, verbose))
+				require.EqualValues(t, tt.expectedIsEqual, tempFile1.MustIsContentEqualByComparingSha256Sum(tempFile2, verbose))
+				require.EqualValues(t, tt.expectedIsEqual, tempFile2.MustIsContentEqualByComparingSha256Sum(tempFile1, verbose))
 			},
 		)
 	}
@@ -383,8 +373,6 @@ func TestFileGetTextBlocksGolangWithCommentAboveFunction(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				testData := "package main\n"
@@ -396,10 +384,11 @@ func TestFileGetTextBlocksGolangWithCommentAboveFunction(t *testing.T) {
 				testData += "}\n"
 
 				testFile := getFileToTest("localFile")
-				testFile.MustWriteString(testData, verbose)
+				err := testFile.WriteString(testData, verbose)
+				require.NoError(t, err)
 				blocks := testFile.MustGetTextBlocks(verbose)
 
-				require.Len(blocks, 2)
+				require.Len(t, blocks, 2)
 			},
 		)
 	}
@@ -636,10 +625,12 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 				testInput := testDataDir.MustReadFileInDirectoryAsString("input")
 
 				testFile := getFileToTest("localFile")
-				testFile.MustWriteString(testInput, verbose)
+				err = testFile.WriteString(testInput, verbose)
+				require.NoError(t, err)
 
 				expectedFile := testDataDir.MustGetFileInDirectory("expectedOutput")
-				testFile.MustSortBlocksInFile(verbose)
+				err = testFile.SortBlocksInFile(verbose)
+				require.NoError(t, err)
 
 				sortedChecksum := testFile.MustGetSha256Sum()
 				expectedChecksum := expectedFile.MustGetSha256Sum()
@@ -954,16 +945,15 @@ func TestFileGetMimeTypeOfEmptyFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				temporaryFile := getFileToTest("localFile")
 				expectedMimeType := "inode/x-empty"
 
-				mimeType := temporaryFile.MustGetMimeType(verbose)
+				mimeType, err := temporaryFile.GetMimeType(verbose)
+				require.NoError(t, err)
 
-				require.EqualValues(expectedMimeType, mimeType)
+				require.EqualValues(t, expectedMimeType, mimeType)
 			},
 		)
 	}
@@ -996,7 +986,8 @@ func TestFileGetCreationDateByFileName(t *testing.T) {
 
 				file, err := temporaryDir.WriteStringToFileInDirectory("content", verbose, tt.filename)
 				require.NoError(t, err)
-				readDate := file.MustGetCreationDateByFileName(verbose)
+				readDate, err := file.GetCreationDateByFileName(verbose)
+				require.NoError(t, err)
 
 				require.EqualValues(t, tt.expected, *readDate)
 			},
@@ -1138,17 +1129,17 @@ func TestFileTrimSpacesAtBeginningOfFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				testFile := getFileToTest("localFile")
-				testFile.MustWriteString(tt.input, verbose)
+				err := testFile.WriteString(tt.input, verbose)
+				require.NoError(t, err)
 
-				testFile.MustTrimSpacesAtBeginningOfFile(verbose)
+				err = testFile.TrimSpacesAtBeginningOfFile(verbose)
+				require.NoError(t, err)
 
 				content := testFile.MustReadAsString()
-				require.EqualValues(tt.expectedContent, content)
+				require.EqualValues(t, tt.expectedContent, content)
 			},
 		)
 	}
@@ -1242,16 +1233,13 @@ func TestLocalFileGetNumberOfNonEmptyLines(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				testFile := getFileToTest("localFile")
-				testFile.MustWriteString(tt.content, verbose)
+				err := testFile.WriteString(tt.content, verbose)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					tt.expectedNonEmptyLines,
-					testFile.MustGetNumberOfNonEmptyLines())
+				require.EqualValues(t, tt.expectedNonEmptyLines, testFile.MustGetNumberOfNonEmptyLines())
 			},
 		)
 	}

@@ -45,7 +45,8 @@ func TestTemporaryFilesCreateFromFile(t *testing.T) {
 				const verbose bool = true
 
 				sourceFile := getFileToTest(tt.implementationName)
-				sourceFile.MustWriteString(tt.content, verbose)
+				err := sourceFile.WriteString(tt.content, verbose)
+				require.NoError(t, err)
 				defer sourceFile.Delete(verbose)
 
 				require.EqualValues(t, tt.content, sourceFile.MustReadAsString())
