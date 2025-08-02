@@ -223,7 +223,9 @@ func TestLocalFileGetSha256Sum(t *testing.T) {
 				require.NoError(t, err)
 				defer temporaryFile.Delete(verbose)
 
-				require.EqualValues(t, tt.expectedChecksum, temporaryFile.MustGetSha256Sum())
+				sha256Sum, err := temporaryFile.GetSha256Sum()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedChecksum, sha256Sum)
 			},
 		)
 	}
@@ -386,7 +388,8 @@ func TestFileGetTextBlocksGolangWithCommentAboveFunction(t *testing.T) {
 				testFile := getFileToTest("localFile")
 				err := testFile.WriteString(testData, verbose)
 				require.NoError(t, err)
-				blocks := testFile.MustGetTextBlocks(verbose)
+				blocks, err := testFile.GetTextBlocks(verbose)
+				require.NoError(t, err)
 
 				require.Len(t, blocks, 2)
 			},
@@ -407,8 +410,6 @@ func TestFileGetTextBlocksYamlWithoutLeadingThreeMinuses(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				testData := "a: b\n"
@@ -417,9 +418,10 @@ func TestFileGetTextBlocksYamlWithoutLeadingThreeMinuses(t *testing.T) {
 
 				testFile := getFileToTest("localFile")
 				testFile.WriteString(testData, verbose)
-				blocks := testFile.MustGetTextBlocks(verbose)
+				blocks, err := testFile.GetTextBlocks(verbose)
+				require.NoError(t, err)
 
-				require.Len(blocks, 2)
+				require.Len(t, blocks, 2)
 			},
 		)
 	}
@@ -438,8 +440,6 @@ func TestFileGetTextBlocksYamlWithLeadingThreeMinuses(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				testData := "---\n"
@@ -449,9 +449,10 @@ func TestFileGetTextBlocksYamlWithLeadingThreeMinuses(t *testing.T) {
 
 				testFile := getFileToTest("localFile")
 				testFile.WriteString(testData, verbose)
-				blocks := testFile.MustGetTextBlocks(verbose)
+				blocks, err := testFile.GetTextBlocks(verbose)
+				require.NoError(t, err)
 
-				require.Len(blocks, 3)
+				require.Len(t, blocks, 3)
 			},
 		)
 	}
@@ -632,8 +633,11 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 				err = testFile.SortBlocksInFile(verbose)
 				require.NoError(t, err)
 
-				sortedChecksum := testFile.MustGetSha256Sum()
-				expectedChecksum := expectedFile.MustGetSha256Sum()
+				sortedChecksum, err := testFile.GetSha256Sum()
+				require.NoError(t, err)
+
+				expectedChecksum, err := expectedFile.GetSha256Sum()
+				require.NoError(t, err)
 
 				if os.Getenv("UPDATE_EXPECTED") == "1" {
 					err = testFile.CopyToFile(expectedFile, verbose)
@@ -1239,7 +1243,10 @@ func TestLocalFileGetNumberOfNonEmptyLines(t *testing.T) {
 				err := testFile.WriteString(tt.content, verbose)
 				require.NoError(t, err)
 
-				require.EqualValues(t, tt.expectedNonEmptyLines, testFile.MustGetNumberOfNonEmptyLines())
+				nEmptyLines, err := testFile.GetNumberOfNonEmptyLines()
+				require.NoError(t, err)
+
+				require.EqualValues(t, tt.expectedNonEmptyLines, nEmptyLines)
 			},
 		)
 	}
