@@ -254,7 +254,9 @@ func TestFileBase_GetValueAsInt(t *testing.T) {
 				err := toTest.WriteString(tt.input, verbose)
 				require.NoError(t, err)
 
-				require.EqualValues(t, tt.expectedValue, toTest.MustGetValueAsInt(tt.key))
+				intValue, err := toTest.GetValueAsInt(tt.key)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedValue, intValue)
 			},
 		)
 	}
