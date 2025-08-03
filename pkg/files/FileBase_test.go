@@ -221,7 +221,9 @@ func TestFileBase_GetValueAsString(t *testing.T) {
 				err := toTest.WriteString(tt.input, verbose)
 				require.NoError(t, err)
 
-				require.EqualValues(t, tt.expectedValue, toTest.MustGetValueAsString(tt.key))
+				value, err := toTest.GetValueAsString(tt.key)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedValue, value)
 			},
 		)
 	}

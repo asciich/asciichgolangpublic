@@ -328,8 +328,8 @@ func TestLocalFileIsContentEqualByComparingSha256Sum(t *testing.T) {
 				require.NoError(t, err)
 				defer tempFile2.Delete(verbose)
 
-				require.EqualValues(t, tt.expectedIsEqual, tempFile1.MustIsContentEqualByComparingSha256Sum(tempFile2, verbose))
-				require.EqualValues(t, tt.expectedIsEqual, tempFile2.MustIsContentEqualByComparingSha256Sum(tempFile1, verbose))
+				require.EqualValues(t, tt.expectedIsEqual, mustutils.Must(tempFile1.IsContentEqualByComparingSha256Sum(tempFile2, verbose)))
+				require.EqualValues(t, tt.expectedIsEqual, mustutils.Must(tempFile2.IsContentEqualByComparingSha256Sum(tempFile1, verbose)))
 			},
 		)
 	}
