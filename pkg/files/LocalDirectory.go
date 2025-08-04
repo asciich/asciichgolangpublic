@@ -216,8 +216,8 @@ func (l *LocalDirectory) CopyFileToTemporaryFileAsLocalFile(verbose bool, filePa
 }
 */
 
-func (l *LocalDirectory) Create(verbose bool) (err error) {
-	exists, err := l.Exists(verbose)
+func (l *LocalDirectory) Create(ctx context.Context) (err error) {
+	exists, err := l.Exists(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
@@ -228,9 +228,7 @@ func (l *LocalDirectory) Create(verbose bool) (err error) {
 	}
 
 	if exists {
-		if verbose {
-			logging.LogInfof("Local directory '%s' already exists. Skip create.", path)
-		}
+		logging.LogInfoByCtxf(ctx, "Local directory '%s' already exists. Skip create.", path)
 	} else {
 		err = os.Mkdir(path, os.ModePerm)
 		if err != nil {
@@ -240,7 +238,7 @@ func (l *LocalDirectory) Create(verbose bool) (err error) {
 					return err
 				}
 
-				err = parentDirectoy.Create(verbose)
+				err = parentDirectoy.Create(ctx)
 				if err != nil {
 					return err
 				}
@@ -254,7 +252,7 @@ func (l *LocalDirectory) Create(verbose bool) (err error) {
 			}
 		}
 
-		existsAfterCreate, err := l.Exists(verbose)
+		existsAfterCreate, err := l.Exists(contextutils.GetVerboseFromContext(ctx))
 		if err != nil {
 			return err
 		}
@@ -263,9 +261,7 @@ func (l *LocalDirectory) Create(verbose bool) (err error) {
 			return tracederrors.TracedErrorf("Local directory '%s' does not exist after creation.", path)
 		}
 
-		if verbose {
-			logging.LogChangedf("Created local directory '%s'", path)
-		}
+		logging.LogChangedByCtxf(ctx, "Created local directory '%s'", path)
 	}
 
 	return nil
@@ -282,7 +278,7 @@ func (l *LocalDirectory) CreateFileInDirectory(verbose bool, path ...string) (cr
 		return nil, err
 	}
 
-	err = parentDirectory.Create(verbose)
+	err = parentDirectory.Create(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return nil, err
 	}
@@ -342,7 +338,7 @@ func (l *LocalDirectory) CreateSubDirectory(subDirName string, verbose bool) (cr
 			logging.LogInfof("Sub directory '%s' already exists.", subDirectoryPath)
 		}
 	} else {
-		err = subDirectory.Create(verbose)
+		err = subDirectory.Create(contextutils.GetVerbosityContextByBool(verbose))
 		if err != nil {
 			return nil, err
 		}
@@ -826,13 +822,6 @@ func (l *LocalDirectory) MustCopyContentToDirectory(destinationDir filesinterfac
 
 func (l *LocalDirectory) MustCopyContentToLocalDirectory(destDirectory *LocalDirectory, verbose bool) {
 	err := l.CopyContentToLocalDirectory(destDirectory, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (l *LocalDirectory) MustCreate(verbose bool) {
-	err := l.Create(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}

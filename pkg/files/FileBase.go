@@ -135,7 +135,7 @@ func (f *FileBase) CreateParentDirectory(verbose bool) (err error) {
 		return err
 	}
 
-	err = parentDir.Create(verbose)
+	err = parentDir.Create(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return err
 	}

@@ -431,7 +431,7 @@ func (g *GitRepositoryBase) CreateAndInit(createOptions *parameteroptions.Create
 		return err
 	}
 
-	err = parent.Create(createOptions.Verbose)
+	err = parent.Create(contextutils.GetVerbosityContextByBool(createOptions.Verbose))
 	if err != nil {
 		return err
 	}

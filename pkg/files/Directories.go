@@ -1,6 +1,7 @@
 package files
 
 import (
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -26,7 +27,7 @@ func (d *DirectoriesService) CreateLocalDirectoryByPath(path string, verbose boo
 		return nil, err
 	}
 
-	err = dir.Create(verbose)
+	err = dir.Create(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return nil, err
 	}

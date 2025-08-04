@@ -29,6 +29,7 @@ func TestLocalDirectoryExists(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				var directory filesinterfaces.Directory = getDirectoryToTest("localDirectory")
 				defer directory.Delete(verbose)
@@ -47,7 +48,7 @@ func TestLocalDirectoryExists(t *testing.T) {
 				}
 
 				for i := 0; i < 2; i++ {
-					err = directory.Create(verbose)
+					err = directory.Create(ctx)
 					require.NoError(t, err)
 
 					exists, err = directory.Exists(verbose)
@@ -314,6 +315,7 @@ func TestLocalDirectoryCreate(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose = true
+				ctx := getCtx()
 
 				tempDir := getDirectoryToTest("localDirectory")
 				subDir, err := tempDir.GetSubDirectory(tt.subDirPath...)
@@ -323,7 +325,7 @@ func TestLocalDirectoryCreate(t *testing.T) {
 				require.NoError(t, err)
 				require.False(t, exists)
 
-				err = subDir.Create(verbose)
+				err = subDir.Create(ctx)
 				require.NoError(t, err)
 
 				exists, err = subDir.Exists(verbose)
