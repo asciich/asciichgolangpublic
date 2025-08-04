@@ -32,8 +32,6 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 				ctx := getCtx()
 
@@ -45,7 +43,8 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 
 				if !expectedOutput.MustExists(verbose) {
 					if os.Getenv("UPDATE_EXPECTED") == "1" {
-						expectedOutput.MustCreate(verbose)
+						err := expectedOutput.Create(ctx)
+						require.NoError(t, err)
 					}
 				}
 
@@ -73,7 +72,7 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 					}
 				}
 
-				require.EqualValues(expectedOutputSha, updatedSha)
+				require.EqualValues(t, expectedOutputSha, updatedSha)
 			},
 		)
 	}

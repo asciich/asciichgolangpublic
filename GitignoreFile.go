@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"slices"
 
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
@@ -71,7 +72,7 @@ func (g *GitignoreFile) AddDirToIgnore(pathToIgnore string, comment string, verb
 
 	pathToIgnore = stringsutils.EnsureSuffix(pathToIgnore, "/")
 
-	err = g.Create(verbose)
+	err = g.Create(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return err
 	}
@@ -127,7 +128,7 @@ func (g *GitignoreFile) AddFileToIgnore(pathToIgnore string, comment string, ver
 		return tracederrors.TracedError("comment is empty string")
 	}
 
-	err = g.Create(verbose)
+	err = g.Create(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return err
 	}

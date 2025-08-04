@@ -292,8 +292,8 @@ func (l *LocalFile) CopyToFile(destFile filesinterfaces.File, verbose bool) (err
 	return nil
 }
 
-func (l *LocalFile) Create(verbose bool) (err error) {
-	exists, err := l.Exists(verbose)
+func (l *LocalFile) Create(ctx context.Context) (err error) {
+	exists, err := l.Exists(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
@@ -304,18 +304,14 @@ func (l *LocalFile) Create(verbose bool) (err error) {
 	}
 
 	if exists {
-		if verbose {
-			logging.LogInfof("Local file '%s' already exists", path)
-		}
+		logging.LogInfoByCtxf(ctx, "Local file '%s' already exists", path)
 	} else {
 		err = l.WriteString("", false)
 		if err != nil {
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf("Local file '%s' created", path)
-		}
+		logging.LogChangedByCtxf(ctx, "Local file '%s' created", path)
 	}
 
 	return nil
@@ -525,13 +521,6 @@ func (l *LocalFile) MustChown(options *parameteroptions.ChownOptions) {
 
 func (l *LocalFile) MustCopyToFile(destFile filesinterfaces.File, verbose bool) {
 	err := l.CopyToFile(destFile, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (l *LocalFile) MustCreate(verbose bool) {
-	err := l.Create(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
