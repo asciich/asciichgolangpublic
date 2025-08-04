@@ -2,7 +2,6 @@ package slicesutils
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"sort"
 	"strings"
@@ -318,6 +317,10 @@ func GetDeepCopyOfByteSlice(input []byte) (deepCopy []byte) {
 }
 
 func GetDeepCopyOfStringsSlice(sliceOfStrings []string) (deepCopy []string) {
+	if sliceOfStrings == nil {
+		return nil
+	}
+
 	if len(sliceOfStrings) <= 0 {
 		return []string{}
 	}
@@ -328,21 +331,23 @@ func GetDeepCopyOfStringsSlice(sliceOfStrings []string) (deepCopy []string) {
 	return deepCopy
 }
 
-func GetIntSliceInitialized(nValues int, initValue int) (initializedSlice []int) {
-	initializedSlice = []int{}
-	if nValues <= 0 {
-		return initializedSlice
+func GetInitializedIntSlice(nValues int, initValue int) []int {
+	if nValues < 0 {
+		return make([]int, 0)
 	}
 
-	for i := 0; i < nValues; i++ {
-		initializedSlice = append(initializedSlice, initValue)
+	initializedSlice := make([]int, nValues)
+	for i := range initializedSlice {
+		initializedSlice[i] = initValue
 	}
-
 	return initializedSlice
 }
 
-func GetIntSliceInitializedWithZeros(nValues int) (initializedSlice []int) {
-	return GetIntSliceInitialized(nValues, 0)
+func GetInitializedIntSliceWithZeros(nValues int) (initializedSlice []int) {
+	if nValues < 0 {
+		return make([]int, 0)
+	}
+	return make([]int, nValues)
 }
 
 func GetStringElementsNotInOtherSlice(toCheck []string, other []string) (elementsNotInOther []string) {
@@ -389,15 +394,6 @@ func MaxIntValuePerIndex(intSlice1 []int, intSlice2 []int) (maxValues []int) {
 	}
 
 	return maxValues
-}
-
-func MustRemoveStringsWhichContains(sliceToRemoveStringsWhichContains []string, searchString string) (cleanedUpSlice []string) {
-	cleanedUpSlice, err := RemoveStringsWhichContains(sliceToRemoveStringsWhichContains, searchString)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return cleanedUpSlice
 }
 
 func RemoveEmptyStrings(sliceOfStrings []string) (sliceOfStringsWithoutEmptyStrings []string) {

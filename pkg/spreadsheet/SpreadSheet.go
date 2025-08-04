@@ -189,7 +189,7 @@ func (s *SpreadSheet) GetMaxColumnWidths() (columnWitdhs []int, err error) {
 		return []int{}, nil
 	}
 
-	columnWidths := slicesutils.GetIntSliceInitializedWithZeros(nColumns)
+	columnWidths := slicesutils.GetInitializedIntSliceWithZeros(nColumns)
 
 	nRows, err := s.GetNumberOfRows()
 	if err != nil {

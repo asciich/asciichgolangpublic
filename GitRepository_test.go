@@ -83,6 +83,7 @@ func TestGitRepository_Init_minimal(t *testing.T) {
 							BareRepository: tt.bareRepository,
 						},
 					)
+					require.NoError(t, err)
 					require.True(t, mustutils.Must(repo.Exists(verbose)))
 					require.True(t, mustutils.Must(repo.IsInitialized(verbose)))
 					require.False(t, mustutils.Must(repo.HasInitialCommit(verbose)))
@@ -1975,6 +1976,7 @@ func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
 						Verbose: verbose,
 					},
 				)
+				require.NoError(t, err)
 
 				require.EqualValues(t, "This should trigger again a commit", mustutils.Must(gitRepo.GetCurrentCommitMessage(verbose)))
 			},
