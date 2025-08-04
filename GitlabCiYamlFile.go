@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -64,7 +65,7 @@ func (g *GitlabCiYamlFile) AddInclude(include *GitlabCiYamlInclude, verbose bool
 		return tracederrors.TracedError("include is nil")
 	}
 
-	err = g.Create(verbose)
+	err = g.Create(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return err
 	}

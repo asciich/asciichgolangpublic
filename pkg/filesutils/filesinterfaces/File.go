@@ -15,7 +15,7 @@ type File interface {
 	Chmod(options *parameteroptions.ChmodOptions) (err error)
 	Chown(options *parameteroptions.ChownOptions) (err error)
 	CopyToFile(destFile File, verbose bool) (err error)
-	Create(verbose bool) (err error)
+	Create(ctx context.Context) (err error)
 	Delete(verbose bool) (err error)
 	Exists(verbose bool) (exists bool, err error)
 	GetAccessPermissions() (permission int, err error)

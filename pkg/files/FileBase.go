@@ -154,7 +154,7 @@ func (f *FileBase) EnsureEndsWithLineBreak(verbose bool) (err error) {
 		return err
 	}
 
-	err = parent.Create(verbose)
+	err = parent.Create(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return err
 	}
@@ -208,7 +208,7 @@ func (f *FileBase) EnsureLineInFile(line string, verbose bool) (err error) {
 		return err
 	}
 
-	err = parent.Create(verbose) // ensure the file is created if not existent.
+	err = parent.Create(contextutils.GetVerbosityContextByBool(verbose)) // ensure the file is created if not existent.
 	if err != nil {
 		return err
 	}

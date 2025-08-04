@@ -287,7 +287,7 @@ func (l *LocalDirectory) CreateFileInDirectory(verbose bool, path ...string) (cr
 		return nil, err
 	}
 
-	err = createdFile.Create(verbose)
+	err = createdFile.Create(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return nil, err
 	}

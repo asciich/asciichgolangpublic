@@ -217,13 +217,13 @@ func (c *CommandExecutorFile) CopyToFile(destFile filesinterfaces.File, verbose 
 	return nil
 }
 
-func (c *CommandExecutorFile) Create(verbose bool) (err error) {
+func (c *CommandExecutorFile) Create(ctx context.Context) (err error) {
 	commandExecutor, filePath, hostDescription, err := c.GetCommandExecutorAndFilePathAndHostDescription()
 	if err != nil {
 		return err
 	}
 
-	exists, err := c.Exists(verbose)
+	exists, err := c.Exists(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
@@ -236,7 +236,7 @@ func (c *CommandExecutorFile) Create(verbose bool) (err error) {
 		)
 	} else {
 		_, err = commandExecutor.RunCommand(
-			contextutils.GetVerbosityContextByBool(verbose),
+			ctx,
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"touch", filePath},
 			},
@@ -676,13 +676,6 @@ func (c *CommandExecutorFile) MustChown(options *parameteroptions.ChownOptions) 
 
 func (c *CommandExecutorFile) MustCopyToFile(destFile filesinterfaces.File, verbose bool) {
 	err := c.CopyToFile(destFile, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorFile) MustCreate(verbose bool) {
-	err := c.Create(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
