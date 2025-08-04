@@ -29,7 +29,7 @@ type GitRepository interface {
 	Commit(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit, err error)
 	CommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool, err error)
 	CreateBranch(createOptions *parameteroptions.CreateBranchOptions) (err error)
-	Create(verbose bool) (err error)
+	Create(ctx context.Context) (err error)
 	CreateFileInDirectory(verbose bool, filePath ...string) (createdFile filesinterfaces.File, err error)
 	CreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory filesinterfaces.Directory, err error)
 	CreateTag(createOptions *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag, err error)

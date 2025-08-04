@@ -165,6 +165,7 @@ func TestGitRepository_Init(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
@@ -178,7 +179,7 @@ func TestGitRepository_Init(t *testing.T) {
 				}
 
 				for i := 0; i < 2; i++ {
-					err := repo.Create(verbose)
+					err := repo.Create(ctx)
 					require.NoError(t, err)
 					require.True(t, mustutils.Must(repo.Exists(verbose)))
 					require.False(t, mustutils.Must(repo.IsInitialized(verbose)))

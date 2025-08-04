@@ -9,7 +9,7 @@ import (
 type Directory interface {
 	Chmod(chmodOptions *parameteroptions.ChmodOptions) (err error)
 	CopyContentToDirectory(destinationDir Directory, verbose bool) (err error)
-	Create(verbose bool) (err error)
+	Create(ctx context.Context) (err error)
 	CreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory Directory, err error)
 	Delete(verbose bool) (err error)
 	Exists(verbose bool) (exists bool, err error)

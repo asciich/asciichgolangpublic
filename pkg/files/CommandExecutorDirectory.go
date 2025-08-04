@@ -175,8 +175,8 @@ func (c *CommandExecutorDirectory) CopyContentToDirectory(destinationDir filesin
 	return nil
 }
 
-func (c *CommandExecutorDirectory) Create(verbose bool) (err error) {
-	exists, err := c.Exists(verbose)
+func (c *CommandExecutorDirectory) Create(ctx context.Context) (err error) {
+	exists, err := c.Exists(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
@@ -194,7 +194,7 @@ func (c *CommandExecutorDirectory) Create(verbose bool) (err error) {
 		)
 	} else {
 		_, err = commandExecutor.RunCommand(
-			contextutils.GetVerbosityContextByBool(verbose),
+			ctx,
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"mkdir", "-p", dirPath},
 			},
@@ -223,7 +223,7 @@ func (c *CommandExecutorDirectory) CreateSubDirectory(subDirectoryName string, v
 		return nil, err
 	}
 
-	err = createdSubDirectory.Create(verbose)
+	err = createdSubDirectory.Create(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return nil, err
 	}

@@ -1107,7 +1107,7 @@ func (c *CommandExecutorGitRepository) Init(options *parameteroptions.CreateRepo
 			)
 		}
 	} else {
-		err = c.Create(options.Verbose)
+		err = c.Create(contextutils.GetVerbosityContextByBool(options.Verbose))
 		if err != nil {
 			return err
 		}

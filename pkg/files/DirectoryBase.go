@@ -142,7 +142,7 @@ func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose 
 		return nil, err
 	}
 
-	err = parentDir.Create(verbose)
+	err = parentDir.Create(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return nil, err
 	}
