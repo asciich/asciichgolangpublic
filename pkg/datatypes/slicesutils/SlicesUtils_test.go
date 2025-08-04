@@ -1,10 +1,11 @@
-package slicesutils
+package slicesutils_test
 
 import (
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 )
 
 func TestSlicesContainsInt(t *testing.T) {
@@ -29,7 +30,7 @@ func TestSlicesContainsInt(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				require.EqualValues(tt.expectedContains, ContainsInt(tt.inputSlice, tt.intToSearch))
+				require.EqualValues(tt.expectedContains, slicesutils.ContainsInt(tt.inputSlice, tt.intToSearch))
 			},
 		)
 	}
@@ -60,7 +61,7 @@ func TestSlicesContainsString(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				require.EqualValues(tt.expectedContains, ContainsString(tt.inputSlice, tt.stringToSearch))
+				require.EqualValues(tt.expectedContains, slicesutils.ContainsString(tt.inputSlice, tt.stringToSearch))
 			},
 		)
 	}
@@ -91,7 +92,7 @@ func TestSlicesContainsStringIgnoreCase(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				require.EqualValues(tt.expectedContains, ContainsStringIgnoreCase(tt.inputSlice, tt.stringToSearch))
+				require.EqualValues(tt.expectedContains, slicesutils.ContainsStringIgnoreCase(tt.inputSlice, tt.stringToSearch))
 			},
 		)
 	}
@@ -124,7 +125,7 @@ func TestSlicesTrimSpace(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				trimmed := TrimSpace(tt.input)
+				trimmed := slicesutils.TrimSpace(tt.input)
 				require.EqualValues(tt.expectedOutput, trimmed)
 			},
 		)
@@ -152,7 +153,7 @@ func TestSlicesRemoveMatchingStrings(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				removedMatching := RemoveMatchingStrings(tt.input, tt.removeMatching)
+				removedMatching := slicesutils.RemoveMatchingStrings(tt.input, tt.removeMatching)
 				require.EqualValues(tt.expectedOutput, removedMatching)
 			},
 		)
@@ -177,10 +178,9 @@ func TestSlicesRemoveStringsWhichContains(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				removedContains := MustRemoveStringsWhichContains(tt.input, tt.searchString)
-				require.EqualValues(tt.expectedOutput, removedContains)
+				removedContains, err := slicesutils.RemoveStringsWhichContains(tt.input, tt.searchString)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedOutput, removedContains)
 			},
 		)
 	}
@@ -206,7 +206,7 @@ func TestSlicesMaxIntValuePerIndex(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				maxValues := MaxIntValuePerIndex(tt.input1, tt.input2)
+				maxValues := slicesutils.MaxIntValuePerIndex(tt.input1, tt.input2)
 				require.EqualValues(tt.expectedOutput, maxValues)
 			},
 		)
@@ -233,7 +233,7 @@ func TestSlicesRemoveLastElementIfEmptyString(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				output := RemoveLastElementIfEmptyString(tt.input)
+				output := slicesutils.RemoveLastElementIfEmptyString(tt.input)
 				require.EqualValues(tt.expectedOutput, output)
 			},
 		)
@@ -263,7 +263,7 @@ func TestSlicesRemoveDuplicatedEntries(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				output := RemoveDuplicatedStrings(tt.input)
+				output := slicesutils.RemoveDuplicatedStrings(tt.input)
 				require.EqualValues(tt.expectedOutput, output)
 			},
 		)
@@ -297,7 +297,7 @@ func TestSlicesStringSlicesEqual(t *testing.T) {
 
 				require.EqualValues(
 					tt.expectedEqual,
-					StringSlicesEqual(tt.input1, tt.input2),
+					slicesutils.StringSlicesEqual(tt.input1, tt.input2),
 				)
 			},
 		)
@@ -330,7 +330,7 @@ func TestSlicesDiffStringSlices(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				aNotInB, bNotInA := DiffStringSlices(tt.input1, tt.input2)
+				aNotInB, bNotInA := slicesutils.DiffStringSlices(tt.input1, tt.input2)
 
 				require.EqualValues(
 					tt.expectedANotInB,
@@ -363,7 +363,7 @@ func TestSlicesGetDeepCopyOfByteSlice(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				copy := GetDeepCopyOfByteSlice(tt.input)
+				copy := slicesutils.GetDeepCopyOfByteSlice(tt.input)
 				require.EqualValues(tt.expected_output, copy)
 
 				for i := 0; i < len(tt.input); i++ {
@@ -381,7 +381,8 @@ func TestSlicesGetDeepCopyOfStringSlice(t *testing.T) {
 		input           []string
 		expected_output []string
 	}{
-		{nil, []string{}},
+		{nil, nil},
+		{[]string{}, []string{}},
 		{[]string{"a"}, []string{"a"}},
 		{[]string{"a", ""}, []string{"a", ""}},
 		{[]string{"a", "b"}, []string{"a", "b"}},
@@ -394,7 +395,7 @@ func TestSlicesGetDeepCopyOfStringSlice(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				copy := GetDeepCopyOfStringsSlice(tt.input)
+				copy := slicesutils.GetDeepCopyOfStringsSlice(tt.input)
 				require.EqualValues(tt.expected_output, copy)
 			},
 		)
@@ -405,7 +406,7 @@ func TestSlices_GetSortedDeepCopyString(t *testing.T) {
 	require := require.New(t)
 	inputSlice := []string{"c", "b", "a"}
 
-	sorted := GetSortedDeepCopyOfStringsSlice(inputSlice)
+	sorted := slicesutils.GetSortedDeepCopyOfStringsSlice(inputSlice)
 	require.EqualValues([]string{"a", "b", "c"}, sorted)
 	require.NotEqual(inputSlice, sorted)
 	require.EqualValues([]string{"c", "b", "a"}, inputSlice)
@@ -437,9 +438,49 @@ func TestSlices_RemoveEmptyStringsAtEnd(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				copy := RemoveEmptyStringsAtEnd(tt.input)
+				copy := slicesutils.RemoveEmptyStringsAtEnd(tt.input)
 				require.EqualValues(tt.expectedOutput, copy)
 			},
 		)
 	}
+}
+
+func Test_GetInitializedIntSlice(t *testing.T) {
+	t.Run("zero", func(t *testing.T) {
+		require.EqualValues(t, []int{}, slicesutils.GetInitializedIntSlice(0, 0))
+	})
+
+	t.Run("two zeros", func(t *testing.T) {
+		require.EqualValues(t, []int{0, 0}, slicesutils.GetInitializedIntSlice(2, 0))
+	})
+
+	t.Run("two threes", func(t *testing.T) {
+		require.EqualValues(t, []int{3, 3}, slicesutils.GetInitializedIntSlice(2, 3))
+	})
+
+	t.Run("two minus threes", func(t *testing.T) {
+		require.EqualValues(t, []int{-3, -3}, slicesutils.GetInitializedIntSlice(2, -3))
+	})
+
+	t.Run("minus two minus threes", func(t *testing.T) {
+		require.EqualValues(t, []int{}, slicesutils.GetInitializedIntSlice(-2, -3))
+	})
+}
+
+func Test_GetInitializedIntSliceWithZeros(t *testing.T) {
+	t.Run("zero", func(t *testing.T) {
+		require.EqualValues(t, []int{}, slicesutils.GetInitializedIntSliceWithZeros(0))
+	})
+
+	t.Run("two", func(t *testing.T) {
+		require.EqualValues(t, []int{0, 0}, slicesutils.GetInitializedIntSliceWithZeros(2))
+	})
+
+	t.Run("five", func(t *testing.T) {
+		require.EqualValues(t, []int{0, 0, 0, 0, 0}, slicesutils.GetInitializedIntSliceWithZeros(5))
+	})
+
+	t.Run("minus 1", func(t *testing.T) {
+		require.EqualValues(t, []int{}, slicesutils.GetInitializedIntSliceWithZeros(-5))
+	})
 }

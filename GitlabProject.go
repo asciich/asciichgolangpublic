@@ -48,11 +48,9 @@ func GetGitlabProjectByUrl(url *urlsutils.URL, authOptions []authenticationoptio
 		return nil, tracederrors.TracedErrorf("Unable to get %v as GitlabAuthenticationOptions", authOption)
 	}
 
-	if authOptions != nil {
-		err = gitlab.Authenticate(gitlabAuthenticationOption)
-		if err != nil {
-			return nil, err
-		}
+	err = gitlab.Authenticate(gitlabAuthenticationOption)
+	if err != nil {
+		return nil, err
 	}
 
 	gitlabProject, err = gitlab.GetGitlabProjectByPath(path, verbose)

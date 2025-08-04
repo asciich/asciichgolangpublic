@@ -233,6 +233,7 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 				require.False(t, exists)
 
 				content, err = syncBranch.ReadFileContentAsString(&GitlabReadFileOptions{Path: filePath, Verbose: verbose})
+				require.NoError(t, err)
 				require.EqualValues(t, "world", content)
 
 				mergeRequest.MustMerge(
