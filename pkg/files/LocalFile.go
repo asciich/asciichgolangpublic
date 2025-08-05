@@ -11,6 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
@@ -49,15 +50,6 @@ func MustGetLocalFileByFile(inputFile filesinterfaces.File) (localFile *LocalFil
 	}
 
 	return localFile
-}
-
-func MustGetLocalFileByPath(localPath string) (l *LocalFile) {
-	l, err := GetLocalFileByPath(localPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return l
 }
 
 func MustNewLocalFileByPath(localPath string) (l *LocalFile) {
@@ -292,7 +284,7 @@ func (l *LocalFile) CopyToFile(destFile filesinterfaces.File, verbose bool) (err
 	return nil
 }
 
-func (l *LocalFile) Create(ctx context.Context) (err error) {
+func (l *LocalFile) Create(ctx context.Context, options *filesoptions.CreateOptions) (err error) {
 	exists, err := l.Exists(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err

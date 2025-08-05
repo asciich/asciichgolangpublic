@@ -7,6 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -72,7 +73,7 @@ func (g *GitignoreFile) AddDirToIgnore(pathToIgnore string, comment string, verb
 
 	pathToIgnore = stringsutils.EnsureSuffix(pathToIgnore, "/")
 
-	err = g.Create(contextutils.GetVerbosityContextByBool(verbose))
+	err = g.Create(contextutils.GetVerbosityContextByBool(verbose), &filesoptions.CreateOptions{})
 	if err != nil {
 		return err
 	}
@@ -128,7 +129,7 @@ func (g *GitignoreFile) AddFileToIgnore(pathToIgnore string, comment string, ver
 		return tracederrors.TracedError("comment is empty string")
 	}
 
-	err = g.Create(contextutils.GetVerbosityContextByBool(verbose))
+	err = g.Create(contextutils.GetVerbosityContextByBool(verbose), &filesoptions.CreateOptions{})
 	if err != nil {
 		return err
 	}

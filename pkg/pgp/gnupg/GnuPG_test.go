@@ -26,9 +26,13 @@ func getFileToTest(implementationName string) (file filesinterfaces.File) {
 	ctx := getCtx()
 
 	if implementationName == "localFile" {
-		file = files.MustGetLocalFileByPath(
+		var err error
+		file, err = files.GetLocalFileByPath(
 			mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)),
 		)
+		if err != nil {
+			panic(err)
+		}
 	} else if implementationName == "localCommandExecutorFile" {
 		file = files.MustGetLocalCommandExecutorFileByPath(
 			mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)),

@@ -12,6 +12,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/changesummary"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 
 	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
@@ -135,7 +136,7 @@ func (f *FileBase) CreateParentDirectory(verbose bool) (err error) {
 		return err
 	}
 
-	err = parentDir.Create(contextutils.GetVerbosityContextByBool(verbose))
+	err = parentDir.Create(contextutils.GetVerbosityContextByBool(verbose), &filesoptions.CreateOptions{})
 	if err != nil {
 		return err
 	}
@@ -154,7 +155,7 @@ func (f *FileBase) EnsureEndsWithLineBreak(verbose bool) (err error) {
 		return err
 	}
 
-	err = parent.Create(contextutils.GetVerbosityContextByBool(verbose))
+	err = parent.Create(contextutils.GetVerbosityContextByBool(verbose), &filesoptions.CreateOptions{})
 	if err != nil {
 		return err
 	}
@@ -208,7 +209,7 @@ func (f *FileBase) EnsureLineInFile(line string, verbose bool) (err error) {
 		return err
 	}
 
-	err = parent.Create(contextutils.GetVerbosityContextByBool(verbose)) // ensure the file is created if not existent.
+	err = parent.Create(contextutils.GetVerbosityContextByBool(verbose), &filesoptions.CreateOptions{}) // ensure the file is created if not existent.
 	if err != nil {
 		return err
 	}

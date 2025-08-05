@@ -31,7 +31,7 @@ func createTempFileAndGetPath() (path string) {
 // the file is deleted after the test is over.
 func getFileToTest(implementationName string) (file filesinterfaces.File) {
 	if implementationName == "localFile" {
-		return files.MustGetLocalFileByPath(createTempFileAndGetPath())
+		return mustutils.Must(files.GetLocalFileByPath(createTempFileAndGetPath()))
 	}
 
 	if implementationName == "localCommandExecutorFile" {

@@ -13,6 +13,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
@@ -175,7 +176,7 @@ func (c *CommandExecutorDirectory) CopyContentToDirectory(destinationDir filesin
 	return nil
 }
 
-func (c *CommandExecutorDirectory) Create(ctx context.Context) (err error) {
+func (c *CommandExecutorDirectory) Create(ctx context.Context, options *filesoptions.CreateOptions) (err error) {
 	exists, err := c.Exists(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
@@ -187,11 +188,7 @@ func (c *CommandExecutorDirectory) Create(ctx context.Context) (err error) {
 	}
 
 	if exists {
-		logging.LogInfof(
-			"Directory '%s' on '%s' already exists.",
-			dirPath,
-			hostDescription,
-		)
+		logging.LogInfoByCtxf(ctx, "Directory '%s' on '%s' already exists.", dirPath, hostDescription)
 	} else {
 		_, err = commandExecutor.RunCommand(
 			ctx,
@@ -203,17 +200,13 @@ func (c *CommandExecutorDirectory) Create(ctx context.Context) (err error) {
 			return err
 		}
 
-		logging.LogChangedf(
-			"Directory '%s' on '%s' created.",
-			dirPath,
-			hostDescription,
-		)
+		logging.LogChangedByCtxf(ctx, "Directory '%s' on '%s' created.", dirPath, hostDescription)
 	}
 
 	return nil
 }
 
-func (c *CommandExecutorDirectory) CreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory filesinterfaces.Directory, err error) {
+func (c *CommandExecutorDirectory) CreateSubDirectory(ctx context.Context, subDirectoryName string, options *filesoptions.CreateOptions) (createdSubDirectory filesinterfaces.Directory, err error) {
 	if subDirectoryName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("subDirectoryName")
 	}
@@ -223,7 +216,7 @@ func (c *CommandExecutorDirectory) CreateSubDirectory(subDirectoryName string, v
 		return nil, err
 	}
 
-	err = createdSubDirectory.Create(contextutils.GetVerbosityContextByBool(verbose))
+	err = createdSubDirectory.Create(ctx, options)
 	if err != nil {
 		return nil, err
 	}

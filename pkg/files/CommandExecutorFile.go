@@ -12,6 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -217,7 +218,7 @@ func (c *CommandExecutorFile) CopyToFile(destFile filesinterfaces.File, verbose 
 	return nil
 }
 
-func (c *CommandExecutorFile) Create(ctx context.Context) (err error) {
+func (c *CommandExecutorFile) Create(ctx context.Context, options *filesoptions.CreateOptions) (err error) {
 	commandExecutor, filePath, hostDescription, err := c.GetCommandExecutorAndFilePathAndHostDescription()
 	if err != nil {
 		return err

@@ -8,6 +8,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
@@ -99,7 +100,7 @@ func (d *DirectoryBase) CheckExists(ctx context.Context) (err error) {
 	)
 }
 
-func (d *DirectoryBase) CreateFileInDirectory(verbose bool, path ...string) (createdFile filesinterfaces.File, err error) {
+func (d *DirectoryBase) CreateFileInDirectory(ctx context.Context, path string, options *filesoptions.CreateOptions) (createdFile filesinterfaces.File, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedError("path has no elements")
 	}
@@ -109,12 +110,12 @@ func (d *DirectoryBase) CreateFileInDirectory(verbose bool, path ...string) (cre
 		return nil, err
 	}
 
-	createdFile, err = parent.GetFileInDirectory(path...)
+	createdFile, err = parent.GetFileInDirectory(path)
 	if err != nil {
 		return nil, err
 	}
 
-	err = createdFile.Create(contextutils.GetVerbosityContextByBool(verbose))
+	err = createdFile.Create(ctx, options)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +143,7 @@ func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose 
 		return nil, err
 	}
 
-	err = parentDir.Create(contextutils.GetVerbosityContextByBool(verbose))
+	err = parentDir.Create(contextutils.GetVerbosityContextByBool(verbose), &filesoptions.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -364,24 +365,6 @@ func (d *DirectoryBase) MustCheckExists(ctx context.Context) {
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
-}
-
-func (d *DirectoryBase) MustCreateFileInDirectory(verbose bool, path ...string) (createdFile filesinterfaces.File) {
-	createdFile, err := d.CreateFileInDirectory(verbose, path...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return createdFile
-}
-
-func (d *DirectoryBase) MustCreateFileInDirectoryFromString(content string, verbose bool, pathToCreate ...string) (createdFile filesinterfaces.File) {
-	createdFile, err := d.CreateFileInDirectoryFromString(content, verbose, pathToCreate...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return createdFile
 }
 
 func (d *DirectoryBase) MustFileInDirectoryExists(verbose bool, path ...string) (fileExists bool) {

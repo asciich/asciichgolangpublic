@@ -3,14 +3,15 @@ package filesinterfaces
 import (
 	"context"
 
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 type Directory interface {
 	Chmod(chmodOptions *parameteroptions.ChmodOptions) (err error)
 	CopyContentToDirectory(destinationDir Directory, verbose bool) (err error)
-	Create(ctx context.Context) (err error)
-	CreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory Directory, err error)
+	Create(ctx context.Context, options *filesoptions.CreateOptions) (err error)
+	CreateSubDirectory(ctx context.Context, subDirectoryName string, options *filesoptions.CreateOptions) (createdSubDirectory Directory, err error)
 	Delete(verbose bool) (err error)
 	Exists(verbose bool) (exists bool, err error)
 	GetBaseName() (baseName string, err error)
@@ -30,7 +31,7 @@ type Directory interface {
 
 	// All methods below this line can be implemented by embedding the `DirectoryBase` struct:
 	CheckExists(ctx context.Context) (err error)
-	CreateFileInDirectory(verbose bool, path ...string) (createdFile File, err error)
+	CreateFileInDirectory(ctx context.Context, path string, options *filesoptions.CreateOptions) (createdFile File, err error)
 	GetFilePathInDirectory(path ...string) (filePath string, err error)
 	GetPathAndHostDescription() (dirPath string, hostDescription string, err error)
 	DeleteFilesMatching(ctx context.Context, listFileOptons *parameteroptions.ListFileOptions) (err error)

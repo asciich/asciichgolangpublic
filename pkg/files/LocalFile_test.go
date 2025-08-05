@@ -15,6 +15,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/pointersutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
@@ -191,7 +192,11 @@ func TestLocalFileGetBaseName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				var file filesinterfaces.File = files.MustGetLocalFileByPath(tt.path)
+				var file filesinterfaces.File
+				var err error
+
+				file, err = files.GetLocalFileByPath(tt.path)
+				require.NoError(t, err)
 
 				baseName, err := file.GetBaseName()
 				require.NoError(t, err)
@@ -264,37 +269,27 @@ func TestLocalFileIsMatchingSha256Sum(t *testing.T) {
 
 // TODO: Move to File_test.go and test for all File implementations.
 func TestLocalFileGetParentDirectory(t *testing.T) {
-	tests := []struct {
-		testcase string
-	}{
-		{"testcase"},
-	}
+	t.Run("happy path", func(t *testing.T) {
+		ctx := getCtx()
 
-	for _, tt := range tests {
-		tt := tt
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				const verbose bool = true
+		const verbose bool = true
 
-				temporaryDir := getDirectoryToTest("localDirectory")
-				defer temporaryDir.Delete(verbose)
+		temporaryDir := getDirectoryToTest("localDirectory")
+		defer temporaryDir.Delete(verbose)
 
-				temporaryFile, err := temporaryDir.CreateFileInDirectory(verbose, "test.txt")
-				require.NoError(t, err)
-				parentDir, err := temporaryFile.GetParentDirectory()
-				require.NoError(t, err)
+		temporaryFile, err := temporaryDir.CreateFileInDirectory(ctx, "test.txt", &filesoptions.CreateOptions{})
+		require.NoError(t, err)
+		parentDir, err := temporaryFile.GetParentDirectory()
+		require.NoError(t, err)
 
-				tmpPath, err := temporaryDir.GetLocalPath()
-				require.NoError(t, err)
+		tmpPath, err := temporaryDir.GetLocalPath()
+		require.NoError(t, err)
 
-				parentPath, err := parentDir.GetLocalPath()
-				require.NoError(t, err)
+		parentPath, err := parentDir.GetLocalPath()
+		require.NoError(t, err)
 
-				require.EqualValues(t, tmpPath, parentPath)
-			},
-		)
-	}
+		require.EqualValues(t, tmpPath, parentPath)
+	})
 }
 
 // TODO: Move to File_test.go and test for all File implementations.
@@ -350,13 +345,12 @@ func TestLocalFileGetLocalPathIsAbsolute(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				localFile := files.MustGetLocalFileByPath(tt.pathToTest)
+				localFile, err := files.GetLocalFileByPath(tt.pathToTest)
+				require.NoError(t, err)
 
 				localPath := localFile.MustGetLocalPath()
 
-				require.True(pathsutils.IsAbsolutePath(localPath))
+				require.True(t, pathsutils.IsAbsolutePath(localPath))
 			},
 		)
 	}
@@ -548,8 +542,6 @@ func TestLocalFile_GetPathReturnsAbsoluteValue(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				startPath, err := os.Getwd()
 				if err != nil {
 					logging.LogFatalWithTrace(err)
@@ -564,7 +556,8 @@ func TestLocalFile_GetPathReturnsAbsoluteValue(t *testing.T) {
 					defer os.Chdir(startPath)
 					defer waitGroup.Done()
 
-					file := files.MustGetLocalFileByPath(tt.path)
+					file, err := files.GetLocalFileByPath(tt.path)
+					require.NoError(t, err)
 					path1 = file.MustGetPath()
 					os.Chdir("..")
 					path2 = file.MustGetPath()
@@ -574,17 +567,17 @@ func TestLocalFile_GetPathReturnsAbsoluteValue(t *testing.T) {
 				go testFunction()
 				waitGroup.Wait()
 
-				require.True(pathsutils.IsAbsolutePath(path1))
-				require.True(pathsutils.IsAbsolutePath(path2))
+				require.True(t, pathsutils.IsAbsolutePath(path1))
+				require.True(t, pathsutils.IsAbsolutePath(path2))
 
-				require.EqualValues(path1, path2)
+				require.EqualValues(t, path1, path2)
 
 				currentPath, err := os.Getwd()
 				if err != nil {
 					t.Fatalf("%v", err)
 				}
 
-				require.EqualValues(startPath, currentPath)
+				require.EqualValues(t, startPath, currentPath)
 			},
 		)
 	}
@@ -808,11 +801,11 @@ func TestFileGetParentDirectoryPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				testFile, err := files.GetLocalFileByPath(tt.inputPath)
+				require.NoError(t, err)
 
-				testFile := files.MustGetLocalFileByPath(tt.inputPath)
 				parentPath := testFile.MustGetParentDirectoryPath()
-				require.EqualValues(tt.expectedParentPath, parentPath)
+				require.EqualValues(t, tt.expectedParentPath, parentPath)
 			},
 		)
 	}
@@ -1074,19 +1067,18 @@ func TestFileEnsureEndsWithLineBreakOnEmptyFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				tempFile, err := os.CreateTemp("", "testfile")
-				require.Nil(err)
+				require.NoError(t, err)
 
-				emptyFile := files.MustGetLocalFileByPath(tempFile.Name())
+				emptyFile, err := files.GetLocalFileByPath(tempFile.Name())
+				require.NoError(t, err)
 				defer func() { _ = emptyFile.Delete(verbose) }()
 
 				emptyFile.MustEnsureEndsWithLineBreak(verbose)
 
-				require.EqualValues("\n", emptyFile.MustReadLastCharAsString())
+				require.EqualValues(t, "\n", emptyFile.MustReadLastCharAsString())
 			},
 		)
 	}
@@ -1100,7 +1092,8 @@ func TestFileEnsureEndsWithLineBreakOnNonExitistingFile(t *testing.T) {
 		tempFile, err := os.CreateTemp("", "testfile")
 		require.Nil(t, err)
 
-		nonExistingFile := files.MustGetLocalFileByPath(tempFile.Name())
+		nonExistingFile, err := files.GetLocalFileByPath(tempFile.Name())
+		require.NoError(t, err)
 		defer func() { _ = nonExistingFile.Delete(verbose) }()
 		err = nonExistingFile.Delete(verbose)
 		require.NoError(t, err)

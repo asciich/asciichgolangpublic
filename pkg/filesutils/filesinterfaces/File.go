@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/changesummary"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
@@ -15,7 +16,7 @@ type File interface {
 	Chmod(options *parameteroptions.ChmodOptions) (err error)
 	Chown(options *parameteroptions.ChownOptions) (err error)
 	CopyToFile(destFile File, verbose bool) (err error)
-	Create(ctx context.Context) (err error)
+	Create(ctx context.Context, options *filesoptions.CreateOptions) (err error)
 	Delete(verbose bool) (err error)
 	Exists(verbose bool) (exists bool, err error)
 	GetAccessPermissions() (permission int, err error)
