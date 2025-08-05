@@ -25,7 +25,7 @@ func getFileToTest(implementationName string) (fileToTest filesinterfaces.File) 
 	temporayFile := mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctxSilent))
 
 	if implementationName == "localFile" {
-		return files.MustGetLocalFileByPath(temporayFile)
+		return mustutils.Must(files.GetLocalFileByPath(temporayFile))
 	}
 
 	if implementationName == "localCommandExecutorFile" {

@@ -125,3 +125,11 @@ func Test_GetNamespace(t *testing.T) {
 		require.EqualValues(t, "abcdefg", namespace)
 	})
 }
+
+func Test_GetCreateFileOptions(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
+		collectionOptions := &ansiblegalaxyutils.CreateCollectionFileStructureOptions{}
+		createOptions := collectionOptions.GetCreateFileOptions()
+		require.False(t, createOptions.UseSudo)
+	})
+}

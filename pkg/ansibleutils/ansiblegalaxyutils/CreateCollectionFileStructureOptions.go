@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 )
@@ -88,4 +89,8 @@ func (c *CreateCollectionFileStructureOptions) GetAuthors() ([]string, error) {
 	}
 
 	return slicesutils.GetDeepCopyOfStringsSlice(c.Authors), nil
+}
+
+func (c *CreateCollectionFileStructureOptions) GetCreateFileOptions() *filesoptions.CreateOptions {
+	return &filesoptions.CreateOptions{}
 }

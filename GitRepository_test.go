@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -113,6 +114,7 @@ func TestGitRepository_IsGitRepository(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
@@ -127,7 +129,7 @@ func TestGitRepository_IsGitRepository(t *testing.T) {
 
 				path, err := repo.GetPath()
 				require.NoError(t, err)
-				_, err = files.Directories().CreateLocalDirectoryByPath(path, verbose)
+				_, err = files.Directories().CreateLocalDirectoryByPath(ctx, path, &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				// The directory exists but is empty which is not a git directory:
@@ -179,7 +181,7 @@ func TestGitRepository_Init(t *testing.T) {
 				}
 
 				for i := 0; i < 2; i++ {
-					err := repo.Create(ctx)
+					err := repo.Create(ctx, &filesoptions.CreateOptions{})
 					require.NoError(t, err)
 					require.True(t, mustutils.Must(repo.Exists(verbose)))
 					require.False(t, mustutils.Must(repo.IsInitialized(verbose)))
@@ -331,13 +333,14 @@ func TestGitRepository_HasNoUncommittedChanges(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
 				require.True(t, mustutils.Must(repo.HasNoUncommittedChanges(verbose)))
 
-				_, err := repo.CreateFileInDirectory(verbose, "hello.txt")
+				_, err := repo.CreateFileInDirectory(ctx, "hello.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 				require.False(t, mustutils.Must(repo.HasNoUncommittedChanges(verbose)))
 			},
@@ -359,13 +362,14 @@ func TestGitRepository_HasUncommittedChanges(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
 				require.False(t, mustutils.Must(repo.HasUncommittedChanges(verbose)))
 
-				_, err := repo.CreateFileInDirectory(verbose, "hello.txt")
+				_, err := repo.CreateFileInDirectory(ctx, "hello.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 				require.True(t, mustutils.Must(repo.HasUncommittedChanges(verbose)))
 			},
@@ -387,13 +391,14 @@ func TestGitRepository_CheckHasNoUncommittedChanges(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
 
 				require.Nil(t, repo.CheckHasNoUncommittedChanges(verbose))
 
-				_, err := repo.CreateFileInDirectory(verbose, "hello.txt")
+				_, err := repo.CreateFileInDirectory(ctx, "hello.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 				require.NotNil(t, repo.CheckHasNoUncommittedChanges(verbose))
 			},
@@ -523,7 +528,7 @@ func TestGitRepository_GetRootDirectory_from_subdirectory(t *testing.T) {
 				expectedRootDirectory, err := repo.GetPath()
 				require.NoError(t, err)
 
-				subDir, err := repo.CreateSubDirectory("sub_directory", verbose)
+				subDir, err := repo.CreateSubDirectory(ctx, "sub_directory", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				repoUsingSubDir1, err := GetCommandExecutorGitRepositoryFromDirectory(subDir)
@@ -666,7 +671,7 @@ func TestGitRepository_PullAndPush(t *testing.T) {
 				)
 
 				fileName := "abc.txt"
-				_, err = clonedRepo2.CreateFileInDirectory(verbose, fileName)
+				_, err = clonedRepo2.CreateFileInDirectory(ctx, fileName, &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				err = clonedRepo2.AddFileByPath(fileName, verbose)
@@ -782,10 +787,10 @@ func TestGitRepository_AddFilesByPath(t *testing.T) {
 
 				fileName := "abc.txt"
 				fileName2 := "abc.txt"
-				_, err = clonedRepo.CreateFileInDirectory(verbose, fileName)
+				_, err = clonedRepo.CreateFileInDirectory(ctx, fileName, &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
-				_, err = clonedRepo.CreateFileInDirectory(verbose, fileName2)
+				_, err = clonedRepo.CreateFileInDirectory(ctx, fileName2, &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				err = clonedRepo.AddFilesByPath(
@@ -831,6 +836,7 @@ func TestGitRepository_FileByPathExists(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
 				defer repo.Delete(verbose)
@@ -838,7 +844,7 @@ func TestGitRepository_FileByPathExists(t *testing.T) {
 				require.False(t, mustutils.Must(repo.HasUncommittedChanges(verbose)))
 				require.False(t, mustutils.Must(repo.FileByPathExists("hello.txt", verbose)))
 
-				_, err := repo.CreateFileInDirectory(verbose, "hello.txt")
+				_, err := repo.CreateFileInDirectory(ctx, "hello.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				require.True(t, mustutils.Must(repo.FileByPathExists("hello.txt", verbose)))
@@ -868,13 +874,13 @@ func TestGitRepository_ListFiles(t *testing.T) {
 
 				require.False(t, mustutils.Must(repo.HasUncommittedChanges(verbose)))
 
-				_, err := repo.CreateFileInDirectory(verbose, "a.txt")
+				_, err := repo.CreateFileInDirectory(ctx, "a.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				_, err = repo.CreateFileInDirectory(verbose, "b.txt")
+				_, err = repo.CreateFileInDirectory(ctx, "b.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				_, err = repo.CreateFileInDirectory(verbose, "c.txt")
+				_, err = repo.CreateFileInDirectory(ctx, "c.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				_, err = repo.CreateFileInDirectory(verbose, "cb.txt")
+				_, err = repo.CreateFileInDirectory(ctx, "cb.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				files, err := repo.ListFiles(
@@ -924,13 +930,13 @@ func TestGitRepository_ListFilePaths(t *testing.T) {
 
 				require.False(t, mustutils.Must(repo.HasUncommittedChanges(verbose)))
 
-				_, err := repo.CreateFileInDirectory(verbose, "a.txt")
+				_, err := repo.CreateFileInDirectory(ctx, "a.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				_, err = repo.CreateFileInDirectory(verbose, "b.txt")
+				_, err = repo.CreateFileInDirectory(ctx, "b.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				_, err = repo.CreateFileInDirectory(verbose, "c.txt")
+				_, err = repo.CreateFileInDirectory(ctx, "c.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				_, err = repo.CreateFileInDirectory(verbose, "cb.txt")
+				_, err = repo.CreateFileInDirectory(ctx, "cb.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				files, err := repo.ListFilePaths(
@@ -2042,13 +2048,14 @@ func TestGitRepository_IsPreCommitRepository(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
 				require.False(t, mustutils.Must(gitRepo.IsPreCommitRepository(verbose)))
 
-				_, err := gitRepo.CreateSubDirectory("pre_commit_hooks", verbose)
+				_, err := gitRepo.CreateSubDirectory(ctx, "pre_commit_hooks", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				require.True(t, mustutils.Must(gitRepo.IsPreCommitRepository(verbose)))
@@ -2071,13 +2078,14 @@ func TestGitRepository_CheckIsPreCommitRepository(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(verbose)
 
 				require.NotNil(t, gitRepo.CheckIsPreCommitRepository(verbose))
 
-				_, err := gitRepo.CreateSubDirectory("pre_commit_hooks", verbose)
+				_, err := gitRepo.CreateSubDirectory(ctx, "pre_commit_hooks", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				require.Nil(t, gitRepo.CheckIsPreCommitRepository(verbose))

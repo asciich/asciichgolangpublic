@@ -6,6 +6,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -431,7 +432,7 @@ func (g *GitRepositoryBase) CreateAndInit(createOptions *parameteroptions.Create
 		return err
 	}
 
-	err = parent.Create(contextutils.GetVerbosityContextByBool(createOptions.Verbose))
+	err = parent.Create(contextutils.GetVerbosityContextByBool(createOptions.Verbose), &filesoptions.CreateOptions{})
 	if err != nil {
 		return err
 	}
@@ -508,7 +509,7 @@ func (g *GitRepositoryBase) EnsureMainReadmeMdExists(verbose bool) (err error) {
 		return err
 	}
 
-	_, err = parent.CreateFileInDirectory(verbose, "README.md")
+	_, err = parent.CreateFileInDirectory(contextutils.GetVerbosityContextByBool(verbose), "README.md", &filesoptions.CreateOptions{})
 	if err != nil {
 		return err
 	}

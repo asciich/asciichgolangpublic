@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -50,11 +51,12 @@ func TestDirectory_GetParentDirectory(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				dir := getDirectoryToTest(tt.implementationName)
 				defer dir.Delete(verbose)
 
-				subDir, err := dir.CreateSubDirectory("subdir", verbose)
+				subDir, err := dir.CreateSubDirectory(ctx, "subdir", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				dirPath, err := dir.GetPath()
@@ -189,21 +191,22 @@ func TestDirectory_ListSubDirectories_RelativePaths(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose = true
+				ctx := getCtx()
 
 				testDirectory := getDirectoryToTest(tt.implementationName)
 				defer testDirectory.Delete(verbose)
 
-				_, err := testDirectory.CreateSubDirectory("test1", verbose)
+				_, err := testDirectory.CreateSubDirectory(ctx, "test1", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
-				test2, err := testDirectory.CreateSubDirectory("test2", verbose)
+				test2, err := testDirectory.CreateSubDirectory(ctx, "test2", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
-				_, err = test2.CreateSubDirectory("a", verbose)
+				_, err = test2.CreateSubDirectory(ctx, "a", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				_, err = test2.CreateSubDirectory("b", verbose)
+				_, err = test2.CreateSubDirectory(ctx, "b", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				_, err = test2.CreateSubDirectory("c", verbose)
+				_, err = test2.CreateSubDirectory(ctx, "c", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				subDirectoryList, err := testDirectory.ListSubDirectoryPaths(
@@ -254,20 +257,21 @@ func TestDirectory_ListSubDirectories(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose = true
+				ctx := getCtx()
 
 				testDirectory := getDirectoryToTest(tt.implementationName)
 				defer testDirectory.Delete(verbose)
 
-				_, err := testDirectory.CreateSubDirectory("test1", verbose)
+				_, err := testDirectory.CreateSubDirectory(ctx, "test1", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				test2, err := testDirectory.CreateSubDirectory("test2", verbose)
+				test2, err := testDirectory.CreateSubDirectory(ctx, "test2", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
-				_, err = test2.CreateSubDirectory("a", verbose)
+				_, err = test2.CreateSubDirectory(ctx, "a", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				_, err = test2.CreateSubDirectory("b", verbose)
+				_, err = test2.CreateSubDirectory(ctx, "b", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				_, err = test2.CreateSubDirectory("c", verbose)
+				_, err = test2.CreateSubDirectory(ctx, "c", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				subDirectoryList, err := testDirectory.ListSubDirectories(

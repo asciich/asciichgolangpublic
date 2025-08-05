@@ -3,9 +3,9 @@ package ansiblegalaxyutils
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -41,12 +41,14 @@ func CreateFileStructureInDir(ctx context.Context, dir filesinterfaces.Directory
 
 	logging.LogInfoByCtxf(ctx, "Create ansible galaxy file structure in '%s' started.", path)
 
-	_, err = dir.CreateSubDirectory("docx", contextutils.GetVerboseFromContext(ctx))
+	_, err = dir.CreateSubDirectory(ctx, "docx", &filesoptions.CreateOptions{})
 	if err != nil {
 		return err
 	}
 
-	galaxyYamlFile, err := dir.CreateFileInDirectory(contextutils.GetVerboseFromContext(ctx), "galaxy.yml")
+	createFilesOptions := options.GetCreateFileOptions()
+
+	galaxyYamlFile, err := dir.CreateFileInDirectory(ctx, "galaxy.yml", createFilesOptions)
 	if err != nil {
 		return err
 	}
@@ -56,24 +58,24 @@ func CreateFileStructureInDir(ctx context.Context, dir filesinterfaces.Directory
 		return err
 	}
 
-	metaDir, err := dir.CreateSubDirectory("meta", contextutils.GetVerboseFromContext(ctx))
+	metaDir, err := dir.CreateSubDirectory(ctx, "meta", createFilesOptions)
 	if err != nil {
 		return err
 	}
 
-	_, err = metaDir.CreateFileInDirectory(contextutils.GetVerboseFromContext(ctx), "runtime.yml")
+	_, err = metaDir.CreateFileInDirectory(ctx, "runtime.yml", createFilesOptions)
 	if err != nil {
 		return err
 	}
 
 	for _, d := range []string{"plugins", "roles", "playbooks", "tests"} {
-		_, err := dir.CreateSubDirectory(d, contextutils.GetVerboseFromContext(ctx))
+		_, err := dir.CreateSubDirectory(ctx, d, createFilesOptions)
 		if err != nil {
 			return err
 		}
 	}
 
-	readmeFile, err := dir.CreateFileInDirectory(contextutils.GetVerboseFromContext(ctx), "README.md")
+	readmeFile, err := dir.CreateFileInDirectory(ctx, "README.md", createFilesOptions)
 	if err != nil {
 		return err
 	}

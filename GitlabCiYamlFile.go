@@ -6,6 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"gopkg.in/yaml.v3"
@@ -65,7 +66,7 @@ func (g *GitlabCiYamlFile) AddInclude(include *GitlabCiYamlInclude, verbose bool
 		return tracederrors.TracedError("include is nil")
 	}
 
-	err = g.Create(contextutils.GetVerbosityContextByBool(verbose))
+	err = g.Create(contextutils.GetVerbosityContextByBool(verbose), &filesoptions.CreateOptions{})
 	if err != nil {
 		return err
 	}

@@ -1,8 +1,10 @@
 package files
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -17,7 +19,7 @@ func NewDirectoriesService() (d *DirectoriesService) {
 	return new(DirectoriesService)
 }
 
-func (d *DirectoriesService) CreateLocalDirectoryByPath(path string, verbose bool) (l filesinterfaces.Directory, err error) {
+func (d *DirectoriesService) CreateLocalDirectoryByPath(ctx context.Context, path string, options *filesoptions.CreateOptions) (l filesinterfaces.Directory, err error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
@@ -27,7 +29,7 @@ func (d *DirectoriesService) CreateLocalDirectoryByPath(path string, verbose boo
 		return nil, err
 	}
 
-	err = dir.Create(contextutils.GetVerbosityContextByBool(verbose))
+	err = dir.Create(ctx, options)
 	if err != nil {
 		return nil, err
 	}

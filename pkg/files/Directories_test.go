@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -24,6 +25,7 @@ func TestDirectoriesCreateLocalDirectoryByPath(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				tempDir, err := os.MkdirTemp("", "tempdir_for_testing")
 				require.Nil(t, err)
@@ -48,7 +50,7 @@ func TestDirectoriesCreateLocalDirectoryByPath(t *testing.T) {
 					localPath, err := directory.GetLocalPath()
 					require.NoError(t, err)
 
-					createdDir, err := files.Directories().CreateLocalDirectoryByPath(localPath, verbose)
+					createdDir, err := files.Directories().CreateLocalDirectoryByPath(ctx, localPath, &filesoptions.CreateOptions{})
 					require.NoError(t, err)
 
 					dirExists, err := directory.Exists(verbose)

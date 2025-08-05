@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -43,7 +44,7 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 
 				if !expectedOutput.MustExists(verbose) {
 					if os.Getenv("UPDATE_EXPECTED") == "1" {
-						err := expectedOutput.Create(ctx)
+						err := expectedOutput.Create(ctx, &filesoptions.CreateOptions{})
 						require.NoError(t, err)
 					}
 				}

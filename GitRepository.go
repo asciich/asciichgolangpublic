@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -29,9 +30,9 @@ type GitRepository interface {
 	Commit(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit, err error)
 	CommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool, err error)
 	CreateBranch(createOptions *parameteroptions.CreateBranchOptions) (err error)
-	Create(ctx context.Context) (err error)
-	CreateFileInDirectory(verbose bool, filePath ...string) (createdFile filesinterfaces.File, err error)
-	CreateSubDirectory(subDirectoryName string, verbose bool) (createdSubDirectory filesinterfaces.Directory, err error)
+	Create(ctx context.Context, options *filesoptions.CreateOptions) (err error)
+	CreateFileInDirectory(ctx context.Context, filePath string, optins *filesoptions.CreateOptions) (createdFile filesinterfaces.File, err error)
+	CreateSubDirectory(ctx context.Context, subDirectoryName string, options *filesoptions.CreateOptions) (createdSubDirectory filesinterfaces.Directory, err error)
 	CreateTag(createOptions *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag, err error)
 	Delete(verbose bool) (err error)
 	DeleteBranchByName(name string, verbose bool) (err error)

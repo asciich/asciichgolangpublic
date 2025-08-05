@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
@@ -62,13 +63,13 @@ func TestDirectoryBase_ListFiles_withoutFilter(t *testing.T) {
 
 				defer directory.Delete(verbose)
 
-				_, err := directory.CreateFileInDirectory(verbose, "a.txt")
+				_, err := directory.CreateFileInDirectory(ctx, "a.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				_, err = directory.CreateFileInDirectory(verbose, "a.log")
+				_, err = directory.CreateFileInDirectory(ctx, "a.log", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				_, err = directory.CreateFileInDirectory(verbose, "a.toc")
+				_, err = directory.CreateFileInDirectory(ctx, "a.toc", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				_, err = directory.CreateFileInDirectory(verbose, "b.toc")
+				_, err = directory.CreateFileInDirectory(ctx, "b.toc", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				fileList, err := directory.ListFilePaths(
@@ -109,13 +110,13 @@ func TestDirectoryBase_ListFiles(t *testing.T) {
 
 				defer directory.Delete(verbose)
 
-				_, err := directory.CreateFileInDirectory(verbose, "a.txt")
+				_, err := directory.CreateFileInDirectory(ctx, "a.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				_, err = directory.CreateFileInDirectory(verbose, "a.log")
+				_, err = directory.CreateFileInDirectory(ctx, "a.log", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				_, err = directory.CreateFileInDirectory(verbose, "a.toc")
+				_, err = directory.CreateFileInDirectory(ctx, "a.toc", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				_, err = directory.CreateFileInDirectory(verbose, "b.toc")
+				_, err = directory.CreateFileInDirectory(ctx, "b.toc", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				fileList, err := directory.ListFilePaths(
@@ -156,13 +157,13 @@ func TestDirectoryBase_DeleteFilesMatching(t *testing.T) {
 
 				directory := getDirectoryToTest(tt.fileImplementationToTest)
 
-				txtFile, err := directory.CreateFileInDirectory(verbose, "a.txt")
+				txtFile, err := directory.CreateFileInDirectory(ctx, "a.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				locFile, err := directory.CreateFileInDirectory(verbose, "a.log")
+				locFile, err := directory.CreateFileInDirectory(ctx, "a.log", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				tocFile, err := directory.CreateFileInDirectory(verbose, "a.toc")
+				tocFile, err := directory.CreateFileInDirectory(ctx, "a.toc", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
-				toc2File, err := directory.CreateFileInDirectory(verbose, "b.toc")
+				toc2File, err := directory.CreateFileInDirectory(ctx, "b.toc", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				directory.DeleteFilesMatching(

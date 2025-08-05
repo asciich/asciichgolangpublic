@@ -13,6 +13,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
@@ -216,7 +217,7 @@ func (l *LocalDirectory) CopyFileToTemporaryFileAsLocalFile(verbose bool, filePa
 }
 */
 
-func (l *LocalDirectory) Create(ctx context.Context) (err error) {
+func (l *LocalDirectory) Create(ctx context.Context, options *filesoptions.CreateOptions) (err error) {
 	exists, err := l.Exists(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
@@ -238,7 +239,7 @@ func (l *LocalDirectory) Create(ctx context.Context) (err error) {
 					return err
 				}
 
-				err = parentDirectoy.Create(ctx)
+				err = parentDirectoy.Create(ctx, options)
 				if err != nil {
 					return err
 				}
@@ -267,8 +268,8 @@ func (l *LocalDirectory) Create(ctx context.Context) (err error) {
 	return nil
 }
 
-func (l *LocalDirectory) CreateFileInDirectory(verbose bool, path ...string) (createdFile filesinterfaces.File, err error) {
-	createdFile, err = l.GetFileInDirectory(path...)
+func (l *LocalDirectory) CreateFileInDirectory(ctx context.Context, path string, options *filesoptions.CreateOptions) (createdFile filesinterfaces.File, err error) {
+	createdFile, err = l.GetFileInDirectory(path)
 	if err != nil {
 		return nil, err
 	}
@@ -278,12 +279,12 @@ func (l *LocalDirectory) CreateFileInDirectory(verbose bool, path ...string) (cr
 		return nil, err
 	}
 
-	err = parentDirectory.Create(contextutils.GetVerbosityContextByBool(verbose))
+	err = parentDirectory.Create(ctx, options)
 	if err != nil {
 		return nil, err
 	}
 
-	err = createdFile.Create(contextutils.GetVerbosityContextByBool(verbose))
+	err = createdFile.Create(ctx, options)
 	if err != nil {
 		return nil, err
 	}
@@ -291,14 +292,14 @@ func (l *LocalDirectory) CreateFileInDirectory(verbose bool, path ...string) (cr
 	return createdFile, nil
 }
 
-func (l *LocalDirectory) CreateFilesInDirectory(filesToCreate []string, verbose bool) (createdFiles []filesinterfaces.File, err error) {
+func (l *LocalDirectory) CreateFilesInDirectory(ctx context.Context, filesToCreate []string, options *filesoptions.CreateOptions) (createdFiles []filesinterfaces.File, err error) {
 	if filesToCreate == nil {
 		return nil, tracederrors.TracedErrorNil("filesToCreate")
 	}
 
 	createdFiles = []filesinterfaces.File{}
 	for _, fileName := range filesToCreate {
-		toAdd, err := l.CreateFileInDirectory(verbose, fileName)
+		toAdd, err := l.CreateFileInDirectory(ctx, fileName, options)
 		if err != nil {
 			return nil, err
 		}
@@ -306,19 +307,17 @@ func (l *LocalDirectory) CreateFilesInDirectory(filesToCreate []string, verbose 
 		createdFiles = append(createdFiles, toAdd)
 	}
 
-	if verbose {
-		dirPath, err := l.GetLocalPath()
-		if err != nil {
-			return nil, err
-		}
-
-		logging.LogInfof("Created '%d' files in directory '%s'.", len(createdFiles), dirPath)
+	dirPath, err := l.GetLocalPath()
+	if err != nil {
+		return nil, err
 	}
+
+	logging.LogInfoByCtxf(ctx, "Created '%d' files in directory '%s'.", len(createdFiles), dirPath)
 
 	return createdFiles, nil
 }
 
-func (l *LocalDirectory) CreateSubDirectory(subDirName string, verbose bool) (createdSubDir filesinterfaces.Directory, err error) {
+func (l *LocalDirectory) CreateSubDirectory(ctx context.Context, subDirName string, options *filesoptions.CreateOptions) (createdSubDir filesinterfaces.Directory, err error) {
 	if subDirName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("subDirName")
 	}
@@ -328,24 +327,19 @@ func (l *LocalDirectory) CreateSubDirectory(subDirName string, verbose bool) (cr
 		return nil, err
 	}
 
-	subDirExists, err := subDirectory.Exists(verbose)
+	subDirExists, err := subDirectory.Exists(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}
 
 	if subDirExists {
-		if verbose {
-			logging.LogInfof("Sub directory '%s' already exists.", subDirectoryPath)
-		}
+		logging.LogInfoByCtxf(ctx, "Sub directory '%s' already exists.", subDirectoryPath)
 	} else {
-		err = subDirectory.Create(contextutils.GetVerbosityContextByBool(verbose))
+		err = subDirectory.Create(ctx, options)
 		if err != nil {
 			return nil, err
 		}
-
-		if verbose {
-			logging.LogChangedf("Sub directory '%s' already created.", subDirectoryPath)
-		}
+		logging.LogChangedByCtxf(ctx, "Sub directory '%s' already created.", subDirectoryPath)
 	}
 
 	return subDirectory, nil
@@ -825,42 +819,6 @@ func (l *LocalDirectory) MustCopyContentToLocalDirectory(destDirectory *LocalDir
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
-}
-
-func (l *LocalDirectory) MustCreateFileInDirectory(verbose bool, path ...string) (createdFile filesinterfaces.File) {
-	createdFile, err := l.CreateFileInDirectory(verbose, path...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return createdFile
-}
-
-func (l *LocalDirectory) MustCreateFilesInDirectory(filesToCreate []string, verbose bool) (createdFiles []filesinterfaces.File) {
-	createdFiles, err := l.CreateFilesInDirectory(filesToCreate, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return createdFiles
-}
-
-func (l *LocalDirectory) MustCreateSubDirectory(subDirName string, verbose bool) (createdSubDir filesinterfaces.Directory) {
-	createdSubDir, err := l.CreateSubDirectory(subDirName, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return createdSubDir
-}
-
-func (l *LocalDirectory) MustExists(verbose bool) (exists bool) {
-	exists, err := l.Exists(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return exists
 }
 
 func (l *LocalDirectory) MustGetBaseName() (baseName string) {

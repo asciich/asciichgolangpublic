@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -48,7 +49,7 @@ func TestLocalDirectoryExists(t *testing.T) {
 				}
 
 				for i := 0; i < 2; i++ {
-					err = directory.Create(ctx)
+					err = directory.Create(ctx, &filesoptions.CreateOptions{})
 					require.NoError(t, err)
 
 					exists, err = directory.Exists(verbose)
@@ -181,7 +182,8 @@ func TestLocalDirectoryCreateFileInDirectoryFromString(t *testing.T) {
 				dir := files.MustGetLocalDirectoryByPath(tempDirPath)
 				defer dir.Delete(verbose)
 
-				createdFile := dir.MustCreateFileInDirectoryFromString(tt.content, verbose, tt.filename...)
+				createdFile, err := dir.CreateFileInDirectoryFromString(tt.content, verbose, tt.filename...)
+				require.NoError(t, err)
 
 				pathElements := []string{dir.MustGetLocalPath()}
 				pathElements = append(pathElements, tt.filename...)
@@ -285,13 +287,12 @@ func TestDirectoryListFilesInDirectory(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				const verbose = true
-
 				tempDirPath, err := os.MkdirTemp("", "tempToTest")
-				require.Nil(t, err)
+				require.NoError(t, err)
 
 				temporaryDirectory := files.MustGetLocalDirectoryByPath(tempDirPath)
-				temporaryDirectory.MustCreateFilesInDirectory(tt.fileNames, verbose)
+				_, err = temporaryDirectory.CreateFilesInDirectory(ctx, tt.fileNames, &filesoptions.CreateOptions{})
+				require.NoError(t, err)
 
 				listedFiles, err := temporaryDirectory.ListFilePaths(ctx, &tt.listOptions)
 				require.NoError(t, err)
@@ -325,7 +326,7 @@ func TestLocalDirectoryCreate(t *testing.T) {
 				require.NoError(t, err)
 				require.False(t, exists)
 
-				err = subDir.Create(ctx)
+				err = subDir.Create(ctx, &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				exists, err = subDir.Exists(verbose)
