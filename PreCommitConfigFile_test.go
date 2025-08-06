@@ -97,7 +97,7 @@ func TestPreCommitConfigFile_GetPreCommitConfigInGitRepository(t *testing.T) {
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				outFile, err := gitRepo.WriteStringToFile("# placeholder", verbose, ".pre-commit-config.yaml")
+				outFile, err := gitRepo.WriteStringToFile(ctx, ".pre-commit-config.yaml", "# placeholder", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 				require.NotNil(t, outFile)
 

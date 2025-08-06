@@ -113,8 +113,8 @@ type GitRepository interface {
 	IsOnLocalhost(verbose bool) (isOnLocalhost bool, err error)
 	IsPreCommitRepository(verbose bool) (isPreCommitRepository bool, err error)
 	ListVersionTags(verbose bool) (versionTags []GitTag, err error)
-	WriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile filesinterfaces.File, err error)
-	WriteStringToFile(content string, verbose bool, path ...string) (writtenFile filesinterfaces.File, err error)
+	WriteBytesToFile(ctx context.Context, path string, content []byte, options *filesoptions.WriteOptions) (writtenFile filesinterfaces.File, err error)
+	WriteStringToFile(ctx context.Context, path string, content string, options *filesoptions.WriteOptions) (writtenFile filesinterfaces.File, err error)
 }
 
 func GetGitRepositoryByDirectory(directory filesinterfaces.Directory) (repository GitRepository, err error) {

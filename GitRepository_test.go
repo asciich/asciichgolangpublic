@@ -1394,7 +1394,7 @@ func TestGitRepository_IsGolangApplication_onlyGoMod(t *testing.T) {
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				_, err := gitRepo.WriteStringToFile(ctx, "go.mod", "module example\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				require.False(t, mustutils.Must(gitRepo.IsGolangApplication(verbose)))
@@ -1421,7 +1421,7 @@ func TestGitRepository_CheckIsGolangApplication_onlyGoMod(t *testing.T) {
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				_, err := gitRepo.WriteStringToFile(ctx, "go.mod", "module example\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				require.NotNil(t, gitRepo.CheckIsGolangApplication(verbose))
@@ -1448,10 +1448,10 @@ func TestGitRepository_CheckIsGolangApplication_NoMainFunction(t *testing.T) {
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				_, err := gitRepo.WriteStringToFile(ctx, "go.mod", "module example\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				_, err = gitRepo.WriteStringToFile("package main\nfunc abc() bool {\n\treturn true\n}\n", verbose, "main.go")
+				_, err = gitRepo.WriteStringToFile(ctx, "main.go", "package main\nfunc abc() bool {\n\treturn true\n}\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				require.NotNil(t, gitRepo.CheckIsGolangApplication(verbose))
@@ -1478,9 +1478,9 @@ func TestGitRepository_IsGolangApplication_NoMainFunction(t *testing.T) {
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				_, err := gitRepo.WriteStringToFile(ctx, "go.mod", "module example\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
-				_, err = gitRepo.WriteStringToFile("package main\nfunc abc() bool {\n\treturn true\n}\n", verbose, "main.go")
+				_, err = gitRepo.WriteStringToFile(ctx, "main.go", "package main\nfunc abc() bool {\n\treturn true\n}\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				require.False(t, mustutils.Must(gitRepo.IsGolangApplication(verbose)))
@@ -1507,9 +1507,9 @@ func TestGitRepository_IsGolangApplication(t *testing.T) {
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				_, err := gitRepo.WriteStringToFile(ctx, "go.mod", "module example\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
-				_, err = gitRepo.WriteStringToFile("package main\nfunc main() {\n\treturn\n}\n", verbose, "main.go")
+				_, err = gitRepo.WriteStringToFile(ctx, "main.go", "package main\nfunc main() {\n\treturn\n}\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				require.True(t, mustutils.Must(gitRepo.IsGolangApplication(verbose)))
@@ -1536,10 +1536,10 @@ func TestGitRepository_CheckIsGolangApplication(t *testing.T) {
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				_, err := gitRepo.WriteStringToFile(ctx, "go.mod", "module example\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				_, err = gitRepo.WriteStringToFile("package main\nfunc main() {\n\treturn\n}\n", verbose, "main.go")
+				_, err = gitRepo.WriteStringToFile(ctx, "main.go", "package main\nfunc main() {\n\treturn\n}\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				require.Nil(t, gitRepo.CheckIsGolangApplication(verbose))
@@ -1566,7 +1566,7 @@ func TestGitRepository_GetFileByPath(t *testing.T) {
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				_, err := gitRepo.WriteStringToFile("hello world\n", verbose, "test.txt")
+				_, err := gitRepo.WriteStringToFile(ctx, "test.txt", "hello world\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				testTxtFile, err := gitRepo.GetFileByPath("test.txt")
@@ -1620,7 +1620,7 @@ func TestGitRepository_IsGolangPackage_onlyGoMod(t *testing.T) {
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				_, err := gitRepo.WriteStringToFile(ctx, "go.mod", "module example\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				require.True(t, mustutils.Must(gitRepo.IsGolangPackage(verbose)))
@@ -1647,9 +1647,9 @@ func TestGitRepository_IsGolangPackage_mainFunctionIsNotAPackage(t *testing.T) {
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				_, err := gitRepo.WriteStringToFile(ctx, "go.mod", "module example\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
-				_, err = gitRepo.WriteStringToFile("package main\nfunc main() {\n\treturn\n}\n", verbose, "main.go")
+				_, err = gitRepo.WriteStringToFile(ctx, "main.go", "package main\nfunc main() {\n\treturn\n}\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				require.False(t, mustutils.Must(gitRepo.IsGolangPackage(verbose)))
@@ -1700,7 +1700,7 @@ func TestGitRepository_CheckIsGolangPackage_onlyGoMod(t *testing.T) {
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				_, err := gitRepo.WriteStringToFile(ctx, "go.mod", "module example\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				require.Nil(t, gitRepo.CheckIsGolangPackage(verbose))
@@ -1727,9 +1727,9 @@ func TestGitRepository_CheckIsGolangPackage_mainFunctionIsNotAPackage(t *testing
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
 				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
+				_, err := gitRepo.WriteStringToFile(ctx, "go.mod", "module example\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
-				_, err = gitRepo.WriteStringToFile("package main\nfunc main() {\n\treturn\n}\n", verbose, "main.go")
+				_, err = gitRepo.WriteStringToFile(ctx, "main.go", "package main\nfunc main() {\n\treturn\n}\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				require.NotNil(t, gitRepo.CheckIsGolangPackage(verbose))
@@ -1935,7 +1935,7 @@ func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
 
 				require.EqualValues(t, "commit before testing", mustutils.Must(gitRepo.GetCurrentCommitMessage(verbose)))
 
-				_, err = gitRepo.WriteStringToFile("hello", verbose, "world.txt")
+				_, err = gitRepo.WriteStringToFile(ctx, "world.txt", "hello", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				err = gitRepo.AddFileByPath("world.txt", verbose)
@@ -1951,7 +1951,7 @@ func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
 
 				require.EqualValues(t, "This should trigger a commit", mustutils.Must(gitRepo.GetCurrentCommitMessage(verbose)))
 
-				_, err = gitRepo.WriteStringToFile("world", verbose, "world.txt")
+				_, err = gitRepo.WriteStringToFile(ctx, "world.txt", "world", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				// world.txt is already known in the git repo.

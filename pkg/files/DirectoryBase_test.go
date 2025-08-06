@@ -22,7 +22,6 @@ func TestDirectoryBase_SetAndGetParentDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				directoryBase := files.NewDirectoryBase()
@@ -58,7 +57,6 @@ func TestDirectoryBase_ListFiles_withoutFilter(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-				const verbose = true
 
 				directory := getDirectoryToTest(tt.fileImplementationToTest)
 
@@ -105,7 +103,6 @@ func TestDirectoryBase_ListFiles(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-				const verbose bool = true
 
 				directory := getDirectoryToTest(tt.fileImplementationToTest)
 

@@ -42,5 +42,5 @@ type Directory interface {
 	ReadFileInDirectoryAsLines(path ...string) (content []string, err error)
 	ReadFileInDirectoryAsString(path ...string) (content string, err error)
 	ReadFirstLineOfFileInDirectoryAsString(path ...string) (firstLine string, err error)
-	WriteStringToFileInDirectory(content string, verbose bool, path ...string) (writtenFile File, err error)
+	WriteStringToFile(ctx context.Context, path string, content string, options *filesoptions.WriteOptions) (writtenFile File, err error)
 }

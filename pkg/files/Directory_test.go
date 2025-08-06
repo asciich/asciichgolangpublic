@@ -50,7 +50,6 @@ func TestDirectory_GetParentDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				dir := getDirectoryToTest(tt.implementationName)
@@ -91,13 +90,12 @@ func TestDirectory_ReadFileInDirectoryAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				dir := getDirectoryToTest(tt.implementationName)
 				defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				_, err := dir.WriteStringToFileInDirectory("hello_world", verbose, "test.txt")
+				_, err := dir.WriteStringToFile(ctx, "test.txt", "hello_world", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				content, err := dir.ReadFileInDirectoryAsString("test.txt")
@@ -133,13 +131,12 @@ func TestDirectory_ReadFileInDirectoryAsInt64(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				dir := getDirectoryToTest(tt.implementationName)
 				defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				_, err := dir.WriteStringToFileInDirectory(tt.content, verbose, "test.txt")
+				_, err := dir.WriteStringToFile(ctx, "test.txt", tt.content, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				content, err := dir.ReadFileInDirectoryAsInt64("test.txt")
@@ -163,13 +160,12 @@ func TestDirectory_ReadFirstLineOfFileInDirectoryAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				dir := getDirectoryToTest(tt.implementationName)
 				defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				_, err := dir.WriteStringToFileInDirectory("1234\nabc\n", verbose, "test.txt")
+				_, err := dir.WriteStringToFile(ctx, "test.txt", "1234\nabc\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				content, err := dir.ReadFirstLineOfFileInDirectoryAsString("test.txt")
@@ -259,7 +255,6 @@ func TestDirectory_ListSubDirectories(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose = true
 				ctx := getCtx()
 
 				testDirectory := getDirectoryToTest(tt.implementationName)
