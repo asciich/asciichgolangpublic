@@ -18,7 +18,6 @@ func TestChecksumsGetSha256SumFromString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
@@ -39,7 +38,6 @@ func TestChecksumsGetSha256SumFromBytes(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
@@ -60,7 +58,6 @@ func TestChecksumsGetSha1SumFromString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
@@ -81,7 +78,6 @@ func TestChecksumsGetSha1SumFromBytes(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
@@ -102,7 +98,6 @@ func TestChecksumsGetSha512SumFromString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
@@ -123,7 +118,6 @@ func TestChecksumsGetSha512SumFromBytes(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {

@@ -20,7 +20,6 @@ func TestPointersIsPointer(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
