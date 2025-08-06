@@ -217,7 +217,6 @@ func TestFileBase_GetValueAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose = true
 				ctx := getCtx()
 
 				toTest := getFileToTest(tt.implementationName)
@@ -253,7 +252,6 @@ func TestFileBase_GetValueAsInt(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose = true
 				ctx := getCtx()
 
 				toTest := getFileToTest(tt.implementationName)

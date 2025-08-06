@@ -23,9 +23,7 @@ func NewDirectoryBase() (d *DirectoryBase) {
 	return new(DirectoryBase)
 }
 
-// TODO: Rename to WriteStringtoFile( to make it more generic.
-// This renaming is needed to bring GitRepository and Directory together.
-func (d *DirectoryBase) WriteStringToFileInDirectory(content string, verbose bool, path ...string) (writtenFile filesinterfaces.File, err error) {
+func (d *DirectoryBase) WriteStringToFile(ctx context.Context, path string, content string, options *filesoptions.WriteOptions) (writtenFile filesinterfaces.File, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedErrorf("Invalid path='%v'", path)
 	}
@@ -35,12 +33,12 @@ func (d *DirectoryBase) WriteStringToFileInDirectory(content string, verbose boo
 		return nil, err
 	}
 
-	writtenFile, err = parent.GetFileInDirectory(path...)
+	writtenFile, err = parent.GetFileInDirectory(path)
 	if err != nil {
 		return nil, err
 	}
 
-	err = writtenFile.WriteString(contextutils.GetVerbosityContextByBool(verbose), content, &filesoptions.WriteOptions{})
+	err = writtenFile.WriteString(ctx, content, options)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +46,7 @@ func (d *DirectoryBase) WriteStringToFileInDirectory(content string, verbose boo
 	return writtenFile, nil
 }
 
-func (c *DirectoryBase) WriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile filesinterfaces.File, err error) {
+func (c *DirectoryBase) WriteBytesToFile(ctx context.Context, path string, content []byte, options *filesoptions.WriteOptions) (writtenFile filesinterfaces.File, err error) {
 	if content == nil {
 		return nil, tracederrors.TracedErrorNil("content")
 	}
@@ -62,12 +60,12 @@ func (c *DirectoryBase) WriteBytesToFile(content []byte, verbose bool, path ...s
 		return nil, err
 	}
 
-	file, err := parent.GetFileInDirectory(path...)
+	file, err := parent.GetFileInDirectory(path)
 	if err != nil {
 		return nil, err
 	}
 
-	err = file.WriteBytes(contextutils.GetVerbosityContextByBool(verbose), content, &filesoptions.WriteOptions{})
+	err = file.WriteBytes(ctx, content, options)
 	if err != nil {
 		return nil, err
 	}
@@ -453,24 +451,6 @@ func (d *DirectoryBase) MustSetParentDirectoryForBaseClass(parentDirectoryForBas
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
-}
-
-func (d *DirectoryBase) MustWriteBytesToFile(content []byte, verbose bool, path ...string) (writtenFile filesinterfaces.File) {
-	writtenFile, err := d.WriteBytesToFile(content, verbose, path...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return writtenFile
-}
-
-func (d *DirectoryBase) MustWriteStringToFileInDirectory(content string, verbose bool, path ...string) (writtenFile filesinterfaces.File) {
-	writtenFile, err := d.WriteStringToFileInDirectory(content, verbose, path...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return writtenFile
 }
 
 func (d *DirectoryBase) ReadFileInDirectoryAsInt64(path ...string) (value int64, err error) {

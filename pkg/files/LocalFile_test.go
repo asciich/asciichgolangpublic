@@ -155,7 +155,6 @@ func TestLocalFileReadAndWriteAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = false
 				ctx := getCtx()
 
 				var file filesinterfaces.File = getFileToTest("localFile")
@@ -216,7 +215,6 @@ func TestLocalFileGetSha256Sum(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				temporaryFile := getFileToTest("localFile")
@@ -249,7 +247,6 @@ func TestLocalFileIsMatchingSha256Sum(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				temporaryFile := getFileToTest("localFile")
@@ -651,7 +648,6 @@ func TestLocalFileGetLastCharAsString(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-				const verbose = true
 
 				testFile := getFileToTest("localFile")
 				testFile.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
@@ -684,7 +680,6 @@ func TestLocalFileGetAsFloat64(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-				const verbose = true
 
 				testFile := getFileToTest("localFile")
 				testFile.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
@@ -717,7 +712,6 @@ func TestFileGetAsInt64(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-				const verbose = true
 
 				testFile := getFileToTest("localFile")
 				testFile.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
@@ -749,7 +743,6 @@ func TestFileGetAsInt(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose = true
 				ctx := getCtx()
 
 				testFile := getFileToTest("localFile")
@@ -955,7 +948,7 @@ func TestFileGetCreationDateByFileName(t *testing.T) {
 				temporaryDir := getDirectoryToTest("localDirectory")
 				defer temporaryDir.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				file, err := temporaryDir.WriteStringToFileInDirectory("content", verbose, tt.filename)
+				file, err := temporaryDir.WriteStringToFile(ctx, tt.filename, "content", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 				readDate, err := file.GetCreationDateByFileName(verbose)
 				require.NoError(t, err)
@@ -984,13 +977,12 @@ func TestFileHasYYYYmmdd_HHMMSSPrefix(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				temporaryDir := getDirectoryToTest("localDirectory")
 				defer temporaryDir.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				file, err := temporaryDir.WriteStringToFileInDirectory("content", verbose, tt.filename)
+				file, err := temporaryDir.WriteStringToFile(ctx, tt.filename, "content", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 				require.EqualValues(t, tt.expectedHasPrefix, file.MustIsYYYYmmdd_HHMMSSPrefix())
 			},

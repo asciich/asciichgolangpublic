@@ -56,7 +56,6 @@ func TestFile_WriteString_ReadAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				fileToTest := getFileToTest(tt.implementationName)
@@ -159,7 +158,6 @@ func TestFile_ContainsLine(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				fileToTest := getFileToTest(tt.implementationName)
@@ -333,7 +331,6 @@ func TestFile_String(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				toTest := getFileToTest(tt.implementationName)

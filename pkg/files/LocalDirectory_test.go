@@ -243,7 +243,8 @@ func TestLocalDirectoryWriteStringToFile(t *testing.T) {
 
 				require.False(t, testDirectory.MustFileInDirectoryExists(verbose, tt.fileName))
 
-				testFile := testDirectory.MustWriteStringToFileInDirectory(tt.content, verbose, tt.fileName)
+				testFile, err := testDirectory.WriteStringToFile(ctx, tt.fileName, tt.content, &filesoptions.WriteOptions{})
+				require.NoError(t, err)
 
 				require.True(t, testDirectory.MustFileInDirectoryExists(verbose, tt.fileName))
 				require.EqualValues(t, tt.content, testFile.MustReadAsString())
@@ -417,7 +418,6 @@ func TestDirectory_CheckExists(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose = true
 				ctx := getCtx()
 
 				temporaryDirectory := getDirectoryToTest("localDirectory")

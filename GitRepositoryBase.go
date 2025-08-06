@@ -1156,15 +1156,6 @@ func (g *GitRepositoryBase) MustSetParentRepositoryForBaseClass(parentRepository
 	}
 }
 
-func (g *GitRepositoryBase) MustWriteStringToFile(content string, verbose bool, path ...string) (writtenFile filesinterfaces.File) {
-	writtenFile, err := g.WriteStringToFile(content, verbose, path...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return writtenFile
-}
-
 func (g *GitRepositoryBase) SetParentRepositoryForBaseClass(parentRepositoryForBaseClass GitRepository) (err error) {
 	if parentRepositoryForBaseClass == nil {
 		return tracederrors.TracedErrorf("parentRepositoryForBaseClass is nil")
@@ -1175,7 +1166,7 @@ func (g *GitRepositoryBase) SetParentRepositoryForBaseClass(parentRepositoryForB
 	return nil
 }
 
-func (g *GitRepositoryBase) WriteStringToFile(content string, verbose bool, path ...string) (writtenFile filesinterfaces.File, err error) {
+func (g *GitRepositoryBase) WriteStringToFile(ctx context.Context, path string, content string, options *filesoptions.WriteOptions) (writtenFile filesinterfaces.File, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedError("path has no elements")
 	}
@@ -1185,5 +1176,5 @@ func (g *GitRepositoryBase) WriteStringToFile(content string, verbose bool, path
 		return nil, err
 	}
 
-	return parent.WriteBytesToFile([]byte(content), verbose, path...)
+	return parent.WriteBytesToFile(ctx, path, []byte(content), options)
 }
