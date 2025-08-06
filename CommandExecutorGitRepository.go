@@ -1169,7 +1169,7 @@ func (c *CommandExecutorGitRepository) Init(options *parameteroptions.CreateRepo
 				if err != nil {
 					return err
 				}
-				defer temporaryClone.Delete(options.Verbose)
+				defer temporaryClone.Delete(contextutils.GetVerbosityContextByBool(options.Verbose), &filesoptions.DeleteOptions{})
 
 				if options.InitializeWithDefaultAuthor {
 					temporaryClone.SetGitConfig(

@@ -5,6 +5,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -105,7 +106,7 @@ func SignFile(fileToSign filesinterfaces.File, options *GnuPGSignOptions) (err e
 		return err
 	}
 
-	if err = signatureFile.Delete(options.Verbose); err != nil {
+	if err = signatureFile.Delete(contextutils.GetVerbosityContextByBool(options.Verbose), &filesoptions.DeleteOptions{}); err != nil {
 		return err
 	}
 

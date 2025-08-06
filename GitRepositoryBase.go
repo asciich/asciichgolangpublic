@@ -950,13 +950,6 @@ func (g *GitRepositoryBase) MustCheckIsGolangApplication(verbose bool) {
 	}
 }
 
-func (g *GitRepositoryBase) MustCheckIsGolangPackage(verbose bool) {
-	err := g.CheckIsGolangPackage(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (g *GitRepositoryBase) MustCheckIsOnLocalhost(verbose bool) {
 	err := g.CheckIsOnLocalhost(verbose)
 	if err != nil {

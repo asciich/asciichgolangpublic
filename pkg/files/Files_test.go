@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -22,9 +23,10 @@ func TestFilesWriteStringToFile(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				tempFile := getFileToTest(tt.implementationName)
-				defer tempFile.Delete(verbose)
+				defer tempFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				localPath, err := tempFile.GetLocalPath()
 				require.NoError(t, err)

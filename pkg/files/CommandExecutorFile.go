@@ -229,6 +229,13 @@ func (c *CommandExecutorFile) Create(ctx context.Context, options *filesoptions.
 		return err
 	}
 
+	command := []string{"touch", filePath}
+	if options != nil {
+		if options.UseSudo {
+			command = append([]string{"sudo"}, command...)
+		}
+	}
+
 	if exists {
 		logging.LogInfof(
 			"File '%s' on '%s' already exists.",
@@ -239,7 +246,7 @@ func (c *CommandExecutorFile) Create(ctx context.Context, options *filesoptions.
 		_, err = commandExecutor.RunCommand(
 			ctx,
 			&parameteroptions.RunCommandOptions{
-				Command: []string{"touch", filePath},
+				Command: command,
 			},
 		)
 		if err != nil {
@@ -256,7 +263,7 @@ func (c *CommandExecutorFile) Create(ctx context.Context, options *filesoptions.
 	return nil
 }
 
-func (c *CommandExecutorFile) Delete(verbose bool) (err error) {
+func (c *CommandExecutorFile) Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error) {
 	commandExecutor, filePath, hostDescription, err := c.GetCommandExecutorAndFilePathAndHostDescription()
 	if err != nil {
 		return err
@@ -269,16 +276,22 @@ func (c *CommandExecutorFile) Delete(verbose bool) (err error) {
 		)
 	}
 
-	exists, err := c.Exists(verbose)
+	exists, err := c.Exists(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
 
+	command := []string{"rm", filePath}
+
+	if options != nil && options.UseSudo {
+		command = append([]string{"sudo"}, command...)
+	}
+
 	if exists {
 		_, err = commandExecutor.RunCommand(
-			contextutils.GetVerbosityContextByBool(verbose),
+			ctx,
 			&parameteroptions.RunCommandOptions{
-				Command: []string{"rm", filePath},
+				Command: command,
 			},
 		)
 		if err != nil {

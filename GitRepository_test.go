@@ -68,9 +68,9 @@ func TestGitRepository_Init_minimal(t *testing.T) {
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				err := repo.Delete(verbose)
+				err := repo.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
 				require.False(t, mustutils.Must(repo.Exists(verbose)))
@@ -117,9 +117,9 @@ func TestGitRepository_IsGitRepository(t *testing.T) {
 				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				err := repo.Delete(verbose)
+				err := repo.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
 				// An non existing directory is not a git repository:
@@ -170,10 +170,10 @@ func TestGitRepository_Init(t *testing.T) {
 				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				for i := 0; i < 2; i++ {
-					err := repo.Delete(verbose)
+					err := repo.Delete(ctx, &filesoptions.DeleteOptions{})
 					require.NoError(t, err)
 					require.False(t, mustutils.Must(repo.Exists(verbose)))
 					require.False(t, mustutils.Must(repo.IsInitialized(verbose)))
@@ -215,7 +215,7 @@ func TestGitRepository_Init(t *testing.T) {
 				}
 
 				for i := 0; i < 2; i++ {
-					err := repo.Delete(verbose)
+					err := repo.Delete(ctx, &filesoptions.DeleteOptions{})
 					require.NoError(t, err)
 					require.False(t, mustutils.Must(repo.Exists(verbose)))
 					require.False(t, mustutils.Must(repo.IsInitialized(verbose)))
@@ -246,8 +246,8 @@ func TestGitRepository_Init_fullInOneStep(t *testing.T) {
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
-				repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
+				repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				for i := 0; i < 2; i++ {
 					err := repo.Init(
@@ -285,12 +285,13 @@ func TestGitRepository_CreateAndDeleteRepository(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				for i := 0; i < 2; i++ {
-					err := repo.Delete(verbose)
+					err := repo.Delete(ctx, &filesoptions.DeleteOptions{})
 					require.NoError(t, err)
 					require.False(t, mustutils.Must(repo.Exists(verbose)))
 				}
@@ -309,7 +310,7 @@ func TestGitRepository_CreateAndDeleteRepository(t *testing.T) {
 				}
 
 				for i := 0; i < 2; i++ {
-					err := repo.Delete(verbose)
+					err := repo.Delete(ctx, &filesoptions.DeleteOptions{})
 					require.NoError(t, err)
 					require.False(t, mustutils.Must(repo.Exists(verbose)))
 				}
@@ -336,7 +337,7 @@ func TestGitRepository_HasNoUncommittedChanges(t *testing.T) {
 				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.True(t, mustutils.Must(repo.HasNoUncommittedChanges(verbose)))
 
@@ -365,7 +366,7 @@ func TestGitRepository_HasUncommittedChanges(t *testing.T) {
 				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.False(t, mustutils.Must(repo.HasUncommittedChanges(verbose)))
 
@@ -394,7 +395,7 @@ func TestGitRepository_CheckHasNoUncommittedChanges(t *testing.T) {
 				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.Nil(t, repo.CheckHasNoUncommittedChanges(verbose))
 
@@ -426,9 +427,9 @@ func TestGitRepository_GetRootDirectoryPath(t *testing.T) {
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				err := repo.Delete(verbose)
+				err := repo.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
 				err = repo.Init(
@@ -467,9 +468,9 @@ func TestGitRepository_GetRootDirectory(t *testing.T) {
 				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				err := repo.Delete(verbose)
+				err := repo.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
 				err = repo.Init(
@@ -512,9 +513,9 @@ func TestGitRepository_GetRootDirectory_from_subdirectory(t *testing.T) {
 				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				err := repo.Delete(verbose)
+				err := repo.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
 				err = repo.Init(
@@ -558,10 +559,11 @@ func TestGitRepository_CloneRepository_idempotence(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				upstreamRepo := getGitRepositoryToTest(tt.implementationName)
-				defer upstreamRepo.Delete(verbose)
-				err := upstreamRepo.Delete(verbose)
+				defer upstreamRepo.Delete(ctx, &filesoptions.DeleteOptions{})
+				err := upstreamRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
 				err = upstreamRepo.Init(
@@ -575,8 +577,8 @@ func TestGitRepository_CloneRepository_idempotence(t *testing.T) {
 				require.NoError(t, err)
 
 				clonedRepo := getGitRepositoryToTest(tt.implementationName)
-				defer clonedRepo.Delete(verbose)
-				err = clonedRepo.Delete(verbose)
+				defer clonedRepo.Delete(ctx, &filesoptions.DeleteOptions{})
+				err = clonedRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
 				for i := 0; i < 2; i++ {
@@ -614,8 +616,8 @@ func TestGitRepository_PullAndPush(t *testing.T) {
 				const verbose bool = true
 
 				upstreamRepo := getGitRepositoryToTest(tt.implementationUpstream)
-				defer upstreamRepo.Delete(verbose)
-				err := upstreamRepo.Delete(verbose)
+				defer upstreamRepo.Delete(ctx, &filesoptions.DeleteOptions{})
+				err := upstreamRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 				err = upstreamRepo.Init(
 					&parameteroptions.CreateRepositoryOptions{
@@ -628,8 +630,8 @@ func TestGitRepository_PullAndPush(t *testing.T) {
 				require.NoError(t, err)
 
 				clonedRepo := getGitRepositoryToTest(tt.implementationCloned)
-				defer clonedRepo.Delete(verbose)
-				err = clonedRepo.Delete(verbose)
+				defer clonedRepo.Delete(ctx, &filesoptions.DeleteOptions{})
+				err = clonedRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
 				err = clonedRepo.CloneRepository(upstreamRepo, verbose)
@@ -644,8 +646,8 @@ func TestGitRepository_PullAndPush(t *testing.T) {
 				require.NoError(t, err)
 
 				clonedRepo2 := getGitRepositoryToTest(tt.implementationCloned2)
-				defer clonedRepo2.Delete(verbose)
-				err = clonedRepo2.Delete(verbose)
+				defer clonedRepo2.Delete(ctx, &filesoptions.DeleteOptions{})
+				err = clonedRepo2.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 				err = clonedRepo2.CloneRepository(upstreamRepo, verbose)
 				require.NoError(t, err)
@@ -739,8 +741,8 @@ func TestGitRepository_AddFilesByPath(t *testing.T) {
 				const verbose bool = true
 
 				upstreamRepo := getGitRepositoryToTest(tt.implementationUpstream)
-				defer upstreamRepo.Delete(verbose)
-				err := upstreamRepo.Delete(verbose)
+				defer upstreamRepo.Delete(ctx, &filesoptions.DeleteOptions{})
+				err := upstreamRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
 				err = upstreamRepo.Init(
@@ -754,8 +756,8 @@ func TestGitRepository_AddFilesByPath(t *testing.T) {
 				require.NoError(t, err)
 
 				clonedRepo := getGitRepositoryToTest(tt.implementationCloned)
-				defer clonedRepo.Delete(verbose)
-				err = clonedRepo.Delete(verbose)
+				defer clonedRepo.Delete(ctx, &filesoptions.DeleteOptions{})
+				err = clonedRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
 				err = clonedRepo.CloneRepository(upstreamRepo, verbose)
@@ -770,8 +772,8 @@ func TestGitRepository_AddFilesByPath(t *testing.T) {
 				require.NoError(t, err)
 
 				clonedRepo2 := getGitRepositoryToTest(tt.implementationCloned)
-				defer clonedRepo2.Delete(verbose)
-				err = clonedRepo2.Delete(verbose)
+				defer clonedRepo2.Delete(ctx, &filesoptions.DeleteOptions{})
+				err = clonedRepo2.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
 				err = clonedRepo2.CloneRepository(upstreamRepo, verbose)
@@ -839,7 +841,7 @@ func TestGitRepository_FileByPathExists(t *testing.T) {
 				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.False(t, mustutils.Must(repo.HasUncommittedChanges(verbose)))
 				require.False(t, mustutils.Must(repo.FileByPathExists("hello.txt", verbose)))
@@ -870,7 +872,7 @@ func TestGitRepository_ListFiles(t *testing.T) {
 				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.False(t, mustutils.Must(repo.HasUncommittedChanges(verbose)))
 
@@ -926,7 +928,7 @@ func TestGitRepository_ListFilePaths(t *testing.T) {
 				const verbose bool = true
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.False(t, mustutils.Must(repo.HasUncommittedChanges(verbose)))
 
@@ -979,9 +981,10 @@ func TestGitRepository_CreateTag(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
@@ -1034,9 +1037,10 @@ func TestGitRepository_ListTags(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
@@ -1087,9 +1091,10 @@ func TestGitRepository_GetLatestTagVersionOrNilIfNotFound(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
@@ -1140,9 +1145,10 @@ func TestGitRepository_GetLatestTagVersion(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
@@ -1192,9 +1198,10 @@ func TestGitRepository_GetLatestTagVersionAsString(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
@@ -1241,9 +1248,10 @@ func TestGitRepository_GetCurrentCommitsNewestVersion(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
@@ -1300,9 +1308,10 @@ func TestGitRepository_GetCurrentCommitsNewestVersionOrNilIfUnset(t *testing.T) 
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
@@ -1357,9 +1366,10 @@ func TestGitRepository_IsGolangApplication_emptyRepo(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.False(t, mustutils.Must(gitRepo.IsGolangApplication(verbose)))
 			},
@@ -1381,9 +1391,10 @@ func TestGitRepository_CheckIsGolangApplication_emptyRepo(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.NotNil(t, gitRepo.CheckIsGolangApplication(verbose))
 			},
@@ -1405,9 +1416,10 @@ func TestGitRepository_IsGolangApplication_onlyGoMod(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
 				require.NoError(t, err)
@@ -1432,9 +1444,10 @@ func TestGitRepository_CheckIsGolangApplication_onlyGoMod(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
 				require.NoError(t, err)
@@ -1459,9 +1472,10 @@ func TestGitRepository_CheckIsGolangApplication_NoMainFunction(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
 				require.NoError(t, err)
@@ -1489,9 +1503,10 @@ func TestGitRepository_IsGolangApplication_NoMainFunction(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
 				require.NoError(t, err)
@@ -1518,9 +1533,10 @@ func TestGitRepository_IsGolangApplication(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
 				require.NoError(t, err)
@@ -1547,9 +1563,10 @@ func TestGitRepository_CheckIsGolangApplication(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
 				require.NoError(t, err)
@@ -1577,9 +1594,10 @@ func TestGitRepository_GetFileByPath(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.WriteStringToFile("hello world\n", verbose, "test.txt")
 				require.NoError(t, err)
@@ -1607,9 +1625,10 @@ func TestGitRepository_IsGolangPackage_emptyRepo(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.False(t, mustutils.Must(gitRepo.IsGolangPackage(verbose)))
 			},
@@ -1631,9 +1650,10 @@ func TestGitRepository_IsGolangPackage_onlyGoMod(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
 				require.NoError(t, err)
@@ -1658,9 +1678,10 @@ func TestGitRepository_IsGolangPackage_mainFunctionIsNotAPackage(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
 				require.NoError(t, err)
@@ -1686,16 +1707,13 @@ func TestGitRepository_CheckIsGolangPackage_emptyRepo(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				require.NotNil(
-					gitRepo.CheckIsGolangPackage(verbose),
-				)
+				require.Error(t, gitRepo.CheckIsGolangPackage(verbose))
 			},
 		)
 	}
@@ -1715,9 +1733,10 @@ func TestGitRepository_CheckIsGolangPackage_onlyGoMod(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
 				require.NoError(t, err)
@@ -1742,9 +1761,10 @@ func TestGitRepository_CheckIsGolangPackage_mainFunctionIsNotAPackage(t *testing
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.WriteStringToFile("module example\n", verbose, "go.mod")
 				require.NoError(t, err)
@@ -1774,7 +1794,7 @@ func TestGitRepository_GetGitRepositoryByDirectory(t *testing.T) {
 				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				repoRootDirectory, err := gitRepo.GetRootDirectory(ctx)
 				require.NoError(t, err)
@@ -1809,9 +1829,10 @@ func TestGitRepository_CreateAndDeleteBranch(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				defaultBranchName, err := gitRepo.GetCurrentBranchName(verbose)
 				require.NoError(t, err)
@@ -1857,9 +1878,10 @@ func TestGitRepository_CheckoutBranch(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				for _, branchName := range []string{"testbranch1", "testbranch2"} {
 					err := gitRepo.CreateBranch(
@@ -1894,9 +1916,10 @@ func TestGitRepository_GetCurrentCommitMessage(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
@@ -1927,9 +1950,10 @@ func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := gitRepo.Commit(
 					&gitparameteroptions.GitCommitOptions{
@@ -2005,9 +2029,10 @@ func TestGitRepository_AddAndRemoveRemote(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.False(t, mustutils.Must(gitRepo.RemoteByNameExists("example", verbose)))
 
@@ -2051,7 +2076,7 @@ func TestGitRepository_IsPreCommitRepository(t *testing.T) {
 				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.False(t, mustutils.Must(gitRepo.IsPreCommitRepository(verbose)))
 
@@ -2081,7 +2106,7 @@ func TestGitRepository_CheckIsPreCommitRepository(t *testing.T) {
 				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.NotNil(t, gitRepo.CheckIsPreCommitRepository(verbose))
 
@@ -2110,11 +2135,11 @@ func Test_CheckExists(t *testing.T) {
 				ctx := contextutils.GetVerbosityContextByBool(true)
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(true)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.NoError(t, gitRepo.CheckExists(ctx))
 
-				err := gitRepo.Delete(true)
+				err := gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
 				require.Error(t, gitRepo.CheckExists(ctx))

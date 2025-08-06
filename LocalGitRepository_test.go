@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -21,6 +22,7 @@ func TestGetCurrentCommitGoGitHash(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := TemporaryGitRepositories().MustCreateEmptyTemporaryGitRepository(
 					&parameteroptions.CreateRepositoryOptions{
@@ -29,7 +31,7 @@ func TestGetCurrentCommitGoGitHash(t *testing.T) {
 						InitializeWithEmptyCommit:   true,
 						InitializeWithDefaultAuthor: true,
 					})
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				localGitRepo, ok := repo.(*LocalGitRepository)
 				require.True(t, ok)
@@ -52,12 +54,11 @@ func TestLocalGitRepository_GetLocalGitReposioryFromDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				directory, err := tempfilesoo.CreateEmptyTemporaryDirectory(ctx)
 				require.NoError(t, err)
-				defer directory.Delete(verbose)
+				defer directory.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.EqualValues(t, "localhost", directory.MustGetHostDescription())
 
@@ -88,6 +89,7 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := TemporaryGitRepositories().MustCreateEmptyTemporaryGitRepository(
 					&parameteroptions.CreateRepositoryOptions{
@@ -96,7 +98,7 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 						InitializeWithEmptyCommit:   false,
 						InitializeWithDefaultAuthor: true,
 					})
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := repo.SetGitConfig(
 					&gitparameteroptions.GitConfigSetOptions{
@@ -142,6 +144,7 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 						AllowEmpty: true,
 					},
 				)
+				require.NoError(t, err)
 				secondCommit, err := repo.GetCurrentCommit(verbose)
 				require.NoError(t, err)
 
@@ -176,6 +179,7 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 						AllowEmpty: true,
 					},
 				)
+				require.NoError(t, err)
 				thirdCommit, err := repo.GetCurrentCommit(verbose)
 				require.NoError(t, err)
 

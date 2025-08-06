@@ -4,8 +4,11 @@ import (
 	"context"
 	"os"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -96,7 +99,7 @@ func Exists(ctx context.Context, pathToCheck string) bool {
 
 // Delete a file or directory.
 // Directories are deleted recursively.
-func Delete(ctx context.Context, pathToDelete string) error {
+func Delete(ctx context.Context, pathToDelete string, options *filesoptions.DeleteOptions) error {
 	if pathToDelete == "" {
 		return tracederrors.TracedErrorEmptyString("pathToDelete")
 	}
@@ -118,9 +121,18 @@ func Delete(ctx context.Context, pathToDelete string) error {
 				return tracederrors.TracedErrorf("Delete '%s' failed: %w", pathToDelete, err)
 			}
 		} else {
-			err := os.Remove(pathToDelete)
-			if err != nil {
-				return tracederrors.TracedErrorf("Delete '%s' failed: %w", pathToDelete, err)
+			if options != nil && options.UseSudo {
+				_, err := commandexecutorexec.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+					Command: []string{"sudo", "rm", pathToDelete},
+				})
+				if err != nil {
+					return tracederrors.TracedErrorf("Delete '%s' using sudo failed: %w", pathToDelete, err)
+				}
+			} else {
+				err := os.Remove(pathToDelete)
+				if err != nil {
+					return tracederrors.TracedErrorf("Delete '%s' failed: %w", pathToDelete, err)
+				}
 			}
 		}
 

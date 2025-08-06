@@ -26,6 +26,8 @@ jobs:
 
     - name: Build
       run: go build -v ./...
+      env:
+        RUN_SUDO_TEST: "1"  # Run tests using sudo in CI.
 
     - name: Test
       run: go test -timeout 20m -v ./...

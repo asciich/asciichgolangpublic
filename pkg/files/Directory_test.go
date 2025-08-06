@@ -54,7 +54,7 @@ func TestDirectory_GetParentDirectory(t *testing.T) {
 				ctx := getCtx()
 
 				dir := getDirectoryToTest(tt.implementationName)
-				defer dir.Delete(verbose)
+				defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				subDir, err := dir.CreateSubDirectory(ctx, "subdir", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
@@ -92,9 +92,10 @@ func TestDirectory_ReadFileInDirectoryAsString(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				dir := getDirectoryToTest(tt.implementationName)
-				defer dir.Delete(verbose)
+				defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := dir.WriteStringToFileInDirectory("hello_world", verbose, "test.txt")
 				require.NoError(t, err)
@@ -133,9 +134,10 @@ func TestDirectory_ReadFileInDirectoryAsInt64(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				dir := getDirectoryToTest(tt.implementationName)
-				defer dir.Delete(verbose)
+				defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := dir.WriteStringToFileInDirectory(tt.content, verbose, "test.txt")
 				require.NoError(t, err)
@@ -162,9 +164,10 @@ func TestDirectory_ReadFirstLineOfFileInDirectoryAsString(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				dir := getDirectoryToTest(tt.implementationName)
-				defer dir.Delete(verbose)
+				defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := dir.WriteStringToFileInDirectory("1234\nabc\n", verbose, "test.txt")
 				require.NoError(t, err)
@@ -194,7 +197,7 @@ func TestDirectory_ListSubDirectories_RelativePaths(t *testing.T) {
 				ctx := getCtx()
 
 				testDirectory := getDirectoryToTest(tt.implementationName)
-				defer testDirectory.Delete(verbose)
+				defer testDirectory.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := testDirectory.CreateSubDirectory(ctx, "test1", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
@@ -260,7 +263,7 @@ func TestDirectory_ListSubDirectories(t *testing.T) {
 				ctx := getCtx()
 
 				testDirectory := getDirectoryToTest(tt.implementationName)
-				defer testDirectory.Delete(verbose)
+				defer testDirectory.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := testDirectory.CreateSubDirectory(ctx, "test1", &filesoptions.CreateOptions{})
 				require.NoError(t, err)

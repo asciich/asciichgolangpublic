@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/hosts"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -121,7 +122,7 @@ func (k *KVMHypervisor) CreateVm(createOptions *KvmCreateVmOptions) (createdVm *
 	if err != nil {
 		return nil, err
 	}
-	defer vmXml.Delete(createOptions.Verbose)
+	defer vmXml.Delete(contextutils.GetVerbosityContextByBool(createOptions.Verbose), &filesoptions.DeleteOptions{})
 
 	err = LibvirtXmls().WriteXmlForVmOnLatopToFile(createOptions, vmXml)
 	if err != nil {

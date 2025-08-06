@@ -17,7 +17,7 @@ type File interface {
 	Chown(options *parameteroptions.ChownOptions) (err error)
 	CopyToFile(destFile File, verbose bool) (err error)
 	Create(ctx context.Context, options *filesoptions.CreateOptions) (err error)
-	Delete(verbose bool) (err error)
+	Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error)
 	Exists(verbose bool) (exists bool, err error)
 	GetAccessPermissions() (permission int, err error)
 	GetAccessPermissionsString() (permissionString string, err error)
