@@ -38,7 +38,7 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 
 				inputFile := MustGetPreCommitConfigByLocalPath(filepath.Join(tt.testDataDir, "input"))
 				preCommitFile := MustGetPreCommitConfigByFile(mustutils.Must(tempfilesoo.CreateTemporaryFileFromFile(ctx, inputFile)))
-				defer preCommitFile.Delete(verbose)
+				defer preCommitFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				expectedOutput := MustGetPreCommitConfigByLocalPath(filepath.Join(tt.testDataDir, "expected_output"))
 
@@ -92,9 +92,10 @@ func TestPreCommitConfigFile_GetPreCommitConfigInGitRepository(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
-				defer gitRepo.Delete(verbose)
+				defer gitRepo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				outFile, err := gitRepo.WriteStringToFile("# placeholder", verbose, ".pre-commit-config.yaml")
 				require.NoError(t, err)

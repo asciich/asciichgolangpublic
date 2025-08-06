@@ -1,7 +1,6 @@
 package files_test
 
 import (
-	"context"
 	"os"
 	"path/filepath"
 	"sync"
@@ -33,14 +32,14 @@ func TestLocalDirectoryExists(t *testing.T) {
 				ctx := getCtx()
 
 				var directory filesinterfaces.Directory = getDirectoryToTest("localDirectory")
-				defer directory.Delete(verbose)
+				defer directory.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				exists, err := directory.Exists(verbose)
 				require.NoError(t, err)
 				require.True(t, exists)
 
 				for i := 0; i < 2; i++ {
-					err = directory.Delete(verbose)
+					err = directory.Delete(ctx, &filesoptions.DeleteOptions{})
 					require.NoError(t, err)
 
 					exists, err = directory.Exists(verbose)
@@ -58,7 +57,7 @@ func TestLocalDirectoryExists(t *testing.T) {
 				}
 
 				for i := 0; i < 2; i++ {
-					err = directory.Delete(verbose)
+					err = directory.Delete(ctx, &filesoptions.DeleteOptions{})
 					require.NoError(t, err)
 
 					exists, err = directory.Exists(verbose)
@@ -175,12 +174,13 @@ func TestLocalDirectoryCreateFileInDirectoryFromString(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				tempDirPath, err := os.MkdirTemp("", "testDir")
 				require.Nil(t, err)
 
 				dir := files.MustGetLocalDirectoryByPath(tempDirPath)
-				defer dir.Delete(verbose)
+				defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				createdFile, err := dir.CreateFileInDirectoryFromString(tt.content, verbose, tt.filename...)
 				require.NoError(t, err)
@@ -238,25 +238,21 @@ func TestLocalDirectoryWriteStringToFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
+				ctx := getCtx()
 				const verbose = true
 
 				tempDirPath, err := os.MkdirTemp("", "testDir")
-				require.Nil(err)
+				require.Nil(t, err)
 
 				testDirectory := files.MustGetLocalDirectoryByPath(tempDirPath)
-				defer testDirectory.Delete(verbose)
+				defer testDirectory.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				require.False(testDirectory.MustFileInDirectoryExists(verbose, tt.fileName))
+				require.False(t, testDirectory.MustFileInDirectoryExists(verbose, tt.fileName))
 
 				testFile := testDirectory.MustWriteStringToFileInDirectory(tt.content, verbose, tt.fileName)
 
-				require.True(testDirectory.MustFileInDirectoryExists(verbose, tt.fileName))
-				require.EqualValues(
-					tt.content,
-					testFile.MustReadAsString(),
-				)
+				require.True(t, testDirectory.MustFileInDirectoryExists(verbose, tt.fileName))
+				require.EqualValues(t, tt.content, testFile.MustReadAsString())
 			},
 		)
 	}
@@ -406,12 +402,13 @@ func TestDirectoryIsEmptyDirectory(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose = true
+				ctx := getCtx()
 
 				path, err := getDirectoryToTest("localDirectory").GetPath()
 				require.NoError(t, err)
 
 				tempDir := files.MustGetLocalDirectoryByPath(path)
-				defer tempDir.Delete(verbose)
+				defer tempDir.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.True(t, tempDir.MustIsEmptyDirectory(verbose))
 			},
@@ -432,14 +429,14 @@ func TestDirectory_CheckExists(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose = true
-				ctx := context.TODO()
+				ctx := getCtx()
 
 				temporaryDirectory := getDirectoryToTest("localDirectory")
-				defer temporaryDirectory.Delete(verbose)
+				defer temporaryDirectory.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.Nil(t, temporaryDirectory.CheckExists(ctx))
 
-				err := temporaryDirectory.Delete(verbose)
+				err := temporaryDirectory.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
 				require.NotNil(t, temporaryDirectory.CheckExists(ctx))

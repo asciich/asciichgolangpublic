@@ -31,14 +31,14 @@ func TestDirectoriesCreateLocalDirectoryByPath(t *testing.T) {
 				require.Nil(t, err)
 
 				var directory filesinterfaces.Directory = files.MustGetLocalDirectoryByPath(tempDir)
-				defer directory.Delete(verbose)
+				defer directory.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				exists, err := directory.Exists(verbose)
 				require.NoError(t, err)
 				require.True(t, exists)
 
 				for i := 0; i < 2; i++ {
-					err = directory.Delete(verbose)
+					err = directory.Delete(ctx, &filesoptions.DeleteOptions{})
 					require.NoError(t, err)
 
 					exists, err = directory.Exists(verbose)

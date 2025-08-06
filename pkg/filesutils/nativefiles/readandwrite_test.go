@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 )
@@ -13,7 +14,7 @@ func Test_ReadAndWriteAsString(t *testing.T) {
 		ctx := getCtx()
 		tmpPath, err := tempfiles.CreateTemporaryFile(ctx)
 		require.NoError(t, err)
-		defer nativefiles.Delete(ctx, tmpPath)
+		defer nativefiles.Delete(ctx, tmpPath, &filesoptions.DeleteOptions{})
 
 		err = nativefiles.WriteString(ctx, tmpPath, "hello world")
 		require.NoError(t, err)
@@ -30,7 +31,7 @@ func Test_ReadAndWriteAsBytes(t *testing.T) {
 		ctx := getCtx()
 		tmpPath, err := tempfiles.CreateTemporaryFile(ctx)
 		require.NoError(t, err)
-		defer nativefiles.Delete(ctx, tmpPath)
+		defer nativefiles.Delete(ctx, tmpPath, &filesoptions.DeleteOptions{})
 
 		err = nativefiles.WriteBytes(ctx, tmpPath, []byte("hello world"))
 		require.NoError(t, err)

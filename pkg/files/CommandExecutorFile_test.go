@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -24,11 +25,12 @@ func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				temporaryFilePath := createTempFileAndGetPath()
 
 				var fileToTest filesinterfaces.File = files.MustGetLocalCommandExecutorFileByPath(temporaryFilePath)
-				defer fileToTest.Delete(verbose)
+				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				exists, err := fileToTest.Exists(verbose)
 				require.NoError(t, err)
@@ -44,7 +46,7 @@ func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 
 				require.EqualValues(t, tt.testContent, fileToTest.MustReadAsString())
 
-				err = fileToTest.Delete(verbose)
+				err = fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
 				exists, err = fileToTest.Exists(verbose)

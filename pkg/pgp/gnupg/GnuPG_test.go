@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
@@ -61,15 +62,16 @@ func TestGnuPg_SignAndValidate(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				toTest := getFileToTest(tt.implementationName)
-				defer toTest.Delete(verbose)
+				defer toTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				signatureFile, err := mustutils.Must(toTest.GetParentDirectory()).GetFileInDirectory(
 					mustutils.Must(toTest.GetBaseName()) + ".asc",
 				)
 				require.NoError(t, err)
-				defer signatureFile.Delete(verbose)
+				defer signatureFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.True(t, mustutils.Must(toTest.Exists(verbose)))
 				require.False(t, mustutils.Must(signatureFile.Exists(verbose)))

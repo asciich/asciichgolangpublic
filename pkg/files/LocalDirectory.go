@@ -345,8 +345,8 @@ func (l *LocalDirectory) CreateSubDirectory(ctx context.Context, subDirName stri
 	return subDirectory, nil
 }
 
-func (l *LocalDirectory) Delete(verbose bool) (err error) {
-	exists, err := l.Exists(verbose)
+func (l *LocalDirectory) Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error) {
+	exists, err := l.Exists(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
@@ -361,14 +361,9 @@ func (l *LocalDirectory) Delete(verbose bool) (err error) {
 		if err != nil {
 			return tracederrors.TracedErrorf("Delete directory '%s' failed: '%w'", path, err)
 		}
-
-		if verbose {
-			logging.LogChangedf("Deleted local directory '%s'", path)
-		}
+		logging.LogChangedByCtxf(ctx, "Deleted local directory '%s'", path)
 	} else {
-		if verbose {
-			logging.LogInfof("Local directory '%s' already absent. Skip delete.", path)
-		}
+		logging.LogInfoByCtxf(ctx, "Local directory '%s' already absent. Skip delete.", path)
 	}
 
 	return nil
