@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -23,7 +24,7 @@ func TestCommandExecutorDirectoryRead_GetFileInDirectory(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
+				ctx := getCtx()
 
 				temporaryDir, err := os.MkdirTemp("", "testdir")
 				require.Nil(t, err)
@@ -42,7 +43,7 @@ func TestCommandExecutorDirectoryRead_GetFileInDirectory(t *testing.T) {
 				executor, err := dir.GetCommandExecutor()
 				require.NoError(t, err)
 				require.NotNil(t, executor)
-				defer dir.Delete(verbose)
+				defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				commandExecutorFile, err := dir.GetFileInDirectory(filepath.Base(temporaryFile.Name()))
 				require.NoError(t, err)

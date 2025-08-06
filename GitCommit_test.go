@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -22,9 +23,10 @@ func TestGitCommit_CreateTag(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := repo.Init(
 					&parameteroptions.CreateRepositoryOptions{
@@ -88,9 +90,10 @@ func TestGitCommit_ListTagsNames(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := repo.Init(
 					&parameteroptions.CreateRepositoryOptions{
@@ -154,9 +157,10 @@ func TestGitCommit_ListVersionTagNames(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := repo.Init(
 					&parameteroptions.CreateRepositoryOptions{
@@ -231,9 +235,10 @@ func TestGitCommit_GetNewestTagVersion(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := repo.Init(
 					&parameteroptions.CreateRepositoryOptions{
@@ -305,9 +310,10 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx,&filesoptions.DeleteOptions{})
 
 				err := repo.Init(
 					&parameteroptions.CreateRepositoryOptions{
@@ -400,9 +406,10 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				repo := getGitRepositoryToTest(tt.implementationName)
-				defer repo.Delete(verbose)
+				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := repo.Init(
 					&parameteroptions.CreateRepositoryOptions{

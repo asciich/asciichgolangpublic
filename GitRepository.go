@@ -34,7 +34,7 @@ type GitRepository interface {
 	CreateFileInDirectory(ctx context.Context, filePath string, optins *filesoptions.CreateOptions) (createdFile filesinterfaces.File, err error)
 	CreateSubDirectory(ctx context.Context, subDirectoryName string, options *filesoptions.CreateOptions) (createdSubDirectory filesinterfaces.Directory, err error)
 	CreateTag(createOptions *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag, err error)
-	Delete(verbose bool) (err error)
+	Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error)
 	DeleteBranchByName(name string, verbose bool) (err error)
 	DirectoryByPathExists(verbose bool, path ...string) (exists bool, err error)
 	Exists(verbose bool) (exists bool, err error)

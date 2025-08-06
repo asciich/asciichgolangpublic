@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubeconfigutils"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
@@ -154,7 +155,7 @@ func TestKubeConfig_IsLoadableByKubectl(t *testing.T) {
 
 				tempFilePath, err := kubeConfig.WriteToTemporaryFileAndGetPath(ctx)
 				require.NoError(t, err)
-				defer nativefiles.Delete(ctx, tempFilePath)
+				defer nativefiles.Delete(ctx, tempFilePath, &filesoptions.DeleteOptions{})
 
 				isLoadable, err = kubeconfigutils.IsFilePathLoadableByKubectl(ctx, tt.path)
 				require.NoError(t, err)
@@ -188,7 +189,7 @@ func TestKubeConfig_CheckContextsUsingKubectl(t *testing.T) {
 
 				tempFilePath, err := kubeConfig.WriteToTemporaryFileAndGetPath(ctx)
 				require.NoError(t, err)
-				defer nativefiles.Delete(ctx, tempFilePath)
+				defer nativefiles.Delete(ctx, tempFilePath, &filesoptions.DeleteOptions{})
 
 				require.EqualValues(t, tt.expectedContextNames, mustutils.Must(kubeconfigutils.ListContextNamesUsingKubectl(ctx, tempFilePath)))
 
@@ -231,7 +232,7 @@ func TestKubeConfig_MergeTwoConfigs(t *testing.T) {
 				tempFilePath, err := merged.WriteToTemporaryFileAndGetPath(ctx)
 				require.NoError(t, err)
 
-				defer nativefiles.Delete(ctx, tempFilePath)
+				defer nativefiles.Delete(ctx, tempFilePath, &filesoptions.DeleteOptions{})
 
 				require.EqualValues(t, tt.expectedNames, mustutils.Must(kubeconfigutils.ListContextNamesUsingKubectl(ctx, tempFilePath)))
 			},
@@ -267,7 +268,7 @@ func TestKubeConfig_MergeThreeConfigs(t *testing.T) {
 
 	tempFilePath, err := merged2.WriteToTemporaryFileAndGetPath(ctx)
 	require.NoError(t, err)
-	defer nativefiles.Delete(ctx, tempFilePath)
+	defer nativefiles.Delete(ctx, tempFilePath, &filesoptions.DeleteOptions{})
 
 	require.EqualValues(
 		t,

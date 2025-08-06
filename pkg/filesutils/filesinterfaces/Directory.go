@@ -12,7 +12,7 @@ type Directory interface {
 	CopyContentToDirectory(destinationDir Directory, verbose bool) (err error)
 	Create(ctx context.Context, options *filesoptions.CreateOptions) (err error)
 	CreateSubDirectory(ctx context.Context, subDirectoryName string, options *filesoptions.CreateOptions) (createdSubDirectory Directory, err error)
-	Delete(verbose bool) (err error)
+	Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error)
 	Exists(verbose bool) (exists bool, err error)
 	GetBaseName() (baseName string, err error)
 	GetDirName() (dirName string, err error)

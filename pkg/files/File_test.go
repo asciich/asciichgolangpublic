@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
@@ -57,9 +58,10 @@ func TestFile_WriteString_ReadAsString(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				fileToTest := getFileToTest(tt.implementationName)
-				defer fileToTest.Delete(verbose)
+				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := fileToTest.WriteString(tt.content, verbose)
 				require.NoError(t, err)
@@ -85,15 +87,16 @@ func TestFile_Exists(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				fileToTest := getFileToTest(tt.implementationName)
-				defer fileToTest.Delete(verbose)
+				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				exists, err := fileToTest.Exists(verbose)
 				require.NoError(t, err)
 				require.True(t, exists)
 
-				err = fileToTest.Delete(verbose)
+				err = fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
 				exists, err = fileToTest.Exists(verbose)
@@ -118,9 +121,10 @@ func TestFile_Truncate(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				fileToTest := getFileToTest(tt.implementationName)
-				defer fileToTest.Delete(verbose)
+				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				for i := 0; i < 10; i++ {
 					err := fileToTest.Truncate(int64(i), verbose)
@@ -160,9 +164,10 @@ func TestFile_ContainsLine(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				fileToTest := getFileToTest(tt.implementationName)
-				defer fileToTest.Delete(verbose)
+				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := fileToTest.WriteString(
 					"this is a\nhello world\nexample text.\n",
@@ -193,13 +198,14 @@ func TestFile_MoveToPath(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				fileToTest := getFileToTest(tt.implementationName)
-				defer fileToTest.Delete(verbose)
+				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				destFile := getFileToTest(tt.implementationName)
-				defer destFile.Delete(verbose)
-				destFile.Delete(verbose)
+				defer destFile.Delete(ctx, &filesoptions.DeleteOptions{})
+				destFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				exists, err := fileToTest.Exists(verbose)
 				require.NoError(t, err)
@@ -256,15 +262,16 @@ func TestFile_CopyToFile(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				srcFile := getFileToTest(tt.implementationName)
 				err := srcFile.WriteString(tt.content, verbose)
 				require.NoError(t, err)
-				defer srcFile.Delete(verbose)
+				defer srcFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				destFile := getFileToTest(tt.implementationName)
-				defer destFile.Delete(verbose)
-				destFile.Delete(verbose)
+				defer destFile.Delete(ctx, &filesoptions.DeleteOptions{})
+				destFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.True(t, mustutils.Must(srcFile.Exists(verbose)))
 				require.False(t, mustutils.Must(destFile.Exists(verbose)))
@@ -299,9 +306,10 @@ func TestFile_Chmod(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				toTest := getFileToTest(tt.implementationName)
-				defer toTest.Delete(verbose)
+				defer toTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := toTest.Chmod(
 					&parameteroptions.ChmodOptions{
@@ -337,9 +345,10 @@ func TestFile_String(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				toTest := getFileToTest(tt.implementationName)
-				defer toTest.Delete(verbose)
+				defer toTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				path, err := toTest.GetPath()
 				require.NoError(t, err)

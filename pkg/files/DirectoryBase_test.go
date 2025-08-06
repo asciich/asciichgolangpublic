@@ -23,6 +23,7 @@ func TestDirectoryBase_SetAndGetParentDirectory(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				directoryBase := files.NewDirectoryBase()
 
@@ -30,7 +31,7 @@ func TestDirectoryBase_SetAndGetParentDirectory(t *testing.T) {
 				require.Nil(t, err)
 
 				directory := files.MustGetLocalDirectoryByPath(tempDir)
-				defer directory.Delete(verbose)
+				defer directory.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				directoryBase.MustSetParentDirectoryForBaseClass(directory)
 
@@ -61,7 +62,7 @@ func TestDirectoryBase_ListFiles_withoutFilter(t *testing.T) {
 
 				directory := getDirectoryToTest(tt.fileImplementationToTest)
 
-				defer directory.Delete(verbose)
+				defer directory.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := directory.CreateFileInDirectory(ctx, "a.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
@@ -108,7 +109,7 @@ func TestDirectoryBase_ListFiles(t *testing.T) {
 
 				directory := getDirectoryToTest(tt.fileImplementationToTest)
 
-				defer directory.Delete(verbose)
+				defer directory.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				_, err := directory.CreateFileInDirectory(ctx, "a.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)

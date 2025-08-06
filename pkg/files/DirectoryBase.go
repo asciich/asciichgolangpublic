@@ -172,7 +172,7 @@ func (d *DirectoryBase) DeleteFilesMatching(ctx context.Context, listFileOptions
 	}
 
 	for _, d := range toDelete {
-		err = d.Delete(contextutils.GetVerboseFromContext(ctx))
+		err = d.Delete(ctx, &filesoptions.DeleteOptions{})
 		if err != nil {
 			return err
 		}

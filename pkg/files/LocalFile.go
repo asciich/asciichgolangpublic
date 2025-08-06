@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbash"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
@@ -95,33 +96,13 @@ func (l *LocalFile) String() string {
 
 // Delete a file if it exists.
 // If the file is already absent this function does nothing.
-func (l *LocalFile) Delete(verbose bool) (err error) {
+func (l *LocalFile) Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error) {
 	path, err := l.GetLocalPath()
 	if err != nil {
 		return err
 	}
 
-	exists, err := l.Exists(verbose)
-	if err != nil {
-		return err
-	}
-
-	if exists {
-		err = os.Remove(path)
-		if err != nil {
-			return tracederrors.TracedErrorf("Failed to delet localFile '%s': '%w'", path, err)
-		}
-
-		if verbose {
-			logging.LogChangedf("Local file '%s' deleted.", path)
-		}
-	} else {
-		if verbose {
-			logging.LogInfof("Local file '%s' is already absent. Skip delete.", path)
-		}
-	}
-
-	return nil
+	return nativefiles.Delete(ctx, path, options)
 }
 
 func (l *LocalFile) AppendBytes(toWrite []byte, verbose bool) (err error) {
@@ -298,9 +279,18 @@ func (l *LocalFile) Create(ctx context.Context, options *filesoptions.CreateOpti
 	if exists {
 		logging.LogInfoByCtxf(ctx, "Local file '%s' already exists", path)
 	} else {
-		err = l.WriteString("", false)
-		if err != nil {
-			return err
+		if options != nil && options.UseSudo {
+			commandexecutorbash.RunCommand(
+				ctx,
+				&parameteroptions.RunCommandOptions{
+					Command: []string{"sudo", "touch", path},
+				},
+			)
+		} else {
+			err = l.WriteString("", false)
+			if err != nil {
+				return err
+			}
 		}
 
 		logging.LogChangedByCtxf(ctx, "Local file '%s' created", path)

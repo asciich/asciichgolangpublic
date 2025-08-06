@@ -1,6 +1,8 @@
 package files
 
 import (
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -22,7 +24,7 @@ func DeleteFileByPath(path string, verbose bool) (err error) {
 		return err
 	}
 
-	err = toDelete.Delete(verbose)
+	err = toDelete.Delete(contextutils.GetVerbosityContextByBool(verbose), &filesoptions.DeleteOptions{})
 	if err != nil {
 		return err
 	}

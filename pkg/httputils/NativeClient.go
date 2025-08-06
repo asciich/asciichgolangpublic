@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
@@ -169,7 +170,7 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 
 	if downloadOptions.OverwriteExisting {
 		logging.LogInfoByCtxf(ctx, "Going to ensure '%s' is absent before download starts", outputFilePath)
-		err = downloadedFile.Delete(contextutils.GetVerboseFromContext(ctx))
+		err = downloadedFile.Delete(ctx, &filesoptions.DeleteOptions{})
 		if err != nil {
 			return nil, err
 		}

@@ -21,6 +21,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -1531,7 +1532,7 @@ func (l *LocalGitRepository) Init(options *parameteroptions.CreateRepositoryOpti
 				if err != nil {
 					return err
 				}
-				defer temporaryRepository.Delete(options.Verbose)
+				defer temporaryRepository.Delete(contextutils.GetVerbosityContextByBool(options.Verbose), &filesoptions.DeleteOptions{})
 
 				err = temporaryRepository.SetGitConfig(
 					&gitparameteroptions.GitConfigSetOptions{

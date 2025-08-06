@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
@@ -34,7 +35,7 @@ func TestCreateTemporaryFile(t *testing.T) {
 
 				file, err := tempfilesoo.CreateFromString(ctx, tt.content)
 				require.NoError(t, err)
-				defer file.Delete(verbose)
+				defer file.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				exists, err := file.Exists(verbose)
 				require.NoError(t, err)
@@ -52,7 +53,7 @@ func TestCreateEmptyTemporaryFile(t *testing.T) {
 
 	file, err := tempfilesoo.CreateEmptyTemporaryFile(ctx)
 	require.NoError(t, err)
-	defer file.Delete(verbose)
+	defer file.Delete(ctx, &filesoptions.DeleteOptions{})
 
 	exists, err := file.Exists(verbose)
 	require.NoError(t, err)
@@ -73,7 +74,7 @@ func TestCreateEmptyTemporaryFileAndGetPath(t *testing.T) {
 	require.NoError(t, err)
 
 	file := files.MustNewLocalFileByPath(filePath)
-	defer file.Delete(verbose)
+	defer file.Delete(ctx, &filesoptions.DeleteOptions{})
 
 	require.True(t, file.MustExists(verbose))
 	require.EqualValues(t, "", file.MustReadAsString())

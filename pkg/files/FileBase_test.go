@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -47,8 +48,9 @@ func TestFileBaseEnsureLineInFile_testcase1(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
+				ctx := getCtx()
 				fileToTest := getFileToTest(tt.implementationName)
-				defer fileToTest.Delete(verbose)
+				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				const testContent string = "hello\nworld\n"
 				err := fileToTest.WriteString(testContent, verbose)
@@ -114,10 +116,11 @@ func TestFileBase_EnsureLineInFile_testcaseWriteToNonexstingString(t *testing.T)
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
+				ctx := getCtx()
 				fileToTest := getFileToTest(tt.implementationName)
-				defer fileToTest.Delete(true)
+				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				err := fileToTest.Delete(verbose)
+				err := fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
 				for i := 0; i < 2; i++ {
@@ -182,9 +185,10 @@ func TestFileBase_RemoveLinesWithPrefix(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose = true
+				ctx := getCtx()
 
 				toTest := getFileToTest(tt.implementationName)
-				defer toTest.Delete(verbose)
+				defer toTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := toTest.WriteString(tt.input, verbose)
 				require.NoError(t, err)
@@ -214,9 +218,10 @@ func TestFileBase_GetValueAsString(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose = true
+				ctx := getCtx()
 
 				toTest := getFileToTest(tt.implementationName)
-				defer toTest.Delete(verbose)
+				defer toTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := toTest.WriteString(tt.input, verbose)
 				require.NoError(t, err)
@@ -249,9 +254,10 @@ func TestFileBase_GetValueAsInt(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose = true
+				ctx := getCtx()
 
 				toTest := getFileToTest(tt.implementationName)
-				defer toTest.Delete(verbose)
+				defer toTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := toTest.WriteString(tt.input, verbose)
 				require.NoError(t, err)

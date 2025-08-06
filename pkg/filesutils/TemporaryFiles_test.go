@@ -8,28 +8,36 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
+// This test suite ensure the different implementations behave in the same way.
+
 func getCtx() context.Context {
 	return contextutils.ContextVerbose()
 }
 
-// This test suite ensure the different implementations behave in the same way.
-func getFileToTest(implementationName string) (fileToTest filesinterfaces.File) {
+func getTemporaryFileToTest(implementationName string) (fileToTest filesinterfaces.File) {
 	ctxSilent := contextutils.WithSilent(getCtx())
 
-	temporayFile := mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctxSilent))
+	temporayFilePath := mustutils.Must(tempfiles.CreateTemporaryFile(ctxSilent))
 
+	return getFileToTest(implementationName, temporayFilePath)
+
+}
+
+func getFileToTest(implementationName string, path string) (fileToTest filesinterfaces.File) {
 	if implementationName == "localFile" {
-		return mustutils.Must(files.GetLocalFileByPath(temporayFile))
+		return mustutils.Must(files.GetLocalFileByPath(path))
 	}
 
 	if implementationName == "localCommandExecutorFile" {
-		return files.MustGetLocalCommandExecutorFileByPath(temporayFile)
+		return files.MustGetLocalCommandExecutorFileByPath(path)
 	}
 
 	logging.LogFatalWithTracef("Unknown implementation name '%s'", implementationName)
@@ -52,16 +60,16 @@ func TestTemporaryFilesCreateFromFile(t *testing.T) {
 				const verbose bool = true
 				ctx := getCtx()
 
-				sourceFile := getFileToTest(tt.implementationName)
+				sourceFile := getTemporaryFileToTest(tt.implementationName)
 				err := sourceFile.WriteString(tt.content, verbose)
 				require.NoError(t, err)
-				defer sourceFile.Delete(verbose)
+				defer sourceFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.EqualValues(t, tt.content, sourceFile.MustReadAsString())
 
 				tempFile, err := tempfilesoo.CreateTemporaryFileFromFile(ctx, sourceFile)
 				require.NoError(t, err)
-				defer tempFile.Delete(verbose)
+				defer tempFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.EqualValues(t, tt.content, tempFile.MustReadAsString())
 			},

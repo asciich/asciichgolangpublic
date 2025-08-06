@@ -224,7 +224,7 @@ func (c *CommandExecutorDirectory) CreateSubDirectory(ctx context.Context, subDi
 	return createdSubDirectory, nil
 }
 
-func (c *CommandExecutorDirectory) Delete(verbose bool) (err error) {
+func (c *CommandExecutorDirectory) Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error) {
 	commandExecutor, dirPath, hostDescription, err := c.GetCommandExecutorAndDirPathAndHostDescription()
 	if err != nil {
 		return err
@@ -237,14 +237,14 @@ func (c *CommandExecutorDirectory) Delete(verbose bool) (err error) {
 		)
 	}
 
-	exists, err := c.Exists(verbose)
+	exists, err := c.Exists(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
 
 	if exists {
 		_, err = commandExecutor.RunCommand(
-			contextutils.GetVerbosityContextByBool(verbose),
+			ctx,
 			&parameteroptions.RunCommandOptions{
 				Command: []string{"rm", "-rf", dirPath},
 			},
