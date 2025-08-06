@@ -40,10 +40,6 @@ func ReadFileAsString(path string) (content string, err error) {
 	return Files().ReadAsString(path)
 }
 
-func WriteStringToFile(path string, content string, verbose bool) (err error) {
-	return Files().WriteStringToFile(path, content, verbose)
-}
-
 func (f *FilesService) ReadAsString(path string) (content string, err error) {
 	if path == "" {
 		return "", tracederrors.TracedErrorEmptyString(path)
@@ -60,24 +56,6 @@ func (f *FilesService) ReadAsString(path string) (content string, err error) {
 	}
 
 	return content, nil
-}
-
-func (f *FilesService) WriteStringToFile(path string, content string, verbose bool) (err error) {
-	if path == "" {
-		return tracederrors.TracedErrorEmptyString(path)
-	}
-
-	localFile, err := GetLocalFileByPath(path)
-	if err != nil {
-		return err
-	}
-
-	err = localFile.WriteString(content, verbose)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func GetCurrentWorkingDirectory() (workingDirectory *LocalDirectory, err error) {

@@ -1040,17 +1040,16 @@ func (c *CommandExecutorFile) WriteBytes(ctx context.Context, toWrite []byte, op
 		return err
 	}
 
+	command := []string{"bash", "-c", fmt.Sprintf("cat > '%s'", filePath)}
+
+	if options != nil && options.UseSudo {
+		command = append([]string{"sudo"}, command...)
+	}
+
 	_, err = commandExecutor.RunCommand(
 		contextutils.WithSilent(ctx),
 		&parameteroptions.RunCommandOptions{
-			Command: []string{
-				"bash",
-				"-c",
-				fmt.Sprintf(
-					"cat > '%s'",
-					filePath,
-				),
-			},
+			Command:     command,
 			StdinString: string(toWrite),
 		},
 	)

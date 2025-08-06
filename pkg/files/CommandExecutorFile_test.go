@@ -38,7 +38,7 @@ func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 
 				require.EqualValues(t, "", fileToTest.MustReadAsString())
 
-				fileToTest.WriteString(tt.testContent, verbose)
+				fileToTest.WriteString(ctx, tt.testContent, &filesoptions.WriteOptions{})
 
 				exists, err = fileToTest.Exists(verbose)
 				require.NoError(t, err)

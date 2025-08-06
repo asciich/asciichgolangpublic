@@ -287,7 +287,7 @@ func (l *LocalFile) Create(ctx context.Context, options *filesoptions.CreateOpti
 				},
 			)
 		} else {
-			err = l.WriteString("", false)
+			err = l.WriteString(contextutils.WithSilent(ctx), "", &filesoptions.WriteOptions{})
 			if err != nil {
 				return err
 			}

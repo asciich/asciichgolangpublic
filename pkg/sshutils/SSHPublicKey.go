@@ -6,11 +6,11 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/userutils"
@@ -285,7 +285,7 @@ func (k *SSHPublicKey) WriteToFile(ctx context.Context, outputFile filesinterfac
 	}
 
 	sshKeyLine = stringsutils.EnsureEndsWithExactlyOneLineBreak(sshKeyLine)
-	err = outputFile.WriteString(sshKeyLine, contextutils.GetVerboseFromContext(ctx))
+	err = outputFile.WriteString(ctx, sshKeyLine, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}

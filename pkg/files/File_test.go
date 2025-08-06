@@ -62,7 +62,7 @@ func TestFile_WriteString_ReadAsString(t *testing.T) {
 				fileToTest := getFileToTest(tt.implementationName)
 				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				err := fileToTest.WriteString(tt.content, verbose)
+				err := fileToTest.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				require.EqualValues(t, tt.content, fileToTest.MustReadAsString())
@@ -165,10 +165,7 @@ func TestFile_ContainsLine(t *testing.T) {
 				fileToTest := getFileToTest(tt.implementationName)
 				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				err := fileToTest.WriteString(
-					"this is a\nhello world\nexample text.\n",
-					verbose,
-				)
+				err := fileToTest.WriteString(ctx, "this is a\nhello world\nexample text.\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				containsLine, err := fileToTest.ContainsLine(tt.line)
@@ -259,7 +256,7 @@ func TestFile_CopyToFile(t *testing.T) {
 				ctx := getCtx()
 
 				srcFile := getFileToTest(tt.implementationName)
-				err := srcFile.WriteString(tt.content, verbose)
+				err := srcFile.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 				defer srcFile.Delete(ctx, &filesoptions.DeleteOptions{})
 

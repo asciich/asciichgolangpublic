@@ -57,11 +57,10 @@ func TestTemporaryFilesCreateFromFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				sourceFile := getTemporaryFileToTest(tt.implementationName)
-				err := sourceFile.WriteString(tt.content, verbose)
+				err := sourceFile.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 				defer sourceFile.Delete(ctx, &filesoptions.DeleteOptions{})
 

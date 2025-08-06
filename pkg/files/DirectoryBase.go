@@ -40,7 +40,7 @@ func (d *DirectoryBase) WriteStringToFileInDirectory(content string, verbose boo
 		return nil, err
 	}
 
-	err = writtenFile.WriteString(content, verbose)
+	err = writtenFile.WriteString(contextutils.GetVerbosityContextByBool(verbose), content, &filesoptions.WriteOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +148,7 @@ func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose 
 		return nil, err
 	}
 
-	err = createdFile.WriteString(content, verbose)
+	err = createdFile.WriteString(contextutils.GetVerbosityContextByBool(verbose), content, &filesoptions.WriteOptions{})
 	if err != nil {
 		return nil, err
 	}

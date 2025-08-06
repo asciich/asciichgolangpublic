@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 )
@@ -113,5 +114,25 @@ func Test_Create(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, nativefiles.IsFile(ctx, testPath))
 		require.False(t, contextutils.IsChanged(ctx))
+	})
+}
+
+func TestFilesWriteStringToFile(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
+		const verbose bool = true
+		ctx := getCtx()
+
+		tempFile, err := tempfiles.CreateTemporaryFile(ctx)
+		require.NoError(t, err)
+		defer nativefiles.Delete(ctx, tempFile, &filesoptions.DeleteOptions{})
+
+		const content = "hello world"
+		err = nativefiles.WriteString(ctx, tempFile, content)
+		require.NoError(t, err)
+
+		readContent, err := nativefiles.ReadAsString(ctx, tempFile)
+		require.NoError(t, err)
+
+		require.EqualValues(t, readContent, content)
 	})
 }

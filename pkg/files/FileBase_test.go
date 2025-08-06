@@ -53,7 +53,7 @@ func TestFileBaseEnsureLineInFile_testcase1(t *testing.T) {
 				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				const testContent string = "hello\nworld\n"
-				err := fileToTest.WriteString(testContent, verbose)
+				err := fileToTest.WriteString(ctx, testContent, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				require.EqualValues(t, testContent, fileToTest.MustReadAsString())
@@ -190,7 +190,7 @@ func TestFileBase_RemoveLinesWithPrefix(t *testing.T) {
 				toTest := getFileToTest(tt.implementationName)
 				defer toTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				err := toTest.WriteString(tt.input, verbose)
+				err := toTest.WriteString(ctx, tt.input, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 				toTest.MustRemoveLinesWithPrefix(tt.prefix, verbose)
 
@@ -223,7 +223,7 @@ func TestFileBase_GetValueAsString(t *testing.T) {
 				toTest := getFileToTest(tt.implementationName)
 				defer toTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				err := toTest.WriteString(tt.input, verbose)
+				err := toTest.WriteString(ctx, tt.input, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				value, err := toTest.GetValueAsString(tt.key)
@@ -259,7 +259,7 @@ func TestFileBase_GetValueAsInt(t *testing.T) {
 				toTest := getFileToTest(tt.implementationName)
 				defer toTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				err := toTest.WriteString(tt.input, verbose)
+				err := toTest.WriteString(ctx, tt.input, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				intValue, err := toTest.GetValueAsInt(tt.key)

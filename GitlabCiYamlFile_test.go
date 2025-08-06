@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
@@ -32,7 +33,7 @@ func TestGitlabCiYamlFileGetInclude(t *testing.T) {
 				toWrite += "  - project: a\n"
 				toWrite += "    ref: b\n"
 				toWrite += "    file: c.yaml\n"
-				err = gitlabCiYamlFile.WriteString(toWrite, verbose)
+				err = gitlabCiYamlFile.WriteString(ctx, toWrite, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				includes, err := gitlabCiYamlFile.GetIncludes(verbose)
@@ -73,7 +74,7 @@ func TestGitlabCiYamlFileGetInclude2(t *testing.T) {
 				toWrite += "    ref: b\n"
 				toWrite += "    file:\n"
 				toWrite += "     - c.yaml\n"
-				err = gitlabCiYamlFile.WriteString(toWrite, verbose)
+				err = gitlabCiYamlFile.WriteString(ctx, toWrite, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				includes, err := gitlabCiYamlFile.GetIncludes(verbose)
@@ -118,7 +119,7 @@ func TestGitlabCiYamlFileGetIncludeIgnoreRules(t *testing.T) {
 				toWrite += "     - c.yaml\n"
 				toWrite += "    rules:\n"
 				toWrite += "     - if: $CI_PIPELINE_SOURCE != \"pipeline\"\n"
-				err = gitlabCiYamlFile.WriteString(toWrite, verbose)
+				err = gitlabCiYamlFile.WriteString(ctx, toWrite, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				includes, err := gitlabCiYamlFile.GetIncludes(verbose)

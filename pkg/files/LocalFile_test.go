@@ -156,13 +156,14 @@ func TestLocalFileReadAndWriteAsString(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = false
+				ctx := getCtx()
 
 				var file filesinterfaces.File = getFileToTest("localFile")
 
 				require.EqualValues(t, "", file.MustReadAsString())
 
 				for i := 0; i < 2; i++ {
-					err := file.WriteString(tt.content, verbose)
+					err := file.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
 					require.NoError(t, err)
 
 					require.EqualValues(t, tt.content, file.MustReadAsString())
@@ -219,7 +220,7 @@ func TestLocalFileGetSha256Sum(t *testing.T) {
 				ctx := getCtx()
 
 				temporaryFile := getFileToTest("localFile")
-				err := temporaryFile.WriteString(tt.input, verbose)
+				err := temporaryFile.WriteString(ctx, tt.input, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 				defer temporaryFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
@@ -252,7 +253,7 @@ func TestLocalFileIsMatchingSha256Sum(t *testing.T) {
 				ctx := getCtx()
 
 				temporaryFile := getFileToTest("localFile")
-				err := temporaryFile.WriteString(tt.input, verbose)
+				err := temporaryFile.WriteString(ctx, tt.input, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 				defer temporaryFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
@@ -307,12 +308,12 @@ func TestLocalFileIsContentEqualByComparingSha256Sum(t *testing.T) {
 				ctx := getCtx()
 
 				tempFile1 := getFileToTest("localFile")
-				err := tempFile1.WriteString(tt.contentFile1, verbose)
+				err := tempFile1.WriteString(ctx, tt.contentFile1, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 				defer tempFile1.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				tempFile2 := getFileToTest("localFile")
-				err = tempFile2.WriteString(tt.contentFile2, verbose)
+				err = tempFile2.WriteString(ctx, tt.contentFile2, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 				defer tempFile2.Delete(ctx, &filesoptions.DeleteOptions{})
 
@@ -361,6 +362,7 @@ func TestFileGetTextBlocksGolangWithCommentAboveFunction(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				testData := "package main\n"
 				testData += "\n"
@@ -371,7 +373,7 @@ func TestFileGetTextBlocksGolangWithCommentAboveFunction(t *testing.T) {
 				testData += "}\n"
 
 				testFile := getFileToTest("localFile")
-				err := testFile.WriteString(testData, verbose)
+				err := testFile.WriteString(ctx, testData, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 				blocks, err := testFile.GetTextBlocks(verbose)
 				require.NoError(t, err)
@@ -395,13 +397,14 @@ func TestFileGetTextBlocksYamlWithoutLeadingThreeMinuses(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const verbose bool = true
+				ctx := getCtx()
 
 				testData := "a: b\n"
 				testData += "\n"
 				testData += "c: d\n"
 
 				testFile := getFileToTest("localFile")
-				testFile.WriteString(testData, verbose)
+				testFile.WriteString(ctx, testData, &filesoptions.WriteOptions{})
 				blocks, err := testFile.GetTextBlocks(verbose)
 				require.NoError(t, err)
 
@@ -423,6 +426,7 @@ func TestFileGetTextBlocksYamlWithLeadingThreeMinuses(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
+				ctx := getCtx()
 				const verbose bool = true
 
 				testData := "---\n"
@@ -431,7 +435,7 @@ func TestFileGetTextBlocksYamlWithLeadingThreeMinuses(t *testing.T) {
 				testData += "c: d\n"
 
 				testFile := getFileToTest("localFile")
-				testFile.WriteString(testData, verbose)
+				testFile.WriteString(ctx, testData, &filesoptions.WriteOptions{})
 				blocks, err := testFile.GetTextBlocks(verbose)
 				require.NoError(t, err)
 
@@ -499,7 +503,7 @@ func TestFileReplaceLineAfterLine(t *testing.T) {
 				ctx := getCtx()
 
 				testFile := getFileToTest("localFile")
-				testFile.WriteString(tt.input, verbose)
+				testFile.WriteString(ctx, tt.input, &filesoptions.WriteOptions{})
 				defer testFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				changeSummary := testFile.MustReplaceLineAfterLine(tt.lineToSearch, tt.replaceLineAfterFoundWith, verbose)
@@ -603,7 +607,7 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 				testInput := testDataDir.MustReadFileInDirectoryAsString("input")
 
 				testFile := getFileToTest("localFile")
-				err = testFile.WriteString(testInput, verbose)
+				err = testFile.WriteString(ctx, testInput, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				expectedFile := testDataDir.MustGetFileInDirectory("expectedOutput")
@@ -650,7 +654,7 @@ func TestLocalFileGetLastCharAsString(t *testing.T) {
 				const verbose = true
 
 				testFile := getFileToTest("localFile")
-				testFile.WriteString(tt.content, verbose)
+				testFile.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
 				defer testFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				lastChar := testFile.MustReadLastCharAsString()
@@ -683,7 +687,7 @@ func TestLocalFileGetAsFloat64(t *testing.T) {
 				const verbose = true
 
 				testFile := getFileToTest("localFile")
-				testFile.WriteString(tt.content, verbose)
+				testFile.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
 				defer testFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				readFloat := testFile.MustReadAsFloat64()
@@ -716,7 +720,7 @@ func TestFileGetAsInt64(t *testing.T) {
 				const verbose = true
 
 				testFile := getFileToTest("localFile")
-				testFile.WriteString(tt.content, verbose)
+				testFile.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
 				defer testFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				readInt64 := testFile.MustReadAsInt64()
@@ -749,7 +753,7 @@ func TestFileGetAsInt(t *testing.T) {
 				ctx := getCtx()
 
 				testFile := getFileToTest("localFile")
-				testFile.WriteString(tt.content, verbose)
+				testFile.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
 				defer testFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				readInt64 := testFile.MustReadAsInt()
@@ -806,7 +810,7 @@ func TestFileIsPgpEncrypted_Case1_unencrypted(t *testing.T) {
 				const verbose bool = true
 
 				testFile := getFileToTest("localFile")
-				testFile.WriteString(tt.unencrypted, verbose)
+				testFile.WriteString(ctx, tt.unencrypted, &filesoptions.WriteOptions{})
 				defer testFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.False(t, testFile.MustIsPgpEncrypted(verbose))
@@ -1095,10 +1099,11 @@ func TestFileTrimSpacesAtBeginningOfFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
+				ctx := getCtx()
+				const verbose = true
 
 				testFile := getFileToTest("localFile")
-				err := testFile.WriteString(tt.input, verbose)
+				err := testFile.WriteString(ctx, tt.input, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				err = testFile.TrimSpacesAtBeginningOfFile(verbose)
@@ -1198,10 +1203,10 @@ func TestLocalFileGetNumberOfNonEmptyLines(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
+				ctx := getCtx()
 
 				testFile := getFileToTest("localFile")
-				err := testFile.WriteString(tt.content, verbose)
+				err := testFile.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				nEmptyLines, err := testFile.GetNumberOfNonEmptyLines()

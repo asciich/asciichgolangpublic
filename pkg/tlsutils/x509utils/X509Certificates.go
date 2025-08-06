@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -557,13 +558,14 @@ func (c *X509CertificatesService) CreateSigningRequestFile(signOptions *X509Sign
 	const extensionName = "v3_req"
 
 	err = openSslConfigFile.WriteString(
+		contextutils.GetVerbosityContextByBool(signOptions.Verbose),
 		" [ req ]\n"+
 			"req_extensions = "+extensionName+"\n"+
 			"x509_extensions = "+extensionName+"\n"+
 			"\n"+
 			"[ "+extensionName+" ]\n"+
 			"basicConstraints = CA:TRUE\n",
-		signOptions.Verbose,
+		&filesoptions.WriteOptions{},
 	)
 	if err != nil {
 		return err
@@ -734,13 +736,14 @@ func (c *X509CertificatesService) SignIntermediateCertificate(signOptions *X509S
 	const extensionName = "v3_req"
 
 	err = openSslConfigFile.WriteString(
+		contextutils.GetVerbosityContextByBool(signOptions.Verbose),
 		" [ req ]\n"+
 			"req_extensions = "+extensionName+"\n"+
 			"x509_extensions = "+extensionName+"\n"+
 			"\n"+
 			"[ "+extensionName+" ]\n"+
 			"basicConstraints = CA:TRUE\n",
-		signOptions.Verbose,
+		&filesoptions.WriteOptions{},
 	)
 	if err != nil {
 		return err
