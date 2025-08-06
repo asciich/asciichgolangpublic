@@ -98,6 +98,6 @@ type File interface {
 	TrimSpacesAtBeginningOfFile(verbose bool) (err error)
 	WriteInt64(toWrite int64, verboe bool) (err error)
 	WriteLines(linesToWrite []string, verbose bool) (err error)
-	WriteString(content string, verbose bool) (err error)
+	WriteString(ctx context.Context, content string, options *filesoptions.WriteOptions) (err error)
 	WriteTextBlocks(textBlocks []string, verbose bool) (err error)
 }

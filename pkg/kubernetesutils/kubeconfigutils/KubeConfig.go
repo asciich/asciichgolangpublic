@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -446,7 +446,7 @@ func (k *KubeConfig) WriteToFile(ctx context.Context, outFile filesinterfaces.Fi
 		return err
 	}
 
-	err = outFile.WriteString(content, contextutils.GetVerboseFromContext(ctx))
+	err = outFile.WriteString(ctx, content, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}

@@ -61,7 +61,7 @@ func CreateFromString(ctx context.Context, content string) (temporaryFile filesi
 		return nil, err
 	}
 
-	err = temporaryFile.WriteString(content, contextutils.GetVerboseFromContext(ctx))
+	err = temporaryFile.WriteString(ctx, content, &filesoptions.WriteOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func CreateTemporaryFileFromString(ctx context.Context, content string) (tempora
 		return nil, err
 	}
 
-	err = temporaryFile.WriteString(content, contextutils.GetVerboseFromContext(ctx))
+	err = temporaryFile.WriteString(ctx, content, &filesoptions.WriteOptions{})
 	if err != nil {
 		return nil, err
 	}

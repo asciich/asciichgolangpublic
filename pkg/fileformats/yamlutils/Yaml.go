@@ -7,8 +7,10 @@ import (
 	"strings"
 
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	gologging "gopkg.in/op/go-logging.v1"
@@ -62,7 +64,7 @@ func DataToYamlFile(data interface{}, outputFile filesinterfaces.File, verbose b
 		return err
 	}
 
-	err = outputFile.WriteString(yamlString, verbose)
+	err = outputFile.WriteString(contextutils.GetVerbosityContextByBool(verbose), yamlString, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}

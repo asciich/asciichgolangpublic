@@ -1,6 +1,7 @@
 package files
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -166,7 +167,7 @@ func (f *FileBase) EnsureEndsWithLineBreak(verbose bool) (err error) {
 	}
 
 	if isEmptyFile {
-		err = parent.WriteString("\n", verbose)
+		err = parent.WriteString(contextutils.GetVerbosityContextByBool(verbose), "\n", &filesoptions.WriteOptions{})
 		if err != nil {
 			return err
 		}
@@ -1020,13 +1021,6 @@ func (f *FileBase) MustWriteLines(linesToWrite []string, verbose bool) {
 	}
 }
 
-func (f *FileBase) MustWriteString(toWrite string, verbose bool) {
-	err := f.WriteString(toWrite, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (f *FileBase) MustWriteTextBlocks(textBlocks []string, verbose bool) {
 	err := f.WriteTextBlocks(textBlocks, verbose)
 	if err != nil {
@@ -1270,10 +1264,7 @@ func (f *FileBase) RemoveLinesWithPrefix(prefix string, verbose bool) (err error
 			)
 		}
 	} else {
-		err = parent.WriteString(
-			replaced,
-			false,
-		)
+		err = parent.WriteString(contextutils.WithSilent(contextutils.GetVerbosityContextByBool(verbose)), replaced, &filesoptions.WriteOptions{})
 		if err != nil {
 			return err
 		}
@@ -1469,7 +1460,7 @@ func (f *FileBase) TrimSpacesAtBeginningOfFile(verbose bool) (err error) {
 
 	content = stringsutils.TrimSpacesLeft(content)
 
-	err = f.WriteString(content, verbose)
+	err = f.WriteString(contextutils.GetVerbosityContextByBool(verbose), content, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}
@@ -1480,7 +1471,7 @@ func (f *FileBase) TrimSpacesAtBeginningOfFile(verbose bool) (err error) {
 func (f *FileBase) WriteInt64(toWrite int64, verbose bool) (err error) {
 	stringRepresentation := fmt.Sprintf("%d", toWrite)
 
-	err = f.WriteString(stringRepresentation, verbose)
+	err = f.WriteString(contextutils.GetVerbosityContextByBool(verbose), stringRepresentation, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}
@@ -1495,7 +1486,7 @@ func (f *FileBase) WriteLines(linesToWrite []string, verbose bool) (err error) {
 
 	contentToWrite := strings.Join(linesToWrite, "\n")
 
-	err = f.WriteString(contentToWrite, verbose)
+	err = f.WriteString(contextutils.GetVerbosityContextByBool(verbose), contentToWrite, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}
@@ -1503,13 +1494,13 @@ func (f *FileBase) WriteLines(linesToWrite []string, verbose bool) (err error) {
 	return nil
 }
 
-func (f *FileBase) WriteString(toWrite string, verbose bool) (err error) {
+func (f *FileBase) WriteString(ctx context.Context, toWrite string, options *filesoptions.WriteOptions) (err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return err
 	}
 
-	return parent.WriteBytes(contextutils.GetVerbosityContextByBool(verbose), []byte(toWrite), &filesoptions.WriteOptions{})
+	return parent.WriteBytes(ctx, []byte(toWrite), &filesoptions.WriteOptions{})
 }
 
 func (f *FileBase) WriteTextBlocks(textBlocks []string, verbose bool) (err error) {
@@ -1524,7 +1515,7 @@ func (f *FileBase) WriteTextBlocks(textBlocks []string, verbose bool) (err error
 		textToWrite += blockToWrite
 	}
 
-	err = f.WriteString(textToWrite, verbose)
+	err = f.WriteString(contextutils.GetVerbosityContextByBool(verbose), textToWrite, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}

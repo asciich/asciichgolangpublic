@@ -6,9 +6,11 @@ import (
 	"reflect"
 
 	"github.com/asciich/asciichgolangpublic/pkg/changesummary"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/dependencyutils/dependencyinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
@@ -381,7 +383,7 @@ func (p *PreCommitConfigFile) WritePreCommitConfigFileContent(content *PreCommit
 		return err
 	}
 
-	err = p.WriteString(toWrite, verbose)
+	err = p.WriteString(contextutils.GetVerbosityContextByBool(verbose), toWrite, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}

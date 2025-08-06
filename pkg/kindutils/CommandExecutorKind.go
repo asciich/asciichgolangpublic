@@ -13,6 +13,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kindutils/kindparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubeconfigutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
@@ -133,7 +134,7 @@ func (c *CommandExecutorKind) EnsureKubectlConfigPresent(ctx context.Context, cl
 			return err
 		}
 
-		err = kubeConfigFile.WriteString(config, contextutils.GetVerboseFromContext(ctx))
+		err = kubeConfigFile.WriteString(ctx, config, &filesoptions.WriteOptions{})
 		if err != nil {
 			return err
 		}

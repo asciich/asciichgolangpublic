@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/documentutils/markdowndocument"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -35,7 +35,7 @@ func WriteInitialCollectionReadme(ctx context.Context, outFile filesinterfaces.F
 		return err
 	}
 
-	return outFile.WriteString(content, contextutils.GetVerboseFromContext(ctx))
+	return outFile.WriteString(ctx, content, &filesoptions.WriteOptions{})
 }
 
 func WriteInitialCollectionReadmeFromCreateCollectionOptions(ctx context.Context, outFile filesinterfaces.File, options *CreateCollectionFileStructureOptions) error {

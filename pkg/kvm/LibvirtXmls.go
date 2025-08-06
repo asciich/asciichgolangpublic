@@ -3,7 +3,9 @@ package kvm
 import (
 	_ "embed"
 
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	libvirtxml "libvirt.org/libvirt-go-xml"
@@ -137,7 +139,7 @@ func (l *LibvirtXmlsService) WriteXmlForVmOnLatopToFile(createOptions *KvmCreate
 		return err
 	}
 
-	err = outputFile.WriteString(xmlString, createOptions.Verbose)
+	err = outputFile.WriteString(contextutils.GetVerbosityContextByBool(createOptions.Verbose), xmlString, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}
