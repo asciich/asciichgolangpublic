@@ -63,7 +63,6 @@ func TestLocalFileGetUriAsString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -89,7 +88,6 @@ func TestLocalFileReadAndWriteAsBytes(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -125,7 +123,6 @@ func TestLocalFileReadAndWriteAsInt64(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -155,7 +152,6 @@ func TestLocalFileReadAndWriteAsString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -188,7 +184,6 @@ func TestLocalFileGetBaseName(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -217,7 +212,6 @@ func TestLocalFileGetSha256Sum(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -251,7 +245,6 @@ func TestLocalFileIsMatchingSha256Sum(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -307,7 +300,6 @@ func TestLocalFileIsContentEqualByComparingSha256Sum(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -342,7 +334,6 @@ func TestLocalFileGetLocalPathIsAbsolute(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -366,7 +357,6 @@ func TestFileGetTextBlocksGolangWithCommentAboveFunction(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -401,7 +391,6 @@ func TestFileGetTextBlocksYamlWithoutLeadingThreeMinuses(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -431,7 +420,6 @@ func TestFileGetTextBlocksYamlWithLeadingThreeMinuses(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -462,7 +450,6 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -505,7 +492,6 @@ func TestFileReplaceLineAfterLine(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -538,7 +524,6 @@ func TestLocalFile_GetPathReturnsAbsoluteValue(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -609,7 +594,6 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -659,7 +643,6 @@ func TestLocalFileGetLastCharAsString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -693,7 +676,6 @@ func TestLocalFileGetAsFloat64(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -727,7 +709,6 @@ func TestFileGetAsInt64(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -761,7 +742,6 @@ func TestFileGetAsInt(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -793,7 +773,6 @@ func TestFileGetParentDirectoryPath(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -820,7 +799,6 @@ func TestFileIsPgpEncrypted_Case1_unencrypted(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -846,7 +824,6 @@ func TestFileIsPgpEncrypted_Case2_encryptedBinary(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -889,7 +866,6 @@ func TestFileIsPgpEncrypted_Case3_encryptedAsciiArmor(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -933,7 +909,6 @@ func TestFileGetMimeTypeOfEmptyFile(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -967,7 +942,6 @@ func TestFileGetCreationDateByFileName(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -1003,7 +977,6 @@ func TestFileHasYYYYmmdd_HHMMSSPrefix(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -1032,7 +1005,6 @@ func TestFileGetSizeBytes(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -1060,7 +1032,6 @@ func TestFileEnsureEndsWithLineBreakOnEmptyFile(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -1121,7 +1092,6 @@ func TestFileTrimSpacesAtBeginningOfFile(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -1225,7 +1195,6 @@ func TestLocalFileGetNumberOfNonEmptyLines(t *testing.T) {
 		{"testcase\n\na", 2},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {

@@ -24,7 +24,6 @@ func TestGetPermissionStringForAccessClass(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -62,7 +61,6 @@ func TestGetPermissionValueForAccessClassString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -89,7 +87,6 @@ func TestSplitPermissionValueInClasses(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			fmt.Sprintf("0o%o", tt.permission),
 			func(t *testing.T) {
@@ -116,7 +113,6 @@ func TestMergeClassValues(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			fmt.Sprintf("0o%o", tt.ExpectedPermission),
 			func(t *testing.T) {
@@ -143,7 +139,6 @@ func TestMergeClassValuesAsString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			tt.ExpectedPermission,
 			func(t *testing.T) {
@@ -170,7 +165,6 @@ func TestSplitPermissionValueInClassPermissionStrings(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			fmt.Sprintf("0o%o", tt.permission),
 			func(t *testing.T) {
@@ -214,7 +208,6 @@ func TestGetPermissionString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
@@ -273,7 +266,6 @@ func TestGetPermissionValue(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
