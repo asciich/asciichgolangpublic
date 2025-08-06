@@ -35,7 +35,7 @@ type File interface {
 	SecurelyDelete(ctx context.Context) (err error)
 	String() (path string)
 	Truncate(newSizeBytes int64, verbose bool) (err error)
-	WriteBytes(toWrite []byte, verbose bool) (err error)
+	WriteBytes(ctx context.Context, toWrite []byte, options *filesoptions.WriteOptions) (err error)
 
 	// All methods below this line can be implemented by embedding the `FileBase` struct:
 	AppendLine(line string, verbose bool) (err error)

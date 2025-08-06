@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -46,7 +47,7 @@ func CreateFromBytes(ctx context.Context, content []byte) (temporaryFile filesin
 		return nil, err
 	}
 
-	err = temporaryFile.WriteBytes(content, contextutils.GetVerboseFromContext(ctx))
+	err = temporaryFile.WriteBytes(ctx, content, &filesoptions.WriteOptions{})
 	if err != nil {
 		return nil, err
 	}

@@ -190,10 +190,16 @@ func (c *CommandExecutorDirectory) Create(ctx context.Context, options *filesopt
 	if exists {
 		logging.LogInfoByCtxf(ctx, "Directory '%s' on '%s' already exists.", dirPath, hostDescription)
 	} else {
+		command := []string{"mkdir", "-p", dirPath}
+
+		if options != nil && options.UseSudo {
+			command = append([]string{"sudo"}, command...)
+		}
+
 		_, err = commandExecutor.RunCommand(
 			ctx,
 			&parameteroptions.RunCommandOptions{
-				Command: []string{"mkdir", "-p", dirPath},
+				Command: command,
 			},
 		)
 		if err != nil {

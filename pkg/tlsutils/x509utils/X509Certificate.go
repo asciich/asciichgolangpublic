@@ -10,8 +10,10 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -409,7 +411,7 @@ func (c *X509Certificate) WritePemToFile(outputFile filesinterfaces.File, verbos
 		return err
 	}
 
-	err = outputFile.WriteBytes(pemBytes, verbose)
+	err = outputFile.WriteBytes(contextutils.GetVerbosityContextByBool(verbose), pemBytes, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}

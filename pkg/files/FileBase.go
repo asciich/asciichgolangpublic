@@ -1509,7 +1509,7 @@ func (f *FileBase) WriteString(toWrite string, verbose bool) (err error) {
 		return err
 	}
 
-	return parent.WriteBytes([]byte(toWrite), verbose)
+	return parent.WriteBytes(contextutils.GetVerbosityContextByBool(verbose), []byte(toWrite), &filesoptions.WriteOptions{})
 }
 
 func (f *FileBase) WriteTextBlocks(textBlocks []string, verbose bool) (err error) {

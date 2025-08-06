@@ -2721,8 +2721,7 @@ func (l *LocalGitRepository) SetGitConfigByGoGitConfig(config *config.Config, ve
 		return tracederrors.TracedErrorf("%w", err)
 	}
 
-	const verboseWrite bool = false
-	err = outFile.WriteBytes(configData, verboseWrite)
+	err = outFile.WriteBytes(contextutils.WithSilent(contextutils.GetVerbosityContextByBool(verbose)), configData, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}

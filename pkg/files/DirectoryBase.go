@@ -67,7 +67,7 @@ func (c *DirectoryBase) WriteBytesToFile(content []byte, verbose bool, path ...s
 		return nil, err
 	}
 
-	err = file.WriteBytes(content, verbose)
+	err = file.WriteBytes(contextutils.GetVerbosityContextByBool(verbose), content, &filesoptions.WriteOptions{})
 	if err != nil {
 		return nil, err
 	}

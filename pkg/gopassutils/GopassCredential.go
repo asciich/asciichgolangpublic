@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -213,7 +214,7 @@ func (c *GopassCredential) WriteIntoFile(ctx context.Context, outputFile filesin
 		return err
 	}
 
-	err = outputFile.WriteBytes(contentBytes, contextutils.GetVerboseFromContext(ctx))
+	err = outputFile.WriteBytes(ctx, contentBytes, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}
