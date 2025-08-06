@@ -3,8 +3,8 @@ package ansiblegalaxyutils
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"gopkg.in/yaml.v3"
 )
@@ -73,5 +73,5 @@ func WriteGalaxyYaml(ctx context.Context, outFile filesinterfaces.File, data *Ga
 		return tracederrors.TracedErrorf("Failed to marshal GalaxyYaml: %w", err)
 	}
 
-	return outFile.WriteBytes(toWrite, contextutils.GetVerboseFromContext(ctx))
+	return outFile.WriteBytes(ctx, toWrite, &filesoptions.WriteOptions{})
 }

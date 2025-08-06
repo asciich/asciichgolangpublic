@@ -878,13 +878,6 @@ func (c *CommandExecutorFile) MustTruncate(newSizeBytes int64, verbose bool) {
 	}
 }
 
-func (c *CommandExecutorFile) MustWriteBytes(toWrite []byte, verbose bool) {
-	err := c.WriteBytes(toWrite, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (c *CommandExecutorFile) ReadAsBytes() (content []byte, err error) {
 	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
 	if err != nil {
@@ -1037,7 +1030,7 @@ func (c *CommandExecutorFile) Truncate(newSizeBytes int64, verbose bool) (err er
 	return nil
 }
 
-func (c *CommandExecutorFile) WriteBytes(toWrite []byte, verbose bool) (err error) {
+func (c *CommandExecutorFile) WriteBytes(ctx context.Context, toWrite []byte, options *filesoptions.WriteOptions) (err error) {
 	if toWrite == nil {
 		return tracederrors.TracedErrorNil("toWrite")
 	}
@@ -1048,7 +1041,7 @@ func (c *CommandExecutorFile) WriteBytes(toWrite []byte, verbose bool) (err erro
 	}
 
 	_, err = commandExecutor.RunCommand(
-		contextutils.ContextSilent(),
+		contextutils.WithSilent(ctx),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
@@ -1065,14 +1058,7 @@ func (c *CommandExecutorFile) WriteBytes(toWrite []byte, verbose bool) (err erro
 		return err
 	}
 
-	if verbose {
-		logging.LogChangedf(
-			"Wrote '%d' bytes to file '%s' on '%s'",
-			len(toWrite),
-			filePath,
-			hostDescription,
-		)
-	}
+	logging.LogChangedByCtxf(ctx, "Wrote '%d' bytes to file '%s' on '%s'", len(toWrite), filePath, hostDescription)
 
 	return nil
 }

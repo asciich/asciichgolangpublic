@@ -243,7 +243,7 @@ func (l *LocalFile) CopyToFile(destFile filesinterfaces.File, verbose bool) (err
 		return err
 	}
 
-	err = destFile.WriteBytes(content, verbose)
+	err = destFile.WriteBytes(contextutils.GetVerbosityContextByBool(verbose), content, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}
@@ -639,13 +639,6 @@ func (l *LocalFile) MustTruncate(newSizeBytes int64, verbose bool) {
 	}
 }
 
-func (l *LocalFile) MustWriteBytes(toWrite []byte, verbose bool) {
-	err := l.WriteBytes(toWrite, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (l *LocalFile) ReadAsBytes() (content []byte, err error) {
 	path, err := l.GetLocalPath()
 	if err != nil {
@@ -778,7 +771,7 @@ func (l *LocalFile) Truncate(newSizeBytes int64, verbose bool) (err error) {
 	return nil
 }
 
-func (l *LocalFile) WriteBytes(toWrite []byte, verbose bool) (err error) {
+func (l *LocalFile) WriteBytes(ctx context.Context, toWrite []byte, options *filesoptions.WriteOptions) (err error) {
 	if toWrite == nil {
 		return tracederrors.TracedErrorNil("toWrite")
 	}
@@ -793,9 +786,7 @@ func (l *LocalFile) WriteBytes(toWrite []byte, verbose bool) (err error) {
 		return tracederrors.TracedErrorf("Unable to write file '%s': %w", localPath, err)
 	}
 
-	if verbose {
-		logging.LogInfof("Wrote data to '%s'", localPath)
-	}
+	logging.LogInfoByCtxf(ctx, "Wrote data to '%s'", localPath)
 
 	return nil
 }

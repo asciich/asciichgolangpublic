@@ -91,7 +91,7 @@ func TestLocalFileReadAndWriteAsBytes(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = false
+				ctx := getCtx()
 
 				var file filesinterfaces.File = getFileToTest("localFile")
 
@@ -100,7 +100,7 @@ func TestLocalFileReadAndWriteAsBytes(t *testing.T) {
 				require.EqualValues(t, []byte{}, content)
 
 				for i := 0; i < 2; i++ {
-					err = file.WriteBytes(tt.content, verbose)
+					err = file.WriteBytes(ctx, tt.content, &filesoptions.WriteOptions{})
 					require.NoError(t, err)
 
 					content, err := file.ReadAsBytes()
@@ -1008,10 +1008,10 @@ func TestFileGetSizeBytes(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
+				ctx := getCtx()
 
 				testFile := getFileToTest("localFile")
-				err := testFile.WriteBytes(tt.content, verbose)
+				err := testFile.WriteBytes(ctx, tt.content, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
 				sizeBytes, err := testFile.GetSizeBytes()
