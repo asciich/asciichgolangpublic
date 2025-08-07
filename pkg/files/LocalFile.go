@@ -266,7 +266,7 @@ func (l *LocalFile) CopyToFile(destFile filesinterfaces.File, verbose bool) (err
 }
 
 func (l *LocalFile) Create(ctx context.Context, options *filesoptions.CreateOptions) (err error) {
-	exists, err := l.Exists(contextutils.GetVerboseFromContext(ctx))
+	exists, err := l.Exists(ctx)
 	if err != nil {
 		return err
 	}
@@ -299,7 +299,7 @@ func (l *LocalFile) Create(ctx context.Context, options *filesoptions.CreateOpti
 	return nil
 }
 
-func (l *LocalFile) Exists(verbose bool) (exists bool, err error) {
+func (l *LocalFile) Exists(ctx context.Context) (exists bool, err error) {
 	localPath, err := l.GetLocalPath()
 	if err != nil {
 		return false, err
@@ -506,15 +506,6 @@ func (l *LocalFile) MustCopyToFile(destFile filesinterfaces.File, verbose bool) 
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
-}
-
-func (l *LocalFile) MustExists(verbose bool) (exists bool) {
-	exists, err := l.Exists(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return exists
 }
 
 func (l *LocalFile) MustGetBaseName() (baseName string) {

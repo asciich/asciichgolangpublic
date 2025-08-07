@@ -127,7 +127,7 @@ func SignFile(fileToSign filesinterfaces.File, options *GnuPGSignOptions) (err e
 		return err
 	}
 
-	signatureFileExists, err := signatureFile.Exists(false)
+	signatureFileExists, err := signatureFile.Exists(contextutils.ContextSilent())
 	if err != nil {
 		return err
 	}

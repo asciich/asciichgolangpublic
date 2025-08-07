@@ -454,7 +454,7 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
+				ctx := getCtx()
 
 				var testFile filesinterfaces.File = getFileToTest("localFile")
 				localTestFile := files.MustGetLocalFileByFile(testFile)
@@ -472,8 +472,8 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 					localCopy.MustGetParentFileForBaseClassAsLocalFile(),
 				))
 
-				require.True(t, mustutils.Must(testFile.Exists(verbose)))
-				require.True(t, mustutils.Must(copy.Exists(verbose)))
+				require.True(t, mustutils.Must(testFile.Exists(ctx)))
+				require.True(t, mustutils.Must(copy.Exists(ctx)))
 			},
 		)
 	}
@@ -1064,7 +1064,9 @@ func TestFileEnsureEndsWithLineBreakOnNonExitistingFile(t *testing.T) {
 		err = nonExistingFile.Delete(ctx, &filesoptions.DeleteOptions{})
 		require.NoError(t, err)
 
-		require.False(t, nonExistingFile.MustExists(verbose))
+		exists, err := nonExistingFile.Exists(ctx)
+		require.NoError(t, err)
+		require.False(t, exists)
 
 		nonExistingFile.MustEnsureEndsWithLineBreak(verbose)
 
@@ -1211,24 +1213,23 @@ func TestLocalFileGetNumberOfNonEmptyLines(t *testing.T) {
 }
 
 func Test_SecureDelete(t *testing.T) {
-	ctx := getCtx()
-
 	t.Run("delete", func(t *testing.T) {
 		const verbose bool = true
+		ctx := getCtx()
 
 		testPath := createTempFileAndGetPath()
 		require.True(t, nativefiles.IsFile(ctx, testPath))
 
 		localFile, err := files.GetLocalFileByPath(testPath)
 		require.NoError(t, err)
-		exists, err := localFile.Exists(verbose)
+		exists, err := localFile.Exists(ctx)
 		require.NoError(t, err)
 		require.True(t, exists)
 
 		err = localFile.SecurelyDelete(ctx)
 		require.NoError(t, err)
 
-		exists, err = localFile.Exists(verbose)
+		exists, err = localFile.Exists(ctx)
 		require.NoError(t, err)
 		require.False(t, exists)
 	})

@@ -1293,7 +1293,7 @@ func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialite
 		return false, err
 	}
 
-	exists, err := c.Exists(verbose)
+	exists, err := c.Exists(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return false, err
 	}

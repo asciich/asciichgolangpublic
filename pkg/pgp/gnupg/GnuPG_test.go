@@ -73,8 +73,8 @@ func TestGnuPg_SignAndValidate(t *testing.T) {
 				require.NoError(t, err)
 				defer signatureFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				require.True(t, mustutils.Must(toTest.Exists(verbose)))
-				require.False(t, mustutils.Must(signatureFile.Exists(verbose)))
+				require.True(t, mustutils.Must(toTest.Exists(ctx)))
+				require.False(t, mustutils.Must(signatureFile.Exists(ctx)))
 
 				MustSignFile(
 					toTest,
@@ -85,8 +85,8 @@ func TestGnuPg_SignAndValidate(t *testing.T) {
 					},
 				)
 
-				require.True(t, mustutils.Must(toTest.Exists(verbose)))
-				require.True(t, mustutils.Must(signatureFile.Exists(verbose)))
+				require.True(t, mustutils.Must(toTest.Exists(ctx)))
+				require.True(t, mustutils.Must(signatureFile.Exists(ctx)))
 
 				MustCheckSignatureValid(signatureFile, verbose)
 			},

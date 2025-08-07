@@ -149,7 +149,7 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 	}
 
 	if downloadOptions.Sha256Sum != "" {
-		exists, err := downloadedFile.Exists(false)
+		exists, err := downloadedFile.Exists(contextutils.ContextSilent())
 		if err != nil {
 			return nil, err
 		}

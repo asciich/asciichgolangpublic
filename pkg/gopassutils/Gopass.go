@@ -293,7 +293,7 @@ func InsertFile(ctx context.Context, fileToInsert filesinterfaces.File, gopassOp
 		return err
 	}
 
-	fileExists, err := fileToInsert.Exists(contextutils.GetVerboseFromContext(ctx))
+	fileExists, err := fileToInsert.Exists(ctx)
 	if err != nil {
 		return err
 	}

@@ -72,7 +72,7 @@ func TestGitRepository_Init_minimal(t *testing.T) {
 				err := repo.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
-				require.False(t, mustutils.Must(repo.Exists(verbose)))
+				require.False(t, mustutils.Must(repo.Exists(ctx)))
 				require.False(t, mustutils.Must(repo.IsInitialized(verbose)))
 				require.False(t, mustutils.Must(repo.HasInitialCommit(verbose)))
 
@@ -84,7 +84,7 @@ func TestGitRepository_Init_minimal(t *testing.T) {
 						},
 					)
 					require.NoError(t, err)
-					require.True(t, mustutils.Must(repo.Exists(verbose)))
+					require.True(t, mustutils.Must(repo.Exists(ctx)))
 					require.True(t, mustutils.Must(repo.IsInitialized(verbose)))
 					require.False(t, mustutils.Must(repo.HasInitialCommit(verbose)))
 					isBare, err := repo.IsBareRepository(ctx)
@@ -172,7 +172,7 @@ func TestGitRepository_Init(t *testing.T) {
 				for i := 0; i < 2; i++ {
 					err := repo.Delete(ctx, &filesoptions.DeleteOptions{})
 					require.NoError(t, err)
-					require.False(t, mustutils.Must(repo.Exists(verbose)))
+					require.False(t, mustutils.Must(repo.Exists(ctx)))
 					require.False(t, mustutils.Must(repo.IsInitialized(verbose)))
 					require.False(t, mustutils.Must(repo.HasInitialCommit(verbose)))
 				}
@@ -180,7 +180,7 @@ func TestGitRepository_Init(t *testing.T) {
 				for i := 0; i < 2; i++ {
 					err := repo.Create(ctx, &filesoptions.CreateOptions{})
 					require.NoError(t, err)
-					require.True(t, mustutils.Must(repo.Exists(verbose)))
+					require.True(t, mustutils.Must(repo.Exists(ctx)))
 					require.False(t, mustutils.Must(repo.IsInitialized(verbose)))
 					require.False(t, mustutils.Must(repo.HasInitialCommit(verbose)))
 				}
@@ -192,7 +192,7 @@ func TestGitRepository_Init(t *testing.T) {
 						},
 					)
 					require.NoError(t, err)
-					require.True(t, mustutils.Must(repo.Exists(verbose)))
+					require.True(t, mustutils.Must(repo.Exists(ctx)))
 					require.True(t, mustutils.Must(repo.IsInitialized(verbose)))
 					require.False(t, mustutils.Must(repo.HasInitialCommit(verbose)))
 				}
@@ -206,7 +206,7 @@ func TestGitRepository_Init(t *testing.T) {
 						},
 					)
 					require.NoError(t, err)
-					require.True(t, mustutils.Must(repo.Exists(verbose)))
+					require.True(t, mustutils.Must(repo.Exists(ctx)))
 					require.True(t, mustutils.Must(repo.IsInitialized(verbose)))
 					require.True(t, mustutils.Must(repo.HasInitialCommit(verbose)))
 				}
@@ -214,7 +214,7 @@ func TestGitRepository_Init(t *testing.T) {
 				for i := 0; i < 2; i++ {
 					err := repo.Delete(ctx, &filesoptions.DeleteOptions{})
 					require.NoError(t, err)
-					require.False(t, mustutils.Must(repo.Exists(verbose)))
+					require.False(t, mustutils.Must(repo.Exists(ctx)))
 					require.False(t, mustutils.Must(repo.IsInitialized(verbose)))
 					require.False(t, mustutils.Must(repo.HasInitialCommit(verbose)))
 				}
@@ -255,7 +255,7 @@ func TestGitRepository_Init_fullInOneStep(t *testing.T) {
 						},
 					)
 					require.NoError(t, err)
-					require.True(t, mustutils.Must(repo.Exists(verbose)))
+					require.True(t, mustutils.Must(repo.Exists(ctx)))
 					require.True(t, mustutils.Must(repo.IsInitialized(verbose)))
 					require.True(t, mustutils.Must(repo.HasInitialCommit(verbose)))
 					isBare, err := repo.IsBareRepository(ctx)
@@ -288,7 +288,7 @@ func TestGitRepository_CreateAndDeleteRepository(t *testing.T) {
 				for i := 0; i < 2; i++ {
 					err := repo.Delete(ctx, &filesoptions.DeleteOptions{})
 					require.NoError(t, err)
-					require.False(t, mustutils.Must(repo.Exists(verbose)))
+					require.False(t, mustutils.Must(repo.Exists(ctx)))
 				}
 
 				for i := 0; i < 2; i++ {
@@ -300,14 +300,14 @@ func TestGitRepository_CreateAndDeleteRepository(t *testing.T) {
 						},
 					)
 					require.NoError(t, err)
-					require.True(t, mustutils.Must(repo.Exists(verbose)))
+					require.True(t, mustutils.Must(repo.Exists(ctx)))
 					require.True(t, mustutils.Must(repo.IsInitialized(verbose)))
 				}
 
 				for i := 0; i < 2; i++ {
 					err := repo.Delete(ctx, &filesoptions.DeleteOptions{})
 					require.NoError(t, err)
-					require.False(t, mustutils.Must(repo.Exists(verbose)))
+					require.False(t, mustutils.Must(repo.Exists(ctx)))
 				}
 
 			},

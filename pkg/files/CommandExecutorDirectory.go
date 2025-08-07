@@ -177,7 +177,7 @@ func (c *CommandExecutorDirectory) CopyContentToDirectory(destinationDir filesin
 }
 
 func (c *CommandExecutorDirectory) Create(ctx context.Context, options *filesoptions.CreateOptions) (err error) {
-	exists, err := c.Exists(contextutils.GetVerboseFromContext(ctx))
+	exists, err := c.Exists(ctx)
 	if err != nil {
 		return err
 	}
@@ -243,7 +243,7 @@ func (c *CommandExecutorDirectory) Delete(ctx context.Context, options *filesopt
 		)
 	}
 
-	exists, err := c.Exists(contextutils.GetVerboseFromContext(ctx))
+	exists, err := c.Exists(ctx)
 	if err != nil {
 		return err
 	}
@@ -275,14 +275,14 @@ func (c *CommandExecutorDirectory) Delete(ctx context.Context, options *filesopt
 	return nil
 }
 
-func (c *CommandExecutorDirectory) Exists(verbose bool) (exists bool, err error) {
+func (c *CommandExecutorDirectory) Exists(ctx context.Context) (exists bool, err error) {
 	commandExecutor, dirPath, hostDescription, err := c.GetCommandExecutorAndDirPathAndHostDescription()
 	if err != nil {
 		return false, err
 	}
 
 	output, err := commandExecutor.RunCommandAndGetStdoutAsString(
-		contextutils.GetVerbosityContextByBool(verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
@@ -312,20 +312,10 @@ func (c *CommandExecutorDirectory) Exists(verbose bool) (exists bool, err error)
 		)
 	}
 
-	if verbose {
-		if exists {
-			logging.LogInfof(
-				"Directory '%s' exists on host '%s'.",
-				dirPath,
-				hostDescription,
-			)
-		} else {
-			logging.LogInfof(
-				"Directory '%s' exists on host '%s'.",
-				dirPath,
-				hostDescription,
-			)
-		}
+	if exists {
+		logging.LogInfoByCtxf(ctx, "Directory '%s' exists on host '%s'.", dirPath, hostDescription)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Directory '%s' exists on host '%s'.", dirPath, hostDescription)
 	}
 
 	return exists, nil

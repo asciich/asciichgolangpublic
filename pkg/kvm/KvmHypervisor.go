@@ -108,7 +108,7 @@ func (k *KVMHypervisor) CreateVm(createOptions *KvmCreateVmOptions) (createdVm *
 		return nil, err
 	}
 
-	diskImageExists, err := diskImage.Exists(createOptions.Verbose)
+	diskImageExists, err := diskImage.Exists(contextutils.GetVerbosityContextByBool(createOptions.Verbose))
 	if err != nil {
 		return nil, err
 	}

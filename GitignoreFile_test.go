@@ -76,7 +76,7 @@ func TestGitignoreFileContainsIgnoreOnNonExistingFile(t *testing.T) {
 				require.NoError(t, err)
 				defer gitignoreFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				require.False(t, mustutils.Must(gitignoreFile.Exists(verbose)))
+				require.False(t, mustutils.Must(gitignoreFile.Exists(ctx)))
 
 				containsIgnore, err := gitignoreFile.ContainsIgnore("abc")
 				require.Error(t, err)
@@ -107,7 +107,7 @@ func TestGitignoreFileContainsIgnoreOnEmptyFile(t *testing.T) {
 				require.NoError(t, err)
 				defer gitignoreFile.Delete(ctx,&filesoptions.DeleteOptions{})
 
-				require.True(t, mustutils.Must(gitignoreFile.Exists(verbose)))
+				require.True(t, mustutils.Must(gitignoreFile.Exists(ctx)))
 				containsIgnore, err := gitignoreFile.ContainsIgnore("abc")
 				require.NoError(t, err)
 				require.False(t, containsIgnore)

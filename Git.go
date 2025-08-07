@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -45,7 +44,7 @@ func (g *GitService) GetRepositoryRootPathByPath(ctx context.Context, path strin
 		return "", err
 	}
 
-	exists, err := repoRootDir.Exists(contextutils.GetVerboseFromContext(ctx))
+	exists, err := repoRootDir.Exists(ctx)
 	if err != nil {
 		return "", err
 	}

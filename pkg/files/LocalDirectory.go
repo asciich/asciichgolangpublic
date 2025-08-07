@@ -150,7 +150,7 @@ func (l *LocalDirectory) CopyContentToLocalDirectory(destDirectory *LocalDirecto
 		return err
 	}
 
-	exists, err := l.Exists(verbose)
+	exists, err := l.Exists(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return err
 	}
@@ -218,7 +218,7 @@ func (l *LocalDirectory) CopyFileToTemporaryFileAsLocalFile(verbose bool, filePa
 */
 
 func (l *LocalDirectory) Create(ctx context.Context, options *filesoptions.CreateOptions) (err error) {
-	exists, err := l.Exists(contextutils.GetVerboseFromContext(ctx))
+	exists, err := l.Exists(ctx)
 	if err != nil {
 		return err
 	}
@@ -253,7 +253,7 @@ func (l *LocalDirectory) Create(ctx context.Context, options *filesoptions.Creat
 			}
 		}
 
-		existsAfterCreate, err := l.Exists(contextutils.GetVerboseFromContext(ctx))
+		existsAfterCreate, err := l.Exists(ctx)
 		if err != nil {
 			return err
 		}
@@ -327,7 +327,7 @@ func (l *LocalDirectory) CreateSubDirectory(ctx context.Context, subDirName stri
 		return nil, err
 	}
 
-	subDirExists, err := subDirectory.Exists(contextutils.GetVerboseFromContext(ctx))
+	subDirExists, err := subDirectory.Exists(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -346,7 +346,7 @@ func (l *LocalDirectory) CreateSubDirectory(ctx context.Context, subDirName stri
 }
 
 func (l *LocalDirectory) Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error) {
-	exists, err := l.Exists(contextutils.GetVerboseFromContext(ctx))
+	exists, err := l.Exists(ctx)
 	if err != nil {
 		return err
 	}
@@ -369,7 +369,7 @@ func (l *LocalDirectory) Delete(ctx context.Context, options *filesoptions.Delet
 	return nil
 }
 
-func (l *LocalDirectory) Exists(verbose bool) (exists bool, err error) {
+func (l *LocalDirectory) Exists(ctx context.Context) (exists bool, err error) {
 	localPath, err := l.GetLocalPath()
 	if err != nil {
 		return false, err
@@ -386,18 +386,10 @@ func (l *LocalDirectory) Exists(verbose bool) (exists bool, err error) {
 
 	exists = dirInfo.IsDir()
 
-	if verbose {
-		if exists {
-			logging.LogInfof(
-				"Local directory '%s' exists.",
-				localPath,
-			)
-		} else {
-			logging.LogInfof(
-				"Local directory '%s' does not exists.",
-				localPath,
-			)
-		}
+	if exists {
+		logging.LogInfoByCtxf(ctx, "Local directory '%s' exists.", localPath)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Local directory '%s' does not exists.", localPath)
 	}
 
 	return exists, nil
@@ -1047,7 +1039,7 @@ func (l *LocalDirectory) SubDirectoryExists(subDirName string, verbose bool) (su
 		return false, err
 	}
 
-	subDirExists, err = subDir.Exists(verbose)
+	subDirExists, err = subDir.Exists(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return false, err
 	}

@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
@@ -129,7 +130,7 @@ func (k *SSHPublicKey) LoadFromSshDir(sshDirectory filesinterfaces.Directory, ve
 		return err
 	}
 
-	exists, err := sshDirectory.Exists(verbose)
+	exists, err := sshDirectory.Exists(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return err
 	}

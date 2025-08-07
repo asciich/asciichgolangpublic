@@ -42,7 +42,9 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 
 				expectedOutput := MustGetPreCommitConfigByLocalPath(filepath.Join(tt.testDataDir, "expected_output"))
 
-				if !expectedOutput.MustExists(verbose) {
+				exists, err := expectedOutput.Exists(ctx)
+				require.NoError(t, err)
+				if !exists {
 					if os.Getenv("UPDATE_EXPECTED") == "1" {
 						err := expectedOutput.Create(ctx, &filesoptions.CreateOptions{})
 						require.NoError(t, err)
@@ -91,7 +93,6 @@ func TestPreCommitConfigFile_GetPreCommitConfigInGitRepository(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				gitRepo := getGitRepositoryToTest(tt.implementationName)
@@ -102,7 +103,9 @@ func TestPreCommitConfigFile_GetPreCommitConfigInGitRepository(t *testing.T) {
 				require.NotNil(t, outFile)
 
 				preCommitConfigFile := MustGetPreCommitConfigFileInGitRepository(gitRepo)
-				require.True(t, preCommitConfigFile.MustExists(verbose))
+
+				exists, err := preCommitConfigFile.Exists(ctx)
+				require.True(t, exists)
 				require.True(t, strings.HasSuffix(preCommitConfigFile.MustGetPath(), "/.pre-commit-config.yaml"))
 			},
 		)

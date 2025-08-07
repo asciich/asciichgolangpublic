@@ -572,7 +572,7 @@ func (f *FileBase) IsMatchingSha256Sum(sha256sum string) (isMatching bool, err e
 		return false, err
 	}
 
-	exists, err := parent.Exists(false)
+	exists, err := parent.Exists(contextutils.ContextSilent())
 	if err != nil {
 		return false, err
 	}
@@ -1500,7 +1500,7 @@ func (f *FileBase) WriteString(ctx context.Context, toWrite string, options *fil
 		return err
 	}
 
-	return parent.WriteBytes(ctx, []byte(toWrite), &filesoptions.WriteOptions{})
+	return parent.WriteBytes(ctx, []byte(toWrite), options)
 }
 
 func (f *FileBase) WriteTextBlocks(textBlocks []string, verbose bool) (err error) {
