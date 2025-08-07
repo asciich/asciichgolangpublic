@@ -24,7 +24,6 @@ func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				temporaryFilePath := createTempFileAndGetPath()
@@ -32,7 +31,7 @@ func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 				var fileToTest filesinterfaces.File = files.MustGetLocalCommandExecutorFileByPath(temporaryFilePath)
 				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				exists, err := fileToTest.Exists(verbose)
+				exists, err := fileToTest.Exists(ctx)
 				require.NoError(t, err)
 				require.True(t, exists)
 
@@ -40,7 +39,7 @@ func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 
 				fileToTest.WriteString(ctx, tt.testContent, &filesoptions.WriteOptions{})
 
-				exists, err = fileToTest.Exists(verbose)
+				exists, err = fileToTest.Exists(ctx)
 				require.NoError(t, err)
 				require.True(t, exists)
 
@@ -49,7 +48,7 @@ func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 				err = fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
-				exists, err = fileToTest.Exists(verbose)
+				exists, err = fileToTest.Exists(ctx)
 				require.NoError(t, err)
 				require.False(t, exists)
 			},

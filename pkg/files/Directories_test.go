@@ -24,7 +24,6 @@ func TestDirectoriesCreateLocalDirectoryByPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				tempDir, err := os.MkdirTemp("", "tempdir_for_testing")
@@ -33,7 +32,7 @@ func TestDirectoriesCreateLocalDirectoryByPath(t *testing.T) {
 				var directory filesinterfaces.Directory = files.MustGetLocalDirectoryByPath(tempDir)
 				defer directory.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				exists, err := directory.Exists(verbose)
+				exists, err := directory.Exists(ctx)
 				require.NoError(t, err)
 				require.True(t, exists)
 
@@ -41,7 +40,7 @@ func TestDirectoriesCreateLocalDirectoryByPath(t *testing.T) {
 					err = directory.Delete(ctx, &filesoptions.DeleteOptions{})
 					require.NoError(t, err)
 
-					exists, err = directory.Exists(verbose)
+					exists, err = directory.Exists(ctx)
 					require.NoError(t, err)
 					require.False(t, exists)
 				}
@@ -53,11 +52,11 @@ func TestDirectoriesCreateLocalDirectoryByPath(t *testing.T) {
 					createdDir, err := files.Directories().CreateLocalDirectoryByPath(ctx, localPath, &filesoptions.CreateOptions{})
 					require.NoError(t, err)
 
-					dirExists, err := directory.Exists(verbose)
+					dirExists, err := directory.Exists(ctx)
 					require.NoError(t, err)
 					require.True(t, dirExists)
 
-					createdExists, err := createdDir.Exists(verbose)
+					createdExists, err := createdDir.Exists(ctx)
 					require.NoError(t, err)
 					require.True(t, createdExists)
 				}

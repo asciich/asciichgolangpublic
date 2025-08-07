@@ -151,8 +151,6 @@ func TestDirectoryBase_DeleteFilesMatching(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				const verbose bool = true
-
 				directory := getDirectoryToTest(tt.fileImplementationToTest)
 
 				txtFile, err := directory.CreateFileInDirectory(ctx, "a.txt", &filesoptions.CreateOptions{})
@@ -171,19 +169,19 @@ func TestDirectoryBase_DeleteFilesMatching(t *testing.T) {
 					},
 				)
 
-				exists, err := txtFile.Exists(verbose)
+				exists, err := txtFile.Exists(ctx)
 				require.NoError(t, err)
 				require.True(t, exists)
 
-				exists, err = locFile.Exists(verbose)
+				exists, err = locFile.Exists(ctx)
 				require.NoError(t, err)
 				require.False(t, exists)
 
-				exists, err = tocFile.Exists(verbose)
+				exists, err = tocFile.Exists(ctx)
 				require.NoError(t, err)
 				require.False(t, exists)
 
-				exists, err = toc2File.Exists(verbose)
+				exists, err = toc2File.Exists(ctx)
 				require.NoError(t, err)
 				require.False(t, exists)
 			},

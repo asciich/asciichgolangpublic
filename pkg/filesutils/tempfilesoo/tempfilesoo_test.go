@@ -31,13 +31,12 @@ func TestCreateTemporaryFile(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-				const verbose = true
 
 				file, err := tempfilesoo.CreateFromString(ctx, tt.content)
 				require.NoError(t, err)
 				defer file.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				exists, err := file.Exists(verbose)
+				exists, err := file.Exists(ctx)
 				require.NoError(t, err)
 
 				require.True(t, exists)
@@ -48,14 +47,13 @@ func TestCreateTemporaryFile(t *testing.T) {
 }
 
 func TestCreateEmptyTemporaryFile(t *testing.T) {
-	const verbose bool = true
 	ctx := getCtx()
 
 	file, err := tempfilesoo.CreateEmptyTemporaryFile(ctx)
 	require.NoError(t, err)
 	defer file.Delete(ctx, &filesoptions.DeleteOptions{})
 
-	exists, err := file.Exists(verbose)
+	exists, err := file.Exists(ctx)
 	require.NoError(t, err)
 	require.True(t, exists)
 
@@ -67,7 +65,6 @@ func TestCreateEmptyTemporaryFile(t *testing.T) {
 }
 
 func TestCreateEmptyTemporaryFileAndGetPath(t *testing.T) {
-	const verbose bool = true
 	ctx := getCtx()
 
 	filePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)
@@ -76,7 +73,10 @@ func TestCreateEmptyTemporaryFileAndGetPath(t *testing.T) {
 	file := files.MustNewLocalFileByPath(filePath)
 	defer file.Delete(ctx, &filesoptions.DeleteOptions{})
 
-	require.True(t, file.MustExists(verbose))
+	exists, err := file.Exists(ctx)
+	require.NoError(t, err)
+	require.True(t, exists)
+
 	require.EqualValues(t, "", file.MustReadAsString())
 	require.True(t, strings.HasPrefix(filePath, "/tmp/"))
 	require.True(t, strings.HasPrefix(file.MustGetPath(), "/tmp/"))

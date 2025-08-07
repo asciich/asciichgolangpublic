@@ -119,7 +119,7 @@ func (c *CommandExecutorKind) EnsureKubectlConfigPresent(ctx context.Context, cl
 		return err
 	}
 
-	exists, err := kubeConfigFile.Exists(contextutils.GetVerboseFromContext(ctx))
+	exists, err := kubeConfigFile.Exists(ctx)
 	if err != nil {
 		return err
 	}

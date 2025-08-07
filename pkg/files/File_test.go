@@ -83,20 +83,19 @@ func TestFile_Exists(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				fileToTest := getFileToTest(tt.implementationName)
 				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				exists, err := fileToTest.Exists(verbose)
+				exists, err := fileToTest.Exists(ctx)
 				require.NoError(t, err)
 				require.True(t, exists)
 
 				err = fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)
 
-				exists, err = fileToTest.Exists(verbose)
+				exists, err = fileToTest.Exists(ctx)
 				require.NoError(t, err)
 				require.False(t, exists)
 			},
@@ -197,11 +196,11 @@ func TestFile_MoveToPath(t *testing.T) {
 				defer destFile.Delete(ctx, &filesoptions.DeleteOptions{})
 				destFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				exists, err := fileToTest.Exists(verbose)
+				exists, err := fileToTest.Exists(ctx)
 				require.NoError(t, err)
 				require.True(t, exists)
 
-				exists, err = destFile.Exists(verbose)
+				exists, err = destFile.Exists(ctx)
 				require.NoError(t, err)
 				require.False(t, exists)
 
@@ -225,11 +224,11 @@ func TestFile_MoveToPath(t *testing.T) {
 
 				require.EqualValues(t, movedHostDescription, destHostDescription)
 
-				exists, err = fileToTest.Exists(verbose)
+				exists, err = fileToTest.Exists(ctx)
 				require.NoError(t, err)
 				require.False(t, exists)
 
-				exists, err = destFile.Exists(verbose)
+				exists, err = destFile.Exists(ctx)
 				require.NoError(t, err)
 				require.True(t, exists)
 			},
@@ -262,14 +261,14 @@ func TestFile_CopyToFile(t *testing.T) {
 				defer destFile.Delete(ctx, &filesoptions.DeleteOptions{})
 				destFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				require.True(t, mustutils.Must(srcFile.Exists(verbose)))
-				require.False(t, mustutils.Must(destFile.Exists(verbose)))
+				require.True(t, mustutils.Must(srcFile.Exists(ctx)))
+				require.False(t, mustutils.Must(destFile.Exists(ctx)))
 
 				err = srcFile.CopyToFile(destFile, verbose)
 				require.NoError(t, err)
 
-				require.True(t, mustutils.Must(srcFile.Exists(verbose)))
-				require.True(t, mustutils.Must(destFile.Exists(verbose)))
+				require.True(t, mustutils.Must(srcFile.Exists(ctx)))
+				require.True(t, mustutils.Must(destFile.Exists(ctx)))
 
 				require.EqualValues(t, tt.content, srcFile.MustReadAsString())
 

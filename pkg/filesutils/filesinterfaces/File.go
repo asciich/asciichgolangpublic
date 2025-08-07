@@ -18,7 +18,7 @@ type File interface {
 	CopyToFile(destFile File, verbose bool) (err error)
 	Create(ctx context.Context, options *filesoptions.CreateOptions) (err error)
 	Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error)
-	Exists(verbose bool) (exists bool, err error)
+	Exists(ctx context.Context) (exists bool, err error)
 	GetAccessPermissions() (permission int, err error)
 	GetAccessPermissionsString() (permissionString string, err error)
 	GetBaseName() (baseName string, err error)

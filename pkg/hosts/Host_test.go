@@ -140,7 +140,7 @@ func TestHost_GetDirectoryByPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose = true
+				ctx := getCtx()
 
 				host := MustGetHostByHostname(tt.hostname)
 				directory, err := host.GetDirectoryByPath(tt.dirPath)
@@ -149,7 +149,7 @@ func TestHost_GetDirectoryByPath(t *testing.T) {
 				_, ok := directory.(*files.CommandExecutorDirectory)
 				require.True(t, ok)
 
-				exists, err := directory.Exists(verbose)
+				exists, err := directory.Exists(ctx)
 				require.NoError(t, err)
 				require.EqualValues(t, tt.expectedExists, exists)
 			},

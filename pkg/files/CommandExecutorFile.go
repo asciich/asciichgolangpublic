@@ -224,7 +224,7 @@ func (c *CommandExecutorFile) Create(ctx context.Context, options *filesoptions.
 		return err
 	}
 
-	exists, err := c.Exists(contextutils.GetVerboseFromContext(ctx))
+	exists, err := c.Exists(ctx)
 	if err != nil {
 		return err
 	}
@@ -276,7 +276,7 @@ func (c *CommandExecutorFile) Delete(ctx context.Context, options *filesoptions.
 		)
 	}
 
-	exists, err := c.Exists(contextutils.GetVerboseFromContext(ctx))
+	exists, err := c.Exists(ctx)
 	if err != nil {
 		return err
 	}
@@ -314,7 +314,7 @@ func (c *CommandExecutorFile) Delete(ctx context.Context, options *filesoptions.
 	return nil
 }
 
-func (c *CommandExecutorFile) Exists(verbose bool) (exists bool, err error) {
+func (c *CommandExecutorFile) Exists(ctx context.Context) (exists bool, err error) {
 	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
 	if err != nil {
 		return false, err
@@ -349,25 +349,15 @@ func (c *CommandExecutorFile) Exists(verbose bool) (exists bool, err error) {
 		)
 	}
 
-	if verbose {
-		hostDescription, err := c.GetHostDescription()
-		if err != nil {
-			return false, err
-		}
+	hostDescription, err := c.GetHostDescription()
+	if err != nil {
+		return false, err
+	}
 
-		if exists {
-			logging.LogInfof(
-				"File '%s' on host '%s' exists.",
-				filePath,
-				hostDescription,
-			)
-		} else {
-			logging.LogInfof(
-				"File '%s' on host '%s' does not exist.",
-				filePath,
-				hostDescription,
-			)
-		}
+	if exists {
+		logging.LogInfoByCtxf(ctx, "File '%s' on host '%s' exists.", filePath, hostDescription)
+	} else {
+		logging.LogInfoByCtxf(ctx, "File '%s' on host '%s' does not exist.", filePath, hostDescription)
 	}
 
 	return exists, nil
@@ -695,15 +685,6 @@ func (c *CommandExecutorFile) MustCopyToFile(destFile filesinterfaces.File, verb
 	}
 }
 
-func (c *CommandExecutorFile) MustExists(verbose bool) (exist bool) {
-	exist, err := c.Exists(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return exist
-}
-
 func (c *CommandExecutorFile) MustGetBaseName() (baseName string) {
 	baseName, err := c.GetBaseName()
 	if err != nil {
@@ -933,7 +914,7 @@ func (c *CommandExecutorFile) SecurelyDelete(ctx context.Context) (err error) {
 		return err
 	}
 
-	exits, err := c.Exists(contextutils.GetVerboseFromContext(ctx))
+	exits, err := c.Exists(ctx)
 	if err != nil {
 		return err
 	}

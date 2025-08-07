@@ -86,15 +86,13 @@ func (c *CommandExecutorHost) GetSshPublicKeyOfUserAsString(ctx context.Context,
 
 	logging.LogInfoByCtxf(ctx, "Getting SSH public key of user '%s' on host '%s'.", userName, hostDescription)
 
-	verbose := contextutils.GetVerboseFromContext(ctx)
-
 	for _, publicKeyBaseName := range []string{"id_ed25519.pub", "id_rsa.pub"} {
 		sshKeyFile, err := c.GetFileInUsersHome(ctx, userName, ".ssh/"+publicKeyBaseName)
 		if err != nil {
 			return "", err
 		}
 
-		exists, err := sshKeyFile.Exists(verbose)
+		exists, err := sshKeyFile.Exists(ctx)
 		if err != nil {
 			return "", err
 		}

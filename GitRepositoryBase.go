@@ -36,7 +36,7 @@ func (g *GitRepositoryBase) CheckExists(ctx context.Context) (err error) {
 		return err
 	}
 
-	exists, err := parent.Exists(contextutils.GetVerboseFromContext(ctx))
+	exists, err := parent.Exists(ctx)
 	if err != nil {
 		return err
 	}
@@ -460,7 +460,7 @@ func (g *GitRepositoryBase) DirectoryByPathExists(verbose bool, path ...string) 
 		return false, err
 	}
 
-	exists, err = subDir.Exists(false)
+	exists, err = subDir.Exists(contextutils.WithSilent(contextutils.GetVerbosityContextByBool(verbose)))
 	if err != nil {
 		return false, err
 	}

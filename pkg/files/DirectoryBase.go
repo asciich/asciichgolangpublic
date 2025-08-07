@@ -79,7 +79,7 @@ func (d *DirectoryBase) CheckExists(ctx context.Context) (err error) {
 		return err
 	}
 
-	exists, err := parent.Exists(contextutils.GetVerboseFromContext(ctx))
+	exists, err := parent.Exists(ctx)
 	if err != nil {
 		return err
 	}
@@ -206,7 +206,7 @@ func (d *DirectoryBase) FileInDirectoryExists(verbose bool, path ...string) (fil
 		return false, err
 	}
 
-	fileExists, err = fileToCheck.Exists(verbose)
+	fileExists, err = fileToCheck.Exists(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return false, err
 	}

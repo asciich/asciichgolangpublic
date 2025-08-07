@@ -27,13 +27,12 @@ func TestLocalDirectoryExists(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				var directory filesinterfaces.Directory = getDirectoryToTest("localDirectory")
 				defer directory.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				exists, err := directory.Exists(verbose)
+				exists, err := directory.Exists(ctx)
 				require.NoError(t, err)
 				require.True(t, exists)
 
@@ -41,7 +40,7 @@ func TestLocalDirectoryExists(t *testing.T) {
 					err = directory.Delete(ctx, &filesoptions.DeleteOptions{})
 					require.NoError(t, err)
 
-					exists, err = directory.Exists(verbose)
+					exists, err = directory.Exists(ctx)
 					require.NoError(t, err)
 					require.False(t, exists)
 				}
@@ -50,7 +49,7 @@ func TestLocalDirectoryExists(t *testing.T) {
 					err = directory.Create(ctx, &filesoptions.CreateOptions{})
 					require.NoError(t, err)
 
-					exists, err = directory.Exists(verbose)
+					exists, err = directory.Exists(ctx)
 					require.NoError(t, err)
 					require.True(t, exists)
 				}
@@ -59,7 +58,7 @@ func TestLocalDirectoryExists(t *testing.T) {
 					err = directory.Delete(ctx, &filesoptions.DeleteOptions{})
 					require.NoError(t, err)
 
-					exists, err = directory.Exists(verbose)
+					exists, err = directory.Exists(ctx)
 					require.NoError(t, err)
 					require.False(t, exists)
 				}
@@ -304,21 +303,20 @@ func TestLocalDirectoryCreate(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose = true
 				ctx := getCtx()
 
 				tempDir := getDirectoryToTest("localDirectory")
 				subDir, err := tempDir.GetSubDirectory(tt.subDirPath...)
 				require.NoError(t, err)
 
-				exists, err := subDir.Exists(verbose)
+				exists, err := subDir.Exists(ctx)
 				require.NoError(t, err)
 				require.False(t, exists)
 
 				err = subDir.Create(ctx, &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
-				exists, err = subDir.Exists(verbose)
+				exists, err = subDir.Exists(ctx)
 				require.NoError(t, err)
 				require.True(t, exists)
 			},

@@ -1428,13 +1428,13 @@ func (l *LocalGitRepository) GetTagByName(tagName string) (tag GitTag, err error
 	return tagToReturn, nil
 }
 
-func (l *LocalGitRepository) GitlabCiYamlFileExists(verbose bool) (gitlabCiYamlFileExists bool, err error) {
+func (l *LocalGitRepository) GitlabCiYamlFileExists(ctx context.Context) (gitlabCiYamlFileExists bool, err error) {
 	gitlabCiYamlFile, err := l.GetGitlabCiYamlFile()
 	if err != nil {
 		return false, err
 	}
 
-	gitlabCiYamlFileExists, err = gitlabCiYamlFile.Exists(verbose)
+	gitlabCiYamlFileExists, err = gitlabCiYamlFile.Exists(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -2184,15 +2184,6 @@ func (l *LocalGitRepository) MustGetTagByName(tagName string) (tag GitTag) {
 	}
 
 	return tag
-}
-
-func (l *LocalGitRepository) MustGitlabCiYamlFileExists(verbose bool) (gitlabCiYamlFileExists bool) {
-	gitlabCiYamlFileExists, err := l.GitlabCiYamlFileExists(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabCiYamlFileExists
 }
 
 func (l *LocalGitRepository) MustHasInitialCommit(verbose bool) (hasInitialCommit bool) {

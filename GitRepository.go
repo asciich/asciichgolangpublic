@@ -37,7 +37,7 @@ type GitRepository interface {
 	Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error)
 	DeleteBranchByName(name string, verbose bool) (err error)
 	DirectoryByPathExists(verbose bool, path ...string) (exists bool, err error)
-	Exists(verbose bool) (exists bool, err error)
+	Exists(ctx context.Context) (exists bool, err error)
 	Fetch(verbose bool) (err error)
 	FileByPathExists(path string, verbose bool) (exists bool, err error)
 	// TODO: Will be removed as there should be no need to explitly get as local Directory:
