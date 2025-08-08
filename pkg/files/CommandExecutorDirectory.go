@@ -315,7 +315,7 @@ func (c *CommandExecutorDirectory) Exists(ctx context.Context) (exists bool, err
 	if exists {
 		logging.LogInfoByCtxf(ctx, "Directory '%s' exists on host '%s'.", dirPath, hostDescription)
 	} else {
-		logging.LogInfoByCtxf(ctx, "Directory '%s' exists on host '%s'.", dirPath, hostDescription)
+		logging.LogInfoByCtxf(ctx, "Directory '%s' does not exist on host '%s'.", dirPath, hostDescription)
 	}
 
 	return exists, nil
