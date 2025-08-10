@@ -19,6 +19,9 @@ jobs:
     - name: Free up space
       run: .github/free_space.sh
 
+    - name: Install python virtualenv
+      run: sudo apt-get install -y python3-virtualenv
+
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
