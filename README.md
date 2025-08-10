@@ -15,6 +15,8 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 * [httputils](pkg/httputils/): High level easy to use HTTP client and testserver.
 * [kindutils](pkg/kindutils/): Handle KinD/ Kubernetes in Docker.
 * [kubernetesutils](pkg/kubernetesutils/): Work with K8s/ Kubernetes.
+* [pythonutils](pkg/pythonutils/): Work with Python programming language.
+	* [virtualenvutils](pkg/pythonutils/virtualenvutils/): Work with Python's `virtualenv`.
 * [versionutils](pkg/versionutils/): Handle versions.
 * [x509utils](pkg/tlsutils/x509utils/): Handle X509 certificates used for TLS/SSL.
 
