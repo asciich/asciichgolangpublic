@@ -5,8 +5,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -165,7 +166,7 @@ func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
 
 				outputPath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)
 				require.NoError(t, err)
-				defer files.DeleteFileByPath(outputPath, contextutils.GetVerboseFromContext(ctx))
+				defer nativefiles.Delete(ctx, outputPath, &filesoptions.DeleteOptions{})
 
 				exampleScript := "#/usr/bin/env bash\n"
 				exampleScript += "\n"
@@ -182,7 +183,7 @@ func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
 
 				exampleScriptPath, err := tempfilesoo.CreateFromStringAndGetPath(ctx, exampleScript)
 				require.NoError(t, err)
-				defer files.DeleteFileByPath(exampleScriptPath, contextutils.GetVerboseFromContext(ctx))
+				defer nativefiles.Delete(ctx, exampleScriptPath, &filesoptions.DeleteOptions{})
 
 				err = window.SendKeys(
 					ctx,

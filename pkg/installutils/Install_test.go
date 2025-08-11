@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/installutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -34,7 +34,7 @@ func TestInstallFromPath(t *testing.T) {
 
 				sourceFile, err := tempfilesoo.CreateFromStringAndGetPath(ctx, tt.content)
 				require.NoError(t, err)
-				defer files.DeleteFileByPath(sourceFile, verbose)
+				defer nativefiles.Delete(ctx, sourceFile, &filesoptions.DeleteOptions{})
 
 				destFile, err := tempfilesoo.CreateEmptyTemporaryFile(ctx)
 				require.NoError(t, err)
