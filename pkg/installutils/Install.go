@@ -1,19 +1,15 @@
 package installutils
 
 import (
+	"context"
+
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
-
-func MustInstall(options *InstallOptions) {
-	err := Install(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
 
 func getSourceFileAndPathFromOptions(options *InstallOptions) (sourceFile filesinterfaces.File, sourcePath string, err error) {
 	if options == nil {
@@ -51,7 +47,7 @@ func getInstallFileFromOptions(options *InstallOptions) (installFile filesinterf
 	return installFile, installPath, nil
 }
 
-func setInstallFileAccessByOptions(installFile filesinterfaces.File, options *InstallOptions) (err error) {
+func setInstallFileAccessByOptions(ctx context.Context, installFile filesinterfaces.File, options *InstallOptions) (err error) {
 	if installFile == nil {
 		tracederrors.TracedErrorNil("installFile")
 	}
@@ -70,8 +66,8 @@ func setInstallFileAccessByOptions(installFile filesinterfaces.File, options *In
 	}
 
 	err = installFile.Chmod(
+		ctx,
 		&parameteroptions.ChmodOptions{
-			Verbose:           options.Verbose,
 			PermissionsString: mode,
 		},
 	)
@@ -82,7 +78,7 @@ func setInstallFileAccessByOptions(installFile filesinterfaces.File, options *In
 	return nil
 }
 
-func installFromSourcePath(options *InstallOptions) (err error) {
+func installFromSourcePath(ctx context.Context, options *InstallOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
@@ -97,34 +93,30 @@ func installFromSourcePath(options *InstallOptions) (err error) {
 		return err
 	}
 
-	if options.Verbose {
-		logging.LogInfof("Install '%s' as '%s' started.", sourcePath, installPath)
-	}
+	logging.LogInfoByCtxf(ctx, "Install '%s' as '%s' started.", sourcePath, installPath)
 
-	err = sourceFile.CopyToFile(installFile, options.Verbose)
+	err = sourceFile.CopyToFile(installFile, contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
 
-	err = setInstallFileAccessByOptions(installFile, options)
+	err = setInstallFileAccessByOptions(ctx, installFile, options)
 	if err != nil {
 		return err
 	}
 
-	if options.Verbose {
-		logging.LogInfof("Install '%s' as '%s' finished.", sourcePath, installPath)
-	}
+	logging.LogInfoByCtxf(ctx, "Install '%s' as '%s' finished.", sourcePath, installPath)
 
 	return nil
 }
 
-func Install(options *InstallOptions) (err error) {
+func Install(ctx context.Context, options *InstallOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
 
 	if options.IsSourcePathSet() {
-		return installFromSourcePath(options)
+		return installFromSourcePath(ctx, options)
 	}
 
 	return tracederrors.TracedError("No source to install set.")

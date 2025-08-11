@@ -355,10 +355,10 @@ func (h *CommandExecutorHost) InstallBinary(installOptions *parameteroptions.Ins
 	}
 
 	err = installedFile.Chmod(
+		contextutils.GetVerbosityContextByBool(installOptions.Verbose),
 		&parameteroptions.ChmodOptions{
 			PermissionsString: "u=rwx,g=rx,o=rx",
 			UseSudo:           installOptions.UseSudoToInstall,
-			Verbose:           installOptions.Verbose,
 		},
 	)
 	if err != nil {

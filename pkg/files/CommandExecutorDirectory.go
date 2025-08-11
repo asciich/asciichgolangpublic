@@ -81,7 +81,7 @@ func NewCommandExecutorDirectory(commandExecutor commandexecutorinterfaces.Comma
 	return c, nil
 }
 
-func (c *CommandExecutorDirectory) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err error) {
+func (c *CommandExecutorDirectory) Chmod(ctx context.Context, chmodOptions *parameteroptions.ChmodOptions) (err error) {
 	if chmodOptions == nil {
 		return tracederrors.TracedErrorNil("chmodOptions")
 	}
@@ -103,7 +103,7 @@ func (c *CommandExecutorDirectory) Chmod(chmodOptions *parameteroptions.ChmodOpt
 	}
 
 	_, err = commandExecutor.RunCommand(
-		contextutils.GetVerbosityContextByBool(chmodOptions.Verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: command,
 		},
@@ -112,14 +112,7 @@ func (c *CommandExecutorDirectory) Chmod(chmodOptions *parameteroptions.ChmodOpt
 		return err
 	}
 
-	if chmodOptions.Verbose {
-		logging.LogChangedf(
-			"Chmod '%s' for '%s' on '%s'",
-			permissionString,
-			dirPath,
-			hostDescription,
-		)
-	}
+	logging.LogChangedByCtxf(ctx, "Chmod '%s' for '%s' on '%s'", permissionString, dirPath, hostDescription)
 
 	return nil
 }

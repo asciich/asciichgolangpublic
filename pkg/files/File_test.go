@@ -292,16 +292,15 @@ func TestFile_Chmod(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				toTest := getFileToTest(tt.implementationName)
 				defer toTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := toTest.Chmod(
+					ctx,
 					&parameteroptions.ChmodOptions{
 						PermissionsString: tt.permissionsString,
-						Verbose:           verbose,
 					},
 				)
 				require.NoError(t, err)

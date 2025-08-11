@@ -149,7 +149,7 @@ func (l *LocalFile) AppendString(toWrite string, verbose bool) (err error) {
 	return nil
 }
 
-func (l *LocalFile) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err error) {
+func (l *LocalFile) Chmod(ctx context.Context, chmodOptions *parameteroptions.ChmodOptions) (err error) {
 	if chmodOptions == nil {
 		return tracederrors.TracedErrorNil("chmodOptions")
 	}
@@ -165,7 +165,7 @@ func (l *LocalFile) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err erro
 	}
 
 	_, err = commandexecutorbashoo.Bash().RunCommand(
-		contextutils.GetVerbosityContextByBool(chmodOptions.Verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"chmod", chmodString, localPath},
 		},
@@ -174,9 +174,7 @@ func (l *LocalFile) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err erro
 		return err
 	}
 
-	if chmodOptions.Verbose {
-		logging.LogChangedf("Chmod '%s' for local file '%s'.", chmodString, localPath)
-	}
+	logging.LogChangedByCtxf(ctx, "Chmod '%s' for local file '%s'.", chmodString, localPath)
 
 	return nil
 }
@@ -482,20 +480,6 @@ func (l *LocalFile) MustAppendBytes(toWrite []byte, verbose bool) {
 
 func (l *LocalFile) MustAppendString(toWrite string, verbose bool) {
 	err := l.AppendString(toWrite, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (l *LocalFile) MustChmod(chmodOptions *parameteroptions.ChmodOptions) {
-	err := l.Chmod(chmodOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (l *LocalFile) MustChown(options *parameteroptions.ChownOptions) {
-	err := l.Chown(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
