@@ -10,9 +10,6 @@ type ChmodOptions struct {
 
 	// Use sudo to perform changemod with root priviledges.
 	UseSudo bool
-
-	// Enable verbose output
-	Verbose bool
 }
 
 func NewChmodOptions() (c *ChmodOptions) {
@@ -32,11 +29,6 @@ func (c *ChmodOptions) GetUseSudo() (useSudo bool) {
 	return c.UseSudo
 }
 
-func (c *ChmodOptions) GetVerbose() (verbose bool) {
-
-	return c.Verbose
-}
-
 func (c *ChmodOptions) SetPermissionsString(permissionsString string) (err error) {
 	if permissionsString == "" {
 		return tracederrors.TracedErrorf("permissionsString is empty string")
@@ -51,6 +43,3 @@ func (c *ChmodOptions) SetUseSudo(useSudo bool) {
 	c.UseSudo = useSudo
 }
 
-func (c *ChmodOptions) SetVerbose(verbose bool) {
-	c.Verbose = verbose
-}

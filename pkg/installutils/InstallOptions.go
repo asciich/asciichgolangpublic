@@ -9,7 +9,6 @@ type InstallOptions struct {
 	SrcPath     string
 	InstallPath string
 	Mode        string
-	Verbose     bool
 }
 
 func NewInstallOptions() (i *InstallOptions) {
@@ -46,11 +45,6 @@ func (i *InstallOptions) GetSrcPath() (srcPath string, err error) {
 	}
 
 	return i.SrcPath, nil
-}
-
-func (i *InstallOptions) GetVerbose() (verbose bool) {
-
-	return i.Verbose
 }
 
 func (i *InstallOptions) MustGetInstallPath() (installPath string) {
@@ -129,8 +123,4 @@ func (i *InstallOptions) SetSrcPath(srcPath string) (err error) {
 	i.SrcPath = srcPath
 
 	return nil
-}
-
-func (i *InstallOptions) SetVerbose(verbose bool) {
-	i.Verbose = verbose
 }

@@ -81,7 +81,7 @@ func (c *CommandExecutorFile) AppendString(toWrite string, verbose bool) (err er
 	return nil
 }
 
-func (c *CommandExecutorFile) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err error) {
+func (c *CommandExecutorFile) Chmod(ctx context.Context, chmodOptions *parameteroptions.ChmodOptions) (err error) {
 	if chmodOptions == nil {
 		return tracederrors.TracedErrorNil("chmodOptions")
 	}
@@ -97,7 +97,7 @@ func (c *CommandExecutorFile) Chmod(chmodOptions *parameteroptions.ChmodOptions)
 	}
 
 	_, err = commandExecutor.RunCommand(
-		contextutils.GetVerbosityContextByBool(chmodOptions.Verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"chmod", permissionsString, filePath},
 		},
@@ -659,13 +659,6 @@ func (c *CommandExecutorFile) MustAppendBytes(toWrite []byte, verbose bool) {
 
 func (c *CommandExecutorFile) MustAppendString(toWrite string, verbose bool) {
 	err := c.AppendString(toWrite, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorFile) MustChmod(chmodOptions *parameteroptions.ChmodOptions) {
-	err := c.Chmod(chmodOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}

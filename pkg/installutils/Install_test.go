@@ -46,14 +46,15 @@ func TestInstallFromPath(t *testing.T) {
 
 				require.NoFileExists(t, destFilePath)
 
-				installutils.MustInstall(
+				err = installutils.Install(
+					ctx,
 					&installutils.InstallOptions{
 						SrcPath:     sourceFile,
 						InstallPath: destFilePath,
 						Mode:        tt.mode,
-						Verbose:     verbose,
 					},
 				)
+				require.NoError(t, err)
 
 				require.FileExists(t, destFilePath)
 

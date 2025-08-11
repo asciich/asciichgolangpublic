@@ -58,7 +58,7 @@ func NewLocalDirectory() (l *LocalDirectory) {
 	return l
 }
 
-func (l *LocalDirectory) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err error) {
+func (l *LocalDirectory) Chmod(ctx context.Context, chmodOptions *parameteroptions.ChmodOptions) (err error) {
 	if chmodOptions == nil {
 		return tracederrors.TracedErrorNil("chmodOptions")
 	}
@@ -74,7 +74,7 @@ func (l *LocalDirectory) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err
 	}
 
 	_, err = commandexecutorbashoo.Bash().RunCommand(
-		contextutils.GetVerbosityContextByBool(chmodOptions.Verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"chmod", chmodString, localPath},
 		},
@@ -83,9 +83,7 @@ func (l *LocalDirectory) Chmod(chmodOptions *parameteroptions.ChmodOptions) (err
 		return err
 	}
 
-	if chmodOptions.Verbose {
-		logging.LogChangedf("Chmod '%s' for local directory '%s'.", chmodString, localPath)
-	}
+	logging.LogChangedByCtxf(ctx, "Chmod '%s' for local directory '%s'.", chmodString, localPath)
 
 	return nil
 }
@@ -785,13 +783,6 @@ func (l *LocalDirectory) ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions 
 	sort.Strings(subDirectoryPaths)
 
 	return subDirectoryPaths, nil
-}
-
-func (l *LocalDirectory) MustChmod(chmodOptions *parameteroptions.ChmodOptions) {
-	err := l.Chmod(chmodOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (l *LocalDirectory) MustCopyContentToDirectory(destinationDir filesinterfaces.Directory, verbose bool) {
