@@ -267,7 +267,7 @@ func (g *GitRepositoryBase) CheckIsPreCommitRepository(verbose bool) (err error)
 	return nil
 }
 
-func (g *GitRepositoryBase) CommitAndPush(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit, err error) {
+func (g *GitRepositoryBase) CommitAndPush(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GenericGitCommit, err error) {
 	if commitOptions == nil {
 		return nil, tracederrors.TracedErrorNil("commitOptions")
 	}
@@ -290,7 +290,7 @@ func (g *GitRepositoryBase) CommitAndPush(commitOptions *gitparameteroptions.Git
 	return createdCommit, nil
 }
 
-func (g *GitRepositoryBase) CommitIfUncommittedChanges(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit, err error) {
+func (g *GitRepositoryBase) CommitIfUncommittedChanges(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GenericGitCommit, err error) {
 	if commitOptions == nil {
 		return nil, tracederrors.TracedErrorNil("commitOptions")
 	}
@@ -964,7 +964,7 @@ func (g *GitRepositoryBase) MustCheckIsPreCommitRepository(verbose bool) {
 	}
 }
 
-func (g *GitRepositoryBase) MustCommitAndPush(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit) {
+func (g *GitRepositoryBase) MustCommitAndPush(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GenericGitCommit) {
 	createdCommit, err := g.CommitAndPush(commitOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -973,7 +973,7 @@ func (g *GitRepositoryBase) MustCommitAndPush(commitOptions *gitparameteroptions
 	return createdCommit
 }
 
-func (g *GitRepositoryBase) MustCommitIfUncommittedChanges(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit) {
+func (g *GitRepositoryBase) MustCommitIfUncommittedChanges(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GenericGitCommit) {
 	createdCommit, err := g.CommitIfUncommittedChanges(commitOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
