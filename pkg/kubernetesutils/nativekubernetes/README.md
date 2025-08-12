@@ -7,3 +7,4 @@ For the object oriented implmenetation see [nativekubernetesoo](/pkg/kubernetesu
 ## Examples
 
 * [Get clientset](Example_GetClientSet_test.go): Get the k8s client-go clientset.
+* [Run temporary pod and get stdout](Example_RunPodAndGetStdout_test.go): How to run a single command in Kubernetes and get it's stdout.

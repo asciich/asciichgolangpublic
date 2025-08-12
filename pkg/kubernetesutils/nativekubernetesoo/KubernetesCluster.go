@@ -551,7 +551,7 @@ func (n *NativeKubernetesCluster) RunCommandInTemporaryPod(ctx context.Context, 
 		return nil, err
 	}
 
-	return RunCommandInTemporaryPod(ctx, config, options)
+	return nativekubernetes.RunCommandInTemporaryPod(ctx, config, options)
 }
 
 func (n *NativeKubernetesCluster) ReadSecret(ctx context.Context, namespaceName string, secretName string) (map[string][]byte, error) {
