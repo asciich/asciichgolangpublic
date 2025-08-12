@@ -429,7 +429,7 @@ func (l *LocalGitRepository) CloneRepositoryByPathOrUrl(urlOrPathToClone string,
 	return nil
 }
 
-func (l *LocalGitRepository) Commit(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit, err error) {
+func (l *LocalGitRepository) Commit(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GenericGitCommit, err error) {
 	if commitOptions == nil {
 		return nil, tracederrors.TracedErrorNil("commitOptions")
 	}
@@ -857,7 +857,7 @@ func (l *LocalGitRepository) GetCommitAgeSecondsByCommitHash(hash string) (ageSe
 	return ageSeconds, nil
 }
 
-func (l *LocalGitRepository) GetCommitByGoGitCommit(goGitCommit *object.Commit) (gitCommit *GitCommit, err error) {
+func (l *LocalGitRepository) GetCommitByGoGitCommit(goGitCommit *object.Commit) (gitCommit *GenericGitCommit, err error) {
 	if goGitCommit == nil {
 		return nil, tracederrors.TracedErrorNil("goGitCommit")
 	}
@@ -872,7 +872,7 @@ func (l *LocalGitRepository) GetCommitByGoGitCommit(goGitCommit *object.Commit) 
 	return gitCommit, nil
 }
 
-func (l *LocalGitRepository) GetCommitByGoGitHash(goGitHash *plumbing.Hash) (gitCommit *GitCommit, err error) {
+func (l *LocalGitRepository) GetCommitByGoGitHash(goGitHash *plumbing.Hash) (gitCommit *GenericGitCommit, err error) {
 	if goGitHash == nil {
 		return nil, tracederrors.TracedErrorNil("goGitHash")
 	}
@@ -902,7 +902,7 @@ func (l *LocalGitRepository) GetCommitByGoGitHash(goGitHash *plumbing.Hash) (git
 	return gitCommit, nil
 }
 
-func (l *LocalGitRepository) GetCommitByGoGitReference(goGitReference *plumbing.Reference) (gitCommit *GitCommit, err error) {
+func (l *LocalGitRepository) GetCommitByGoGitReference(goGitReference *plumbing.Reference) (gitCommit *GenericGitCommit, err error) {
 	if goGitReference == nil {
 		return nil, tracederrors.TracedErrorNil("goGitReference")
 	}
@@ -932,7 +932,7 @@ func (l *LocalGitRepository) GetCommitMessageByCommitHash(hash string) (commitMe
 	return commitMessage, nil
 }
 
-func (l *LocalGitRepository) GetCommitParentsByCommitHash(hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []*GitCommit, err error) {
+func (l *LocalGitRepository) GetCommitParentsByCommitHash(hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []*GenericGitCommit, err error) {
 	if hash == "" {
 		return nil, tracederrors.TracedErrorEmptyString("hash")
 	}
@@ -1039,7 +1039,7 @@ func (l *LocalGitRepository) GetCurrentBranchName(verbose bool) (branchName stri
 	return branchName, nil
 }
 
-func (l *LocalGitRepository) GetCurrentCommit(verbose bool) (gitCommit *GitCommit, err error) {
+func (l *LocalGitRepository) GetCurrentCommit(verbose bool) (gitCommit *GenericGitCommit, err error) {
 	head, err := l.GetGoGitHead()
 	if err != nil {
 		return nil, err
@@ -1868,7 +1868,7 @@ func (l *LocalGitRepository) MustCloneRepositoryByPathOrUrl(pathToClone string, 
 	}
 }
 
-func (l *LocalGitRepository) MustCommit(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit) {
+func (l *LocalGitRepository) MustCommit(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GenericGitCommit) {
 	createdCommit, err := l.Commit(commitOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1988,7 +1988,7 @@ func (l *LocalGitRepository) MustGetCommitAgeSecondsByCommitHash(hash string) (a
 	return ageSeconds
 }
 
-func (l *LocalGitRepository) MustGetCommitByGoGitCommit(goGitCommit *object.Commit) (gitCommit *GitCommit) {
+func (l *LocalGitRepository) MustGetCommitByGoGitCommit(goGitCommit *object.Commit) (gitCommit *GenericGitCommit) {
 	gitCommit, err := l.GetCommitByGoGitCommit(goGitCommit)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -1997,7 +1997,7 @@ func (l *LocalGitRepository) MustGetCommitByGoGitCommit(goGitCommit *object.Comm
 	return gitCommit
 }
 
-func (l *LocalGitRepository) MustGetCommitByGoGitHash(goGitHash *plumbing.Hash) (gitCommit *GitCommit) {
+func (l *LocalGitRepository) MustGetCommitByGoGitHash(goGitHash *plumbing.Hash) (gitCommit *GenericGitCommit) {
 	gitCommit, err := l.GetCommitByGoGitHash(goGitHash)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -2006,7 +2006,7 @@ func (l *LocalGitRepository) MustGetCommitByGoGitHash(goGitHash *plumbing.Hash) 
 	return gitCommit
 }
 
-func (l *LocalGitRepository) MustGetCommitByGoGitReference(goGitReference *plumbing.Reference) (gitCommit *GitCommit) {
+func (l *LocalGitRepository) MustGetCommitByGoGitReference(goGitReference *plumbing.Reference) (gitCommit *GenericGitCommit) {
 	gitCommit, err := l.GetCommitByGoGitReference(goGitReference)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -2024,7 +2024,7 @@ func (l *LocalGitRepository) MustGetCommitMessageByCommitHash(hash string) (comm
 	return commitMessage
 }
 
-func (l *LocalGitRepository) MustGetCommitParentsByCommitHash(hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []*GitCommit) {
+func (l *LocalGitRepository) MustGetCommitParentsByCommitHash(hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []*GenericGitCommit) {
 	commitParents, err := l.GetCommitParentsByCommitHash(hash, options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -2051,7 +2051,7 @@ func (l *LocalGitRepository) MustGetCurrentBranchName(verbose bool) (branchName 
 	return branchName
 }
 
-func (l *LocalGitRepository) MustGetCurrentCommit(verbose bool) (gitCommit *GitCommit) {
+func (l *LocalGitRepository) MustGetCurrentCommit(verbose bool) (gitCommit *GenericGitCommit) {
 	gitCommit, err := l.GetCurrentCommit(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

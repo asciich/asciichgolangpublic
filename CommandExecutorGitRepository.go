@@ -327,7 +327,7 @@ func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClo
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) Commit(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GitCommit, err error) {
+func (c *CommandExecutorGitRepository) Commit(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GenericGitCommit, err error) {
 	if commitOptions == nil {
 		return nil, tracederrors.TracedErrorNil("commitOptions")
 	}
@@ -593,7 +593,7 @@ func (c *CommandExecutorGitRepository) GetCommitAgeSecondsByCommitHash(hash stri
 	return -1, tracederrors.TracedErrorNotImplemented()
 }
 
-func (c *CommandExecutorGitRepository) GetCommitByHash(hash string) (gitCommit *GitCommit, err error) {
+func (c *CommandExecutorGitRepository) GetCommitByHash(hash string) (gitCommit *GenericGitCommit, err error) {
 	if hash == "" {
 		return nil, tracederrors.TracedErrorEmptyString("hash")
 	}
@@ -645,7 +645,7 @@ func (c *CommandExecutorGitRepository) GetCommitMessageByCommitHash(hash string)
 	return commitMessage, nil
 }
 
-func (c *CommandExecutorGitRepository) GetCommitParentsByCommitHash(hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []*GitCommit, err error) {
+func (c *CommandExecutorGitRepository) GetCommitParentsByCommitHash(hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []*GenericGitCommit, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
@@ -689,7 +689,7 @@ func (c *CommandExecutorGitRepository) GetCurrentBranchName(verbose bool) (branc
 	return branchName, nil
 }
 
-func (c *CommandExecutorGitRepository) GetCurrentCommit(verbose bool) (currentCommit *GitCommit, err error) {
+func (c *CommandExecutorGitRepository) GetCurrentCommit(verbose bool) (currentCommit *GenericGitCommit, err error) {
 	currentCommitHash, err := c.GetCurrentCommitHash(verbose)
 	if err != nil {
 		return nil, err
