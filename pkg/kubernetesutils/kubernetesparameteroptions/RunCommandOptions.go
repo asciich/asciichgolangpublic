@@ -11,8 +11,12 @@ type RunCommandOptions struct {
 	Namespace                string
 	Image                    string
 	PodName                  string
+	ContainerName            string
 	Command                  []string
 	DeleteAlreadyExistingPod bool
+
+	// Wait until pod is in "running" state
+	WaitForPodRunning bool
 }
 
 func (r *RunCommandOptions) GetNamespaceName() (string, error) {
@@ -21,6 +25,15 @@ func (r *RunCommandOptions) GetNamespaceName() (string, error) {
 	}
 
 	return r.Namespace, nil
+}
+
+func (r *RunCommandOptions) GetContainerName() (string, error) {
+	if r.ContainerName == "" {
+		// If the container name is not explicitly defined the same name as for the pod is used:
+		return r.GetPodName()
+	}
+
+	return r.ContainerName, nil
 }
 
 func (r *RunCommandOptions) GetPodName() (string, error) {
