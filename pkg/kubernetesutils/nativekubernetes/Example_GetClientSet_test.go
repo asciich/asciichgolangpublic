@@ -26,14 +26,14 @@ func Test_Example_GetClientSet(t *testing.T) {
 	require.NoError(t, err)
 
 	// Ensure the created cluster is used by default
-	err = kubeconfigutils.SetCurrentContext(ctx, "kind-" + clusterName)
+	err = kubeconfigutils.SetCurrentContext(ctx, "kind-"+clusterName)
 	require.NoError(t, err)
 
 	// ... prepare test environment finished.
 	// -----
 
-	// Get the client set (by not specifying the cluster name the default one is returned.)
-	clientset, err := nativekubernetes.GetClientSet(ctx, "")
+	// Get the clientset
+	clientset, err := nativekubernetes.GetClientSet(ctx, "kind-"+clusterName)
 	require.NoError(t, err)
 
 	// As an example we use the clientset to list the namespaces
