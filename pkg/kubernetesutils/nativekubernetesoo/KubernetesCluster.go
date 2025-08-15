@@ -546,12 +546,12 @@ func (n *NativeKubernetesCluster) CreateObject(ctx context.Context, options *kub
 }
 
 func (n *NativeKubernetesCluster) RunCommandInTemporaryPod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
-	config, err := n.GetConfig()
+	clientSet, err := n.GetClientSet()
 	if err != nil {
 		return nil, err
 	}
 
-	return nativekubernetes.RunCommandInTemporaryPod(ctx, config, options)
+	return nativekubernetes.RunCommandInTemporaryPod(ctx, clientSet, options)
 }
 
 func (n *NativeKubernetesCluster) ReadSecret(ctx context.Context, namespaceName string, secretName string) (map[string][]byte, error) {
