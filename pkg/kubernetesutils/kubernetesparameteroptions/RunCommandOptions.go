@@ -17,6 +17,8 @@ type RunCommandOptions struct {
 
 	// Wait until pod is in "running" state
 	WaitForPodRunning bool
+
+	StdinBytes []byte
 }
 
 func (r *RunCommandOptions) GetNamespaceName() (string, error) {

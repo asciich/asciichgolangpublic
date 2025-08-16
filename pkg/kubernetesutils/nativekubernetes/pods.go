@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"path/filepath"
 	"time"
 
+	"github.com/asciich/asciichgolangpublic/pkg/archiveutils/tarutils"
+	"github.com/asciich/asciichgolangpublic/pkg/archiveutils/tarutils/tarparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -479,4 +482,74 @@ func WaitForPodSucceeded(ctx context.Context, clientSet *kubernetes.Clientset, n
 			return ctx.Err() // Context was cancelled
 		}
 	}
+}
+
+func CopyFileToPod(ctx context.Context, config *rest.Config, localFile string, destPath string, podName string, containerName string, namespaceName string) error {
+	if config == nil {
+		return tracederrors.TracedErrorNil("config")
+	}
+
+	if localFile == "" {
+		return tracederrors.TracedErrorEmptyString("localFile")
+	}
+
+	if destPath == "" {
+		return tracederrors.TracedErrorEmptyString("destPath")
+	}
+
+	if podName == "" {
+		return tracederrors.TracedErrorEmptyString("podName")
+	}
+
+	if namespaceName == "" {
+		return tracederrors.TracedErrorEmptyString("namespaceName")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Copy local file '%s' as '%s' into container '%s' of pod '%s' of namespace '%s' started.", localFile, destPath, containerName, podName, namespaceName)
+
+	tarReader, err := tarutils.FileToTarReader(localFile, &tarparameteroptions.FileToTarOptions{
+		OverrideFileName: filepath.Base(destPath),
+	})
+	if err != nil {
+		return err
+	}
+
+	clientset, err := GetClientSetFromRestConfig(ctx, config)
+	if err != nil {
+		return err
+	}
+
+	req := clientset.CoreV1().RESTClient().Post().
+		Resource("pods").
+		Name(podName).
+		Namespace(namespaceName).
+		SubResource("exec").
+		Param("container", containerName).
+		VersionedParams(&corev1.PodExecOptions{
+			Command: []string{"tar", "xf", "-", "-C", filepath.Dir(destPath)},
+			Stdin:   true,
+			Stdout:  true,
+			Stderr:  true,
+			TTY:     false,
+		}, scheme.ParameterCodec)
+
+	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
+	if err != nil {
+		return fmt.Errorf("failed to create executor: %w", err)
+	}
+
+	var stdout, stderr bytes.Buffer
+	err = exec.StreamWithContext(context.Background(), remotecommand.StreamOptions{
+		Stdin:  tarReader,
+		Stdout: &stdout,
+		Stderr: &stderr,
+		Tty:    false,
+	})
+	if err != nil {
+
+	}
+
+	logging.LogInfoByCtxf(ctx, "Copy local file '%s' as '%s' into container '%s' of pod '%s' of namespace '%s' finished.", localFile, destPath, containerName, podName, namespaceName)
+
+	return nil
 }

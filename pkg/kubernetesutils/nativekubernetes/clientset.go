@@ -98,3 +98,16 @@ func GetClientSet(ctx context.Context, clusterName string) (*kubernetes.Clientse
 
 	return clientset, nil
 }
+
+func GetClientSetFromRestConfig(ctx context.Context, restConfig *rest.Config) (*kubernetes.Clientset, error) {
+	if restConfig == nil {
+		return nil, tracederrors.TracedErrorNil("restConfig")
+	}
+
+	clientset, err := kubernetes.NewForConfig(restConfig)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to create kubernetes clientset from restConfig: %w", err)
+	}
+
+	return clientset, nil
+}
