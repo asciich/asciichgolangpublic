@@ -476,22 +476,12 @@ func (n *NativeKubernetesCluster) WhoAmI(ctx context.Context) (*kubernetesimplem
 		return nil, err
 	}
 
-	kubeContext, err := n.GetKubectlContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	username, err := kubeconfigutils.GetUserNameByContextName(ctx, kubeContext)
-	if err != nil {
-		return nil, err
-	}
-
 	response, err := clientset.AuthenticationV1().SelfSubjectReviews().Create(ctx, &authenticationv1.SelfSubjectReview{}, metav1.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	username = response.Status.UserInfo.Username
+	var username = response.Status.UserInfo.Username
 
 	logging.LogInfoByCtxf(ctx, "Whoami: Kube config uses user '%s' to log in to cluster '%s'.", username, clusterName)
 
@@ -546,12 +536,12 @@ func (n *NativeKubernetesCluster) CreateObject(ctx context.Context, options *kub
 }
 
 func (n *NativeKubernetesCluster) RunCommandInTemporaryPod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
-	clientSet, err := n.GetClientSet()
+	config, err := n.GetConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	return nativekubernetes.RunCommandInTemporaryPod(ctx, clientSet, options)
+	return nativekubernetes.RunCommandInTemporaryPod(ctx, config, options)
 }
 
 func (n *NativeKubernetesCluster) ReadSecret(ctx context.Context, namespaceName string, secretName string) (map[string][]byte, error) {

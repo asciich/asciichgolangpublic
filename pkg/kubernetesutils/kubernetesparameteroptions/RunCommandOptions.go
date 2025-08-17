@@ -61,3 +61,7 @@ func (r *RunCommandOptions) GetCommand() ([]string, error) {
 
 	return slicesutils.GetDeepCopyOfStringsSlice(r.Command), nil
 }
+
+func (r *RunCommandOptions) IsStinDataAvailable() bool {
+	return len(r.StdinBytes) > 0 
+}

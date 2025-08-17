@@ -55,13 +55,13 @@ func Test_Example_CopyFileToPod(t *testing.T) {
 	// start the pod
 	err = nativekubernetes.CreatePod(
 		ctx,
-		clientset,
+		config,
 		&kubernetesparameteroptions.RunCommandOptions{
 			Image:                    "ubuntu",
 			Namespace:                "default",
 			PodName:                  podName,
 			DeleteAlreadyExistingPod: true,
-			Command:                  []string{"bash", "-c", "sleep infinity"},
+			Command:                  []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"}, // Same as sleep inifinity but does not ignore SIGINT
 			WaitForPodRunning:        true,
 		},
 	)
