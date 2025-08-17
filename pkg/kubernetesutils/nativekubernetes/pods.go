@@ -14,7 +14,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -102,10 +101,10 @@ func Exec(ctx context.Context, config *rest.Config, options *kubernetesparameter
 		Name(podName).
 		Namespace(namespace).
 		SubResource("exec").
-		VersionedParams(&v1.PodExecOptions{
+		VersionedParams(&corev1.PodExecOptions{
 			Container: containerName,
 			Command:   command,
-			Stdin:     false,
+			Stdin:     options.IsStinDataAvailable(),
 			Stdout:    true,
 			Stderr:    true,
 			TTY:       false,
@@ -116,10 +115,16 @@ func Exec(ctx context.Context, config *rest.Config, options *kubernetesparameter
 		return nil, tracederrors.TracedErrorf("Failed to create exec: %s", err)
 	}
 	var stdout, stderr bytes.Buffer
-	err = exec.StreamWithContext(ctx, remotecommand.StreamOptions{
+
+	streamOptions := remotecommand.StreamOptions{
 		Stdout: &stdout,
 		Stderr: &stderr,
-	})
+	}
+	if options.IsStinDataAvailable() {
+		streamOptions.Stdin = bytes.NewReader(options.StdinBytes)
+	}
+
+	err = exec.StreamWithContext(ctx, streamOptions)
 	if err != nil {
 		return nil, tracederrors.TracedErrorf("Error executing command: %s", err)
 	}
@@ -139,9 +144,9 @@ func Exec(ctx context.Context, config *rest.Config, options *kubernetesparameter
 	return output, nil
 }
 
-func CreatePod(ctx context.Context, clientset *kubernetes.Clientset, options *kubernetesparameteroptions.RunCommandOptions) error {
-	if clientset == nil {
-		return tracederrors.TracedErrorNil("clientset")
+func CreatePod(ctx context.Context, config *rest.Config, options *kubernetesparameteroptions.RunCommandOptions) error {
+	if config == nil {
+		return tracederrors.TracedErrorNil("config")
 	}
 
 	if options == nil {
@@ -174,6 +179,11 @@ func CreatePod(ctx context.Context, clientset *kubernetes.Clientset, options *ku
 	}
 
 	logging.LogInfoByCtxf(ctx, "Create pod '%s' in namespace '%s' using container image '%s' started.", podName, namespace, imageName)
+
+	clientset, err := GetClientSetFromRestConfig(ctx, config)
+	if err != nil {
+		return err
+	}
 
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -223,8 +233,8 @@ func CreatePod(ctx context.Context, clientset *kubernetes.Clientset, options *ku
 	return nil
 }
 
-func RunCommandInTemporaryPod(ctx context.Context, clientset *kubernetes.Clientset, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
-	if clientset == nil {
+func RunCommandInTemporaryPod(ctx context.Context, config *rest.Config, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
+	if config == nil {
 		return nil, tracederrors.TracedErrorNil("config")
 	}
 
@@ -254,7 +264,12 @@ func RunCommandInTemporaryPod(ctx context.Context, clientset *kubernetes.Clients
 
 	logging.LogInfoByCtxf(ctx, "Run command in temporary pod '%s' in namespace '%s' using container image '%s' started.", podName, namespace, imageName)
 
-	err = CreatePod(ctx, clientset, options)
+	clientset, err := GetClientSetFromRestConfig(ctx, config)
+	if err != nil {
+		return nil, err
+	}
+
+	err = CreatePod(ctx, config, options)
 	if err != nil {
 		return nil, err
 	}
@@ -539,7 +554,7 @@ func CopyFileToPod(ctx context.Context, config *rest.Config, localFile string, d
 	}
 
 	var stdout, stderr bytes.Buffer
-	err = exec.StreamWithContext(context.Background(), remotecommand.StreamOptions{
+	err = exec.StreamWithContext(ctx, remotecommand.StreamOptions{
 		Stdin:  tarReader,
 		Stdout: &stdout,
 		Stderr: &stderr,

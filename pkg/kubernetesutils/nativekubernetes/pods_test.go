@@ -27,7 +27,10 @@ func Test_CreateAndDeletePod(t *testing.T) {
 	_, err := kindutils.CreateCluster(ctx, clusterName)
 	require.NoError(t, err)
 
-	clientset, err := nativekubernetes.GetClientSet(ctx, "kind-"+clusterName)
+	config, err := nativekubernetes.GetConfig(ctx, "kind-"+clusterName)
+	require.NoError(t, err)
+
+	clientset, err := nativekubernetes.GetClientSetFromRestConfig(ctx, config)
 	require.NoError(t, err)
 
 	// ... prepare test environment finished.
@@ -47,7 +50,7 @@ func Test_CreateAndDeletePod(t *testing.T) {
 
 		// check if consecutive create, delete, create, delete... works
 		for range 3 {
-			err = nativekubernetes.CreatePod(ctx, clientset, &kubernetesparameteroptions.RunCommandOptions{
+			err = nativekubernetes.CreatePod(ctx, config, &kubernetesparameteroptions.RunCommandOptions{
 				Namespace: namespaceName,
 				PodName:   podName,
 				Image:     "ubunt",
@@ -89,13 +92,13 @@ func Test_WaitForDeleted(t *testing.T) {
 	t.Run("already deleted pod", func(t *testing.T) {
 		podName := "testpod"
 		namespaceName := "default"
-	
+
 		// Ensure pod is absent
 		err = nativekubernetes.DeletePod(ctx, clientset, podName, namespaceName)
 		require.NoError(t, err)
 
 		// Check there's no wait for an already deleted pod:
-		err = nativekubernetes.WaitForPodDeleted(ctx, clientset, podName, namespaceName, time.Second * 1)
+		err = nativekubernetes.WaitForPodDeleted(ctx, clientset, podName, namespaceName, time.Second*1)
 		require.NoError(t, err)
 	})
 }

@@ -11,8 +11,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 )
 
-// This example shows how to exec in a container
-func Test_Example_Exec(t *testing.T) {
+// This example shows how to exec in a container and write to the stdin of this command
+func Test_Example_WriteToStdinOfExecCommand(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.WithVerbose(context.TODO())
 
@@ -70,7 +70,7 @@ func Test_Example_Exec(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, exists)
 
-	// Exec hello_world
+	// Exec command printing out what's written to stdin
 	output, err := nativekubernetes.Exec(
 		ctx,
 		config,
@@ -79,7 +79,8 @@ func Test_Example_Exec(t *testing.T) {
 			Namespace:                "default",
 			PodName:                  podName,
 			DeleteAlreadyExistingPod: true,
-			Command:                  []string{"bash", "-c", "echo hello world"},
+			Command:                  []string{"cat"},
+			StdinBytes:               []byte("hello world"),
 		},
 	)
 	require.NoError(t, err)
@@ -87,5 +88,5 @@ func Test_Example_Exec(t *testing.T) {
 	// Check the output of the exec command:
 	stdout, err := output.GetStdoutAsString()
 	require.NoError(t, err)
-	require.EqualValues(t, "hello world\n", stdout)
+	require.EqualValues(t, "hello world", stdout)
 }
