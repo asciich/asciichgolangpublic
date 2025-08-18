@@ -3,6 +3,7 @@ package nativefiles
 import (
 	"context"
 	"os"
+	"path/filepath"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -20,6 +21,11 @@ func Create(ctx context.Context, path string) error {
 	if IsFile(contextutils.WithSilent(ctx), path) {
 		logging.LogInfoByCtxf(ctx, "File '%s' already exists. Skip create.", path)
 	} else {
+		err := CreateDirectory(ctx, filepath.Dir(path))
+		if err != nil {
+			return err
+		}
+
 		file, err := os.OpenFile(path, os.O_RDONLY|os.O_CREATE, 0666)
 		if err != nil {
 			return tracederrors.TracedErrorf("Failed to create file '%s': %w", path, err)
@@ -44,7 +50,7 @@ func CreateDirectory(ctx context.Context, path string) error {
 	if IsDir(contextutils.WithSilent(ctx), path) {
 		logging.LogInfoByCtxf(ctx, "Directory '%s' already exists. Skip create.", path)
 	} else {
-		err := os.Mkdir(path, 0755)
+		err := os.MkdirAll(path, 0755)
 		if err != nil {
 			return tracederrors.TracedErrorf("Failed to create directory '%s': %w", path, err)
 		}
