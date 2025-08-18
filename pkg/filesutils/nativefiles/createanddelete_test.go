@@ -91,7 +91,7 @@ func Test_CreateAndDeleteDir(t *testing.T) {
 	})
 }
 
-func Test_DeleteDireRecursively(t *testing.T) {
+func Test_DeleteDirRecursively(t *testing.T) {
 	t.Run("delete empty dir", func(t *testing.T) {
 		ctx := getCtx()
 		tempDir, err := tempfiles.CreateTempDir(ctx)

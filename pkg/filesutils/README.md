@@ -1,7 +1,13 @@
 # filesutils package
 
 Contains various implementations to work with files:
+* [nativefiles](./nativefiles/): Handle local files using go native/ std library commands.
 * [tempfileoo](./tempfilesoo/): Create temporary files and directories in a object oriented way.
+
+## Examples
+
+* [Create directory recursively](./nativefiles/Example_CreateDirectoryRecursively_test.go)
+* [Create file and it's parent directories recursively](./nativefiles/Example_CreateFileRecursively_test.go)
 
 ## For developers
 
