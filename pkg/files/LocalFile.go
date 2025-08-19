@@ -15,7 +15,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -149,34 +148,13 @@ func (l *LocalFile) AppendString(toWrite string, verbose bool) (err error) {
 	return nil
 }
 
-func (l *LocalFile) Chmod(ctx context.Context, chmodOptions *parameteroptions.ChmodOptions) (err error) {
-	if chmodOptions == nil {
-		return tracederrors.TracedErrorNil("chmodOptions")
-	}
-
-	chmodString, err := chmodOptions.GetPermissionsString()
+func (l *LocalFile) Chmod(ctx context.Context, chmodOptions *filesoptions.ChmodOptions) (err error) {
+	path, err := l.GetPath()
 	if err != nil {
 		return err
 	}
 
-	localPath, err := l.GetLocalPath()
-	if err != nil {
-		return err
-	}
-
-	_, err = commandexecutorbashoo.Bash().RunCommand(
-		ctx,
-		&parameteroptions.RunCommandOptions{
-			Command: []string{"chmod", chmodString, localPath},
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	logging.LogChangedByCtxf(ctx, "Chmod '%s' for local file '%s'.", chmodString, localPath)
-
-	return nil
+	return nativefiles.Chmod(ctx, path, chmodOptions)
 }
 
 func (l *LocalFile) Chown(options *parameteroptions.ChownOptions) (err error) {
@@ -790,26 +768,14 @@ func (l *LocalFile) GetAccessPermissions() (permissions int, err error) {
 		return 0, err
 	}
 
-	fileInfo, err := os.Stat(path)
-	if err != nil {
-		return 0, tracederrors.TracedErrorf("Unable to get fileInfo of '%s': %w", path, err)
-	}
-
-	perm := fileInfo.Mode().Perm()
-
-	return int(perm), nil
+	return nativefiles.GetAccessPermissions(path)
 }
 
 func (l *LocalFile) GetAccessPermissionsString() (permissionsString string, err error) {
-	permissions, err := l.GetAccessPermissions()
+	path, err := l.GetPath()
 	if err != nil {
 		return "", err
 	}
 
-	permissionsString, err = unixfilepermissionsutils.GetPermissionString(permissions)
-	if err != nil {
-		return "", err
-	}
-
-	return permissionsString, nil
+	return nativefiles.GetAccessPermissionsString(path)
 }

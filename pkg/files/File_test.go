@@ -11,8 +11,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
@@ -273,45 +271,6 @@ func TestFile_CopyToFile(t *testing.T) {
 				require.EqualValues(t, tt.content, srcFile.MustReadAsString())
 
 				require.EqualValues(t, tt.content, destFile.MustReadAsString())
-			},
-		)
-	}
-}
-
-func TestFile_Chmod(t *testing.T) {
-	tests := []struct {
-		implementationName       string
-		permissionsString        string
-		expectedPermissionString string
-	}{
-		{"localFile", "u=rw,g=,o=", "u=rw,g=,o="},
-		{"localCommandExecutorFile", "u=rw,g=,o=", "u=rw,g=,o="},
-	}
-
-	for _, tt := range tests {
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				ctx := getCtx()
-
-				toTest := getFileToTest(tt.implementationName)
-				defer toTest.Delete(ctx, &filesoptions.DeleteOptions{})
-
-				err := toTest.Chmod(
-					ctx,
-					&parameteroptions.ChmodOptions{
-						PermissionsString: tt.permissionsString,
-					},
-				)
-				require.NoError(t, err)
-
-				accessPermissionsString, err := toTest.GetAccessPermissionsString()
-				require.NoError(t, err)
-				require.EqualValues(t, tt.expectedPermissionString, accessPermissionsString)
-
-				accessPermissions, err := toTest.GetAccessPermissions()
-				require.NoError(t, err)
-				require.EqualValues(t, unixfilepermissionsutils.MustGetPermissionsValue(tt.expectedPermissionString), accessPermissions)
 			},
 		)
 	}

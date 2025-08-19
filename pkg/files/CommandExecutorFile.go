@@ -4,17 +4,16 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -81,7 +80,7 @@ func (c *CommandExecutorFile) AppendString(toWrite string, verbose bool) (err er
 	return nil
 }
 
-func (c *CommandExecutorFile) Chmod(ctx context.Context, chmodOptions *parameteroptions.ChmodOptions) (err error) {
+func (c *CommandExecutorFile) Chmod(ctx context.Context, chmodOptions *filesoptions.ChmodOptions) (err error) {
 	if chmodOptions == nil {
 		return tracederrors.TracedErrorNil("chmodOptions")
 	}
@@ -1045,15 +1044,6 @@ func (c *CommandExecutorFile) MustGetAccessPermissionsString() (permissionString
 	return permissionString
 }
 
-func (c *CommandExecutorFile) MustGetAccessPermissions() (permissions int) {
-	permissions, err := c.GetAccessPermissions()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return permissions
-}
-
 func (c *CommandExecutorFile) GetAccessPermissions() (permissions int, err error) {
 	commandexecutor, err := c.GetCommandExecutor()
 	if err != nil {
@@ -1065,38 +1055,19 @@ func (c *CommandExecutorFile) GetAccessPermissions() (permissions int, err error
 		return 0, err
 	}
 
-	output, err := commandexecutor.RunCommandAndGetStdoutAsString(
-		contextutils.ContextSilent(),
-		&parameteroptions.RunCommandOptions{
-			Command: []string{"stat", "-c", "%a", path},
-		},
-	)
-	if err != nil {
-		return 0, err
-	}
-
-	output = strings.TrimSpace(output)
-
-	permissions64, err := strconv.ParseInt(output, 8, 32)
-	if err != nil {
-		return 0, tracederrors.TracedErrorf("Unable to parse permission string '%s': %w", output, err)
-	}
-
-	permissions = int(permissions64)
-
-	return permissions, nil
+	return commandexecutorfile.GetAccessPermissions(commandexecutor, path)
 }
 
 func (c *CommandExecutorFile) GetAccessPermissionsString() (permissionsString string, err error) {
-	permissions, err := c.GetAccessPermissions()
+	commandexecutor, err := c.GetCommandExecutor()
 	if err != nil {
 		return "", err
 	}
 
-	permissionsString, err = unixfilepermissionsutils.GetPermissionString(permissions)
+	path, err := c.GetPath()
 	if err != nil {
 		return "", err
 	}
 
-	return permissionsString, nil
+	return commandexecutorfile.GetAccessPermissionsString(commandexecutor, path)
 }

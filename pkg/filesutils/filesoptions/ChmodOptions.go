@@ -1,6 +1,7 @@
-package parameteroptions
+package filesoptions
 
 import (
+	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -43,3 +44,11 @@ func (c *ChmodOptions) SetUseSudo(useSudo bool) {
 	c.UseSudo = useSudo
 }
 
+func (c *ChmodOptions) GetPermissions() (int, error) {
+	permissionsString, err := c.GetPermissionsString()
+	if err != nil {
+		return 0, err
+	}
+
+	return unixfilepermissionsutils.GetPermissionsValue(permissionsString)
+}

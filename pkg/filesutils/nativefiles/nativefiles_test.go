@@ -119,7 +119,6 @@ func Test_Create(t *testing.T) {
 
 func TestFilesWriteStringToFile(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		const verbose bool = true
 		ctx := getCtx()
 
 		tempFile, err := tempfiles.CreateTemporaryFile(ctx)

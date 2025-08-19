@@ -14,6 +14,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/ftputils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -356,7 +357,7 @@ func (h *CommandExecutorHost) InstallBinary(installOptions *parameteroptions.Ins
 
 	err = installedFile.Chmod(
 		contextutils.GetVerbosityContextByBool(installOptions.Verbose),
-		&parameteroptions.ChmodOptions{
+		&filesoptions.ChmodOptions{
 			PermissionsString: "u=rwx,g=rx,o=rx",
 			UseSudo:           installOptions.UseSudoToInstall,
 		},
