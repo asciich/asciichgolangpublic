@@ -9,6 +9,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/bigintutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datetime"
+	"github.com/asciich/asciichgolangpublic/pkg/datetime/durationparser"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -38,7 +39,7 @@ func NewX509CreateCertificateOptions() (x *X509CreateCertificateOptions) {
 }
 
 func (o *X509CreateCertificateOptions) GetValidityDuration() (validityDuration *time.Duration, err error) {
-	return datetime.DurationParser().ToSecondsAsTimeDuration("45days")
+	return durationparser.ToSecondsAsTimeDuration("45days")
 }
 
 func (o *X509CreateCertificateOptions) GetValidityDurationAsString() (validityDuration string, err error) {
