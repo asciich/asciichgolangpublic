@@ -2,6 +2,7 @@
 
 Contains various implementations to work with files:
 * [nativefiles](./nativefiles/): Handle local files using go native/ std library commands.
+* [tempfile](./tempfiles/): Create temporary files and directories.
 * [tempfileoo](./tempfilesoo/): Create temporary files and directories in a object oriented way.
 
 ## Examples

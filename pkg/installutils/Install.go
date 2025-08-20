@@ -6,8 +6,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -67,7 +67,7 @@ func setInstallFileAccessByOptions(ctx context.Context, installFile filesinterfa
 
 	err = installFile.Chmod(
 		ctx,
-		&parameteroptions.ChmodOptions{
+		&filesoptions.ChmodOptions{
 			PermissionsString: mode,
 		},
 	)

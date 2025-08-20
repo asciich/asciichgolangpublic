@@ -1214,7 +1214,6 @@ func TestLocalFileGetNumberOfNonEmptyLines(t *testing.T) {
 
 func Test_SecureDelete(t *testing.T) {
 	t.Run("delete", func(t *testing.T) {
-		const verbose bool = true
 		ctx := getCtx()
 
 		testPath := createTempFileAndGetPath()

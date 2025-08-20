@@ -8,7 +8,7 @@ import (
 )
 
 type Directory interface {
-	Chmod(ctx context.Context, chmodOptions *parameteroptions.ChmodOptions) (err error)
+	Chmod(ctx context.Context, chmodOptions *filesoptions.ChmodOptions) (err error)
 	CopyContentToDirectory(destinationDir Directory, verbose bool) (err error)
 	Create(ctx context.Context, options *filesoptions.CreateOptions) (err error)
 	CreateSubDirectory(ctx context.Context, subDirectoryName string, options *filesoptions.CreateOptions) (createdSubDirectory Directory, err error)

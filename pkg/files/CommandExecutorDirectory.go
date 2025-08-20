@@ -81,7 +81,7 @@ func NewCommandExecutorDirectory(commandExecutor commandexecutorinterfaces.Comma
 	return c, nil
 }
 
-func (c *CommandExecutorDirectory) Chmod(ctx context.Context, chmodOptions *parameteroptions.ChmodOptions) (err error) {
+func (c *CommandExecutorDirectory) Chmod(ctx context.Context, chmodOptions *filesoptions.ChmodOptions) (err error) {
 	if chmodOptions == nil {
 		return tracederrors.TracedErrorNil("chmodOptions")
 	}

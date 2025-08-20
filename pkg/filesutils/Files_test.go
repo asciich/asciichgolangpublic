@@ -29,11 +29,11 @@ func Test_CreateFileUsingSudo(t *testing.T) {
 
 			// Creating the test file in the root directory without sudo failed:
 			sourceFile := getFileToTest(tt.implementationName, testPath)
-			
-			// Hint: Ensure the /testfile is absent, otherwise this test failes. 
+
+			// Hint: Ensure the /testfile is absent, otherwise this test failes.
 			// The idempotent written Create function will skip the attempt to create the file if it already exists.
 			err := sourceFile.Create(ctx, &filesoptions.CreateOptions{})
-			require.Error(t, err) 
+			require.Error(t, err)
 
 			require.Contains(t, strings.ToLower(err.Error()), "permission denied")
 		})

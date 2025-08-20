@@ -58,7 +58,7 @@ func NewLocalDirectory() (l *LocalDirectory) {
 	return l
 }
 
-func (l *LocalDirectory) Chmod(ctx context.Context, chmodOptions *parameteroptions.ChmodOptions) (err error) {
+func (l *LocalDirectory) Chmod(ctx context.Context, chmodOptions *filesoptions.ChmodOptions) (err error) {
 	if chmodOptions == nil {
 		return tracederrors.TracedErrorNil("chmodOptions")
 	}

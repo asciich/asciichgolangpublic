@@ -13,7 +13,7 @@ import (
 type File interface {
 	AppendBytes(toWrite []byte, verbose bool) (err error)
 	AppendString(toWrite string, verbose bool) (err error)
-	Chmod(ctx context.Context, options *parameteroptions.ChmodOptions) (err error)
+	Chmod(ctx context.Context, options *filesoptions.ChmodOptions) (err error)
 	Chown(options *parameteroptions.ChownOptions) (err error)
 	CopyToFile(destFile File, verbose bool) (err error)
 	Create(ctx context.Context, options *filesoptions.CreateOptions) (err error)
