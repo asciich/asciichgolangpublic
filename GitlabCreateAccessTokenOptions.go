@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
-	"github.com/asciich/asciichgolangpublic/pkg/datetime"
+	"github.com/asciich/asciichgolangpublic/pkg/datetime/durationparser"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -179,9 +179,12 @@ func (o *GitlabCreateAccessTokenOptions) GetExipiresAtOrDefaultIfUnset() (expire
 	}
 
 	defaultTime := time.Now()
-	defaultTime = defaultTime.Add(
-		*datetime.DurationParser().MustToSecondsAsTimeDuration("1month"),
-	)
+
+	monthDuration, err := durationparser.ToSecondsAsTimeDuration("1month")
+	if err != nil {
+		return nil, err
+	}
+	defaultTime = defaultTime.Add(*monthDuration)
 
 	return &defaultTime, nil
 }
