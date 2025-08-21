@@ -1,10 +1,11 @@
 package slicesutils
 
 import (
-	"fmt"
 	"math"
 	"sort"
 	"strings"
+
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func RemoveDuplicatedStrings(sliceOfStrings []string) (cleaned []string) {
@@ -481,8 +482,8 @@ func RemoveStringEntryAtIndex(elements []string, indexToRemove int) (elementsWit
 }
 
 func RemoveStringsWhichContains(sliceToRemoveStringsWhichContains []string, searchString string) (cleanedUpSlice []string, err error) {
-	if len(searchString) <= 0 {
-		return nil, fmt.Errorf("searchString is empty string")
+	if searchString == "" {
+		return nil, tracederrors.TracedErrorEmptyString(searchString)
 	}
 
 	if len(sliceToRemoveStringsWhichContains) <= 0 {

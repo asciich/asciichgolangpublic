@@ -49,11 +49,9 @@ func TestTypes_GetTypeName(t *testing.T) {
 					}
 				}
 
-				require.EqualValues(
-					t,
-					tt.expectedName,
-					MustGetTypeName(input),
-				)
+				typeName, err := GetTypeName(input)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedName, typeName)
 			},
 		)
 	}

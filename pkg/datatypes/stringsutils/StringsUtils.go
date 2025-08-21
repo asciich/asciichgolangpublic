@@ -2,13 +2,14 @@ package stringsutils
 
 import (
 	"encoding/hex"
-	"fmt"
 	"log"
 	"regexp"
 
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type StringsService struct{}
@@ -179,28 +180,19 @@ func GetAsKeyValues(input string) (output map[string]string, err error) {
 			} else if strings.Contains(line, ":") {
 				delimiter = ":"
 			} else {
-				return nil, fmt.Errorf(
-					"unable to find delimiter for getting key values in line: '%s'",
-					line,
-				)
+				return nil, tracederrors.TracedErrorf("unable to find delimiter for getting key values in line: '%s'", line)
 			}
 		}
 
 		splitted := strings.SplitN(line, delimiter, 2)
 
 		if len(splitted) != 2 {
-			return nil, fmt.Errorf(
-				"unable to split line '%s' into key values",
-				line,
-			)
+			return nil, tracederrors.TracedErrorf("unable to split line '%s' into key values", line)
 		}
 
 		key := strings.TrimSpace(splitted[0])
 		if key == "" {
-			return nil, fmt.Errorf(
-				"key is empty string after evaluation of line '%s' for key values",
-				line,
-			)
+			return nil, tracederrors.TracedErrorf("key is empty string after evaluation of line '%s' for key values", line)
 		}
 
 		value := strings.TrimSpace(splitted[1])
@@ -266,7 +258,7 @@ func GetNumberOfLinesWithPrefix(content string, prefix string, trimLines bool) (
 
 func GetValueAsInt(input string, key string) (value int, err error) {
 	if key == "" {
-		return -1, fmt.Errorf("key is empty string")
+		return -1, tracederrors.TracedErrorEmptyString("key")
 	}
 
 	valueString, err := GetValueAsString(input, key)
@@ -276,10 +268,7 @@ func GetValueAsInt(input string, key string) (value int, err error) {
 
 	value, err = strconv.Atoi(valueString)
 	if err != nil {
-		return -1, fmt.Errorf(
-			"unalbe to parse '%s' as string",
-			valueString,
-		)
+		return -1, tracederrors.TracedErrorf("unalbe to parse '%s' as string", valueString)
 	}
 
 	return value, nil
@@ -287,7 +276,7 @@ func GetValueAsInt(input string, key string) (value int, err error) {
 
 func GetValueAsString(input string, key string) (value string, err error) {
 	if key == "" {
-		return "", fmt.Errorf("key is empty string")
+		return "", tracederrors.TracedErrorEmptyString("key")
 	}
 
 	keyValues, err := GetAsKeyValues(input)
@@ -297,10 +286,7 @@ func GetValueAsString(input string, key string) (value string, err error) {
 
 	value, ok := keyValues[key]
 	if !ok {
-		return "", fmt.Errorf(
-			"key not found: %s",
-			key,
-		)
+		return "", tracederrors.TracedErrorf("key not found: %s", key)
 	}
 
 	return value, nil
@@ -345,10 +331,7 @@ func HexStringToBytes(hexString string) (output []byte, err error) {
 
 	output, err = hex.DecodeString(hexStringToParse)
 	if err != nil {
-		return nil, fmt.Errorf(
-			"unable to convert hexString to bytes: %w",
-			err,
-		)
+		return nil, tracederrors.TracedErrorf("unable to convert hexString to bytes: %w", err)
 	}
 
 	return output, nil
@@ -407,7 +390,7 @@ func IsFirstCharUpperCase(input string) (isFirstCharUpperCase bool) {
 func MatchesRegex(input string, regex string) (matches bool, err error) {
 	matches, err = regexp.Match(regex, []byte(input))
 	if err != nil {
-		return false, fmt.Errorf("match regex failed: '%w'", err)
+		return false, tracederrors.TracedErrorf("match regex failed: '%w'", err)
 	}
 
 	return matches, nil

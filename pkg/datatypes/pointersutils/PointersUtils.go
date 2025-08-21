@@ -5,12 +5,14 @@ import (
 	"log"
 	"reflect"
 	"unsafe"
+
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func CheckIsPointer(objectToTest interface{}) (err error) {
 	isPointer := IsPointer(objectToTest)
 	if !isPointer {
-		return fmt.Errorf("'%s' is not a pointer", objectToTest)
+		return tracederrors.TracedErrorf("'%s' is not a pointer", objectToTest)
 	}
 
 	return nil
@@ -29,7 +31,7 @@ func GetMemoryAddressAsHexString(input interface{}) (memoryAddress string, err e
 
 func GetMemoryAddressAsUInt64(input interface{}) (memoryAddress uint64, err error) {
 	if input == nil {
-		return 0, fmt.Errorf("input is nil")
+		return 0, tracederrors.TracedErrorNil("input")
 	}
 
 	memoryAddressUIntPtr, err := GetMemoryAddressAsUIntPtr(input)
@@ -44,11 +46,11 @@ func GetMemoryAddressAsUInt64(input interface{}) (memoryAddress uint64, err erro
 
 func GetMemoryAddressAsUIntPtr(input interface{}) (memoryAddress uintptr, err error) {
 	if input == nil {
-		return 0, fmt.Errorf("input is nil")
+		return 0, tracederrors.TracedErrorNil("input")
 	}
 
 	if !IsPointer(input) {
-		return 0, fmt.Errorf("input is not a pointer: '%v'", input)
+		return 0, tracederrors.TracedErrorf("input is not a pointer: '%v'", input)
 	}
 
 	pointer := reflect.ValueOf(input).Pointer()
