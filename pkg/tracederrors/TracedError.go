@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
+	getypename "github.com/asciich/asciichgolangpublic/pkg/datatypes/gettypename"
 )
 
 var ErrTracedError = errors.New("asciichgolangpublic TracedError base")
@@ -197,7 +197,7 @@ func (t TracedErrorType) Error() (errorMessage string) {
 
 	allErrors := UnwrapRecursive(t)
 	for _, unwrapped := range allErrors {
-		unwrapType, err := datatypes.GetTypeName(unwrapped)
+		unwrapType, err := getypename.GetTypeName(unwrapped)
 		if err != nil {
 			continue
 		}

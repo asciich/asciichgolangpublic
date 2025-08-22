@@ -31,7 +31,12 @@ func GetFluxDeployment(cluster kubernetesinterfaces.KubernetesCluster, namespace
 
 	nativeCluster, ok := cluster.(*nativekubernetesoo.NativeKubernetesCluster)
 	if !ok {
-		return nil, tracederrors.TracedErrorf("cluster is not a native kubernetes cluster, it is of type: '%s'", datatypes.MustGetTypeName(cluster))
+		typeName, err := datatypes.GetTypeName(cluster)
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, tracederrors.TracedErrorf("cluster is not a native kubernetes cluster, it is of type: '%s'", typeName)
 	}
 
 	if namespaceName == "" {

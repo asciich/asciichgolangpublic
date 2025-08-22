@@ -11,9 +11,9 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
@@ -638,57 +638,12 @@ func (l *LocalDirectory) ListFilePaths(ctx context.Context, listOptions *paramet
 		return nil, tracederrors.TracedError("listOptions is nil")
 	}
 
-	listOptions = listOptions.GetDeepCopy()
-	listOptions.OnlyFiles = true
-
-	directoryPath, err := l.GetLocalPath()
+	dirPath, err := l.GetPath()
 	if err != nil {
 		return nil, err
 	}
 
-	filePathList = []string{}
-	err = filepath.Walk(
-		directoryPath,
-		func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-
-			if info.IsDir() {
-				return nil
-			}
-
-			filePathList = append(filePathList, path)
-			return nil
-		},
-	)
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("Unable to filepath.Walk: '%w'", err)
-	}
-
-	filePathList = slicesutils.RemoveEmptyStrings(filePathList)
-
-	filePathList, err = pathsutils.FilterPaths(filePathList, listOptions)
-	if err != nil {
-		return nil, err
-	}
-
-	if listOptions.ReturnRelativePaths {
-		filePathList, err = pathsutils.GetRelativePathsTo(filePathList, directoryPath)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	filePathList = slicesutils.SortStringSliceAndRemoveEmpty(filePathList)
-
-	if len(filePathList) <= 0 {
-		if !listOptions.AllowEmptyListIfNoFileIsFound {
-			return nil, tracederrors.TracedErrorf("No files in '%s' found", directoryPath)
-		}
-	}
-
-	return filePathList, nil
+	return nativefiles.ListFiles(ctx, dirPath, listOptions)
 }
 
 func (l *LocalDirectory) ListFiles(ctx context.Context, options *parameteroptions.ListFileOptions) (files []filesinterfaces.File, err error) {

@@ -1,12 +1,12 @@
 package bytesutils
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/floatsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func GetSizeAsHumanReadableString(sizeBytes int64) (readableSize string, err error) {
@@ -19,13 +19,13 @@ func GetSizeAsHumanReadableString(sizeBytes int64) (readableSize string, err err
 	for _, k := range []string{"TiB", "GiB", "MiB", "KiB"} {
 		v, ok := multipliers[k]
 		if !ok {
-			return "", fmt.Errorf("unable to get size of '%s'", k)
+			return "", tracederrors.TracedErrorf("unable to get size of '%s'", k)
 		}
 		if sizeBytes >= v {
 			const maxDigits int = 2
 			readableValue, err := floatsutils.ToString(float64(sizeBytes)/float64(v), maxDigits)
 			if err != nil {
-				return "", fmt.Errorf("failed to format float as string: %w", err)
+				return "", tracederrors.TracedErrorf("failed to format float as string: %w", err)
 			}
 			readableSize = readableValue + k
 
@@ -58,7 +58,7 @@ func ParseSizeStringAsInt64(sizeString string) (sizeBytes int64, err error) {
 	sizeString = strings.TrimSpace(sizeString)
 
 	if len(sizeString) <= 0 {
-		return -1, fmt.Errorf("sizeString is empty string")
+		return -1, tracederrors.TracedErrorEmptyString(sizeString)
 	}
 
 	var multiplier int64 = 1

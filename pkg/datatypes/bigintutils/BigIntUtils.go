@@ -37,14 +37,14 @@ func EqualsInts(i1 *big.Int, i2 *big.Int) bool {
 
 func GetFromDecimalString(decimal string) (bigInt *big.Int, err error) {
 	if decimal == "" {
-		return nil, fmt.Errorf("decimal is empty string")
+		return nil, tracederrors.TracedErrorEmptyString("decimal")
 	}
 
 	bigInt = new(big.Int)
 
 	_, ok := bigInt.SetString(decimal, 10)
 	if !ok {
-		return nil, fmt.Errorf("failed to parse decimal string '%s' as *big.Int", bigInt)
+		return nil, tracederrors.TracedErrorf("failed to parse decimal string '%s' as *big.Int", bigInt)
 	}
 
 	return bigInt, nil
@@ -83,14 +83,14 @@ func GetRandomBigIntByInts(min *big.Int, max *big.Int) (random *big.Int, err err
 			return nil, err
 		}
 
-		return nil, fmt.Errorf("unable to generate random big.Int: min '%s' is not lower than max '%s'", minStr, maxStr)
+		return nil, tracederrors.TracedErrorf("unable to generate random big.Int: min '%s' is not lower than max '%s'", minStr, maxStr)
 	}
 
 	randomRange := max.Sub(max, min)
 
 	generated, err := rand.Int(rand.Reader, randomRange)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate serial number: %w", err)
+		return nil, tracederrors.TracedErrorf("failed to generate serial number: %w", err)
 	}
 	random = generated.Add(generated, min)
 
@@ -99,7 +99,7 @@ func GetRandomBigIntByInts(min *big.Int, max *big.Int) (random *big.Int, err err
 
 func ToDecimalString(bigInt *big.Int) (decimal string, err error) {
 	if bigInt == nil {
-		return "", fmt.Errorf("bigInt is nil pointer")
+		return "", tracederrors.TracedErrorNil("bigInt")
 	}
 
 	decimal = bigInt.String()
@@ -109,7 +109,7 @@ func ToDecimalString(bigInt *big.Int) (decimal string, err error) {
 
 func AddIntToDecimalString(decimal string, toAdd int) (result string, err error) {
 	if decimal == "" {
-		return "", fmt.Errorf("decimal is empty string")
+		return "", tracederrors.TracedErrorEmptyString("decimal")
 	}
 
 	bigInt, err := GetFromDecimalString(decimal)
@@ -126,7 +126,7 @@ func AddIntToDecimalString(decimal string, toAdd int) (result string, err error)
 
 func IncrementDecimalString(decimal string) (incremented string, err error) {
 	if decimal == "" {
-		return "", fmt.Errorf("decimal is empty string")
+		return "", tracederrors.TracedErrorEmptyString("decimal")
 	}
 
 	incremented, err = AddIntToDecimalString(decimal, 1)
@@ -139,7 +139,7 @@ func IncrementDecimalString(decimal string) (incremented string, err error) {
 
 func ToHexStringColonSeparated(input *big.Int) (out string, err error) {
 	if input == nil {
-		return "", fmt.Errorf("input is empty string")
+		return "", tracederrors.TracedErrorNil("input")
 	}
 
 	serialBytes := input.Bytes()

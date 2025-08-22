@@ -6,13 +6,15 @@ import (
 	"math"
 	"strconv"
 	"strings"
+
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 // Format the given float64 'input' as string with 'maxDigits' digits after the '.'.
 // Tailing zeros after '.' are removed.
 func ToString(input float64, maxDigits int) (formatedFloat string, err error) {
 	if maxDigits < 0 {
-		return "", fmt.Errorf("negative maxDigits='%d' not allowed", maxDigits)
+		return "", tracederrors.TracedErrorf("negative maxDigits='%d' not allowed", maxDigits)
 	}
 
 	roundedInput, err := Round(input, maxDigits)
@@ -56,7 +58,7 @@ func MustToString(input float64, maxDigits int) (formatedFloat string) {
 
 func Round(input float64, nDigits int) (rounded float64, err error) {
 	if nDigits < 0 {
-		return -1.0, fmt.Errorf("negative nDigits='%d' not allowed", nDigits)
+		return -1.0, tracederrors.TracedErrorf("negative nDigits='%d' not allowed", nDigits)
 	}
 
 	multiplier := math.Pow(10.0, float64(nDigits))
