@@ -14,9 +14,6 @@ type GitCommitOptions struct {
 
 	// Commit all changes, not only the added ones:
 	CommitAllChanges bool
-
-	// Enable verbose output
-	Verbose bool
 }
 
 func NewGitCommitOptions() (g *GitCommitOptions) {
@@ -47,11 +44,6 @@ func (g *GitCommitOptions) GetMessage() (message string, err error) {
 	}
 
 	return g.Message, nil
-}
-
-func (g *GitCommitOptions) GetVerbose() (verbose bool) {
-
-	return g.Verbose
 }
 
 func (g *GitCommitOptions) MustGetMessage() (message string) {
@@ -86,8 +78,4 @@ func (g *GitCommitOptions) SetMessage(message string) (err error) {
 	g.Message = message
 
 	return nil
-}
-
-func (g *GitCommitOptions) SetVerbose(verbose bool) {
-	g.Verbose = verbose
 }

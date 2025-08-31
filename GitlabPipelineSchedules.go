@@ -43,22 +43,22 @@ func (g *GitlabPipelineSchedules) GetNativePipelineSchedulesClient() (nativeClie
 	return gitlabProject.GetNativePipelineSchedulesClient()
 }
 
-func (g *GitlabPipelineSchedules) GetProjectId() (projectId int, err error) {
+func (g *GitlabPipelineSchedules) GetProjectId(ctx context.Context) (projectId int, err error) {
 	project, err := g.GetGitlabProject()
 	if err != nil {
 		return 0, err
 	}
 
-	return project.GetId()
+	return project.GetId(ctx)
 }
 
-func (g *GitlabPipelineSchedules) GetProjectUrl() (projectUrl string, err error) {
+func (g *GitlabPipelineSchedules) GetProjectUrl(ctx context.Context) (projectUrl string, err error) {
 	p, err := g.GetGitlabProject()
 	if err != nil {
 		return "", err
 	}
 
-	return p.GetProjectUrl()
+	return p.GetProjectUrl(ctx)
 }
 
 func (g *GitlabPipelineSchedules) GetPipelineScheduleById(id int) (pipelineSchedule *GitlabPipelineSchedule, err error) {
@@ -120,12 +120,12 @@ func (g *GitlabPipelineSchedules) ListPipelineSchedules(ctx context.Context) (pi
 		return nil, err
 	}
 
-	projectId, err := g.GetProjectId()
+	projectId, err := g.GetProjectId(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	projectUrl, err := g.GetProjectUrl()
+	projectUrl, err := g.GetProjectUrl(ctx)
 	if err != nil {
 		return nil, err
 	}

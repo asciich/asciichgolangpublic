@@ -34,24 +34,6 @@ func GetGitlabByFQDN(fqdn string) (gitlab *GitlabInstance, err error) {
 	return gitlab, nil
 }
 
-func MustGetGitlabByFQDN(fqdn string) (gitlab *GitlabInstance) {
-	gitlab, err := GetGitlabByFQDN(fqdn)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlab
-}
-
-func MustGetGitlabByFqdn(fqdn string) (gitlab *GitlabInstance) {
-	gitlab, err := GetGitlabByFQDN(fqdn)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlab
-}
-
 func NewGitlab() (gitlab *GitlabInstance) {
 	return new(GitlabInstance)
 }
@@ -61,8 +43,8 @@ func NewGitlabInstance() (g *GitlabInstance) {
 }
 
 // Get the path to the personal projects which is "users/USERNAME/projects".
-func (g *GitlabInstance) GetPersonalProjectsPath(verbose bool) (personalProjetsPath string, err error) {
-	userName, err := g.GetCurrentUsersName(verbose)
+func (g *GitlabInstance) GetPersonalProjectsPath(ctx context.Context) (personalProjetsPath string, err error) {
+	userName, err := g.GetCurrentUsersName(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -76,8 +58,8 @@ func (g *GitlabInstance) GetPersonalProjectsPath(verbose bool) (personalProjetsP
 // This is the technical user name used by Gitlab.
 //
 // To get the human readable user name use `GetCurrentUsersName`.
-func (g *GitlabInstance) GetCurrentUsersUsername(verbose bool) (currentUserName string, err error) {
-	user, err := g.GetCurrentUser(verbose)
+func (g *GitlabInstance) GetCurrentUsersUsername(ctx context.Context) (currentUserName string, err error) {
+	user, err := g.GetCurrentUser(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -108,8 +90,8 @@ func (g *GitlabInstance) GetUserId() (userId int, err error) {
 // Returns the human readable gitlab user name also known as display name.
 //
 // For the technical user name use `GetCurrentUsersUsername`.
-func (g *GitlabInstance) GetCurrentUsersName(verbose bool) (currentUserName string, err error) {
-	user, err := g.GetCurrentUser(verbose)
+func (g *GitlabInstance) GetCurrentUsersName(ctx context.Context) (currentUserName string, err error) {
+	user, err := g.GetCurrentUser(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -140,7 +122,7 @@ func (g *GitlabInstance) AddRunner(newRunnerOptions *GitlabAddRunnerOptions) (cr
 	return createdRunner, nil
 }
 
-func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) (err error) {
+func (g *GitlabInstance) Authenticate(ctx context.Context, authOptions *GitlabAuthenticationOptions) (err error) {
 	if authOptions == nil {
 		return tracederrors.TracedError("authOptions is nil")
 	}
@@ -150,9 +132,7 @@ func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) 
 		return err
 	}
 
-	if authOptions.Verbose {
-		logging.LogInfof("Authenticate against gitlab '%s' started.", fqdn)
-	}
+	logging.LogInfoByCtxf(ctx, "Authenticate against gitlab '%s' started.", fqdn)
 
 	g.nativeClient = nil
 
@@ -186,12 +166,7 @@ func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) 
 		}
 
 		if !credentialExists {
-			if authOptions.Verbose {
-				logging.LogInfof(
-					"Gopass credential '%s' does not exist and can therefore not be used to authenticate against gitlab.",
-					gopassPath,
-				)
-			}
+			logging.LogInfoByCtxf(ctx, "Gopass credential '%s' does not exist and can therefore not be used to authenticate against gitlab.", gopassPath)
 			continue
 		}
 
@@ -223,30 +198,24 @@ func (g *GitlabInstance) Authenticate(authOptions *GitlabAuthenticationOptions) 
 		return tracederrors.TracedErrorf("No authentication method for gitlab '%s' worked.", fqdn)
 	}
 
-	if authOptions.Verbose {
-		logging.LogInfof("Authenticate against gitlab '%s' finished.", fqdn)
-	}
+	logging.LogInfoByCtxf(ctx, "Authenticate against gitlab '%s' finished.", fqdn)
 
 	return nil
 }
 
-func (g *GitlabInstance) CheckProjectByPathExists(projectPath string, verbose bool) (projectExists bool, err error) {
+func (g *GitlabInstance) CheckProjectByPathExists(ctx context.Context, projectPath string) (projectExists bool, err error) {
 	if projectPath == "" {
 		return false, tracederrors.TracedError("projectPath is empty string")
 	}
 
-	projectExists, err = g.ProjectByProjectPathExists(projectPath, verbose)
+	projectExists, err = g.ProjectByProjectPathExists(ctx, projectPath)
 	if err != nil {
 		return false, err
 	}
 
 	if !projectExists {
 		errorMessage := fmt.Sprintf("Gitlab project '%s' does not exist.", projectPath)
-
-		if verbose {
-			logging.LogError(errorMessage)
-		}
-
+		logging.LogErrorByCtx(ctx, errorMessage)
 		return false, tracederrors.TracedError(errorMessage)
 	}
 
@@ -289,13 +258,9 @@ func (g *GitlabInstance) CreateAccessToken(options *GitlabCreateAccessTokenOptio
 	return newToken, nil
 }
 
-func (g *GitlabInstance) CreateGroupByPath(groupPath string, createOptions *GitlabCreateGroupOptions) (createdGroup *GitlabGroup, err error) {
+func (g *GitlabInstance) CreateGroupByPath(ctx context.Context, groupPath string) (createdGroup *GitlabGroup, err error) {
 	if groupPath == "" {
 		return nil, tracederrors.TracedErrorEmptyString("groupPath")
-	}
-
-	if createOptions == nil {
-		return nil, tracederrors.TracedErrorNil("createOptions")
 	}
 
 	gitlabGroups, err := g.GetGitlabGroups()
@@ -303,7 +268,7 @@ func (g *GitlabInstance) CreateGroupByPath(groupPath string, createOptions *Gitl
 		return nil, err
 	}
 
-	createdGroup, err = gitlabGroups.CreateGroup(groupPath, createOptions)
+	createdGroup, err = gitlabGroups.CreateGroup(ctx, groupPath)
 	if err != nil {
 		return nil, err
 	}
@@ -311,17 +276,17 @@ func (g *GitlabInstance) CreateGroupByPath(groupPath string, createOptions *Gitl
 	return createdGroup, nil
 }
 
-func (g *GitlabInstance) CreatePersonalProject(projectName string, verbose bool) (personalProject *GitlabProject, err error) {
+func (g *GitlabInstance) CreatePersonalProject(ctx context.Context, projectName string) (personalProject *GitlabProject, err error) {
 	if projectName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("projectName")
 	}
 
-	personalProject, err = g.GetPersonalProjectByName(projectName, verbose)
+	personalProject, err = g.GetPersonalProjectByName(ctx, projectName)
 	if err != nil {
 		return nil, err
 	}
 
-	err = personalProject.Create(verbose)
+	err = personalProject.Create(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -329,7 +294,7 @@ func (g *GitlabInstance) CreatePersonalProject(projectName string, verbose bool)
 	return personalProject, nil
 }
 
-func (g *GitlabInstance) CreateProject(createOptions *GitlabCreateProjectOptions) (gitlabProject *GitlabProject, err error) {
+func (g *GitlabInstance) CreateProject(ctx context.Context, createOptions *GitlabCreateProjectOptions) (gitlabProject *GitlabProject, err error) {
 	if createOptions == nil {
 		return nil, tracederrors.TracedError("createOptions is nil")
 	}
@@ -339,7 +304,7 @@ func (g *GitlabInstance) CreateProject(createOptions *GitlabCreateProjectOptions
 		return nil, err
 	}
 
-	gitlabProject, err = gitlabProjects.CreateProject(createOptions)
+	gitlabProject, err = gitlabProjects.CreateProject(ctx, createOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -347,17 +312,17 @@ func (g *GitlabInstance) CreateProject(createOptions *GitlabCreateProjectOptions
 	return gitlabProject, err
 }
 
-func (g *GitlabInstance) DeleteGroupByPath(groupPath string, verbose bool) (err error) {
+func (g *GitlabInstance) DeleteGroupByPath(ctx context.Context, groupPath string) (err error) {
 	if groupPath == "" {
 		return tracederrors.TracedErrorEmptyString("groupPath")
 	}
 
-	group, err := g.GetGroupByPath(groupPath, verbose)
+	group, err := g.GetGroupByPath(ctx, groupPath)
 	if err != nil {
 		return err
 	}
 
-	err = group.Delete(verbose)
+	err = group.Delete(ctx)
 	if err != nil {
 		return err
 	}
@@ -376,7 +341,7 @@ func (g *GitlabInstance) GetApiV4Url() (v4ApiUrl string, err error) {
 	return v4ApiUrl, nil
 }
 
-func (g *GitlabInstance) GetCurrentUser(verbose bool) (currentUser *GitlabUser, err error) {
+func (g *GitlabInstance) GetCurrentUser(ctx context.Context) (currentUser *GitlabUser, err error) {
 	users, err := g.GetGitlabUsers()
 	if err != nil {
 		return nil, err
@@ -429,7 +394,7 @@ func (g *GitlabInstance) GetGitlabGroups() (gitlabGroups *GitlabGroups, err erro
 	return gitlabGroups, nil
 }
 
-func (g *GitlabInstance) GetGitlabProjectById(projectId int, verbose bool) (gitlabProject *GitlabProject, err error) {
+func (g *GitlabInstance) GetGitlabProjectById(ctx context.Context, projectId int) (gitlabProject *GitlabProject, err error) {
 	if projectId <= 0 {
 		return nil, tracederrors.TracedErrorf("projectId '%d' <= 0 is invalid", projectId)
 	}
@@ -448,23 +413,23 @@ func (g *GitlabInstance) GetGitlabProjectById(projectId int, verbose bool) (gitl
 	return gitlabProject, nil
 }
 
-func (g *GitlabInstance) GetGitlabProjectByPath(projectPath string, verbose bool) (gitlabProject *GitlabProject, err error) {
+func (g *GitlabInstance) GetGitlabProjectByPath(ctx context.Context, projectPath string) (gitlabProject *GitlabProject, err error) {
 	if len(projectPath) <= 0 {
 		return nil, tracederrors.TracedError("projectPath is empty string")
 	}
 
-	exists, err := g.ProjectByProjectPathExists(projectPath, verbose)
+	exists, err := g.ProjectByProjectPathExists(ctx, projectPath)
 	if err != nil {
 		return nil, err
 	}
 
 	if exists {
-		projectId, err := g.GetProjectIdByPath(projectPath, verbose)
+		projectId, err := g.GetProjectIdByPath(ctx, projectPath)
 		if err != nil {
 			return nil, err
 		}
 
-		gitlabProject, err = g.GetGitlabProjectById(projectId, verbose)
+		gitlabProject, err = g.GetGitlabProjectById(ctx, projectId)
 		if err != nil {
 			return nil, err
 		}
@@ -544,13 +509,13 @@ func (g *GitlabInstance) GetGitlabUsers() (gitlabUsers *GitlabUsers, err error) 
 	return gitlabUsers, nil
 }
 
-func (g *GitlabInstance) GetGroupById(id int, verbose bool) (gitlabGroup *GitlabGroup, err error) {
+func (g *GitlabInstance) GetGroupById(ctx context.Context, id int) (gitlabGroup *GitlabGroup, err error) {
 	groups, err := g.GetGitlabGroups()
 	if err != nil {
 		return nil, err
 	}
 
-	gitlabGroup, err = groups.GetGroupById(id, verbose)
+	gitlabGroup, err = groups.GetGroupById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -622,13 +587,13 @@ func (g *GitlabInstance) GetVersionAsString(ctx context.Context) (version string
 	return version, nil
 }
 
-func (g *GitlabInstance) GetGroupByPath(groupPath string, verbose bool) (gitlabGroup *GitlabGroup, err error) {
+func (g *GitlabInstance) GetGroupByPath(ctx context.Context, groupPath string) (gitlabGroup *GitlabGroup, err error) {
 	groups, err := g.GetGitlabGroups()
 	if err != nil {
 		return nil, err
 	}
 
-	gitlabGroup, err = groups.GetGroupByPath(groupPath, verbose)
+	gitlabGroup, err = groups.GetGroupByPath(ctx, groupPath)
 	if err != nil {
 		return nil, err
 	}
@@ -771,12 +736,12 @@ func (g *GitlabInstance) GetPersonalAccessTokens() (tokens *GitlabPersonalAccess
 	return tokens, nil
 }
 
-func (g *GitlabInstance) GetPersonalProjectByName(projectName string, verbose bool) (project *GitlabProject, err error) {
+func (g *GitlabInstance) GetPersonalProjectByName(ctx context.Context, projectName string) (project *GitlabProject, err error) {
 	if projectName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("projectName")
 	}
 
-	personalProjectsPath, err := g.GetPersonalProjectsPath(verbose)
+	personalProjectsPath, err := g.GetPersonalProjectsPath(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -785,7 +750,7 @@ func (g *GitlabInstance) GetPersonalProjectByName(projectName string, verbose bo
 
 	projectPath := stringsutils.EnsurePrefix(projectName, personalProjectsPath)
 
-	project, err = g.GetGitlabProjectByPath(projectPath, verbose)
+	project, err = g.GetGitlabProjectByPath(ctx, projectPath)
 	if err != nil {
 		return nil, err
 	}
@@ -793,7 +758,7 @@ func (g *GitlabInstance) GetPersonalProjectByName(projectName string, verbose bo
 	return project, nil
 }
 
-func (g *GitlabInstance) GetProjectIdByPath(projectPath string, verbose bool) (projectId int, err error) {
+func (g *GitlabInstance) GetProjectIdByPath(ctx context.Context, projectPath string) (projectId int, err error) {
 	if len(projectPath) <= 0 {
 		return -1, tracederrors.TracedError("projectPath is empty string")
 	}
@@ -803,7 +768,7 @@ func (g *GitlabInstance) GetProjectIdByPath(projectPath string, verbose bool) (p
 		return -1, err
 	}
 
-	projectId, err = projects.GetProjectIdByProjectPath(projectPath, verbose)
+	projectId, err = projects.GetProjectIdByProjectPath(ctx, projectPath)
 	if err != nil {
 		return -1, err
 	}
@@ -811,7 +776,7 @@ func (g *GitlabInstance) GetProjectIdByPath(projectPath string, verbose bool) (p
 	return projectId, nil
 }
 
-func (g *GitlabInstance) GetProjectPathList(options *GitlabgetProjectListOptions) (projectPaths []string, err error) {
+func (g *GitlabInstance) GetProjectPathList(ctx context.Context, options *GitlabgetProjectListOptions) (projectPaths []string, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -821,7 +786,7 @@ func (g *GitlabInstance) GetProjectPathList(options *GitlabgetProjectListOptions
 		return nil, err
 	}
 
-	projectPaths, err = project.GetProjectPathList(options)
+	projectPaths, err = project.GetProjectPathList(ctx, options)
 	if err != nil {
 		return nil, err
 	}
@@ -897,7 +862,7 @@ func (g *GitlabInstance) GetUserNameList(verbose bool) (userNames []string, err 
 	return userNames, nil
 }
 
-func (g *GitlabInstance) GroupByGroupPathExists(groupPath string, verbose bool) (groupExists bool, err error) {
+func (g *GitlabInstance) GroupByGroupPathExists(ctx context.Context, groupPath string) (groupExists bool, err error) {
 	if len(groupPath) <= 0 {
 		return false, tracederrors.TracedError("groupPath is empty string")
 	}
@@ -907,7 +872,7 @@ func (g *GitlabInstance) GroupByGroupPathExists(groupPath string, verbose bool) 
 		return false, err
 	}
 
-	groupExists, err = gitlabGroups.GroupByGroupPathExists(groupPath, verbose)
+	groupExists, err = gitlabGroups.GroupByGroupPathExists(ctx, groupPath)
 	if err != nil {
 		return false, err
 	}
@@ -915,475 +880,7 @@ func (g *GitlabInstance) GroupByGroupPathExists(groupPath string, verbose bool) 
 	return groupExists, nil
 }
 
-func (g *GitlabInstance) MustAddRunner(newRunnerOptions *GitlabAddRunnerOptions) (createdRunner *GitlabRunner) {
-	createdRunner, err := g.AddRunner(newRunnerOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return createdRunner
-}
-
-func (g *GitlabInstance) MustAuthenticate(authOptions *GitlabAuthenticationOptions) {
-	err := g.Authenticate(authOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabInstance) MustCheckProjectByPathExists(projectPath string, verbose bool) (projectExists bool) {
-	projectExists, err := g.CheckProjectByPathExists(projectPath, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return projectExists
-}
-
-func (g *GitlabInstance) MustCheckRunnerStatusOk(runnerName string, verbose bool) (isStatusOk bool) {
-	isStatusOk, err := g.CheckRunnerStatusOk(runnerName, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isStatusOk
-}
-
-func (g *GitlabInstance) MustCreateGroupByPath(groupPath string, createOptions *GitlabCreateGroupOptions) (createdGroup *GitlabGroup) {
-	createdGroup, err := g.CreateGroupByPath(groupPath, createOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return createdGroup
-}
-
-func (g *GitlabInstance) MustCreatePersonalProject(projectName string, verbose bool) (personalProject *GitlabProject) {
-	personalProject, err := g.CreatePersonalProject(projectName, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return personalProject
-}
-
-func (g *GitlabInstance) MustCreateProject(createOptions *GitlabCreateProjectOptions) (gitlabProject *GitlabProject) {
-	gitlabProject, err := g.CreateProject(createOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabProject
-}
-
-func (g *GitlabInstance) MustDeleteGroupByPath(groupPath string, verbose bool) {
-	err := g.DeleteGroupByPath(groupPath, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabInstance) MustGetApiV4Url() (v4ApiUrl string) {
-	v4ApiUrl, err := g.GetApiV4Url()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return v4ApiUrl
-}
-
-func (g *GitlabInstance) MustGetCurrentUser(verbose bool) (currentUser *GitlabUser) {
-	currentUser, err := g.GetCurrentUser(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return currentUser
-}
-
-func (g *GitlabInstance) MustGetCurrentUserName(verbose bool) (currentUserName string) {
-	currentUserName, err := g.GetCurrentUsersName(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return currentUserName
-}
-
-func (g *GitlabInstance) MustGetCurrentUsersName(verbose bool) (currentUserName string) {
-	currentUserName, err := g.GetCurrentUsersName(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return currentUserName
-}
-
-func (g *GitlabInstance) MustGetCurrentUsersUsername(verbose bool) (currentUserName string) {
-	currentUserName, err := g.GetCurrentUsersUsername(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return currentUserName
-}
-
-func (g *GitlabInstance) MustGetCurrentlyUsedAccessToken() (gitlabAccessToken string) {
-	gitlabAccessToken, err := g.GetCurrentlyUsedAccessToken()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabAccessToken
-}
-
-func (g *GitlabInstance) MustGetFqdn() (fqdn string) {
-	fqdn, err := g.GetFqdn()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return fqdn
-}
-
-func (g *GitlabInstance) MustGetGitlabGroups() (gitlabGroups *GitlabGroups) {
-	gitlabGroups, err := g.GetGitlabGroups()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabGroups
-}
-
-func (g *GitlabInstance) MustGetGitlabProjectById(projectId int, verbose bool) (gitlabProject *GitlabProject) {
-	gitlabProject, err := g.GetGitlabProjectById(projectId, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabProject
-}
-
-func (g *GitlabInstance) MustGetGitlabProjectByPath(projectPath string, verbose bool) (gitlabProject *GitlabProject) {
-	gitlabProject, err := g.GetGitlabProjectByPath(projectPath, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabProject
-}
-
-func (g *GitlabInstance) MustGetGitlabProjects() (gitlabProjects *GitlabProjects) {
-	gitlabProjects, err := g.GetGitlabProjects()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabProjects
-}
-
-func (g *GitlabInstance) MustGetGitlabRunners() (gitlabRunners *GitlabRunnersService) {
-	gitlabRunners, err := g.GetGitlabRunners()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabRunners
-}
-
-func (g *GitlabInstance) MustGetGitlabSettings() (gitlabSettings *GitlabSettings) {
-	gitlabSettings, err := g.GetGitlabSettings()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabSettings
-}
-
-func (g *GitlabInstance) MustGetGitlabUsers() (gitlabUsers *GitlabUsers) {
-	gitlabUsers, err := g.GetGitlabUsers()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabUsers
-}
-
-func (g *GitlabInstance) MustGetGroupById(id int, verbose bool) (gitlabGroup *GitlabGroup) {
-	gitlabGroup, err := g.GetGroupById(id, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabGroup
-}
-
-func (g *GitlabInstance) MustGetGroupByPath(groupPath string, verbose bool) (gitlabGroup *GitlabGroup) {
-	gitlabGroup, err := g.GetGroupByPath(groupPath, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabGroup
-}
-
-func (g *GitlabInstance) MustGetNativeBranchesClient() (nativeClient *gitlab.BranchesService) {
-	nativeClient, err := g.GetNativeBranchesClient()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeClient
-}
-
-func (g *GitlabInstance) MustGetNativeClient() (nativeClient *gitlab.Client) {
-	nativeClient, err := g.GetNativeClient()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeClient
-}
-
-func (g *GitlabInstance) MustGetNativeMergeRequestsService() (nativeClient *gitlab.MergeRequestsService) {
-	nativeClient, err := g.GetNativeMergeRequestsService()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeClient
-}
-
-func (g *GitlabInstance) MustGetNativeReleaseLinksClient() (nativeClient *gitlab.ReleaseLinksService) {
-	nativeClient, err := g.GetNativeReleaseLinksClient()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeClient
-}
-
-func (g *GitlabInstance) MustGetNativeReleasesClient() (nativeReleasesClient *gitlab.ReleasesService) {
-	nativeReleasesClient, err := g.GetNativeReleasesClient()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeReleasesClient
-}
-
-func (g *GitlabInstance) MustGetNativeRepositoriesClient() (nativeRepositoriesClient *gitlab.RepositoriesService) {
-	nativeRepositoriesClient, err := g.GetNativeRepositoriesClient()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeRepositoriesClient
-}
-
-func (g *GitlabInstance) MustGetNativeRepositoryFilesClient() (nativeRepositoryFilesClient *gitlab.RepositoryFilesService) {
-	nativeRepositoryFilesClient, err := g.GetNativeRepositoryFilesClient()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeRepositoryFilesClient
-}
-
-func (g *GitlabInstance) MustGetNativeTagsService() (nativeTagsService *gitlab.TagsService) {
-	nativeTagsService, err := g.GetNativeTagsService()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeTagsService
-}
-
-func (g *GitlabInstance) MustGetPersonalAccessTokenList(verbose bool) (personalAccessTokens []*GitlabPersonalAccessToken) {
-	personalAccessTokens, err := g.GetPersonalAccessTokenList(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return personalAccessTokens
-}
-
-func (g *GitlabInstance) MustGetPersonalAccessTokens() (tokens *GitlabPersonalAccessTokenService) {
-	tokens, err := g.GetPersonalAccessTokens()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return tokens
-}
-
-func (g *GitlabInstance) MustGetPersonalProjectByName(projectName string, verbose bool) (project *GitlabProject) {
-	project, err := g.GetPersonalProjectByName(projectName, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return project
-}
-
-func (g *GitlabInstance) MustGetPersonalProjectsPath(verbose bool) (personalProjetsPath string) {
-	personalProjetsPath, err := g.GetPersonalProjectsPath(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return personalProjetsPath
-}
-
-func (g *GitlabInstance) MustGetProjectIdByPath(projectPath string, verbose bool) (projectId int) {
-	projectId, err := g.GetProjectIdByPath(projectPath, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return projectId
-}
-
-func (g *GitlabInstance) MustGetProjectPathList(options *GitlabgetProjectListOptions) (projectPaths []string) {
-	projectPaths, err := g.GetProjectPathList(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return projectPaths
-}
-
-func (g *GitlabInstance) MustGetRunnerByName(name string) (runner *GitlabRunner) {
-	runner, err := g.GetRunnerByName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return runner
-}
-
-func (g *GitlabInstance) MustGetUserById(id int) (gitlabUser *GitlabUser) {
-	gitlabUser, err := g.GetUserById(id)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabUser
-}
-
-func (g *GitlabInstance) MustGetUserByUsername(username string) (gitlabUser *GitlabUser) {
-	gitlabUser, err := g.GetUserByUsername(username)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabUser
-}
-
-func (g *GitlabInstance) MustGetUserId() (userId int) {
-	userId, err := g.GetUserId()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return userId
-}
-
-func (g *GitlabInstance) MustGetUserNameList(verbose bool) (userNames []string) {
-	userNames, err := g.GetUserNameList(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return userNames
-}
-
-func (g *GitlabInstance) MustGroupByGroupPathExists(groupPath string, verbose bool) (groupExists bool) {
-	groupExists, err := g.GroupByGroupPathExists(groupPath, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return groupExists
-}
-
-func (g *GitlabInstance) MustProjectByProjectIdExists(projectId int, verbose bool) (projectExists bool) {
-	projectExists, err := g.ProjectByProjectIdExists(projectId, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return projectExists
-}
-
-func (g *GitlabInstance) MustProjectByProjectPathExists(projectPath string, verbose bool) (projectExists bool) {
-	projectExists, err := g.ProjectByProjectPathExists(projectPath, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return projectExists
-}
-
-func (g *GitlabInstance) MustRecreatePersonalAccessToken(createOptions *GitlabCreatePersonalAccessTokenOptions) (newToken string) {
-	newToken, err := g.RecreatePersonalAccessToken(createOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return newToken
-}
-
-func (g *GitlabInstance) MustRemoveAllRunners(verbose bool) {
-	err := g.RemoveAllRunners(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabInstance) MustResetAccessToken(options *GitlabResetAccessTokenOptions) {
-	err := g.ResetAccessToken(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabInstance) MustResetUserPassword(resetOptions *GitlabResetPasswordOptions) {
-	err := g.ResetUserPassword(resetOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabInstance) MustSetCurrentlyUsedAccessToken(currentlyUsedAccessToken *string) {
-	err := g.SetCurrentlyUsedAccessToken(currentlyUsedAccessToken)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabInstance) MustSetFqdn(fqdn string) {
-	err := g.SetFqdn(fqdn)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabInstance) MustSetNativeClient(nativeClient *gitlab.Client) {
-	err := g.SetNativeClient(nativeClient)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabInstance) MustUseUnauthenticatedClient(verbose bool) {
-	err := g.UseUnauthenticatedClient(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabInstance) ProjectByProjectIdExists(projectId int, verbose bool) (projectExists bool, err error) {
+func (g *GitlabInstance) ProjectByProjectIdExists(ctx context.Context, projectId int) (projectExists bool, err error) {
 	if projectId <= 0 {
 		return false, tracederrors.TracedErrorf("projectId '%d' <= 0 is invalid", projectId)
 	}
@@ -1393,7 +890,7 @@ func (g *GitlabInstance) ProjectByProjectIdExists(projectId int, verbose bool) (
 		return false, err
 	}
 
-	projectExists, err = gitlabProjects.ProjectByProjectIdExists(projectId, verbose)
+	projectExists, err = gitlabProjects.ProjectByProjectIdExists(ctx, projectId)
 	if err != nil {
 		return false, err
 	}
@@ -1401,7 +898,7 @@ func (g *GitlabInstance) ProjectByProjectIdExists(projectId int, verbose bool) (
 	return projectExists, nil
 }
 
-func (g *GitlabInstance) ProjectByProjectPathExists(projectPath string, verbose bool) (projectExists bool, err error) {
+func (g *GitlabInstance) ProjectByProjectPathExists(ctx context.Context, projectPath string) (projectExists bool, err error) {
 	if len(projectPath) <= 0 {
 		return false, tracederrors.TracedError("projectPath is empty string")
 	}
@@ -1411,7 +908,7 @@ func (g *GitlabInstance) ProjectByProjectPathExists(projectPath string, verbose 
 		return false, err
 	}
 
-	projectExists, err = gitlabProjects.ProjectByProjectPathExists(projectPath, verbose)
+	projectExists, err = gitlabProjects.ProjectByProjectPathExists(ctx, projectPath)
 	if err != nil {
 		return false, err
 	}
@@ -1644,7 +1141,7 @@ func (g *GitlabInstance) SetNativeClient(nativeClient *gitlab.Client) (err error
 	return nil
 }
 
-func (g *GitlabInstance) UseUnauthenticatedClient(verbose bool) (err error) {
+func (g *GitlabInstance) UseUnauthenticatedClient(ctx context.Context) (err error) {
 	fqdn, err := g.GetFqdn()
 	if err != nil {
 		return err
@@ -1665,9 +1162,7 @@ func (g *GitlabInstance) UseUnauthenticatedClient(verbose bool) (err error) {
 
 	g.nativeClient = nativeClient
 
-	if verbose {
-		logging.LogInfof("Unauthenticated gitlab client for '%s' is used.", fqdn)
-	}
+	logging.LogInfoByCtxf(ctx, "Unauthenticated gitlab client for '%s' is used.", fqdn)
 
 	return nil
 }

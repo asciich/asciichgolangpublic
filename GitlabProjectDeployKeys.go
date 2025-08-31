@@ -1,9 +1,9 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"slices"
 
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
@@ -16,109 +16,12 @@ func NewGitlabProjectDeployKeys() (deployKeys *GitlabProjectDeployKeys) {
 	return new(GitlabProjectDeployKeys)
 }
 
-func (g *GitlabProjectDeployKeys) MustDeployKeyByNameExists(keyName string) (keyExists bool) {
-	keyExists, err := g.DeployKeyByNameExists(keyName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return keyExists
-}
-
-func (g *GitlabProjectDeployKeys) MustGetGitlab() (gitlab *GitlabInstance) {
-	gitlab, err := g.GetGitlab()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlab
-}
-
-func (g *GitlabProjectDeployKeys) MustGetGitlabProject() (gitlabProject *GitlabProject) {
-	gitlabProject, err := g.GetGitlabProject()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabProject
-}
-
-func (g *GitlabProjectDeployKeys) MustGetGitlabProjectDeployKeyByName(keyName string) (deployKey *GitlabProjectDeployKey) {
-	deployKey, err := g.GetGitlabProjectDeployKeyByName(keyName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return deployKey
-}
-
-func (g *GitlabProjectDeployKeys) MustGetKeyIdByKeyName(keyName string) (id int) {
-	id, err := g.GetKeyIdByKeyName(keyName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return id
-}
-
-func (g *GitlabProjectDeployKeys) MustGetKeyNameList() (keyNames []string) {
-	keyNames, err := g.GetKeyNameList()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return keyNames
-}
-
-func (g *GitlabProjectDeployKeys) MustGetKeysList() (keys []*GitlabProjectDeployKey) {
-	keys, err := g.GetKeysList()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return keys
-}
-
-func (g *GitlabProjectDeployKeys) MustGetNativeGitlabClient() (nativeGitlabClient *gitlab.Client) {
-	nativeGitlabClient, err := g.GetNativeGitlabClient()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeGitlabClient
-}
-
-func (g *GitlabProjectDeployKeys) MustGetNativeProjectDeployKeyService() (nativeService *gitlab.DeployKeysService) {
-	nativeService, err := g.GetNativeProjectDeployKeyService()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeService
-}
-
-func (g *GitlabProjectDeployKeys) MustGetProjectId() (id int) {
-	id, err := g.GetProjectId()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return id
-}
-
-func (g *GitlabProjectDeployKeys) MustSetGitlabProject(gitlabProject *GitlabProject) {
-	err := g.SetGitlabProject(gitlabProject)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (k *GitlabProjectDeployKeys) DeployKeyByNameExists(keyName string) (keyExists bool, err error) {
+func (k *GitlabProjectDeployKeys) DeployKeyByNameExists(ctx context.Context, keyName string) (keyExists bool, err error) {
 	if len(keyName) <= 0 {
 		return false, tracederrors.TracedError("keyName is empty string")
 	}
 
-	keyNameList, err := k.GetKeyNameList()
+	keyNameList, err := k.GetKeyNameList(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -170,12 +73,12 @@ func (k *GitlabProjectDeployKeys) GetGitlabProjectDeployKeyByName(keyName string
 	return deployKey, nil
 }
 
-func (k *GitlabProjectDeployKeys) GetKeyIdByKeyName(keyName string) (id int, err error) {
+func (k *GitlabProjectDeployKeys) GetKeyIdByKeyName(ctx context.Context, keyName string) (id int, err error) {
 	if len(keyName) <= 0 {
 		return -1, tracederrors.TracedError("keyName is empty string")
 	}
 
-	keys, err := k.GetKeysList()
+	keys, err := k.GetKeysList(ctx)
 	if err != nil {
 		return -1, err
 	}
@@ -194,8 +97,8 @@ func (k *GitlabProjectDeployKeys) GetKeyIdByKeyName(keyName string) (id int, err
 	return id, nil
 }
 
-func (k *GitlabProjectDeployKeys) GetKeyNameList() (keyNames []string, err error) {
-	keys, err := k.GetKeysList()
+func (k *GitlabProjectDeployKeys) GetKeyNameList(ctx context.Context) (keyNames []string, err error) {
+	keys, err := k.GetKeysList(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -212,13 +115,13 @@ func (k *GitlabProjectDeployKeys) GetKeyNameList() (keyNames []string, err error
 	return keyNames, nil
 }
 
-func (k *GitlabProjectDeployKeys) GetKeysList() (keys []*GitlabProjectDeployKey, err error) {
+func (k *GitlabProjectDeployKeys) GetKeysList(ctx context.Context) (keys []*GitlabProjectDeployKey, err error) {
 	nativeService, err := k.GetNativeProjectDeployKeyService()
 	if err != nil {
 		return nil, err
 	}
 
-	projectId, err := k.GetProjectId()
+	projectId, err := k.GetProjectId(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -281,13 +184,13 @@ func (k *GitlabProjectDeployKeys) GetNativeProjectDeployKeyService() (nativeServ
 	return nativeService, nil
 }
 
-func (k *GitlabProjectDeployKeys) GetProjectId() (id int, err error) {
+func (k *GitlabProjectDeployKeys) GetProjectId(ctx context.Context) (id int, err error) {
 	gitlabProject, err := k.GetGitlabProject()
 	if err != nil {
 		return -1, err
 	}
 
-	id, err = gitlabProject.GetId()
+	id, err = gitlabProject.GetId(ctx)
 	if err != nil {
 		return -1, err
 	}

@@ -105,6 +105,7 @@ func TestPreCommitConfigFile_GetPreCommitConfigInGitRepository(t *testing.T) {
 				preCommitConfigFile := MustGetPreCommitConfigFileInGitRepository(gitRepo)
 
 				exists, err := preCommitConfigFile.Exists(ctx)
+				require.NoError(t, err)
 				require.True(t, exists)
 				require.True(t, strings.HasSuffix(preCommitConfigFile.MustGetPath(), "/.pre-commit-config.yaml"))
 			},

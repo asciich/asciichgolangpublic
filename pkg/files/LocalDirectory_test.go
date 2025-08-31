@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -240,12 +241,12 @@ func TestLocalDirectoryWriteStringToFile(t *testing.T) {
 				testDirectory := files.MustGetLocalDirectoryByPath(tempDirPath)
 				defer testDirectory.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				require.False(t, testDirectory.MustFileInDirectoryExists(verbose, tt.fileName))
+				require.False(t, mustutils.Must(testDirectory.FileInDirectoryExists(ctx, tt.fileName)))
 
 				testFile, err := testDirectory.WriteStringToFile(ctx, tt.fileName, tt.content, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				require.True(t, testDirectory.MustFileInDirectoryExists(verbose, tt.fileName))
+				require.True(t, mustutils.Must(testDirectory.FileInDirectoryExists(ctx, tt.fileName)))
 				require.EqualValues(t, tt.content, testFile.MustReadAsString())
 			},
 		)

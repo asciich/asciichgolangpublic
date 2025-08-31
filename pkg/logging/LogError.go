@@ -60,3 +60,22 @@ func LogErrorByCtxf(ctx context.Context, logmessage string, args ...interface{})
 
 	LogErrorf(logmessage, args...)
 }
+
+var overrideFunctionLogErrorByCtx func(ctx context.Context, logmessage string)
+
+func OverrideLogErrorByCtx(overrideFunction func(ctx context.Context, logmessage string)) {
+	overrideFunctionLogErrorByCtx = overrideFunction
+}
+
+func LogErrorByCtx(ctx context.Context, logmessage string, ) {
+	if overrideFunctionLogErrorByCtx != nil {
+		overrideFunctionLogErrorByCtx(ctx, logmessage)
+		return
+	}
+
+	if !contextutils.GetVerboseFromContext(ctx) {
+		return
+	}
+
+	LogError(logmessage)
+}

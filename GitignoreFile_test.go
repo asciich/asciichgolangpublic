@@ -64,7 +64,6 @@ func TestGitignoreFileContainsIgnoreOnNonExistingFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				nonExitstingFile, err := tempfilesoo.CreateEmptyTemporaryFile(ctx)
@@ -97,7 +96,6 @@ func TestGitignoreFileContainsIgnoreOnEmptyFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				emptyFile, err := tempfilesoo.CreateEmptyTemporaryFile(ctx)

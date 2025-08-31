@@ -80,15 +80,6 @@ func MustGetCommandExecutorGitRepositoryByPath(commandExecutor commandexecutorin
 	return gitRepo
 }
 
-func MustGetLocalCommandExecutorGitRepositoryByDirectory(directory filesinterfaces.Directory) (gitRepo *CommandExecutorGitRepository) {
-	gitRepo, err := GetLocalCommandExecutorGitRepositoryByDirectory(directory)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitRepo
-}
-
 func MustGetLocalCommandExecutorGitRepositoryByPath(path string) (gitRepo *CommandExecutorGitRepository) {
 	gitRepo, err := GetLocalCommandExecutorGitRepositoryByPath(path)
 	if err != nil {

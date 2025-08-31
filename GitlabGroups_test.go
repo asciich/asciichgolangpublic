@@ -21,21 +21,22 @@ func TestGitlabGroupsGroupByGroupPathExists(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				require.NoError(t, err)
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
-				gitlab.MustAuthenticate(
+				err = gitlab.Authenticate(
+					ctx,
 					&GitlabAuthenticationOptions{
 						AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
-						Verbose:                verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				exists := gitlab.MustGroupByGroupPathExists(tt.groupPath, verbose)
-
-				require.EqualValues(tt.expectedExists, exists)
+				exists, err := gitlab.GroupByGroupPathExists(ctx, tt.groupPath)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedExists, exists)
 			},
 		)
 	}
@@ -54,46 +55,54 @@ func TestGitlabGroupsCreateAndDeleteGroup(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				require.NoError(t, err)
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
-				gitlab.MustAuthenticate(
+				err = gitlab.Authenticate(
+					ctx,
 					&GitlabAuthenticationOptions{
 						AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
-						Verbose:                verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				groupUnderTest := gitlab.MustGetGroupByPath(tt.groupName, verbose)
+				groupUnderTest, err := gitlab.GetGroupByPath(ctx, tt.groupName)
+				require.NoError(t, err)
 
 				for i := 0; i < 2; i++ {
-					gitlab.MustDeleteGroupByPath(
-						tt.groupName,
-						verbose,
-					)
-					require.False(groupUnderTest.MustExists(verbose))
+					err = gitlab.DeleteGroupByPath(ctx, tt.groupName)
+					require.NoError(t, err)
+
+					exists, err := groupUnderTest.Exists(ctx)
+					require.NoError(t, err)
+					require.False(t, exists)
 				}
 
 				for i := 0; i < 2; i++ {
-					createdGroup := gitlab.MustCreateGroupByPath(
-						tt.groupName,
-						&GitlabCreateGroupOptions{
-							Verbose: verbose,
-						},
-					)
-					require.True(createdGroup.MustExists(verbose))
-					require.True(groupUnderTest.MustExists(verbose))
+					createdGroup, err := gitlab.CreateGroupByPath(ctx, tt.groupName)
+					require.NoError(t, err)
+
+					exists, err := createdGroup.Exists(ctx)
+					require.NoError(t, err)
+					require.True(t, exists)
+
+					exists, err = groupUnderTest.Exists(ctx)
+					require.NoError(t, err)
+					require.True(t, exists)
 				}
-				require.Greater(groupUnderTest.MustGetId(verbose), 0)
+				id, err := groupUnderTest.GetId(ctx)
+				require.NoError(t, err)
+				require.Greater(t, id, 0)
 
 				for i := 0; i < 2; i++ {
-					gitlab.MustDeleteGroupByPath(
-						tt.groupName,
-						verbose,
-					)
-					require.False(groupUnderTest.MustExists(verbose))
+					err := gitlab.DeleteGroupByPath(ctx, tt.groupName)
+					require.NoError(t, err)
+
+					exists, err := groupUnderTest.Exists(ctx)
+					require.NoError(t, err)
+					require.False(t, exists)
 				}
 			},
 		)

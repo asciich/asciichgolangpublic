@@ -2,7 +2,6 @@ package parameteroptions
 
 type CreateRepositoryOptions struct {
 	BareRepository            bool
-	Verbose                   bool
 	InitializeWithEmptyCommit bool
 
 	// Set the default author for the repository to a default one.
@@ -29,11 +28,6 @@ func (c *CreateRepositoryOptions) GetInitializeWithEmptyCommit() (initializeWith
 	return c.InitializeWithEmptyCommit
 }
 
-func (c *CreateRepositoryOptions) GetVerbose() (verbose bool) {
-
-	return c.Verbose
-}
-
 func (c *CreateRepositoryOptions) SetBareRepository(bareRepository bool) {
 	c.BareRepository = bareRepository
 }
@@ -44,8 +38,4 @@ func (c *CreateRepositoryOptions) SetInitializeWithDefaultAuthor(initializeWithD
 
 func (c *CreateRepositoryOptions) SetInitializeWithEmptyCommit(initializeWithEmptyCommit bool) {
 	c.InitializeWithEmptyCommit = initializeWithEmptyCommit
-}
-
-func (c *CreateRepositoryOptions) SetVerbose(verbose bool) {
-	c.Verbose = verbose
 }

@@ -88,7 +88,7 @@ func (l *LocalDirectory) Chmod(ctx context.Context, chmodOptions *filesoptions.C
 	return nil
 }
 
-func (l *LocalDirectory) CopyContentToDirectory(destinationDir filesinterfaces.Directory, verbose bool) (err error) {
+func (l *LocalDirectory) CopyContentToDirectory(ctx context.Context, destinationDir filesinterfaces.Directory) (err error) {
 	if destinationDir == nil {
 		return tracederrors.TracedError("destinationDir is empty string")
 	}
@@ -110,7 +110,6 @@ func (l *LocalDirectory) CopyContentToDirectory(destinationDir filesinterfaces.D
 		destPath + "/.",
 	}
 
-	ctx := contextutils.GetVerbosityContextByBool(verbose)
 	stdout, err := commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsString(
 		commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
@@ -121,14 +120,7 @@ func (l *LocalDirectory) CopyContentToDirectory(destinationDir filesinterfaces.D
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Copied files from '%s' to '%s':\n%s",
-			srcPath,
-			destPath,
-			stdout,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Copied files from '%s' to '%s':\n%s", srcPath, destPath, stdout)
 
 	return nil
 }
@@ -738,13 +730,6 @@ func (l *LocalDirectory) ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions 
 	sort.Strings(subDirectoryPaths)
 
 	return subDirectoryPaths, nil
-}
-
-func (l *LocalDirectory) MustCopyContentToDirectory(destinationDir filesinterfaces.Directory, verbose bool) {
-	err := l.CopyContentToDirectory(destinationDir, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (l *LocalDirectory) MustCopyContentToLocalDirectory(destDirectory *LocalDirectory, verbose bool) {

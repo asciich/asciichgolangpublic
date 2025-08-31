@@ -8,16 +8,10 @@ import (
 type GitRemoteAddOptions struct {
 	RemoteName string
 	RemoteUrl  string
-	Verbose    bool
 }
 
 func NewGitRemoteAddOptions() (g *GitRemoteAddOptions) {
 	return new(GitRemoteAddOptions)
-}
-
-func (g *GitRemoteAddOptions) GetVerbose() (verbose bool, err error) {
-
-	return g.Verbose, nil
 }
 
 func (g *GitRemoteAddOptions) MustGetRemoteName() (remoteName string) {
@@ -38,15 +32,6 @@ func (g *GitRemoteAddOptions) MustGetRemoteUrl() (remoteUrl string) {
 	return remoteUrl
 }
 
-func (g *GitRemoteAddOptions) MustGetVerbose() (verbose bool) {
-	verbose, err := g.GetVerbose()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return verbose
-}
-
 func (g *GitRemoteAddOptions) MustSetRemoteName(remoteName string) {
 	err := g.SetRemoteName(remoteName)
 	if err != nil {
@@ -56,13 +41,6 @@ func (g *GitRemoteAddOptions) MustSetRemoteName(remoteName string) {
 
 func (g *GitRemoteAddOptions) MustSetRemoteUrl(remoteUrl string) {
 	err := g.SetRemoteUrl(remoteUrl)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitRemoteAddOptions) MustSetVerbose(verbose bool) {
-	err := g.SetVerbose(verbose)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
@@ -84,12 +62,6 @@ func (g *GitRemoteAddOptions) SetRemoteUrl(remoteUrl string) (err error) {
 	}
 
 	g.RemoteUrl = remoteUrl
-
-	return nil
-}
-
-func (g *GitRemoteAddOptions) SetVerbose(verbose bool) (err error) {
-	g.Verbose = verbose
 
 	return nil
 }

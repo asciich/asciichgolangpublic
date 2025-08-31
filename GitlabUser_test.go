@@ -20,17 +20,17 @@ func TestGitlabUserGetCurrentUserName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				require.NoError(t, err)
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
-				gitlab.MustAuthenticate(&GitlabAuthenticationOptions{
-					AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
-				})
+				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				require.NoError(t, err)
 
-				userName := gitlab.MustGetCurrentUserName(verbose)
-				require.EqualValues("reto", userName)
+				userName, err := gitlab.GetCurrentUsersName(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, "reto", userName)
 			},
 		)
 	}

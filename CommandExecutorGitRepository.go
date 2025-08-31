@@ -108,34 +108,27 @@ func (c *CommandExecutorGitRepository) GetAsLocalGitRepository() (l *LocalGitRep
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
-func (c *CommandExecutorGitRepository) AddFileByPath(pathToAdd string, verbose bool) (err error) {
+func (c *CommandExecutorGitRepository) AddFileByPath(ctx context.Context, pathToAdd string) (err error) {
 	if pathToAdd == "" {
 		return tracederrors.TracedErrorEmptyString("pathToAdd")
 	}
 
-	_, err = c.RunGitCommand(contextutils.GetVerbosityContextByBool(verbose), []string{"add", pathToAdd})
+	_, err = c.RunGitCommand(ctx, []string{"add", pathToAdd})
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		path, hostDescription, err := c.GetPathAndHostDescription()
-		if err != nil {
-			return err
-		}
-
-		logging.LogChangedf(
-			"Added '%s' to git repository '%s' on host '%s'.",
-			pathToAdd,
-			path,
-			hostDescription,
-		)
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
 	}
+
+	logging.LogChangedByCtxf(ctx, "Added '%s' to git repository '%s' on host '%s'.", pathToAdd, path, hostDescription)
 
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) AddRemote(remoteOptions *gitparameteroptions.GitRemoteAddOptions) (err error) {
+func (c *CommandExecutorGitRepository) AddRemote(ctx context.Context, remoteOptions *gitparameteroptions.GitRemoteAddOptions) (err error) {
 	if remoteOptions == nil {
 		return tracederrors.TracedError("remoteOptions is nil")
 	}
@@ -156,46 +149,42 @@ func (c *CommandExecutorGitRepository) AddRemote(remoteOptions *gitparameteropti
 	}
 
 	remoteExists, err := c.RemoteConfigurationExists(
+		ctx,
 		&GitRemoteConfig{
 			RemoteName: remoteName,
 			UrlFetch:   remoteUrl,
 			UrlPush:    remoteUrl,
 		},
-		remoteOptions.Verbose,
 	)
 	if err != nil {
 		return err
 	}
 
 	if remoteExists {
-		if remoteOptions.Verbose {
-			logging.LogInfof("Remote '%s' as '%s' to repository '%s' already exists.", remoteUrl, remoteName, repoPath)
-		}
+		logging.LogInfoByCtxf(ctx, "Remote '%s' as '%s' to repository '%s' already exists.", remoteUrl, remoteName, repoPath)
 	} else {
-		err = c.RemoveRemoteByName(remoteName, remoteOptions.Verbose)
+		err = c.RemoveRemoteByName(ctx, remoteName)
 		if err != nil {
 			return err
 		}
 
-		_, err = c.RunGitCommand(contextutils.GetVerbosityContextByBool(remoteOptions.Verbose), []string{"remote", "add", remoteName, remoteUrl})
+		_, err = c.RunGitCommand(ctx, []string{"remote", "add", remoteName, remoteUrl})
 		if err != nil {
 			return err
 		}
 
-		if remoteOptions.Verbose {
-			logging.LogChangedf("Added remote '%s' as '%s' to repository '%s'.", remoteUrl, remoteName, repoPath)
-		}
+		logging.LogChangedByCtxf(ctx, "Added remote '%s' as '%s' to repository '%s'.", remoteUrl, remoteName, repoPath)
 	}
 
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) CheckoutBranchByName(name string, verbose bool) (err error) {
+func (c *CommandExecutorGitRepository) CheckoutBranchByName(ctx context.Context, name string) (err error) {
 	if name == "" {
 		return tracederrors.TracedErrorEmptyString("name")
 	}
 
-	currentBranchName, err := c.GetCurrentBranchName(verbose)
+	currentBranchName, err := c.GetCurrentBranchName(ctx)
 	if err != nil {
 		return err
 	}
@@ -206,37 +195,20 @@ func (c *CommandExecutorGitRepository) CheckoutBranchByName(name string, verbose
 	}
 
 	if currentBranchName == name {
-		if verbose {
-			logging.LogInfof(
-				"Git repository '%s' on host '%s' is already checked out on branch '%s'.",
-				path,
-				hostDescription,
-				name,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Git repository '%s' on host '%s' is already checked out on branch '%s'.", path, hostDescription, name)
 	} else {
-		_, err := c.RunGitCommand(
-			contextutils.GetVerbosityContextByBool(verbose),
-			[]string{"checkout", name},
-		)
+		_, err := c.RunGitCommand(ctx, []string{"checkout", name})
 		if err != nil {
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf(
-				"Git repository '%s' on host '%s' checked out on branch '%s'.",
-				path,
-				hostDescription,
-				name,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "Git repository '%s' on host '%s' checked out on branch '%s'.", path, hostDescription, name)
 	}
 
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) CloneRepository(repository GitRepository, verbose bool) (err error) {
+func (c *CommandExecutorGitRepository) CloneRepository(ctx context.Context, repository GitRepository) (err error) {
 	if repository == nil {
 		return tracederrors.TracedErrorNil("repository")
 	}
@@ -264,10 +236,10 @@ func (c *CommandExecutorGitRepository) CloneRepository(repository GitRepository,
 		return err
 	}
 
-	return c.CloneRepositoryByPathOrUrl(pathToClone, verbose)
+	return c.CloneRepositoryByPathOrUrl(ctx, pathToClone)
 }
 
-func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClone string, verbose bool) (err error) {
+func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(ctx context.Context, pathOrUrlToClone string) (err error) {
 	if pathOrUrlToClone == "" {
 		return tracederrors.TracedErrorEmptyString("pathToClone")
 	}
@@ -277,16 +249,9 @@ func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClo
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Cloning git repository '%s' to '%s' on '%s' started.",
-			pathOrUrlToClone,
-			path,
-			hostDescription,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Cloning git repository '%s' to '%s' on '%s' started.", pathOrUrlToClone, path, hostDescription)
 
-	isInitialized, err := c.IsInitialized(verbose)
+	isInitialized, err := c.IsInitialized(ctx)
 	if err != nil {
 		return err
 	}
@@ -303,7 +268,6 @@ func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClo
 			return err
 		}
 
-		ctx := contextutils.GetVerbosityContextByBool(verbose)
 		_, err = commandExecutor.RunCommand(
 			commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 			&parameteroptions.RunCommandOptions{
@@ -315,19 +279,12 @@ func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(pathOrUrlToClo
 		}
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Cloning git repository '%s' to '%s' on host '%s' finished.",
-			pathOrUrlToClone,
-			path,
-			hostDescription,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Cloning git repository '%s' to '%s' on host '%s' finished.", pathOrUrlToClone, path, hostDescription)
 
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) Commit(commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit *GenericGitCommit, err error) {
+func (c *CommandExecutorGitRepository) Commit(ctx context.Context, commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit GitCommit, err error) {
 	if commitOptions == nil {
 		return nil, tracederrors.TracedErrorNil("commitOptions")
 	}
@@ -350,36 +307,29 @@ func (c *CommandExecutorGitRepository) Commit(commitOptions *gitparameteroptions
 	commitCommand = append(commitCommand, "-m", message)
 
 	_, err = c.RunGitCommand(
-		contextutils.GetVerbosityContextByBool(commitOptions.Verbose),
+		ctx,
 		commitCommand,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	createdCommit, err = c.GetCurrentCommit(commitOptions.Verbose)
+	createdCommit, err = c.GetCurrentCommit(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if commitOptions.Verbose {
-		path, hostDescription, err := c.GetPathAndHostDescription()
-		if err != nil {
-			return nil, err
-		}
-
-		createdHash, err := createdCommit.GetHash()
-		if err != nil {
-			return nil, err
-		}
-
-		logging.LogChangedf(
-			"Created commit '%s' in git repository '%s' on host '%s'.",
-			createdHash,
-			path,
-			hostDescription,
-		)
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return nil, err
 	}
+
+	createdHash, err := createdCommit.GetHash(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogChangedByCtxf(ctx, "Created commit '%s' in git repository '%s' on host '%s'.", createdHash, path, hostDescription)
 
 	return createdCommit, nil
 }
@@ -388,7 +338,7 @@ func (c *CommandExecutorGitRepository) CommitHasParentCommitByCommitHash(hash st
 	return false, tracederrors.TracedErrorNotImplemented()
 }
 
-func (c *CommandExecutorGitRepository) CreateBranch(createOptions *parameteroptions.CreateBranchOptions) (err error) {
+func (c *CommandExecutorGitRepository) CreateBranch(ctx context.Context, createOptions *parameteroptions.CreateBranchOptions) (err error) {
 	if createOptions == nil {
 		return tracederrors.TracedErrorNil("createOptions")
 	}
@@ -398,7 +348,7 @@ func (c *CommandExecutorGitRepository) CreateBranch(createOptions *parameteropti
 		return err
 	}
 
-	branchExists, err := c.BranchByNameExists(name, createOptions.Verbose)
+	branchExists, err := c.BranchByNameExists(ctx, name)
 	if err != nil {
 		return err
 	}
@@ -417,7 +367,7 @@ func (c *CommandExecutorGitRepository) CreateBranch(createOptions *parameteropti
 		)
 	} else {
 		_, err = c.RunGitCommand(
-			contextutils.GetVerbosityContextByBool(createOptions.Verbose),
+			ctx,
 			[]string{"checkout", "-b", name},
 		)
 		if err != nil {
@@ -435,7 +385,7 @@ func (c *CommandExecutorGitRepository) CreateBranch(createOptions *parameteropti
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) CreateTag(options *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
+func (c *CommandExecutorGitRepository) CreateTag(ctx context.Context, options *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -460,16 +410,13 @@ func (c *CommandExecutorGitRepository) CreateTag(options *gitparameteroptions.Gi
 			return nil, err
 		}
 	} else {
-		hashToTag, err = c.GetCurrentCommitHash(options.Verbose)
+		hashToTag, err = c.GetCurrentCommitHash(ctx)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	_, err = c.RunGitCommand(
-		contextutils.GetVerbosityContextByBool(options.Verbose),
-		[]string{"tag", "-a", tagName, hashToTag, "-m", tagMessage},
-	)
+	_, err = c.RunGitCommand(ctx, []string{"tag", "-a", tagName, hashToTag, "-m", tagMessage})
 	if err != nil {
 		return nil, err
 	}
@@ -484,25 +431,17 @@ func (c *CommandExecutorGitRepository) CreateTag(options *gitparameteroptions.Gi
 		return nil, err
 	}
 
-	if options.Verbose {
-		logging.LogChangedf(
-			"Created tag '%s' for commit '%s' in git repository '%s' on host '%s'.",
-			tagName,
-			hashToTag,
-			path,
-			hostDescription,
-		)
-	}
+	logging.LogChangedByCtxf(ctx, "Created tag '%s' for commit '%s' in git repository '%s' on host '%s'.", tagName, hashToTag, path, hostDescription)
 
 	return createdTag, nil
 }
 
-func (c *CommandExecutorGitRepository) DeleteBranchByName(name string, verbose bool) (err error) {
+func (c *CommandExecutorGitRepository) DeleteBranchByName(ctx context.Context, name string) (err error) {
 	if name == "" {
 		return tracederrors.TracedErrorEmptyString("name")
 	}
 
-	branchExists, err := c.BranchByNameExists(name, verbose)
+	branchExists, err := c.BranchByNameExists(ctx, name)
 	if err != nil {
 		return err
 	}
@@ -513,68 +452,41 @@ func (c *CommandExecutorGitRepository) DeleteBranchByName(name string, verbose b
 	}
 
 	if branchExists {
-		_, err := c.RunGitCommand(
-			contextutils.GetVerbosityContextByBool(verbose),
-			[]string{"branch", "-D", name},
-		)
+		_, err := c.RunGitCommand(ctx, []string{"branch", "-D", name})
 		if err != nil {
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf(
-				"Branch '%s' in git repository '%s' on host '%s' deleted.",
-				name,
-				path,
-				hostDescription,
-			)
-		}
-
+		logging.LogChangedByCtxf(ctx, "Branch '%s' in git repository '%s' on host '%s' deleted.", name, path, hostDescription)
 	} else {
-		if verbose {
-			logging.LogInfof(
-				"Branch '%s' in git repository '%s' on host '%s' is already absent. Skip delete.",
-				name,
-				path,
-				hostDescription,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Branch '%s' in git repository '%s' on host '%s' is already absent. Skip delete.", name, path, hostDescription)
 	}
 
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) Fetch(verbose bool) (err error) {
-	_, err = c.RunGitCommand(
-		contextutils.GetVerbosityContextByBool(verbose),
-		[]string{"fetch"},
-	)
+func (c *CommandExecutorGitRepository) Fetch(ctx context.Context) (err error) {
+	_, err = c.RunGitCommand(ctx, []string{"fetch"})
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		path, hostDescription, err := c.GetPathAndHostDescription()
-		if err != nil {
-			return err
-		}
-
-		logging.LogChangedf(
-			"Fetched git repository '%s' on host '%s'",
-			path,
-			hostDescription,
-		)
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
 	}
+
+	logging.LogChangedByCtxf(ctx, "Fetched git repository '%s' on host '%s'", path, hostDescription)
 
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) FileByPathExists(path string, verbose bool) (exists bool, err error) {
+func (c *CommandExecutorGitRepository) FileByPathExists(ctx context.Context, path string) (exists bool, err error) {
 	if path == "" {
 		return false, tracederrors.TracedErrorEmptyString(path)
 	}
 
-	return c.FileInDirectoryExists(verbose, path)
+	return c.FileInDirectoryExists(ctx, path)
 }
 
 func (c *CommandExecutorGitRepository) GetAuthorEmailByCommitHash(hash string) (authorEmail string, err error) {
@@ -593,14 +505,14 @@ func (c *CommandExecutorGitRepository) GetCommitAgeSecondsByCommitHash(hash stri
 	return -1, tracederrors.TracedErrorNotImplemented()
 }
 
-func (c *CommandExecutorGitRepository) GetCommitByHash(hash string) (gitCommit *GenericGitCommit, err error) {
+func (c *CommandExecutorGitRepository) GetCommitByHash(hash string) (GitCommit, error) {
 	if hash == "" {
 		return nil, tracederrors.TracedErrorEmptyString("hash")
 	}
 
-	gitCommit = NewGitCommit()
+	gitCommit := NewGitCommit()
 
-	err = gitCommit.SetGitRepo(c)
+	err := gitCommit.SetGitRepo(c)
 	if err != nil {
 		return nil, err
 	}
@@ -645,7 +557,7 @@ func (c *CommandExecutorGitRepository) GetCommitMessageByCommitHash(hash string)
 	return commitMessage, nil
 }
 
-func (c *CommandExecutorGitRepository) GetCommitParentsByCommitHash(hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []*GenericGitCommit, err error) {
+func (c *CommandExecutorGitRepository) GetCommitParentsByCommitHash(ctx context.Context, hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []GitCommit, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
@@ -653,11 +565,8 @@ func (c *CommandExecutorGitRepository) GetCommitTimeByCommitHash(hash string) (c
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
-func (c *CommandExecutorGitRepository) GetCurrentBranchName(verbose bool) (branchName string, err error) {
-	stdout, err := c.RunGitCommandAndGetStdoutAsString(
-		contextutils.GetVerbosityContextByBool(verbose),
-		[]string{"rev-parse", "--abbrev-ref", "HEAD"},
-	)
+func (c *CommandExecutorGitRepository) GetCurrentBranchName(ctx context.Context) (branchName string, err error) {
+	stdout, err := c.RunGitCommandAndGetStdoutAsString(ctx, []string{"rev-parse", "--abbrev-ref", "HEAD"})
 	if err != nil {
 		return "", err
 	}
@@ -677,51 +586,34 @@ func (c *CommandExecutorGitRepository) GetCurrentBranchName(verbose bool) (branc
 		)
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Branch '%s' is currently checked out in git repository '%s' on host '%s'.",
-			branchName,
-			path,
-			hostDescription,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Branch '%s' is currently checked out in git repository '%s' on host '%s'.", branchName, path, hostDescription)
 
 	return branchName, nil
 }
 
-func (c *CommandExecutorGitRepository) GetCurrentCommit(verbose bool) (currentCommit *GenericGitCommit, err error) {
-	currentCommitHash, err := c.GetCurrentCommitHash(verbose)
+func (c *CommandExecutorGitRepository) GetCurrentCommit(ctx context.Context) (GitCommit, error) {
+	currentCommitHash, err := c.GetCurrentCommitHash(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	currentCommit, err = c.GetCommitByHash(currentCommitHash)
+	currentCommit, err := c.GetCommitByHash(currentCommitHash)
 	if err != nil {
 		return nil, err
 	}
 
-	if verbose {
-		path, hostDescription, err := c.GetPathAndHostDescription()
-		if err != nil {
-			return nil, err
-		}
-
-		logging.LogInfof(
-			"Current commit of git repository '%s' on host '%s' has hash '%s'.",
-			path,
-			hostDescription,
-			currentCommitHash,
-		)
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return nil, err
 	}
+
+	logging.LogInfoByCtxf(ctx, "Current commit of git repository '%s' on host '%s' has hash '%s'.", path, hostDescription, currentCommitHash)
 
 	return currentCommit, nil
 }
 
-func (c *CommandExecutorGitRepository) GetCurrentCommitHash(verbose bool) (currentCommitHash string, err error) {
-	currentCommitHash, err = c.RunGitCommandAndGetStdoutAsString(
-		contextutils.GetVerbosityContextByBool(verbose),
-		[]string{"rev-parse", "HEAD"},
-	)
+func (c *CommandExecutorGitRepository) GetCurrentCommitHash(ctx context.Context) (currentCommitHash string, err error) {
+	currentCommitHash, err = c.RunGitCommandAndGetStdoutAsString(ctx, []string{"rev-parse", "HEAD"})
 	if err != nil {
 		return "", err
 	}
@@ -739,7 +631,7 @@ func (c *CommandExecutorGitRepository) GetDirectoryByPath(pathToSubDir ...string
 	return c.GetSubDirectory(pathToSubDir...)
 }
 
-func (c *CommandExecutorGitRepository) GetGitStatusOutput(verbose bool) (output string, err error) {
+func (c *CommandExecutorGitRepository) GetGitStatusOutput(ctx context.Context) (output string, err error) {
 	return "", tracederrors.TracedErrorNotImplemented()
 }
 
@@ -772,8 +664,8 @@ func (c *CommandExecutorGitRepository) GetHashByTagName(tagName string) (hash st
 	return hash, nil
 }
 
-func (c *CommandExecutorGitRepository) GetRemoteConfigs(verbose bool) (remoteConfigs []*GitRemoteConfig, err error) {
-	output, err := c.RunGitCommand(contextutils.GetVerbosityContextByBool(verbose), []string{"remote", "-v"})
+func (c *CommandExecutorGitRepository) GetRemoteConfigs(ctx context.Context) (remoteConfigs []*GitRemoteConfig, err error) {
+	output, err := c.RunGitCommand(ctx, []string{"remote", "-v"})
 	if err != nil {
 		return nil, err
 	}
@@ -954,25 +846,19 @@ func (c *CommandExecutorGitRepository) GetTagByName(name string) (tag GitTag, er
 	return toReturn, nil
 }
 
-func (c *CommandExecutorGitRepository) HasInitialCommit(verbose bool) (hasInitialCommit bool, err error) {
+func (c *CommandExecutorGitRepository) HasInitialCommit(ctx context.Context) (hasInitialCommit bool, err error) {
 	path, hostDescription, err := c.GetPathAndHostDescription()
 	if err != nil {
 		return false, err
 	}
 
-	isInitialized, err := c.IsInitialized(verbose)
+	isInitialized, err := c.IsInitialized(ctx)
 	if err != nil {
 		return false, err
 	}
 
 	if !isInitialized {
-		if verbose {
-			logging.LogInfof(
-				"'%s' does not initialized as git repository on host '%s' and can therefore not have an initial commit.",
-				path,
-				hostDescription,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "'%s' does not initialized as git repository on host '%s' and can therefore not have an initial commit.", path, hostDescription)
 		return false, nil
 	}
 
@@ -981,7 +867,6 @@ func (c *CommandExecutorGitRepository) HasInitialCommit(verbose bool) (hasInitia
 		return false, err
 	}
 
-	ctx := contextutils.GetVerbosityContextByBool(verbose)
 	stdout, err := commandExecutor.RunCommandAndGetStdoutAsString(
 		commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
@@ -1009,26 +894,16 @@ func (c *CommandExecutorGitRepository) HasInitialCommit(verbose bool) (hasInitia
 		return false, tracederrors.TracedErrorf("Unexpected stdout='%s'", stdout)
 	}
 
-	if verbose {
-		if hasInitialCommit {
-			logging.LogInfof(
-				"Git repository '%s' on host '%s' has an initial commit",
-				path,
-				hostDescription,
-			)
-		} else {
-			logging.LogInfof(
-				"Git repository '%s' on host '%s' has no initial commit",
-				path,
-				hostDescription,
-			)
-		}
+	if hasInitialCommit {
+		logging.LogInfoByCtxf(ctx, "Git repository '%s' on host '%s' has an initial commit", path, hostDescription)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Git repository '%s' on host '%s' has no initial commit", path, hostDescription)
 	}
 
 	return hasInitialCommit, nil
 }
 
-func (c *CommandExecutorGitRepository) HasUncommittedChanges(verbose bool) (hasUncommitedChanges bool, err error) {
+func (c *CommandExecutorGitRepository) HasUncommittedChanges(ctx context.Context) (hasUncommitedChanges bool, err error) {
 	path, hostDescription, err := c.GetPathAndHostDescription()
 	if err != nil {
 		return false, err
@@ -1040,7 +915,7 @@ func (c *CommandExecutorGitRepository) HasUncommittedChanges(verbose bool) (hasU
 	}
 
 	commandOutput, err := commandExecutor.RunCommand(
-		contextutils.GetVerbosityContextByBool(verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				"bash",
@@ -1065,26 +940,16 @@ func (c *CommandExecutorGitRepository) HasUncommittedChanges(verbose bool) (hasU
 		hasUncommitedChanges = true
 	}
 
-	if verbose {
-		if hasUncommitedChanges {
-			logging.LogInfof(
-				"Git repository '%s' on '%s' has uncommited changes.",
-				path,
-				hostDescription,
-			)
-		} else {
-			logging.LogInfof(
-				"Git repository '%s' on '%s' has no uncommited changes.",
-				path,
-				hostDescription,
-			)
-		}
+	if hasUncommitedChanges {
+		logging.LogInfoByCtxf(ctx, "Git repository '%s' on '%s' has uncommited changes.", path, hostDescription)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Git repository '%s' on '%s' has no uncommited changes.", path, hostDescription)
 	}
 
 	return hasUncommitedChanges, nil
 }
 
-func (c *CommandExecutorGitRepository) Init(options *parameteroptions.CreateRepositoryOptions) (err error) {
+func (c *CommandExecutorGitRepository) Init(ctx context.Context, options *parameteroptions.CreateRepositoryOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
@@ -1094,21 +959,15 @@ func (c *CommandExecutorGitRepository) Init(options *parameteroptions.CreateRepo
 		return err
 	}
 
-	isInitialized, err := c.IsInitialized(options.Verbose)
+	isInitialized, err := c.IsInitialized(ctx)
 	if err != nil {
 		return err
 	}
 
 	if isInitialized {
-		if options.Verbose {
-			logging.LogInfof(
-				"Git repository '%s' on host '%s' is already initialized.",
-				path,
-				hostDescription,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Git repository '%s' on host '%s' is already initialized.", path, hostDescription)
 	} else {
-		err = c.Create(contextutils.GetVerbosityContextByBool(options.Verbose), &filesoptions.CreateOptions{})
+		err = c.Create(ctx, &filesoptions.CreateOptions{})
 		if err != nil {
 			return err
 		}
@@ -1119,73 +978,60 @@ func (c *CommandExecutorGitRepository) Init(options *parameteroptions.CreateRepo
 			commandToUse = append(commandToUse, "--bare")
 		}
 
-		_, err = c.RunGitCommand(
-			contextutils.GetVerbosityContextByBool(options.Verbose),
-			commandToUse,
-		)
+		_, err = c.RunGitCommand(ctx, commandToUse)
 		if err != nil {
 			return err
 		}
 
-		if options.Verbose {
-			if options.BareRepository {
-				logging.LogChangedf(
-					"Git repository '%s' on host '%s' initialized as bare repository.",
-					path,
-					hostDescription,
-				)
-			} else {
-				logging.LogChangedf(
-					"Git repository '%s' on host '%s' initialized as non bare repository.",
-					path,
-					hostDescription,
-				)
-			}
+		if options.BareRepository {
+			logging.LogChangedByCtxf(ctx, "Git repository '%s' on host '%s' initialized as bare repository.", path, hostDescription)
+		} else {
+			logging.LogChangedByCtxf(ctx, "Git repository '%s' on host '%s' initialized as non bare repository.", path, hostDescription)
 		}
+
 	}
 
 	if options.InitializeWithDefaultAuthor {
-		err = c.SetDefaultAuthor(options.Verbose)
+		err = c.SetDefaultAuthor(ctx)
 		if err != nil {
 			return err
 		}
 	}
 
 	if options.InitializeWithEmptyCommit {
-		hasInitialCommit, err := c.HasInitialCommit(options.Verbose)
+		hasInitialCommit, err := c.HasInitialCommit(ctx)
 		if err != nil {
 			return err
 		}
 
 		if hasInitialCommit {
-			logging.LogInfof(
-				"Repository '%s' on host '%s' has already an initial commit.",
-				path,
-				hostDescription,
-			)
+			logging.LogInfoByCtxf(ctx, "Repository '%s' on host '%s' has already an initial commit.", path, hostDescription)
 		} else {
 			if options.BareRepository {
-				temporaryClone, err := GitRepositories().CloneGitRepositoryToTemporaryDirectory(c, options.Verbose)
+				temporaryClone, err := GitRepositories().CloneGitRepositoryToTemporaryDirectory(ctx, c)
 				if err != nil {
 					return err
 				}
-				defer temporaryClone.Delete(contextutils.GetVerbosityContextByBool(options.Verbose), &filesoptions.DeleteOptions{})
+				defer temporaryClone.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				if options.InitializeWithDefaultAuthor {
-					temporaryClone.SetGitConfig(
+					err = temporaryClone.SetGitConfig(
+						ctx,
 						&gitparameteroptions.GitConfigSetOptions{
-							Name:    GitRepositryDefaultAuthorName(),
-							Email:   GitRepositryDefaultAuthorEmail(),
-							Verbose: options.Verbose,
+							Name:  GitRepositryDefaultAuthorName(),
+							Email: GitRepositryDefaultAuthorEmail(),
 						},
 					)
+					if err != nil {
+						return err
+					}
 				}
 
 				_, err = temporaryClone.CommitAndPush(
+					ctx,
 					&gitparameteroptions.GitCommitOptions{
 						Message:    GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit(),
 						AllowEmpty: true,
-						Verbose:    true,
 					},
 				)
 				if err != nil {
@@ -1193,10 +1039,10 @@ func (c *CommandExecutorGitRepository) Init(options *parameteroptions.CreateRepo
 				}
 			} else {
 				_, err = c.Commit(
+					ctx,
 					&gitparameteroptions.GitCommitOptions{
 						Message:    GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit(),
 						AllowEmpty: true,
-						Verbose:    true,
 					},
 				)
 				if err != nil {
@@ -1204,13 +1050,7 @@ func (c *CommandExecutorGitRepository) Init(options *parameteroptions.CreateRepo
 				}
 			}
 
-			if options.Verbose {
-				logging.LogChangedf(
-					"Initialized repository '%s' on host '%s' with an empty commit.",
-					path,
-					hostDescription,
-				)
-			}
+			logging.LogChangedByCtxf(ctx, "Initialized repository '%s' on host '%s' with an empty commit.", path, hostDescription)
 		}
 	}
 
@@ -1250,39 +1090,29 @@ func (c *CommandExecutorGitRepository) IsBareRepository(ctx context.Context) (is
 	return isBare, nil
 }
 
-func (c *CommandExecutorGitRepository) IsGitRepository(verbose bool) (isRepository bool, err error) {
-	isInitalized, err := c.IsInitialized(verbose)
+func (c *CommandExecutorGitRepository) IsGitRepository(ctx context.Context) (isRepository bool, err error) {
+	isInitalized, err := c.IsInitialized(ctx)
 	if err != nil {
 		return false, err
 	}
 
 	isRepository = isInitalized
 
-	if verbose {
-		path, hostDescription, err := c.GetPathAndHostDescription()
-		if err != nil {
-			return false, err
-		}
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return false, err
+	}
 
-		if isRepository {
-			logging.LogInfof(
-				"'%s' on host '%s' is a git repository",
-				path,
-				hostDescription,
-			)
-		} else {
-			logging.LogInfof(
-				"'%s' on host '%s' is not a git repository",
-				path,
-				hostDescription,
-			)
-		}
+	if isRepository {
+		logging.LogInfoByCtxf(ctx, "'%s' on host '%s' is a git repository", path, hostDescription)
+	} else {
+		logging.LogInfoByCtxf(ctx, "'%s' on host '%s' is not a git repository", path, hostDescription)
 	}
 
 	return isRepository, nil
 }
 
-func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialited bool, err error) {
+func (c *CommandExecutorGitRepository) IsInitialized(ctx context.Context) (isInitialited bool, err error) {
 	path, hostDescription, err := c.GetPathAndHostDescription()
 	if err != nil {
 		return false, err
@@ -1293,23 +1123,16 @@ func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialite
 		return false, err
 	}
 
-	exists, err := c.Exists(contextutils.GetVerbosityContextByBool(verbose))
+	exists, err := c.Exists(ctx)
 	if err != nil {
 		return false, err
 	}
 
 	if !exists {
-		if verbose {
-			logging.LogInfof(
-				"Git repository '%s' does not exist on host '%s' and is therefore not initalized.",
-				path,
-				hostDescription,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Git repository '%s' does not exist on host '%s' and is therefore not initalized.", path, hostDescription)
 		return false, nil
 	}
 
-	ctx := contextutils.GetVerbosityContextByBool(verbose)
 	stdout, err := commandExecutor.RunCommandAndGetStdoutAsString(
 		commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
@@ -1342,27 +1165,17 @@ func (c *CommandExecutorGitRepository) IsInitialized(verbose bool) (isInitialite
 		)
 	}
 
-	if verbose {
-		if isInitialited {
-			logging.LogInfof(
-				"Git repository '%s' on host '%s' is initialized.",
-				path,
-				hostDescription,
-			)
-		} else {
-			logging.LogInfof(
-				"'%s' is not an initialized git repository on host '%s'.",
-				path,
-				hostDescription,
-			)
-		}
+	if isInitialited {
+		logging.LogInfoByCtxf(ctx, "Git repository '%s' on host '%s' is initialized.", path, hostDescription)
+	} else {
+		logging.LogInfoByCtxf(ctx, "'%s' is not an initialized git repository on host '%s'.", path, hostDescription)
 	}
 
 	return isInitialited, nil
 }
 
-func (c *CommandExecutorGitRepository) ListBranchNames(verbose bool) (branchNames []string, err error) {
-	lines, err := c.RunGitCommandAndGetStdoutAsLines(contextutils.GetVerbosityContextByBool(verbose), []string{"branch"})
+func (c *CommandExecutorGitRepository) ListBranchNames(ctx context.Context) (branchNames []string, err error) {
+	lines, err := c.RunGitCommandAndGetStdoutAsLines(ctx, []string{"branch"})
 	if err != nil {
 		return nil, err
 	}
@@ -1378,32 +1191,25 @@ func (c *CommandExecutorGitRepository) ListBranchNames(verbose bool) (branchName
 
 	sort.Strings(branchNames)
 
-	if verbose {
-		path, hostDescripton, err := c.GetPathAndHostDescription()
-		if err != nil {
-			return nil, err
-		}
-
-		logging.LogInfof(
-			"Found '%d' branches in git repository '%s' on host '%s'.",
-			len(branchNames),
-			path,
-			hostDescripton,
-		)
+	path, hostDescripton, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return nil, err
 	}
+
+	logging.LogInfoByCtxf(ctx, "Found '%d' branches in git repository '%s' on host '%s'.", len(branchNames), path, hostDescripton)
 
 	return branchNames, nil
 }
 
-func (c *CommandExecutorGitRepository) ListTagNames(verbose bool) (tagNames []string, err error) {
+func (c *CommandExecutorGitRepository) ListTagNames(ctx context.Context) (tagNames []string, err error) {
 	return c.RunGitCommandAndGetStdoutAsLines(
 		contextutils.ContextSilent(), // Do not clutter output by pritning all tags.
 		[]string{"tag"},
 	)
 }
 
-func (c *CommandExecutorGitRepository) ListTags(verbose bool) (tags []GitTag, err error) {
-	tagNames, err := c.ListTagNames(verbose)
+func (c *CommandExecutorGitRepository) ListTags(ctx context.Context) (tags []GitTag, err error) {
+	tagNames, err := c.ListTagNames(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -1421,7 +1227,7 @@ func (c *CommandExecutorGitRepository) ListTags(verbose bool) (tags []GitTag, er
 	return tags, nil
 }
 
-func (c *CommandExecutorGitRepository) ListTagsForCommitHash(hash string, verbose bool) (tags []GitTag, err error) {
+func (c *CommandExecutorGitRepository) ListTagsForCommitHash(ctx context.Context, hash string) (tags []GitTag, err error) {
 	if hash == "" {
 		return nil, tracederrors.TracedErrorEmptyString("hash")
 	}
@@ -1530,7 +1336,7 @@ func (c *CommandExecutorGitRepository) Push(ctx context.Context) (err error) {
 	return
 }
 
-func (c *CommandExecutorGitRepository) PushTagsToRemote(remoteName string, verbose bool) (err error) {
+func (c *CommandExecutorGitRepository) PushTagsToRemote(ctx context.Context, remoteName string) (err error) {
 	if len(remoteName) <= 0 {
 		return tracederrors.TracedError("remoteName is empty string")
 	}
@@ -1540,59 +1346,42 @@ func (c *CommandExecutorGitRepository) PushTagsToRemote(remoteName string, verbo
 		return err
 	}
 
-	_, err = c.RunGitCommand(
-		contextutils.GetVerbosityContextByBool(verbose),
-		[]string{"push", remoteName, "--tags"},
-	)
+	_, err = c.RunGitCommand(ctx, []string{"push", remoteName, "--tags"})
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Pushed tags of git repository '%s' on host '%s' to remote '%s'.",
-			path,
-			hostDescription,
-			remoteName,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Pushed tags of git repository '%s' on host '%s' to remote '%s'.", path, hostDescription, remoteName)
 
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) PushToRemote(remoteName string, verbose bool) (err error) {
+func (c *CommandExecutorGitRepository) PushToRemote(ctx context.Context, remoteName string) (err error) {
 	if len(remoteName) <= 0 {
 		return tracederrors.TracedError("remoteName is empty string")
 	}
 
-	_, err = c.RunGitCommand(contextutils.GetVerbosityContextByBool(verbose), []string{"push", remoteName})
+	_, err = c.RunGitCommand(ctx, []string{"push", remoteName})
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		path, hostDescription, err := c.GetPathAndHostDescription()
-		if err != nil {
-			return err
-		}
-
-		logging.LogInfof(
-			"Pushed git repository '%s' on host '%s' to remote '%s'.",
-			path,
-			hostDescription,
-			remoteName,
-		)
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
 	}
+
+	logging.LogInfoByCtxf(ctx, "Pushed git repository '%s' on host '%s' to remote '%s'.", path, hostDescription, remoteName)
 
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) RemoteByNameExists(remoteName string, verbose bool) (remoteExists bool, err error) {
+func (c *CommandExecutorGitRepository) RemoteByNameExists(ctx context.Context, remoteName string) (remoteExists bool, err error) {
 	if len(remoteName) <= 0 {
 		return false, fmt.Errorf("remoteName is empty string")
 	}
 
-	remoteConfigs, err := c.GetRemoteConfigs(verbose)
+	remoteConfigs, err := c.GetRemoteConfigs(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -1606,12 +1395,12 @@ func (c *CommandExecutorGitRepository) RemoteByNameExists(remoteName string, ver
 	return false, nil
 }
 
-func (c *CommandExecutorGitRepository) RemoteConfigurationExists(config *GitRemoteConfig, verbose bool) (exists bool, err error) {
+func (c *CommandExecutorGitRepository) RemoteConfigurationExists(ctx context.Context, config *GitRemoteConfig) (exists bool, err error) {
 	if config == nil {
 		return false, tracederrors.TracedError("config is nil")
 	}
 
-	remoteConfigs, err := c.GetRemoteConfigs(verbose)
+	remoteConfigs, err := c.GetRemoteConfigs(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -1625,12 +1414,12 @@ func (c *CommandExecutorGitRepository) RemoteConfigurationExists(config *GitRemo
 	return false, nil
 }
 
-func (c *CommandExecutorGitRepository) RemoveRemoteByName(remoteNameToRemove string, verbose bool) (err error) {
+func (c *CommandExecutorGitRepository) RemoveRemoteByName(ctx context.Context, remoteNameToRemove string) (err error) {
 	if len(remoteNameToRemove) <= 0 {
 		return tracederrors.TracedError("remoteNameToRemove is empty string")
 	}
 
-	remoteExists, err := c.RemoteByNameExists(remoteNameToRemove, verbose)
+	remoteExists, err := c.RemoteByNameExists(ctx, remoteNameToRemove)
 	if err != nil {
 		return err
 	}
@@ -1641,18 +1430,14 @@ func (c *CommandExecutorGitRepository) RemoveRemoteByName(remoteNameToRemove str
 	}
 
 	if remoteExists {
-		_, err := c.RunGitCommand(contextutils.GetVerbosityContextByBool(verbose), []string{"remote", "remove", remoteNameToRemove})
+		_, err := c.RunGitCommand(ctx, []string{"remote", "remove", remoteNameToRemove})
 		if err != nil {
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf("Remote '%s' for repository '%s' removed.", remoteNameToRemove, repoDirPath)
-		}
+		logging.LogChangedByCtxf(ctx, "Remote '%s' for repository '%s' removed.", remoteNameToRemove, repoDirPath)
 	} else {
-		if verbose {
-			logging.LogInfof("Remote '%s' for repository '%s' already deleted.", remoteNameToRemove, repoDirPath)
-		}
+		logging.LogInfoByCtxf(ctx, "Remote '%s' for repository '%s' already deleted.", remoteNameToRemove, repoDirPath)
 	}
 
 	return nil
@@ -1710,47 +1495,41 @@ func (c *CommandExecutorGitRepository) RunGitCommandAndGetStdoutAsString(ctx con
 	return commandOutput.GetStdoutAsString()
 }
 
-func (c *CommandExecutorGitRepository) SetDefaultAuthor(verbose bool) (err error) {
-	err = c.SetUserName(GitRepositryDefaultAuthorName(), verbose)
+func (c *CommandExecutorGitRepository) SetDefaultAuthor(ctx context.Context) (err error) {
+	err = c.SetUserName(ctx, GitRepositryDefaultAuthorName())
 	if err != nil {
 		return err
 	}
 
-	err = c.SetUserEmail(GitRepositryDefaultAuthorEmail(), verbose)
+	err = c.SetUserEmail(ctx, GitRepositryDefaultAuthorEmail())
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		path, hostDescription, err := c.GetPathAndHostDescription()
-		if err != nil {
-			return err
-		}
-
-		logging.LogChangedf(
-			"Initialized git repository '%s' on '%s' with default author and email.",
-			path,
-			hostDescription,
-		)
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
 	}
+
+	logging.LogChangedByCtxf(ctx, "Initialized git repository '%s' on '%s' with default author and email.", path, hostDescription)
 
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) SetGitConfig(options *gitparameteroptions.GitConfigSetOptions) (err error) {
+func (c *CommandExecutorGitRepository) SetGitConfig(ctx context.Context, options *gitparameteroptions.GitConfigSetOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
 
 	if options.Email != "" {
-		err = c.SetUserEmail(options.Email, options.Verbose)
+		err = c.SetUserEmail(ctx, options.Email)
 		if err != nil {
 			return err
 		}
 	}
 
 	if options.Name != "" {
-		err = c.SetUserName(options.Name, options.Verbose)
+		err = c.SetUserName(ctx, options.Name)
 		if err != nil {
 			return err
 		}
@@ -1759,7 +1538,7 @@ func (c *CommandExecutorGitRepository) SetGitConfig(options *gitparameteroptions
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) SetRemoteUrl(remoteUrl string, verbose bool) (err error) {
+func (c *CommandExecutorGitRepository) SetRemoteUrl(ctx context.Context, remoteUrl string) (err error) {
 	remoteUrl = strings.TrimSpace(remoteUrl)
 	if len(remoteUrl) <= 0 {
 		return tracederrors.TracedError("remoteUrl is empty string")
@@ -1767,79 +1546,59 @@ func (c *CommandExecutorGitRepository) SetRemoteUrl(remoteUrl string, verbose bo
 
 	name := "origin"
 
-	_, err = c.RunGitCommand(contextutils.GetVerbosityContextByBool(verbose), []string{"remote", "set-url", name, remoteUrl})
+	_, err = c.RunGitCommand(ctx, []string{"remote", "set-url", name, remoteUrl})
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		path, hostDescription, err := c.GetPathAndHostDescription()
-		if err != nil {
-			return err
-		}
-
-		logging.LogChangedf(
-			"Set remote Url for '%v' in git repository '%v' on host '%s' to '%v'.",
-			name,
-			path,
-			hostDescription,
-			remoteUrl,
-		)
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
 	}
+
+	logging.LogChangedByCtxf(ctx, "Set remote Url for '%v' in git repository '%v' on host '%s' to '%v'.", name, path, hostDescription, remoteUrl)
 
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) SetUserEmail(email string, verbose bool) (err error) {
+func (c *CommandExecutorGitRepository) SetUserEmail(ctx context.Context, email string) (err error) {
 	if email == "" {
 		return tracederrors.TracedErrorEmptyString("email")
 	}
 
-	_, err = c.RunGitCommand(contextutils.GetVerbosityContextByBool(verbose), []string{"config", "user.email", email})
+	_, err = c.RunGitCommand(ctx, []string{"config", "user.email", email})
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		path, hostDescription, err := c.GetPathAndHostDescription()
-		if err != nil {
-			return err
-		}
-
-		logging.LogInfof(
-			"Set git user email to '%s' for git repository '%s' on host '%s'.",
-			email,
-			path,
-			hostDescription,
-		)
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
 	}
+
+	logging.LogInfoByCtxf(ctx, "Set git user email to '%s' for git repository '%s' on host '%s'.", email, path, hostDescription)
 
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) SetUserName(name string, verbose bool) (err error) {
+func (c *CommandExecutorGitRepository) SetUserName(ctx context.Context, name string) (err error) {
 	if name == "" {
 		return tracederrors.TracedErrorEmptyString("name")
 	}
 
-	_, err = c.RunGitCommand(contextutils.GetVerbosityContextByBool(verbose), []string{"config", "user.name", name})
+	_, err = c.RunGitCommand(ctx, []string{"config", "user.name", name})
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		path, hostDescription, err := c.GetPathAndHostDescription()
-		if err != nil {
-			return err
-		}
-
-		logging.LogInfof(
-			"Set git user name to '%s' for git repository '%s' on host '%s'.",
-			name,
-			path,
-			hostDescription,
-		)
+	path, hostDescription, err := c.GetPathAndHostDescription()
+	if err != nil {
+		return err
 	}
+
+	logging.LogInfoByCtxf(ctx, "Set git user name to '%s' for git repository '%s' on host '%s'.", name, path,
+		hostDescription,
+	)
 
 	return nil
 }
