@@ -9,7 +9,7 @@ import (
 
 type Directory interface {
 	Chmod(ctx context.Context, chmodOptions *filesoptions.ChmodOptions) (err error)
-	CopyContentToDirectory(destinationDir Directory, verbose bool) (err error)
+	CopyContentToDirectory(ctx context.Context, destinationDir Directory) (err error)
 	Create(ctx context.Context, options *filesoptions.CreateOptions) (err error)
 	CreateSubDirectory(ctx context.Context, subDirectoryName string, options *filesoptions.CreateOptions) (createdSubDirectory Directory, err error)
 	Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error)
@@ -35,7 +35,7 @@ type Directory interface {
 	GetFilePathInDirectory(path ...string) (filePath string, err error)
 	GetPathAndHostDescription() (dirPath string, hostDescription string, err error)
 	DeleteFilesMatching(ctx context.Context, listFileOptons *parameteroptions.ListFileOptions) (err error)
-	FileInDirectoryExists(verbose bool, path ...string) (exists bool, err error)
+	FileInDirectoryExists(ctx context.Context, path ...string) (exists bool, err error)
 	ListFilePaths(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error)
 	ListSubDirectoryPaths(options *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string, err error)
 	ReadFileInDirectoryAsInt64(path ...string) (content int64, err error)

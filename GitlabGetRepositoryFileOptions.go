@@ -8,7 +8,6 @@ import (
 type GitlabGetRepositoryFileOptions struct {
 	Path       string
 	BranchName string
-	Verbose    bool
 }
 
 func NewGitlabGetRepositoryFileOptions() (g *GitlabGetRepositoryFileOptions) {
@@ -29,11 +28,6 @@ func (g *GitlabGetRepositoryFileOptions) GetPath() (path string, err error) {
 	}
 
 	return g.Path, nil
-}
-
-func (g *GitlabGetRepositoryFileOptions) GetVerbose() (verbose bool) {
-
-	return g.Verbose
 }
 
 func (g *GitlabGetRepositoryFileOptions) IsBranchNameSet() (isSet bool) {
@@ -90,8 +84,4 @@ func (g *GitlabGetRepositoryFileOptions) SetPath(path string) (err error) {
 	g.Path = path
 
 	return nil
-}
-
-func (g *GitlabGetRepositoryFileOptions) SetVerbose(verbose bool) {
-	g.Verbose = verbose
 }

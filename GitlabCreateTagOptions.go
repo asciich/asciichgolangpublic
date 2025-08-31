@@ -6,7 +6,6 @@ import (
 
 type GitlabCreateTagOptions struct {
 	Name    string
-	Verbose bool
 	Ref     string
 }
 
@@ -38,11 +37,6 @@ func (g *GitlabCreateTagOptions) GetRef() (ref string, err error) {
 	return g.Ref, nil
 }
 
-func (g *GitlabCreateTagOptions) GetVerbose() (verbose bool) {
-
-	return g.Verbose
-}
-
 func (g *GitlabCreateTagOptions) SetName(name string) (err error) {
 	if name == "" {
 		return tracederrors.TracedErrorf("name is empty string")
@@ -61,8 +55,4 @@ func (g *GitlabCreateTagOptions) SetRef(ref string) (err error) {
 	g.Ref = ref
 
 	return nil
-}
-
-func (g *GitlabCreateTagOptions) SetVerbose(verbose bool) {
-	g.Verbose = verbose
 }

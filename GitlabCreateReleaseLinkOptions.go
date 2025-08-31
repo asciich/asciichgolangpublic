@@ -1,14 +1,12 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type GitlabCreateReleaseLinkOptions struct {
-	Verbose bool
-	Name    string
-	Url     string
+	Name string
+	Url  string
 }
 
 func NewGitlabCreateReleaseLinkOptions() (g *GitlabCreateReleaseLinkOptions) {
@@ -45,52 +43,6 @@ func (g *GitlabCreateReleaseLinkOptions) GetUrl() (url string, err error) {
 	return g.Url, nil
 }
 
-func (g *GitlabCreateReleaseLinkOptions) GetVerbose() (verbose bool) {
-
-	return g.Verbose
-}
-
-func (g *GitlabCreateReleaseLinkOptions) MustGetName() (name string) {
-	name, err := g.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (g *GitlabCreateReleaseLinkOptions) MustGetNameAndUrl() (name string, url string) {
-	name, url, err := g.GetNameAndUrl()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name, url
-}
-
-func (g *GitlabCreateReleaseLinkOptions) MustGetUrl() (url string) {
-	url, err := g.GetUrl()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return url
-}
-
-func (g *GitlabCreateReleaseLinkOptions) MustSetName(name string) {
-	err := g.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabCreateReleaseLinkOptions) MustSetUrl(url string) {
-	err := g.SetUrl(url)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (g *GitlabCreateReleaseLinkOptions) SetName(name string) (err error) {
 	if name == "" {
 		return tracederrors.TracedErrorf("name is empty string")
@@ -109,8 +61,4 @@ func (g *GitlabCreateReleaseLinkOptions) SetUrl(url string) (err error) {
 	g.Url = url
 
 	return nil
-}
-
-func (g *GitlabCreateReleaseLinkOptions) SetVerbose(verbose bool) {
-	g.Verbose = verbose
 }

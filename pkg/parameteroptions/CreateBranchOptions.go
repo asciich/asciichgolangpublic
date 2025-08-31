@@ -9,9 +9,6 @@ import (
 type CreateBranchOptions struct {
 	// Name of the branch to create:
 	Name string
-
-	// Enable verbose output:
-	Verbose bool
 }
 
 func NewCreateBranchOptions() (c *CreateBranchOptions) {
@@ -26,11 +23,6 @@ func (c *CreateBranchOptions) GetName() (name string, err error) {
 	return c.Name, nil
 }
 
-func (c *CreateBranchOptions) GetVerbose() (verbose bool) {
-
-	return c.Verbose
-}
-
 func (c *CreateBranchOptions) SetName(name string) (err error) {
 	if name == "" {
 		return tracederrors.TracedErrorf("name is empty string")
@@ -39,8 +31,4 @@ func (c *CreateBranchOptions) SetName(name string) (err error) {
 	c.Name = name
 
 	return nil
-}
-
-func (c *CreateBranchOptions) SetVerbose(verbose bool) {
-	c.Verbose = verbose
 }

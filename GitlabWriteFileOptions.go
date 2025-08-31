@@ -2,7 +2,6 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -11,7 +10,6 @@ type GitlabWriteFileOptions struct {
 	Content       []byte
 	BranchName    string
 	CommitMessage string
-	Verbose       bool
 }
 
 func NewGitlabWriteFileOptions() (g *GitlabWriteFileOptions) {
@@ -61,7 +59,6 @@ func (g *GitlabWriteFileOptions) GetGitlabGetRepositoryFileOptions() (getOptions
 	getOptions = NewGitlabGetRepositoryFileOptions()
 	getOptions.Path = g.Path
 	getOptions.BranchName = g.BranchName
-	getOptions.Verbose = g.Verbose
 	return getOptions, nil
 }
 
@@ -71,84 +68,6 @@ func (g *GitlabWriteFileOptions) GetPath() (path string, err error) {
 	}
 
 	return g.Path, nil
-}
-
-func (g *GitlabWriteFileOptions) GetVerbose() (verbose bool) {
-
-	return g.Verbose
-}
-
-func (g *GitlabWriteFileOptions) MustGetBranchName() (branchName string) {
-	branchName, err := g.GetBranchName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return branchName
-}
-
-func (g *GitlabWriteFileOptions) MustGetCommitMessage() (commitMessage string) {
-	commitMessage, err := g.GetCommitMessage()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commitMessage
-}
-
-func (g *GitlabWriteFileOptions) MustGetContent() (content []byte) {
-	content, err := g.GetContent()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return content
-}
-
-func (g *GitlabWriteFileOptions) MustGetGitlabGetRepositoryFileOptions() (getOptions *GitlabGetRepositoryFileOptions) {
-	getOptions, err := g.GetGitlabGetRepositoryFileOptions()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return getOptions
-}
-
-func (g *GitlabWriteFileOptions) MustGetPath() (path string) {
-	path, err := g.GetPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return path
-}
-
-func (g *GitlabWriteFileOptions) MustSetBranchName(branchName string) {
-	err := g.SetBranchName(branchName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabWriteFileOptions) MustSetCommitMessage(commitMessage string) {
-	err := g.SetCommitMessage(commitMessage)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabWriteFileOptions) MustSetContent(content []byte) {
-	err := g.SetContent(content)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabWriteFileOptions) MustSetPath(path string) {
-	err := g.SetPath(path)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GitlabWriteFileOptions) SetBranchName(branchName string) (err error) {
@@ -193,8 +112,4 @@ func (g *GitlabWriteFileOptions) SetPath(path string) (err error) {
 	g.Path = path
 
 	return nil
-}
-
-func (g *GitlabWriteFileOptions) SetVerbose(verbose bool) {
-	g.Verbose = verbose
 }

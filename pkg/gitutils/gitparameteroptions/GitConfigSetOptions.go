@@ -8,7 +8,6 @@ import (
 type GitConfigSetOptions struct {
 	Name    string
 	Email   string
-	Verbose bool
 }
 
 func NewGitConfigSetOptions() (g *GitConfigSetOptions) {
@@ -29,11 +28,6 @@ func (g *GitConfigSetOptions) GetName() (name string, err error) {
 	}
 
 	return g.Name, nil
-}
-
-func (g *GitConfigSetOptions) GetVerbose() (verbose bool) {
-
-	return g.Verbose
 }
 
 func (g *GitConfigSetOptions) IsEmailSet() (isSet bool) {
@@ -94,8 +88,4 @@ func (g *GitConfigSetOptions) SetName(name string) (err error) {
 	g.Name = name
 
 	return nil
-}
-
-func (g *GitConfigSetOptions) SetVerbose(verbose bool) {
-	g.Verbose = verbose
 }

@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"errors"
 
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -26,18 +27,18 @@ func NewGitlabTag() (g *GitlabTag) {
 	return g
 }
 
-func (g *GitlabTag) Delete(verbose bool) (err error) {
+func (g *GitlabTag) Delete(ctx context.Context) (err error) {
 	name, err := g.GetName()
 	if err != nil {
 		return err
 	}
 
-	projectId, projectUrl, err := g.GetProjectIdAndUrl()
+	projectId, projectUrl, err := g.GetProjectIdAndUrl(ctx)
 	if err != nil {
 		return err
 	}
 
-	exists, err := g.Exists(verbose)
+	exists, err := g.Exists(ctx)
 	if err != nil {
 		return err
 	}
@@ -54,42 +55,25 @@ func (g *GitlabTag) Delete(verbose bool) (err error) {
 			nil,
 		)
 		if err != nil {
-			return tracederrors.TracedErrorf(
-				"Delete tag '%s' in gitlab project %s failed: %w",
-				name,
-				projectUrl,
-				err,
-			)
+			return tracederrors.TracedErrorf("Delete tag '%s' in gitlab project %s failed: %w", name, projectUrl, err)
 		}
 
-		if verbose {
-			logging.LogChangedf(
-				"Deleted tag '%s' in gitlab project %s .",
-				name,
-				projectUrl,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "Deleted tag '%s' in gitlab project %s .", name, projectUrl)
 	} else {
-		if verbose {
-			logging.LogInfof(
-				"Tag '%s' in gitlab project %s already absent. Skip delete.",
-				name,
-				projectUrl,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Tag '%s' in gitlab project %s already absent. Skip delete.", name, projectUrl)
 	}
 
 	return nil
 }
 
-func (g *GitlabTag) Exists(verbose bool) (exists bool, err error) {
-	projectUrl, err := g.GetProjectUrl()
+func (g *GitlabTag) Exists(ctx context.Context) (exists bool, err error) {
+	projectUrl, err := g.GetProjectUrl(ctx)
 	if err != nil {
 		return false, err
 	}
 
 	exists = true
-	_, err = g.GetRawResponse()
+	_, err = g.GetRawResponse(ctx)
 	if err != nil {
 		if errors.Is(err, ErrGitlabTagNotFound) {
 			exists = false
@@ -103,20 +87,10 @@ func (g *GitlabTag) Exists(verbose bool) (exists bool, err error) {
 		return false, err
 	}
 
-	if verbose {
-		if exists {
-			logging.LogInfof(
-				"Tag '%s' in gitlab project %s exists.",
-				tagName,
-				projectUrl,
-			)
-		} else {
-			logging.LogInfof(
-				"Tag '%s' in gitlab project %s does not exist.",
-				tagName,
-				projectUrl,
-			)
-		}
+	if exists {
+		logging.LogInfoByCtxf(ctx, "Tag '%s' in gitlab project %s exists.", tagName, projectUrl)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Tag '%s' in gitlab project %s does not exist.", tagName, projectUrl)
 	}
 
 	return exists, nil
@@ -151,8 +125,8 @@ func (g *GitlabTag) GetGitlabTags() (gitlabTags *GitlabTags, err error) {
 	return g.gitlabTags, nil
 }
 
-func (g *GitlabTag) GetHash() (hash string, err error) {
-	raw, err := g.GetRawResponse()
+func (g *GitlabTag) GetHash(ctx context.Context) (hash string, err error) {
+	raw, err := g.GetRawResponse(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -197,13 +171,13 @@ func (g *GitlabTag) GetNativeTagsService() (nativeTagsService *gitlab.TagsServic
 	return nativeTagsService, nil
 }
 
-func (g *GitlabTag) GetProjectId() (projectId int, err error) {
+func (g *GitlabTag) GetProjectId(ctx context.Context) (projectId int, err error) {
 	project, err := g.GetGitlabProject()
 	if err != nil {
 		return -1, err
 	}
 
-	projectId, err = project.GetId()
+	projectId, err = project.GetId(ctx)
 	if err != nil {
 		return -1, err
 	}
@@ -211,13 +185,13 @@ func (g *GitlabTag) GetProjectId() (projectId int, err error) {
 	return projectId, nil
 }
 
-func (g *GitlabTag) GetProjectIdAndUrl() (projectId int, projectUrl string, err error) {
-	projectId, err = g.GetProjectId()
+func (g *GitlabTag) GetProjectIdAndUrl(ctx context.Context) (projectId int, projectUrl string, err error) {
+	projectId, err = g.GetProjectId(ctx)
 	if err != nil {
 		return -1, "", err
 	}
 
-	projectUrl, err = g.GetProjectUrl()
+	projectUrl, err = g.GetProjectUrl(ctx)
 	if err != nil {
 		return -1, "", err
 	}
@@ -225,13 +199,13 @@ func (g *GitlabTag) GetProjectIdAndUrl() (projectId int, projectUrl string, err 
 	return projectId, projectUrl, err
 }
 
-func (g *GitlabTag) GetProjectUrl() (projectUrl string, err error) {
+func (g *GitlabTag) GetProjectUrl(ctx context.Context) (projectUrl string, err error) {
 	gitlabProject, err := g.GetGitlabProject()
 	if err != nil {
 		return "", err
 	}
 
-	gitlabUrl, err := gitlabProject.GetProjectUrl()
+	gitlabUrl, err := gitlabProject.GetProjectUrl(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -239,13 +213,13 @@ func (g *GitlabTag) GetProjectUrl() (projectUrl string, err error) {
 	return gitlabUrl, nil
 }
 
-func (g *GitlabTag) GetRawResponse() (rawResponse *gitlab.Tag, err error) {
+func (g *GitlabTag) GetRawResponse(ctx context.Context) (rawResponse *gitlab.Tag, err error) {
 	nativeClient, err := g.GetNativeTagsService()
 	if err != nil {
 		return nil, err
 	}
 
-	projectId, projectUrl, err := g.GetProjectIdAndUrl()
+	projectId, projectUrl, err := g.GetProjectIdAndUrl(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -293,135 +267,6 @@ func (g *GitlabTag) IsVersionTag() (isVersionTag bool, err error) {
 	}
 
 	return versionutils.IsVersionString(tagName), nil
-}
-
-func (g *GitlabTag) MustDelete(verbose bool) {
-	err := g.Delete(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabTag) MustExists(verbose bool) (exists bool) {
-	exists, err := g.Exists(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return exists
-}
-
-func (g *GitlabTag) MustGetGitRepository() (gitRepo GitRepository) {
-	gitRepo, err := g.GetGitRepository()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitRepo
-}
-
-func (g *GitlabTag) MustGetGitlabProject() (gitlabProject *GitlabProject) {
-	gitlabProject, err := g.GetGitlabProject()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabProject
-}
-
-func (g *GitlabTag) MustGetGitlabTags() (gitlabTags *GitlabTags) {
-	gitlabTags, err := g.GetGitlabTags()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabTags
-}
-
-func (g *GitlabTag) MustGetHash() (hash string) {
-	hash, err := g.GetHash()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hash
-}
-
-func (g *GitlabTag) MustGetName() (name string) {
-	name, err := g.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (g *GitlabTag) MustGetNativeTagsService() (nativeTagsService *gitlab.TagsService) {
-	nativeTagsService, err := g.GetNativeTagsService()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeTagsService
-}
-
-func (g *GitlabTag) MustGetProjectId() (projectId int) {
-	projectId, err := g.GetProjectId()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return projectId
-}
-
-func (g *GitlabTag) MustGetProjectIdAndUrl() (projectId int, projectUrl string) {
-	projectId, projectUrl, err := g.GetProjectIdAndUrl()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return projectId, projectUrl
-}
-
-func (g *GitlabTag) MustGetProjectUrl() (projectUrl string) {
-	projectUrl, err := g.GetProjectUrl()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return projectUrl
-}
-
-func (g *GitlabTag) MustGetRawResponse() (rawResponse *gitlab.Tag) {
-	rawResponse, err := g.GetRawResponse()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return rawResponse
-}
-
-func (g *GitlabTag) MustIsVersionTag() (isVersionTag bool) {
-	isVersionTag, err := g.IsVersionTag()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isVersionTag
-}
-
-func (g *GitlabTag) MustSetGitlabTags(gitlabTags *GitlabTags) {
-	err := g.SetGitlabTags(gitlabTags)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabTag) MustSetName(name string) {
-	err := g.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GitlabTag) SetGitlabTags(gitlabTags *GitlabTags) (err error) {

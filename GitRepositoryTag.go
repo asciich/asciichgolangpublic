@@ -1,6 +1,8 @@
 package asciichgolangpublic
 
 import (
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
@@ -83,7 +85,7 @@ func (g *GitRepositoryTag) GetGitRepository() (gitRepository GitRepository, err 
 	return g.gitRepository, nil
 }
 
-func (g *GitRepositoryTag) GetHash() (hash string, err error) {
+func (g *GitRepositoryTag) GetHash(ctx context.Context) (hash string, err error) {
 	repo, err := g.GetGitRepository()
 	if err != nil {
 		return "", err
@@ -126,65 +128,6 @@ func (g *GitRepositoryTag) IsVersionTag() (isVersionTag bool, err error) {
 	}
 
 	return versionutils.IsVersionString(name), nil
-}
-
-func (g *GitRepositoryTag) MustGetGitRepository() (gitRepository GitRepository) {
-	gitRepository, err := g.GetGitRepository()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitRepository
-}
-
-func (g *GitRepositoryTag) MustGetHash() (hash string) {
-	hash, err := g.GetHash()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hash
-}
-
-func (g *GitRepositoryTag) MustGetName() (name string) {
-	name, err := g.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (g *GitRepositoryTag) MustGetVersion() (version versionutils.Version) {
-	version, err := g.GetVersion()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return version
-}
-
-func (g *GitRepositoryTag) MustIsVersionTag() (isVersionTag bool) {
-	isVersionTag, err := g.IsVersionTag()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isVersionTag
-}
-
-func (g *GitRepositoryTag) MustSetGitRepository(gitRepository GitRepository) {
-	err := g.SetGitRepository(gitRepository)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitRepositoryTag) MustSetName(name string) {
-	err := g.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GitRepositoryTag) SetGitRepository(gitRepository GitRepository) (err error) {

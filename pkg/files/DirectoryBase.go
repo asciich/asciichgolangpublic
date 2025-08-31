@@ -191,7 +191,7 @@ func (d *DirectoryBase) DeleteFilesMatching(ctx context.Context, listFileOptions
 	return err
 }
 
-func (d *DirectoryBase) FileInDirectoryExists(verbose bool, path ...string) (fileExists bool, err error) {
+func (d *DirectoryBase) FileInDirectoryExists(ctx context.Context, path ...string) (fileExists bool, err error) {
 	if len(path) <= 0 {
 		return false, tracederrors.TracedError("path has no elements")
 	}
@@ -206,7 +206,7 @@ func (d *DirectoryBase) FileInDirectoryExists(verbose bool, path ...string) (fil
 		return false, err
 	}
 
-	fileExists, err = fileToCheck.Exists(contextutils.GetVerbosityContextByBool(verbose))
+	fileExists, err = fileToCheck.Exists(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -363,15 +363,6 @@ func (d *DirectoryBase) MustCheckExists(ctx context.Context) {
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
-}
-
-func (d *DirectoryBase) MustFileInDirectoryExists(verbose bool, path ...string) (fileExists bool) {
-	fileExists, err := d.FileInDirectoryExists(verbose, path...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return fileExists
 }
 
 func (d *DirectoryBase) MustGetFilePathInDirectory(path ...string) (filePath string) {

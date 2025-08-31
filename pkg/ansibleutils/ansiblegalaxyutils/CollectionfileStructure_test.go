@@ -44,7 +44,7 @@ func Test_CreateFileStructure(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		readmeExists, err := tempDir.FileInDirectoryExists(verbose, "README.md")
+		readmeExists, err := tempDir.FileInDirectoryExists(ctx, "README.md")
 		require.NoError(t, err)
 		require.True(t, readmeExists)
 

@@ -8,7 +8,6 @@ import (
 type GitlabReadFileOptions struct {
 	Path       string
 	BranchName string
-	Verbose    bool
 }
 
 func NewGitlabReadFileOptions() (g *GitlabReadFileOptions) {
@@ -35,7 +34,6 @@ func (g *GitlabReadFileOptions) GetGitlabGetRepositoryFileOptions() (getOptions 
 	getOptions = NewGitlabGetRepositoryFileOptions()
 	getOptions.Path = g.Path
 	getOptions.BranchName = g.BranchName
-	getOptions.Verbose = g.Verbose
 	return getOptions, nil
 }
 
@@ -45,11 +43,6 @@ func (g *GitlabReadFileOptions) GetPath() (path string, err error) {
 	}
 
 	return g.Path, nil
-}
-
-func (g *GitlabReadFileOptions) GetVerbose() (verbose bool) {
-
-	return g.Verbose
 }
 
 func (g *GitlabReadFileOptions) MustGetBranchName() (branchName string) {
@@ -111,8 +104,4 @@ func (g *GitlabReadFileOptions) SetPath(path string) (err error) {
 	g.Path = path
 
 	return nil
-}
-
-func (g *GitlabReadFileOptions) SetVerbose(verbose bool) {
-	g.Verbose = verbose
 }

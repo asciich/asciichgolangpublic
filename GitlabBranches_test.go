@@ -21,27 +21,30 @@ func TestGitlabProjectBranches_pagination(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				require.NoError(t, err)
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
-				gitlab.MustAuthenticate(&GitlabAuthenticationOptions{
-					AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
-				})
+				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				require.NoError(t, err)
 
-				gitlabProject := gitlab.MustGetGitlabProjectByPath("test_group/testproject", verbose)
-				require.True(gitlabProject.MustExists(verbose))
+				gitlabProject, err := gitlab.GetGitlabProjectByPath(ctx, "test_group/testproject")
+				require.NoError(t, err)
 
-				branchName := gitlabProject.MustGetDefaultBranchName()
+				exists, err := gitlabProject.Exists(ctx)
+				require.NoError(t, err)
+				require.True(t, exists)
 
-				gitlabProject.MustDeleteAllBranchesExceptDefaultBranch(verbose)
+				branchName, err := gitlabProject.GetDefaultBranchName(ctx)
+				require.NoError(t, err)
 
-				branchList := gitlabProject.MustGetBranchNames(verbose)
-				require.EqualValues(
-					[]string{branchName},
-					branchList,
-				)
+				err = gitlabProject.DeleteAllBranchesExceptDefaultBranch(ctx)
+				require.NoError(t, err)
+
+				branchList, err := gitlabProject.GetBranchNames(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, []string{branchName}, branchList)
 
 				expectedBranchesList := []string{}
 				for i := 0; i < 21; i++ {
@@ -52,11 +55,13 @@ func TestGitlabProjectBranches_pagination(t *testing.T) {
 				}
 
 				for _, toCreate := range expectedBranchesList {
-					gitlabProject.MustCreateBranchFromDefaultBranch(toCreate, verbose)
+					_, err = gitlabProject.CreateBranchFromDefaultBranch(ctx, toCreate)
+					require.NoError(t, err)
 				}
 
-				branchList = gitlabProject.MustGetBranchNames(verbose)
-				require.EqualValues(branchList, branchList)
+				branchList, err = gitlabProject.GetBranchNames(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, branchList, branchList)
 			},
 		)
 	}

@@ -11,7 +11,6 @@ type GitlabCreateDeployKeyOptions struct {
 	Name          string
 	WriteAccess   bool
 	PublicKeyFile filesinterfaces.File
-	Verbose       bool
 }
 
 func NewGitlabCreateDeployKeyOptions() (g *GitlabCreateDeployKeyOptions) {
@@ -24,11 +23,6 @@ func (g *GitlabCreateDeployKeyOptions) GetPublicKeyFile() (publicKeyFile filesin
 	}
 
 	return g.PublicKeyFile, nil
-}
-
-func (g *GitlabCreateDeployKeyOptions) GetVerbose() (verbose bool, err error) {
-
-	return g.Verbose, nil
 }
 
 func (g *GitlabCreateDeployKeyOptions) GetWriteAccess() (writeAccess bool, err error) {
@@ -52,12 +46,6 @@ func (g *GitlabCreateDeployKeyOptions) SetPublicKeyFile(publicKeyFile filesinter
 	}
 
 	g.PublicKeyFile = publicKeyFile
-
-	return nil
-}
-
-func (g *GitlabCreateDeployKeyOptions) SetVerbose(verbose bool) (err error) {
-	g.Verbose = verbose
 
 	return nil
 }

@@ -53,22 +53,22 @@ func (g *GitlabPipelineSchedule) GetId() (id int, err error) {
 	return g.id, nil
 }
 
-func (g *GitlabPipelineSchedule) GetProjectId() (projectId int, err error) {
+func (g *GitlabPipelineSchedule) GetProjectId(ctx context.Context) (projectId int, err error) {
 	project, err := g.GetGitlabProject()
 	if err != nil {
 		return 0, err
 	}
 
-	return project.GetId()
+	return project.GetId(ctx)
 }
 
-func (g *GitlabPipelineSchedule) GetRawResponse() (rawResponse *gitlab.PipelineSchedule, err error) {
+func (g *GitlabPipelineSchedule) GetRawResponse(ctx context.Context) (rawResponse *gitlab.PipelineSchedule, err error) {
 	native, err := g.GetNativePipelineSchedulesClient()
 	if err != nil {
 		return nil, err
 	}
 
-	projectId, err := g.GetProjectId()
+	projectId, err := g.GetProjectId(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -90,17 +90,17 @@ func (g *GitlabPipelineSchedule) GetRawResponse() (rawResponse *gitlab.PipelineS
 	return rawResponse, nil
 }
 
-func (g *GitlabPipelineSchedule) GetGitlabUrl() (url string, err error) {
+func (g *GitlabPipelineSchedule) GetGitlabUrl(ctx context.Context) (url string, err error) {
 	project, err := g.GetGitlabProject()
 	if err != nil {
 		return "", err
 	}
 
-	return project.GetProjectUrl()
+	return project.GetProjectUrl(ctx)
 }
 
 func (g *GitlabPipelineSchedule) GetLastPipelineStatus(ctx context.Context) (status string, err error) {
-	rawResponse, err := g.GetRawResponse()
+	rawResponse, err := g.GetRawResponse(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -120,7 +120,7 @@ func (g *GitlabPipelineSchedule) GetLastPipelineStatus(ctx context.Context) (sta
 		return "", err
 	}
 
-	url, err := g.GetGitlabUrl()
+	url, err := g.GetGitlabUrl(ctx)
 	if err != nil {
 		return "", err
 	}

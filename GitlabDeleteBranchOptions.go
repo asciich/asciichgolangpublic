@@ -5,8 +5,6 @@ type GitlabDeleteBranchOptions struct {
 	// SkipWaitForDeletion = true will skip this check/wait.
 	SkipWaitForDeletion bool
 
-	// Enable verbose output:
-	Verbose bool
 }
 
 func NewGitlabDeleteBranchOptions() (g *GitlabDeleteBranchOptions) {
@@ -18,15 +16,6 @@ func (g *GitlabDeleteBranchOptions) GetSkipWaitForDeletion() (skipWaitForDeletio
 	return g.SkipWaitForDeletion
 }
 
-func (g *GitlabDeleteBranchOptions) GetVerbose() (verbose bool) {
-
-	return g.Verbose
-}
-
 func (g *GitlabDeleteBranchOptions) SetSkipWaitForDeletion(skipWaitForDeletion bool) {
 	g.SkipWaitForDeletion = skipWaitForDeletion
-}
-
-func (g *GitlabDeleteBranchOptions) SetVerbose(verbose bool) {
-	g.Verbose = verbose
 }

@@ -26,10 +26,9 @@ func TestGitlabCreateProjectOptionsGetProjectName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				projectName := tt.createOptions.MustGetProjectName()
-				require.EqualValues(tt.expectedProjectName, projectName)
+				projectName, err := tt.createOptions.GetProjectName()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedProjectName, projectName)
 			},
 		)
 	}
@@ -54,12 +53,11 @@ func TestGitlabCreateProjectOptionsGetGroupNames(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
-
-				groupNames := tt.createOptions.MustGetGroupNames(verbose)
-				require.EqualValues(tt.expectedGroupNames, groupNames)
+				groupNames, err := tt.createOptions.GetGroupNames(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedGroupNames, groupNames)
 			},
 		)
 	}
@@ -84,12 +82,10 @@ func TestGitlabCreateProjectOptionsGetGroupPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				const verbose bool = true
-
-				groupPath := tt.createOptions.MustGetGroupPath(verbose)
-				require.EqualValues(tt.expectedGroupPath, groupPath)
+				ctx := getCtx()
+				groupPath, err := tt.createOptions.GetGroupPath(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedGroupPath, groupPath)
 			},
 		)
 	}

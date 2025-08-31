@@ -1,9 +1,9 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -25,7 +25,7 @@ func NewGitRepositoriesService() (g *GitRepositoriesService) {
 	return new(GitRepositoriesService)
 }
 
-func (g *GitRepositoriesService) CloneGitRepositoryToDirectory(toClone GitRepository, destinationPath string, verbose bool) (repo GitRepository, err error) {
+func (g *GitRepositoriesService) CloneGitRepositoryToDirectory(ctx context.Context, toClone GitRepository, destinationPath string) (repo GitRepository, err error) {
 	if toClone == nil {
 		return nil, tracederrors.TracedErrorNil("toClone")
 	}
@@ -44,7 +44,7 @@ func (g *GitRepositoriesService) CloneGitRepositoryToDirectory(toClone GitReposi
 		return nil, err
 	}
 
-	repo, err = g.CloneToDirectoryByPath(localPath, destinationPath, verbose)
+	repo, err = g.CloneToDirectoryByPath(ctx, localPath, destinationPath)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (g *GitRepositoriesService) CloneGitRepositoryToDirectory(toClone GitReposi
 	return repo, nil
 }
 
-func (g *GitRepositoriesService) CloneGitRepositoryToTemporaryDirectory(toClone GitRepository, verbose bool) (repo GitRepository, err error) {
+func (g *GitRepositoriesService) CloneGitRepositoryToTemporaryDirectory(ctx context.Context, toClone GitRepository) (repo GitRepository, err error) {
 	if toClone == nil {
 		return nil, tracederrors.TracedErrorNil("toClone")
 	}
@@ -64,23 +64,17 @@ func (g *GitRepositoriesService) CloneGitRepositoryToTemporaryDirectory(toClone 
 			return nil, err
 		}
 
-		repo, err = g.CloneToTemporaryDirectory(localPath, verbose)
+		repo, err = g.CloneToTemporaryDirectory(ctx, localPath)
 		if err != nil {
 			return nil, err
 		}
 
-		if verbose {
-			clonedPath, err := repo.GetPath()
-			if err != nil {
-				return nil, err
-			}
-
-			logging.LogChangedf(
-				"Cloned local git repository '%s' into temporary directory '%s'",
-				localPath,
-				clonedPath,
-			)
+		clonedPath, err := repo.GetPath()
+		if err != nil {
+			return nil, err
 		}
+
+		logging.LogChangedByCtxf(ctx, "Cloned local git repository '%s' into temporary directory '%s'", localPath, clonedPath)
 	}
 
 	if repo == nil {
@@ -98,31 +92,24 @@ func (g *GitRepositoriesService) CloneGitRepositoryToTemporaryDirectory(toClone 
 				)
 			}
 
-			repo, err = g.CloneToTemporaryDirectory(localPath, verbose)
+			repo, err = g.CloneToTemporaryDirectory(ctx, localPath)
 			if err != nil {
 				return nil, err
 			}
 
-			if verbose {
-				clonedPath, err := repo.GetPath()
-				if err != nil {
-					return nil, err
-				}
-
-				logging.LogChangedf(
-					"Cloned git repository '%s' from host '%s' into temporary directory '%s'",
-					localPath,
-					hostDescription,
-					clonedPath,
-				)
+			clonedPath, err := repo.GetPath()
+			if err != nil {
+				return nil, err
 			}
+
+			logging.LogChangedByCtxf(ctx, "Cloned git repository '%s' from host '%s' into temporary directory '%s'", localPath, hostDescription, clonedPath)
 		}
 	}
 
 	return repo, nil
 }
 
-func (g *GitRepositoriesService) CloneToDirectoryByPath(urlOrPath string, destinationPath string, verbose bool) (repo *LocalGitRepository, err error) {
+func (g *GitRepositoriesService) CloneToDirectoryByPath(ctx context.Context, urlOrPath string, destinationPath string) (repo *LocalGitRepository, err error) {
 	urlOrPath = strings.TrimSpace(urlOrPath)
 	if urlOrPath == "" {
 		return nil, tracederrors.TracedErrorEmptyString("urlOrPath")
@@ -138,7 +125,7 @@ func (g *GitRepositoriesService) CloneToDirectoryByPath(urlOrPath string, destin
 		return nil, err
 	}
 
-	err = repo.CloneRepositoryByPathOrUrl(urlOrPath, verbose)
+	err = repo.CloneRepositoryByPathOrUrl(ctx, urlOrPath)
 	if err != nil {
 		return nil, err
 	}
@@ -146,35 +133,33 @@ func (g *GitRepositoriesService) CloneToDirectoryByPath(urlOrPath string, destin
 	return repo, nil
 }
 
-func (g *GitRepositoriesService) CloneToTemporaryDirectory(urlOrPath string, verbose bool) (repo GitRepository, err error) {
+func (g *GitRepositoriesService) CloneToTemporaryDirectory(ctx context.Context, urlOrPath string) (repo GitRepository, err error) {
 	urlOrPath = strings.TrimSpace(urlOrPath)
 	if urlOrPath == "" {
 		return nil, tracederrors.TracedErrorEmptyString("urlOrPath")
 	}
 
-	destinationPath, err := tempfilesoo.CreateEmptyTemporaryDirectoryAndGetPath(contextutils.GetVerbosityContextByBool(verbose))
+	destinationPath, err := tempfilesoo.CreateEmptyTemporaryDirectoryAndGetPath(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	repo, err = g.CloneToDirectoryByPath(urlOrPath, destinationPath, verbose)
+	repo, err = g.CloneToDirectoryByPath(ctx, urlOrPath, destinationPath)
 	if err != nil {
 		return nil, err
 	}
 
-	if verbose {
-		logging.LogChangedf("Cloned git repository '%s' to local directory '%s'.", urlOrPath, destinationPath)
-	}
+	logging.LogChangedByCtxf(ctx, "Cloned git repository '%s' to local directory '%s'.", urlOrPath, destinationPath)
 
 	return repo, nil
 }
 
-func (g *GitRepositoriesService) CreateTemporaryInitializedRepository(options *parameteroptions.CreateRepositoryOptions) (repo GitRepository, err error) {
+func (g *GitRepositoriesService) CreateTemporaryInitializedRepository(ctx context.Context, options *parameteroptions.CreateRepositoryOptions) (repo GitRepository, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	repoPath, err := tempfilesoo.CreateEmptyTemporaryDirectoryAndGetPath(contextutils.GetVerbosityContextByBool(options.Verbose))
+	repoPath, err := tempfilesoo.CreateEmptyTemporaryDirectoryAndGetPath(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +169,7 @@ func (g *GitRepositoriesService) CreateTemporaryInitializedRepository(options *p
 		return nil, err
 	}
 
-	err = repo.Init(options)
+	err = repo.Init(ctx, options)
 	if err != nil {
 		return nil, err
 	}

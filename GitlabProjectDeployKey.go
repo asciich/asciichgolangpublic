@@ -1,6 +1,8 @@
 package asciichgolangpublic
 
 import (
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -16,121 +18,7 @@ func NewGitlabProjectDeployKey() (projectDeployKey *GitlabProjectDeployKey) {
 	return new(GitlabProjectDeployKey)
 }
 
-func (g *GitlabProjectDeployKey) MustCreateDeployKey(createOptions *GitlabCreateDeployKeyOptions) {
-	err := g.CreateDeployKey(createOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabProjectDeployKey) MustDelete(verbose bool) {
-	err := g.Delete(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabProjectDeployKey) MustExists() (exists bool) {
-	exists, err := g.Exists()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return exists
-}
-
-func (g *GitlabProjectDeployKey) MustGetGitlab() (gitlab *GitlabInstance) {
-	gitlab, err := g.GetGitlab()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlab
-}
-
-func (g *GitlabProjectDeployKey) MustGetGitlabProject() (gitlabProject *GitlabProject) {
-	gitlabProject, err := g.GetGitlabProject()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabProject
-}
-
-func (g *GitlabProjectDeployKey) MustGetGitlabProjectDeployKeys() (gitlabProjectProjectDeployKeys *GitlabProjectDeployKeys) {
-	gitlabProjectProjectDeployKeys, err := g.GetGitlabProjectDeployKeys()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabProjectProjectDeployKeys
-}
-
-func (g *GitlabProjectDeployKey) MustGetId() (id int) {
-	id, err := g.GetId()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return id
-}
-
-func (g *GitlabProjectDeployKey) MustGetName() (name string) {
-	name, err := g.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (g *GitlabProjectDeployKey) MustGetNativeProjectDeployKeyService() (nativeService *gitlab.DeployKeysService) {
-	nativeService, err := g.GetNativeProjectDeployKeyService()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeService
-}
-
-func (g *GitlabProjectDeployKey) MustGetProjectId() (id int) {
-	id, err := g.GetProjectId()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return id
-}
-
-func (g *GitlabProjectDeployKey) MustRecreateDeployKey(createOptions *GitlabCreateDeployKeyOptions) {
-	err := g.RecreateDeployKey(createOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabProjectDeployKey) MustSetGitlabProjectDeployKeys(gitlabProjectDeployKeys *GitlabProjectDeployKeys) {
-	err := g.SetGitlabProjectDeployKeys(gitlabProjectDeployKeys)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabProjectDeployKey) MustSetId(id int) {
-	err := g.SetId(id)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabProjectDeployKey) MustSetName(name string) {
-	err := g.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (k *GitlabProjectDeployKey) CreateDeployKey(createOptions *GitlabCreateDeployKeyOptions) (err error) {
+func (k *GitlabProjectDeployKey) CreateDeployKey(ctx context.Context, createOptions *GitlabCreateDeployKeyOptions) (err error) {
 	if createOptions == nil {
 		return tracederrors.TracedError("createOptions is nil")
 	}
@@ -140,7 +28,7 @@ func (k *GitlabProjectDeployKey) CreateDeployKey(createOptions *GitlabCreateDepl
 		return err
 	}
 
-	exists, err := k.Exists()
+	exists, err := k.Exists(ctx)
 	if err != nil {
 		return err
 	}
@@ -154,7 +42,7 @@ func (k *GitlabProjectDeployKey) CreateDeployKey(createOptions *GitlabCreateDepl
 		return err
 	}
 
-	projectId, err := k.GetProjectId()
+	projectId, err := k.GetProjectId(ctx)
 	if err != nil {
 		return err
 	}
@@ -173,15 +61,13 @@ func (k *GitlabProjectDeployKey) CreateDeployKey(createOptions *GitlabCreateDepl
 		return tracederrors.TracedError(err.Error())
 	}
 
-	if createOptions.Verbose {
-		logging.LogInfof("Created project deploy key '%s'", keyName)
-	}
+	logging.LogInfoByCtxf(ctx, "Created project deploy key '%s'", keyName)
 
 	return nil
 }
 
-func (k *GitlabProjectDeployKey) Delete(verbose bool) (err error) {
-	deployKeyExists, err := k.Exists()
+func (k *GitlabProjectDeployKey) Delete(ctx context.Context) (err error) {
+	deployKeyExists, err := k.Exists(ctx)
 	if err != nil {
 		return err
 	}
@@ -197,12 +83,12 @@ func (k *GitlabProjectDeployKey) Delete(verbose bool) (err error) {
 			return err
 		}
 
-		projectId, err := k.GetProjectId()
+		projectId, err := k.GetProjectId(ctx)
 		if err != nil {
 			return err
 		}
 
-		keyId, err := k.GetId()
+		keyId, err := k.GetId(ctx)
 		if err != nil {
 			return err
 		}
@@ -212,19 +98,15 @@ func (k *GitlabProjectDeployKey) Delete(verbose bool) (err error) {
 			return tracederrors.TracedError(err.Error())
 		}
 
-		if verbose {
-			logging.LogInfof("Project deploy key '%s' Deleted.", keyName)
-		}
+		logging.LogChangedByCtxf(ctx, "Project deploy key '%s' Deleted.", keyName)
 	} else {
-		if verbose {
-			logging.LogInfof("Project deploy key '%s' already absent. Skip deletion.", keyName)
-		}
+		logging.LogInfoByCtxf(ctx, "Project deploy key '%s' already absent. Skip deletion.", keyName)
 	}
 
 	return nil
 }
 
-func (k *GitlabProjectDeployKey) Exists() (exists bool, err error) {
+func (k *GitlabProjectDeployKey) Exists(ctx context.Context) (exists bool, err error) {
 	gitlabProject, err := k.GetGitlabProject()
 	if err != nil {
 		return false, err
@@ -235,7 +117,7 @@ func (k *GitlabProjectDeployKey) Exists() (exists bool, err error) {
 		return false, err
 	}
 
-	exists, err = gitlabProject.DeployKeyByNameExists(keyName)
+	exists, err = gitlabProject.DeployKeyByNameExists(ctx, keyName)
 	if err != nil {
 		return false, err
 	}
@@ -279,7 +161,7 @@ func (k *GitlabProjectDeployKey) GetGitlabProjectDeployKeys() (gitlabProjectProj
 	return k.gitlabProjectDeployKeys, nil
 }
 
-func (k *GitlabProjectDeployKey) GetId() (id int, err error) {
+func (k *GitlabProjectDeployKey) GetId(ctx context.Context) (id int, err error) {
 	if k.id > 0 {
 		return k.id, nil
 	}
@@ -294,7 +176,7 @@ func (k *GitlabProjectDeployKey) GetId() (id int, err error) {
 		return -1, err
 	}
 
-	id, err = deployKeys.GetKeyIdByKeyName(name)
+	id, err = deployKeys.GetKeyIdByKeyName(ctx, name)
 	if err != nil {
 		return -1, err
 	}
@@ -324,13 +206,13 @@ func (k *GitlabProjectDeployKey) GetNativeProjectDeployKeyService() (nativeServi
 	return nativeService, nil
 }
 
-func (k *GitlabProjectDeployKey) GetProjectId() (id int, err error) {
+func (k *GitlabProjectDeployKey) GetProjectId(ctx context.Context) (id int, err error) {
 	project, err := k.GetGitlabProject()
 	if err != nil {
 		return -1, err
 	}
 
-	id, err = project.GetId()
+	id, err = project.GetId(ctx)
 	if err != nil {
 		return -1, err
 	}
@@ -338,7 +220,7 @@ func (k *GitlabProjectDeployKey) GetProjectId() (id int, err error) {
 	return id, nil
 }
 
-func (k *GitlabProjectDeployKey) RecreateDeployKey(createOptions *GitlabCreateDeployKeyOptions) (err error) {
+func (k *GitlabProjectDeployKey) RecreateDeployKey(ctx context.Context, createOptions *GitlabCreateDeployKeyOptions) (err error) {
 	if createOptions == nil {
 		return tracederrors.TracedError("createOptions is nil")
 	}
@@ -348,23 +230,19 @@ func (k *GitlabProjectDeployKey) RecreateDeployKey(createOptions *GitlabCreateDe
 		return err
 	}
 
-	if createOptions.Verbose {
-		logging.LogInfof("Recreate gitlab project deploy key '%s' started.", keyName)
-	}
+	logging.LogInfoByCtxf(ctx, "Recreate gitlab project deploy key '%s' started.", keyName)
 
-	err = k.Delete(createOptions.Verbose)
+	err = k.Delete(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = k.CreateDeployKey(createOptions)
+	err = k.CreateDeployKey(ctx, createOptions)
 	if err != nil {
 		return err
 	}
 
-	if createOptions.Verbose {
-		logging.LogInfof("Recreate gitlab project deploy key '%s' finished.", keyName)
-	}
+	logging.LogInfoByCtxf(ctx, "Recreate gitlab project deploy key '%s' finished.", keyName)
 
 	return nil
 }

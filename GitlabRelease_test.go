@@ -23,62 +23,78 @@ func TestGitlabReleaseCreateAndDelete(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				const verbose bool = true
-
+				ctx := getCtx()
 				gitlabFQDN := "gitlab.asciich.ch"
 
-				gitlab := MustGetGitlabByFqdn(gitlabFQDN)
-				gitlab.MustAuthenticate(&GitlabAuthenticationOptions{
-					AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
-				})
+				gitlab, err := GetGitlabByFQDN(gitlabFQDN)
+				require.NoError(t, err)
+
+				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				require.NoError(t, err)
 
 				const projectPath string = "test_group/testproject"
 
 				const releaseName string = "test_release"
 				const releaseDescription string = "Release description."
 
-				project := gitlab.MustGetGitlabProjectByPath(projectPath, verbose)
-				release := project.MustGetReleaseByName(releaseName)
+				project, err := gitlab.GetGitlabProjectByPath(ctx, projectPath)
+				require.NoError(t, err)
+				release, err := project.GetReleaseByName(releaseName)
+				require.NoError(t, err)
 
 				for i := 0; i < 2; i++ {
-					release.MustDelete(
+					err = release.Delete(
+						ctx,
 						&GitlabDeleteReleaseOptions{
-							Verbose:                verbose,
 							DeleteCorrespondingTag: true,
 						},
 					)
+					require.NoError(t, err)
 
-					require.False(release.MustExists(verbose))
+					exists, err := release.Exists(ctx)
+					require.NoError(t, err)
+					require.False(t, exists)
 				}
 
 				var tag *GitlabTag
 
 				for i := 0; i < 2; i++ {
-					release = project.MustCreateReleaseFromLatestCommitInDefaultBranch(
+					release, err = project.CreateReleaseFromLatestCommitInDefaultBranch(
+						ctx,
 						&GitlabCreateReleaseOptions{
 							Name:        releaseName,
-							Verbose:     verbose,
 							Description: releaseDescription,
 						},
 					)
-					tag = release.MustGetTag()
+					require.NoError(t, err)
 
-					require.True(release.MustExists(verbose))
-					require.True(tag.MustExists(verbose))
+					tag, err = release.GetTag()
+					require.NoError(t, err)
+
+					exists, err := release.Exists(ctx)
+					require.NoError(t, err)
+					require.True(t, exists)
+
+					exists, err = tag.Exists(ctx)
+					require.NoError(t, err)
+					require.True(t, exists)
 				}
 
 				for i := 0; i < 2; i++ {
-					release.MustDelete(
+					err = release.Delete(
+						ctx,
 						&GitlabDeleteReleaseOptions{
-							Verbose:                verbose,
 							DeleteCorrespondingTag: true,
 						},
 					)
 
-					require.False(release.MustExists(verbose))
-					require.False(tag.MustExists(verbose))
+					exists, err := release.Exists(ctx)
+					require.NoError(t, err)
+					require.False(t, exists)
+
+					exists, err = tag.Exists(ctx)
+					require.NoError(t, err)
+					require.False(t, exists)
 				}
 			},
 		)
@@ -98,69 +114,73 @@ func TestGitlabRelease_ReleaseLinks(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				const verbose bool = true
-
+				ctx := getCtx()
 				gitlabFQDN := "gitlab.asciich.ch"
 
-				gitlab := MustGetGitlabByFqdn(gitlabFQDN)
-				gitlab.MustAuthenticate(&GitlabAuthenticationOptions{
-					AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
-				})
+				gitlab, err := GetGitlabByFQDN(gitlabFQDN)
+				require.NoError(t, err)
+
+				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
 
 				const projectPath string = "test_group/testproject"
 
 				const releaseName string = "test_release"
 				const releaseDescription string = "Release description."
 
-				project := gitlab.MustGetGitlabProjectByPath(projectPath, verbose)
-				release := project.MustGetReleaseByName(releaseName)
+				project, err := gitlab.GetGitlabProjectByPath(ctx, projectPath)
+				require.NoError(t, err)
 
-				release.MustDelete(
-					&GitlabDeleteReleaseOptions{
-						Verbose:                verbose,
-						DeleteCorrespondingTag: true,
-					},
-				)
+				release, err := project.GetReleaseByName(releaseName)
+				require.NoError(t, err)
 
-				release = project.MustCreateReleaseFromLatestCommitInDefaultBranch(
+				err = release.Delete(ctx, &GitlabDeleteReleaseOptions{DeleteCorrespondingTag: true})
+
+				release, err = project.CreateReleaseFromLatestCommitInDefaultBranch(
+					ctx,
 					&GitlabCreateReleaseOptions{
 						Name:        releaseName,
-						Verbose:     verbose,
 						Description: releaseDescription,
 					},
 				)
-				require.True(release.MustExists(verbose))
+
+				exists, err := release.Exists(ctx)
+				require.NoError(t, err)
+				require.True(t, exists)
 
 				const releaseLink = "https://asciich.ch/release/link/1"
 
-				require.False(release.MustHasReleaseLinks(verbose))
+				hasReleaseLinks, err := release.HasReleaseLinks(ctx)
+				require.NoError(t, err)
+				require.False(t, hasReleaseLinks)
 
 				for i := 0; i < 2; i++ {
-					release.MustCreateReleaseLink(
+					_, err = release.CreateReleaseLink(
+						ctx,
 						&GitlabCreateReleaseLinkOptions{
-							Url:     releaseLink,
-							Name:    "testReleaseLink",
-							Verbose: verbose,
+							Url:  releaseLink,
+							Name: "testReleaseLink",
 						},
 					)
-					require.True(release.MustHasReleaseLinks(verbose))
+					hasLinks, err := release.HasReleaseLinks(ctx)
+					require.NoError(t, err)
+					require.True(t, hasLinks)
 				}
 
-				require.EqualValues(
-					[]string{releaseLink},
-					release.MustListReleaseLinkUrls(verbose),
-				)
+				linkUrls, err := release.ListReleaseLinkUrls(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, []string{releaseLink}, linkUrls)
 
-				release.MustDelete(
+				err = release.Delete(
+					ctx,
 					&GitlabDeleteReleaseOptions{
-						Verbose:                verbose,
 						DeleteCorrespondingTag: true,
 					},
 				)
+				require.NoError(t, err)
 
-				require.False(release.MustExists(verbose))
+				exists, err = release.Exists(ctx)
+				require.NoError(t, err)
+				require.False(t, exists)
 			},
 		)
 	}
@@ -179,68 +199,69 @@ func TestGitlabRelease_CreateNewPatchRelease(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				const verbose bool = true
-
+				ctx := getCtx()
 				gitlabFQDN := "gitlab.asciich.ch"
 
-				gitlab := MustGetGitlabByFqdn(gitlabFQDN)
-				gitlab.MustAuthenticate(&GitlabAuthenticationOptions{
-					AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
-				})
+				gitlab, err := GetGitlabByFQDN(gitlabFQDN)
+				require.NoError(t, err)
+
+				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				require.NoError(t, err)
 
 				const projectPath string = "test_group/testproject"
 
 				const releaseDescription string = "Release description."
 
-				project := gitlab.MustGetGitlabProjectByPath(projectPath, verbose)
+				project, err := gitlab.GetGitlabProjectByPath(ctx, projectPath)
 
-				project.MustDeleteAllReleases(
+				err = project.DeleteAllReleases(
+					ctx,
 					&GitlabDeleteReleaseOptions{
-						Verbose:                verbose,
 						DeleteCorrespondingTag: true,
 					},
 				)
 
-				release := project.MustCreateReleaseFromLatestCommitInDefaultBranch(
+				release, err := project.CreateReleaseFromLatestCommitInDefaultBranch(
+					ctx,
 					&GitlabCreateReleaseOptions{
 						Name:        "v1.2.3",
 						Description: releaseDescription,
-						Verbose:     verbose,
 					},
 				)
-				require.True(release.MustExists(verbose))
+				exists, err := release.Exists(ctx)
+				require.NoError(t, err)
+				require.True(t, exists)
 
-				project.MustWriteFileContentInDefaultBranch(
+				_, err = project.WriteFileContentInDefaultBranch(
+					ctx,
 					&GitlabWriteFileOptions{
 						Path:          "random.txt",
 						Content:       []byte(mustutils.Must(randomgenerator.GetRandomString(50))),
 						CommitMessage: "Dummy change to test release.",
-						Verbose:       verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				nextPatchRelease := project.MustCreateNextPatchReleaseFromLatestCommitInDefaultBranch("next patch release", verbose)
+				nextPatchRelease, err := project.CreateNextPatchReleaseFromLatestCommitInDefaultBranch(ctx, "next patch release")
+				require.NoError(t, err)
 
-				require.EqualValues(
-					"v1.2.4",
-					nextPatchRelease.MustGetName(),
-				)
+				name, err := nextPatchRelease.GetName()
+				require.NoError(t, err)
+				require.EqualValues(t, "v1.2.4", name)
 
-				nextMinorRelease := project.MustCreateNextMinorReleaseFromLatestCommitInDefaultBranch("next minor release", verbose)
+				nextMinorRelease, err := project.CreateNextMinorReleaseFromLatestCommitInDefaultBranch(ctx, "next minor release")
+				require.NoError(t, err)
 
-				require.EqualValues(
-					"v1.3.0",
-					nextMinorRelease.MustGetName(),
-				)
+				name, err = nextMinorRelease.GetName()
+				require.NoError(t, err)
+				require.EqualValues(t, "v1.3.0", name)
 
-				nextMajorRelease := project.MustCreateNextMajorReleaseFromLatestCommitInDefaultBranch("next minor release", verbose)
+				nextMajorRelease, err := project.CreateNextMajorReleaseFromLatestCommitInDefaultBranch(ctx, "next minor release")
+				require.NoError(t, err)
 
-				require.EqualValues(
-					"v2.0.0",
-					nextMajorRelease.MustGetName(),
-				)
+				name, err = nextMajorRelease.GetName()
+				require.NoError(t, err)
+				require.EqualValues(t, "v2.0.0", name)
 			},
 		)
 	}

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -20,14 +21,15 @@ func TestGitlabProjectsProjectDoesNotExist(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				require.NoError(t, err)
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
-				gitlab.MustUseUnauthenticatedClient(verbose)
-				doesExist := gitlab.MustProjectByProjectPathExists("this/project_does_not_exist", verbose)
-				require.False(doesExist)
+				err = gitlab.UseUnauthenticatedClient(ctx)
+				require.NoError(t, err)
+				doesExist, err := gitlab.ProjectByProjectPathExists(ctx, "this/project_does_not_exist")
+				require.False(t, doesExist)
 			},
 		)
 	}
@@ -46,51 +48,41 @@ func TestGitlabProjectsGetProjectIdAndPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				const verbose bool = true
+				ctx := getCtx()
 
 				gitlabFQDN := "gitlab.asciich.ch"
 
-				gitlab := MustGetGitlabByFqdn(gitlabFQDN)
-				gitlab.MustAuthenticate(&GitlabAuthenticationOptions{
+				gitlab, err := GetGitlabByFQDN(gitlabFQDN)
+				require.NoError(t, err)
+
+				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{
 					AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
 				})
+				require.NoError(t, err)
 
 				const projectPath string = "test_group/testproject"
 
-				gitlabProject := gitlab.MustGetGitlabProjectByPath(projectPath, verbose)
-				require.True(gitlabProject.MustExists(verbose))
+				gitlabProject, err := gitlab.GetGitlabProjectByPath(ctx, projectPath)
+				require.NoError(t, err)
+				exists, err := gitlabProject.Exists(ctx)
+				require.NoError(t, err)
+				require.True(t, exists)
 
-				projectId := gitlabProject.MustGetId()
-				gitlabProject2 := gitlab.MustGetGitlabProjectById(projectId, verbose)
-				require.True(gitlabProject2.MustExists(verbose))
+				projectId, err := gitlabProject.GetId(ctx)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					projectPath,
-					gitlabProject.MustGetCachedPath(),
-				)
-				require.EqualValues(
-					projectPath,
-					gitlabProject2.MustGetCachedPath(),
-				)
-				require.EqualValues(
-					projectPath,
-					gitlabProject.MustGetPath(),
-				)
-				require.EqualValues(
-					projectPath,
-					gitlabProject2.MustGetPath(),
-				)
+				gitlabProject2, err := gitlab.GetGitlabProjectById(ctx, projectId)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					"https://"+gitlabFQDN+"/"+projectPath,
-					gitlabProject.MustGetProjectUrl(),
-				)
-				require.EqualValues(
-					"https://"+gitlabFQDN+"/"+projectPath,
-					gitlabProject2.MustGetProjectUrl(),
-				)
+				exists, err = gitlabProject2.Exists(ctx)
+				require.True(t, exists)
+
+				require.EqualValues(t, projectPath, mustutils.Must(gitlabProject.GetCachedPath(ctx)))
+				require.EqualValues(t, projectPath, mustutils.Must(gitlabProject2.GetCachedPath(ctx)))
+				require.EqualValues(t, projectPath, mustutils.Must(gitlabProject.GetPath(ctx)))
+				require.EqualValues(t, projectPath, mustutils.Must(gitlabProject2.GetPath(ctx)))
+				require.EqualValues(t, "https://"+gitlabFQDN+"/"+projectPath, mustutils.Must(gitlabProject.GetProjectUrl(ctx)))
+				require.EqualValues(t, "https://"+gitlabFQDN+"/"+projectPath, mustutils.Must(gitlabProject2.GetProjectUrl(ctx)))
 			},
 		)
 	}
@@ -109,39 +101,41 @@ func TestGitlabProjectsGetFileContentAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				require.NoError(t, err)
+				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				require.NoError(t, err)
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
-				gitlab.MustAuthenticate(&GitlabAuthenticationOptions{
-					AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
-				})
+				gitlabProject, err := gitlab.GetGitlabProjectByPath(ctx, "test_group/testproject")
 
-				gitlabProject := gitlab.MustGetGitlabProjectByPath("test_group/testproject", verbose)
-				require.True(gitlabProject.MustExists(verbose))
+				exists, err := gitlabProject.Exists(ctx)
+				require.NoError(t, err)
+				require.True(t, exists)
 
 				fileName := "test.txt"
 
 				for _, content := range []string{"a", "hello", "world"} {
-					gitlabProject.MustWriteFileContent(
+					_, err = gitlabProject.WriteFileContent(
+						ctx,
 						&GitlabWriteFileOptions{
 							Path:          fileName,
 							Content:       []byte(content),
 							CommitMessage: "commit during automated testing",
-							Verbose:       verbose,
 						},
 					)
+					require.NoError(t, err)
 
-					require.EqualValues(
-						content,
-						gitlabProject.MustReadFileContentAsString(
-							&GitlabReadFileOptions{
-								Path:    fileName,
-								Verbose: verbose,
-							},
-						),
+					readBack, err := gitlabProject.ReadFileContentAsString(
+						ctx,
+						&GitlabReadFileOptions{
+							Path: fileName,
+						},
 					)
+					require.NoError(t, err)
+
+					require.EqualValues(t, content, readBack)
 				}
 			},
 		)

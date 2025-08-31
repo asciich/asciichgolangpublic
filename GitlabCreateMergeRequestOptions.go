@@ -15,7 +15,6 @@ type GitlabCreateMergeRequestOptions struct {
 	Labels                          []string
 	SquashEnabled                   bool
 	DeleteSourceBranchOnMerge       bool
-	Verbose                         bool
 	FailIfMergeRequestAlreadyExists bool
 	AssignToSelf                    bool
 }
@@ -106,11 +105,6 @@ func (g *GitlabCreateMergeRequestOptions) GetTitle() (title string, err error) {
 	}
 
 	return g.Title, nil
-}
-
-func (g *GitlabCreateMergeRequestOptions) GetVerbose() (verbose bool) {
-
-	return g.Verbose
 }
 
 func (g *GitlabCreateMergeRequestOptions) IsTargetBranchSet() (isSet bool) {
@@ -265,8 +259,4 @@ func (g *GitlabCreateMergeRequestOptions) SetTitle(title string) (err error) {
 	g.Title = title
 
 	return nil
-}
-
-func (g *GitlabCreateMergeRequestOptions) SetVerbose(verbose bool) {
-	g.Verbose = verbose
 }

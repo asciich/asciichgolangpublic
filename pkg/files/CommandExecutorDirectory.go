@@ -117,7 +117,7 @@ func (c *CommandExecutorDirectory) Chmod(ctx context.Context, chmodOptions *file
 	return nil
 }
 
-func (c *CommandExecutorDirectory) CopyContentToDirectory(destinationDir filesinterfaces.Directory, verbose bool) (err error) {
+func (c *CommandExecutorDirectory) CopyContentToDirectory(ctx context.Context, destinationDir filesinterfaces.Directory) (err error) {
 	if destinationDir == nil {
 		return tracederrors.TracedErrorNil("destinationDir")
 	}
@@ -145,7 +145,6 @@ func (c *CommandExecutorDirectory) CopyContentToDirectory(destinationDir filesin
 		return err
 	}
 
-	ctx := contextutils.GetVerbosityContextByBool(verbose)
 	_, err = commandExecutor.RunCommand(
 		commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
@@ -156,15 +155,7 @@ func (c *CommandExecutorDirectory) CopyContentToDirectory(destinationDir filesin
 		return err
 	}
 
-	if verbose {
-		logging.LogChangedf(
-			"Copied directory '%s' on '%s' to '%s' on '%s'",
-			srcDirPath,
-			srcHostDescription,
-			destDirPath,
-			destHostDescription,
-		)
-	}
+	logging.LogChangedByCtxf(ctx, "Copied directory '%s' on '%s' to '%s' on '%s'", srcDirPath, srcHostDescription, destDirPath, destHostDescription)
 
 	return nil
 }

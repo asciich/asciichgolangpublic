@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions/authenticationoptions"
 )
 
@@ -42,12 +43,12 @@ func listCmd(ctx context.Context, url string) {
 			GitlabUrl:   url,
 		},
 	}
-	project, err := asciichgolangpublic.GetGitlabProjectByUrlFromString(url, access, contextutils.GetVerboseFromContext(ctx))
+	project, err := asciichgolangpublic.GetGitlabProjectByUrlFromString(ctx, url, access)
 	if err != nil {
 		return
 	}
 
-	names := project.MustListScheduledPipelineNames(ctx)
+	names := mustutils.Must(project.ListScheduledPipelineNames(ctx))
 	for _, n := range names {
 		fmt.Println(n)
 	}

@@ -21,41 +21,56 @@ func TestMergeRequestCreateAndClose(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
+				ctx := getCtx()
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
-				gitlab.MustAuthenticate(&GitlabAuthenticationOptions{
-					AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
-				})
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				require.NoError(t, err)
 
-				testProject := gitlab.MustCreatePersonalProject("testProject", verbose)
+				testProject, err := gitlab.CreatePersonalProject(ctx, "testProject")
+				require.NoError(t, err)
 
 				const testBranchName string = "mr_test_branch"
 
-				testProject.MustDeleteBranch(testBranchName, &GitlabDeleteBranchOptions{
-					Verbose: verbose,
-				})
-				branch := testProject.MustCreateBranchFromDefaultBranch(testBranchName, verbose)
+				err = testProject.DeleteBranch(ctx, testBranchName, &GitlabDeleteBranchOptions{})
+				require.NoError(t, err)
+
+				branch, err := testProject.CreateBranchFromDefaultBranch(ctx, testBranchName)
+				require.NoError(t, err)
 
 				for i := 0; i < 2; i++ {
 					mergeRequest, err := branch.CreateMergeRequest(
+						ctx,
 						&GitlabCreateMergeRequestOptions{
-							Title:   tt.mergeRequestTitle,
-							Verbose: verbose,
+							Title: tt.mergeRequestTitle,
 						},
 					)
 					require.NoError(t, err)
 
-					require.True(t, mergeRequest.MustIsOpen())
-					require.EqualValues(t, testProject.MustGetDefaultBranchName(), mergeRequest.MustGetTargetBranchName())
-					require.EqualValues(t, testBranchName, mergeRequest.MustGetSourceBranchName())
+					isOpen, err := mergeRequest.IsOpen(ctx)
+					require.NoError(t, err)
+					require.True(t, isOpen)
+
+					defaultBranchName, err := testProject.GetDefaultBranchName(ctx)
+					require.NoError(t, err)
+					targetBranchName, err := mergeRequest.GetTargetBranchName(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, defaultBranchName, targetBranchName)
+
+					sourceBranchName, err := mergeRequest.GetSourceBranchName(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, testBranchName, sourceBranchName)
 				}
 
-				mergeRequest := testProject.MustGetOpenMergeRequestByTitle(tt.mergeRequestTitle, verbose)
+				mergeRequest, err := testProject.GetOpenMergeRequestByTitle(ctx, tt.mergeRequestTitle)
+				require.NoError(t, err)
 				for i := 0; i < 2; i++ {
-					err := mergeRequest.Close("closed for testing", verbose)
+					err := mergeRequest.Close(ctx, "closed for testing")
 					require.NoError(t, err)
-					require.True(t, mergeRequest.MustIsClosed())
+
+					isClosed, err := mergeRequest.IsClosed(ctx)
+					require.NoError(t, err)
+					require.True(t, isClosed)
 				}
 			},
 		)
@@ -86,56 +101,77 @@ func TestMergeRequestCreateAndClose_withLabels(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
+				ctx := getCtx()
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
-				gitlab.MustAuthenticate(&GitlabAuthenticationOptions{
-					AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
-				})
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				require.NoError(t, err)
 
-				testProject := gitlab.MustCreatePersonalProject("testProject", verbose)
+				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				require.NoError(t, err)
+
+				testProject, err := gitlab.CreatePersonalProject(ctx, "testProject")
+				require.NoError(t, err)
 
 				const testBranchName string = "mr_test_branch"
 
-				testProject.MustDeleteBranch(testBranchName, &GitlabDeleteBranchOptions{
-					Verbose: verbose,
-				})
-				branch := testProject.MustCreateBranchFromDefaultBranch(testBranchName, verbose)
+				err = testProject.DeleteBranch(ctx, testBranchName, &GitlabDeleteBranchOptions{})
+				require.NoError(t, err)
+
+				branch, err := testProject.CreateBranchFromDefaultBranch(ctx, testBranchName)
+				require.NoError(t, err)
 
 				for i := 0; i < 2; i++ {
 					branchName, err := branch.GetName()
 					require.NoError(t, err)
 
-					mergeRequest := testProject.MustCreateMergeRequest(
+					mergeRequest, err := testProject.CreateMergeRequest(
+						ctx,
 						&GitlabCreateMergeRequestOptions{
 							SourceBranchName: branchName,
 							Title:            tt.mergeRequestTitle,
 							Labels:           tt.labels,
 							Description:      tt.description,
-							Verbose:          verbose,
 						},
 					)
-					require.True(t, mergeRequest.MustIsOpen())
-					require.EqualValues(t, testProject.MustGetDefaultBranchName(), mergeRequest.MustGetTargetBranchName())
-					require.EqualValues(t, testBranchName, mergeRequest.MustGetSourceBranchName())
+					require.NoError(t, err)
 
-					require.EqualValues(t, tt.labels, mergeRequest.MustGetLabels())
+					isOpen, err := mergeRequest.IsOpen(ctx)
+					require.NoError(t, err)
+					require.True(t, isOpen)
 
-					require.EqualValues(t, tt.description, mergeRequest.MustGetDescription())
+					defaultBranchName, err := testProject.GetDefaultBranchName(ctx)
+					require.NoError(t, err)
+					targetBranchName, err := mergeRequest.GetTargetBranchName(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, defaultBranchName, targetBranchName)
+
+					sourceBranch, err := mergeRequest.GetSourceBranchName(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, testBranchName, sourceBranch)
+
+					labels, err := mergeRequest.GetLabels(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, tt.labels, labels)
+
+					description, err := mergeRequest.GetDescription(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, tt.description, description)
 				}
 
 				branchName, err := branch.GetName()
 				require.NoError(t, err)
 
-				mergeRequest := testProject.MustGetOpenMergeRequestBySourceAndTargetBranch(
-					branchName,
-					testProject.MustGetDefaultBranchName(),
-					verbose,
-				)
+				defaultBranchName, err := testProject.GetDefaultBranchName(ctx)
+				require.NoError(t, err)
+				mergeRequest, err := testProject.GetOpenMergeRequestBySourceAndTargetBranch(ctx, branchName, defaultBranchName)
+				require.NoError(t, err)
 				for i := 0; i < 2; i++ {
-					err = mergeRequest.Close("closed for testing", verbose)
+					err = mergeRequest.Close(ctx, "closed for testing")
 					require.NoError(t, err)
-					require.True(t, mergeRequest.MustIsClosed())
+
+					isClosed, err := mergeRequest.IsClosed(ctx)
+					require.NoError(t, err)
+					require.True(t, isClosed)
 				}
 			},
 		)

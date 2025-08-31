@@ -21,37 +21,58 @@ func TestGitlabPersonalProjectsCreateAndDelete(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				require.NoError(t, err)
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
-				gitlab.MustAuthenticate(&GitlabAuthenticationOptions{
-					AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
-				})
+				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				require.NoError(t, err)
 
-				privateProject := gitlab.MustGetPersonalProjectByName(tt.projectName, verbose)
-				require.True(privateProject.MustIsPersonalProject())
+				privateProject, err := gitlab.GetPersonalProjectByName(ctx, tt.projectName)
+				require.NoError(t, err)
+
+				isPersonalProject, err := privateProject.IsPersonalProject(ctx)
+				require.NoError(t, err)
+				require.True(t, isPersonalProject)
 
 				for i := 0; i < 2; i++ {
-					privateProject.MustDelete(verbose)
-					require.False(privateProject.MustExists(verbose))
+					err = privateProject.Delete(ctx)
+					require.NoError(t, err)
 
-					require.True(privateProject.MustIsPersonalProject())
+					exists, err := privateProject.Exists(ctx)
+					require.NoError(t, err)
+					require.False(t, exists)
+
+					isPersonalProject, err := privateProject.IsPersonalProject(ctx)
+					require.NoError(t, err)
+					require.True(t, isPersonalProject)
 				}
 
 				for i := 0; i < 2; i++ {
-					privateProject.MustCreate(verbose)
-					require.True(privateProject.MustExists(verbose))
+					err := privateProject.Create(ctx)
+					require.NoError(t, err)
 
-					require.True(privateProject.MustIsPersonalProject())
+					exists, err := privateProject.Exists(ctx)
+					require.NoError(t, err)
+					require.True(t, exists)
+
+					isPersonalProject, err := privateProject.IsPersonalProject(ctx)
+					require.NoError(t, err)
+					require.True(t, isPersonalProject)
 				}
 
 				for i := 0; i < 2; i++ {
-					privateProject.MustDelete(verbose)
-					require.False(privateProject.MustExists(verbose))
+					err := privateProject.Delete(ctx)
+					require.NoError(t, err)
 
-					require.True(privateProject.MustIsPersonalProject())
+					exists, err := privateProject.Exists(ctx)
+					require.NoError(t, err)
+					require.False(t, exists)
+
+					isPersonalProject, err := privateProject.IsPersonalProject(ctx)
+					require.NoError(t, err)
+					require.True(t, isPersonalProject)
 				}
 			},
 		)
