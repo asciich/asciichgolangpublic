@@ -31,18 +31,16 @@ func TestGitlabGroupGetGroupPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				require.NoError(t, err)
 
-				const verbose bool = true
+				testGroup, err := gitlab.GetGroupByPath(ctx, tt.groupPath)
+				require.NoError(t, err)
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
-
-				testGroup := gitlab.MustGetGroupByPath(tt.groupPath, verbose)
-
-				require.EqualValues(
-					tt.expectedGroupName,
-					testGroup.MustGetGroupPath(),
-				)
+				groupPath, err := testGroup.GetGroupPath(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedGroupName, groupPath)
 			},
 		)
 	}
@@ -69,18 +67,17 @@ func TestGitlabGroupGetGroupName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				require.NoError(t, err)
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
+				testGroup, err := gitlab.GetGroupByPath(ctx, tt.groupPath)
+				require.NoError(t, err)
 
-				testGroup := gitlab.MustGetGroupByPath(tt.groupPath, verbose)
-
-				require.EqualValues(
-					tt.expectedGroupName,
-					testGroup.MustGetGroupName(),
-				)
+				groupName, err := testGroup.GetGroupName(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedGroupName, groupName)
 			},
 		)
 	}
@@ -109,18 +106,17 @@ func TestGitlabGroupIsSubgroup(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				require.NoError(t, err)
 
-				const verbose bool = true
+				testGroup, err := gitlab.GetGroupByPath(ctx, tt.groupPath)
+				require.NoError(t, err)
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
+				isSubGroup, err := testGroup.IsSubgroup(ctx)
+				require.NoError(t, err)
 
-				testGroup := gitlab.MustGetGroupByPath(tt.groupPath, verbose)
-
-				require.EqualValues(
-					tt.expectedIsSubgroup,
-					testGroup.MustIsSubgroup(),
-				)
+				require.EqualValues(t, tt.expectedIsSubgroup, isSubGroup)
 			},
 		)
 	}
@@ -145,18 +141,17 @@ func TestGitlabGroupGetParentGroupPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				require.NoError(t, err)
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
+				testGroup, err := gitlab.GetGroupByPath(ctx, tt.groupPath)
+				require.NoError(t, err)
 
-				testGroup := gitlab.MustGetGroupByPath(tt.groupPath, verbose)
-
-				require.EqualValues(
-					tt.expectedParentGroupPath,
-					testGroup.MustGetParentGroupPath(verbose),
-				)
+				parentGroupPath, err := testGroup.GetParentGroupPath(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedParentGroupPath, parentGroupPath)
 			},
 		)
 	}
@@ -176,56 +171,87 @@ func TestGitlabGroupByPathAndId(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				require.NoError(t, err)
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
-				gitlab.MustAuthenticate(
+				err = gitlab.Authenticate(
+					ctx,
 					&GitlabAuthenticationOptions{
 						AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
-						Verbose:                verbose,
 					},
 				)
+				require.NoError(t, err)
 
-				testGroup := gitlab.MustGetGroupByPath(tt.groupPath, verbose)
+				testGroup, err := gitlab.GetGroupByPath(ctx, tt.groupPath)
+				require.NoError(t, err)
 
-				parentGroup := testGroup.MustGetParentGroup(verbose)
+				parentGroup, err := testGroup.GetParentGroup(ctx)
+				require.NoError(t, err)
 
-				parentGroup.MustDelete(verbose)
-				require.False(testGroup.MustExists(verbose))
-				require.False(parentGroup.MustExists(verbose))
+				err = parentGroup.Delete(ctx)
+				require.NoError(t, err)
 
-				testGroup.MustCreate(
-					&GitlabCreateGroupOptions{
-						Verbose: verbose,
-					},
-				)
+				exists, err := testGroup.Exists(ctx)
+				require.NoError(t, err)
+				require.False(t, exists)
 
-				require.True(testGroup.MustExists(verbose))
-				require.True(parentGroup.MustExists(verbose))
+				exists, err = parentGroup.Exists(ctx)
+				require.NoError(t, err)
+				require.False(t, exists)
 
-				testGroupId := testGroup.MustGetId(verbose)
-				testGroupById := gitlab.MustGetGroupById(testGroupId, verbose)
+				err = testGroup.Create(ctx)
+				require.NoError(t, err)
 
-				require.True(testGroupById.MustExists(verbose))
-				require.EqualValues(
-					tt.groupPath,
-					testGroupById.MustGetGroupPath(),
-				)
-				require.EqualValues(
-					testGroup.MustGetGroupName(),
-					testGroupById.MustGetGroupName(),
-				)
-				require.EqualValues(
-					parentGroup.MustGetGroupPath(),
-					testGroupById.MustGetParentGroupPath(verbose),
-				)
+				exists, err = testGroup.Exists(ctx)
+				require.NoError(t, err)
+				require.True(t, exists)
+				exists, err = parentGroup.Exists(ctx)
+				require.NoError(t, err)
+				require.True(t, exists)
 
-				parentGroup.MustDelete(verbose)
-				require.False(testGroup.MustExists(verbose))
-				require.False(testGroupById.MustExists(verbose))
-				require.False(parentGroup.MustExists(verbose))
+				testGroupId, err := testGroup.GetId(ctx)
+				require.NoError(t, err)
+
+				testGroupById, err := gitlab.GetGroupById(ctx, testGroupId)
+				require.NoError(t, err)
+
+				exists, err = testGroupById.Exists(ctx)
+				require.NoError(t, err)
+				require.True(t, exists)
+
+				groupPath, err := testGroupById.GetGroupPath(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.groupPath, groupPath)
+
+				testGroupName, err := testGroup.GetGroupName(ctx)
+				require.NoError(t, err)
+
+				testGroupByIdName, err := testGroupById.GetGroupName(ctx)
+				require.NoError(t, err)
+
+				require.EqualValues(t, testGroupName, testGroupByIdName)
+
+				parentGroupPath, err := parentGroup.GetGroupPath(ctx)
+				require.NoError(t, err)
+				testGroupByIdPath, err := testGroupById.GetGroupPath(ctx)
+				require.NoError(t, err)
+
+				require.EqualValues(t, parentGroupPath, testGroupByIdPath)
+
+				err = parentGroup.Delete(ctx)
+				require.NoError(t, err)
+
+				exists, err = testGroup.Exists(ctx)
+				require.NoError(t, err)
+				require.False(t, exists)
+				exists, err = testGroupById.Exists(ctx)
+				require.NoError(t, err)
+				require.False(t, exists)
+				exists, err = parentGroup.Exists(ctx)
+				require.NoError(t, err)
+				require.False(t, exists)
 
 			},
 		)
@@ -245,23 +271,29 @@ func TestGitlabGroupListProjects(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				require.NoError(t, err)
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
-				gitlab.MustAuthenticate(
+				err = gitlab.Authenticate(
+					ctx,
 					&GitlabAuthenticationOptions{
 						AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
-						Verbose:                verbose,
 					},
 				)
+				require.NoError(t, err)
 
 				const testGroupName string = "test_projects_in_group"
-				testGroup := gitlab.MustGetGroupByPath(testGroupName, verbose)
+				testGroup, err := gitlab.GetGroupByPath(ctx, testGroupName)
+				require.NoError(t, err)
 
-				testGroup.MustDelete(verbose)
-				require.False(testGroup.MustExists(verbose))
+				err = testGroup.Delete(ctx)
+				require.NoError(t, err)
+
+				exists, err := testGroup.Exists(ctx)
+				require.NoError(t, err)
+				require.False(t, exists)
 
 				nProjects := 25
 				projectPaths := []string{}
@@ -269,25 +301,23 @@ func TestGitlabGroupListProjects(t *testing.T) {
 					projectPath := fmt.Sprintf("%s/project_%d", testGroupName, i)
 					projectPaths = append(projectPaths, projectPath)
 
-					gitlab.MustCreateProject(
+					_, err = gitlab.CreateProject(
+						ctx,
 						&GitlabCreateProjectOptions{
 							ProjectPath: projectPath,
-							Verbose:     verbose,
 						},
 					)
+					require.NoError(t, err)
 				}
 
 				time.Sleep(3 * time.Second)
-				listedProjectPaths := testGroup.MustListProjectPaths(
-					&GitlabListProjectsOptions{
-						Verbose: verbose,
-					},
-				)
+				listedProjectPaths, err := testGroup.ListProjectPaths(ctx, &GitlabListProjectsOptions{})
+				require.NoError(t, err)
 
-				require.Len(listedProjectPaths, nProjects)
+				require.Len(t, listedProjectPaths, nProjects)
 
 				for _, toCheck := range projectPaths {
-					require.True(
+					require.True(t,
 						slices.Contains(
 							listedProjectPaths,
 							toCheck,
@@ -295,8 +325,12 @@ func TestGitlabGroupListProjects(t *testing.T) {
 					)
 				}
 
-				testGroup.MustDelete(verbose)
-				require.False(testGroup.MustExists(verbose))
+				err = testGroup.Delete(ctx)
+				require.NoError(t, err)
+
+				exists, err = testGroup.Exists(ctx)
+				require.NoError(t, err)
+				require.False(t, exists)
 			},
 		)
 	}

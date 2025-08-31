@@ -13,8 +13,6 @@ type GitlabSyncBranchOptions struct {
 	TargetBranchName string
 
 	PathsToSync []string
-
-	Verbose bool
 }
 
 func NewGitlabSyncBranchOptions() (g *GitlabSyncBranchOptions) {
@@ -81,10 +79,6 @@ func (g *GitlabSyncBranchOptions) GetTargetBranchName() (targetBranchName string
 	}
 
 	return targetBranchName, nil
-}
-
-func (g *GitlabSyncBranchOptions) GetVerbose() (verbose bool) {
-	return g.Verbose
 }
 
 func (g *GitlabSyncBranchOptions) IsTargetBranchSet() (isSet bool) {
@@ -199,10 +193,6 @@ func (g *GitlabSyncBranchOptions) SetTargetBranchNameAndUnsetTargetBranchObject(
 	}
 
 	return err
-}
-
-func (g *GitlabSyncBranchOptions) SetVerbose(verbose bool) {
-	g.Verbose = verbose
 }
 
 func (g *GitlabSyncBranchOptions) UnsetTargetBranch() (err error) {

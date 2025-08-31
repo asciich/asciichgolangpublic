@@ -7,7 +7,6 @@ import (
 type GitlabCreateReleaseOptions struct {
 	Name        string
 	Description string
-	Verbose     bool
 }
 
 func NewGitlabCreateReleaseOptions() (g *GitlabCreateReleaseOptions) {
@@ -30,10 +29,6 @@ func (g *GitlabCreateReleaseOptions) GetName() (name string, err error) {
 	return g.Name, nil
 }
 
-func (g *GitlabCreateReleaseOptions) GetVerbose() (verbose bool) {
-
-	return g.Verbose
-}
 
 func (g *GitlabCreateReleaseOptions) SetDescription(description string) (err error) {
 	if description == "" {
@@ -53,8 +48,4 @@ func (g *GitlabCreateReleaseOptions) SetName(name string) (err error) {
 	g.Name = name
 
 	return nil
-}
-
-func (g *GitlabCreateReleaseOptions) SetVerbose(verbose bool) {
-	g.Verbose = verbose
 }

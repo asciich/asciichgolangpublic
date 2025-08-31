@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/asciich/asciichgolangpublic/pkg/binaryinfo"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -17,7 +16,6 @@ type GitRepositoryCreateTagOptions struct {
 	TagName    string
 	TagComment string
 
-	Verbose              bool
 	PushTagsToAllRemotes bool
 }
 
@@ -79,97 +77,12 @@ func (g *GitRepositoryCreateTagOptions) GetTagNameOrEmptyStringIfUnset() (tagNam
 	return g.TagName
 }
 
-func (g *GitRepositoryCreateTagOptions) GetVerbose() (verbose bool, err error) {
-
-	return g.Verbose, nil
-}
-
 func (g *GitRepositoryCreateTagOptions) IsCommitHashSet() (isSet bool) {
 	return g.CommitHash != ""
 }
 
 func (g *GitRepositoryCreateTagOptions) IsTagCommentSet() (isSet bool) {
 	return g.TagComment != ""
-}
-
-func (g *GitRepositoryCreateTagOptions) MustGetCommitHash() (commitHash string) {
-	commitHash, err := g.GetCommitHash()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commitHash
-}
-
-func (g *GitRepositoryCreateTagOptions) MustGetPushTagsToAllRemotes() (pushTagsToAllRemotes bool) {
-	pushTagsToAllRemotes, err := g.GetPushTagsToAllRemotes()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return pushTagsToAllRemotes
-}
-
-func (g *GitRepositoryCreateTagOptions) MustGetTagComment() (tagComment string) {
-	tagComment, err := g.GetTagComment()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return tagComment
-}
-
-func (g *GitRepositoryCreateTagOptions) MustGetTagName() (tagName string) {
-	tagName, err := g.GetTagName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return tagName
-}
-
-func (g *GitRepositoryCreateTagOptions) MustGetVerbose() (verbose bool) {
-	verbose, err := g.GetVerbose()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return verbose
-}
-
-func (g *GitRepositoryCreateTagOptions) MustSetCommitHash(commitHash string) {
-	err := g.SetCommitHash(commitHash)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitRepositoryCreateTagOptions) MustSetPushTagsToAllRemotes(pushTagsToAllRemotes bool) {
-	err := g.SetPushTagsToAllRemotes(pushTagsToAllRemotes)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitRepositoryCreateTagOptions) MustSetTagComment(tagComment string) {
-	err := g.SetTagComment(tagComment)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitRepositoryCreateTagOptions) MustSetTagName(tagName string) {
-	err := g.SetTagName(tagName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitRepositoryCreateTagOptions) MustSetVerbose(verbose bool) {
-	err := g.SetVerbose(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GitRepositoryCreateTagOptions) SetCommitHash(commitHash string) (err error) {
@@ -204,12 +117,6 @@ func (g *GitRepositoryCreateTagOptions) SetTagName(tagName string) (err error) {
 	}
 
 	g.TagName = tagName
-
-	return nil
-}
-
-func (g *GitRepositoryCreateTagOptions) SetVerbose(verbose bool) (err error) {
-	g.Verbose = verbose
 
 	return nil
 }

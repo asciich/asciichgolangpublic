@@ -14,6 +14,7 @@ import (
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
 
 func NewExposeMetricsCommand() (cmd *cobra.Command) {
@@ -60,7 +61,7 @@ func NewExposeMetricsCommand() (cmd *cobra.Command) {
 func cliExposeMetrics(ctx context.Context, url string, port int, group string) {
 	logging.LogInfoByCtxf(ctx, "Going to export metrics of Gitlab instance '%s'", url)
 
-	gitlab := asciichgolangpublic.MustGetGitlabByFQDN(url)
+	gitlab := mustutils.Must(asciichgolangpublic.GetGitlabByFQDN(url))
 
 	accessToken := os.Getenv("GITLAB_ACCESS_TOKEN")
 	if accessToken == "" {
@@ -73,11 +74,9 @@ func cliExposeMetrics(ctx context.Context, url string, port int, group string) {
 		logging.LogInfoByCtx(ctx, "No '--group' specified to export projects.")
 	}
 
-	gitlab.MustAuthenticate(
-		&asciichgolangpublic.GitlabAuthenticationOptions{AccessToken: accessToken},
-	)
+	mustutils.Must0(gitlab.Authenticate(ctx, &asciichgolangpublic.GitlabAuthenticationOptions{AccessToken: accessToken}))
 
-	gitlab_fqdn := gitlab.MustGetFqdn()
+	gitlab_fqdn := mustutils.Must(gitlab.GetFqdn())
 
 	instanceMetrics := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -130,7 +129,7 @@ func cliExposeMetrics(ctx context.Context, url string, port int, group string) {
 			scheduleStatuses := []ScheduledStatus{}
 
 			if group != "" {
-				g, err := gitlab.GetGroupByPath(group, contextutils.GetVerboseFromContext(ctx))
+				g, err := gitlab.GetGroupByPath(ctx, group)
 				if err != nil {
 					logging.LogGoError(err)
 					error_counter += 1
@@ -138,7 +137,7 @@ func cliExposeMetrics(ctx context.Context, url string, port int, group string) {
 				}
 
 				if g != nil {
-					projects, err := g.ListProjects(&asciichgolangpublic.GitlabListProjectsOptions{Recursive: true, Verbose: false})
+					projects, err := g.ListProjects(contextutils.WithSilent(ctx), &asciichgolangpublic.GitlabListProjectsOptions{Recursive: true})
 					if err != nil {
 						logging.LogGoError(err)
 						error_counter += 1
@@ -148,7 +147,7 @@ func cliExposeMetrics(ctx context.Context, url string, port int, group string) {
 					logging.LogInfoByCtxf(ctx, "Collected '%d' projects in group '%s'", len(projects), group)
 
 					for _, project := range projects {
-						url, err := project.GetProjectUrl()
+						url, err := project.GetProjectUrl(ctx)
 						if err != nil {
 							logging.LogGoError(err)
 							error_counter += 1

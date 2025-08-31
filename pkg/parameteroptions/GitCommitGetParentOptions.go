@@ -2,7 +2,6 @@ package parameteroptions
 
 type GitCommitGetParentsOptions struct {
 	IncludeParentsOfParents bool
-	Verbose                 bool
 }
 
 func NewGitCommitGetParentsOptions() (g *GitCommitGetParentsOptions) {
@@ -14,15 +13,6 @@ func (g *GitCommitGetParentsOptions) GetIncludeParentsOfParents() (includeParent
 	return g.IncludeParentsOfParents
 }
 
-func (g *GitCommitGetParentsOptions) GetVerbose() (verbose bool) {
-
-	return g.Verbose
-}
-
 func (g *GitCommitGetParentsOptions) SetIncludeParentsOfParents(includeParentsOfParents bool) {
 	g.IncludeParentsOfParents = includeParentsOfParents
-}
-
-func (g *GitCommitGetParentsOptions) SetVerbose(verbose bool) {
-	g.Verbose = verbose
 }

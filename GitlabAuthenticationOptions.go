@@ -9,7 +9,6 @@ import (
 type GitlabAuthenticationOptions struct {
 	AccessToken            string
 	AccessTokensFromGopass []string
-	Verbose                bool
 	GitlabUrl              string
 }
 
@@ -45,11 +44,6 @@ func (g *GitlabAuthenticationOptions) GetGitlabUrl() (gitlabUrl string, err erro
 	return g.GitlabUrl, nil
 }
 
-func (g *GitlabAuthenticationOptions) GetVerbose() (verbose bool, err error) {
-
-	return g.Verbose, nil
-}
-
 func (g *GitlabAuthenticationOptions) IsAccessTokenSet() (isSet bool) {
 	return g.AccessToken != ""
 }
@@ -63,10 +57,6 @@ func (g *GitlabAuthenticationOptions) IsAuthenticatingAgainst(serviceName string
 	isAuthenticatingAgainst = strings.HasPrefix(serviceName, gitlabUrl)
 
 	return isAuthenticatingAgainst, nil
-}
-
-func (g *GitlabAuthenticationOptions) IsVerbose() (isVerbose bool) {
-	return g.Verbose
 }
 
 func (g *GitlabAuthenticationOptions) SetAccessToken(accessToken string) (err error) {
@@ -103,8 +93,3 @@ func (g *GitlabAuthenticationOptions) SetGitlabUrl(gitlabUrl string) (err error)
 	return nil
 }
 
-func (g *GitlabAuthenticationOptions) SetVerbose(verbose bool) (err error) {
-	g.Verbose = verbose
-
-	return nil
-}

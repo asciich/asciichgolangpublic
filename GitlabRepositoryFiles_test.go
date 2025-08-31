@@ -21,31 +21,45 @@ func TestGitlabProjectsGetFileList(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				require.NoError(t, err)
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
-				gitlab.MustAuthenticate(&GitlabAuthenticationOptions{
-					AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
-				})
+				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				require.NoError(t, err)
 
-				gitlabProject := gitlab.MustGetGitlabProjectByPath("test_group/testproject", verbose)
-				require.True(gitlabProject.MustExists(verbose))
+				gitlabProject, err := gitlab.GetGitlabProjectByPath(ctx, "test_group/testproject")
+				require.NoError(t, err)
 
-				branchName := gitlabProject.MustGetDefaultBranchName()
+				exists, err := gitlabProject.Exists(ctx)
+				require.True(t, exists)
 
-				gitlabProject.MustDeleteAllRepositoryFiles(branchName, verbose)
-				require.True(gitlabProject.MustHasNoRepositoryFiles(branchName, verbose))
+				branchName, err := gitlabProject.GetDefaultBranchName(ctx)
+				require.NoError(t, err)
 
-				gitlabProject.MustCreateEmptyFile("a.txt", branchName, verbose)
-				gitlabProject.MustCreateEmptyFile("b.txt", branchName, verbose)
-				gitlabProject.MustCreateEmptyFile("aa/a.txt", branchName, verbose)
-				gitlabProject.MustCreateEmptyFile("aa/b.txt", branchName, verbose)
-				gitlabProject.MustCreateEmptyFile("evenMore/aa/b.txt", branchName, verbose)
-				gitlabProject.MustCreateEmptyFile("evenMore/aa/a.txt", branchName, verbose)
+				err = gitlabProject.DeleteAllRepositoryFiles(ctx, branchName)
+				require.NoError(t, err)
 
-				fileList := gitlabProject.MustGetFilesNames(branchName, verbose)
+				hasRepoFile, err := gitlabProject.HasNoRepositoryFiles(ctx, branchName)
+				require.NoError(t, err)
+				require.True(t, hasRepoFile)
+
+				_, err = gitlabProject.CreateEmptyFile(ctx, "a.txt", branchName)
+				require.NoError(t, err)
+				_, err = gitlabProject.CreateEmptyFile(ctx, "b.txt", branchName)
+				require.NoError(t, err)
+				_, err = gitlabProject.CreateEmptyFile(ctx, "aa/a.txt", branchName)
+				require.NoError(t, err)
+				_, err = gitlabProject.CreateEmptyFile(ctx, "aa/b.txt", branchName)
+				require.NoError(t, err)
+				_, err = gitlabProject.CreateEmptyFile(ctx, "evenMore/aa/b.txt", branchName)
+				require.NoError(t, err)
+				_, err = gitlabProject.CreateEmptyFile(ctx, "evenMore/aa/a.txt", branchName)
+				require.NoError(t, err)
+
+				fileList, err := gitlabProject.GetFilesNames(ctx, branchName)
+				require.NoError(t, err)
 				expectedFileList := []string{
 					"a.txt",
 					"aa/a.txt",
@@ -54,15 +68,15 @@ func TestGitlabProjectsGetFileList(t *testing.T) {
 					"evenMore/aa/a.txt",
 					"evenMore/aa/b.txt",
 				}
-				require.EqualValues(expectedFileList, fileList)
+				require.EqualValues(t, expectedFileList, fileList)
 
-				directoryList := gitlabProject.MustGetDirectoryNames(branchName, verbose)
+				directoryList, err := gitlabProject.GetDirectoryNames(ctx, branchName)
 				exepctedDirectoryList := []string{
 					"aa",
 					"evenMore",
 					"evenMore/aa",
 				}
-				require.EqualValues(exepctedDirectoryList, directoryList)
+				require.EqualValues(t, exepctedDirectoryList, directoryList)
 			},
 		)
 	}
@@ -81,22 +95,27 @@ func TestGitlabProjectsGetFileList_pagination(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				ctx := getCtx()
 
-				const verbose bool = true
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
+				require.NoError(t, err)
+				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
-				gitlab.MustAuthenticate(&GitlabAuthenticationOptions{
-					AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
-				})
+				gitlabProject, err := gitlab.GetGitlabProjectByPath(ctx, "test_group/testproject")
 
-				gitlabProject := gitlab.MustGetGitlabProjectByPath("test_group/testproject", verbose)
-				require.True(gitlabProject.MustExists(verbose))
+				exists, err := gitlabProject.Exists(ctx)
+				require.NoError(t, err)
+				require.True(t, exists)
 
-				branchName := gitlabProject.MustGetDefaultBranchName()
+				branchName, err := gitlabProject.GetDefaultBranchName(ctx)
+				require.NoError(t, err)
 
-				gitlabProject.MustDeleteAllRepositoryFiles(branchName, verbose)
-				require.True(gitlabProject.MustHasNoRepositoryFiles(branchName, verbose))
+				err = gitlabProject.DeleteAllRepositoryFiles(ctx, branchName)
+				require.NoError(t, err)
+
+				hasNoRepositoryFiles, err := gitlabProject.HasNoRepositoryFiles(ctx, branchName)
+				require.NoError(t, err)
+				require.True(t, hasNoRepositoryFiles)
 
 				expectedFileList := []string{}
 				for i := 0; i < 21; i++ {
@@ -107,11 +126,13 @@ func TestGitlabProjectsGetFileList_pagination(t *testing.T) {
 				}
 
 				for _, toCreate := range expectedFileList {
-					gitlabProject.MustCreateEmptyFile(toCreate, branchName, verbose)
+					_, err = gitlabProject.CreateEmptyFile(ctx, toCreate, branchName)
+					require.NoError(t, err)
 				}
 
-				fileList := gitlabProject.MustGetFilesNames(branchName, verbose)
-				require.EqualValues(expectedFileList, fileList)
+				fileList, err := gitlabProject.GetFilesNames(ctx, branchName)
+				require.NoError(t, err)
+				require.EqualValues(t, expectedFileList, fileList)
 			},
 		)
 	}

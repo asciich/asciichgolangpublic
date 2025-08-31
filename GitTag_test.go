@@ -43,16 +43,14 @@ func TestGitlabTag_IsVersionTag(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				toTest := getGitTagToTest(tt.implementationName)
 
-				toTest.MustSetName(tt.tagName)
+				err := toTest.SetName(tt.tagName)
+				require.NoError(t, err)
 
-				require.EqualValues(
-					tt.expectedIsVersionTag,
-					toTest.MustIsVersionTag(),
-				)
+				isVersionTag, err := toTest.IsVersionTag()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedIsVersionTag, isVersionTag)
 			},
 		)
 	}

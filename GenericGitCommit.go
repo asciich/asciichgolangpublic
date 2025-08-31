@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"sort"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -19,7 +20,7 @@ func NewGitCommit() (g *GenericGitCommit) {
 	return new(GenericGitCommit)
 }
 
-func (g *GenericGitCommit) CreateTag(options *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
+func (g *GenericGitCommit) CreateTag(ctx context.Context, options *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -29,7 +30,7 @@ func (g *GenericGitCommit) CreateTag(options *gitparameteroptions.GitRepositoryC
 		return nil, err
 	}
 
-	hash, err := g.GetHash()
+	hash, err := g.GetHash(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -41,13 +42,11 @@ func (g *GenericGitCommit) CreateTag(options *gitparameteroptions.GitRepositoryC
 		return nil, err
 	}
 
-	return repo.CreateTag(
-		optionsToUse,
-	)
+	return repo.CreateTag(ctx, optionsToUse)
 }
 
-func (g *GenericGitCommit) GetAgeSeconds() (age float64, err error) {
-	hash, err := g.GetHash()
+func (g *GenericGitCommit) GetAgeSeconds(ctx context.Context) (age float64, err error) {
+	hash, err := g.GetHash(ctx)
 	if err != nil {
 		return -1, err
 	}
@@ -65,8 +64,8 @@ func (g *GenericGitCommit) GetAgeSeconds() (age float64, err error) {
 	return age, nil
 }
 
-func (g *GenericGitCommit) GetAuthorEmail() (authorEmail string, err error) {
-	hash, err := g.GetHash()
+func (g *GenericGitCommit) GetAuthorEmail(ctx context.Context) (authorEmail string, err error) {
+	hash, err := g.GetHash(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -84,8 +83,8 @@ func (g *GenericGitCommit) GetAuthorEmail() (authorEmail string, err error) {
 	return authorEmail, nil
 }
 
-func (g *GenericGitCommit) GetAuthorString() (authorString string, err error) {
-	hash, err := g.GetHash()
+func (g *GenericGitCommit) GetAuthorString(ctx context.Context) (authorString string, err error) {
+	hash, err := g.GetHash(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -103,8 +102,8 @@ func (g *GenericGitCommit) GetAuthorString() (authorString string, err error) {
 	return authorString, nil
 }
 
-func (g *GenericGitCommit) GetCommitMessage() (commitMessage string, err error) {
-	hash, err := g.GetHash()
+func (g *GenericGitCommit) GetCommitMessage(ctx context.Context) (commitMessage string, err error) {
+	hash, err := g.GetHash(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -129,7 +128,7 @@ func (g *GenericGitCommit) GetGitRepo() (gitRepo GitRepository, err error) {
 	return g.gitRepo, nil
 }
 
-func (g *GenericGitCommit) GetHash() (hash string, err error) {
+func (g *GenericGitCommit) GetHash(ctx context.Context) (hash string, err error) {
 	if g.hash == "" {
 		return "", tracederrors.TracedErrorf("hash not set")
 	}
@@ -137,8 +136,8 @@ func (g *GenericGitCommit) GetHash() (hash string, err error) {
 	return g.hash, nil
 }
 
-func (g *GenericGitCommit) GetNewestTagVersionString(verbose bool) (string, error) {
-	version, err := g.GetNewestTagVersion(verbose)
+func (g *GenericGitCommit) GetNewestTagVersionString(ctx context.Context) (string, error) {
+	version, err := g.GetNewestTagVersion(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -146,14 +145,14 @@ func (g *GenericGitCommit) GetNewestTagVersionString(verbose bool) (string, erro
 	return version.GetAsString()
 }
 
-func (g *GenericGitCommit) GetNewestTagVersion(verbose bool) (newestVersion versionutils.Version, err error) {
-	newestVersion, err = g.GetNewestTagVersionOrNilIfUnset(verbose)
+func (g *GenericGitCommit) GetNewestTagVersion(ctx context.Context) (newestVersion versionutils.Version, err error) {
+	newestVersion, err = g.GetNewestTagVersionOrNilIfUnset(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	if newestVersion == nil {
-		hash, err := g.GetHash()
+		hash, err := g.GetHash(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -174,8 +173,8 @@ func (g *GenericGitCommit) GetNewestTagVersion(verbose bool) (newestVersion vers
 	return newestVersion, nil
 }
 
-func (g *GenericGitCommit) GetNewestTagVersionOrNilIfUnset(verbose bool) (newestVersion versionutils.Version, err error) {
-	versions, err := g.ListVersionTagVersions(verbose)
+func (g *GenericGitCommit) GetNewestTagVersionOrNilIfUnset(ctx context.Context) (newestVersion versionutils.Version, err error) {
+	versions, err := g.ListVersionTagVersions(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -187,8 +186,8 @@ func (g *GenericGitCommit) GetNewestTagVersionOrNilIfUnset(verbose bool) (newest
 	return versionutils.GetLatestVersionFromSlice(versions)
 }
 
-func (g *GenericGitCommit) GetParentCommits(options *parameteroptions.GitCommitGetParentsOptions) (parentCommit []*GenericGitCommit, err error) {
-	hash, err := g.GetHash()
+func (g *GenericGitCommit) GetParentCommits(ctx context.Context, options *parameteroptions.GitCommitGetParentsOptions) ([]GitCommit, error) {
+	hash, err := g.GetHash(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -198,9 +197,9 @@ func (g *GenericGitCommit) GetParentCommits(options *parameteroptions.GitCommitG
 		return nil, err
 	}
 
-	parentCommit, err = repo.GetCommitParentsByCommitHash(hash, options)
+	parentCommit, err := repo.GetCommitParentsByCommitHash(ctx, hash, options)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	return parentCommit, nil
@@ -225,8 +224,8 @@ func (g *GenericGitCommit) GetRepoRootPathAndHostDescription() (repoRootPath str
 	return repoRootPath, hostDescription, nil
 }
 
-func (g *GenericGitCommit) HasParentCommit() (hasParentCommit bool, err error) {
-	hash, err := g.GetHash()
+func (g *GenericGitCommit) HasParentCommit(ctx context.Context) (hasParentCommit bool, err error) {
+	hash, err := g.GetHash(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -244,8 +243,8 @@ func (g *GenericGitCommit) HasParentCommit() (hasParentCommit bool, err error) {
 	return hasParentCommit, nil
 }
 
-func (g *GenericGitCommit) HasVersionTag(verbose bool) (hasVersionTag bool, err error) {
-	tags, err := g.ListVersionTags(verbose)
+func (g *GenericGitCommit) HasVersionTag(ctx context.Context) (hasVersionTag bool, err error) {
+	tags, err := g.ListVersionTags(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -253,8 +252,8 @@ func (g *GenericGitCommit) HasVersionTag(verbose bool) (hasVersionTag bool, err 
 	return len(tags) > 0, nil
 }
 
-func (g *GenericGitCommit) ListTagNames(verbose bool) (tagNames []string, err error) {
-	tags, err := g.ListTags(verbose)
+func (g *GenericGitCommit) ListTagNames(ctx context.Context) (tagNames []string, err error) {
+	tags, err := g.ListTags(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -274,22 +273,22 @@ func (g *GenericGitCommit) ListTagNames(verbose bool) (tagNames []string, err er
 	return tagNames, nil
 }
 
-func (g *GenericGitCommit) ListTags(verbose bool) (tags []GitTag, err error) {
+func (g *GenericGitCommit) ListTags(ctx context.Context) (tags []GitTag, err error) {
 	repository, err := g.GetGitRepo()
 	if err != nil {
 		return nil, err
 	}
 
-	hash, err := g.GetHash()
+	hash, err := g.GetHash(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return repository.ListTagsForCommitHash(hash, verbose)
+	return repository.ListTagsForCommitHash(ctx, hash)
 }
 
-func (g *GenericGitCommit) ListVersionTagNames(verbose bool) (tagNames []string, err error) {
-	tags, err := g.ListVersionTags(verbose)
+func (g *GenericGitCommit) ListVersionTagNames(ctx context.Context) (tagNames []string, err error) {
+	tags, err := g.ListVersionTags(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -312,8 +311,8 @@ func (g *GenericGitCommit) ListVersionTagNames(verbose bool) (tagNames []string,
 	return tagNames, nil
 }
 
-func (g *GenericGitCommit) ListVersionTagVersions(verbose bool) (versions []versionutils.Version, err error) {
-	versionTags, err := g.ListVersionTags(verbose)
+func (g *GenericGitCommit) ListVersionTagVersions(ctx context.Context) (versions []versionutils.Version, err error) {
+	versionTags, err := g.ListVersionTags(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -331,8 +330,8 @@ func (g *GenericGitCommit) ListVersionTagVersions(verbose bool) (versions []vers
 	return versions, nil
 }
 
-func (g *GenericGitCommit) ListVersionTags(verbose bool) (tags []GitTag, err error) {
-	allTags, err := g.ListTags(verbose)
+func (g *GenericGitCommit) ListVersionTags(ctx context.Context) (tags []GitTag, err error) {
+	allTags, err := g.ListTags(ctx)
 	if err != nil {
 		return nil, err
 	}

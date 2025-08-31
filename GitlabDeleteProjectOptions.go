@@ -7,7 +7,6 @@ import (
 
 type GitlabDeleteProjectOptions struct {
 	ProjectPath string
-	Verbose     bool
 }
 
 func NewGitlabDeleteProjectOptions() (g *GitlabDeleteProjectOptions) {
@@ -20,11 +19,6 @@ func (g *GitlabDeleteProjectOptions) GetProjectPath() (projectPath string, err e
 	}
 
 	return g.ProjectPath, nil
-}
-
-func (g *GitlabDeleteProjectOptions) GetVerbose() (verbose bool) {
-
-	return g.Verbose
 }
 
 func (g *GitlabDeleteProjectOptions) MustGetProjectPath() (projectPath string) {
@@ -51,8 +45,4 @@ func (g *GitlabDeleteProjectOptions) SetProjectPath(projectPath string) (err err
 	g.ProjectPath = projectPath
 
 	return nil
-}
-
-func (g *GitlabDeleteProjectOptions) SetVerbose(verbose bool) {
-	g.Verbose = verbose
 }

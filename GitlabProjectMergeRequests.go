@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"errors"
 
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -39,7 +40,7 @@ func (g *GitlabProjectMergeRequests) GetUserId() (userId int, err error) {
 	return userId, nil
 }
 
-func (g *GitlabProjectMergeRequests) CreateMergeRequest(options *GitlabCreateMergeRequestOptions) (createdMergeRequest *GitlabMergeRequest, err error) {
+func (g *GitlabProjectMergeRequests) CreateMergeRequest(ctx context.Context, options *GitlabCreateMergeRequestOptions) (createdMergeRequest *GitlabMergeRequest, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -49,7 +50,7 @@ func (g *GitlabProjectMergeRequests) CreateMergeRequest(options *GitlabCreateMer
 		return nil, err
 	}
 
-	projectId, err := g.GetProjectId()
+	projectId, err := g.GetProjectId(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -73,18 +74,18 @@ func (g *GitlabProjectMergeRequests) CreateMergeRequest(options *GitlabCreateMer
 			return nil, err
 		}
 	} else {
-		targetBranch, err = g.GetDefaultBranchName()
+		targetBranch, err = g.GetDefaultBranchName(ctx)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	projectUrl, err := g.GetProjectUrlAsString()
+	projectUrl, err := g.GetProjectUrlAsString(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	createdMergeRequest, err = g.GetOpenMergeRequestByTitleOrNilIfNotPresent(title, options.Verbose)
+	createdMergeRequest, err = g.GetOpenMergeRequestByTitleOrNilIfNotPresent(ctx, title)
 	if err != nil {
 		return nil, err
 	}
@@ -105,18 +106,12 @@ func (g *GitlabProjectMergeRequests) CreateMergeRequest(options *GitlabCreateMer
 	deleteSourceBranch := options.GetDeleteSourceBranchOnMerge()
 
 	if createdMergeRequest != nil {
-		url, err := createdMergeRequest.GetUrlAsString()
+		url, err := createdMergeRequest.GetUrlAsString(ctx)
 		if err != nil {
 			return nil, err
 		}
 
-		if options.Verbose {
-			logging.LogChangedf(
-				"Merge request '%s' already exists: %s .",
-				title,
-				url,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "Merge request '%s' already exists: %s .", title, url)
 	} else {
 		assigneIds := []int{}
 
@@ -155,33 +150,25 @@ func (g *GitlabProjectMergeRequests) CreateMergeRequest(options *GitlabCreateMer
 			return nil, err
 		}
 
-		url, err := createdMergeRequest.GetUrlAsString()
+		url, err := createdMergeRequest.GetUrlAsString(ctx)
 		if err != nil {
 			return nil, err
 		}
 
-		if options.Verbose {
-			logging.LogChangedf(
-				"Created merge request '%s' from branch '%s' to '%s': %s .",
-				title,
-				sourceBranch,
-				targetBranch,
-				url,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "Created merge request '%s' from branch '%s' to '%s': %s .", title, sourceBranch, targetBranch, url)
 
 	}
 
 	return createdMergeRequest, nil
 }
 
-func (g *GitlabProjectMergeRequests) GetDefaultBranchName() (defaultBranchName string, err error) {
+func (g *GitlabProjectMergeRequests) GetDefaultBranchName(ctx context.Context) (defaultBranchName string, err error) {
 	gitlabProject, err := g.GetGitlabProject()
 	if err != nil {
 		return "", err
 	}
 
-	defaultBranchName, err = gitlabProject.GetDefaultBranchName()
+	defaultBranchName, err = gitlabProject.GetDefaultBranchName(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -259,7 +246,7 @@ func (g *GitlabProjectMergeRequests) GetNativeMergeRequestsService() (nativeServ
 	return nativeService, nil
 }
 
-func (g *GitlabProjectMergeRequests) GetOpenMergeRequestBySourceAndTargetBranch(sourceBranchName string, targetBranchName string, verbose bool) (mergeRequest *GitlabMergeRequest, err error) {
+func (g *GitlabProjectMergeRequests) GetOpenMergeRequestBySourceAndTargetBranch(ctx context.Context, sourceBranchName string, targetBranchName string) (mergeRequest *GitlabMergeRequest, err error) {
 	if sourceBranchName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("sourceBranchName")
 	}
@@ -268,7 +255,7 @@ func (g *GitlabProjectMergeRequests) GetOpenMergeRequestBySourceAndTargetBranch(
 		return nil, tracederrors.TracedErrorEmptyString("targetBranchName")
 	}
 
-	openMergeRequests, err := g.GetOpenMergeRequests(verbose)
+	openMergeRequests, err := g.GetOpenMergeRequests(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -293,7 +280,7 @@ func (g *GitlabProjectMergeRequests) GetOpenMergeRequestBySourceAndTargetBranch(
 		}
 	}
 
-	projectUrl, err := g.GetProjectUrlAsString()
+	projectUrl, err := g.GetProjectUrlAsString(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -315,31 +302,23 @@ func (g *GitlabProjectMergeRequests) GetOpenMergeRequestBySourceAndTargetBranch(
 			projectUrl,
 		)
 	} else {
-		if verbose {
-			title, err := mergeRequest.GetCachedTitle()
-			if err != nil {
-				return nil, err
-			}
-
-			logging.LogInfof(
-				"Found merge request by sourceBranch  '%s' and targetBranch '%s': '%s' in %s",
-				sourceBranchName,
-				targetBranchName,
-				title,
-				projectUrl,
-			)
+		title, err := mergeRequest.GetCachedTitle()
+		if err != nil {
+			return nil, err
 		}
+
+		logging.LogInfoByCtxf(ctx, "Found merge request by sourceBranch  '%s' and targetBranch '%s': '%s' in %s", sourceBranchName, targetBranchName, title, projectUrl)
 	}
 
 	return mergeRequest, nil
 }
 
-func (g *GitlabProjectMergeRequests) GetOpenMergeRequestByTitle(title string, verbose bool) (mergeRequest *GitlabMergeRequest, err error) {
+func (g *GitlabProjectMergeRequests) GetOpenMergeRequestByTitle(ctx context.Context, title string) (mergeRequest *GitlabMergeRequest, err error) {
 	if title == "" {
 		return nil, tracederrors.TracedErrorEmptyString("title")
 	}
 
-	openMergeRequests, err := g.GetOpenMergeRequests(verbose)
+	openMergeRequests, err := g.GetOpenMergeRequests(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -357,7 +336,7 @@ func (g *GitlabProjectMergeRequests) GetOpenMergeRequestByTitle(title string, ve
 		}
 	}
 
-	projectUrl, err := g.GetProjectUrlAsString()
+	projectUrl, err := g.GetProjectUrlAsString(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -372,16 +351,14 @@ func (g *GitlabProjectMergeRequests) GetOpenMergeRequestByTitle(title string, ve
 			projectUrl,
 		)
 	} else {
-		if verbose {
-			logging.LogInfof("Found merge request by title '%s': %s", title, projectUrl)
-		}
+		logging.LogInfoByCtxf(ctx, "Found merge request by title '%s': %s", title, projectUrl)
 	}
 
 	return mergeRequest, nil
 }
 
-func (g *GitlabProjectMergeRequests) GetOpenMergeRequestByTitleOrNilIfNotPresent(title string, verbose bool) (mergeRequest *GitlabMergeRequest, err error) {
-	mergeRequest, err = g.GetOpenMergeRequestByTitle(title, verbose)
+func (g *GitlabProjectMergeRequests) GetOpenMergeRequestByTitleOrNilIfNotPresent(ctx context.Context, title string) (mergeRequest *GitlabMergeRequest, err error) {
+	mergeRequest, err = g.GetOpenMergeRequestByTitle(ctx, title)
 	if err != nil {
 		if errors.Is(err, ErrNoMergeRequestWithTitleFound) {
 			return nil, nil
@@ -392,12 +369,10 @@ func (g *GitlabProjectMergeRequests) GetOpenMergeRequestByTitleOrNilIfNotPresent
 	return mergeRequest, nil
 }
 
-func (g *GitlabProjectMergeRequests) GetOpenMergeRequests(verbose bool) (openMergeRequest []*GitlabMergeRequest, err error) {
+func (g *GitlabProjectMergeRequests) GetOpenMergeRequests(ctx context.Context) (openMergeRequest []*GitlabMergeRequest, err error) {
 	var stateStringOpen string = "opened"
 
-	rawMergeRequest, err := g.GetRawMergeRequests(&gitlab.ListProjectMergeRequestsOptions{
-		State: &stateStringOpen,
-	})
+	rawMergeRequest, err := g.GetRawMergeRequests(ctx, &gitlab.ListProjectMergeRequestsOptions{State: &stateStringOpen})
 	if err != nil {
 		return nil, err
 	}
@@ -415,13 +390,13 @@ func (g *GitlabProjectMergeRequests) GetOpenMergeRequests(verbose bool) (openMer
 	return openMergeRequest, nil
 }
 
-func (g *GitlabProjectMergeRequests) GetProjectId() (projectId int, err error) {
+func (g *GitlabProjectMergeRequests) GetProjectId(ctx context.Context) (projectId int, err error) {
 	project, err := g.GetGitlabProject()
 	if err != nil {
 		return -1, err
 	}
 
-	projectId, err = project.GetId()
+	projectId, err = project.GetId(ctx)
 	if err != nil {
 		return -1, err
 	}
@@ -429,13 +404,13 @@ func (g *GitlabProjectMergeRequests) GetProjectId() (projectId int, err error) {
 	return projectId, nil
 }
 
-func (g *GitlabProjectMergeRequests) GetProjectUrlAsString() (projectUrl string, err error) {
+func (g *GitlabProjectMergeRequests) GetProjectUrlAsString(ctx context.Context) (projectUrl string, err error) {
 	project, err := g.GetGitlabProject()
 	if err != nil {
 		return "", err
 	}
 
-	projectUrl, err = project.GetProjectUrl()
+	projectUrl, err = project.GetProjectUrl(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -443,12 +418,12 @@ func (g *GitlabProjectMergeRequests) GetProjectUrlAsString() (projectUrl string,
 	return projectUrl, nil
 }
 
-func (g *GitlabProjectMergeRequests) GetRawMergeRequests(options *gitlab.ListProjectMergeRequestsOptions) (rawMergeRequests []*gitlab.MergeRequest, err error) {
+func (g *GitlabProjectMergeRequests) GetRawMergeRequests(ctx context.Context, options *gitlab.ListProjectMergeRequestsOptions) (rawMergeRequests []*gitlab.MergeRequest, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	projectId, err := g.GetProjectId()
+	projectId, err := g.GetProjectId(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -479,139 +454,6 @@ func (g *GitlabProjectMergeRequests) GetRawMergeRequests(options *gitlab.ListPro
 
 	}
 	return rawMergeRequests, nil
-}
-
-func (g *GitlabProjectMergeRequests) MustCreateMergeRequest(options *GitlabCreateMergeRequestOptions) (createdMergeRequest *GitlabMergeRequest) {
-	createdMergeRequest, err := g.CreateMergeRequest(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return createdMergeRequest
-}
-
-func (g *GitlabProjectMergeRequests) MustGetDefaultBranchName() (defaultBranchName string) {
-	defaultBranchName, err := g.GetDefaultBranchName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return defaultBranchName
-}
-
-func (g *GitlabProjectMergeRequests) MustGetGitlab() (gitlab *GitlabInstance) {
-	gitlab, err := g.GetGitlab()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlab
-}
-
-func (g *GitlabProjectMergeRequests) MustGetGitlabProject() (gitlabProject *GitlabProject) {
-	gitlabProject, err := g.GetGitlabProject()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabProject
-}
-
-func (g *GitlabProjectMergeRequests) MustGetMergeRequestByNativeMergeRequest(nativeMergeRequest *gitlab.MergeRequest) (mergeRequest *GitlabMergeRequest) {
-	mergeRequest, err := g.GetMergeRequestByNativeMergeRequest(nativeMergeRequest)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return mergeRequest
-}
-
-func (g *GitlabProjectMergeRequests) MustGetNativeMergeRequestsService() (nativeService *gitlab.MergeRequestsService) {
-	nativeService, err := g.GetNativeMergeRequestsService()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeService
-}
-
-func (g *GitlabProjectMergeRequests) MustGetOpenMergeRequestBySourceAndTargetBranch(sourceBranchName string, targetBranchName string, verbose bool) (mergeRequest *GitlabMergeRequest) {
-	mergeRequest, err := g.GetOpenMergeRequestBySourceAndTargetBranch(sourceBranchName, targetBranchName, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return mergeRequest
-}
-
-func (g *GitlabProjectMergeRequests) MustGetOpenMergeRequestByTitle(title string, verbose bool) (mergeRequest *GitlabMergeRequest) {
-	mergeRequest, err := g.GetOpenMergeRequestByTitle(title, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return mergeRequest
-}
-
-func (g *GitlabProjectMergeRequests) MustGetOpenMergeRequestByTitleOrNilIfNotPresent(title string, verbose bool) (mergeRequest *GitlabMergeRequest) {
-	mergeRequest, err := g.GetOpenMergeRequestByTitleOrNilIfNotPresent(title, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return mergeRequest
-}
-
-func (g *GitlabProjectMergeRequests) MustGetOpenMergeRequests(verbose bool) (openMergeRequest []*GitlabMergeRequest) {
-	openMergeRequest, err := g.GetOpenMergeRequests(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return openMergeRequest
-}
-
-func (g *GitlabProjectMergeRequests) MustGetProjectId() (projectId int) {
-	projectId, err := g.GetProjectId()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return projectId
-}
-
-func (g *GitlabProjectMergeRequests) MustGetProjectUrlAsString() (projectUrl string) {
-	projectUrl, err := g.GetProjectUrlAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return projectUrl
-}
-
-func (g *GitlabProjectMergeRequests) MustGetRawMergeRequests(options *gitlab.ListProjectMergeRequestsOptions) (rawMergeRequests []*gitlab.MergeRequest) {
-	rawMergeRequests, err := g.GetRawMergeRequests(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return rawMergeRequests
-}
-
-func (g *GitlabProjectMergeRequests) MustGetUserId() (userId int) {
-	userId, err := g.GetUserId()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return userId
-}
-
-func (g *GitlabProjectMergeRequests) MustSetGitlabProject(gitlabProject *GitlabProject) {
-	err := g.SetGitlabProject(gitlabProject)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GitlabProjectMergeRequests) SetGitlabProject(gitlabProject *GitlabProject) (err error) {

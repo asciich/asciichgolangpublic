@@ -6,7 +6,6 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -116,7 +115,7 @@ func (p *PreCommitService) RunInGitRepository(ctx context.Context, gitRepo GitRe
 		return err
 	}
 
-	gitStatusOutput, err := gitRepo.GetGitStatusOutput(contextutils.GetVerboseFromContext(ctx))
+	gitStatusOutput, err := gitRepo.GetGitStatusOutput(ctx)
 	if err != nil {
 		return err
 	}
