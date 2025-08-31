@@ -21,41 +21,53 @@ func TestGitlabProjectBranchCreateAndDelete(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
+				ctx := getCtx()
 
-				gitlab := MustGetGitlabByFqdn("gitlab.asciich.ch")
-				gitlab.MustAuthenticate(&GitlabAuthenticationOptions{
-					AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
-				})
-
-				gitlabProject := gitlab.MustGetGitlabProjectByPath("test_group/testproject", verbose)
-				require.True(t, gitlabProject.MustExists(verbose))
-
-				branch := gitlabProject.MustGetBranchByName(tt.branchName)
-
-				err := branch.Delete(&GitlabDeleteBranchOptions{
-					SkipWaitForDeletion: false,
-					Verbose:             verbose,
-				})
+				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
 				require.NoError(t, err)
-				exists, err := branch.Exists()
+
+				err = gitlab.Authenticate(ctx,
+					&GitlabAuthenticationOptions{
+						AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
+					},
+				)
+				require.NoError(t, err)
+
+				gitlabProject, err := gitlab.GetGitlabProjectByPath(ctx, "test_group/testproject")
+				require.NoError(t, err)
+
+				exists, err := gitlabProject.Exists(ctx)
+				require.NoError(t, err)
+				require.True(t, exists)
+
+				branch, err := gitlabProject.GetBranchByName(tt.branchName)
+				require.NoError(t, err)
+
+				err = branch.Delete(
+					ctx,
+					&GitlabDeleteBranchOptions{
+						SkipWaitForDeletion: false,
+					})
+				require.NoError(t, err)
+				exists, err = branch.Exists(ctx)
 				require.NoError(t, err)
 				require.False(t, exists)
 
 				for i := 0; i < 2; i++ {
-					branch.CreateFromDefaultBranch(verbose)
-					exists, err := branch.Exists()
+					branch.CreateFromDefaultBranch(ctx)
+					exists, err := branch.Exists(ctx)
 					require.NoError(t, err)
 					require.True(t, exists)
 				}
 
 				for i := 0; i < 2; i++ {
-					err := branch.Delete(&GitlabDeleteBranchOptions{
-						SkipWaitForDeletion: false,
-						Verbose:             verbose,
-					})
+					err := branch.Delete(
+						ctx,
+						&GitlabDeleteBranchOptions{
+							SkipWaitForDeletion: false,
+						})
 					require.NoError(t, err)
-					exists, err := branch.Exists()
+					exists, err := branch.Exists(ctx)
 					require.NoError(t, err)
 					require.False(t, exists)
 				}

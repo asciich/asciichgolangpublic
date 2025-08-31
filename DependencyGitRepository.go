@@ -2,6 +2,7 @@ package asciichgolangpublic
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/changesummary"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -67,12 +68,12 @@ func (d *DependencyGitRepository) GetNewestVersion(authOptions []authenticationo
 		return newestVersion, nil
 	}
 
-	gitlabProject, err := GetGitlabProjectByUrlFromString(url, authOptions, verbose)
+	gitlabProject, err := GetGitlabProjectByUrlFromString(contextutils.GetVerbosityContextByBool(verbose), url, authOptions)
 	if err != nil {
 		return nil, err
 	}
 
-	newestVersion, err = gitlabProject.GetNewestVersion(verbose)
+	newestVersion, err = gitlabProject.GetNewestVersion(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return nil, err
 	}

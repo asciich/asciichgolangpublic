@@ -1,7 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
@@ -14,7 +15,7 @@ func NewGitlabProjectCommits() (g *GitlabProjectCommits) {
 	return new(GitlabProjectCommits)
 }
 
-func (g *GitlabProjectCommits) GetCommitByHashString(hash string, verbose bool) (commit *GitlabCommit, err error) {
+func (g *GitlabProjectCommits) GetCommitByHashString(ctx context.Context, hash string) (commit *GitlabCommit, err error) {
 	if hash == "" {
 		return nil, tracederrors.TracedErrorEmptyString("hash")
 	}
@@ -83,58 +84,6 @@ func (g *GitlabProjectCommits) GetNativeGitlabClient() (nativeClient *gitlab.Cli
 	}
 
 	return nativeClient, nil
-}
-
-func (g *GitlabProjectCommits) MustGetCommitByHashString(hash string, verbose bool) (commit *GitlabCommit) {
-	commit, err := g.GetCommitByHashString(hash, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commit
-}
-
-func (g *GitlabProjectCommits) MustGetGitlab() (gitlab *GitlabInstance) {
-	gitlab, err := g.GetGitlab()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlab
-}
-
-func (g *GitlabProjectCommits) MustGetGitlabProject() (gitlabProject *GitlabProject) {
-	gitlabProject, err := g.GetGitlabProject()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabProject
-}
-
-func (g *GitlabProjectCommits) MustGetNativeCommitsService() (nativeCommitsService *gitlab.CommitsService) {
-	nativeCommitsService, err := g.GetNativeCommitsService()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeCommitsService
-}
-
-func (g *GitlabProjectCommits) MustGetNativeGitlabClient() (nativeClient *gitlab.Client) {
-	nativeClient, err := g.GetNativeGitlabClient()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeClient
-}
-
-func (g *GitlabProjectCommits) MustSetGitlabProject(gitlabProject *GitlabProject) {
-	err := g.SetGitlabProject(gitlabProject)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GitlabProjectCommits) SetGitlabProject(gitlabProject *GitlabProject) (err error) {
