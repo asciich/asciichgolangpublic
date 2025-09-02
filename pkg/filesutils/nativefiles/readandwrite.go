@@ -52,7 +52,7 @@ func ReadAsString(ctx context.Context, pathToRead string) (string, error) {
 		return "", tracederrors.TracedErrorf("Unable to read file '%s': %w", pathToRead, err)
 	}
 
-	logging.LogInfoByCtxf(ctx, "Read content of file '%s'.", content)
+	logging.LogInfoByCtxf(ctx, "Read content of file '%s'.", pathToRead)
 
 	return string(content), nil
 }
@@ -67,7 +67,7 @@ func ReadAsBytes(ctx context.Context, pathToRead string) ([]byte, error) {
 		return nil, tracederrors.TracedErrorf("Unable to read file '%s': %w", pathToRead, err)
 	}
 
-	logging.LogInfoByCtxf(ctx, "Read content of file '%s'.", content)
+	logging.LogInfoByCtxf(ctx, "Read content of file '%s'.", pathToRead)
 
 	return content, nil
 }
