@@ -1,19 +1,20 @@
 package asciichgolangpublic
 
 import (
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 )
 
 type GitTagBase struct {
-	parentGitTagForBaseClass GitTag
+	parentGitTagForBaseClass gitinterfaces.GitTag
 }
 
 func NewGitTagBase() (g *GitTagBase) {
 	return new(GitTagBase)
 }
 
-func (g *GitTagBase) GetParentGitTagForBaseClass() (parentGitTagForBaseClass GitTag, err error) {
+func (g *GitTagBase) GetParentGitTagForBaseClass() (parentGitTagForBaseClass gitinterfaces.GitTag, err error) {
 
 	return g.parentGitTagForBaseClass, nil
 }
@@ -32,7 +33,7 @@ func (g *GitTagBase) GetVersion() (version versionutils.Version, err error) {
 	return versionutils.ReadFromString(name)
 }
 
-func (g *GitTagBase) MustGetParentGitTagForBaseClass() (parentGitTagForBaseClass GitTag) {
+func (g *GitTagBase) MustGetParentGitTagForBaseClass() (parentGitTagForBaseClass gitinterfaces.GitTag) {
 	parentGitTagForBaseClass, err := g.GetParentGitTagForBaseClass()
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -50,14 +51,14 @@ func (g *GitTagBase) MustGetVersion() (version versionutils.Version) {
 	return version
 }
 
-func (g *GitTagBase) MustSetParentGitTagForBaseClass(parentGitTagForBaseClass GitTag) {
+func (g *GitTagBase) MustSetParentGitTagForBaseClass(parentGitTagForBaseClass gitinterfaces.GitTag) {
 	err := g.SetParentGitTagForBaseClass(parentGitTagForBaseClass)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 }
 
-func (g *GitTagBase) SetParentGitTagForBaseClass(parentGitTagForBaseClass GitTag) (err error) {
+func (g *GitTagBase) SetParentGitTagForBaseClass(parentGitTagForBaseClass gitinterfaces.GitTag) (err error) {
 	g.parentGitTagForBaseClass = parentGitTagForBaseClass
 
 	return nil

@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
@@ -21,7 +22,7 @@ func getCtx() context.Context {
 	return contextutils.ContextVerbose()
 }
 
-func getGitRepositoryToTest(implementationName string) (repo GitRepository) {
+func getGitRepositoryToTest(implementationName string) (repo gitinterfaces.GitRepository) {
 	ctx := getCtx()
 
 	if implementationName == "localGitRepository" {

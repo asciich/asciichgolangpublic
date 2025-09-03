@@ -7,6 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"gopkg.in/yaml.v3"
@@ -44,7 +45,7 @@ func GetGitlabCiYamlFileByPath(filePath string) (gitlabCiYamlFile *GitlabCiYamlF
 	return GetGitlabCiYamlFileByFile(localFile)
 }
 
-func GetGitlabCiYamlFileInGitRepository(gitRepository GitRepository) (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
+func GetGitlabCiYamlFileInGitRepository(gitRepository gitinterfaces.GitRepository) (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
 	if gitRepository == nil {
 		return nil, tracederrors.TracedErrorNil("gitRepository")
 	}

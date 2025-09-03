@@ -7,6 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -16,7 +17,7 @@ import (
 )
 
 type GitRepositoryBase struct {
-	parentRepositoryForBaseClass GitRepository
+	parentRepositoryForBaseClass gitinterfaces.GitRepository
 }
 
 func NewGitRepositoryBase() (g *GitRepositoryBase) {
@@ -241,7 +242,7 @@ func (g *GitRepositoryBase) CheckIsPreCommitRepository(ctx context.Context) (err
 	return nil
 }
 
-func (g *GitRepositoryBase) CommitAndPush(ctx context.Context, commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit GitCommit, err error) {
+func (g *GitRepositoryBase) CommitAndPush(ctx context.Context, commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit gitinterfaces.GitCommit, err error) {
 	if commitOptions == nil {
 		return nil, tracederrors.TracedErrorNil("commitOptions")
 	}
@@ -264,7 +265,7 @@ func (g *GitRepositoryBase) CommitAndPush(ctx context.Context, commitOptions *gi
 	return createdCommit, nil
 }
 
-func (g *GitRepositoryBase) CommitIfUncommittedChanges(ctx context.Context, commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit GitCommit, err error) {
+func (g *GitRepositoryBase) CommitIfUncommittedChanges(ctx context.Context, commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit gitinterfaces.GitCommit, err error) {
 	if commitOptions == nil {
 		return nil, tracederrors.TracedErrorNil("commitOptions")
 	}
@@ -587,7 +588,7 @@ func (g *GitRepositoryBase) GetLatestTagVersionOrNilIfNotFound(ctx context.Conte
 	return latestTagVersion, nil
 }
 
-func (g *GitRepositoryBase) GetParentRepositoryForBaseClass() (parentRepositoryForBaseClass GitRepository, err error) {
+func (g *GitRepositoryBase) GetParentRepositoryForBaseClass() (parentRepositoryForBaseClass gitinterfaces.GitRepository, err error) {
 	if g.parentRepositoryForBaseClass == nil {
 		return nil, tracederrors.TracedErrorf("parentRepositoryForBaseClass not set")
 	}
@@ -776,7 +777,7 @@ func (g *GitRepositoryBase) IsPreCommitRepository(ctx context.Context) (isPreCom
 	return isPreCommitRepository, nil
 }
 
-func (g *GitRepositoryBase) ListVersionTags(ctx context.Context) (versionTags []GitTag, err error) {
+func (g *GitRepositoryBase) ListVersionTags(ctx context.Context) (versionTags []gitinterfaces.GitTag, err error) {
 	parent, err := g.GetParentRepositoryForBaseClass()
 	if err != nil {
 		return nil, err
@@ -787,7 +788,7 @@ func (g *GitRepositoryBase) ListVersionTags(ctx context.Context) (versionTags []
 		return nil, err
 	}
 
-	versionTags = []GitTag{}
+	versionTags = []gitinterfaces.GitTag{}
 	for _, tag := range allTags {
 		isVersionTag, err := tag.IsVersionTag()
 		if err != nil {
@@ -802,7 +803,7 @@ func (g *GitRepositoryBase) ListVersionTags(ctx context.Context) (versionTags []
 	return versionTags, nil
 }
 
-func (g *GitRepositoryBase) SetParentRepositoryForBaseClass(parentRepositoryForBaseClass GitRepository) (err error) {
+func (g *GitRepositoryBase) SetParentRepositoryForBaseClass(parentRepositoryForBaseClass gitinterfaces.GitRepository) (err error) {
 	if parentRepositoryForBaseClass == nil {
 		return tracederrors.TracedErrorf("parentRepositoryForBaseClass is nil")
 	}

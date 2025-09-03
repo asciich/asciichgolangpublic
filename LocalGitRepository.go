@@ -23,6 +23,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -35,7 +36,7 @@ type LocalGitRepository struct {
 	GitRepositoryBase
 }
 
-func GetLocalGitReposioryFromDirectory(directory filesinterfaces.Directory) (repo GitRepository, err error) {
+func GetLocalGitReposioryFromDirectory(directory filesinterfaces.Directory) (repo gitinterfaces.GitRepository, err error) {
 	if directory == nil {
 		return nil, tracederrors.TracedErrorNil("directory")
 	}
@@ -95,7 +96,7 @@ func GetLocalGitRepositoryByPath(path string) (l *LocalGitRepository, err error)
 	return l, nil
 }
 
-func MustGetLocalGitReposioryFromDirectory(directory filesinterfaces.Directory) (repo GitRepository) {
+func MustGetLocalGitReposioryFromDirectory(directory filesinterfaces.Directory) (repo gitinterfaces.GitRepository) {
 	repo, err := GetLocalGitReposioryFromDirectory(directory)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -232,7 +233,7 @@ func (l *LocalGitRepository) AddRemote(ctx context.Context, remoteOptions *gitpa
 
 	remoteExists, err := l.RemoteConfigurationExists(
 		ctx,
-		&GitRemoteConfig{
+		&gitgeneric.GenericGitRemoteConfig{
 			RemoteName: remoteName,
 			UrlFetch:   remoteUrl,
 			UrlPush:    remoteUrl,
@@ -290,7 +291,7 @@ func (l *LocalGitRepository) CheckoutBranchByName(ctx context.Context, name stri
 	return nil
 }
 
-func (l *LocalGitRepository) CloneRepository(ctx context.Context, repository GitRepository) (err error) {
+func (l *LocalGitRepository) CloneRepository(ctx context.Context, repository gitinterfaces.GitRepository) (err error) {
 	if repository == nil {
 		return tracederrors.TracedErrorNil("repository")
 	}
@@ -380,7 +381,7 @@ func (l *LocalGitRepository) CloneRepositoryByPathOrUrl(ctx context.Context, url
 	return nil
 }
 
-func (l *LocalGitRepository) Commit(ctx context.Context, commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit GitCommit, err error) {
+func (l *LocalGitRepository) Commit(ctx context.Context, commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit gitinterfaces.GitCommit, err error) {
 	if commitOptions == nil {
 		return nil, tracederrors.TracedErrorNil("commitOptions")
 	}
@@ -487,7 +488,7 @@ func (l *LocalGitRepository) CreateBranch(ctx context.Context, createOptions *pa
 	return nil
 }
 
-func (l *LocalGitRepository) CreateTag(ctx context.Context, options *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
+func (l *LocalGitRepository) CreateTag(ctx context.Context, options *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag gitinterfaces.GitTag, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -743,7 +744,7 @@ func (l *LocalGitRepository) GetCommitAgeSecondsByCommitHash(hash string) (ageSe
 	return ageSeconds, nil
 }
 
-func (l *LocalGitRepository) GetCommitByGoGitCommit(goGitCommit *object.Commit) (GitCommit, error) {
+func (l *LocalGitRepository) GetCommitByGoGitCommit(goGitCommit *object.Commit) (gitinterfaces.GitCommit, error) {
 	if goGitCommit == nil {
 		return nil, tracederrors.TracedErrorNil("goGitCommit")
 	}
@@ -758,7 +759,7 @@ func (l *LocalGitRepository) GetCommitByGoGitCommit(goGitCommit *object.Commit) 
 	return gitCommit, nil
 }
 
-func (l *LocalGitRepository) GetCommitByGoGitHash(goGitHash *plumbing.Hash) (GitCommit, error) {
+func (l *LocalGitRepository) GetCommitByGoGitHash(goGitHash *plumbing.Hash) (gitinterfaces.GitCommit, error) {
 	if goGitHash == nil {
 		return nil, tracederrors.TracedErrorNil("goGitHash")
 	}
@@ -788,7 +789,7 @@ func (l *LocalGitRepository) GetCommitByGoGitHash(goGitHash *plumbing.Hash) (Git
 	return gitCommit, nil
 }
 
-func (l *LocalGitRepository) GetCommitByGoGitReference(goGitReference *plumbing.Reference) (gitCommit GitCommit, err error) {
+func (l *LocalGitRepository) GetCommitByGoGitReference(goGitReference *plumbing.Reference) (gitCommit gitinterfaces.GitCommit, err error) {
 	if goGitReference == nil {
 		return nil, tracederrors.TracedErrorNil("goGitReference")
 	}
@@ -818,7 +819,7 @@ func (l *LocalGitRepository) GetCommitMessageByCommitHash(hash string) (commitMe
 	return commitMessage, nil
 }
 
-func (l *LocalGitRepository) GetCommitParentsByCommitHash(ctx context.Context, hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []GitCommit, err error) {
+func (l *LocalGitRepository) GetCommitParentsByCommitHash(ctx context.Context, hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []gitinterfaces.GitCommit, err error) {
 	if hash == "" {
 		return nil, tracederrors.TracedErrorEmptyString("hash")
 	}
@@ -918,7 +919,7 @@ func (l *LocalGitRepository) GetCurrentBranchName(ctx context.Context) (branchNa
 	return branchName, nil
 }
 
-func (l *LocalGitRepository) GetCurrentCommit(ctx context.Context) (GitCommit, error) {
+func (l *LocalGitRepository) GetCurrentCommit(ctx context.Context) (gitinterfaces.GitCommit, error) {
 	head, err := l.GetGoGitHead()
 	if err != nil {
 		return nil, err
@@ -1158,7 +1159,7 @@ func (l *LocalGitRepository) GetHashByTagName(tagName string) (hash string, err 
 	)
 }
 
-func (l *LocalGitRepository) GetRemoteConfigs(ctx context.Context) (remoteConfigs []*GitRemoteConfig, err error) {
+func (l *LocalGitRepository) GetRemoteConfigs(ctx context.Context) (remoteConfigs []gitinterfaces.GitRemoteConfig, err error) {
 	// TODO reimplement without calling the git binary.
 	output, err := l.RunGitCommand(ctx, []string{"remote", "-v"})
 	if err != nil {
@@ -1170,7 +1171,7 @@ func (l *LocalGitRepository) GetRemoteConfigs(ctx context.Context) (remoteConfig
 		return nil, err
 	}
 
-	remoteConfigs = []*GitRemoteConfig{}
+	remoteConfigs = []gitinterfaces.GitRemoteConfig{}
 	for _, line := range outputLines {
 		line = strings.TrimSpace(line)
 		if len(line) <= 0 {
@@ -1188,24 +1189,31 @@ func (l *LocalGitRepository) GetRemoteConfigs(ctx context.Context) (remoteConfig
 		remoteUrl := splitted[1]
 		remoteDirection := splitted[2]
 
-		var remoteToModify *GitRemoteConfig = nil
+		var remoteToModify gitinterfaces.GitRemoteConfig = nil
 		for _, existingRemote := range remoteConfigs {
-			if existingRemote.RemoteName == remoteName {
+			existingRemoteName, _ := existingRemote.GetRemoteName()
+			if existingRemoteName == remoteName {
 				remoteToModify = existingRemote
 			}
 		}
 
 		if remoteToModify == nil {
-			remoteToAdd := NewGitRemoteConfig()
+			remoteToAdd := &gitgeneric.GenericGitRemoteConfig{}
 			remoteToAdd.RemoteName = remoteName
 			remoteConfigs = append(remoteConfigs, remoteToAdd)
 			remoteToModify = remoteToAdd
 		}
 
 		if remoteDirection == "(fetch)" {
-			remoteToModify.UrlFetch = remoteUrl
+			err = remoteToModify.SetUrlFetch(remoteUrl)
+			if err != nil {
+				return nil, err
+			}
 		} else if remoteDirection == "(push)" {
-			remoteToModify.UrlPush = remoteUrl
+			err = remoteToModify.SetUrlPush(remoteUrl)
+			if err != nil {
+				return nil, err
+			}
 		} else {
 			return nil, tracederrors.TracedErrorf("Unknown remoteDirection='%s'", remoteDirection)
 		}
@@ -1282,7 +1290,8 @@ func (l *LocalGitRepository) GetRootDirectoryPath(ctx context.Context) (rootDire
 	}
 }
 
-func (l *LocalGitRepository) GetTagByName(tagName string) (tag GitTag, err error) {
+func (l *LocalGitRepository) GetTagByName(tagName string) (tag gitinterfaces.GitTag, err error) {
+
 	if tagName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("tagName")
 	}
@@ -1603,13 +1612,13 @@ func (l *LocalGitRepository) ListTagNames(ctx context.Context) (tagNames []strin
 	return tagNames, nil
 }
 
-func (l *LocalGitRepository) ListTags(ctx context.Context) (tags []GitTag, err error) {
+func (l *LocalGitRepository) ListTags(ctx context.Context) (tags []gitinterfaces.GitTag, err error) {
 	tagNames, err := l.ListTagNames(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	tags = []GitTag{}
+	tags = []gitinterfaces.GitTag{}
 	for _, name := range tagNames {
 		toAdd, err := l.GetTagByName(name)
 		if err != nil {
@@ -1622,7 +1631,7 @@ func (l *LocalGitRepository) ListTags(ctx context.Context) (tags []GitTag, err e
 	return tags, nil
 }
 
-func (l *LocalGitRepository) ListTagsForCommitHash(ctx context.Context, hash string) (tags []GitTag, err error) {
+func (l *LocalGitRepository) ListTagsForCommitHash(ctx context.Context, hash string) (tags []gitinterfaces.GitTag, err error) {
 	if hash == "" {
 		return nil, tracederrors.TracedErrorEmptyString("hash")
 	}
@@ -1641,7 +1650,7 @@ func (l *LocalGitRepository) ListTagsForCommitHash(ctx context.Context, hash str
 	}
 	defer nativeTagObjects.Close()
 
-	tags = []GitTag{}
+	tags = []gitinterfaces.GitTag{}
 	for {
 		tag, err := nativeTagObjects.Next()
 		if err != nil {
@@ -1700,7 +1709,7 @@ func (l *LocalGitRepository) Pull(ctx context.Context) (err error) {
 	return nil
 }
 
-func (l *LocalGitRepository) PullFromRemote(pullOptions *GitPullFromRemoteOptions) (err error) {
+func (l *LocalGitRepository) PullFromRemote(pullOptions *gitparameteroptions.GitPullFromRemoteOptions) (err error) {
 	if pullOptions == nil {
 		return tracederrors.TracedError("pullOptions not set")
 	}
@@ -1837,7 +1846,8 @@ func (l *LocalGitRepository) RemoteByNameExists(ctx context.Context, remoteName 
 	}
 
 	for _, toCheck := range remoteConfigs {
-		if toCheck.RemoteName == remoteName {
+		toCheckRemoteName, _ := toCheck.GetRemoteName()
+		if toCheckRemoteName == remoteName {
 			return true, nil
 		}
 	}
@@ -1845,7 +1855,7 @@ func (l *LocalGitRepository) RemoteByNameExists(ctx context.Context, remoteName 
 	return false, nil
 }
 
-func (l *LocalGitRepository) RemoteConfigurationExists(ctx context.Context, config *GitRemoteConfig) (exists bool, err error) {
+func (l *LocalGitRepository) RemoteConfigurationExists(ctx context.Context, config gitinterfaces.GitRemoteConfig) (exists bool, err error) {
 	if config == nil {
 		return false, tracederrors.TracedError("config is nil")
 	}

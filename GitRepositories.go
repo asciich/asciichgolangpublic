@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -25,7 +26,7 @@ func NewGitRepositoriesService() (g *GitRepositoriesService) {
 	return new(GitRepositoriesService)
 }
 
-func (g *GitRepositoriesService) CloneGitRepositoryToDirectory(ctx context.Context, toClone GitRepository, destinationPath string) (repo GitRepository, err error) {
+func (g *GitRepositoriesService) CloneGitRepositoryToDirectory(ctx context.Context, toClone gitinterfaces.GitRepository, destinationPath string) (repo gitinterfaces.GitRepository, err error) {
 	if toClone == nil {
 		return nil, tracederrors.TracedErrorNil("toClone")
 	}
@@ -52,7 +53,7 @@ func (g *GitRepositoriesService) CloneGitRepositoryToDirectory(ctx context.Conte
 	return repo, nil
 }
 
-func (g *GitRepositoriesService) CloneGitRepositoryToTemporaryDirectory(ctx context.Context, toClone GitRepository) (repo GitRepository, err error) {
+func (g *GitRepositoriesService) CloneGitRepositoryToTemporaryDirectory(ctx context.Context, toClone gitinterfaces.GitRepository) (repo gitinterfaces.GitRepository, err error) {
 	if toClone == nil {
 		return nil, tracederrors.TracedErrorNil("toClone")
 	}
@@ -133,7 +134,7 @@ func (g *GitRepositoriesService) CloneToDirectoryByPath(ctx context.Context, url
 	return repo, nil
 }
 
-func (g *GitRepositoriesService) CloneToTemporaryDirectory(ctx context.Context, urlOrPath string) (repo GitRepository, err error) {
+func (g *GitRepositoriesService) CloneToTemporaryDirectory(ctx context.Context, urlOrPath string) (repo gitinterfaces.GitRepository, err error) {
 	urlOrPath = strings.TrimSpace(urlOrPath)
 	if urlOrPath == "" {
 		return nil, tracederrors.TracedErrorEmptyString("urlOrPath")
@@ -154,7 +155,7 @@ func (g *GitRepositoriesService) CloneToTemporaryDirectory(ctx context.Context, 
 	return repo, nil
 }
 
-func (g *GitRepositoriesService) CreateTemporaryInitializedRepository(ctx context.Context, options *parameteroptions.CreateRepositoryOptions) (repo GitRepository, err error) {
+func (g *GitRepositoriesService) CreateTemporaryInitializedRepository(ctx context.Context, options *parameteroptions.CreateRepositoryOptions) (repo gitinterfaces.GitRepository, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}

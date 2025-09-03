@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -45,7 +46,7 @@ func GetGitignoreFileByPath(filePath string) (gitignoreFile *GitignoreFile, err 
 	return GetGitignoreFileByFile(fileToUse)
 }
 
-func GetGitignoreFileInGitRepository(gitRepository GitRepository) (gitignoreFile *GitignoreFile, err error) {
+func GetGitignoreFileInGitRepository(gitRepository gitinterfaces.GitRepository) (gitignoreFile *GitignoreFile, err error) {
 	if gitRepository == nil {
 		return nil, tracederrors.TracedErrorNil("gitRepository")
 	}

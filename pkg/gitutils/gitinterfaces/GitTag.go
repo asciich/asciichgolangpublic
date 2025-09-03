@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package gitinterfaces
 
 import (
 	"context"
