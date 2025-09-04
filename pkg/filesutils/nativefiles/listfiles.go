@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
@@ -35,7 +36,28 @@ func ListFiles(ctx context.Context, path string, listOptions *parameteroptions.L
 				return nil
 			}
 
-			filePathList = append(filePathList, path)
+			isSymlink, err := IsSymlinkToDirectory(contextutils.WithSilent(ctx), path)
+			if err != nil {
+				return err
+			}
+
+			if isSymlink {
+				resolved, err := ResolveSymlink(ctx, path)
+				if err != nil {
+					return err
+				}
+
+				toExtend, err := ListFiles(contextutils.WithSilent(ctx), resolved, &parameteroptions.ListFileOptions{ReturnRelativePaths: true})
+				if err != nil {
+					return err
+				}
+
+				for _, toAdd := range toExtend {
+					filePathList = append(filePathList, filepath.Join(path, toAdd))
+				}
+			} else {
+				filePathList = append(filePathList, path)
+			}
 			return nil
 		},
 	)

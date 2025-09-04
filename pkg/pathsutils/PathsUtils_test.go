@@ -247,6 +247,7 @@ func TestPaths_GetRelativePathTo(t *testing.T) {
 		{"/bin/bash", "/", "bin/bash"},
 		{"/bin/bash", "/bin", "bash"},
 		{"/bin/bash", "/bin/", "bash"},
+		{"/bin/bash", "/bin/bash", ""},
 	}
 
 	for _, tt := range tests {
