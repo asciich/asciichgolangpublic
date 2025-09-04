@@ -6,6 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/dnscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/dockercmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/errorscmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/filescmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/gitlabcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/loggingcmd"
@@ -28,6 +29,7 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 		dnscmd.NewDnsCommand(),
 		dockercmd.NewDockerCmd(),
 		errorscmd.NewErrorsCommand(),
+		filescmd.NewFilesCmd(),
 		gitlabcmd.NewGitlabCommand(),
 		kubernetescmd.NewKubernetesCmd(),
 		loggingcmd.NewLoggingCmd(),
