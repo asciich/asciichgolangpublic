@@ -208,6 +208,10 @@ func GetRelativePathTo(absolutePath string, relativeTo string) (relativePath str
 		return "", err
 	}
 
+	if absolutePath == relativeTo {
+		return "", err
+	}
+
 	relativeToDirPath := stringsutils.EnsureSuffix(relativeTo, "/")
 
 	if !strings.HasPrefix(absolutePath, relativeToDirPath) {
