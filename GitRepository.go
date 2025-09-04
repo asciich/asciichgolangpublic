@@ -1,119 +1,15 @@
 package asciichgolangpublic
 
 import (
-	"context"
-	"time"
-
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
-	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
-	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 )
 
-// A git repository can be a LocalGitRepository or
-// remote repositories like Gitlab or Github.
-type GitRepository interface {
-	AddRemote(ctx context.Context, options *gitparameteroptions.GitRemoteAddOptions) (err error)
-	AddFileByPath(ctx context.Context, pathToAdd string) (err error)
-	CheckoutBranchByName(ctx context.Context, name string) (err error)
-	CloneRepository(ctx context.Context, repository GitRepository) (err error)
-	CloneRepositoryByPathOrUrl(ctx context.Context, pathOrUrl string) (err error)
-	Commit(ctx context.Context, commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit GitCommit, err error)
-	CommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool, err error)
-	CreateBranch(ctx context.Context, createOptions *parameteroptions.CreateBranchOptions) (err error)
-	Create(ctx context.Context, options *filesoptions.CreateOptions) (err error)
-	CreateFileInDirectory(ctx context.Context, filePath string, optins *filesoptions.CreateOptions) (createdFile filesinterfaces.File, err error)
-	CreateSubDirectory(ctx context.Context, subDirectoryName string, options *filesoptions.CreateOptions) (createdSubDirectory filesinterfaces.Directory, err error)
-	CreateTag(ctx context.Context, createOptions *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag, err error)
-	Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error)
-	DeleteBranchByName(ctx context.Context, name string) (err error)
-	DirectoryByPathExists(ctx context.Context, path ...string) (exists bool, err error)
-	Exists(ctx context.Context) (exists bool, err error)
-	Fetch(ctx context.Context) (err error)
-	FileByPathExists(ctx context.Context, path string) (exists bool, err error)
-	// TODO: Will be removed as there should be no need to explitly get as local Directory:
-	GetAsLocalDirectory() (localDirectory *files.LocalDirectory, err error)
-	// TODO: Will be removed as there should be no need to explitly get as local GitRepository:
-	GetAsLocalGitRepository() (localGitRepository *LocalGitRepository, err error)
-	GetAuthorEmailByCommitHash(hash string) (authorEmail string, err error)
-	GetAuthorStringByCommitHash(hash string) (authorString string, err error)
-	GetDirectoryByPath(pathToSubDir ...string) (subDir filesinterfaces.Directory, err error)
-	GetCommitAgeDurationByCommitHash(hash string) (ageDuration *time.Duration, err error)
-	GetCommitAgeSecondsByCommitHash(hash string) (ageSeconds float64, err error)
-	GetCommitMessageByCommitHash(hash string) (commitMessage string, err error)
-	GetCommitParentsByCommitHash(ctx context.Context, hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []GitCommit, err error)
-	GetCommitTimeByCommitHash(hash string) (commitTime *time.Time, err error)
-	GetCurrentBranchName(ctx context.Context) (branchName string, err error)
-	GetCurrentCommit(ctx context.Context) (commit GitCommit, err error)
-	GetCurrentCommitHash(ctx context.Context) (currentCommitHash string, err error)
-	GetGitStatusOutput(ctx context.Context) (output string, err error)
-	GetHashByTagName(tagName string) (hash string, err error)
-	GetHostDescription() (hostDescription string, err error)
-	GetPath() (path string, err error)
-	GetRemoteConfigs(ctx context.Context) (remoteConfigs []*GitRemoteConfig, err error)
-	GetRootDirectory(ctx context.Context) (directory filesinterfaces.Directory, err error)
-	GetRootDirectoryPath(ctx context.Context) (path string, err error)
-	HasInitialCommit(ctx context.Context) (hasInitialCommit bool, err error)
-	HasUncommittedChanges(ctx context.Context) (hasUncommitedChanges bool, err error)
-	Init(ctx context.Context, options *parameteroptions.CreateRepositoryOptions) (err error)
-	IsBareRepository(ctx context.Context) (isBareRepository bool, err error)
-	// Returns true if pointing to an existing git repository, false otherwise
-	IsGitRepository(ctx context.Context) (isRepository bool, err error)
-	IsInitialized(ctx context.Context) (isInitialited bool, err error)
-	ListBranchNames(ctx context.Context) (branchNames []string, err error)
-	ListFilePaths(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error)
-	ListFiles(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (files []filesinterfaces.File, err error)
-	ListTagNames(ctx context.Context) (tagNames []string, err error)
-	ListTags(ctx context.Context) (tags []GitTag, err error)
-	ListTagsForCommitHash(ctx context.Context, hash string) (tags []GitTag, err error)
-	RemoteByNameExists(ctx context.Context, remoteName string) (remoteExists bool, err error)
-	RemoteConfigurationExists(ctx context.Context, config *GitRemoteConfig) (exists bool, err error)
-	RemoveRemoteByName(ctx context.Context, remoteName string) (err error)
-	Pull(ctx context.Context) (err error)
-	PullFromRemote(pullOptions *GitPullFromRemoteOptions) (err error)
-	Push(ctx context.Context) (err error)
-	PushTagsToRemote(ctx context.Context, remoteName string) (err error)
-	PushToRemote(ctx context.Context, remoteName string) (err error)
-	SetGitConfig(ctx context.Context, options *gitparameteroptions.GitConfigSetOptions) (err error)
-	SetRemoteUrl(ctx context.Context, remoteUrl string) (err error)
-
-	// All methods below this line can be implemented by embedding the `GitRepositoryBase` struct:
-	AddFilesByPath(ctx context.Context, pathsToAdd []string) (err error)
-	BranchByNameExists(ctx context.Context, branchName string) (branchExists bool, err error)
-	CheckExists(ctx context.Context) (err error)
-	CheckHasNoUncommittedChanges(ctx context.Context) (err error)
-	CheckIsGolangApplication(ctx context.Context) (err error)
-	CheckIsGolangPackage(ctx context.Context) (err error)
-	CheckIsOnLocalhost(ctx context.Context) (err error)
-	CheckIsPreCommitRepository(ctx context.Context) (err error)
-	CommitAndPush(ctx context.Context, commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit GitCommit, err error)
-	CommitIfUncommittedChanges(ctx context.Context, commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit GitCommit, err error)
-	CreateAndInit(ctx context.Context, options *parameteroptions.CreateRepositoryOptions) (err error)
-	EnsureMainReadmeMdExists(ctx context.Context) (err error)
-	GetCurrentCommitMessage(ctx context.Context) (currentCommitMessage string, err error)
-	GetCurrentCommitsNewestVersion(ctx context.Context) (newestVersion versionutils.Version, err error)
-	GetCurrentCommitsNewestVersionOrNilIfNotPresent(ctx context.Context) (newestVersion versionutils.Version, err error)
-	GetFileByPath(path ...string) (fileInRepo filesinterfaces.File, err error)
-	GetLatestTagVersion(ctx context.Context) (latestTagVersion versionutils.Version, err error)
-	GetLatestTagVersionAsString(ctx context.Context) (latestTagVersion string, err error)
-	GetLatestTagVersionOrNilIfNotFound(ctx context.Context) (latestTagVersion versionutils.Version, err error)
-	GetPathAndHostDescription() (path string, hostDescription string, err error)
-	HasNoUncommittedChanges(ctx context.Context) (noUncommitedChnages bool, err error)
-	IsGolangApplication(ctx context.Context) (isGolangApplication bool, err error)
-	IsGolangPackage(ctx context.Context) (isGolangPackage bool, err error)
-	IsOnLocalhost(ctx context.Context) (isOnLocalhost bool, err error)
-	IsPreCommitRepository(ctx context.Context) (isPreCommitRepository bool, err error)
-	ListVersionTags(ctx context.Context) (versionTags []GitTag, err error)
-	WriteBytesToFile(ctx context.Context, path string, content []byte, options *filesoptions.WriteOptions) (writtenFile filesinterfaces.File, err error)
-	WriteStringToFile(ctx context.Context, path string, content string, options *filesoptions.WriteOptions) (writtenFile filesinterfaces.File, err error)
-}
-
-func GetGitRepositoryByDirectory(directory filesinterfaces.Directory) (repository GitRepository, err error) {
+func GetGitRepositoryByDirectory(directory filesinterfaces.Directory) (repository gitinterfaces.GitRepository, err error) {
 	if directory == nil {
 		return nil, tracederrors.TracedErrorNil("directory")
 	}
@@ -151,7 +47,7 @@ func GitRepositryDefaultAuthorName() (name string) {
 	return "asciichgolangpublic git repo initializer"
 }
 
-func MustGetGitRepositoryByDirectory(directory filesinterfaces.Directory) (repository GitRepository) {
+func MustGetGitRepositoryByDirectory(directory filesinterfaces.Directory) (repository gitinterfaces.GitRepository) {
 	repository, err := GetGitRepositoryByDirectory(directory)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

@@ -17,6 +17,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -150,7 +152,7 @@ func (c *CommandExecutorGitRepository) AddRemote(ctx context.Context, remoteOpti
 
 	remoteExists, err := c.RemoteConfigurationExists(
 		ctx,
-		&GitRemoteConfig{
+		&gitgeneric.GenericGitRemoteConfig{
 			RemoteName: remoteName,
 			UrlFetch:   remoteUrl,
 			UrlPush:    remoteUrl,
@@ -208,7 +210,7 @@ func (c *CommandExecutorGitRepository) CheckoutBranchByName(ctx context.Context,
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) CloneRepository(ctx context.Context, repository GitRepository) (err error) {
+func (c *CommandExecutorGitRepository) CloneRepository(ctx context.Context, repository gitinterfaces.GitRepository) (err error) {
 	if repository == nil {
 		return tracederrors.TracedErrorNil("repository")
 	}
@@ -284,7 +286,7 @@ func (c *CommandExecutorGitRepository) CloneRepositoryByPathOrUrl(ctx context.Co
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) Commit(ctx context.Context, commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit GitCommit, err error) {
+func (c *CommandExecutorGitRepository) Commit(ctx context.Context, commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit gitinterfaces.GitCommit, err error) {
 	if commitOptions == nil {
 		return nil, tracederrors.TracedErrorNil("commitOptions")
 	}
@@ -385,7 +387,7 @@ func (c *CommandExecutorGitRepository) CreateBranch(ctx context.Context, createO
 	return nil
 }
 
-func (c *CommandExecutorGitRepository) CreateTag(ctx context.Context, options *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
+func (c *CommandExecutorGitRepository) CreateTag(ctx context.Context, options *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag gitinterfaces.GitTag, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -505,7 +507,7 @@ func (c *CommandExecutorGitRepository) GetCommitAgeSecondsByCommitHash(hash stri
 	return -1, tracederrors.TracedErrorNotImplemented()
 }
 
-func (c *CommandExecutorGitRepository) GetCommitByHash(hash string) (GitCommit, error) {
+func (c *CommandExecutorGitRepository) GetCommitByHash(hash string) (gitinterfaces.GitCommit, error) {
 	if hash == "" {
 		return nil, tracederrors.TracedErrorEmptyString("hash")
 	}
@@ -557,7 +559,7 @@ func (c *CommandExecutorGitRepository) GetCommitMessageByCommitHash(hash string)
 	return commitMessage, nil
 }
 
-func (c *CommandExecutorGitRepository) GetCommitParentsByCommitHash(ctx context.Context, hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []GitCommit, err error) {
+func (c *CommandExecutorGitRepository) GetCommitParentsByCommitHash(ctx context.Context, hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []gitinterfaces.GitCommit, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
@@ -591,7 +593,7 @@ func (c *CommandExecutorGitRepository) GetCurrentBranchName(ctx context.Context)
 	return branchName, nil
 }
 
-func (c *CommandExecutorGitRepository) GetCurrentCommit(ctx context.Context) (GitCommit, error) {
+func (c *CommandExecutorGitRepository) GetCurrentCommit(ctx context.Context) (gitinterfaces.GitCommit, error) {
 	currentCommitHash, err := c.GetCurrentCommitHash(ctx)
 	if err != nil {
 		return nil, err
@@ -664,7 +666,7 @@ func (c *CommandExecutorGitRepository) GetHashByTagName(tagName string) (hash st
 	return hash, nil
 }
 
-func (c *CommandExecutorGitRepository) GetRemoteConfigs(ctx context.Context) (remoteConfigs []*GitRemoteConfig, err error) {
+func (c *CommandExecutorGitRepository) GetRemoteConfigs(ctx context.Context) (remoteConfigs []gitinterfaces.GitRemoteConfig, err error) {
 	output, err := c.RunGitCommand(ctx, []string{"remote", "-v"})
 	if err != nil {
 		return nil, err
@@ -675,7 +677,7 @@ func (c *CommandExecutorGitRepository) GetRemoteConfigs(ctx context.Context) (re
 		return nil, err
 	}
 
-	remoteConfigs = []*GitRemoteConfig{}
+	remoteConfigs = []gitinterfaces.GitRemoteConfig{}
 	for _, line := range outputLines {
 		line = strings.TrimSpace(line)
 		if len(line) <= 0 {
@@ -693,24 +695,31 @@ func (c *CommandExecutorGitRepository) GetRemoteConfigs(ctx context.Context) (re
 		remoteUrl := splitted[1]
 		remoteDirection := splitted[2]
 
-		var remoteToModify *GitRemoteConfig = nil
+		var remoteToModify gitinterfaces.GitRemoteConfig = nil
 		for _, existingRemote := range remoteConfigs {
-			if existingRemote.RemoteName == remoteName {
+			existingRemoteName, _ := existingRemote.GetRemoteName()
+			if existingRemoteName == remoteName {
 				remoteToModify = existingRemote
 			}
 		}
 
 		if remoteToModify == nil {
-			remoteToAdd := NewGitRemoteConfig()
+			remoteToAdd := &gitgeneric.GenericGitRemoteConfig{}
 			remoteToAdd.RemoteName = remoteName
 			remoteConfigs = append(remoteConfigs, remoteToAdd)
 			remoteToModify = remoteToAdd
 		}
 
 		if remoteDirection == "(fetch)" {
-			remoteToModify.UrlFetch = remoteUrl
+			err = remoteToModify.SetUrlFetch(remoteUrl)
+			if err != nil {
+				return nil, err
+			}
 		} else if remoteDirection == "(push)" {
-			remoteToModify.UrlPush = remoteUrl
+			err = remoteToModify.SetUrlPush(remoteUrl)
+			if err != nil {
+				return nil, err
+			}
 		} else {
 			return nil, tracederrors.TracedErrorf("Unknown remoteDirection='%s'", remoteDirection)
 		}
@@ -821,7 +830,7 @@ func (c *CommandExecutorGitRepository) GetRootDirectoryPath(ctx context.Context)
 	return rootDirectoryPath, nil
 }
 
-func (c *CommandExecutorGitRepository) GetTagByName(name string) (tag GitTag, err error) {
+func (c *CommandExecutorGitRepository) GetTagByName(name string) (tag gitinterfaces.GitTag, err error) {
 	if name == "" {
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
@@ -1208,13 +1217,13 @@ func (c *CommandExecutorGitRepository) ListTagNames(ctx context.Context) (tagNam
 	)
 }
 
-func (c *CommandExecutorGitRepository) ListTags(ctx context.Context) (tags []GitTag, err error) {
+func (c *CommandExecutorGitRepository) ListTags(ctx context.Context) (tags []gitinterfaces.GitTag, err error) {
 	tagNames, err := c.ListTagNames(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	tags = []GitTag{}
+	tags = []gitinterfaces.GitTag{}
 	for _, name := range tagNames {
 		toAdd, err := c.GetTagByName(name)
 		if err != nil {
@@ -1227,7 +1236,7 @@ func (c *CommandExecutorGitRepository) ListTags(ctx context.Context) (tags []Git
 	return tags, nil
 }
 
-func (c *CommandExecutorGitRepository) ListTagsForCommitHash(ctx context.Context, hash string) (tags []GitTag, err error) {
+func (c *CommandExecutorGitRepository) ListTagsForCommitHash(ctx context.Context, hash string) (tags []gitinterfaces.GitTag, err error) {
 	if hash == "" {
 		return nil, tracederrors.TracedErrorEmptyString("hash")
 	}
@@ -1240,7 +1249,7 @@ func (c *CommandExecutorGitRepository) ListTagsForCommitHash(ctx context.Context
 		return nil, err
 	}
 
-	tags = []GitTag{}
+	tags = []gitinterfaces.GitTag{}
 	for _, name := range tagNames {
 		toAdd, err := c.GetTagByName(name)
 		if err != nil {
@@ -1274,7 +1283,7 @@ func (c *CommandExecutorGitRepository) Pull(ctx context.Context) (err error) {
 	return
 }
 
-func (c *CommandExecutorGitRepository) PullFromRemote(pullOptions *GitPullFromRemoteOptions) (err error) {
+func (c *CommandExecutorGitRepository) PullFromRemote(pullOptions *gitparameteroptions.GitPullFromRemoteOptions) (err error) {
 	if pullOptions == nil {
 		return tracederrors.TracedError("pullOptions not set")
 	}
@@ -1387,7 +1396,8 @@ func (c *CommandExecutorGitRepository) RemoteByNameExists(ctx context.Context, r
 	}
 
 	for _, toCheck := range remoteConfigs {
-		if toCheck.RemoteName == remoteName {
+		toCheckRemoteName, _ := toCheck.GetRemoteName()
+		if toCheckRemoteName == remoteName {
 			return true, nil
 		}
 	}
@@ -1395,7 +1405,7 @@ func (c *CommandExecutorGitRepository) RemoteByNameExists(ctx context.Context, r
 	return false, nil
 }
 
-func (c *CommandExecutorGitRepository) RemoteConfigurationExists(ctx context.Context, config *GitRemoteConfig) (exists bool, err error) {
+func (c *CommandExecutorGitRepository) RemoteConfigurationExists(ctx context.Context, config gitinterfaces.GitRemoteConfig) (exists bool, err error) {
 	if config == nil {
 		return false, tracederrors.TracedError("config is nil")
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
@@ -96,7 +97,7 @@ func (g *GitlabTag) Exists(ctx context.Context) (exists bool, err error) {
 	return exists, nil
 }
 
-func (g *GitlabTag) GetGitRepository() (gitRepo GitRepository, err error) {
+func (g *GitlabTag) GetGitRepository() (gitRepo gitinterfaces.GitRepository, err error) {
 	// TODO: This should return the gitlab project which
 	// should implement everything a git repsository does so it
 	// fullfils the GitRepository interface:

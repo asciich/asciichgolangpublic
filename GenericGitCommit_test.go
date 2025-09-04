@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -40,7 +41,7 @@ func TestGitCommit_CreateTag(t *testing.T) {
 				require.NoError(t, err)
 				tagList, err := commitToTag.ListTags(ctx)
 				require.NoError(t, err)
-				require.EqualValues(t, []GitTag{}, tagList)
+				require.EqualValues(t, []gitinterfaces.GitTag{}, tagList)
 
 				// Add a newer commit to validate the given commit is tagged NOT the latest one
 				newerCommit, err := repo.Commit(
@@ -94,7 +95,7 @@ func TestGitCommit_ListTagsNames(t *testing.T) {
 				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := repo.Init(
-					ctx, 
+					ctx,
 					&parameteroptions.CreateRepositoryOptions{
 						InitializeWithEmptyCommit:   true,
 						InitializeWithDefaultAuthor: true,
@@ -107,7 +108,7 @@ func TestGitCommit_ListTagsNames(t *testing.T) {
 
 				tagList, err := currentCommit.ListTags(ctx)
 				require.NoError(t, err)
-				require.EqualValues(t, []GitTag{}, tagList)
+				require.EqualValues(t, []gitinterfaces.GitTag{}, tagList)
 
 				_, err = currentCommit.CreateTag(
 					ctx,
@@ -174,7 +175,7 @@ func TestGitCommit_ListVersionTagNames(t *testing.T) {
 				tagList, err := currentCommit.ListTags(ctx)
 				require.NoError(t, err)
 
-				require.EqualValues(t, []GitTag{}, tagList)
+				require.EqualValues(t, []gitinterfaces.GitTag{}, tagList)
 
 				_, err = currentCommit.CreateTag(
 					ctx,
@@ -251,7 +252,7 @@ func TestGitCommit_GetNewestTagVersion(t *testing.T) {
 				tags, err := currentCommit.ListTags(ctx)
 				require.NoError(t, err)
 
-				require.EqualValues(t, []GitTag{}, tags)
+				require.EqualValues(t, []gitinterfaces.GitTag{}, tags)
 
 				_, err = currentCommit.CreateTag(
 					ctx,
@@ -311,7 +312,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := repo.Init(
-					ctx, 
+					ctx,
 					&parameteroptions.CreateRepositoryOptions{
 						InitializeWithEmptyCommit:   true,
 						InitializeWithDefaultAuthor: true,
@@ -324,14 +325,14 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 
 				tagList, err := currentCommit.ListTags(ctx)
 				require.NoError(t, err)
-				require.EqualValues(t, []GitTag{}, tagList)
+				require.EqualValues(t, []gitinterfaces.GitTag{}, tagList)
 
 				newestTagVersion, err := currentCommit.GetNewestTagVersionOrNilIfUnset(ctx)
 				require.NoError(t, err)
 				require.Nil(t, newestTagVersion)
 
 				_, err = currentCommit.CreateTag(
-					ctx, 
+					ctx,
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "first_tag",
 					},
@@ -371,7 +372,7 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 				require.EqualValues(t, "v1.0.0", newestTagVersion.String())
 
 				_, err = currentCommit.CreateTag(
-					ctx, 
+					ctx,
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "another_tag",
 					},
@@ -406,7 +407,7 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := repo.Init(
-					ctx, 
+					ctx,
 					&parameteroptions.CreateRepositoryOptions{
 						InitializeWithEmptyCommit:   true,
 						InitializeWithDefaultAuthor: true,
@@ -421,7 +422,7 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 				require.False(t, hasVersionTag)
 
 				_, err = currentCommit.CreateTag(
-					ctx, 
+					ctx,
 					&gitparameteroptions.GitRepositoryCreateTagOptions{
 						TagName: "first_tag",
 					},

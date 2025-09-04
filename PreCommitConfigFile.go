@@ -11,6 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
@@ -58,7 +59,7 @@ func GetPreCommitConfigByLocalPath(localPath string) (preCommitConfigFile *PreCo
 	return preCommitConfigFile, nil
 }
 
-func GetPreCommitConfigFileInGitRepository(gitRepository GitRepository) (preCommitConfigFile *PreCommitConfigFile, err error) {
+func GetPreCommitConfigFileInGitRepository(gitRepository gitinterfaces.GitRepository) (preCommitConfigFile *PreCommitConfigFile, err error) {
 	if gitRepository == nil {
 		return nil, tracederrors.TracedErrorNil("gitRepository")
 	}
@@ -89,7 +90,7 @@ func MustGetPreCommitConfigByLocalPath(localPath string) (preCommitConfigFile *P
 	return preCommitConfigFile
 }
 
-func MustGetPreCommitConfigFileInGitRepository(gitRepository GitRepository) (preCommitConfigFile *PreCommitConfigFile) {
+func MustGetPreCommitConfigFileInGitRepository(gitRepository gitinterfaces.GitRepository) (preCommitConfigFile *PreCommitConfigFile) {
 	preCommitConfigFile, err := GetPreCommitConfigFileInGitRepository(gitRepository)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

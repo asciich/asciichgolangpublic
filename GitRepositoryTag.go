@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"context"
 
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
@@ -11,7 +12,7 @@ import (
 type GitRepositoryTag struct {
 	GitTagBase
 	name          string
-	gitRepository GitRepository
+	gitRepository gitinterfaces.GitRepository
 }
 
 func GetGitRepositoryTagByName(tagName string) (g *GitRepositoryTag, err error) {
@@ -29,7 +30,7 @@ func GetGitRepositoryTagByName(tagName string) (g *GitRepositoryTag, err error) 
 	return g, nil
 }
 
-func GetGitRepositoryTagByNameAndRepository(tagName string, gitRepository GitRepository) (g *GitRepositoryTag, err error) {
+func GetGitRepositoryTagByNameAndRepository(tagName string, gitRepository gitinterfaces.GitRepository) (g *GitRepositoryTag, err error) {
 	if tagName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("tagName")
 	}
@@ -60,7 +61,7 @@ func MustGetGitRepositoryTagByName(tagName string) (g *GitRepositoryTag) {
 	return g
 }
 
-func MustGetGitRepositoryTagByNameAndRepository(tagName string, gitRepository GitRepository) (g *GitRepositoryTag) {
+func MustGetGitRepositoryTagByNameAndRepository(tagName string, gitRepository gitinterfaces.GitRepository) (g *GitRepositoryTag) {
 	g, err := GetGitRepositoryTagByNameAndRepository(tagName, gitRepository)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
@@ -77,7 +78,7 @@ func NewGitRepositoryTag() (g *GitRepositoryTag) {
 	return g
 }
 
-func (g *GitRepositoryTag) GetGitRepository() (gitRepository GitRepository, err error) {
+func (g *GitRepositoryTag) GetGitRepository() (gitRepository gitinterfaces.GitRepository, err error) {
 	if g.gitRepository == nil {
 		return nil, tracederrors.TracedErrorf("gitRepository not set")
 	}
@@ -130,7 +131,7 @@ func (g *GitRepositoryTag) IsVersionTag() (isVersionTag bool, err error) {
 	return versionutils.IsVersionString(name), nil
 }
 
-func (g *GitRepositoryTag) SetGitRepository(gitRepository GitRepository) (err error) {
+func (g *GitRepositoryTag) SetGitRepository(gitRepository gitinterfaces.GitRepository) (err error) {
 	if gitRepository == nil {
 		return tracederrors.TracedErrorf("gitRepository is nil")
 	}

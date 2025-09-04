@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package gitparameteroptions
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"

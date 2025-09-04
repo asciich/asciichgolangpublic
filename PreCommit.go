@@ -6,7 +6,9 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -91,7 +93,7 @@ func (p *PreCommitService) RunInDirectory(ctx context.Context, directoy filesint
 	return nil
 }
 
-func (p *PreCommitService) RunInGitRepository(ctx context.Context, gitRepo GitRepository, options *PreCommitRunOptions) (err error) {
+func (p *PreCommitService) RunInGitRepository(ctx context.Context, gitRepo gitinterfaces.GitRepository, options *PreCommitRunOptions) (err error) {
 	if gitRepo == nil {
 		return tracederrors.TracedErrorNil("gitRepo")
 	}
@@ -100,17 +102,26 @@ func (p *PreCommitService) RunInGitRepository(ctx context.Context, gitRepo GitRe
 		return tracederrors.TracedErrorNil("options")
 	}
 
-	gitRepoDir, err := gitRepo.GetAsLocalGitRepository()
+	hostDescription, err := gitRepo.GetHostDescription()
 	if err != nil {
 		return err
 	}
 
-	err = p.RunInDirectory(ctx, gitRepoDir, options)
+	if hostDescription != "localhost" {
+		return tracederrors.TracedErrorf("Only implemented for localhost but got '%s'", hostDescription)
+	}
+
+	localPath, err := gitRepo.GetPath()
 	if err != nil {
 		return err
 	}
 
-	path, err := gitRepoDir.GetLocalPath()
+	localDir, err := files.GetLocalDirectoryByPath(localPath)
+	if err != nil {
+		return err
+	}
+
+	err = p.RunInDirectory(ctx, localDir, options)
 	if err != nil {
 		return err
 	}
@@ -120,12 +131,7 @@ func (p *PreCommitService) RunInGitRepository(ctx context.Context, gitRepo GitRe
 		return err
 	}
 
-	logging.LogInfoByCtxf(
-		ctx,
-		"Git status of repository '%s' after running pre-commit:\n%s",
-		path,
-		gitStatusOutput,
-	)
+	logging.LogInfoByCtxf(ctx, "Git status of repository '%s' after running pre-commit:\n%s", localPath, gitStatusOutput)
 
 	return nil
 }

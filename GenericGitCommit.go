@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -12,7 +13,7 @@ import (
 )
 
 type GenericGitCommit struct {
-	gitRepo GitRepository
+	gitRepo gitinterfaces.GitRepository
 	hash    string
 }
 
@@ -20,7 +21,7 @@ func NewGitCommit() (g *GenericGitCommit) {
 	return new(GenericGitCommit)
 }
 
-func (g *GenericGitCommit) CreateTag(ctx context.Context, options *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag GitTag, err error) {
+func (g *GenericGitCommit) CreateTag(ctx context.Context, options *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag gitinterfaces.GitTag, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -121,7 +122,7 @@ func (g *GenericGitCommit) GetCommitMessage(ctx context.Context) (commitMessage 
 	return commitMessage, nil
 }
 
-func (g *GenericGitCommit) GetGitRepo() (gitRepo GitRepository, err error) {
+func (g *GenericGitCommit) GetGitRepo() (gitRepo gitinterfaces.GitRepository, err error) {
 	if g.gitRepo == nil {
 		return nil, tracederrors.TracedError("gitRepo not set")
 	}
@@ -186,7 +187,7 @@ func (g *GenericGitCommit) GetNewestTagVersionOrNilIfUnset(ctx context.Context) 
 	return versionutils.GetLatestVersionFromSlice(versions)
 }
 
-func (g *GenericGitCommit) GetParentCommits(ctx context.Context, options *parameteroptions.GitCommitGetParentsOptions) ([]GitCommit, error) {
+func (g *GenericGitCommit) GetParentCommits(ctx context.Context, options *parameteroptions.GitCommitGetParentsOptions) ([]gitinterfaces.GitCommit, error) {
 	hash, err := g.GetHash(ctx)
 	if err != nil {
 		return nil, err
@@ -273,7 +274,7 @@ func (g *GenericGitCommit) ListTagNames(ctx context.Context) (tagNames []string,
 	return tagNames, nil
 }
 
-func (g *GenericGitCommit) ListTags(ctx context.Context) (tags []GitTag, err error) {
+func (g *GenericGitCommit) ListTags(ctx context.Context) (tags []gitinterfaces.GitTag, err error) {
 	repository, err := g.GetGitRepo()
 	if err != nil {
 		return nil, err
@@ -330,13 +331,13 @@ func (g *GenericGitCommit) ListVersionTagVersions(ctx context.Context) (versions
 	return versions, nil
 }
 
-func (g *GenericGitCommit) ListVersionTags(ctx context.Context) (tags []GitTag, err error) {
+func (g *GenericGitCommit) ListVersionTags(ctx context.Context) (tags []gitinterfaces.GitTag, err error) {
 	allTags, err := g.ListTags(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	tags = []GitTag{}
+	tags = []gitinterfaces.GitTag{}
 	for _, t := range allTags {
 		isVersionTag, err := t.IsVersionTag()
 		if err != nil {
@@ -351,7 +352,7 @@ func (g *GenericGitCommit) ListVersionTags(ctx context.Context) (tags []GitTag, 
 	return tags, nil
 }
 
-func (g *GenericGitCommit) SetGitRepo(gitRepo GitRepository) (err error) {
+func (g *GenericGitCommit) SetGitRepo(gitRepo gitinterfaces.GitRepository) (err error) {
 	if gitRepo == nil {
 		return tracederrors.TracedErrorNil("gitRepo")
 	}
