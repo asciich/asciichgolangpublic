@@ -1,6 +1,7 @@
 package userutils
 
 import (
+	"context"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -11,7 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func GetCurrentUserName(verbose bool) (currentUserName string, err error) {
+func GetCurrentUserName(ctx context.Context) (currentUserName string, err error) {
 	nativeUser, err := GetNativeUser()
 	if err != nil {
 		return "", err
@@ -23,9 +24,7 @@ func GetCurrentUserName(verbose bool) (currentUserName string, err error) {
 		return "", tracederrors.TracedError("currentUserName is empty string after evaluation")
 	}
 
-	if verbose {
-		logging.LogInfof("Current username is '%s'.", currentUserName)
-	}
+	logging.LogInfoByCtxf(ctx, "Current username is '%s'.", currentUserName)
 
 	return currentUserName, nil
 }
@@ -129,27 +128,25 @@ func GetNativeUser() (nativeUser *user.User, err error) {
 	return nativeUser, nil
 }
 
-func IsRunningAsRoot(verbose bool) (isRunningAsRoot bool, err error) {
-	userName, err := GetCurrentUserName(verbose)
+func IsRunningAsRoot(ctx context.Context) (isRunningAsRoot bool, err error) {
+	userName, err := GetCurrentUserName(ctx)
 	if err != nil {
 		return false, err
 	}
 
 	isRunningAsRoot = userName == "root"
 
-	if verbose {
-		if isRunningAsRoot {
-			logging.LogInfof("Running as root since current user name is '%s'.", userName)
-		} else {
-			logging.LogInfof("Not running as root, current user name is '%s'.", userName)
-		}
+	if isRunningAsRoot {
+		logging.LogInfoByCtxf(ctx, "Running as root since current user name is '%s'.", userName)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Not running as root, current user name is '%s'.", userName)
 	}
 
 	return isRunningAsRoot, nil
 }
 
-func WhoAmI(verbose bool) (userName string, err error) {
-	userName, err = GetCurrentUserName(verbose)
+func WhoAmI(ctx context.Context) (userName string, err error) {
+	userName, err = GetCurrentUserName(ctx)
 	if err != nil {
 		return "", err
 	}
