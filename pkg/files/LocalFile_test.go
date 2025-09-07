@@ -574,7 +574,10 @@ func getRepoRootDir(ctx context.Context, t *testing.T) (repoRoot filesinterfaces
 	require.NoError(t, err)
 	path = strings.TrimSpace(path)
 
-	return files.MustGetLocalDirectoryByPath(path)
+	repoRoot, err = files.GetLocalDirectoryByPath(path)
+	require.NoError(t, err)
+
+	return repoRoot
 }
 
 // TODO: Move to File_test.go and test for all File implementations.
@@ -588,7 +591,7 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 
 	testDataDirectory, err := getRepoRootDir(ctx, t).GetSubDirectory("testdata", "File", "SortBlocksInFile")
 	require.NoError(t, err)
-	for _, testDirectory := range mustutils.Must(testDataDirectory.ListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false})) {
+	for _, testDirectory := range mustutils.Must(testDataDirectory.ListSubDirectories(ctx, &parameteroptions.ListDirectoryOptions{Recursive: false})) {
 		localPath, err := testDirectory.GetLocalPath()
 		require.NoError(t, err)
 		tests = append(tests, TestCase{localPath})
@@ -600,14 +603,19 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 			func(t *testing.T) {
 				const verbose = true
 
-				testDataDir := files.MustGetLocalDirectoryByPath(tt.testDataDir)
-				testInput := testDataDir.MustReadFileInDirectoryAsString("input")
+				testDataDir, err := files.GetLocalDirectoryByPath(tt.testDataDir)
+				require.NoError(t, err)
+
+				testInput, err := testDataDir.ReadFileInDirectoryAsString("input")
+				require.NoError(t, err)
 
 				testFile := getFileToTest("localFile")
 				err = testFile.WriteString(ctx, testInput, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				expectedFile := testDataDir.MustGetFileInDirectory("expectedOutput")
+				expectedFile, err := testDataDir.GetFileInDirectory("expectedOutput")
+				require.NoError(t, err)
+
 				err = testFile.SortBlocksInFile(verbose)
 				require.NoError(t, err)
 
@@ -1056,7 +1064,7 @@ func TestFileEnsureEndsWithLineBreakOnNonExitistingFile(t *testing.T) {
 		ctx := getCtx()
 
 		tempFile, err := os.CreateTemp("", "testfile")
-		require.Nil(t, err)
+		require.NoError(t, err)
 
 		nonExistingFile, err := files.GetLocalFileByPath(tempFile.Name())
 		require.NoError(t, err)

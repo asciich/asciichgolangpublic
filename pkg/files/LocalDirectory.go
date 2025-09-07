@@ -40,20 +40,14 @@ func GetLocalDirectoryByPath(path string) (l *LocalDirectory, err error) {
 	return localDirectory, nil
 }
 
-func MustGetLocalDirectoryByPath(path string) (l *LocalDirectory) {
-	l, err := GetLocalDirectoryByPath(path)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return l
-}
-
 func NewLocalDirectory() (l *LocalDirectory) {
 	l = new(LocalDirectory)
 
 	// Allow usage of the base class functions:
-	l.MustSetParentDirectoryForBaseClass(l)
+	err := l.SetParentDirectoryForBaseClass(l)
+	if err != nil {
+		logging.LogFatalWithTrace(err)
+	}
 
 	return l
 }
@@ -590,12 +584,8 @@ func (l *LocalDirectory) GetSubDirectoryAndLocalPath(path ...string) (subDirecto
 	return subDirectory, subDirectoryPath, nil
 }
 
-func (l *LocalDirectory) IsEmptyDirectory(verbose bool) (isEmpty bool, err error) {
-	subDirs, err := l.ListSubDirectories(
-		&parameteroptions.ListDirectoryOptions{
-			Verbose: verbose,
-		},
-	)
+func (l *LocalDirectory) IsEmptyDirectory(ctx context.Context) (isEmpty bool, err error) {
+	subDirs, err := l.ListSubDirectories(ctx, &parameteroptions.ListDirectoryOptions{})
 	if err != nil {
 		return false, err
 	}
@@ -605,7 +595,7 @@ func (l *LocalDirectory) IsEmptyDirectory(verbose bool) (isEmpty bool, err error
 	}
 
 	files, err := l.ListFiles(
-		contextutils.GetVerbosityContextByBool(verbose),
+		ctx,
 		&parameteroptions.ListFileOptions{
 			AllowEmptyListIfNoFileIsFound: true,
 		},
@@ -664,7 +654,7 @@ func (l *LocalDirectory) ListFiles(ctx context.Context, options *parameteroption
 	return files, nil
 }
 
-func (l *LocalDirectory) ListSubDirectories(listDirectoryOptions *parameteroptions.ListDirectoryOptions) (subDirectories []filesinterfaces.Directory, err error) {
+func (l *LocalDirectory) ListSubDirectories(ctx context.Context, listDirectoryOptions *parameteroptions.ListDirectoryOptions) (subDirectories []filesinterfaces.Directory, err error) {
 	if listDirectoryOptions == nil {
 		return nil, tracederrors.TracedErrorNil("listDirectoryOptions")
 	}
@@ -730,177 +720,6 @@ func (l *LocalDirectory) ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions 
 	sort.Strings(subDirectoryPaths)
 
 	return subDirectoryPaths, nil
-}
-
-func (l *LocalDirectory) MustCopyContentToLocalDirectory(destDirectory *LocalDirectory, verbose bool) {
-	err := l.CopyContentToLocalDirectory(destDirectory, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (l *LocalDirectory) MustGetBaseName() (baseName string) {
-	baseName, err := l.GetBaseName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return baseName
-}
-
-func (l *LocalDirectory) MustGetDirName() (dirName string) {
-	dirName, err := l.GetDirName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return dirName
-}
-
-func (l *LocalDirectory) MustGetFileInDirectory(path ...string) (file filesinterfaces.File) {
-	file, err := l.GetFileInDirectory(path...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return file
-}
-
-func (l *LocalDirectory) MustGetFileInDirectoryAsLocalFile(filePath ...string) (localFile *LocalFile) {
-	localFile, err := l.GetFileInDirectoryAsLocalFile(filePath...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return localFile
-}
-
-/* TODO remove or move
-func (l *LocalDirectory) MustGetGitRepositories(verbose bool) (gitRepos []GitRepository) {
-	gitRepos, err := l.GetGitRepositories(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitRepos
-}
-*/
-
-/* TODO remove or move
-func (l *LocalDirectory) MustGetGitRepositoriesAsLocalGitRepositories(verbose bool) (gitRepos []*LocalGitRepository) {
-	gitRepos, err := l.GetGitRepositoriesAsLocalGitRepositories(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitRepos
-}
-*/
-
-func (l *LocalDirectory) MustGetHostDescription() (hostDescription string) {
-	hostDescription, err := l.GetHostDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hostDescription
-}
-
-func (l *LocalDirectory) MustGetLocalPath() (localPath string) {
-	localPath, err := l.GetLocalPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return localPath
-}
-
-func (l *LocalDirectory) MustGetParentDirectory() (parentDirectory filesinterfaces.Directory) {
-	parentDirectory, err := l.GetParentDirectory()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return parentDirectory
-}
-
-func (l *LocalDirectory) MustGetPath() (dirPath string) {
-	dirPath, err := l.GetPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return dirPath
-}
-
-func (l *LocalDirectory) MustGetSubDirectory(path ...string) (subDirectory filesinterfaces.Directory) {
-	subDirectory, err := l.GetSubDirectory(path...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return subDirectory
-}
-
-func (l *LocalDirectory) MustGetSubDirectoryAndLocalPath(path ...string) (subDirectory filesinterfaces.Directory, subDirectoryPath string) {
-	subDirectory, subDirectoryPath, err := l.GetSubDirectoryAndLocalPath(path...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return subDirectory, subDirectoryPath
-}
-
-func (l *LocalDirectory) MustIsEmptyDirectory(verbose bool) (isEmpty bool) {
-	isEmpty, err := l.IsEmptyDirectory(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isEmpty
-}
-
-func (l *LocalDirectory) MustIsLocalDirectory() (isLocalDirectory bool) {
-	isLocalDirectory, err := l.IsLocalDirectory()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isLocalDirectory
-}
-
-func (l *LocalDirectory) MustListSubDirectories(listDirectoryOptions *parameteroptions.ListDirectoryOptions) (subDirectories []filesinterfaces.Directory) {
-	subDirectories, err := l.ListSubDirectories(listDirectoryOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return subDirectories
-}
-
-func (l *LocalDirectory) MustListSubDirectoriesAsAbsolutePaths(listDirectoryOptions *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string) {
-	subDirectoryPaths, err := l.ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return subDirectoryPaths
-}
-
-func (l *LocalDirectory) MustSetLocalPath(localPath string) {
-	err := l.SetLocalPath(localPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (l *LocalDirectory) MustSubDirectoryExists(subDirName string, verbose bool) (subDirExists bool) {
-	subDirExists, err := l.SubDirectoryExists(subDirName, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return subDirExists
 }
 
 /* TODO remove or move

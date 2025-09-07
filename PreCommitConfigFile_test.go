@@ -16,14 +16,16 @@ import (
 )
 
 func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
+	ctx := getCtx()
 	type TestCase struct {
 		testDataDir string
 	}
 
 	tests := []TestCase{}
 
-	testDataDirectory := MustGetLocalGitRepositoryByPath(".").MustGetSubDirectory("testdata", "PreCommitConfigFile", "UpdateDependency")
-	for _, testDirectory := range mustutils.Must(testDataDirectory.ListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false})) {
+	testDataDirectory, err := MustGetLocalGitRepositoryByPath(".").GetSubDirectory("testdata", "PreCommitConfigFile", "UpdateDependency")
+	require.NoError(t, err)
+	for _, testDirectory := range mustutils.Must(testDataDirectory.ListSubDirectories(ctx, &parameteroptions.ListDirectoryOptions{Recursive: false})) {
 		localPath, err := testDirectory.GetLocalPath()
 		require.NoError(t, err)
 		tests = append(tests, TestCase{localPath})

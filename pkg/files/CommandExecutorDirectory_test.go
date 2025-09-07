@@ -27,13 +27,13 @@ func TestCommandExecutorDirectoryRead_GetFileInDirectory(t *testing.T) {
 				ctx := getCtx()
 
 				temporaryDir, err := os.MkdirTemp("", "testdir")
-				require.Nil(t, err)
+				require.NoError(t, err)
 
 				temporaryFile, err := os.CreateTemp(temporaryDir, "testfile")
-				require.Nil(t, err)
+				require.NoError(t, err)
 
 				_, err = temporaryFile.WriteString(tt.testContent)
-				require.Nil(t, err)
+				require.NoError(t, err)
 
 				parentDirPath := filepath.Dir(temporaryFile.Name())
 
