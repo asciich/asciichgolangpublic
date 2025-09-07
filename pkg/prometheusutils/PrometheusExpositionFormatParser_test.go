@@ -20,22 +20,15 @@ func TestPrometheusExpositionFormatParserParseExample(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				gitRepo := asciichgolangpublic.MustGetLocalGitRepositoryByPath(".")
-				metricsTxt := gitRepo.MustReadFileInDirectoryAsString("testdata", "PrometheusExpositionFormatParser", "metrics.txt")
+				metricsTxt, err := gitRepo.ReadFileInDirectoryAsString("testdata", "PrometheusExpositionFormatParser", "metrics.txt")
+				require.NoError(t, err)
 
 				parsedMetrics := PrometheusExpositionFormatParser().MustParseString(metricsTxt)
 
-				require.EqualValues(
-					12.47,
-					parsedMetrics.MustGetMetricValueAsFloat64("metric_without_timestamp_and_labels"),
-				)
+				require.EqualValues(t, 12.47, parsedMetrics.MustGetMetricValueAsFloat64("metric_without_timestamp_and_labels"))
 
-				require.EqualValues(
-					1.458255915e9,
-					parsedMetrics.MustGetMetricValueAsFloat64("msdos_file_access_time_seconds"),
-				)
+				require.EqualValues(t, 1.458255915e9, parsedMetrics.MustGetMetricValueAsFloat64("msdos_file_access_time_seconds"))
 			},
 		)
 	}

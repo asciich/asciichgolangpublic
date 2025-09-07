@@ -27,9 +27,11 @@ func TestDirectoriesCreateLocalDirectoryByPath(t *testing.T) {
 				ctx := getCtx()
 
 				tempDir, err := os.MkdirTemp("", "tempdir_for_testing")
-				require.Nil(t, err)
+				require.NoError(t, err)
 
-				var directory filesinterfaces.Directory = files.MustGetLocalDirectoryByPath(tempDir)
+				var directory filesinterfaces.Directory
+				directory, err = files.GetLocalDirectoryByPath(tempDir)
+				require.NoError(t, err)
 				defer directory.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				exists, err := directory.Exists(ctx)

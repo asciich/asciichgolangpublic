@@ -22,7 +22,12 @@ func getDirectoryToTest(implementationName string) (directory filesinterfaces.Di
 	}
 
 	if implementationName == "localDirectory" {
-		return files.MustGetLocalDirectoryByPath(tempDir)
+		dir, err :=  files.GetLocalDirectoryByPath(tempDir)
+		if err != nil {
+			logging.LogGoErrorFatal(err)
+		}
+
+		return dir
 	}
 
 	if implementationName == "localCommandExecutorDirectory" {
@@ -209,10 +214,10 @@ func TestDirectory_ListSubDirectories_RelativePaths(t *testing.T) {
 				require.NoError(t, err)
 
 				subDirectoryList, err := testDirectory.ListSubDirectoryPaths(
+					ctx, 
 					&parameteroptions.ListDirectoryOptions{
 						Recursive:           false,
 						ReturnRelativePaths: true,
-						Verbose:             verbose,
 					},
 				)
 				require.NoError(t, err)
@@ -222,10 +227,10 @@ func TestDirectory_ListSubDirectories_RelativePaths(t *testing.T) {
 				require.EqualValues(t, "test2", subDirectoryList[1])
 
 				subDirectoryList, err = testDirectory.ListSubDirectoryPaths(
+					ctx,
 					&parameteroptions.ListDirectoryOptions{
 						Recursive:           true,
 						ReturnRelativePaths: true,
-						Verbose:             verbose,
 					},
 				)
 				require.NoError(t, err)
@@ -273,6 +278,7 @@ func TestDirectory_ListSubDirectories(t *testing.T) {
 				require.NoError(t, err)
 
 				subDirectoryList, err := testDirectory.ListSubDirectories(
+					ctx,
 					&parameteroptions.ListDirectoryOptions{
 						Recursive: false,
 					},
@@ -301,6 +307,7 @@ func TestDirectory_ListSubDirectories(t *testing.T) {
 				require.EqualValues(t, testDirLocalPath, dirName)
 
 				subDirectoryList, err = testDirectory.ListSubDirectories(
+					ctx,
 					&parameteroptions.ListDirectoryOptions{
 						Recursive: true,
 					},

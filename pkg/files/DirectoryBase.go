@@ -302,7 +302,7 @@ func (d *DirectoryBase) ListFilePaths(ctx context.Context, listFileOptions *para
 	return filePaths, nil
 }
 
-func (d *DirectoryBase) ListSubDirectoryPaths(options *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string, err error) {
+func (d *DirectoryBase) ListSubDirectoryPaths(ctx context.Context, options *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -312,7 +312,7 @@ func (d *DirectoryBase) ListSubDirectoryPaths(options *parameteroptions.ListDire
 		return nil, err
 	}
 
-	subDirs, err := parent.ListSubDirectories(options)
+	subDirs, err := parent.ListSubDirectories(ctx, options)
 	if err != nil {
 		return nil, err
 	}
@@ -346,102 +346,9 @@ func (d *DirectoryBase) ListSubDirectoryPaths(options *parameteroptions.ListDire
 
 	sort.Strings(subDirectoryPaths)
 
-	if options.Verbose {
-		logging.LogInfof(
-			"Listed '%d' sub directory of directory '%s' on host '%s'.",
-			len(subDirectoryPaths),
-			dirPath,
-			hostDescription,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Listed '%d' sub directory of directory '%s' on host '%s'.", len(subDirectoryPaths), dirPath, hostDescription)
 
 	return subDirectoryPaths, nil
-}
-
-func (d *DirectoryBase) MustCheckExists(ctx context.Context) {
-	err := d.CheckExists(ctx)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (d *DirectoryBase) MustGetFilePathInDirectory(path ...string) (filePath string) {
-	filePath, err := d.GetFilePathInDirectory(path...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return filePath
-}
-
-func (d *DirectoryBase) MustGetParentDirectoryForBaseClass() (parentDirectoryForBaseClass filesinterfaces.Directory) {
-	parentDirectoryForBaseClass, err := d.GetParentDirectoryForBaseClass()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return parentDirectoryForBaseClass
-}
-
-func (d *DirectoryBase) MustGetPathAndHostDescription() (path string, hostDescription string) {
-	path, hostDescription, err := d.GetPathAndHostDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return path, hostDescription
-}
-
-func (d *DirectoryBase) MustListSubDirectoryPaths(options *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string) {
-	subDirectoryPaths, err := d.ListSubDirectoryPaths(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return subDirectoryPaths
-}
-
-func (d *DirectoryBase) MustReadFileInDirectoryAsInt64(path ...string) (value int64) {
-	value, err := d.ReadFileInDirectoryAsInt64(path...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return value
-}
-
-func (d *DirectoryBase) MustReadFileInDirectoryAsLines(path ...string) (content []string) {
-	content, err := d.ReadFileInDirectoryAsLines(path...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return content
-}
-
-func (d *DirectoryBase) MustReadFileInDirectoryAsString(path ...string) (content string) {
-	content, err := d.ReadFileInDirectoryAsString(path...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return content
-}
-
-func (d *DirectoryBase) MustReadFirstLineOfFileInDirectoryAsString(path ...string) (firstLine string) {
-	firstLine, err := d.ReadFirstLineOfFileInDirectoryAsString(path...)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return firstLine
-}
-
-func (d *DirectoryBase) MustSetParentDirectoryForBaseClass(parentDirectoryForBaseClass filesinterfaces.Directory) {
-	err := d.SetParentDirectoryForBaseClass(parentDirectoryForBaseClass)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (d *DirectoryBase) ReadFileInDirectoryAsInt64(path ...string) (value int64, err error) {

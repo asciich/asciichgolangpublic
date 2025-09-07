@@ -38,6 +38,7 @@ func mustRepoRoot(ctx context.Context) (repoRootDir filesinterfaces.Directory) {
 }
 
 func TestX509CertificateLoadFromFilePath(t *testing.T) {
+	ctx := getCtx()
 	testDir, err := mustRepoRoot(getCtx()).GetSubDirectory("testdata", "X509Certificate", "LoadFromFilePath")
 	require.NoError(t, err)
 
@@ -46,7 +47,7 @@ func TestX509CertificateLoadFromFilePath(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range mustutils.Must(testDir.ListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true})) {
+	for _, testCaseDir := range mustutils.Must(testDir.ListSubDirectories(ctx, &parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true})) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
@@ -80,6 +81,7 @@ func TestX509CertificateLoadFromFilePath(t *testing.T) {
 }
 
 func TestX509CertificateGetAsPemString(t *testing.T) {
+	ctx := getCtx()
 	testDir, err := mustRepoRoot(getCtx()).GetSubDirectory("testdata", "X509Certificate", "GetAsPemString")
 	require.NoError(t, err)
 
@@ -88,7 +90,7 @@ func TestX509CertificateGetAsPemString(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range mustutils.Must(testDir.ListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true})) {
+	for _, testCaseDir := range mustutils.Must(testDir.ListSubDirectories(ctx, &parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true})) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
@@ -116,6 +118,7 @@ func TestX509CertificateGetAsPemString(t *testing.T) {
 }
 
 func TestX509CertificateIsRootCa(t *testing.T) {
+	ctx := getCtx()
 	testDir, err := mustRepoRoot(getCtx()).GetSubDirectory("testdata", "X509Certificate", "IsRootCa")
 	require.NoError(t, err)
 
@@ -124,7 +127,7 @@ func TestX509CertificateIsRootCa(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range mustutils.Must(testDir.ListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true})) {
+	for _, testCaseDir := range mustutils.Must(testDir.ListSubDirectories(ctx, &parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true})) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
@@ -154,6 +157,7 @@ func TestX509CertificateIsRootCa(t *testing.T) {
 }
 
 func TestX509CertificateIsV1(t *testing.T) {
+	ctx := getCtx()
 	testDir, err := mustRepoRoot(getCtx()).GetSubDirectory("testdata", "X509Certificate", "IsV1")
 	require.NoError(t, err)
 
@@ -162,7 +166,7 @@ func TestX509CertificateIsV1(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range mustutils.Must(testDir.ListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true})) {
+	for _, testCaseDir := range mustutils.Must(testDir.ListSubDirectories(ctx, &parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true})) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 
@@ -190,6 +194,7 @@ func TestX509CertificateIsV1(t *testing.T) {
 }
 
 func TestX509CertificateIsV3(t *testing.T) {
+	ctx := getCtx()
 	testDir, err := mustRepoRoot(getCtx()).GetSubDirectory("testdata", "X509Certificate", "IsV3")
 	require.NoError(t, err)
 
@@ -198,7 +203,7 @@ func TestX509CertificateIsV3(t *testing.T) {
 	}
 
 	tests := []TestCase{}
-	for _, testCaseDir := range mustutils.Must(testDir.ListSubDirectories(&parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true})) {
+	for _, testCaseDir := range mustutils.Must(testDir.ListSubDirectories(ctx, &parameteroptions.ListDirectoryOptions{Recursive: false, ReturnRelativePaths: true})) {
 		tests = append(tests, TestCase{testCaseDir})
 	}
 

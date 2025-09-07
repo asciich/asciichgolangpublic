@@ -62,16 +62,21 @@ func TestLocalGitRepository_GetLocalGitReposioryFromDirectory(t *testing.T) {
 				require.NoError(t, err)
 				defer directory.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				require.EqualValues(t, "localhost", directory.MustGetHostDescription())
+				hostDescription, err := directory.GetHostDescription()
+				require.NoError(t, err)
+				require.EqualValues(t, "localhost", hostDescription)
 
 				repo, err := GetLocalGitReposioryFromDirectory(directory)
 				require.NoError(t, err)
 
 				repoPath, err := repo.GetPath()
 				require.NoError(t, err)
-				require.EqualValues(t, directory.MustGetPath(), repoPath)
 
-				hostDescription, err := repo.GetHostDescription()
+				dirPath, err := directory.GetPath()
+				require.NoError(t, err)
+				require.EqualValues(t, dirPath, repoPath)
+
+				hostDescription, err = repo.GetHostDescription()
 				require.NoError(t, err)
 				require.EqualValues(t, "localhost", hostDescription)
 			},

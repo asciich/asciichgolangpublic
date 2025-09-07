@@ -6,9 +6,6 @@ type ListDirectoryOptions struct {
 
 	// Return paths relative to the directory to list:
 	ReturnRelativePaths bool
-
-	// Enable verbose output
-	Verbose bool
 }
 
 func NewListDirectoryOptions() (l *ListDirectoryOptions) {
@@ -25,19 +22,10 @@ func (l *ListDirectoryOptions) GetReturnRelativePaths() (returnRelativePaths boo
 	return l.ReturnRelativePaths
 }
 
-func (l *ListDirectoryOptions) GetVerbose() (verbose bool) {
-
-	return l.Verbose
-}
-
 func (l *ListDirectoryOptions) SetRecursive(recursive bool) {
 	l.Recursive = recursive
 }
 
 func (l *ListDirectoryOptions) SetReturnRelativePaths(returnRelativePaths bool) {
 	l.ReturnRelativePaths = returnRelativePaths
-}
-
-func (l *ListDirectoryOptions) SetVerbose(verbose bool) {
-	l.Verbose = verbose
 }

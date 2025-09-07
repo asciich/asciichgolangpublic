@@ -27,7 +27,7 @@ type Directory interface {
 	GetSubDirectory(path ...string) (subDirectory Directory, err error)
 	IsLocalDirectory() (isLocalDirectory bool, err error)
 	ListFiles(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (files []File, err error)
-	ListSubDirectories(options *parameteroptions.ListDirectoryOptions) (subDirectories []Directory, err error)
+	ListSubDirectories(ctx context.Context, options *parameteroptions.ListDirectoryOptions) (subDirectories []Directory, err error)
 
 	// All methods below this line can be implemented by embedding the `DirectoryBase` struct:
 	CheckExists(ctx context.Context) (err error)
@@ -37,7 +37,7 @@ type Directory interface {
 	DeleteFilesMatching(ctx context.Context, listFileOptons *parameteroptions.ListFileOptions) (err error)
 	FileInDirectoryExists(ctx context.Context, path ...string) (exists bool, err error)
 	ListFilePaths(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error)
-	ListSubDirectoryPaths(options *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string, err error)
+	ListSubDirectoryPaths(ctx context.Context, options *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string, err error)
 	ReadFileInDirectoryAsInt64(path ...string) (content int64, err error)
 	ReadFileInDirectoryAsLines(path ...string) (content []string, err error)
 	ReadFileInDirectoryAsString(path ...string) (content string, err error)

@@ -10,7 +10,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
@@ -71,7 +70,10 @@ func NewCommandExecutorDirectory(commandExecutor commandexecutorinterfaces.Comma
 	}
 
 	c = new(CommandExecutorDirectory)
-	c.MustSetParentDirectoryForBaseClass(c)
+	err = c.SetParentDirectoryForBaseClass(c)
+	if err != nil {
+		return nil, err
+	}
 
 	err = c.SetCommandExecutor(commandExecutor)
 	if err != nil {
@@ -595,7 +597,7 @@ func (c *CommandExecutorDirectory) ListFiles(ctx context.Context, listFileOption
 	return files, nil
 }
 
-func (c *CommandExecutorDirectory) ListSubDirectories(options *parameteroptions.ListDirectoryOptions) (subDirectories []filesinterfaces.Directory, err error) {
+func (c *CommandExecutorDirectory) ListSubDirectories(ctx context.Context, options *parameteroptions.ListDirectoryOptions) (subDirectories []filesinterfaces.Directory, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -618,7 +620,7 @@ func (c *CommandExecutorDirectory) ListSubDirectories(options *parameteroptions.
 	}
 
 	stdoutLines, err := commandExecutor.RunCommandAndGetStdoutAsLines(
-		contextutils.GetVerbosityContextByBool(options.Verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: findCommand,
 		},
