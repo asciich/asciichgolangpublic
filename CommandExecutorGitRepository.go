@@ -1283,7 +1283,7 @@ func (c *CommandExecutorGitRepository) Pull(ctx context.Context) (err error) {
 	return
 }
 
-func (c *CommandExecutorGitRepository) PullFromRemote(pullOptions *gitparameteroptions.GitPullFromRemoteOptions) (err error) {
+func (c *CommandExecutorGitRepository) PullFromRemote(ctx context.Context, pullOptions *gitparameteroptions.GitPullFromRemoteOptions) (err error) {
 	if pullOptions == nil {
 		return tracederrors.TracedError("pullOptions not set")
 	}
@@ -1307,19 +1307,12 @@ func (c *CommandExecutorGitRepository) PullFromRemote(pullOptions *gitparametero
 		return err
 	}
 
-	_, err = c.RunGitCommand(contextutils.GetVerbosityContextByBool(pullOptions.Verbose), []string{"pull", remoteName, branchName})
+	_, err = c.RunGitCommand(ctx, []string{"pull", remoteName, branchName})
 	if err != nil {
 		return err
 	}
 
-	if pullOptions.Verbose {
-		logging.LogInfof(
-			"Pulled git repository '%s' on host '%s' from remote '%s'.",
-			path,
-			hostDescription,
-			remoteName,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Pulled git repository '%s' on host '%s' from remote '%s'.", path, hostDescription, remoteName)
 
 	return nil
 }
