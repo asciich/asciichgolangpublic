@@ -1,6 +1,7 @@
 package versionutils
 
 import (
+	"context"
 	"os"
 	"regexp"
 	"sort"
@@ -79,25 +80,17 @@ func GetSoftwareVersionEnvVarName() (envVarName string) {
 	return "SOFTWARE_VERSION"
 }
 
-func GetSoftwareVersionFromEnvVarOrEmptyStringIfUnset(verbose bool) (softwareVersion string) {
+func GetSoftwareVersionFromEnvVarOrEmptyStringIfUnset(ctx context.Context) (softwareVersion string) {
 	envVarName := GetSoftwareVersionEnvVarName()
 
 	softwareVersion = os.Getenv(envVarName)
 	softwareVersion = strings.TrimSpace(softwareVersion)
 
 	if softwareVersion == "" {
-		if verbose {
-			logging.LogInfof("Software version is not set in environment variable '%s'.", envVarName)
-		}
+		logging.LogInfoByCtxf(ctx, "Software version is not set in environment variable '%s'.", envVarName)
 		return ""
 	} else {
-		if verbose {
-			logging.LogInfof(
-				"Get software version from environment variable '%s' as '%s'.",
-				envVarName,
-				softwareVersion,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Get software version from environment variable '%s' as '%s'.", envVarName, softwareVersion)
 		return softwareVersion
 	}
 }

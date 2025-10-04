@@ -9,8 +9,8 @@ import (
 // An artifact handler is used to download or update artifacts.
 // While artifacts could be some compiled binaries, docker images, vm images...
 type ArtifactHandler interface {
-	DownloadAndValidateArtifact(ctx context.Context, downloadOptions *artifactparameteroptions.ArtifactDownloadOptions) (downloadedArtifactPath string, err error)
-	GetLatestArtifactVersionAsString(artifactName string, verbose bool) (latestVersion string, err error)
-	IsHandlingArtifactByName(artifactName string) (isHandlingArtifactByName bool, err error)
-	UploadBinaryArtifact(uploadOptions *artifactparameteroptions.UploadArtifactOptions) (err error)
+	DownloadAndValidateArtifact(ctx context.Context, downloadOptions *artifactparameteroptions.ArtifactDownloadOptions) (string, error)
+	GetLatestArtifactVersionAsString(artifactName string, verbose bool) (string, error)
+	IsHandlingArtifactByName(artifactName string) (bool, error)
+	UploadBinaryArtifact(ctx context.Context, uploadOptions *artifactparameteroptions.UploadArtifactOptions) error
 }
