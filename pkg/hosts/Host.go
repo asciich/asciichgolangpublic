@@ -22,7 +22,7 @@ type Host interface {
 	GetHostDescription() (hostDescription string, err error)
 	GetHostName() (hostName string, err error)
 	GetSshPublicKeyOfUserAsString(ctx context.Context, username string) (publicKey string, err error)
-	InstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile filesinterfaces.File, err error)
+	InstallBinary(ctx context.Context, installOptions *parameteroptions.InstallOptions) (installedFile filesinterfaces.File, err error)
 	RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error)
 
 	// All methods below this line can be implemented by embedding the `CommandExecutorBase` struct:

@@ -131,7 +131,7 @@ func CreateTemporaryFileFromFile(ctx context.Context, fileToCopyAsTemporaryFile 
 		return nil, err
 	}
 
-	isLocalFile, err := fileToCopyAsTemporaryFile.IsLocalFile(contextutils.GetVerboseFromContext(ctx))
+	isLocalFile, err := fileToCopyAsTemporaryFile.IsLocalFile(ctx)
 	if err != nil {
 		return nil, err
 	}

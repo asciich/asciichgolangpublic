@@ -34,7 +34,7 @@ func getFileToTest(implementationName string) (file filesinterfaces.File) {
 	}
 
 	if implementationName == "localCommandExecutorFile" {
-		return files.MustGetLocalCommandExecutorFileByPath(createTempFileAndGetPath())
+		return mustutils.Must(files.GetLocalCommandExecutorFileByPath(createTempFileAndGetPath()))
 	}
 
 	logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)

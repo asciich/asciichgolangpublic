@@ -14,7 +14,7 @@ type File interface {
 	AppendBytes(toWrite []byte, verbose bool) (err error)
 	AppendString(toWrite string, verbose bool) (err error)
 	Chmod(ctx context.Context, options *filesoptions.ChmodOptions) (err error)
-	Chown(options *parameteroptions.ChownOptions) (err error)
+	Chown(ctx context.Context, options *parameteroptions.ChownOptions) (err error)
 	CopyToFile(destFile File, verbose bool) (err error)
 	Create(ctx context.Context, options *filesoptions.CreateOptions) (err error)
 	Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error)
@@ -39,7 +39,7 @@ type File interface {
 
 	// All methods below this line can be implemented by embedding the `FileBase` struct:
 	AppendLine(line string, verbose bool) (err error)
-	CheckIsLocalFile(verbose bool) (err error)
+	CheckIsLocalFile(ctx context.Context) (err error)
 	ContainsLine(line string) (containsLine bool, err error)
 	CreateParentDirectory(verbose bool) (err error)
 	EnsureLineInFile(line string, verbose bool) (err error)
@@ -57,7 +57,7 @@ type File interface {
 	GetValueAsString(key string) (value string, err error)
 	IsContentEqualByComparingSha256Sum(other File, verbose bool) (isMatching bool, err error)
 	IsEmptyFile() (isEmpty bool, err error)
-	IsLocalFile(verbose bool) (isLocalFile bool, err error)
+	IsLocalFile(ctx context.Context) (isLocalFile bool, err error)
 	IsMatchingSha256Sum(sha256sum string) (isMatching bool, err error)
 	IsPgpEncrypted(verbose bool) (isPgpEncrypted bool, err error)
 	IsYYYYmmdd_HHMMSSPrefix() (hasDatePrefix bool, err error)

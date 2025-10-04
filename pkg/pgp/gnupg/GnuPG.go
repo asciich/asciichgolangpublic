@@ -1,6 +1,8 @@
 package gnupg
 
 import (
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
@@ -11,12 +13,12 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func CheckSignatureValid(signatureFile filesinterfaces.File, verbose bool) (err error) {
+func CheckSignatureValid(ctx context.Context, signatureFile filesinterfaces.File) (err error) {
 	if signatureFile == nil {
 		return tracederrors.TracedErrorNil("signatureFile")
 	}
 
-	err = signatureFile.CheckIsLocalFile(verbose)
+	err = signatureFile.CheckIsLocalFile(ctx)
 	if err != nil {
 		return tracederrors.TracedErrorf("Only implemented for local available files: %w", err)
 	}
@@ -26,16 +28,9 @@ func CheckSignatureValid(signatureFile filesinterfaces.File, verbose bool) (err 
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Validate GnuPG signature from '%s' on host '%s' started.",
-			path,
-			hostDescription,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Validate GnuPG signature from '%s' on host '%s' started.", path, hostDescription)
 
-	_, err = commandexecutorbashoo.Bash().RunCommand(
-		contextutils.GetVerbosityContextByBool(verbose),
+	_, err = commandexecutorbashoo.Bash().RunCommand(ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"gpg", "--verify", path},
 		},
@@ -44,32 +39,12 @@ func CheckSignatureValid(signatureFile filesinterfaces.File, verbose bool) (err 
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"GnuPG signature from '%s' on host '%s' validated.",
-			path,
-			hostDescription,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "GnuPG signature from '%s' on host '%s' validated.", path, hostDescription)
 
 	return nil
 }
 
-func MustCheckSignatureValid(signatureFile filesinterfaces.File, verbose bool) {
-	err := CheckSignatureValid(signatureFile, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func MustSignFile(fileToSign filesinterfaces.File, options *GnuPGSignOptions) {
-	err := SignFile(fileToSign, options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func SignFile(fileToSign filesinterfaces.File, options *GnuPGSignOptions) (err error) {
+func SignFile(ctx context.Context, fileToSign filesinterfaces.File, options *GnuPGSignOptions) (err error) {
 	if fileToSign == nil {
 		return tracederrors.TracedError("fileToSign is nil")
 	}
@@ -78,7 +53,7 @@ func SignFile(fileToSign filesinterfaces.File, options *GnuPGSignOptions) (err e
 		return tracederrors.TracedError("options is nil")
 	}
 
-	err = fileToSign.CheckIsLocalFile(options.Verbose)
+	err = fileToSign.CheckIsLocalFile(ctx)
 	if err != nil {
 		return tracederrors.TracedErrorf("Only implemented for local available files: %w", err)
 	}
@@ -88,9 +63,7 @@ func SignFile(fileToSign filesinterfaces.File, options *GnuPGSignOptions) (err e
 		return err
 	}
 
-	if options.Verbose {
-		logging.LogInfof("Sign '%s' using gnupg started.", path)
-	}
+	logging.LogInfoByCtxf(ctx, "Sign '%s' using gnupg started.", path)
 
 	if !options.AsciiArmor {
 		return tracederrors.TracedError("Only implemented for asciiArmor at the moment")
@@ -106,7 +79,7 @@ func SignFile(fileToSign filesinterfaces.File, options *GnuPGSignOptions) (err e
 		return err
 	}
 
-	if err = signatureFile.Delete(contextutils.GetVerbosityContextByBool(options.Verbose), &filesoptions.DeleteOptions{}); err != nil {
+	if err = signatureFile.Delete(ctx, &filesoptions.DeleteOptions{}); err != nil {
 		return err
 	}
 
@@ -118,7 +91,7 @@ func SignFile(fileToSign filesinterfaces.File, options *GnuPGSignOptions) (err e
 	}
 
 	_, err = commandexecutorbashoo.Bash().RunCommand(
-		contextutils.GetVerbosityContextByBool(options.Verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: signCommand,
 		},
@@ -140,9 +113,7 @@ func SignFile(fileToSign filesinterfaces.File, options *GnuPGSignOptions) (err e
 		)
 	}
 
-	if options.Verbose {
-		logging.LogInfof("Sign '%s' using gnupg finished.", path)
-	}
+	logging.LogInfoByCtxf(ctx, "Sign '%s' using gnupg finished.", path)
 
 	return nil
 }

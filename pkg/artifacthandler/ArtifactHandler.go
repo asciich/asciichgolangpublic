@@ -10,7 +10,7 @@ import (
 // While artifacts could be some compiled binaries, docker images, vm images...
 type ArtifactHandler interface {
 	DownloadAndValidateArtifact(ctx context.Context, downloadOptions *artifactparameteroptions.ArtifactDownloadOptions) (string, error)
-	GetLatestArtifactVersionAsString(artifactName string, verbose bool) (string, error)
+	GetLatestArtifactVersionAsString(ctx context.Context, artifactName string) (string, error)
 	IsHandlingArtifactByName(artifactName string) (bool, error)
 	UploadBinaryArtifact(ctx context.Context, uploadOptions *artifactparameteroptions.UploadArtifactOptions) error
 }

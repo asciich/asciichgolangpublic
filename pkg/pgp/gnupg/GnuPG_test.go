@@ -35,9 +35,9 @@ func getFileToTest(implementationName string) (file filesinterfaces.File) {
 			panic(err)
 		}
 	} else if implementationName == "localCommandExecutorFile" {
-		file = files.MustGetLocalCommandExecutorFileByPath(
+		file = mustutils.Must(files.GetLocalCommandExecutorFileByPath(
 			mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)),
-		)
+		))
 	} else {
 		logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)
 	}
@@ -76,19 +76,21 @@ func TestGnuPg_SignAndValidate(t *testing.T) {
 				require.True(t, mustutils.Must(toTest.Exists(ctx)))
 				require.False(t, mustutils.Must(signatureFile.Exists(ctx)))
 
-				MustSignFile(
+				err = SignFile(
+					ctx, 
 					toTest,
 					&GnuPGSignOptions{
 						DetachedSign: true,
 						AsciiArmor:   tt.asciiArmor,
-						Verbose:      verbose,
 					},
 				)
+				require.NoError(t, err)
 
 				require.True(t, mustutils.Must(toTest.Exists(ctx)))
 				require.True(t, mustutils.Must(signatureFile.Exists(ctx)))
 
-				MustCheckSignatureValid(signatureFile, verbose)
+				err = CheckSignatureValid(ctx, signatureFile)
+				require.NoError(t, err)
 			},
 		)
 	}

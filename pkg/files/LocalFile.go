@@ -157,7 +157,7 @@ func (l *LocalFile) Chmod(ctx context.Context, chmodOptions *filesoptions.ChmodO
 	return nativefiles.Chmod(ctx, path, chmodOptions)
 }
 
-func (l *LocalFile) Chown(options *parameteroptions.ChownOptions) (err error) {
+func (l *LocalFile) Chown(ctx context.Context, options *parameteroptions.ChownOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
@@ -197,14 +197,7 @@ func (l *LocalFile) Chown(options *parameteroptions.ChownOptions) (err error) {
 		return err
 	}
 
-	if options.Verbose {
-		logging.LogChangedf(
-			"Changed ownership of file '%s' to '%s' on host '%s'",
-			path,
-			userAndGroupForCommand,
-			hostDescription,
-		)
-	}
+	logging.LogChangedByCtxf(ctx, "Changed ownership of file '%s' to '%s' on host '%s'", path, userAndGroupForCommand, hostDescription)
 
 	return nil
 }
