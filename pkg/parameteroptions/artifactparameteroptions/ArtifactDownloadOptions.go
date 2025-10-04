@@ -9,7 +9,6 @@ type ArtifactDownloadOptions struct {
 	OutputPath        string
 	VersionToDownload string
 	OverwriteExisting bool
-	Verbose           bool
 }
 
 func NewArtifactDownloadOptions() (a *ArtifactDownloadOptions) {
@@ -39,11 +38,6 @@ func (a *ArtifactDownloadOptions) GetOutputPath() (outputPath string, err error)
 func (a *ArtifactDownloadOptions) GetOverwriteExisting() (overwriteExisting bool, err error) {
 
 	return a.OverwriteExisting, nil
-}
-
-func (a *ArtifactDownloadOptions) GetVerbose() (verbose bool, err error) {
-
-	return a.Verbose, nil
 }
 
 func (a *ArtifactDownloadOptions) GetVersionToDownload() (versionToDownload string, err error) {
@@ -84,12 +78,6 @@ func (a *ArtifactDownloadOptions) SetOutputPath(outputPath string) (err error) {
 
 func (a *ArtifactDownloadOptions) SetOverwriteExisting(overwriteExisting bool) (err error) {
 	a.OverwriteExisting = overwriteExisting
-
-	return nil
-}
-
-func (a *ArtifactDownloadOptions) SetVerbose(verbose bool) (err error) {
-	a.Verbose = verbose
 
 	return nil
 }

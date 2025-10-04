@@ -8,7 +8,6 @@ type ChownOptions struct {
 	UserName  string
 	GroupName string
 	UseSudo   bool
-	Verbose   bool
 }
 
 func NewChownOptions() (c *ChownOptions) {
@@ -54,11 +53,6 @@ func (c *ChownOptions) GetUserName() (userName string, err error) {
 	return c.UserName, nil
 }
 
-func (c *ChownOptions) GetVerbose() (verbose bool) {
-
-	return c.Verbose
-}
-
 func (c *ChownOptions) IsGroupNameSet() (isSet bool) {
 	return c.GroupName != ""
 }
@@ -85,8 +79,4 @@ func (c *ChownOptions) SetUserName(userName string) (err error) {
 	c.UserName = userName
 
 	return nil
-}
-
-func (c *ChownOptions) SetVerbose(verbose bool) {
-	c.Verbose = verbose
 }

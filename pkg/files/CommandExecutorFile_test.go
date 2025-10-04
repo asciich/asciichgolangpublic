@@ -28,7 +28,10 @@ func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 
 				temporaryFilePath := createTempFileAndGetPath()
 
-				var fileToTest filesinterfaces.File = files.MustGetLocalCommandExecutorFileByPath(temporaryFilePath)
+				var fileToTest filesinterfaces.File
+				var err error
+				fileToTest, err = files.GetLocalCommandExecutorFileByPath(temporaryFilePath)
+				require.NoError(t, err)
 				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				exists, err := fileToTest.Exists(ctx)

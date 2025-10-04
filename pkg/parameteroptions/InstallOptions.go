@@ -12,7 +12,6 @@ type InstallOptions struct {
 	InstallationPath      string
 	InstallBashCompletion bool
 	UseSudoToInstall      bool
-	Verbose               bool
 }
 
 func NewInstallOptions() (i *InstallOptions) {
@@ -68,11 +67,6 @@ func (i *InstallOptions) GetUseSudoToInstall() (useSudoToInstall bool) {
 	return i.UseSudoToInstall
 }
 
-func (i *InstallOptions) GetVerbose() (verbose bool) {
-
-	return i.Verbose
-}
-
 func (i *InstallOptions) SetBinaryName(binaryName string) (err error) {
 	if binaryName == "" {
 		return tracederrors.TracedErrorf("binaryName is empty string")
@@ -109,8 +103,4 @@ func (i *InstallOptions) SetSourcePath(sourcePath string) (err error) {
 
 func (i *InstallOptions) SetUseSudoToInstall(useSudoToInstall bool) {
 	i.UseSudoToInstall = useSudoToInstall
-}
-
-func (i *InstallOptions) SetVerbose(verbose bool) {
-	i.Verbose = verbose
 }

@@ -1,10 +1,11 @@
 package files
 
 import (
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -32,12 +33,12 @@ func GetCommandExecutorFileByPath(commandExector commandexecutorinterfaces.Comma
 	return commandExecutorFile, nil
 }
 
-func GetLocalCommandExecutorFileByFile(file filesinterfaces.File, verbose bool) (commandExecutorFile *CommandExecutorFile, err error) {
+func GetLocalCommandExecutorFileByFile(ctx context.Context, file filesinterfaces.File) (commandExecutorFile *CommandExecutorFile, err error) {
 	if file == nil {
 		return nil, tracederrors.TracedErrorEmptyString("file")
 	}
 
-	err = file.CheckIsLocalFile(verbose)
+	err = file.CheckIsLocalFile(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -61,31 +62,4 @@ func GetLocalCommandExecutorFileByPath(localPath string) (commandExecutorFile *C
 	}
 
 	return GetCommandExecutorFileByPath(commandexecutorbashoo.Bash(), localPath)
-}
-
-func MustGetCommandExecutorFileByPath(commandExector commandexecutorinterfaces.CommandExecutor, path string) (commandExecutorFile *CommandExecutorFile) {
-	commandExecutorFile, err := GetCommandExecutorFileByPath(commandExector, path)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandExecutorFile
-}
-
-func MustGetLocalCommandExecutorFileByFile(file filesinterfaces.File, verbose bool) (commandExecutorFile *CommandExecutorFile) {
-	commandExecutorFile, err := GetLocalCommandExecutorFileByFile(file, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandExecutorFile
-}
-
-func MustGetLocalCommandExecutorFileByPath(localPath string) (commandExecutorFile *CommandExecutorFile) {
-	commandExecutorFile, err := GetLocalCommandExecutorFileByPath(localPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandExecutorFile
 }

@@ -1,6 +1,8 @@
 package parameteroptions
 
 import (
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/pkg/artifacthandler"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions/authenticationoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -70,7 +72,7 @@ func (u *UpdateDependenciesOptions) GetCommit() (commit bool, err error) {
 	return u.Commit, nil
 }
 
-func (u *UpdateDependenciesOptions) GetLatestArtifactVersionAsString(softwareName string, verbose bool) (latestVersion string, err error) {
+func (u *UpdateDependenciesOptions) GetLatestArtifactVersionAsString(ctx context.Context, softwareName string) (latestVersion string, err error) {
 	if softwareName == "" {
 		return "", tracederrors.TracedError("softwareName is empty string")
 	}
@@ -80,7 +82,7 @@ func (u *UpdateDependenciesOptions) GetLatestArtifactVersionAsString(softwareNam
 		return "", err
 	}
 
-	latestVersion, err = artifactHandler.GetLatestArtifactVersionAsString(softwareName, verbose)
+	latestVersion, err = artifactHandler.GetLatestArtifactVersionAsString(ctx, softwareName)
 	if err != nil {
 		return "", err
 	}

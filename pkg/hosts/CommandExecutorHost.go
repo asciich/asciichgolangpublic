@@ -296,7 +296,7 @@ func (h *CommandExecutorHost) GetFileByPath(path string) (file filesinterfaces.F
 	return file, nil
 }
 
-func (h *CommandExecutorHost) InstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile filesinterfaces.File, err error) {
+func (h *CommandExecutorHost) InstallBinary(ctx context.Context, installOptions *parameteroptions.InstallOptions) (installedFile filesinterfaces.File, err error) {
 	if installOptions == nil {
 		return nil, tracederrors.TracedErrorNil("installOptions")
 	}
@@ -321,16 +321,8 @@ func (h *CommandExecutorHost) InstallBinary(installOptions *parameteroptions.Ins
 		return nil, err
 	}
 
-	if installOptions.Verbose {
-		logging.LogInfof(
-			"Install '%s' as '%s' on host '%s' started.",
-			sourceFilePath,
-			binaryName,
-			hostName,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Install '%s' as '%s' on host '%s' started.", sourceFilePath, binaryName, hostName)
 
-	ctx := contextutils.GetVerbosityContextByBool(installOptions.Verbose)
 	tempCopy, err := tempfilesoo.CreateTemporaryFileFromFile(ctx, sourceFile)
 	if err != nil {
 		return nil, err
@@ -341,22 +333,14 @@ func (h *CommandExecutorHost) InstallBinary(installOptions *parameteroptions.Ins
 		return nil, err
 	}
 
-	if installOptions.Verbose {
-		logging.LogInfof(
-			"'%s' will be installed as '%s' on host '%s'.",
-			binaryName,
-			destPath,
-			hostName,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "'%s' will be installed as '%s' on host '%s'.", binaryName, destPath, hostName)
 
-	installedFile, err = tempCopy.MoveToPath(destPath, installOptions.UseSudoToInstall, installOptions.Verbose)
+	installedFile, err = tempCopy.MoveToPath(destPath, installOptions.UseSudoToInstall, contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}
 
-	err = installedFile.Chmod(
-		contextutils.GetVerbosityContextByBool(installOptions.Verbose),
+	err = installedFile.Chmod(ctx,
 		&filesoptions.ChmodOptions{
 			PermissionsString: "u=rwx,g=rx,o=rx",
 			UseSudo:           installOptions.UseSudoToInstall,
@@ -367,25 +351,18 @@ func (h *CommandExecutorHost) InstallBinary(installOptions *parameteroptions.Ins
 	}
 
 	err = installedFile.Chown(
+		ctx,
 		&parameteroptions.ChownOptions{
 			UserName:  "root",
 			GroupName: "root",
 			UseSudo:   installOptions.UseSudoToInstall,
-			Verbose:   installOptions.Verbose,
 		},
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	if installOptions.Verbose {
-		logging.LogChangedf(
-			"Install '%s' as '%s' on host '%s' finished.",
-			sourceFilePath,
-			binaryName,
-			hostName,
-		)
-	}
+	logging.LogChangedByCtxf(ctx, "Install '%s' as '%s' on host '%s' finished.", sourceFilePath, binaryName, hostName)
 
 	return installedFile, nil
 }
@@ -513,15 +490,6 @@ func (h *CommandExecutorHost) MustGetHostName() (hostname string) {
 	}
 
 	return hostname
-}
-
-func (h *CommandExecutorHost) MustInstallBinary(installOptions *parameteroptions.InstallOptions) (installedFile filesinterfaces.File) {
-	installedFile, err := h.InstallBinary(installOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return installedFile
 }
 
 func (h *CommandExecutorHost) MustIsFtpPortOpen(verbose bool) (isOpen bool) {

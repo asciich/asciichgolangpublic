@@ -108,7 +108,7 @@ func (c *CommandExecutorFile) Chmod(ctx context.Context, chmodOptions *filesopti
 	return nil
 }
 
-func (c *CommandExecutorFile) Chown(options *parameteroptions.ChownOptions) (err error) {
+func (c *CommandExecutorFile) Chown(ctx context.Context, options *parameteroptions.ChownOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
@@ -153,14 +153,7 @@ func (c *CommandExecutorFile) Chown(options *parameteroptions.ChownOptions) (err
 		return err
 	}
 
-	if options.Verbose {
-		logging.LogChangedf(
-			"Changed ownership of file '%s' to '%s' on host '%s'",
-			path,
-			userAndGroupForCommand,
-			hostDescription,
-		)
-	}
+	logging.LogChangedByCtxf(ctx, "Changed ownership of file '%s' to '%s' on host '%s'", path, userAndGroupForCommand, hostDescription)
 
 	return nil
 }
@@ -658,13 +651,6 @@ func (c *CommandExecutorFile) MustAppendBytes(toWrite []byte, verbose bool) {
 
 func (c *CommandExecutorFile) MustAppendString(toWrite string, verbose bool) {
 	err := c.AppendString(toWrite, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorFile) MustChown(options *parameteroptions.ChownOptions) {
-	err := c.Chown(options)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
