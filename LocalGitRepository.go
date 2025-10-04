@@ -1709,7 +1709,7 @@ func (l *LocalGitRepository) Pull(ctx context.Context) (err error) {
 	return nil
 }
 
-func (l *LocalGitRepository) PullFromRemote(pullOptions *gitparameteroptions.GitPullFromRemoteOptions) (err error) {
+func (l *LocalGitRepository) PullFromRemote(ctx context.Context, pullOptions *gitparameteroptions.GitPullFromRemoteOptions) (err error) {
 	if pullOptions == nil {
 		return tracederrors.TracedError("pullOptions not set")
 	}
@@ -1735,21 +1735,14 @@ func (l *LocalGitRepository) PullFromRemote(pullOptions *gitparameteroptions.Git
 
 	// TODO implement without calling the git binary.
 	_, err = l.RunGitCommand(
-		contextutils.GetVerbosityContextByBool(pullOptions.Verbose),
+		ctx,
 		[]string{"pull", remoteName, branchName},
 	)
 	if err != nil {
 		return err
 	}
 
-	if pullOptions.Verbose {
-		logging.LogInfof(
-			"Pulled git repository '%s' on host '%s' from remote '%s'.",
-			path,
-			hostDescription,
-			remoteName,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Pulled git repository '%s' on host '%s' from remote '%s'.", path, hostDescription, remoteName)
 
 	return nil
 }

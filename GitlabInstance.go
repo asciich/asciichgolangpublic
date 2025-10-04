@@ -203,23 +203,23 @@ func (g *GitlabInstance) Authenticate(ctx context.Context, authOptions *GitlabAu
 	return nil
 }
 
-func (g *GitlabInstance) CheckProjectByPathExists(ctx context.Context, projectPath string) (projectExists bool, err error) {
+func (g *GitlabInstance) CheckProjectByPathExists(ctx context.Context, projectPath string) (err error) {
 	if projectPath == "" {
-		return false, tracederrors.TracedError("projectPath is empty string")
+		return tracederrors.TracedError("projectPath is empty string")
 	}
 
-	projectExists, err = g.ProjectByProjectPathExists(ctx, projectPath)
+	projectExists, err := g.ProjectByProjectPathExists(ctx, projectPath)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	if !projectExists {
 		errorMessage := fmt.Sprintf("Gitlab project '%s' does not exist.", projectPath)
 		logging.LogErrorByCtx(ctx, errorMessage)
-		return false, tracederrors.TracedError(errorMessage)
+		return tracederrors.TracedError(errorMessage)
 	}
 
-	return projectExists, nil
+	return nil
 }
 
 func (g *GitlabInstance) CheckRunnerStatusOk(runnerName string, verbose bool) (isStatusOk bool, err error) {

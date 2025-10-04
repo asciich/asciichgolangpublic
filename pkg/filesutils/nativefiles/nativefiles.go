@@ -92,6 +92,30 @@ func IsDir(ctx context.Context, pathToCheck string) bool {
 	return false
 }
 
+func CheckAllExists(ctx context.Context, pathsToCheck []string) error {
+	if len(pathsToCheck) <= 0 {
+		return tracederrors.TracedError("pathsToCheck is empty")
+	}
+
+	for _, p := range pathsToCheck {
+		err := CheckExists(ctx, p)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func CheckExists(ctx context.Context, pathToCheck string) error {
+	exists := Exists(ctx, pathToCheck)
+	if exists {
+		return nil
+	}
+
+	return tracederrors.TracedErrorf("Path '%s' does not exist.", pathToCheck)
+}
+
 func Exists(ctx context.Context, pathToCheck string) bool {
 	_, err := os.Stat(pathToCheck)
 	if err != nil {

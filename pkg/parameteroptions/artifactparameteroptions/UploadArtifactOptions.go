@@ -10,7 +10,6 @@ type UploadArtifactOptions struct {
 	BinaryPath            string
 	SignaturePath         string
 	SoftwareVersionString string
-	Verbose               bool
 	AuthOptions           []authenticationoptions.AuthenticationOption
 }
 
@@ -66,11 +65,6 @@ func (u *UploadArtifactOptions) GetSoftwareVersionString() (softwareVersionStrin
 	return u.SoftwareVersionString, nil
 }
 
-func (u *UploadArtifactOptions) GetVerbose() (verbose bool) {
-
-	return u.Verbose
-}
-
 func (u *UploadArtifactOptions) SetArtifactName(artifactName string) (err error) {
 	if artifactName == "" {
 		return tracederrors.TracedErrorf("artifactName is empty string")
@@ -123,8 +117,4 @@ func (u *UploadArtifactOptions) SetSoftwareVersionString(softwareVersionString s
 	u.SoftwareVersionString = softwareVersionString
 
 	return nil
-}
-
-func (u *UploadArtifactOptions) SetVerbose(verbose bool) {
-	u.Verbose = verbose
 }

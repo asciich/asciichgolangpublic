@@ -16,6 +16,17 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
+func Test_LocalDirectoryFulfillsDirectoryInterface(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
+		dir, err := files.GetLocalDirectoryByPath(".")
+		require.NoError(t, err)
+		require.NotNil(t, dir)
+
+		var dirInterface filesinterfaces.Directory = dir
+		require.NotNil(t, dirInterface)
+	})
+}
+
 func TestLocalDirectoryExists(t *testing.T) {
 
 	tests := []struct {

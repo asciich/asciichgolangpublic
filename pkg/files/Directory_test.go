@@ -194,7 +194,6 @@ func TestDirectory_ListSubDirectories_RelativePaths(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose = true
 				ctx := getCtx()
 
 				testDirectory := getDirectoryToTest(tt.implementationName)

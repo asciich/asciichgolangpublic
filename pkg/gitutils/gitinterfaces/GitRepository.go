@@ -68,7 +68,7 @@ type GitRepository interface {
 	RemoteConfigurationExists(ctx context.Context, config GitRemoteConfig) (exists bool, err error)
 	RemoveRemoteByName(ctx context.Context, remoteName string) (err error)
 	Pull(ctx context.Context) (err error)
-	PullFromRemote(pullOptions *gitparameteroptions.GitPullFromRemoteOptions) (err error)
+	PullFromRemote(ctx context.Context, pullOptions *gitparameteroptions.GitPullFromRemoteOptions) (err error)
 	Push(ctx context.Context) (err error)
 	PushTagsToRemote(ctx context.Context, remoteName string) (err error)
 	PushToRemote(ctx context.Context, remoteName string) (err error)
