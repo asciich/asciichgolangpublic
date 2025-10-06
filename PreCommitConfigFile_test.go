@@ -60,13 +60,14 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 					targetVersionString: "v0.10.0",
 				}
 
-				preCommitFile.MustUpdateDependency(
+				_, err = preCommitFile.UpdateDependency(
+					ctx,
 					dependency,
 					&parameteroptions.UpdateDependenciesOptions{
-						Commit:  false,
-						Verbose: verbose,
+						Commit: false,
 					},
 				)
+				require.NoError(t, err)
 
 				updatedSha := preCommitFile.MustGetSha256Sum()
 				expectedOutputSha := expectedOutput.MustGetSha256Sum()

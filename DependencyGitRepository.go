@@ -1,6 +1,8 @@
 package asciichgolangpublic
 
 import (
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/pkg/changesummary"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
@@ -40,7 +42,7 @@ func (d *DependencyGitRepository) GetName() (name string, err error) {
 	return d.GetUrl()
 }
 
-func (d *DependencyGitRepository) GetNewestVersion(authOptions []authenticationoptions.AuthenticationOption, verbose bool) (newestVersion versionutils.Version, err error) {
+func (d *DependencyGitRepository) GetNewestVersion(ctx context.Context, authOptions []authenticationoptions.AuthenticationOption) (newestVersion versionutils.Version, err error) {
 	url, err := d.GetUrl()
 	if err != nil {
 		return nil, err
@@ -57,23 +59,17 @@ func (d *DependencyGitRepository) GetNewestVersion(authOptions []authenticationo
 			return nil, err
 		}
 
-		if verbose {
-			logging.LogInfof(
-				"Newest version for '%s' is set by already defined target version '%s'",
-				url,
-				targetVersionString,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Newest version for '%s' is set by already defined target version '%s'", url, targetVersionString)
 
 		return newestVersion, nil
 	}
 
-	gitlabProject, err := GetGitlabProjectByUrlFromString(contextutils.GetVerbosityContextByBool(verbose), url, authOptions)
+	gitlabProject, err := GetGitlabProjectByUrlFromString(ctx, url, authOptions)
 	if err != nil {
 		return nil, err
 	}
 
-	newestVersion, err = gitlabProject.GetNewestVersion(contextutils.GetVerbosityContextByBool(verbose))
+	newestVersion, err = gitlabProject.GetNewestVersion(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -88,19 +84,13 @@ func (d *DependencyGitRepository) GetNewestVersion(authOptions []authenticationo
 		return nil, err
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Newest version of git repository dependency '%s' is '%s'.",
-			name,
-			newestVersionString,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Newest version of git repository dependency '%s' is '%s'.", name, newestVersionString)
 
 	return newestVersion, err
 }
 
-func (d *DependencyGitRepository) GetNewestVersionAsString(authOptions []authenticationoptions.AuthenticationOption, verbose bool) (newestVersionString string, err error) {
-	newestVersion, err := d.GetNewestVersion(authOptions, verbose)
+func (d *DependencyGitRepository) GetNewestVersionAsString(ctx context.Context, authOptions []authenticationoptions.AuthenticationOption) (newestVersionString string, err error) {
+	newestVersion, err := d.GetNewestVersion(ctx, authOptions)
 	if err != nil {
 		return "", err
 	}
@@ -191,7 +181,7 @@ func (d *DependencyGitRepository) IsTargetVersionSet() (isSet bool) {
 	return d.targetVersionString != ""
 }
 
-func (d *DependencyGitRepository) IsUpdateAvailable(authOptions []authenticationoptions.AuthenticationOption, verbose bool) (isUpdateAvailable bool, err error) {
+func (d *DependencyGitRepository) IsUpdateAvailable(ctx context.Context, authOptions []authenticationoptions.AuthenticationOption) (isUpdateAvailable bool, err error) {
 	if d.IsVersionStringUnset() {
 		return true, nil
 	}
@@ -201,7 +191,7 @@ func (d *DependencyGitRepository) IsUpdateAvailable(authOptions []authentication
 		return false, err
 	}
 
-	newestVersionString, err := d.GetNewestVersion(authOptions, verbose)
+	newestVersionString, err := d.GetNewestVersion(ctx, authOptions)
 	if err != nil {
 		return false, err
 	}
@@ -213,22 +203,10 @@ func (d *DependencyGitRepository) IsUpdateAvailable(authOptions []authentication
 		return false, err
 	}
 
-	if verbose {
-		if isUpdateAvailable {
-			logging.LogChangedf(
-				"Update available for dependency '%s'. Current version is '%s' but newest version is '%s'.",
-				dependencyName,
-				currentVersion,
-				newestVersionString,
-			)
-		} else {
-			logging.LogInfof(
-				"No Update available for dependency '%s'. Current version is '%s' and newest version is '%s'.",
-				dependencyName,
-				currentVersion,
-				newestVersionString,
-			)
-		}
+	if isUpdateAvailable {
+		logging.LogChangedByCtxf(ctx, "Update available for dependency '%s'. Current version is '%s' but newest version is '%s'.", dependencyName, currentVersion, newestVersionString)
+	} else {
+		logging.LogInfoByCtxf(ctx, "No Update available for dependency '%s'. Current version is '%s' and newest version is '%s'.", dependencyName, currentVersion, newestVersionString)
 	}
 
 	return isUpdateAvailable, nil
@@ -282,7 +260,7 @@ func (d *DependencyGitRepository) SetVersionString(versionString string) (err er
 	return nil
 }
 
-func (d *DependencyGitRepository) Update(options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
+func (d *DependencyGitRepository) Update(ctx context.Context, options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -294,17 +272,15 @@ func (d *DependencyGitRepository) Update(options *parameteroptions.UpdateDepende
 
 	changeSummary = changesummary.NewChangeSummary()
 
-	if options.Verbose {
-		logging.LogInfof("Update git repository dependency '%s' started.", name)
-	}
+	logging.LogInfoByCtxf(ctx, "Update git repository dependency '%s' started.", name)
 
 	if !d.IsAtLeastOneSourceFileSet() {
 		return nil, tracederrors.TracedErrorf("No source files set for git repository dependency '%s'", name)
 	}
 
 	latestVersion, err := d.GetNewestVersionAsString(
+		ctx,
 		options.AuthenticationOptions,
-		options.Verbose,
 	)
 	if err != nil {
 		return nil, err
@@ -316,7 +292,7 @@ func (d *DependencyGitRepository) Update(options *parameteroptions.UpdateDepende
 	}
 
 	for _, sourceFile := range sourceFiles {
-		sourceFileSummary, err := d.UpdateVersionByStringInSourceFile(latestVersion, sourceFile, options)
+		sourceFileSummary, err := d.UpdateVersionByStringInSourceFile(ctx, latestVersion, sourceFile, options)
 		if err != nil {
 			return nil, err
 		}
@@ -327,14 +303,14 @@ func (d *DependencyGitRepository) Update(options *parameteroptions.UpdateDepende
 		}
 	}
 
-	if options.Verbose {
+	if contextutils.GetVerboseFromContext(ctx) {
 		logging.LogByChangeSummaryf(changeSummary, "Update git repository dependency '%s' finished.", name)
 	}
 
 	return changeSummary, nil
 }
 
-func (d *DependencyGitRepository) UpdateVersionByStringInSourceFile(version string, sourceFile filesinterfaces.File, options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
+func (d *DependencyGitRepository) UpdateVersionByStringInSourceFile(ctx context.Context, version string, sourceFile filesinterfaces.File, options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if version == "" {
 		return nil, tracederrors.TracedErrorEmptyString("version")
 	}
@@ -359,21 +335,15 @@ func (d *DependencyGitRepository) UpdateVersionByStringInSourceFile(version stri
 		return nil, err
 	}
 
-	if options.Verbose {
-		logging.LogInfof(
-			"Update of git repository dependency '%s' in '%s' started.",
-			name,
-			sourceFileUri,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Update of git repository dependency '%s' in '%s' started.", name, sourceFileUri)
 
-	preCommitConfigFile, err := PreCommit().GetAsPreCommitConfigFileOrNilIfContentIsInvalid(sourceFile, options.Verbose)
+	preCommitConfigFile, err := PreCommit().GetAsPreCommitConfigFileOrNilIfContentIsInvalid(ctx, sourceFile)
 	if err != nil {
 		return nil, err
 	}
 
 	if preCommitConfigFile != nil {
-		fileChangeSummary, err := preCommitConfigFile.UpdateDependency(d, options)
+		fileChangeSummary, err := preCommitConfigFile.UpdateDependency(ctx, d, options)
 		if err != nil {
 			return nil, err
 		}

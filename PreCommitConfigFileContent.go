@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"errors"
 	"reflect"
 
@@ -46,7 +47,7 @@ func (p *PreCommitConfigFileContent) GetConfig() (config *PreCommitConfigFileCon
 	return p.config, nil
 }
 
-func (p *PreCommitConfigFileContent) GetDependencies(verbose bool) (dependencies []dependencyinterfaces.Dependency, err error) {
+func (p *PreCommitConfigFileContent) GetDependencies(ctx context.Context) (dependencies []dependencyinterfaces.Dependency, err error) {
 	config, err := p.GetConfig()
 	if err != nil {
 		return nil, err
@@ -113,56 +114,6 @@ func (p *PreCommitConfigFileContent) LoadFromString(toLoad string) (err error) {
 	return nil
 }
 
-func (p *PreCommitConfigFileContent) MustGetAsString() (contentString string) {
-	contentString, err := p.GetAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return contentString
-}
-
-func (p *PreCommitConfigFileContent) MustGetConfig() (config *PreCommitConfigFileConfig) {
-	config, err := p.GetConfig()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return config
-}
-
-func (p *PreCommitConfigFileContent) MustGetDependencies(verbose bool) (dependencies []dependencyinterfaces.Dependency) {
-	dependencies, err := p.GetDependencies(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return dependencies
-}
-
-func (p *PreCommitConfigFileContent) MustLoadFromString(toLoad string) {
-	err := p.LoadFromString(toLoad)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (p *PreCommitConfigFileContent) MustSetConfig(config *PreCommitConfigFileConfig) {
-	err := p.SetConfig(config)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (p *PreCommitConfigFileContent) MustUpdateDependency(dependency dependencyinterfaces.Dependency, authOptions []authenticationoptions.AuthenticationOption, verbose bool) (changeSummary *changesummary.ChangeSummary) {
-	changeSummary, err := p.UpdateDependency(dependency, authOptions, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return changeSummary
-}
-
 func (p *PreCommitConfigFileContent) SetConfig(config *PreCommitConfigFileConfig) (err error) {
 	if config == nil {
 		return tracederrors.TracedErrorf("config is nil")
@@ -173,7 +124,7 @@ func (p *PreCommitConfigFileContent) SetConfig(config *PreCommitConfigFileConfig
 	return nil
 }
 
-func (p *PreCommitConfigFileContent) UpdateDependency(dependency dependencyinterfaces.Dependency, authOptions []authenticationoptions.AuthenticationOption, verbose bool) (changeSummary *changesummary.ChangeSummary, err error) {
+func (p *PreCommitConfigFileContent) UpdateDependency(ctx context.Context, dependency dependencyinterfaces.Dependency, authOptions []authenticationoptions.AuthenticationOption) (changeSummary *changesummary.ChangeSummary, err error) {
 	if dependency == nil {
 		return nil, tracederrors.TracedErrorNil("dependency")
 	}
@@ -188,7 +139,7 @@ func (p *PreCommitConfigFileContent) UpdateDependency(dependency dependencyinter
 		return nil, err
 	}
 
-	isUpdateAvailable, err := gitRepoDependency.IsUpdateAvailable(authOptions, verbose)
+	isUpdateAvailable, err := gitRepoDependency.IsUpdateAvailable(ctx, authOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +157,7 @@ func (p *PreCommitConfigFileContent) UpdateDependency(dependency dependencyinter
 	}
 
 	if isUpdateAvailable {
-		newVersion, err := dependency.GetNewestVersionAsString(authOptions, verbose)
+		newVersion, err := dependency.GetNewestVersionAsString(ctx, authOptions)
 		if err != nil {
 			return nil, err
 		}
@@ -218,21 +169,9 @@ func (p *PreCommitConfigFileContent) UpdateDependency(dependency dependencyinter
 
 		changeSummary.SetIsChanged(true)
 
-		if verbose {
-			logging.LogChangedf(
-				"Dependency '%s' updated in pre-commit config file content to '%s'.",
-				dependencyName,
-				newVersion,
-			)
-		}
-
+		logging.LogChangedByCtxf(ctx, "Dependency '%s' updated in pre-commit config file content to '%s'.", dependencyName, newVersion)
 	} else {
-		if verbose {
-			logging.LogInfof(
-				"Dependency '%s' is already up to date in pre-commit config file content.",
-				dependencyName,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Dependency '%s' is already up to date in pre-commit config file content.", dependencyName)
 	}
 
 	return changeSummary, nil

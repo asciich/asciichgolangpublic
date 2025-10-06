@@ -104,7 +104,7 @@ func (g *GitlabInstance) GetCurrentUsersName(ctx context.Context) (currentUserNa
 	return currentUserName, nil
 }
 
-func (g *GitlabInstance) AddRunner(newRunnerOptions *GitlabAddRunnerOptions) (createdRunner *GitlabRunner, err error) {
+func (g *GitlabInstance) AddRunner(ctx context.Context, newRunnerOptions *GitlabAddRunnerOptions) (createdRunner *GitlabRunner, err error) {
 	if newRunnerOptions == nil {
 		return nil, tracederrors.TracedError("newRunnerOptions is nil")
 	}
@@ -114,7 +114,7 @@ func (g *GitlabInstance) AddRunner(newRunnerOptions *GitlabAddRunnerOptions) (cr
 		return nil, err
 	}
 
-	createdRunner, err = gitlabRunners.AddRunner(newRunnerOptions)
+	createdRunner, err = gitlabRunners.AddRunner(ctx, newRunnerOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -222,7 +222,7 @@ func (g *GitlabInstance) CheckProjectByPathExists(ctx context.Context, projectPa
 	return nil
 }
 
-func (g *GitlabInstance) CheckRunnerStatusOk(runnerName string, verbose bool) (isStatusOk bool, err error) {
+func (g *GitlabInstance) CheckRunnerStatusOk(ctx context.Context, runnerName string) (isStatusOk bool, err error) {
 	if len(runnerName) <= 0 {
 		return false, tracederrors.TracedError("runnerName is empty string")
 	}
@@ -232,7 +232,7 @@ func (g *GitlabInstance) CheckRunnerStatusOk(runnerName string, verbose bool) (i
 		return false, err
 	}
 
-	isStatusOk, err = gitlabRunners.CheckRunnerStatusOk(runnerName, verbose)
+	isStatusOk, err = gitlabRunners.CheckRunnerStatusOk(ctx, runnerName)
 	if err != nil {
 		return false, err
 	}
@@ -948,7 +948,7 @@ func (g *GitlabInstance) RemoveAllRunners(verbose bool) (err error) {
 	return nil
 }
 
-func (g *GitlabInstance) ResetAccessToken(options *GitlabResetAccessTokenOptions) (err error) {
+func (g *GitlabInstance) ResetAccessToken(ctx context.Context, options *GitlabResetAccessTokenOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedError("options is nil")
 	}
@@ -965,9 +965,7 @@ func (g *GitlabInstance) ResetAccessToken(options *GitlabResetAccessTokenOptions
 
 	accessTokenName := "PERSONAL_ACCESS_TOKEN"
 
-	if options.Verbose {
-		logging.LogInfof("Reset access token '%s' for user '%s' on gitlab '%s' started.", accessTokenName, username, fqdn)
-	}
+	logging.LogInfoByCtxf(ctx, "Reset access token '%s' for user '%s' on gitlab '%s' started.", accessTokenName, username, fqdn)
 
 	return tracederrors.TracedErrorNotImplemented()
 	/*

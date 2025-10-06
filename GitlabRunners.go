@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"sort"
@@ -8,7 +9,6 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -81,137 +81,6 @@ func (s *GitlabRunnersService) GetRunnerList() (runners []*GitlabRunner, err err
 	return runners, nil
 }
 
-func (g *GitlabRunnersService) MustAddRunner(newRunnerOptions *GitlabAddRunnerOptions) (createdRunner *GitlabRunner) {
-	createdRunner, err := g.AddRunner(newRunnerOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return createdRunner
-}
-
-func (g *GitlabRunnersService) MustCheckRunnerStatusOk(runnerName string, verbose bool) (isRunnerOk bool) {
-	isRunnerOk, err := g.CheckRunnerStatusOk(runnerName, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isRunnerOk
-}
-
-func (g *GitlabRunnersService) MustGetApiV4Url() (apiV4Url string) {
-	apiV4Url, err := g.GetApiV4Url()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return apiV4Url
-}
-
-func (g *GitlabRunnersService) MustGetCurrentlyUsedAccessToken() (gitlabAccessToken string) {
-	gitlabAccessToken, err := g.GetCurrentlyUsedAccessToken()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabAccessToken
-}
-
-func (g *GitlabRunnersService) MustGetFqdn() (fqdn string) {
-	fqdn, err := g.GetFqdn()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return fqdn
-}
-
-func (g *GitlabRunnersService) MustGetGitlab() (gitlab *GitlabInstance) {
-	gitlab, err := g.GetGitlab()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlab
-}
-
-func (g *GitlabRunnersService) MustGetNativeClient() (nativeClient *gitlab.Client) {
-	nativeClient, err := g.GetNativeClient()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeClient
-}
-
-func (g *GitlabRunnersService) MustGetNativeRunnersService() (nativeRunnersService *gitlab.RunnersService) {
-	nativeRunnersService, err := g.GetNativeRunnersService()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeRunnersService
-}
-
-func (g *GitlabRunnersService) MustGetRunnerByName(runnerName string) (runner *GitlabRunner) {
-	runner, err := g.GetRunnerByName(runnerName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return runner
-}
-
-func (g *GitlabRunnersService) MustGetRunnerList() (runners []*GitlabRunner) {
-	runners, err := g.GetRunnerList()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return runners
-}
-
-func (g *GitlabRunnersService) MustGetRunnerNamesList() (runnerNames []string) {
-	runnerNames, err := g.GetRunnerNamesList()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return runnerNames
-}
-
-func (g *GitlabRunnersService) MustIsRunnerStatusOk(runnerName string, verbose bool) (isStatusOk bool) {
-	isStatusOk, err := g.IsRunnerStatusOk(runnerName, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isStatusOk
-}
-
-func (g *GitlabRunnersService) MustRemoveAllRunners(verbose bool) {
-	err := g.RemoveAllRunners(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabRunnersService) MustRunnerByNameExists(runnerName string) (exists bool) {
-	exists, err := g.RunnerByNameExists(runnerName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return exists
-}
-
-func (g *GitlabRunnersService) MustSetGitlab(gitlab *GitlabInstance) {
-	err := g.SetGitlab(gitlab)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (r *GitlabRunnersService) GetFqdn() (fqdn string, err error) {
 	gitlab, err := r.GetGitlab()
 	if err != nil {
@@ -254,7 +123,7 @@ func (r *GitlabRunnersService) RemoveAllRunners(verbose bool) (err error) {
 	return nil
 }
 
-func (s *GitlabRunnersService) AddRunner(newRunnerOptions *GitlabAddRunnerOptions) (createdRunner *GitlabRunner, err error) {
+func (s *GitlabRunnersService) AddRunner(ctx context.Context, newRunnerOptions *GitlabAddRunnerOptions) (createdRunner *GitlabRunner, err error) {
 	if newRunnerOptions == nil {
 		return nil, tracederrors.TracedError("newRunnerOptions is nil")
 	}
@@ -285,9 +154,7 @@ func (s *GitlabRunnersService) AddRunner(newRunnerOptions *GitlabAddRunnerOption
 	}
 
 	if runnerExists {
-		if newRunnerOptions.Verbose {
-			logging.LogInfof("Gitlab runner '%s' already exists.", runnerName)
-		}
+		logging.LogInfoByCtxf(ctx, "Gitlab runner '%s' already exists.", runnerName)
 	} else {
 		addRunnerCommand := []string{
 			"curl",
@@ -301,7 +168,7 @@ func (s *GitlabRunnersService) AddRunner(newRunnerOptions *GitlabAddRunnerOption
 		}
 
 		_, err = commandexecutorbashoo.Bash().RunCommand(
-			contextutils.GetVerbosityContextByBool(newRunnerOptions.Verbose),
+			ctx,
 			&parameteroptions.RunCommandOptions{
 				Command: addRunnerCommand,
 			},
@@ -309,9 +176,7 @@ func (s *GitlabRunnersService) AddRunner(newRunnerOptions *GitlabAddRunnerOption
 		if err != nil {
 			return nil, err
 		}
-		if newRunnerOptions.Verbose {
-			logging.LogChangedf("Registered/ created new gitlab runner '%s'", runnerName)
-		}
+		logging.LogChangedByCtxf(ctx, "Registered/ created new gitlab runner '%s'", runnerName)
 	}
 
 	createdRunner, err = s.GetRunnerByName(runnerName)
@@ -322,12 +187,12 @@ func (s *GitlabRunnersService) AddRunner(newRunnerOptions *GitlabAddRunnerOption
 	return createdRunner, nil
 }
 
-func (s *GitlabRunnersService) CheckRunnerStatusOk(runnerName string, verbose bool) (isRunnerOk bool, err error) {
+func (s *GitlabRunnersService) CheckRunnerStatusOk(ctx context.Context, runnerName string) (isRunnerOk bool, err error) {
 	if len(runnerName) <= 0 {
 		return false, tracederrors.TracedError("runnerName is empty string")
 	}
 
-	isRunnerOk, err = s.IsRunnerStatusOk(runnerName, verbose)
+	isRunnerOk, err = s.IsRunnerStatusOk(ctx, runnerName)
 	if err != nil {
 		return false, err
 	}
@@ -450,7 +315,7 @@ func (s *GitlabRunnersService) GetRunnerNamesList() (runnerNames []string, err e
 	return runnerNames, err
 }
 
-func (s *GitlabRunnersService) IsRunnerStatusOk(runnerName string, verbose bool) (isStatusOk bool, err error) {
+func (s *GitlabRunnersService) IsRunnerStatusOk(ctx context.Context, runnerName string) (isStatusOk bool, err error) {
 	if len(runnerName) <= 0 {
 		return false, tracederrors.TracedError("runnerName is empty string")
 	}
@@ -461,9 +326,7 @@ func (s *GitlabRunnersService) IsRunnerStatusOk(runnerName string, verbose bool)
 	}
 
 	if !runnerExists {
-		if verbose {
-			logging.LogInfof("Runner '%s' does not exists and therefore status is not ok", runnerName)
-		}
+		logging.LogInfoByCtxf(ctx, "Runner '%s' does not exists and therefore status is not ok", runnerName)
 		return false, nil
 	}
 
