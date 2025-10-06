@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"reflect"
@@ -126,13 +127,13 @@ func (p *PreCommitConfigFile) GetAbsolutePath() (absolutePath string, err error)
 	return path, nil
 }
 
-func (p *PreCommitConfigFile) GetDependencies(verbose bool) (dependencies []dependencyinterfaces.Dependency, err error) {
-	preCommitConfigFileContent, err := p.GetPreCommitConfigFileContent(verbose)
+func (p *PreCommitConfigFile) GetDependencies(ctx context.Context) (dependencies []dependencyinterfaces.Dependency, err error) {
+	preCommitConfigFileContent, err := p.GetPreCommitConfigFileContent(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	dependencies, err = preCommitConfigFileContent.GetDependencies(verbose)
+	dependencies, err = preCommitConfigFileContent.GetDependencies(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +160,7 @@ func (p *PreCommitConfigFile) GetLocalPath() (localPath string, err error) {
 	return p.GetPath()
 }
 
-func (p *PreCommitConfigFile) GetPreCommitConfigFileContent(verbose bool) (content *PreCommitConfigFileContent, err error) {
+func (p *PreCommitConfigFile) GetPreCommitConfigFileContent(ctx context.Context) (content *PreCommitConfigFileContent, err error) {
 	contentString, err := p.ReadAsString()
 	if err != nil {
 		return nil, err
@@ -185,8 +186,8 @@ func (p *PreCommitConfigFile) GetUriAsString() (uri string, err error) {
 	return uri, nil
 }
 
-func (p *PreCommitConfigFile) IsValidPreCommitConfigFile(verbose bool) (isValidPreCommitConfigFile bool, err error) {
-	_, err = p.GetPreCommitConfigFileContent(verbose)
+func (p *PreCommitConfigFile) IsValidPreCommitConfigFile(ctx context.Context) (isValidPreCommitConfigFile bool, err error) {
+	_, err = p.GetPreCommitConfigFileContent(ctx)
 	if err != nil {
 		if errors.Is(err, ErrorPreCommitConfigFileContentLoad) {
 			return false, nil
@@ -197,91 +198,12 @@ func (p *PreCommitConfigFile) IsValidPreCommitConfigFile(verbose bool) (isValidP
 	return true, nil
 }
 
-func (p *PreCommitConfigFile) MustGetAbsolutePath() (absolutePath string) {
-	absolutePath, err := p.GetAbsolutePath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return absolutePath
-}
-
-func (p *PreCommitConfigFile) MustGetDependencies(verbose bool) (dependencies []dependencyinterfaces.Dependency) {
-	dependencies, err := p.GetDependencies(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return dependencies
-}
-
-func (p *PreCommitConfigFile) MustGetLocalPath() (localPath string) {
-	localPath, err := p.GetLocalPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return localPath
-}
-
-func (p *PreCommitConfigFile) MustGetPreCommitConfigFileContent(verbose bool) (content *PreCommitConfigFileContent) {
-	content, err := p.GetPreCommitConfigFileContent(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return content
-}
-
-func (p *PreCommitConfigFile) MustGetUriAsString() (uri string) {
-	uri, err := p.GetUriAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return uri
-}
-
-func (p *PreCommitConfigFile) MustIsValidPreCommitConfigFile(verbose bool) (isValidPreCommitConfigFile bool) {
-	isValidPreCommitConfigFile, err := p.IsValidPreCommitConfigFile(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isValidPreCommitConfigFile
-}
-
-func (p *PreCommitConfigFile) MustUpdateDependencies(options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary) {
-	changeSummary, err := p.UpdateDependencies(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return changeSummary
-}
-
-func (p *PreCommitConfigFile) MustUpdateDependency(dependency dependencyinterfaces.Dependency, options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary) {
-	changeSummary, err := p.UpdateDependency(dependency, options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return changeSummary
-}
-
-func (p *PreCommitConfigFile) MustWritePreCommitConfigFileContent(content *PreCommitConfigFileContent, verbose bool) {
-	err := p.WritePreCommitConfigFileContent(content, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (p *PreCommitConfigFile) UpdateDependencies(options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
+func (p *PreCommitConfigFile) UpdateDependencies(ctx context.Context, options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	dependencies, err := p.GetDependencies(options.Verbose)
+	dependencies, err := p.GetDependencies(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -289,7 +211,7 @@ func (p *PreCommitConfigFile) UpdateDependencies(options *parameteroptions.Updat
 	changeSummary = changesummary.NewChangeSummary()
 
 	for _, dependency := range dependencies {
-		singleUpdateSummary, err := p.UpdateDependency(dependency, options)
+		singleUpdateSummary, err := p.UpdateDependency(ctx, dependency, options)
 		if err != nil {
 			return nil, err
 		}
@@ -305,18 +227,16 @@ func (p *PreCommitConfigFile) UpdateDependencies(options *parameteroptions.Updat
 		return nil, err
 	}
 
-	if options.Verbose {
-		if changeSummary.IsChanged() {
-			logging.LogChangedf("Updated dependencies in pre-commit config file '%s'.", path)
-		} else {
-			logging.LogInfof("All dependencies in pre-commit config file '%s' were already up to date.", path)
-		}
+	if changeSummary.IsChanged() {
+		logging.LogChangedByCtxf(ctx, "Updated dependencies in pre-commit config file '%s'.", path)
+	} else {
+		logging.LogInfoByCtxf(ctx, "All dependencies in pre-commit config file '%s' were already up to date.", path)
 	}
 
 	return changeSummary, nil
 }
 
-func (p *PreCommitConfigFile) UpdateDependency(dependency dependencyinterfaces.Dependency, options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
+func (p *PreCommitConfigFile) UpdateDependency(ctx context.Context, dependency dependencyinterfaces.Dependency, options *parameteroptions.UpdateDependenciesOptions) (changeSummary *changesummary.ChangeSummary, err error) {
 	if dependency == nil {
 		return nil, tracederrors.TracedErrorNil("dependency")
 	}
@@ -335,7 +255,7 @@ func (p *PreCommitConfigFile) UpdateDependency(dependency dependencyinterfaces.D
 		return nil, err
 	}
 
-	newestVersion, err := gitRepoDependency.GetNewestVersionAsString(options.AuthenticationOptions, options.Verbose)
+	newestVersion, err := gitRepoDependency.GetNewestVersionAsString(ctx, options.AuthenticationOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -355,7 +275,7 @@ func (p *PreCommitConfigFile) UpdateDependency(dependency dependencyinterfaces.D
 	changeSummary, err = p.ReplaceLineAfterLine(
 		repoLine,
 		fmt.Sprintf("  rev: \"%s\"", newestVersion),
-		options.Verbose,
+		contextutils.GetVerboseFromContext(ctx),
 	)
 	if err != nil {
 		return nil, err

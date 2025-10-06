@@ -24,13 +24,13 @@ func PreCommit() (p *PreCommitService) {
 	return NewPreCommitService()
 }
 
-func (p *PreCommitService) GetAsPreCommitConfigFileOrNilIfContentIsInvalid(file filesinterfaces.File, verbose bool) (preCommitConfigFile *PreCommitConfigFile, err error) {
+func (p *PreCommitService) GetAsPreCommitConfigFileOrNilIfContentIsInvalid(ctx context.Context, file filesinterfaces.File) (preCommitConfigFile *PreCommitConfigFile, err error) {
 	preCommitConfigFile, err = GetPreCommitConfigByFile(file)
 	if err != nil {
 		return nil, err
 	}
 
-	isContentValid, err := preCommitConfigFile.IsValidPreCommitConfigFile(verbose)
+	isContentValid, err := preCommitConfigFile.IsValidPreCommitConfigFile(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -44,15 +44,6 @@ func (p *PreCommitService) GetAsPreCommitConfigFileOrNilIfContentIsInvalid(file 
 
 func (p *PreCommitService) GetDefaultConfigFileName() (preCommitDefaultName string) {
 	return ".pre-commit-config.yaml"
-}
-
-func (p *PreCommitService) MustGetAsPreCommitConfigFileOrNilIfContentIsInvalid(file filesinterfaces.File, verbose bool) (preCommitConfigFile *PreCommitConfigFile) {
-	preCommitConfigFile, err := p.GetAsPreCommitConfigFileOrNilIfContentIsInvalid(file, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return preCommitConfigFile
 }
 
 func (p *PreCommitService) RunInDirectory(ctx context.Context, directoy filesinterfaces.Directory, options *PreCommitRunOptions) (err error) {

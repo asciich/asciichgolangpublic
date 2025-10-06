@@ -9,7 +9,6 @@ import (
 type GitlabAddRunnerOptions struct {
 	Name       string
 	RunnerTags []string
-	Verbose    bool
 }
 
 func NewGitlabAddRunnerOptions() (g *GitlabAddRunnerOptions) {
@@ -36,11 +35,6 @@ func (g *GitlabAddRunnerOptions) GetRunnerTags() (runnerTags []string, err error
 	return g.RunnerTags, nil
 }
 
-func (g *GitlabAddRunnerOptions) GetVerbose() (verbose bool, err error) {
-
-	return g.Verbose, nil
-}
-
 func (g *GitlabAddRunnerOptions) SetName(name string) (err error) {
 	if name == "" {
 		return tracederrors.TracedErrorf("name is empty string")
@@ -61,12 +55,6 @@ func (g *GitlabAddRunnerOptions) SetRunnerTags(runnerTags []string) (err error) 
 	}
 
 	g.RunnerTags = runnerTags
-
-	return nil
-}
-
-func (g *GitlabAddRunnerOptions) SetVerbose(verbose bool) (err error) {
-	g.Verbose = verbose
 
 	return nil
 }

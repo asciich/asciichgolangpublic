@@ -11,7 +11,6 @@ import (
 type UpdateDependenciesOptions struct {
 	ArtifactHandlers      []artifacthandler.ArtifactHandler
 	Commit                bool
-	Verbose               bool
 	AuthenticationOptions []authenticationoptions.AuthenticationOption
 }
 
@@ -90,11 +89,6 @@ func (u *UpdateDependenciesOptions) GetLatestArtifactVersionAsString(ctx context
 	return latestVersion, err
 }
 
-func (u *UpdateDependenciesOptions) GetVerbose() (verbose bool, err error) {
-
-	return u.Verbose, nil
-}
-
 func (u *UpdateDependenciesOptions) SetArtifactHandlers(artifactHandlers []artifacthandler.ArtifactHandler) (err error) {
 	if artifactHandlers == nil {
 		return tracederrors.TracedErrorf("artifactHandlers is nil")
@@ -125,12 +119,6 @@ func (u *UpdateDependenciesOptions) SetAuthenticationOptions(authenticationOptio
 
 func (u *UpdateDependenciesOptions) SetCommit(commit bool) (err error) {
 	u.Commit = commit
-
-	return nil
-}
-
-func (u *UpdateDependenciesOptions) SetVerbose(verbose bool) (err error) {
-	u.Verbose = verbose
 
 	return nil
 }
