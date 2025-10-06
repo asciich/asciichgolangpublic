@@ -848,7 +848,7 @@ func (g *GitlabInstance) GetUserByUsername(username string) (gitlabUser *GitlabU
 	return gitlabUser, nil
 }
 
-func (g *GitlabInstance) GetUserNameList(verbose bool) (userNames []string, err error) {
+func (g *GitlabInstance) GetUserNameList(ctx context.Context) (userNames []string, err error) {
 	gitlabUsers, err := g.GetGitlabUsers()
 	if err != nil {
 		return nil, err
