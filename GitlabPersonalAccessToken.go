@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -52,8 +53,8 @@ func (t *GitlabPersonalAccessToken) GetId() (id int, err error) {
 	return t.id, nil
 }
 
-func (t *GitlabPersonalAccessToken) GetInfoString(verbose bool) (infoString string, err error) {
-	rawResponse, err := t.GetTokenRawResponse(verbose)
+func (t *GitlabPersonalAccessToken) GetInfoString(ctx context.Context) (infoString string, err error) {
+	rawResponse, err := t.GetTokenRawResponse(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -88,7 +89,7 @@ func (t *GitlabPersonalAccessToken) GetPersonalAccessTokens() (tokensService *Gi
 	return t.gitlabPersonalAccessTokens, nil
 }
 
-func (t *GitlabPersonalAccessToken) GetTokenRawResponse(verbose bool) (nativeResponse *gitlab.PersonalAccessToken, err error) {
+func (t *GitlabPersonalAccessToken) GetTokenRawResponse(ctx context.Context) (nativeResponse *gitlab.PersonalAccessToken, err error) {
 	nativeService, err := t.GetNativePersonalTokenService()
 	if err != nil {
 		return nil, err
@@ -108,9 +109,7 @@ func (t *GitlabPersonalAccessToken) GetTokenRawResponse(verbose bool) (nativeRes
 		return nil, tracederrors.TracedError("nativeResponse is nil")
 	}
 
-	if verbose {
-		logging.LogInfof("Collected personal access token id='%d' raw response.", id)
-	}
+	logging.LogInfoByCtxf(ctx, "Collected personal access token id='%d' raw response.", id)
 
 	return nativeResponse, nil
 }
