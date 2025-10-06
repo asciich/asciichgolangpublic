@@ -1,7 +1,8 @@
 package asciichgolangpublic
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -39,7 +40,7 @@ func (g *GitlabUser) GetCachedUsername() (cachedUsername string, err error) {
 	return g.cachedUsername, nil
 }
 
-func (u *GitlabUser) AddSshKey(sshKey *sshutils.SSHPublicKey, verbose bool) (err error) {
+func (u *GitlabUser) AddSshKey(ctx context.Context, sshKey *sshutils.SSHPublicKey) (err error) {
 	if sshKey == nil {
 		return tracederrors.TracedError("sshKey is nil")
 	}
@@ -69,9 +70,7 @@ func (u *GitlabUser) AddSshKey(sshKey *sshutils.SSHPublicKey, verbose bool) (err
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof("Going to add SSH key to gitlab user '%s': '%s'", username, keyMaterial)
-	}
+	logging.LogInfoByCtxf(ctx, "Going to add SSH key to gitlab user '%s': '%s'", username, keyMaterial)
 
 	keyExists, err := u.SshKeyExists(sshKey)
 	if err != nil {
@@ -79,9 +78,7 @@ func (u *GitlabUser) AddSshKey(sshKey *sshutils.SSHPublicKey, verbose bool) (err
 	}
 
 	if keyExists {
-		if verbose {
-			logging.LogInfof("SSH key '%s' already present for gitlab user '%s'.", keyMaterial, username)
-		}
+		logging.LogInfoByCtxf(ctx, "SSH key '%s' already present for gitlab user '%s'.", keyMaterial, username)
 	} else {
 		_, _, err = nativeUsersService.AddSSHKeyForUser(
 			userId,
@@ -94,15 +91,13 @@ func (u *GitlabUser) AddSshKey(sshKey *sshutils.SSHPublicKey, verbose bool) (err
 			return tracederrors.TracedError(err.Error())
 		}
 
-		if verbose {
-			logging.LogChangedf("SSH key '%s' added for gitlab user '%s'.", keyMaterial, username)
-		}
+		logging.LogChangedByCtxf(ctx, "SSH key '%s' added for gitlab user '%s'.", keyMaterial, username)
 	}
 
 	return nil
 }
 
-func (u *GitlabUser) AddSshKeysFromFile(sshKeysFile filesinterfaces.File, verbose bool) (err error) {
+func (u *GitlabUser) AddSshKeysFromFile(ctx context.Context, sshKeysFile filesinterfaces.File) (err error) {
 	if sshKeysFile == nil {
 		return tracederrors.TracedError("sshKeysFile is nil")
 	}
@@ -112,17 +107,15 @@ func (u *GitlabUser) AddSshKeysFromFile(sshKeysFile filesinterfaces.File, verbos
 		return err
 	}
 
-	sshKeys, err := sshutils.LoadPublicKeysFromFile(contextutils.GetVerbosityContextByBool(verbose), sshKeysFile)
+	sshKeys, err := sshutils.LoadPublicKeysFromFile(ctx, sshKeysFile)
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof("Going to add '%d' SSH keys for gitlab user '%s'.", len(sshKeys), username)
-	}
+	logging.LogInfoByCtxf(ctx, "Going to add '%d' SSH keys for gitlab user '%s'.", len(sshKeys), username)
 
 	for _, keyToAdd := range sshKeys {
-		err = u.AddSshKey(keyToAdd, verbose)
+		err = u.AddSshKey(ctx, keyToAdd)
 		if err != nil {
 			return err
 		}
@@ -131,7 +124,7 @@ func (u *GitlabUser) AddSshKeysFromFile(sshKeysFile filesinterfaces.File, verbos
 	return nil
 }
 
-func (u *GitlabUser) AddSshKeysFromFilePath(sshKeyFilePath string, verbose bool) (err error) {
+func (u *GitlabUser) AddSshKeysFromFilePath(ctx context.Context, sshKeyFilePath string) (err error) {
 	if len(sshKeyFilePath) <= 0 {
 		return tracederrors.TracedError("sshKeyFilePath is empty string")
 	}
@@ -141,7 +134,7 @@ func (u *GitlabUser) AddSshKeysFromFilePath(sshKeyFilePath string, verbose bool)
 		return err
 	}
 
-	err = u.AddSshKeysFromFile(sshKeyFile, verbose)
+	err = u.AddSshKeysFromFile(ctx, sshKeyFile)
 	if err != nil {
 		return err
 	}
