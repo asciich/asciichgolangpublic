@@ -21,7 +21,6 @@ func TestGitignoreFileAddFileToIgnore(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				gitignoreFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)
@@ -32,7 +31,7 @@ func TestGitignoreFileAddFileToIgnore(t *testing.T) {
 				defer gitignoreFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				for i := 0; i < 3; i++ {
-					err := gitignoreFile.AddFileToIgnore("test", "comment", verbose)
+					err := gitignoreFile.AddFileToIgnore(ctx, "test", "comment")
 					require.NoError(t, err)
 
 					nEmptyLines, err := gitignoreFile.GetNumberOfNonEmptyLines()
@@ -41,7 +40,7 @@ func TestGitignoreFileAddFileToIgnore(t *testing.T) {
 				}
 
 				for i := 0; i < 3; i++ {
-					err := gitignoreFile.AddFileToIgnore("test2", "comment2", verbose)
+					err := gitignoreFile.AddFileToIgnore(ctx, "test2", "comment2")
 					require.NoError(t, err)
 
 					nEmptyLines, err := gitignoreFile.GetNumberOfNonEmptyLines()

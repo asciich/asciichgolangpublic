@@ -711,13 +711,13 @@ func (g *GitlabInstance) GetNativeTagsService() (nativeTagsService *gitlab.TagsS
 	return nativeTagsService, nil
 }
 
-func (g *GitlabInstance) GetPersonalAccessTokenList(verbose bool) (personalAccessTokens []*GitlabPersonalAccessToken, err error) {
+func (g *GitlabInstance) GetPersonalAccessTokenList(ctx context.Context) (personalAccessTokens []*GitlabPersonalAccessToken, err error) {
 	personalTokens, err := g.GetPersonalAccessTokens()
 	if err != nil {
 		return nil, err
 	}
 
-	personalAccessTokens, err = personalTokens.GetPersonalAccessTokenList(verbose)
+	personalAccessTokens, err = personalTokens.GetPersonalAccessTokenList(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -916,7 +916,7 @@ func (g *GitlabInstance) ProjectByProjectPathExists(ctx context.Context, project
 	return projectExists, nil
 }
 
-func (g *GitlabInstance) RecreatePersonalAccessToken(createOptions *GitlabCreatePersonalAccessTokenOptions) (newToken string, err error) {
+func (g *GitlabInstance) RecreatePersonalAccessToken(ctx context.Context, createOptions *GitlabCreatePersonalAccessTokenOptions) (newToken string, err error) {
 	if createOptions == nil {
 		return "", tracederrors.TracedError("createOptions is nil")
 	}
@@ -926,7 +926,7 @@ func (g *GitlabInstance) RecreatePersonalAccessToken(createOptions *GitlabCreate
 		return "", err
 	}
 
-	newToken, err = personalAccessTokens.RecreateToken(createOptions)
+	newToken, err = personalAccessTokens.RecreateToken(ctx, createOptions)
 	if err != nil {
 		return "", err
 	}

@@ -1,12 +1,12 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/fileformats/jsonutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -23,147 +23,7 @@ func NewGitlabPersonalAccessTokenService() (tokens *GitlabPersonalAccessTokenSer
 	return new(GitlabPersonalAccessTokenService)
 }
 
-func (g *GitlabPersonalAccessTokenService) MustCreateToken(tokenOptions *GitlabCreatePersonalAccessTokenOptions) (newToken string) {
-	newToken, err := g.CreateToken(tokenOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return newToken
-}
-
-func (g *GitlabPersonalAccessTokenService) MustExistsByName(tokenName string, verbose bool) (exists bool) {
-	exists, err := g.ExistsByName(tokenName, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return exists
-}
-
-func (g *GitlabPersonalAccessTokenService) MustGetApiV4Url() (apiV4Url string) {
-	apiV4Url, err := g.GetApiV4Url()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return apiV4Url
-}
-
-func (g *GitlabPersonalAccessTokenService) MustGetCurrentUserId(verbose bool) (userId int) {
-	userId, err := g.GetCurrentUserId(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return userId
-}
-
-func (g *GitlabPersonalAccessTokenService) MustGetCurrentlyUsedAccessToken() (accessToken string) {
-	accessToken, err := g.GetCurrentlyUsedAccessToken()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return accessToken
-}
-
-func (g *GitlabPersonalAccessTokenService) MustGetGitlab() (gitlab *GitlabInstance) {
-	gitlab, err := g.GetGitlab()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlab
-}
-
-func (g *GitlabPersonalAccessTokenService) MustGetGitlabUsers() (gitlabUsers *GitlabUsers) {
-	gitlabUsers, err := g.GetGitlabUsers()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabUsers
-}
-
-func (g *GitlabPersonalAccessTokenService) MustGetNativeGitlabClient() (nativeClient *gitlab.Client) {
-	nativeClient, err := g.GetNativeGitlabClient()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeClient
-}
-
-func (g *GitlabPersonalAccessTokenService) MustGetNativePersonalTokenService() (nativeService *gitlab.PersonalAccessTokensService) {
-	nativeService, err := g.GetNativePersonalTokenService()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeService
-}
-
-func (g *GitlabPersonalAccessTokenService) MustGetNativeUsersService() (nativeService *gitlab.UsersService) {
-	nativeService, err := g.GetNativeUsersService()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeService
-}
-
-func (g *GitlabPersonalAccessTokenService) MustGetPersonalAccessTokenList(verbose bool) (tokens []*GitlabPersonalAccessToken) {
-	tokens, err := g.GetPersonalAccessTokenList(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return tokens
-}
-
-func (g *GitlabPersonalAccessTokenService) MustGetPersonalAccessTokenNameList(verbose bool) (tokenNames []string) {
-	tokenNames, err := g.GetPersonalAccessTokenNameList(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return tokenNames
-}
-
-func (g *GitlabPersonalAccessTokenService) MustGetTokenIdByName(tokenName string, verbose bool) (tokenId int) {
-	tokenId, err := g.GetTokenIdByName(tokenName, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return tokenId
-}
-
-func (g *GitlabPersonalAccessTokenService) MustRecreateToken(tokenOptions *GitlabCreatePersonalAccessTokenOptions) (newToken string) {
-	newToken, err := g.RecreateToken(tokenOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return newToken
-}
-
-func (g *GitlabPersonalAccessTokenService) MustRevokeTokenByName(tokenName string, verbose bool) {
-	err := g.RevokeTokenByName(tokenName, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabPersonalAccessTokenService) MustSetGitlab(gitlab *GitlabInstance) {
-	err := g.SetGitlab(gitlab)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (p *GitlabPersonalAccessTokenService) CreateToken(tokenOptions *GitlabCreatePersonalAccessTokenOptions) (newToken string, err error) {
+func (p *GitlabPersonalAccessTokenService) CreateToken(ctx context.Context, tokenOptions *GitlabCreatePersonalAccessTokenOptions) (newToken string, err error) {
 	if tokenOptions == nil {
 		return "", tracederrors.TracedError("tokenOptions is nil")
 	}
@@ -173,7 +33,7 @@ func (p *GitlabPersonalAccessTokenService) CreateToken(tokenOptions *GitlabCreat
 		return "", err
 	}
 
-	exists, err := p.ExistsByName(tokenName, tokenOptions.Verbose)
+	exists, err := p.ExistsByName(ctx, tokenName)
 	if err != nil {
 		return "", err
 	}
@@ -215,7 +75,7 @@ func (p *GitlabPersonalAccessTokenService) CreateToken(tokenOptions *GitlabCreat
 		apiV4Urt + "/user/personal_access_tokens",
 	}
 	stdout, err := commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsString(
-		contextutils.GetVerbosityContextByBool(tokenOptions.Verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: command,
 		},
@@ -238,12 +98,12 @@ func (p *GitlabPersonalAccessTokenService) CreateToken(tokenOptions *GitlabCreat
 	return newToken, nil
 }
 
-func (p *GitlabPersonalAccessTokenService) ExistsByName(tokenName string, verbose bool) (exists bool, err error) {
+func (p *GitlabPersonalAccessTokenService) ExistsByName(ctx context.Context, tokenName string) (exists bool, err error) {
 	if len(tokenName) <= 0 {
 		return false, tracederrors.TracedError("tokenName is nil")
 	}
 
-	tokenNames, err := p.GetPersonalAccessTokenNameList(verbose)
+	tokenNames, err := p.GetPersonalAccessTokenNameList(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -363,7 +223,7 @@ func (p *GitlabPersonalAccessTokenService) GetNativeUsersService() (nativeServic
 	return nativeService, nil
 }
 
-func (p *GitlabPersonalAccessTokenService) GetPersonalAccessTokenList(verbose bool) (tokens []*GitlabPersonalAccessToken, err error) {
+func (p *GitlabPersonalAccessTokenService) GetPersonalAccessTokenList(ctx context.Context) (tokens []*GitlabPersonalAccessToken, err error) {
 	nativeService, err := p.GetNativePersonalTokenService()
 	if err != nil {
 		return nil, err
@@ -399,8 +259,8 @@ func (p *GitlabPersonalAccessTokenService) GetPersonalAccessTokenList(verbose bo
 	return tokens, nil
 }
 
-func (p *GitlabPersonalAccessTokenService) GetPersonalAccessTokenNameList(verbose bool) (tokenNames []string, err error) {
-	tokens, err := p.gitlab.GetPersonalAccessTokenList(verbose)
+func (p *GitlabPersonalAccessTokenService) GetPersonalAccessTokenNameList(ctx context.Context) (tokenNames []string, err error) {
+	tokens, err := p.gitlab.GetPersonalAccessTokenList(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -418,12 +278,12 @@ func (p *GitlabPersonalAccessTokenService) GetPersonalAccessTokenNameList(verbos
 	return tokenNames, nil
 }
 
-func (p *GitlabPersonalAccessTokenService) GetTokenIdByName(tokenName string, verbose bool) (tokenId int, err error) {
+func (p *GitlabPersonalAccessTokenService) GetTokenIdByName(ctx context.Context, tokenName string) (tokenId int, err error) {
 	if len(tokenName) <= 0 {
 		return -1, tracederrors.TracedError("tokenName is empty string")
 	}
 
-	tokens, err := p.GetPersonalAccessTokenList(verbose)
+	tokens, err := p.GetPersonalAccessTokenList(ctx)
 	if err != nil {
 		return -1, err
 	}
@@ -447,7 +307,7 @@ func (p *GitlabPersonalAccessTokenService) GetTokenIdByName(tokenName string, ve
 	return -1, tracederrors.TracedErrorf("No token with name '%s' found.", tokenName)
 }
 
-func (p *GitlabPersonalAccessTokenService) RecreateToken(tokenOptions *GitlabCreatePersonalAccessTokenOptions) (newToken string, err error) {
+func (p *GitlabPersonalAccessTokenService) RecreateToken(ctx context.Context, tokenOptions *GitlabCreatePersonalAccessTokenOptions) (newToken string, err error) {
 	if tokenOptions == nil {
 		return "", tracederrors.TracedError("tokenOptions is nil")
 	}
@@ -457,13 +317,13 @@ func (p *GitlabPersonalAccessTokenService) RecreateToken(tokenOptions *GitlabCre
 		return "", err
 	}
 
-	exists, err := p.ExistsByName(tokenName, tokenOptions.Verbose)
+	exists, err := p.ExistsByName(ctx, tokenName)
 	if err != nil {
 		return "", err
 	}
 
 	if exists {
-		err = p.RevokeTokenByName(tokenName, tokenOptions.Verbose)
+		err = p.RevokeTokenByName(ctx, tokenName)
 		if err != nil {
 			return "", err
 		}
@@ -473,7 +333,7 @@ func (p *GitlabPersonalAccessTokenService) RecreateToken(tokenOptions *GitlabCre
 			return "", err
 		}
 
-		tokenId, err := p.GetTokenIdByName(tokenName, tokenOptions.Verbose)
+		tokenId, err := p.GetTokenIdByName(ctx, tokenName)
 		if err != nil {
 			return "", err
 		}
@@ -488,30 +348,26 @@ func (p *GitlabPersonalAccessTokenService) RecreateToken(tokenOptions *GitlabCre
 			return "", tracederrors.TracedError("recreate personal access token failed. NewToken is empty string.")
 		}
 
-		if tokenOptions.Verbose {
-			logging.LogInfof("Personal access token '%s' recreated.", tokenName)
-		}
+		logging.LogInfoByCtxf(ctx, "Personal access token '%s' recreated.", tokenName)
 
 		return newToken, nil
 	} else {
-		newToken, err = p.CreateToken(tokenOptions)
+		newToken, err = p.CreateToken(ctx, tokenOptions)
 		if err != nil {
 			return "", err
 		}
-		if tokenOptions.Verbose {
-			logging.LogInfof("Personal access token '%s' created.", tokenName)
-		}
+		logging.LogInfoByCtxf(ctx, "Personal access token '%s' created.", tokenName)
 
 		return newToken, nil
 	}
 }
 
-func (p *GitlabPersonalAccessTokenService) RevokeTokenByName(tokenName string, verbose bool) (err error) {
+func (p *GitlabPersonalAccessTokenService) RevokeTokenByName(ctx context.Context, tokenName string) (err error) {
 	if len(tokenName) <= 0 {
 		return tracederrors.TracedError("tokenName is empty string")
 	}
 
-	exists, err := p.ExistsByName(tokenName, verbose)
+	exists, err := p.ExistsByName(ctx, tokenName)
 	if err != nil {
 		return err
 	}
@@ -522,7 +378,7 @@ func (p *GitlabPersonalAccessTokenService) RevokeTokenByName(tokenName string, v
 			return err
 		}
 
-		tokenId, err := p.GetTokenIdByName(tokenName, verbose)
+		tokenId, err := p.GetTokenIdByName(ctx, tokenName)
 		if err != nil {
 			return err
 		}
@@ -532,13 +388,9 @@ func (p *GitlabPersonalAccessTokenService) RevokeTokenByName(tokenName string, v
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf("Personal gitlab access token '%s' deleted.", tokenName)
-		}
+		logging.LogChangedByCtxf(ctx, "Personal gitlab access token '%s' deleted.", tokenName)
 	} else {
-		if verbose {
-			logging.LogInfof("Personal gitlab access token '%s' was already deleted.", tokenName)
-		}
+		logging.LogInfoByCtxf(ctx, "Personal gitlab access token '%s' was already deleted.", tokenName)
 	}
 
 	return nil

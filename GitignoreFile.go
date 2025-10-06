@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"slices"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -63,7 +64,7 @@ func NewGitignoreFile() (g *GitignoreFile) {
 	return new(GitignoreFile)
 }
 
-func (g *GitignoreFile) AddDirToIgnore(pathToIgnore string, comment string, verbose bool) (err error) {
+func (g *GitignoreFile) AddDirToIgnore(ctx context.Context, pathToIgnore string, comment string) (err error) {
 	if pathToIgnore == "" {
 		return tracederrors.TracedError("pathToIgnore is empty string")
 	}
@@ -74,7 +75,7 @@ func (g *GitignoreFile) AddDirToIgnore(pathToIgnore string, comment string, verb
 
 	pathToIgnore = stringsutils.EnsureSuffix(pathToIgnore, "/")
 
-	err = g.Create(contextutils.GetVerbosityContextByBool(verbose), &filesoptions.CreateOptions{})
+	err = g.Create(ctx, &filesoptions.CreateOptions{})
 	if err != nil {
 		return err
 	}
@@ -90,38 +91,26 @@ func (g *GitignoreFile) AddDirToIgnore(pathToIgnore string, comment string, verb
 	}
 
 	if containsIgnore {
-		if verbose {
-			logging.LogInfof(
-				"Gitignore file '%s' already contains ignore entry for '%s'.",
-				path,
-				pathToIgnore,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Gitignore file '%s' already contains ignore entry for '%s'.", path, pathToIgnore)
 		return nil
 	}
 
-	err = g.AppendLine("# "+comment, verbose)
+	err = g.AppendLine("# "+comment, contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
 
-	err = g.AppendLine(pathToIgnore, verbose)
+	err = g.AppendLine(pathToIgnore, contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		logging.LogChangedf(
-			"Added '%s' to gitignore file '%s'.",
-			pathToIgnore,
-			path,
-		)
-	}
+	logging.LogChangedByCtxf(ctx, "Added '%s' to gitignore file '%s'.", pathToIgnore, path)
 
 	return nil
 }
 
-func (g *GitignoreFile) AddFileToIgnore(pathToIgnore string, comment string, verbose bool) (err error) {
+func (g *GitignoreFile) AddFileToIgnore(ctx context.Context, pathToIgnore string, comment string) (err error) {
 	if pathToIgnore == "" {
 		return tracederrors.TracedError("pathToIgnore is empty string")
 	}
@@ -130,7 +119,7 @@ func (g *GitignoreFile) AddFileToIgnore(pathToIgnore string, comment string, ver
 		return tracederrors.TracedError("comment is empty string")
 	}
 
-	err = g.Create(contextutils.GetVerbosityContextByBool(verbose), &filesoptions.CreateOptions{})
+	err = g.Create(ctx, &filesoptions.CreateOptions{})
 	if err != nil {
 		return err
 	}
@@ -146,33 +135,21 @@ func (g *GitignoreFile) AddFileToIgnore(pathToIgnore string, comment string, ver
 	}
 
 	if containsIgnore {
-		if verbose {
-			logging.LogInfof(
-				"Gitignore file '%s' already contains ignore entry for '%s'.",
-				path,
-				pathToIgnore,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "Gitignore file '%s' already contains ignore entry for '%s'.", path, pathToIgnore)
 		return nil
 	}
 
-	err = g.AppendLine("# "+comment, verbose)
+	err = g.AppendLine("# "+comment, contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
 
-	err = g.AppendLine(pathToIgnore, verbose)
+	err = g.AppendLine(pathToIgnore, contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		logging.LogChangedf(
-			"Added '%s' to gitignore file '%s'.",
-			pathToIgnore,
-			path,
-		)
-	}
+	logging.LogChangedByCtxf(ctx, "Added '%s' to gitignore file '%s'.", pathToIgnore, path)
 
 	return nil
 }
@@ -201,20 +178,18 @@ func (g *GitignoreFile) GetIgnoredPaths() (ignoredPaths []string, err error) {
 	return ignoredPaths, nil
 }
 
-func (g *GitignoreFile) Reformat(verbose bool) (err error) {
+func (g *GitignoreFile) Reformat(ctx context.Context) (err error) {
 	path, err := g.GetPath()
 	if err != nil {
 		return err
 	}
 
-	err = g.TrimSpacesAtBeginningOfFile(verbose)
+	err = g.TrimSpacesAtBeginningOfFile(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof("Reformat gitignore file '%s' finished.", path)
-	}
+	logging.LogInfoByCtxf(ctx, "Reformat gitignore file '%s' finished.", path)
 
 	return nil
 }
