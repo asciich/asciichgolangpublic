@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -17,122 +18,6 @@ type GitlabRunner struct {
 
 func NewGitlabRunner() (gitlabRunner *GitlabRunner) {
 	return new(GitlabRunner)
-}
-
-func (g *GitlabRunner) MustGetCachedDescription() (description string) {
-	description, err := g.GetCachedDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return description
-}
-
-func (g *GitlabRunner) MustGetCachedName() (name string) {
-	name, err := g.GetCachedName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (g *GitlabRunner) MustGetCachedNameOrDescription() (name string) {
-	name, err := g.GetCachedNameOrDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (g *GitlabRunner) MustGetGitlab() (gitlab *GitlabInstance) {
-	gitlab, err := g.GetGitlab()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlab
-}
-
-func (g *GitlabRunner) MustGetGitlabRunners() (gitlabRunners *GitlabRunnersService) {
-	gitlabRunners, err := g.GetGitlabRunners()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabRunners
-}
-
-func (g *GitlabRunner) MustGetId() (id int) {
-	id, err := g.GetId()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return id
-}
-
-func (g *GitlabRunner) MustGetNativeRunnersService() (nativeRunnersService *gitlab.RunnersService) {
-	nativeRunnersService, err := g.GetNativeRunnersService()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeRunnersService
-}
-
-func (g *GitlabRunner) MustIsStatusOk() (isStatusOk bool) {
-	isStatusOk, err := g.IsStatusOk()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isStatusOk
-}
-
-func (g *GitlabRunner) MustRemove(verbose bool) {
-	err := g.Remove(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabRunner) MustResetRunnerToken() (runnerToken string) {
-	runnerToken, err := g.ResetRunnerToken()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return runnerToken
-}
-
-func (g *GitlabRunner) MustSetCachedDescription(description string) {
-	err := g.SetCachedDescription(description)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabRunner) MustSetCachedName(name string) {
-	err := g.SetCachedName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabRunner) MustSetGitlab(gitlab *GitlabInstance) {
-	err := g.SetGitlab(gitlab)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabRunner) MustSetId(id int) {
-	err := g.SetId(id)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (r *GitlabRunner) GetCachedDescription() (description string, err error) {
@@ -238,7 +123,7 @@ func (r *GitlabRunner) IsStatusOk() (isStatusOk bool, err error) {
 	return true, nil
 }
 
-func (r *GitlabRunner) Remove(verbose bool) (err error) {
+func (r *GitlabRunner) Remove(ctx context.Context) (err error) {
 	nativeRunnersService, err := r.GetNativeRunnersService()
 	if err != nil {
 		return err
@@ -254,9 +139,7 @@ func (r *GitlabRunner) Remove(verbose bool) (err error) {
 		return err
 	}
 
-	if verbose {
-		logging.LogChangedf("Runner with id '%d' removed.", runnerId)
-	}
+	logging.LogChangedByCtxf(ctx, "Runner with id '%d' removed.", runnerId)
 
 	return nil
 }
