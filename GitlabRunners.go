@@ -95,30 +95,26 @@ func (r *GitlabRunnersService) GetFqdn() (fqdn string, err error) {
 	return fqdn, nil
 }
 
-func (r *GitlabRunnersService) RemoveAllRunners(verbose bool) (err error) {
+func (r *GitlabRunnersService) RemoveAllRunners(ctx context.Context) (err error) {
 	fqdn, err := r.GetFqdn()
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof("Delete all gitlab '%s' runners started.", fqdn)
-	}
+	logging.LogInfoByCtxf(ctx, "Delete all gitlab '%s' runners started.", fqdn)
 
 	runners, err := r.GetRunnerList()
 	if err != nil {
 		return err
 	}
 	for _, runner := range runners {
-		err = runner.Remove(verbose)
+		err = runner.Remove(ctx)
 		if err != nil {
 			return err
 		}
 	}
 
-	if verbose {
-		logging.LogInfof("Delete all gitlab '%s' runners finished.", fqdn)
-	}
+	logging.LogInfoByCtxf(ctx, "Delete all gitlab '%s' runners finished.", fqdn)
 
 	return nil
 }

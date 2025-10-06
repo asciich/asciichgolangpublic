@@ -934,13 +934,13 @@ func (g *GitlabInstance) RecreatePersonalAccessToken(createOptions *GitlabCreate
 	return newToken, nil
 }
 
-func (g *GitlabInstance) RemoveAllRunners(verbose bool) (err error) {
+func (g *GitlabInstance) RemoveAllRunners(ctx context.Context) (err error) {
 	runners, err := g.GetGitlabRunners()
 	if err != nil {
 		return err
 	}
 
-	err = runners.RemoveAllRunners(verbose)
+	err = runners.RemoveAllRunners(ctx)
 	if err != nil {
 		return err
 	}
