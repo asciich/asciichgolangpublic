@@ -20,7 +20,6 @@ func TestGitlabCiYamlFileGetInclude(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				emptyFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)
@@ -36,7 +35,7 @@ func TestGitlabCiYamlFileGetInclude(t *testing.T) {
 				err = gitlabCiYamlFile.WriteString(ctx, toWrite, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				includes, err := gitlabCiYamlFile.GetIncludes(verbose)
+				includes, err := gitlabCiYamlFile.GetIncludes(ctx)
 				require.NoError(t, err)
 				require.Len(t, includes, 1)
 
@@ -60,7 +59,6 @@ func TestGitlabCiYamlFileGetInclude2(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				emptyFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)
@@ -77,7 +75,7 @@ func TestGitlabCiYamlFileGetInclude2(t *testing.T) {
 				err = gitlabCiYamlFile.WriteString(ctx, toWrite, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				includes, err := gitlabCiYamlFile.GetIncludes(verbose)
+				includes, err := gitlabCiYamlFile.GetIncludes(ctx)
 				require.NoError(t, err)
 				require.Len(t, includes, 1)
 
@@ -103,7 +101,6 @@ func TestGitlabCiYamlFileGetIncludeIgnoreRules(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				emptyFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)
@@ -122,7 +119,7 @@ func TestGitlabCiYamlFileGetIncludeIgnoreRules(t *testing.T) {
 				err = gitlabCiYamlFile.WriteString(ctx, toWrite, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				includes, err := gitlabCiYamlFile.GetIncludes(verbose)
+				includes, err := gitlabCiYamlFile.GetIncludes(ctx)
 				require.NoError(t, err)
 				require.Len(t, includes, 1)
 
@@ -147,7 +144,6 @@ func TestGitlabCiYamlFileAddIncludes(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				emptyFilePath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)
@@ -157,32 +153,32 @@ func TestGitlabCiYamlFileAddIncludes(t *testing.T) {
 
 				for i := 0; i < 3; i++ {
 					err = gitlabCiYamlFile.AddInclude(
+						ctx,
 						&GitlabCiYamlInclude{
 							Project: "abc",
 							File:    "test.yml",
 							Ref:     "v1234",
 						},
-						verbose,
 					)
 					require.NoError(t, err)
 
-					includes, err := gitlabCiYamlFile.GetIncludes(verbose)
+					includes, err := gitlabCiYamlFile.GetIncludes(ctx)
 					require.NoError(t, err)
 					require.Len(t, includes, 1)
 				}
 
 				for i := 0; i < 3; i++ {
 					err = gitlabCiYamlFile.AddInclude(
+						ctx,
 						&GitlabCiYamlInclude{
 							Project: "abc_other",
 							File:    "test2.yml",
 							Ref:     "v12345",
 						},
-						verbose,
 					)
 					require.NoError(t, err)
 
-					includes, err := gitlabCiYamlFile.GetIncludes(verbose)
+					includes, err := gitlabCiYamlFile.GetIncludes(ctx)
 					require.NoError(t, err)
 					require.Len(t, includes, 2)
 				}

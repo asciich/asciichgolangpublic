@@ -1018,7 +1018,7 @@ func (g *GitlabInstance) ResetAccessToken(ctx context.Context, options *GitlabRe
 	*/
 }
 
-func (g *GitlabInstance) ResetUserPassword(resetOptions *GitlabResetPasswordOptions) (err error) {
+func (g *GitlabInstance) ResetUserPassword(ctx context.Context, resetOptions *GitlabResetPasswordOptions) (err error) {
 
 	if resetOptions == nil {
 		return tracederrors.TracedError("resetOptions is nil")
@@ -1034,9 +1034,7 @@ func (g *GitlabInstance) ResetUserPassword(resetOptions *GitlabResetPasswordOpti
 		return err
 	}
 
-	if resetOptions.Verbose {
-		logging.LogInfof("Reset password for user '%s' on  gitlab '%s' started.", username, fqdn)
-	}
+	logging.LogInfoByCtxf(ctx, "Reset password for user '%s' on  gitlab '%s' started.", username, fqdn)
 
 	return tracederrors.TracedErrorNotImplemented()
 	/*

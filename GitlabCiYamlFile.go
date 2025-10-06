@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -62,18 +63,18 @@ func NewGitlabCiYamlFile() (g *GitlabCiYamlFile) {
 	return new(GitlabCiYamlFile)
 }
 
-func (g *GitlabCiYamlFile) AddInclude(include *GitlabCiYamlInclude, verbose bool) (err error) {
+func (g *GitlabCiYamlFile) AddInclude(ctx context.Context, include *GitlabCiYamlInclude) (err error) {
 	if include == nil {
 		return tracederrors.TracedError("include is nil")
 	}
 
-	err = g.Create(contextutils.GetVerbosityContextByBool(verbose), &filesoptions.CreateOptions{})
+	err = g.Create(ctx, &filesoptions.CreateOptions{})
 	if err != nil {
 		return err
 	}
 
 	const ignoreVersion bool = true
-	containsInclude, err := g.ContainsInclude(include, ignoreVersion, verbose)
+	containsInclude, err := g.ContainsInclude(ctx, include, ignoreVersion)
 	if err != nil {
 		return err
 	}
@@ -89,20 +90,18 @@ func (g *GitlabCiYamlFile) AddInclude(include *GitlabCiYamlInclude, verbose bool
 	}
 
 	if containsInclude {
-		if verbose {
-			logging.LogInfof("File '%s' is already included in '%s'.", fileToInclude, path)
-		}
+		logging.LogInfoByCtxf(ctx, "File '%s' is already included in '%s'.", fileToInclude, path)
 		return nil
 	}
 
-	includes, err := g.GetIncludes(verbose)
+	includes, err := g.GetIncludes(ctx)
 	if err != nil {
 		return err
 	}
 
 	includes = append(includes, include)
 
-	err = g.RewriteIncludes(includes, verbose)
+	err = g.RewriteIncludes(ctx, includes)
 	if err != nil {
 		return err
 	}
@@ -112,19 +111,17 @@ func (g *GitlabCiYamlFile) AddInclude(include *GitlabCiYamlInclude, verbose bool
 		return err
 	}
 
-	if verbose {
-		logging.LogChangedf("Added include '%s' to '%s'.", printableString, path)
-	}
+	logging.LogChangedByCtxf(ctx, "Added include '%s' to '%s'.", printableString, path)
 
 	return nil
 }
 
-func (g *GitlabCiYamlFile) ContainsInclude(include *GitlabCiYamlInclude, ignoreVersion bool, verbose bool) (containsInclude bool, err error) {
+func (g *GitlabCiYamlFile) ContainsInclude(ctx context.Context, include *GitlabCiYamlInclude, ignoreVersion bool) (containsInclude bool, err error) {
 	if include == nil {
 		return false, tracederrors.TracedError("include is nil")
 	}
 
-	includes, err := g.GetIncludes(verbose)
+	includes, err := g.GetIncludes(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -147,13 +144,13 @@ func (g *GitlabCiYamlFile) ContainsInclude(include *GitlabCiYamlInclude, ignoreV
 	return false, nil
 }
 
-func (g *GitlabCiYamlFile) GetIncludes(verbose bool) (includes []*GitlabCiYamlInclude, err error) {
+func (g *GitlabCiYamlFile) GetIncludes(ctx context.Context) (includes []*GitlabCiYamlInclude, err error) {
 	localPath, err := g.GetLocalPath()
 	if err != nil {
 		return nil, err
 	}
 
-	includeBlock, err := g.getIncludeBlock(verbose)
+	includeBlock, err := g.getIncludeBlock(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -173,15 +170,13 @@ func (g *GitlabCiYamlFile) GetIncludes(verbose bool) (includes []*GitlabCiYamlIn
 
 	includes = includesYaml.Includes
 
-	if verbose {
-		logging.LogInfof("Found '%d' includes in gitlab-ci.yml '%s'.", len(includes), localPath)
-	}
+	logging.LogInfoByCtxf(ctx, "Found '%d' includes in gitlab-ci.yml '%s'.", len(includes), localPath)
 
 	return includes, nil
 }
 
-func (g *GitlabCiYamlFile) GetTextBlocksWithoutIncludes(verbose bool) (textBlocks []string, err error) {
-	blocks, err := g.GetTextBlocks(verbose)
+func (g *GitlabCiYamlFile) GetTextBlocksWithoutIncludes(ctx context.Context) (textBlocks []string, err error) {
+	blocks, err := g.GetTextBlocks(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -199,8 +194,8 @@ func (g *GitlabCiYamlFile) GetTextBlocksWithoutIncludes(verbose bool) (textBlock
 	return textBlocks, nil
 }
 
-func (g *GitlabCiYamlFile) RewriteIncludes(includes []*GitlabCiYamlInclude, verbose bool) (err error) {
-	blocks, err := g.GetTextBlocksWithoutIncludes(verbose)
+func (g *GitlabCiYamlFile) RewriteIncludes(ctx context.Context, includes []*GitlabCiYamlInclude) (err error) {
+	blocks, err := g.GetTextBlocksWithoutIncludes(ctx)
 	if err != nil {
 		return err
 	}
@@ -212,7 +207,7 @@ func (g *GitlabCiYamlFile) RewriteIncludes(includes []*GitlabCiYamlInclude, verb
 
 	blocksToWrite := append([]string{includeBlock}, blocks...)
 
-	err = g.WriteTextBlocks(blocksToWrite, verbose)
+	err = g.WriteTextBlocks(blocksToWrite, contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return err
 	}
@@ -222,19 +217,13 @@ func (g *GitlabCiYamlFile) RewriteIncludes(includes []*GitlabCiYamlInclude, verb
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Added %d includes to '%s'",
-			len(includes),
-			path,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Added %d includes to '%s'", len(includes), path)
 
 	return nil
 }
 
-func (g *GitlabCiYamlFile) getIncludeBlock(verbose bool) (includeBlock string, err error) {
-	blocks, err := g.GetTextBlocks(verbose)
+func (g *GitlabCiYamlFile) getIncludeBlock(ctx context.Context) (includeBlock string, err error) {
+	blocks, err := g.GetTextBlocks(contextutils.GetVerboseFromContext(ctx))
 	if err != nil {
 		return "", err
 	}
@@ -251,9 +240,7 @@ func (g *GitlabCiYamlFile) getIncludeBlock(verbose bool) (includeBlock string, e
 		return "", err
 	}
 
-	if verbose {
-		logging.LogInfof("No include blocks found in '%s'.", path)
-	}
+	logging.LogInfoByCtxf(ctx, "No include blocks found in '%s'.", path)
 
 	return includeBlock, nil
 }
