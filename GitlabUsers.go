@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"slices"
 	"strings"
 
@@ -150,139 +151,6 @@ func (g *GitlabUsers) GetUsers() (users []*GitlabUser, err error) {
 	return users, nil
 }
 
-func (g *GitlabUsers) MustCreateAccessToken(options *GitlabCreateAccessTokenOptions) (newToken string) {
-	newToken, err := g.CreateAccessToken(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return newToken
-}
-
-func (g *GitlabUsers) MustCreateUser(createUserOptions *GitlabCreateUserOptions) (createdUser *GitlabUser) {
-	createdUser, err := g.CreateUser(createUserOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return createdUser
-}
-
-func (g *GitlabUsers) MustGetFqdn() (fqdn string) {
-	fqdn, err := g.GetFqdn()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return fqdn
-}
-
-func (g *GitlabUsers) MustGetGitlab() (gitlab *GitlabInstance) {
-	gitlab, err := g.GetGitlab()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlab
-}
-
-func (g *GitlabUsers) MustGetNativeGitlabClient() (nativeGitlabClient *gitlab.Client) {
-	nativeGitlabClient, err := g.GetNativeGitlabClient()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeGitlabClient
-}
-
-func (g *GitlabUsers) MustGetNativeUsersService() (nativeUsersService *gitlab.UsersService) {
-	nativeUsersService, err := g.GetNativeUsersService()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeUsersService
-}
-
-func (g *GitlabUsers) MustGetUser() (gitlabUser *GitlabUser) {
-	gitlabUser, err := g.GetUser()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabUser
-}
-
-func (g *GitlabUsers) MustGetUserById(id int) (gitlabUser *GitlabUser) {
-	gitlabUser, err := g.GetUserById(id)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabUser
-}
-
-func (g *GitlabUsers) MustGetUserByNativeGitlabUser(nativeUser *gitlab.User) (user *GitlabUser) {
-	user, err := g.GetUserByNativeGitlabUser(nativeUser)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return user
-}
-
-func (g *GitlabUsers) MustGetUserByUsername(username string) (gitlabUser *GitlabUser) {
-	gitlabUser, err := g.GetUserByUsername(username)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return gitlabUser
-}
-
-func (g *GitlabUsers) MustGetUserId() (userId int) {
-	userId, err := g.GetUserId()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return userId
-}
-
-func (g *GitlabUsers) MustGetUserNames() (userNames []string) {
-	userNames, err := g.GetUserNames()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return userNames
-}
-
-func (g *GitlabUsers) MustGetUsers() (users []*GitlabUser) {
-	users, err := g.GetUsers()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return users
-}
-
-func (g *GitlabUsers) MustSetGitlab(gitlab *GitlabInstance) {
-	err := g.SetGitlab(gitlab)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabUsers) MustUserByUserNameExists(username string) (userExists bool) {
-	userExists, err := g.UserByUserNameExists(username)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return userExists
-}
-
 func (u *GitlabUsers) CreateAccessToken(options *GitlabCreateAccessTokenOptions) (newToken string, err error) {
 	if options == nil {
 		return "", tracederrors.TracedError("options is nil")
@@ -306,7 +174,7 @@ func (u *GitlabUsers) CreateAccessToken(options *GitlabCreateAccessTokenOptions)
 	return newToken, nil
 }
 
-func (u *GitlabUsers) CreateUser(createUserOptions *GitlabCreateUserOptions) (createdUser *GitlabUser, err error) {
+func (u *GitlabUsers) CreateUser(ctx context.Context, createUserOptions *GitlabCreateUserOptions) (createdUser *GitlabUser, err error) {
 	if createUserOptions == nil {
 		return nil, tracederrors.TracedError("createUserOptions is nil")
 	}
@@ -327,13 +195,8 @@ func (u *GitlabUsers) CreateUser(createUserOptions *GitlabCreateUserOptions) (cr
 	}
 
 	if userExists {
-		if createUserOptions.Verbose {
-			logging.LogInfof(
-				"User with username='%s' already exists on gitlab '%s'.",
-				createUserOptions.Username,
-				fqdn,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "User with username='%s' already exists on gitlab '%s'.", createUserOptions.Username, fqdn)
+
 		createdUser, err = u.GetUserByUsername(createUserOptions.Username)
 		if err != nil {
 			return nil, err
@@ -342,9 +205,7 @@ func (u *GitlabUsers) CreateUser(createUserOptions *GitlabCreateUserOptions) (cr
 		passwordToSet := createUserOptions.Password
 		if len(passwordToSet) <= 0 {
 			nDigits := 15
-			if createUserOptions.Verbose {
-				logging.LogInfof("Going to use a random %d digit password for user '%s' since no password was specified.", nDigits, createUserOptions.Name)
-			}
+			logging.LogInfoByCtxf(ctx, "Going to use a random %d digit password for user '%s' since no password was specified.", nDigits, createUserOptions.Name)
 
 			passwordToSet, err = randomgenerator.GetRandomString(nDigits)
 			if err != nil {
@@ -383,10 +244,7 @@ func (u *GitlabUsers) CreateUser(createUserOptions *GitlabCreateUserOptions) (cr
 			return nil, err
 		}
 
-		if createUserOptions.Verbose {
-			logging.LogChangedf("User '%s' created on gitlab '%s'.", createUserOptions.Username, fqdn)
-		}
-
+		logging.LogChangedByCtxf(ctx, "User '%s' created on gitlab '%s'.", createUserOptions.Username, fqdn)
 	}
 
 	return createdUser, nil
