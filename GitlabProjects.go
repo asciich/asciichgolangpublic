@@ -215,9 +215,9 @@ func (g *GitlabProjects) GetProjectByProjectPath(ctx context.Context, projectPat
 
 	if isPersonalProject {
 		ownedProjects, err := g.GetProjectList(
+			ctx,
 			&GitlabgetProjectListOptions{
-				Verbose: false,
-				Owned:   true,
+				Owned: true,
 			},
 		)
 		if err != nil {
@@ -476,7 +476,7 @@ func (p *GitlabProjects) GetNativeProjectsService() (nativeGitlabProject *gitlab
 	return nativeGitlabProject, nil
 }
 
-func (p *GitlabProjects) GetProjectList(options *GitlabgetProjectListOptions) (gitlabProjects []*GitlabProject, err error) {
+func (p *GitlabProjects) GetProjectList(ctx context.Context, options *GitlabgetProjectListOptions) (gitlabProjects []*GitlabProject, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -547,7 +547,7 @@ func (p *GitlabProjects) GetProjectPathList(ctx context.Context, options *Gitlab
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	projects, err := p.GetProjectList(options)
+	projects, err := p.GetProjectList(ctx, options)
 	if err != nil {
 		return nil, err
 	}

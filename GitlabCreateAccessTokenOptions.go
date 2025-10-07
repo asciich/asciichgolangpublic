@@ -5,7 +5,6 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datetime/durationparser"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -14,7 +13,6 @@ type GitlabCreateAccessTokenOptions struct {
 	TokenName string
 	Scopes    []string
 	ExpiresAt *time.Time
-	Verbose   bool
 }
 
 func NewGitlabCreateAccessTokenOptions() (g *GitlabCreateAccessTokenOptions) {
@@ -27,100 +25,6 @@ func (g *GitlabCreateAccessTokenOptions) GetExpiresAt() (expiresAt *time.Time, e
 	}
 
 	return g.ExpiresAt, nil
-}
-
-func (g *GitlabCreateAccessTokenOptions) GetVerbose() (verbose bool, err error) {
-
-	return g.Verbose, nil
-}
-
-func (g *GitlabCreateAccessTokenOptions) MustGetExipiresAtOrDefaultIfUnset() (expiresAt *time.Time) {
-	expiresAt, err := g.GetExipiresAtOrDefaultIfUnset()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return expiresAt
-}
-
-func (g *GitlabCreateAccessTokenOptions) MustGetExpiresAt() (expiresAt *time.Time) {
-	expiresAt, err := g.GetExpiresAt()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return expiresAt
-}
-
-func (g *GitlabCreateAccessTokenOptions) MustGetScopes() (scopes []string) {
-	scopes, err := g.GetScopes()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return scopes
-}
-
-func (g *GitlabCreateAccessTokenOptions) MustGetTokenName() (tokenName string) {
-	tokenName, err := g.GetTokenName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return tokenName
-}
-
-func (g *GitlabCreateAccessTokenOptions) MustGetUserName() (userName string) {
-	userName, err := g.GetUserName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return userName
-}
-
-func (g *GitlabCreateAccessTokenOptions) MustGetVerbose() (verbose bool) {
-	verbose, err := g.GetVerbose()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return verbose
-}
-
-func (g *GitlabCreateAccessTokenOptions) MustSetExpiresAt(expiresAt *time.Time) {
-	err := g.SetExpiresAt(expiresAt)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabCreateAccessTokenOptions) MustSetScopes(scopes []string) {
-	err := g.SetScopes(scopes)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabCreateAccessTokenOptions) MustSetTokenName(tokenName string) {
-	err := g.SetTokenName(tokenName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabCreateAccessTokenOptions) MustSetUserName(userName string) {
-	err := g.SetUserName(userName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabCreateAccessTokenOptions) MustSetVerbose(verbose bool) {
-	err := g.SetVerbose(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GitlabCreateAccessTokenOptions) SetExpiresAt(expiresAt *time.Time) (err error) {
@@ -163,12 +67,6 @@ func (g *GitlabCreateAccessTokenOptions) SetUserName(userName string) (err error
 	}
 
 	g.UserName = userName
-
-	return nil
-}
-
-func (g *GitlabCreateAccessTokenOptions) SetVerbose(verbose bool) (err error) {
-	g.Verbose = verbose
 
 	return nil
 }

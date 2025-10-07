@@ -75,9 +75,7 @@ func (g *GitlabBranches) CreateBranch(ctx context.Context, options *GitlabCreate
 			)
 		}
 
-		if options.Verbose {
-			logging.LogInfof("Branch '%s' already exists in gitlab project %s .", branchName, projectUrl)
-		}
+		logging.LogInfoByCtxf(ctx, "Branch '%s' already exists in gitlab project %s .", branchName, projectUrl)
 	} else {
 		_, _, err = nativeClient.CreateBranch(
 			projectId,
@@ -96,14 +94,7 @@ func (g *GitlabBranches) CreateBranch(ctx context.Context, options *GitlabCreate
 			)
 		}
 
-		if options.Verbose {
-			logging.LogChangedf(
-				"Created branch '%s' from '%s' in gitlab project %s .",
-				branchName,
-				sourceBranchName,
-				projectUrl,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "Created branch '%s' from '%s' in gitlab project %s .", branchName, sourceBranchName, projectUrl)
 	}
 
 	createdBranch, err = g.GetBranchByName(branchName)
