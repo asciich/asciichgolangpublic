@@ -8,6 +8,9 @@ type CreateVirtualenvOptions struct {
 
 	// Slice of packages to install:
 	Packages []string
+
+	// Use sudo to create the virtualenv
+	UseSudo bool
 }
 
 func (c *CreateVirtualenvOptions) GetPath() (string, error) {

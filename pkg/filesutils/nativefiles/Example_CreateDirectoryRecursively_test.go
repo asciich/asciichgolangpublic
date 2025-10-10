@@ -29,7 +29,7 @@ func Test_Example_CreateDirectoryRecursively(t *testing.T) {
 	require.False(t, nativefiles.Exists(ctx, testDir))
 
 	// Create the directory
-	err = nativefiles.CreateDirectory(ctx, testDir)
+	err = nativefiles.CreateDirectory(ctx, testDir, &filesoptions.CreateOptions{})
 	require.NoError(t, err)
 
 	// The testDir should now exists:

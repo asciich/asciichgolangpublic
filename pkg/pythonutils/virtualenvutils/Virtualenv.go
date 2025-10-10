@@ -11,6 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -62,7 +63,7 @@ func (v *VirtualEnv) GetCommandExecutorOrDefaultIfUnset() commandexecutorinterfa
 	return commandexecutorexecoo.Exec()
 }
 
-func (v *VirtualEnv) Create(ctx context.Context) error {
+func (v *VirtualEnv) Create(ctx context.Context, useSudo bool) error {
 	vePath, err := v.GetPath()
 	if err != nil {
 		return err
@@ -76,13 +77,20 @@ func (v *VirtualEnv) Create(ctx context.Context) error {
 	if isVirtuelEnv {
 		logging.LogInfoByCtxf(ctx, "Virtualenv '%s' already exists.", vePath)
 	} else {
-		err := nativefiles.CreateDirectory(ctx, vePath)
+		err := nativefiles.CreateDirectory(ctx, vePath, &filesoptions.CreateOptions{
+			UseSudo: useSudo,
+		})
 		if err != nil {
 			return err
 		}
 
 		ce := v.GetCommandExecutorOrDefaultIfUnset()
 		cmd := []string{"virtualenv", vePath}
+		if useSudo {
+			logging.LogInfoByCtxf(ctx, "Sudo is used to create virtualenv '%s'.", vePath)
+			cmd = append([]string{"sudo"}, cmd...)
+		}
+
 		_, err = ce.RunCommand(
 			commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
 			&parameteroptions.RunCommandOptions{
@@ -117,7 +125,7 @@ func CreateVirtualEnv(ctx context.Context, options *CreateVirtualenvOptions) (*V
 		return nil, err
 	}
 
-	err = ve.Create(ctx)
+	err = ve.Create(ctx, options.UseSudo)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +133,7 @@ func CreateVirtualEnv(ctx context.Context, options *CreateVirtualenvOptions) (*V
 	if len(options.Packages) <= 0 {
 		logging.LogInfoByCtxf(ctx, "No packages to install in virtualenv '%s'.", vePath)
 	} else {
-		err = ve.InstallPackages(ctx, options.Packages)
+		err = ve.InstallPackages(ctx, options.Packages, options.UseSudo)
 		if err != nil {
 			return nil, err
 		}
@@ -246,7 +254,7 @@ func (v *VirtualEnv) IsPackagesInstalled(ctx context.Context, packageNames []str
 	return isInstalled, nil
 }
 
-func (v *VirtualEnv) InstallPackages(ctx context.Context, packages []string) error {
+func (v *VirtualEnv) InstallPackages(ctx context.Context, packages []string, useSudo bool) error {
 	if packages == nil {
 		return tracederrors.TracedErrorNil("packages")
 	}
@@ -269,7 +277,7 @@ func (v *VirtualEnv) InstallPackages(ctx context.Context, packages []string) err
 		logging.LogInfoByCtxf(ctx, "All packages '%v' already installed in virtualenv '%s'.", packages, vePath)
 	} else {
 		for _, p := range packages {
-			err = v.InstallPackage(ctx, p)
+			err = v.InstallPackage(ctx, p, useSudo)
 			if err != nil {
 				return err
 			}
@@ -279,7 +287,7 @@ func (v *VirtualEnv) InstallPackages(ctx context.Context, packages []string) err
 	return nil
 }
 
-func (v *VirtualEnv) InstallPackage(ctx context.Context, packageName string) error {
+func (v *VirtualEnv) InstallPackage(ctx context.Context, packageName string, useSudo bool) error {
 	if packageName == "" {
 		return tracederrors.TracedErrorEmptyString("packageName")
 	}
@@ -302,11 +310,17 @@ func (v *VirtualEnv) InstallPackage(ctx context.Context, packageName string) err
 			return err
 		}
 
+		cmd := []string{pipPath, "install", packageName}
+		if useSudo {
+			logging.LogInfoByCtxf(ctx, "Sudo is used to install package '%s' in virtualenv '%s'.", packageName, vePath)
+			cmd = append([]string{"sudo"}, cmd...)
+		}
+
 		ce := v.GetCommandExecutorOrDefaultIfUnset()
 		_, err = ce.RunCommand(
 			commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 			&parameteroptions.RunCommandOptions{
-				Command: []string{pipPath, "install", packageName},
+				Command: cmd,
 			},
 		)
 		if err != nil {
