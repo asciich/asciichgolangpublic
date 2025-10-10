@@ -104,12 +104,12 @@ func Test_ListFilesWithSymlinks(t *testing.T) {
 		// regular files
 		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "a.txt")))
 		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "b.txt")))
-		require.NoError(t, nativefiles.CreateDirectory(ctx, filepath.Join(dir, "directory")))
+		require.NoError(t, nativefiles.CreateDirectory(ctx, filepath.Join(dir, "directory"), &filesoptions.CreateOptions{}))
 		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "directory", "c.txt")))
 		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "directory", "d.txt")))
 
 		// symlink
-		require.NoError(t, nativefiles.CreateDirectory(ctx, filepath.Join(dir2, "target")))
+		require.NoError(t, nativefiles.CreateDirectory(ctx, filepath.Join(dir2, "target"), &filesoptions.CreateOptions{}))
 		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir2, "target", "e.txt")))
 		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir2, "target", "f.txt")))
 		require.NoError(t, nativefiles.CreateSymlink(ctx, filepath.Join(dir2, "target"), filepath.Join(dir, "symlink")))

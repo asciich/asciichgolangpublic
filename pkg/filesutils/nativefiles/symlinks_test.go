@@ -63,7 +63,7 @@ func Test_CreateAndDeleteSymlink(t *testing.T) {
 		defer func() { _ = nativefiles.Delete(ctx, tempDir, &filesoptions.DeleteOptions{}) }()
 
 		targetDir := filepath.Join(tempDir, "target")
-		require.NoError(t, nativefiles.CreateDirectory(ctx, targetDir))
+		require.NoError(t, nativefiles.CreateDirectory(ctx, targetDir, &filesoptions.CreateOptions{}))
 
 		symlink := filepath.Join(tempDir, "symlink")
 
@@ -223,7 +223,6 @@ func Test_IsSymlink(t *testing.T) {
 	})
 }
 
-
 func Test_IsSymlinkToDirectory(t *testing.T) {
 	t.Run("empty string as path", func(t *testing.T) {
 		ctx := getCtx()
@@ -261,7 +260,6 @@ func Test_IsSymlinkToDirectory(t *testing.T) {
 		require.NoError(t, err)
 		require.False(t, isSymlinkToDir)
 	})
-
 
 	t.Run("symlink to directory", func(t *testing.T) {
 		ctx := getCtx()

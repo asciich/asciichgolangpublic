@@ -21,7 +21,7 @@ func Create(ctx context.Context, path string) error {
 	if IsFile(contextutils.WithSilent(ctx), path) {
 		logging.LogInfoByCtxf(ctx, "File '%s' already exists. Skip create.", path)
 	} else {
-		err := CreateDirectory(ctx, filepath.Dir(path))
+		err := CreateDirectory(ctx, filepath.Dir(path), &filesoptions.CreateOptions{})
 		if err != nil {
 			return err
 		}
@@ -42,7 +42,11 @@ func Create(ctx context.Context, path string) error {
 	return nil
 }
 
-func CreateDirectory(ctx context.Context, path string) error {
+func CreateDirectory(ctx context.Context, path string, options *filesoptions.CreateOptions) error {
+	if options == nil {
+		options = &filesoptions.CreateOptions{}
+	}
+
 	if path == "" {
 		return tracederrors.TracedErrorEmptyString("path")
 	}
@@ -50,11 +54,23 @@ func CreateDirectory(ctx context.Context, path string) error {
 	if IsDir(contextutils.WithSilent(ctx), path) {
 		logging.LogInfoByCtxf(ctx, "Directory '%s' already exists. Skip create.", path)
 	} else {
-		err := os.MkdirAll(path, 0755)
-		if err != nil {
-			return tracederrors.TracedErrorf("Failed to create directory '%s': %w", path, err)
+		if options.UseSudo {
+			logging.LogInfoByCtxf(ctx, "Going to create directory '%s' using sudo. Please enter your password if asked by sudo.", path)
+			_, err := commandexecutorexec.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+				Command: []string{"sudo", "mkdir", "-p", path},
+			})
+			if err != nil {
+				return tracederrors.TracedErrorf("Failed to create directory '%s' using sudo: %w", path, err)
+			} else {
+				logging.LogChangedByCtxf(ctx, "Created directory '%s' using sudo.", path)	
+			}
+		} else {
+			err := os.MkdirAll(path, 0755)
+			if err != nil {
+				return tracederrors.TracedErrorf("Failed to create directory '%s': %w", path, err)
+			}
+			logging.LogChangedByCtxf(ctx, "Created directory '%s'.", path)
 		}
-		logging.LogChangedByCtxf(ctx, "Created file '%s'.", path)
 	}
 
 	return nil

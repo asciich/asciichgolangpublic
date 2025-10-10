@@ -17,7 +17,7 @@ func Test_CreateAndDeleteFile(t *testing.T) {
 		// We use a temporary file path for testing:
 		filePath, err := tempfiles.CreateTemporaryFile(ctx)
 		require.NoError(t, err)
-		defer nativefiles.Delete(ctx, filePath,&filesoptions.DeleteOptions{})
+		defer nativefiles.Delete(ctx, filePath, &filesoptions.DeleteOptions{})
 		err = nativefiles.Delete(ctx, filePath, &filesoptions.DeleteOptions{})
 		require.NoError(t, err)
 
@@ -73,7 +73,7 @@ func Test_CreateAndDeleteDir(t *testing.T) {
 		// Create the file again
 		// Is done twice to test idempotence.
 		for range 2 {
-			err = nativefiles.CreateDirectory(ctx, filePath)
+			err = nativefiles.CreateDirectory(ctx, filePath, &filesoptions.CreateOptions{})
 			require.NoError(t, err)
 
 			require.True(t, nativefiles.Exists(ctx, filePath))
@@ -111,7 +111,7 @@ func Test_DeleteDirRecursively(t *testing.T) {
 
 		require.DirExists(t, tempDir)
 
-		err = nativefiles.CreateDirectory(ctx, filepath.Join(tempDir, "abc"))
+		err = nativefiles.CreateDirectory(ctx, filepath.Join(tempDir, "abc"), &filesoptions.CreateOptions{})
 		require.NoError(t, err)
 
 		err = nativefiles.Delete(ctx, tempDir, &filesoptions.DeleteOptions{})
