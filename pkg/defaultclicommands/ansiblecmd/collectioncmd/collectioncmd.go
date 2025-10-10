@@ -10,6 +10,7 @@ func NewCollectionCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		NewCreateFileStructureCmd(),
+		NewListInstalledCmd(),
 	)
 
 	return cmd
