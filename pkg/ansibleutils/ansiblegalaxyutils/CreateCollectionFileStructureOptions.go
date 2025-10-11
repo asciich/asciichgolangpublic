@@ -79,6 +79,9 @@ func (c *CreateCollectionFileStructureOptions) GetVersionAsString() (string, err
 	}
 
 	versionString, err := version.GetAsString()
+	if err != nil {
+		return "", err
+	}
 
 	return strings.TrimPrefix(versionString, "v"), nil
 }
