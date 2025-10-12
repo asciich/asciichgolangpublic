@@ -1,4 +1,4 @@
-package ansiblegalaxyutils
+package ansibleparemeteroptions
 
 import (
 	"errors"
@@ -36,3 +36,13 @@ func GetAnsibleGalaxyPath(options any) (string, error) {
 
 	return path + "-galaxy", nil
 }
+
+func GetAnsiblePlaybookPath(options any) (string, error) {
+	path, err := GetAnsiblePath(options)
+	if err != nil {
+		return "", err
+	}
+
+	return path + "-playbook", nil
+}
+

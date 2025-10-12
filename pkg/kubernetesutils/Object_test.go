@@ -185,11 +185,10 @@ func TestKubernetesObject_GetAsYamlString(t *testing.T) {
 
 				yamlString, err := k8sObject.GetAsYamlString()
 				require.NoError(t, err)
-				require.EqualValues(
-					t,
-					tt.objectName,
-					yamlutils.MustRunYqQueryAginstYamlStringAsString(yamlString, ".metadata.name"),
-				)
+
+				got, err := yamlutils.RunYqQueryAginstYamlStringAsString(yamlString, ".metadata.name")
+				require.NoError(t, err)
+				require.EqualValues(t, tt.objectName, got)
 			},
 		)
 	}

@@ -1,5 +1,7 @@
 package ansiblegalaxyutils
 
+import "github.com/asciich/asciichgolangpublic/pkg/ansibleutils/ansibleparemeteroptions"
+
 type InstallCollectionOptions struct {
 	// Local path to the root directory of the ansible collection to install.
 	LocalCollectionPath string
@@ -9,9 +11,9 @@ type InstallCollectionOptions struct {
 }
 
 func (i *InstallCollectionOptions) GetAnsiblePath() (string, error) {
-	return GetAnsiblePath(i)
+	return ansibleparemeteroptions.GetAnsiblePath(i)
 }
 
 func (i *InstallCollectionOptions) GetAnsibleGalaxyPath() (string, error) {
-	return GetAnsibleGalaxyPath(i)
+	return ansibleparemeteroptions.GetAnsibleGalaxyPath(i)
 }

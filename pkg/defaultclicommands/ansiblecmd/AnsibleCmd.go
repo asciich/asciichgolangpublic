@@ -12,6 +12,8 @@ func NewAnsibleCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		NewRunRoleCmd(),
+
 		collectioncmd.NewCollectionCmd(),
 	)
 

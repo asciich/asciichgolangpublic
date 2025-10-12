@@ -17,7 +17,7 @@ func getCtx() context.Context {
 	return contextutils.ContextVerbose()
 }
 
-func TestCreateTemporaryFile(t *testing.T) {
+func TestCreateFromString(t *testing.T) {
 	tests := []struct {
 		content string
 	}{
