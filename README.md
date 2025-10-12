@@ -10,6 +10,9 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 
 * [commandexecutor](pkg/commandexecutor/): Run arbitrary shell commands ([exec](pkg/commandexecutor/commandexecutorexecoo/), [bash](pkg/commandexecutor/commandexecutorbashoo/), [powershell](pkg/commandexecutor/commandexecutorpowershelloo/)). 
 * [fluxutils](pkg/fluxutils/): Work with FluxCD.
+* [fileformats](pkg/fileformats/): Work with different file formats:
+	* [jsonutils](pkg/fileformats/jsonutils/): Work with JSON
+	* [yamlutils](pkg/fileformats/yamlutils/): Work with YAML
 * [filesutils](pkg/filesutils/): Work with files.
 * [helmutils](pkg/helmutils/): Work with helm and helmcharts.
 * [httputils](pkg/httputils/): High level easy to use HTTP client and testserver.

@@ -1,12 +1,19 @@
-package yamlutils
+package yamlutils_test
 
 import (
+	"context"
 	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/fileformats/yamlutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func TestYaml_runYqQueryAgainstYamlStringAsString_2(t *testing.T) {
 	resourceName := "resourceName"
@@ -26,11 +33,9 @@ func TestYaml_runYqQueryAgainstYamlStringAsString_2(t *testing.T) {
 	expectedYaml += "  name: " + resourceName + "\n"
 	expectedYaml += "  namespace: " + namespaceName
 
-	require.EqualValues(
-		t,
-		expectedYaml,
-		MustRunYqQueryAginstYamlStringAsString(roleYaml, ".kind=\"hello_world\""),
-	)
+	got, err := yamlutils.RunYqQueryAginstYamlStringAsString(roleYaml, ".kind=\"hello_world\"")
+	require.NoError(t, err)
+	require.EqualValues(t, expectedYaml, got)
 }
 
 func TestYaml_runYqQueryAgainstYamlStringAsString(t *testing.T) {
@@ -52,12 +57,9 @@ func TestYaml_runYqQueryAgainstYamlStringAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedResult,
-					MustRunYqQueryAginstYamlStringAsString(tt.yamlString, tt.query),
-				)
+				got, err := yamlutils.RunYqQueryAginstYamlStringAsString(tt.yamlString, tt.query)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedResult, got)
 			},
 		)
 	}
@@ -69,7 +71,7 @@ func Test_SplitMultiYaml(t *testing.T) {
 		require.EqualValues(
 			t,
 			[]string{"---\n" + content + "\n"},
-			SplitMultiYaml(content),
+			yamlutils.SplitMultiYaml(content),
 		)
 	})
 
@@ -78,7 +80,7 @@ func Test_SplitMultiYaml(t *testing.T) {
 		require.EqualValues(
 			t,
 			[]string{"---\n" + content + "\n"},
-			SplitMultiYaml(content),
+			yamlutils.SplitMultiYaml(content),
 		)
 	})
 
@@ -87,7 +89,7 @@ func Test_SplitMultiYaml(t *testing.T) {
 		require.EqualValues(
 			t,
 			[]string{"---\n" + content + "\n"},
-			SplitMultiYaml("---\n"+content),
+			yamlutils.SplitMultiYaml("---\n"+content),
 		)
 	})
 
@@ -97,7 +99,7 @@ func Test_SplitMultiYaml(t *testing.T) {
 		require.EqualValues(
 			t,
 			[]string{"---\n" + content + "\n", "---\n" + content2 + "\n"},
-			SplitMultiYaml("---\n"+content+"\n---\n"+content2),
+			yamlutils.SplitMultiYaml("---\n"+content+"\n---\n"+content2),
 		)
 	})
 
@@ -107,7 +109,7 @@ func Test_SplitMultiYaml(t *testing.T) {
 		require.EqualValues(
 			t,
 			[]string{"---\n" + content + "\n", "---\n" + content2 + "\n"},
-			SplitMultiYaml("---\n"+content+"\n---\n---\n---\n"+content2),
+			yamlutils.SplitMultiYaml("---\n"+content+"\n---\n---\n---\n"+content2),
 		)
 	})
 
@@ -117,115 +119,119 @@ func Test_SplitMultiYaml(t *testing.T) {
 		require.EqualValues(
 			t,
 			[]string{"---\na: 5\n#---\n#c: 16 is commented out\n", "---\n" + content2 + "\n"},
-			SplitMultiYaml("---\n"+content+"\n#---\n#c: 16 is commented out\n---\n---\n"+content2),
+			yamlutils.SplitMultiYaml("---\n"+content+"\n#---\n#c: 16 is commented out\n---\n---\n"+content2),
 		)
 	})
 }
 
 func Test_MergeMultiYaml(t *testing.T) {
 	t.Run("empty list", func(t *testing.T) {
-		require.EqualValues(t, "\n", MustMergeMultiYaml([]string{""}))
-		require.EqualValues(t, "\n", MustMergeMultiYaml([]string{" "}))
-		require.EqualValues(t, "\n", MustMergeMultiYaml([]string{"\n"}))
+		require.EqualValues(t, "\n", yamlutils.MustMergeMultiYaml([]string{""}))
+		require.EqualValues(t, "\n", yamlutils.MustMergeMultiYaml([]string{" "}))
+		require.EqualValues(t, "\n", yamlutils.MustMergeMultiYaml([]string{"\n"}))
 	})
 
 	t.Run("single entry", func(t *testing.T) {
-		require.EqualValues(t, "---\na: 1234\n", MustMergeMultiYaml([]string{"a: 1234"}))
+		require.EqualValues(t, "---\na: 1234\n", yamlutils.MustMergeMultiYaml([]string{"a: 1234"}))
 	})
 
 	t.Run("single entry leading yaml start marker", func(t *testing.T) {
-		require.EqualValues(t, "---\na: 1234\n", MustMergeMultiYaml([]string{"---\na: 1234"}))
+		require.EqualValues(t, "---\na: 1234\n", yamlutils.MustMergeMultiYaml([]string{"---\na: 1234"}))
 	})
 
 	t.Run("double entry", func(t *testing.T) {
-		require.EqualValues(t, "---\na: 1234\n---\nb: 123\n", MustMergeMultiYaml([]string{"a: 1234", "b: 123"}))
-		require.EqualValues(t, "---\na: 1234\n---\nb: 123\n", MustMergeMultiYaml([]string{"a: 1234", "---\nb: 123"}))
-		require.EqualValues(t, "---\na: 1234\n---\nb: 123\n", MustMergeMultiYaml([]string{"---\na: 1234", "b: 123"}))
-		require.EqualValues(t, "---\na: 1234\n---\nb: 123\n", MustMergeMultiYaml([]string{"---\na: 1234", "---\nb: 123"}))
-		require.EqualValues(t, "---\na: 1234\n---\nb: 123\n", MustMergeMultiYaml([]string{"---\na: 1234\n", "---\nb: 123\n"}))
+		require.EqualValues(t, "---\na: 1234\n---\nb: 123\n", yamlutils.MustMergeMultiYaml([]string{"a: 1234", "b: 123"}))
+		require.EqualValues(t, "---\na: 1234\n---\nb: 123\n", yamlutils.MustMergeMultiYaml([]string{"a: 1234", "---\nb: 123"}))
+		require.EqualValues(t, "---\na: 1234\n---\nb: 123\n", yamlutils.MustMergeMultiYaml([]string{"---\na: 1234", "b: 123"}))
+		require.EqualValues(t, "---\na: 1234\n---\nb: 123\n", yamlutils.MustMergeMultiYaml([]string{"---\na: 1234", "---\nb: 123"}))
+		require.EqualValues(t, "---\na: 1234\n---\nb: 123\n", yamlutils.MustMergeMultiYaml([]string{"---\na: 1234\n", "---\nb: 123\n"}))
 	})
 
 	t.Run("double entry leading whitespces", func(t *testing.T) {
-		require.EqualValues(t, "---\na: 1234\n---\nb: 123\n", MustMergeMultiYaml([]string{"\n\n\n---\na: 1234\n", "\n\n\n---\nb: 123\n"}))
+		require.EqualValues(t, "---\na: 1234\n---\nb: 123\n", yamlutils.MustMergeMultiYaml([]string{"\n\n\n---\na: 1234\n", "\n\n\n---\nb: 123\n"}))
 	})
 
 	t.Run("single intend", func(t *testing.T) {
 		require.EqualValues(
 			t,
 			"---\na:\n  b: 1\n",
-			MustMergeMultiYaml([]string{"a:\n  b: 1\n"}),
+			yamlutils.MustMergeMultiYaml([]string{"a:\n  b: 1\n"}),
 		)
 	})
 }
 
 func Test_Validate(t *testing.T) {
 	for i, s := range []string{"", " ", "\n", "\t", "\n\t     "} {
-		i := i
-		s := s
 		t.Run(
 			"empty string"+strconv.Itoa(i),
 			func(t *testing.T) {
-				err := Validate(s)
-				require.ErrorIs(t, err, ErrInvalidYaml)
-				require.ErrorIs(t, err, ErrInvalidYamlEmptyString)
+				err := yamlutils.Validate(s, &yamlutils.ValidateOptions{})
+				require.ErrorIs(t, err, yamlutils.ErrInvalidYaml)
+				require.ErrorIs(t, err, yamlutils.ErrInvalidYamlEmptyString)
 			},
 		)
 	}
 
 	t.Run("single char", func(t *testing.T) {
-		require.NoError(t, Validate("x"))
+		require.NoError(t, yamlutils.Validate("x", &yamlutils.ValidateOptions{}))
 	})
 
 	t.Run("Only document start", func(t *testing.T) {
-		require.NoError(t, Validate("---"))
-		require.NoError(t, Validate("---\n"))
+		require.NoError(t, yamlutils.Validate("---", &yamlutils.ValidateOptions{}))
+		require.NoError(t, yamlutils.Validate("---\n", &yamlutils.ValidateOptions{}))
 	})
 
 	t.Run("single key value", func(t *testing.T) {
-		require.NoError(t, Validate("a: b"))
-		require.NoError(t, Validate("---\na: b"))
+		require.NoError(t, yamlutils.Validate("a: b", &yamlutils.ValidateOptions{}))
+		require.NoError(t, yamlutils.Validate("---\na: b", &yamlutils.ValidateOptions{}))
 	})
 
 	t.Run("key without value", func(t *testing.T) {
-		err := Validate("a: b: 5\n")
+		err := yamlutils.Validate("a: b: 5\n", &yamlutils.ValidateOptions{})
 
-		require.ErrorIs(t, err, ErrInvalidYaml)
-		require.NotErrorIs(t, err, ErrInvalidYamlEmptyString)
+		require.ErrorIs(t, err, yamlutils.ErrInvalidYaml)
+		require.NotErrorIs(t, err, yamlutils.ErrInvalidYamlEmptyString)
 	})
 }
 
 func Test_EnsureDocumentStart(t *testing.T) {
 	t.Run("Empty string", func(t *testing.T) {
-		require.EqualValues(t, "---\n", EnsureDocumentStart(""))
+		require.EqualValues(t, "---\n", yamlutils.EnsureDocumentStart(""))
 	})
 
 	t.Run("document only", func(t *testing.T) {
-		require.EqualValues(t, "---\n", EnsureDocumentStart("---"))
+		require.EqualValues(t, "---\n", yamlutils.EnsureDocumentStart("---"))
 	})
 
 	t.Run("document and newline", func(t *testing.T) {
-		require.EqualValues(t, "---\n", EnsureDocumentStart("---\n"))
+		require.EqualValues(t, "---\n", yamlutils.EnsureDocumentStart("---\n"))
 	})
 
 	t.Run("key value", func(t *testing.T) {
-		require.EqualValues(t, "---\na: b", EnsureDocumentStart("a: b"))
+		require.EqualValues(t, "---\na: b", yamlutils.EnsureDocumentStart("a: b"))
 	})
 
 	t.Run("comment only", func(t *testing.T) {
-		require.EqualValues(t, "---\n# comment", EnsureDocumentStart("# comment"))
+		require.EqualValues(t, "---\n# comment", yamlutils.EnsureDocumentStart("# comment"))
 	})
 
 	t.Run("comment only and key value", func(t *testing.T) {
-		require.EqualValues(t, "---\n# comment\na: b", EnsureDocumentStart("# comment\na: b"))
+		require.EqualValues(t, "---\n# comment\na: b", yamlutils.EnsureDocumentStart("# comment\na: b"))
 	})
 
 	t.Run("comment only and document start only", func(t *testing.T) {
-		require.EqualValues(t, "# comment\n---\n", EnsureDocumentStart("# comment\n---"))
+		require.EqualValues(t, "# comment\n---\n", yamlutils.EnsureDocumentStart("# comment\n---"))
 	})
 }
 
 func Test_EnsureDocumentStartAndEnd(t *testing.T) {
 	t.Run("key value", func(t *testing.T) {
-		require.EqualValues(t, "---\na: 42\n", EnsureDocumentStartAndEnd("a: 42"))
+		require.EqualValues(t, "---\na: 42\n", yamlutils.EnsureDocumentStartAndEnd("a: 42"))
+	})
+}
+
+func Test_IsYamlString(t *testing.T) {
+	t.Run("empty", func(t *testing.T) {
+
 	})
 }

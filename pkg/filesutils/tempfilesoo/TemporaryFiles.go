@@ -56,17 +56,12 @@ func CreateFromBytes(ctx context.Context, content []byte) (temporaryFile filesin
 }
 
 func CreateFromString(ctx context.Context, content string) (temporaryFile filesinterfaces.File, err error) {
-	temporaryFile, err = CreateEmptyTemporaryFile(ctx)
+	path, err := tempfiles.CreateTemporaryFileFromContentString(ctx, content)
 	if err != nil {
 		return nil, err
 	}
 
-	err = temporaryFile.WriteString(ctx, content, &filesoptions.WriteOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	return temporaryFile, nil
+	return files.GetLocalFileByPath(path)
 }
 
 func CreateFromStringAndGetPath(ctx context.Context, content string) (temporaryFilePath string, err error) {

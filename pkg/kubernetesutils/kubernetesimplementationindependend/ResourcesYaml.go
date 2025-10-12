@@ -36,7 +36,7 @@ func (r *ObjectYamlEntry) Validate() (err error) {
 		return tracederrors.TracedError("Content not set")
 	}
 
-	err = yamlutils.Validate(r.Content)
+	err = yamlutils.Validate(r.Content, &yamlutils.ValidateOptions{})
 	if err != nil {
 		return err
 	}

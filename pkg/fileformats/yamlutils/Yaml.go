@@ -1,6 +1,8 @@
 package yamlutils
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"regexp"
@@ -11,6 +13,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	gologging "gopkg.in/op/go-logging.v1"
@@ -18,6 +21,7 @@ import (
 )
 
 var ErrInvalidYaml = errors.New("invalid yaml")
+var ErrOnlyJSONinDocument = errors.New("only JSON data in document")
 
 type errTypeInvalidYamlEmptyString struct{}
 
@@ -81,40 +85,6 @@ func DataToYamlString(input interface{}) (yamlString string, err error) {
 	yamlString = string(yamlBytes)
 
 	return yamlString, err
-}
-
-func MustDataToYamlBytes(input interface{}) (yamlBytes []byte) {
-	yamlBytes, err := DataToYamlBytes(input)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return yamlBytes
-}
-
-func MustDataToYamlFile(jsonData interface{}, outputFile filesinterfaces.File, verbose bool) {
-	err := DataToYamlFile(jsonData, outputFile, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func MustDataToYamlString(input interface{}) (yamlString string) {
-	yamlString, err := DataToYamlString(input)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return yamlString
-}
-
-func MustRunYqQueryAginstYamlStringAsString(yamlString string, query string) (result string) {
-	result, err := RunYqQueryAginstYamlStringAsString(yamlString, query)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return result
 }
 
 func RunYqQueryAginstYamlStringAsString(yamlString string, query string) (result string, err error) {
@@ -225,7 +195,12 @@ func LoadGeneric(input string) (data interface{}, err error) {
 	return data, nil
 }
 
-func Validate(toValidate string) (err error) {
+// Validates if a string contains a valid yaml.
+func Validate(toValidate string, options *ValidateOptions) (err error) {
+	if options == nil {
+		options = new(ValidateOptions)
+	}
+
 	trimmed := strings.TrimSpace(toValidate)
 
 	if trimmed == "" {
@@ -235,6 +210,14 @@ func Validate(toValidate string) (err error) {
 	_, err = LoadGeneric(toValidate)
 	if err != nil {
 		return err
+	}
+
+	if options.RefuesePureJson {
+		data := new(interface{})
+		err := json.Unmarshal([]byte(trimmed), data)
+		if err == nil {
+			return tracederrors.TracedErrorf("%w", ErrOnlyJSONinDocument)
+		}
 	}
 
 	return nil
@@ -268,4 +251,30 @@ func EnsureDocumentStart(input string) (output string) {
 func EnsureDocumentStartAndEnd(input string) (output string) {
 	output = EnsureDocumentStart(input)
 	return stringsutils.EnsureEndsWithExactlyOneLineBreak(output)
+}
+
+func IsYaml(context string, options *ValidateOptions) bool {
+	err := Validate(context, options)
+	return err == nil
+}
+
+func IsYamlFile(ctx context.Context, path string, options *ValidateOptions) (bool, error) {
+	if path == "" {
+		return false, tracederrors.TracedErrorEmptyString("path")
+	}
+
+	content, err := nativefiles.ReadAsString(contextutils.WithSilent(ctx), path)
+	if err != nil {
+		return false, err
+	}
+
+	isYaml := IsYaml(content, options)
+
+	if isYaml {
+		logging.LogInfoByCtxf(ctx, "File '%s' contains valid YAML.", path)
+	} else {
+		logging.LogInfoByCtxf(ctx, "File '%s' does not contain valid YAML.", path)
+	}
+
+	return isYaml, nil
 }
