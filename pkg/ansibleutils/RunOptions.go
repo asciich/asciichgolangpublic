@@ -7,7 +7,10 @@ type RunOptions struct {
 	PlaybookPath string
 
 	// The Limit to a host or group used by ansible
-	Limit        string
+	Limit string
+
+	// The tags to run. If empty the --tags argument is omitted.
+	Tags []string
 
 	// Local path to the root directory of the python virtualenv containing ansible.
 	AnsibleVirtualenvPath string
