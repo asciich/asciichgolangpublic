@@ -8,23 +8,29 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func NewMinimalPlaybookExecutingRoles(ctx context.Context, hostname string, roles []string) (*Playbook, error) {
-	if hostname == "" {
-		return nil, tracederrors.TracedErrorEmptyString("hostname")
+func NewMinimalPlaybookExecutingRoles(ctx context.Context, options *MinimalPlaybookOptions) (*Playbook, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	if len(roles) <= 0 {
+	hostname, err := options.GetHostName()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(options.Roles) <= 0 {
 		return nil, tracederrors.TracedError("roles has no elements")
 	}
 
-	roles = slicesutils.GetDeepCopyOfStringsSlice(roles)
+	roles := slicesutils.GetDeepCopyOfStringsSlice(options.Roles)
 
 	playbook := &Playbook{
 		Plays: []*Play{
 			{
-				Name:  "Minimal playbook executing roles",
-				Hosts: []string{hostname},
-				Roles: roles,
+				Name:       "Minimal playbook executing roles",
+				Hosts:      []string{hostname},
+				Roles:      roles,
+				RemoteUser: options.RemoteUser,
 			},
 		},
 	}
@@ -32,8 +38,8 @@ func NewMinimalPlaybookExecutingRoles(ctx context.Context, hostname string, role
 	return playbook, nil
 }
 
-func WriteTemporaryMinimalPlaybookExecutingRoles(ctx context.Context, hostname string, roles []string) (string, error) {
-	playbook, err := NewMinimalPlaybookExecutingRoles(ctx, hostname, roles)
+func WriteTemporaryMinimalPlaybookExecutingRoles(ctx context.Context, options *MinimalPlaybookOptions) (string, error) {
+	playbook, err := NewMinimalPlaybookExecutingRoles(ctx, options)
 	if err != nil {
 		return "", err
 	}

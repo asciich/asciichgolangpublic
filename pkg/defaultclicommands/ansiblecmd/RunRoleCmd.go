@@ -3,6 +3,7 @@ package ansiblecmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/ansibleutils"
+	"github.com/asciich/asciichgolangpublic/pkg/ansibleutils/ansibleparemeteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
@@ -46,7 +47,7 @@ func NewRunRoleCmd() *cobra.Command {
 			mustutils.Must0(ansibleutils.RunRoles(
 				ctx,
 				[]string{role},
-				&ansibleutils.RunOptions{
+				&ansibleparemeteroptions.RunOptions{
 					Limit:                 hostname,
 					AnsibleVirtualenvPath: vePath,
 					KeepTemporaryPlaybook: keepTemporaryPlaybook,

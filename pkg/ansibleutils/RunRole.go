@@ -3,6 +3,7 @@ package ansibleutils
 import (
 	"context"
 
+	"github.com/asciich/asciichgolangpublic/pkg/ansibleutils/ansibleparemeteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/ansibleutils/ansibleplaybook"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
@@ -10,7 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func RunRoles(ctx context.Context, roles []string, options *RunOptions) error {
+func RunRoles(ctx context.Context, roles []string, options *ansibleparemeteroptions.RunOptions) error {
 	if len(roles) <= 0 {
 		return tracederrors.TracedError("roles has no elements")
 	}
@@ -26,7 +27,14 @@ func RunRoles(ctx context.Context, roles []string, options *RunOptions) error {
 
 	logging.LogInfoByCtxf(ctx, "Running ansible roles '%v' against host '%s' started.", roles, hostname)
 
-	tempPlaybook, err := ansibleplaybook.WriteTemporaryMinimalPlaybookExecutingRoles(ctx, hostname, roles)
+	tempPlaybook, err := ansibleplaybook.WriteTemporaryMinimalPlaybookExecutingRoles(
+		ctx,
+		&ansibleplaybook.MinimalPlaybookOptions{
+			Hostname:   hostname,
+			Roles:      roles,
+			RemoteUser: options.RemoteUser,
+		},
+	)
 	if err != nil {
 		return err
 	}

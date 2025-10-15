@@ -1,4 +1,4 @@
-package ansibleutils
+package ansibleparemeteroptions
 
 import "github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 
@@ -11,6 +11,9 @@ type RunOptions struct {
 
 	// The tags to run. If empty the --tags argument is omitted.
 	Tags []string
+
+	// The remote user to use:
+	RemoteUser string
 
 	// Local path to the root directory of the python virtualenv containing ansible.
 	AnsibleVirtualenvPath string
