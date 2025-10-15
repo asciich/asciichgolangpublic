@@ -15,6 +15,9 @@ type RunOptions struct {
 	// Local path to the root directory of the python virtualenv containing ansible.
 	AnsibleVirtualenvPath string
 
+	// Local path to the ansible inventory. If not set the Limit will be used as adhoc inventoroy
+	AnsibleInventoryPath string
+
 	// Do not delete the temprary playbook (if one is in use) to allow easier debugging.
 	KeepTemporaryPlaybook bool
 }

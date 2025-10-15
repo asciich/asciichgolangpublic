@@ -36,7 +36,12 @@ func RunPlaybook(ctx context.Context, options *RunOptions) error {
 
 	logging.LogInfoByCtxf(ctx, "Run ansible playbook '%s' using '%s' against hosts '%s' started.", playbookPath, binPath, limit)
 
-	cmd := []string{binPath, playbookPath, "--limit", limit, "--inventory=" + limit + ","}
+	cmd := []string{binPath, playbookPath, "--limit", limit}
+	if options.AnsibleInventoryPath == "" {
+		cmd = append(cmd, "--inventory="+limit+",")
+	} else {
+		cmd = append(cmd, "--inventory="+options.AnsibleInventoryPath)
+	}
 
 	if len(options.Tags) > 0 {
 		cmd = append(cmd, fmt.Sprintf("--tags=%s", strings.Join(options.Tags, ",")))
