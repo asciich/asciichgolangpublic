@@ -14,7 +14,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func RunPlaybook(ctx context.Context, options *RunOptions) error {
+func RunPlaybook(ctx context.Context, options *ansibleparemeteroptions.RunOptions) error {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}

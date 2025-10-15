@@ -6,9 +6,10 @@ import (
 )
 
 type Play struct {
-	Name  string   `yaml:"name"`
-	Hosts Hosts    `yaml:"hosts"`
-	Roles []string `yaml:"roles,omitempty"`
+	Name       string   `yaml:"name"`
+	Hosts      Hosts    `yaml:"hosts"`
+	Roles      []string `yaml:"roles,omitempty"`
+	RemoteUser string   `yaml:"remote_user,omitempty"`
 }
 
 // Custom type alias so we can implement the UnmarshalYaml
