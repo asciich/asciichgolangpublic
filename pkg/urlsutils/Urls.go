@@ -1,6 +1,9 @@
 package urlsutils
 
 import (
+	"fmt"
+	"net/url"
+
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -23,4 +26,17 @@ func IsUrl(url string) (isUrl bool) {
 		"https://",
 		"http://",
 	})
+}
+
+func GetBaseUrl(inputUrl string) (string, error) {
+	if inputUrl == "" {
+		return "", tracederrors.TracedErrorEmptyString("inputUrl")
+	}
+
+	parsedURL, err := url.Parse(inputUrl)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Failed to parse URL '%s': %w", inputUrl, err)
+	}
+
+	return fmt.Sprintf("%s://%s", parsedURL.Scheme, parsedURL.Host), nil
 }

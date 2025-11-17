@@ -19,6 +19,9 @@ type RequestOptions struct {
 
 	// Skip TLS validation
 	SkipTLSvalidation bool
+
+	// The headers to send
+	Header map[string]string
 }
 
 func NewRequestOptions() (r *RequestOptions) {

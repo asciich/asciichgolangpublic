@@ -7,6 +7,7 @@ toolchain go1.24.3
 require (
 	cloud.google.com/go/storage v1.39.0
 	github.com/go-git/go-git/v5 v5.11.0
+	github.com/go-xmlfmt/xmlfmt v1.1.3
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/itchyny/gojq v0.12.16
 	github.com/lu4p/shred v0.0.0-20201211173428-0347b645d724
@@ -18,6 +19,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	gitlab.com/gitlab-org/api/client-go v0.121.0
 	golang.org/x/crypto v0.36.0
+	golang.org/x/net v0.38.0
 	golang.org/x/text v0.23.0
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473
 	gopkg.in/yaml.v3 v3.0.1
@@ -106,7 +108,6 @@ require (
 	go.opentelemetry.io/otel/metric v1.23.0 // indirect
 	go.opentelemetry.io/otel/trace v1.23.0 // indirect
 	golang.org/x/mod v0.21.0 // indirect
-	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/oauth2 v0.27.0 // indirect
 	golang.org/x/sync v0.12.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
