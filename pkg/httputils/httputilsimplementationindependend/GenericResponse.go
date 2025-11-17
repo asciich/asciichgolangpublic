@@ -94,10 +94,6 @@ func (g *GenericResponse) SetBody(body []byte) (err error) {
 		return tracederrors.TracedErrorf("body is nil")
 	}
 
-	if len(body) <= 0 {
-		return tracederrors.TracedErrorf("body has no elements")
-	}
-
 	g.body = body
 
 	return nil

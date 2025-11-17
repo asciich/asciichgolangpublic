@@ -1,10 +1,11 @@
-package urlsutils
+package urlsutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/urlsutils"
 )
 
 func TestUrlGetFqdnAndPath(t *testing.T) {
@@ -24,7 +25,7 @@ func TestUrlGetFqdnAndPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				url, err := GetUrlFromString(tt.url)
+				url, err := urlsutils.GetUrlFromString(tt.url)
 				require.NoError(t, err)
 
 				fqdn, path, err := url.GetFqdnWitShemeAndPathAsString()

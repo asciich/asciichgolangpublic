@@ -75,6 +75,10 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httputil
 		return nil, err
 	}
 
+	for k,v := range requestOptions.Header {
+		request.Header.Set(k, v)
+	}
+
 	nativeResponse, err := client.Do(request)
 	if err != nil {
 		return nil, err
