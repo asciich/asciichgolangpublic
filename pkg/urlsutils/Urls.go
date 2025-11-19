@@ -40,3 +40,18 @@ func GetBaseUrl(inputUrl string) (string, error) {
 
 	return fmt.Sprintf("%s://%s", parsedURL.Scheme, parsedURL.Host), nil
 }
+
+// GetPath parses the given raw URL string and returns the path component.
+// If the URL cannot be parsed, an empty string is returned.
+func GetPath(inputUrl string) (string, error) {
+	if inputUrl == "" {
+		return "", tracederrors.TracedErrorEmptyString("inputUrl")
+	}
+
+	u, err := url.Parse(inputUrl)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Failed to parse as url: %w", err)
+	}
+
+	return u.Path, nil
+}
