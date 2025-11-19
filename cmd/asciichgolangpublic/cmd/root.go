@@ -6,19 +6,25 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands"
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "asciichgolangpublic",
-	Short: "System admin helper",
-}
+func NewRootCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "asciichgolangpublic",
+		Short: "System admin helper",
+	}
 
-func init() {
-	mustutils.Must0(defaultclicommands.AddDefaultCommands(rootCmd))
+	err := defaultclicommands.AddDefaultCommands(cmd)
+	if err != nil {
+		return nil
+	}
+
+	return cmd
 }
 
 func Execute() {
+	rootCmd := NewRootCmd()
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
