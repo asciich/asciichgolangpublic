@@ -13,8 +13,12 @@ func NewGitlabCommand() (cmd *cobra.Command) {
 		Short: "Gitlab related commands",
 	}
 
-	cmd.AddCommand(gitlabmetricscmd.NewMetricsCommand())
-	cmd.AddCommand(pipelineschedulescmd.NewPipelineSchedulesCmd())
+	cmd.AddCommand(
+		NewDownloadMainReadmesCmd(),
+
+		gitlabmetricscmd.NewMetricsCommand(),
+		pipelineschedulescmd.NewPipelineSchedulesCmd(),
+	)
 
 	return cmd
 }
@@ -24,7 +28,9 @@ func AddGitlabCommand(rootCmd *cobra.Command) (err error) {
 		return tracederrors.TracedErrorNil("rootCmd")
 	}
 
-	rootCmd.AddCommand(NewGitlabCommand())
+	rootCmd.AddCommand(
+		NewGitlabCommand(),
+	)
 
 	return nil
 }

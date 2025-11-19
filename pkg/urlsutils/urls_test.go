@@ -32,3 +32,24 @@ func Test_GetBaseUrl(t *testing.T) {
 		require.EqualValues(t, "https://asciich.ch", url)
 	})
 }
+
+
+func TestGetPath(t *testing.T) {
+	tests := []struct {
+		in   string
+		want string
+	}{
+		{"https://example.com/foo/bar?query=1", "/foo/bar"},
+		{"http://example.com/", "/"},
+		{"http://example.com", ""},               // no trailing slash -> empty path
+		{"ftp://host/some/path/file.txt", "/some/path/file.txt"},
+		{"//example.com/relative", "/relative"},  // scheme-less absolute URL (Parse handles it)
+		{"/just/a/path", "/just/a/path"},         // relative path only
+	}
+
+	for _, tc := range tests {
+		got, err := urlsutils.GetPath(tc.in)
+		require.NoError(t, err)
+		require.Equal(t, tc.want, got, "input: %q", tc.in)
+	}
+}

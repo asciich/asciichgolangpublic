@@ -14,6 +14,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/urlsutils"
 )
 
 type GitlabGroup struct {
@@ -486,6 +487,11 @@ func (g *GitlabGroup) ListProjects(ctx context.Context, listProjectOptions *Gitl
 func (g *GitlabGroup) SetGroupPath(groupPath string) (err error) {
 	if groupPath == "" {
 		return tracederrors.TracedErrorf("groupPath is empty string")
+	}
+
+	groupPath, err = urlsutils.GetPath(groupPath)
+	if err != nil {
+		return err
 	}
 
 	trimmed := stringsutils.TrimPrefixAndSuffix(groupPath, "/", "/")
