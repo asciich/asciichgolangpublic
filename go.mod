@@ -6,6 +6,7 @@ toolchain go1.24.3
 
 require (
 	cloud.google.com/go/storage v1.39.0
+	github.com/gavv/cobradoc v1.2.0
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/go-xmlfmt/xmlfmt v1.1.3
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
