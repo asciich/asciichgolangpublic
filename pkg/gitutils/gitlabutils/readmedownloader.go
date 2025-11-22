@@ -23,9 +23,9 @@ type DownloadMainReadmesOptions struct {
 	IgnoreNoReadmeMd bool
 }
 
-// Downlaod the main README.md of all projects in a gitlab group
+// Download the main README.md of all projects in a gitlab group
 func DownloadMainReadmes(ctx context.Context, options *DownloadMainReadmesOptions) error {
-	logging.LogInfoByCtxf(ctx, "Downlaod main README.md files started.")
+	logging.LogInfoByCtxf(ctx, "Download main README.md files started.")
 
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
@@ -133,7 +133,7 @@ func DownloadMainReadmes(ctx context.Context, options *DownloadMainReadmesOption
 		logging.LogInfoByCtxf(ctx, "Collect main README.md of %s finished.", url)
 	}
 
-	logging.LogInfoByCtxf(ctx, "Downlaod main README.md files finished.")
+	logging.LogInfoByCtxf(ctx, "Download main README.md files finished.")
 
 	return nil
 }

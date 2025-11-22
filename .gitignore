@@ -6,3 +6,4 @@ asciich_root_ca.crt
 .vscode/
 __debug_*
 asciichgolangpublic
+*.patch
