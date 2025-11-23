@@ -2,6 +2,7 @@ package markdowndocument
 
 import (
 	"reflect"
+	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/documentutils/documentbase"
@@ -48,6 +49,8 @@ func (m MarkDownDocument) RenderAsString() (rendered string, err error) {
 				return "", err
 			}
 			rendered = extendRendered(rendered) + stringsutils.EnsureEndsWithExactlyOneLineBreak(table)
+		case *documentbase.Verbatim:
+			rendered = extendRendered(rendered) + "```\n" + plainTest + "\n```\n"
 		default:
 			return "", tracederrors.TracedErrorf("Unknown element type to render: %s", reflect.TypeOf(e))
 		}
@@ -56,4 +59,61 @@ func (m MarkDownDocument) RenderAsString() (rendered string, err error) {
 	rendered = stringsutils.EnsureEndsWithExactlyOneLineBreak(rendered)
 
 	return rendered, nil
+}
+
+// ParseFromString parses a markdown string and populates the document
+func (d *MarkDownDocument) ParseFromString(markdown string) error {
+	lines := strings.SplitSeq(markdown, "\n")
+	var inVerbatim bool
+	var verbatimContent []string
+
+	for line := range lines {
+		if line == "```" {
+			if inVerbatim {
+				// End of verbatim block
+				if err := d.AddVerbatimByString(strings.Join(verbatimContent, "\n")); err != nil {
+					return err
+				}
+				verbatimContent = nil
+				inVerbatim = false
+			} else {
+				// Start of verbatim block
+				inVerbatim = true
+			}
+			continue
+		}
+
+		if inVerbatim {
+			verbatimContent = append(verbatimContent, line)
+			continue
+		}
+
+		if line == "" {
+			continue
+		}
+
+		if strings.HasPrefix(line, "#### ") {
+			if err := d.AddSubSubSubTitleByString(strings.TrimPrefix(line, "#### ")); err != nil {
+				return err
+			}
+		} else if strings.HasPrefix(line, "### ") {
+			if err := d.AddSubSubTitleByString(strings.TrimPrefix(line, "### ")); err != nil {
+				return err
+			}
+		} else if strings.HasPrefix(line, "## ") {
+			if err := d.AddSubTitleByString(strings.TrimPrefix(line, "## ")); err != nil {
+				return err
+			}
+		} else if strings.HasPrefix(line, "# ") {
+			if err := d.AddTitleByString(strings.TrimPrefix(line, "# ")); err != nil {
+				return err
+			}
+		} else if !strings.HasPrefix(line, "|") {
+			if err := d.AddTextByString(line); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

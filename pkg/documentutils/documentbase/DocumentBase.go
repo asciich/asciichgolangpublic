@@ -134,3 +134,17 @@ func (d *DocumentBase) AddTextByString(text string) (err error) {
 func (d *DocumentBase) RenderAsString() (rendered string, err error) {
 	return "", tracederrors.TracedError("DocumentBase does not implement any renderer. You have to implement your own renderer.")
 }
+
+func (d *DocumentBase) AddVerbatimByString(verbatim string) (err error) {
+	toAdd, err := GetNewVerbatimByString(verbatim)
+	if err != nil {
+		return err
+	}
+
+	err = d.AddElement(toAdd)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
