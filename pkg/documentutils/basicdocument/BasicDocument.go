@@ -1,23 +1,24 @@
-package documentbase
+package basicdocument
 
 import (
+	"github.com/asciich/asciichgolangpublic/pkg/documentutils/documentinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/spreadsheet"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-type DocumentBase struct {
-	elements []Element
+type BasicDocument struct {
+	elements []documentinterfaces.Element
 }
 
-func NewDocumentBase() (d *DocumentBase) {
-	return new(DocumentBase)
+func NewBasicDocument() (d *BasicDocument) {
+	return new(BasicDocument)
 }
 
-func (d DocumentBase) GetElements() (elementes []Element) {
+func (d BasicDocument) GetElements() (elementes []documentinterfaces.Element) {
 	return d.elements
 }
 
-func (d *DocumentBase) AddElement(element Element) (err error) {
+func (d *BasicDocument) AddElement(element documentinterfaces.Element) (err error) {
 	if element == nil {
 		return tracederrors.TracedErrorNil("element")
 	}
@@ -27,7 +28,7 @@ func (d *DocumentBase) AddElement(element Element) (err error) {
 	return nil
 }
 
-func (d *DocumentBase) AddTable() (spreadsheet *spreadsheet.SpreadSheet, err error) {
+func (d *BasicDocument) AddTable() (spreadsheet *spreadsheet.SpreadSheet, err error) {
 	toAdd, err := GetNewTable()
 	if err != nil {
 		return nil, err
@@ -41,7 +42,7 @@ func (d *DocumentBase) AddTable() (spreadsheet *spreadsheet.SpreadSheet, err err
 	return toAdd.GetSpreadSheet()
 }
 
-func (d *DocumentBase) AddTitleByString(title string) (err error) {
+func (d *BasicDocument) AddTitleByString(title string) (err error) {
 	if title == "" {
 		return tracederrors.TracedErrorEmptyString("title")
 	}
@@ -59,7 +60,7 @@ func (d *DocumentBase) AddTitleByString(title string) (err error) {
 	return nil
 }
 
-func (d *DocumentBase) AddSubTitleByString(subtitle string) (err error) {
+func (d *BasicDocument) AddSubTitleByString(subtitle string) (err error) {
 	if subtitle == "" {
 		return tracederrors.TracedErrorEmptyString("subtitle")
 	}
@@ -77,7 +78,7 @@ func (d *DocumentBase) AddSubTitleByString(subtitle string) (err error) {
 	return nil
 }
 
-func (d *DocumentBase) AddSubSubTitleByString(subsubtitle string) (err error) {
+func (d *BasicDocument) AddSubSubTitleByString(subsubtitle string) (err error) {
 	if subsubtitle == "" {
 		return tracederrors.TracedErrorEmptyString("subsubtitle")
 	}
@@ -95,7 +96,7 @@ func (d *DocumentBase) AddSubSubTitleByString(subsubtitle string) (err error) {
 	return nil
 }
 
-func (d *DocumentBase) AddSubSubSubTitleByString(subsubsubtitle string) (err error) {
+func (d *BasicDocument) AddSubSubSubTitleByString(subsubsubtitle string) (err error) {
 	if subsubsubtitle == "" {
 		return tracederrors.TracedErrorEmptyString("subsubsubtitle")
 	}
@@ -113,7 +114,7 @@ func (d *DocumentBase) AddSubSubSubTitleByString(subsubsubtitle string) (err err
 	return nil
 }
 
-func (d *DocumentBase) AddTextByString(text string) (err error) {
+func (d *BasicDocument) AddTextByString(text string) (err error) {
 	if text == "" {
 		return tracederrors.TracedErrorEmptyString("text")
 	}
@@ -131,11 +132,7 @@ func (d *DocumentBase) AddTextByString(text string) (err error) {
 	return nil
 }
 
-func (d *DocumentBase) RenderAsString() (rendered string, err error) {
-	return "", tracederrors.TracedError("DocumentBase does not implement any renderer. You have to implement your own renderer.")
-}
-
-func (d *DocumentBase) AddVerbatimByString(verbatim string) (err error) {
+func (d *BasicDocument) AddVerbatimByString(verbatim string) (err error) {
 	toAdd, err := GetNewVerbatimByString(verbatim)
 	if err != nil {
 		return err

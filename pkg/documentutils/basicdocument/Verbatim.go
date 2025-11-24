@@ -1,6 +1,6 @@
 // Verbatim.go
 
-package documentbase
+package basicdocument
 
 type Verbatim struct {
 	ElementBase
