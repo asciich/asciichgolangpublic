@@ -1,4 +1,4 @@
-package documentbase
+package basicdocument
 
 type SubSubTitle struct {
 	ElementBase

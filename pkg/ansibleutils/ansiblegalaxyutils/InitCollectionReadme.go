@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/asciich/asciichgolangpublic/pkg/documentutils/basicdocument"
 	"github.com/asciich/asciichgolangpublic/pkg/documentutils/markdowndocument"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
@@ -23,14 +24,14 @@ func WriteInitialCollectionReadme(ctx context.Context, outFile filesinterfaces.F
 		return tracederrors.TracedErrorEmptyString("namespace")
 	}
 
-	doc := markdowndocument.NewMarkDownDocument()
+	doc := basicdocument.NewBasicDocument()
 
 	err := doc.AddTitleByString(fmt.Sprintf("Ansible collection %s.%s", name, namespace))
 	if err != nil {
 		return err
 	}
 
-	content, err := doc.RenderAsString()
+	content, err := markdowndocument.RenderAsString(doc)
 	if err != nil {
 		return err
 	}

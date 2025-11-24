@@ -1,4 +1,4 @@
-package documentbase
+package basicdocument
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"

@@ -1,4 +1,4 @@
-package documentbase
+package basicdocument
 
 type Text struct {
 	ElementBase

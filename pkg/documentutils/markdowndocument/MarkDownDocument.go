@@ -5,19 +5,12 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/documentutils/documentbase"
+	"github.com/asciich/asciichgolangpublic/pkg/documentutils/documentinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/documentutils/basicdocument"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-type MarkDownDocument struct {
-	documentbase.DocumentBase
-}
-
-func NewMarkDownDocument() (m *MarkDownDocument) {
-	return new(MarkDownDocument)
-}
-
-func (m MarkDownDocument) RenderAsString() (rendered string, err error) {
+func RenderAsString(document documentinterfaces.Document) (rendered string, err error) {
 	extendRendered := func(r string) string {
 		if r == "" {
 			return r
@@ -26,30 +19,30 @@ func (m MarkDownDocument) RenderAsString() (rendered string, err error) {
 		return r + "\n"
 	}
 
-	for _, e := range m.GetElements() {
+	for _, e := range document.GetElements() {
 		plainTest, err := e.GetPlainText()
 		if err != nil {
 			return "", err
 		}
 
 		switch e := e.(type) {
-		case *documentbase.Text:
+		case *basicdocument.Text:
 			rendered = extendRendered(rendered) + stringsutils.EnsureEndsWithExactlyOneLineBreak(plainTest)
-		case *documentbase.Title:
+		case *basicdocument.Title:
 			rendered = extendRendered(rendered) + "# " + stringsutils.EnsureEndsWithExactlyOneLineBreak(plainTest)
-		case *documentbase.SubTitle:
+		case *basicdocument.SubTitle:
 			rendered = extendRendered(rendered) + "## " + stringsutils.EnsureEndsWithExactlyOneLineBreak(plainTest)
-		case *documentbase.SubSubTitle:
+		case *basicdocument.SubSubTitle:
 			rendered = extendRendered(rendered) + "### " + stringsutils.EnsureEndsWithExactlyOneLineBreak(plainTest)
-		case *documentbase.SubSubSubTitle:
+		case *basicdocument.SubSubSubTitle:
 			rendered = extendRendered(rendered) + "#### " + stringsutils.EnsureEndsWithExactlyOneLineBreak(plainTest)
-		case *documentbase.Table:
+		case *basicdocument.Table:
 			table, err := e.RenderAsMarkDownString()
 			if err != nil {
 				return "", err
 			}
 			rendered = extendRendered(rendered) + stringsutils.EnsureEndsWithExactlyOneLineBreak(table)
-		case *documentbase.Verbatim:
+		case *basicdocument.Verbatim:
 			rendered = extendRendered(rendered) + "```\n" + plainTest + "\n```\n"
 		default:
 			return "", tracederrors.TracedErrorf("Unknown element type to render: %s", reflect.TypeOf(e))
@@ -62,17 +55,19 @@ func (m MarkDownDocument) RenderAsString() (rendered string, err error) {
 }
 
 // ParseFromString parses a markdown string and populates the document
-func (d *MarkDownDocument) ParseFromString(markdown string) error {
+func ParseFromString(markdown string) (documentinterfaces.Document, error) {
 	lines := strings.SplitSeq(markdown, "\n")
 	var inVerbatim bool
 	var verbatimContent []string
+
+	ret := basicdocument.NewBasicDocument()
 
 	for line := range lines {
 		if line == "```" {
 			if inVerbatim {
 				// End of verbatim block
-				if err := d.AddVerbatimByString(strings.Join(verbatimContent, "\n")); err != nil {
-					return err
+				if err := ret.AddVerbatimByString(strings.Join(verbatimContent, "\n")); err != nil {
+					return nil, err
 				}
 				verbatimContent = nil
 				inVerbatim = false
@@ -93,27 +88,27 @@ func (d *MarkDownDocument) ParseFromString(markdown string) error {
 		}
 
 		if strings.HasPrefix(line, "#### ") {
-			if err := d.AddSubSubSubTitleByString(strings.TrimPrefix(line, "#### ")); err != nil {
-				return err
+			if err := ret.AddSubSubSubTitleByString(strings.TrimPrefix(line, "#### ")); err != nil {
+				return nil, err
 			}
 		} else if strings.HasPrefix(line, "### ") {
-			if err := d.AddSubSubTitleByString(strings.TrimPrefix(line, "### ")); err != nil {
-				return err
+			if err := ret.AddSubSubTitleByString(strings.TrimPrefix(line, "### ")); err != nil {
+				return nil, err
 			}
 		} else if strings.HasPrefix(line, "## ") {
-			if err := d.AddSubTitleByString(strings.TrimPrefix(line, "## ")); err != nil {
-				return err
+			if err := ret.AddSubTitleByString(strings.TrimPrefix(line, "## ")); err != nil {
+				return nil, err
 			}
 		} else if strings.HasPrefix(line, "# ") {
-			if err := d.AddTitleByString(strings.TrimPrefix(line, "# ")); err != nil {
-				return err
+			if err := ret.AddTitleByString(strings.TrimPrefix(line, "# ")); err != nil {
+				return nil, err
 			}
 		} else if !strings.HasPrefix(line, "|") {
-			if err := d.AddTextByString(line); err != nil {
-				return err
+			if err := ret.AddTextByString(line); err != nil {
+				return nil, err
 			}
 		}
 	}
 
-	return nil
+	return ret, nil
 }
