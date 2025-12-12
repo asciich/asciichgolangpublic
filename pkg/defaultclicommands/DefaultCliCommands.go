@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/errorscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/filescmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/gitlabcmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/installcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/latexcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/loggingcmd"
@@ -37,6 +38,7 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 		errorscmd.NewErrorsCommand(),
 		filescmd.NewFilesCmd(),
 		gitlabcmd.NewGitlabCommand(),
+		installcmd.NewInstallCmd(),
 		kubernetescmd.NewKubernetesCmd(),
 		latexcmd.NewLatexCmd(),
 		loggingcmd.NewLoggingCmd(),
