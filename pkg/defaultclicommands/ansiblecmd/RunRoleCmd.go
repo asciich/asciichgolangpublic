@@ -34,6 +34,11 @@ func NewRunRoleCmd() *cobra.Command {
 				logging.LogFatal("Please specify --role")
 			}
 
+			remoteUser, err := cmd.Flags().GetString("remote-user")
+			if err != nil {
+				logging.LogGoErrorFatalWithTrace(err)
+			}
+
 			vePath, err := cmd.Flags().GetString("virtualenv-path")
 			if err != nil {
 				logging.LogGoErrorFatalWithTrace(err)
@@ -51,6 +56,7 @@ func NewRunRoleCmd() *cobra.Command {
 					Limit:                 hostname,
 					AnsibleVirtualenvPath: vePath,
 					KeepTemporaryPlaybook: keepTemporaryPlaybook,
+					RemoteUser:            remoteUser,
 				},
 			))
 		},
@@ -59,6 +65,7 @@ func NewRunRoleCmd() *cobra.Command {
 	cmd.PersistentFlags().String("host", "", "Host to run the ansible role against.")
 	cmd.PersistentFlags().String("role", "", "Name of the role to run.")
 	cmd.PersistentFlags().String("virtualenv-path", "", "Path to the python virtualenv containing the ansible installation.")
+	cmd.PersistentFlags().String("remote-user", "", "The remote user name to set in the playbook. E.g. '--remote-user=root' if you want ansible to connect to the --host as 'root' user.")
 	cmd.PersistentFlags().Bool("keep-temporary-playbook", false, "Do not automatically delete the temporary used playbook. Useful for debugging.")
 
 	return cmd
