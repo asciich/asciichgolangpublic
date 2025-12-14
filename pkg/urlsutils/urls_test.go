@@ -1,6 +1,7 @@
 package urlsutils_test
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -33,7 +34,6 @@ func Test_GetBaseUrl(t *testing.T) {
 	})
 }
 
-
 func TestGetPath(t *testing.T) {
 	tests := []struct {
 		in   string
@@ -41,15 +41,69 @@ func TestGetPath(t *testing.T) {
 	}{
 		{"https://example.com/foo/bar?query=1", "/foo/bar"},
 		{"http://example.com/", "/"},
-		{"http://example.com", ""},               // no trailing slash -> empty path
+		{"http://example.com", ""}, // no trailing slash -> empty path
 		{"ftp://host/some/path/file.txt", "/some/path/file.txt"},
-		{"//example.com/relative", "/relative"},  // scheme-less absolute URL (Parse handles it)
-		{"/just/a/path", "/just/a/path"},         // relative path only
+		{"//example.com/relative", "/relative"}, // scheme-less absolute URL (Parse handles it)
+		{"/just/a/path", "/just/a/path"},        // relative path only
 	}
 
-	for _, tc := range tests {
-		got, err := urlsutils.GetPath(tc.in)
+	for _, tt := range tests {
+		got, err := urlsutils.GetPath(tt.in)
 		require.NoError(t, err)
-		require.Equal(t, tc.want, got, "input: %q", tc.in)
+		require.Equal(t, tt.want, got, "input: %q", tt.in)
+	}
+}
+
+func TestSetPort(t *testing.T) {
+	tests := []struct {
+		url      string
+		port     int
+		expected string
+	}{
+		{"https://example.com", 123, "https://example.com:123"},
+		{"https://example.com", 443, "https://example.com:443"},
+		{"https://example.com/index.html", 123, "https://example.com:123/index.html"},
+		{"https://example.com/index.html", 443, "https://example.com:443/index.html"},
+		{"https://example.com/path/index.html", 123, "https://example.com:123/path/index.html"},
+		{"https://example.com/path/index.html", 443, "https://example.com:443/path/index.html"},
+		{"https://example.com:80", 123, "https://example.com:123"},
+		{"https://example.com:80", 443, "https://example.com:443"},
+		{"https://example.com:80/index.html", 123, "https://example.com:123/index.html"},
+		{"https://example.com:80/index.html", 443, "https://example.com:443/index.html"},
+		{"https://example.com:80/path/index.html", 123, "https://example.com:123/path/index.html"},
+		{"https://example.com:80/path/index.html", 443, "https://example.com:443/path/index.html"},
+		{"https://example.com:443", 123, "https://example.com:123"},
+		{"https://example.com:443", 443, "https://example.com:443"},
+		{"https://example.com:443/index.html", 123, "https://example.com:123/index.html"},
+		{"https://example.com:443/index.html", 443, "https://example.com:443/index.html"},
+		{"https://example.com:443/path/index.html", 123, "https://example.com:123/path/index.html"},
+		{"https://example.com:443/path/index.html", 443, "https://example.com:443/path/index.html"},
+		{"https://example.com:1234", 123, "https://example.com:123"},
+		{"https://example.com:1234", 443, "https://example.com:443"},
+		{"https://example.com:1234/index.html", 123, "https://example.com:123/index.html"},
+		{"https://example.com:1234/index.html", 443, "https://example.com:443/index.html"},
+		{"https://example.com:1234/path/index.html", 123, "https://example.com:123/path/index.html"},
+		{"https://example.com:1234/path/index.html", 443, "https://example.com:443/path/index.html"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.expected, func(t *testing.T) {
+			got, err := urlsutils.SetPort(tt.url, tt.port)
+			require.NoError(t, err)
+			require.EqualValues(t, tt.expected, got)
+		})
+	}
+
+	t.Run("empty URL", func(t *testing.T) {
+		got, err := urlsutils.SetPort("", 123)
+		require.Error(t, err)
+		require.EqualValues(t, "", got)
+	})
+
+	for _, port := range []int{0, -1, -80, -443} {
+		t.Run("invalid Port "+strconv.Itoa(port), func(t *testing.T) {
+			got, err := urlsutils.SetPort("https://example.com", port)
+			require.Error(t, err)
+			require.EqualValues(t, "", got)
+		})
 	}
 }

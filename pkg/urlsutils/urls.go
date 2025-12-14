@@ -3,6 +3,7 @@ package urlsutils
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -54,4 +55,25 @@ func GetPath(inputUrl string) (string, error) {
 	}
 
 	return u.Path, nil
+}
+
+func SetPort(inputUrl string, port int) (string, error) {
+	if inputUrl == "" {
+		return "", tracederrors.TracedErrorEmptyString("inputUrl")
+	}
+
+	if port <= 0 {
+		return "", tracederrors.TracedErrorf("Invalid port number: %d", port)
+	}
+
+	u, err := url.Parse(inputUrl)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Failed to parse as url: %w", err)
+	}
+
+	hostname := u.Hostname()
+	newHost := hostname + ":" + strconv.Itoa(port)
+	u.Host = newHost
+	newUrl := u.String()
+	return newUrl, nil
 }

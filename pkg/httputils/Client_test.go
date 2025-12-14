@@ -30,6 +30,8 @@ func getClientByImplementationName(implementationName string) (client httputilsi
 	return nil
 }
 
+// Test a simple get request.
+// The port of the webserver is directly included in the URL for this test case e.g. https://url:port
 func TestClient_GetRequest_RootPage_PortInUrl(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -72,6 +74,105 @@ func TestClient_GetRequest_RootPage_PortInUrl(t *testing.T) {
 		)
 	}
 }
+
+// Perform a simple get request
+// The port of the webserver is given as a dedicated option in the RequestOptions struct and not part of the URL.
+func TestClient_GetRequest_RootPage_PortInRequest(t *testing.T) {
+	tests := []struct {
+		implementationName string
+		method             string
+	}{
+		{"nativeClient", "get"},
+		{"nativeClient", "Get"},
+		{"nativeClient", "GET"},
+		{"nativeClient", "GeT"},
+		{"nativeClient", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				const port int = 9123
+				ctx := getCtx()
+
+				testServer, err := httputils.GetTestWebServer(port)
+				require.NoError(t, err)
+				defer testServer.Stop(ctx)
+
+				err = testServer.StartInBackground(ctx)
+				require.NoError(t, err)
+
+				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				var response httputilsinterfaces.Response
+				response, err = client.SendRequest(
+					ctx,
+					&httputilsparameteroptions.RequestOptions{
+						Url:    "http://localhost",
+						Port: mustutils.Must(testServer.GetPort()),
+						Method: tt.method,
+					},
+				)
+				require.NoError(t, err)
+
+				require.True(t, response.IsStatusCode200Ok())
+			},
+		)
+	}
+}
+
+
+// Perform a simple get request
+// The port of the webserver is set on client level. 
+func TestClient_GetRequest_RootPage_PortOnClientLevel(t *testing.T) {
+	tests := []struct {
+		implementationName string
+		method             string
+	}{
+		{"nativeClient", "get"},
+		{"nativeClient", "Get"},
+		{"nativeClient", "GET"},
+		{"nativeClient", "GeT"},
+		{"nativeClient", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				const port int = 9123
+				ctx := getCtx()
+
+				testServer, err := httputils.GetTestWebServer(port)
+				require.NoError(t, err)
+				defer testServer.Stop(ctx)
+
+				err = testServer.StartInBackground(ctx)
+				require.NoError(t, err)
+
+				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+
+				// Compared to other test cases the port is set here:
+				err = client.SetPort(mustutils.Must(testServer.GetPort()))
+				require.NoError(t, err)
+
+				var response httputilsinterfaces.Response
+				response, err = client.SendRequest(
+					ctx,
+					&httputilsparameteroptions.RequestOptions{
+						Url:    "http://localhost",
+						Method: tt.method,
+						// Setting the port on the client itself makes it obsolete to set it here for every request.
+					},
+				)
+				require.NoError(t, err)
+
+				require.True(t, response.IsStatusCode200Ok())
+			},
+		)
+	}
+}
+
 
 func TestClient_GetRequestBodyAsString_RootPage_PortInUrl(t *testing.T) {
 	tests := []struct {
