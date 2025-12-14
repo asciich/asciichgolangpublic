@@ -17,10 +17,12 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/urlsutils"
 )
 
 // HTTP client written using native go http implementation.
 type NativeClient struct {
+	port int
 }
 
 // Get the HTTP client written using native go http implementation.
@@ -61,6 +63,20 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httputil
 		return nil, err
 	}
 
+	if requestOptions.Port != 0 {
+		url, err = urlsutils.SetPort(url, requestOptions.Port)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		if c.port != 0 {
+			url, err = urlsutils.SetPort(url, c.port)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
 	method, err := requestOptions.GetMethodOrDefault()
 	if err != nil {
 		return nil, err
@@ -75,7 +91,7 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httputil
 		return nil, err
 	}
 
-	for k,v := range requestOptions.Header {
+	for k, v := range requestOptions.Header {
 		request.Header.Set(k, v)
 	}
 
@@ -268,4 +284,14 @@ func (n *NativeClient) DownloadAsTemporaryFile(ctx context.Context, downloadOpti
 	toUse.OverwriteExisting = true
 
 	return n.DownloadAsFile(ctx, toUse)
+}
+
+func (n *NativeClient) SetPort(port int) (error) {
+	if port <= 0 {
+		return tracederrors.TracedErrorf("Invalid port '%d'", port)
+	}
+
+	n.port = port
+
+	return nil
 }
