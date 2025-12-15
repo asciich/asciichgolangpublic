@@ -217,6 +217,11 @@ func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 		io.WriteString(w, `{"hello": "world"}`)
 	})
 
+	basicAuthExample := NewBasicAuthExample()
+	t.mux.HandleFunc("/basicauth/index.html", basicAuthExample.IndexHtml)
+	t.mux.HandleFunc("/basicauth/credentials.json", basicAuthExample.CredentialsJson)
+	t.mux.HandleFunc("/basicauth/protected.txt", basicAuthExample.Protected)
+
 	t.server = &http.Server{
 		Addr:      ":" + strconv.Itoa(port),
 		Handler:   t.mux,

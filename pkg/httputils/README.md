@@ -4,6 +4,7 @@ High level easy to use HTTP client and testserver.
 
 ## Examples
 
+* [BasicAuth protection for http endpoints](basicauth/README.md)
 * [Download as file](Example_DownloadAsFile_test.go)
 * [GET request](Example_PerformGetRequest_test.go)
 * [GET request of a nonexisting page: 404 not found](Example_PerformGetRequest404_test.go)
