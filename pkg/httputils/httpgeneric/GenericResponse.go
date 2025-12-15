@@ -1,6 +1,8 @@
-package httputilsimplementationindependend
+package httpgeneric
 
 import (
+	"net/http"
+
 	"github.com/asciich/asciichgolangpublic/pkg/fileformats/jsonutils"
 	"github.com/asciich/asciichgolangpublic/pkg/fileformats/yamlutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -86,7 +88,7 @@ func (g *GenericResponse) IsStatusCode(expectedStatusCode int) bool {
 }
 
 func (g *GenericResponse) IsStatusCode200Ok() bool {
-	return g.IsStatusCode(STATUS_CODE_OK)
+	return g.IsStatusCode(http.StatusOK)
 }
 
 func (g *GenericResponse) SetBody(body []byte) (err error) {

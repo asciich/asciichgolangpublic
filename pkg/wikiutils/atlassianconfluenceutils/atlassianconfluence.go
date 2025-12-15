@@ -17,7 +17,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/urlsutils"
@@ -117,7 +117,7 @@ func GetChildPageIds(ctx context.Context, url string, options *GetChildPageOptio
 	requestUrl := baseUrl + "/rest/api/content/" + pageId + "/child/page"
 	logging.LogInfoByCtxf(ctx, "Use atlassian confluence api url %s to retrieve the pages child pages.", requestUrl)
 
-	response, err := httputils.SendRequestAndGetBodyAsString(ctx, &httputilsparameteroptions.RequestOptions{
+	response, err := httputils.SendRequestAndGetBodyAsString(ctx, &httpoptions.RequestOptions{
 		Url:    requestUrl,
 		Method: "GET",
 		Header: header,
@@ -178,7 +178,7 @@ func GetBodyStorageRawApiResponse(ctx context.Context, url string) (string, erro
 	requestUrl := baseUrl + "/rest/api/content/" + pageId + "?expand=body.storage"
 	logging.LogInfoByCtxf(ctx, "Use atlassian confluence api url %s to retrieve the page content.", requestUrl)
 
-	response, err := httputils.SendRequestAndGetBodyAsString(ctx, &httputilsparameteroptions.RequestOptions{
+	response, err := httputils.SendRequestAndGetBodyAsString(ctx, &httpoptions.RequestOptions{
 		Url:    requestUrl,
 		Method: "GET",
 		Header: header,
@@ -226,7 +226,7 @@ func GetRequest(ctx context.Context, url string) (string, error) {
 		return "", err
 	}
 
-	response, err := httputils.SendRequest(ctx, &httputilsparameteroptions.RequestOptions{
+	response, err := httputils.SendRequest(ctx, &httpoptions.RequestOptions{
 		Url:    url,
 		Method: "GET",
 		Header: header,

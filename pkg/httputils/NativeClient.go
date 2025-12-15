@@ -12,9 +12,9 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/urlsutils"
@@ -36,7 +36,7 @@ func NewNativeClient() (n *NativeClient) {
 	return new(NativeClient)
 }
 
-func (c *NativeClient) SendRequestAndRunYqQueryAgainstBody(ctx context.Context, requestOptions *httputilsparameteroptions.RequestOptions, query string) (result string, err error) {
+func (c *NativeClient) SendRequestAndRunYqQueryAgainstBody(ctx context.Context, requestOptions *httpoptions.RequestOptions, query string) (result string, err error) {
 	if requestOptions == nil {
 		return "", tracederrors.TracedErrorNil("requestOptions")
 	}
@@ -53,7 +53,7 @@ func (c *NativeClient) SendRequestAndRunYqQueryAgainstBody(ctx context.Context, 
 	return response.RunYqQueryAgainstBody(query)
 }
 
-func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httputilsparameteroptions.RequestOptions) (response httputilsinterfaces.Response, err error) {
+func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httpoptions.RequestOptions) (response httputilsinterfaces.Response, err error) {
 	if requestOptions == nil {
 		return nil, tracederrors.TracedErrorNil("requestOptions")
 	}
@@ -101,7 +101,7 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httputil
 	}
 	defer nativeResponse.Body.Close()
 
-	response = httputilsimplementationindependend.NewGenericResponse()
+	response = httpgeneric.NewGenericResponse()
 	body, err := io.ReadAll(nativeResponse.Body)
 	if err != nil {
 		return nil, tracederrors.TracedErrorf("Unable to read body as bytes: %w", err)
@@ -117,7 +117,7 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httputil
 		return nil, err
 	}
 
-	err = response.CheckStatusCode(httputilsimplementationindependend.STATUS_CODE_OK)
+	err = response.CheckStatusCode(http.StatusOK)
 	if err != nil {
 		return response, err
 	}
@@ -125,7 +125,7 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httputil
 	return response, err
 }
 
-func (c *NativeClient) SendRequestAndGetBodyAsString(ctx context.Context, requestOptions *httputilsparameteroptions.RequestOptions) (responseBody string, err error) {
+func (c *NativeClient) SendRequestAndGetBodyAsString(ctx context.Context, requestOptions *httpoptions.RequestOptions) (responseBody string, err error) {
 	if requestOptions == nil {
 		return "", tracederrors.TracedErrorNil("requestOptions")
 	}
@@ -138,7 +138,7 @@ func (c *NativeClient) SendRequestAndGetBodyAsString(ctx context.Context, reques
 	return response.GetBodyAsString()
 }
 
-func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *httputilsparameteroptions.DownloadAsFileOptions) (downloadedFile filesinterfaces.File, err error) {
+func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *httpoptions.DownloadAsFileOptions) (downloadedFile filesinterfaces.File, err error) {
 	if downloadOptions == nil {
 		return nil, tracederrors.TracedErrorNil("downloadOptions")
 	}
@@ -270,7 +270,7 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 	return downloadedFile, nil
 }
 
-func (n *NativeClient) DownloadAsTemporaryFile(ctx context.Context, downloadOptions *httputilsparameteroptions.DownloadAsFileOptions) (downloadedFile filesinterfaces.File, err error) {
+func (n *NativeClient) DownloadAsTemporaryFile(ctx context.Context, downloadOptions *httpoptions.DownloadAsFileOptions) (downloadedFile filesinterfaces.File, err error) {
 	if downloadOptions == nil {
 		return nil, tracederrors.TracedErrorNil("downloadOptions")
 	}
@@ -286,7 +286,7 @@ func (n *NativeClient) DownloadAsTemporaryFile(ctx context.Context, downloadOpti
 	return n.DownloadAsFile(ctx, toUse)
 }
 
-func (n *NativeClient) SetPort(port int) (error) {
+func (n *NativeClient) SetPort(port int) error {
 	if port <= 0 {
 		return tracederrors.TracedErrorf("Invalid port '%d'", port)
 	}

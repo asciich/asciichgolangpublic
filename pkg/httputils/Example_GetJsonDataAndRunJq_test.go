@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/testwebserver"
 )
 
@@ -33,7 +33,7 @@ func Test_Example_GetJsonDataAndRunJq(t *testing.T) {
 	// Use a get request to receive the YAML data:
 	response, err := httputils.SendRequest(
 		ctx,
-		&httputilsparameteroptions.RequestOptions{
+		&httpoptions.RequestOptions{
 			// Add the URL to request here:
 			Url: "http://localhost:9123/example1.json",
 

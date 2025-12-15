@@ -1,4 +1,4 @@
-package httputilsparameteroptions
+package httpoptions
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"

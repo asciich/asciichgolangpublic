@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/testwebserver"
 )
 
@@ -32,7 +32,7 @@ func Test_Example_PerformGetRequest(t *testing.T) {
 	// To perform a GET request use:
 	response, err := httputils.SendRequest(
 		ctx,
-		&httputilsparameteroptions.RequestOptions{
+		&httpoptions.RequestOptions{
 			// Add the URL to request here:
 			Url: "http://localhost:9123/hello_world.txt",
 
@@ -70,7 +70,7 @@ func Test_Example_PerformGetRequestAndGetBodyAsString(t *testing.T) {
 	// To perform a GET request use:
 	response, err := httputils.SendRequestAndGetBodyAsString(
 		ctx,
-		&httputilsparameteroptions.RequestOptions{
+		&httpoptions.RequestOptions{
 			// Add the URL to request here:
 			Url: "http://localhost:9123/hello_world.txt",
 

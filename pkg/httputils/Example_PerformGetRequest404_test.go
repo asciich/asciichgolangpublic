@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/testwebserver"
 )
 
@@ -31,7 +31,7 @@ func Test_Example_PerformGetRequest404(t *testing.T) {
 	// To perform a GET request use:
 	response, err := httputils.SendRequest(
 		ctx,
-		&httputilsparameteroptions.RequestOptions{
+		&httpoptions.RequestOptions{
 			// This URL does not exits:
 			Url: "http://localhost:9123/this-page-does-not-exist.txt",
 
@@ -41,7 +41,7 @@ func Test_Example_PerformGetRequest404(t *testing.T) {
 	)
 	// If the return value is not ok an error is returned:
 	require.Error(t, err)
-	require.ErrorIs(t, err, httputilsimplementationindependend.ErrUnexpectedStatusCode)
+	require.ErrorIs(t, err, httpgeneric.ErrUnexpectedStatusCode)
 
 	// Even the the return value was not ok the response is returned:
 	require.NotNil(t, response)
