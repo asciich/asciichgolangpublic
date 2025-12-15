@@ -12,6 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/testwebserver"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -51,7 +52,7 @@ func TestClient_GetRequest_RootPage_PortInUrl(t *testing.T) {
 				const port int = 9123
 				ctx := getCtx()
 
-				testServer, err := httputils.GetTestWebServer(port)
+				testServer, err := testwebserver.GetTestWebServer(port)
 				require.NoError(t, err)
 				defer testServer.Stop(ctx)
 
@@ -96,7 +97,7 @@ func TestClient_GetRequest_RootPage_PortInRequest(t *testing.T) {
 				const port int = 9123
 				ctx := getCtx()
 
-				testServer, err := httputils.GetTestWebServer(port)
+				testServer, err := testwebserver.GetTestWebServer(port)
 				require.NoError(t, err)
 				defer testServer.Stop(ctx)
 
@@ -143,7 +144,7 @@ func TestClient_GetRequest_RootPage_PortOnClientLevel(t *testing.T) {
 				const port int = 9123
 				ctx := getCtx()
 
-				testServer, err := httputils.GetTestWebServer(port)
+				testServer, err := testwebserver.GetTestWebServer(port)
 				require.NoError(t, err)
 				defer testServer.Stop(ctx)
 
@@ -193,7 +194,7 @@ func TestClient_GetRequestBodyAsString_RootPage_PortInUrl(t *testing.T) {
 				ctx := getCtx()
 				const port int = 9123
 
-				testServer, err := httputils.GetTestWebServer(port)
+				testServer, err := testwebserver.GetTestWebServer(port)
 				require.NoError(t, err)
 				defer testServer.Stop(ctx)
 
@@ -234,7 +235,7 @@ func TestClient_GetRequest_404_PortInUrl(t *testing.T) {
 				ctx := getCtx()
 				const port int = 9123
 
-				testServer, err := httputils.GetTestWebServer(port)
+				testServer, err := testwebserver.GetTestWebServer(port)
 				require.NoError(t, err)
 				defer testServer.Stop(ctx)
 
@@ -275,7 +276,7 @@ func TestClient_DownloadAsFile_ChecksumMismatch(t *testing.T) {
 				ctx := getCtx()
 				const port int = 9123
 
-				testServer, err := httputils.GetTestWebServer(port)
+				testServer, err := testwebserver.GetTestWebServer(port)
 				require.NoError(t, err)
 				defer testServer.Stop(ctx)
 
@@ -322,7 +323,7 @@ func TestClient_DownloadAsFile(t *testing.T) {
 				const port int = 9123
 				ctx := getCtx()
 
-				testServer, err := httputils.GetTestWebServer(port)
+				testServer, err := testwebserver.GetTestWebServer(port)
 				require.NoError(t, err)
 				defer testServer.Stop(ctx)
 
@@ -385,7 +386,7 @@ func TestClient_DownloadAsTempraryFile(t *testing.T) {
 				ctx := getCtx()
 				const port int = 9123
 
-				testServer, err := httputils.GetTestWebServer(port)
+				testServer, err := testwebserver.GetTestWebServer(port)
 				require.NoError(t, err)
 				defer testServer.Stop(ctx)
 
@@ -426,7 +427,7 @@ func TestClient_GetRequestAndRunYqQuery(t *testing.T) {
 				ctx := getCtx()
 				const port int = 9123
 
-				testServer, err := httputils.GetTestWebServer(port)
+				testServer, err := testwebserver.GetTestWebServer(port)
 				require.NoError(t, err)
 				defer testServer.Stop(ctx)
 
@@ -465,7 +466,7 @@ func TestClient_GetRequestUsingTls_insecure(t *testing.T) {
 				ctx := getCtx()
 				const port int = 9123
 
-				testServer := mustutils.Must(httputils.GetTlsTestWebServer(ctx, port))
+				testServer := mustutils.Must(testwebserver.GetTlsTestWebServer(ctx, port))
 				defer testServer.Stop(ctx)
 
 				err := testServer.StartInBackground(ctx)

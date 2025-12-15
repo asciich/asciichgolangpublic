@@ -86,7 +86,7 @@ func WaitPortAvailableForListening(ctx context.Context, port int) error {
 	for {
 		err := ctx.Err()
 		if err != nil {
-			return tracederrors.TracedErrorf("Wait for port %d avaialbe for listening failed: %w", port, err)
+			return tracederrors.TracedErrorf("Wait for port %d available for listening failed: %w", port, err)
 		}
 
 		isAvailable, err := IsTcpPortAvailableForListening(contextutils.WithSilent(ctx), port)
