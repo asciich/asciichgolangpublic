@@ -1,4 +1,4 @@
-package httputils
+package testwebserver
 
 import (
 	"context"
@@ -18,7 +18,12 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/netutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+
+	_ "embed"
 )
+
+//go:embed data/testwebserver_index.html
+var testwebserverIndexHtml string
 
 // A simple webserver mostly used for testing.
 type TestWebServer struct {
@@ -197,7 +202,7 @@ func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 			return
 		}
 
-		io.WriteString(w, "TestWebServer main page\n")
+		io.WriteString(w, testwebserverIndexHtml)
 	})
 
 	t.mux.HandleFunc("/hello_world.txt", func(w http.ResponseWriter, r *http.Request) {

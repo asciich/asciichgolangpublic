@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/testwebserver"
 )
 
 // This example shows how to perform a download to a file
@@ -19,7 +20,7 @@ func Test_Example_DownloadAsFile(t *testing.T) {
 
 	// Initialize the test web server:
 	const port int = 9123
-	testServer, err := httputils.GetTestWebServer(port)
+	testServer, err := testwebserver.GetTestWebServer(port)
 	require.NoError(t, err)
 	defer testServer.Stop(ctx)
 	err = testServer.StartInBackground(ctx)

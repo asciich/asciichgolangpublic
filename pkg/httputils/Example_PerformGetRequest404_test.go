@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/testwebserver"
 )
 
 // This example shows how a 404 response of the webserver is handled.
@@ -20,7 +21,7 @@ func Test_Example_PerformGetRequest404(t *testing.T) {
 
 	// Initialize the test web server:
 	const port int = 9123
-	testServer, err := httputils.GetTestWebServer(port)
+	testServer, err := testwebserver.GetTestWebServer(port)
 	require.NoError(t, err)
 	defer testServer.Stop(ctx)
 	err = testServer.StartInBackground(ctx)

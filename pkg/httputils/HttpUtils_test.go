@@ -1,11 +1,17 @@
 package httputils_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func Test_WithDownloadProgress(t *testing.T) {
 	t.Run("nil", func(t *testing.T) {
