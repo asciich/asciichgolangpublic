@@ -17,4 +17,7 @@ type Client interface {
 	// Set the port of the webserver to use for all requests.
 	// Setting the port on the client simplyfies the requests as it has to be set only once.
 	SetPort(port int) error
+
+	// Set the basic auth authentication to use for all requests.
+	SetBasicAuth(*httpoptions.BasicAuth) error
 }

@@ -22,7 +22,8 @@ import (
 
 // HTTP client written using native go http implementation.
 type NativeClient struct {
-	port int
+	port      int
+	basicAuth *httpoptions.BasicAuth
 }
 
 // Get the HTTP client written using native go http implementation.
@@ -89,6 +90,14 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httpopti
 	request, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	if requestOptions.BasicAuth != nil {
+		request.Header.Set("Authorization", requestOptions.BasicAuth.AuthorizationValue())
+	} else {
+		if c.basicAuth != nil {
+			request.Header.Set("Authorization", c.basicAuth.AuthorizationValue())
+		}
 	}
 
 	for k, v := range requestOptions.Header {
@@ -292,6 +301,16 @@ func (n *NativeClient) SetPort(port int) error {
 	}
 
 	n.port = port
+
+	return nil
+}
+
+func (n *NativeClient) SetBasicAuth(basicAuth *httpoptions.BasicAuth) error {
+	if basicAuth == nil {
+		return tracederrors.TracedErrorNil("basicAuth")
+	}
+
+	n.basicAuth = basicAuth
 
 	return nil
 }

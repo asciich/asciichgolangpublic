@@ -22,6 +22,9 @@ type RequestOptions struct {
 
 	// The headers to send
 	Header map[string]string
+
+	// Use the provided credentials for BasicAuth authentication:
+	BasicAuth *BasicAuth
 }
 
 func NewRequestOptions() (r *RequestOptions) {

@@ -43,7 +43,6 @@ func Test_Example_PerformGetRequest(t *testing.T) {
 	require.NoError(t, err)
 
 	// To access the response body/ payload as string use:
-	// Hint: There is the function SendR
 	body, err := response.GetBodyAsString()
 	require.NoError(t, err)
 
