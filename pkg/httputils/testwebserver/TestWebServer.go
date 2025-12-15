@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsimplementationindependend"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils"
@@ -180,7 +180,7 @@ func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 	if t.webServerWaitGroup == nil {
 		t.webServerWaitGroup = new(sync.WaitGroup)
 	} else {
-		return tracederrors.TracedError(httputilsimplementationindependend.ErrWebServerAlreadyRunning)
+		return tracederrors.TracedError(httpgeneric.ErrWebServerAlreadyRunning)
 	}
 
 	t.mux = http.NewServeMux()

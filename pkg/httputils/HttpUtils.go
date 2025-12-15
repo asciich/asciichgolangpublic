@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func SendRequest(ctx context.Context, requestOptions *httputilsparameteroptions.RequestOptions) (httputilsinterfaces.Response, error) {
+func SendRequest(ctx context.Context, requestOptions *httpoptions.RequestOptions) (httputilsinterfaces.Response, error) {
 	if requestOptions == nil {
 		return nil, tracederrors.TracedErrorNil("requestOptions")
 	}
@@ -17,7 +17,7 @@ func SendRequest(ctx context.Context, requestOptions *httputilsparameteroptions.
 	return GetNativeClient().SendRequest(ctx, requestOptions)
 }
 
-func SendRequestAndGetBodyAsString(ctx context.Context, requestOptions *httputilsparameteroptions.RequestOptions) (response string, err error) {
+func SendRequestAndGetBodyAsString(ctx context.Context, requestOptions *httpoptions.RequestOptions) (response string, err error) {
 	if requestOptions == nil {
 		return "", tracederrors.TracedErrorNil("requestOptions")
 	}
@@ -25,7 +25,7 @@ func SendRequestAndGetBodyAsString(ctx context.Context, requestOptions *httputil
 	return GetNativeClient().SendRequestAndGetBodyAsString(ctx, requestOptions)
 }
 
-func DownloadAsFile(ctx context.Context, options *httputilsparameteroptions.DownloadAsFileOptions) (downloadedFile filesinterfaces.File, err error) {
+func DownloadAsFile(ctx context.Context, options *httpoptions.DownloadAsFileOptions) (downloadedFile filesinterfaces.File, err error) {
 	return GetNativeClient().DownloadAsFile(ctx, options)
 }
 

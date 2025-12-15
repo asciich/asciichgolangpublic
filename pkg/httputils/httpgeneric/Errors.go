@@ -1,4 +1,4 @@
-package httputilsimplementationindependend
+package httpgeneric
 
 import "errors"
 
