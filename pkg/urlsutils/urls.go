@@ -9,13 +9,13 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func CheckIsUrl(url string) (isUrl bool, err error) {
-	isUrl = IsUrl(url)
+func CheckIsUrl(url string) (err error) {
+	isUrl := IsUrl(url)
 	if !isUrl {
-		return false, tracederrors.TracedErrorf("'%s' is not an URL.", url)
+		return tracederrors.TracedErrorf("'%s' is not an URL.", url)
 	}
 
-	return isUrl, nil
+	return nil
 }
 
 func IsUrl(url string) (isUrl bool) {
@@ -74,6 +74,19 @@ func SetPort(inputUrl string, port int) (string, error) {
 	hostname := u.Hostname()
 	newHost := hostname + ":" + strconv.Itoa(port)
 	u.Host = newHost
-	newUrl := u.String()
-	return newUrl, nil
+	return u.String(), nil
+}
+
+func SetPath(inputUrl string, path string) (string, error) {
+	if inputUrl == "" {
+		return "", tracederrors.TracedErrorEmptyString("inputUrl")
+	}
+
+	u, err := url.Parse(inputUrl)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Failed to parse as url: %w", err)
+	}
+
+	u.Path = path
+	return u.String(), nil
 }

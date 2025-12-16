@@ -22,6 +22,7 @@ import (
 
 // HTTP client written using native go http implementation.
 type NativeClient struct {
+	baseUrl   string
 	port      int
 	basicAuth *httpoptions.BasicAuth
 }
@@ -59,9 +60,24 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httpopti
 		return nil, tracederrors.TracedErrorNil("requestOptions")
 	}
 
-	url, err := requestOptions.GetUrl()
-	if err != nil {
-		return nil, err
+	url := c.baseUrl
+
+	if url == "" {
+		url, err = requestOptions.GetUrl()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if requestOptions.Path != "" {
+		url, err = urlsutils.SetPath(url, requestOptions.Path)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if url == "" {
+		return nil, tracederrors.TracedError("url is empty string after evaluation")
 	}
 
 	if requestOptions.Port != 0 {
@@ -311,6 +327,17 @@ func (n *NativeClient) SetBasicAuth(basicAuth *httpoptions.BasicAuth) error {
 	}
 
 	n.basicAuth = basicAuth
+
+	return nil
+}
+
+func (n *NativeClient) SetBaseUrl(baseUrl string) error {
+	err := urlsutils.CheckIsUrl(baseUrl)
+	if err != nil {
+		return err
+	}
+
+	n.baseUrl = baseUrl
 
 	return nil
 }

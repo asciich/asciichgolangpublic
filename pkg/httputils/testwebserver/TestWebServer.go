@@ -209,6 +209,10 @@ func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 		io.WriteString(w, "hello world\n")
 	})
 
+	t.mux.HandleFunc("/hello_world2.txt", func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, "hello world2\n")
+	})
+
 	t.mux.HandleFunc("/example1.yaml", func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "---\nhello: world\n")
 	})

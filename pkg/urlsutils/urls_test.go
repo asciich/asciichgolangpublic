@@ -107,3 +107,43 @@ func TestSetPort(t *testing.T) {
 		})
 	}
 }
+
+
+
+func TestSetPath(t *testing.T) {
+	tests := []struct {
+		url      string
+		path     string
+		expected string
+	}{
+		{"https://example.com", "", "https://example.com"},
+		{"https://example.com/", "", "https://example.com"},
+		{"https://example.com/this", "", "https://example.com"},
+		{"https://example.com/this/", "", "https://example.com"},
+		{"https://example.com/this/will", "", "https://example.com"},
+		{"https://example.com/this/will/", "", "https://example.com"},
+		{"https://example.com/this/will/be", "", "https://example.com"},
+		{"https://example.com/this/will/be/", "", "https://example.com"},
+		{"https://example.com/this/will/be/removed", "", "https://example.com"},
+		{"https://example.com", "/", "https://example.com/"},
+		{"https://example.com:443", "", "https://example.com:443"},
+		{"https://example.com:443", "/", "https://example.com:443/"},
+		{"https://example.com/this/will/be/overwritten", "by/this", "https://example.com/by/this"},
+		{"https://example.com/this/will/be/overwritten", "/by/this", "https://example.com/by/this"},
+		{"https://example.com:8443/this/will/be/overwritten", "by/this", "https://example.com:8443/by/this"},
+		{"https://example.com:8443/this/will/be/overwritten", "/by/this", "https://example.com:8443/by/this"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.expected, func(t *testing.T) {
+			got, err := urlsutils.SetPath(tt.url, tt.path)
+			require.NoError(t, err)
+			require.EqualValues(t, tt.expected, got)
+		})
+	}
+
+	t.Run("empty URL", func(t *testing.T) {
+		got, err := urlsutils.SetPath("", "")
+		require.Error(t, err)
+		require.EqualValues(t, "", got)
+	})
+}
