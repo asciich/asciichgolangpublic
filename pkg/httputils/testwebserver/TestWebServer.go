@@ -221,6 +221,8 @@ func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 	t.mux.HandleFunc("/basicauth/index.html", basicAuthExample.IndexHtml)
 	t.mux.HandleFunc("/basicauth/credentials.json", basicAuthExample.CredentialsJson)
 	t.mux.HandleFunc("/basicauth/protected.txt", basicAuthExample.Protected)
+	t.mux.HandleFunc("/basicauth/username", basicAuthExample.GetUsername)
+	t.mux.HandleFunc("/basicauth/password", basicAuthExample.GetPassword)
 
 	t.server = &http.Server{
 		Addr:      ":" + strconv.Itoa(port),

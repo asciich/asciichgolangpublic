@@ -59,3 +59,11 @@ func (b *BasicAuthExample) Protected(w http.ResponseWriter, r *http.Request) {
 	}
 	basicauth.BasicAuthSingleCredentials(protectedEndpoint, b.Username, b.Password)(w, r)
 }
+
+func (b *BasicAuthExample) GetUsername(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte(b.Username))
+}
+
+func (b *BasicAuthExample) GetPassword(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte(b.Password))
+}
