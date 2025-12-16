@@ -18,6 +18,35 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
+
+func RunCommandAndGetStdoutAsBytes(ctx context.Context, options *parameteroptions.RunCommandOptions) ([]byte, error) {
+	output, err := RunCommand(ctx, options)
+	if err != nil {
+		return nil, err
+	}
+
+	stdout, err := output.GetStdoutAsBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	return stdout, nil
+}
+
+func RunCommandAndGetStdoutAsString(ctx context.Context, options *parameteroptions.RunCommandOptions) (string, error) {
+	output, err := RunCommand(ctx, options)
+	if err != nil {
+		return "", err
+	}
+
+	stdout, err := output.GetStdoutAsString()
+	if err != nil {
+		return "", err
+	}
+
+	return stdout, nil
+}
+
 func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")

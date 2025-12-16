@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
@@ -80,8 +81,8 @@ func (c *GopassCredential) GetAsBytes(ctx context.Context) (credential []byte, e
 
 	logging.LogInfoByCtxf(ctx, "Get gopass credential '%s' started.", name)
 
-	credential, err = commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsBytes(
-		contextutils.ContextSilent(),
+	credential, err = commandexecutorexec.RunCommandAndGetStdoutAsBytes(
+		contextutils.WithSilent(ctx),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"gopass", "cat", name},
 		})

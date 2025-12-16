@@ -15,6 +15,10 @@ func getCtx() context.Context {
 	return contextutils.ContextVerbose()
 }
 
+// Run a simple command and check the output.
+//
+// Hint: For convenience there is a RunCommandAndGetStdoutAsString() function available
+//       in case only stdout is needed after a successful exec.
 func TestExecRunCommand(t *testing.T) {
 	tests := []struct {
 		command        []string
@@ -84,6 +88,69 @@ func TestExecRunCommandStdin(t *testing.T) {
 				stdout, err := output.GetStdoutAsString()
 				require.NoError(t, err)
 				require.EqualValues(t, tt.expectedOutput, stdout)
+			},
+		)
+	}
+}
+
+// Test the convenience function RunCommandAndgetStdoutAsString to directly get the
+// stdout after a successful exec.
+func TestExecRunCommandAndGetStdoutAsString(t *testing.T) {
+	tests := []struct {
+		command        []string
+		expectedOutput string
+	}{
+		{[]string{"echo", "hello"}, "hello\n"},
+		{[]string{"echo", "hello world"}, "hello world\n"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+
+				stdout, err := commandexecutorexec.RunCommandAndGetStdoutAsString(
+					ctx,
+					&parameteroptions.RunCommandOptions{
+						Command: tt.command,
+					},
+				)
+				require.NoError(t, err)
+
+				require.EqualValues(t, tt.expectedOutput, stdout)
+			},
+		)
+	}
+}
+
+
+// Test the convenience function RunCommandAndgetStdoutAsString to directly get the
+// stdout after a successful exec.
+func TestExecRunCommandAndGetStdoutAsBytes(t *testing.T) {
+	tests := []struct {
+		command        []string
+		expectedOutput string
+	}{
+		{[]string{"echo", "hello"}, "hello\n"},
+		{[]string{"echo", "hello world"}, "hello world\n"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+
+				stdout, err := commandexecutorexec.RunCommandAndGetStdoutAsBytes(
+					ctx,
+					&parameteroptions.RunCommandOptions{
+						Command: tt.command,
+					},
+				)
+				require.NoError(t, err)
+
+				require.EqualValues(t, []byte(tt.expectedOutput), stdout)
 			},
 		)
 	}
