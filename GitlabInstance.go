@@ -172,7 +172,7 @@ func (g *GitlabInstance) Authenticate(ctx context.Context, authOptions *GitlabAu
 
 		getSecretOptions := parameteroptions.NewGopassSecretOptions()
 		getSecretOptions.SetSecretPath(gopassPath)
-		accessToken, err := gopassutils.GetCredentialValueAsString(getSecretOptions)
+		accessToken, err := gopassutils.GetCredentialValueAsString(ctx, getSecretOptions)
 		if err != nil {
 			return err
 		}

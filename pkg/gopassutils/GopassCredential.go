@@ -72,11 +72,13 @@ func (c *GopassCredential) Exists() (exists bool, err error) {
 	return stderr == "", nil
 }
 
-func (c *GopassCredential) GetAsBytes() (credential []byte, err error) {
+func (c *GopassCredential) GetAsBytes(ctx context.Context) (credential []byte, err error) {
 	name, err := c.GetName()
 	if err != nil {
 		return nil, err
 	}
+
+	logging.LogInfoByCtxf(ctx, "Get gopass credential '%s' started.", name)
 
 	credential, err = commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsBytes(
 		contextutils.ContextSilent(),
@@ -87,11 +89,13 @@ func (c *GopassCredential) GetAsBytes() (credential []byte, err error) {
 		return nil, err
 	}
 
+	logging.LogInfoByCtxf(ctx, "Get gopass credential '%s' finished.", name)
+
 	return credential, nil
 }
 
-func (c *GopassCredential) GetAsInt() (value int, err error) {
-	valueString, err := c.GetAsString()
+func (c *GopassCredential) GetAsInt(ctx context.Context) (value int, err error) {
+	valueString, err := c.GetAsString(ctx)
 	if err != nil {
 		return -1, err
 	}
@@ -106,8 +110,8 @@ func (c *GopassCredential) GetAsInt() (value int, err error) {
 	return value, nil
 }
 
-func (c *GopassCredential) GetAsString() (credential string, err error) {
-	credentialBytes, err := c.GetAsBytes()
+func (c *GopassCredential) GetAsString(ctx context.Context) (credential string, err error) {
+	credentialBytes, err := c.GetAsBytes(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -125,8 +129,8 @@ func (c *GopassCredential) GetName() (name string, err error) {
 	return c.name, nil
 }
 
-func (c *GopassCredential) GetSslCertificate() (sslCert *x509utils.X509Certificate, err error) {
-	contentBytes, err := c.GetAsBytes()
+func (c *GopassCredential) GetSslCertificate(ctx context.Context) (sslCert *x509utils.X509Certificate, err error) {
+	contentBytes, err := c.GetAsBytes(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -140,8 +144,8 @@ func (c *GopassCredential) GetSslCertificate() (sslCert *x509utils.X509Certifica
 	return sslCert, nil
 }
 
-func (c *GopassCredential) IncrementIntValue() (err error) {
-	currentValue, err := c.GetAsInt()
+func (c *GopassCredential) IncrementIntValue(ctx context.Context) (err error) {
+	currentValue, err := c.GetAsInt(ctx)
 	if err != nil {
 		return err
 	}
@@ -209,7 +213,7 @@ func (c *GopassCredential) WriteIntoFile(ctx context.Context, outputFile filesin
 		return tracederrors.TracedError("outputFile is nil")
 	}
 
-	contentBytes, err := c.GetAsBytes()
+	contentBytes, err := c.GetAsBytes(ctx)
 	if err != nil {
 		return err
 	}

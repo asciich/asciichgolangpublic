@@ -61,7 +61,7 @@ func Generate(ctx context.Context, credentialName string) (generatedCredential *
 	return credential, nil
 }
 
-func GetCredential(getOptions *parameteroptions.GopassSecretOptions) (credential *GopassCredential, err error) {
+func GetCredential(ctx context.Context, getOptions *parameteroptions.GopassSecretOptions) (credential *GopassCredential, err error) {
 	if getOptions == nil {
 		return nil, tracederrors.TracedError("getOptions is nil")
 	}
@@ -129,17 +129,17 @@ func GetCredentialNameList() (credentialNames []string, err error) {
 	return credentialNames, nil
 }
 
-func GetCredentialValueAsString(getOptions *parameteroptions.GopassSecretOptions) (credentialValue string, err error) {
+func GetCredentialValueAsString(ctx context.Context, getOptions *parameteroptions.GopassSecretOptions) (credentialValue string, err error) {
 	if getOptions == nil {
 		return "", tracederrors.TracedError("getOptions is nil")
 	}
 
-	credential, err := GetCredential(getOptions)
+	credential, err := GetCredential(ctx, getOptions)
 	if err != nil {
 		return
 	}
 
-	credentialValue, err = credential.GetAsString()
+	credentialValue, err = credential.GetAsString(ctx)
 	if err != nil {
 		return
 	}
@@ -147,12 +147,13 @@ func GetCredentialValueAsString(getOptions *parameteroptions.GopassSecretOptions
 	return credentialValue, nil
 }
 
-func GetCredentialValueAsStringByPath(secretPath string) (secretValue string, err error) {
+func GetCredentialValueAsStringByPath(ctx context.Context, secretPath string) (secretValue string, err error) {
 	if secretPath == "" {
 		return "", tracederrors.TracedError("secretPath is empty string")
 	}
 
 	secretValue, err = GetCredentialValueAsString(
+		ctx,
 		&parameteroptions.GopassSecretOptions{
 			SecretPath: secretPath,
 		},
@@ -164,12 +165,13 @@ func GetCredentialValueAsStringByPath(secretPath string) (secretValue string, er
 	return secretValue, nil
 }
 
-func GetCredentialValueOrEmptyIfUnsetAsStringByPath(secretPath string) (credentialValue string, err error) {
+func GetCredentialValueOrEmptyIfUnsetAsStringByPath(ctx context.Context, secretPath string) (credentialValue string, err error) {
 	if secretPath == "" {
 		return "", tracederrors.TracedErrorEmptyString(secretPath)
 	}
 
 	credential, err := GetCredential(
+		ctx,
 		&parameteroptions.GopassSecretOptions{
 			SecretPath: secretPath,
 		},
@@ -187,7 +189,7 @@ func GetCredentialValueOrEmptyIfUnsetAsStringByPath(secretPath string) (credenti
 		return "", nil
 	}
 
-	credentialValue, err = credential.GetAsString()
+	credentialValue, err = credential.GetAsString(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -200,7 +202,7 @@ func GetPrivateKey(ctx context.Context, getOptions *parameteroptions.GopassSecre
 		return nil, tracederrors.TracedError("getOptions is nil")
 	}
 
-	credential, err := GetCredentialValueAsString(getOptions)
+	credential, err := GetCredentialValueAsString(ctx, getOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +220,7 @@ func GetSslCertificate(ctx context.Context, getOptions *parameteroptions.GopassS
 		return nil, tracederrors.TracedError("getOptions is nil")
 	}
 
-	credential, err := GetCredentialValueAsString(getOptions)
+	credential, err := GetCredentialValueAsString(ctx, getOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -492,7 +494,7 @@ func WriteSecretIntoTemporaryFile(ctx context.Context, getOptions *parameteropti
 		return nil, tracederrors.TracedError("getOptions is nil")
 	}
 
-	credential, err := GetCredential(getOptions)
+	credential, err := GetCredential(ctx, getOptions)
 	if err != nil {
 		return nil, err
 	}
