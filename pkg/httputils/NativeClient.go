@@ -103,10 +103,13 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httpopti
 	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: requestOptions.SkipTLSvalidation}
 
 	client := http.Client{Transport: customTransport}
+
 	request, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		return nil, err
 	}
+
+	logging.LogInfoByCtxf(ctx, "http native client is used to send request to %s", request.URL.String())
 
 	if requestOptions.BasicAuth != nil {
 		request.Header.Set("Authorization", requestOptions.BasicAuth.AuthorizationValue())
