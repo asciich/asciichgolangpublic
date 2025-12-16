@@ -8,7 +8,12 @@ import (
 
 type RequestOptions struct {
 	// Url to request
+	// For a simple single request you can add a full URL here like:
+	//   https://example.com:8443/page.html
 	Url string
+
+	// The Path to request.
+	Path string
 
 	// Port to use.
 	// Overrides the port defined in URL if specified.
