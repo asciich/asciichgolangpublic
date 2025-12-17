@@ -544,15 +544,6 @@ func (l *LocalFile) MustGetUriAsString() (uri string) {
 	return uri
 }
 
-func (l *LocalFile) MustMoveToPath(path string, useSudo bool, verbose bool) (movedFile filesinterfaces.File) {
-	movedFile, err := l.MoveToPath(path, useSudo, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return movedFile
-}
-
 func (l *LocalFile) MustReadAsBytes() (content []byte) {
 	content, err := l.ReadAsBytes()
 	if err != nil {
