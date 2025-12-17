@@ -43,10 +43,12 @@ func GetVerbosityContextByBool(verbose bool) (ctx context.Context) {
 	return ContextSilent()
 }
 
+// context.Background() with verbose output enabled.
 func ContextVerbose() (ctx context.Context) {
 	return context.WithValue(context.Background(), "verbose", true)
 }
 
+// context.Background() with verbose output explicitly disabled.
 func ContextSilent() (ctx context.Context) {
 	return context.WithValue(context.Background(), "verbose", false)
 }
