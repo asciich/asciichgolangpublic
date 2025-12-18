@@ -789,15 +789,6 @@ func (c *CommandExecutorFile) MustIsRunningOnLocalhost() (isRunningOnLocalhost b
 	return isRunningOnLocalhost
 }
 
-func (c *CommandExecutorFile) MustMoveToPath(path string, useSudo bool, verbose bool) (movedFile filesinterfaces.File) {
-	movedFile, err := c.MoveToPath(path, useSudo, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return movedFile
-}
-
 func (c *CommandExecutorFile) MustReadAsBytes() (content []byte) {
 	content, err := c.ReadAsBytes()
 	if err != nil {
