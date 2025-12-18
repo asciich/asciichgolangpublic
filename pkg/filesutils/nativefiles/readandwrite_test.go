@@ -19,7 +19,7 @@ func Test_ReadAndWriteAsString(t *testing.T) {
 		err = nativefiles.WriteString(ctx, tmpPath, "hello world")
 		require.NoError(t, err)
 
-		content, err := nativefiles.ReadAsString(ctx, tmpPath)
+		content, err := nativefiles.ReadAsString(ctx, tmpPath, &filesoptions.ReadOptions{})
 		require.NoError(t, err)
 
 		require.EqualValues(t, "hello world", content)

@@ -64,7 +64,7 @@ func TestCreateTemporaryFile(t *testing.T) {
 				exists := nativefiles.Exists(ctx, tmpFilePath)
 				require.True(t, exists)
 
-				got, err := nativefiles.ReadAsString(ctx, tmpFilePath)
+				got, err := nativefiles.ReadAsString(ctx, tmpFilePath, &filesoptions.ReadOptions{})
 				require.NoError(t, err)
 				require.EqualValues(t, tt.content, got)
 			},

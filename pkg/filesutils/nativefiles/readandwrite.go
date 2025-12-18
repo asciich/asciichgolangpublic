@@ -4,7 +4,10 @@ import (
 	"context"
 	"os"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -42,14 +45,34 @@ func WriteBytes(ctx context.Context, pathToWrite string, content []byte) error {
 	return nil
 }
 
-func ReadAsString(ctx context.Context, pathToRead string) (string, error) {
+func ReadAsString(ctx context.Context, pathToRead string, options *filesoptions.ReadOptions) (string, error) {
 	if pathToRead == "" {
 		return "", tracederrors.TracedErrorEmptyString("pathToRead")
 	}
 
-	content, err := os.ReadFile(pathToRead)
-	if err != nil {
-		return "", tracederrors.TracedErrorf("Unable to read file '%s': %w", pathToRead, err)
+	if options == nil {
+		options = new(filesoptions.ReadOptions)
+	}
+
+	var content []byte
+	var err error
+	if options.UseSudo {
+		logging.LogInfoByCtxf(ctx, "Read file '%s' using sudo started.", pathToRead)
+		content, err = commandexecutorexec.RunCommandAndGetStdoutAsBytes(
+			ctx,
+			&parameteroptions.RunCommandOptions{
+				Command: []string{"sudo", "cat", pathToRead},
+			},
+		)
+		if err != nil {
+			return "", tracederrors.TracedErrorf("Unable to read file '%s': %w", pathToRead, err)
+		}
+	} else {
+		logging.LogInfoByCtxf(ctx, "Read file '%s' started.", pathToRead)
+		content, err = os.ReadFile(pathToRead)
+		if err != nil {
+			return "", tracederrors.TracedErrorf("Unable to read file '%s': %w", pathToRead, err)
+		}
 	}
 
 	logging.LogInfoByCtxf(ctx, "Read content of file '%s'.", pathToRead)
