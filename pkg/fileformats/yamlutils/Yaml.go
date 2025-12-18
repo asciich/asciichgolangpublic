@@ -263,7 +263,7 @@ func IsYamlFile(ctx context.Context, path string, options *ValidateOptions) (boo
 		return false, tracederrors.TracedErrorEmptyString("path")
 	}
 
-	content, err := nativefiles.ReadAsString(contextutils.WithSilent(ctx), path)
+	content, err := nativefiles.ReadAsString(contextutils.WithSilent(ctx), path, &filesoptions.ReadOptions{})
 	if err != nil {
 		return false, err
 	}

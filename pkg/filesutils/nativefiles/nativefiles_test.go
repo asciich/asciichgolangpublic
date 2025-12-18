@@ -129,7 +129,7 @@ func TestFilesWriteStringToFile(t *testing.T) {
 		err = nativefiles.WriteString(ctx, tempFile, content)
 		require.NoError(t, err)
 
-		readContent, err := nativefiles.ReadAsString(ctx, tempFile)
+		readContent, err := nativefiles.ReadAsString(ctx, tempFile, &filesoptions.ReadOptions{})
 		require.NoError(t, err)
 
 		require.EqualValues(t, readContent, content)

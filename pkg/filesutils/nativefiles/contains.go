@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -14,7 +15,7 @@ func Contains(ctx context.Context, filePath string, searchString string) (bool, 
 		return false, tracederrors.TracedErrorEmptyString("filePath")
 	}
 
-	content, err := ReadAsString(contextutils.WithSilent(ctx), filePath)
+	content, err := ReadAsString(contextutils.WithSilent(ctx), filePath, &filesoptions.ReadOptions{})
 	if err != nil {
 		return false, err
 	}

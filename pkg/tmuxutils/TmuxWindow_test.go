@@ -207,7 +207,7 @@ func TestTemuxWindow_WaitOutputMatchesRegex(t *testing.T) {
 				shownLines, err := window.GetShownLines()
 				require.NoError(t, err)
 
-				content, err := nativefiles.ReadAsString(ctx, outputPath)
+				content, err := nativefiles.ReadAsString(ctx, outputPath, &filesoptions.ReadOptions{})
 				require.NoError(t, err)
 				require.EqualValues(t, tt.username+"\n"+tt.password+"\n", content)
 				require.Contains(t, shownLines, "finished")

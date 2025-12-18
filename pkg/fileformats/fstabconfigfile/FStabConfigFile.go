@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -14,7 +15,7 @@ func ReadFromFile(ctx context.Context, path string) ([]*Entry, error) {
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
 
-	content, err := nativefiles.ReadAsString(ctx, path)
+	content, err := nativefiles.ReadAsString(ctx, path, &filesoptions.ReadOptions{})
 	if err != nil {
 		return nil, err
 	}
