@@ -1031,3 +1031,115 @@ func Test_IsBeforeInAlphabeth(t *testing.T) {
 		)
 	}
 }
+
+func Test_AddLinePrefix(t *testing.T) {
+	t.Run("empty", func(t *testing.T) {
+		got := AddLinePrefix("", "")
+		require.EqualValues(t, "", got)
+	})
+
+	t.Run("empty content", func(t *testing.T) {
+		got := AddLinePrefix("", "prefix")
+		require.EqualValues(t, "prefix", got)
+	})
+
+	t.Run("empty prefix", func(t *testing.T) {
+		got := AddLinePrefix("hello", "")
+		require.EqualValues(t, "hello", got)
+	})
+
+	t.Run("empty prefix with tailing newline for content", func(t *testing.T) {
+		got := AddLinePrefix("hello\n", "")
+		require.EqualValues(t, "hello\n", got)
+	})
+
+	t.Run("no newline at end", func(t *testing.T) {
+		input := `abc
+def`
+		expected := `    abc
+    def`
+
+		got := AddLinePrefix(input, "    ")
+		require.EqualValues(t, expected, got)
+	})
+
+	t.Run("newline at end", func(t *testing.T) {
+		input := `abc
+def
+`
+		expected := `    abc
+    def
+`
+		got := AddLinePrefix(input, "    ")
+		require.EqualValues(t, expected, got)
+	})
+
+	t.Run("empty line in between", func(t *testing.T) {
+		input := `abc
+
+def
+`
+		expected := `    abc
+    
+    def
+`
+		got := AddLinePrefix(input, "    ")
+		require.EqualValues(t, expected, got)
+	})
+}
+
+func Test_AddIndent(t *testing.T) {
+	t.Run("empty", func(t *testing.T) {
+		got := AddIndent("", "")
+		require.EqualValues(t, "", got)
+	})
+
+	t.Run("empty content", func(t *testing.T) {
+		got := AddIndent("", "prefix")
+		require.EqualValues(t, "", got)
+	})
+
+	t.Run("empty prefix", func(t *testing.T) {
+		got := AddIndent("hello", "")
+		require.EqualValues(t, "hello", got)
+	})
+
+	t.Run("empty prefix with tailing newline for content", func(t *testing.T) {
+		got := AddIndent("hello\n", "")
+		require.EqualValues(t, "hello\n", got)
+	})
+
+	t.Run("no newline at end", func(t *testing.T) {
+		input := `abc
+def`
+		expected := `    abc
+    def`
+
+		got := AddIndent(input, "    ")
+		require.EqualValues(t, expected, got)
+	})
+
+	t.Run("newline at end", func(t *testing.T) {
+		input := `abc
+def
+`
+		expected := `    abc
+    def
+`
+		got := AddIndent(input, "    ")
+		require.EqualValues(t, expected, got)
+	})
+
+	t.Run("empty line in between", func(t *testing.T) {
+		input := `abc
+
+def
+`
+		expected := `    abc
+
+    def
+`
+		got := AddIndent(input, "    ")
+		require.EqualValues(t, expected, got)
+	})
+}

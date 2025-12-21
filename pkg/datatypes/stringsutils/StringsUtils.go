@@ -831,13 +831,63 @@ func IsBeforeInAlphabeth(s1 string, s2 string) (isBefore bool) {
 	return true
 }
 
-func AddLinePrefix(context string, linePrefix string) (output string) {
-	if linePrefix == "" {
-		return context
+// Adds the 'indent' to every non empty line.
+// This ensures no tailing whitespaces if you use tabs or spaces for 'indent'.
+//
+// If you want to add a prefix to every line regardless if it's empty or not use AddLinePrefix instead.
+func AddIndent(content string, indent string) (output string) {
+	if len(content) == 0 {
+		return ""
 	}
 
-	for _, l := range SplitLines(context, true) {
-		output += linePrefix + ": " + l + "\n"
+	if indent == "" {
+		return content
+	}
+
+	splitted := SplitLines(content, true)
+	for i, l := range splitted {
+		if len(l) == 0 {
+			// Do not add indent to empty lines.
+			output += "\n"
+			continue
+		}
+
+		if i+1 == len(splitted) {
+			output += indent + l
+			if content[len(content)-1] == '\n' {
+				output += "\n"
+			}
+		} else {
+			output += indent + l + "\n"
+		}
+	}
+
+	return output
+}
+
+// Adds a line prefix to every line.
+//
+// Adding the prefix is also done for empty lines.
+// If you want to add a prefix only on nonempty lines use AddIndent instead.
+func AddLinePrefix(content string, linePrefix string) (output string) {
+	if len(content) == 0 {
+		return linePrefix
+	}
+
+	if linePrefix == "" {
+		return content
+	}
+
+	splitted := SplitLines(content, true)
+	for i, l := range splitted {
+		if i+1 == len(splitted) {
+			output += linePrefix + l
+			if content[len(content)-1] == '\n' {
+				output += "\n"
+			}
+		} else {
+			output += linePrefix + l + "\n"
+		}
 	}
 
 	return output
