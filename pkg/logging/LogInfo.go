@@ -94,5 +94,5 @@ func LogInfoWithLinePrefix(logmessage string, logLinePrefix string) {
 		return
 	}
 
-	LogInfo(stringsutils.AddLinePrefix(logmessage, logLinePrefix))
+	LogInfo(stringsutils.AddLinePrefix(logmessage, logLinePrefix + ": "))
 }
