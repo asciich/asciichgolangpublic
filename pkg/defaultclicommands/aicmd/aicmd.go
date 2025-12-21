@@ -1,6 +1,9 @@
 package aicmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd/ollamacmd"
+)
 
 func NewAICmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -10,6 +13,8 @@ func NewAICmd() *cobra.Command {
 
 	cmd.AddCommand(
 		NewConcatFilesToKnowledgeFileCmd(),
+
+		ollamacmd.NewOllamaCmd(),
 	)
 
 	return cmd
