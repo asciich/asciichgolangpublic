@@ -72,7 +72,7 @@ func (g *GenericResponse) GetStatusCode() (statusCode int, err error) {
 
 func (g *GenericResponse) CheckStatusCode(expectedStatusCode int) error {
 	if !g.IsStatusCode(expectedStatusCode) {
-		return tracederrors.TracedErrorf("%w: %d does not match expected status code %d", ErrUnexpectedStatusCode, g.statusCode, expectedStatusCode)
+		return tracederrors.TracedErrorf("%w: %d does not match expected status code %d. Response body is:\n%s", ErrUnexpectedStatusCode, g.statusCode, expectedStatusCode, g.body)
 	}
 
 	return nil
