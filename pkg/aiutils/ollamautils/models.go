@@ -9,5 +9,5 @@ func GetModerateSpeedModelName() string {
 }
 
 func GetSlowModelName() string {
-	return "LLaMA 3"
+	return "llama3"
 }
