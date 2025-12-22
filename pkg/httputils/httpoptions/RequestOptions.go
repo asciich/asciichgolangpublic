@@ -30,6 +30,9 @@ type RequestOptions struct {
 
 	// Use the provided credentials for BasicAuth authentication:
 	BasicAuth *BasicAuth
+
+	// The payload to send to the server:
+	Data []byte
 }
 
 func NewRequestOptions() (r *RequestOptions) {

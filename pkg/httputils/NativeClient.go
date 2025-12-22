@@ -1,6 +1,7 @@
 package httputils
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"io"
@@ -121,6 +122,12 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httpopti
 
 	for k, v := range requestOptions.Header {
 		request.Header.Set(k, v)
+	}
+
+	if requestOptions.Data != nil {
+		request.Body = io.NopCloser(bytes.NewReader(requestOptions.Data))
+		request.ContentLength = int64(len(requestOptions.Data))
+		logging.LogInfoByCtxf(ctx, "The request body of '%d' bytes was added for %s .", request.ContentLength, url)
 	}
 
 	nativeResponse, err := client.Do(request)

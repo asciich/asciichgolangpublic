@@ -221,6 +221,19 @@ func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 		io.WriteString(w, `{"hello": "world"}`)
 	})
 
+	t.mux.HandleFunc("/return_post_payload", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		_, err := io.Copy(w, r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	})
+
 	basicAuthExample := NewBasicAuthExample()
 	t.mux.HandleFunc("/basicauth/index.html", basicAuthExample.IndexHtml)
 	t.mux.HandleFunc("/basicauth/credentials.json", basicAuthExample.CredentialsJson)

@@ -14,3 +14,4 @@ High level easy to use HTTP client and testserver.
     * [GET YAML data and run yq](Example_GetYamlDataAndRunYq_test.go)
 * HTTPClient:
     * [Set base URL on client](Example_SetBaseUrlOnClient_test.go): This is useful if many requests are send to the same webserver using the same client.
+* [POST request](Example_PostRequest_test.go)
