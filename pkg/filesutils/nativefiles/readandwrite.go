@@ -80,6 +80,9 @@ func ReadAsString(ctx context.Context, pathToRead string, options *filesoptions.
 	return string(content), nil
 }
 
+// Read a complete files and return the content as []byte.
+//
+// Compared to a simple os.ReadFile this method uses TracedErrors and a more descriptive error message in case something goes wrong.
 func ReadAsBytes(ctx context.Context, pathToRead string) ([]byte, error) {
 	if pathToRead == "" {
 		return nil, tracederrors.TracedErrorEmptyString("pathToRead")

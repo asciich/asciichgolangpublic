@@ -1,7 +1,7 @@
 package ollamautils
 
 func GetFastModelName() string {
-	return "TinyLlama"
+	return "TinyLlama" // no useful results, just for testing
 }
 
 func GetModerateSpeedModelName() string {
@@ -12,6 +12,12 @@ func GetSlowModelName() string {
 	return "llama3"
 }
 
+func GetImageProcessingModelName() string {
+	return "llava-llama3:8b"
+}
+
 // More models:
 // - deepseek-v2: https://ollama.com/library/deepseek-v2 8.9GB
-// - deepseek-v1:1.5b https://ollama.com/library/deepseek-r1 1.1GB
+// - deepseek-r1:1.5b https://ollama.com/library/deepseek-r1 1.1GB
+// - deepseek-llm
+// - llava for image description

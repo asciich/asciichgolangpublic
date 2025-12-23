@@ -4,7 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/encodingutils/base64utils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type PromptOptions struct {
@@ -14,6 +19,21 @@ type PromptOptions struct {
 
 	// Name of the model to use
 	ModelName string
+
+	// File paths to images/ pictures to embed into the request.
+	ImagePaths []string
+}
+
+func (p *PromptOptions) GetDeepCopy() (*PromptOptions) {
+	copy := new(PromptOptions)
+
+	*copy = *p
+
+	if p.ImagePaths != nil {
+		copy.ImagePaths = slicesutils.GetDeepCopyOfStringsSlice(p.ImagePaths)
+	}
+
+	return copy
 }
 
 func (p *PromptOptions) GetHostnameOrDefault() (string, error) {
@@ -60,4 +80,34 @@ func (p *PromptOptions) GetModelNameOrDefault(ctx context.Context) (string, erro
 	modelName := p.ModelName
 	logging.LogInfoByCtxf(ctx, "Use explicit set ollama model name: '%s'.", modelName)
 	return modelName, nil
+}
+
+func (p *PromptOptions) GetImagesAsBase64Slice(ctx context.Context) ([]string, error) {
+	if len(p.ImagePaths) == 0 {
+		return nil, tracederrors.TracedError("No ImagePaths set to encode")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Encode prompt image data into base64 slice started.")
+
+	images := []string{}
+	for _, ipath := range p.ImagePaths {
+		data, err := nativefiles.ReadAsBytes(ctx, ipath)
+		if err != nil {
+			return nil, err
+		}
+
+		encoded, err := base64utils.EncodeBytesAsString(data)
+		if err != nil {
+			return nil, err
+		}
+
+		images = append(images, encoded)
+
+		sha256 := checksumutils.GetSha256SumFromBytes(data)
+		logging.LogInfoByCtxf(ctx, "Appended image '%s' with sha256sum '%s' to prompt request.", ipath, sha256)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Encode prompt image data into base64 slice finished.")
+
+	return images, nil
 }
