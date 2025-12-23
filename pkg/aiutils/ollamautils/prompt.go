@@ -13,6 +13,41 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
+// Sends a prompt do tescribe an image to the ollama server and returns the complete description/ response.
+func DescribeImage(ctx context.Context, imagePath string, options *PromptOptions) (string, error) {
+	logging.LogInfoByCtxf(ctx, "Describe image using ollama started.")
+
+	if imagePath == "" {
+		return "", tracederrors.TracedErrorEmptyString("imagePath")
+	}
+
+	if options == nil {
+		options = new(PromptOptions)
+	}
+
+	optionsToUse := options.GetDeepCopy()
+
+	if optionsToUse.ModelName == "" {
+		optionsToUse.ModelName = GetImageProcessingModelName()
+		logging.LogInfoByCtxf(ctx, "Set LLM model for image description to default '%s'.", optionsToUse.ModelName)
+	}
+
+	optionsToUse.ImagePaths = []string{imagePath}
+
+	description, err := SendPrompt(
+		ctx,
+		"Describe the image.",
+		optionsToUse,
+	)
+	if err != nil {
+		return "", err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Describe image using ollama finished.")
+
+	return description, nil
+}
+
 // Send a single prompt (no conversation) to a ollama server and return the complete response.
 //
 // This function is not streaming the result, it waits until the answer is complete and returns it as a whole.
@@ -39,10 +74,11 @@ func SendPrompt(ctx context.Context, prompt string, options *PromptOptions) (str
 
 	// Request structure for Ollama API
 	type OllamaRequest struct {
-		Model  string `json:"model"`
-		Prompt string `json:"prompt"`
-		System string `json:"system"`
-		Stream bool   `json:"stream"`
+		Model  string   `json:"model"`
+		Prompt string   `json:"prompt"`
+		System string   `json:"system"`
+		Stream bool     `json:"stream"`
+		Images []string `json:"images"`
 	}
 
 	// Response structure for Ollama API
@@ -57,6 +93,16 @@ func SendPrompt(ctx context.Context, prompt string, options *PromptOptions) (str
 		Prompt: prompt,
 		System: "", // can be used to add agent instructions
 		Stream: false,
+	}
+
+	if len(options.ImagePaths) >= 1 {
+		requestBody.Images, err = options.GetImagesAsBase64Slice(ctx)
+		if err != nil {
+			return "", err
+		}
+		logging.LogInfoByCtxf(ctx, "Added '%d' images to the request.", len(options.ImagePaths))
+	} else {
+		logging.LogInfoByCtxf(ctx, "No images are loaded and send as part of the reuqest.")
 	}
 
 	jsonData, err := json.Marshal(requestBody)
