@@ -13,9 +13,11 @@ import (
 )
 
 func NewSendPromptCmd() *cobra.Command {
+	const short = "Send a prompt to a running ollama instance and return the response. The prompt is read from stdin."
+
 	cmd := &cobra.Command{
 		Use:   "send-prompt",
-		Short: "Send a prompt to a running ollama instance and return the response. The prompt is read from stdin.",
+		Short: short,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
