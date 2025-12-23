@@ -13,9 +13,11 @@ import (
 )
 
 func NewSendPromptCmd() *cobra.Command {
+	const short = "Send a prompt to a running ollama instance and return the response. The prompt is read from stdin."
+
 	cmd := &cobra.Command{
 		Use:   "send-prompt",
-		Short: "Send a prompt to a running ollama instance and return the response. The prompt is read from stdin.",
+		Short: short,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
@@ -33,9 +35,18 @@ func NewSendPromptCmd() *cobra.Command {
 				logging.LogGoErrorFatal(err)
 			}
 
-			response := mustutils.Must(ollamautils.SendPrompt(ctx, string(prompt), &ollamautils.PromptOptions{
-				ModelName: model,
-			}))
+			imagePaths, err := cmd.Flags().GetStringArray("image")
+			if err != nil {
+				logging.LogGoErrorFatal(err)
+			}
+
+			response := mustutils.Must(ollamautils.SendPrompt(
+				ctx, string(prompt),
+				&ollamautils.PromptOptions{
+					ModelName:  model,
+					ImagePaths: imagePaths,
+				}),
+			)
 			fmt.Println(response)
 
 			logging.LogGoodByCtxf(ctx, "Sending prompt to ollama and print response finished.")
@@ -47,6 +58,8 @@ func NewSendPromptCmd() *cobra.Command {
 		ollamautils.GetFastModelName(),
 		ollamautils.GetModerateSpeedModelName(),
 	))
+
+	cmd.Flags().StringArray("image", []string{}, "Images to send as part of the prompt. This implies a model able to process images is used like '"+ollamautils.GetImageProcessingModelName()+"'.")
 
 	return cmd
 }
