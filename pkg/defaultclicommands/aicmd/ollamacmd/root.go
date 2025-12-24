@@ -11,6 +11,7 @@ func NewOllamaCmd() *cobra.Command {
 	cmd.AddCommand(
 		NewDefaultPortCmd(),
 		NewDescribeImageCmd(),
+		NewOcrCmd(),
 		NewRunCpuOnlyCmd(),
 		NewSendPromptCmd(),
 	)
