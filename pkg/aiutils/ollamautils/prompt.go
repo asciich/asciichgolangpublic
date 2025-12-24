@@ -13,12 +13,13 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-// Sends a prompt do tescribe an image to the ollama server and returns the complete description/ response.
-func DescribeImage(ctx context.Context, imagePath string, options *PromptOptions) (string, error) {
-	logging.LogInfoByCtxf(ctx, "Describe image using ollama started.")
-
+func sendPromptToSingleimage(ctx context.Context, prompt string, imagePath string, options *PromptOptions) (string, error) {
 	if imagePath == "" {
 		return "", tracederrors.TracedErrorEmptyString("imagePath")
+	}
+
+	if prompt == "" {
+		return "", tracederrors.TracedErrorEmptyString("prompt")
 	}
 
 	if options == nil {
@@ -34,16 +35,42 @@ func DescribeImage(ctx context.Context, imagePath string, options *PromptOptions
 
 	optionsToUse.ImagePaths = []string{imagePath}
 
-	description, err := SendPrompt(
+	response, err := SendPrompt(
 		ctx,
-		"Describe the image.",
+		prompt,
 		optionsToUse,
 	)
 	if err != nil {
 		return "", err
 	}
 
+	return response, nil
+}
+
+// Sends a prompt do tescribe an image to the ollama server and returns the complete description/ response.
+func DescribeImage(ctx context.Context, imagePath string, options *PromptOptions) (string, error) {
+	logging.LogInfoByCtxf(ctx, "Describe image using ollama started.")
+
+	description, err := sendPromptToSingleimage(ctx, "Describe the image", imagePath, options)
+	if err != nil {
+		return "", err
+	}
+
 	logging.LogInfoByCtxf(ctx, "Describe image using ollama finished.")
+
+	return description, nil
+}
+
+// Sends a prompt do detect the characters in an image to the ollama server and returns them.
+func OpticalCharacterRecognition(ctx context.Context, imagePath string, options *PromptOptions) (string, error) {
+	logging.LogInfoByCtxf(ctx, "OCR using ollama started.")
+
+	description, err := sendPromptToSingleimage(ctx, "Perform an optical character recognition by only outputting the detected characters.", imagePath, options)
+	if err != nil {
+		return "", err
+	}
+
+	logging.LogInfoByCtxf(ctx, "OCR image using ollama finished.")
 
 	return description, nil
 }
@@ -72,13 +99,19 @@ func SendPrompt(ctx context.Context, prompt string, options *PromptOptions) (str
 		return "", err
 	}
 
+	// OllamaOptions contains model parameters
+	type OllamaOptions struct {
+		Temperature float64 `json:"temperature"`
+	}
+
 	// Request structure for Ollama API
 	type OllamaRequest struct {
-		Model  string   `json:"model"`
-		Prompt string   `json:"prompt"`
-		System string   `json:"system"`
-		Stream bool     `json:"stream"`
-		Images []string `json:"images"`
+		Model   string        `json:"model"`
+		Prompt  string        `json:"prompt"`
+		System  string        `json:"system"`
+		Stream  bool          `json:"stream"`
+		Images  []string      `json:"images"`
+		Options OllamaOptions `json:"options,omitempty"`
 	}
 
 	// Response structure for Ollama API
