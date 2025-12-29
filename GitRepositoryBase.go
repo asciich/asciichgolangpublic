@@ -321,7 +321,6 @@ func (g *GitRepositoryBase) ContainsGoSourceFileOfMainPackageWithMainFunction(ct
 	goFiles, err := parent.ListFiles(
 		ctx,
 		&parameteroptions.ListFileOptions{
-			NonRecursive:                  true,
 			MatchBasenamePattern:          []string{".*.go"},
 			AllowEmptyListIfNoFileIsFound: true,
 		},
