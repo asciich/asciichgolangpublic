@@ -1,4 +1,4 @@
-package dockerutils
+package commandexecutordocker
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/hosts"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
@@ -14,6 +13,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockerinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/hosts"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -77,42 +78,6 @@ func GetCommandExecutorDockerOnHost(host hosts.Host) (docker dockerinterfaces.Do
 
 func GetLocalCommandExecutorDocker() (docker dockerinterfaces.Docker, err error) {
 	return GetCommandExecutorDocker(commandexecutorbashoo.Bash())
-}
-
-func MustGetCommandExecutorDocker(commandExecutor commandexecutorinterfaces.CommandExecutor) (docker dockerinterfaces.Docker) {
-	docker, err := GetCommandExecutorDocker(commandExecutor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return docker
-}
-
-func MustGetCommandExecutorDockerOnHost(host hosts.Host) (docker dockerinterfaces.Docker) {
-	docker, err := GetCommandExecutorDockerOnHost(host)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return docker
-}
-
-func MustGetLocalCommandExecutorDocker() (docker dockerinterfaces.Docker) {
-	docker, err := GetLocalCommandExecutorDocker()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return docker
-}
-
-func MustGetcommandExecutorDocker(commandExecutor commandexecutorinterfaces.CommandExecutor) (docker dockerinterfaces.Docker) {
-	docker, err := GetCommandExecutorDocker(commandExecutor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return docker
 }
 
 func NewCommandExecutorDocker() (c *CommandExecutorDocker) {
@@ -245,7 +210,7 @@ func (c *CommandExecutorDocker) RunCommandAndGetStdoutAsString(ctx context.Conte
 	return commandExecutor.RunCommandAndGetStdoutAsString(ctx, runOptions)
 }
 
-func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *DockerRunContainerOptions) (startedContainer containerinterfaces.Container, err error) {
+func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *dockeroptions.DockerRunContainerOptions) (startedContainer containerinterfaces.Container, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedError("runOptions is nil")
 	}
@@ -260,13 +225,11 @@ func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *Do
 		return nil, err
 	}
 
-	if runOptions.Verbose {
-		logging.LogInfof(
-			"Going to start container '%s' using image '%s'.",
-			containerName,
-			imageName,
-		)
-	}
+	logging.LogInfoByCtxf(ctx,
+		"Going to start container '%s' using image '%s'.",
+		containerName,
+		imageName,
+	)
 
 	err = c.KillContainerByName(ctx, containerName)
 	if err != nil {
@@ -300,9 +263,7 @@ func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *Do
 
 	startCommand = append(startCommand, runOptions.Command...)
 
-	if runOptions.VerboseDockerRunCommand {
-		logging.LogInfof("Going to start docker container using:\n%v", startCommand)
-	}
+	logging.LogInfoByCtxf(ctx, "Going to start docker container using:\n%v", startCommand)
 
 	stdout, err := c.RunCommandAndGetStdoutAsString(
 		ctx,
@@ -314,9 +275,7 @@ func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *Do
 		return nil, err
 	}
 
-	if runOptions.Verbose {
-		logging.LogChangedf("Started container '%s':\n%s", containerName, stdout)
-	}
+	logging.LogChangedByCtxf(ctx, "Started container '%s':\n%s", containerName, stdout)
 
 	startedContainer, err = c.GetContainerByName(containerName)
 	if err != nil {
