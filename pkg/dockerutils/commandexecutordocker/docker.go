@@ -1,4 +1,4 @@
-package dockerutils
+package commandexecutordocker
 
 import (
 	"context"
@@ -6,14 +6,17 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/hosts"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockerinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/hosts"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -77,42 +80,6 @@ func GetCommandExecutorDockerOnHost(host hosts.Host) (docker dockerinterfaces.Do
 
 func GetLocalCommandExecutorDocker() (docker dockerinterfaces.Docker, err error) {
 	return GetCommandExecutorDocker(commandexecutorbashoo.Bash())
-}
-
-func MustGetCommandExecutorDocker(commandExecutor commandexecutorinterfaces.CommandExecutor) (docker dockerinterfaces.Docker) {
-	docker, err := GetCommandExecutorDocker(commandExecutor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return docker
-}
-
-func MustGetCommandExecutorDockerOnHost(host hosts.Host) (docker dockerinterfaces.Docker) {
-	docker, err := GetCommandExecutorDockerOnHost(host)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return docker
-}
-
-func MustGetLocalCommandExecutorDocker() (docker dockerinterfaces.Docker) {
-	docker, err := GetLocalCommandExecutorDocker()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return docker
-}
-
-func MustGetcommandExecutorDocker(commandExecutor commandexecutorinterfaces.CommandExecutor) (docker dockerinterfaces.Docker) {
-	docker, err := GetCommandExecutorDocker(commandExecutor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return docker
 }
 
 func NewCommandExecutorDocker() (c *CommandExecutorDocker) {
@@ -245,7 +212,7 @@ func (c *CommandExecutorDocker) RunCommandAndGetStdoutAsString(ctx context.Conte
 	return commandExecutor.RunCommandAndGetStdoutAsString(ctx, runOptions)
 }
 
-func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *DockerRunContainerOptions) (startedContainer containerinterfaces.Container, err error) {
+func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *dockeroptions.DockerRunContainerOptions) (startedContainer containerinterfaces.Container, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedError("runOptions is nil")
 	}
@@ -260,12 +227,15 @@ func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *Do
 		return nil, err
 	}
 
-	if runOptions.Verbose {
-		logging.LogInfof(
-			"Going to start container '%s' using image '%s'.",
-			containerName,
-			imageName,
-		)
+	logging.LogInfoByCtxf(ctx,
+		"Going to start container '%s' using image '%s'.",
+		containerName,
+		imageName,
+	)
+
+	_, err = c.PullImage(ctx, imageName)
+	if err != nil {
+		return nil, err
 	}
 
 	err = c.KillContainerByName(ctx, containerName)
@@ -300,9 +270,7 @@ func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *Do
 
 	startCommand = append(startCommand, runOptions.Command...)
 
-	if runOptions.VerboseDockerRunCommand {
-		logging.LogInfof("Going to start docker container using:\n%v", startCommand)
-	}
+	logging.LogInfoByCtxf(ctx, "Going to start docker container using:\n%v", startCommand)
 
 	stdout, err := c.RunCommandAndGetStdoutAsString(
 		ctx,
@@ -314,9 +282,7 @@ func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *Do
 		return nil, err
 	}
 
-	if runOptions.Verbose {
-		logging.LogChangedf("Started container '%s':\n%s", containerName, stdout)
-	}
+	logging.LogChangedByCtxf(ctx, "Started container '%s':\n%s", containerName, stdout)
 
 	startedContainer, err = c.GetContainerByName(containerName)
 	if err != nil {
@@ -416,4 +382,133 @@ func (c *CommandExecutorDocker) ListContainerNames(ctx context.Context) ([]strin
 	}
 
 	return names, nil
+}
+
+func (c *CommandExecutorDocker) GetImageByName(imageName string) (containerinterfaces.Image, error) {
+	if imageName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("imageName")
+	}
+
+	image := new(Image)
+
+	err := image.SetName(imageName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = image.SetDocker(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return image, nil
+}
+
+func (c *CommandExecutorDocker) PullImage(ctx context.Context, imageName string) (containerinterfaces.Image, error) {
+	if imageName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("imageName")
+	}
+
+	exists, err := c.ImageExists(ctx, imageName)
+	if err != nil {
+		return nil, err
+	}
+
+	if exists {
+		logging.LogInfoByCtxf(ctx, "Docker image '%s' is already present. Skip pull", imageName)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Pull docker image '%s' started.", imageName)
+
+		commandExecutor, err := c.GetCommandExecutor()
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = commandExecutor.RunCommand(
+			commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
+			&parameteroptions.RunCommandOptions{
+				Command: []string{"docker", "pull", imageName},
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		logging.LogChangedByCtxf(ctx, "Pulled docker image '%s'.", imageName)
+	}
+
+	return c.GetImageByName(imageName)
+}
+
+func (c *CommandExecutorDocker) ImageExists(ctx context.Context, imageName string) (bool, error) {
+	if imageName == "" {
+		return false, tracederrors.TracedErrorEmptyString("imageName")
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return false, err
+	}
+
+	output, err := commandExecutor.RunCommand(
+		contextutils.WithSilent(ctx),
+		&parameteroptions.RunCommandOptions{
+			Command:           []string{"docker", "image", "inspect", imageName},
+			AllowAllExitCodes: true,
+		},
+	)
+	if err != nil {
+		return false, err
+	}
+
+	if output.IsExitSuccess() {
+		logging.LogInfoByCtxf(ctx, "Docker image '%s' exists.", imageName)
+		return true, nil
+	}
+
+	stderr, err := output.GetStderrAsString()
+	if err != nil {
+		return false, err
+	}
+
+	if strings.Contains(stderr, "No such image:") {
+		logging.LogInfoByCtxf(ctx, "Docker image '%s' does not exist.", imageName)
+		return false, err
+	}
+
+	return false, tracederrors.TracedErrorf("Unknown docker output on stderr: %w", err)
+}
+
+func (c *CommandExecutorDocker) RemoveImage(ctx context.Context, imageName string) error {
+	if imageName == "" {
+		return tracederrors.TracedErrorEmptyString("imageName")
+	}
+
+	exists, err := c.ImageExists(ctx, imageName)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		commandExecutor, err := c.GetCommandExecutor()
+		if err != nil {
+			return err
+		}
+
+		_, err = commandExecutor.RunCommand(
+			ctx,
+			&parameteroptions.RunCommandOptions{
+				Command: []string{"docker", "rmi", imageName},
+			},
+		)
+		if err != nil {
+			return err
+		}
+
+		logging.LogChangedByCtxf(ctx, "Docker image '%s' removed.", imageName)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Docker image '%s' is already absent. Skip remove.", imageName)
+	}
+
+	return nil
 }

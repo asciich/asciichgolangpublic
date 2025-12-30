@@ -3,11 +3,11 @@ package dockerutils
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/hosts"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/commandexecutordocker"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockerinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/nativedocker"
+	"github.com/asciich/asciichgolangpublic/pkg/hosts"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -33,29 +33,11 @@ func GetDockerOnHost(host hosts.Host) (docker dockerinterfaces.Docker, err error
 		return nil, tracederrors.TracedErrorNil("host")
 	}
 
-	return GetCommandExecutorDockerOnHost(host)
-}
-
-func MustGetDockerContainerOnHost(host hosts.Host, containerName string) (dockerContainer containerinterfaces.Container) {
-	dockerContainer, err := GetDockerContainerOnHost(host, containerName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return dockerContainer
-}
-
-func MustGetDockerOnHost(host hosts.Host) (docker dockerinterfaces.Docker) {
-	docker, err := GetDockerOnHost(host)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return docker
+	return commandexecutordocker.GetCommandExecutorDockerOnHost(host)
 }
 
 func GetDockerOnLocalHost() (dockerinterfaces.Docker, error) {
-	return GetCommandExecutorDocker(commandexecutorbashoo.Bash())
+	return nativedocker.NewDocker(), nil
 }
 
 func ListContainerNames(ctx context.Context) ([]string, error) {
