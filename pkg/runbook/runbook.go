@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -99,6 +100,8 @@ func (r *RunBook) Execute(ctx context.Context) error {
 		return err
 	}
 
+	tStart := time.Now()
+
 	logging.LogInfoByCtxf(ctx, "Runbook '%s' started.", name)
 
 	err = r.Validate(ctx)
@@ -113,7 +116,9 @@ func (r *RunBook) Execute(ctx context.Context) error {
 		}
 	}
 
-	logging.LogInfoByCtxf(ctx, "Runbook '%s' finished.", name)
+	duration := time.Since(tStart)
+
+	logging.LogInfoByCtxf(ctx, "Runbook '%s' finished (took %s).", name, duration)
 
 	return nil
 }

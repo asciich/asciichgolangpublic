@@ -2,6 +2,7 @@ package runbook
 
 import (
 	"context"
+	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -35,6 +36,8 @@ func (s *Step) Execute(ctx context.Context) error {
 		return err
 	}
 
+	tStart := time.Now()
+
 	logging.LogInfoByCtxf(ctx, "Step '%s' started.", name)
 
 	if s.Run == nil {
@@ -46,7 +49,9 @@ func (s *Step) Execute(ctx context.Context) error {
 		return err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Step '%s' finished.", name)
+	duration := time.Since(tStart)
+
+	logging.LogInfoByCtxf(ctx, "Step '%s' finished (took %s).", name, duration)
 
 	return nil
 }
