@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/commandexecutordocker"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockergeneric"
@@ -32,4 +33,14 @@ func TestGetContainerStateSatus(t *testing.T) {
 		require.True(t, dockergeneric.IsErrorContainerNotFound(err))
 		require.Empty(t, status)
 	})
+}
+
+func Test_ContainerIsACommandExecutor(t *testing.T) {
+	// It should be possible to run commands in a container in the same way as other CommandExectuors.
+	// This test validates a container fullfils the CommandExecutor interface:
+
+	var commandExecutor commandexecutorinterfaces.CommandExecutor
+
+	commandExecutor = commandexecutordocker.NewCommandExecutorDocker()
+	require.NotNil(t, commandExecutor)
 }

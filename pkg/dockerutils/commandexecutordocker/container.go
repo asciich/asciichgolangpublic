@@ -2,9 +2,11 @@ package commandexecutordocker
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -19,6 +21,8 @@ import (
 )
 
 type CommandExecutorDockerContainer struct {
+	commandexecutorgeneric.CommandExecutorBase
+
 	docker dockerinterfaces.Docker
 	name   string
 	id     string
@@ -211,7 +215,25 @@ func (c *CommandExecutorDockerContainer) RunCommand(ctx context.Context, runOpti
 		return nil, err
 	}
 
-	return commandExecutor.RunCommand(ctx, runOptions)
+	command, err := runOptions.GetCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	name, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	optionsToUse := runOptions.GetDeepCopy()
+	newCommand := []string{"docker", "exec", name}
+	newCommand = append(newCommand, command...)
+	err = optionsToUse.SetCommand(newCommand)
+	if err != nil {
+		return nil, err
+	}
+
+	return commandExecutor.RunCommand(ctx, optionsToUse)
 }
 
 func (c *CommandExecutorDockerContainer) RunCommandAndGetStdoutAsString(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (stdout string, err error) {
@@ -277,13 +299,22 @@ func (c *CommandExecutorDockerContainer) SetDocker(docker dockerinterfaces.Docke
 	return nil
 }
 
-func (c *CommandExecutorDockerContainer) Remove(ctx context.Context) error {
+func (c *CommandExecutorDockerContainer) Remove(ctx context.Context, options *dockeroptions.RemoveOptions) error {
+	if options == nil {
+		options = new(dockeroptions.RemoveOptions)
+	}
+
 	name, err := c.GetName()
 	if err != nil {
 		return err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Remove docker container '%s' started.", name)
+	force := options.Force
+	if force {
+		logging.LogInfoByCtxf(ctx, "Remove docker container '%s' started.", name)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Force remove docker container '%s' started.", name)
+	}
 
 	exists, err := c.Exists(ctx)
 	if err != nil {
@@ -296,8 +327,16 @@ func (c *CommandExecutorDockerContainer) Remove(ctx context.Context) error {
 			return err
 		}
 
+		cmd := []string{"docker", "rm"}
+
+		if force {
+			cmd = append(cmd, "--force")
+		}
+
+		cmd = append(cmd, name)
+
 		_, err = commandExectuor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
-			Command: []string{"docker", "rm", name},
+			Command: cmd,
 		})
 		if err != nil {
 			return err
@@ -386,4 +425,25 @@ func (c *CommandExecutorDockerContainer) Exists(ctx context.Context) (bool, erro
 	}
 
 	return exists, nil
+}
+
+func (c *CommandExecutorDockerContainer) GetHostDescription() (string, error) {
+	docker, err := c.GetDocker()
+	if err != nil {
+		return "", err
+	}
+
+	dockerHostDescription, err := docker.GetHostDescription()
+	if err != nil {
+		return "", err
+	}
+
+	name, err := c.GetName()
+	if err != nil {
+		return "", err
+	}
+
+	hostDescription := fmt.Sprintf("Docker container '%s' running on host '%s'.", name, dockerHostDescription)
+
+	return hostDescription, nil
 }

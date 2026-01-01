@@ -1,22 +1,32 @@
 package nativedocker
 
 import (
+	"bytes"
 	"context"
+	"fmt"
 
+	"github.com/moby/moby/api/pkg/stdcopy"
 	"github.com/moby/moby/client"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockergeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type Container struct {
+	commandexecutorgeneric.CommandExecutorBase
 	name string
 }
 
 func NewContainer(name string) (*Container, error) {
 	ret := new(Container)
+
+	ret.SetParentCommandExecutorForBaseClass(ret)
+
 	err := ret.SetName(name)
 	if err != nil {
 		return nil, err
@@ -44,7 +54,17 @@ func (c *Container) GetName() (string, error) {
 }
 
 func (c *Container) GetHostDescription() (string, error) {
-	return NewDocker().GetHostDescription()
+	dockerHostDescription, err := NewDocker().GetHostDescription()
+	if err != nil {
+		return "", err
+	}
+
+	name, err := c.GetName()
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("Docker container '%s' running on host '%s'.", name, dockerHostDescription), nil
 }
 
 func (c *Container) Exists(ctx context.Context) (bool, error) {
@@ -112,7 +132,11 @@ func (c *Container) Kill(ctx context.Context) error {
 	return NewDocker().KillContainerByName(ctx, containerName)
 }
 
-func (c *Container) Remove(ctx context.Context) error {
+func (c *Container) Remove(ctx context.Context, options *dockeroptions.RemoveOptions) error {
+	if options == nil {
+		options = new(dockeroptions.RemoveOptions)
+	}
+
 	name, err := c.GetName()
 	if err != nil {
 		return err
@@ -129,17 +153,25 @@ func (c *Container) Remove(ctx context.Context) error {
 	}
 
 	if exists {
-		cli, err := client.New(client.FromEnv, client.WithAPIVersionNegotiation())
+		force := options.Force
+
+		if force {
+			logging.LogInfoByCtxf(ctx, "Remove docker container '%s' started.", name)
+		} else {
+			logging.LogInfoByCtxf(ctx, "Force remove docker container '%s' started.", name)
+		}
+
+		cli, err := client.New(client.FromEnv)
 		if err != nil {
 			return tracederrors.TracedErrorf("unable to create docker client: %w", err)
 		}
 		defer cli.Close()
 
-		options := client.ContainerRemoveOptions{
-			Force:         false,
+		clientOptions := client.ContainerRemoveOptions{
+			Force:         force,
 			RemoveVolumes: false,
 		}
-		_, err = cli.ContainerRemove(ctx, name, options)
+		_, err = cli.ContainerRemove(ctx, name, clientOptions)
 		if err != nil {
 			return tracederrors.TracedErrorf("Failed to delete container '%s' on host '%s': %w", name, hostDescription, err)
 		}
@@ -150,6 +182,100 @@ func (c *Container) Remove(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (c *Container) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	name, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	output := new(commandoutput.CommandOutput)
+
+	logging.LogInfoByCtxf(ctx, "Run command in docker container '%s' started.", name)
+
+	cli, err := client.New(client.FromEnv)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("unable to create docker client: %w", err)
+	}
+	defer cli.Close()
+
+	cmd, err := options.GetCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	isStdinSet := len(options.StdinString) > 0
+
+	exec, err := cli.ExecCreate(ctx, name, client.ExecCreateOptions{
+		AttachStderr: true,
+		AttachStdout: true,
+		AttachStdin:  isStdinSet,
+		Cmd:          cmd,
+	})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to exec crate to RunCommand in container '%s': %w", name, err)
+	}
+
+	execId := exec.ID
+
+	logging.LogInfoByCtxf(ctx, "Started command in container '%s' with exec id '%s'.", name, execId)
+
+	attach, err := cli.ExecAttach(ctx, execId, client.ExecAttachOptions{})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to exec attach for id '%s' on container '%s': %w", execId, name, err)
+	}
+	defer attach.HijackedResponse.Close()
+
+	if isStdinSet {
+		_, err = attach.HijackedResponse.Conn.Write([]byte(options.StdinString))
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to write to the stdin of container '%s' with exect id '%s': %w", name, execId, err)
+		}
+
+		if cw, ok := attach.Conn.(interface{ CloseWrite() error }); ok {
+			err := cw.CloseWrite()
+			if err != nil {
+				return nil, tracederrors.TracedErrorf("Failed to close stdin of container '%s' with exect id '%s': %w", name, execId, err)
+			}
+		} else {
+			return nil, tracederrors.TracedErrorf("Unable to close stdin of container '%s' with exect id '%s': %w", name, execId, err)
+		}
+	}
+
+	var stdout, stderr bytes.Buffer
+	_, err = stdcopy.StdCopy(&stdout, &stderr, attach.HijackedResponse.Reader)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to read stdout and stderr of execid '%s' on container '%s': %w", execId, name, err)
+	}
+
+	err = output.SetStdout(stdout.Bytes())
+	if err != nil {
+		return nil, err
+	}
+
+	err = output.SetStderr(stderr.Bytes())
+	if err != nil {
+		return nil, err
+	}
+
+	inspect, err := cli.ExecInspect(ctx, execId, client.ExecInspectOptions{})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to exec inspect for exec id='%s' and container '%s': %w", execId, name, err)
+	}
+
+	err = output.SetReturnCode(inspect.ExitCode)
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run command in docker container '%s' finished.", name)
+
+	return output, err
 }
 
 func (c *Container) Run(ctx context.Context, options *dockeroptions.DockerRunContainerOptions) error {

@@ -2,7 +2,6 @@ package dockerutils_test
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -13,6 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -60,7 +60,12 @@ func TestContainers_Container_Run(t *testing.T) {
 				const imageName = "ubuntu:latest"
 				ctx := getCtx()
 
-				container, docker := getDockerContainerToTest(t, tt.implementationName, "containername-"+strings.ToLower(tt.implementationName))
+				container, docker := getDockerContainerToTest(t, tt.implementationName, containername)
+
+				defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+				err := container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+				require.NoError(t, err)
+
 				if tt.enforcePullImage {
 					// Delete the image so the run command is forced to perform a pull before the container can be started:
 					err := docker.RemoveImage(ctx, imageName)
@@ -70,10 +75,6 @@ func TestContainers_Container_Run(t *testing.T) {
 					_, err := docker.PullImage(ctx, imageName)
 					require.NoError(t, err)
 				}
-
-				defer container.Remove(ctx)
-				err := container.Remove(ctx)
-				require.NoError(t, err)
 
 				// Test a deleted container does not exist:
 				exists, err := container.Exists(ctx)
@@ -112,7 +113,7 @@ func TestContainers_Container_Run(t *testing.T) {
 				require.NoError(t, err)
 				require.False(t, isRunning)
 
-				err = container.Remove(ctx)
+				err = container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
 				require.NoError(t, err)
 
 				exists, err = container.Exists(ctx)
@@ -122,6 +123,99 @@ func TestContainers_Container_Run(t *testing.T) {
 				isRunning, err = container.IsRunning(ctx)
 				require.NoError(t, err)
 				require.False(t, isRunning)
+			},
+		)
+	}
+}
+
+func TestContainers_Container_RunCommand(t *testing.T) {
+	tests := []struct {
+		enforcePullImage   bool
+		implementationName string
+	}{
+		{false, "nativeDocker"},
+		{true, "nativeDocker"},
+		{false, "commandExectuorDockerContainer"},
+		{true, "commandExectuorDockerContainer"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				const containername = "test-run-container"
+				const imageName = "ubuntu:latest"
+				ctx := getCtx()
+
+				container, docker := getDockerContainerToTest(t, tt.implementationName, containername)
+				defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+				err := container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+				require.NoError(t, err)
+
+				if tt.enforcePullImage {
+					// Delete the image so the run command is forced to perform a pull before the container can be started:
+					err := docker.RemoveImage(ctx, imageName)
+					require.NoError(t, err)
+				} else {
+					// Ensure the image is already present so no pull is needed to run the container:
+					_, err := docker.PullImage(ctx, imageName)
+					require.NoError(t, err)
+				}
+
+				// Start the container:
+				err = container.Run(ctx, &dockeroptions.DockerRunContainerOptions{
+					Command:   []string{"sleep", "1m"},
+					ImageName: imageName,
+				})
+				require.NoError(t, err)
+
+				// Run another command (like docker exec) in the same container:
+				output, err := container.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+					Command: []string{"bash", "-c", "echo hello > /world.txt; echo world"},
+				})
+				require.NoError(t, err)
+
+				returnCode, err := output.GetReturnCode()
+				require.NoError(t, err)
+				require.EqualValues(t, returnCode, 0)
+
+				stdout, err := output.GetStdoutAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, "world\n", stdout)
+
+				// Run again a command in the same container.
+				// As it is the same container we can open the file writen by the command before:
+				output, err = container.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+					Command: []string{"cat", "/world.txt"},
+				})
+				require.NoError(t, err)
+				stdout, err = output.GetStdoutAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, "hello\n", stdout)
+			},
+		)
+	}
+}
+
+func Test_Container_GetHostDescription(t *testing.T) {
+	tests := []struct {
+		implementationName string
+		containerName      string
+		expected           string
+	}{
+		{"nativeDocker", "test-get-hostdescription", "Docker container 'test-get-hostdescription' running on host 'localhost'."},
+		{"commandExectuorDockerContainer", "test-get-hostdescription", "Docker container 'test-get-hostdescription' running on host 'localhost'."},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				container, _ := getDockerContainerToTest(t, tt.implementationName, tt.containerName)
+
+				hostDescription, err := container.GetHostDescription()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expected, hostDescription)
 			},
 		)
 	}
