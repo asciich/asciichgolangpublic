@@ -290,3 +290,29 @@ func (d *Docker) RemoveImage(ctx context.Context, imageName string) error {
 
 	return nil
 }
+
+func (d *Docker) ContainerExists(ctx context.Context, containerName string) (bool, error) {
+	if containerName == "" {
+		return false, tracederrors.TracedErrorEmptyString("containerName")
+	}
+
+	container, err := d.GetContainerByName(containerName)
+	if err != nil {
+		return false, err
+	}
+
+	return container.Exists(ctx)
+}
+
+func (d *Docker) RemoveContainer(ctx context.Context, containerName string, options *dockeroptions.RemoveOptions) error {
+	if containerName == "" {
+		return tracederrors.TracedErrorEmptyString("containerName")
+	}
+
+	container, err := d.GetContainerByName(containerName)
+	if err != nil {
+		return err
+	}
+
+	return container.Remove(ctx, options)
+}
