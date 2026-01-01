@@ -23,6 +23,7 @@ import (
 )
 
 type CommandExecutorDocker struct {
+	commandexecutorgeneric.CommandExecutorBase
 	host hosts.Host
 }
 
@@ -511,4 +512,30 @@ func (c *CommandExecutorDocker) RemoveImage(ctx context.Context, imageName strin
 	}
 
 	return nil
+}
+
+func (c *CommandExecutorDocker) ContainerExists(ctx context.Context, containerName string) (bool, error) {
+	if containerName == "" {
+		return false, tracederrors.TracedErrorEmptyString("containerName")
+	}
+
+	container, err := c.GetContainerByName(containerName)
+	if err != nil {
+		return false, err
+	}
+
+	return container.Exists(ctx)
+}
+
+func (c *CommandExecutorDocker) RemoveContainer(ctx context.Context, containerName string, options *dockeroptions.RemoveOptions) error {
+	if containerName == "" {
+		return tracederrors.TracedErrorEmptyString("containerName")
+	}
+
+	container, err := c.GetContainerByName(containerName)
+	if err != nil {
+		return err
+	}
+
+	return container.Remove(ctx, options)
 }

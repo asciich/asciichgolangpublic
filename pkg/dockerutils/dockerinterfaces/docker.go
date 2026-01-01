@@ -8,6 +8,8 @@ import (
 )
 
 type Docker interface {
+	ContainerExists(ctx context.Context, name string) (bool, error)
+
 	GetContainerByName(name string) (containerinterfaces.Container, error)
 	GetImageByName(name string) (containerinterfaces.Image, error)
 	GetHostDescription() (string, error)
@@ -23,4 +25,6 @@ type Docker interface {
 
 	RemoveImage(ctx context.Context, imageName string) error
 	RunContainer(ctx context.Context, options *dockeroptions.DockerRunContainerOptions) (containerinterfaces.Container, error)
+
+	RemoveContainer(ctx context.Context, name string, options *dockeroptions.RemoveOptions) error
 }
