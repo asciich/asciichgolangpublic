@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/moby/moby/api/pkg/stdcopy"
 	"github.com/moby/moby/client"
@@ -263,14 +264,35 @@ func (c *Container) RunCommand(ctx context.Context, options *parameteroptions.Ru
 		return nil, err
 	}
 
-	inspect, err := cli.ExecInspect(ctx, execId, client.ExecInspectOptions{})
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("Failed to exec inspect for exec id='%s' and container '%s': %w", execId, name, err)
+	for range 3 {
+		inspect, err := cli.ExecInspect(ctx, execId, client.ExecInspectOptions{})
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to exec inspect for exec id='%s' and container '%s': %w", execId, name, err)
+		}
+
+		if inspect.ID == "" || inspect.ContainerID == "" || inspect.PID == 0 {
+			// There is a race condition returing an empty inspect while the container is still closing
+			time.Sleep(time.Millisecond * 100)
+			continue
+		}
+
+		err = output.SetReturnCode(inspect.ExitCode)
+		if err != nil {
+			return nil, err
+		}
+
+		break
 	}
 
-	err = output.SetReturnCode(inspect.ExitCode)
-	if err != nil {
-		return nil, err
+	if !output.IsReturnCodeSet() {
+		return nil, tracederrors.TracedError("Unable to set return code for docker exec")
+	}
+
+	if !options.AllowAllExitCodes {
+		err = output.CheckExitSuccess(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	logging.LogInfoByCtxf(ctx, "Run command in docker container '%s' finished.", name)

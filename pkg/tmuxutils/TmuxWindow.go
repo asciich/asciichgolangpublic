@@ -696,7 +696,7 @@ func (t *TmuxWindow) RunCommand(ctx context.Context, runCommandOptions *paramete
 		return nil, err
 	}
 
-	err = commandOutput.CheckExitSuccess(false)
+	err = commandOutput.CheckExitSuccess(contextutils.WithSilent(ctx))
 	if err != nil {
 		return nil, err
 	}
