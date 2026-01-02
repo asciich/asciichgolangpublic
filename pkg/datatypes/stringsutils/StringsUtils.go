@@ -892,3 +892,13 @@ func AddLinePrefix(content string, linePrefix string) (output string) {
 
 	return output
 }
+
+func ContainsAllIgnoreCase(input string, substrings []string) bool {
+	for _, s := range substrings {
+		if ! ContainsIgnoreCase(input, s) {
+			return false
+		}
+	}
+
+	return true
+}

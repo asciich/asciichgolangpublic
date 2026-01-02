@@ -1,6 +1,7 @@
 package commandoutput
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -117,7 +118,7 @@ func (c *CommandOutput) LogStdoutAsInfo() (err error) {
 	return nil
 }
 
-func (o *CommandOutput) CheckExitSuccess(verbose bool) (err error) {
+func (o *CommandOutput) CheckExitSuccess(ctx context.Context) (err error) {
 	if o.IsExitSuccess() {
 		return nil
 	} else {
@@ -232,6 +233,10 @@ func (o *CommandOutput) IsTimedOut() (IsTimedOut bool, err error) {
 func (o *CommandOutput) SetCmdRunError(err error) {
 	errToAdd := err
 	o.cmdRunError = &errToAdd
+}
+
+func (o *CommandOutput) IsReturnCodeSet() (bool) {
+	return o.ReturnCode != nil
 }
 
 func (o *CommandOutput) SetReturnCode(returnCode int) (err error) {
