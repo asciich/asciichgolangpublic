@@ -15,6 +15,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/installcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/latexcmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/linuxcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/loggingcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/monitoringcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/sshcmd"
@@ -46,6 +47,7 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 		installcmd.NewInstallCmd(),
 		kubernetescmd.NewKubernetesCmd(),
 		latexcmd.NewLatexCmd(),
+		linuxcmd.NewLinuxCmd(),
 		loggingcmd.NewLoggingCmd(),
 		monitoringcmd.NewMonitoringCommand(),
 		sshcmd.NewSshCmd(),
