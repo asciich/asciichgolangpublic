@@ -1,4 +1,4 @@
-package pacman_test
+package archlinuxutils_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/nativedocker"
+	"github.com/asciich/asciichgolangpublic/pkg/linuxutils/archlinuxutils"
 	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/packagemanageroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/pacman"
 )
@@ -16,10 +17,8 @@ func getCtx() context.Context {
 	return contextutils.ContextVerbose()
 }
 
-func Test_IsPackageUpdateAvailable(t *testing.T) {
+func Test_UpdateArchlinuxKeyringPackage(t *testing.T) {
 	ctx := getCtx()
-
-	const packageName = "archlinux-keyring"
 
 	// Let's take an fixed image version where we know the package is outdated:
 	const imageName = "archlinux:base-20250727.0.390543"
@@ -38,16 +37,16 @@ func Test_IsPackageUpdateAvailable(t *testing.T) {
 	pacman, err := pacman.NewPacman(container)
 	require.NoError(t, err)
 
-	// We expect an update available:
+	// We expect an update of the "archlinux-keyring" package:
+	const packageName = "archlinux-keyring"
 	updateAvailabe, err := pacman.IsPackageUpdateAvailalbe(ctx, packageName, &packagemanageroptions.UpdateDatabaseOptions{})
 	require.NoError(t, err)
 	require.True(t, updateAvailabe)
 
-	// Let's update the package:
-	err = pacman.UpdatePackage(ctx, packageName, &packagemanageroptions.UpdatePackageOptions{Force: true})
+	err = archlinuxutils.UpdateArchLinuxKeyringPackage(ctx, container, false)
 	require.NoError(t, err)
 
-	// After the update we expect no update available:
+	// The keyring should now be up to date and no further updates available:
 	updateAvailabe, err = pacman.IsPackageUpdateAvailalbe(ctx, packageName, &packagemanageroptions.UpdateDatabaseOptions{})
 	require.NoError(t, err)
 	require.False(t, updateAvailabe)

@@ -7,16 +7,21 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/packagemanageroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func (p *Pacman) IsPackageUpdateAvailalbe(ctx context.Context, packageName string) (bool, error) {
+func (p *Pacman) IsPackageUpdateAvailalbe(ctx context.Context, packageName string, options *packagemanageroptions.UpdateDatabaseOptions) (bool, error) {
 	if packageName == "" {
 		return false, tracederrors.TracedErrorEmptyString("packageName")
 	}
 
 	logging.LogInfoByCtxf(ctx, "Is pacman update available for package '%s' started.", packageName)
+
+	if options == nil {
+		options = new(packagemanageroptions.UpdateDatabaseOptions)
+	}
 
 	commandExectuor, err := p.GetCommandExecutor()
 	if err != nil {
@@ -58,7 +63,10 @@ func (p *Pacman) IsPackageUpdateAvailalbe(ctx context.Context, packageName strin
 
 		if stringsutils.ContainsAllIgnoreCase(stderr, []string{"database file for", "does not exist", "-Sy"}) {
 			logging.LogInfoByCtxf(ctx, "Pacman database not present yet to check for updates for package '%s'. Going to download pacman database.", packageName)
-			err := p.UpdateDatabase(ctx)
+			err := p.UpdateDatabase(
+				ctx,
+				options,
+			)
 			if err != nil {
 				return false, err
 			}
