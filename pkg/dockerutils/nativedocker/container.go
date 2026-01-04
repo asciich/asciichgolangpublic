@@ -270,7 +270,7 @@ func (c *Container) RunCommand(ctx context.Context, options *parameteroptions.Ru
 			return nil, tracederrors.TracedErrorf("Failed to exec inspect for exec id='%s' and container '%s': %w", execId, name, err)
 		}
 
-		if inspect.ID == "" || inspect.ContainerID == "" || inspect.PID == 0 {
+		if inspect.ID == "" || inspect.ContainerID == "" {
 			// There is a race condition returing an empty inspect while the container is still closing
 			time.Sleep(time.Millisecond * 100)
 			continue

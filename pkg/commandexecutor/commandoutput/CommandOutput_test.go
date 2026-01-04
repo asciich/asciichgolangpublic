@@ -9,7 +9,6 @@ import (
 )
 
 func TestCommandOutputGetAndSetReturnCode(t *testing.T) {
-
 	tests := []struct {
 		returnCode int
 	}{
