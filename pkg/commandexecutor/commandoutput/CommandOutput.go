@@ -11,7 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/encodingutils/utf16utils"
 	"github.com/asciich/asciichgolangpublic/pkg/exitcodes"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/osutils"
+	"github.com/asciich/asciichgolangpublic/pkg/osutils/windowsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -154,7 +154,7 @@ func (o *CommandOutput) GetStderrAsString() (stderr string, err error) {
 		return "", tracederrors.TracedError("stderr is not set")
 	}
 
-	if osutils.IsRunningOnWindows() {
+	if windowsutils.IsRunningOnWindows() {
 		stderr, err = utf16utils.DecodeAsString(*o.Stderr)
 		if err != nil {
 			return "", err
@@ -200,7 +200,7 @@ func (o *CommandOutput) GetStdoutAsString() (stdout string, err error) {
 		return "", tracederrors.TracedError("stdout is not set")
 	}
 
-	if osutils.IsRunningOnWindows() {
+	if windowsutils.IsRunningOnWindows() {
 		stdout, err = utf16utils.DecodeAsString(*o.Stdout)
 		if err != nil {
 			return "", err
@@ -235,7 +235,7 @@ func (o *CommandOutput) SetCmdRunError(err error) {
 	o.cmdRunError = &errToAdd
 }
 
-func (o *CommandOutput) IsReturnCodeSet() (bool) {
+func (o *CommandOutput) IsReturnCodeSet() bool {
 	return o.ReturnCode != nil
 }
 

@@ -29,10 +29,6 @@ func IsRunningOnLinux() (isRunningOnLinux bool) {
 	return runtime.GOOS == "linux"
 }
 
-func IsRunningOnWindows() (isRunningOnWindows bool) {
-	return runtime.GOOS == "windows"
-}
-
 func MustGetCurrentWorkingDirectoryAsString() (workingDirPath string) {
 	workingDirPath, err := GetCurrentWorkingDirectoryAsString()
 	if err != nil {

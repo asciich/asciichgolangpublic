@@ -12,12 +12,10 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/osutils"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/windowsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
-
 
 func RunCommandAndGetStdoutAsBytes(ctx context.Context, options *parameteroptions.RunCommandOptions) ([]byte, error) {
 	output, err := RunCommand(ctx, options)
@@ -153,7 +151,7 @@ func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions
 			if commandexecutorgeneric.IsLiveOutputOnStdoutEnabled(ctx) {
 				mOutput := line
 
-				if osutils.IsRunningOnWindows() {
+				if windowsutils.IsRunningOnWindows() {
 					if len(mOutput) > 0 {
 						if []byte(mOutput)[0] == 0x00 {
 							mOutput = string([]byte(mOutput)[1:])
@@ -191,7 +189,7 @@ func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions
 	}
 
 	stderrBytes := stderr.Bytes()
-	if osutils.IsRunningOnWindows() {
+	if windowsutils.IsRunningOnWindows() {
 		stderrBytes, err = windowsutils.DecodeAsBytes(stderrBytes)
 		if err != nil {
 			return nil, err

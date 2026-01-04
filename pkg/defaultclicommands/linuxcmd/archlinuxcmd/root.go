@@ -9,6 +9,7 @@ func NewArchLinuxCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		NewIsYayInstalledCmd(),
 		NewUpdateArchlinuxKeyringCmd(),
 	)
 

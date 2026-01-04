@@ -1,8 +1,9 @@
 package windowsutils
 
 import (
+	"runtime"
+
 	"github.com/asciich/asciichgolangpublic/pkg/encodingutils/utf16utils"
-	"github.com/asciich/asciichgolangpublic/pkg/osutils"
 )
 
 func DecodeAsBytes(windowsUtf16 []byte) (decoded []byte, err error) {
@@ -28,5 +29,5 @@ func DecodeStringAsString(windowsUtf16 string) (decoded string, err error) {
 }
 
 func IsRunningOnWindows() (isRunningOnWindows bool) {
-	return osutils.IsRunningOnWindows()
+	return runtime.GOOS == "windows"
 }
