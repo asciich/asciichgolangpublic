@@ -8,7 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/nativedocker"
-	"github.com/asciich/asciichgolangpublic/pkg/linuxutils/archlinuxutils"
+	"github.com/asciich/asciichgolangpublic/pkg/osutils/linuxutils/archlinuxutils"
 	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/packagemanageroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/pacman"
 )
@@ -39,7 +39,7 @@ func Test_UpdateArchlinuxKeyringPackage(t *testing.T) {
 
 	// We expect an update of the "archlinux-keyring" package:
 	const packageName = "archlinux-keyring"
-	updateAvailabe, err := pacman.IsPackageUpdateAvailalbe(ctx, packageName, &packagemanageroptions.UpdateDatabaseOptions{})
+	updateAvailabe, err := pacman.IsPackageUpdateAvailable(ctx, packageName, &packagemanageroptions.UpdateDatabaseOptions{})
 	require.NoError(t, err)
 	require.True(t, updateAvailabe)
 
@@ -47,7 +47,7 @@ func Test_UpdateArchlinuxKeyringPackage(t *testing.T) {
 	require.NoError(t, err)
 
 	// The keyring should now be up to date and no further updates available:
-	updateAvailabe, err = pacman.IsPackageUpdateAvailalbe(ctx, packageName, &packagemanageroptions.UpdateDatabaseOptions{})
+	updateAvailabe, err = pacman.IsPackageUpdateAvailable(ctx, packageName, &packagemanageroptions.UpdateDatabaseOptions{})
 	require.NoError(t, err)
 	require.False(t, updateAvailabe)
 }

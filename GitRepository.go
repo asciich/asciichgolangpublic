@@ -4,6 +4,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/commandexecutorgitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -21,7 +22,7 @@ func GetGitRepositoryByDirectory(directory filesinterfaces.Directory) (repositor
 
 	commandExecutorDirectory, ok := directory.(*files.CommandExecutorDirectory)
 	if ok {
-		return GetCommandExecutorGitRepositoryFromDirectory(commandExecutorDirectory)
+		return commandexecutorgitoo.NewFromDirectory(commandExecutorDirectory)
 	}
 
 	unknownTypeName, err := datatypes.GetTypeName(directory)
@@ -33,18 +34,6 @@ func GetGitRepositoryByDirectory(directory filesinterfaces.Directory) (repositor
 		"Unknown directory implementation '%s'. Unable to get GitRepository",
 		unknownTypeName,
 	)
-}
-
-func GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit() (msg string) {
-	return "Initial empty commit during repo initialization"
-}
-
-func GitRepositryDefaultAuthorEmail() (email string) {
-	return "asciichgolangpublic@example.net"
-}
-
-func GitRepositryDefaultAuthorName() (name string) {
-	return "asciichgolangpublic git repo initializer"
 }
 
 func MustGetGitRepositoryByDirectory(directory filesinterfaces.Directory) (repository gitinterfaces.GitRepository) {

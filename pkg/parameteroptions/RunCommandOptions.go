@@ -18,6 +18,10 @@ type RunCommandOptions struct {
 	// Run as "root" user (or Administrator on Windows):
 	RunAsRoot bool
 
+	// Run command as given user
+	RunAsUser          string
+	UseSudoToRunAsUser bool
+
 	RemoveLastLineIfEmpty bool
 }
 
@@ -25,12 +29,29 @@ func NewRunCommandOptions() (runCommandOptions *RunCommandOptions) {
 	return new(RunCommandOptions)
 }
 
-func (o *RunCommandOptions) GetCommand() (command []string, err error) {
-	if len(o.Command) <= 0 {
-		return nil, tracederrors.TracedError("command not set")
+// Get the command with all prefix commands as set by the other options like 'sudo', 'timeout'...
+//
+// To only get the defined command without addtional prefix commands use GetCommand.
+func (o *RunCommandOptions) GetFullCommand() ([]string, error) {
+	command, err := o.GetCommand()
+	if err != nil {
+		return nil, err
 	}
 
-	command = slicesutils.GetDeepCopyOfStringsSlice(o.Command)
+	if o.RunAsRoot {
+		command = append([]string{"sudo"}, command...)
+	} else {
+		if o.RunAsUser != "" {
+			joined, err := shelllinehandler.Join(command)
+			if err != nil {
+				return nil, err
+			}
+			command = []string{"su", o.RunAsUser, "-c", joined}
+			if o.UseSudoToRunAsUser {
+				command = append([]string{"sudo"}, command...)
+			}
+		}
+	}
 
 	if o.IsTimeoutSet() {
 		timeout, err := o.GetTimeoutSecondsAsString()
@@ -42,6 +63,18 @@ func (o *RunCommandOptions) GetCommand() (command []string, err error) {
 	}
 
 	return command, nil
+}
+
+// Returns the command as defined in the struct or an error if empty or unset.
+//
+// This function does not return additional prefix commands like 'sudo', 'timeout'...
+// For getting the command including the prefix commands use GetFullCommand instead.
+func (o *RunCommandOptions) GetCommand() ([]string, error) {
+	if len(o.Command) <= 0 {
+		return nil, tracederrors.TracedError("command not set")
+	}
+
+	return slicesutils.GetDeepCopyOfStringsSlice(o.Command), nil
 }
 
 func (o *RunCommandOptions) GetDeepCopy() (deepCopy *RunCommandOptions) {
@@ -56,12 +89,16 @@ func (o *RunCommandOptions) GetJoinedCommand() (joinedCommand string, err error)
 		return "", err
 	}
 
-	joinedCommand, err = shelllinehandler.Join(command)
+	return shelllinehandler.Join(command)
+}
+
+func (o *RunCommandOptions) GetJoinedFullCommand() (joinedCommand string, err error) {
+	command, err := o.GetFullCommand()
 	if err != nil {
 		return "", err
 	}
 
-	return joinedCommand, nil
+	return shelllinehandler.Join(command)
 }
 
 func (o *RunCommandOptions) GetTimeoutSecondsAsString() (timeoutSeconds string, err error) {

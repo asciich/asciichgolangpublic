@@ -4,26 +4,32 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/packagemanageroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func (p *Pacman) UpdatePackage(ctx context.Context, packageName string, options *packagemanageroptions.UpdatePackageOptions) error {
-	if packageName == "" {
-		return tracederrors.TracedErrorEmptyString("packageName")
+func UpdatePackages(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, packageNames []string, options *packagemanageroptions.UpdatePackageOptions) error {
+	if commandExecutor == nil {
+		return tracederrors.TracedErrorNil("commandExecutor")
 	}
 
-	logging.LogInfoByCtxf(ctx, "Update pacman package '%s' started.", packageName)
+	if len(packageNames) == 0 {
+		return tracederrors.TracedError("packageNames is empty")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Update pacman packages '%s' started.", packageNames)
 
 	if options == nil {
 		options = new(packagemanageroptions.UpdatePackageOptions)
 	}
 
 	if options.UpdateDatabaseFirst {
-		err := p.UpdateDatabase(
+		err := UpdateDatabase(
 			ctx,
+			commandExecutor,
 			&packagemanageroptions.UpdateDatabaseOptions{
 				UseSudo: options.UseSudo,
 			},
@@ -33,15 +39,16 @@ func (p *Pacman) UpdatePackage(ctx context.Context, packageName string, options 
 		}
 	}
 
-	isInstalled, err := p.IsPackageInstalled(ctx, packageName)
+	isInstalled, err := IsPackagesInstalled(ctx, commandExecutor, packageNames)
 	if err != nil {
 		return err
 	}
 
 	if !isInstalled {
-		err := p.InstallPackage(
+		err := InstallPackages(
 			ctx,
-			packageName,
+			commandExecutor,
+			packageNames,
 			&packagemanageroptions.InstallPackageOptions{
 				Force: options.Force,
 			},
@@ -51,9 +58,10 @@ func (p *Pacman) UpdatePackage(ctx context.Context, packageName string, options 
 		}
 	}
 
-	isUpdateAvailable, err := p.IsPackageUpdateAvailalbe(
+	isUpdateAvailable, err := IsPackagesUpdateAvailable(
 		ctx,
-		packageName,
+		commandExecutor,
+		packageNames,
 		&packagemanageroptions.UpdateDatabaseOptions{
 			UseSudo: options.UseSudo,
 		})
@@ -62,12 +70,7 @@ func (p *Pacman) UpdatePackage(ctx context.Context, packageName string, options 
 	}
 
 	if isUpdateAvailable {
-		logging.LogInfoByCtxf(ctx, "Going to update pacman package '%s'.", packageName)
-
-		commandExecutor, err := p.GetCommandExecutor()
-		if err != nil {
-			return err
-		}
+		logging.LogInfoByCtxf(ctx, "Going to update pacman packages '%s'.", packageNames)
 
 		command := []string{"pacman", "-S", "--noconfirm"}
 
@@ -75,7 +78,7 @@ func (p *Pacman) UpdatePackage(ctx context.Context, packageName string, options 
 			command = append(command, "--overwrite='*'")
 		}
 
-		command = append(command, packageName)
+		command = append(command, packageNames...)
 
 		if options.UseSudo {
 			command = append([]string{"sudo"}, command...)
@@ -93,12 +96,21 @@ func (p *Pacman) UpdatePackage(ctx context.Context, packageName string, options 
 
 		logging.LogInfoByCtx(ctx, stdout)
 
-		logging.LogChangedByCtxf(ctx, "Pacman package '%s' updated.", packageName)
+		logging.LogChangedByCtxf(ctx, "Pacman package '%s' updated.", packageNames)
 	} else {
-		logging.LogInfoByCtxf(ctx, "Pacman package '%s' is already up to date.", packageName)
+		logging.LogInfoByCtxf(ctx, "Pacman package '%s' is already up to date.", packageNames)
 	}
 
-	logging.LogInfoByCtxf(ctx, "Update pacman package '%s' finished.", packageName)
+	logging.LogInfoByCtxf(ctx, "Update pacman package '%s' finished.", packageNames)
 
 	return nil
+}
+
+func (p *Pacman) UpdatePackages(ctx context.Context, packageNames []string, options *packagemanageroptions.UpdatePackageOptions) error {
+	commandExecutor, err := p.GetCommandExecutor()
+	if err != nil {
+		return err
+	}
+
+	return UpdatePackages(ctx, commandExecutor, packageNames, options)
 }

@@ -87,6 +87,24 @@ func NewCommandExecutorDocker() (c *CommandExecutorDocker) {
 	return new(CommandExecutorDocker)
 }
 
+func (c *CommandExecutorDocker) GetDeepCopy() *CommandExecutorDocker {
+	ret := NewCommandExecutorDocker()
+
+	if c.host != nil {
+		panic("use c.commandExecutor instead of c.host")
+	}
+
+	return ret
+}
+
+func (c *CommandExecutorDocker) GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor {
+	return c.GetDeepCopy()
+}
+
+func (c *CommandExecutorDocker) GetDeepCopyAsDocker() dockerinterfaces.Docker {
+	return c.GetDeepCopy()
+}
+
 func (c *CommandExecutorDocker) GetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor, err error) {
 	host, err := c.GetHost()
 	if err != nil {

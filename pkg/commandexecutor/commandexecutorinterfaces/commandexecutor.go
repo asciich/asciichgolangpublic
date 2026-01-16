@@ -9,6 +9,8 @@ import (
 
 // A CommandExecutor is able to run a command like Exec or bash does.
 type CommandExecutor interface {
+	GetDeepCopyAsCommandExecutor() CommandExecutor
+
 	GetHostDescription() (string, error)
 	RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error)
 

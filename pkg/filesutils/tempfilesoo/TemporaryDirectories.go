@@ -5,9 +5,10 @@ import (
 	"os"
 
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 )
 
-func CreateEmptyTemporaryDirectory(ctx context.Context) (temporaryDirectory *files.LocalDirectory, err error) {
+func CreateEmptyTemporaryDirectory(ctx context.Context) (temporaryDirectory filesinterfaces.Directory, err error) {
 	dirPath, err := os.MkdirTemp("", "empty")
 	if err != nil {
 		return nil, err
