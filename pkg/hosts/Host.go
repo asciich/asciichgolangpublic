@@ -18,6 +18,8 @@ import (
 type Host interface {
 	CheckReachable(verbose bool) (err error)
 
+	GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor
+
 	GetDirectoryByPath(path string) (directory filesinterfaces.Directory, err error)
 	GetHostDescription() (hostDescription string, err error)
 	GetHostName() (hostName string, err error)

@@ -10,6 +10,8 @@ import (
 type Docker interface {
 	ContainerExists(ctx context.Context, name string) (bool, error)
 
+	GetDeepCopyAsDocker() Docker
+
 	GetContainerByName(name string) (containerinterfaces.Container, error)
 	GetImageByName(name string) (containerinterfaces.Image, error)
 	GetHostDescription() (string, error)
