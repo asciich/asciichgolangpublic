@@ -6,6 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/commandexecutorgitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -23,33 +24,12 @@ func TemporaryGitRepositories() (temporaryDirectoriesService *TemporaryGitReposi
 	return NewTemporaryGitRepositoriesService()
 }
 
-func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepository(ctx context.Context) (temporaryGitRepository gitinterfaces.GitRepository, err error) {
-	tempDir, err := tempfilesoo.CreateEmptyTemporaryDirectory(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	localRepository, err := GetLocalGitReposioryFromLocalDirectory(tempDir)
-	if err != nil {
-		return nil, err
-	}
-
-	err = localRepository.Init(ctx, &parameteroptions.CreateRepositoryOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	temporaryGitRepository = localRepository
-
-	return temporaryGitRepository, nil
-}
-
 func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepositoryAndAddDataFromDirectory(ctx context.Context, dataToAdd filesinterfaces.Directory) (temporaryRepository gitinterfaces.GitRepository, err error) {
 	if dataToAdd == nil {
 		return nil, tracederrors.TracedError("dataToAdd is nil")
 	}
 
-	temporaryRepository, err = g.CreateTemporaryGitRepository(ctx)
+	temporaryRepository, err = commandexecutorgitoo.CreateLocalTemporaryRepository(ctx, &parameteroptions.CreateRepositoryOptions{})
 	if err != nil {
 		return nil, err
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -12,7 +13,37 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func (p *Pacman) IsPackageUpdateAvailalbe(ctx context.Context, packageName string, options *packagemanageroptions.UpdateDatabaseOptions) (bool, error) {
+func IsPackagesUpdateAvailable(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, packageNames []string, options *packagemanageroptions.UpdateDatabaseOptions) (bool, error) {
+	if len(packageNames) == 0 {
+		return false, tracederrors.TracedError("packageNames has no entries.")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Is packaman packages update available for '%s' started.", packageNames)
+	var updateAvailable bool
+	var err error
+
+	for _, name := range packageNames {
+		updateAvailable, err = IsPackageUpdateAvailable(ctx, commandExecutor, name, options)
+		if err != nil {
+			return false, err
+		}
+
+		if updateAvailable {
+			updateAvailable = true
+			break
+		}
+	}
+
+	logging.LogInfoByCtxf(ctx, "Is packaman packages update available for '%s' finished.", packageNames)
+
+	return updateAvailable, nil
+}
+
+func IsPackageUpdateAvailable(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, packageName string, options *packagemanageroptions.UpdateDatabaseOptions) (bool, error) {
+	if commandExecutor == nil {
+		return false, tracederrors.TracedErrorNil("commandExecutor")
+	}
+
 	if packageName == "" {
 		return false, tracederrors.TracedErrorEmptyString("packageName")
 	}
@@ -23,15 +54,9 @@ func (p *Pacman) IsPackageUpdateAvailalbe(ctx context.Context, packageName strin
 		options = new(packagemanageroptions.UpdateDatabaseOptions)
 	}
 
-	commandExectuor, err := p.GetCommandExecutor()
-	if err != nil {
-		return false, err
-	}
-
 	queryPackageUpdate := func() (*commandoutput.CommandOutput, error) {
-
 		command := []string{"pacman", "-Qu", packageName}
-		return commandExectuor.RunCommand(
+		return commandExecutor.RunCommand(
 			ctx,
 			&parameteroptions.RunCommandOptions{
 				Command:           command,
@@ -63,10 +88,7 @@ func (p *Pacman) IsPackageUpdateAvailalbe(ctx context.Context, packageName strin
 
 		if stringsutils.ContainsAllIgnoreCase(stderr, []string{"database file for", "does not exist", "-Sy"}) {
 			logging.LogInfoByCtxf(ctx, "Pacman database not present yet to check for updates for package '%s'. Going to download pacman database.", packageName)
-			err := p.UpdateDatabase(
-				ctx,
-				options,
-			)
+			err := UpdateDatabase(ctx, commandExecutor, options)
 			if err != nil {
 				return false, err
 			}
@@ -111,4 +133,13 @@ func (p *Pacman) IsPackageUpdateAvailalbe(ctx context.Context, packageName strin
 	}
 
 	return false, tracederrors.TracedErrorf("Failed to evaluate if an update of the pacman package '%s' is available: %s", packageName, stderr)
+}
+
+func (p *Pacman) IsPackageUpdateAvailable(ctx context.Context, packageName string, options *packagemanageroptions.UpdateDatabaseOptions) (bool, error) {
+	commandExecutor, err := p.GetCommandExecutor()
+	if err != nil {
+		return false, err
+	}
+
+	return IsPackageUpdateAvailable(ctx, commandExecutor, packageName, options)
 }
