@@ -76,7 +76,6 @@ type File interface {
 	MustReadFirstLine() (firstLine string)
 	MustReadFirstLineAndTrimSpace() (firstLine string)
 	MustReadLastCharAsString() (lastChar string)
-	MustReadFirstNBytes(numberOfBytesToRead int) (firstBytes []byte)
 	MustRemoveLinesWithPrefix(prefix string, verbose bool)
 	MustReplaceLineAfterLine(lineToFind string, replaceLineAfterWith string, verbose bool) (changeSummary *changesummary.ChangeSummary)
 	PrintContentOnStdout() (err error)

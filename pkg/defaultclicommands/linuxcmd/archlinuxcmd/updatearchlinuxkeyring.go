@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/linuxutils/archlinuxutils"
+	"github.com/asciich/asciichgolangpublic/pkg/osutils/linuxutils/archlinuxutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils"

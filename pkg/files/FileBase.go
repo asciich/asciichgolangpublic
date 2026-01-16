@@ -47,17 +47,12 @@ func (f *FileBase) IsLocalFile(ctx context.Context) (isLocalFile bool, err error
 		return false, err
 	}
 
-	localPath, err := parent.GetLocalPath()
+	hostDescription, err := parent.GetHostDescription()
 	if err != nil {
-		return false, tracederrors.TracedErrorf(
-			"Not implemented for %w",
-			err,
-		)
+		return false, err
 	}
 
-	logging.LogInfoByCtxf(ctx, "'%s' is a local file.", localPath)
-
-	return true, nil
+	return hostDescription == "localhost", nil
 }
 
 func (f *FileBase) AppendLine(line string, verbose bool) (err error) {
@@ -650,7 +645,6 @@ func (f *FileBase) MustAppendLine(line string, verbose bool) {
 		logging.LogGoErrorFatal(err)
 	}
 }
-
 
 func (f *FileBase) MustContainsLine(line string) (containsLine bool) {
 	containsLine, err := f.ContainsLine(line)

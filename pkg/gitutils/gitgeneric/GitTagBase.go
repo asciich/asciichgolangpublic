@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package gitgeneric
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"

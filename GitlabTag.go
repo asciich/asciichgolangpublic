@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -15,7 +16,7 @@ import (
 var ErrGitlabTagNotFound = errors.New("gitlab tag not found")
 
 type GitlabTag struct {
-	GitTagBase
+	gitgeneric.GitTagBase
 	gitlabTags *GitlabTags
 	name       string
 }

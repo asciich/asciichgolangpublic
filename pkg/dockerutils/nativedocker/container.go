@@ -10,6 +10,7 @@ import (
 	"github.com/moby/moby/client"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockergeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
@@ -34,6 +35,12 @@ func NewContainer(name string) (*Container, error) {
 	}
 
 	return ret, nil
+}
+
+func (c *Container) GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor {
+	return &Container{
+		name: c.name,
+	}
 }
 
 func (c *Container) SetName(name string) error {
@@ -197,7 +204,12 @@ func (c *Container) RunCommand(ctx context.Context, options *parameteroptions.Ru
 
 	output := new(commandoutput.CommandOutput)
 
-	logging.LogInfoByCtxf(ctx, "Run command in docker container '%s' started.", name)
+	cmdJoined, err := options.GetJoinedCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run command '%s' in docker container '%s' started.", cmdJoined, name)
 
 	cli, err := client.New(client.FromEnv)
 	if err != nil {
@@ -217,14 +229,13 @@ func (c *Container) RunCommand(ctx context.Context, options *parameteroptions.Ru
 		AttachStdout: true,
 		AttachStdin:  isStdinSet,
 		Cmd:          cmd,
+		User:         options.RunAsUser,
 	})
 	if err != nil {
 		return nil, tracederrors.TracedErrorf("Failed to exec crate to RunCommand in container '%s': %w", name, err)
 	}
 
 	execId := exec.ID
-
-	logging.LogInfoByCtxf(ctx, "Started command in container '%s' with exec id '%s'.", name, execId)
 
 	attach, err := cli.ExecAttach(ctx, execId, client.ExecAttachOptions{})
 	if err != nil {
@@ -289,13 +300,22 @@ func (c *Container) RunCommand(ctx context.Context, options *parameteroptions.Ru
 	}
 
 	if !options.AllowAllExitCodes {
-		err = output.CheckExitSuccess(ctx)
-		if err != nil {
-			return nil, err
+		if !output.IsExitSuccess() {
+			exitCode, err := output.GetReturnCode()
+			if err != nil {
+				return nil, err
+			}
+
+			stderr, err := output.GetStderrAsString()
+			if err != nil {
+				return nil, err
+			}
+
+			return nil, tracederrors.TracedErrorf("Run command '%s' in docker container '%s' failed. Exit code is: %d, stderr is\n%s", cmdJoined, name, exitCode, stderr)
 		}
 	}
 
-	logging.LogInfoByCtxf(ctx, "Run command in docker container '%s' finished.", name)
+	logging.LogInfoByCtxf(ctx, "Run command '%s' in docker container '%s' finished.", cmdJoined, name)
 
 	return output, err
 }

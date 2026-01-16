@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -11,7 +12,7 @@ import (
 
 func getGitTagToTest(implementationName string) (gitTag gitinterfaces.GitTag) {
 	if implementationName == "gitRepositoryTag" {
-		return NewGitRepositoryTag()
+		return gitgeneric.NewGitRepositoryTag()
 	}
 
 	if implementationName == "gitlabTag" {

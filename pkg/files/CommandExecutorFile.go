@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -19,15 +18,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-// A CommandExecutorFile implements the functionality of a `File` by
-// executing commands (like: test, stat, cat...).
-//
-// The benefit of this apporach is an easy way to access files on any
-// remote system like VMs, Containers, Hosts... while it easy to chain
-// like inside Container on VM behind Jumphost...
-//
-// The downside of this is the poor performance and the possiblity to see
-// in the process table which operations where done.
+// Deprecated: USe commandexecutiorfileoo.File instead
 type CommandExecutorFile struct {
 	FileBase
 	commandExecutor commandexecutorinterfaces.CommandExecutor
@@ -255,6 +246,7 @@ func (c *CommandExecutorFile) Create(ctx context.Context, options *filesoptions.
 	return nil
 }
 
+// Already moved to commandexecutorfile
 func (c *CommandExecutorFile) Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error) {
 	commandExecutor, filePath, hostDescription, err := c.GetCommandExecutorAndFilePathAndHostDescription()
 	if err != nil {
@@ -306,6 +298,7 @@ func (c *CommandExecutorFile) Delete(ctx context.Context, options *filesoptions.
 	return nil
 }
 
+// Already moved to commandexecutorfile
 func (c *CommandExecutorFile) Exists(ctx context.Context) (exists bool, err error) {
 	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
 	if err != nil {
@@ -405,12 +398,7 @@ func (c *CommandExecutorFile) GetDeepCopy() (deepCopy filesinterfaces.File) {
 	*d = *c
 
 	if c.commandExecutor != nil {
-		cmde, err := commandexecutor.GetDeepCopyOfCommandExecutor(c.commandExecutor)
-		if err != nil {
-			logging.LogGoErrorFatal(err)
-		}
-
-		d.commandExecutor = cmde
+		d.commandExecutor = c.commandExecutor.GetDeepCopyAsCommandExecutor()
 	}
 
 	return d
@@ -789,24 +777,6 @@ func (c *CommandExecutorFile) MustIsRunningOnLocalhost() (isRunningOnLocalhost b
 	return isRunningOnLocalhost
 }
 
-func (c *CommandExecutorFile) MustReadAsBytes() (content []byte) {
-	content, err := c.ReadAsBytes()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return content
-}
-
-func (c *CommandExecutorFile) MustReadFirstNBytes(numberOfBytesToRead int) (firstBytes []byte) {
-	firstBytes, err := c.ReadFirstNBytes(numberOfBytesToRead)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return firstBytes
-}
-
 func (c *CommandExecutorFile) MustSetCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) {
 	err := c.SetCommandExecutor(commandExecutor)
 	if err != nil {
@@ -828,6 +798,7 @@ func (c *CommandExecutorFile) MustTruncate(newSizeBytes int64, verbose bool) {
 	}
 }
 
+// Already moved to commandexecutorfile
 func (c *CommandExecutorFile) ReadAsBytes() (content []byte, err error) {
 	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
 	if err != nil {
@@ -847,6 +818,7 @@ func (c *CommandExecutorFile) ReadAsBytes() (content []byte, err error) {
 	return content, nil
 }
 
+// Already moved to commandexecutorfile
 func (c *CommandExecutorFile) ReadFirstNBytes(numberOfBytesToRead int) (firstBytes []byte, err error) {
 	if numberOfBytesToRead < 0 {
 		return nil, tracederrors.TracedErrorf("Invalid number of bytest to read: '%d'", numberOfBytesToRead)
@@ -980,6 +952,7 @@ func (c *CommandExecutorFile) Truncate(newSizeBytes int64, verbose bool) (err er
 	return nil
 }
 
+// Already moved to commandexecutorfile
 func (c *CommandExecutorFile) WriteBytes(ctx context.Context, toWrite []byte, options *filesoptions.WriteOptions) (err error) {
 	if toWrite == nil {
 		return tracederrors.TracedErrorNil("toWrite")

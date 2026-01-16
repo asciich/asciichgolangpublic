@@ -39,16 +39,16 @@ func Test_IsPackageUpdateAvailable(t *testing.T) {
 	require.NoError(t, err)
 
 	// We expect an update available:
-	updateAvailabe, err := pacman.IsPackageUpdateAvailalbe(ctx, packageName, &packagemanageroptions.UpdateDatabaseOptions{})
+	updateAvailabe, err := pacman.IsPackageUpdateAvailable(ctx, packageName, &packagemanageroptions.UpdateDatabaseOptions{})
 	require.NoError(t, err)
 	require.True(t, updateAvailabe)
 
 	// Let's update the package:
-	err = pacman.UpdatePackage(ctx, packageName, &packagemanageroptions.UpdatePackageOptions{Force: true})
+	err = pacman.UpdatePackages(ctx, []string{packageName}, &packagemanageroptions.UpdatePackageOptions{Force: true})
 	require.NoError(t, err)
 
 	// After the update we expect no update available:
-	updateAvailabe, err = pacman.IsPackageUpdateAvailalbe(ctx, packageName, &packagemanageroptions.UpdateDatabaseOptions{})
+	updateAvailabe, err = pacman.IsPackageUpdateAvailable(ctx, packageName, &packagemanageroptions.UpdateDatabaseOptions{})
 	require.NoError(t, err)
 	require.False(t, updateAvailabe)
 }

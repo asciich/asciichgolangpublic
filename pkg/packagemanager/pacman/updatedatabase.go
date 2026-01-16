@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/packagemanageroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -11,16 +12,15 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func (p *Pacman) UpdateDatabase(ctx context.Context, options *packagemanageroptions.UpdateDatabaseOptions) error {
+func UpdateDatabase(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, options *packagemanageroptions.UpdateDatabaseOptions) error {
+	if commandExecutor == nil {
+		return tracederrors.TracedErrorNil("commandExecutor")
+	}
+
 	logging.LogInfoByCtxf(ctx, "Update pacman database started.")
 
 	if options == nil {
 		options = new(packagemanageroptions.UpdateDatabaseOptions)
-	}
-
-	commandExecutor, err := p.GetCommandExecutor()
-	if err != nil {
-		return err
 	}
 
 	command := []string{"pacman", "-Sy"}
@@ -57,4 +57,13 @@ func (p *Pacman) UpdateDatabase(ctx context.Context, options *packagemanageropti
 
 	logging.LogInfoByCtxf(ctx, "Update pacman database finished.")
 	return nil
+}
+
+func (p *Pacman) UpdateDatabase(ctx context.Context, options *packagemanageroptions.UpdateDatabaseOptions) error {
+	commandExecutor, err := p.GetCommandExecutor()
+	if err != nil {
+		return err
+	}
+
+	return UpdateDatabase(ctx, commandExecutor, options)
 }

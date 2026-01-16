@@ -33,7 +33,7 @@ import (
 
 type LocalGitRepository struct {
 	files.LocalDirectory
-	GitRepositoryBase
+	gitgeneric.GitRepositoryBase
 }
 
 func GetLocalGitReposioryFromDirectory(directory filesinterfaces.Directory) (repo gitinterfaces.GitRepository, err error) {
@@ -103,15 +103,6 @@ func MustGetLocalGitReposioryFromDirectory(directory filesinterfaces.Directory) 
 	}
 
 	return repo
-}
-
-func MustGetLocalGitReposioryFromLocalDirectory(localDirectory *files.LocalDirectory) (l *LocalGitRepository) {
-	l, err := GetLocalGitReposioryFromLocalDirectory(localDirectory)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return l
 }
 
 func MustGetLocalGitRepositoryByPath(path string) (l *LocalGitRepository) {
@@ -764,7 +755,7 @@ func (l *LocalGitRepository) GetCommitByGoGitHash(goGitHash *plumbing.Hash) (git
 		return nil, tracederrors.TracedErrorNil("goGitHash")
 	}
 
-	gitCommit := NewGitCommit()
+	gitCommit := gitgeneric.NewGitCommit()
 
 	err := gitCommit.SetGitRepo(l)
 	if err != nil {
@@ -1296,7 +1287,7 @@ func (l *LocalGitRepository) GetTagByName(tagName string) (tag gitinterfaces.Git
 		return nil, tracederrors.TracedErrorEmptyString("tagName")
 	}
 
-	tagToReturn := NewGitRepositoryTag()
+	tagToReturn := gitgeneric.NewGitRepositoryTag()
 
 	err = tagToReturn.SetName(tagName)
 	if err != nil {
@@ -1430,8 +1421,8 @@ func (l *LocalGitRepository) Init(ctx context.Context, options *parameteroptions
 					err = l.SetGitConfig(
 						ctx,
 						&gitparameteroptions.GitConfigSetOptions{
-							Name:  GitRepositryDefaultAuthorName(),
-							Email: GitRepositryDefaultAuthorEmail(),
+							Name:  gitgeneric.GitRepositryDefaultAuthorName(),
+							Email: gitgeneric.GitRepositryDefaultAuthorEmail(),
 						},
 					)
 					if err != nil {
@@ -1443,7 +1434,7 @@ func (l *LocalGitRepository) Init(ctx context.Context, options *parameteroptions
 					_, err = l.Commit(
 						ctx,
 						&gitparameteroptions.GitCommitOptions{
-							Message:    GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit(),
+							Message:    gitgeneric.GitRepositoryDefaultCommitMessageForInitializeWithEmptyCommit(),
 							AllowEmpty: true,
 						},
 					)
@@ -2060,4 +2051,8 @@ func (l *LocalGitRepository) SetRemoteUrl(ctx context.Context, remoteUrl string)
 	logging.LogChangedByCtxf(ctx, "Set remote Url for '%v' in git repository '%v' on host '%s' to '%v'.", name, path, hostDescription, remoteUrl)
 
 	return nil
+}
+
+func (l *LocalGitRepository) CloneToTemporaryRepository(ctx context.Context) (gitinterfaces.GitRepository, error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
 }
