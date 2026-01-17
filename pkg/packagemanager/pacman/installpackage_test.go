@@ -36,7 +36,7 @@ func Test_InstallPackage(t *testing.T) {
 		pacman, container := getPacmanInContainer(ctx, t)
 		defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
 
-		err := pacman.InstallPackage(ctx, "", &packagemanageroptions.InstallPackageOptions{})
+		err := pacman.InstallPackages(ctx, []string{}, &packagemanageroptions.InstallPackageOptions{})
 		require.Error(t, err)
 	})
 
@@ -51,12 +51,12 @@ func Test_InstallPackage(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, isInstalled)
 
-		isUpdateAvailable, err := pacman.IsPackageUpdateAvailalbe(ctx, packageName, &packagemanageroptions.UpdateDatabaseOptions{})
+		isUpdateAvailable, err := pacman.IsPackageUpdateAvailable(ctx, packageName, &packagemanageroptions.UpdateDatabaseOptions{})
 		require.NoError(t, err)
 		require.True(t, isUpdateAvailable)
 
 		ctx = contextutils.WithChangeIndicator(ctx)
-		err = pacman.InstallPackage(ctx, packageName, &packagemanageroptions.InstallPackageOptions{
+		err = pacman.InstallPackages(ctx, []string{packageName}, &packagemanageroptions.InstallPackageOptions{
 			UpdateDatabaseFirst: false,
 			Force:               false,
 		})
@@ -69,7 +69,7 @@ func Test_InstallPackage(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, isInstalled)
 
-		isUpdateAvailable, err = pacman.IsPackageUpdateAvailalbe(ctx, packageName, &packagemanageroptions.UpdateDatabaseOptions{})
+		isUpdateAvailable, err = pacman.IsPackageUpdateAvailable(ctx, packageName, &packagemanageroptions.UpdateDatabaseOptions{})
 		require.NoError(t, err)
 		require.True(t, isUpdateAvailable)
 	})
@@ -85,7 +85,7 @@ func Test_InstallPackage(t *testing.T) {
 		require.False(t, isInstalled)
 
 		ctx = contextutils.WithChangeIndicator(ctx)
-		err = pacman.InstallPackage(ctx, packageName, &packagemanageroptions.InstallPackageOptions{
+		err = pacman.InstallPackages(ctx, []string{packageName}, &packagemanageroptions.InstallPackageOptions{
 			UpdateDatabaseFirst: true,
 			Force:               false,
 		})

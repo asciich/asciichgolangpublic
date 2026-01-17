@@ -7,7 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
 )
 
-func Test_IsPackageInstalled(t *testing.T) {
+func Test_IsPackageInstalledPacman(t *testing.T) {
 	t.Run("empty package name", func(t *testing.T) {
 		ctx := getCtx()
 		pacman, container := getPacmanInContainer(ctx, t)

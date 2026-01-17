@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/commandexecutorgitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -79,7 +80,7 @@ func (g *GitRepositoriesService) CloneGitRepositoryToTemporaryDirectory(ctx cont
 	}
 
 	if repo == nil {
-		commandExecutorRepository, ok := toClone.(*CommandExecutorGitRepository)
+		commandExecutorRepository, ok := toClone.(*commandexecutorgitoo.GitRepository)
 		if ok {
 			localPath, hostDescription, err := commandExecutorRepository.GetPathAndHostDescription()
 			if err != nil {

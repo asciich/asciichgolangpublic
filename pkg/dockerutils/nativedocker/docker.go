@@ -24,6 +24,18 @@ func NewDocker() dockerinterfaces.Docker {
 	return new(Docker)
 }
 
+func RunContainer(ctx context.Context, options *dockeroptions.DockerRunContainerOptions) (containerinterfaces.Container, error) {
+	return NewDocker().RunContainer(ctx, options)
+}
+
+func GetContainerByName(name string) (containerinterfaces.Container, error) {
+	return NewDocker().GetContainerByName(name)
+}
+
+func (d *Docker) GetDeepCopyAsDocker() dockerinterfaces.Docker {
+	return &Docker{}
+}
+
 func (d *Docker) GetContainerByName(name string) (containerinterfaces.Container, error) {
 	return NewContainer(name)
 }
