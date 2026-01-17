@@ -1,19 +1,19 @@
 package commandexecutorexec_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 // This test case shows how to execute a simple command using exec.
 func Test_EchoHelloWorld(t *testing.T) {
-	// Get a context
-	ctx := context.TODO()
+	// Use a background context with verbose output enabled:
+	ctx := contextutils.ContextVerbose()
 
 	// execute the command
 	output, err := commandexecutorexec.RunCommand(

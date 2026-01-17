@@ -50,15 +50,19 @@ func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	command, err := options.GetCommand()
+	command, err := options.GetFullCommand()
 	if err != nil {
 		return nil, err
 	}
 
-	commandJoined, err := options.GetJoinedCommand()
+	commandJoined, err := options.GetJoinedFullCommand()
 	if err != nil {
 		return nil, err
 	}
+
+	hostDescription := "localhost"
+
+	logging.LogInfoByCtxf(ctx, "Exec command '%s' on '%s' started.", commandJoined, hostDescription)
 
 	const avoidExecEnvVarName = "ASCIICHGOLANGPUBLIC_AVOID_EXEC"
 	const trueValue = "1"
@@ -72,7 +76,7 @@ func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions
 	}
 
 	cmd := exec.Command(command[0])
-	if len(options.Command) > 1 {
+	if len(command) > 1 {
 		cmd = exec.Command(command[0], command[1:]...)
 	}
 
@@ -237,6 +241,8 @@ func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions
 			return commandOutput, tracederrors.TracedError(errorMessage)
 		}
 	}
+
+	logging.LogInfoByCtxf(ctx, "Exec command '%s' on '%s' finished.", commandJoined, hostDescription)
 
 	return commandOutput, nil
 }

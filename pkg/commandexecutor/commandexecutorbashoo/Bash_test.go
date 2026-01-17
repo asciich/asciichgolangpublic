@@ -3,6 +3,7 @@ package commandexecutorbashoo_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -345,4 +346,53 @@ func TestBashRunCommandStdin(t *testing.T) {
 			},
 		)
 	}
+}
+
+func TestTimeout(t *testing.T) {
+	t.Run("without timeout", func(t *testing.T) {
+		ctx := getCtx()
+		output, err := commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsString(
+			ctx,
+			&parameteroptions.RunCommandOptions{
+				Command: []string{"sleep", "1", "&&", "echo", "hallo"},
+			},
+		)
+		require.NoError(t, err)
+		require.EqualValues(t, "hallo", strings.TrimSpace(output))
+	})
+
+	t.Run("with timeout", func(t *testing.T) {
+		ctx := getCtx()
+		output, err := commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsString(
+			ctx,
+			&parameteroptions.RunCommandOptions{
+				Command:       []string{"sleep", "2", "&&", "echo", "hallo"},
+				TimeoutString: "1s",
+			},
+		)
+		require.Error(t, err)
+		require.Empty(t, output)
+	})
+
+	t.Run("with timeout and exit code", func(t *testing.T) {
+		ctx := getCtx()
+		output, err := commandexecutorbashoo.Bash().RunCommand(
+			ctx,
+			&parameteroptions.RunCommandOptions{
+				Command:           []string{"sleep", "2", "&&", "echo", "hallo"},
+				TimeoutString:     "1s",
+				AllowAllExitCodes: true,
+			},
+		)
+		require.NoError(t, err)
+		require.False(t, output.IsExitSuccess())
+
+		exitCode, err := output.GetReturnCode()
+		require.NoError(t, err)
+		require.EqualValues(t, 124, exitCode)
+
+		stdout, err := output.GetStdoutAsString()
+		require.NoError(t, err)
+		require.EqualValues(t, "", stdout)
+	})
 }

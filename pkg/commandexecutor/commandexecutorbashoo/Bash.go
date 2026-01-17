@@ -25,7 +25,7 @@ func NewBashService() (b *BashService) {
 	return b
 }
 
-func (b *BashService) GetDeepCopy() (deepCopy commandexecutorinterfaces.CommandExecutor) {
+func (b *BashService) GetDeepCopyAsCommandExecutor() (deepCopy commandexecutorinterfaces.CommandExecutor) {
 	d := NewBashService()
 
 	*d = *b

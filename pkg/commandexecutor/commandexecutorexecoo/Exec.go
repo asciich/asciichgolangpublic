@@ -32,7 +32,7 @@ func NewExecService() (e *ExecService) {
 	return new(ExecService)
 }
 
-func (e *ExecService) GetDeepCopy() (deepCopy commandexecutorinterfaces.CommandExecutor) {
+func (e *ExecService) GetDeepCopyAsCommandExecutor() (deepCopy commandexecutorinterfaces.CommandExecutor) {
 	d := NewExec()
 	*d = *e
 	deepCopy = d
