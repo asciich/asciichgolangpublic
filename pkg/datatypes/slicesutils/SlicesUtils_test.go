@@ -145,6 +145,7 @@ func TestSlicesRemoveMatchingStrings(t *testing.T) {
 		{[]string{"a", "b"}, "a", []string{"b"}},
 		{[]string{"a", "b", "a"}, "a", []string{"b"}},
 		{[]string{"a", "b", "c"}, "a", []string{"b", "c"}},
+		{[]string{"a", "b", "c"}, "[ab]", []string{"c"}},
 	}
 
 	for _, tt := range tests {

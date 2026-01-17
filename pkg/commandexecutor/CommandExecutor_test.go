@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
@@ -46,8 +45,7 @@ func TestCommandExecutor_GetDeepCopyOfCommandExecutor(t *testing.T) {
 			func(t *testing.T) {
 				commandExecutor := getCommandExecutorByImplementationName(tt.implementationName)
 
-				copy, err := commandexecutor.GetDeepCopyOfCommandExecutor(commandExecutor)
-				require.NoError(t, err)
+				copy := commandExecutor.GetDeepCopyAsCommandExecutor()
 
 				expectedHostDescription, err := commandExecutor.GetHostDescription()
 				require.NoError(t, err)

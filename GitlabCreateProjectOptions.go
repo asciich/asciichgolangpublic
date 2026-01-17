@@ -54,7 +54,7 @@ func (o *GitlabCreateProjectOptions) GetGroupNames(ctx context.Context) (groupNa
 
 	groupNames = strings.Split(pathOnly, "/")
 	groupNames = slicesutils.RemoveEmptyStrings(groupNames)
-	groupNames = slicesutils.RemoveMatchingStrings(groupNames, ".")
+	groupNames = slicesutils.RemoveMatchingStrings(groupNames, "\\.")
 
 	logging.LogInfoByCtxf(ctx, "Gitlab create project options: Evaluated group names '%v' from project path '%s'", groupNames, projectPath)
 
