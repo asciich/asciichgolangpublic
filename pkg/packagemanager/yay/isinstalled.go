@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -15,7 +14,7 @@ func IsInstalled(ctx context.Context, commandExecutor commandexecutorinterfaces.
 		return false, tracederrors.TracedErrorNil("commandExecutor")
 	}
 
-	isInstalled, err := osutils.IsCommandAvailable(contextutils.WithSilent(ctx), commandExecutor, "yay")
+	isInstalled, err := osutils.IsCommandAvailable(ctx, commandExecutor, "yay")
 	if err != nil {
 		return false, err
 	}

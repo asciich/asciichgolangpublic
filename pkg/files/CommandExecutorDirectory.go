@@ -198,6 +198,7 @@ func (c *CommandExecutorDirectory) Create(ctx context.Context, options *filesopt
 	return nil
 }
 
+// Already moved to commandexecutorfileoo
 func (c *CommandExecutorDirectory) CreateSubDirectory(ctx context.Context, subDirectoryName string, options *filesoptions.CreateOptions) (createdSubDirectory filesinterfaces.Directory, err error) {
 	if subDirectoryName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("subDirectoryName")
@@ -216,6 +217,7 @@ func (c *CommandExecutorDirectory) CreateSubDirectory(ctx context.Context, subDi
 	return createdSubDirectory, nil
 }
 
+// Already moved to commandexecutorfileoo
 func (c *CommandExecutorDirectory) Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error) {
 	commandExecutor, dirPath, hostDescription, err := c.GetCommandExecutorAndDirPathAndHostDescription()
 	if err != nil {
@@ -371,6 +373,7 @@ func (c *CommandExecutorDirectory) GetDirPath() (dirPath string, err error) {
 	return c.dirPath, nil
 }
 
+// Already moved to commandexecutorfilesoo.
 func (c *CommandExecutorDirectory) GetFileInDirectory(pathToFile ...string) (file filesinterfaces.File, err error) {
 	if len(pathToFile) <= 0 {
 		return nil, tracederrors.TracedErrorNil("pathToFile")
@@ -422,6 +425,7 @@ func (c *CommandExecutorDirectory) GetHostDescription() (hostDescription string,
 	return hostDescription, nil
 }
 
+// Already moved to commandexecutorfileoo
 func (c *CommandExecutorDirectory) GetLocalPath() (localPath string, err error) {
 	isLocalDirectory, err := c.IsLocalDirectory()
 	if err != nil {
@@ -475,6 +479,7 @@ func (c *CommandExecutorDirectory) GetPath() (path string, err error) {
 	return path, nil
 }
 
+// Already moved to commandexecutorfileoo
 func (c *CommandExecutorDirectory) GetSubDirectory(path ...string) (subDirectory filesinterfaces.Directory, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedErrorNil("path")
@@ -512,6 +517,7 @@ func (c *CommandExecutorDirectory) GetSubDirectory(path ...string) (subDirectory
 	return subdir, nil
 }
 
+// Already moved to commandexecutorfileoo
 func (c *CommandExecutorDirectory) IsLocalDirectory() (isLocalDirectory bool, err error) {
 	hostDescription, err := c.GetHostDescription()
 	if err != nil {
@@ -523,6 +529,7 @@ func (c *CommandExecutorDirectory) IsLocalDirectory() (isLocalDirectory bool, er
 	return isLocalDirectory, nil
 }
 
+// Already moved to commandexecutorfileoo
 func (c *CommandExecutorDirectory) ListFilePaths(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error) {
 	if listFileOptions == nil {
 		return nil, tracederrors.TracedErrorNil("listFileOptions")
@@ -570,6 +577,7 @@ func (c *CommandExecutorDirectory) ListFilePaths(ctx context.Context, listFileOp
 	return filePaths, nil
 }
 
+// Already moved to commandexecutorfileoo
 func (c *CommandExecutorDirectory) ListFiles(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (files []filesinterfaces.File, err error) {
 	if listFileOptions == nil {
 		return nil, tracederrors.TracedErrorNil("listFileOptions")

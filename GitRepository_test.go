@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/commandexecutorgitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -30,9 +31,7 @@ func getGitRepositoryToTest(implementationName string) (repo gitinterfaces.GitRe
 			mustutils.Must(tempfilesoo.CreateEmptyTemporaryDirectory(ctx)),
 		)
 	} else if implementationName == "localCommandExecutorRepository" {
-		repo = mustutils.Must(GetLocalCommandExecutorGitRepositoryByDirectory(
-			mustutils.Must(tempfilesoo.CreateEmptyTemporaryDirectory(ctx)),
-		))
+		repo = mustutils.Must(commandexecutorgitoo.CreateLocalTemporaryRepository(ctx, &parameteroptions.CreateRepositoryOptions{}))
 	} else {
 		logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)
 	}
@@ -506,7 +505,7 @@ func TestGitRepository_GetRootDirectory_from_subdirectory(t *testing.T) {
 				subDir, err := repo.CreateSubDirectory(ctx, "sub_directory", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
-				repoUsingSubDir1, err := GetCommandExecutorGitRepositoryFromDirectory(subDir)
+				repoUsingSubDir1, err := commandexecutorgitoo.NewFromDirectory(subDir)
 				require.NoError(t, err)
 
 				require.EqualValues(t, expectedRootDirectory, mustutils.Must(repoUsingSubDir1.GetRootDirectoryPath(ctx)))
@@ -1450,7 +1449,9 @@ func TestGitRepository_IsGolangApplication_NoMainFunction(t *testing.T) {
 				_, err = gitRepo.WriteStringToFile(ctx, "main.go", "package main\nfunc abc() bool {\n\treturn true\n}\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				require.False(t, mustutils.Must(gitRepo.IsGolangApplication(ctx)))
+				isGolangApplication, err := gitRepo.IsGolangApplication(ctx)
+				require.NoError(t, err)
+				require.False(t, isGolangApplication)
 			},
 		)
 	}

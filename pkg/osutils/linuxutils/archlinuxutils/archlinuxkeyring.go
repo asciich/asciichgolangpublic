@@ -53,9 +53,9 @@ Running this before an system update makes sense to ensure all signing keys are 
 						return err
 					}
 
-					return pacman.InstallPackage(
+					return pacman.InstallPackages(
 						ctx,
-						"archlinux-keyring",
+						[]string{"archlinux-keyring"},
 						&packagemanageroptions.InstallPackageOptions{
 							UpdatePackage:       true,
 							UpdateDatabaseFirst: false, // Update was already done in previous step.

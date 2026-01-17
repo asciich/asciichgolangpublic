@@ -65,6 +65,22 @@ func NewCommandExecutorHost() (c *CommandExecutorHost) {
 	return c
 }
 
+func (c *CommandExecutorHost) GetDeepCopy() *CommandExecutorHost {
+	ret := &CommandExecutorHost{
+		Comment: c.Comment,
+	}
+
+	if c.commandExecutor != nil {
+		ret.commandExecutor = c.commandExecutor.GetDeepCopyAsCommandExecutor()
+	}
+
+	return ret
+}
+
+func (c *CommandExecutorHost) GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor {
+	return c.GetDeepCopy()
+}
+
 func (c *CommandExecutorHost) GetFileInUsersHome(ctx context.Context, userName string, path string) (file filesinterfaces.File, err error) {
 	if userName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("userName")

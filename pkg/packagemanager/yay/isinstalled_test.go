@@ -1,20 +1,14 @@
 package yay_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/yay"
 )
-
-func getCtx() context.Context {
-	return contextutils.ContextVerbose()
-}
 
 func getArchLinuxContainer(t *testing.T) containerinterfaces.Container {
 	container, err := nativedocker.NewDocker().RunContainer(getCtx(),
