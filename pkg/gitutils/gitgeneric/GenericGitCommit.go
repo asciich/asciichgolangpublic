@@ -1,5 +1,4 @@
-package asciichgolangpublic
-
+package gitgeneric
 import (
 	"context"
 	"sort"

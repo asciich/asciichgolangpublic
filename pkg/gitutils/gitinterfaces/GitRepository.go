@@ -19,6 +19,7 @@ type GitRepository interface {
 	CheckoutBranchByName(ctx context.Context, name string) (err error)
 	CloneRepository(ctx context.Context, repository GitRepository) (err error)
 	CloneRepositoryByPathOrUrl(ctx context.Context, pathOrUrl string) (err error)
+	CloneToTemporaryRepository(ctx context.Context) (GitRepository, error)
 	Commit(ctx context.Context, commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit GitCommit, err error)
 	CommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool, err error)
 	CreateBranch(ctx context.Context, createOptions *parameteroptions.CreateBranchOptions) (err error)

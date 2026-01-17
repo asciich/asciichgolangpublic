@@ -2,6 +2,7 @@ package aicmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/aiutils"
@@ -11,9 +12,16 @@ import (
 )
 
 func NewConcatFilesToKnowledgeFileCmd() *cobra.Command {
+	const short = "Concat files in a directory to one knowledge file."
+
 	cmd := &cobra.Command{
 		Use:   "concat-files-to-knowledge-file",
-		Short: "Concat files in a directory to one knowledge file.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` ai concat-files-to-knowledge-file --verbose [toplevel dir with knowledgefiles] > documentation.markdown
+`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

@@ -3,12 +3,16 @@ package containerinterfaces
 import (
 	"context"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 type Container interface {
+	// Get a deep copy of the instance:
+	GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor
+
 	// Get the name of the container.
 	GetName() (string, error)
 

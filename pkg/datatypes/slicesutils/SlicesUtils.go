@@ -2,6 +2,7 @@ package slicesutils
 
 import (
 	"math"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -433,14 +434,20 @@ func RemoveEmptyStringsAtEnd(input []string) (withoutEmptyStringsAtEnd []string)
 	return withoutEmptyStringsAtEnd
 }
 
-func RemoveMatchingStrings(sliceToRemoveMatching []string, matchingStringToRemove string) (cleanedUpSlice []string) {
+// Remove all strings matching the given 'matchingRegex'.
+func RemoveMatchingStrings(sliceToRemoveMatching []string, matchingRegex string) (cleanedUpSlice []string) {
 	if len(sliceToRemoveMatching) <= 0 {
 		return []string{}
 	}
 
+	regex, err := regexp.Compile(matchingRegex)
+	if err != nil {
+		panic("matchingStringToRemove: '" + matchingRegex + "' :" + err.Error())
+	}
+
 	cleanedUpSlice = []string{}
 	for _, s := range sliceToRemoveMatching {
-		if s == matchingStringToRemove {
+		if regex.MatchString(s) {
 			continue
 		}
 

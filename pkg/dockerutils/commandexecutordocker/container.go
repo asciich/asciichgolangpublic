@@ -3,6 +3,7 @@ package commandexecutordocker
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -32,7 +33,22 @@ type CommandExecutorDockerContainer struct {
 }
 
 func NewCommandExecutorDockerContainer() (c *CommandExecutorDockerContainer) {
-	return new(CommandExecutorDockerContainer)
+	container := new(CommandExecutorDockerContainer)
+	container.SetParentCommandExecutorForBaseClass(container)
+	return container
+}
+
+func (c *CommandExecutorDockerContainer) GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor {
+	ret := &CommandExecutorDockerContainer{
+		name: c.name,
+		id:   c.id,
+	}
+
+	if c.docker != nil {
+		ret.docker = c.docker.GetDeepCopyAsDocker()
+	}
+
+	return ret
 }
 
 func (c *CommandExecutorDockerContainer) SetCachedName(cachedName string) (err error) {
@@ -225,28 +241,44 @@ func (c *CommandExecutorDockerContainer) RunCommand(ctx context.Context, runOpti
 		return nil, err
 	}
 
+	newCommand := []string{"docker", "exec"}
+	if runOptions.RunAsUser != "" {
+		username := runOptions.RunAsUser
+		id, err := strconv.Atoi(username)
+		if err != nil {
+			idString, err := commandExecutor.RunCommandAndGetStdoutAsString(ctx, &parameteroptions.RunCommandOptions{Command: []string{"docker", "exec", name, "id", "-u", runOptions.RunAsUser}})
+			if err != nil {
+				return nil, err
+			}
+
+			id, err = strconv.Atoi(strings.TrimSpace(idString))
+			if err != nil {
+				return nil, tracederrors.TracedErrorf("Unable to get id of user '%s' to start command. idString is '%s'.", username, idString)
+			}
+		}
+
+		newCommand = append(newCommand, "-u", strconv.Itoa(id))
+	}
+
 	optionsToUse := runOptions.GetDeepCopy()
-	newCommand := []string{"docker", "exec", name}
+
+	// Starting the process as user is already handled by the docker exec and prepared above.
+	optionsToUse.RunAsUser = ""
+
+	newCommand = append(newCommand, name)
 	newCommand = append(newCommand, command...)
+
 	err = optionsToUse.SetCommand(newCommand)
 	if err != nil {
 		return nil, err
 	}
 
-	return commandExecutor.RunCommand(ctx, optionsToUse)
-}
-
-func (c *CommandExecutorDockerContainer) RunCommandAndGetStdoutAsString(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (stdout string, err error) {
-	if runOptions == nil {
-		return "", tracederrors.TracedErrorNil("runOptions")
-	}
-
-	commandExecutor, err := c.GetCommandExecutor()
+	output, err := commandExecutor.RunCommand(ctx, optionsToUse)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return commandExecutor.RunCommandAndGetStdoutAsString(ctx, runOptions)
+	return output, nil
 }
 
 func (c *CommandExecutorDockerContainer) SetName(name string) (err error) {

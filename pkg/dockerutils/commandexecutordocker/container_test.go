@@ -44,3 +44,20 @@ func Test_ContainerIsACommandExecutor(t *testing.T) {
 	commandExecutor = commandexecutordocker.NewCommandExecutorDocker()
 	require.NotNil(t, commandExecutor)
 }
+
+func TestParentSet(t *testing.T) {
+	docker, err := commandexecutordocker.GetLocalCommandExecutorDocker()
+	require.NoError(t, err)
+	require.NotNil(t, docker)
+
+	container, err := docker.GetContainerByName("testcontainer")
+	require.NoError(t, err)
+	require.NotNil(t, container)
+
+	commandExecutorContainer, ok := container.(*commandexecutordocker.CommandExecutorDockerContainer)
+	require.True(t, ok)
+
+	parent, err := commandExecutorContainer.GetParentCommandExecutorForBaseClass()
+	require.NoError(t, err)
+	require.NotNil(t, parent)
+}
