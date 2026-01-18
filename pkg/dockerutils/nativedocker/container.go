@@ -81,17 +81,22 @@ func (c *Container) Exists(ctx context.Context) (bool, error) {
 		return false, err
 	}
 
+	hostDescription, err := c.GetHostDescription()
+	if err != nil {
+		return false, err
+	}
+
 	_, err = c.inspect(ctx)
 	if err != nil {
 		if dockergeneric.IsErrorContainerNotFound(err) {
-			logging.LogInfoByCtxf(ctx, "Docker container '%s' does not exist.", name)
+			logging.LogInfoByCtxf(ctx, "Docker container '%s' does not exist on '%s'.", name, hostDescription)
 			return false, nil
 		}
 
 		return false, err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Docker container '%s' exists.", name)
+	logging.LogInfoByCtxf(ctx, "Docker container '%s' exists on '%s'.", name, hostDescription)
 	return true, nil
 }
 
@@ -140,6 +145,52 @@ func (c *Container) Kill(ctx context.Context) error {
 	return NewDocker().KillContainerByName(ctx, containerName)
 }
 
+func (c *Container) WaitUntilRemoved(ctx context.Context) error {
+	name, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	hostDescription, err := c.GetHostDescription()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Wait until container '%s' on '%s' is removed started.", name, hostDescription)
+
+	maxTries := 20
+	var exists bool
+	for i := range maxTries {
+		exists, err = c.Exists(ctx)
+		if err != nil {
+			return err
+		}
+
+		if exists {
+			if i+1 >= maxTries {
+				break
+			}
+
+			duration := time.Millisecond * 500
+			logging.LogInfoByCtxf(ctx, "Container '%s' still present on host '%s'. Waiting another %v (%d/%d)", name, hostDescription, duration, i+1, maxTries)
+			time.Sleep(duration)
+			continue
+		} else {
+			logging.LogInfoByCtxf(ctx, "Container '%s' is now absent on '%s'.", name, hostDescription)
+		}
+
+		break
+	}
+
+	if exists {
+		return tracederrors.TracedErrorf("Failed to wait for container '%s' to be deleted on '%s'. Container still available.", name, hostDescription)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Wait until container '%s' on '%s' is removed finished.", name, hostDescription)
+
+	return nil
+}
+
 func (c *Container) Remove(ctx context.Context, options *dockeroptions.RemoveOptions) error {
 	if options == nil {
 		options = new(dockeroptions.RemoveOptions)
@@ -181,7 +232,14 @@ func (c *Container) Remove(ctx context.Context, options *dockeroptions.RemoveOpt
 		}
 		_, err = cli.ContainerRemove(ctx, name, clientOptions)
 		if err != nil {
-			return tracederrors.TracedErrorf("Failed to delete container '%s' on host '%s': %w", name, hostDescription, err)
+			if !IsRemovalAlreadyInProgressError(err) {
+				return tracederrors.TracedErrorf("Failed to delete container '%s' on host '%s': %w", name, hostDescription, err)
+			}
+		}
+
+		err = c.WaitUntilRemoved(ctx)
+		if err != nil {
+			return err
 		}
 
 		logging.LogChangedByCtxf(ctx, "Docker container '%s' removed on host '%s'.", name, hostDescription)
