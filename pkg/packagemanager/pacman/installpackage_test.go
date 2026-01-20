@@ -20,7 +20,7 @@ func getPacmanInContainer(ctx context.Context, t *testing.T) (*pacman.Pacman, co
 
 	err = container.Run(ctx, &dockeroptions.DockerRunContainerOptions{
 		ImageName: "archlinux:base-20250727.0.390543",
-		Command:   []string{"sleep", "1m"},
+		Command:   []string{"sleep", "2m"},
 	})
 	require.NoError(t, err)
 
