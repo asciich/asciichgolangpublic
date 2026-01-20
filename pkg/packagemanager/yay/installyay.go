@@ -6,7 +6,9 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/exitcodes"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/commandexecutorgitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -153,17 +155,62 @@ func InstallYay(ctx context.Context, commandExecutor commandexecutorinterfaces.C
 		if err != nil {
 			return err
 		}
-		logging.LogInfoByCtxf(ctx, "Build yay package using '%s' started.", cmdJoined)
-		_, err = commandExecutor.RunCommand(
-			commandexecutorgeneric.WithLiveOutputOnStdout(contextutils.WithSilent(ctx)),
-			&parameteroptions.RunCommandOptions{
-				Command:            cmd,
-				RunAsUser:          YAY_INSTALLATION_USER,
-				UseSudoToRunAsUser: options.UseSudo,
-			})
-		if err != nil {
-			return err
+
+		const maxTries = 2
+		var successfullyBuild bool
+		var output *commandoutput.CommandOutput
+		for i := range maxTries {
+			logging.LogInfoByCtxf(ctx, "Build yay package using '%s' started.", cmdJoined)
+			output, err = commandExecutor.RunCommand(
+				commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
+				&parameteroptions.RunCommandOptions{
+					Command:            cmd,
+					RunAsUser:          YAY_INSTALLATION_USER,
+					UseSudoToRunAsUser: options.UseSudo,
+					AllowAllExitCodes:  true,
+				})
+			if err != nil {
+				return err
+			}
+
+			if output.IsExitSuccess() {
+				successfullyBuild = true
+				break
+			}
+
+			returnCode, err := output.GetReturnCode()
+			if err != nil {
+				return err
+			}
+
+			if returnCode == exitcodes.EXIT_CODE_OUT_OF_MEMORY {
+				if i >= maxTries {
+					logging.LogWarnByCtxf(ctx, "Building yay package was out of memory killed. Stop retrying after %d tries.", maxTries)
+				} else {
+					logging.LogWarnByCtxf(ctx, "Building yay package was out of memory killed. Going to retry (%d/%d)", i+1, maxTries)
+					continue
+				}
+			}
+
+			break
 		}
+
+		if successfullyBuild {
+			logging.LogChangedByCtxf(ctx, "Successfully build yay package.")
+		} else {
+			stderr, err := output.GetStderrAsString()
+			if err != nil {
+				return err
+			}
+
+			exitCode, err := output.GetReturnCode()
+			if err != nil {
+				return err
+			}
+
+			return tracederrors.TracedErrorf("Failed to make yay package after '%d' tries: Last tries stderr is: '%s', exit code = %d", maxTries, stderr, exitCode)
+		}
+
 		logging.LogInfoByCtxf(ctx, "Build yay package using '%s' finished.", cmdJoined)
 
 		cmd = []string{"bash", "-c", fmt.Sprintf("cd '%s' && pacman -U yay-*.pkg.tar.*z* --noconfirm 2>&1", yayRepoPath)}
