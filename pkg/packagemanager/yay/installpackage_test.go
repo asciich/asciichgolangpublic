@@ -34,7 +34,7 @@ func getYayInContainer(ctx context.Context, t *testing.T) (*yay.Yay, containerin
 	return yay, container
 }
 
-func Test_InstallPackage(t *testing.T) {
+func Test_InstallPackageYay(t *testing.T) {
 	t.Run("empty package name", func(t *testing.T) {
 		ctx := getCtx()
 		yay, container := getYayInContainer(ctx, t)
