@@ -35,8 +35,14 @@ func NewDownloadPageCmd() *cobra.Command {
 				logging.LogGoErrorFatal(err)
 			}
 
+			convertToMarkdown, err := cmd.Flags().GetBool("convert-to-markdown")
+			if err != nil {
+				logging.LogGoErrorFatal(err)
+			}
+
 			mustutils.Must0(atlassianconfluenceutils.DownloadPageContent(ctx, url, outputDir, &atlassianconfluenceutils.DownloadPageContentOptions{
-				Recursive: recursive,
+				Recursive:        recursive,
+				ConvertToMdFiles: convertToMarkdown,
 			}))
 
 			logging.LogGoodByCtxf(ctx, "Download wiki page %s finished.", url)
@@ -45,6 +51,7 @@ func NewDownloadPageCmd() *cobra.Command {
 
 	cmd.PersistentFlags().String("output-dir", "", "The output directory to write the downloaded wiki page.")
 	cmd.PersistentFlags().Bool("recursive", false, "If set the child pages are downloaded as well.")
+	cmd.PersistentFlags().Bool("convert-to-markdown", false, "If set the pages are converted and stored in markdown format instead of HTML.")
 
 	return cmd
 }
