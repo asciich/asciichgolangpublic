@@ -12,6 +12,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/documentutils/documentconverter"
 	"github.com/asciich/asciichgolangpublic/pkg/fileformats/htmlutils"
 	"github.com/asciich/asciichgolangpublic/pkg/fileformats/jsonutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
@@ -268,7 +269,11 @@ func GetPageIdFromUrl(ctx context.Context, url string) (string, error) {
 	return pageId, nil
 }
 
-func downloadSinglePageContent(ctx context.Context, url string, outputDir string) error {
+func downloadSinglePageContent(ctx context.Context, url string, outputDir string, options *DownloadPageContentOptions) error {
+	if options == nil {
+		options = &DownloadPageContentOptions{}
+	}
+
 	if url == "" {
 		return tracederrors.TracedErrorEmptyString("url")
 	}
@@ -313,7 +318,7 @@ func downloadSinglePageContent(ctx context.Context, url string, outputDir string
 		return err
 	}
 
-	pageOutputDir := filepath.Join(outputDir, baseUrl, filepath.Dir(webuiPath))
+	pageOutputDir := filepath.Join(outputDir, strings.ReplaceAll(strings.ReplaceAll(baseUrl, "/", "_"), ":", "_"), webuiPath)
 
 	err = nativefiles.CreateDirectory(ctx, pageOutputDir, &filesoptions.CreateOptions{})
 	if err != nil {
@@ -321,15 +326,25 @@ func downloadSinglePageContent(ctx context.Context, url string, outputDir string
 	}
 
 	contentBaseName := fmt.Sprintf("%s_content.html", pageId)
+	if options.ConvertToMdFiles {
+		contentBaseName = fmt.Sprintf("%s_content.md", pageId)
+	}
 
 	content, err := jsonutils.RunJqAgainstJsonStringAsString(rawResponse, ".body.storage.value")
 	if err != nil {
 		return err
 	}
 
-	content, err = htmlutils.PrettyFormat(content)
-	if err != nil {
-		return err
+	if options.ConvertToMdFiles {
+		content, err = documentconverter.HtmlStringToMdString(content)
+		if err != nil {
+			return err
+		}
+	} else {
+		content, err = htmlutils.PrettyFormat(content)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = nativefiles.WriteString(ctx, filepath.Join(pageOutputDir, contentBaseName), content)
@@ -377,7 +392,7 @@ func DownloadPageContent(ctx context.Context, url string, outputDir string, opti
 
 	logging.LogInfoByCtxf(ctx, "Download page content of %s started.", url)
 
-	err := downloadSinglePageContent(ctx, url, outputDir)
+	err := downloadSinglePageContent(ctx, url, outputDir, options)
 	if err != nil {
 		return err
 	}
@@ -396,7 +411,7 @@ func DownloadPageContent(ctx context.Context, url string, outputDir string, opti
 		}
 
 		for _, id := range ids {
-			err = downloadSinglePageContent(ctx, baseUrl+"/rest/api/content/"+id+"/child/page", outputDir)
+			err = downloadSinglePageContent(ctx, baseUrl+"/rest/api/content/"+id+"/child/page", outputDir, options)
 			if err != nil {
 				return err
 			}
