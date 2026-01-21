@@ -2,6 +2,7 @@ package commandexecutorexecoo_test
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -105,5 +106,61 @@ func TestExecRunCommandStdin(t *testing.T) {
 				require.EqualValues(t, tt.expectedOutput, output2)
 			},
 		)
+	}
+}
+
+func TestExecEnvVar(t *testing.T) {
+	t.Run("env var not set", func(t *testing.T) {
+		ctx := getCtx()
+		stdout, err := commandexecutorexecoo.Exec().RunCommandAndGetStdoutAsString(
+			ctx,
+			&parameteroptions.RunCommandOptions{
+				Command: []string{"bash", "-c", "echo -en \"${MY_ENV}\""},
+			},
+		)
+		require.NoError(t, err)
+		require.Empty(t, stdout)
+	})
+
+	tests := []struct {
+		value string
+	}{
+		{"a"},
+		{"hello"},
+		{"hello world"},
+		{"HELLO WORLD"},
+	}
+
+	for _, tt := range tests {
+		t.Run("env var set: "+tt.value, func(t *testing.T) {
+			ctx := getCtx()
+			stdout, err := commandexecutorexecoo.Exec().RunCommandAndGetStdoutAsString(
+				ctx,
+				&parameteroptions.RunCommandOptions{
+					Command: []string{"bash", "-c", "echo -en \"${MY_ENV}\""},
+					AdditionalEnvVars: map[string]string{
+						"MY_ENV": tt.value,
+					},
+				},
+			)
+			require.NoError(t, err)
+			require.EqualValues(t, tt.value, stdout)
+
+			// Addionally the PATH variable is check to ensure it's not overwritten or absent after defining AdditionalEnvVars:
+			pathValue := os.Getenv("PATH")
+			require.NotEmpty(t, pathValue)
+
+			stdout, err = commandexecutorexecoo.Exec().RunCommandAndGetStdoutAsString(
+				ctx,
+				&parameteroptions.RunCommandOptions{
+					Command: []string{"bash", "-c", "echo -en \"${PATH}\""},
+					AdditionalEnvVars: map[string]string{
+						"MY_ENV": tt.value,
+					},
+				},
+			)
+			require.NoError(t, err)
+			require.EqualValues(t, pathValue, stdout)
+		})
 	}
 }
