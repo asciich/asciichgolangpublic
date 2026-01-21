@@ -23,6 +23,9 @@ type RunCommandOptions struct {
 	UseSudoToRunAsUser bool
 
 	RemoveLastLineIfEmpty bool
+
+	// These env vars are merged to the default env vars.
+	AdditionalEnvVars map[string]string
 }
 
 func NewRunCommandOptions() (runCommandOptions *RunCommandOptions) {

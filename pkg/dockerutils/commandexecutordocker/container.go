@@ -242,6 +242,11 @@ func (c *CommandExecutorDockerContainer) RunCommand(ctx context.Context, runOpti
 	}
 
 	newCommand := []string{"docker", "exec"}
+
+	for k, v := range runOptions.AdditionalEnvVars {
+		newCommand = append(newCommand, "-e", k + "=" + v)
+	}
+
 	if runOptions.RunAsUser != "" {
 		username := runOptions.RunAsUser
 		id, err := strconv.Atoi(username)

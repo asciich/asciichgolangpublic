@@ -20,6 +20,17 @@ func getCtx() context.Context {
 	return contextutils.ContextVerbose()
 }
 
+func getRunningDockerContainerToTest(t *testing.T, implementationName string, containerName string) (containerinterfaces.Container, dockerinterfaces.Docker) {
+	container, docker := getDockerContainerToTest(t, implementationName, containerName)
+	err := container.Run(getCtx(), &dockeroptions.DockerRunContainerOptions{
+		ImageName: "ubuntu",
+		Command:   []string{"sleep", "1m"},
+	})
+	require.NoError(t, err)
+
+	return container, docker
+}
+
 func getDockerContainerToTest(t *testing.T, implementationName string, containerName string) (containerinterfaces.Container, dockerinterfaces.Docker) {
 	if implementationName == "commandExectuorDockerContainer" {
 		docker, err := commandexecutordocker.GetLocalCommandExecutorDocker()
@@ -213,12 +224,82 @@ func Test_Container_GetHostDescription(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
+				ctx := getCtx()
+
 				container, _ := getDockerContainerToTest(t, tt.implementationName, tt.containerName)
+				defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
 
 				hostDescription, err := container.GetHostDescription()
 				require.NoError(t, err)
 				require.EqualValues(t, tt.expected, hostDescription)
 			},
 		)
+	}
+}
+
+func TestAdditionalEnvVarsDockerContainers(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeDocker"},
+		{"commandExectuorDockerContainer"},
+	}
+	for _, tt := range tests {
+		t.Run("env var not set "+tt.implementationName, func(t *testing.T) {
+			ctx := getCtx()
+			container, _ := getRunningDockerContainerToTest(t, tt.implementationName, "test-additional-env-vars-not-set")
+			defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+			stdout, err := container.RunCommandAndGetStdoutAsString(
+				ctx,
+				&parameteroptions.RunCommandOptions{
+					Command: []string{"bash", "-c", "echo -en \"${MY_ENV}\""},
+				},
+			)
+			require.NoError(t, err)
+			require.Empty(t, stdout)
+		})
+	}
+
+	testsValues := []struct {
+		value string
+	}{
+		{"a"},
+		{"hello"},
+		{"hello world"},
+		{"HELLO WORLD"},
+	}
+
+	for _, tt := range tests {
+		for _, v := range testsValues {
+			t.Run("env var set: "+tt.implementationName+" "+v.value, func(t *testing.T) {
+				ctx := getCtx()
+				container, _ := getRunningDockerContainerToTest(t, tt.implementationName, "test-additional-env-vars-not-set")
+				defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+				stdout, err := container.RunCommandAndGetStdoutAsString(
+					ctx,
+					&parameteroptions.RunCommandOptions{
+						Command: []string{"bash", "-c", "echo -en \"${MY_ENV}\""},
+						AdditionalEnvVars: map[string]string{
+							"MY_ENV": v.value,
+						},
+					},
+				)
+				require.NoError(t, err)
+				require.EqualValues(t, v.value, stdout)
+
+				// Addionally the PATH variable is check to ensure it's not overwritten or absent after defining AdditionalEnvVars:
+				stdout, err = container.RunCommandAndGetStdoutAsString(
+					ctx,
+					&parameteroptions.RunCommandOptions{
+						Command: []string{"bash", "-c", "echo -en \"${PATH}\""},
+						AdditionalEnvVars: map[string]string{
+							"MY_ENV": v.value,
+						},
+					},
+				)
+				require.NoError(t, err)
+				require.Contains(t, stdout, "/bin")
+			})
+		}
 	}
 }

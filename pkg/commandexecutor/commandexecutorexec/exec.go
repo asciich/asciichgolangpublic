@@ -11,6 +11,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
+	"github.com/asciich/asciichgolangpublic/pkg/environmentvariables"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/windowsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -89,6 +90,15 @@ func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions
 	cmd.Stderr = &stderr
 
 	commandOutput := new(commandoutput.CommandOutput)
+
+	if len(options.AdditionalEnvVars) > 0 {
+		envVars, err := environmentvariables.SetEnvVarsInStringSlice(os.Environ(), options.AdditionalEnvVars)
+		if err != nil {
+			return nil, err
+		}
+
+		cmd.Env = envVars
+	}
 
 	writeStdin := options.IsStdinStringSet()
 

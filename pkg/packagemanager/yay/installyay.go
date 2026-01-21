@@ -156,11 +156,18 @@ func InstallYay(ctx context.Context, commandExecutor commandexecutorinterfaces.C
 			return err
 		}
 
-		const maxTries = 2
+		const maxTries = 3
 		var successfullyBuild bool
 		var output *commandoutput.CommandOutput
 		for i := range maxTries {
 			logging.LogInfoByCtxf(ctx, "Build yay package using '%s' started.", cmdJoined)
+			env := map[string]string{}
+			if i > 0 {
+				const name = "GOMAXPROCS"
+				const value = "1"
+				logging.LogInfoByCtxf(ctx, "Reduce number of parallel go builds to reduce memory footprint in retry %d using %s=%s .", i, name, value)
+				env[name] = value
+			}
 			output, err = commandExecutor.RunCommand(
 				commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
 				&parameteroptions.RunCommandOptions{
@@ -168,6 +175,7 @@ func InstallYay(ctx context.Context, commandExecutor commandexecutorinterfaces.C
 					RunAsUser:          YAY_INSTALLATION_USER,
 					UseSudoToRunAsUser: options.UseSudo,
 					AllowAllExitCodes:  true,
+					AdditionalEnvVars:  env,
 				})
 			if err != nil {
 				return err
@@ -196,7 +204,7 @@ func InstallYay(ctx context.Context, commandExecutor commandexecutorinterfaces.C
 		}
 
 		if successfullyBuild {
-			logging.LogChangedByCtxf(ctx, "Successfully build yay package.")
+			logging.LogInfoByCtxf(ctx, "Successfully build yay package.")
 		} else {
 			stderr, err := output.GetStderrAsString()
 			if err != nil {

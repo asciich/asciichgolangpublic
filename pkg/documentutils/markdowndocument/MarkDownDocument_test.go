@@ -239,7 +239,6 @@ func Test_ParseFromString(t *testing.T) {
 	t.Run("Verbatim with multiple lines", func(t *testing.T) {
 		document, err := markdowndocument.ParseFromString("```\nline 1\nline 2\nline 3\n```")
 		require.NoError(t, err)
-
 		rendered, err := markdowndocument.RenderAsString(document)
 		require.NoError(t, err)
 		require.EqualValues(t, "```\nline 1\nline 2\nline 3\n```\n", rendered)

@@ -14,6 +14,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockergeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/environmentvariables"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -282,15 +283,24 @@ func (c *Container) RunCommand(ctx context.Context, options *parameteroptions.Ru
 
 	isStdinSet := len(options.StdinString) > 0
 
+	var env []string
+	if options.AdditionalEnvVars != nil {
+		env, err = environmentvariables.SetEnvVarsInStringSlice(env, options.AdditionalEnvVars)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	exec, err := cli.ExecCreate(ctx, name, client.ExecCreateOptions{
 		AttachStderr: true,
 		AttachStdout: true,
 		AttachStdin:  isStdinSet,
 		Cmd:          cmd,
 		User:         options.RunAsUser,
+		Env:          env,
 	})
 	if err != nil {
-		return nil, tracederrors.TracedErrorf("Failed to exec crate to RunCommand in container '%s': %w", name, err)
+		return nil, tracederrors.TracedErrorf("Failed to exec create to RunCommand in container '%s': %w", name, err)
 	}
 
 	execId := exec.ID
@@ -373,7 +383,12 @@ func (c *Container) RunCommand(ctx context.Context, options *parameteroptions.Ru
 		}
 	}
 
-	logging.LogInfoByCtxf(ctx, "Run command '%s' in docker container '%s' finished.", cmdJoined, name)
+	exitCode, err := output.GetReturnCode()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run command '%s' in docker container '%s' finished with exit code=%d.", cmdJoined, name, exitCode)
 
 	return output, err
 }
