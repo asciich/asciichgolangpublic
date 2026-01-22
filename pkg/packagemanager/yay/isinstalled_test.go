@@ -15,7 +15,7 @@ func getArchLinuxContainer(t *testing.T) containerinterfaces.Container {
 		&dockeroptions.DockerRunContainerOptions{
 			Name:      "test-archlinux-yay",
 			ImageName: "archlinux",
-			Command:   []string{"sleep", "1m"},
+			Command:   []string{"sleep", "2m"},
 		},
 	)
 	require.NoError(t, err)

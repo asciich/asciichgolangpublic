@@ -895,10 +895,18 @@ func AddLinePrefix(content string, linePrefix string) (output string) {
 
 func ContainsAllIgnoreCase(input string, substrings []string) bool {
 	for _, s := range substrings {
-		if ! ContainsIgnoreCase(input, s) {
+		if !ContainsIgnoreCase(input, s) {
 			return false
 		}
 	}
 
 	return true
+}
+
+func HasPrefixAndSuffix(input string, prefix string, suffix string) bool {
+	if !strings.HasPrefix(input, prefix) {
+		return false
+	}
+
+	return strings.HasSuffix(input, suffix)
 }

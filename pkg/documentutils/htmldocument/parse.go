@@ -42,6 +42,23 @@ func ParseString(htmlString string) (documentinterfaces.Document, error) {
 				document.AddSubTitleByString(text)
 			case "p":
 				document.AddTextByString(text)
+			// The atlassian confluence wiki uses ac:structured-macro :
+			case "ac:structured-macro":
+				name, err := htmlutils.GetAttributeValue(c, "", "ac:name")
+				if err != nil {
+					return nil, err
+				}
+
+				if name == "code" {
+					child, err := htmlutils.GetFirstChildNodeByTagName(c, "ac:plain-text-body")
+					if err != nil {
+						return nil, err
+					}
+					text = htmlutils.GetNodeText(child)
+					document.AddCodeBlockByString(text, "")
+				} else {
+					return nil, tracederrors.TracedErrorf("Unknown ac:name: '%s'", name)
+				}
 			default:
 				return nil, tracederrors.TracedErrorf("Unknown tag '%s'", tag)
 			}
