@@ -18,7 +18,7 @@ func (d BasicDocument) GetElements() (elementes []documentinterfaces.Element) {
 	return d.elements
 }
 
-func (d *BasicDocument) AddElement(element documentinterfaces.Element) (err error) {
+func (d *BasicDocument) AddElement(element documentinterfaces.Element) error {
 	if element == nil {
 		return tracederrors.TracedErrorNil("element")
 	}
@@ -42,7 +42,7 @@ func (d *BasicDocument) AddTable() (spreadsheet *spreadsheet.SpreadSheet, err er
 	return toAdd.GetSpreadSheet()
 }
 
-func (d *BasicDocument) AddTitleByString(title string) (err error) {
+func (d *BasicDocument) AddTitleByString(title string) error {
 	if title == "" {
 		return tracederrors.TracedErrorEmptyString("title")
 	}
@@ -52,15 +52,10 @@ func (d *BasicDocument) AddTitleByString(title string) (err error) {
 		return err
 	}
 
-	err = d.AddElement(toAdd)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return d.AddElement(toAdd)
 }
 
-func (d *BasicDocument) AddSubTitleByString(subtitle string) (err error) {
+func (d *BasicDocument) AddSubTitleByString(subtitle string) error {
 	if subtitle == "" {
 		return tracederrors.TracedErrorEmptyString("subtitle")
 	}
@@ -78,7 +73,7 @@ func (d *BasicDocument) AddSubTitleByString(subtitle string) (err error) {
 	return nil
 }
 
-func (d *BasicDocument) AddSubSubTitleByString(subsubtitle string) (err error) {
+func (d *BasicDocument) AddSubSubTitleByString(subsubtitle string) error {
 	if subsubtitle == "" {
 		return tracederrors.TracedErrorEmptyString("subsubtitle")
 	}
@@ -88,15 +83,10 @@ func (d *BasicDocument) AddSubSubTitleByString(subsubtitle string) (err error) {
 		return err
 	}
 
-	err = d.AddElement(toAdd)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return d.AddElement(toAdd)
 }
 
-func (d *BasicDocument) AddSubSubSubTitleByString(subsubsubtitle string) (err error) {
+func (d *BasicDocument) AddSubSubSubTitleByString(subsubsubtitle string) error {
 	if subsubsubtitle == "" {
 		return tracederrors.TracedErrorEmptyString("subsubsubtitle")
 	}
@@ -106,15 +96,10 @@ func (d *BasicDocument) AddSubSubSubTitleByString(subsubsubtitle string) (err er
 		return err
 	}
 
-	err = d.AddElement(toAdd)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return d.AddElement(toAdd)
 }
 
-func (d *BasicDocument) AddTextByString(text string) (err error) {
+func (d *BasicDocument) AddTextByString(text string) error {
 	if text == "" {
 		return tracederrors.TracedErrorEmptyString("text")
 	}
@@ -124,24 +109,25 @@ func (d *BasicDocument) AddTextByString(text string) (err error) {
 		return err
 	}
 
-	err = d.AddElement(toAdd)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return d.AddElement(toAdd)
 }
 
-func (d *BasicDocument) AddVerbatimByString(verbatim string) (err error) {
+func (d *BasicDocument) AddVerbatimByString(verbatim string) error {
 	toAdd, err := GetNewVerbatimByString(verbatim)
 	if err != nil {
 		return err
 	}
 
-	err = d.AddElement(toAdd)
+	return d.AddElement(toAdd)
+}
+
+// Add a code block in the given language.
+// Use an empty string for the language if not specified.
+func (d *BasicDocument) AddCodeBlockByString(code string, language string) error {
+	toAdd, err := GetNewCodeBlockByString(code, language)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return d.AddElement(toAdd)
 }
