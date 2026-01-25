@@ -11,6 +11,7 @@ func NewYayCmd() *cobra.Command {
 	cmd.AddCommand(
 		NewInstallYayCmd(),
 		NewInstallPackagesCmd(),
+		NewRemovePackagesCmd(),
 	)
 
 	return cmd

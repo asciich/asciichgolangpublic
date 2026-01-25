@@ -3,8 +3,8 @@ package yay
 import (
 	"context"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/packagemanageroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -62,7 +62,7 @@ func InstallPackages(ctx context.Context, commandExecutor commandexecutorinterfa
 		}
 
 		stdout, err := commandExecutor.RunCommandAndGetStdoutAsString(
-			contextutils.WithSilent(ctx),
+			commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
 			&parameteroptions.RunCommandOptions{
 				Command: command,
 			},
