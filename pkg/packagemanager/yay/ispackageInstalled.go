@@ -53,7 +53,7 @@ func IsPackageInstalled(ctx context.Context, commandExecutor commandexecutorinte
 	_, err := commandExecutor.RunCommand(
 		contextutils.WithSilent(ctx),
 		&parameteroptions.RunCommandOptions{
-			Command: []string{"yay", "-Qs", packageName},
+			Command: []string{"yay", "-Qs", "^" + packageName + "$"},
 		},
 	)
 	if err == nil {
