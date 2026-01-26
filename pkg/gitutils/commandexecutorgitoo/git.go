@@ -33,7 +33,9 @@ func NewFromDirectory(dir filesinterfaces.Directory) (*GitRepository, error) {
 		return nil, err
 	}
 
-	cedir, ok := dir.(*commandexecutorfileoo.Directory)
+	cedir, ok := dir.(interface{
+		GetCommandExecutor() (commandexecutorinterfaces.CommandExecutor, error)
+	})
 	if ok {
 		commandExecutor, err := cedir.GetCommandExecutor()
 		if err != nil {
