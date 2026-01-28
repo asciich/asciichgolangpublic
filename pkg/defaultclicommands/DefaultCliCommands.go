@@ -18,6 +18,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/linuxcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/loggingcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/monitoringcmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/packagemanagercmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/sshcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/uuidcmd"
@@ -52,6 +53,7 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 		linuxcmd.NewLinuxCmd(),
 		loggingcmd.NewLoggingCmd(),
 		monitoringcmd.NewMonitoringCommand(),
+		networkcmd.NewNetworkCmd(),
 		packagemanagercmd.NewPackageManagerCmd(),
 		sshcmd.NewSshCmd(),
 		uuidcmd.NewUuidCmd(),
