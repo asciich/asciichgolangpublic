@@ -1,4 +1,4 @@
-package netutils_test
+package dnsutils_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/netutils"
+	"github.com/asciich/asciichgolangpublic/pkg/netutils/dnsutils"
 )
 
 func getCtx() context.Context {
@@ -14,13 +14,13 @@ func getCtx() context.Context {
 }
 
 func TestDnsLookupIpV4(t *testing.T) {
-	ips, err := netutils.DnsLookupIpV4(getCtx(), "asciich.ch")
+	ips, err := dnsutils.DnsLookupIpV4(getCtx(), "asciich.ch")
 	require.NoError(t, err)
 	require.EqualValues(t, []string{"80.74.146.168"}, ips)
 }
 
 func TestDnsReverseLookup(t *testing.T) {
-	fqdns, err := netutils.DnsReverseLookup(getCtx(), "80.74.146.168")
+	fqdns, err := dnsutils.DnsReverseLookup(getCtx(), "80.74.146.168")
 	require.NoError(t, err)
 	require.EqualValues(t, []string{"ns24.kreativmedia.ch."}, fqdns)
 }

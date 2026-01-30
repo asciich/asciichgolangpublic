@@ -1,4 +1,4 @@
-package netutils
+package dnsutils
 
 import (
 	"context"
@@ -52,22 +52,4 @@ func DnsReverseLookup(ctx context.Context, ipAddress string) (fqdns []string, er
 	logging.LogInfoByCtxf(ctx, "Resolved IP address '%s' to  '%v'", ipAddress, fqdns)
 
 	return fqdns, nil
-}
-
-func MustDnsLookupIpV4(ctx context.Context, fqdn string) (ipV4Addresses []string) {
-	ipV4Addresses, err := DnsLookupIpV4(ctx, fqdn)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return ipV4Addresses
-}
-
-func MustDnsReverseLookup(ctx context.Context, ipAddress string) (fqdn []string) {
-	fqdn, err := DnsReverseLookup(ctx, ipAddress)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return fqdn
 }

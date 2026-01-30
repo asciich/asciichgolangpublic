@@ -5,7 +5,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/ansiblecmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/bashcmd"
-	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/dnscmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/cloudcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/dockercmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/documentationcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/errorscmd"
@@ -40,7 +40,7 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 		aicmd.NewAICmd(),
 		ansiblecmd.NewAnsibleCmd(),
 		bashcmd.NewBashCmd(),
-		dnscmd.NewDnsCommand(),
+		cloudcmd.NewCloudCmd(),
 		dockercmd.NewDockerCmd(),
 		documentationcmd.NewDocumentationCmd(rootCmd),
 		errorscmd.NewErrorsCommand(),
