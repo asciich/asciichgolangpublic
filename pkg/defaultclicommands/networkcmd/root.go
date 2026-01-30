@@ -2,6 +2,7 @@ package networkcmd
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/dnscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/publicipscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/tcpcmd"
 )
@@ -13,6 +14,7 @@ func NewNetworkCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		dnscmd.NewDnsCommand(),
 		publicipscmd.NewPublicIpsCmd(),
 		tcpcmd.NewTcpCmd(),
 	)

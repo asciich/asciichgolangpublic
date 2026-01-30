@@ -6,7 +6,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/netutils"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"github.com/asciich/asciichgolangpublic/pkg/netutils/dnsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -33,7 +34,7 @@ func NewDnsCommand() (dnsCmd *cobra.Command) {
 
 			hostname := args[0]
 
-			ips := netutils.MustDnsLookupIpV4(ctx, hostname)
+			ips := mustutils.Must(dnsutils.DnsLookupIpV4(ctx, hostname))
 
 			for _, ip := range ips {
 				fmt.Println(ip)
@@ -58,7 +59,7 @@ func NewDnsCommand() (dnsCmd *cobra.Command) {
 
 			hostname := args[0]
 
-			ips := netutils.MustDnsReverseLookup(ctx, hostname)
+			ips := mustutils.Must(dnsutils.DnsReverseLookup(ctx, hostname))
 
 			for _, ip := range ips {
 				fmt.Println(ip)
