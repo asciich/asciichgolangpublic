@@ -1,4 +1,4 @@
-package exoscaleantiveclientoo
+package exoscalenativeclientoo
 
 import (
 	"context"

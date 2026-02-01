@@ -1,4 +1,4 @@
-package exoscaleantiveclientoo
+package exoscalenativeclientoo
 
 import (
 	v3 "github.com/exoscale/egoscale/v3"
@@ -15,6 +15,14 @@ func (e *ExoscaleClient) GetNativeClient() (*v3.Client, error) {
 	}
 
 	return e.client, nil
+}
+
+func (e *ExoscaleClient) DNS() (*ExoscaleDNS, error) {
+	dns := &ExoscaleDNS{
+		client: e,
+	}
+
+	return dns, nil
 }
 
 func (e *ExoscaleClient) IAM() (*ExoscaleIAM, error) {
