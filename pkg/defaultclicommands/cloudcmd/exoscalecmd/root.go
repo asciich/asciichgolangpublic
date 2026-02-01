@@ -2,6 +2,7 @@ package exoscalecmd
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/cloudcmd/exoscalecmd/exoscalednscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/cloudcmd/exoscalecmd/exoscaleiamcmd"
 )
 
@@ -12,6 +13,7 @@ func NewExoscaleCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		exoscalednscmd.NewDnsCmd(),
 		exoscaleiamcmd.NewIamCmd(),
 	)
 
