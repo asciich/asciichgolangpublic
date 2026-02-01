@@ -14,3 +14,12 @@ func Generate(ctx context.Context) string {
 
 	return uuid
 }
+
+func IsUuid(input string) bool {
+	_, err := uuid.Parse(input)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
