@@ -10,7 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 )
 
-func Test_Example_CreateAndDeleteNammespace(t *testing.T) {
+func Test_Example_CreateAndDeleteNamespace(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.WithVerbose(context.TODO())
 
