@@ -142,3 +142,33 @@ func WaitForNamespaceDeletion(ctx context.Context, clientSet *kubernetes.Clients
 		return false, nil // Keep polling
 	})
 }
+
+func GetNamespace(ctx context.Context, clientSet *kubernetes.Clientset, namespaceName string) (*corev1.Namespace, error) {
+	if clientSet == nil {
+		return nil, tracederrors.TracedErrorNil("clientSet")
+	}
+
+	if namespaceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
+	}
+
+	namespace, err := clientSet.CoreV1().Namespaces().Get(ctx, namespaceName, metav1.GetOptions{})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to get kubernetes namespace '%s': %w", namespaceName, err)
+	}
+
+	return namespace, nil
+}
+
+func GetNamespaceUid(ctx context.Context, clientSet *kubernetes.Clientset, namespaceName string) (string, error) {
+	namespace, err := GetNamespace(ctx, clientSet, namespaceName)
+	if err != nil {
+		return "", err
+	}
+
+	uid := string(namespace.UID)
+
+	logging.LogInfoByCtxf(ctx, "Kubernetes namespace '%s' has UID='%s'.", namespaceName, uid)
+
+	return uid, err
+}
