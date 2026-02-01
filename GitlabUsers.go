@@ -100,7 +100,7 @@ func (g *GitlabUsers) GetUserByNativeGitlabUser(nativeUser *gitlab.User) (user *
 	userId := nativeUser.ID
 	userName := nativeUser.Name
 	userEmail := nativeUser.Email
-	userUsernamme := nativeUser.Username
+	userUsername := nativeUser.Username
 
 	err = user.SetId(userId)
 	if err != nil {
@@ -119,7 +119,7 @@ func (g *GitlabUsers) GetUserByNativeGitlabUser(nativeUser *gitlab.User) (user *
 		}
 	}
 
-	err = user.SetCachedUsername(userUsernamme)
+	err = user.SetCachedUsername(userUsername)
 	if err != nil {
 		return nil, err
 	}
