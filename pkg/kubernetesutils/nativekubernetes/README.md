@@ -11,5 +11,5 @@ For the object oriented implmenetation see [nativekubernetesoo](/pkg/kubernetesu
     * [Write to stdin of exec command](Example_WriteToStdinOfExecCommand_test.go)
 * [Get clientset](Example_GetClientSet_test.go): Get the k8s client-go clientset.
 * Namespaces:
-    * [Creatae and delete namespace](Example_CreateAndDeleteNamespace_test.go)
+    * [Create and delete namespace](Example_CreateAndDeleteNamespace_test.go)
 * [Run temporary pod and get stdout](Example_RunPodAndGetStdout_test.go): How to run a single command in Kubernetes and get it's stdout.
