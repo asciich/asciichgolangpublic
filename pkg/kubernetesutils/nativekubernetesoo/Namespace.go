@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	v1 "k8s.io/api/core/v1"
@@ -53,22 +54,17 @@ func (n *NativeNamespace) GetDynamicClient() (*dynamic.DynamicClient, error) {
 }
 
 func (n *NativeNamespace) Create(ctx context.Context) (err error) {
-	cluster, err := n.GetKubernetesCluster()
-	if err != nil {
-		return err
-	}
-
 	namespaceName, err := n.GetName()
 	if err != nil {
 		return err
 	}
 
-	_, err = cluster.CreateNamespaceByName(ctx, namespaceName)
+	clientSet, err := n.GetClientSet()
 	if err != nil {
 		return err
 	}
 
-	return err
+	return nativekubernetes.CreateNamespace(ctx, clientSet, namespaceName)
 }
 
 func (n *NativeNamespace) CreateRole(ctx context.Context, createOptions *kubernetesparameteroptions.CreateRoleOptions) (createdRole kubernetesinterfaces.Role, err error) {

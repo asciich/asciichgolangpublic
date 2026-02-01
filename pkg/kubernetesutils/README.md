@@ -10,7 +10,9 @@ The implementation using the official k8s client-go is available as:
 
 - [ConfigMap by name exists](Example_ConfigmapByNameExists_test.go)
 - The examples to exec/ run commands as additional process inside a container are in [nativekubernetes](./nativekubernetes/README.md)
-- [List namespace names](Example_ListNamespaceNames_test.go)
+- Namespaces:
+    - [Create and delete namespace](nativekubernetes/Example_CreateAndDeleteNamespace_test.go)
+    - [List namespace names](Example_ListNamespaceNames_test.go)
 - [List node names](Example_ListNodeNames_test.go)
 - [Secret by name exists](Example_SecretByNameExists_test.go)
 - [Read and write secret](Example_SecretReatAndWrite_test.go)
