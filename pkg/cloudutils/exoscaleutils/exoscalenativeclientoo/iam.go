@@ -1,4 +1,4 @@
-package exoscaleantiveclientoo
+package exoscalenativeclientoo
 
 import (
 	v3 "github.com/exoscale/egoscale/v3"

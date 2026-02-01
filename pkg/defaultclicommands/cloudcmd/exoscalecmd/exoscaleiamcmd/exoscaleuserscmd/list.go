@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/asciich/asciichgolangpublic/pkg/cloudutils/exoscaleutils/exoscaleantiveclientoo"
+	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/cloudutils/exoscaleutils/exoscalenativeclient"
+	"github.com/asciich/asciichgolangpublic/pkg/cloudutils/exoscaleutils/exoscalenativeclientoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-
-	"github.com/spf13/cobra"
 )
 
 func NewListCmd() *cobra.Command {
@@ -27,7 +26,7 @@ Usage:
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
-			client := mustutils.Must(exoscaleantiveclientoo.NewNativeClientFromEnvVars(ctx))
+			client := mustutils.Must(exoscalenativeclientoo.NewNativeClientFromEnvVars(ctx))
 
 			iam := mustutils.Must(client.IAM())
 			users := mustutils.Must(iam.Users())
