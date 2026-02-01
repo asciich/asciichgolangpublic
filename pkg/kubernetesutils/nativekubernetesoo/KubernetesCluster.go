@@ -15,7 +15,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 
 	authenticationv1 "k8s.io/api/authentication/v1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
@@ -61,41 +60,14 @@ func GetDefaultCluster(ctx context.Context) (*NativeKubernetesCluster, error) {
 }
 
 func (n *NativeKubernetesCluster) CreateNamespaceByName(ctx context.Context, namespaceName string) (createdNamespace kubernetesinterfaces.Namespace, err error) {
-	if namespaceName == "" {
-		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
-	}
-
-	exists, err := n.NamespaceByNameExists(ctx, namespaceName)
+	clientSet, err := n.GetClientSet()
 	if err != nil {
 		return nil, err
 	}
 
-	if exists {
-		logging.LogInfoByCtxf(ctx, "Namespace '%s' already exists. Skip creation.", namespaceName)
-	} else {
-		clientset, err := n.GetClientSet()
-		if err != nil {
-			return nil, err
-		}
-
-		namespace := &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   namespaceName,
-				Labels: map[string]string{},
-			},
-		}
-
-		_, err = clientset.CoreV1().Namespaces().Create(ctx, namespace, metav1.CreateOptions{})
-		if err != nil {
-			return nil, tracederrors.TracedErrorf("Error creating namespace '%s': %v", namespaceName, err)
-		}
-
-		logging.LogChangedByCtxf(ctx, "Namespace '%s' created successfully.\n", namespaceName)
-
-		err = n.WaitUntilNamespaceCreated(ctx, namespaceName)
-		if err != nil {
-			return nil, err
-		}
+	err = nativekubernetes.CreateNamespace(ctx, clientSet, namespaceName)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.GetNamespaceByName(namespaceName)
