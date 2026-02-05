@@ -53,6 +53,49 @@ func IsTcpPortOpen(ctx context.Context, hostnameOrIp string, port int) (isOpen b
 	return isOpen, nil
 }
 
+func WaitTcpPortOpen(ctx context.Context, hostnameOrIp string, port int, maxWait time.Duration) error {
+	if hostnameOrIp == "" {
+		return tracederrors.TracedErrorEmptyString("hostnameOrIp")
+	}
+
+	if port <= 0 {
+		return tracederrors.TracedErrorf("Invalid port number: %d", port)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Wait for TCP port '%d' on '%s' open started.", port, hostnameOrIp)
+
+	tStart := time.Now()
+
+	var isOpen bool
+	var err error
+	for {
+		isOpen, err = IsTcpPortOpen(ctx, hostnameOrIp, port)
+		if err != nil {
+			return err
+		}
+
+		if isOpen {
+			break
+		}
+
+		if time.Since(tStart) > maxWait {
+			break
+		}
+
+		const wait = 100 * time.Millisecond
+		logging.LogInfoByCtxf(ctx, "Wait another '%v' for TCP port '%d' open on '%s'.", wait, port, hostnameOrIp)
+		time.Sleep(wait)
+	}
+
+	if !isOpen {
+		return tracederrors.TracedErrorf("Wait for TCP port '%d' on '%s' open failed. Port is still not open.", port, hostnameOrIp)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Wait for TCP port '%d' on '%s' open finished.", port, hostnameOrIp)
+
+	return nil
+}
+
 func IsTcpPortAvailableForListening(ctx context.Context, port int) (bool, error) {
 	if port <= 0 {
 		return false, tracederrors.TracedErrorf("Invalid port number '%d", port)

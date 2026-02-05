@@ -3,17 +3,25 @@ package nativedocker
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
+	"net/netip"
 	"os"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/containerd/errdefs"
 	"github.com/moby/moby/api/types/container"
+	"github.com/moby/moby/api/types/network"
 	"github.com/moby/moby/client"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockergeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockerinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/environmentvariables"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/netutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -30,6 +38,10 @@ func RunContainer(ctx context.Context, options *dockeroptions.DockerRunContainer
 
 func GetContainerByName(name string) (containerinterfaces.Container, error) {
 	return NewDocker().GetContainerByName(name)
+}
+
+func RemoveContainer(ctx context.Context, name string, options *dockeroptions.RemoveOptions) error {
+	return NewDocker().RemoveContainer(ctx, name, options)
 }
 
 func (d *Docker) GetDeepCopyAsDocker() dockerinterfaces.Docker {
@@ -122,14 +134,61 @@ func (d *Docker) RunContainer(ctx context.Context, options *dockeroptions.Docker
 		return nil, tracederrors.TracedErrorf("Failed to create docker client: %w", err)
 	}
 
+	envVars := []string{}
+	if len(options.AdditionalEnvVars) > 0 {
+		envVars, err = environmentvariables.SetEnvVarsInStringSlice(envVars, options.AdditionalEnvVars)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	portBindings := network.PortMap{}
+
+	for _, p := range options.Ports {
+		splitted := strings.Split(p, ":")
+		if len(splitted) != 2 {
+			return nil, tracederrors.TracedErrorf("Unsupported port mapping '%s' to start docker container '%s'", p, name)
+		}
+
+		hostPortNumber, err := strconv.Atoi(splitted[0])
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to parse host port '%s': %w", splitted[0], err)
+		}
+
+		containerPortNumber, err := strconv.Atoi(splitted[1])
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to parse container port '%s': %w", splitted[1], err)
+		}
+
+		const localhostOnlIP = "127.0.0.1" // "127.0.0.1" for private, "0.0.0.0" for public
+		localhostIp, err := netip.ParseAddr(localhostOnlIP)
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to parse hostIP '%s': %w", localhostOnlIP, err)
+		}
+
+		hostBinding := network.PortBinding{
+			HostIP:   localhostIp,
+			HostPort: strconv.Itoa(hostPortNumber),
+		}
+
+		containerPort, err := network.ParsePort(fmt.Sprintf("%d/tcp", containerPortNumber))
+		if err != nil {
+			return nil, err
+		}
+
+		portBindings[containerPort] = []network.PortBinding{hostBinding}
+	}
+
 	createResult, err := cli.ContainerCreate(ctx, client.ContainerCreateOptions{
 		Name:  name,
 		Image: imageName,
 		Config: &container.Config{
+			Env: envVars,
 			Cmd: command,
 		},
 		HostConfig: &container.HostConfig{
-			AutoRemove: autoremove,
+			AutoRemove:   autoremove,
+			PortBindings: portBindings,
 		},
 	})
 	if err != nil {
@@ -139,6 +198,18 @@ func (d *Docker) RunContainer(ctx context.Context, options *dockeroptions.Docker
 	_, err = cli.ContainerStart(ctx, createResult.ID, client.ContainerStartOptions{})
 	if err != nil {
 		return nil, tracederrors.TracedErrorf("Failed to start container '%s': %w", name, err)
+	}
+
+	ports, err := options.GetPortsOnHost()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, port := range ports {
+		err := netutils.WaitTcpPortOpen(ctx, "localhost", port, time.Minute*1)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	logging.LogInfoByCtxf(ctx, "Run docker container '%s' finished.", name)
