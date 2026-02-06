@@ -128,7 +128,8 @@ func Test_WaitPortAvailableForListening(t *testing.T) {
 
 		<-cWaitOpen
 
-		ctx, _ = context.WithTimeout(ctx, time.Millisecond*100)
+		ctx, cancel := context.WithTimeout(ctx, time.Millisecond*100)
+		defer cancel()
 		err = netutils.WaitPortAvailableForListening(ctx, testport)
 		require.Error(t, err)
 		require.False(t, closed)

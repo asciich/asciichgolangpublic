@@ -20,6 +20,8 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 * [kubernetesutils](pkg/kubernetesutils/): Work with K8s/ Kubernetes.
 * [pythonutils](pkg/pythonutils/): Work with Python programming language.
 	* [virtualenvutils](pkg/pythonutils/virtualenvutils/): Work with Python's `virtualenv`.
+* storage:
+	* [S3 storage](pkg/storage/s3/)
 * [uuidutils](pkg/uuidutils/): Work with UUIDs.
 * [versionutils](pkg/versionutils/): Handle versions.
 * [x509utils](pkg/tlsutils/x509utils/): Handle X509 certificates used for TLS/SSL.

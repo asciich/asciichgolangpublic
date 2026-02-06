@@ -1,6 +1,10 @@
 package dockeroptions
 
 import (
+	"slices"
+	"strconv"
+	"strings"
+
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -13,6 +17,10 @@ type DockerRunContainerOptions struct {
 	Mounts               []string
 	KeepStoppedContainer bool
 	UseHostNet           bool
+	AdditionalEnvVars    map[string]string
+
+	// If Ports are specified this waits until a connect to all ports is accepted:
+	WaitForPortsOpen bool
 }
 
 func NewDockerRunContainerOptions() (d *DockerRunContainerOptions) {
@@ -173,4 +181,28 @@ func (o *DockerRunContainerOptions) GetName() (name string, err error) {
 	}
 
 	return o.Name, nil
+}
+
+// Returns all ports numbers on the host.
+// So for a "123:456" the returned port would be 123.
+func (d *DockerRunContainerOptions) GetPortsOnHost() ([]int, error) {
+	ret := []int{}
+
+	for _, port := range d.Ports {
+		splitted := strings.Split(port, ":")
+		if len(splitted) != 2 {
+			return nil, tracederrors.TracedErrorf("Failed to extract host port from '%s'", port)
+		}
+
+		p, err := strconv.Atoi(splitted[0])
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to parse '%s' as port: %w", splitted[0], err)
+		}
+
+		ret = append(ret, p)
+	}
+
+	slices.Sort(ret)
+
+	return ret, nil
 }
