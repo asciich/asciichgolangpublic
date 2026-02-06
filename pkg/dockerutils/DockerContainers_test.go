@@ -2,6 +2,7 @@ package dockerutils_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -302,4 +303,42 @@ func TestAdditionalEnvVarsDockerContainers(t *testing.T) {
 			})
 		}
 	}
+}
+
+func TestRunContainerWithEnvVars(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeDocker"},
+		{"commandExectuorDockerContainer"},
+	}
+	for _, tt := range tests {
+		t.Run("env var not set "+tt.implementationName, func(t *testing.T) {
+			ctx := getCtx()
+
+			const containerName = "test-run-with-env-vars"
+
+			container, _ := getDockerContainerToTest(t, tt.implementationName, containerName)
+			err := container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+			require.NoError(t, err)
+			defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+
+			err = container.Run(getCtx(), &dockeroptions.DockerRunContainerOptions{
+				ImageName:         "ubuntu",
+				Command:           []string{"sleep", "1m"},
+				AdditionalEnvVars: map[string]string{"MY_ENV": "hello world"},
+			})
+			require.NoError(t, err)
+
+			stdout, err := container.RunCommandAndGetStdoutAsString(ctx, &parameteroptions.RunCommandOptions{
+				Command: []string{"printenv", "MY_ENV"},
+			})
+			require.NoError(t, err)
+
+			stdout = strings.TrimSpace(stdout)
+
+			require.EqualValues(t, "hello world", stdout)
+		})
+	}
+
 }

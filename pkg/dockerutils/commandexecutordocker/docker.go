@@ -3,6 +3,7 @@ package commandexecutordocker
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -275,6 +276,10 @@ func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *do
 
 	if runOptions.UseHostNet {
 		startCommand = append(startCommand, "--net=host")
+	}
+
+	for envName, envValue := range runOptions.AdditionalEnvVars {
+		startCommand = append(startCommand, "-e", fmt.Sprintf("%s=%s", envName, envValue))
 	}
 
 	for _, port := range runOptions.Ports {
