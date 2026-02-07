@@ -1,0 +1,143 @@
+---
+# Minimal config for headscale.
+#
+# Bases on the official config-example.yaml:
+#   - https://github.com/juanfont/headscale/blob/main/config-example.yaml
+
+# The url clients will connect to.
+# Typically this will be a domain like:
+#
+# https://myheadscale.example.com:443
+#
+server_url: http://127.0.0.1:8080
+
+# Address to listen to / bind to on the server
+#
+# For production:
+# listen_addr: 0.0.0.0:8080
+listen_addr: 127.0.0.1:8080
+
+# Address to listen to /metrics and /debug, you may want
+# to keep this endpoint private to your internal network
+# Use an emty value to disable the metrics listener.
+metrics_listen_addr: 127.0.0.1:9090
+
+# The Noise section includes specific configuration for the
+# TS2021 Noise protocol
+noise:
+  # The Noise private key is used to encrypt the traffic between headscale and
+  # Tailscale clients when using the new Noise-based protocol. A missing key
+  # will be automatically generated.
+  private_key_path: /var/lib/headscale/noise_private.key
+
+## DNS
+#
+# headscale supports Tailscale's DNS configuration and MagicDNS.
+# Please have a look to their KB to better understand the concepts:
+#
+# - https://tailscale.com/kb/1054/dns/
+# - https://tailscale.com/kb/1081/magicdns/
+# - https://tailscale.com/blog/2021-09-private-dns-with-magicdns/
+#
+# Please note that for the DNS configuration to have any effect,
+# clients must have the `--accept-dns=true` option enabled. This is the
+# default for the Tailscale client. This option is enabled by default
+# in the Tailscale client.
+#
+# Setting _any_ of the configuration and `--accept-dns=true` on the
+# clients will integrate with the DNS manager on the client or
+# overwrite /etc/resolv.conf.
+# https://tailscale.com/kb/1235/resolv-conf
+#
+# If you want stop Headscale from managing the DNS configuration
+# all the fields under `dns` should be set to empty values.
+dns:
+  # Whether to use [MagicDNS](https://tailscale.com/kb/1081/magicdns/).
+  magic_dns: true
+
+  # Defines the base domain to create the hostnames for MagicDNS.
+  # This domain _must_ be different from the server_url domain.
+  # `base_domain` must be a FQDN, without the trailing dot.
+  # The FQDN of the hosts will be
+  # `hostname.base_domain` (e.g., _myhost.example.com_).
+  base_domain: headscale.example.com
+
+  # List of DNS servers to expose to clients.
+  nameservers:
+    global:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 2606:4700:4700::1111
+      - 2606:4700:4700::1001
+
+# List of IP prefixes to allocate tailaddresses from.
+# Each prefix consists of either an IPv4 or IPv6 address,
+# and the associated prefix length, delimited by a slash.
+# It must be within IP ranges supported by the Tailscale
+# client - i.e., subnets of 100.64.0.0/10 and fd7a:115c:a1e0::/48.
+# See below:
+# IPv6: https://github.com/tailscale/tailscale/blob/22ebb25e833264f58d7c3f534a8b166894a89536/net/tsaddr/tsaddr.go#LL81C52-L81C71
+# IPv4: https://github.com/tailscale/tailscale/blob/22ebb25e833264f58d7c3f534a8b166894a89536/net/tsaddr/tsaddr.go#L33
+# Any other range is NOT supported, and it will cause unexpected issues.
+prefixes:
+  v4: 100.64.0.0/10
+  v6: fd7a:115c:a1e0::/48
+
+  # Strategy used for allocation of IPs to nodes, available options:
+  # - sequential (default): assigns the next free IP from the previous given
+  #   IP. A best-effort approach is used and Headscale might leave holes in the
+  #   IP range or fill up existing holes in the IP range.
+  # - random: assigns the next free IP from a pseudo-random IP generator (crypto/rand).
+  allocation: sequential
+
+database:
+  # Database type. Available options: sqlite, postgres
+  # Please note that using Postgres is highly discouraged as it is only supported for legacy reasons.
+  # All new development, testing and optimisations are done with SQLite in mind.
+  type: sqlite
+
+  # SQLite config
+  sqlite:
+    path: /var/lib/headscale/db.sqlite
+
+    # Enable WAL mode for SQLite. This is recommended for production environments.
+    # https://www.sqlite.org/wal.html
+    write_ahead_log: true
+
+    # Maximum number of WAL file frames before the WAL file is automatically checkpointed.
+    # https://www.sqlite.org/c3ref/wal_autocheckpoint.html
+    # Set to 0 to disable automatic checkpointing.
+    wal_autocheckpoint: 1000
+  
+# DERP is a relay system that Tailscale uses when a direct
+# connection cannot be established.
+# https://tailscale.com/blog/how-tailscale-works/#encrypted-tcp-relays-derp
+#
+# headscale needs a list of DERP servers that can be presented
+# to the clients.
+derp:
+  server:
+    # If enabled, runs the embedded DERP server and merges it into the rest of the DERP config
+    # The Headscale server_url defined above MUST be using https, DERP requires TLS to be in place
+    enabled: false
+
+  # List of externally available DERP maps encoded in JSON
+  urls:
+    - https://controlplane.tailscale.com/derpmap/default
+  # Locally available DERP map files encoded in YAML
+  #
+  # This option is mostly interesting for people hosting
+  # their own DERP servers:
+  # https://tailscale.com/kb/1118/custom-derp-servers/
+  #
+  # paths:
+  #   - /etc/headscale/derp-example.yaml
+  paths: []
+
+  # If enabled, a worker will be set up to periodically
+  # refresh the given sources and update the derpmap
+  # will be set up.
+  auto_update_enabled: true
+
+  # How often should we check for DERP updates?
+  update_frequency: 3h
