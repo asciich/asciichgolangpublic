@@ -12,8 +12,6 @@ func WaitUserAbortf(format string, args ...any) {
 }
 
 // WaitUserAbort displays a message and waits until the user presses CTRL+C (SIGINT).
-// It returns nil upon receiving the signal, or an error if the signal listener fails
-// (though this is rare in a typical setup).
 func WaitUserAbort(msg string) {
 	// 1. Show the message from the parameter
 	fmt.Println(msg)
@@ -38,6 +36,5 @@ func WaitUserAbort(msg string) {
 	// Print a confirmation message
 	fmt.Println("\nUser aborted execution by pressing CTRL+C.")
 
-	// 6. Return nil afterwards.
 	return
 }

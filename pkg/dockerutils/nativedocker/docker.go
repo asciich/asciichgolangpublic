@@ -146,6 +146,12 @@ func (d *Docker) RunContainer(ctx context.Context, options *dockeroptions.Docker
 	portBindings := network.PortMap{}
 
 	for _, p := range options.Ports {
+		listenIpAddress := "127.0.0.1" // defaults to the local host.
+		if strings.HasPrefix(p, "0.0.0.0:") {
+			listenIpAddress = "0.0.0.0"
+			p = strings.TrimPrefix(p, "0.0.0.0:")
+		}
+
 		splitted := strings.Split(p, ":")
 		if len(splitted) != 2 {
 			return nil, tracederrors.TracedErrorf("Unsupported port mapping '%s' to start docker container '%s'", p, name)
@@ -161,10 +167,9 @@ func (d *Docker) RunContainer(ctx context.Context, options *dockeroptions.Docker
 			return nil, tracederrors.TracedErrorf("Failed to parse container port '%s': %w", splitted[1], err)
 		}
 
-		const localhostOnlIP = "127.0.0.1" // "127.0.0.1" for private, "0.0.0.0" for public
-		localhostIp, err := netip.ParseAddr(localhostOnlIP)
+		localhostIp, err := netip.ParseAddr(listenIpAddress)
 		if err != nil {
-			return nil, tracederrors.TracedErrorf("Failed to parse hostIP '%s': %w", localhostOnlIP, err)
+			return nil, tracederrors.TracedErrorf("Failed to parse hostIP '%s': %w", listenIpAddress, err)
 		}
 
 		hostBinding := network.PortBinding{
