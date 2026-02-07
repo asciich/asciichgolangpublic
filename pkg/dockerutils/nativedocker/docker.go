@@ -13,6 +13,7 @@ import (
 
 	"github.com/containerd/errdefs"
 	"github.com/moby/moby/api/types/container"
+	"github.com/moby/moby/api/types/mount"
 	"github.com/moby/moby/api/types/network"
 	"github.com/moby/moby/client"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
@@ -179,6 +180,23 @@ func (d *Docker) RunContainer(ctx context.Context, options *dockeroptions.Docker
 		portBindings[containerPort] = []network.PortBinding{hostBinding}
 	}
 
+	mounts := []mount.Mount{}
+	for _, m := range options.Mounts {
+		splitted := strings.Split(m, ":")
+		if len(splitted) != 2 {
+			return nil, tracederrors.TracedErrorf("Failed to process mount: '%s'.", m)
+		}
+
+		toAdd := mount.Mount{
+			Type: mount.TypeBind,
+			Source: splitted[0],
+			Target: splitted[1],
+			ReadOnly: false,
+		}
+
+		mounts = append(mounts, toAdd)
+	}
+
 	createResult, err := cli.ContainerCreate(ctx, client.ContainerCreateOptions{
 		Name:  name,
 		Image: imageName,
@@ -189,6 +207,7 @@ func (d *Docker) RunContainer(ctx context.Context, options *dockeroptions.Docker
 		HostConfig: &container.HostConfig{
 			AutoRemove:   autoremove,
 			PortBindings: portBindings,
+			Mounts:       mounts,
 		},
 	})
 	if err != nil {
