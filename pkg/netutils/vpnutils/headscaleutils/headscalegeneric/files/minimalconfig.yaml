@@ -15,12 +15,12 @@ server_url: http://127.0.0.1:8080
 #
 # For production:
 # listen_addr: 0.0.0.0:8080
-listen_addr: 127.0.0.1:8080
+listen_addr: 0.0.0.0:8080
 
 # Address to listen to /metrics and /debug, you may want
 # to keep this endpoint private to your internal network
 # Use an emty value to disable the metrics listener.
-metrics_listen_addr: 127.0.0.1:9090
+metrics_listen_addr: 0.0.0.0:9090
 
 # The Noise section includes specific configuration for the
 # TS2021 Noise protocol
@@ -81,7 +81,7 @@ dns:
 # Any other range is NOT supported, and it will cause unexpected issues.
 prefixes:
   v4: 100.64.0.0/10
-  v6: fd7a:115c:a1e0::/48
+  # v6: fd7a:115c:a1e0::/48
 
   # Strategy used for allocation of IPs to nodes, available options:
   # - sequential (default): assigns the next free IP from the previous given

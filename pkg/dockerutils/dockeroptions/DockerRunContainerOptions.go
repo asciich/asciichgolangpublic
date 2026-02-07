@@ -189,6 +189,8 @@ func (d *DockerRunContainerOptions) GetPortsOnHost() ([]int, error) {
 	ret := []int{}
 
 	for _, port := range d.Ports {
+		port = strings.TrimPrefix(port, "0.0.0.0:")
+
 		splitted := strings.Split(port, ":")
 		if len(splitted) != 2 {
 			return nil, tracederrors.TracedErrorf("Failed to extract host port from '%s'", port)
