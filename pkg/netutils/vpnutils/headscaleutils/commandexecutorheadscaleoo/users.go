@@ -32,3 +32,12 @@ func (c *CommandExecutorHeadscale) ListUserNames(ctx context.Context) ([]string,
 
 	return commandexecutorheadscale.ListUserNames(ctx, commandExectuor)
 }
+
+func (c *CommandExecutorHeadscale) GeneratePreauthKeyForUser(ctx context.Context, userName string) (string, error) {
+	commandExectuor, err := c.GetCommandExecutor()
+	if err != nil {
+		return "", err
+	}
+
+	return commandexecutorheadscale.GeneratePreauthKeyForUser(ctx, commandExectuor, userName)
+}

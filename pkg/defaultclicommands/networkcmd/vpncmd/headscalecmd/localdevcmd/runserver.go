@@ -19,7 +19,7 @@ func NewRunServerCmd() *cobra.Command {
 
 			containerName, port := getContainerNameAndPort(cmd)
 
-			cancel := mustutils.Must(headscalelocaldevserver.RunLocalDevServer(ctx, &headscalelocaldevserver.RunOptions{
+			_, cancel := mustutils.Must2(headscalelocaldevserver.RunLocalDevServer(ctx, &headscalelocaldevserver.RunOptions{
 				Port:          port,
 				ContainerName: containerName,
 			}))
