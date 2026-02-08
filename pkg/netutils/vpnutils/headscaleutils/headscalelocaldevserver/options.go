@@ -6,6 +6,8 @@ const DEFAULT_CONTAINER_NAME = "headscale-localdev"
 type RunOptions struct {
 	Port          int
 	ContainerName string
+
+	RestartAlreadyRunningDevServer bool
 }
 
 func (r *RunOptions) GetPort() int {

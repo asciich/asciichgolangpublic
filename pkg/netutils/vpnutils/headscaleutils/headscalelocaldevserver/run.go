@@ -10,10 +10,12 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"github.com/asciich/asciichgolangpublic/pkg/netutils/vpnutils/headscaleutils/commandexecutorheadscaleoo"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils/vpnutils/headscaleutils/headscalegeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/netutils/vpnutils/headscaleutils/headscaleinterfaces"
 )
 
-func RunLocalDevServer(ctx context.Context, options *RunOptions) (cancel func() error, err error) {
+func RunLocalDevServer(ctx context.Context, options *RunOptions) (headscale headscaleinterfaces.HeadScale, cancel func() error, err error) {
 	if options == nil {
 		options = &RunOptions{}
 	}
@@ -26,20 +28,30 @@ func RunLocalDevServer(ctx context.Context, options *RunOptions) (cancel func() 
 	// Use a minimal config:
 	configPath := mustutils.Must(headscalegeneric.WriteMinimalConfigAsTemporaryFile(ctx))
 
-	container := mustutils.Must(nativedocker.RunContainer(
+	if options.RestartAlreadyRunningDevServer {
+		err := nativedocker.RemoveContainer(ctx, containerName, &dockeroptions.RemoveOptions{Force: true})
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	container, err := nativedocker.RunContainer(
 		ctx,
 		&dockeroptions.DockerRunContainerOptions{
 			ImageName: "headscale/headscale",
 			Name:      containerName,
-			Ports:     []string{fmt.Sprintf("0.0.0.0:%d:8080", options.Port)},
+			Ports:     []string{fmt.Sprintf("0.0.0.0:%d:8080", options.GetPort())},
 			Command:   []string{"serve"},
 			Mounts:    []string{configPath + ":/etc/headscale/config.yaml"},
 		},
-	))
+	)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	logging.LogInfoByCtxf(ctx, "Start local headscale container '%s' on port '%d' finished.", containerName, port)
 
-	return func() error {
+	cancel = func() error {
 		logging.LogInfoByCtxf(ctx, "Remove headscale local dev container '%s' and config started.", containerName)
 		err := container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
 		if err != nil {
@@ -52,5 +64,12 @@ func RunLocalDevServer(ctx context.Context, options *RunOptions) (cancel func() 
 		logging.LogInfoByCtxf(ctx, "Remove headscale local dev container '%s' and config finished.", containerName)
 
 		return nil
-	}, nil
+	}
+
+	headscale, err = commandexecutorheadscaleoo.New(container)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return headscale, cancel, nil
 }
