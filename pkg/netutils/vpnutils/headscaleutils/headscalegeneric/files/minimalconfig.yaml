@@ -81,7 +81,7 @@ dns:
 # Any other range is NOT supported, and it will cause unexpected issues.
 prefixes:
   v4: 100.64.0.0/10
-  # v6: fd7a:115c:a1e0::/48
+  v6: fd7a:115c:a1e0::/48
 
   # Strategy used for allocation of IPs to nodes, available options:
   # - sequential (default): assigns the next free IP from the previous given
