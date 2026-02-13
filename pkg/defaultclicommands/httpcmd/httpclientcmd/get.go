@@ -1,20 +1,20 @@
-package clientcmd
+package httpclientcmd
 
 import (
 	"fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/httpcmd/httpclientcmd/httpclientcmdoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
 
-func NewPerformRequestCmd() *cobra.Command {
+func NewGetCmd(options *httpclientcmdoptions.HttpClientCmdOptions) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "perform-request",
-		Short: "Perform a request and print response body to stdout. Use --method to specify the used in the request.",
+		Use:   "get",
+		Short: "Send get request and print response body to stdout.",
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
@@ -28,24 +28,18 @@ func NewPerformRequestCmd() *cobra.Command {
 				logging.LogFatal("Please specify exactly one URL. Given argument is empty string")
 			}
 
-			method, err := cmd.Flags().GetString("method")
-			if err != nil {
-				logging.LogGoErrorFatal(err)
-			}
-
-			response := mustutils.Must(httputils.GetNativeClient().SendRequest(
+			client := options.GetClient()
+			response := mustutils.Must(client.SendRequest(
 				ctx,
 				&httpoptions.RequestOptions{
 					Url:    url,
-					Method: method,
+					Method: "GET",
 				},
 			))
 
 			fmt.Print(mustutils.Must(response.GetBodyAsString()))
 		},
 	}
-
-	cmd.Flags().String("method", "GET", "HTTP method to perform.")
 
 	return cmd
 }

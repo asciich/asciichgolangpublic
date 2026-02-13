@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpnativeclientoo"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/testwebserver"
 )
@@ -32,7 +32,7 @@ func Test_Example_SetBaseUrlOnClient_test(t *testing.T) {
 	// ... preparation end.
 
 	// Get the HTTP client
-	client := httputils.GetNativeClient()
+	client := httpnativeclientoo.GetNativeClient()
 
 	// Set the base URL and port
 	err = client.SetBaseUrl("http://localhost")
@@ -55,7 +55,7 @@ func Test_Example_SetBaseUrlOnClient_test(t *testing.T) {
 	body, err := response.GetBodyAsString()
 	require.NoError(t, err)
 
-	// No we can do with the received data whatever we want:
+	// Now we can do with the received data whatever we want:
 	require.EqualValues(t, "hello world\n", body)
 
 	// To perform another request we use a shorter version.

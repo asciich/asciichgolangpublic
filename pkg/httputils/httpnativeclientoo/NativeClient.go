@@ -1,4 +1,4 @@
-package httputils
+package httpnativeclientoo
 
 import (
 	"bytes"
@@ -245,7 +245,7 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 	}
 	defer response.Body.Close()
 
-	chunkSize := GetProgressEveryNBytes(ctx)
+	chunkSize := httpgeneric.GetProgressEveryNBytes(ctx)
 	if chunkSize <= 0 {
 		outFd.ReadFrom(response.Body)
 	} else {
