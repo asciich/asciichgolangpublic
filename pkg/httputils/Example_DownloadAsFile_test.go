@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/testwebserver"
 )
@@ -34,7 +35,7 @@ func Test_Example_DownloadAsFile(t *testing.T) {
 		// Enable progress output.
 		// Since we download a very small example file we output the progress after two bytes.
 		// Use 'httputils.WithDownloadProgressEveryNMBytes(ctx, 10)' to print out every 10MB.
-		httputils.WithDownloadProgressEveryNBytes(ctx, 2),
+		httpgeneric.WithDownloadProgressEveryNBytes(ctx, 2),
 		// Download and output file options:
 		&httpoptions.DownloadAsFileOptions{
 			RequestOptions: &httpoptions.RequestOptions{

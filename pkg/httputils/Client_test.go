@@ -1,15 +1,17 @@
 package httputils_test
 
 import (
+	"context"
 	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpnativeclientoo"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/testwebserver"
@@ -18,9 +20,13 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
+
 func getClientByImplementationName(implementationName string) (client httputilsinterfaces.Client) {
 	if implementationName == "nativeClient" {
-		return httputils.NewNativeClient()
+		return httpnativeclientoo.NewNativeClient()
 	}
 
 	logging.LogFatalWithTracef(

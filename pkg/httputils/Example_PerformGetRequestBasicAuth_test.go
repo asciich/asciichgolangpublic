@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpnativeclientoo"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/testwebserver"
 )
@@ -91,7 +92,7 @@ func Test_Example_PerformGetRequestWithBasicAuth_SetOnClient(t *testing.T) {
 	require.NoError(t, err)
 
 	// Get the HTTP client
-	client := httputils.GetNativeClient()
+	client := httpnativeclientoo.GetNativeClient()
 
 	// Set the basic auth credentials. They are automatically used in every request:
 	err = client.SetBasicAuth(&httpoptions.BasicAuth{
