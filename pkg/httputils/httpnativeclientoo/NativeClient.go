@@ -31,10 +31,6 @@ type NativeClient struct {
 // Get the HTTP client written using native go http implementation.
 //
 // This is the default client to use when sending request from your running machine.
-func GetNativeClient() (client httputilsinterfaces.Client) {
-	return NewNativeClient()
-}
-
 func NewNativeClient() (n *NativeClient) {
 	return new(NativeClient)
 }
@@ -100,10 +96,15 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httpopti
 		return nil, err
 	}
 
-	customTransport := http.DefaultTransport.(*http.Transport).Clone()
-	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: requestOptions.SkipTLSvalidation}
+	var transportToUse *http.Transport
+	if requestOptions.TransportToUse != nil {
+		transportToUse = requestOptions.TransportToUse
+	} else {
+		transportToUse := http.DefaultTransport.(*http.Transport).Clone()
+		transportToUse.TLSClientConfig = &tls.Config{InsecureSkipVerify: requestOptions.SkipTLSvalidation}
+	}
 
-	client := http.Client{Transport: customTransport}
+	client := http.Client{Transport: transportToUse}
 
 	request, err := http.NewRequest(method, url, nil)
 	if err != nil {
