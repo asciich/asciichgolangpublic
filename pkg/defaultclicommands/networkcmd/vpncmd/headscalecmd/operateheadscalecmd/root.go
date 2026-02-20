@@ -19,6 +19,7 @@ func NewOperateCmd(options *OperateOptions) *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		NewCreatePreauthKeyCmd(options),
 		NewCreateUserCmd(options),
 		NewGetUserIdCmd(options),
 		NewListUsersCmd(options),

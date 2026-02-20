@@ -32,7 +32,7 @@ func Test_Example_SetBaseUrlOnClient_test(t *testing.T) {
 	// ... preparation end.
 
 	// Get the HTTP client
-	client := httpnativeclientoo.GetNativeClient()
+	client := httpnativeclientoo.NewNativeClient()
 
 	// Set the base URL and port
 	err = client.SetBaseUrl("http://localhost")
