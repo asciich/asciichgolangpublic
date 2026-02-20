@@ -92,7 +92,7 @@ func Test_Example_PerformGetRequestWithBasicAuth_SetOnClient(t *testing.T) {
 	require.NoError(t, err)
 
 	// Get the HTTP client
-	client := httpnativeclientoo.GetNativeClient()
+	client := httpnativeclientoo.NewNativeClient()
 
 	// Set the basic auth credentials. They are automatically used in every request:
 	err = client.SetBasicAuth(&httpoptions.BasicAuth{

@@ -141,3 +141,15 @@ derp:
 
   # How often should we check for DERP updates?
   update_frequency: 3h
+
+## Policy
+# headscale supports Tailscale's ACL policies.
+# Please have a look to their KB to better
+# understand the concepts: https://tailscale.com/kb/1018/acls/
+policy:
+  # The mode can be "file" or "database" that defines
+  # where the ACL policies are stored and read from.
+  mode: file
+  # If the mode is set to "file", the path to a
+  # HuJSON file containing ACL policies.
+  path: "/etc/headscale/acl.json"

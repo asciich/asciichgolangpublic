@@ -1,6 +1,7 @@
 package httpoptions
 
 import (
+	"net/http"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -24,6 +25,9 @@ type RequestOptions struct {
 
 	// Skip TLS validation
 	SkipTLSvalidation bool
+
+	// Provide your custom transport to be used.
+	TransportToUse *http.Transport
 
 	// The headers to send
 	Header map[string]string

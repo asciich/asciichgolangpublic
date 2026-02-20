@@ -391,6 +391,7 @@ func (l *LocalGitRepository) Commit(ctx context.Context, commitOptions *gitparam
 		commitMessage,
 		&git.CommitOptions{
 			AllowEmptyCommits: commitOptions.GetAllowEmpty(),
+			All: commitOptions.CommitAllChanges,
 		},
 	)
 	if err != nil {
