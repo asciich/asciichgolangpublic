@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
@@ -18,7 +19,10 @@ func getCtx() context.Context {
 	return contextutils.ContextVerbose()
 }
 
-func Test_CreateAndDeleteUsers(t *testing.T) {
+func Test_headscale_CreateAndDeleteUsers(t *testing.T) {
+	// Currently not available in Github CI:
+	continuousintegration.SkipInGithubCi(t, "Expose docker port does not work yet.")
+
 	ctx := getCtx()
 
 	const containerName = "test-headscale"

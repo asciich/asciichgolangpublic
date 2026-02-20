@@ -9,7 +9,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils/vpnutils/headscaleutils/commandexecutorheadscaleoo"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils/vpnutils/headscaleutils/headscalegeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils/vpnutils/headscaleutils/headscaleinterfaces"
@@ -26,7 +25,16 @@ func RunLocalDevServer(ctx context.Context, options *RunOptions) (headscale head
 	logging.LogInfoByCtxf(ctx, "Start local headscale container '%s' on port '%d' started.", containerName, port)
 
 	// Use a minimal config:
-	configPath := mustutils.Must(headscalegeneric.WriteMinimalConfigAsTemporaryFile(ctx))
+	configPath, err := headscalegeneric.WriteMinimalConfigAsTemporaryFile(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Use all open policy file:
+	policyPath, err := headscalegeneric.WriteAclAllOpenAsTemporaryFile(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	if options.RestartAlreadyRunningDevServer {
 		err := nativedocker.RemoveContainer(ctx, containerName, &dockeroptions.RemoveOptions{Force: true})
@@ -42,7 +50,10 @@ func RunLocalDevServer(ctx context.Context, options *RunOptions) (headscale head
 			Name:      containerName,
 			Ports:     []string{fmt.Sprintf("0.0.0.0:%d:8080", options.GetPort())},
 			Command:   []string{"serve"},
-			Mounts:    []string{configPath + ":/etc/headscale/config.yaml"},
+			Mounts: []string{
+				configPath + ":/etc/headscale/config.yaml",
+				policyPath + ":/etc/headscale/acl.json",
+			},
 		},
 	)
 	if err != nil {
@@ -58,6 +69,10 @@ func RunLocalDevServer(ctx context.Context, options *RunOptions) (headscale head
 			return err
 		}
 		err = nativefiles.Delete(ctx, configPath, &filesoptions.DeleteOptions{})
+		if err != nil {
+			return err
+		}
+		err = nativefiles.Delete(ctx, policyPath, &filesoptions.DeleteOptions{})
 		if err != nil {
 			return err
 		}

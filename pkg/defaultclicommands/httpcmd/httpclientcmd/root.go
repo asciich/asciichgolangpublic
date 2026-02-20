@@ -30,5 +30,5 @@ func NewClientCmd(options *httpclientcmdoptions.HttpClientCmdOptions) *cobra.Com
 }
 
 func defaultGetClient() httputilsinterfaces.Client {
-	return httpnativeclientoo.GetNativeClient()
+	return httpnativeclientoo.NewNativeClient()
 }

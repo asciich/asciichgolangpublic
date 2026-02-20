@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils/vpnutils/headscaleutils/headscalelocaldevserver"
 )
 
@@ -12,6 +13,9 @@ import (
 // Then two containers were started as tailscale clients/ nodes.
 // After connecting the two nodes using the same user a `tailscale ping` is performed to check connectivity.
 func Test_ConnectTwoNodesWithOneUser(t *testing.T) {
+	// Currently not available in Github CI:
+	continuousintegration.SkipInGithubCi(t, "Expose docker port does not work yet.")
+
 	// Enable verbose output:
 	ctx := contextutils.ContextVerbose()
 

@@ -15,7 +15,7 @@ func SendRequest(ctx context.Context, requestOptions *httpoptions.RequestOptions
 		return nil, tracederrors.TracedErrorNil("requestOptions")
 	}
 
-	return httpnativeclientoo.GetNativeClient().SendRequest(ctx, requestOptions)
+	return httpnativeclientoo.NewNativeClient().SendRequest(ctx, requestOptions)
 }
 
 func SendRequestAndGetBodyAsString(ctx context.Context, requestOptions *httpoptions.RequestOptions) (response string, err error) {
@@ -23,9 +23,9 @@ func SendRequestAndGetBodyAsString(ctx context.Context, requestOptions *httpopti
 		return "", tracederrors.TracedErrorNil("requestOptions")
 	}
 
-	return httpnativeclientoo.GetNativeClient().SendRequestAndGetBodyAsString(ctx, requestOptions)
+	return httpnativeclientoo.NewNativeClient().SendRequestAndGetBodyAsString(ctx, requestOptions)
 }
 
 func DownloadAsFile(ctx context.Context, options *httpoptions.DownloadAsFileOptions) (downloadedFile filesinterfaces.File, err error) {
-	return httpnativeclientoo.GetNativeClient().DownloadAsFile(ctx, options)
+	return httpnativeclientoo.NewNativeClient().DownloadAsFile(ctx, options)
 }
