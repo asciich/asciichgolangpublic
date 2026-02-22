@@ -1,4 +1,4 @@
-package gnupg
+package gnupgutils_test
 
 import (
 	"context"
@@ -12,6 +12,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"github.com/asciich/asciichgolangpublic/pkg/pgp/gnupgutils"
+	"github.com/asciich/asciichgolangpublic/pkg/pgp/gnupgutils/gnupgoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -45,7 +47,7 @@ func getFileToTest(implementationName string) (file filesinterfaces.File) {
 	return file
 }
 
-func TestGnuPg_SignAndValidate(t *testing.T) {
+func TestGnuPg_SignAndValidate_File(t *testing.T) {
 	testutils.SkipIfRunningInGithub(t)
 
 	tests := []struct {
@@ -76,10 +78,10 @@ func TestGnuPg_SignAndValidate(t *testing.T) {
 				require.True(t, mustutils.Must(toTest.Exists(ctx)))
 				require.False(t, mustutils.Must(signatureFile.Exists(ctx)))
 
-				err = SignFile(
-					ctx, 
+				err = gnupgutils.SignFile(
+					ctx,
 					toTest,
-					&GnuPGSignOptions{
+					&gnupgoptions.SignOption{
 						DetachedSign: true,
 						AsciiArmor:   tt.asciiArmor,
 					},
@@ -89,7 +91,7 @@ func TestGnuPg_SignAndValidate(t *testing.T) {
 				require.True(t, mustutils.Must(toTest.Exists(ctx)))
 				require.True(t, mustutils.Must(signatureFile.Exists(ctx)))
 
-				err = CheckSignatureValid(ctx, signatureFile)
+				err = gnupgutils.CheckSignatureValid(ctx, signatureFile)
 				require.NoError(t, err)
 			},
 		)
