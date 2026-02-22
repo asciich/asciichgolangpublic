@@ -1,6 +1,7 @@
 package checksumutils
 
 import (
+	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
@@ -42,4 +43,16 @@ func GetSha512SumFromBytes(bytesToHash []byte) (checksum string) {
 
 func GetSha512SumFromString(stringToHash string) (checksum string) {
 	return GetSha512SumFromBytes([]byte(stringToHash))
+}
+
+func GetMD5SumFromBytes(bytesToHash []byte) (checksum string) {
+	h := md5.New()
+	h.Write(bytesToHash)
+	checksumBytes := h.Sum(nil)
+	checksum = fmt.Sprintf("%x", checksumBytes)
+	return checksum
+}
+
+func GetMD5SumFromString(stringToHash string) (checksum string) {
+	return GetMD5SumFromBytes([]byte(stringToHash))
 }

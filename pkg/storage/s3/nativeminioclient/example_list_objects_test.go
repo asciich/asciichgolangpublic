@@ -13,8 +13,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/s3options"
 )
 
-func Test_Example_CreateAndDeleteBuckets_test(t *testing.T) {
-	// Enable verbose output:
+func Test_Example_ListObjects_test(t *testing.T) {
+	// enable verbose output
 	ctx := contextutils.ContextVerbose()
 
 	// Define admin credentials for the test environment
@@ -44,7 +44,7 @@ func Test_Example_CreateAndDeleteBuckets_test(t *testing.T) {
 	//defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
 
 	// Define the bucket name used for this test:
-	const bucketName = "test-create-bucket"
+	const bucketName = "test-bucket"
 
 	// Get the minio client:
 	client, err := nativeminioclient.NewClient("localhost:9000", minioAdminUser, minioAdminPassword, &s3options.NewS3ClientOptions{})
@@ -58,11 +58,7 @@ func Test_Example_CreateAndDeleteBuckets_test(t *testing.T) {
 	require.NoError(t, err)
 	require.False(t, exists)
 
-	bucketNames, err := nativeminioclient.ListBucketNames(ctx, client)
-	require.NoError(t, err)
-	require.NotContains(t, bucketNames, bucketName)
-
-	// Create the bucket:
+	// Create the bucket which is now empty:
 	err = nativeminioclient.CreateBucket(ctx, client, bucketName)
 	require.NoError(t, err)
 
@@ -70,43 +66,39 @@ func Test_Example_CreateAndDeleteBuckets_test(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, exists)
 
-	bucketNames, err = nativeminioclient.ListBucketNames(ctx, client)
+	objectList, err := nativeminioclient.ListObjectNames(ctx, client, bucketName)
 	require.NoError(t, err)
-	require.Contains(t, bucketNames, bucketName)
+	require.Len(t, objectList, 0)
 
-	// Create the bucket again to check idempotence:
-	err = nativeminioclient.CreateBucket(ctx, client, bucketName)
-	require.NoError(t, err)
-
-	exists, err = nativeminioclient.BucketExists(ctx, client, bucketName)
-	require.NoError(t, err)
-	require.True(t, exists)
-
-	bucketNames, err = nativeminioclient.ListBucketNames(ctx, client)
-	require.NoError(t, err)
-	require.Contains(t, bucketNames, bucketName)
-
-	// Delete the bucket:
-	err = nativeminioclient.DeleteBucket(ctx, client, bucketName)
+	// Generate one object:
+	err = nativeminioclient.CreateObjectFromString(ctx, client, bucketName, "test.txt", "hello world")
 	require.NoError(t, err)
 
-	exists, err = nativeminioclient.BucketExists(ctx, client, bucketName)
+	objectList, err = nativeminioclient.ListObjectNames(ctx, client, bucketName)
 	require.NoError(t, err)
-	require.False(t, exists)
+	require.EqualValues(t, objectList, []string{"test.txt"})
 
-	bucketNames, err = nativeminioclient.ListBucketNames(ctx, client)
-	require.NoError(t, err)
-	require.NotContains(t, bucketNames, bucketName)
-
-	// Delete the bucket again to check idempotence:
-	err = nativeminioclient.DeleteBucket(ctx, client, bucketName)
+	// Generate a second object:
+	err = nativeminioclient.CreateObjectFromString(ctx, client, bucketName, "abc.txt", "hello world")
 	require.NoError(t, err)
 
-	exists, err = nativeminioclient.BucketExists(ctx, client, bucketName)
+	objectList, err = nativeminioclient.ListObjectNames(ctx, client, bucketName)
 	require.NoError(t, err)
-	require.False(t, exists)
+	require.EqualValues(t, objectList, []string{"abc.txt", "test.txt"})
 
-	bucketNames, err = nativeminioclient.ListBucketNames(ctx, client)
+	// Generate a second object again:
+	err = nativeminioclient.CreateObjectFromString(ctx, client, bucketName, "abc.txt", "hello world2")
 	require.NoError(t, err)
-	require.NotContains(t, bucketNames, bucketName)
+
+	objectList, err = nativeminioclient.ListObjectNames(ctx, client, bucketName)
+	require.NoError(t, err)
+	require.EqualValues(t, objectList, []string{"abc.txt", "test.txt"})
+
+	// Generate a third object:
+	err = nativeminioclient.CreateObjectFromString(ctx, client, bucketName, "aaa.txt", "hello world")
+	require.NoError(t, err)
+
+	objectList, err = nativeminioclient.ListObjectNames(ctx, client, bucketName)
+	require.NoError(t, err)
+	require.EqualValues(t, objectList, []string{"aaa.txt", "abc.txt", "test.txt"})
 }
