@@ -104,6 +104,8 @@ func SignFileByPath(ctx context.Context, commandExecutor commandexecutorinterfac
 		"gpg",
 		"--armor",
 		"--detach-sig",
+		"--output",
+		signaturePath,
 		toSignPath,
 	}
 
