@@ -9,7 +9,7 @@ import (
 
 func Test_Example_ReadSemanticVersionFromString(t *testing.T) {
 	// Read directly as semantic version:
-	version, err := versionutils.ReadSemanticVersionFormString("v1.2.3")
+	version, err := versionutils.NewSmanticVersionFormString("v1.2.3")
 	require.NoError(t, err)
 
 	// Extract major, minor and patch as dedicated values

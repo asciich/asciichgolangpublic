@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 )
 
 func TestVersionSemanticVersionGetNextVersion(t *testing.T) {
@@ -30,7 +30,7 @@ func TestVersionSemanticVersionGetNextVersion(t *testing.T) {
 				var version versionutils.Version
 				var err error
 
-				version, err = versionutils.ReadFromString(tt.versionString)
+				version, err = versionutils.NewFromString(tt.versionString)
 				require.NoError(t, err)
 
 				nextVersion, err := version.GetNextVersion(tt.nextVersionType)

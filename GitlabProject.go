@@ -1013,7 +1013,7 @@ func (g *GitlabProject) GetVersions(ctx context.Context) (versions []versionutil
 			return nil, err
 		}
 
-		toAdd, err := versionutils.ReadFromString(versionName)
+		toAdd, err := versionutils.NewFromString(versionName)
 		if err != nil {
 			return nil, err
 		}

@@ -127,7 +127,7 @@ func (d *DependencyGitRepository) GetTargetVersion() (targetVersion versionutils
 		return nil, err
 	}
 
-	targetVersion, err = versionutils.ReadFromString(targetVersionString)
+	targetVersion, err = versionutils.NewFromString(targetVersionString)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +157,7 @@ func (d *DependencyGitRepository) GetVersion() (version versionutils.Version, er
 		return nil, err
 	}
 
-	version, err = versionutils.ReadFromString(versionString)
+	version, err = versionutils.NewFromString(versionString)
 	if err != nil {
 		return nil, err
 	}
