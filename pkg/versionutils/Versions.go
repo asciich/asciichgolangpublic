@@ -60,17 +60,17 @@ func GetNewDateVersionString() (versionString string) {
 	return versionString
 }
 
-func ReadFromString(versionString string) (version Version, err error) {
+func NewFromString(versionString string) (version Version, err error) {
 	if !IsVersionString(versionString) {
 		return nil, tracederrors.TracedErrorf("versionString '%s' is not a valid version string", versionString)
 	}
 
 	if IsDateVersionString(versionString) {
-		return ReadDateVersionFromString(versionString)
+		return NewDateVersionFromString(versionString)
 	}
 
 	if IsSemanticVersionString(versionString) {
-		return ReadSemanticVersionFormString(versionString)
+		return NewSmanticVersionFormString(versionString)
 	}
 
 	return nil, tracederrors.TracedErrorf("Not implemented for versionString='%s'", versionString)
@@ -132,7 +132,7 @@ func GetVersionsFromStringSlice(stringSlice []string) (versions []Version, err e
 
 	versions = []Version{}
 	for _, stringVersion := range stringSlice {
-		toAdd, err := ReadFromString(stringVersion)
+		toAdd, err := NewFromString(stringVersion)
 		if err != nil {
 			return nil, err
 		}

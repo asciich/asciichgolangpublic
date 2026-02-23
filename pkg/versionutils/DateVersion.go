@@ -7,7 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func ReadDateVersionFromString(versionString string) (*DateVersion, error) {
+func NewDateVersionFromString(versionString string) (*DateVersion, error) {
 	version := &DateVersion{}
 	err := version.SetVersion(versionString)
 	if err != nil {
@@ -23,7 +23,7 @@ type DateVersion struct {
 
 // Creates a new DateVersion set to the current time and date.
 func NewCurrentDateVersion() (version Version) {
-	version, err := ReadFromString(GetNewDateVersionString())
+	version, err := NewFromString(GetNewDateVersionString())
 	if err != nil {
 		panic(fmt.Sprintf("internal error: %v", err))
 	}

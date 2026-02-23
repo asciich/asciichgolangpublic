@@ -39,6 +39,7 @@ func NewMinioCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
 
 	cmd.AddCommand(
 		NewListBuckets(options),
+		NewListObjectsCmd(options),
 	)
 
 	cmd.PersistentFlags().String("endpoint", "", "The minio endpoint/ server to use.")

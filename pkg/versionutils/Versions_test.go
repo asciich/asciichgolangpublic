@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 )
 
 func TestVersions_GetDateVersionString(t *testing.T) {
@@ -164,7 +164,7 @@ func TestVersions_IsSemanticVersion(t *testing.T) {
 				var version versionutils.Version
 				var err error
 
-				version, err = versionutils.ReadFromString(tt.versionString)
+				version, err = versionutils.NewFromString(tt.versionString)
 				require.NoError(t, err)
 
 				require.EqualValues(t, tt.expectedIsSemanticVersion, version.IsSemanticVersion())
@@ -204,7 +204,7 @@ func TestVersions_GetLatestVersionFromSlice(t *testing.T) {
 				latestVersion, err := versionutils.GetLatestVersionFromSlice(versions)
 				require.NoError(t, err)
 
-				expectedNewestVersion, err := versionutils.ReadFromString(tt.expectedNewest)
+				expectedNewestVersion, err := versionutils.NewFromString(tt.expectedNewest)
 				require.NoError(t, err)
 
 				require.True(t, latestVersion.Equals(expectedNewestVersion))

@@ -114,7 +114,7 @@ func (g *GitRepositoryTag) GetVersion() (version versionutils.Version, err error
 		return nil, err
 	}
 
-	version, err = versionutils.ReadFromString(name)
+	version, err = versionutils.NewFromString(name)
 	if err != nil {
 		return nil, err
 	}

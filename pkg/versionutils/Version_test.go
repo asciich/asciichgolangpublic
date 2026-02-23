@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
 )
 
 func TestVersionEquals(t *testing.T) {
@@ -30,10 +30,10 @@ func TestVersionEquals(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				version1, err := versionutils.ReadFromString(tt.version1)
+				version1, err := versionutils.NewFromString(tt.version1)
 				require.NoError(t, err)
 
-				version2, err := versionutils.ReadFromString(tt.version2)
+				version2, err := versionutils.NewFromString(tt.version2)
 				require.NoError(t, err)
 
 				require.EqualValues(t, tt.expectedEquals, version1.Equals(version2))

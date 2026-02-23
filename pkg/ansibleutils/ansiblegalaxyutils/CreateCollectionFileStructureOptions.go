@@ -69,7 +69,7 @@ func (c *CreateCollectionFileStructureOptions) GetVersion() (versionutils.Versio
 		return nil, tracederrors.TracedError("Version not set")
 	}
 
-	return versionutils.ReadFromString(c.Version)
+	return versionutils.NewFromString(c.Version)
 }
 
 func (c *CreateCollectionFileStructureOptions) GetVersionAsString() (string, error) {
