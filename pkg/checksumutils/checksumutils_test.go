@@ -1,12 +1,22 @@
 package checksumutils_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func TestChecksumsGetSha256SumFromString(t *testing.T) {
 	tests := []struct {
@@ -126,4 +136,43 @@ func TestChecksumsGetMD5SumFromBytes(t *testing.T) {
 			},
 		)
 	}
+}
+
+func Test_GetMD5SumFromFileByPath(t *testing.T) {
+	t.Run("empty file name", func(t *testing.T) {
+		ctx := getCtx()
+		got, err := checksumutils.GetMD5SumFromFileByPath(ctx, "")
+		require.Error(t, err)
+		require.Empty(t, got)
+	})
+
+	t.Run("Non existing file", func(t *testing.T) {
+		ctx := getCtx()
+		got, err := checksumutils.GetMD5SumFromFileByPath(ctx, "/this/file/does/not/exist")
+		require.Error(t, err)
+		require.Empty(t, got)
+		require.True(t, filesgeneric.IsErrFileNotFound(err))
+	})
+
+	t.Run("empty file", func(t *testing.T) {
+		ctx := getCtx()
+		tempPath, err := tempfiles.CreateTemporaryFile(ctx)
+		require.NoError(t, err)
+		defer nativefiles.Delete(ctx, tempPath, &filesoptions.DeleteOptions{})
+
+		got, err := checksumutils.GetMD5SumFromFileByPath(ctx, tempPath)
+		require.NoError(t, err)
+		require.EqualValues(t, got, "d41d8cd98f00b204e9800998ecf8427e")
+	})
+
+	t.Run("hello world", func(t *testing.T) {
+		ctx := getCtx()
+		tempPath, err := tempfiles.CreateTemporaryFileFromContentString(ctx, "hello world")
+		require.NoError(t, err)
+		defer nativefiles.Delete(ctx, tempPath, &filesoptions.DeleteOptions{})
+
+		got, err := checksumutils.GetMD5SumFromFileByPath(ctx, tempPath)
+		require.NoError(t, err)
+		require.EqualValues(t, got, "5eb63bbbe01eeed093cb22bb8f5acdc3")
+	})
 }
