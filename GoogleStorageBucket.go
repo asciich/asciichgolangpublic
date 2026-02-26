@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"cloud.google.com/go/storage"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -27,15 +26,6 @@ func GetGoogleStorageBucketByName(bucketName string) (g *GoogleStorageBucket, er
 	}
 
 	return g, nil
-}
-
-func MustGetGoogleStorageBucketByName(bucketName string) (g *GoogleStorageBucket) {
-	g, err := GetGoogleStorageBucketByName(bucketName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return g
 }
 
 func NewGoogleStorageBucket() (g *GoogleStorageBucket) {
@@ -92,56 +82,6 @@ func (g *GoogleStorageBucket) GetNativeClient() (nativeClient *storage.Client, e
 		g.nativeClient = clientToAdd
 	}
 	return g.nativeClient, nil
-}
-
-func (g *GoogleStorageBucket) MustExists() (bucketExists bool) {
-	bucketExists, err := g.Exists()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return bucketExists
-}
-
-func (g *GoogleStorageBucket) MustGetName() (name string) {
-	name, err := g.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (g *GoogleStorageBucket) MustGetNativeBucket() (nativeBucket *storage.BucketHandle) {
-	nativeBucket, err := g.GetNativeBucket()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeBucket
-}
-
-func (g *GoogleStorageBucket) MustGetNativeClient() (nativeClient *storage.Client) {
-	nativeClient, err := g.GetNativeClient()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nativeClient
-}
-
-func (g *GoogleStorageBucket) MustSetName(name string) {
-	err := g.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GoogleStorageBucket) MustSetNativeClient(nativeClient *storage.Client) {
-	err := g.SetNativeClient(nativeClient)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GoogleStorageBucket) SetName(name string) (err error) {

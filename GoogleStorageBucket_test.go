@@ -24,11 +24,12 @@ func TestGoogleStorageBucketExists(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
+				bucket, err := GetGoogleStorageBucketByName(tt.bucketName)
+				require.NoError(t, err)
 
-				var bucket ObjectStoreBucket = MustGetGoogleStorageBucketByName(tt.bucketName)
-
-				require.EqualValues(tt.expectedExists, bucket.MustExists())
+				exists, err := bucket.Exists()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedExists, exists)
 			},
 		)
 	}
