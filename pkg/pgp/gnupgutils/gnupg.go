@@ -36,3 +36,7 @@ func CheckSignatureValid(ctx context.Context, signatureFile filesinterfaces.File
 	commandExecutor := commandexecutorexecoo.Exec()
 	return commandexecutorgnupg.CheckSignatureValid(ctx, commandExecutor, signatureFile)
 }
+
+func CheckSingnatureByPathValid(ctx context.Context, signaturePath string) error {
+	return commandexecutorgnupg.CheckSingnatureByPathValid(ctx, commandexecutorexecoo.Exec(), signaturePath)
+}

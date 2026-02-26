@@ -1,7 +1,6 @@
 package installutils
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -9,6 +8,7 @@ type InstallOptions struct {
 	SrcPath     string
 	InstallPath string
 	Mode        string
+	UseSudo     bool
 }
 
 func NewInstallOptions() (i *InstallOptions) {
@@ -45,54 +45,6 @@ func (i *InstallOptions) GetSrcPath() (srcPath string, err error) {
 	}
 
 	return i.SrcPath, nil
-}
-
-func (i *InstallOptions) MustGetInstallPath() (installPath string) {
-	installPath, err := i.GetInstallPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return installPath
-}
-
-func (i *InstallOptions) MustGetMode() (mode string) {
-	mode, err := i.GetMode()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return mode
-}
-
-func (i *InstallOptions) MustGetSrcPath() (srcPath string) {
-	srcPath, err := i.GetSrcPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return srcPath
-}
-
-func (i *InstallOptions) MustSetInstallPath(installPath string) {
-	err := i.SetInstallPath(installPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (i *InstallOptions) MustSetMode(mode string) {
-	err := i.SetMode(mode)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (i *InstallOptions) MustSetSrcPath(srcPath string) {
-	err := i.SetSrcPath(srcPath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (i *InstallOptions) SetInstallPath(installPath string) (err error) {
