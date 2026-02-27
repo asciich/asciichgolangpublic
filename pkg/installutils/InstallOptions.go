@@ -5,10 +5,11 @@ import (
 )
 
 type InstallOptions struct {
-	SrcPath     string
-	InstallPath string
-	Mode        string
-	UseSudo     bool
+	SrcPath         string
+	InstallPath     string
+	Mode            string
+	UseSudo         bool
+	ReplaceExisting bool
 }
 
 func NewInstallOptions() (i *InstallOptions) {

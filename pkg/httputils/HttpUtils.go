@@ -29,3 +29,7 @@ func SendRequestAndGetBodyAsString(ctx context.Context, requestOptions *httpopti
 func DownloadAsFile(ctx context.Context, options *httpoptions.DownloadAsFileOptions) (downloadedFile filesinterfaces.File, err error) {
 	return httpnativeclientoo.NewNativeClient().DownloadAsFile(ctx, options)
 }
+
+func DownloadAsTemporaryFile(ctx context.Context, options *httpoptions.DownloadAsTemporaryFileOptions) (downloadedFile filesinterfaces.File, err error) {
+	return httpnativeclientoo.NewNativeClient().DownloadAsTemporaryFile(ctx, options)
+}

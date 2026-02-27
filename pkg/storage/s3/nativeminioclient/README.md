@@ -10,3 +10,4 @@ This implementation can be used to manage Minio installations as well as working
 * Objects:
     * [Create and delete objects](example_createanddelete_objects_test.go)
     * [Upload and download S3 objects as files](example_uploadanddownload_file_test.go)
+    * [Download a S3 object using from a public bucket using the weburl](example_uploadanddownload_file_withurlfrompublicbucket_test.go)

@@ -400,7 +400,7 @@ func TestClient_DownloadAsTempraryFile(t *testing.T) {
 				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
 				downloadedFile, err := client.DownloadAsTemporaryFile(
 					ctx,
-					&httpoptions.DownloadAsFileOptions{
+					&httpoptions.DownloadAsTemporaryFileOptions{
 						RequestOptions: &httpoptions.RequestOptions{
 							Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
 							Method: tt.method,

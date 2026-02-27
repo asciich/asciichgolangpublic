@@ -426,3 +426,22 @@ func DownloadAsFileByPath(ctx context.Context, client *minio.Client, bucketName 
 
 	return nil
 }
+
+func GetDownloadUrl(ctx context.Context, client *minio.Client, bucketName string, objectKey string) (string, error) {
+	if client == nil {
+		return "", tracederrors.TracedErrorNil("client")
+	}
+
+	if bucketName == "" {
+		return "", tracederrors.TracedErrorEmptyString("bucketName")
+	}
+
+	if objectKey == "" {
+		return "", tracederrors.TracedErrorEmptyString("objectKey")
+	}
+
+	url := client.EndpointURL()
+	url = url.JoinPath(bucketName, objectKey)
+
+	return url.String(), nil
+}

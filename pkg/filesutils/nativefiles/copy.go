@@ -7,6 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -26,12 +27,32 @@ func Copy(ctx context.Context, src string, dst string, options *filesoptions.Cop
 	}
 
 	if options.UseSudo {
-		logging.LogInfoByCtxf(ctx, "Copy '%s' to '%s' started using sudo started.", src, dst)
-		_, err := commandexecutorexec.RunCommand(ctx, &parameteroptions.RunCommandOptions{
-			Command: []string{"sudo", "cp", src, dst},
-		})
-		if err != nil {
-			return err
+		if options.ReplaceExisting {
+			logging.LogInfoByCtxf(ctx, "Copy '%s' to '%s' started using sudo and replace existing started.", src, dst)
+			tempFile, err := tempfiles.CreateTemporaryFile(ctx)
+			if err != nil {
+				return err
+			}
+			_, err = commandexecutorexec.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+				Command: []string{"sudo", "cp", src, tempFile},
+			})
+			if err != nil {
+				return err
+			}
+			_, err = commandexecutorexec.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+				Command: []string{"sudo", "mv", tempFile, dst},
+			})
+			if err != nil {
+				return err
+			}
+		} else {
+			logging.LogInfoByCtxf(ctx, "Copy '%s' to '%s' started using sudo started.", src, dst)
+			_, err := commandexecutorexec.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+				Command: []string{"sudo", "cp", src, dst},
+			})
+			if err != nil {
+				return err
+			}
 		}
 	} else {
 		logging.LogInfoByCtxf(ctx, "Copy '%s' to '%s' started.", src, dst)

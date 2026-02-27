@@ -63,7 +63,7 @@ func Test_Example_CreateAndDeleteBuckets_test(t *testing.T) {
 	require.NotContains(t, bucketNames, bucketName)
 
 	// Create the bucket:
-	err = nativeminioclient.CreateBucket(ctx, client, bucketName)
+	err = nativeminioclient.CreateBucket(ctx, client, bucketName, &s3options.CreateBucketOptions{})
 	require.NoError(t, err)
 
 	exists, err = nativeminioclient.BucketExists(ctx, client, bucketName)
@@ -75,7 +75,7 @@ func Test_Example_CreateAndDeleteBuckets_test(t *testing.T) {
 	require.Contains(t, bucketNames, bucketName)
 
 	// Create the bucket again to check idempotence:
-	err = nativeminioclient.CreateBucket(ctx, client, bucketName)
+	err = nativeminioclient.CreateBucket(ctx, client, bucketName, &s3options.CreateBucketOptions{})
 	require.NoError(t, err)
 
 	exists, err = nativeminioclient.BucketExists(ctx, client, bucketName)
