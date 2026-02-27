@@ -59,7 +59,7 @@ func Test_Example_CreateAndDelete_Objects_test(t *testing.T) {
 	require.False(t, exists)
 
 	// Create the bucket which is now empty:
-	err = nativeminioclient.CreateBucket(ctx, client, bucketName)
+	err = nativeminioclient.CreateBucket(ctx, client, bucketName, &s3options.CreateBucketOptions{})
 	require.NoError(t, err)
 
 	exists, err = nativeminioclient.BucketExists(ctx, client, bucketName)

@@ -12,7 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
@@ -310,20 +310,24 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 	return downloadedFile, nil
 }
 
-func (n *NativeClient) DownloadAsTemporaryFile(ctx context.Context, downloadOptions *httpoptions.DownloadAsFileOptions) (downloadedFile filesinterfaces.File, err error) {
+func (n *NativeClient) DownloadAsTemporaryFile(ctx context.Context, downloadOptions *httpoptions.DownloadAsTemporaryFileOptions) (downloadedFile filesinterfaces.File, err error) {
 	if downloadOptions == nil {
 		return nil, tracederrors.TracedErrorNil("downloadOptions")
 	}
 
-	toUse := downloadOptions.GetDeepCopy()
-
-	toUse.OutputPath, err = tempfilesoo.CreateEmptyTemporaryFileAndGetPath(contextutils.WithSilent(ctx))
+	outputPath, err := tempfiles.CreateTemporaryFile(contextutils.WithSilent(ctx))
 	if err != nil {
 		return nil, err
 	}
-	toUse.OverwriteExisting = true
 
-	return n.DownloadAsFile(ctx, toUse)
+	options := &httpoptions.DownloadAsFileOptions{
+		RequestOptions:    downloadOptions.RequestOptions,
+		Sha256Sum:         downloadOptions.Sha256Sum,
+		OutputPath:        outputPath,
+		OverwriteExisting: true,
+	}
+
+	return n.DownloadAsFile(ctx, options)
 }
 
 func (n *NativeClient) SetPort(port int) error {

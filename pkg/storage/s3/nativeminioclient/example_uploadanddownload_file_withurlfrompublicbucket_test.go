@@ -11,12 +11,14 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
 	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/nativeminioclient"
 	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/s3options"
 )
 
-func Test_Example_UploadAndDownload_File_test(t *testing.T) {
+func Test_Example_UploadAndDownload_File_withUrlFromPublicBucket_test(t *testing.T) {
 	// enable verbose output
 	ctx := contextutils.ContextVerbose()
 
@@ -53,25 +55,17 @@ func Test_Example_UploadAndDownload_File_test(t *testing.T) {
 	client, err := nativeminioclient.NewClient("localhost:9000", minioAdminUser, minioAdminPassword, &s3options.NewS3ClientOptions{})
 	require.NoError(t, err)
 
-	// Delete the bucket to ensure a clear defined test setup:
-	err = nativeminioclient.DeleteBucket(ctx, client, bucketName)
+	// Create the bucket which is now empty:
+	err = nativeminioclient.CreateBucket(ctx, client, bucketName, 
+		&s3options.CreateBucketOptions{
+			PublicReadable: true, // make this bucket public readable so we directly download the files.
+		},
+	)
 	require.NoError(t, err)
 
 	exists, err := nativeminioclient.BucketExists(ctx, client, bucketName)
 	require.NoError(t, err)
-	require.False(t, exists)
-
-	// Create the bucket which is now empty:
-	err = nativeminioclient.CreateBucket(ctx, client, bucketName, &s3options.CreateBucketOptions{})
-	require.NoError(t, err)
-
-	exists, err = nativeminioclient.BucketExists(ctx, client, bucketName)
-	require.NoError(t, err)
 	require.True(t, exists)
-
-	objectList, err := nativeminioclient.ListObjectNames(ctx, client, bucketName)
-	require.NoError(t, err)
-	require.Len(t, objectList, 0)
 
 	// Create the local file:
 	srcFilePath, err := tempfiles.CreateTemporaryFileFromContentString(ctx, "This is the test data")
@@ -79,32 +73,25 @@ func Test_Example_UploadAndDownload_File_test(t *testing.T) {
 	defer nativefiles.Delete(ctx, srcFilePath, &filesoptions.DeleteOptions{})
 
 	// Upload the local file as "example.txt" into the S3 bucket:
-	ctxUpload := contextutils.WithChangeIndicator(ctx)
 	objectKey := "example.txt"
-	err = nativeminioclient.UploadFileByPath(ctxUpload, client, bucketName, objectKey, srcFilePath)
+	err = nativeminioclient.UploadFileByPath(ctx, client, bucketName, objectKey, srcFilePath)
 	require.NoError(t, err)
-	require.True(t, contextutils.IsChanged(ctxUpload)) // Uploading the file is considered a change.
 
-	// Upload the same file again will be skipped since the content is already up to date:
-	ctxUpload = contextutils.WithChangeIndicator(ctx)
-	err = nativeminioclient.UploadFileByPath(ctxUpload, client, bucketName, objectKey, srcFilePath)
+	// Get the URL to download the file again:
+	downloadUrl, err := nativeminioclient.GetDownloadUrl(ctx, client, bucketName, objectKey)
 	require.NoError(t, err)
-	require.False(t, contextutils.IsChanged(ctxUpload))
+	require.EqualValues(t, "http://localhost:9000/test-bucket/example.txt", downloadUrl)
 
-	// Downlaod the file directly as a temporary file:
-	ctxDownload := contextutils.WithChangeIndicator(ctx)
-	destFilePath, err := nativeminioclient.DownloadAsTemporaryFile(ctxDownload, client, bucketName, objectKey)
+	// Download the file:
+	downloadedFile, err := httputils.DownloadAsTemporaryFile(ctx, &httpoptions.DownloadAsTemporaryFileOptions{
+		RequestOptions: &httpoptions.RequestOptions{
+			Url: downloadUrl,
+		},
+	})
 	require.NoError(t, err)
-	defer nativefiles.Delete(ctx, destFilePath, &filesoptions.DeleteOptions{})
-	require.True(t, contextutils.IsChanged(ctxDownload))
+	defer downloadedFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-	downloadedContent, err := nativefiles.ReadAsString(ctx, destFilePath, &filesoptions.ReadOptions{})
+	downloadedContent, err := downloadedFile.ReadAsString()
 	require.NoError(t, err)
 	require.EqualValues(t, "This is the test data", downloadedContent)
-
-	// Redownload it again. This time we spedify the output path.
-	ctxDownload = contextutils.WithChangeIndicator(ctx)
-	err = nativeminioclient.DownloadAsFileByPath(ctxDownload, client, bucketName, objectKey, destFilePath)
-	require.NoError(t, err)
-	require.False(t, contextutils.IsChanged(ctxDownload)) // As it's the same file and the same content it will not considered as a change.
 }

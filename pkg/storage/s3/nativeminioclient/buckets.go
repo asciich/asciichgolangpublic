@@ -2,9 +2,11 @@ package nativeminioclient
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/s3options"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -66,7 +68,41 @@ func BucketExists(ctx context.Context, client *minio.Client, bucketName string) 
 	return exists, nil
 }
 
-func CreateBucket(ctx context.Context, client *minio.Client, bucketName string) error {
+func MakeBucketPublicReadable(ctx context.Context, client *minio.Client, bucketName string) error {
+	if client == nil {
+		return tracederrors.TracedErrorNil("client")
+	}
+
+	if bucketName == "" {
+		return tracederrors.TracedErrorEmptyString("bucketName")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Make bucket '%s' public readable started.", bucketName)
+
+	policy := fmt.Sprintf(`{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Action": ["s3:GetObject"],
+			"Effect": "Allow",
+			"Principal": {"AWS": ["*"]},
+			"Resource": ["arn:aws:s3:::%s/*"],
+			"Sid": ""
+		}
+	]
+}`, bucketName)
+
+	err := client.SetBucketPolicy(ctx, bucketName, policy)
+	if err != nil {
+		tracederrors.TracedErrorf("Error setting bucket policy: %w", err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Make bucket '%s' public readable finished.", bucketName)
+
+	return nil
+}
+
+func CreateBucket(ctx context.Context, client *minio.Client, bucketName string, options *s3options.CreateBucketOptions) error {
 	if client == nil {
 		return tracederrors.TracedErrorNil("client")
 	}
@@ -76,6 +112,10 @@ func CreateBucket(ctx context.Context, client *minio.Client, bucketName string) 
 	}
 
 	logging.LogInfoByCtxf(ctx, "Create bucket '%s' started.", bucketName)
+
+	if options == nil {
+		options = &s3options.CreateBucketOptions{}
+	}
 
 	var created = true
 	err := client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
@@ -93,6 +133,13 @@ func CreateBucket(ctx context.Context, client *minio.Client, bucketName string) 
 		logging.LogChangedByCtxf(ctx, "Bucket '%s' created.", bucketName)
 	} else {
 		logging.LogInfoByCtxf(ctx, "Bucket '%s' already exists and belongs to you. Skip creation.", bucketName)
+	}
+
+	if options.PublicReadable {
+		err := MakeBucketPublicReadable(ctx, client, bucketName)
+		if err != nil {
+			return err
+		}
 	}
 
 	logging.LogInfoByCtxf(ctx, "Create bucket '%s' finised.", bucketName)

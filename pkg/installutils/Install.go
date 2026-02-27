@@ -27,7 +27,8 @@ func installFromSourcePath(ctx context.Context, options *InstallOptions) (err er
 	logging.LogInfoByCtxf(ctx, "Install '%s' as '%s' started.", sourcePath, installPath)
 
 	err = nativefiles.Copy(ctx, sourcePath, installPath, &filesoptions.CopyOptions{
-		UseSudo: options.UseSudo,
+		UseSudo:         options.UseSudo,
+		ReplaceExisting: options.ReplaceExisting,
 	})
 	if err != nil {
 		return err
