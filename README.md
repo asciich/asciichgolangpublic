@@ -9,6 +9,8 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 ## Provided functionality
 
 * [commandexecutor](pkg/commandexecutor/): Run arbitrary shell commands ([exec](pkg/commandexecutor/commandexecutorexecoo/), [bash](pkg/commandexecutor/commandexecutorbashoo/), [powershell](pkg/commandexecutor/commandexecutorpowershelloo/)). 
+* [containerutils](pkg/containerutils/): Work with containers.
+	* [containerimageanlder](pkg/containerutils/containerimagehandler/): Handle container images without the need of a container runtime (e.g. no Docker required.)
 * [fluxutils](pkg/fluxutils/): Work with FluxCD.
 * [fileformats](pkg/fileformats/): Work with different file formats:
 	* [jsonutils](pkg/fileformats/jsonutils/): Work with JSON
