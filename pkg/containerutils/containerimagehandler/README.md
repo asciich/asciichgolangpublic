@@ -5,4 +5,5 @@ This makes the handling fast and available in buildsystems where no Docker or ot
 
 # Examples:
 
-* [Downlaod a container image as archive](./example_downloadimageasarchive_test.go)
+* [Add and delete files in a container image archive file](./example_addanddeletefilesinarchive_test.go)
+* [Downlaod a container image as archive file](./example_downloadimageasarchive_test.go)
