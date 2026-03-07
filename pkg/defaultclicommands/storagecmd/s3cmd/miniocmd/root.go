@@ -38,6 +38,7 @@ func NewMinioCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		NewDeleteObjectsCmd(options),
 		NewListBuckets(options),
 		NewListObjectsCmd(options),
 	)
