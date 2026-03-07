@@ -10,9 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-
-
-func CreateEmptyTemporaryDirectory(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor) (string, error) {
+func CreateEmptyTemporaryFile(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor) (string, error) {
 	if commandExecutor == nil {
 		return "", tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -25,7 +23,7 @@ func CreateEmptyTemporaryDirectory(ctx context.Context, commandExecutor commande
 	stdout, err := commandExecutor.RunCommandAndGetStdoutAsString(
 		ctx,
 		&parameteroptions.RunCommandOptions{
-			Command: []string{"mktemp", "-d"},
+			Command: []string{"mktemp"},
 		},
 	)
 
@@ -35,7 +33,7 @@ func CreateEmptyTemporaryDirectory(ctx context.Context, commandExecutor commande
 
 	path := strings.TrimSpace(stdout)
 
-	logging.LogChangedByCtxf(ctx, "Created empty temporary directory '%s' on '%s'.", path, hostDescription)
+	logging.LogChangedByCtxf(ctx, "Created empty temporary file '%s' on '%s'.", path, hostDescription)
 
 	return path, nil
 }

@@ -27,23 +27,44 @@ func Chmod(ctx context.Context, commandExecutor commandexecutorinterfaces.Comman
 		return tracederrors.TracedErrorNil("options")
 	}
 
-	chmodString, err := options.GetPermissionsString()
+	newPermissions, err := options.GetPermissions()
 	if err != nil {
 		return err
 	}
 
-	_, err = commandExecutor.RunCommand(
-		ctx,
-		&parameteroptions.RunCommandOptions{
-			Command: []string{"chmod", chmodString, path},
-		},
-	)
+	currentPermissions, err := GetAccessPermissions(commandExecutor, path)
+	if err != nil {
+		return err
+	}
+
+	newPermissionsString, err := unixfilepermissionsutils.GetPermissionString(newPermissions)
+	if err != nil {
+		return err
+	}
+
+	hostDescription, err := commandExecutor.GetHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if newPermissions == currentPermissions {
+		logging.LogInfoByCtxf(ctx, "File permissions for '%s' on '%s' are already set to '%s'.", path, hostDescription, newPermissionsString)
+	} else {
+		_, err = commandExecutor.RunCommand(
+			ctx,
+			&parameteroptions.RunCommandOptions{
+				Command: []string{"chmod", newPermissionsString, path},
+			},
+		)
+		
+		logging.LogChangedByCtxf(ctx, "Changed file permissions for '%s' on '%s' to '%s'.",path, hostDescription, newPermissionsString)
+	}
 
 	if err != nil {
 		return err
 	}
 
-	logging.LogChangedByCtxf(ctx, "Chmod '%s' for local file '%s'.", chmodString, path)
+	
 
 	return nil
 }

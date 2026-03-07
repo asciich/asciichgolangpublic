@@ -7,7 +7,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
 
 // To run this test use:
@@ -19,6 +18,8 @@ func Test_CreateFileUsingSudo(t *testing.T) {
 	}{
 		{"localFile"},
 		{"localCommandExecutorFile"},
+		{"commandExecutorFileExec"},
+		{"commandExecutorFileBash"},
 	}
 
 	for _, tt := range tests {
@@ -49,9 +50,40 @@ func Test_CreateFileUsingSudo(t *testing.T) {
 			ctx := getCtx()
 
 			sourceFile := getFileToTest(tt.implementationName, "/testfile")
-			defer mustutils.Must0(sourceFile.Delete(ctx, &filesoptions.DeleteOptions{UseSudo: true}))
+			defer func() {
+				err := sourceFile.Delete(ctx, &filesoptions.DeleteOptions{UseSudo: true})
+				require.NoError(t, err)
+			}()
 			err := sourceFile.Create(ctx, &filesoptions.CreateOptions{UseSudo: true})
 			require.NoError(t, err)
 		})
+	}
+
+	for _, tt := range tests {
+		for _, permissionString := range []string{"u=rwx,g=r,o="} {
+			t.Run("chmod "+tt.implementationName+" "+permissionString, func(t *testing.T) {
+				ctx := getCtx()
+
+				testfile := getTemporaryFileToTest(tt.implementationName)
+				defer func() {
+					err := testfile.Delete(ctx, &filesoptions.DeleteOptions{})
+					require.NoError(t, err)
+				}()
+
+				exists, err := testfile.Exists(ctx)
+				require.NoError(t, err)
+				require.True(t, exists)
+
+				err = testfile.Chmod(ctx, &filesoptions.ChmodOptions{
+					PermissionsString: permissionString,
+				})
+				require.NoError(t, err)
+
+				got, err := testfile.GetAccessPermissionsString()
+				require.NoError(t, err)
+
+				require.EqualValues(t, permissionString, got)
+			})
+		}
 	}
 }

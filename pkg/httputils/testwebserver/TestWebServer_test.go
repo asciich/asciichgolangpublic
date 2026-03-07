@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/testwebserver"
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
 
 func getCtx() context.Context {
@@ -22,11 +21,23 @@ func Test_TestWebServer_SetAndGetCertificate(t *testing.T) {
 	err := testServer.SetPort(port)
 	require.NoError(t, err)
 
-	certAndKey := mustutils.Must(testwebserver.GenerateCertAndKeyForTestWebserver(getCtx()))
+	certAndKey, err := testwebserver.GenerateCertAndKeyForTestWebserver(getCtx())
+	require.NoError(t, err)
 
-	mustutils.Must0(testServer.SetTlsCertAndKey(ctx, certAndKey))
+	err = testServer.SetTlsCertAndKey(ctx, certAndKey)
+	require.NoError(t, err)
 
-	cert2 := mustutils.Must(testServer.GetTlsCert())
+	cert2, err := testServer.GetTlsCert()
+	require.NoError(t, err)
 
 	require.True(t, certAndKey.Cert.Equal(cert2))
+}
+
+func Test_TestWebsServer_GetUrl(t *testing.T) {
+	testWebServer, err := testwebserver.GetTestWebServer(1234)
+	require.NoError(t, err)
+
+	url, err := testWebServer.GetUrl()
+	require.NoError(t, err)
+	require.EqualValues(t, "http://localhost:1234", url)
 }

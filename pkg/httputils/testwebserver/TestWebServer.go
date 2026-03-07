@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -91,6 +92,20 @@ func GetTestWebServer(port int) (webServer httputilsinterfaces.Server, err error
 	}
 
 	return toReturn, nil
+}
+
+func GetRunningTestWebServer(ctx context.Context, port int) (httputilsinterfaces.Server, error) {
+	webserver, err := GetTestWebServer(port)
+	if err != nil {
+		return nil, err
+	}
+
+	err = webserver.StartInBackground(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return webserver, nil
 }
 
 func NewTestWebServer() (t *TestWebServer) {
@@ -332,4 +347,15 @@ func (t *TestWebServer) Stop(ctx context.Context) (err error) {
 	logging.LogInfoByCtx(ctx, "Stop TestWebServer finished.")
 
 	return nil
+}
+
+func (t *TestWebServer) GetUrl() (string, error) {
+	port, err := t.GetPort()
+	if err != nil {
+		return "", err
+	}
+
+	url := fmt.Sprintf("http://localhost:%d", port)
+
+	return url, nil
 }

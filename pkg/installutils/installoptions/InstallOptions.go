@@ -1,4 +1,4 @@
-package installutils
+package installoptions
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -6,22 +6,28 @@ import (
 
 type InstallOptions struct {
 	SrcPath         string
+	SrcUrl          string
 	InstallPath     string
 	Mode            string
 	UseSudo         bool
 	ReplaceExisting bool
+	Sha256Sum       string
 }
 
 func NewInstallOptions() (i *InstallOptions) {
 	return new(InstallOptions)
 }
 
-func (i *InstallOptions) IsSourcePathSet() (isSet bool) {
+func (i *InstallOptions) IsSourcePathSet() bool {
 	return i.SrcPath != ""
 }
 
-func (i *InstallOptions) IsModeSet() (isSet bool) {
+func (i *InstallOptions) IsModeSet() bool {
 	return i.Mode != ""
+}
+
+func (i *InstallOptions) IsSourceUrlSet() bool {
+	return i.SrcUrl != ""
 }
 
 func (i *InstallOptions) GetInstallPath() (installPath string, err error) {
@@ -76,4 +82,12 @@ func (i *InstallOptions) SetSrcPath(srcPath string) (err error) {
 	i.SrcPath = srcPath
 
 	return nil
+}
+
+func (i *InstallOptions) GetSrcUrl() (string, error) {
+	if i.SrcUrl == "" {
+		return "", tracederrors.TracedError("Src URL not set")
+	}
+
+	return i.SrcUrl, nil
 }

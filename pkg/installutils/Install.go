@@ -5,11 +5,12 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
+	"github.com/asciich/asciichgolangpublic/pkg/installutils/installoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func installFromSourcePath(ctx context.Context, options *InstallOptions) (err error) {
+func installFromSourcePath(ctx context.Context, options *installoptions.InstallOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
@@ -52,7 +53,7 @@ func installFromSourcePath(ctx context.Context, options *InstallOptions) (err er
 	return nil
 }
 
-func Install(ctx context.Context, options *InstallOptions) (err error) {
+func Install(ctx context.Context, options *installoptions.InstallOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}

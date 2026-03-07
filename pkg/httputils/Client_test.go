@@ -7,9 +7,12 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpcommandexecutorclientoo"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpnativeclientoo"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
@@ -27,6 +30,24 @@ func getCtx() context.Context {
 func getClientByImplementationName(implementationName string) (client httputilsinterfaces.Client) {
 	if implementationName == "nativeClient" {
 		return httpnativeclientoo.NewNativeClient()
+	}
+
+	if implementationName == "commandExecutorExec" {
+		client, err := httpcommandexecutorclientoo.NewClient(commandexecutorexecoo.Exec())
+		if err != nil {
+			panic(err)
+		}
+
+		return client
+	}
+
+	if implementationName == "commandExecutorBash" {
+		client, err := httpcommandexecutorclientoo.NewClient(commandexecutorbashoo.Bash())
+		if err != nil {
+			panic(err)
+		}
+
+		return client
 	}
 
 	logging.LogFatalWithTracef(
@@ -49,20 +70,29 @@ func TestClient_GetRequest_RootPage_PortInUrl(t *testing.T) {
 		{"nativeClient", "GET"},
 		{"nativeClient", "GeT"},
 		{"nativeClient", ""},
+		{"commandExecutorExec", "get"},
+		{"commandExecutorExec", "Get"},
+		{"commandExecutorExec", "GET"},
+		{"commandExecutorExec", "GeT"},
+		{"commandExecutorExec", ""},
+		{"commandExecutorBash", "get"},
+		{"commandExecutorBash", "Get"},
+		{"commandExecutorBash", "GET"},
+		{"commandExecutorBash", "GeT"},
+		{"commandExecutorBash", ""},
 	}
 
 	for _, tt := range tests {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const port int = 9123
 				ctx := getCtx()
 
-				testServer, err := testwebserver.GetTestWebServer(port)
+				testServer, err := testwebserver.GetRunningTestWebServer(ctx, 9123)
 				require.NoError(t, err)
 				defer testServer.Stop(ctx)
 
-				err = testServer.StartInBackground(ctx)
+				url, err := testServer.GetUrl()
 				require.NoError(t, err)
 
 				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
@@ -70,7 +100,7 @@ func TestClient_GetRequest_RootPage_PortInUrl(t *testing.T) {
 				response, err = client.SendRequest(
 					ctx,
 					&httpoptions.RequestOptions{
-						Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())),
+						Url:    url,
 						Method: tt.method,
 					},
 				)
@@ -94,6 +124,16 @@ func TestClient_GetRequest_RootPage_PortInRequest(t *testing.T) {
 		{"nativeClient", "GET"},
 		{"nativeClient", "GeT"},
 		{"nativeClient", ""},
+		{"commandExecutorExec", "get"},
+		{"commandExecutorExec", "Get"},
+		{"commandExecutorExec", "GET"},
+		{"commandExecutorExec", "GeT"},
+		{"commandExecutorExec", ""},
+		{"commandExecutorBash", "get"},
+		{"commandExecutorBash", "Get"},
+		{"commandExecutorBash", "GET"},
+		{"commandExecutorBash", "GeT"},
+		{"commandExecutorBash", ""},
 	}
 
 	for _, tt := range tests {
@@ -140,6 +180,16 @@ func TestClient_GetRequest_RootPage_PortOnClientLevel(t *testing.T) {
 		{"nativeClient", "GET"},
 		{"nativeClient", "GeT"},
 		{"nativeClient", ""},
+		{"commandExecutorExec", "get"},
+		{"commandExecutorExec", "Get"},
+		{"commandExecutorExec", "GET"},
+		{"commandExecutorExec", "GeT"},
+		{"commandExecutorExec", ""},
+		{"commandExecutorBash", "get"},
+		{"commandExecutorBash", "Get"},
+		{"commandExecutorBash", "GET"},
+		{"commandExecutorBash", "GeT"},
+		{"commandExecutorBash", ""},
 	}
 
 	for _, tt := range tests {
@@ -189,6 +239,16 @@ func TestClient_GetRequestBodyAsString_RootPage_PortInUrl(t *testing.T) {
 		{"nativeClient", "GET"},
 		{"nativeClient", "GeT"},
 		{"nativeClient", ""},
+		{"commandExecutorExec", "get"},
+		{"commandExecutorExec", "Get"},
+		{"commandExecutorExec", "GET"},
+		{"commandExecutorExec", "GeT"},
+		{"commandExecutorExec", ""},
+		{"commandExecutorBash", "get"},
+		{"commandExecutorBash", "Get"},
+		{"commandExecutorBash", "GET"},
+		{"commandExecutorBash", "GeT"},
+		{"commandExecutorBash", ""},
 	}
 
 	for _, tt := range tests {
@@ -230,6 +290,16 @@ func TestClient_GetRequest_404_PortInUrl(t *testing.T) {
 		{"nativeClient", "GET"},
 		{"nativeClient", "GeT"},
 		{"nativeClient", ""},
+		{"commandExecutorExec", "get"},
+		{"commandExecutorExec", "Get"},
+		{"commandExecutorExec", "GET"},
+		{"commandExecutorExec", "GeT"},
+		{"commandExecutorExec", ""},
+		{"commandExecutorBash", "get"},
+		{"commandExecutorBash", "Get"},
+		{"commandExecutorBash", "GET"},
+		{"commandExecutorBash", "GeT"},
+		{"commandExecutorBash", ""},
 	}
 
 	for _, tt := range tests {
@@ -271,6 +341,8 @@ func TestClient_DownloadAsFile_ChecksumMismatch(t *testing.T) {
 		method             string
 	}{
 		{"nativeClient", "get"},
+		{"commandExecutorExec", "get"},
+		{"commandExecutorBash", "get"},
 	}
 
 	for _, tt := range tests {
@@ -306,6 +378,8 @@ func TestClient_DownloadAsFile_ChecksumMismatch(t *testing.T) {
 					},
 				)
 				require.Error(t, err)
+				require.ErrorIs(t, err, httpgeneric.ErrChecksumMismatch)
+				require.True(t, httpgeneric.IsErrorChecksumMismatch(err))
 			},
 		)
 	}
@@ -317,6 +391,8 @@ func TestClient_DownloadAsFile(t *testing.T) {
 		method             string
 	}{
 		{"nativeClient", "get"},
+		{"commandExecutorExec", "get"},
+		{"commandExecutorBash", "get"},
 	}
 
 	for _, tt := range tests {
@@ -341,8 +417,9 @@ func TestClient_DownloadAsFile(t *testing.T) {
 				const expectedOutput = "hello world\n"
 
 				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				ctxDownload := contextutils.WithChangeIndicator(ctx)
 				downloadedFile, err := client.DownloadAsFile(
-					ctx,
+					ctxDownload,
 					&httpoptions.DownloadAsFileOptions{
 						RequestOptions: &httpoptions.RequestOptions{
 							Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
@@ -353,12 +430,14 @@ func TestClient_DownloadAsFile(t *testing.T) {
 					},
 				)
 				require.NoError(t, err)
+				require.True(t, contextutils.IsChanged(ctxDownload))
 				defer downloadedFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.EqualValues(t, expectedOutput, downloadedFile.MustReadAsString())
 
+				ctxDownload = contextutils.WithChangeIndicator(ctx)
 				downloadedFile, err = client.DownloadAsFile(
-					ctx,
+					ctxDownload,
 					&httpoptions.DownloadAsFileOptions{
 						RequestOptions: &httpoptions.RequestOptions{
 							Url:    "http://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
@@ -369,6 +448,10 @@ func TestClient_DownloadAsFile(t *testing.T) {
 					},
 				)
 				require.NoError(t, err)
+				
+				// Since the file was already downloaded once there was nothing changed:
+				require.False(t, contextutils.IsChanged(ctxDownload)) 
+
 				require.EqualValues(t, expectedOutput, downloadedFile.MustReadAsString())
 			},
 		)
@@ -381,6 +464,8 @@ func TestClient_DownloadAsTempraryFile(t *testing.T) {
 		method             string
 	}{
 		{"nativeClient", "get"},
+		{"commandExecutorExec", "get"},
+		{"commandExecutorBash", "get"},
 	}
 
 	for _, tt := range tests {
@@ -398,6 +483,7 @@ func TestClient_DownloadAsTempraryFile(t *testing.T) {
 				require.NoError(t, err)
 
 				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				ctx = contextutils.WithChangeIndicator(ctx)
 				downloadedFile, err := client.DownloadAsTemporaryFile(
 					ctx,
 					&httpoptions.DownloadAsTemporaryFileOptions{
@@ -409,7 +495,7 @@ func TestClient_DownloadAsTempraryFile(t *testing.T) {
 				)
 				require.NoError(t, err)
 				defer downloadedFile.Delete(ctx, &filesoptions.DeleteOptions{})
-
+				require.True(t, contextutils.IsChanged(ctx))
 				require.Contains(t, "hello world\n", downloadedFile.MustReadAsString())
 			},
 		)
@@ -422,6 +508,8 @@ func TestClient_GetRequestAndRunYqQuery(t *testing.T) {
 		method             string
 	}{
 		{"nativeClient", "get"},
+		{"commandExecutorExec", "get"},
+		{"commandExecutorBash", "get"},
 	}
 
 	for _, tt := range tests {
@@ -461,6 +549,8 @@ func TestClient_GetRequestUsingTls_insecure(t *testing.T) {
 		method             string
 	}{
 		{"nativeClient", "get"},
+		{"commandExecutorExec", "get"},
+		{"commandExecutorBash", "get"},
 	}
 
 	for _, tt := range tests {

@@ -209,7 +209,7 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 	}
 
 	if downloadOptions.Sha256Sum != "" {
-		exists, err := downloadedFile.Exists(contextutils.ContextSilent())
+		exists, err := downloadedFile.Exists(contextutils.WithSilent(ctx))
 		if err != nil {
 			return nil, err
 		}
@@ -283,7 +283,7 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 		}
 	}
 
-	logging.LogInfoByCtxf(ctx, "Downloaded '%s' as file '%s'.", url, outputFilePath)
+	logging.LogChangedByCtxf(ctx, "Downloaded '%s' as file '%s'.", url, outputFilePath)
 
 	if downloadOptions.Sha256Sum != "" {
 		expectedSha256 := downloadOptions.Sha256Sum
@@ -299,7 +299,8 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 			logging.LogInfoByCtxf(ctx, "Downloaded file '%s' matches expected sha256sum %s", outputFilePath, expectedSha256)
 		} else {
 			return nil, tracederrors.TracedErrorf(
-				"Downloaded file '%s' has checksum '%s' and is not matching expected '%s'.",
+				"%w: Downloaded file '%s' has checksum '%s' and is not matching expected '%s'.",
+				httpgeneric.ErrChecksumMismatch,
 				outputFilePath,
 				sha256,
 				expectedSha256,
