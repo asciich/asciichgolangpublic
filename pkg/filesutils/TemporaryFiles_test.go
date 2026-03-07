@@ -6,9 +6,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfileoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutortempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
@@ -26,9 +28,9 @@ func getCtx() context.Context {
 }
 
 func getTemporaryFileToTest(implementationName string) (fileToTest filesinterfaces.File) {
-	ctxSilent := contextutils.WithSilent(getCtx())
+	ctx := getCtx()
 
-	temporayFilePath := mustutils.Must(tempfiles.CreateTemporaryFile(ctxSilent))
+	temporayFilePath := mustutils.Must(tempfiles.CreateTemporaryFile(ctx))
 
 	return getFileToTest(implementationName, temporayFilePath)
 }
@@ -38,8 +40,17 @@ func getFileToTest(implementationName string, path string) (fileToTest filesinte
 		return mustutils.Must(files.GetLocalFileByPath(path))
 	}
 
+	// Deprecated: use the commandExecutorfileoo implementeations below in the next if statements.
 	if implementationName == "localCommandExecutorFile" {
 		return mustutils.Must(files.GetLocalCommandExecutorFileByPath(path))
+	}
+
+	if implementationName == "commandExecutorFileExec" {
+		return mustutils.Must(commandexecutorfileoo.New(commandexecutorexecoo.Exec(), path))
+	}
+
+	if implementationName == "commandExecutorFileBash" {
+		return mustutils.Must(commandexecutorfileoo.New(commandexecutorbashoo.Bash(), path))
 	}
 
 	logging.LogFatalWithTracef("Unknown implementation name '%s'", implementationName)

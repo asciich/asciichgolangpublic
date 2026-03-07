@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/installutils"
+	"github.com/asciich/asciichgolangpublic/pkg/installutils/installoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -48,7 +49,7 @@ func TestInstallFromPath(t *testing.T) {
 
 				err = installutils.Install(
 					ctx,
-					&installutils.InstallOptions{
+					&installoptions.InstallOptions{
 						SrcPath:     sourceFile,
 						InstallPath: destFilePath,
 						Mode:        tt.mode,

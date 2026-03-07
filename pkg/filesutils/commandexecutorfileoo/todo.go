@@ -5,7 +5,6 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -19,10 +18,6 @@ func (f *File) AppendString(toWrite string, verbose bool) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
 }
 
-func (f *File) Chmod(ctx context.Context, options *filesoptions.ChmodOptions) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
-}
-
 func (f *File) Chown(ctx context.Context, options *parameteroptions.ChownOptions) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
 }
@@ -30,15 +25,6 @@ func (f *File) Chown(ctx context.Context, options *parameteroptions.ChownOptions
 func (f *File) CopyToFile(destFile filesinterfaces.File, verbose bool) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
 }
-
-func (f *File) GetAccessPermissions() (permission int, err error) {
-	return 0, tracederrors.TracedErrorNotImplemented()
-}
-
-func (f *File) GetAccessPermissionsString() (permissionString string, err error) {
-	return "", tracederrors.TracedErrorNotImplemented()
-}
-
 
 
 func (f *File) GetDeepCopy() (deepCopy filesinterfaces.File) {

@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
+// Deprecated: Use the commandexecutorfileoo package instead.
 func GetCommandExecutorFileByPath(commandExector commandexecutorinterfaces.CommandExecutor, path string) (commandExecutorFile *CommandExecutorFile, err error) {
 	if commandExector == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
@@ -33,6 +34,7 @@ func GetCommandExecutorFileByPath(commandExector commandexecutorinterfaces.Comma
 	return commandExecutorFile, nil
 }
 
+// Deprecated: Use the commandexecutorfileoo package instead.
 func GetLocalCommandExecutorFileByFile(ctx context.Context, file filesinterfaces.File) (commandExecutorFile *CommandExecutorFile, err error) {
 	if file == nil {
 		return nil, tracederrors.TracedErrorEmptyString("file")
