@@ -1,20 +1,17 @@
 package miniocmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/s3cmd/miniocmd/miniocmdoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/nativeminioclient"
 )
 
-func NewListObjectsCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
+func NewDeleteObjectsCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list-objects",
-		Short: "List the objects in the S3 --bucket.",
+		Use:   "delete-objects",
+		Short: "Delete the given objects in the S3 --bucket.",
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
@@ -29,15 +26,19 @@ func NewListObjectsCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command 
 				logging.LogFatalf("Please specify --bucket.")
 			}
 
-			for _, o := range mustutils.Must(nativeminioclient.ListObjectNames(ctx, client, bucketName)) {
-				fmt.Println(o)
+			if len(args) <= 0 {
+				logging.LogFatalf("Please specify at least one object to delete.")
+			}
+
+			for _, objectKey := range args {
+				nativeminioclient.DeleteObject(ctx, client, bucketName, objectKey)
 			}
 
 			logging.LogGoodByCtxf(ctx, "List objects in bucket '%s' finished.", bucketName)
 		},
 	}
 
-	cmd.Flags().String("bucket", "", "Name of the bucket to list.")
+	cmd.Flags().String("bucket", "", "Name of the bucket where to delete the object.")
 
 	return cmd
 }
