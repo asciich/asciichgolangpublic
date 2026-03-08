@@ -398,7 +398,7 @@ func (f *FileBase) GetPathAndHostDescription() (path string, hostDescription str
 	return path, hostDescription, nil
 }
 
-func (f *FileBase) GetSha256Sum() (sha256sum string, err error) {
+func (f *FileBase) GetSha256Sum(ctx context.Context) (sha256sum string, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return "", err
@@ -525,12 +525,12 @@ func (f *FileBase) IsContentEqualByComparingSha256Sum(otherFile filesinterfaces.
 		return false, tracederrors.TracedErrorNil("otherFile")
 	}
 
-	thisChecksum, err := f.GetSha256Sum()
+	thisChecksum, err := f.GetSha256Sum(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return false, err
 	}
 
-	otherChecksum, err := otherFile.GetSha256Sum()
+	otherChecksum, err := otherFile.GetSha256Sum(contextutils.GetVerbosityContextByBool(verbose))
 	if err != nil {
 		return false, err
 	}
@@ -571,7 +571,7 @@ func (f *FileBase) IsMatchingSha256Sum(sha256sum string) (isMatching bool, err e
 		return false, nil
 	}
 
-	currentSum, err := parent.GetSha256Sum()
+	currentSum, err := parent.GetSha256Sum(contextutils.ContextSilent())
 	if err != nil {
 		return false, err
 	}
@@ -749,7 +749,7 @@ func (f *FileBase) MustGetPathAndHostDescription() (path string, hostDescription
 }
 
 func (f *FileBase) MustGetSha256Sum() (sha256sum string) {
-	sha256sum, err := f.GetSha256Sum()
+	sha256sum, err := f.GetSha256Sum(contextutils.ContextSilent())
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}

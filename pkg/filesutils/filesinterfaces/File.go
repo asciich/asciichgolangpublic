@@ -51,7 +51,7 @@ type File interface {
 	GetNumberOfNonEmptyLines() (nLines int, err error)
 	GetParentDirectoryPath() (parentDirectoryPath string, err error)
 	GetPathAndHostDescription() (path string, hostDescription string, err error)
-	GetSha256Sum() (sha256sum string, err error)
+	GetSha256Sum(context.Context) (sha256sum string, err error)
 	GetTextBlocks(verbose bool) (textBlocks []string, err error)
 	GetValueAsInt(key string) (value int, err error)
 	GetValueAsString(key string) (value string, err error)

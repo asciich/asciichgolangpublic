@@ -74,6 +74,11 @@ func (c *CommandExecutorHost) GetDeepCopy() *CommandExecutorHost {
 		ret.commandExecutor = c.commandExecutor.GetDeepCopyAsCommandExecutor()
 	}
 
+	err := ret.SetParentCommandExecutorForBaseClass(ret)
+	if err != nil {
+		panic(err)
+	}
+
 	return ret
 }
 

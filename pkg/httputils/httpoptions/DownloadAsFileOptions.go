@@ -13,6 +13,8 @@ type DownloadAsFileOptions struct {
 	// - The download will be skipped if OutputPath has already the expected content.
 	// - The download is validated.
 	Sha256Sum string
+
+	UseSudo bool
 }
 
 func NewDownloadAsFileOptions() (d *DownloadAsFileOptions) {

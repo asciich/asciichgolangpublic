@@ -169,3 +169,4 @@ func TestHost_LocalHostUsesBashCommandExecutorByDefault(t *testing.T) {
 	_, ok = commandExecutor.(*commandexecutorbashoo.BashService)
 	require.True(t, ok)
 }
+

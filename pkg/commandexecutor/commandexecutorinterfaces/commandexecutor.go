@@ -16,6 +16,7 @@ type CommandExecutor interface {
 
 	// These Commands can be implemented by embedding the `CommandExecutorBase` struct:
 	IsRunningOnLocalhost() (bool, error)
+	GetCPUArchitecture(ctx context.Context) (string, error)
 	RunCommandAndGetStdoutAsBytes(ctx context.Context, options *parameteroptions.RunCommandOptions) ([]byte, error)
 	RunCommandAndGetStdoutAsFloat64(ctx context.Context, options *parameteroptions.RunCommandOptions) (float64, error)
 	RunCommandAndGetStdoutAsInt64(ctx context.Context, options *parameteroptions.RunCommandOptions) (int64, error)
