@@ -12,6 +12,7 @@ type InstallOptions struct {
 	UseSudo         bool
 	ReplaceExisting bool
 	Sha256Sum       string
+	SkipTLSvalidation bool
 }
 
 func NewInstallOptions() (i *InstallOptions) {

@@ -50,21 +50,25 @@ func Chmod(ctx context.Context, commandExecutor commandexecutorinterfaces.Comman
 	if newPermissions == currentPermissions {
 		logging.LogInfoByCtxf(ctx, "File permissions for '%s' on '%s' are already set to '%s'.", path, hostDescription, newPermissionsString)
 	} else {
+		command := []string{"chmod", newPermissionsString, path}
+
+		if options.UseSudo {
+			command = append([]string{"sudo"}, command...)
+		}
+
 		_, err = commandExecutor.RunCommand(
 			ctx,
 			&parameteroptions.RunCommandOptions{
-				Command: []string{"chmod", newPermissionsString, path},
+				Command: command,
 			},
 		)
-		
-		logging.LogChangedByCtxf(ctx, "Changed file permissions for '%s' on '%s' to '%s'.",path, hostDescription, newPermissionsString)
+
+		logging.LogChangedByCtxf(ctx, "Changed file permissions for '%s' on '%s' to '%s'.", path, hostDescription, newPermissionsString)
 	}
 
 	if err != nil {
 		return err
 	}
-
-	
 
 	return nil
 }

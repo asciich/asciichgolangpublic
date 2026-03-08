@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -149,4 +150,38 @@ func (c *CommandExecutorBase) SetParentCommandExecutorForBaseClass(parentCommand
 	c.parentCommandExecutorForBaseClass = parentCommandExecutorForBaseClass
 
 	return nil
+}
+
+func (c *CommandExecutorBase) GetCPUArchitecture(ctx context.Context) (string, error) {
+	parent, err := c.GetParentCommandExecutorForBaseClass()
+	if err != nil {
+		return "", err
+	}
+
+	hostDescription, err := parent.GetHostDescription()
+	if err != nil {
+		return "", err
+	}
+
+	unameMOutput, err := parent.RunCommandAndGetStdoutAsString(ctx, &parameteroptions.RunCommandOptions{
+		Command: []string{"uname", "-m"},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	lookup := map[string]string{
+		"x86_64":  "amd64",
+		"amd64":   "amd64",
+		"aarch64": "arm64",
+	}
+
+	arch, ok := lookup[strings.TrimSpace(unameMOutput)]
+	if !ok {
+		return "", tracederrors.TracedErrorf("Unknown uname -m  output '%s' to evaluate arch of '%s'.", unameMOutput, hostDescription)
+	}
+
+	logging.LogInfoByCtxf(ctx, "CPU architecture of '%s' is '%s'.", hostDescription, arch)
+
+	return arch, nil
 }

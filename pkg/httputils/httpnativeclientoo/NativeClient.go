@@ -215,7 +215,7 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 		}
 
 		if exists {
-			sha256, err := downloadedFile.GetSha256Sum()
+			sha256, err := downloadedFile.GetSha256Sum(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -290,7 +290,7 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 
 		logging.LogInfoByCtxf(ctx, "Going to validate downloaded file '%s' using expected sha256sum %s", outputFilePath, expectedSha256)
 
-		sha256, err := downloadedFile.GetSha256Sum()
+		sha256, err := downloadedFile.GetSha256Sum(ctx)
 		if err != nil {
 			return nil, err
 		}

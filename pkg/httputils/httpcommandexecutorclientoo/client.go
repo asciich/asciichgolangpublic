@@ -81,7 +81,7 @@ func (h *HttpCommandExecutorClient) DownloadAsFile(ctx context.Context, download
 		return nil, err
 	}
 
-	outputFilePath, err := downloadedFile.GetLocalPath()
+	outputFilePath, err := downloadedFile.GetPath()
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func (h *HttpCommandExecutorClient) DownloadAsFile(ctx context.Context, download
 		}
 
 		if exists {
-			sha256, err := downloadedFile.GetSha256Sum()
+			sha256, err := downloadedFile.GetSha256Sum(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -108,7 +108,7 @@ func (h *HttpCommandExecutorClient) DownloadAsFile(ctx context.Context, download
 
 	if downloadOptions.OverwriteExisting {
 		logging.LogInfoByCtxf(ctx, "Going to ensure '%s' is absent before download starts", outputFilePath)
-		err = downloadedFile.Delete(ctx, &filesoptions.DeleteOptions{})
+		err = downloadedFile.Delete(ctx, &filesoptions.DeleteOptions{UseSudo: downloadOptions.UseSudo})
 		if err != nil {
 			return nil, err
 		}
@@ -116,16 +116,24 @@ func (h *HttpCommandExecutorClient) DownloadAsFile(ctx context.Context, download
 
 	logging.LogInfoByCtxf(ctx, "Going to download: '%s' as file '%s' on '%s'.", url, outputFilePath, hostDescription)
 
-	command := []string{
-		"curl",
-		"-L",
-		url,
-		"--output",
-		outputFilePath,
+	command := []string{"curl", "--fail"}
+
+	if downloadOptions.RequestOptions.SkipTLSvalidation {
+		command = append(command, "--insecure")
 	}
+
+	command = append(command, "-L", url, "--output", outputFilePath)
+
+	if downloadOptions.UseSudo {
+		command = append([]string{"sudo"}, command...)
+	}
+
 	_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
 		Command: command,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	logging.LogChangedByCtxf(ctx, "Downloaded '%s' as file '%s' on '%s'.", url, outputFilePath, hostDescription)
 
@@ -134,7 +142,7 @@ func (h *HttpCommandExecutorClient) DownloadAsFile(ctx context.Context, download
 
 		logging.LogInfoByCtxf(ctx, "Going to validate downloaded file '%s' using expected sha256sum %s", outputFilePath, expectedSha256)
 
-		sha256, err := downloadedFile.GetSha256Sum()
+		sha256, err := downloadedFile.GetSha256Sum(ctx)
 		if err != nil {
 			return nil, err
 		}

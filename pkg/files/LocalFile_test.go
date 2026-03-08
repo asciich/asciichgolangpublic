@@ -222,7 +222,7 @@ func TestLocalFileGetSha256Sum(t *testing.T) {
 				require.NoError(t, err)
 				defer temporaryFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				sha256Sum, err := temporaryFile.GetSha256Sum()
+				sha256Sum, err := temporaryFile.GetSha256Sum(ctx)
 				require.NoError(t, err)
 				require.EqualValues(t, tt.expectedChecksum, sha256Sum)
 			},
@@ -619,10 +619,10 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 				err = testFile.SortBlocksInFile(verbose)
 				require.NoError(t, err)
 
-				sortedChecksum, err := testFile.GetSha256Sum()
+				sortedChecksum, err := testFile.GetSha256Sum(ctx)
 				require.NoError(t, err)
 
-				expectedChecksum, err := expectedFile.GetSha256Sum()
+				expectedChecksum, err := expectedFile.GetSha256Sum(ctx)
 				require.NoError(t, err)
 
 				if os.Getenv("UPDATE_EXPECTED") == "1" {

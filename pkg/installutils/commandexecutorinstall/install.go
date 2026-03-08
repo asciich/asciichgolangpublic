@@ -37,11 +37,13 @@ func installFromSourceUrl(ctx context.Context, commandExecutor commandexecutorin
 
 	downloaded, err := httpClient.DownloadAsFile(ctx, &httpoptions.DownloadAsFileOptions{
 		RequestOptions: &httpoptions.RequestOptions{
-			Url: srcUrl,
+			Url:               srcUrl,
+			SkipTLSvalidation: options.SkipTLSvalidation,
 		},
 		OutputPath:        installPath,
 		OverwriteExisting: true,
 		Sha256Sum:         options.Sha256Sum,
+		UseSudo:           options.UseSudo,
 	})
 	if err != nil {
 		return err
@@ -50,6 +52,7 @@ func installFromSourceUrl(ctx context.Context, commandExecutor commandexecutorin
 	if options.Mode != "" {
 		err := downloaded.Chmod(ctx, &filesoptions.ChmodOptions{
 			PermissionsString: options.Mode,
+			UseSudo:           options.UseSudo,
 		})
 		if err != nil {
 			return err
