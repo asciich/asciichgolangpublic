@@ -1,6 +1,7 @@
 package containerutils
 
 import (
+	"context"
 	"slices"
 	"strings"
 
@@ -10,7 +11,7 @@ import (
 )
 
 // Returns true if running in a container like docker container.
-func IsRunningInsideContainer(verbose bool) (isRunningInContainer bool, err error) {
+func IsRunningInsideContainer(ctx context.Context) (isRunningInContainer bool, err error) {
 	const procFilePath string = "/proc/1/cgroup"
 
 	procFile, err := files.GetLocalFileByPath(procFilePath)
@@ -18,7 +19,7 @@ func IsRunningInsideContainer(verbose bool) (isRunningInContainer bool, err erro
 		return false, err
 	}
 
-	procLines, err := procFile.ReadAsLines()
+	procLines, err := procFile.ReadAsLines(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -38,16 +39,12 @@ func IsRunningInsideContainer(verbose bool) (isRunningInContainer bool, err erro
 		pathToCheck := splittedLine[2]
 
 		if !slices.Contains([]string{"/", "/init.scope"}, pathToCheck) {
-			if verbose {
-				logging.LogInfo("Currently running in a container")
-			}
+			logging.LogInfoByCtx(ctx, "Currently running in a container")
 			return true, nil
 		}
 	}
 
-	if verbose {
-		logging.LogInfo("Currently not running in a container")
-	}
+	logging.LogInfoByCtx(ctx, "Currently not running in a container")
 
 	return false, nil
 }

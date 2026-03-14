@@ -10,19 +10,19 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
 
-func ctx() context.Context {
+func getCtx() context.Context {
 	return contextutils.ContextVerbose()
 }
 
 func Test_ParseListHostsOutput(t *testing.T) {
 	t.Run("unknown output", func(t *testing.T) {
-		parsed, err := ansibleutils.ParseCliOutput(ctx(), "x")
+		parsed, err := ansibleutils.ParseCliOutput(getCtx(), "x")
 		require.Nil(t, parsed)
 		require.ErrorIs(t, err, ansibleutils.ErrUnknwnAnsibleCliOutput)
 	})
 
 	t.Run("single host", func(t *testing.T) {
-		parsed, err := ansibleutils.ParseCliOutput(ctx(), "  hosts (1):\n    one.example.net\n")
+		parsed, err := ansibleutils.ParseCliOutput(getCtx(), "  hosts (1):\n    one.example.net\n")
 		require.NoError(t, err)
 		require.EqualValues(
 			t,
@@ -32,7 +32,7 @@ func Test_ParseListHostsOutput(t *testing.T) {
 	})
 
 	t.Run("two hosts", func(t *testing.T) {
-		parsed, err := ansibleutils.ParseCliOutput(ctx(), "  hosts (2):\n    one.example.net\n    two.example.net")
+		parsed, err := ansibleutils.ParseCliOutput(getCtx(), "  hosts (2):\n    one.example.net\n    two.example.net")
 		require.NoError(t, err)
 		require.EqualValues(
 			t,

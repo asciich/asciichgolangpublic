@@ -30,7 +30,7 @@ func TestDirectoriesCreateLocalDirectoryByPath(t *testing.T) {
 				require.NoError(t, err)
 
 				var directory filesinterfaces.Directory
-				directory, err = files.GetLocalDirectoryByPath(tempDir)
+				directory, err = files.GetLocalDirectoryByPath(ctx, tempDir)
 				require.NoError(t, err)
 				defer directory.Delete(ctx, &filesoptions.DeleteOptions{})
 

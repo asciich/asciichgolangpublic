@@ -30,7 +30,7 @@ func TestDirectoryBase_SetAndGetParentDirectory(t *testing.T) {
 				tempDir, err := os.MkdirTemp("", "test_direcotry")
 				require.NoError(t, err)
 
-				directory, err := files.GetLocalDirectoryByPath(tempDir)
+				directory, err := files.GetLocalDirectoryByPath(ctx, tempDir)
 				require.NoError(t, err)
 				defer directory.Delete(ctx, &filesoptions.DeleteOptions{})
 

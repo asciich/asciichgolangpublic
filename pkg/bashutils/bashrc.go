@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -47,7 +46,7 @@ func EnableImmediateHistoryReadAndWriteForCurrentUser(ctx context.Context) (err 
 		"export HISTCONTROL=ignorespace:erasedups",
 	}
 	for _, line := range linesToAdd {
-		err = bashRcFile.EnsureLineInFile(line, contextutils.GetVerboseFromContext(ctx))
+		err = bashRcFile.EnsureLineInFile(ctx, line)
 		if err != nil {
 			return err
 		}
@@ -76,7 +75,7 @@ func SetBashHistorySizeOfCurrentUser(ctx context.Context, newBashHistorySize int
 	}
 
 	for _, l := range linesToAdd {
-		err = bashRcfile.EnsureLineInFile(l, contextutils.GetVerboseFromContext(ctx))
+		err = bashRcfile.EnsureLineInFile(ctx, l)
 		if err != nil {
 			return err
 		}

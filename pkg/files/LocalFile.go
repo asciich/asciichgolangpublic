@@ -4,16 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbash"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
@@ -22,7 +23,7 @@ import (
 
 // A LocalFile represents a locally available file.
 type LocalFile struct {
-	FileBase
+	filesgeneric.FileBase
 	path string
 }
 
@@ -65,7 +66,10 @@ func NewLocalFile() (l *LocalFile) {
 	l = new(LocalFile)
 
 	// Allow usage of the base class functions:
-	l.MustSetParentFileForBaseClass(l)
+	err := l.SetParentFileForBaseClass(l)
+	if err != nil {
+		panic(err)
+	}
 
 	return l
 }
@@ -104,7 +108,7 @@ func (l *LocalFile) Delete(ctx context.Context, options *filesoptions.DeleteOpti
 	return nativefiles.Delete(ctx, path, options)
 }
 
-func (l *LocalFile) AppendBytes(toWrite []byte, verbose bool) (err error) {
+func (l *LocalFile) AppendBytes(ctx context.Context, toWrite []byte) (err error) {
 	if toWrite == nil {
 		return tracederrors.TracedErrorNil("toWrite")
 	}
@@ -132,15 +136,13 @@ func (l *LocalFile) AppendBytes(toWrite []byte, verbose bool) (err error) {
 		return tracederrors.TracedErrorf("Unable to close file after append: '%w'", err)
 	}
 
-	if verbose {
-		logging.LogChangedf("Appended data to localfile '%s'.", localPath)
-	}
+	logging.LogChangedByCtxf(ctx, "Appended data to localfile '%s'.", localPath)
 
 	return nil
 }
 
-func (l *LocalFile) AppendString(toWrite string, verbose bool) (err error) {
-	err = l.AppendBytes([]byte(toWrite), verbose)
+func (l *LocalFile) AppendString(ctx context.Context, toWrite string) (err error) {
+	err = l.AppendBytes(ctx, []byte(toWrite))
 	if err != nil {
 		return err
 	}
@@ -202,34 +204,32 @@ func (l *LocalFile) Chown(ctx context.Context, options *parameteroptions.ChownOp
 	return nil
 }
 
-func (l *LocalFile) CopyToFile(destFile filesinterfaces.File, verbose bool) (err error) {
+func (l *LocalFile) CopyToFile(ctx context.Context, destFile filesinterfaces.File) (err error) {
 	if destFile == nil {
 		return tracederrors.TracedErrorNil("destFile")
 	}
 
-	content, err := l.ReadAsBytes()
+	content, err := l.ReadAsBytes(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = destFile.WriteBytes(contextutils.GetVerbosityContextByBool(verbose), content, &filesoptions.WriteOptions{})
+	err = destFile.WriteBytes(ctx, content, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		srcPath, err := l.GetLocalPath()
-		if err != nil {
-			return err
-		}
-
-		destPath, err := destFile.GetLocalPath()
-		if err != nil {
-			return err
-		}
-
-		logging.LogChangedf("Copied '%s' to '%s'", srcPath, destPath)
+	srcPath, err := l.GetLocalPath()
+	if err != nil {
+		return err
 	}
+
+	destPath, err := destFile.GetLocalPath()
+	if err != nil {
+		return err
+	}
+
+	logging.LogChangedByCtxf(ctx, "Copied '%s' to '%s'", srcPath, destPath)
 
 	return nil
 }
@@ -325,7 +325,7 @@ func (l *LocalFile) GetLocalPathOrEmptyStringIfUnset() (localPath string, err er
 	return l.path, nil
 }
 
-func (l *LocalFile) GetParentDirectory() (parentDirectory filesinterfaces.Directory, err error) {
+func (l *LocalFile) GetParentDirectory(ctx context.Context) (parentDirectory filesinterfaces.Directory, err error) {
 	localPath, err := l.GetLocalPath()
 	if err != nil {
 		return nil, err
@@ -333,7 +333,7 @@ func (l *LocalFile) GetParentDirectory() (parentDirectory filesinterfaces.Direct
 
 	localDirPath := filepath.Dir(localPath)
 
-	parentDirectory, err = GetLocalDirectoryByPath(localDirPath)
+	parentDirectory, err = GetLocalDirectoryByPath(ctx, localDirPath)
 	if err != nil {
 		return nil, err
 	}
@@ -397,7 +397,7 @@ func (l *LocalFile) IsPathSet() (isSet bool) {
 	return false
 }
 
-func (l *LocalFile) MoveToPath(path string, useSudo bool, verbose bool) (movedFile filesinterfaces.File, err error) {
+func (l *LocalFile) MoveToPath(ctx context.Context, path string, useSudo bool) (movedFile filesinterfaces.File, err error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString(path)
 	}
@@ -430,153 +430,12 @@ func (l *LocalFile) MoveToPath(path string, useSudo bool, verbose bool) (movedFi
 		}
 	}
 
-	if verbose {
-		logging.LogChangedf(
-			"Moved '%s' to '%s' on host '%s'.",
-			srcPath,
-			path,
-			hostDescription,
-		)
-	}
+	logging.LogChangedByCtxf(ctx, "Moved '%s' to '%s' on host '%s'.", srcPath, path, hostDescription)
 
 	return GetLocalFileByPath(path)
 }
 
-func (l *LocalFile) MustAppendBytes(toWrite []byte, verbose bool) {
-	err := l.AppendBytes(toWrite, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (l *LocalFile) MustAppendString(toWrite string, verbose bool) {
-	err := l.AppendString(toWrite, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (l *LocalFile) MustCopyToFile(destFile filesinterfaces.File, verbose bool) {
-	err := l.CopyToFile(destFile, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (l *LocalFile) MustGetBaseName() (baseName string) {
-	baseName, err := l.GetBaseName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return baseName
-}
-
-func (l *LocalFile) MustGetHostDescription() (hostDescription string) {
-	hostDescription, err := l.GetHostDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hostDescription
-}
-
-func (l *LocalFile) MustGetLocalPath() (path string) {
-	path, err := l.GetLocalPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return path
-}
-
-func (l *LocalFile) MustGetLocalPathOrEmptyStringIfUnset() (localPath string) {
-	localPath, err := l.GetLocalPathOrEmptyStringIfUnset()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return localPath
-}
-
-func (l *LocalFile) MustGetParentDirectory() (parentDirectory filesinterfaces.Directory) {
-	parentDirectory, err := l.GetParentDirectory()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return parentDirectory
-}
-
-func (l *LocalFile) MustGetParentFileForBaseClassAsLocalFile() (parentAsLocalFile *LocalFile) {
-	parentAsLocalFile, err := l.GetParentFileForBaseClassAsLocalFile()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return parentAsLocalFile
-}
-
-func (l *LocalFile) MustGetPath() (path string) {
-	path, err := l.GetPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return path
-}
-
-func (l *LocalFile) MustGetSizeBytes() (fileSizeBytes int64) {
-	fileSizeBytes, err := l.GetSizeBytes()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return fileSizeBytes
-}
-
-func (l *LocalFile) MustGetUriAsString() (uri string) {
-	uri, err := l.GetUriAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return uri
-}
-
-func (l *LocalFile) MustReadAsBytes() (content []byte) {
-	content, err := l.ReadAsBytes()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return content
-}
-
-func (l *LocalFile) MustReadFirstNBytes(numberOfBytesToRead int) (firstBytes []byte) {
-	firstBytes, err := l.ReadFirstNBytes(numberOfBytesToRead)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return firstBytes
-}
-
-func (l *LocalFile) MustSetPath(path string) {
-	err := l.SetPath(path)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (l *LocalFile) MustTruncate(newSizeBytes int64, verbose bool) {
-	err := l.Truncate(newSizeBytes, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (l *LocalFile) ReadAsBytes() (content []byte, err error) {
+func (l *LocalFile) ReadAsBytes(ctx context.Context) (content []byte, err error) {
 	path, err := l.GetLocalPath()
 	if err != nil {
 		return nil, err
@@ -590,34 +449,19 @@ func (l *LocalFile) ReadAsBytes() (content []byte, err error) {
 	return content, err
 }
 
-func (l *LocalFile) ReadFirstNBytes(numberOfBytesToRead int) (firstBytes []byte, err error) {
-	if numberOfBytesToRead <= 0 {
-		return nil, tracederrors.TracedErrorf("Invalid numberOfBytesToRead: '%d'", numberOfBytesToRead)
-	}
-
-	path, err := l.GetLocalPath()
+// This function is already migrated to nativefilesoo
+func (l *LocalFile) ReadFirstNBytes(ctx context.Context, numberOfBytesToRead int) ([]byte, error) {
+	path, err := l.GetPath()
 	if err != nil {
 		return nil, err
 	}
 
-	fd, err := os.Open(path)
+	newFile, err := nativefilesoo.NewFileByPath(path)
 	if err != nil {
-		return nil, tracederrors.TracedError(err.Error())
+		return nil, err
 	}
 
-	defer fd.Close()
-
-	firstBytes = make([]byte, numberOfBytesToRead)
-	readBytes, err := fd.Read(firstBytes)
-	if err != nil {
-		if !errors.Is(err, io.EOF) {
-			return nil, tracederrors.TracedError(err.Error())
-		}
-	}
-
-	firstBytes = firstBytes[:readBytes]
-
-	return firstBytes, nil
+	return newFile.ReadFirstNBytes(ctx, numberOfBytesToRead)
 }
 
 func (l *LocalFile) SecurelyDelete(ctx context.Context) (err error) {
@@ -655,7 +499,7 @@ func (l *LocalFile) SetPath(path string) (err error) {
 	return nil
 }
 
-func (l *LocalFile) Truncate(newSizeBytes int64, verbose bool) (err error) {
+func (l *LocalFile) Truncate(ctx context.Context, newSizeBytes int64) (err error) {
 	if newSizeBytes < 0 {
 		return tracederrors.TracedErrorf("Invalid newSizeBytes='%d'", newSizeBytes)
 	}
@@ -696,13 +540,7 @@ func (l *LocalFile) Truncate(newSizeBytes int64, verbose bool) (err error) {
 			)
 		}
 
-		if verbose {
-			logging.LogChangedf(
-				"Truncated local file '%s' to new size '%d'.",
-				localPath,
-				newSizeBytes,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "Truncated local file '%s' to new size '%d'.", localPath, newSizeBytes)
 	}
 
 	return nil

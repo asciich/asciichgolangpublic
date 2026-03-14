@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
@@ -22,7 +23,8 @@ func getDirectoryToTest(implementationName string) (directory filesinterfaces.Di
 	}
 
 	if implementationName == "localDirectory" {
-		dir, err :=  files.GetLocalDirectoryByPath(tempDir)
+		ctx := contextutils.ContextVerbose()
+		dir, err := files.GetLocalDirectoryByPath(ctx, tempDir)
 		if err != nil {
 			logging.LogGoErrorFatal(err)
 		}
@@ -71,7 +73,7 @@ func TestDirectory_GetParentDirectory(t *testing.T) {
 
 				require.NotEqualValues(t, dirPath, subDirPath)
 
-				parentDir, err := subDir.GetParentDirectory()
+				parentDir, err := subDir.GetParentDirectory(ctx)
 				require.NoError(t, err)
 
 				parentDirPath, err := parentDir.GetPath()
@@ -103,7 +105,7 @@ func TestDirectory_ReadFileInDirectoryAsString(t *testing.T) {
 				_, err := dir.WriteStringToFile(ctx, "test.txt", "hello_world", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				content, err := dir.ReadFileInDirectoryAsString("test.txt")
+				content, err := dir.ReadFileInDirectoryAsString(ctx, "test.txt")
 				require.NoError(t, err)
 
 				require.EqualValues(t, "hello_world", content)
@@ -144,7 +146,7 @@ func TestDirectory_ReadFileInDirectoryAsInt64(t *testing.T) {
 				_, err := dir.WriteStringToFile(ctx, "test.txt", tt.content, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				content, err := dir.ReadFileInDirectoryAsInt64("test.txt")
+				content, err := dir.ReadFileInDirectoryAsInt64(ctx, "test.txt")
 				require.NoError(t, err)
 
 				require.EqualValues(t, tt.expectedInt64, content)
@@ -173,7 +175,7 @@ func TestDirectory_ReadFirstLineOfFileInDirectoryAsString(t *testing.T) {
 				_, err := dir.WriteStringToFile(ctx, "test.txt", "1234\nabc\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				content, err := dir.ReadFirstLineOfFileInDirectoryAsString("test.txt")
+				content, err := dir.ReadFirstLineOfFileInDirectoryAsString(ctx, "test.txt")
 				require.NoError(t, err)
 
 				require.EqualValues(t, "1234", content)
@@ -213,7 +215,7 @@ func TestDirectory_ListSubDirectories_RelativePaths(t *testing.T) {
 				require.NoError(t, err)
 
 				subDirectoryList, err := testDirectory.ListSubDirectoryPaths(
-					ctx, 
+					ctx,
 					&parameteroptions.ListDirectoryOptions{
 						Recursive:           false,
 						ReturnRelativePaths: true,

@@ -26,7 +26,7 @@ func WriteString(ctx context.Context, pathToWrite string, content string) error 
 	return nil
 }
 
-func WriteBytes(ctx context.Context, pathToWrite string, content []byte) error {
+func WriteBytes(ctx context.Context, pathToWrite string, content []byte, options *filesoptions.WriteOptions) error {
 	if pathToWrite == "" {
 		return tracederrors.TracedErrorEmptyString("pathToWrite")
 	}

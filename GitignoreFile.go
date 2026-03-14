@@ -95,12 +95,12 @@ func (g *GitignoreFile) AddDirToIgnore(ctx context.Context, pathToIgnore string,
 		return nil
 	}
 
-	err = g.AppendLine("# "+comment, contextutils.GetVerboseFromContext(ctx))
+	err = g.AppendLine(ctx, "# "+comment)
 	if err != nil {
 		return err
 	}
 
-	err = g.AppendLine(pathToIgnore, contextutils.GetVerboseFromContext(ctx))
+	err = g.AppendLine(ctx, pathToIgnore)
 	if err != nil {
 		return err
 	}
@@ -139,12 +139,12 @@ func (g *GitignoreFile) AddFileToIgnore(ctx context.Context, pathToIgnore string
 		return nil
 	}
 
-	err = g.AppendLine("# "+comment, contextutils.GetVerboseFromContext(ctx))
+	err = g.AppendLine(ctx, "# "+comment)
 	if err != nil {
 		return err
 	}
 
-	err = g.AppendLine(pathToIgnore, contextutils.GetVerboseFromContext(ctx))
+	err = g.AppendLine(ctx, pathToIgnore)
 	if err != nil {
 		return err
 	}
@@ -159,7 +159,8 @@ func (g *GitignoreFile) ContainsIgnore(pathToCheck string) (containsIgnore bool,
 		return false, tracederrors.TracedError("pathToCheck is empty string")
 	}
 
-	ignoredPaths, err := g.GetIgnoredPaths()
+	ctx := contextutils.ContextVerbose()
+	ignoredPaths, err := g.GetIgnoredPaths(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -169,8 +170,8 @@ func (g *GitignoreFile) ContainsIgnore(pathToCheck string) (containsIgnore bool,
 	return containsIgnore, nil
 }
 
-func (g *GitignoreFile) GetIgnoredPaths() (ignoredPaths []string, err error) {
-	ignoredPaths, err = g.ReadAsLinesWithoutComments()
+func (g *GitignoreFile) GetIgnoredPaths(ctx context.Context) (ignoredPaths []string, err error) {
+	ignoredPaths, err = g.ReadAsLinesWithoutComments(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +185,7 @@ func (g *GitignoreFile) Reformat(ctx context.Context) (err error) {
 		return err
 	}
 
-	err = g.TrimSpacesAtBeginningOfFile(contextutils.GetVerboseFromContext(ctx))
+	err = g.TrimSpacesAtBeginningOfFile(ctx)
 	if err != nil {
 		return err
 	}

@@ -433,7 +433,9 @@ func TestClient_DownloadAsFile(t *testing.T) {
 				require.True(t, contextutils.IsChanged(ctxDownload))
 				defer downloadedFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				require.EqualValues(t, expectedOutput, downloadedFile.MustReadAsString())
+				content, err := downloadedFile.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, expectedOutput, content)
 
 				ctxDownload = contextutils.WithChangeIndicator(ctx)
 				downloadedFile, err = client.DownloadAsFile(
@@ -448,11 +450,13 @@ func TestClient_DownloadAsFile(t *testing.T) {
 					},
 				)
 				require.NoError(t, err)
-				
-				// Since the file was already downloaded once there was nothing changed:
-				require.False(t, contextutils.IsChanged(ctxDownload)) 
 
-				require.EqualValues(t, expectedOutput, downloadedFile.MustReadAsString())
+				// Since the file was already downloaded once there was nothing changed:
+				require.False(t, contextutils.IsChanged(ctxDownload))
+
+				content, err = downloadedFile.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, expectedOutput, content)
 			},
 		)
 	}
@@ -496,7 +500,10 @@ func TestClient_DownloadAsTempraryFile(t *testing.T) {
 				require.NoError(t, err)
 				defer downloadedFile.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.True(t, contextutils.IsChanged(ctx))
-				require.Contains(t, "hello world\n", downloadedFile.MustReadAsString())
+
+				content, err := downloadedFile.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.Contains(t, "hello world\n", content)
 			},
 		)
 	}

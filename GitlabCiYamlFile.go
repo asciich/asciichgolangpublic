@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
@@ -176,7 +175,7 @@ func (g *GitlabCiYamlFile) GetIncludes(ctx context.Context) (includes []*GitlabC
 }
 
 func (g *GitlabCiYamlFile) GetTextBlocksWithoutIncludes(ctx context.Context) (textBlocks []string, err error) {
-	blocks, err := g.GetTextBlocks(contextutils.GetVerboseFromContext(ctx))
+	blocks, err := g.GetTextBlocks(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +206,7 @@ func (g *GitlabCiYamlFile) RewriteIncludes(ctx context.Context, includes []*Gitl
 
 	blocksToWrite := append([]string{includeBlock}, blocks...)
 
-	err = g.WriteTextBlocks(blocksToWrite, contextutils.GetVerboseFromContext(ctx))
+	err = g.WriteTextBlocks(ctx, blocksToWrite)
 	if err != nil {
 		return err
 	}
@@ -223,7 +222,7 @@ func (g *GitlabCiYamlFile) RewriteIncludes(ctx context.Context, includes []*Gitl
 }
 
 func (g *GitlabCiYamlFile) getIncludeBlock(ctx context.Context) (includeBlock string, err error) {
-	blocks, err := g.GetTextBlocks(contextutils.GetVerboseFromContext(ctx))
+	blocks, err := g.GetTextBlocks(ctx)
 	if err != nil {
 		return "", err
 	}

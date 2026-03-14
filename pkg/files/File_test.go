@@ -62,7 +62,9 @@ func TestFile_WriteString_ReadAsString(t *testing.T) {
 				err := fileToTest.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				require.EqualValues(t, tt.content, fileToTest.MustReadAsString())
+				content, err := fileToTest.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.content, content)
 			},
 		)
 	}
@@ -113,14 +115,13 @@ func TestFile_Truncate(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				fileToTest := getFileToTest(tt.implementationName)
 				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				for i := 0; i < 10; i++ {
-					err := fileToTest.Truncate(int64(i), verbose)
+					err := fileToTest.Truncate(ctx, int64(i))
 					require.NoError(t, err)
 
 					sizeBytes, err := fileToTest.GetSizeBytes()
@@ -128,7 +129,7 @@ func TestFile_Truncate(t *testing.T) {
 					require.EqualValues(t, sizeBytes, int64(i))
 				}
 
-				err := fileToTest.Truncate(0, verbose)
+				err := fileToTest.Truncate(ctx, 0)
 				require.NoError(t, err)
 
 				sizeBytes, err := fileToTest.GetSizeBytes()
@@ -163,7 +164,7 @@ func TestFile_ContainsLine(t *testing.T) {
 				err := fileToTest.WriteString(ctx, "this is a\nhello world\nexample text.\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				containsLine, err := fileToTest.ContainsLine(tt.line)
+				containsLine, err := fileToTest.ContainsLine(ctx, tt.line)
 				require.NoError(t, err)
 
 				require.EqualValues(t, tt.expectedContains, containsLine)
@@ -184,7 +185,6 @@ func TestFile_MoveToPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				fileToTest := getFileToTest(tt.implementationName)
@@ -205,7 +205,7 @@ func TestFile_MoveToPath(t *testing.T) {
 				destFilePath, err := destFile.GetPath()
 				require.NoError(t, err)
 
-				movedFile, err := fileToTest.MoveToPath(destFilePath, false, verbose)
+				movedFile, err := fileToTest.MoveToPath(ctx, destFilePath, false)
 				require.NoError(t, err)
 
 				movedFilePath, err := movedFile.GetPath()
@@ -247,7 +247,6 @@ func TestFile_CopyToFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				srcFile := getFileToTest(tt.implementationName)
@@ -262,15 +261,19 @@ func TestFile_CopyToFile(t *testing.T) {
 				require.True(t, mustutils.Must(srcFile.Exists(ctx)))
 				require.False(t, mustutils.Must(destFile.Exists(ctx)))
 
-				err = srcFile.CopyToFile(destFile, verbose)
+				err = srcFile.CopyToFile(ctx, destFile)
 				require.NoError(t, err)
 
 				require.True(t, mustutils.Must(srcFile.Exists(ctx)))
 				require.True(t, mustutils.Must(destFile.Exists(ctx)))
 
-				require.EqualValues(t, tt.content, srcFile.MustReadAsString())
+				content, err := srcFile.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.content, content)
 
-				require.EqualValues(t, tt.content, destFile.MustReadAsString())
+				content, err = destFile.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.content, content)
 			},
 		)
 	}

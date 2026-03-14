@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -20,7 +21,7 @@ import (
 
 // Deprecated: USe commandexecutiorfileoo.File instead
 type CommandExecutorFile struct {
-	FileBase
+	filesgeneric.FileBase
 	commandExecutor commandexecutorinterfaces.CommandExecutor
 	filePath        string
 }
@@ -40,11 +41,11 @@ func (c *CommandExecutorFile) String() string {
 	return c.filePath
 }
 
-func (c *CommandExecutorFile) AppendBytes(toWrite []byte, verbose bool) (err error) {
+func (c *CommandExecutorFile) AppendBytes(ctx context.Context, toWrite []byte) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
 }
 
-func (c *CommandExecutorFile) AppendString(toWrite string, verbose bool) (err error) {
+func (c *CommandExecutorFile) AppendString(ctx context.Context, toWrite string) (err error) {
 	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
 	if err != nil {
 		return err
@@ -149,7 +150,7 @@ func (c *CommandExecutorFile) Chown(ctx context.Context, options *parameteroptio
 	return nil
 }
 
-func (c *CommandExecutorFile) CopyToFile(destFile filesinterfaces.File, verbose bool) (err error) {
+func (c *CommandExecutorFile) CopyToFile(ctx context.Context, destFile filesinterfaces.File) (err error) {
 	if destFile == nil {
 		return tracederrors.TracedErrorNil("destFile")
 	}
@@ -189,14 +190,7 @@ func (c *CommandExecutorFile) CopyToFile(destFile filesinterfaces.File, verbose 
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof(
-			"Copied '%s' to '%s' on host '%s'.",
-			srcPath,
-			destPath,
-			destHostDescription,
-		)
-	}
+	logging.LogInfoByCtxf(ctx, "Copied '%s' to '%s' on host '%s'.", srcPath, destPath, destHostDescription)
 
 	return nil
 }
@@ -468,7 +462,7 @@ func (c *CommandExecutorFile) GetLocalPathOrEmptyStringIfUnset() (localPath stri
 	return "", tracederrors.TracedError("Not running on local host.")
 }
 
-func (c *CommandExecutorFile) GetParentDirectory() (parentDirectory filesinterfaces.Directory, err error) {
+func (c *CommandExecutorFile) GetParentDirectory(ctx context.Context) (parentDirectory filesinterfaces.Directory, err error) {
 	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
 	if err != nil {
 		return nil, err
@@ -588,7 +582,7 @@ func (c *CommandExecutorFile) IsRunningOnLocalhost() (isRunningOnLocalhost bool,
 	return isRunningOnLocalhost, nil
 }
 
-func (c *CommandExecutorFile) MoveToPath(path string, useSudo bool, verbose bool) (movedFile filesinterfaces.File, err error) {
+func (c *CommandExecutorFile) MoveToPath(ctx context.Context, path string, useSudo bool) (movedFile filesinterfaces.File, err error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
@@ -609,7 +603,7 @@ func (c *CommandExecutorFile) MoveToPath(path string, useSudo bool, verbose bool
 	}
 
 	_, err = commandExecutor.RunCommand(
-		contextutils.GetVerbosityContextByBool(verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: commandToUse,
 		},
@@ -618,188 +612,13 @@ func (c *CommandExecutorFile) MoveToPath(path string, useSudo bool, verbose bool
 		return nil, err
 	}
 
-	if verbose {
-		logging.LogChangedf(
-			"Moved file '%s' to '%s' on host '%s'.",
-			srcPath,
-			path,
-			hostDescription,
-		)
-	}
+	logging.LogChangedByCtxf(ctx, "Moved file '%s' to '%s' on host '%s'.", srcPath, path, hostDescription)
 
 	return GetCommandExecutorFileByPath(commandExecutor, path)
 }
 
-func (c *CommandExecutorFile) MustAppendBytes(toWrite []byte, verbose bool) {
-	err := c.AppendBytes(toWrite, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorFile) MustAppendString(toWrite string, verbose bool) {
-	err := c.AppendString(toWrite, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorFile) MustCopyToFile(destFile filesinterfaces.File, verbose bool) {
-	err := c.CopyToFile(destFile, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorFile) MustGetBaseName() (baseName string) {
-	baseName, err := c.GetBaseName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return baseName
-}
-
-func (c *CommandExecutorFile) MustGetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor) {
-	commandExecutor, err := c.GetCommandExecutor()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandExecutor
-}
-
-func (c *CommandExecutorFile) MustGetCommandExecutorAndFilePath() (commandExecutor commandexecutorinterfaces.CommandExecutor, filePath string) {
-	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandExecutor, filePath
-}
-
-func (c *CommandExecutorFile) MustGetCommandExecutorAndFilePathAndHostDescription() (commandExecutor commandexecutorinterfaces.CommandExecutor, filePath string, hostDescription string) {
-	commandExecutor, filePath, hostDescription, err := c.GetCommandExecutorAndFilePathAndHostDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandExecutor, filePath, hostDescription
-}
-
-func (c *CommandExecutorFile) MustGetFilePath() (filePath string) {
-	filePath, err := c.GetFilePath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return filePath
-}
-
-func (c *CommandExecutorFile) MustGetHostDescription() (hostDescription string) {
-	hostDescription, err := c.GetHostDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hostDescription
-}
-
-func (c *CommandExecutorFile) MustGetLocalPath() (localPath string) {
-	localPath, err := c.GetLocalPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return localPath
-}
-
-func (c *CommandExecutorFile) MustGetLocalPathOrEmptyStringIfUnset() (localPath string) {
-	localPath, err := c.GetLocalPathOrEmptyStringIfUnset()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return localPath
-}
-
-func (c *CommandExecutorFile) MustGetParentDirectory() (parentDirectory filesinterfaces.Directory) {
-	parentDirectory, err := c.GetParentDirectory()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return parentDirectory
-}
-
-func (c *CommandExecutorFile) MustGetPath() (path string) {
-	path, err := c.GetPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return path
-}
-
-func (c *CommandExecutorFile) MustGetPathAndHostDescription() (path string, hostDescription string) {
-	path, hostDescription, err := c.GetPathAndHostDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return path, hostDescription
-}
-
-func (c *CommandExecutorFile) MustGetSizeBytes() (fileSize int64) {
-	fileSize, err := c.GetSizeBytes()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return fileSize
-}
-
-func (c *CommandExecutorFile) MustGetUriAsString() (uri string) {
-	uri, err := c.GetUriAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return uri
-}
-
-func (c *CommandExecutorFile) MustIsRunningOnLocalhost() (isRunningOnLocalhost bool) {
-	isRunningOnLocalhost, err := c.IsRunningOnLocalhost()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isRunningOnLocalhost
-}
-
-func (c *CommandExecutorFile) MustSetCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) {
-	err := c.SetCommandExecutor(commandExecutor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorFile) MustSetFilePath(filePath string) {
-	err := c.SetFilePath(filePath)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorFile) MustTruncate(newSizeBytes int64, verbose bool) {
-	err := c.Truncate(newSizeBytes, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 // Already moved to commandexecutorfile
-func (c *CommandExecutorFile) ReadAsBytes() (content []byte, err error) {
+func (c *CommandExecutorFile) ReadAsBytes(ctx context.Context) (content []byte, err error) {
 	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
 	if err != nil {
 		return nil, err
@@ -819,7 +638,7 @@ func (c *CommandExecutorFile) ReadAsBytes() (content []byte, err error) {
 }
 
 // Already moved to commandexecutorfile
-func (c *CommandExecutorFile) ReadFirstNBytes(numberOfBytesToRead int) (firstBytes []byte, err error) {
+func (c *CommandExecutorFile) ReadFirstNBytes(ctx context.Context, numberOfBytesToRead int) (firstBytes []byte, err error) {
 	if numberOfBytesToRead < 0 {
 		return nil, tracederrors.TracedErrorf("Invalid number of bytest to read: '%d'", numberOfBytesToRead)
 	}
@@ -895,7 +714,7 @@ func (c *CommandExecutorFile) SetFilePath(filePath string) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorFile) Truncate(newSizeBytes int64, verbose bool) (err error) {
+func (c *CommandExecutorFile) Truncate(ctx context.Context, newSizeBytes int64) (err error) {
 	if newSizeBytes < 0 {
 		return tracederrors.TracedErrorf(
 			"Invalid size for truncating: newSizeBytes='%d'",
@@ -926,7 +745,6 @@ func (c *CommandExecutorFile) Truncate(newSizeBytes int64, verbose bool) (err er
 			return err
 		}
 
-		ctx := contextutils.GetVerbosityContextByBool(verbose)
 		_, err = commandExecutor.RunCommand(
 			commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 			&parameteroptions.RunCommandOptions{
