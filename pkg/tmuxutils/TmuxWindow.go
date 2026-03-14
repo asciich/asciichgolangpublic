@@ -623,7 +623,7 @@ func (t *TmuxWindow) RunCommand(ctx context.Context, runCommandOptions *paramete
 		return nil, err
 	}
 
-	allOutputLines, err := captureFile.ReadAsLines()
+	allOutputLines, err := captureFile.ReadAsLines(ctx)
 	if err != nil {
 		return nil, err
 	}

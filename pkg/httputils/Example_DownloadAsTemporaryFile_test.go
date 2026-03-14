@@ -50,7 +50,7 @@ func Test_Example_DownloadAsTemporaryFile(t *testing.T) {
 	defer downloadedFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 	// Check downloaded content
-	content, err := downloadedFile.ReadAsString()
+	content, err := downloadedFile.ReadAsString(ctx)
 	require.NoError(t, err)
 	require.EqualExportedValues(t, "hello world\n", content)
 }

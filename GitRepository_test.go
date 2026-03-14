@@ -1537,7 +1537,9 @@ func TestGitRepository_GetFileByPath(t *testing.T) {
 				testTxtFile, err := gitRepo.GetFileByPath("test.txt")
 				require.NoError(t, err)
 
-				require.EqualValues(t, "hello world\n", testTxtFile.MustReadAsString())
+				got, err := testTxtFile.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, "hello world\n", got)
 			},
 		)
 	}

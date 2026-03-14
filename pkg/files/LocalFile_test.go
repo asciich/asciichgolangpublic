@@ -95,7 +95,7 @@ func TestLocalFileReadAndWriteAsBytes(t *testing.T) {
 
 				var file filesinterfaces.File = getFileToTest("localFile")
 
-				content, err := file.ReadAsBytes()
+				content, err := file.ReadAsBytes(ctx)
 				require.NoError(t, err)
 				require.EqualValues(t, []byte{}, content)
 
@@ -103,7 +103,7 @@ func TestLocalFileReadAndWriteAsBytes(t *testing.T) {
 					err = file.WriteBytes(ctx, tt.content, &filesoptions.WriteOptions{})
 					require.NoError(t, err)
 
-					content, err := file.ReadAsBytes()
+					content, err := file.ReadAsBytes(ctx)
 					require.NoError(t, err)
 					require.EqualValues(t, tt.content, content)
 				}
@@ -126,15 +126,17 @@ func TestLocalFileReadAndWriteAsInt64(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = false
+				ctx := getCtx()
 
 				var file filesinterfaces.File = getFileToTest("localFile")
 
 				for i := 0; i < 2; i++ {
-					err := file.WriteInt64(tt.content, verbose)
+					err := file.WriteInt64(ctx, tt.content)
 					require.NoError(t, err)
 
-					require.EqualValues(t, tt.content, file.MustReadAsInt64())
+					got, err := file.ReadAsInt64(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, tt.content, got)
 				}
 			},
 		)
@@ -159,13 +161,17 @@ func TestLocalFileReadAndWriteAsString(t *testing.T) {
 
 				var file filesinterfaces.File = getFileToTest("localFile")
 
-				require.EqualValues(t, "", file.MustReadAsString())
+				content, err := file.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, "", content)
 
 				for i := 0; i < 2; i++ {
 					err := file.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
 					require.NoError(t, err)
 
-					require.EqualValues(t, tt.content, file.MustReadAsString())
+					content, err := file.ReadAsString(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, tt.content, content)
 				}
 			},
 		)
@@ -254,7 +260,9 @@ func TestLocalFileIsMatchingSha256Sum(t *testing.T) {
 				require.NoError(t, err)
 				defer temporaryFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				require.EqualValues(t, tt.expectedIsMatching, temporaryFile.MustIsMatchingSha256Sum(tt.sha256sum))
+				isMatching, err := temporaryFile.IsMatchingSha256Sum(tt.sha256sum)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedIsMatching, isMatching)
 			},
 		)
 	}
@@ -270,7 +278,7 @@ func TestLocalFileGetParentDirectory(t *testing.T) {
 
 		temporaryFile, err := temporaryDir.CreateFileInDirectory(ctx, "test.txt", &filesoptions.CreateOptions{})
 		require.NoError(t, err)
-		parentDir, err := temporaryFile.GetParentDirectory()
+		parentDir, err := temporaryFile.GetParentDirectory(ctx)
 		require.NoError(t, err)
 
 		tmpPath, err := temporaryDir.GetLocalPath()
@@ -301,7 +309,6 @@ func TestLocalFileIsContentEqualByComparingSha256Sum(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				tempFile1 := getFileToTest("localFile")
@@ -314,8 +321,8 @@ func TestLocalFileIsContentEqualByComparingSha256Sum(t *testing.T) {
 				require.NoError(t, err)
 				defer tempFile2.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				require.EqualValues(t, tt.expectedIsEqual, mustutils.Must(tempFile1.IsContentEqualByComparingSha256Sum(tempFile2, verbose)))
-				require.EqualValues(t, tt.expectedIsEqual, mustutils.Must(tempFile2.IsContentEqualByComparingSha256Sum(tempFile1, verbose)))
+				require.EqualValues(t, tt.expectedIsEqual, mustutils.Must(tempFile1.IsContentEqualByComparingSha256Sum(ctx, tempFile2)))
+				require.EqualValues(t, tt.expectedIsEqual, mustutils.Must(tempFile2.IsContentEqualByComparingSha256Sum(ctx, tempFile1)))
 			},
 		)
 	}
@@ -338,7 +345,8 @@ func TestLocalFileGetLocalPathIsAbsolute(t *testing.T) {
 				localFile, err := files.GetLocalFileByPath(tt.pathToTest)
 				require.NoError(t, err)
 
-				localPath := localFile.MustGetLocalPath()
+				localPath, err := localFile.GetLocalPath()
+				require.NoError(t, err)
 
 				require.True(t, pathsutils.IsAbsolutePath(localPath))
 			},
@@ -358,7 +366,6 @@ func TestFileGetTextBlocksGolangWithCommentAboveFunction(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				testData := "package main\n"
@@ -372,7 +379,7 @@ func TestFileGetTextBlocksGolangWithCommentAboveFunction(t *testing.T) {
 				testFile := getFileToTest("localFile")
 				err := testFile.WriteString(ctx, testData, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
-				blocks, err := testFile.GetTextBlocks(verbose)
+				blocks, err := testFile.GetTextBlocks(ctx)
 				require.NoError(t, err)
 
 				require.Len(t, blocks, 2)
@@ -393,7 +400,6 @@ func TestFileGetTextBlocksYamlWithoutLeadingThreeMinuses(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				testData := "a: b\n"
@@ -402,7 +408,7 @@ func TestFileGetTextBlocksYamlWithoutLeadingThreeMinuses(t *testing.T) {
 
 				testFile := getFileToTest("localFile")
 				testFile.WriteString(ctx, testData, &filesoptions.WriteOptions{})
-				blocks, err := testFile.GetTextBlocks(verbose)
+				blocks, err := testFile.GetTextBlocks(ctx)
 				require.NoError(t, err)
 
 				require.Len(t, blocks, 2)
@@ -424,7 +430,6 @@ func TestFileGetTextBlocksYamlWithLeadingThreeMinuses(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-				const verbose bool = true
 
 				testData := "---\n"
 				testData += "a: b\n"
@@ -433,7 +438,7 @@ func TestFileGetTextBlocksYamlWithLeadingThreeMinuses(t *testing.T) {
 
 				testFile := getFileToTest("localFile")
 				testFile.WriteString(ctx, testData, &filesoptions.WriteOptions{})
-				blocks, err := testFile.GetTextBlocks(verbose)
+				blocks, err := testFile.GetTextBlocks(ctx)
 				require.NoError(t, err)
 
 				require.Len(t, blocks, 3)
@@ -467,10 +472,11 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 				)
 				localCopy := files.MustGetLocalFileByFile(copy)
 
-				require.False(t, pointersutils.MustPointersEqual(
-					localTestFile.MustGetParentFileForBaseClassAsLocalFile(),
-					localCopy.MustGetParentFileForBaseClassAsLocalFile(),
-				))
+				got, err := localTestFile.GetParentFileForBaseClassAsLocalFile()
+				require.NoError(t, err)
+				gotCopy, err := localCopy.GetParentFileForBaseClassAsLocalFile()
+				require.NoError(t, err)
+				require.False(t, pointersutils.MustPointersEqual(got, gotCopy))
 
 				require.True(t, mustutils.Must(testFile.Exists(ctx)))
 				require.True(t, mustutils.Must(copy.Exists(ctx)))
@@ -496,16 +502,17 @@ func TestFileReplaceLineAfterLine(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				testFile := getFileToTest("localFile")
 				testFile.WriteString(ctx, tt.input, &filesoptions.WriteOptions{})
 				defer testFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				changeSummary := testFile.MustReplaceLineAfterLine(tt.lineToSearch, tt.replaceLineAfterFoundWith, verbose)
+				changeSummary, err := testFile.ReplaceLineAfterLine(ctx, tt.lineToSearch, tt.replaceLineAfterFoundWith)
+				require.NoError(t, err)
 
-				content := testFile.MustReadAsString()
+				content, err := testFile.ReadAsString(ctx)
+				require.NoError(t, err)
 				require.EqualValues(t, tt.expectedContent, content)
 				require.EqualValues(t, tt.expectedChanged, changeSummary.IsChanged())
 			},
@@ -544,9 +551,11 @@ func TestLocalFile_GetPathReturnsAbsoluteValue(t *testing.T) {
 
 					file, err := files.GetLocalFileByPath(tt.path)
 					require.NoError(t, err)
-					path1 = file.MustGetPath()
+					path1, err = file.GetPath()
+					require.NoError(t, err)
 					os.Chdir("..")
-					path2 = file.MustGetPath()
+					path2, err = file.GetPath()
+					require.NoError(t, err)
 				}
 
 				waitGroup.Add(1)
@@ -574,7 +583,7 @@ func getRepoRootDir(ctx context.Context, t *testing.T) (repoRoot filesinterfaces
 	require.NoError(t, err)
 	path = strings.TrimSpace(path)
 
-	repoRoot, err = files.GetLocalDirectoryByPath(path)
+	repoRoot, err = files.GetLocalDirectoryByPath(ctx, path)
 	require.NoError(t, err)
 
 	return repoRoot
@@ -589,7 +598,7 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 	tests := []TestCase{}
 	ctx := getCtx()
 
-	testDataDirectory, err := getRepoRootDir(ctx, t).GetSubDirectory("testdata", "File", "SortBlocksInFile")
+	testDataDirectory, err := getRepoRootDir(ctx, t).GetSubDirectory(ctx, "testdata", "File", "SortBlocksInFile")
 	require.NoError(t, err)
 	for _, testDirectory := range mustutils.Must(testDataDirectory.ListSubDirectories(ctx, &parameteroptions.ListDirectoryOptions{Recursive: false})) {
 		localPath, err := testDirectory.GetLocalPath()
@@ -601,12 +610,10 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose = true
-
-				testDataDir, err := files.GetLocalDirectoryByPath(tt.testDataDir)
+				testDataDir, err := files.GetLocalDirectoryByPath(ctx, tt.testDataDir)
 				require.NoError(t, err)
 
-				testInput, err := testDataDir.ReadFileInDirectoryAsString("input")
+				testInput, err := testDataDir.ReadFileInDirectoryAsString(ctx, "input")
 				require.NoError(t, err)
 
 				testFile := getFileToTest("localFile")
@@ -616,7 +623,7 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 				expectedFile, err := testDataDir.GetFileInDirectory("expectedOutput")
 				require.NoError(t, err)
 
-				err = testFile.SortBlocksInFile(verbose)
+				err = testFile.SortBlocksInFile(ctx)
 				require.NoError(t, err)
 
 				sortedChecksum, err := testFile.GetSha256Sum(ctx)
@@ -626,7 +633,7 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 				require.NoError(t, err)
 
 				if os.Getenv("UPDATE_EXPECTED") == "1" {
-					err = testFile.CopyToFile(expectedFile, verbose)
+					err = testFile.CopyToFile(ctx, expectedFile)
 					require.NoError(t, err)
 				}
 
@@ -661,7 +668,8 @@ func TestLocalFileGetLastCharAsString(t *testing.T) {
 				testFile.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
 				defer testFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				lastChar := testFile.MustReadLastCharAsString()
+				lastChar, err := testFile.ReadLastCharAsString(ctx)
+				require.NoError(t, err)
 
 				require.EqualValues(t, tt.lastChar, lastChar)
 			},
@@ -693,7 +701,8 @@ func TestLocalFileGetAsFloat64(t *testing.T) {
 				testFile.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
 				defer testFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				readFloat := testFile.MustReadAsFloat64()
+				readFloat, err := testFile.ReadAsFloat64(ctx)
+				require.NoError(t, err)
 
 				require.EqualValues(t, tt.expectedFloat, readFloat)
 			},
@@ -725,7 +734,8 @@ func TestFileGetAsInt64(t *testing.T) {
 				testFile.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
 				defer testFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				readInt64 := testFile.MustReadAsInt64()
+				readInt64, err := testFile.ReadAsInt64(ctx)
+				require.NoError(t, err)
 
 				require.EqualValues(t, tt.expectedInt, readInt64)
 			},
@@ -757,7 +767,8 @@ func TestFileGetAsInt(t *testing.T) {
 				testFile.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
 				defer testFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				readInt64 := testFile.MustReadAsInt()
+				readInt64, err := testFile.ReadAsInt(ctx)
+				require.NoError(t, err)
 
 				require.EqualValues(t, tt.expectedInt, readInt64)
 			},
@@ -781,10 +792,12 @@ func TestFileGetParentDirectoryPath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
+				ctx := getCtx()
 				testFile, err := files.GetLocalFileByPath(tt.inputPath)
 				require.NoError(t, err)
 
-				parentPath := testFile.MustGetParentDirectoryPath()
+				parentPath, err := testFile.GetParentDirectoryPath(ctx)
+				require.NoError(t, err)
 				require.EqualValues(t, tt.expectedParentPath, parentPath)
 			},
 		)
@@ -814,7 +827,9 @@ func TestFileIsPgpEncrypted_Case1_unencrypted(t *testing.T) {
 				testFile.WriteString(ctx, tt.unencrypted, &filesoptions.WriteOptions{})
 				defer testFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				require.False(t, testFile.MustIsPgpEncrypted(verbose))
+				isPgpEncrypted, err := testFile.IsPgpEncrypted(ctx)
+				require.NoError(t, err)
+				require.False(t, isPgpEncrypted)
 			},
 		)
 	}
@@ -833,7 +848,6 @@ func TestFileIsPgpEncrypted_Case2_encryptedBinary(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-				const verbose bool = true
 
 				temporaryFile := getFileToTest("localFile")
 				defer temporaryFile.Delete(ctx, &filesoptions.DeleteOptions{})
@@ -856,7 +870,9 @@ func TestFileIsPgpEncrypted_Case2_encryptedBinary(t *testing.T) {
 					},
 				)
 
-				require.True(t, temporaryFile.MustIsPgpEncrypted(verbose))
+				isPgpEncrypted, err := temporaryFile.IsPgpEncrypted(ctx)
+				require.NoError(t, err)
+				require.True(t, isPgpEncrypted)
 			},
 		)
 	}
@@ -875,7 +891,6 @@ func TestFileIsPgpEncrypted_Case3_encryptedAsciiArmor(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-				const verbose bool = true
 
 				temporaryFile := getFileToTest("localFile")
 				defer temporaryFile.Delete(ctx, &filesoptions.DeleteOptions{})
@@ -899,7 +914,8 @@ func TestFileIsPgpEncrypted_Case3_encryptedAsciiArmor(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.True(t, temporaryFile.MustIsPgpEncrypted(verbose))
+				isPgpEncrypted, err := temporaryFile.IsPgpEncrypted(ctx)
+				require.True(t, isPgpEncrypted)
 			},
 		)
 	}
@@ -917,12 +933,11 @@ func TestFileGetMimeTypeOfEmptyFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
-
+				ctx := getCtx()
 				temporaryFile := getFileToTest("localFile")
 				expectedMimeType := "inode/x-empty"
 
-				mimeType, err := temporaryFile.GetMimeType(verbose)
+				mimeType, err := temporaryFile.GetMimeType(ctx)
 				require.NoError(t, err)
 
 				require.EqualValues(t, expectedMimeType, mimeType)
@@ -950,7 +965,6 @@ func TestFileGetCreationDateByFileName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
 				ctx := getCtx()
 
 				temporaryDir := getDirectoryToTest("localDirectory")
@@ -958,7 +972,7 @@ func TestFileGetCreationDateByFileName(t *testing.T) {
 
 				file, err := temporaryDir.WriteStringToFile(ctx, tt.filename, "content", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
-				readDate, err := file.GetCreationDateByFileName(verbose)
+				readDate, err := file.GetCreationDateByFileName(ctx)
 				require.NoError(t, err)
 
 				require.EqualValues(t, tt.expected, *readDate)
@@ -992,7 +1006,9 @@ func TestFileHasYYYYmmdd_HHMMSSPrefix(t *testing.T) {
 
 				file, err := temporaryDir.WriteStringToFile(ctx, tt.filename, "content", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
-				require.EqualValues(t, tt.expectedHasPrefix, file.MustIsYYYYmmdd_HHMMSSPrefix())
+				got, err := file.IsYYYYmmdd_HHMMSSPrefix()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedHasPrefix, got)
 			},
 		)
 	}
@@ -1049,9 +1065,12 @@ func TestFileEnsureEndsWithLineBreakOnEmptyFile(t *testing.T) {
 				require.NoError(t, err)
 				defer func() { _ = emptyFile.Delete(ctx, &filesoptions.DeleteOptions{}) }()
 
-				emptyFile.MustEnsureEndsWithLineBreak(verbose)
+				err = emptyFile.EnsureEndsWithLineBreak(ctx)
+				require.NoError(t, err)
 
-				require.EqualValues(t, "\n", emptyFile.MustReadLastCharAsString())
+				got, err := emptyFile.ReadLastCharAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, "\n", got)
 			},
 		)
 	}
@@ -1060,7 +1079,6 @@ func TestFileEnsureEndsWithLineBreakOnEmptyFile(t *testing.T) {
 // TODO: Move to File_test.go and test for all File implementations.
 func TestFileEnsureEndsWithLineBreakOnNonExitistingFile(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		const verbose bool = true
 		ctx := getCtx()
 
 		tempFile, err := os.CreateTemp("", "testfile")
@@ -1076,9 +1094,13 @@ func TestFileEnsureEndsWithLineBreakOnNonExitistingFile(t *testing.T) {
 		require.NoError(t, err)
 		require.False(t, exists)
 
-		nonExistingFile.MustEnsureEndsWithLineBreak(verbose)
+		err = nonExistingFile.EnsureEndsWithLineBreak(ctx)
+		require.NoError(t, err)
 
-		require.EqualValues(t, "\n", nonExistingFile.MustReadLastCharAsString())
+		got, err := nonExistingFile.ReadLastCharAsString(ctx)
+		require.NoError(t, err)
+
+		require.EqualValues(t, "\n", got)
 	})
 }
 
@@ -1102,16 +1124,16 @@ func TestFileTrimSpacesAtBeginningOfFile(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-				const verbose = true
 
 				testFile := getFileToTest("localFile")
 				err := testFile.WriteString(ctx, tt.input, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				err = testFile.TrimSpacesAtBeginningOfFile(verbose)
+				err = testFile.TrimSpacesAtBeginningOfFile(ctx)
 				require.NoError(t, err)
 
-				content := testFile.MustReadAsString()
+				content, err := testFile.ReadAsString(ctx)
+				require.NoError(t, err)
 				require.EqualValues(t, tt.expectedContent, content)
 			},
 		)
@@ -1211,7 +1233,7 @@ func TestLocalFileGetNumberOfNonEmptyLines(t *testing.T) {
 				err := testFile.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				nEmptyLines, err := testFile.GetNumberOfNonEmptyLines()
+				nEmptyLines, err := testFile.GetNumberOfNonEmptyLines(ctx)
 				require.NoError(t, err)
 
 				require.EqualValues(t, tt.expectedNonEmptyLines, nEmptyLines)

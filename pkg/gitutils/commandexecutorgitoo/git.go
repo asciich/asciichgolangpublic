@@ -168,7 +168,7 @@ func (g *GitRepository) GetRootDirectoryPath(ctx context.Context) (rootDirectory
 				break
 			}
 
-			cwd, err = cwd.GetParentDirectory()
+			cwd, err = cwd.GetParentDirectory(ctx)
 			if err != nil {
 				return "", err
 			}

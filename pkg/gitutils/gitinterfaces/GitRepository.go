@@ -36,7 +36,7 @@ type GitRepository interface {
 
 	GetAuthorEmailByCommitHash(hash string) (authorEmail string, err error)
 	GetAuthorStringByCommitHash(hash string) (authorString string, err error)
-	GetDirectoryByPath(pathToSubDir ...string) (subDir filesinterfaces.Directory, err error)
+	GetDirectoryByPath(ctx context.Context, pathToSubDir ...string) (subDir filesinterfaces.Directory, err error)
 	GetCommitAgeDurationByCommitHash(hash string) (ageDuration *time.Duration, err error)
 	GetCommitAgeSecondsByCommitHash(hash string) (ageSeconds float64, err error)
 	GetCommitMessageByCommitHash(hash string) (commitMessage string, err error)

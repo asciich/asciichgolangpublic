@@ -33,7 +33,7 @@ func Test_ReadAndWriteAsBytes(t *testing.T) {
 		require.NoError(t, err)
 		defer nativefiles.Delete(ctx, tmpPath, &filesoptions.DeleteOptions{})
 
-		err = nativefiles.WriteBytes(ctx, tmpPath, []byte("hello world"))
+		err = nativefiles.WriteBytes(ctx, tmpPath, []byte("hello world"), &filesoptions.WriteOptions{})
 		require.NoError(t, err)
 
 		content, err := nativefiles.ReadAsBytes(ctx, tmpPath)

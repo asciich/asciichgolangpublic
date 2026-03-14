@@ -1,6 +1,7 @@
 package commandexecutorfile
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
@@ -9,7 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func ReadFirstNBytes(commandExecutor commandexecutorinterfaces.CommandExecutor, filePath string, numberOfBytesToRead int) (firstBytes []byte, err error) {
+func ReadFirstNBytes(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, filePath string, numberOfBytesToRead int) (firstBytes []byte, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExectuor")
 	}

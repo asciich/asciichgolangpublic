@@ -1,19 +1,21 @@
 package commandexecutorfileoo
 
 import (
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
 )
 
-func (f *File) ReadFirstNBytes(numberOfBytesToRead int) (firstBytes []byte, err error) {
+func (f *File) ReadFirstNBytes(ctx context.Context, numberOfBytesToRead int) (firstBytes []byte, err error) {
 	commandExecutor, filePath, err := f.GetCommandExecutorAndFilePath()
 	if err != nil {
 		return nil, err
 	}
 
-	return commandexecutorfile.ReadFirstNBytes(commandExecutor, filePath, numberOfBytesToRead)
+	return commandexecutorfile.ReadFirstNBytes(ctx, commandExecutor, filePath, numberOfBytesToRead)
 }
 
-func (f *File) ReadAsBytes() (content []byte, err error) {
+func (f *File) ReadAsBytes(ctx context.Context) (content []byte, err error) {
 	commandExecutor, filePath, err := f.GetCommandExecutorAndFilePath()
 	if err != nil {
 		return nil, err

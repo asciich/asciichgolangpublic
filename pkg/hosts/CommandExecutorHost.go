@@ -127,7 +127,7 @@ func (c *CommandExecutorHost) GetSshPublicKeyOfUserAsString(ctx context.Context,
 
 			logging.LogInfoByCtxf(ctx, "SSH public key for user '%s' on host '%s' found in '%s'.", userName, hostDescription, path)
 
-			return sshKeyFile.ReadAsString()
+			return sshKeyFile.ReadAsString(ctx)
 		}
 	}
 
@@ -139,7 +139,7 @@ func (c *CommandExecutorHost) GetCommandExecutor() (commandExecutor commandexecu
 	return c.commandExecutor, nil
 }
 
-func (c *CommandExecutorHost) GetDirectoryByPath(path string) (directory filesinterfaces.Directory, err error) {
+func (c *CommandExecutorHost) GetDirectoryByPath(ctx context.Context, path string) (directory filesinterfaces.Directory, err error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
@@ -356,7 +356,7 @@ func (h *CommandExecutorHost) InstallBinary(ctx context.Context, installOptions 
 
 	logging.LogInfoByCtxf(ctx, "'%s' will be installed as '%s' on host '%s'.", binaryName, destPath, hostName)
 
-	installedFile, err = tempCopy.MoveToPath(destPath, installOptions.UseSudoToInstall, contextutils.GetVerboseFromContext(ctx))
+	installedFile, err = tempCopy.MoveToPath(ctx, destPath, installOptions.UseSudoToInstall)
 	if err != nil {
 		return nil, err
 	}
@@ -484,15 +484,6 @@ func (h *CommandExecutorHost) MustGetComment() (comment string) {
 	}
 
 	return comment
-}
-
-func (h *CommandExecutorHost) MustGetDirectoryByPath(path string) (directory filesinterfaces.Directory) {
-	directory, err := h.GetDirectoryByPath(path)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return directory
 }
 
 func (h *CommandExecutorHost) MustGetHostDescription() (hostDescription string) {

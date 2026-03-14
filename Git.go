@@ -39,7 +39,7 @@ func (g *GitService) GetRepositoryRootPathByPath(ctx context.Context, path strin
 
 	repoRootPath = strings.TrimSpace(repoRootPath)
 
-	repoRootDir, err := files.GetLocalDirectoryByPath(repoRootPath)
+	repoRootDir, err := files.GetLocalDirectoryByPath(ctx, repoRootPath)
 	if err != nil {
 		return "", err
 	}

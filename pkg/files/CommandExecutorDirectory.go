@@ -204,7 +204,7 @@ func (c *CommandExecutorDirectory) CreateSubDirectory(ctx context.Context, subDi
 		return nil, tracederrors.TracedErrorEmptyString("subDirectoryName")
 	}
 
-	createdSubDirectory, err = c.GetSubDirectory(subDirectoryName)
+	createdSubDirectory, err = c.GetSubDirectory(ctx, subDirectoryName)
 	if err != nil {
 		return nil, err
 	}
@@ -449,7 +449,7 @@ func (c *CommandExecutorDirectory) GetLocalPath() (localPath string, err error) 
 	}
 }
 
-func (c *CommandExecutorDirectory) GetParentDirectory() (parent filesinterfaces.Directory, err error) {
+func (c *CommandExecutorDirectory) GetParentDirectory(ctx context.Context) (parent filesinterfaces.Directory, err error) {
 	parentPath, err := c.GetDirName()
 	if err != nil {
 		return nil, err
@@ -480,7 +480,7 @@ func (c *CommandExecutorDirectory) GetPath() (path string, err error) {
 }
 
 // Already moved to commandexecutorfileoo
-func (c *CommandExecutorDirectory) GetSubDirectory(path ...string) (subDirectory filesinterfaces.Directory, err error) {
+func (c *CommandExecutorDirectory) GetSubDirectory(ctx context.Context, path ...string) (subDirectory filesinterfaces.Directory, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedErrorNil("path")
 	}
@@ -662,7 +662,7 @@ func (c *CommandExecutorDirectory) ListSubDirectories(ctx context.Context, optio
 
 	subDirectories = []filesinterfaces.Directory{}
 	for _, pathToAdd := range pathsToAdd {
-		toAdd, err := c.GetSubDirectory(pathToAdd)
+		toAdd, err := c.GetSubDirectory(ctx, pathToAdd)
 		if err != nil {
 			return nil, err
 		}
