@@ -1,14 +1,51 @@
-package files_test
+package filesgeneric_test
 
 import (
+	"context"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
+
+func createTempFileAndGetPath() (path string) {
+	file, err := os.CreateTemp("", "file_for_testing")
+	if err != nil {
+		logging.LogGoErrorFatalWithTrace(err)
+	}
+
+	return file.Name()
+}
+
+// Return a temporary file of the given 'implementationName'.
+//
+// Use defer file.Delete(verbose) to after calling this function to ensure
+// the file is deleted after the test is over.
+func getFileToTest(implementationName string) (file filesinterfaces.File) {
+	if implementationName == "localFile" {
+		return mustutils.Must(files.GetLocalFileByPath(createTempFileAndGetPath()))
+	}
+
+	if implementationName == "localCommandExecutorFile" {
+		return mustutils.Must(files.GetLocalCommandExecutorFileByPath(createTempFileAndGetPath()))
+	}
+
+	logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)
+	return nil
+}
 
 func TestFileBase(t *testing.T) {
 	tests := []struct {
@@ -23,11 +60,11 @@ func TestFileBase(t *testing.T) {
 			func(t *testing.T) {
 				require := require.New(t)
 
-				fileBase := files.FileBase{}
+				fileBase := filesgeneric.FileBase{}
 
 				parent, err := fileBase.GetParentFileForBaseClass()
 				require.Nil(parent)
-				require.ErrorIs(err, files.ErrFileBaseParentNotSet)
+				require.ErrorIs(err, filesgeneric.ErrFileBaseParentNotSet)
 				require.ErrorIs(err, tracederrors.ErrTracedError)
 			},
 		)
@@ -35,8 +72,6 @@ func TestFileBase(t *testing.T) {
 }
 
 func TestFileBaseEnsureLineInFile_testcase1(t *testing.T) {
-	const verbose bool = true
-
 	tests := []struct {
 		implementationName string
 	}{
@@ -56,27 +91,40 @@ func TestFileBaseEnsureLineInFile_testcase1(t *testing.T) {
 				err := fileToTest.WriteString(ctx, testContent, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				require.EqualValues(t, testContent, fileToTest.MustReadAsString())
-
-				err = fileToTest.EnsureLineInFile("hello", verbose)
+				content, err := fileToTest.ReadAsString(ctx)
 				require.NoError(t, err)
-				require.EqualValues(t, testContent, fileToTest.MustReadAsString())
+				require.EqualValues(t, testContent, content)
 
-				err = fileToTest.EnsureLineInFile("hello\n", verbose)
+				content, err = fileToTest.ReadAsString(ctx)
 				require.NoError(t, err)
-				require.EqualValues(t, testContent, fileToTest.MustReadAsString())
+				err = fileToTest.EnsureLineInFile(ctx, "hello")
+				require.NoError(t, err)
+				require.EqualValues(t, testContent, content)
 
-				err = fileToTest.EnsureLineInFile("\nhello", verbose)
+				content, err = fileToTest.ReadAsString(ctx)
 				require.NoError(t, err)
-				require.EqualValues(t, testContent, fileToTest.MustReadAsString())
+				err = fileToTest.EnsureLineInFile(ctx, "hello\n")
+				require.NoError(t, err)
+				require.EqualValues(t, testContent, content)
 
-				err = fileToTest.EnsureLineInFile("\nhello\n", verbose)
+				content, err = fileToTest.ReadAsString(ctx)
 				require.NoError(t, err)
-				require.EqualValues(t, testContent, fileToTest.MustReadAsString())
+				err = fileToTest.EnsureLineInFile(ctx, "\nhello")
+				require.NoError(t, err)
+				require.EqualValues(t, testContent, content)
 
-				err = fileToTest.EnsureLineInFile("abc", verbose)
+				content, err = fileToTest.ReadAsString(ctx)
 				require.NoError(t, err)
-				require.EqualValues(t, testContent+"abc\n", fileToTest.MustReadAsString())
+				err = fileToTest.EnsureLineInFile(ctx, "\nhello\n")
+				require.NoError(t, err)
+				require.EqualValues(t, testContent, content)
+
+				err = fileToTest.EnsureLineInFile(ctx, "abc")
+				require.NoError(t, err)
+
+				content, err = fileToTest.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, testContent+"abc\n", content)
 			},
 		)
 	}
@@ -124,10 +172,12 @@ func TestFileBase_EnsureLineInFile_testcaseWriteToNonexstingString(t *testing.T)
 				require.NoError(t, err)
 
 				for i := 0; i < 2; i++ {
-					err = fileToTest.EnsureLineInFile(tt.line, verbose)
+					err = fileToTest.EnsureLineInFile(ctx, tt.line)
 					require.NoError(t, err)
 
-					require.EqualValues(t, tt.expected, fileToTest.MustReadAsString())
+					content, err := fileToTest.ReadAsString(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, tt.expected, content)
 				}
 			},
 		)
@@ -192,9 +242,12 @@ func TestFileBase_RemoveLinesWithPrefix(t *testing.T) {
 
 				err := toTest.WriteString(ctx, tt.input, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
-				toTest.MustRemoveLinesWithPrefix(tt.prefix, verbose)
+				err = toTest.RemoveLinesWithPrefix(ctx, tt.prefix)
+				require.NoError(t, err)
 
-				require.EqualValues(t, tt.expectedOutput, toTest.MustReadAsString())
+				content, err := toTest.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedOutput, content)
 			},
 		)
 	}
@@ -225,7 +278,7 @@ func TestFileBase_GetValueAsString(t *testing.T) {
 				err := toTest.WriteString(ctx, tt.input, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				value, err := toTest.GetValueAsString(tt.key)
+				value, err := toTest.GetValueAsString(ctx, tt.key)
 				require.NoError(t, err)
 				require.EqualValues(t, tt.expectedValue, value)
 			},
@@ -260,7 +313,7 @@ func TestFileBase_GetValueAsInt(t *testing.T) {
 				err := toTest.WriteString(ctx, tt.input, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				intValue, err := toTest.GetValueAsInt(tt.key)
+				intValue, err := toTest.GetValueAsInt(ctx, tt.key)
 				require.NoError(t, err)
 				require.EqualValues(t, tt.expectedValue, intValue)
 			},

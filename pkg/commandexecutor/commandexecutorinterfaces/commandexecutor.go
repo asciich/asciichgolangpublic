@@ -2,6 +2,7 @@ package commandexecutorinterfaces
 
 import (
 	"context"
+	"io"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -12,7 +13,15 @@ type CommandExecutor interface {
 	GetDeepCopyAsCommandExecutor() CommandExecutor
 
 	GetHostDescription() (string, error)
+	
+	// Run a command, wait until it's finished and get the whole output as CommandOutput. 
 	RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error)
+
+	// Run a command in background giving you the possibility to read the stdout as stream.
+	RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error)
+
+	// Run a command in background givining you the possibility to write the stdout as stream.
+	RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error)
 
 	// These Commands can be implemented by embedding the `CommandExecutorBase` struct:
 	IsRunningOnLocalhost() (bool, error)

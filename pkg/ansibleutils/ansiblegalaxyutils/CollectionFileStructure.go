@@ -16,7 +16,7 @@ func CreateFileStructure(ctx context.Context, path string, options *CreateCollec
 		return tracederrors.TracedErrorEmptyString("path")
 	}
 
-	dir, err := files.GetLocalDirectoryByPath(path)
+	dir, err := files.GetLocalDirectoryByPath(ctx, path)
 	if err != nil {
 		return err
 	}

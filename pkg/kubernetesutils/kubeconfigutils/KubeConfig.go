@@ -61,7 +61,7 @@ func LoadFromFile(ctx context.Context, file filesinterfaces.File) (config *KubeC
 		return nil, err
 	}
 
-	content, err := file.ReadAsBytes()
+	content, err := file.ReadAsBytes(ctx)
 	if err != nil {
 		return nil, err
 	}

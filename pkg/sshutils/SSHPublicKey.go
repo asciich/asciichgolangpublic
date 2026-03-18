@@ -120,7 +120,7 @@ func (k *SSHPublicKey) GetKeyUserName() (keyUserName string, err error) {
 	return k.KeyUserName, nil
 }
 
-func (k *SSHPublicKey) LoadFromSshDir(sshDirectory filesinterfaces.Directory, verbose bool) (err error) {
+func (k *SSHPublicKey) LoadFromSshDir(ctx context.Context, sshDirectory filesinterfaces.Directory) (err error) {
 	if sshDirectory == nil {
 		return tracederrors.TracedError("sshDirectory is nil")
 	}
@@ -130,7 +130,7 @@ func (k *SSHPublicKey) LoadFromSshDir(sshDirectory filesinterfaces.Directory, ve
 		return err
 	}
 
-	exists, err := sshDirectory.Exists(contextutils.GetVerbosityContextByBool(verbose))
+	exists, err := sshDirectory.Exists(ctx)
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func (k *SSHPublicKey) LoadFromSshDir(sshDirectory filesinterfaces.Directory, ve
 		return err
 	}
 
-	keyMaterial, err := keyFile.ReadAsString()
+	keyMaterial, err := keyFile.ReadAsString(ctx)
 	if err != nil {
 		return err
 	}
@@ -155,9 +155,7 @@ func (k *SSHPublicKey) LoadFromSshDir(sshDirectory filesinterfaces.Directory, ve
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof("Loaded ssh public key from '%v'", keyFilePath)
-	}
+	logging.LogInfoByCtxf(ctx, "Loaded ssh public key from '%v'", keyFilePath)
 
 	return nil
 }
@@ -346,13 +344,6 @@ func (s *SSHPublicKey) MustGetKeyUserAtHost() (userAtHost string) {
 	return userAtHost
 }
 
-func (s *SSHPublicKey) MustLoadFromSshDir(sshDirectory filesinterfaces.Directory, verbose bool) {
-	err := s.LoadFromSshDir(sshDirectory, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (s *SSHPublicKey) MustSetKeyMaterial(keyMaterial string) {
 	err := s.SetKeyMaterial(keyMaterial)
 	if err != nil {
@@ -418,7 +409,7 @@ func LoadPublicKeysFromFile(ctx context.Context, sshKeysFile filesinterfaces.Fil
 
 	logging.LogInfoByCtxf(ctx, "Load SSH public keys from file '%s' started.", sshKeysFile)
 
-	lines, err := sshKeysFile.ReadAsLinesWithoutComments()
+	lines, err := sshKeysFile.ReadAsLinesWithoutComments(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -482,7 +473,8 @@ func GetCurrentUsersSshDirectory() (sshDir filesinterfaces.Directory, err error)
 		return nil, err
 	}
 
-	sshDir, err = homeDir.GetSubDirectory(".ssh")
+	ctx := contextutils.ContextSilent()
+	sshDir, err = homeDir.GetSubDirectory(ctx, ".ssh")
 	if err != nil {
 		return nil, err
 	}
@@ -497,7 +489,7 @@ func GetSshPublicKey(verbose bool) (sshPublicKey *SSHPublicKey, err error) {
 	}
 
 	sshPublicKey = new(SSHPublicKey)
-	err = sshPublicKey.LoadFromSshDir(sshDirectory, verbose)
+	err = sshPublicKey.LoadFromSshDir(contextutils.GetVerbosityContextByBool(verbose), sshDirectory)
 	if err != nil {
 		return nil, err
 	}

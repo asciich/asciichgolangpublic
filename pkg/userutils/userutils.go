@@ -6,6 +6,7 @@ import (
 	"os/user"
 	"path/filepath"
 
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -39,7 +40,8 @@ func GetDirectoryInHomeDirectory(path ...string) (fileInUnsersHome filesinterfac
 		return nil, err
 	}
 
-	fileInUnsersHome, err = usersHome.GetSubDirectory(path...)
+	ctx := contextutils.ContextVerbose()
+	fileInUnsersHome, err = usersHome.GetSubDirectory(ctx, path...)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +104,8 @@ func GetHomeDirectory() (homeDir filesinterfaces.Directory, err error) {
 		return nil, err
 	}
 
-	homeDir, err = files.GetLocalDirectoryByPath(homeDirPath)
+	ctx := contextutils.ContextSilent()
+	homeDir, err = files.GetLocalDirectoryByPath(ctx, homeDirPath)
 	if err != nil {
 		return nil, err
 	}

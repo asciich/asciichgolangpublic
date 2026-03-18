@@ -38,7 +38,9 @@ func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 				require.NoError(t, err)
 				require.True(t, exists)
 
-				require.EqualValues(t, "", fileToTest.MustReadAsString())
+				content, err := fileToTest.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, "", content)
 
 				fileToTest.WriteString(ctx, tt.testContent, &filesoptions.WriteOptions{})
 
@@ -46,7 +48,9 @@ func TestCommandExecutorFileReadAndWrite(t *testing.T) {
 				require.NoError(t, err)
 				require.True(t, exists)
 
-				require.EqualValues(t, tt.testContent, fileToTest.MustReadAsString())
+				content, err = fileToTest.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.testContent, content)
 
 				err = fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 				require.NoError(t, err)

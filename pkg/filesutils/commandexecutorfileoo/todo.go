@@ -10,11 +10,11 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func (f *File) AppendBytes(toWrite []byte, verbose bool) (err error) {
+func (f *File) AppendBytes(ctx context.Context, toWrite []byte) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
 }
 
-func (f *File) AppendString(toWrite string, verbose bool) (err error) {
+func (f *File) AppendString(ctx context.Context, toWrite string) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
 }
 
@@ -22,10 +22,9 @@ func (f *File) Chown(ctx context.Context, options *parameteroptions.ChownOptions
 	return tracederrors.TracedErrorNotImplemented()
 }
 
-func (f *File) CopyToFile(destFile filesinterfaces.File, verbose bool) (err error) {
+func (f *File) CopyToFile(ctx context.Context, destFile filesinterfaces.File) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
 }
-
 
 func (f *File) GetDeepCopy() (deepCopy filesinterfaces.File) {
 	copy := &File{}
@@ -47,7 +46,7 @@ func (f *File) GetLocalPathOrEmptyStringIfUnset() (localPath string, err error) 
 	return "", tracederrors.TracedErrorNotImplemented()
 }
 
-func (f *File) GetParentDirectory() (parentDirectory filesinterfaces.Directory, err error) {
+func (f *File) GetParentDirectory(ctx context.Context) (parentDirectory filesinterfaces.Directory, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
@@ -67,7 +66,7 @@ func (f *File) GetUriAsString() (uri string, err error) {
 	return "", tracederrors.TracedErrorNotImplemented()
 }
 
-func (f *File) MoveToPath(destPath string, useSudo bool, verbose bool) (movedFile filesinterfaces.File, err error) {
+func (f *File) MoveToPath(ctx context.Context, destPath string, useSudo bool) (movedFile filesinterfaces.File, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
@@ -80,7 +79,7 @@ func (f *File) String() (path string) {
 	return ""
 }
 
-func (f *File) Truncate(newSizeBytes int64, verbose bool) (err error) {
+func (f *File) Truncate(ctx context.Context, newSizeBytes int64) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
 }
 

@@ -161,7 +161,7 @@ func (p *PreCommitConfigFile) GetLocalPath() (localPath string, err error) {
 }
 
 func (p *PreCommitConfigFile) GetPreCommitConfigFileContent(ctx context.Context) (content *PreCommitConfigFileContent, err error) {
-	contentString, err := p.ReadAsString()
+	contentString, err := p.ReadAsString(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -273,9 +273,9 @@ func (p *PreCommitConfigFile) UpdateDependency(ctx context.Context, dependency d
 	}
 
 	changeSummary, err = p.ReplaceLineAfterLine(
+		ctx,
 		repoLine,
 		fmt.Sprintf("  rev: \"%s\"", newestVersion),
-		contextutils.GetVerboseFromContext(ctx),
 	)
 	if err != nil {
 		return nil, err

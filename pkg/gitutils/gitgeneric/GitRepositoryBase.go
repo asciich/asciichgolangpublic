@@ -338,7 +338,7 @@ func (g *GitRepositoryBase) ContainsGoSourceFileOfMainPackageWithMainFunction(ct
 	const funcMainString string = "func main() {"
 
 	for _, goFile := range goFiles {
-		firstLine, err := goFile.ReadFirstLineAndTrimSpace()
+		firstLine, err := goFile.ReadFirstLineAndTrimSpace(ctx)
 		if err != nil {
 			return false, err
 		}
@@ -347,7 +347,7 @@ func (g *GitRepositoryBase) ContainsGoSourceFileOfMainPackageWithMainFunction(ct
 			continue
 		}
 
-		containsLine, err := goFile.ContainsLine(funcMainString)
+		containsLine, err := goFile.ContainsLine(ctx, funcMainString)
 		if err != nil {
 			return false, err
 		}
@@ -401,7 +401,7 @@ func (g *GitRepositoryBase) DirectoryByPathExists(ctx context.Context, path ...s
 		return false, err
 	}
 
-	subDir, err := parent.GetDirectoryByPath(path...)
+	subDir, err := parent.GetDirectoryByPath(ctx, path...)
 	if err != nil {
 		return false, err
 	}

@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -121,7 +120,7 @@ func (d *DirectoryBase) CreateFileInDirectory(ctx context.Context, path string, 
 	return createdFile, nil
 }
 
-func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose bool, pathToCreate ...string) (createdFile filesinterfaces.File, err error) {
+func (d *DirectoryBase) CreateFileInDirectoryFromString(ctx context.Context, content string, pathToCreate ...string) (createdFile filesinterfaces.File, err error) {
 	if len(pathToCreate) <= 0 {
 		return nil, tracederrors.TracedErrorf("Invalid pathToCreate='%v'", pathToCreate)
 	}
@@ -136,17 +135,17 @@ func (d *DirectoryBase) CreateFileInDirectoryFromString(content string, verbose 
 		return nil, err
 	}
 
-	parentDir, err := createdFile.GetParentDirectory()
+	parentDir, err := createdFile.GetParentDirectory(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	err = parentDir.Create(contextutils.GetVerbosityContextByBool(verbose), &filesoptions.CreateOptions{})
+	err = parentDir.Create(ctx, &filesoptions.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	err = createdFile.WriteString(contextutils.GetVerbosityContextByBool(verbose), content, &filesoptions.WriteOptions{})
+	err = createdFile.WriteString(ctx, content, &filesoptions.WriteOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -351,7 +350,7 @@ func (d *DirectoryBase) ListSubDirectoryPaths(ctx context.Context, options *para
 	return subDirectoryPaths, nil
 }
 
-func (d *DirectoryBase) ReadFileInDirectoryAsInt64(path ...string) (value int64, err error) {
+func (d *DirectoryBase) ReadFileInDirectoryAsInt64(ctx context.Context, path ...string) (value int64, err error) {
 	if len(path) <= 0 {
 		return -1, tracederrors.TracedError("path has no elements")
 	}
@@ -361,7 +360,7 @@ func (d *DirectoryBase) ReadFileInDirectoryAsInt64(path ...string) (value int64,
 		return -1, err
 	}
 
-	content, err := parent.ReadFileInDirectoryAsString(path...)
+	content, err := parent.ReadFileInDirectoryAsString(ctx, path...)
 	if err != nil {
 		return -1, err
 	}
@@ -379,7 +378,7 @@ func (d *DirectoryBase) ReadFileInDirectoryAsInt64(path ...string) (value int64,
 	return value, nil
 }
 
-func (d *DirectoryBase) ReadFileInDirectoryAsLines(path ...string) (content []string, err error) {
+func (d *DirectoryBase) ReadFileInDirectoryAsLines(ctx context.Context, path ...string) (content []string, err error) {
 	if len(path) == 0 {
 		return nil, tracederrors.TracedError("path is empty")
 	}
@@ -394,7 +393,7 @@ func (d *DirectoryBase) ReadFileInDirectoryAsLines(path ...string) (content []st
 		return nil, err
 	}
 
-	content, err = fileToRead.ReadAsLines()
+	content, err = fileToRead.ReadAsLines(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -402,7 +401,7 @@ func (d *DirectoryBase) ReadFileInDirectoryAsLines(path ...string) (content []st
 	return content, nil
 }
 
-func (d *DirectoryBase) ReadFileInDirectoryAsString(path ...string) (content string, err error) {
+func (d *DirectoryBase) ReadFileInDirectoryAsString(ctx context.Context, path ...string) (content string, err error) {
 	parent, err := d.GetParentDirectoryForBaseClass()
 	if err != nil {
 		return "", err
@@ -413,7 +412,7 @@ func (d *DirectoryBase) ReadFileInDirectoryAsString(path ...string) (content str
 		return "", err
 	}
 
-	content, err = fileToRead.ReadAsString()
+	content, err = fileToRead.ReadAsString(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -421,7 +420,7 @@ func (d *DirectoryBase) ReadFileInDirectoryAsString(path ...string) (content str
 	return content, nil
 }
 
-func (d *DirectoryBase) ReadFirstLineOfFileInDirectoryAsString(path ...string) (firstLine string, err error) {
+func (d *DirectoryBase) ReadFirstLineOfFileInDirectoryAsString(ctx context.Context, path ...string) (firstLine string, err error) {
 	if len(path) <= 0 {
 		return "", tracederrors.TracedError("No path given")
 	}
@@ -436,7 +435,7 @@ func (d *DirectoryBase) ReadFirstLineOfFileInDirectoryAsString(path ...string) (
 		return "", err
 	}
 
-	return f.ReadFirstLine()
+	return f.ReadFirstLine(ctx)
 }
 
 func (d *DirectoryBase) SetParentDirectoryForBaseClass(parentDirectoryForBaseClass filesinterfaces.Directory) (err error) {

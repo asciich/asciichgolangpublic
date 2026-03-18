@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
@@ -18,7 +19,8 @@ import (
 
 func Test_LocalDirectoryFulfillsDirectoryInterface(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		dir, err := files.GetLocalDirectoryByPath(".")
+		ctx := getCtx()
+		dir, err := files.GetLocalDirectoryByPath(ctx, ".")
 		require.NoError(t, err)
 		require.NotNil(t, dir)
 
@@ -81,7 +83,8 @@ func TestLocalDirectoryExists(t *testing.T) {
 
 func TestLocalDirectoryGetFileInDirectory(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		homeDir, err := files.GetLocalDirectoryByPath("/home/")
+		ctx := getCtx()
+		homeDir, err := files.GetLocalDirectoryByPath(ctx, "/home/")
 		require.NoError(t, err)
 
 		file, err := homeDir.GetFileInDirectory("testfile")
@@ -94,7 +97,8 @@ func TestLocalDirectoryGetFileInDirectory(t *testing.T) {
 	})
 
 	t.Run("with sub path", func(t *testing.T) {
-		homeDir, err := files.GetLocalDirectoryByPath("/home/")
+		ctx := getCtx()
+		homeDir, err := files.GetLocalDirectoryByPath(ctx, "/home/")
 		require.NoError(t, err)
 
 		file, err := homeDir.GetFileInDirectory("subdir", "another_file")
@@ -109,7 +113,8 @@ func TestLocalDirectoryGetFileInDirectory(t *testing.T) {
 
 func TestLocalDirectoryGetFilePathInDirectory(t *testing.T) {
 	t.Run("testfile in home", func(t *testing.T) {
-		homeDir, err := files.GetLocalDirectoryByPath("/home/")
+		ctx := getCtx()
+		homeDir, err := files.GetLocalDirectoryByPath(ctx, "/home/")
 		require.NoError(t, err)
 
 		path, err := homeDir.GetFilePathInDirectory("testfile")
@@ -119,7 +124,8 @@ func TestLocalDirectoryGetFilePathInDirectory(t *testing.T) {
 	})
 
 	t.Run("testfile subdir in in home", func(t *testing.T) {
-		homeDir, err := files.GetLocalDirectoryByPath("/home/")
+		ctx := getCtx()
+		homeDir, err := files.GetLocalDirectoryByPath(ctx, "/home/")
 		require.NoError(t, err)
 
 		path, err := homeDir.GetFilePathInDirectory("subdir", "another_file")
@@ -131,10 +137,11 @@ func TestLocalDirectoryGetFilePathInDirectory(t *testing.T) {
 
 func TestLocalDirectoryGetSubDirectory(t *testing.T) {
 	t.Run("single file", func(t *testing.T) {
-		homeDir, err := files.GetLocalDirectoryByPath("/home/")
+		ctx := getCtx()
+		homeDir, err := files.GetLocalDirectoryByPath(ctx, "/home/")
 		require.NoError(t, err)
 
-		subDir, err := homeDir.GetSubDirectory("testfile")
+		subDir, err := homeDir.GetSubDirectory(ctx, "testfile")
 		require.NoError(t, err)
 
 		localPath, err := subDir.GetLocalPath()
@@ -145,10 +152,11 @@ func TestLocalDirectoryGetSubDirectory(t *testing.T) {
 	})
 
 	t.Run("subdir and file", func(t *testing.T) {
-		homeDir, err := files.GetLocalDirectoryByPath("/home/")
+		ctx := getCtx()
+		homeDir, err := files.GetLocalDirectoryByPath(ctx, "/home/")
 		require.NoError(t, err)
 
-		subDir, err := homeDir.GetSubDirectory("subdir", "another_file")
+		subDir, err := homeDir.GetSubDirectory(ctx, "subdir", "another_file")
 		require.NoError(t, err)
 
 		localPath, err := subDir.GetLocalPath()
@@ -198,11 +206,11 @@ func TestLocalDirectoryCreateFileInDirectoryFromString(t *testing.T) {
 				tempDirPath, err := os.MkdirTemp("", "testDir")
 				require.NoError(t, err)
 
-				dir, err := files.GetLocalDirectoryByPath(tempDirPath)
+				dir, err := files.GetLocalDirectoryByPath(ctx, tempDirPath)
 				require.NoError(t, err)
 				defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				createdFile, err := dir.CreateFileInDirectoryFromString(tt.content, verbose, tt.filename...)
+				createdFile, err := dir.CreateFileInDirectoryFromString(ctx, tt.content, tt.filename...)
 				require.NoError(t, err)
 
 				localPath, err := dir.GetLocalPath()
@@ -214,7 +222,10 @@ func TestLocalDirectoryCreateFileInDirectoryFromString(t *testing.T) {
 				localPath, err = createdFile.GetLocalPath()
 				require.NoError(t, err)
 				require.EqualValues(t, expectedFileName, localPath)
-				require.EqualValues(t, tt.content, createdFile.MustReadAsString())
+
+				content, err := createdFile.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.content, content)
 			},
 		)
 	}
@@ -233,7 +244,8 @@ func TestLocalDirectoryGetLocalPathIsAbsolute(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				localDir, err := files.GetLocalDirectoryByPath(tt.pathToTest)
+				ctx := getCtx()
+				localDir, err := files.GetLocalDirectoryByPath(ctx, tt.pathToTest)
 				require.NoError(t, err)
 
 				localPath, err := localDir.GetLocalPath()
@@ -263,7 +275,7 @@ func TestLocalDirectoryWriteStringToFile(t *testing.T) {
 				tempDirPath, err := os.MkdirTemp("", "testDir")
 				require.NoError(t, err)
 
-				testDirectory, err := files.GetLocalDirectoryByPath(tempDirPath)
+				testDirectory, err := files.GetLocalDirectoryByPath(ctx, tempDirPath)
 				require.NoError(t, err)
 				defer testDirectory.Delete(ctx, &filesoptions.DeleteOptions{})
 
@@ -273,7 +285,10 @@ func TestLocalDirectoryWriteStringToFile(t *testing.T) {
 				require.NoError(t, err)
 
 				require.True(t, mustutils.Must(testDirectory.FileInDirectoryExists(ctx, tt.fileName)))
-				require.EqualValues(t, tt.content, testFile.MustReadAsString())
+
+				content, err := testFile.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.content, content)
 			},
 		)
 	}
@@ -306,7 +321,7 @@ func TestDirectoryListFilesInDirectory(t *testing.T) {
 				tempDirPath, err := os.MkdirTemp("", "tempToTest")
 				require.NoError(t, err)
 
-				temporaryDirectory, err := files.GetLocalDirectoryByPath(tempDirPath)
+				temporaryDirectory, err := files.GetLocalDirectoryByPath(ctx, tempDirPath)
 				_, err = temporaryDirectory.CreateFilesInDirectory(ctx, tt.fileNames, &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
@@ -333,7 +348,7 @@ func TestLocalDirectoryCreate(t *testing.T) {
 				ctx := getCtx()
 
 				tempDir := getDirectoryToTest("localDirectory")
-				subDir, err := tempDir.GetSubDirectory(tt.subDirPath...)
+				subDir, err := tempDir.GetSubDirectory(ctx, tt.subDirPath...)
 				require.NoError(t, err)
 
 				exists, err := subDir.Exists(ctx)
@@ -364,6 +379,8 @@ func TestDirectoryGetPathReturnsAbsoluteValue(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
+				ctx := contextutils.ContextVerbose()
+
 				startPath, err := os.Getwd()
 				if err != nil {
 					t.Fatalf("%v", err)
@@ -378,7 +395,7 @@ func TestDirectoryGetPathReturnsAbsoluteValue(t *testing.T) {
 					defer os.Chdir(startPath)
 					defer waitGroup.Done()
 
-					directory, err := files.GetLocalDirectoryByPath(tt.path)
+					directory, err := files.GetLocalDirectoryByPath(ctx, tt.path)
 					require.NoError(t, err)
 
 					path1, err = directory.GetLocalPath()
@@ -422,7 +439,7 @@ func TestDirectoryIsEmptyDirectory(t *testing.T) {
 				path, err := getDirectoryToTest("localDirectory").GetPath()
 				require.NoError(t, err)
 
-				tempDir, err := files.GetLocalDirectoryByPath(path)
+				tempDir, err := files.GetLocalDirectoryByPath(ctx, path)
 				require.NoError(t, err)
 				defer tempDir.Delete(ctx, &filesoptions.DeleteOptions{})
 

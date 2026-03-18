@@ -2,6 +2,7 @@ package commandexecutorbashoo
 
 import (
 	"context"
+	"io"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbash"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
@@ -53,4 +54,12 @@ func (b *BashService) RunOneLinerAndGetStdoutAsLines(ctx context.Context, oneLin
 
 func (b *BashService) RunOneLinerAndGetStdoutAsString(ctx context.Context, oneLiner string) (stdout string, err error) {
 	return commandexecutorbash.RunOneLinerAndGetStdoutAsString(ctx, oneLiner)
+}
+
+func (b *BashService) RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error) {
+	return commandexecutorbash.RunCommandAndGetStdoutAsIoReadCloser(ctx, options)
+}
+
+func (b *BashService) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error) {
+	return commandexecutorbash.RunCommandAndGetStdinAsIoWriteCloser(ctx, options)
 }

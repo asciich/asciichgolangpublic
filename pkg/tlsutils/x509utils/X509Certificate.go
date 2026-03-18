@@ -2,6 +2,7 @@ package x509utils
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"io"
 	"strings"
@@ -48,7 +49,8 @@ func GetX509CertificateFromFilePath(certFilePath string) (cert *X509Certificate,
 	}
 
 	cert = NewX509Certificate()
-	err = cert.LoadFromFilePath(certFilePath)
+	ctx := contextutils.ContextSilent()
+	err = cert.LoadFromFilePath(ctx, certFilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -351,12 +353,12 @@ func (c *X509Certificate) LoadFromBytes(certBytes []byte) (err error) {
 	return nil
 }
 
-func (c *X509Certificate) LoadFromFile(loadFile filesinterfaces.File) (err error) {
+func (c *X509Certificate) LoadFromFile(ctx context.Context, loadFile filesinterfaces.File) (err error) {
 	if loadFile == nil {
 		return tracederrors.TracedError("loadFile is nil")
 	}
 
-	contentString, err := loadFile.ReadAsString()
+	contentString, err := loadFile.ReadAsString(ctx)
 	if err != nil {
 		return err
 	}
@@ -369,7 +371,7 @@ func (c *X509Certificate) LoadFromFile(loadFile filesinterfaces.File) (err error
 	return nil
 }
 
-func (c *X509Certificate) LoadFromFilePath(loadPath string) (err error) {
+func (c *X509Certificate) LoadFromFilePath(ctx context.Context, loadPath string) (err error) {
 	loadPath = strings.TrimSpace(loadPath)
 	if len(loadPath) <= 0 {
 		return tracederrors.TracedError("loadPath is empty string")
@@ -380,7 +382,7 @@ func (c *X509Certificate) LoadFromFilePath(loadPath string) (err error) {
 		return err
 	}
 
-	err = c.LoadFromFile(loadFile)
+	err = c.LoadFromFile(ctx, loadFile)
 	if err != nil {
 		return err
 	}
@@ -601,20 +603,6 @@ func (x *X509Certificate) MustIsV3() (isV3 bool) {
 
 func (x *X509Certificate) MustLoadFromBytes(certBytes []byte) {
 	err := x.LoadFromBytes(certBytes)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (x *X509Certificate) MustLoadFromFile(loadFile filesinterfaces.File) {
-	err := x.LoadFromFile(loadFile)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (x *X509Certificate) MustLoadFromFilePath(loadPath string) {
-	err := x.LoadFromFilePath(loadPath)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
