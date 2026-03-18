@@ -2,6 +2,7 @@ package containerinterfaces
 
 import (
 	"context"
+	"io"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
@@ -35,6 +36,9 @@ type Container interface {
 	// Run a command as new process in the container.
 	// Equivalent to the CLI command 'docker exec' if docker is used.
 	RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error)
+
+	RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error)
+	RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error)
 
 	// These Commands can be implemented by embedding the `CommandExecutorBase` struct:
 	IsRunningOnLocalhost() (bool, error)

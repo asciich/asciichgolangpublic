@@ -1,32 +1,20 @@
 package containerutils_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
+func getCtx() context.Context {
+	return contextutils.ContextSilent()
+}
+
 func TestContainersIsRunningInsideContainer(t *testing.T) {
-
-	tests := []struct {
-		testcase string
-	}{
-		{"testcase"},
-	}
-
-	for _, tt := range tests {
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				require := require.New(t)
-
-				const verbose bool = true
-
-				require.False(mustutils.Must(containerutils.IsRunningInsideContainer(verbose)))
-			},
-		)
-	}
+	ctx := getCtx()
+	require.False(t, mustutils.Must(containerutils.IsRunningInsideContainer(ctx)))
 }

@@ -40,7 +40,10 @@ func TestCreateFromString(t *testing.T) {
 				require.NoError(t, err)
 
 				require.True(t, exists)
-				require.EqualValues(t, tt.content, file.MustReadAsString())
+
+				content, err := file.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.content, content)
 			},
 		)
 	}
@@ -57,7 +60,9 @@ func TestCreateEmptyTemporaryFile(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, exists)
 
-	require.EqualValues(t, "", file.MustReadAsString())
+	content, err := file.ReadAsString(ctx)
+	require.NoError(t, err)
+	require.EqualValues(t, "", content)
 
 	localPath, err := file.GetLocalPath()
 	require.NoError(t, err)
@@ -77,7 +82,12 @@ func TestCreateEmptyTemporaryFileAndGetPath(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, exists)
 
-	require.EqualValues(t, "", file.MustReadAsString())
+	content, err := file.ReadAsString(ctx)
+	require.NoError(t, err)
+	require.EqualValues(t, "", content)
 	require.True(t, strings.HasPrefix(filePath, "/tmp/"))
-	require.True(t, strings.HasPrefix(file.MustGetPath(), "/tmp/"))
+
+	got, err := file.GetPath()
+	require.NoError(t, err)
+	require.True(t, strings.HasPrefix(got, "/tmp/"))
 }

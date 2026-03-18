@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"path/filepath"
 	"strings"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func GetContentToInsertDefinedInStartLineAsLines(line string, options *ReplaceBetweenMarkersOptions) (lines []string, err error) {
+func GetContentToInsertDefinedInStartLineAsLines(ctx context.Context, line string, options *ReplaceBetweenMarkersOptions) (lines []string, err error) {
 	if line == "" {
 		return nil, tracederrors.TracedError("line is empty string")
 	}
@@ -26,7 +27,7 @@ func GetContentToInsertDefinedInStartLineAsLines(line string, options *ReplaceBe
 		return nil, err
 	}
 
-	lines, err = sourceFile.ReadAsLines()
+	lines, err = sourceFile.ReadAsLines(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -114,43 +115,7 @@ func IsReplaceBetweenMarkerStart(line string) (isReplaceBetweenMarkerStart bool)
 	return strings.HasPrefix(commentContent, "REPLACE_BETWEEN_MARKERS START")
 }
 
-func MustGetContentToInsertDefinedInStartLineAsLines(line string, options *ReplaceBetweenMarkersOptions) (lines []string) {
-	lines, err := GetContentToInsertDefinedInStartLineAsLines(line, options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return lines
-}
-
-func MustGetSourceFile(line string, options *ReplaceBetweenMarkersOptions) (sourceFile filesinterfaces.File) {
-	sourceFile, err := GetSourceFile(line, options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return sourceFile
-}
-
-func MustGetSourcePath(line string, options *ReplaceBetweenMarkersOptions) (sourcePath string) {
-	sourcePath, err := GetSourcePath(line, options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return sourcePath
-}
-
-func MustReplaceBySourcesInString(input string, options *ReplaceBetweenMarkersOptions) (replaced string) {
-	replaced, err := ReplaceBySourcesInString(input, options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return replaced
-}
-
-func ReplaceBySourcesInString(input string, options *ReplaceBetweenMarkersOptions) (replaced string, err error) {
+func ReplaceBySourcesInString(ctx context.Context, input string, options *ReplaceBetweenMarkersOptions) (replaced string, err error) {
 	if options == nil {
 		return "", tracederrors.TracedError("options is nil")
 	}
@@ -164,7 +129,7 @@ func ReplaceBySourcesInString(input string, options *ReplaceBetweenMarkersOption
 				startMarkerFound = true
 				outLines = append(outLines, line)
 
-				additionalLines, err := GetContentToInsertDefinedInStartLineAsLines(line, options)
+				additionalLines, err := GetContentToInsertDefinedInStartLineAsLines(ctx, line, options)
 				if err != nil {
 					return "", err
 				}

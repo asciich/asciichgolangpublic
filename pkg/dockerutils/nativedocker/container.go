@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"github.com/moby/moby/api/pkg/stdcopy"
@@ -415,4 +416,12 @@ func (c *Container) Run(ctx context.Context, options *dockeroptions.DockerRunCon
 	}
 
 	return nil
+}
+
+func (c *Container) RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *Container) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
 }

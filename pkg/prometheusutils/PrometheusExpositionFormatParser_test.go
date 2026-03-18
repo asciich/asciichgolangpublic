@@ -1,13 +1,19 @@
 package prometheusutils
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func TestPrometheusExpositionFormatParserParseExample(t *testing.T) {
 	tests := []struct {
@@ -20,8 +26,9 @@ func TestPrometheusExpositionFormatParserParseExample(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
+				ctx := getCtx()
 				gitRepo := asciichgolangpublic.MustGetLocalGitRepositoryByPath(".")
-				metricsTxt, err := gitRepo.ReadFileInDirectoryAsString("testdata", "PrometheusExpositionFormatParser", "metrics.txt")
+				metricsTxt, err := gitRepo.ReadFileInDirectoryAsString(ctx, "testdata", "PrometheusExpositionFormatParser", "metrics.txt")
 				require.NoError(t, err)
 
 				parsedMetrics := PrometheusExpositionFormatParser().MustParseString(metricsTxt)

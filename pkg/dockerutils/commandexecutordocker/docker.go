@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"reflect"
 	"strings"
 
@@ -217,6 +218,24 @@ func (c *CommandExecutorDocker) RunCommand(ctx context.Context, runOptions *para
 	}
 
 	return commandExecutor.RunCommand(ctx, runOptions)
+}
+
+func (c *CommandExecutorDocker) RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error) {
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	return commandExecutor.RunCommandAndGetStdoutAsIoReadCloser(ctx, options)
+}
+
+func (c *CommandExecutorDocker) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error) {
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	return commandExecutor.RunCommandAndGetStdinAsIoWriteCloser(ctx, options)
 }
 
 func (c *CommandExecutorDocker) RunCommandAndGetStdoutAsString(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (stdout string, err error) {

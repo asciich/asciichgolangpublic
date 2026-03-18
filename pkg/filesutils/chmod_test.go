@@ -69,14 +69,17 @@ func TestFile_ChmodObjectOriented(t *testing.T) {
 		{"localCommandExecutorFile", "u=rw,g=,o=", "u=rw,g=,o="},
 		{"commandExecutorFileExec", "u=rw,g=,o=", "u=rw,g=,o="},
 		{"commandExecutorFileBash", "u=rw,g=,o=", "u=rw,g=,o="},
+		{"nativefilesoo", "u=rw,g=,o=", "u=rw,g=,o="},
 		{"localFile", "u=rw,g=r,o=r", "u=rw,g=r,o=r"},
 		{"localCommandExecutorFile", "u=rw,g=r,o=r", "u=rw,g=r,o=r"},
 		{"commandExecutorFileExec", "u=rw,g=r,o=r", "u=rw,g=r,o=r"},
 		{"commandExecutorFileBash", "u=rw,g=r,o=r", "u=rw,g=r,o=r"},
+		{"nativefilesoo", "u=rw,g=r,o=r", "u=rw,g=r,o=r"},
 		{"localFile", "u=rwx,g=r,o=r", "u=rwx,g=r,o=r"},
 		{"localCommandExecutorFile", "u=rwx,g=r,o=r", "u=rwx,g=r,o=r"},
 		{"commandExecutorFileExec", "u=rwx,g=r,o=r", "u=rwx,g=r,o=r"},
 		{"commandExecutorFileBash", "u=rwx,g=r,o=r", "u=rwx,g=r,o=r"},
+		{"nativefilesoo", "u=rwx,g=r,o=r", "u=rwx,g=r,o=r"},
 	}
 
 	for _, tt := range tests {

@@ -91,7 +91,7 @@ func Test_Example_UploadAndDownload_File_withUrlFromPublicBucket_test(t *testing
 	require.NoError(t, err)
 	defer downloadedFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-	downloadedContent, err := downloadedFile.ReadAsString()
+	downloadedContent, err := downloadedFile.ReadAsString(ctx)
 	require.NoError(t, err)
 	require.EqualValues(t, "This is the test data", downloadedContent)
 }

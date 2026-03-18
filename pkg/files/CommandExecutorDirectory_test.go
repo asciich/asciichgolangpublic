@@ -48,7 +48,9 @@ func TestCommandExecutorDirectoryRead_GetFileInDirectory(t *testing.T) {
 				commandExecutorFile, err := dir.GetFileInDirectory(filepath.Base(temporaryFile.Name()))
 				require.NoError(t, err)
 
-				require.EqualValues(t, tt.testContent, commandExecutorFile.MustReadAsString())
+				content, err := commandExecutorFile.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.testContent, content)
 			},
 		)
 	}

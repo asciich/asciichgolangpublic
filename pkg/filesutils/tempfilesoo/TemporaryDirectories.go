@@ -14,7 +14,7 @@ func CreateEmptyTemporaryDirectory(ctx context.Context) (temporaryDirectory file
 		return nil, err
 	}
 
-	temporaryDirectory, err = files.GetLocalDirectoryByPath(dirPath)
+	temporaryDirectory, err = files.GetLocalDirectoryByPath(ctx, dirPath)
 	if err != nil {
 		return nil, err
 	}

@@ -29,7 +29,7 @@ func mustRepoRoot(ctx context.Context) (repoRootDir filesinterfaces.Directory) {
 
 	repoRootPath = strings.TrimSpace(repoRootPath)
 
-	repoRootDir, err = files.GetLocalDirectoryByPath(repoRootPath)
+	repoRootDir, err = files.GetLocalDirectoryByPath(ctx, repoRootPath)
 	if err != nil {
 		logging.LogGoErrorFatalWithTrace(err)
 	}
@@ -39,7 +39,7 @@ func mustRepoRoot(ctx context.Context) (repoRootDir filesinterfaces.Directory) {
 
 func TestX509CertificateLoadFromFilePath(t *testing.T) {
 	ctx := getCtx()
-	testDir, err := mustRepoRoot(getCtx()).GetSubDirectory("testdata", "X509Certificate", "LoadFromFilePath")
+	testDir, err := mustRepoRoot(getCtx()).GetSubDirectory(ctx, "testdata", "X509Certificate", "LoadFromFilePath")
 	require.NoError(t, err)
 
 	type TestCase struct {
@@ -69,11 +69,13 @@ func TestX509CertificateLoadFromFilePath(t *testing.T) {
 				cert := MustGetX509CertificateFromFilePath(localPath)
 
 				subject := cert.MustGetSubjectString()
-				expectedSubject := expectedSubjectFile.MustReadFirstLineAndTrimSpace()
+				expectedSubject, err := expectedSubjectFile.ReadFirstLineAndTrimSpace(ctx)
+				require.NoError(t, err)
 				require.EqualValues(t, expectedSubject, subject)
 
 				issuert := cert.MustGetIssuerString()
-				expectedIssuer := expectedIssuerStringFile.MustReadFirstLineAndTrimSpace()
+				expectedIssuer, err := expectedIssuerStringFile.ReadFirstLineAndTrimSpace(ctx)
+				require.NoError(t, err)
 				require.EqualValues(t, expectedIssuer, issuert)
 			},
 		)
@@ -82,7 +84,7 @@ func TestX509CertificateLoadFromFilePath(t *testing.T) {
 
 func TestX509CertificateGetAsPemString(t *testing.T) {
 	ctx := getCtx()
-	testDir, err := mustRepoRoot(getCtx()).GetSubDirectory("testdata", "X509Certificate", "GetAsPemString")
+	testDir, err := mustRepoRoot(getCtx()).GetSubDirectory(ctx, "testdata", "X509Certificate", "GetAsPemString")
 	require.NoError(t, err)
 
 	type TestCase struct {
@@ -109,7 +111,8 @@ func TestX509CertificateGetAsPemString(t *testing.T) {
 				cert := MustGetX509CertificateFromFilePath(localPath)
 
 				pemString := cert.MustGetAsPemString()
-				expectedPemString := expectedSubjectFile.MustReadAsString()
+				expectedPemString, err := expectedSubjectFile.ReadAsString(ctx)
+				require.NoError(t, err)
 
 				require.EqualValues(t, expectedPemString, pemString)
 			},
@@ -119,7 +122,7 @@ func TestX509CertificateGetAsPemString(t *testing.T) {
 
 func TestX509CertificateIsRootCa(t *testing.T) {
 	ctx := getCtx()
-	testDir, err := mustRepoRoot(getCtx()).GetSubDirectory("testdata", "X509Certificate", "IsRootCa")
+	testDir, err := mustRepoRoot(getCtx()).GetSubDirectory(ctx, "testdata", "X509Certificate", "IsRootCa")
 	require.NoError(t, err)
 
 	type TestCase struct {
@@ -135,7 +138,8 @@ func TestX509CertificateIsRootCa(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				const verbose bool = true
+				const verbose = true
+				ctx := getCtx()
 
 				inputFile, err := tt.testDir.GetFileInDirectory("input")
 				require.NoError(t, err)
@@ -148,7 +152,7 @@ func TestX509CertificateIsRootCa(t *testing.T) {
 				cert := MustGetX509CertificateFromFilePath(localPath)
 
 				isRootCa := cert.MustIsRootCa(verbose)
-				expectedIsRootCa := expectedSubjectFile.MustReadAsBool()
+				expectedIsRootCa, err := expectedSubjectFile.ReadAsBool(ctx)
 
 				require.EqualValues(t, expectedIsRootCa, isRootCa)
 			},
@@ -158,7 +162,7 @@ func TestX509CertificateIsRootCa(t *testing.T) {
 
 func TestX509CertificateIsV1(t *testing.T) {
 	ctx := getCtx()
-	testDir, err := mustRepoRoot(getCtx()).GetSubDirectory("testdata", "X509Certificate", "IsV1")
+	testDir, err := mustRepoRoot(getCtx()).GetSubDirectory(ctx, "testdata", "X509Certificate", "IsV1")
 	require.NoError(t, err)
 
 	type TestCase struct {
@@ -185,7 +189,8 @@ func TestX509CertificateIsV1(t *testing.T) {
 				cert := MustGetX509CertificateFromFilePath(localPath)
 
 				isV1 := cert.MustIsV1()
-				expectedIsV1 := expectedSubjectFile.MustReadAsBool()
+				expectedIsV1, err := expectedSubjectFile.ReadAsBool(ctx)
+				require.NoError(t, err)
 
 				require.EqualValues(t, expectedIsV1, isV1)
 			},
@@ -195,7 +200,7 @@ func TestX509CertificateIsV1(t *testing.T) {
 
 func TestX509CertificateIsV3(t *testing.T) {
 	ctx := getCtx()
-	testDir, err := mustRepoRoot(getCtx()).GetSubDirectory("testdata", "X509Certificate", "IsV3")
+	testDir, err := mustRepoRoot(getCtx()).GetSubDirectory(ctx, "testdata", "X509Certificate", "IsV3")
 	require.NoError(t, err)
 
 	type TestCase struct {
@@ -222,7 +227,8 @@ func TestX509CertificateIsV3(t *testing.T) {
 				cert := MustGetX509CertificateFromFilePath(localPath)
 
 				isV3 := cert.MustIsV3()
-				expectedIsV3 := expectedSubjectFile.MustReadAsBool()
+				expectedIsV3, err := expectedSubjectFile.ReadAsBool(ctx)
+				require.NoError(t, err)
 
 				require.EqualValues(t, expectedIsV3, isV3)
 			},

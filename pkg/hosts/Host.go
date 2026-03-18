@@ -20,7 +20,7 @@ type Host interface {
 
 	GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor
 
-	GetDirectoryByPath(path string) (directory filesinterfaces.Directory, err error)
+	GetDirectoryByPath(ctx context.Context, path string) (directory filesinterfaces.Directory, err error)
 	GetHostDescription() (hostDescription string, err error)
 	GetHostName() (hostName string, err error)
 	GetSshPublicKeyOfUserAsString(ctx context.Context, username string) (publicKey string, err error)

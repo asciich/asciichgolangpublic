@@ -47,7 +47,7 @@ func (k *GitlabProjectDeployKey) CreateDeployKey(ctx context.Context, createOpti
 		return err
 	}
 
-	keyMaterial, err := createOptions.GetPublicKeyMaterialString()
+	keyMaterial, err := createOptions.GetPublicKeyMaterialString(ctx)
 	if err != nil {
 		return err
 	}

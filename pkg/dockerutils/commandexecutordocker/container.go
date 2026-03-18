@@ -3,6 +3,7 @@ package commandexecutordocker
 import (
 	"context"
 	"fmt"
+	"io"
 	"strconv"
 	"strings"
 	"time"
@@ -244,7 +245,7 @@ func (c *CommandExecutorDockerContainer) RunCommand(ctx context.Context, runOpti
 	newCommand := []string{"docker", "exec"}
 
 	for k, v := range runOptions.AdditionalEnvVars {
-		newCommand = append(newCommand, "-e", k + "=" + v)
+		newCommand = append(newCommand, "-e", k+"="+v)
 	}
 
 	if runOptions.RunAsUser != "" {
@@ -483,4 +484,12 @@ func (c *CommandExecutorDockerContainer) GetHostDescription() (string, error) {
 	hostDescription := fmt.Sprintf("Docker container '%s' running on host '%s'.", name, dockerHostDescription)
 
 	return hostDescription, nil
+}
+
+func (c *CommandExecutorDockerContainer) RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorDockerContainer) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
 }

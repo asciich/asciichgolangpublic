@@ -373,7 +373,7 @@ func downloadSinglePageContent(ctx context.Context, url string, outputDir string
 		return tracederrors.TracedErrorf("Failed to marshal info file: %w", err)
 	}
 
-	err = nativefiles.WriteBytes(ctx, filepath.Join(pageOutputDir, "info.json"), info)
+	err = nativefiles.WriteBytes(ctx, filepath.Join(pageOutputDir, "info.json"), info, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}

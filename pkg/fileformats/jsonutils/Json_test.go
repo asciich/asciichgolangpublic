@@ -146,7 +146,9 @@ func TestJsonStringToYamlFileByPath(t *testing.T) {
 				require.NoError(t, err)
 				createdFile := MustJsonStringToYamlFileByPath(tt.jsonString, localPath, verbose)
 
-				require.EqualValues(t, tt.expectedResult, createdFile.MustReadAsString())
+				content, err := createdFile.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedResult, content)
 			},
 		)
 	}
@@ -217,7 +219,9 @@ func TestJsonFileHas(t *testing.T) {
 				localPath, err := tempFile.GetLocalPath()
 				require.NoError(t, err)
 
-				require.EqualValues(t, tt.expectedResult, MustJsonFileByPathHas(localPath, tt.query, tt.keyToCheck))
+				got, err := JsonFileByPathHas(ctx, localPath, tt.query, tt.keyToCheck)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedResult, got)
 			},
 		)
 	}

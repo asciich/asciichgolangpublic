@@ -2,6 +2,7 @@ package commandexecutorexecoo
 
 import (
 	"context"
+	"io"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
@@ -45,4 +46,12 @@ func (e *ExecService) GetHostDescription() (hostDescription string, err error) {
 
 func (e *ExecService) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
 	return commandexecutorexec.RunCommand(ctx, options)
+}
+
+func (e *ExecService) RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error) {
+	return commandexecutorexec.RunCommandAndGetStdoutAsIoReadCloser(ctx, options)
+}
+
+func (e *ExecService) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error) {
+	return commandexecutorexec.RunCommandAndGetStdinAsIoWriteCloser(ctx, options)
 }

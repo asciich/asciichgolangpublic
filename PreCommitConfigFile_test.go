@@ -23,7 +23,7 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 
 	tests := []TestCase{}
 
-	testDataDirectory, err := MustGetLocalGitRepositoryByPath(".").GetSubDirectory("testdata", "PreCommitConfigFile", "UpdateDependency")
+	testDataDirectory, err := MustGetLocalGitRepositoryByPath(".").GetSubDirectory(ctx, "testdata", "PreCommitConfigFile", "UpdateDependency")
 	require.NoError(t, err)
 	for _, testDirectory := range mustutils.Must(testDataDirectory.ListSubDirectories(ctx, &parameteroptions.ListDirectoryOptions{Recursive: false})) {
 		localPath, err := testDirectory.GetLocalPath()
@@ -69,12 +69,15 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				updatedSha := preCommitFile.MustGetSha256Sum()
-				expectedOutputSha := expectedOutput.MustGetSha256Sum()
+				updatedSha, err := preCommitFile.GetSha256Sum(ctx)
+				require.NoError(t, err)
+				expectedOutputSha, err := expectedOutput.GetSha256Sum(ctx)
+				require.NoError(t, err)
 
 				if expectedOutputSha != updatedSha {
 					if os.Getenv("UPDATE_EXPECTED") == "1" {
-						preCommitFile.MustCopyToFile(expectedOutput, verbose)
+						err := preCommitFile.CopyToFile(ctx, expectedOutput)
+						require.NoError(t, err)
 					}
 				}
 
@@ -110,7 +113,9 @@ func TestPreCommitConfigFile_GetPreCommitConfigInGitRepository(t *testing.T) {
 				exists, err := preCommitConfigFile.Exists(ctx)
 				require.NoError(t, err)
 				require.True(t, exists)
-				require.True(t, strings.HasSuffix(preCommitConfigFile.MustGetPath(), "/.pre-commit-config.yaml"))
+				got, err := preCommitConfigFile.GetPath()
+				require.NoError(t, err)
+				require.True(t, strings.HasSuffix(got, "/.pre-commit-config.yaml"))
 			},
 		)
 	}

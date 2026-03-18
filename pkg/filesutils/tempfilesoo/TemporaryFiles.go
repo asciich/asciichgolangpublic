@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
@@ -148,7 +147,7 @@ func CreateTemporaryFileFromFile(ctx context.Context, fileToCopyAsTemporaryFile 
 		return nil, err
 	}
 
-	err = fileToCopyAsTemporaryFile.CopyToFile(temporaryFile, contextutils.GetVerboseFromContext(ctx))
+	err = fileToCopyAsTemporaryFile.CopyToFile(ctx, temporaryFile)
 	if err != nil {
 		return nil, err
 	}
@@ -163,13 +162,7 @@ func CreateTemporaryFileFromFile(ctx context.Context, fileToCopyAsTemporaryFile 
 		return nil, err
 	}
 
-	logging.LogChangedByCtxf(
-		ctx,
-		"Created temporary file '%s' filed with content from '%s' on '%s'",
-		temporaryfilePath,
-		srcPath,
-		hostDescription,
-	)
+	logging.LogChangedByCtxf(ctx, "Created temporary file '%s' filed with content from '%s' on '%s'", temporaryfilePath, srcPath, hostDescription)
 
 	return temporaryFile, nil
 }

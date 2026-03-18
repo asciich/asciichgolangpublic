@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 )
 
 // To run this test use:
@@ -20,6 +21,7 @@ func Test_CreateFileUsingSudo(t *testing.T) {
 		{"localCommandExecutorFile"},
 		{"commandExecutorFileExec"},
 		{"commandExecutorFileBash"},
+		{"nativefilesoo"},
 	}
 
 	for _, tt := range tests {
@@ -33,6 +35,8 @@ func Test_CreateFileUsingSudo(t *testing.T) {
 
 			// Hint: Ensure the /testfile is absent, otherwise this test failes.
 			// The idempotent written Create function will skip the attempt to create the file if it already exists.
+			require.False(t, nativefiles.Exists(ctx, testPath))
+
 			err := sourceFile.Create(ctx, &filesoptions.CreateOptions{})
 			require.Error(t, err)
 
