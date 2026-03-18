@@ -1,8 +1,6 @@
 package latexcmd
 
 import (
-	"context"
-
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
@@ -25,22 +23,18 @@ func NewCleanupTemporaryFilesCmd() *cobra.Command {
 
 			directoryPath := args[0]
 
-			cliLatexCleanupTemporaryFilesCmd(ctx, directoryPath)
+			dirToCleanUp := mustutils.Must(files.GetLocalDirectoryByPath(ctx, directoryPath))
+
+			mustutils.Must0(dirToCleanUp.DeleteFilesMatching(
+				ctx,
+				&parameteroptions.ListFileOptions{
+					MatchBasenamePattern: []string{".*\\.aux", ".*\\.log"},
+				},
+			))
+
+			logging.LogGoodByCtxf(ctx, "Temporary latex files from '%s' deleted.", directoryPath)
 		},
 	}
 
 	return cmd
-}
-
-func cliLatexCleanupTemporaryFilesCmd(ctx context.Context, directoryPath string) {
-	dirToCleanUp := mustutils.Must(files.GetLocalDirectoryByPath(directoryPath))
-
-	mustutils.Must0(dirToCleanUp.DeleteFilesMatching(
-		ctx,
-		&parameteroptions.ListFileOptions{
-			MatchBasenamePattern: []string{".*\\.aux", ".*\\.log"},
-		},
-	))
-
-	logging.LogGoodByCtxf(ctx, "Temporary latex files from '%s' deleted.", directoryPath)
 }

@@ -34,7 +34,7 @@ func TestGitignoreFileAddFileToIgnore(t *testing.T) {
 					err := gitignoreFile.AddFileToIgnore(ctx, "test", "comment")
 					require.NoError(t, err)
 
-					nEmptyLines, err := gitignoreFile.GetNumberOfNonEmptyLines()
+					nEmptyLines, err := gitignoreFile.GetNumberOfNonEmptyLines(ctx)
 					require.NoError(t, err)
 					require.EqualValues(t, 2, nEmptyLines)
 				}
@@ -43,7 +43,7 @@ func TestGitignoreFileAddFileToIgnore(t *testing.T) {
 					err := gitignoreFile.AddFileToIgnore(ctx, "test2", "comment2")
 					require.NoError(t, err)
 
-					nEmptyLines, err := gitignoreFile.GetNumberOfNonEmptyLines()
+					nEmptyLines, err := gitignoreFile.GetNumberOfNonEmptyLines(ctx)
 					require.NoError(t, err)
 					require.EqualValues(t, 4, nEmptyLines)
 				}

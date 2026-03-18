@@ -69,7 +69,7 @@ func TestGnuPg_SignAndValidate_File(t *testing.T) {
 				toTest := getFileToTest(tt.implementationName)
 				defer toTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				signatureFile, err := mustutils.Must(toTest.GetParentDirectory()).GetFileInDirectory(
+				signatureFile, err := mustutils.Must(toTest.GetParentDirectory(ctx)).GetFileInDirectory(
 					mustutils.Must(toTest.GetBaseName()) + ".asc",
 				)
 				require.NoError(t, err)

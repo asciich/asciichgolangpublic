@@ -1,4 +1,4 @@
-package files
+package filesgeneric
 
 import (
 	"context"
@@ -55,7 +55,7 @@ func (f *FileBase) IsLocalFile(ctx context.Context) (isLocalFile bool, err error
 	return hostDescription == "localhost", nil
 }
 
-func (f *FileBase) AppendLine(line string, verbose bool) (err error) {
+func (f *FileBase) AppendLine(ctx context.Context, line string) (err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return err
@@ -70,13 +70,13 @@ func (f *FileBase) AppendLine(line string, verbose bool) (err error) {
 	}
 
 	if !isEmptyFile {
-		err = parent.EnsureEndsWithLineBreak(verbose)
+		err = parent.EnsureEndsWithLineBreak(ctx)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = parent.AppendString(toWrite, verbose)
+	err = parent.AppendString(ctx, toWrite)
 	if err != nil {
 		return err
 	}
@@ -102,13 +102,13 @@ func (f *FileBase) CheckIsLocalFile(ctx context.Context) (err error) {
 	return nil
 }
 
-func (f *FileBase) ContainsLine(line string) (containsLine bool, err error) {
+func (f *FileBase) ContainsLine(ctx context.Context, line string) (containsLine bool, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return false, err
 	}
 
-	content, err := parent.ReadAsString()
+	content, err := parent.ReadAsString(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -116,18 +116,18 @@ func (f *FileBase) ContainsLine(line string) (containsLine bool, err error) {
 	return stringsutils.ContainsLine(content, line), nil
 }
 
-func (f *FileBase) CreateParentDirectory(verbose bool) (err error) {
+func (f *FileBase) CreateParentDirectory(ctx context.Context) (err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return err
 	}
 
-	parentDir, err := parent.GetParentDirectory()
+	parentDir, err := parent.GetParentDirectory(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = parentDir.Create(contextutils.GetVerbosityContextByBool(verbose), &filesoptions.CreateOptions{})
+	err = parentDir.Create(ctx, &filesoptions.CreateOptions{})
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func (f *FileBase) CreateParentDirectory(verbose bool) (err error) {
 	return nil
 }
 
-func (f *FileBase) EnsureEndsWithLineBreak(verbose bool) (err error) {
+func (f *FileBase) EnsureEndsWithLineBreak(ctx context.Context) (err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return err
@@ -146,7 +146,7 @@ func (f *FileBase) EnsureEndsWithLineBreak(verbose bool) (err error) {
 		return err
 	}
 
-	err = parent.Create(contextutils.GetVerbosityContextByBool(verbose), &filesoptions.CreateOptions{})
+	err = parent.Create(ctx, &filesoptions.CreateOptions{})
 	if err != nil {
 		return err
 	}
@@ -157,42 +157,36 @@ func (f *FileBase) EnsureEndsWithLineBreak(verbose bool) (err error) {
 	}
 
 	if isEmptyFile {
-		err = parent.WriteString(contextutils.GetVerbosityContextByBool(verbose), "\n", &filesoptions.WriteOptions{})
+		err = parent.WriteString(ctx, "\n", &filesoptions.WriteOptions{})
 		if err != nil {
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf("Added newline to empty file '%s' to ensure ends with line break.", filePath)
-		}
+		logging.LogChangedByCtxf(ctx, "Added newline to empty file '%s' to ensure ends with line break.", filePath)
 
 		return nil
 	}
 
-	lastChar, err := parent.ReadLastCharAsString()
+	lastChar, err := parent.ReadLastCharAsString(ctx)
 	if err != nil {
 		return err
 	}
 
 	if lastChar == "\n" {
-		if verbose {
-			logging.LogInfof("File '%s' already ends with a line break.", filePath)
-		}
+		logging.LogInfoByCtxf(ctx, "File '%s' already ends with a line break.", filePath)
 	} else {
-		err = parent.AppendString("\n", verbose)
+		err = parent.AppendString(ctx, "\n")
 		if err != nil {
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf("Added line break at end of '%s'.", filePath)
-		}
+		logging.LogChangedByCtxf(ctx, "Added line break at end of '%s'.", filePath)
 	}
 
 	return nil
 }
 
-func (f *FileBase) EnsureLineInFile(line string, verbose bool) (err error) {
+func (f *FileBase) EnsureLineInFile(ctx context.Context, line string) (err error) {
 	line = stringsutils.TrimAllLeadingAndTailingNewLines(line)
 
 	parent, err := f.GetParentFileForBaseClass()
@@ -200,12 +194,12 @@ func (f *FileBase) EnsureLineInFile(line string, verbose bool) (err error) {
 		return err
 	}
 
-	err = parent.Create(contextutils.GetVerbosityContextByBool(verbose), &filesoptions.CreateOptions{}) // ensure the file is created if not existent.
+	err = parent.Create(ctx, &filesoptions.CreateOptions{}) // ensure the file is created if not existent.
 	if err != nil {
 		return err
 	}
 
-	lines, err := parent.ReadAsLines()
+	lines, err := parent.ReadAsLines(ctx)
 	if err != nil {
 		return err
 	}
@@ -218,20 +212,18 @@ func (f *FileBase) EnsureLineInFile(line string, verbose bool) (err error) {
 	if slices.Contains(lines, line) {
 		logging.LogInfof("Line '%s' already present in '%s'.", line, localPath)
 	} else {
-		err := parent.AppendLine(line, verbose)
+		err := parent.AppendLine(ctx, line)
 		if err != nil {
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf("Wrote line '%s' into '%s'.", line, localPath)
-		}
+		logging.LogChangedByCtxf(ctx, "Wrote line '%s' into '%s'.", line, localPath)
 	}
 
 	return nil
 }
 
-func (f *FileBase) GetFileTypeDescription(verbose bool) (fileTypeDescription string, err error) {
+func (f *FileBase) GetFileTypeDescription(ctx context.Context) (fileTypeDescription string, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return "", err
@@ -243,7 +235,7 @@ func (f *FileBase) GetFileTypeDescription(verbose bool) (fileTypeDescription str
 	}
 
 	stdoutLines, err := commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsLines(
-		contextutils.GetVerbosityContextByBool(verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"file", path},
 		},
@@ -268,14 +260,14 @@ func (f *FileBase) GetFileTypeDescription(verbose bool) (fileTypeDescription str
 	return fileTypeDescription, nil
 }
 
-func (f *FileBase) GetMimeType(verbose bool) (mimeType string, err error) {
+func (f *FileBase) GetMimeType(ctx context.Context) (mimeType string, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return "", err
 	}
 
 	const atMostConsideredBytesByHttpDetectContentType int = 512
-	beginningOfFile, err := parent.ReadFirstNBytes(atMostConsideredBytesByHttpDetectContentType)
+	beginningOfFile, err := parent.ReadFirstNBytes(ctx, atMostConsideredBytesByHttpDetectContentType)
 	if err != nil {
 		return "", err
 	}
@@ -296,33 +288,20 @@ func (f *FileBase) GetMimeType(verbose bool) (mimeType string, err error) {
 			if strings.HasPrefix(string(beginningOfFile), beginPgpMessage) {
 				mimeType = "application/pgp-encrypted"
 
-				if verbose {
-					logging.LogInfof(
-						"Adjusted mimeType of '%s' to '%s' to make it compliant to output of unix 'file' command.",
-						path,
-						mimeType,
-					)
-				}
+				logging.LogInfoByCtxf(ctx, "Adjusted mimeType of '%s' to '%s' to make it compliant to output of unix 'file' command.", path, mimeType)
 			}
 		} else if len(beginningOfFile) <= 0 {
 			mimeType = "inode/x-empty"
 
-			if verbose {
-				logging.LogInfof(
-					"Adjusted mimeType of '%s' to '%s' to make it compliant to output of unix 'file' command.",
-					path,
-					mimeType,
-				)
-			}
-
+			logging.LogInfoByCtxf(ctx, "Adjusted mimeType of '%s' to '%s' to make it compliant to output of unix 'file' command.", path, mimeType)
 		}
 	}
 
 	return mimeType, nil
 }
 
-func (f *FileBase) GetNumberOfLinesWithPrefix(prefix string, trimLines bool) (nLines int, err error) {
-	contentString, err := f.ReadAsString()
+func (f *FileBase) GetNumberOfLinesWithPrefix(ctx context.Context, prefix string, trimLines bool) (nLines int, err error) {
+	contentString, err := f.ReadAsString(ctx)
 	if err != nil {
 		return -1, err
 	}
@@ -332,13 +311,13 @@ func (f *FileBase) GetNumberOfLinesWithPrefix(prefix string, trimLines bool) (nL
 	return nLines, nil
 }
 
-func (f *FileBase) GetNumberOfNonEmptyLines() (nLines int, err error) {
+func (f *FileBase) GetNumberOfNonEmptyLines(ctx context.Context) (nLines int, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return -1, err
 	}
 
-	lines, err := parent.ReadAsLines()
+	lines, err := parent.ReadAsLines(ctx)
 	if err != nil {
 		return -1, err
 	}
@@ -353,13 +332,13 @@ func (f *FileBase) GetNumberOfNonEmptyLines() (nLines int, err error) {
 	return nLines, nil
 }
 
-func (f *FileBase) GetParentDirectoryPath() (parentDirectoryPath string, err error) {
+func (f *FileBase) GetParentDirectoryPath(ctx context.Context) (parentDirectoryPath string, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return "", err
 	}
 
-	parentDir, err := parent.GetParentDirectory()
+	parentDir, err := parent.GetParentDirectory(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -404,7 +383,7 @@ func (f *FileBase) GetSha256Sum(ctx context.Context) (sha256sum string, err erro
 		return "", err
 	}
 
-	content, err := parent.ReadAsString()
+	content, err := parent.ReadAsString(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -414,8 +393,8 @@ func (f *FileBase) GetSha256Sum(ctx context.Context) (sha256sum string, err erro
 	return sha256sum, nil
 }
 
-func (f *FileBase) GetTextBlocks(verbose bool) (textBlocks []string, err error) {
-	lines, err := f.ReadAsLines()
+func (f *FileBase) GetTextBlocks(ctx context.Context) (textBlocks []string, err error) {
+	lines, err := f.ReadAsLines(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -477,14 +456,12 @@ func (f *FileBase) GetTextBlocks(verbose bool) (textBlocks []string, err error) 
 		insideBlock = false
 	}
 
-	if verbose {
-		logging.LogInfof("Splitted file into '%d' text blocks.", len(textBlocks))
-	}
+	logging.LogInfoByCtxf(ctx, "Splitted file into '%d' text blocks.", len(textBlocks))
 
 	return textBlocks, nil
 }
 
-func (f *FileBase) GetValueAsInt(key string) (value int, err error) {
+func (f *FileBase) GetValueAsInt(ctx context.Context, key string) (value int, err error) {
 	if key == "" {
 		return -1, tracederrors.TracedErrorEmptyString("key")
 	}
@@ -494,7 +471,7 @@ func (f *FileBase) GetValueAsInt(key string) (value int, err error) {
 		return -1, err
 	}
 
-	content, err := parent.ReadAsString()
+	content, err := parent.ReadAsString(ctx)
 	if err != nil {
 		return -1, err
 	}
@@ -502,7 +479,7 @@ func (f *FileBase) GetValueAsInt(key string) (value int, err error) {
 	return stringsutils.GetValueAsInt(content, key)
 }
 
-func (f *FileBase) GetValueAsString(key string) (value string, err error) {
+func (f *FileBase) GetValueAsString(ctx context.Context, key string) (value string, err error) {
 	if key == "" {
 		return "", tracederrors.TracedErrorEmptyString("key")
 	}
@@ -512,7 +489,7 @@ func (f *FileBase) GetValueAsString(key string) (value string, err error) {
 		return "", err
 	}
 
-	content, err := parent.ReadAsString()
+	content, err := parent.ReadAsString(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -520,17 +497,17 @@ func (f *FileBase) GetValueAsString(key string) (value string, err error) {
 	return stringsutils.GetValueAsString(content, key)
 }
 
-func (f *FileBase) IsContentEqualByComparingSha256Sum(otherFile filesinterfaces.File, verbose bool) (isEqual bool, err error) {
+func (f *FileBase) IsContentEqualByComparingSha256Sum(ctx context.Context, otherFile filesinterfaces.File) (isEqual bool, err error) {
 	if otherFile == nil {
 		return false, tracederrors.TracedErrorNil("otherFile")
 	}
 
-	thisChecksum, err := f.GetSha256Sum(contextutils.GetVerbosityContextByBool(verbose))
+	thisChecksum, err := f.GetSha256Sum(ctx)
 	if err != nil {
 		return false, err
 	}
 
-	otherChecksum, err := otherFile.GetSha256Sum(contextutils.GetVerbosityContextByBool(verbose))
+	otherChecksum, err := otherFile.GetSha256Sum(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -580,13 +557,13 @@ func (f *FileBase) IsMatchingSha256Sum(sha256sum string) (isMatching bool, err e
 	return isMatching, nil
 }
 
-func (f *FileBase) IsPgpEncrypted(verbose bool) (isEncrypted bool, err error) {
+func (f *FileBase) IsPgpEncrypted(ctx context.Context) (isEncrypted bool, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return false, err
 	}
 
-	mimeType, err := parent.GetMimeType(verbose)
+	mimeType, err := parent.GetMimeType(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -595,7 +572,7 @@ func (f *FileBase) IsPgpEncrypted(verbose bool) (isEncrypted bool, err error) {
 		return true, nil
 	}
 
-	fileDescription, err := parent.GetFileTypeDescription(verbose)
+	fileDescription, err := parent.GetFileTypeDescription(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -639,376 +616,13 @@ func (f *FileBase) IsYYYYmmdd_HHMMSSPrefix() (hasDatePrefix bool, err error) {
 	return true, nil
 }
 
-func (f *FileBase) MustAppendLine(line string, verbose bool) {
-	err := f.AppendLine(line, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (f *FileBase) MustContainsLine(line string) (containsLine bool) {
-	containsLine, err := f.ContainsLine(line)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return containsLine
-}
-
-func (f *FileBase) MustCreateParentDirectory(verbose bool) {
-	err := f.CreateParentDirectory(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (f *FileBase) MustEnsureEndsWithLineBreak(verbose bool) {
-	err := f.EnsureEndsWithLineBreak(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (f *FileBase) MustEnsureLineInFile(line string, verbose bool) {
-	err := f.EnsureLineInFile(line, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (f *FileBase) MustGetCreationDateByFileName(verbose bool) (creationDate *time.Time) {
-	creationDate, err := f.GetCreationDateByFileName(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return creationDate
-}
-
-func (f *FileBase) MustGetFileTypeDescription(verbose bool) (fileTypeDescription string) {
-	fileTypeDescription, err := f.GetFileTypeDescription(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return fileTypeDescription
-}
-
-func (f *FileBase) MustGetMimeType(verbose bool) (mimeType string) {
-	mimeType, err := f.GetMimeType(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return mimeType
-}
-
-func (f *FileBase) MustGetNumberOfLinesWithPrefix(prefix string, trimLines bool) (nLines int) {
-	nLines, err := f.GetNumberOfLinesWithPrefix(prefix, trimLines)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nLines
-}
-
-func (f *FileBase) MustGetNumberOfNonEmptyLines() (nLines int) {
-	nLines, err := f.GetNumberOfNonEmptyLines()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nLines
-}
-
-func (f *FileBase) MustGetParentDirectoryPath() (parentDirectoryPath string) {
-	parentDirectoryPath, err := f.GetParentDirectoryPath()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return parentDirectoryPath
-}
-
-func (f *FileBase) MustGetParentFileForBaseClass() (parentFileForBaseClass filesinterfaces.File) {
-	parentFileForBaseClass, err := f.GetParentFileForBaseClass()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return parentFileForBaseClass
-}
-
-func (f *FileBase) MustGetPathAndHostDescription() (path string, hostDescription string) {
-	path, hostDescription, err := f.GetPathAndHostDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return path, hostDescription
-}
-
-func (f *FileBase) MustGetSha256Sum() (sha256sum string) {
-	sha256sum, err := f.GetSha256Sum(contextutils.ContextSilent())
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return sha256sum
-}
-
-func (f *FileBase) MustGetTextBlocks(verbose bool) (textBlocks []string) {
-	textBlocks, err := f.GetTextBlocks(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return textBlocks
-}
-
-func (f *FileBase) MustGetValueAsInt(key string) (value int) {
-	value, err := f.GetValueAsInt(key)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return value
-}
-
-func (f *FileBase) MustGetValueAsString(key string) (value string) {
-	value, err := f.GetValueAsString(key)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return value
-}
-
-func (f *FileBase) MustIsContentEqualByComparingSha256Sum(otherFile filesinterfaces.File, verbose bool) (isEqual bool) {
-	isEqual, err := f.IsContentEqualByComparingSha256Sum(otherFile, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isEqual
-}
-
-func (f *FileBase) MustIsEmptyFile() (isEmtpyFile bool) {
-	isEmtpyFile, err := f.IsEmptyFile()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isEmtpyFile
-}
-
-func (f *FileBase) MustIsMatchingSha256Sum(sha256sum string) (isMatching bool) {
-	isMatching, err := f.IsMatchingSha256Sum(sha256sum)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isMatching
-}
-
-func (f *FileBase) MustIsPgpEncrypted(verbose bool) (isEncrypted bool) {
-	isEncrypted, err := f.IsPgpEncrypted(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isEncrypted
-}
-
-func (f *FileBase) MustIsYYYYmmdd_HHMMSSPrefix() (hasDatePrefix bool) {
-	hasDatePrefix, err := f.IsYYYYmmdd_HHMMSSPrefix()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hasDatePrefix
-}
-
-func (f *FileBase) MustPrintContentOnStdout() {
-	err := f.PrintContentOnStdout()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (f *FileBase) MustReadAsBool() (boolValue bool) {
-	boolValue, err := f.ReadAsBool()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return boolValue
-}
-
-func (f *FileBase) MustReadAsFloat64() (content float64) {
-	content, err := f.ReadAsFloat64()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return content
-}
-
-func (f *FileBase) MustReadAsInt() (readValue int) {
-	readValue, err := f.ReadAsInt()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return readValue
-}
-
-func (f *FileBase) MustReadAsInt64() (readValue int64) {
-	readValue, err := f.ReadAsInt64()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return readValue
-}
-
-func (f *FileBase) MustReadAsLines() (contentLines []string) {
-	contentLines, err := f.ReadAsLines()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return contentLines
-}
-
-func (f *FileBase) MustReadAsLinesWithoutComments() (contentLines []string) {
-	contentLines, err := f.ReadAsLinesWithoutComments()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return contentLines
-}
-
-func (f *FileBase) MustReadAsString() (content string) {
-	content, err := f.ReadAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return content
-}
-
-func (f *FileBase) MustReadAsTimeTime() (date *time.Time) {
-	date, err := f.ReadAsTimeTime()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return date
-}
-
-func (f *FileBase) MustReadFirstLine() (firstLine string) {
-	firstLine, err := f.ReadFirstLine()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return firstLine
-}
-
-func (f *FileBase) MustReadFirstLineAndTrimSpace() (firstLine string) {
-	firstLine, err := f.ReadFirstLineAndTrimSpace()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return firstLine
-}
-
-func (f *FileBase) MustReadLastCharAsString() (lastChar string) {
-	lastChar, err := f.ReadLastCharAsString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return lastChar
-}
-
-func (f *FileBase) MustRemoveLinesWithPrefix(prefix string, verbose bool) {
-	err := f.RemoveLinesWithPrefix(prefix, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-/* todo remove or move
-func (f *FileBase) MustReplaceBetweenMarkers(verbose bool) {
-	err := f.ReplaceBetweenMarkers(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-*/
-
-func (f *FileBase) MustReplaceLineAfterLine(lineToFind string, replaceLineAfterWith string, verbose bool) (changeSummary *changesummary.ChangeSummary) {
-	changeSummary, err := f.ReplaceLineAfterLine(lineToFind, replaceLineAfterWith, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return changeSummary
-}
-
-func (f *FileBase) MustSetParentFileForBaseClass(parentFileForBaseClass filesinterfaces.File) {
-	err := f.SetParentFileForBaseClass(parentFileForBaseClass)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (f *FileBase) MustSortBlocksInFile(verbose bool) {
-	err := f.SortBlocksInFile(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (f *FileBase) MustTrimSpacesAtBeginningOfFile(verbose bool) {
-	err := f.TrimSpacesAtBeginningOfFile(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (f *FileBase) MustWriteInt64(toWrite int64, verbose bool) {
-	err := f.WriteInt64(toWrite, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (f *FileBase) MustWriteLines(linesToWrite []string, verbose bool) {
-	err := f.WriteLines(linesToWrite, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (f *FileBase) MustWriteTextBlocks(textBlocks []string, verbose bool) {
-	err := f.WriteTextBlocks(textBlocks, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (f *FileBase) PrintContentOnStdout() (err error) {
+func (f *FileBase) PrintContentOnStdout(ctx context.Context) (err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return err
 	}
 
-	content, err := parent.ReadAsString()
+	content, err := parent.ReadAsString(ctx)
 	if err != nil {
 		return err
 	}
@@ -1018,8 +632,8 @@ func (f *FileBase) PrintContentOnStdout() (err error) {
 	return nil
 }
 
-func (f *FileBase) ReadAsBool() (boolValue bool, err error) {
-	contentString, err := f.ReadAsString()
+func (f *FileBase) ReadAsBool(ctx context.Context) (boolValue bool, err error) {
+	contentString, err := f.ReadAsString(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -1034,13 +648,13 @@ func (f *FileBase) ReadAsBool() (boolValue bool, err error) {
 	return boolValue, nil
 }
 
-func (f *FileBase) ReadAsFloat64() (content float64, err error) {
+func (f *FileBase) ReadAsFloat64(ctx context.Context) (content float64, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return -1, err
 	}
 
-	contentString, err := parent.ReadAsString()
+	contentString, err := parent.ReadAsString(ctx)
 	if err != nil {
 		return -1, err
 	}
@@ -1053,13 +667,13 @@ func (f *FileBase) ReadAsFloat64() (content float64, err error) {
 	return content, nil
 }
 
-func (f *FileBase) ReadAsInt() (readValue int, err error) {
+func (f *FileBase) ReadAsInt(ctx context.Context) (readValue int, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return 0, err
 	}
 
-	contentString, err := parent.ReadAsString()
+	contentString, err := parent.ReadAsString(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -1083,13 +697,13 @@ func (f *FileBase) ReadAsInt() (readValue int, err error) {
 	return readValue, nil
 }
 
-func (f *FileBase) ReadAsInt64() (readValue int64, err error) {
+func (f *FileBase) ReadAsInt64(ctx context.Context) (readValue int64, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return 0, err
 	}
 
-	contentString, err := parent.ReadAsString()
+	contentString, err := parent.ReadAsString(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -1113,8 +727,8 @@ func (f *FileBase) ReadAsInt64() (readValue int64, err error) {
 	return readValue, nil
 }
 
-func (f *FileBase) ReadAsLines() (contentLines []string, err error) {
-	content, err := f.ReadAsString()
+func (f *FileBase) ReadAsLines(ctx context.Context) (contentLines []string, err error) {
+	content, err := f.ReadAsString(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -1124,8 +738,8 @@ func (f *FileBase) ReadAsLines() (contentLines []string, err error) {
 	return contentLines, nil
 }
 
-func (f *FileBase) ReadAsLinesWithoutComments() (contentLines []string, err error) {
-	contentString, err := f.ReadAsString()
+func (f *FileBase) ReadAsLinesWithoutComments(ctx context.Context) (contentLines []string, err error) {
+	contentString, err := f.ReadAsString(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -1136,13 +750,13 @@ func (f *FileBase) ReadAsLinesWithoutComments() (contentLines []string, err erro
 	return contentLines, nil
 }
 
-func (f *FileBase) ReadAsString() (content string, err error) {
+func (f *FileBase) ReadAsString(ctx context.Context) (content string, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return "", err
 	}
 
-	contentBytes, err := parent.ReadAsBytes()
+	contentBytes, err := parent.ReadAsBytes(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -1150,8 +764,8 @@ func (f *FileBase) ReadAsString() (content string, err error) {
 	return string(contentBytes), nil
 }
 
-func (f *FileBase) ReadAsTimeTime() (date *time.Time, err error) {
-	contentString, err := f.ReadAsString()
+func (f *FileBase) ReadAsTimeTime(ctx context.Context) (date *time.Time, err error) {
+	contentString, err := f.ReadAsString(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -1164,8 +778,8 @@ func (f *FileBase) ReadAsTimeTime() (date *time.Time, err error) {
 	return date, nil
 }
 
-func (f *FileBase) ReadFirstLine() (firstLine string, err error) {
-	content, err := f.ReadAsString()
+func (f *FileBase) ReadFirstLine(ctx context.Context) (firstLine string, err error) {
+	content, err := f.ReadAsString(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -1175,8 +789,8 @@ func (f *FileBase) ReadFirstLine() (firstLine string, err error) {
 	return firstLine, nil
 }
 
-func (f *FileBase) ReadFirstLineAndTrimSpace() (firstLine string, err error) {
-	firstLine, err = f.ReadFirstLine()
+func (f *FileBase) ReadFirstLineAndTrimSpace(ctx context.Context) (firstLine string, err error) {
+	firstLine, err = f.ReadFirstLine(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -1186,13 +800,13 @@ func (f *FileBase) ReadFirstLineAndTrimSpace() (firstLine string, err error) {
 	return firstLine, nil
 }
 
-func (f *FileBase) ReadLastCharAsString() (lastChar string, err error) {
+func (f *FileBase) ReadLastCharAsString(ctx context.Context) (lastChar string, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return "", err
 	}
 
-	content, err := parent.ReadAsString()
+	content, err := parent.ReadAsString(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -1211,13 +825,13 @@ func (f *FileBase) ReadLastCharAsString() (lastChar string, err error) {
 	return lastChar, nil
 }
 
-func (f *FileBase) RemoveLinesWithPrefix(prefix string, verbose bool) (err error) {
+func (f *FileBase) RemoveLinesWithPrefix(ctx context.Context, prefix string) (err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return err
 	}
 
-	content, err := parent.ReadAsString()
+	content, err := parent.ReadAsString(ctx)
 	if err != nil {
 		return err
 	}
@@ -1230,84 +844,26 @@ func (f *FileBase) RemoveLinesWithPrefix(prefix string, verbose bool) (err error
 	}
 
 	if content == replaced {
-		if verbose {
-			logging.LogInfof(
-				"No lines with prefix '%s' to remove in '%s'.",
-				prefix,
-				path,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "No lines with prefix '%s' to remove in '%s'.", prefix, path)
 	} else {
-		err = parent.WriteString(contextutils.WithSilent(contextutils.GetVerbosityContextByBool(verbose)), replaced, &filesoptions.WriteOptions{})
+		err = parent.WriteString(contextutils.WithSilent(ctx), replaced, &filesoptions.WriteOptions{})
 		if err != nil {
 			return err
 		}
 
-		if verbose {
-			logging.LogChangedf(
-				"Replaced all lines with prefix '%s' in '%s'.",
-				prefix,
-				path,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "Replaced all lines with prefix '%s' in '%s'.", prefix, path)
 	}
 
 	return nil
 }
 
-/* TODO remove or move
-func (f *FileBase) ReplaceBetweenMarkers(verbose bool) (err error) {
-	parent, err := f.GetParentFileForBaseClass()
-	if err != nil {
-		return err
-	}
-
-	content, err := parent.ReadAsString()
-	if err != nil {
-		return err
-	}
-
-	workingDirPath, err := parent.GetParentDirectoryPath()
-	if err != nil {
-		return err
-	}
-
-	content, err = ReplaceBetweenMarkers().ReplaceBySourcesInString(
-		content,
-		&ReplaceBetweenMarkersOptions{
-			WorkingDirPath: workingDirPath,
-			Verbose:        verbose,
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	err = parent.WriteString(content, verbose)
-	if err != nil {
-		return err
-	}
-
-	path, err := parent.GetLocalPath()
-	if err != nil {
-		return err
-	}
-
-	if verbose {
-		logging.LogInfof("Replace between markers finished in '%s'.", path)
-	}
-
-	return nil
-}
-*/
-
-func (f *FileBase) ReplaceLineAfterLine(lineToFind string, replaceLineAfterWith string, verbose bool) (changeSummary *changesummary.ChangeSummary, err error) {
+func (f *FileBase) ReplaceLineAfterLine(ctx context.Context, lineToFind string, replaceLineAfterWith string) (changeSummary *changesummary.ChangeSummary, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return nil, err
 	}
 
-	lines, err := parent.ReadAsLines()
+	lines, err := parent.ReadAsLines(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -1327,24 +883,11 @@ func (f *FileBase) ReplaceLineAfterLine(lineToFind string, replaceLineAfterWith 
 		if matchFound {
 			lineNumber := i + 1
 
-			if verbose {
-				if line == replaceLineAfterWith {
-					logging.LogInfof(
-						"ReplaceLineAfterLine: No need to replace line '%d' in '%s' as already '%s'",
-						lineNumber,
-						path,
-						replaceLineAfterWith,
-					)
-				} else {
-					logging.LogChangedf(
-						"ReplaceLineAfterLine: Replace line '%d' in '%s' by '%s' (was '%s')",
-						lineNumber,
-						path,
-						replaceLineAfterWith,
-						line,
-					)
-					numberOfReplaces += 1
-				}
+			if line == replaceLineAfterWith {
+				logging.LogInfoByCtxf(ctx, "ReplaceLineAfterLine: No need to replace line '%d' in '%s' as already '%s'", lineNumber, path, replaceLineAfterWith)
+			} else {
+				logging.LogInfoByCtxf(ctx, "ReplaceLineAfterLine: Replace line '%d' in '%s' by '%s' (was '%s')", lineNumber, path, replaceLineAfterWith, line)
+				numberOfReplaces += 1
 			}
 
 			linesToWrite = append(linesToWrite, replaceLineAfterWith)
@@ -1375,25 +918,14 @@ func (f *FileBase) ReplaceLineAfterLine(lineToFind string, replaceLineAfterWith 
 	}
 
 	if changeSummary.IsChanged() {
-		err = parent.WriteLines(linesToWrite, verbose)
+		err = parent.WriteLines(ctx, linesToWrite)
 		if err != nil {
 			return nil, err
 		}
 
-		if verbose {
-			logging.LogChangedf(
-				"ReplaceLineAfterLine: Replaced '%d' lines in '%s'.",
-				numberOfReplaces,
-				path,
-			)
-		}
+		logging.LogChangedByCtxf(ctx, "ReplaceLineAfterLine: Replaced '%d' lines in '%s'.", numberOfReplaces, path)
 	} else {
-		if verbose {
-			logging.LogInfof(
-				"ReplaceLineAfterLine: No replaces in '%s' made since no matches were found.",
-				path,
-			)
-		}
+		logging.LogInfoByCtxf(ctx, "ReplaceLineAfterLine: No replaces in '%s' made since no matches were found.", path)
 	}
 
 	return changeSummary, nil
@@ -1405,15 +937,15 @@ func (f *FileBase) SetParentFileForBaseClass(parentFileForBaseClass filesinterfa
 	return nil
 }
 
-func (f *FileBase) SortBlocksInFile(verbose bool) (err error) {
-	blocks, err := f.GetTextBlocks(verbose)
+func (f *FileBase) SortBlocksInFile(ctx context.Context) (err error) {
+	blocks, err := f.GetTextBlocks(ctx)
 	if err != nil {
 		return err
 	}
 
 	sort.Strings(blocks)
 
-	err = f.WriteTextBlocks(blocks, verbose)
+	err = f.WriteTextBlocks(ctx, blocks)
 	if err != nil {
 		return err
 	}
@@ -1421,20 +953,20 @@ func (f *FileBase) SortBlocksInFile(verbose bool) (err error) {
 	return nil
 }
 
-func (f *FileBase) TrimSpacesAtBeginningOfFile(verbose bool) (err error) {
+func (f *FileBase) TrimSpacesAtBeginningOfFile(ctx context.Context) (err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return err
 	}
 
-	content, err := parent.ReadAsString()
+	content, err := parent.ReadAsString(ctx)
 	if err != nil {
 		return err
 	}
 
 	content = stringsutils.TrimSpacesLeft(content)
 
-	err = f.WriteString(contextutils.GetVerbosityContextByBool(verbose), content, &filesoptions.WriteOptions{})
+	err = f.WriteString(ctx, content, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}
@@ -1442,10 +974,10 @@ func (f *FileBase) TrimSpacesAtBeginningOfFile(verbose bool) (err error) {
 	return nil
 }
 
-func (f *FileBase) WriteInt64(toWrite int64, verbose bool) (err error) {
+func (f *FileBase) WriteInt64(ctx context.Context, toWrite int64) (err error) {
 	stringRepresentation := fmt.Sprintf("%d", toWrite)
 
-	err = f.WriteString(contextutils.GetVerbosityContextByBool(verbose), stringRepresentation, &filesoptions.WriteOptions{})
+	err = f.WriteString(ctx, stringRepresentation, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}
@@ -1453,14 +985,14 @@ func (f *FileBase) WriteInt64(toWrite int64, verbose bool) (err error) {
 	return nil
 }
 
-func (f *FileBase) WriteLines(linesToWrite []string, verbose bool) (err error) {
+func (f *FileBase) WriteLines(ctx context.Context, linesToWrite []string) (err error) {
 	if linesToWrite == nil {
 		return tracederrors.TracedErrorNil("linesToWrite")
 	}
 
 	contentToWrite := strings.Join(linesToWrite, "\n")
 
-	err = f.WriteString(contextutils.GetVerbosityContextByBool(verbose), contentToWrite, &filesoptions.WriteOptions{})
+	err = f.WriteString(ctx, contentToWrite, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}
@@ -1477,7 +1009,7 @@ func (f *FileBase) WriteString(ctx context.Context, toWrite string, options *fil
 	return parent.WriteBytes(ctx, []byte(toWrite), options)
 }
 
-func (f *FileBase) WriteTextBlocks(textBlocks []string, verbose bool) (err error) {
+func (f *FileBase) WriteTextBlocks(ctx context.Context, textBlocks []string) (err error) {
 	textToWrite := ""
 
 	for i, blockToWrite := range textBlocks {
@@ -1489,7 +1021,7 @@ func (f *FileBase) WriteTextBlocks(textBlocks []string, verbose bool) (err error
 		textToWrite += blockToWrite
 	}
 
-	err = f.WriteString(contextutils.GetVerbosityContextByBool(verbose), textToWrite, &filesoptions.WriteOptions{})
+	err = f.WriteString(ctx, textToWrite, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}
@@ -1498,7 +1030,7 @@ func (f *FileBase) WriteTextBlocks(textBlocks []string, verbose bool) (err error
 
 }
 
-func (xxx *FileBase) GetCreationDateByFileName(verbose bool) (creationDate *time.Time, err error) {
+func (xxx *FileBase) GetCreationDateByFileName(ctx context.Context) (creationDate *time.Time, err error) {
 	parent, err := xxx.GetParentFileForBaseClass()
 	if err != nil {
 		return nil, err

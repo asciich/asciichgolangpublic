@@ -4,14 +4,17 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/environmentvariables"
+	"github.com/asciich/asciichgolangpublic/pkg/ioutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/windowsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -255,4 +258,142 @@ func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions
 	logging.LogInfoByCtxf(ctx, "Exec command '%s' on '%s' finished.", commandJoined, hostDescription)
 
 	return commandOutput, nil
+}
+
+func RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	fullCommand, err := options.GetFullCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	cmd := exec.Command(fullCommand[0])
+	if len(fullCommand) > 0 {
+		cmd = exec.Command(fullCommand[0], fullCommand[1:]...)
+	}
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to create stdout pipe: %w", err)
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		err = stdout.Close()
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Close stdout reader after start of command failed: %w", err)
+		}
+		return nil, tracederrors.TracedErrorf("Failed to start command: %w", err)
+	}
+
+	ret := &ioutils.ReadCloser{
+		CloseFunc: func() error {
+			err := stdout.Close()
+			if err != nil {
+				return tracederrors.TracedErrorf("Failed to close stdout: %w", err)
+			}
+
+			done := make(chan error, 1)
+			go func() {
+				done <- cmd.Wait()
+			}()
+
+			select {
+			case <-time.After(10 * time.Second):
+				err := cmd.Process.Kill()
+				if err != nil {
+					if !errors.Is(err, os.ErrProcessDone) {
+						return tracederrors.TracedErrorf("Failed to kill command in ReadCloser: %w", err)
+					}
+				}
+				logging.LogInfoByCtxf(ctx, "Killed ReadCloser process.")
+			case err := <-done:
+				// Process finished before the timeout
+				if err != nil {
+					logging.LogErrorByCtxf(ctx, "ReadCloser process finished with error: %v\n", err)
+				} else {
+					logging.LogInfoByCtxf(ctx, "ReadCloser process finished successfully")
+				}
+			}
+
+			return nil
+		},
+		ReadFunc: func(p []byte) (n int, err error) {
+			return stdout.Read(p)
+		},
+	}
+
+	return ret, nil
+}
+
+func RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	fullCommand, err := options.GetFullCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	cmd := exec.Command(fullCommand[0])
+	if len(fullCommand) > 0 {
+		cmd = exec.Command(fullCommand[0], fullCommand[1:]...)
+	}
+
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to create stdin pipe: %w", err)
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		err = stdin.Close()
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Close stdin writer after start of command failed: %w", err)
+		}
+		return nil, tracederrors.TracedErrorf("Failed to start command: %w", err)
+	}
+
+	ret := &ioutils.WriteCloser{
+		CloseFunc: func() error {
+			err := stdin.Close()
+			if err != nil {
+				return tracederrors.TracedErrorf("Failed to close stdin: %w", err)
+			}
+
+			done := make(chan error, 1)
+			go func() {
+				done <- cmd.Wait()
+			}()
+
+			select {
+			case <-time.After(10 * time.Second):
+				err := cmd.Process.Kill()
+				if err != nil {
+					if !errors.Is(err, os.ErrProcessDone) {
+						return tracederrors.TracedErrorf("Failed to kill command in WriteCloser: %w", err)
+					}
+				}
+				logging.LogInfoByCtxf(ctx, "Killed WriteCloser process.")
+			case err := <-done:
+				// Process finished before the timeout
+				if err != nil {
+					logging.LogErrorByCtxf(ctx, "WriteCloser process finished with error: %v\n", err)
+				} else {
+					logging.LogInfoByCtxf(ctx, "WriteCloser process finished successfully")
+				}
+			}
+
+			return nil
+		},
+		WriteFunc: func(p []byte) (n int, err error) {
+			return stdin.Write(p)
+		},
+	}
+
+	return ret, nil
 }

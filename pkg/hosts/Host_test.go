@@ -143,7 +143,7 @@ func TestHost_GetDirectoryByPath(t *testing.T) {
 				ctx := getCtx()
 
 				host := MustGetHostByHostname(tt.hostname)
-				directory, err := host.GetDirectoryByPath(tt.dirPath)
+				directory, err := host.GetDirectoryByPath(ctx, tt.dirPath)
 				require.NoError(t, err)
 
 				_, ok := directory.(*files.CommandExecutorDirectory)

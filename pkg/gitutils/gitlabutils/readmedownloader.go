@@ -48,7 +48,7 @@ func DownloadMainReadmes(ctx context.Context, options *DownloadMainReadmesOption
 		return err
 	}
 
-	outDir, err := files.GetLocalDirectoryByPath(options.OuputPath)
+	outDir, err := files.GetLocalDirectoryByPath(ctx, options.OuputPath)
 	if err != nil {
 		return err
 	}

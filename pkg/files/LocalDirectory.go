@@ -25,7 +25,7 @@ type LocalDirectory struct {
 	localPath string
 }
 
-func GetLocalDirectoryByPath(path string) (l *LocalDirectory, err error) {
+func GetLocalDirectoryByPath(ctx context.Context, path string) (l *LocalDirectory, err error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
@@ -218,7 +218,7 @@ func (l *LocalDirectory) Create(ctx context.Context, options *filesoptions.Creat
 		err = os.Mkdir(path, os.ModePerm)
 		if err != nil {
 			if strings.Contains(err.Error(), "no such file or directory") {
-				parentDirectoy, err := l.GetParentDirectory()
+				parentDirectoy, err := l.GetParentDirectory(ctx)
 				if err != nil {
 					return err
 				}
@@ -258,7 +258,7 @@ func (l *LocalDirectory) CreateFileInDirectory(ctx context.Context, path string,
 		return nil, err
 	}
 
-	parentDirectory, err := createdFile.GetParentDirectory()
+	parentDirectory, err := createdFile.GetParentDirectory(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -306,7 +306,7 @@ func (l *LocalDirectory) CreateSubDirectory(ctx context.Context, subDirName stri
 		return nil, tracederrors.TracedErrorEmptyString("subDirName")
 	}
 
-	subDirectory, subDirectoryPath, err := l.GetSubDirectoryAndLocalPath(subDirName)
+	subDirectory, subDirectoryPath, err := l.GetSubDirectoryAndLocalPath(ctx, subDirName)
 	if err != nil {
 		return nil, err
 	}
@@ -524,13 +524,13 @@ func (l *LocalDirectory) GetLocalPath() (localPath string, err error) {
 	return l.localPath, nil
 }
 
-func (l *LocalDirectory) GetParentDirectory() (parentDirectory filesinterfaces.Directory, err error) {
+func (l *LocalDirectory) GetParentDirectory(ctx context.Context) (parentDirectory filesinterfaces.Directory, err error) {
 	parentPath, err := l.GetDirName()
 	if err != nil {
 		return nil, err
 	}
 
-	parentDirectory, err = GetLocalDirectoryByPath(parentPath)
+	parentDirectory, err = GetLocalDirectoryByPath(ctx, parentPath)
 	if err != nil {
 		return nil, err
 	}
@@ -547,7 +547,7 @@ func (l *LocalDirectory) GetPath() (dirPath string, err error) {
 	return dirPath, nil
 }
 
-func (l *LocalDirectory) GetSubDirectory(path ...string) (subDirectory filesinterfaces.Directory, err error) {
+func (l *LocalDirectory) GetSubDirectory(ctx context.Context, path ...string) (subDirectory filesinterfaces.Directory, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedError("path has no elements")
 	}
@@ -562,7 +562,7 @@ func (l *LocalDirectory) GetSubDirectory(path ...string) (subDirectory filesinte
 		directoryPath = filepath.Join(directoryPath, p)
 	}
 
-	subDirectory, err = GetLocalDirectoryByPath(directoryPath)
+	subDirectory, err = GetLocalDirectoryByPath(ctx, directoryPath)
 	if err != nil {
 		return nil, err
 	}
@@ -570,8 +570,8 @@ func (l *LocalDirectory) GetSubDirectory(path ...string) (subDirectory filesinte
 	return subDirectory, nil
 }
 
-func (l *LocalDirectory) GetSubDirectoryAndLocalPath(path ...string) (subDirectory filesinterfaces.Directory, subDirectoryPath string, err error) {
-	subDirectory, err = l.GetSubDirectory(path...)
+func (l *LocalDirectory) GetSubDirectoryAndLocalPath(ctx context.Context, path ...string) (subDirectory filesinterfaces.Directory, subDirectoryPath string, err error) {
+	subDirectory, err = l.GetSubDirectory(ctx, path...)
 	if err != nil {
 		return nil, "", err
 	}
@@ -659,13 +659,13 @@ func (l *LocalDirectory) ListSubDirectories(ctx context.Context, listDirectoryOp
 		return nil, tracederrors.TracedErrorNil("listDirectoryOptions")
 	}
 
-	pathsToAdd, err := l.ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions)
+	pathsToAdd, err := l.ListSubDirectoriesAsAbsolutePaths(ctx, listDirectoryOptions)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, pathToAdd := range pathsToAdd {
-		toAdd, err := GetLocalDirectoryByPath(pathToAdd)
+		toAdd, err := GetLocalDirectoryByPath(ctx, pathToAdd)
 		if err != nil {
 			return nil, err
 		}
@@ -676,7 +676,7 @@ func (l *LocalDirectory) ListSubDirectories(ctx context.Context, listDirectoryOp
 	return subDirectories, nil
 }
 
-func (l *LocalDirectory) ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string, err error) {
+func (l *LocalDirectory) ListSubDirectoriesAsAbsolutePaths(ctx context.Context, listDirectoryOptions *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string, err error) {
 	if listDirectoryOptions == nil {
 		return nil, tracederrors.TracedErrorNil("listDirectoryOptions")
 	}
@@ -698,12 +698,13 @@ func (l *LocalDirectory) ListSubDirectoriesAsAbsolutePaths(listDirectoryOptions 
 			subDirectoryPaths = append(subDirectoryPaths, pathToAdd)
 
 			if listDirectoryOptions.Recursive {
-				subDirectory, err := GetLocalDirectoryByPath(pathToAdd)
+				subDirectory, err := GetLocalDirectoryByPath(ctx, pathToAdd)
 				if err != nil {
 					return nil, err
 				}
 
 				subDirectoriesToAdd, err := subDirectory.ListSubDirectoriesAsAbsolutePaths(
+					ctx,
 					&parameteroptions.ListDirectoryOptions{
 						Recursive: true,
 					},
@@ -779,17 +780,17 @@ func (l *LocalDirectory) SetLocalPath(localPath string) (err error) {
 	return nil
 }
 
-func (l *LocalDirectory) SubDirectoryExists(subDirName string, verbose bool) (subDirExists bool, err error) {
+func (l *LocalDirectory) SubDirectoryExists(ctx context.Context, subDirName string) (subDirExists bool, err error) {
 	if subDirName == "" {
 		return false, tracederrors.TracedErrorEmptyString("subDirName")
 	}
 
-	subDir, err := l.GetSubDirectory(subDirName)
+	subDir, err := l.GetSubDirectory(ctx, subDirName)
 	if err != nil {
 		return false, err
 	}
 
-	subDirExists, err = subDir.Exists(contextutils.GetVerbosityContextByBool(verbose))
+	subDirExists, err = subDir.Exists(ctx)
 	if err != nil {
 		return false, err
 	}

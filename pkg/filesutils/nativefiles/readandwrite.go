@@ -2,6 +2,7 @@ package nativefiles
 
 import (
 	"context"
+	"io"
 	"os"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
@@ -26,7 +27,7 @@ func WriteString(ctx context.Context, pathToWrite string, content string) error 
 	return nil
 }
 
-func WriteBytes(ctx context.Context, pathToWrite string, content []byte) error {
+func WriteBytes(ctx context.Context, pathToWrite string, content []byte, options *filesoptions.WriteOptions) error {
 	if pathToWrite == "" {
 		return tracederrors.TracedErrorEmptyString("pathToWrite")
 	}
@@ -96,4 +97,30 @@ func ReadAsBytes(ctx context.Context, pathToRead string) ([]byte, error) {
 	logging.LogInfoByCtxf(ctx, "Read content of file '%s'.", pathToRead)
 
 	return content, nil
+}
+
+func OpenAsReadCloser(ctx context.Context, pathToRead string) (io.ReadCloser, error) {
+	if pathToRead == "" {
+		return nil, tracederrors.TracedErrorEmptyString("pathToRead")
+	}
+
+	file, err := os.Open(pathToRead)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to open '%s': %w", pathToRead, err)
+	}
+
+	return file, nil
+}
+
+func OpenAsWriteCloser(ctx context.Context, pathToWrite string) (io.WriteCloser, error) {
+	if pathToWrite == "" {
+		return nil, tracederrors.TracedErrorEmptyString("pathToRead")
+	}
+
+	file, err := os.OpenFile(pathToWrite, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to open '%s' for writing: %w", pathToWrite, err)
+	}
+
+	return file, nil
 }

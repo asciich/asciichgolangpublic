@@ -2,8 +2,9 @@ package commandexecutorbash
 
 import (
 	"context"
+	"io"
 
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -28,12 +29,7 @@ func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions
 	}
 	optionsToUse.Command = bashCommand
 
-	commandOutput, err = commandexecutorexecoo.Exec().RunCommand(ctx, optionsToUse)
-	if err != nil {
-		return nil, err
-	}
-
-	return commandOutput, nil
+	return commandexecutorexec.RunCommand(ctx, optionsToUse)
 }
 
 func RunOneLiner(ctx context.Context, oneLiner string) (output *commandoutput.CommandOutput, err error) {
@@ -80,4 +76,48 @@ func RunOneLinerAndGetStdoutAsString(ctx context.Context, oneLiner string) (stdo
 	}
 
 	return stdout, nil
+}
+
+func RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	optionsToUse := options.GetDeepCopy()
+
+	joinedCommand, err := optionsToUse.GetJoinedCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	bashCommand := []string{
+		"bash",
+		"-c",
+		joinedCommand,
+	}
+	optionsToUse.Command = bashCommand
+
+	return commandexecutorexec.RunCommandAndGetStdoutAsIoReadCloser(ctx, optionsToUse)
+}
+
+func RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	optionsToUse := options.GetDeepCopy()
+
+	joinedCommand, err := optionsToUse.GetJoinedCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	bashCommand := []string{
+		"bash",
+		"-c",
+		joinedCommand,
+	}
+	optionsToUse.Command = bashCommand
+
+	return commandexecutorexec.RunCommandAndGetStdinAsIoWriteCloser(ctx, optionsToUse)
 }

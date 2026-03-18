@@ -14,6 +14,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutortempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -36,6 +37,7 @@ func getTemporaryFileToTest(implementationName string) (fileToTest filesinterfac
 }
 
 func getFileToTest(implementationName string, path string) (fileToTest filesinterfaces.File) {
+	// Deprecated: use nativefilesoo instead:
 	if implementationName == "localFile" {
 		return mustutils.Must(files.GetLocalFileByPath(path))
 	}
@@ -53,6 +55,10 @@ func getFileToTest(implementationName string, path string) (fileToTest filesinte
 		return mustutils.Must(commandexecutorfileoo.New(commandexecutorbashoo.Bash(), path))
 	}
 
+	if implementationName == "nativefilesoo" {
+		return mustutils.Must(nativefilesoo.NewFileByPath(path))
+	}
+
 	logging.LogFatalWithTracef("Unknown implementation name '%s'", implementationName)
 	return nil
 }
@@ -64,6 +70,7 @@ func TestTemporaryFilesCreateFromFile(t *testing.T) {
 	}{
 		{"localFile", "testcase"},
 		{"localCommandExecutorFile", "testcase"},
+		{"nativefilesoo", "testcase"},
 	}
 
 	for _, tt := range tests {
@@ -77,13 +84,17 @@ func TestTemporaryFilesCreateFromFile(t *testing.T) {
 				require.NoError(t, err)
 				defer sourceFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				require.EqualValues(t, tt.content, sourceFile.MustReadAsString())
+				content, err := sourceFile.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.content, content)
 
 				tempFile, err := tempfilesoo.CreateTemporaryFileFromFile(ctx, sourceFile)
 				require.NoError(t, err)
 				defer tempFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				require.EqualValues(t, tt.content, tempFile.MustReadAsString())
+				content, err = sourceFile.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.content, content)
 			},
 		)
 	}
@@ -121,7 +132,7 @@ func TestCreateEmptyTemporaryFile(t *testing.T) {
 				require.NoError(t, err)
 				require.True(t, exists)
 
-				content, err := file.ReadAsString()
+				content, err := file.ReadAsString(ctx)
 				require.NoError(t, err)
 				require.EqualValues(t, "", content)
 

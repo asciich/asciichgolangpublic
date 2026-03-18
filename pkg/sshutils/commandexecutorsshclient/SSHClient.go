@@ -2,8 +2,10 @@ package commandexecutorsshclient
 
 import (
 	"context"
+	"io"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
@@ -155,7 +157,8 @@ func (s *SSHClient) IsSshUserNameSet() (isSet bool) {
 	return len(s.sshUserName) > 0
 }
 
-func (s *SSHClient) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
+// Get the full CLI command including ssh ... to be executed.
+func (s *SSHClient) getCommandToUse(options *parameteroptions.RunCommandOptions) (*parameteroptions.RunCommandOptions, error) {
 	userAtHost, err := s.GetHostName()
 	if err != nil {
 		return nil, err
@@ -180,6 +183,15 @@ func (s *SSHClient) RunCommand(ctx context.Context, options *parameteroptions.Ru
 		"ssh",
 		userAtHost,
 		commandString,
+	}
+
+	return commandToUse, nil
+}
+
+func (s *SSHClient) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
+	commandToUse, err := s.getCommandToUse(options)
+	if err != nil {
+		return nil, err
 	}
 
 	commandOutput, err = commandexecutorexecoo.Exec().RunCommand(ctx, commandToUse)
@@ -208,4 +220,22 @@ func (s *SSHClient) SetSshUserName(sshUserName string) (err error) {
 	s.sshUserName = sshUserName
 
 	return nil
+}
+
+func (s *SSHClient) RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error) {
+	commandToUse, err := s.getCommandToUse(options)
+	if err != nil {
+		return nil, err
+	}
+
+	return commandexecutorexec.RunCommandAndGetStdoutAsIoReadCloser(ctx, commandToUse)
+}
+
+func (s *SSHClient) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error) {
+	commandToUse, err := s.getCommandToUse(options)
+	if err != nil {
+		return nil, err
+	}
+
+	return commandexecutorexec.RunCommandAndGetStdinAsIoWriteCloser(ctx, commandToUse)
 }

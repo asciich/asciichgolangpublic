@@ -1,6 +1,7 @@
 package jsonutils
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -36,7 +37,7 @@ func DataToJsonString(data interface{}) (jsonString string, err error) {
 	return jsonString, nil
 }
 
-func JsonFileByPathHas(jsonFilePath string, query string, keyToCheck string) (has bool, err error) {
+func JsonFileByPathHas(ctx context.Context, jsonFilePath string, query string, keyToCheck string) (has bool, err error) {
 	if jsonFilePath == "" {
 		return false, tracederrors.TracedErrorEmptyString("jsonFilePath")
 	}
@@ -54,7 +55,7 @@ func JsonFileByPathHas(jsonFilePath string, query string, keyToCheck string) (ha
 		return false, err
 	}
 
-	has, err = JsonFileHas(jsonFile, query, keyToCheck)
+	has, err = JsonFileHas(ctx, jsonFile, query, keyToCheck)
 	if err != nil {
 		return false, err
 	}
@@ -62,7 +63,7 @@ func JsonFileByPathHas(jsonFilePath string, query string, keyToCheck string) (ha
 	return has, nil
 }
 
-func JsonFileHas(jsonFile filesinterfaces.File, query string, keyToCheck string) (has bool, err error) {
+func JsonFileHas(ctx context.Context, jsonFile filesinterfaces.File, query string, keyToCheck string) (has bool, err error) {
 	if jsonFile == nil {
 		return false, tracederrors.TracedErrorNil("jsonFile")
 	}
@@ -75,7 +76,7 @@ func JsonFileHas(jsonFile filesinterfaces.File, query string, keyToCheck string)
 		return false, tracederrors.TracedErrorEmptyString("keyToCheck")
 	}
 
-	content, err := jsonFile.ReadAsString()
+	content, err := jsonFile.ReadAsString(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -155,12 +156,12 @@ func JsonStringToYamlString(jsonString string) (yamlString string, err error) {
 	return yamlString, nil
 }
 
-func LoadKeyValueInterfaceDictFromJsonFile(jsonFile filesinterfaces.File) (keyValues map[string]interface{}, err error) {
+func LoadKeyValueInterfaceDictFromJsonFile(ctx context.Context, jsonFile filesinterfaces.File) (keyValues map[string]interface{}, err error) {
 	if jsonFile == nil {
 		return nil, tracederrors.TracedError("jsonFile is nil")
 	}
 
-	jsonContent, err := jsonFile.ReadAsString()
+	jsonContent, err := jsonFile.ReadAsString(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -223,24 +224,6 @@ func MustDataToJsonString(data interface{}) (jsonString string) {
 	return jsonString
 }
 
-func MustJsonFileByPathHas(jsonFilePath string, query string, keyToCheck string) (has bool) {
-	has, err := JsonFileByPathHas(jsonFilePath, query, keyToCheck)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return has
-}
-
-func MustJsonFileHas(jsonFile filesinterfaces.File, query string, keyToCheck string) (has bool) {
-	has, err := JsonFileHas(jsonFile, query, keyToCheck)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return has
-}
-
 func MustJsonStringHas(jsonString string, query string, keyToCheck string) (has bool) {
 	has, err := JsonStringHas(jsonString, query, keyToCheck)
 	if err != nil {
@@ -273,15 +256,6 @@ func MustJsonStringToYamlString(jsonString string) (yamlString string) {
 	}
 
 	return yamlString
-}
-
-func MustLoadKeyValueInterfaceDictFromJsonFile(jsonFile filesinterfaces.File) (keyValues map[string]interface{}) {
-	keyValues, err := LoadKeyValueInterfaceDictFromJsonFile(jsonFile)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return keyValues
 }
 
 func MustLoadKeyValueInterfaceDictFromJsonString(jsonString string) (keyValues map[string]interface{}) {
@@ -318,15 +292,6 @@ func MustPrettyFormatJsonString(jsonString string) (formatted string) {
 	}
 
 	return formatted
-}
-
-func MustRunJqAgainstJsonFileAsString(jsonFile filesinterfaces.File, query string) (result string) {
-	result, err := RunJqAgainstJsonFileAsString(jsonFile, query)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return result
 }
 
 func MustRunJqAgainstJsonStringAsBool(jsonString string, query string) (result bool) {
@@ -381,12 +346,12 @@ func PrettyFormatJsonString(jsonString string) (formatted string, err error) {
 	return formatted, nil
 }
 
-func RunJqAgainstJsonFileAsString(jsonFile filesinterfaces.File, query string) (result string, err error) {
+func RunJqAgainstJsonFileAsString(ctx context.Context, jsonFile filesinterfaces.File, query string) (result string, err error) {
 	if jsonFile == nil {
 		return "", tracederrors.TracedErrorNil("jsonFile")
 	}
 
-	jsonString, err := jsonFile.ReadAsString()
+	jsonString, err := jsonFile.ReadAsString(ctx)
 	if err != nil {
 		return "", err
 	}

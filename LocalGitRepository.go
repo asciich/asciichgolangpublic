@@ -391,7 +391,7 @@ func (l *LocalGitRepository) Commit(ctx context.Context, commitOptions *gitparam
 		commitMessage,
 		&git.CommitOptions{
 			AllowEmptyCommits: commitOptions.GetAllowEmpty(),
-			All: commitOptions.CommitAllChanges,
+			All:               commitOptions.CommitAllChanges,
 		},
 	)
 	if err != nil {
@@ -653,7 +653,8 @@ func (l *LocalGitRepository) GetAsLocalDirectory() (localDirectory *files.LocalD
 		return nil, err
 	}
 
-	localDirectory, err = files.GetLocalDirectoryByPath(localPath)
+	ctx := contextutils.ContextVerbose()
+	localDirectory, err = files.GetLocalDirectoryByPath(ctx, localPath)
 	if err != nil {
 		return nil, err
 	}
@@ -975,12 +976,12 @@ func (l *LocalGitRepository) GetCurrentCommitHashAsBytes(ctx context.Context) (h
 	return stringsutils.HexStringToBytes(currentHash)
 }
 
-func (l *LocalGitRepository) GetDirectoryByPath(pathToSubDir ...string) (subDir filesinterfaces.Directory, err error) {
+func (l *LocalGitRepository) GetDirectoryByPath(ctx context.Context, pathToSubDir ...string) (subDir filesinterfaces.Directory, err error) {
 	if len(pathToSubDir) <= 0 {
 		return nil, tracederrors.TracedError("pathToSubdir has no elements")
 	}
 
-	return l.GetSubDirectory(pathToSubDir...)
+	return l.GetSubDirectory(ctx, pathToSubDir...)
 }
 
 func (l *LocalGitRepository) GetGitStatusOutput(ctx context.Context) (output string, err error) {
@@ -1220,7 +1221,7 @@ func (l *LocalGitRepository) GetRootDirectory(ctx context.Context) (rootDirector
 		return nil, err
 	}
 
-	rootDirectory, err = files.GetLocalDirectoryByPath(rootDirectoryPath)
+	rootDirectory, err = files.GetLocalDirectoryByPath(ctx, rootDirectoryPath)
 	if err != nil {
 		return nil, err
 	}
@@ -1237,7 +1238,7 @@ func (l *LocalGitRepository) GetRootDirectoryPath(ctx context.Context) (rootDire
 	searchedFromPath := pathToCheck
 
 	for {
-		localDirToCheck, err := files.GetLocalDirectoryByPath(pathToCheck)
+		localDirToCheck, err := files.GetLocalDirectoryByPath(ctx, pathToCheck)
 		if err != nil {
 			return "", nil
 		}
@@ -1252,7 +1253,7 @@ func (l *LocalGitRepository) GetRootDirectoryPath(ctx context.Context) (rootDire
 		}
 
 		// local git repository
-		dotGitExists, err := localDirToCheck.SubDirectoryExists(".git", false)
+		dotGitExists, err := localDirToCheck.SubDirectoryExists(contextutils.WithSilent(ctx), ".git")
 		if err != nil {
 			return "", nil
 		}
@@ -1263,12 +1264,12 @@ func (l *LocalGitRepository) GetRootDirectoryPath(ctx context.Context) (rootDire
 
 		// bare git repository
 		if filepath.Base(localPathToCheck) != ".git" {
-			refsExists, err := localDirToCheck.SubDirectoryExists("refs", false)
+			refsExists, err := localDirToCheck.SubDirectoryExists(contextutils.WithSilent(ctx), "refs")
 			if err != nil {
 				return "", nil
 			}
 
-			objectsExists, err := localDirToCheck.SubDirectoryExists("objects", false)
+			objectsExists, err := localDirToCheck.SubDirectoryExists(contextutils.WithSilent(ctx), "objects")
 			if err != nil {
 				return "", nil
 			}

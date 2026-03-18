@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"context"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
@@ -64,7 +65,7 @@ func (o *GitlabCreateDeployKeyOptions) GetName() (name string, err error) {
 	return o.Name, nil
 }
 
-func (o *GitlabCreateDeployKeyOptions) GetPublicKeyMaterialString() (keyMaterial string, err error) {
+func (o *GitlabCreateDeployKeyOptions) GetPublicKeyMaterialString(ctx context.Context) (keyMaterial string, err error) {
 	keyFile, err := o.GetPublicKeyfile()
 	if err != nil {
 		return "", err
@@ -75,7 +76,7 @@ func (o *GitlabCreateDeployKeyOptions) GetPublicKeyMaterialString() (keyMaterial
 		return "", err
 	}
 
-	keyMaterial, err = keyFile.ReadAsString()
+	keyMaterial, err = keyFile.ReadAsString(ctx)
 	if err != nil {
 		return "", err
 	}

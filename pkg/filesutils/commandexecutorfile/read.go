@@ -1,7 +1,9 @@
 package commandexecutorfile
 
 import (
+	"context"
 	"fmt"
+	"io"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -9,7 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func ReadFirstNBytes(commandExecutor commandexecutorinterfaces.CommandExecutor, filePath string, numberOfBytesToRead int) (firstBytes []byte, err error) {
+func ReadFirstNBytes(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, filePath string, numberOfBytesToRead int) (firstBytes []byte, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExectuor")
 	}
@@ -62,4 +64,18 @@ func ReadAsBytes(commandExecutor commandexecutorinterfaces.CommandExecutor, file
 	}
 
 	return content, nil
+}
+
+func OpenAsReadCloser(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, filePath string) (io.ReadCloser, error) {
+	if commandExecutor == nil {
+		return nil, tracederrors.TracedErrorNil("commandExectuor")
+	}
+
+	if filePath == "" {
+		return nil, tracederrors.TracedErrorEmptyString("path")
+	}
+
+	return commandExecutor.RunCommandAndGetStdoutAsIoReadCloser(ctx, &parameteroptions.RunCommandOptions{
+		Command: []string{"cat", filePath},
+	})
 }

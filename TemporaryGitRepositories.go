@@ -48,7 +48,7 @@ func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepositoryAndAddData
 		return nil, err
 	}
 
-	destDir, err := files.GetLocalDirectoryByPath(localPath)
+	destDir, err := files.GetLocalDirectoryByPath(ctx, localPath)
 	if err != nil {
 		return nil, err
 	}

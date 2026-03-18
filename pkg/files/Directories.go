@@ -24,7 +24,7 @@ func (d *DirectoriesService) CreateLocalDirectoryByPath(ctx context.Context, pat
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
 
-	dir, err := GetLocalDirectoryByPath(path)
+	dir, err := GetLocalDirectoryByPath(ctx, path)
 	if err != nil {
 		return nil, err
 	}

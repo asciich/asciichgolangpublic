@@ -20,11 +20,11 @@ type Directory interface {
 	GetHostDescription() (hostDescription string, err error)
 	// Returns the path on the local machine. If the path is not available locally an error is returned.
 	GetLocalPath() (localPath string, err error)
-	GetParentDirectory() (parentDirectory Directory, err error)
+	GetParentDirectory(ctx context.Context) (parentDirectory Directory, err error)
 	// Returns the absolute path to the file without any indication of the host.
 	GetPath() (dirPath string, err error)
 	// TODO rename GetSubDirectory with GetDirectoryByPath to make it consistent.
-	GetSubDirectory(path ...string) (subDirectory Directory, err error)
+	GetSubDirectory(ctx context.Context, path ...string) (subDirectory Directory, err error)
 	IsLocalDirectory() (isLocalDirectory bool, err error)
 	ListFiles(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (files []File, err error)
 	ListSubDirectories(ctx context.Context, options *parameteroptions.ListDirectoryOptions) (subDirectories []Directory, err error)
@@ -38,9 +38,9 @@ type Directory interface {
 	FileInDirectoryExists(ctx context.Context, path ...string) (exists bool, err error)
 	ListFilePaths(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error)
 	ListSubDirectoryPaths(ctx context.Context, options *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string, err error)
-	ReadFileInDirectoryAsInt64(path ...string) (content int64, err error)
-	ReadFileInDirectoryAsLines(path ...string) (content []string, err error)
-	ReadFileInDirectoryAsString(path ...string) (content string, err error)
-	ReadFirstLineOfFileInDirectoryAsString(path ...string) (firstLine string, err error)
+	ReadFileInDirectoryAsInt64(ctx context.Context, path ...string) (content int64, err error)
+	ReadFileInDirectoryAsLines(ctx context.Context, path ...string) (content []string, err error)
+	ReadFileInDirectoryAsString(ctx context.Context, path ...string) (content string, err error)
+	ReadFirstLineOfFileInDirectoryAsString(ctx context.Context, path ...string) (firstLine string, err error)
 	WriteStringToFile(ctx context.Context, path string, content string, options *filesoptions.WriteOptions) (writtenFile File, err error)
 }

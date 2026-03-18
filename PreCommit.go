@@ -107,7 +107,7 @@ func (p *PreCommitService) RunInGitRepository(ctx context.Context, gitRepo gitin
 		return err
 	}
 
-	localDir, err := files.GetLocalDirectoryByPath(localPath)
+	localDir, err := files.GetLocalDirectoryByPath(ctx, localPath)
 	if err != nil {
 		return err
 	}

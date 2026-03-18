@@ -29,7 +29,7 @@ func Test_AddAndGetHostnames(t *testing.T) {
 	t.Run("One entry", func(t *testing.T) {
 		inventory := ansibleutils.NewAnsibleInventory()
 
-		_, err := inventory.CreateHostByName(ctx(), "test.example.net")
+		_, err := inventory.CreateHostByName(getCtx(), "test.example.net")
 		require.NoError(t, err)
 
 		hostnames, err := inventory.ListHostNames()
@@ -40,10 +40,10 @@ func Test_AddAndGetHostnames(t *testing.T) {
 	t.Run("Two entries already sorted", func(t *testing.T) {
 		inventory := ansibleutils.NewAnsibleInventory()
 
-		_, err := inventory.CreateHostByName(ctx(), "a.example.net")
+		_, err := inventory.CreateHostByName(getCtx(), "a.example.net")
 		require.NoError(t, err)
 
-		_, err = inventory.CreateHostByName(ctx(), "test.example.net")
+		_, err = inventory.CreateHostByName(getCtx(), "test.example.net")
 		require.NoError(t, err)
 
 		hostnames, err := inventory.ListHostNames()
@@ -54,10 +54,10 @@ func Test_AddAndGetHostnames(t *testing.T) {
 	t.Run("Two entries", func(t *testing.T) {
 		inventory := ansibleutils.NewAnsibleInventory()
 
-		_, err := inventory.CreateHostByName(ctx(), "test.example.net")
+		_, err := inventory.CreateHostByName(getCtx(), "test.example.net")
 		require.NoError(t, err)
 
-		_, err = inventory.CreateHostByName(ctx(), "a.example.net")
+		_, err = inventory.CreateHostByName(getCtx(), "a.example.net")
 		require.NoError(t, err)
 
 		hostnames, err := inventory.ListHostNames()
@@ -83,17 +83,17 @@ func Test_ParseInventoryJson(t *testing.T) {
 	input += `	}` + "\n"
 	input += `}` + "\n"
 
-	inventory, err := ansibleutils.ParseInventoryJson(ctx(), input)
+	inventory, err := ansibleutils.ParseInventoryJson(getCtx(), input)
 	require.NoError(t, err)
 
-	require.EqualValues(t, 1, mustutils.Must(inventory.GetNumberOfHosts(ctx())))
+	require.EqualValues(t, 1, mustutils.Must(inventory.GetNumberOfHosts(getCtx())))
 	require.EqualValues(t, []string{"one.example.net"}, mustutils.Must(inventory.ListHostNames()))
 	require.EqualValues(t, []string{"all", "ungrouped"}, mustutils.Must(inventory.ListGroupNames()))
 }
 
 func Test_CreateGroupByName(t *testing.T) {
 	inventory := ansibleutils.NewAnsibleInventory()
-	ctx := ctx()
+	ctx := getCtx()
 
 	nGroups := 10
 
