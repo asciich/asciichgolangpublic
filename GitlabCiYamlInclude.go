@@ -3,7 +3,6 @@ package asciichgolangpublic
 import (
 	"fmt"
 
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -161,10 +160,6 @@ func (g *GitlabCiYamlInclude) IsEmpty() (isEmpty bool) {
 		return false
 	}
 
-	// TODO if g.File != "" {
-	// TODO 	return false
-	// TODO }
-
 	if g.Ref != "" {
 		return false
 	}
@@ -174,81 +169,6 @@ func (g *GitlabCiYamlInclude) IsEmpty() (isEmpty bool) {
 
 func (g *GitlabCiYamlInclude) IsNonEmpty() (isNonEmpty bool) {
 	return !g.IsEmpty()
-}
-
-func (g *GitlabCiYamlInclude) MustEqualsIgnoreVersion(other *GitlabCiYamlInclude) (isEqual bool) {
-	isEqual, err := g.EqualsIgnoreVersion(other)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isEqual
-}
-
-func (g *GitlabCiYamlInclude) MustGetFile() (file string) {
-	file, err := g.GetFile()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return file
-}
-
-func (g *GitlabCiYamlInclude) MustGetLoggableString() (loggableString string) {
-	loggableString, err := g.GetLoggableString()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return loggableString
-}
-
-func (g *GitlabCiYamlInclude) MustGetProject() (project string) {
-	project, err := g.GetProject()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return project
-}
-
-func (g *GitlabCiYamlInclude) MustGetProjectAndFile() (project string, file string) {
-	project, file, err := g.GetProjectAndFile()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return project, file
-}
-
-func (g *GitlabCiYamlInclude) MustGetRef() (ref string) {
-	ref, err := g.GetRef()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return ref
-}
-
-func (g *GitlabCiYamlInclude) MustSetFile(file string) {
-	err := g.SetFile(file)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabCiYamlInclude) MustSetProject(project string) {
-	err := g.SetProject(project)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabCiYamlInclude) MustSetRef(ref string) {
-	err := g.SetRef(ref)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GitlabCiYamlInclude) SetFile(file string) (err error) {
