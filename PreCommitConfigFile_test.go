@@ -76,7 +76,7 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 
 				if expectedOutputSha != updatedSha {
 					if os.Getenv("UPDATE_EXPECTED") == "1" {
-						err := preCommitFile.CopyToFile(ctx, expectedOutput)
+						err := preCommitFile.CopyToFile(ctx, expectedOutput, &filesoptions.CopyOptions{})
 						require.NoError(t, err)
 					}
 				}

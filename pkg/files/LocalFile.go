@@ -220,36 +220,6 @@ func (l *LocalFile) OpenAsReadCloser(ctx context.Context) (io.ReadCloser, error)
 	return nativeFile.OpenAsReadCloser(ctx)
 }
 
-func (l *LocalFile) CopyToFile(ctx context.Context, destFile filesinterfaces.File) (err error) {
-	if destFile == nil {
-		return tracederrors.TracedErrorNil("destFile")
-	}
-
-	content, err := l.ReadAsBytes(ctx)
-	if err != nil {
-		return err
-	}
-
-	err = destFile.WriteBytes(ctx, content, &filesoptions.WriteOptions{})
-	if err != nil {
-		return err
-	}
-
-	srcPath, err := l.GetLocalPath()
-	if err != nil {
-		return err
-	}
-
-	destPath, err := destFile.GetLocalPath()
-	if err != nil {
-		return err
-	}
-
-	logging.LogChangedByCtxf(ctx, "Copied '%s' to '%s'", srcPath, destPath)
-
-	return nil
-}
-
 func (l *LocalFile) Create(ctx context.Context, options *filesoptions.CreateOptions) (err error) {
 	exists, err := l.Exists(ctx)
 	if err != nil {
@@ -317,13 +287,13 @@ func (l *LocalFile) GetBaseName() (baseName string, err error) {
 	return baseName, nil
 }
 
-func (l *LocalFile) OpenAsWriteCloser(ctx context.Context) (io.WriteCloser, error) {
+func (l *LocalFile) OpenAsWriteCloser(ctx context.Context, options *filesoptions.WriteOptions) (io.WriteCloser, error) {
 	path, err := l.GetLocalPath()
 	if err != nil {
 		return nil, err
 	}
 
-	return nativefiles.OpenAsWriteCloser(ctx, path)
+	return nativefiles.OpenAsWriteCloser(ctx, path, options)
 }
 
 func (l *LocalFile) GetDeepCopy() (deepCopy filesinterfaces.File) {

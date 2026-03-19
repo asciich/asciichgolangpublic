@@ -26,7 +26,7 @@ func NewInstallCmd() (cmd *cobra.Command) {
 It's recommended to explicitly specify the --binary-name during the installation to avoid version numbers in the binary name after downloading it.
 
 Usage:
-    asciichgolangpublic install --verbose --binary-name=asciichgolangpublic.
+    ` + os.Args[0] + ` install --verbose --binary-name=` + os.Args[0] + `
 `,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)

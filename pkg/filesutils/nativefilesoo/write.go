@@ -17,11 +17,11 @@ func (f *File) WriteBytes(ctx context.Context, toWrite []byte, options *filesopt
 	return nativefiles.WriteBytes(ctx, path, toWrite, options)
 }
 
-func (f *File) OpenAsWriteCloser(ctx context.Context) (io.WriteCloser, error) {
+func (f *File) OpenAsWriteCloser(ctx context.Context, options *filesoptions.WriteOptions) (io.WriteCloser, error) {
 	path, err := f.GetPath()
 	if err != nil {
 		return nil, err
 	}
 
-	return nativefiles.OpenAsWriteCloser(ctx, path)
+	return nativefiles.OpenAsWriteCloser(ctx, path, options)
 }

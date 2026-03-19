@@ -18,6 +18,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/windowsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/shellutils/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -339,6 +340,11 @@ func RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *paramete
 		return nil, err
 	}
 
+	fullCommandJoined, err := shelllinehandler.Join(fullCommand)
+	if err != nil {
+		return nil, err
+	}
+
 	cmd := exec.Command(fullCommand[0])
 	if len(fullCommand) > 0 {
 		cmd = exec.Command(fullCommand[0], fullCommand[1:]...)
@@ -378,13 +384,13 @@ func RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *paramete
 						return tracederrors.TracedErrorf("Failed to kill command in WriteCloser: %w", err)
 					}
 				}
-				logging.LogInfoByCtxf(ctx, "Killed WriteCloser process.")
+				logging.LogInfoByCtxf(ctx, "Killed WriteCloser process '%s' .", fullCommandJoined)
 			case err := <-done:
 				// Process finished before the timeout
 				if err != nil {
-					logging.LogErrorByCtxf(ctx, "WriteCloser process finished with error: %v\n", err)
+					logging.LogErrorByCtxf(ctx, "WriteCloser command '%s' finished with error: %v\n", fullCommandJoined, err)
 				} else {
-					logging.LogInfoByCtxf(ctx, "WriteCloser process finished successfully")
+					logging.LogInfoByCtxf(ctx, "WriteCloser command '%s' finished successfully", fullCommandJoined)
 				}
 			}
 

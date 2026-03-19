@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -112,15 +114,28 @@ func OpenAsReadCloser(ctx context.Context, pathToRead string) (io.ReadCloser, er
 	return file, nil
 }
 
-func OpenAsWriteCloser(ctx context.Context, pathToWrite string) (io.WriteCloser, error) {
+func OpenAsWriteCloser(ctx context.Context, pathToWrite string, options *filesoptions.WriteOptions) (io.WriteCloser, error) {
 	if pathToWrite == "" {
 		return nil, tracederrors.TracedErrorEmptyString("pathToRead")
 	}
 
-	file, err := os.OpenFile(pathToWrite, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("Failed to open '%s' for writing: %w", pathToWrite, err)
+	if options == nil {
+		options = &filesoptions.WriteOptions{}
 	}
 
-	return file, nil
+	var writeCloser io.WriteCloser
+	var err error
+	if options.UseSudo {
+		writeCloser, err = commandexecutorfile.OpenAsWriteCloser(ctx, commandexecutorexecoo.Exec(), pathToWrite, options)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		writeCloser, err = os.OpenFile(pathToWrite, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to open '%s' for writing: %w", pathToWrite, err)
+		}
+	}
+
+	return writeCloser, nil
 }

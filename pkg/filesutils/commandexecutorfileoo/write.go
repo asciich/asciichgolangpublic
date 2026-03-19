@@ -3,8 +3,10 @@ package commandexecutorfileoo
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -46,4 +48,13 @@ func (f *File) WriteBytes(ctx context.Context, toWrite []byte, options *filesopt
 	logging.LogChangedByCtxf(ctx, "Wrote '%d' bytes to file '%s' on '%s'", len(toWrite), filePath, hostDescription)
 
 	return nil
+}
+
+func (f *File) OpenAsWriteCloser(ctx context.Context, options *filesoptions.WriteOptions) (io.WriteCloser, error) {
+	commandExecutor, filePath, err := f.GetCommandExecutorAndFilePath()
+	if err != nil {
+		return nil, err
+	}
+
+	return commandexecutorfile.OpenAsWriteCloser(ctx, commandExecutor, filePath, options)
 }

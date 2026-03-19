@@ -147,7 +147,7 @@ func CreateTemporaryFileFromFile(ctx context.Context, fileToCopyAsTemporaryFile 
 		return nil, err
 	}
 
-	err = fileToCopyAsTemporaryFile.CopyToFile(ctx, temporaryFile)
+	err = fileToCopyAsTemporaryFile.CopyToFile(ctx, temporaryFile, &filesoptions.CopyOptions{})
 	if err != nil {
 		return nil, err
 	}

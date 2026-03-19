@@ -26,7 +26,7 @@ func Test_OpenAsWriteCloser(t *testing.T) {
 		require.NoError(t, err)
 		defer nativefiles.Delete(ctx, tempFile, &filesoptions.DeleteOptions{})
 
-		writeCloser, err := commandexecutorfile.OpenAsWriteCloser(ctx, commandexecutorexecoo.Exec(), tempFile)
+		writeCloser, err := commandexecutorfile.OpenAsWriteCloser(ctx, commandexecutorexecoo.Exec(), tempFile, &filesoptions.WriteOptions{})
 		require.NoError(t, err)
 		defer writeCloser.Close()
 
