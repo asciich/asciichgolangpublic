@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"slices"
 	"sort"
@@ -1070,4 +1071,52 @@ func (xxx *FileBase) GetCreationDateByFileName(ctx context.Context) (creationDat
 	}
 
 	return creationDate, nil
+}
+
+func (xxx *FileBase) CopyToFile(ctx context.Context, destFile filesinterfaces.File, options *filesoptions.CopyOptions) error {
+	if destFile == nil {
+		return tracederrors.TracedErrorNil("destFile")
+	}
+
+	if options == nil {
+		options = &filesoptions.CopyOptions{}
+	}
+
+	parent, err := xxx.GetParentFileForBaseClass()
+	if err != nil {
+		return err
+	}
+
+	srcPath, srcHostDescription, err := parent.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	destPath, destHostDescription, err := destFile.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Copy '%s' on '%s' to '%s' on '%s' started.", srcPath, srcHostDescription, destPath, destHostDescription)
+
+	src, err := parent.OpenAsReadCloser(ctx)
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	dst, err := destFile.OpenAsWriteCloser(ctx, &filesoptions.WriteOptions{UseSudo: options.UseSudo})
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	_, err = io.Copy(dst, src)
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to copy file '%s' on '%s' to '%s' on '%s': %w", srcPath, srcHostDescription, destPath, destHostDescription, err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Copy '%s' on '%s' to '%s' on '%s' finished.", srcPath, srcHostDescription, destPath, destHostDescription)
+
+	return nil
 }

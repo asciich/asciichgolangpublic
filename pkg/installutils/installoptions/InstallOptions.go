@@ -5,14 +5,23 @@ import (
 )
 
 type InstallOptions struct {
-	SrcPath         string
-	SrcUrl          string
-	InstallPath     string
-	Mode            string
-	UseSudo         bool
-	ReplaceExisting bool
-	Sha256Sum       string
+	SrcPath           string
+	SrcUrl            string
+	InstallPath       string
+	Mode              string
+	UseSudo           bool
+	ReplaceExisting   bool
+	Sha256Sum         string
 	SkipTLSvalidation bool
+
+	// Perform the download and validation in a local directory before the installation.
+	//
+	// This allows the installation on a machine which can not reach the SrcUrl because:
+	//  1. The host running this command performs the download locally while the assumption is this host can reach the SrcUrl.
+	//  2. The downloaded binary to install is validated by the checksums if specified.
+	//  3. The downloaded binary is copied to the target host and installed.
+	//  4. The installed file on the target host is validated by the checksums if specifed.
+	ViaLocalTempDirectory bool
 }
 
 func NewInstallOptions() (i *InstallOptions) {

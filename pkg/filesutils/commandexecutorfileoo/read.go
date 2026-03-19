@@ -33,12 +33,3 @@ func (f *File) OpenAsReadCloser(ctx context.Context) (io.ReadCloser, error) {
 
 	return commandexecutorfile.OpenAsReadCloser(ctx, commandExecutor, filePath)
 }
-
-func (f *File) OpenAsWriteCloser(ctx context.Context) (io.WriteCloser, error) {
-		commandExecutor, filePath, err := f.GetCommandExecutorAndFilePath()
-	if err != nil {
-		return nil, err
-	}
-
-	return commandexecutorfile.OpenAsWriteCloser(ctx, commandExecutor, filePath)
-}

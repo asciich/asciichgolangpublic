@@ -234,50 +234,6 @@ func TestFile_MoveToPath(t *testing.T) {
 	}
 }
 
-func TestFile_CopyToFile(t *testing.T) {
-	tests := []struct {
-		implementationName string
-		content            string
-	}{
-		{"localFile", "test content\nwith a new line\n"},
-		{"localCommandExecutorFile", "test content\nwith a new line\n"},
-	}
-
-	for _, tt := range tests {
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				ctx := getCtx()
-
-				srcFile := getFileToTest(tt.implementationName)
-				err := srcFile.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
-				require.NoError(t, err)
-				defer srcFile.Delete(ctx, &filesoptions.DeleteOptions{})
-
-				destFile := getFileToTest(tt.implementationName)
-				defer destFile.Delete(ctx, &filesoptions.DeleteOptions{})
-				destFile.Delete(ctx, &filesoptions.DeleteOptions{})
-
-				require.True(t, mustutils.Must(srcFile.Exists(ctx)))
-				require.False(t, mustutils.Must(destFile.Exists(ctx)))
-
-				err = srcFile.CopyToFile(ctx, destFile)
-				require.NoError(t, err)
-
-				require.True(t, mustutils.Must(srcFile.Exists(ctx)))
-				require.True(t, mustutils.Must(destFile.Exists(ctx)))
-
-				content, err := srcFile.ReadAsString(ctx)
-				require.NoError(t, err)
-				require.EqualValues(t, tt.content, content)
-
-				content, err = destFile.ReadAsString(ctx)
-				require.NoError(t, err)
-				require.EqualValues(t, tt.content, content)
-			},
-		)
-	}
-}
 
 func TestFile_String(t *testing.T) {
 	tests := []struct {

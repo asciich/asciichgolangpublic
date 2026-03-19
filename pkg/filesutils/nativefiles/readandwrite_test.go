@@ -89,7 +89,7 @@ func Test_OpenAsWriteCloser(t *testing.T) {
 	require.NoError(t, err)
 	defer nativefiles.Delete(ctx, tmpPath, &filesoptions.DeleteOptions{})
 
-	writeCloser, err := nativefiles.OpenAsWriteCloser(ctx, tmpPath)
+	writeCloser, err := nativefiles.OpenAsWriteCloser(ctx, tmpPath, &filesoptions.WriteOptions{})
 	require.NoError(t, err)
 	defer writeCloser.Close()
 

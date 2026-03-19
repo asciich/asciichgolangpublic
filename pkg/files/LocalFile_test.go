@@ -633,7 +633,7 @@ func TestLocalFileSortBlocksInFile(t *testing.T) {
 				require.NoError(t, err)
 
 				if os.Getenv("UPDATE_EXPECTED") == "1" {
-					err = testFile.CopyToFile(ctx, expectedFile)
+					err = testFile.CopyToFile(ctx, expectedFile, &filesoptions.CopyOptions{})
 					require.NoError(t, err)
 				}
 

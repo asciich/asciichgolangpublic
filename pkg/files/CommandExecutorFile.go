@@ -47,13 +47,13 @@ func (c *CommandExecutorFile) AppendBytes(ctx context.Context, toWrite []byte) (
 }
 
 // Is already migrated to commandexecutorfileoo
-func (c *CommandExecutorFile) OpenAsWriteCloser(ctx context.Context) (io.WriteCloser, error) {
+func (c *CommandExecutorFile) OpenAsWriteCloser(ctx context.Context, options *filesoptions.WriteOptions) (io.WriteCloser, error) {
 	commandexecutor, path, _, err := c.GetCommandExecutorAndFilePathAndHostDescription()
 	if err != nil {
 		return nil, err
 	}
 
-	return commandexecutorfile.OpenAsWriteCloser(ctx, commandexecutor, path)
+	return commandexecutorfile.OpenAsWriteCloser(ctx, commandexecutor, path, options)
 }
 
 func (c *CommandExecutorFile) AppendString(ctx context.Context, toWrite string) (err error) {
@@ -157,51 +157,6 @@ func (c *CommandExecutorFile) Chown(ctx context.Context, options *parameteroptio
 	}
 
 	logging.LogChangedByCtxf(ctx, "Changed ownership of file '%s' to '%s' on host '%s'", path, userAndGroupForCommand, hostDescription)
-
-	return nil
-}
-
-func (c *CommandExecutorFile) CopyToFile(ctx context.Context, destFile filesinterfaces.File) (err error) {
-	if destFile == nil {
-		return tracederrors.TracedErrorNil("destFile")
-	}
-
-	srcPath, srcHostDescription, err := c.GetPathAndHostDescription()
-	if err != nil {
-		return err
-	}
-
-	destPath, destHostDescription, err := destFile.GetPathAndHostDescription()
-	if err != nil {
-		return err
-	}
-
-	if srcHostDescription != destHostDescription {
-		return tracederrors.TracedErrorf(
-			"Unable to copy src file '%s' from host '%s' to '%s' on host '%s'. Only implemented on the same host.",
-			srcPath,
-			srcHostDescription,
-			destPath,
-			destHostDescription,
-		)
-	}
-
-	commandexecutor, err := c.GetCommandExecutor()
-	if err != nil {
-		return err
-	}
-
-	_, err = commandexecutor.RunCommand(
-		contextutils.ContextSilent(),
-		&parameteroptions.RunCommandOptions{
-			Command: []string{"cp", srcPath, destPath},
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	logging.LogInfoByCtxf(ctx, "Copied '%s' to '%s' on host '%s'.", srcPath, destPath, destHostDescription)
 
 	return nil
 }

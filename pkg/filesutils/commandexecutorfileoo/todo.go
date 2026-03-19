@@ -22,10 +22,6 @@ func (f *File) Chown(ctx context.Context, options *parameteroptions.ChownOptions
 	return tracederrors.TracedErrorNotImplemented()
 }
 
-func (f *File) CopyToFile(ctx context.Context, destFile filesinterfaces.File) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
-}
-
 func (f *File) GetDeepCopy() (deepCopy filesinterfaces.File) {
 	copy := &File{}
 	err := copy.SetParentFileForBaseClass(copy)
