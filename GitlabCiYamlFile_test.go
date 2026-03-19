@@ -40,9 +40,18 @@ func TestGitlabCiYamlFileGetInclude(t *testing.T) {
 				require.Len(t, includes, 1)
 
 				include := includes[0]
-				require.EqualValues(t, "a", include.MustGetProject())
-				require.EqualValues(t, "b", include.MustGetRef())
-				require.EqualValues(t, "c.yaml", include.MustGetFile())
+
+				project, err := include.GetProject()
+				require.NoError(t, err)
+				require.EqualValues(t, "a", project)
+
+				ref, err := include.GetRef()
+				require.NoError(t, err)
+				require.EqualValues(t, "b", ref)
+
+				file, err := include.GetFile()
+				require.NoError(t, err)
+				require.EqualValues(t, "c.yaml", file)
 			},
 		)
 	}
@@ -81,9 +90,17 @@ func TestGitlabCiYamlFileGetInclude2(t *testing.T) {
 
 				include := includes[0]
 
-				require.EqualValues(t, "a", include.MustGetProject())
-				require.EqualValues(t, "b", include.MustGetRef())
-				require.EqualValues(t, "c.yaml", include.MustGetFile())
+				project, err := include.GetProject()
+				require.NoError(t, err)
+				require.EqualValues(t, "a", project)
+
+				ref, err := include.GetRef()
+				require.NoError(t, err)
+				require.EqualValues(t, "b", ref)
+
+				file, err := include.GetFile()
+				require.NoError(t, err)
+				require.EqualValues(t, "c.yaml", file)
 			},
 		)
 	}
@@ -125,9 +142,17 @@ func TestGitlabCiYamlFileGetIncludeIgnoreRules(t *testing.T) {
 
 				include := includes[0]
 
-				require.EqualValues(t, "a", include.MustGetProject())
-				require.EqualValues(t, "b", include.MustGetRef())
-				require.EqualValues(t, "c.yaml", include.MustGetFile())
+				project, err := include.GetProject()
+				require.NoError(t, err)
+				require.EqualValues(t, "a", project)
+
+				ref, err := include.GetRef()
+				require.NoError(t, err)
+				require.EqualValues(t, "b", ref)
+
+				file, err := include.GetFile()
+				require.NoError(t, err)
+				require.EqualValues(t, "c.yaml", file)
 			},
 		)
 	}
