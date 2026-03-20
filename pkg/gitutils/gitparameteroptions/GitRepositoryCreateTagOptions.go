@@ -57,7 +57,7 @@ func (g *GitRepositoryCreateTagOptions) GetTagCommentOrDefaultIfUnset() (tagComm
 		return fmt.Sprintf(
 			"Create tag '%s' by '%s' version '%s'.",
 			g.GetTagNameOrEmptyStringIfUnset(),
-			binaryinfo.GetSoftwareNameString(),
+			binaryinfo.GetSoftwareName(),
 			binaryinfo.GetSoftwareVersionString(),
 		)
 	}
