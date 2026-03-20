@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/pkg/binaryinfo"
 	getypename "github.com/asciich/asciichgolangpublic/pkg/datatypes/gettypename"
 )
 
@@ -206,6 +207,8 @@ func (t TracedErrorType) Error() (errorMessage string) {
 			unwrapType,
 		)
 	}
+	errorMessage += "\n"
+	errorMessage += binaryinfo.GetInfoString() + "\n"
 	errorMessage += "\n"
 
 	errorMessage += t.formattedError.Error()
