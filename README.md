@@ -82,6 +82,11 @@ Output produced by this example code:
 
 ![](docs/log_example.png)
 
+## Software name and version
+
+Use the [`binaryinfo` package](/pkg/binaryinfo/) to define the name and the version of your binary.
+This info will also be printed as part of [`TracedError`](/pkg/tracederrors/).
+
 ## Errors
 
 It's recommended to use [`TracedError`](/pkg/tracederrors/) whenever an error occurs with a custom error message to provide additional debug information. 
