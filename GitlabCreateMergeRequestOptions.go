@@ -3,7 +3,6 @@ package asciichgolangpublic
 import (
 	"sort"
 
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -109,86 +108,6 @@ func (g *GitlabCreateMergeRequestOptions) GetTitle() (title string, err error) {
 
 func (g *GitlabCreateMergeRequestOptions) IsTargetBranchSet() (isSet bool) {
 	return g.TargetBranchName != ""
-}
-
-func (g *GitlabCreateMergeRequestOptions) MustGetDescription() (description string) {
-	description, err := g.GetDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return description
-}
-
-func (g *GitlabCreateMergeRequestOptions) MustGetLabels() (labels []string) {
-	labels, err := g.GetLabels()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return labels
-}
-
-func (g *GitlabCreateMergeRequestOptions) MustGetSourceBranchName() (sourceBranchName string) {
-	sourceBranchName, err := g.GetSourceBranchName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return sourceBranchName
-}
-
-func (g *GitlabCreateMergeRequestOptions) MustGetTargetBranchName() (targetBranchName string) {
-	targetBranchName, err := g.GetTargetBranchName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return targetBranchName
-}
-
-func (g *GitlabCreateMergeRequestOptions) MustGetTitle() (title string) {
-	title, err := g.GetTitle()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return title
-}
-
-func (g *GitlabCreateMergeRequestOptions) MustSetDescription(description string) {
-	err := g.SetDescription(description)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabCreateMergeRequestOptions) MustSetLabels(labels []string) {
-	err := g.SetLabels(labels)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabCreateMergeRequestOptions) MustSetSourceBranchName(sourceBranchName string) {
-	err := g.SetSourceBranchName(sourceBranchName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabCreateMergeRequestOptions) MustSetTargetBranchName(targetBranchName string) {
-	err := g.SetTargetBranchName(targetBranchName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabCreateMergeRequestOptions) MustSetTitle(title string) {
-	err := g.SetTitle(title)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (g *GitlabCreateMergeRequestOptions) SetAssignToSelf(assignToSelf bool) {
