@@ -22,6 +22,8 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 * [kubernetesutils](pkg/kubernetesutils/): Work with K8s/ Kubernetes.
 * [pythonutils](pkg/pythonutils/): Work with Python programming language.
 	* [virtualenvutils](pkg/pythonutils/virtualenvutils/): Work with Python's `virtualenv`.
+* [testutils](pkg/testutils/README.md):
+	* [testsuite](pkg/testutils/testsuite/README.md): An easy way to create and run test suites.
 * storage:
 	* [S3 storage](pkg/storage/s3/)
 * [uuidutils](pkg/uuidutils/): Work with UUIDs.
