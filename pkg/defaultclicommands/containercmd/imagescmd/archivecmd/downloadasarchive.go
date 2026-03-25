@@ -1,4 +1,4 @@
-package imagescmd
+package archivecmd
 
 import (
 	"github.com/spf13/cobra"
@@ -8,12 +8,14 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
 
+const DOWNLOAD_AS_ARCHIVE_USE = "download-as-archive"
+
 func NewDownloadAsArchiveCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "download-as-archive",
+		Use:   DOWNLOAD_AS_ARCHIVE_USE,
 		Short: "Download a container image from a registry to a local archive file. This does no require docker or another deamon running.",
 		Run: func(cmd *cobra.Command, args []string) {
-			ctx := contextutils.ContextVerbose()
+			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
 			imageAndTag, err := cmd.Flags().GetString("image")
 			if err != nil {
