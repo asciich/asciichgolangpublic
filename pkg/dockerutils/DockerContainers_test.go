@@ -2,6 +2,7 @@ package dockerutils_test
 
 import (
 	"context"
+	"io"
 	"strings"
 	"testing"
 
@@ -313,7 +314,7 @@ func TestRunContainerWithEnvVars(t *testing.T) {
 		{"commandExectuorDockerContainer"},
 	}
 	for _, tt := range tests {
-		t.Run("env var not set "+tt.implementationName, func(t *testing.T) {
+		t.Run("with env vars "+tt.implementationName, func(t *testing.T) {
 			ctx := getCtx()
 
 			const containerName = "test-run-with-env-vars"
@@ -341,4 +342,45 @@ func TestRunContainerWithEnvVars(t *testing.T) {
 		})
 	}
 
+}
+
+func Test_RunCommandAndGetStdoutAsIoReadCloser(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeDocker"},
+		{"commandExectuorDockerContainer"},
+	}
+	for _, tt := range tests {
+		t.Run("io.ReadCloser"+tt.implementationName, func(t *testing.T) {
+			ctx := contextutils.ContextVerbose()
+
+			const containerName = "test-run-command-and-get-stdout-as-io-read-closer"
+
+			container, _ := getDockerContainerToTest(t, tt.implementationName, containerName)
+			err := container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+			require.NoError(t, err)
+			defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+
+			err = container.Run(getCtx(), &dockeroptions.DockerRunContainerOptions{
+				ImageName: "ubuntu",
+				Command:   []string{"sleep", "1m"},
+			})
+			require.NoError(t, err)
+
+			readCloser, err := container.RunCommandAndGetStdoutAsIoReadCloser(
+				ctx,
+				&parameteroptions.RunCommandOptions{
+					Command: []string{"echo", "hello", "world"},
+				},
+			)
+			require.NoError(t, err)
+			defer readCloser.Close()
+
+			output, err := io.ReadAll(readCloser)
+			require.NoError(t, err)
+
+			require.EqualValues(t, "hello world\n", string(output))
+		})
+	}
 }

@@ -222,7 +222,8 @@ func (c *CommandExecutorDockerContainer) Kill(ctx context.Context) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorDockerContainer) RunCommand(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
+// Get the run command options to actually exeute outside of docker.
+func (c *CommandExecutorDockerContainer) getRunCommandOptionsToUse(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (*parameteroptions.RunCommandOptions, error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runOptions")
 	}
@@ -279,12 +280,44 @@ func (c *CommandExecutorDockerContainer) RunCommand(ctx context.Context, runOpti
 		return nil, err
 	}
 
+	return optionsToUse, nil
+}
+
+func (c *CommandExecutorDockerContainer) RunCommand(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
+	optionsToUse, err := c.getRunCommandOptionsToUse(ctx, runOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
 	output, err := commandExecutor.RunCommand(ctx, optionsToUse)
 	if err != nil {
 		return nil, err
 	}
 
 	return output, nil
+}
+
+func (c *CommandExecutorDockerContainer) RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error) {
+	optionsToUse, err := c.getRunCommandOptionsToUse(ctx, options)
+	if err != nil {
+		return nil, err
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	return commandExecutor.RunCommandAndGetStdoutAsIoReadCloser(ctx, optionsToUse)
+}
+
+func (c *CommandExecutorDockerContainer) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorDockerContainer) SetName(name string) (err error) {
@@ -484,12 +517,4 @@ func (c *CommandExecutorDockerContainer) GetHostDescription() (string, error) {
 	hostDescription := fmt.Sprintf("Docker container '%s' running on host '%s'.", name, dockerHostDescription)
 
 	return hostDescription, nil
-}
-
-func (c *CommandExecutorDockerContainer) RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
-}
-
-func (c *CommandExecutorDockerContainer) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
 }

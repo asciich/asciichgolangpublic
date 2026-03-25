@@ -16,6 +16,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockergeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/environmentvariables"
+	"github.com/asciich/asciichgolangpublic/pkg/ioutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -419,7 +420,87 @@ func (c *Container) Run(ctx context.Context, options *dockeroptions.DockerRunCon
 }
 
 func (c *Container) RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	name, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	cmdJoined, err := options.GetJoinedCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run command '%s' with stdout as io.ReadCloser in docker container '%s' started.", cmdJoined, name)
+
+	cli, err := client.New(client.FromEnv)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("unable to create docker client: %w", err)
+	}
+
+	cmd, err := options.GetCommand()
+	if err != nil {
+		cli.Close()
+		return nil, err
+	}
+
+	var env []string
+	if options.AdditionalEnvVars != nil {
+		env, err = environmentvariables.SetEnvVarsInStringSlice(env, options.AdditionalEnvVars)
+		if err != nil {
+			cli.Close()
+			return nil, err
+		}
+	}
+
+	exec, err := cli.ExecCreate(ctx, name, client.ExecCreateOptions{
+		AttachStderr: true,
+		AttachStdout: true,
+		Cmd:          cmd,
+		User:         options.RunAsUser,
+		Env:          env,
+	})
+	if err != nil {
+		cli.Close()
+		return nil, tracederrors.TracedErrorf("Failed to exec create to RunCommand in container '%s': %w", name, err)
+	}
+
+	execId := exec.ID
+
+	attach, err := cli.ExecAttach(ctx, execId, client.ExecAttachOptions{})
+	if err != nil {
+		cli.Close()
+		return nil, tracederrors.TracedErrorf("Failed to exec attach for id '%s' on container '%s': %w", execId, name, err)
+	}
+
+	pr, pw := io.Pipe()
+
+	ret := &ioutils.ReadCloser{
+		CloseFunc: func() error {
+			pr.Close()
+			attach.HijackedResponse.Close()
+			return cli.Close()
+		},
+		ReadFunc: func(p []byte) (n int, err error) {
+			return pr.Read(p)
+		},
+	}
+
+	go func() {
+		_, err := stdcopy.StdCopy(pw, io.Discard, attach.Reader)
+		if err != nil {
+			pw.CloseWithError(err) // propagates error to reader
+		} else {
+			pw.Close() // signals EOF cleanly
+		}
+	}()
+
+	logging.LogInfoByCtxf(ctx, "Run command '%s' with stdout as io.ReadCloser in docker container '%s' finished.", cmdJoined, name)
+
+	return ret, nil
 }
 
 func (c *Container) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error) {
