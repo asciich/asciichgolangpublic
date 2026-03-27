@@ -18,8 +18,9 @@ func NewCreateSingleFileArchive() *cobra.Command {
 	const architectureHelp = "Usually 'amd64' or 'arm' (32bit) or 'arm64'"
 
 	cmd := &cobra.Command{
-		Use: "create-single-file-archive",
-		Short: shortDescription + `
+		Use:   "create-single-file-archive",
+		Short: shortDescription,
+		Long: shortDescription + `
 
 Can be used to pack a single statically linked binary into a container image with absolutely no other files included.
 
