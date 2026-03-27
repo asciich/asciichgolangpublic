@@ -17,9 +17,9 @@ import (
 	"github.com/moby/moby/api/types/network"
 	"github.com/moby/moby/client"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockergeneric"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockerinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockergeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockerinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/environmentvariables"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils"
@@ -193,9 +193,9 @@ func (d *Docker) RunContainer(ctx context.Context, options *dockeroptions.Docker
 		}
 
 		toAdd := mount.Mount{
-			Type: mount.TypeBind,
-			Source: splitted[0],
-			Target: splitted[1],
+			Type:     mount.TypeBind,
+			Source:   splitted[0],
+			Target:   splitted[1],
 			ReadOnly: false,
 		}
 

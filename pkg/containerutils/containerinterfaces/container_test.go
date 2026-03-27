@@ -6,12 +6,12 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/nativedocker"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/nativedocker"
 )
 
 func Test_ContainerIsACommandExecutor(t *testing.T) {
 	var container containerinterfaces.Container
-	
+
 	// nativedocker.Container is used as example here.
 	container = &nativedocker.Container{}
 

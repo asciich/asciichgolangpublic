@@ -6,9 +6,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/commandexecutordocker"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockergeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/commandexecutordocker"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockergeneric"
 )
 
 func getCtx() context.Context {
