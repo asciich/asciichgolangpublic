@@ -2,6 +2,7 @@ package dockerutils_test
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"strings"
 	"testing"
@@ -13,6 +14,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -381,6 +383,52 @@ func Test_RunCommandAndGetStdoutAsIoReadCloser(t *testing.T) {
 			require.NoError(t, err)
 
 			require.EqualValues(t, "hello world\n", string(output))
+		})
+	}
+}
+
+func Test_RunCommandAndGetStdinAsIoWriteCloser(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeDocker"},
+		{"commandExectuorDockerContainer"},
+	}
+	for _, tt := range tests {
+		t.Run("io.WriteCloser"+tt.implementationName, func(t *testing.T) {
+			ctx := contextutils.ContextVerbose()
+
+			const containerName = "test-run-command-and-get-stdin-as-io-read-writer"
+
+			container, _ := getDockerContainerToTest(t, tt.implementationName, containerName)
+			err := container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+			require.NoError(t, err)
+			defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+
+			err = container.Run(getCtx(), &dockeroptions.DockerRunContainerOptions{
+				ImageName: "ubuntu",
+				Command:   []string{"sleep", "1m"},
+			})
+			require.NoError(t, err)
+
+			writeCloser, err := container.RunCommandAndGetStdinAsIoWriteCloser(
+				ctx,
+				&parameteroptions.RunCommandOptions{
+					Command: []string{"tee", "/testfile"},
+				},
+			)
+			require.NoError(t, err)
+			defer writeCloser.Close()
+
+			_, err = fmt.Fprint(writeCloser, "hello world.\n")
+			require.NoError(t, err)
+
+			err = writeCloser.Close()
+			require.NoError(t, err)
+
+			content, err := commandexecutorfile.ReadAsString(container, "/testfile")
+			require.NoError(t, err)
+			require.EqualValues(t, "hello world.\n", content)
 		})
 	}
 }

@@ -504,5 +504,77 @@ func (c *Container) RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, op
 }
 
 func (c *Container) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	name, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	cmdJoined, err := options.GetJoinedCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run command '%s' with stdin as io.WriteCloser in docker container '%s' started.", cmdJoined, name)
+
+	cli, err := client.New(client.FromEnv)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("unable to create docker client: %w", err)
+	}
+
+	cmd, err := options.GetCommand()
+	if err != nil {
+		cli.Close()
+		return nil, err
+	}
+
+	var env []string
+	if options.AdditionalEnvVars != nil {
+		env, err = environmentvariables.SetEnvVarsInStringSlice(env, options.AdditionalEnvVars)
+		if err != nil {
+			cli.Close()
+			return nil, err
+		}
+	}
+
+	exec, err := cli.ExecCreate(ctx, name, client.ExecCreateOptions{
+		AttachStdin:  true,
+		AttachStdout: true,
+		AttachStderr: true,
+		Cmd:          cmd,
+		User:         options.RunAsUser,
+		Env:          env,
+	})
+	if err != nil {
+		cli.Close()
+		return nil, tracederrors.TracedErrorf("Failed to exec create to RunCommand in container '%s': %w", name, err)
+	}
+
+	execId := exec.ID
+
+	attach, err := cli.ExecAttach(ctx, execId, client.ExecAttachOptions{})
+	if err != nil {
+		cli.Close()
+		return nil, tracederrors.TracedErrorf("Failed to exec attach for id '%s' on container '%s': %w", execId, name, err)
+	}
+
+	ret := &ioutils.WriteCloser{
+		CloseFunc: func() error {
+			attach.HijackedResponse.CloseWrite()
+			attach.HijackedResponse.Close()
+			cli.Close()
+			_, err:= WaitUntilExecFinished(ctx, execId)
+			return err
+		},
+		WriteFunc: func(p []byte) (n int, err error) {
+			return attach.HijackedResponse.Conn.Write(p)
+		},
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run command '%s' with stdin as io.WriteCloser in docker container '%s' finished.", cmdJoined, name)
+
+	return ret, nil
 }
