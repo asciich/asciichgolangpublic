@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/datatypes/pointersutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/pointerutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
@@ -476,7 +476,9 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 				require.NoError(t, err)
 				gotCopy, err := localCopy.GetParentFileForBaseClassAsLocalFile()
 				require.NoError(t, err)
-				require.False(t, pointersutils.MustPointersEqual(got, gotCopy))
+				equal, err := pointerutils.PointersEqual(got, gotCopy)
+				require.NoError(t, err)
+				require.False(t, equal)
 
 				require.True(t, mustutils.Must(testFile.Exists(ctx)))
 				require.True(t, mustutils.Must(copy.Exists(ctx)))

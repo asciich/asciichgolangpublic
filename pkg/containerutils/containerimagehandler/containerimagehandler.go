@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/go-containerregistry/pkg/name"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
+	"github.com/google/go-containerregistry/pkg/v1/empty"
 	"github.com/google/go-containerregistry/pkg/v1/mutate"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/google/go-containerregistry/pkg/v1/tarball"
@@ -300,6 +301,124 @@ func OverwriteArchive(ctx context.Context, archivePath string, tag *name.Tag, im
 	return nil
 }
 
+func CreateSingleFileArchive(ctx context.Context, outputPath string, options *containeroptions.CreateSingleFileArchiveOptions) error {
+	if outputPath == "" {
+		return tracederrors.TracedErrorEmptyString("outputPath")
+	}
+
+	if options == nil {
+		return tracederrors.TracedErrorNil("options")
+	}
+
+	srcFilePath, err := options.GetSourceFilePath()
+	if err != nil {
+		return err
+	}
+
+	pathInArchive, err := options.GetPathInImage()
+	if err != nil {
+		return err
+	}
+
+	newImageNameAndTag, err := options.GetNewImageNameAndTag()
+	if err != nil {
+		return err
+	}
+
+	mode, err := options.GetMode()
+	if err != nil {
+		return err
+	}
+
+	architexture, err := options.GetArchitecture()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Create new container image archive '%s' with single file '%s' as '%s' started.", outputPath, srcFilePath, pathInArchive)
+
+	// Parse the image tag
+	tag, err := name.NewTag(newImageNameAndTag)
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to parse new image name and tag '%s': %w", newImageNameAndTag, err)
+	}
+
+	var buf bytes.Buffer
+	tw := tar.NewWriter(&buf)
+
+	file, err := os.Open(srcFilePath)
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to open '%s' to add it to the container image archive '%s': %w", srcFilePath, outputPath, err)
+	}
+	defer file.Close()
+
+	stat, err := file.Stat()
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to stat '%s' to add it to the container image archive '%s': %w", srcFilePath, outputPath, err)
+	}
+
+	header := &tar.Header{
+		Name: pathInArchive,
+		Size: stat.Size(),
+		Mode: mode,
+	}
+	if err = tw.WriteHeader(header); err != nil {
+		return tracederrors.TracedErrorf("Failed to write tar header for '%s': %w", srcFilePath, err)
+	}
+	if _, err = io.Copy(tw, file); err != nil {
+		return tracederrors.TracedErrorf("Failed to write file content for '%s' into tar: %w", srcFilePath, err)
+	}
+	if err = tw.Close(); err != nil {
+		return tracederrors.TracedErrorf("Failed to close tar writer for '%s': %w", srcFilePath, err)
+	}
+
+	// Create a single layer from the tar buffer
+	layer, err := tarball.LayerFromOpener(
+		func() (io.ReadCloser, error) {
+			return io.NopCloser(bytes.NewReader(buf.Bytes())), nil
+		},
+		tarball.WithMediaType(types.DockerLayer),
+	)
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to create layer from file '%s': %w", srcFilePath, err)
+	}
+
+	// Start from a completely empty base image
+	baseImage := empty.Image
+
+	// Append the single layer to the empty image
+	newImage, err := mutate.AppendLayers(baseImage, layer)
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to append layer to empty image: %w", err)
+	}
+
+	// Fix platform metadata
+	configFile, err := newImage.ConfigFile()
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to get config file: %w", err)
+	}
+
+	configFile.Architecture = architexture
+	configFile.OS = "linux"
+
+	newImage, err = mutate.ConfigFile(newImage, configFile)
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to set platform config: %w", err)
+	}
+
+	// Write the new image to the archive
+	err = OverwriteArchive(ctx, outputPath, &tag, newImage)
+	if err != nil {
+		return err
+	}
+
+	logging.LogChangedByCtxf(ctx, "Created new container image archive '%s' with single file '%s' as '%s'.", outputPath, srcFilePath, pathInArchive)
+
+	logging.LogInfoByCtxf(ctx, "Create new container image archive '%s' with single file '%s' as '%s' finished.", outputPath, srcFilePath, pathInArchive)
+
+	return nil
+}
+
 func AddFileToArchive(ctx context.Context, archivePath string, options *containeroptions.AddFileToImageOptions) error {
 	if archivePath == "" {
 		return tracederrors.TracedErrorEmptyString("archivePath")
@@ -340,6 +459,11 @@ func AddFileToArchive(ctx context.Context, archivePath string, options *containe
 		return err
 	}
 
+	mode, err := options.GetMode()
+	if err != nil {
+		return err
+	}
+
 	var buf bytes.Buffer
 	tw := tar.NewWriter(&buf)
 
@@ -355,11 +479,22 @@ func AddFileToArchive(ctx context.Context, archivePath string, options *containe
 	header := &tar.Header{
 		Name: pathInArchive,
 		Size: stat.Size(),
-		Mode: 0644,
+		Mode: mode,
 	}
-	tw.WriteHeader(header)
-	io.Copy(tw, file)
-	tw.Close()
+	err = tw.WriteHeader(header)
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to write tar header for '%s': %w", srcFilePath, err)
+	}
+
+	_, err = io.Copy(tw, file)
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to write file content for '%s' into tar: %w", srcFilePath, err)
+	}
+
+	err = tw.Close()
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to close tar writer for '%s': %w", srcFilePath, err)
+	}
 
 	layer, err := tarball.LayerFromOpener(
 		func() (io.ReadCloser, error) {

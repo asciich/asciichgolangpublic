@@ -1,8 +1,7 @@
-package pointersutils
+package pointerutils
 
 import (
 	"fmt"
-	"log"
 	"reflect"
 	"unsafe"
 
@@ -71,49 +70,6 @@ func IsPointer(objectToTest interface{}) (isPointer bool) {
 	return isPointer
 }
 
-func MustCheckIsPointer(objectToTest interface{}) {
-	err := CheckIsPointer(objectToTest)
-	if err != nil {
-		log.Panic(err)
-	}
-}
-
-func MustGetMemoryAddressAsHexString(input interface{}) (memoryAddress string) {
-	memoryAddress, err := GetMemoryAddressAsHexString(input)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return memoryAddress
-}
-
-func MustGetMemoryAddressAsUInt64(input interface{}) (memoryAddress uint64) {
-	memoryAddress, err := GetMemoryAddressAsUInt64(input)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return memoryAddress
-}
-
-func MustGetMemoryAddressAsUIntPtr(input interface{}) (memoryAddress uintptr) {
-	memoryAddress, err := GetMemoryAddressAsUIntPtr(input)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return memoryAddress
-}
-
-func MustPointersEqual(ptr1 interface{}, ptr2 interface{}) (addressEqual bool) {
-	addressEqual, err := PointersEqual(ptr1, ptr2)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return addressEqual
-}
-
 func PointersEqual(ptr1 interface{}, ptr2 interface{}) (addressEqual bool, err error) {
 	if ptr1 == nil && ptr2 == nil {
 		return true, nil
@@ -150,4 +106,8 @@ func PointersEqual(ptr1 interface{}, ptr2 interface{}) (addressEqual bool, err e
 	addressEqual = addrPtr1 == addrPtr2
 
 	return addressEqual, nil
+}
+
+func ToInt64Pointer(data int64) (*int64) {
+	return &data
 }
