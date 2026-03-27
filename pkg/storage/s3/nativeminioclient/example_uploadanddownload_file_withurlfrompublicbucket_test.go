@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
@@ -56,7 +56,7 @@ func Test_Example_UploadAndDownload_File_withUrlFromPublicBucket_test(t *testing
 	require.NoError(t, err)
 
 	// Create the bucket which is now empty:
-	err = nativeminioclient.CreateBucket(ctx, client, bucketName, 
+	err = nativeminioclient.CreateBucket(ctx, client, bucketName,
 		&s3options.CreateBucketOptions{
 			PublicReadable: true, // make this bucket public readable so we directly download the files.
 		},

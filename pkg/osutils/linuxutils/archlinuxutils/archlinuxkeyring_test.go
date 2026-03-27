@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/linuxutils/archlinuxutils"
 	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/packagemanageroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/pacman"

@@ -10,9 +10,9 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/commandexecutordocker"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/nativedocker"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/commandexecutordocker"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/linuxuserutils/commandexecutorlinuxuserutils"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/linuxuserutils/linuxuseroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -89,7 +89,7 @@ func TestRunAsUser(t *testing.T) {
 				err := commandexecutorlinuxuserutils.Delete(ctx, tt.executor, &linuxuseroptions.DeleteOptions{
 					UserName: username,
 					UseSudo:  tt.useSudo,
-					Force: true,
+					Force:    true,
 				})
 				require.NoError(t, err)
 			}()

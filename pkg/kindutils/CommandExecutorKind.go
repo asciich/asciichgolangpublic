@@ -11,7 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kindutils/kindparameteroptions"

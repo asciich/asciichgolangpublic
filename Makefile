@@ -17,7 +17,7 @@ build:
 
 	@echo "Build $(BIN_PATH)"
 	@mkdir -p "$(BIN_DIR)"
-	go build -o "$(BIN_PATH)" cmd/asciichgolangpublic/asciichgolangpublic.go
+	go build -o "$(BIN_PATH)" cmd/asciichgolangpublic/main.go
 
 	@echo "Build finished"
 	

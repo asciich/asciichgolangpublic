@@ -6,7 +6,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 

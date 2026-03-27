@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/nativedocker"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/nativedocker"
 )
 
 func Test_IsRemovalAlreadyInProgressError(t *testing.T) {

@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockergeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockergeneric"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/nativedocker"
 )
 
 func getCtx() context.Context {

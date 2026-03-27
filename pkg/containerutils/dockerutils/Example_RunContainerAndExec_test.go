@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
@@ -88,6 +88,6 @@ func Test_RunContainer_and_Exec_Example(t *testing.T) {
 	require.NoError(t, err)
 
 	exists, err = container.Exists(ctx)
-	require.NoError(t,err)
+	require.NoError(t, err)
 	require.False(t, exists)
 }

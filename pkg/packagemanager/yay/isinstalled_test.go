@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/nativedocker"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/yay"
 )
 

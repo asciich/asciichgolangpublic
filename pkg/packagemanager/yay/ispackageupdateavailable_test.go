@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/dockeroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/packagemanageroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/yay"
 )
@@ -39,7 +39,7 @@ func Test_IsPackageUpdateAvailable(t *testing.T) {
 	yay, err := yay.NewYay(container)
 	require.NoError(t, err)
 
-	err = yay.InstallYay(ctx, &packagemanageroptions.InstallPackageOptions{UpdateDatabaseFirst: true}	)
+	err = yay.InstallYay(ctx, &packagemanageroptions.InstallPackageOptions{UpdateDatabaseFirst: true})
 	require.NoError(t, err)
 
 	// We expect an update available:
