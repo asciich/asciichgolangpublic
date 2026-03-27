@@ -22,7 +22,7 @@ func NewGetUserIdCmd(options *OperateOptions) *cobra.Command {
 
 			userName := args[0]
 
-			id := mustutils.Must(options.GetHeadScale(cmd).GetUserId(ctx, userName))
+			id := mustutils.Must(options.GetHeadScale(ctx, cmd).GetUserId(ctx, userName))
 			fmt.Printf("%d\n", id)
 
 			logging.LogGoodByCtxf(ctx, "Got user id '%d' for headscale user '%s'.", id, userName)

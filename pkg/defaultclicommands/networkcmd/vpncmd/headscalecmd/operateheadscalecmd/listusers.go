@@ -16,7 +16,7 @@ func NewListUsersCmd(options *OperateOptions) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
-			for _, user := range mustutils.Must(options.GetHeadScale(cmd).ListUserNames(ctx)) {
+			for _, user := range mustutils.Must(options.GetHeadScale(ctx, cmd).ListUserNames(ctx)) {
 				fmt.Println(user)
 			}
 

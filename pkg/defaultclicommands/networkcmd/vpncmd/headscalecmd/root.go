@@ -1,6 +1,8 @@
 package headscalecmd
 
 import (
+	"context"
+
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/vpncmd/headscalecmd/localdevcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/vpncmd/headscalecmd/operateheadscalecmd"
@@ -19,7 +21,7 @@ func NewHeadscaleCmd() *cobra.Command {
 		localdevcmd.NewLocalDevCmd(),
 		operateheadscalecmd.NewOperateCmd(
 			&operateheadscalecmd.OperateOptions{
-				GetHeadScale: func(cmd *cobra.Command) headscaleinterfaces.HeadScale {
+				GetHeadScale: func(ctx context.Context, cmd *cobra.Command) headscaleinterfaces.HeadScale {
 					headscale, err := commandexecutorheadscaleoo.NewOnLocalhost()
 					if err != nil {
 						logging.LogGoErrorFatalWithTrace(err)

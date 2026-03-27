@@ -20,7 +20,7 @@ func NewCreateUserCmd(options *OperateOptions) *cobra.Command {
 
 			userName := args[0]
 
-			mustutils.Must0(options.GetHeadScale(cmd).CreateUser(ctx, userName))
+			mustutils.Must0(options.GetHeadScale(ctx, cmd).CreateUser(ctx, userName))
 
 			logging.LogGoodByCtxf(ctx, "Created headscale user '%s'.", userName)
 		},
