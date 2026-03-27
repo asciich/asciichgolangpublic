@@ -1,6 +1,8 @@
 package localdevcmd
 
 import (
+	"context"
+
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/vpncmd/headscalecmd/operateheadscalecmd"
@@ -24,7 +26,7 @@ func NewLocalDevCmd() *cobra.Command {
 		operateheadscalecmd.NewOperateCmd(
 			&operateheadscalecmd.OperateOptions{
 				RootCmdShort: "Operate the local development environment.",
-				GetHeadScale: func(cmd *cobra.Command) headscaleinterfaces.HeadScale {
+				GetHeadScale: func(ctx context.Context, cmd *cobra.Command) headscaleinterfaces.HeadScale {
 					containerName, err := cmd.Flags().GetString("container-name")
 					if err != nil {
 						logging.LogGoErrorFatalWithTrace(err)

@@ -1,6 +1,8 @@
 package operateheadscalecmd
 
 import (
+	"context"
+
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils/vpnutils/headscaleutils/headscaleinterfaces"
 )
@@ -11,7 +13,7 @@ type OperateOptions struct {
 	RootCmdShort string
 
 	// Get the HeadScale to operate:
-	GetHeadScale func(cmd *cobra.Command) headscaleinterfaces.HeadScale
+	GetHeadScale func(ctx context.Context, cmd *cobra.Command) headscaleinterfaces.HeadScale
 }
 
 func (o *OperateOptions) GetRootCmdUse() string {

@@ -23,7 +23,7 @@ func NewCreatePreauthKeyCmd(options *OperateOptions) *cobra.Command {
 
 			userName := args[0]
 
-			preauthKey := mustutils.Must(options.GetHeadScale(cmd).GeneratePreauthKeyForUser(ctx, userName))
+			preauthKey := mustutils.Must(options.GetHeadScale(ctx, cmd).GeneratePreauthKeyForUser(ctx, userName))
 			fmt.Print(stringsutils.EnsureEndsWithExactlyOneLineBreak(preauthKey))
 
 			logging.LogGoodByCtxf(ctx, "Generated preauth key for user '%s'.", userName)
