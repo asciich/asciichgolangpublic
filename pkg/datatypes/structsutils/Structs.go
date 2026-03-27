@@ -7,7 +7,7 @@ import (
 	"slices"
 	"sort"
 
-	"github.com/asciich/asciichgolangpublic/pkg/datatypes/pointersutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/pointerutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -76,7 +76,7 @@ func IsPointerToStruct(objectToTest interface{}) (isStruct bool) {
 		return false
 	}
 
-	if !pointersutils.IsPointer(objectToTest) {
+	if !pointerutils.IsPointer(objectToTest) {
 		return false
 	}
 

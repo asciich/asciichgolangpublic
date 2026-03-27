@@ -19,6 +19,7 @@ For docker users an already available image can be exported using:
 
 	cmd.AddCommand(
 		NewAddFileCmd(),
+		NewCreateSingleFileArchive(),
 		NewDownloadAsArchiveCmd(),
 		NewListFilesCmd(),
 	)

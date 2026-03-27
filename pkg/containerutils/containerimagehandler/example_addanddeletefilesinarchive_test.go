@@ -7,6 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerimagehandler"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/pointerutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
@@ -41,6 +42,7 @@ func Test_Example_AddAndDeleteFilesToImageArchive(t *testing.T) {
 		PathInImage:            examplePath,
 		NewImageNameAndTag:     "exampleaddanddeletefiles:latest",
 		OverwriteSourceArchive: true,
+		Mode:                   pointerutils.ToInt64Pointer(0644),
 	})
 	require.NoError(t, err)
 

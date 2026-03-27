@@ -1,10 +1,11 @@
-package pointersutils
+package pointerutils_test
 
 import (
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/pointerutils"
 )
 
 var constIntForTesting int = 10
@@ -23,12 +24,7 @@ func TestPointersIsPointer(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedIsPointer,
-					IsPointer(tt.pointerToCheck),
-				)
+				require.EqualValues(t, tt.expectedIsPointer, pointerutils.IsPointer(tt.pointerToCheck))
 			},
 		)
 	}
@@ -49,14 +45,11 @@ func TestPointersGetMemoryAddressAsHexString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				expectedPointerAddress := fmt.Sprintf("%p", tt.pointer)
 
-				require.EqualValues(
-					expectedPointerAddress,
-					MustGetMemoryAddressAsHexString(tt.pointer),
-				)
+				address, err := pointerutils.GetMemoryAddressAsHexString(tt.pointer)
+				require.NoError(t, err)
+				require.EqualValues(t, expectedPointerAddress, address)
 			},
 		)
 	}
@@ -81,13 +74,17 @@ func TestPointersPointersEqual(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedIsEqual,
-					MustPointersEqual(tt.pointer1, tt.pointer2),
-				)
+				equal, err := pointerutils.PointersEqual(tt.pointer1, tt.pointer2)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedIsEqual, equal)
 			},
 		)
 	}
+}
+
+func TestToPointer(t *testing.T) {
+	t.Run("int64", func(t *testing.T) {
+		pointer := pointerutils.ToInt64Pointer(123)
+		require.True(t, pointerutils.IsPointer(pointer))
+	})
 }

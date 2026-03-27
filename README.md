@@ -11,6 +11,8 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 * [commandexecutor](pkg/commandexecutor/): Run arbitrary shell commands ([exec](pkg/commandexecutor/commandexecutorexecoo/), [bash](pkg/commandexecutor/commandexecutorbashoo/), [powershell](pkg/commandexecutor/commandexecutorpowershelloo/)). 
 * [containerutils](pkg/containerutils/): Work with containers.
 	* [containerimagehandler](pkg/containerutils/containerimagehandler/): Handle container images without the need of a container runtime (e.g. no Docker required.)
+* [datatypes](pkg/datatypes/):
+	* [pointerutils](pkg/datatypes/pointerutils/): Helperfunctions to handle pointer or get pointers from datatypes, usfull to initialize structs directly with pointer values.
 * [fluxutils](pkg/fluxutils/): Work with FluxCD.
 * [fileformats](pkg/fileformats/): Work with different file formats:
 	* [jsonutils](pkg/fileformats/jsonutils/): Work with JSON
@@ -20,11 +22,13 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 * [httputils](pkg/httputils/): High level easy to use HTTP client and testserver.
 * [kindutils](pkg/kindutils/): Handle KinD/ Kubernetes in Docker.
 * [kubernetesutils](pkg/kubernetesutils/): Work with K8s/ Kubernetes.
+* [osutils](pkg/osutils/):
+	* [unixfilepermissionsutils](pkg/osutils/unixfilepermissionsutils/): Convert human readable file permissions (also known as mode) into values and back.
 * [pythonutils](pkg/pythonutils/): Work with Python programming language.
 	* [virtualenvutils](pkg/pythonutils/virtualenvutils/): Work with Python's `virtualenv`.
 * [testutils](pkg/testutils/README.md):
 	* [testsuite](pkg/testutils/testsuite/README.md): An easy way to create and run test suites.
-* storage:
+* [storage](pkg/storage/):
 	* [S3 storage](pkg/storage/s3/)
 * [uuidutils](pkg/uuidutils/): Work with UUIDs.
 * [versionutils](pkg/versionutils/): Handle versions.

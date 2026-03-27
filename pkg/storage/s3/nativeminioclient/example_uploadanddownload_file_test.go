@@ -91,7 +91,7 @@ func Test_Example_UploadAndDownload_File_test(t *testing.T) {
 	require.NoError(t, err)
 	require.False(t, contextutils.IsChanged(ctxUpload))
 
-	// Downlaod the file directly as a temporary file:
+	// Download the file directly as a temporary file:
 	ctxDownload := contextutils.WithChangeIndicator(ctx)
 	destFilePath, err := nativeminioclient.DownloadAsTemporaryFile(ctxDownload, client, bucketName, objectKey)
 	require.NoError(t, err)
