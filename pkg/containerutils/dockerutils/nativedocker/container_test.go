@@ -3,7 +3,9 @@ package nativedocker_test
 import (
 	"path/filepath"
 	"testing"
+	"time"
 
+	"github.com/moby/moby/client"
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
@@ -170,4 +172,44 @@ func Test_DeleteContainerTwice(t *testing.T) {
 	err = container.Remove(ctxDelete, &dockeroptions.RemoveOptions{Force: true})
 	require.NoError(t, err)
 	require.False(t, contextutils.IsChanged(ctxDelete))
+}
+
+func Test_WaitUntilExecFinished(t *testing.T) {
+	ctx := getCtx()
+	const containerName = "test-wait-until-exec-finished"
+	container, err := nativedocker.RunContainer(ctx, &dockeroptions.DockerRunContainerOptions{
+		KeepStoppedContainer: false,
+		Name:                 containerName,
+		ImageName:            "ubuntu",
+		Command:              []string{"sleep", "1m"},
+	})
+	require.NoError(t, err)
+	defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+
+	cli, err := client.New(client.FromEnv)
+	require.NoError(t, err)
+	defer cli.Close()
+
+	exec, err := cli.ExecCreate(ctx, containerName, client.ExecCreateOptions{
+		AttachStdin:  true,
+		AttachStdout: true,
+		AttachStderr: true,
+		Cmd:          []string{"sleep", "2s"},
+	})
+	require.NoError(t, err)
+
+	// Attach to the exec (this starts it)
+	resp, err := cli.ExecAttach(ctx, exec.ID, client.ExecAttachOptions{})
+	require.NoError(t, err)
+	defer resp.Close()
+
+	tStart := time.Now()
+	exitCode, err := nativedocker.WaitUntilExecFinished(ctx, exec.ID)
+	require.NoError(t, err)
+	require.EqualValues(t, 0, exitCode)
+
+	duration := time.Since(tStart)
+
+	require.GreaterOrEqual(t, duration, time.Millisecond*1900)
+	require.LessOrEqual(t, duration, time.Millisecond*2200)
 }

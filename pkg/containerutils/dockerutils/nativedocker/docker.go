@@ -423,3 +423,47 @@ func (d *Docker) RemoveContainer(ctx context.Context, containerName string, opti
 
 	return container.Remove(ctx, options)
 }
+
+// Waits until the execId finished and returns its exit code.
+func WaitUntilExecFinished(ctx context.Context, execId string) (int, error) {
+	if execId == "" {
+		return 0, tracederrors.TracedErrorEmptyString("execId")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Wait until exec '%s' finished started.", execId)
+
+	var inspectResult *client.ExecInspectResult
+	var maxTries = 50
+	for i := range maxTries {
+		cli, err := client.New(client.FromEnv)
+		if err != nil {
+			return 0, tracederrors.TracedErrorf("Failed to get native docker client: %w", err)
+		}
+		defer cli.Close()
+
+		inspect, err := cli.ExecInspect(ctx, execId, client.ExecInspectOptions{})
+		if err != nil {
+			return 0, tracederrors.TracedErrorf("Attach with execId '%s' failed: %w", execId, err)
+		}
+
+		if inspect.Running {
+			delay := time.Millisecond * 100
+			logging.LogInfoByCtxf(ctx, "Exec '%s' is still running in docker container as PID=%d. Wait anoter '%s' (%d/%d).", execId, inspect.PID, delay, i+1, maxTries)
+			time.Sleep(delay)
+			continue
+		}
+
+		inspectResult = &inspect
+		break
+	}
+
+	if inspectResult == nil {
+		return 0, tracederrors.TracedErrorf("Container exec '%s' still running.", execId)
+	}
+
+	exitCode := inspectResult.ExitCode
+
+	logging.LogInfoByCtxf(ctx, "Wait until exec '%s' finished finished. Exit code is %d.", execId, exitCode)
+
+	return exitCode, nil
+}

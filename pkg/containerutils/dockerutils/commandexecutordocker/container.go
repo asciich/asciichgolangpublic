@@ -11,12 +11,12 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
-	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockergeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockerinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -223,7 +223,7 @@ func (c *CommandExecutorDockerContainer) Kill(ctx context.Context) (err error) {
 }
 
 // Get the run command options to actually exeute outside of docker.
-func (c *CommandExecutorDockerContainer) getRunCommandOptionsToUse(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (*parameteroptions.RunCommandOptions, error) {
+func (c *CommandExecutorDockerContainer) getRunCommandOptionsToUse(ctx context.Context, runOptions *parameteroptions.RunCommandOptions, interactiveForStdin bool) (*parameteroptions.RunCommandOptions, error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runOptions")
 	}
@@ -244,6 +244,10 @@ func (c *CommandExecutorDockerContainer) getRunCommandOptionsToUse(ctx context.C
 	}
 
 	newCommand := []string{"docker", "exec"}
+
+	if interactiveForStdin {
+		newCommand = append(newCommand, "-i")
+	}
 
 	for k, v := range runOptions.AdditionalEnvVars {
 		newCommand = append(newCommand, "-e", k+"="+v)
@@ -284,7 +288,7 @@ func (c *CommandExecutorDockerContainer) getRunCommandOptionsToUse(ctx context.C
 }
 
 func (c *CommandExecutorDockerContainer) RunCommand(ctx context.Context, runOptions *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
-	optionsToUse, err := c.getRunCommandOptionsToUse(ctx, runOptions)
+	optionsToUse, err := c.getRunCommandOptionsToUse(ctx, runOptions, false)
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +307,7 @@ func (c *CommandExecutorDockerContainer) RunCommand(ctx context.Context, runOpti
 }
 
 func (c *CommandExecutorDockerContainer) RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error) {
-	optionsToUse, err := c.getRunCommandOptionsToUse(ctx, options)
+	optionsToUse, err := c.getRunCommandOptionsToUse(ctx, options, false)
 	if err != nil {
 		return nil, err
 	}
@@ -317,7 +321,17 @@ func (c *CommandExecutorDockerContainer) RunCommandAndGetStdoutAsIoReadCloser(ct
 }
 
 func (c *CommandExecutorDockerContainer) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	optionsToUse, err := c.getRunCommandOptionsToUse(ctx, options, true)
+	if err != nil {
+		return nil, err
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	return commandExecutor.RunCommandAndGetStdinAsIoWriteCloser(ctx, optionsToUse)
 }
 
 func (c *CommandExecutorDockerContainer) SetName(name string) (err error) {

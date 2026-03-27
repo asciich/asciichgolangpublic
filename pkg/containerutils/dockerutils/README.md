@@ -10,3 +10,4 @@ There are two implementations available:
 
 * [Run container and exec](./Example_RunContainerAndExec_test.go)
 * [Run container and exec command while streaming stdout](./Example_RunCommandAndGetStdoutAsIoReadCloser_test.go)
+* [Run container and exec command while streaming stdin](./Example_RunCommandAndGetStdinAsIoWriteCloser_test.go)
