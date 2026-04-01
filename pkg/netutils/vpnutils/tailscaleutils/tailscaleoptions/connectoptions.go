@@ -45,17 +45,24 @@ func (c *ConnectOptions) GetControlUrl() (string, error) {
 }
 
 func (c *ConnectOptions) GetStateDir(ctx context.Context) (string, error) {
-	hostname, err := c.GetHostName()
-	if err != nil {
-		return "", err
-	}
+	var stateDir string
+	const envName = "TS_STATE_DIR"
+	if os.Getenv(envName) == "" {
+		hostname, err := c.GetHostName()
+		if err != nil {
+			return "", err
+		}
 
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", tracederrors.TracedErrorf("Failed to get users home: %w", err)
-	}
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return "", tracederrors.TracedErrorf("Failed to get users home: %w", err)
+		}
 
-	stateDir := filepath.Join(homeDir, ".config", "tsnet-"+hostname)
+		stateDir = filepath.Join(homeDir, ".config", "tsnet-"+hostname)
+	} else {
+		stateDir = os.Getenv(envName)
+		logging.LogInfoByCtxf(ctx, "Taking tailscale client state dir from env var '%s'='%s'", envName, stateDir)
+	}
 
 	logging.LogInfoByCtxf(ctx, "Tailscale client state dir by ConnectOptions is '%s'.", stateDir)
 
