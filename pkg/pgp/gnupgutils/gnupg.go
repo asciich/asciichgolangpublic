@@ -28,15 +28,19 @@ func SignFile(ctx context.Context, toSign filesinterfaces.File, options *gnupgop
 	return commandexecutorgnupg.SignFile(ctx, commandExecutor, toSign, options)
 }
 
-func CheckSignatureValid(ctx context.Context, signatureFile filesinterfaces.File) error {
+func CheckSignatureValid(ctx context.Context, signatureFile filesinterfaces.File, toValidateFile filesinterfaces.File) error {
 	if signatureFile == nil {
 		return tracederrors.TracedErrorNil("signatureFile")
 	}
 
+	if toValidateFile == nil {
+		return tracederrors.TracedErrorNil("toValidateFile")
+	}
+
 	commandExecutor := commandexecutorexecoo.Exec()
-	return commandexecutorgnupg.CheckSignatureValid(ctx, commandExecutor, signatureFile)
+	return commandexecutorgnupg.CheckSignatureValid(ctx, commandExecutor, signatureFile, toValidateFile)
 }
 
-func CheckSingnatureByPathValid(ctx context.Context, signaturePath string) error {
-	return commandexecutorgnupg.CheckSingnatureByPathValid(ctx, commandexecutorexecoo.Exec(), signaturePath)
+func CheckSingnatureByPathValid(ctx context.Context, signaturePath string, toValidatePath string) error {
+	return commandexecutorgnupg.CheckSingnatureByPathValid(ctx, commandexecutorexecoo.Exec(), signaturePath, toValidatePath)
 }

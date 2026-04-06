@@ -91,7 +91,7 @@ func TestGnuPg_SignAndValidate_File(t *testing.T) {
 				require.True(t, mustutils.Must(toTest.Exists(ctx)))
 				require.True(t, mustutils.Must(signatureFile.Exists(ctx)))
 
-				err = gnupgutils.CheckSignatureValid(ctx, signatureFile)
+				err = gnupgutils.CheckSignatureValid(ctx, signatureFile, toTest)
 				require.NoError(t, err)
 			},
 		)
