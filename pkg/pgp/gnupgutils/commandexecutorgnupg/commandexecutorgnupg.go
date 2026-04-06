@@ -14,7 +14,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func CheckSignatureValid(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, signatureFile filesinterfaces.File) (err error) {
+func CheckSignatureValid(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, signatureFile filesinterfaces.File, toValidateFile filesinterfaces.File) (err error) {
 	if commandExecutor == nil {
 		return tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -23,9 +23,8 @@ func CheckSignatureValid(ctx context.Context, commandExecutor commandexecutorint
 		return tracederrors.TracedErrorNil("signatureFile")
 	}
 
-	path, hostDescription, err := signatureFile.GetPathAndHostDescription()
-	if err != nil {
-		return err
+	if toValidateFile == nil {
+		return tracederrors.TracedErrorNil("signatureFile")
 	}
 
 	hostDescriptionCommandExecutor, err := commandExecutor.GetHostDescription()
@@ -33,14 +32,28 @@ func CheckSignatureValid(ctx context.Context, commandExecutor commandexecutorint
 		return err
 	}
 
-	if hostDescription != hostDescriptionCommandExecutor {
-		return tracederrors.TracedErrorf("Mismatching hostDescriptions: CommandExecutor is on hostdescription='%s' while the file to check is on '%s'.", hostDescriptionCommandExecutor, hostDescription)
+	signaturePath, hostDescription, err := signatureFile.GetPathAndHostDescription()
+	if err != nil {
+		return err
 	}
 
-	return CheckSingnatureByPathValid(ctx, commandExecutor, path)
+	if hostDescription != hostDescriptionCommandExecutor {
+		return tracederrors.TracedErrorf("Mismatching hostDescriptions: CommandExecutor is on hostdescription='%s' while the signature file is on '%s'.", hostDescriptionCommandExecutor, hostDescription)
+	}
+
+	toValidatePath, hostDescription, err := toValidateFile.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if hostDescription != hostDescriptionCommandExecutor {
+		return tracederrors.TracedErrorf("Mismatching hostDescriptions: CommandExecutor is on hostdescription='%s' while the file to validate is on '%s'.", hostDescriptionCommandExecutor, hostDescription)
+	}
+
+	return CheckSingnatureByPathValid(ctx, commandExecutor, signaturePath, toValidatePath)
 }
 
-func CheckSingnatureByPathValid(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, signaturePath string) error {
+func CheckSingnatureByPathValid(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, signaturePath string, toValidatePath string) error {
 	if commandExecutor == nil {
 		return tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -49,24 +62,28 @@ func CheckSingnatureByPathValid(ctx context.Context, commandExecutor commandexec
 		return tracederrors.TracedErrorEmptyString("signaturePath")
 	}
 
+	if toValidatePath == "" {
+		return tracederrors.TracedErrorEmptyString("toValidatePath")
+	}
+
 	hostDescription, err := commandExecutor.GetHostDescription()
 	if err != nil {
 		return err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Validate GnuPG signature from '%s' on host '%s' started.", signaturePath, hostDescription)
+	logging.LogInfoByCtxf(ctx, "Validate GnuPG signature '%s' for '%s' on host '%s' started.", signaturePath, toValidatePath, hostDescription)
 
 	_, err = commandExecutor.RunCommand(
 		commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
-			Command: []string{"gpg", "--verify", signaturePath},
+			Command: []string{"gpg", "--verify", signaturePath, toValidatePath},
 		},
 	)
 	if err != nil {
 		return err
 	}
 
-	logging.LogInfoByCtxf(ctx, "GnuPG signature from '%s' on host '%s' validated.", signaturePath, hostDescription)
+	logging.LogInfoByCtxf(ctx, "Validate GnuPG signature '%s' for '%s' on host '%s' finished.", signaturePath, toValidatePath, hostDescription)
 
 	return nil
 }
