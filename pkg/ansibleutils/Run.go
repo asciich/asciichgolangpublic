@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/ansibleutils/ansibleparemeteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/shellutils/shelllinehandler"
@@ -54,10 +55,16 @@ func RunPlaybook(ctx context.Context, options *ansibleparemeteroptions.RunOption
 
 	logging.LogInfoByCtxf(ctx, "CLI used to run ansible playbook: %s", joined)
 
+	additionlaEnvVars := map[string]string{}
+	if contextutils.GetVerboseFromContext(ctx) {
+		additionlaEnvVars["ANSIBLE_FORCE_COLOR"] = "True"
+	}
+
 	_, err = commandexecutorexec.RunCommand(
 		commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
 		&parameteroptions.RunCommandOptions{
-			Command: cmd,
+			Command:           cmd,
+			AdditionalEnvVars: additionlaEnvVars,
 		},
 	)
 	if err != nil {
