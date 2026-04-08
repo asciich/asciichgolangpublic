@@ -37,7 +37,7 @@ func Test_Example_AddAndDeleteFilesToImageArchive(t *testing.T) {
 	srcFile, err := tempfiles.CreateTemporaryFileFromContentString(ctx, "This is the example content to add.")
 	require.NoError(t, err)
 
-	err = containerimagehandler.AddFileToArchive(ctx, archivePath, &containeroptions.AddFileToImageOptions{
+	err = containerimagehandler.AddFileToArchive(ctx, archivePath, &containeroptions.AddFileToImageArchiveOptions{
 		SourceFilePath:         srcFile,
 		PathInImage:            examplePath,
 		NewImageNameAndTag:     "exampleaddanddeletefiles:latest",

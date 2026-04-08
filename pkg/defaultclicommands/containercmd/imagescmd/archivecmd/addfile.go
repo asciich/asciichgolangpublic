@@ -67,7 +67,7 @@ func NewAddFileCmd() *cobra.Command {
 			mustutils.Must0(containerimagehandler.AddFileToArchive(
 				ctx,
 				archive,
-				&containeroptions.AddFileToImageOptions{
+				&containeroptions.AddFileToImageArchiveOptions{
 					SourceFilePath:         srcPath,
 					PathInImage:            pathInImage,
 					OverwriteSourceArchive: true,
