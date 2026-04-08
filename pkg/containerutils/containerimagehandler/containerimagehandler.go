@@ -14,75 +14,13 @@ import (
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/empty"
 	"github.com/google/go-containerregistry/pkg/v1/mutate"
-	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/google/go-containerregistry/pkg/v1/tarball"
 	"github.com/google/go-containerregistry/pkg/v1/types"
 
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containeroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
-
-func DownloadImageAsArchive(ctx context.Context, imageNameAndTag string, outputPath string) error {
-	if imageNameAndTag == "" {
-		return tracederrors.TracedErrorEmptyString("imageNameAndTag")
-	}
-
-	if outputPath == "" {
-		return tracederrors.TracedErrorEmptyString("outputPath")
-	}
-
-	logging.LogInfoByCtxf(ctx, "Download container image '%s' as archive '%s' started.", imageNameAndTag, outputPath)
-
-	if !strings.Contains(imageNameAndTag, ":") {
-		imageNameAndTag += ":latest"
-		logging.LogInfoByCtxf(ctx, "Going to download latest: '%s'", imageNameAndTag)
-	}
-
-	ref, err := name.ParseReference(imageNameAndTag)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed parse reference to download container image '%s' as archive '%s': %w", imageNameAndTag, outputPath, err)
-	}
-
-	img, err := remote.Image(ref)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to get remote image descriptor to download container image '%s' as archive '%s': %w", imageNameAndTag, outputPath, err)
-	}
-
-	f, err := os.Create(outputPath)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to creat outputPath to download container image '%s' as archive '%s': %w", imageNameAndTag, outputPath, err)
-	}
-	defer f.Close()
-
-	err = tarball.Write(ref, img, f)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to download container image '%s' as archive '%s': %w", imageNameAndTag, outputPath, err)
-	}
-
-	logging.LogChangedByCtxf(ctx, "Downloaded container image '%s' as archive '%s'.", imageNameAndTag, outputPath)
-
-	logging.LogInfoByCtxf(ctx, "Download container image '%s' as archive '%s' finished.", imageNameAndTag, outputPath)
-
-	return nil
-}
-
-func DownloadImageAsTeporaryArchive(ctx context.Context, imageNameAndTag string) (string, error) {
-	tempFile, err := tempfiles.CreateNamedTemporaryFile(ctx, strings.ReplaceAll(imageNameAndTag, ":", "_"))
-	if err != nil {
-		return "", err
-	}
-
-	logging.LogInfoByCtxf(ctx, "Going to download container image '%s' to temporary file '%s'.", imageNameAndTag, tempFile)
-
-	err = DownloadImageAsArchive(ctx, imageNameAndTag, tempFile)
-	if err != nil {
-		return "", err
-	}
-
-	return tempFile, nil
-}
 
 func ListImageNamesAndTagsInArchive(ctx context.Context, archivePath string) ([]string, error) {
 	if archivePath == "" {
@@ -415,110 +353,6 @@ func CreateSingleFileArchive(ctx context.Context, outputPath string, options *co
 	logging.LogChangedByCtxf(ctx, "Created new container image archive '%s' with single file '%s' as '%s'.", outputPath, srcFilePath, pathInArchive)
 
 	logging.LogInfoByCtxf(ctx, "Create new container image archive '%s' with single file '%s' as '%s' finished.", outputPath, srcFilePath, pathInArchive)
-
-	return nil
-}
-
-func AddFileToArchive(ctx context.Context, archivePath string, options *containeroptions.AddFileToImageOptions) error {
-	if archivePath == "" {
-		return tracederrors.TracedErrorEmptyString("archivePath")
-	}
-
-	if options == nil {
-		return tracederrors.TracedErrorNil("options")
-	}
-
-	srcFilePath, err := options.GetSourceFilePath()
-	if err != nil {
-		return err
-	}
-
-	pathInArchive, err := options.GetPathInImage()
-	if err != nil {
-		return err
-	}
-
-	newImageNameAndTag, err := options.GetNewImageNameAndTag()
-	if err != nil {
-		return err
-	}
-
-	logging.LogInfoByCtxf(ctx, "Add file '%s' as '%s' into container image archive '%s' started.", srcFilePath, pathInArchive, archivePath)
-
-	if !options.OverwriteSourceArchive {
-		return tracederrors.TracedError("Only implemented to overwrite source archive.")
-	}
-
-	tag, err := name.NewTag(newImageNameAndTag)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to parse new image name and tag '%s': %w", newImageNameAndTag, err)
-	}
-
-	image, _, err := LoadImageFromArchive(ctx, archivePath, "")
-	if err != nil {
-		return err
-	}
-
-	mode, err := options.GetMode()
-	if err != nil {
-		return err
-	}
-
-	var buf bytes.Buffer
-	tw := tar.NewWriter(&buf)
-
-	file, err := os.Open(srcFilePath)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to open '%s' to add it to the container image archive '%s': %w", srcFilePath, archivePath, err)
-	}
-	stat, err := file.Stat()
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to stat '%s' to add it to the container image archive '%s': %w", srcFilePath, archivePath, err)
-	}
-
-	header := &tar.Header{
-		Name: pathInArchive,
-		Size: stat.Size(),
-		Mode: mode,
-	}
-	err = tw.WriteHeader(header)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to write tar header for '%s': %w", srcFilePath, err)
-	}
-
-	_, err = io.Copy(tw, file)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to write file content for '%s' into tar: %w", srcFilePath, err)
-	}
-
-	err = tw.Close()
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to close tar writer for '%s': %w", srcFilePath, err)
-	}
-
-	layer, err := tarball.LayerFromOpener(
-		func() (io.ReadCloser, error) {
-			return io.NopCloser(bytes.NewReader(buf.Bytes())), nil
-		},
-		tarball.WithMediaType(types.DockerLayer),
-	)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to create new file layer to add '%s' to the container image archive '%s': %w", srcFilePath, archivePath, err)
-	}
-
-	newImage, err := mutate.AppendLayers(image, layer)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to append new layer")
-	}
-
-	err = OverwriteArchive(ctx, archivePath, &tag, newImage)
-	if err != nil {
-		return err
-	}
-
-	logging.LogChangedByCtxf(ctx, "Added file '%s' as '%s' in container image '%s' to '%s'.", srcFilePath, pathInArchive, newImageNameAndTag, archivePath)
-
-	logging.LogInfoByCtxf(ctx, "Add file '%s' as '%s' into container image archive '%s' finished.", srcFilePath, pathInArchive, archivePath)
 
 	return nil
 }
