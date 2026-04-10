@@ -5,7 +5,9 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/spf13/cobra"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/s3cmd/miniocmd/bucketscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/s3cmd/miniocmd/miniocmdoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/s3cmd/miniocmd/objectscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/nativeminioclient"
@@ -38,9 +40,8 @@ func NewMinioCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		NewDeleteObjectsCmd(options),
-		NewListBuckets(options),
-		NewListObjectsCmd(options),
+		bucketscmd.NewBucketsCmd(options),
+		objectscmd.NewObjectsCmd(options),
 	)
 
 	cmd.PersistentFlags().String("endpoint", "", "The minio endpoint/ server to use.")

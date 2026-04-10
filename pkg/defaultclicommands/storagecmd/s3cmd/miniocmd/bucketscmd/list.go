@@ -1,4 +1,4 @@
-package miniocmd
+package bucketscmd
 
 import (
 	"fmt"
@@ -11,9 +11,9 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/nativeminioclient"
 )
 
-func NewListBuckets(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
+func NewListBucketsCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list-buckets",
+		Use:   "list",
 		Short: "List buckets.",
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
