@@ -104,3 +104,51 @@ func GetMD5SumFromFileByPath(ctx context.Context, path string) (checksum string,
 
 	return checksum, nil
 }
+
+func GetSha256SumFromFile(ctx context.Context, path string) (checksum string, err error) {
+	if path == "" {
+		return "", tracederrors.TracedErrorEmptyString("path")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Get sha256 sum of file '%s' started.", path)
+	
+	if err = ctx.Err(); err != nil {
+		return "", tracederrors.TracedErrorEmptyString("context error before opening file: %w", err)
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return "", tracederrors.TracedErrorEmptyString("failed to open file: %w", err)
+	}
+	defer file.Close()
+
+	hasher := sha256.New()
+
+	// Use a buffer to read in chunks and respect context cancellation
+	buf := make([]byte, 32*1024) // 32 KB buffer
+	for {
+		// Check for context cancellation on each iteration
+		if err = ctx.Err(); err != nil {
+			return "", tracederrors.TracedErrorEmptyString("context cancelled while reading file: %w", err)
+		}
+
+		n, readErr := file.Read(buf)
+		if n > 0 {
+			if _, err = hasher.Write(buf[:n]); err != nil {
+				return "", tracederrors.TracedErrorEmptyString("failed to write to hasher: %w", err)
+			}
+		}
+		if readErr == io.EOF {
+			break
+		}
+		if readErr != nil {
+			return "", tracederrors.TracedErrorEmptyString("failed to read file: %w", readErr)
+		}
+	}
+
+	checksum = hex.EncodeToString(hasher.Sum(nil))
+
+	logging.LogInfoByCtxf(ctx, "Get sha256 sum of file '%s' finished. Checksum is '%s'.", path, checksum)
+
+	return checksum, nil
+}

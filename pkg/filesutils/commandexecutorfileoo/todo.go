@@ -55,6 +55,7 @@ func (f *File) GetPath() (path string, err error) {
 }
 
 func (f *File) GetSizeBytes() (fileSize int64, err error) {
+	// TODO: exists already in nativefiles but needs change to a funxtion signature with ctx.
 	return 0, tracederrors.TracedErrorNotImplemented()
 }
 
