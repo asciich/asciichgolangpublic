@@ -1,4 +1,4 @@
-package miniocmd
+package objectscmd
 
 import (
 	"github.com/spf13/cobra"
@@ -10,7 +10,7 @@ import (
 
 func NewDeleteObjectsCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "delete-objects",
+		Use:   "delete",
 		Short: "Delete the given objects in the S3 --bucket.",
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
@@ -38,7 +38,7 @@ func NewDeleteObjectsCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Comman
 		},
 	}
 
-	cmd.Flags().String("bucket", "", "Name of the bucket where to delete the object.")
+
 
 	return cmd
 }

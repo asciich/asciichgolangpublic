@@ -1,4 +1,4 @@
-package miniocmd
+package objectscmd
 
 import (
 	"fmt"
@@ -11,33 +11,32 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/nativeminioclient"
 )
 
-func NewListObjectsCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
+func NewShowDownloadUrlCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list-objects",
-		Short: "List the objects in the S3 --bucket.",
+		Use:   "show-download-url",
+		Short: "Show the download URL of the specified object key in the --bucket",
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
-			client := options.GetClient(ctx, cmd)
-
-			bucketName, err := cmd.Flags().GetString("bucket")
+			bucket, err := cmd.Flags().GetString("bucket")
 			if err != nil {
 				logging.LogGoErrorFatalWithTrace(err)
 			}
 
-			if bucketName == "" {
-				logging.LogFatalf("Please specify --bucket.")
+			if bucket == "" {
+				logging.LogFatal("Please specify --bucket.")
 			}
 
-			for _, o := range mustutils.Must(nativeminioclient.ListObjectNames(ctx, client, bucketName)) {
-				fmt.Println(o)
+			if len(args) != 1 {
+				logging.LogFatal("Please specify exactly one object key to build the download URL.")
 			}
 
-			logging.LogGoodByCtxf(ctx, "List objects in bucket '%s' finished.", bucketName)
+			client := options.GetClient(ctx, cmd)
+
+			url := mustutils.Must(nativeminioclient.GetDownloadUrl(ctx, client, bucket, args[0]))
+			fmt.Println(url)
 		},
 	}
-
-	cmd.Flags().String("bucket", "", "Name of the bucket to list.")
 
 	return cmd
 }
