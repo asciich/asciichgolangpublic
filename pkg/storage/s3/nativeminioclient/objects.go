@@ -3,6 +3,7 @@ package nativeminioclient
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"sort"
 
@@ -340,6 +341,37 @@ func UploadFileByPath(ctx context.Context, client *minio.Client, bucketName stri
 	logging.LogInfoByCtxf(ctx, "Upload '%s' to S3 bucket '%s' as '%s' finished.", path, bucketName, objectKey)
 
 	return nil
+}
+
+func DownloadAsString(ctx context.Context, client *minio.Client, bucketName string, objectKey string) (string, error) {
+	if client == nil {
+		return "", tracederrors.TracedErrorNil("client")
+	}
+
+	if bucketName == "" {
+		return "", tracederrors.TracedErrorEmptyString("bucketName")
+	}
+
+	if objectKey == "" {
+		return "", tracederrors.TracedErrorEmptyString("objectKey")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Download S3 object '%s' from bucket '%s' as string started.", objectKey, bucketName)
+
+	object, err := client.GetObject(ctx, bucketName, objectKey, minio.GetObjectOptions{})
+	if err != nil {
+		return "", fmt.Errorf("failed to get object %q from bucket %q: %w", objectKey, bucketName, err)
+	}
+	defer object.Close()
+
+	data, err := io.ReadAll(object)
+	if err != nil {
+		return "", fmt.Errorf("failed to read object %q from bucket %q: %w", objectKey, bucketName, err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Download S3 object '%s' from bucket '%s' as string finished.", objectKey, bucketName)
+
+	return string(data), nil
 }
 
 func DownloadAsTemporaryFile(ctx context.Context, client *minio.Client, bucketName string, objectKey string) (string, error) {

@@ -135,14 +135,14 @@ func GetSha256SumFromFile(ctx context.Context, path string) (checksum string, er
 		n, readErr := file.Read(buf)
 		if n > 0 {
 			if _, err = hasher.Write(buf[:n]); err != nil {
-				return "", tracederrors.TracedErrorEmptyString("failed to write to hasher: %w", err)
+				return "", tracederrors.TracedErrorf("failed to write to hasher: %w", err)
 			}
 		}
 		if readErr == io.EOF {
 			break
 		}
 		if readErr != nil {
-			return "", tracederrors.TracedErrorEmptyString("failed to read file: %w", readErr)
+			return "", tracederrors.TracedErrorf("failed to read file: %w", readErr)
 		}
 	}
 

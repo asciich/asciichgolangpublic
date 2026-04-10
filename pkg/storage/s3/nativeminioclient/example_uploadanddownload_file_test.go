@@ -107,4 +107,9 @@ func Test_Example_UploadAndDownload_File_test(t *testing.T) {
 	err = nativeminioclient.DownloadAsFileByPath(ctxDownload, client, bucketName, objectKey, destFilePath)
 	require.NoError(t, err)
 	require.False(t, contextutils.IsChanged(ctxDownload)) // As it's the same file and the same content it will not considered as a change.
+
+	// To download directly as string use:
+	content, err := nativeminioclient.DownloadAsString(ctx, client, bucketName, objectKey)
+	require.NoError(t, err)
+	require.EqualValues(t, "This is the test data", content)
 }
