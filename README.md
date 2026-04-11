@@ -18,6 +18,8 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 	* [jsonutils](pkg/fileformats/jsonutils/): Work with JSON
 	* [yamlutils](pkg/fileformats/yamlutils/): Work with YAML
 * [filesutils](pkg/filesutils/): Work with files.
+* [pgp](pkg/pgp/):
+	* [gnupgutils](pkg/pgp/gnupgutils/): Handle GnuPG.
 * [helmutils](pkg/helmutils/): Work with helm and helmcharts.
 * [httputils](pkg/httputils/): High level easy to use HTTP client and testserver.
 * [kindutils](pkg/kindutils/): Handle KinD/ Kubernetes in Docker.
