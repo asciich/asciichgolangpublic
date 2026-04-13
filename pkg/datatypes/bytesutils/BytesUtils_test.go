@@ -32,10 +32,9 @@ func TestBytesParseSizeStringAsInt64(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				sizeBytes := MustParseSizeStringAsInt64(tt.stringToParse)
-				require.EqualValues(tt.expectedSizeBytes, sizeBytes)
+				sizeBytes, err := ParseSizeStringAsInt64(tt.stringToParse)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedSizeBytes, sizeBytes)
 			},
 		)
 	}
@@ -61,10 +60,9 @@ func TestGetSizeAsHumanReadableString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				sizeString := MustGetSizeAsHumanReadableString(tt.sizeToConvert)
-				require.EqualValues(tt.expectedSizeString, sizeString)
+				sizeString, err := GetSizeAsHumanReadableString(tt.sizeToConvert)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedSizeString, sizeString)
 			},
 		)
 	}

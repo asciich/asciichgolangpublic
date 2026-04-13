@@ -7,12 +7,15 @@ import (
 
 func NewStorageCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "storage",
+		Use:   "storage",
 		Short: "Storage related commands",
 	}
 
 	cmd.AddCommand(
 		s3cmd.NewS3Cmd(),
+
+		NewSpeedTestCmd(),
+		NewSyncCmd(),
 	)
 
 	return cmd
