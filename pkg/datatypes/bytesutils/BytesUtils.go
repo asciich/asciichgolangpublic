@@ -1,7 +1,6 @@
 package bytesutils
 
 import (
-	"log"
 	"strconv"
 	"strings"
 
@@ -34,24 +33,6 @@ func GetSizeAsHumanReadableString(sizeBytes int64) (readableSize string, err err
 	}
 
 	return strconv.Itoa(int(sizeBytes)), nil
-}
-
-func MustGetSizeAsHumanReadableString(sizeBytes int64) (readableSize string) {
-	readableSize, err := GetSizeAsHumanReadableString(sizeBytes)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return readableSize
-}
-
-func MustParseSizeStringAsInt64(sizeString string) (sizeBytes int64) {
-	sizeBytes, err := ParseSizeStringAsInt64(sizeString)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return sizeBytes
 }
 
 func ParseSizeStringAsInt64(sizeString string) (sizeBytes int64, err error) {
