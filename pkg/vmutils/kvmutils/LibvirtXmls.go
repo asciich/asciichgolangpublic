@@ -1,9 +1,9 @@
-package kvm
+package kvmutils
 
 import (
+	"context"
 	_ "embed"
 
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -100,32 +100,7 @@ func (l *LibvirtXmlsService) GetMacAddressFromXmlString(libvirtXml string) (macA
 	return macAddress, nil
 }
 
-func (l *LibvirtXmlsService) MustCreateXmlForVmOnLatopAsString(createOptions *KvmCreateVmOptions) (libvirtXml string) {
-	libvirtXml, err := l.CreateXmlForVmOnLatopAsString(createOptions)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return libvirtXml
-}
-
-func (l *LibvirtXmlsService) MustGetMacAddressFromXmlString(libvirtXml string) (macAddress string) {
-	macAddress, err := l.GetMacAddressFromXmlString(libvirtXml)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return macAddress
-}
-
-func (l *LibvirtXmlsService) MustWriteXmlForVmOnLatopToFile(createOptions *KvmCreateVmOptions, outputFile filesinterfaces.File) {
-	err := l.WriteXmlForVmOnLatopToFile(createOptions, outputFile)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (l *LibvirtXmlsService) WriteXmlForVmOnLatopToFile(createOptions *KvmCreateVmOptions, outputFile filesinterfaces.File) (err error) {
+func (l *LibvirtXmlsService) WriteXmlForVmOnLatopToFile(ctx context.Context, createOptions *KvmCreateVmOptions, outputFile filesinterfaces.File) (err error) {
 	if createOptions == nil {
 		return tracederrors.TracedError("createOptions is nil")
 	}
@@ -139,7 +114,7 @@ func (l *LibvirtXmlsService) WriteXmlForVmOnLatopToFile(createOptions *KvmCreate
 		return err
 	}
 
-	err = outputFile.WriteString(contextutils.GetVerbosityContextByBool(createOptions.Verbose), xmlString, &filesoptions.WriteOptions{})
+	err = outputFile.WriteString(ctx, xmlString, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}
@@ -149,9 +124,7 @@ func (l *LibvirtXmlsService) WriteXmlForVmOnLatopToFile(createOptions *KvmCreate
 		return err
 	}
 
-	if createOptions.Verbose {
-		logging.LogInfof("Created xml for laptop on VM to: '%s'", outputPath)
-	}
+	logging.LogInfoByCtxf(ctx, "Created xml for laptop on VM to: '%s'", outputPath)
 
 	return nil
 }

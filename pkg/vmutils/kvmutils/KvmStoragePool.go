@@ -1,6 +1,7 @@
-package kvm
+package kvmutils
 
 import (
+	"context"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
@@ -47,7 +48,7 @@ func (k *KvmStoragePool) GetName() (name string, err error) {
 	return k.name, nil
 }
 
-func (k *KvmStoragePool) GetVolumes(verbose bool) (volumes []*KvmVolume, err error) {
+func (k *KvmStoragePool) GetVolumes(ctx context.Context) (volumes []*KvmVolume, err error) {
 	poolName, err := k.GetName()
 	if err != nil {
 		return nil, err
@@ -58,16 +59,14 @@ func (k *KvmStoragePool) GetVolumes(verbose bool) (volumes []*KvmVolume, err err
 		return nil, err
 	}
 
-	if verbose {
-		logging.LogInfof("Get volumes in storage pool '%s' on kvm hypervisor '%s' started.", poolName, hostname)
-	}
+	logging.LogInfoByCtxf(ctx, "Get volumes in storage pool '%s' on kvm hypervisor '%s' started.", poolName, hostname)
 
 	hypervisor, err := k.GetHypervisor()
 	if err != nil {
 		return nil, err
 	}
 
-	listPoolOutput, err := hypervisor.RunKvmCommandAndGetStdout([]string{"vol-list", "--pool", poolName}, verbose)
+	listPoolOutput, err := hypervisor.RunKvmCommandAndGetStdout(ctx, []string{"vol-list", "--pool", poolName})
 	if err != nil {
 		return nil, err
 	}
@@ -111,65 +110,11 @@ func (k *KvmStoragePool) GetVolumes(verbose bool) (volumes []*KvmVolume, err err
 		volumes = append(volumes, volumeToAdd)
 	}
 
-	if verbose {
-		logging.LogInfof("Collected '%d' storage pools on kvm host '%s'", len(volumes), hostname)
-	}
+	logging.LogInfoByCtxf(ctx, "Collected '%d' storage pools on kvm host '%s'", len(volumes), hostname)
 
-	if verbose {
-		logging.LogInfof("Get volumes in storage pool '%s' on kvm hypervisor '%s' finished.", poolName, hostname)
-	}
+	logging.LogInfoByCtxf(ctx, "Get volumes in storage pool '%s' on kvm hypervisor '%s' finished.", poolName, hostname)
 
 	return volumes, nil
-}
-
-func (k *KvmStoragePool) MustGetHostName() (hostname string) {
-	hostname, err := k.GetHostName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hostname
-}
-
-func (k *KvmStoragePool) MustGetHypervisor() (hypervisor *KVMHypervisor) {
-	hypervisor, err := k.GetHypervisor()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hypervisor
-}
-
-func (k *KvmStoragePool) MustGetName() (name string) {
-	name, err := k.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (k *KvmStoragePool) MustGetVolumes(verbose bool) (volumes []*KvmVolume) {
-	volumes, err := k.GetVolumes(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return volumes
-}
-
-func (k *KvmStoragePool) MustSetHypervisor(hypervisor *KVMHypervisor) {
-	err := k.SetHypervisor(hypervisor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (k *KvmStoragePool) MustSetName(name string) {
-	err := k.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (k *KvmStoragePool) SetHypervisor(hypervisor *KVMHypervisor) (err error) {

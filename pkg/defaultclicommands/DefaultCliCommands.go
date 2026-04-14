@@ -25,6 +25,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/testingcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/uuidcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/versioncmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/virtualmachinescmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/wikicmd"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -63,6 +64,7 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 		testingcmd.NewTestingCmd(),
 		uuidcmd.NewUuidCmd(),
 		versioncmd.NewVersionCmd(),
+		virtualmachinescmd.NewVirtualMachinesCmd(),
 		wikicmd.NewWikiCmd(),
 	)
 

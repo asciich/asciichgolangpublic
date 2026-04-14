@@ -1,7 +1,8 @@
-package kvm
+package kvmutils
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -30,7 +31,7 @@ func (k *KvmVm) GetCachedName() (cachedName string, err error) {
 	return k.cachedName, nil
 }
 
-func (k *KvmVm) GetDomainXmlAsString(verbose bool) (domainXml string, err error) {
+func (k *KvmVm) GetDomainXmlAsString(ctx context.Context) (domainXml string, err error) {
 	hypervisor, err := k.GetHypervisor()
 	if err != nil {
 		return "", err
@@ -41,10 +42,7 @@ func (k *KvmVm) GetDomainXmlAsString(verbose bool) (domainXml string, err error)
 		return "", err
 	}
 
-	domainXml, err = hypervisor.RunKvmCommandAndGetStdout(
-		[]string{"dumpxml", vmName},
-		verbose,
-	)
+	domainXml, err = hypervisor.RunKvmCommandAndGetStdout(ctx, []string{"dumpxml", vmName})
 	if err != nil {
 		return "", err
 	}
@@ -68,7 +66,7 @@ func (k *KvmVm) GetId() (id int, err error) {
 	return *(k.vmId), nil
 }
 
-func (k *KvmVm) GetInfo(verbose bool) (vmInfo *KvmVmInfo, err error) {
+func (k *KvmVm) GetInfo(ctx context.Context) (vmInfo *KvmVmInfo, err error) {
 	vmInfo = NewKvmVmInfo()
 
 	vmName, err := k.GetCachedName()
@@ -81,7 +79,7 @@ func (k *KvmVm) GetInfo(verbose bool) (vmInfo *KvmVmInfo, err error) {
 		return nil, err
 	}
 
-	macAddress, err := k.GetMacAddress(verbose)
+	macAddress, err := k.GetMacAddress(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -94,8 +92,8 @@ func (k *KvmVm) GetInfo(verbose bool) (vmInfo *KvmVmInfo, err error) {
 	return vmInfo, nil
 }
 
-func (k *KvmVm) GetMacAddress(verbose bool) (macAddress string, err error) {
-	domainXml, err := k.GetDomainXmlAsString(verbose)
+func (k *KvmVm) GetMacAddress(ctx context.Context) (macAddress string, err error) {
+	domainXml, err := k.GetDomainXmlAsString(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -118,106 +116,6 @@ func (k *KvmVm) GetVmId() (vmId *int, err error) {
 	}
 
 	return k.vmId, nil
-}
-
-func (k *KvmVm) MustGetCachedName() (cachedName string) {
-	cachedName, err := k.GetCachedName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return cachedName
-}
-
-func (k *KvmVm) MustGetDomainXmlAsString(verbose bool) (domainXml string) {
-	domainXml, err := k.GetDomainXmlAsString(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return domainXml
-}
-
-func (k *KvmVm) MustGetHypervisor() (hypervisor *KVMHypervisor) {
-	hypervisor, err := k.GetHypervisor()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hypervisor
-}
-
-func (k *KvmVm) MustGetId() (id int) {
-	id, err := k.GetId()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return id
-}
-
-func (k *KvmVm) MustGetInfo(verbose bool) (vmInfo *KvmVmInfo) {
-	vmInfo, err := k.GetInfo(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return vmInfo
-}
-
-func (k *KvmVm) MustGetMacAddress(verbose bool) (macAddress string) {
-	macAddress, err := k.GetMacAddress(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return macAddress
-}
-
-func (k *KvmVm) MustGetName() (name string) {
-	name, err := k.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (k *KvmVm) MustGetVmId() (vmId *int) {
-	vmId, err := k.GetVmId()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return vmId
-}
-
-func (k *KvmVm) MustSetCachedName(cachedName string) {
-	err := k.SetCachedName(cachedName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (k *KvmVm) MustSetHypervisor(hypervisor *KVMHypervisor) {
-	err := k.SetHypervisor(hypervisor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (k *KvmVm) MustSetId(id int) {
-	err := k.SetId(id)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (k *KvmVm) MustSetVmId(vmId *int) {
-	err := k.SetVmId(vmId)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (k *KvmVm) SetCachedName(cachedName string) (err error) {

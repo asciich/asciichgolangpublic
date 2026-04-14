@@ -1,4 +1,4 @@
-package kvm
+package kvmutils
 
 import (
 	"testing"
@@ -18,13 +18,10 @@ func TestKvmHypervisorGetHostNameWhenUsingLocalhost(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				hypervisor := MustGetKvmHypervisorOnLocalhost()
-				require.EqualValues(
-					"localhost_connection",
-					hypervisor.MustGetHostName(),
-				)
+				hypervisor, err := GetKvmHypervisorOnLocalhost()
+				require.NoError(t, err)
+				hostname, err := hypervisor.GetHostName()
+				require.EqualValues(t, "localhost_connection", hostname)
 			},
 		)
 	}
