@@ -1,7 +1,6 @@
-package kvm
+package kvmutils
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -42,47 +41,6 @@ func (k *KvmVmInfo) GetNameAndMacAddress() (name string, macAddress string, err 
 	}
 
 	return name, macAddress, nil
-}
-
-func (k *KvmVmInfo) MustGetMacAddress() (macAddress string) {
-	macAddress, err := k.GetMacAddress()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return macAddress
-}
-
-func (k *KvmVmInfo) MustGetName() (name string) {
-	name, err := k.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (k *KvmVmInfo) MustGetNameAndMacAddress() (name string, macAddress string) {
-	name, macAddress, err := k.GetNameAndMacAddress()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name, macAddress
-}
-
-func (k *KvmVmInfo) MustSetMacAddress(macAddress string) {
-	err := k.SetMacAddress(macAddress)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (k *KvmVmInfo) MustSetName(name string) {
-	err := k.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (k *KvmVmInfo) SetMacAddress(macAddress string) (err error) {

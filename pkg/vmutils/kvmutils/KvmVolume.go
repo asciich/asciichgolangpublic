@@ -1,6 +1,8 @@
-package kvm
+package kvmutils
 
 import (
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -12,72 +14,6 @@ type KvmVolume struct {
 
 func NewKvmVolume() (kvmVolume *KvmVolume) {
 	return new(KvmVolume)
-}
-
-func (k *KvmVolume) MustGetHostName() (hostname string) {
-	hostname, err := k.GetHostName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hostname
-}
-
-func (k *KvmVolume) MustGetHypervisor() (hypervisor *KVMHypervisor) {
-	hypervisor, err := k.GetHypervisor()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hypervisor
-}
-
-func (k *KvmVolume) MustGetName() (name string) {
-	name, err := k.GetName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return name
-}
-
-func (k *KvmVolume) MustGetStoragePool() (storagePool *KvmStoragePool) {
-	storagePool, err := k.GetStoragePool()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return storagePool
-}
-
-func (k *KvmVolume) MustGetStoragePoolName() (storagePoolName string) {
-	storagePoolName, err := k.GetStoragePoolName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return storagePoolName
-}
-
-func (k *KvmVolume) MustRemove(verbose bool) {
-	err := k.Remove(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (k *KvmVolume) MustSetName(name string) {
-	err := k.SetName(name)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (k *KvmVolume) MustSetStoragePool(storagePool *KvmStoragePool) {
-	err := k.SetStoragePool(storagePool)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (v *KvmVolume) GetHostName() (hostname string, err error) {
@@ -138,7 +74,7 @@ func (v *KvmVolume) GetStoragePoolName() (storagePoolName string, err error) {
 	return storagePoolName, nil
 }
 
-func (v *KvmVolume) Remove(verbose bool) (err error) {
+func (v *KvmVolume) Remove(ctx context.Context) (err error) {
 	hostname, err := v.GetHostName()
 	if err != nil {
 		return err
@@ -159,14 +95,12 @@ func (v *KvmVolume) Remove(verbose bool) (err error) {
 		return err
 	}
 
-	_, err = hypervisor.RunKvmCommand([]string{"vol-delete", "--pool", poolName, volumeName}, verbose)
+	_, err = hypervisor.RunKvmCommand(ctx, []string{"vol-delete", "--pool", poolName, volumeName})
 	if err != nil {
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof("KVM volume '%s' on storage pool '%s' on host '%v' deleted.", volumeName, poolName, hostname)
-	}
+	logging.LogInfoByCtxf(ctx, "KVM volume '%s' on storage pool '%s' on host '%v' deleted.", volumeName, poolName, hostname)
 
 	return nil
 }

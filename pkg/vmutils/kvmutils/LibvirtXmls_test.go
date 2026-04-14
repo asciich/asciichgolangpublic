@@ -1,4 +1,4 @@
-package kvm
+package kvmutils
 
 /* TODO enable again
 import (
