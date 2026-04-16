@@ -1,9 +1,10 @@
-package asciichgolangpublic
+package macaddresses_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	macaddresses "github.com/asciich/asciichgolangpublic/pkg/netutils/macadrresses"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -35,7 +36,7 @@ func TestMacAddressesIsStringAMacAddress(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				require := require.New(t)
-				require.EqualValues(tt.isMacAddress, IsStringAMacAddress(tt.input))
+				require.EqualValues(tt.isMacAddress, macaddresses.IsStringAMacAddress(tt.input))
 			},
 		)
 	}
