@@ -2,7 +2,7 @@ package bashcmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/bashcmd/historycmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/shellcmd/bashcmd/historycmd"
 )
 
 func NewBashCmd() *cobra.Command {

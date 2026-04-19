@@ -4,7 +4,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/ansiblecmd"
-	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/bashcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/cloudcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/containercmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/documentationcmd"
@@ -20,6 +19,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/monitoringcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/packagemanagercmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/shellcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/sshcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/testingcmd"
@@ -43,7 +43,7 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 	rootCmd.AddCommand(
 		aicmd.NewAICmd(),
 		ansiblecmd.NewAnsibleCmd(),
-		bashcmd.NewBashCmd(),
+
 		cloudcmd.NewCloudCmd(),
 		containercmd.NewContainerCmd(),
 		documentationcmd.NewDocumentationCmd(rootCmd),
@@ -59,6 +59,7 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 		monitoringcmd.NewMonitoringCommand(),
 		networkcmd.NewNetworkCmd(),
 		packagemanagercmd.NewPackageManagerCmd(),
+		shellcmd.NewShellCmd(),
 		sshcmd.NewSshCmd(),
 		storagecmd.NewStorageCmd(),
 		testingcmd.NewTestingCmd(),
