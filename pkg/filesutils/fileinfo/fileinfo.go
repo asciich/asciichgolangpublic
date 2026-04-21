@@ -1,4 +1,4 @@
-package files
+package fileinfo
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
