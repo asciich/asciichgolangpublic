@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
 // To run this test use:
@@ -89,5 +90,152 @@ func Test_CreateFileUsingSudo(t *testing.T) {
 				require.EqualValues(t, permissionString, got)
 			})
 		}
+	}
+}
+
+func TestFile_WriteString_ReadAsString(t *testing.T) {
+	tests := []struct {
+		implementationName string
+		content            string
+	}{
+		{"localFile", "hello world"},
+		{"localCommandExecutorFile", "hello world"},
+		{"commandExecutorFileExec", "hello world"},
+		{"commandExecutorFileBash", "hello world"},
+		{"nativefilesoo", "hello world"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+
+				fileToTest := getTemporaryFileToTest(tt.implementationName)
+				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
+
+				err := fileToTest.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
+				require.NoError(t, err)
+
+				content, err := fileToTest.ReadAsString(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.content, content)
+			},
+		)
+	}
+}
+
+func TestFile_Exists(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localFile"},
+		{"localCommandExecutorFile"},
+		{"commandExecutorFileExec"},
+		{"commandExecutorFileBash"},
+		{"nativefilesoo"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+
+				fileToTest := getTemporaryFileToTest(tt.implementationName)
+				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
+
+				exists, err := fileToTest.Exists(ctx)
+				require.NoError(t, err)
+				require.True(t, exists)
+
+				err = fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
+				require.NoError(t, err)
+
+				exists, err = fileToTest.Exists(ctx)
+				require.NoError(t, err)
+				require.False(t, exists)
+			},
+		)
+	}
+}
+
+func TestFile_Truncate(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localFile"},
+		{"localCommandExecutorFile"},
+		{"commandExecutorFileExec"},
+		{"commandExecutorFileBash"},
+		{"nativefilesoo"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+
+				fileToTest := getTemporaryFileToTest(tt.implementationName)
+				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
+
+				for i := 0; i < 10; i++ {
+					err := fileToTest.Truncate(ctx, int64(i))
+					require.NoError(t, err)
+
+					sizeBytes, err := fileToTest.GetSizeBytes(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, sizeBytes, int64(i))
+				}
+
+				err := fileToTest.Truncate(ctx, 0)
+				require.NoError(t, err)
+
+				sizeBytes, err := fileToTest.GetSizeBytes(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, sizeBytes, 0)
+			},
+		)
+	}
+}
+
+func TestFile_GetSizeBytes(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"localFile"},
+		{"localCommandExecutorFile"},
+		{"commandExecutorFileExec"},
+		{"commandExecutorFileBash"},
+		{"nativefilesoo"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+
+				fileToTest := getTemporaryFileToTest(tt.implementationName)
+				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
+
+				for i := 0; i < 10; i++ {
+					err := fileToTest.WriteString(ctx, strings.Repeat("a", i), &filesoptions.WriteOptions{})
+					require.NoError(t, err)
+
+					sizeBytes, err := fileToTest.GetSizeBytes(ctx)
+					require.NoError(t, err)
+					require.EqualValues(t, int64(i), sizeBytes)
+				}
+
+				err := fileToTest.WriteString(ctx, "", &filesoptions.WriteOptions{})
+				require.NoError(t, err)
+
+				sizeBytes, err := fileToTest.GetSizeBytes(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, int64(0), sizeBytes)
+			},
+		)
 	}
 }

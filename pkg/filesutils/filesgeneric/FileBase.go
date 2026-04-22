@@ -65,7 +65,7 @@ func (f *FileBase) AppendLine(ctx context.Context, line string) (err error) {
 	toWrite := stringsutils.TrimAllLeadingAndTailingNewLines(line)
 	toWrite = stringsutils.EnsureEndsWithExactlyOneLineBreak(toWrite)
 
-	isEmptyFile, err := f.IsEmptyFile()
+	isEmptyFile, err := f.IsEmptyFile(ctx)
 	if err != nil {
 		return err
 	}
@@ -152,7 +152,7 @@ func (f *FileBase) EnsureEndsWithLineBreak(ctx context.Context) (err error) {
 		return err
 	}
 
-	isEmptyFile, err := parent.IsEmptyFile()
+	isEmptyFile, err := parent.IsEmptyFile(ctx)
 	if err != nil {
 		return err
 	}
@@ -518,13 +518,13 @@ func (f *FileBase) IsContentEqualByComparingSha256Sum(ctx context.Context, other
 	return isEqual, nil
 }
 
-func (f *FileBase) IsEmptyFile() (isEmtpyFile bool, err error) {
+func (f *FileBase) IsEmptyFile(ctx context.Context) (isEmtpyFile bool, err error) {
 	parent, err := f.GetParentFileForBaseClass()
 	if err != nil {
 		return false, err
 	}
 
-	size, err := parent.GetSizeBytes()
+	size, err := parent.GetSizeBytes(ctx)
 	if err != nil {
 		return false, err
 	}

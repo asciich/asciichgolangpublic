@@ -8,8 +8,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-
-
 func (f *File) AppendBytes(ctx context.Context, toWrite []byte) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
 }
@@ -38,9 +36,6 @@ func (f *File) GetParentDirectory(ctx context.Context) (parentDirectory filesint
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
-func (f *File) GetSizeBytes() (fileSize int64, err error) {
-	return -1, tracederrors.TracedErrorNotImplemented()
-}
 func (f *File) GetUriAsString() (uri string, err error) {
 	return "", tracederrors.TracedErrorNotImplemented()
 }
@@ -51,9 +46,7 @@ func (f *File) MoveToPath(ctx context.Context, destPath string, useSudo bool) (m
 func (f *File) SecurelyDelete(ctx context.Context) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
 }
+
 func (f *File) String() (path string) {
 	return f.path
-}
-func (f *File) Truncate(ctx context.Context, newSizeBytes int64) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
 }

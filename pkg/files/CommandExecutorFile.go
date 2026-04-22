@@ -487,7 +487,8 @@ func (c *CommandExecutorFile) GetPathAndHostDescription() (path string, hostDesc
 	return path, hostDescription, nil
 }
 
-func (c *CommandExecutorFile) GetSizeBytes() (fileSize int64, err error) {
+// This is already available in commandexecutorfileoo
+func (c *CommandExecutorFile) GetSizeBytes(ctx context.Context) (fileSize int64, err error) {
 	commandExecutor, filePath, err := c.GetCommandExecutorAndFilePath()
 	if err != nil {
 		return -1, err
@@ -680,6 +681,7 @@ func (c *CommandExecutorFile) SetFilePath(filePath string) (err error) {
 	return nil
 }
 
+// Already available in commandexecutorfileoo
 func (c *CommandExecutorFile) Truncate(ctx context.Context, newSizeBytes int64) (err error) {
 	if newSizeBytes < 0 {
 		return tracederrors.TracedErrorf(
@@ -688,7 +690,7 @@ func (c *CommandExecutorFile) Truncate(ctx context.Context, newSizeBytes int64) 
 		)
 	}
 
-	currentSize, err := c.GetSizeBytes()
+	currentSize, err := c.GetSizeBytes(ctx)
 	if err != nil {
 		return err
 	}
