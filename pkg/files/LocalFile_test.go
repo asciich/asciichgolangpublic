@@ -1036,7 +1036,7 @@ func TestFileGetSizeBytes(t *testing.T) {
 				err := testFile.WriteBytes(ctx, tt.content, &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				sizeBytes, err := testFile.GetSizeBytes()
+				sizeBytes, err := testFile.GetSizeBytes(ctx)
 				require.NoError(t, err)
 
 				require.EqualValues(t, tt.expectedSize, sizeBytes)

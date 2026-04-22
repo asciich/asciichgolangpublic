@@ -355,7 +355,7 @@ func (l *LocalFile) GetPath() (path string, err error) {
 	return l.path, nil
 }
 
-func (l *LocalFile) GetSizeBytes() (fileSizeBytes int64, err error) {
+func (l *LocalFile) GetSizeBytes(ctx context.Context) (fileSizeBytes int64, err error) {
 	path, err := l.GetPath()
 	if err != nil {
 		return -1, err
@@ -501,7 +501,7 @@ func (l *LocalFile) Truncate(ctx context.Context, newSizeBytes int64) (err error
 		return err
 	}
 
-	currentSize, err := l.GetSizeBytes()
+	currentSize, err := l.GetSizeBytes(ctx)
 	if err != nil {
 		return err
 	}

@@ -54,11 +54,6 @@ func (f *File) GetPath() (path string, err error) {
 	return f.path, nil
 }
 
-func (f *File) GetSizeBytes() (fileSize int64, err error) {
-	// TODO: exists already in nativefiles but needs change to a funxtion signature with ctx.
-	return 0, tracederrors.TracedErrorNotImplemented()
-}
-
 func (f *File) GetUriAsString() (uri string, err error) {
 	return "", tracederrors.TracedErrorNotImplemented()
 }
@@ -76,9 +71,7 @@ func (f *File) String() (path string) {
 	return ""
 }
 
-func (f *File) Truncate(ctx context.Context, newSizeBytes int64) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
-}
+
 
 func (f *File) GetCommandExecutor() (commandexecutorinterfaces.CommandExecutor, error) {
 	if f.commandExecutor == nil {

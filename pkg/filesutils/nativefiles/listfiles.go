@@ -12,6 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
+// List all files in the given directory 'path'.
 func ListFiles(ctx context.Context, path string, listOptions *parameteroptions.ListFileOptions) ([]string, error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString("path")
