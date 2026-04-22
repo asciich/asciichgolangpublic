@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	macaddresses "github.com/asciich/asciichgolangpublic/pkg/netutils/macadrresses"
+	"github.com/asciich/asciichgolangpublic/pkg/netutils/macaddresses"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
