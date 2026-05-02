@@ -1,16 +1,49 @@
-package files_test
+package filesgeneric_test
 
 import (
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
+
+func getDirectoryToTest(implementationName string) (directory filesinterfaces.Directory) {
+	tempDir, err := os.MkdirTemp("", "test_dir")
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	if implementationName == "localDirectory" {
+		ctx := contextutils.ContextVerbose()
+		dir, err := files.GetLocalDirectoryByPath(ctx, tempDir)
+		if err != nil {
+			logging.LogGoErrorFatal(err)
+		}
+
+		return dir
+	}
+
+	if implementationName == "localCommandExecutorDirectory" {
+		return mustutils.Must(files.GetLocalCommandExecutorDirectoryByPath(tempDir))
+	}
+
+	logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)
+	err = os.Remove(tempDir)
+	if err != nil {
+		logging.LogGoErrorFatal(err)
+	}
+
+	return nil
+}
 
 func TestDirectoryBase_SetAndGetParentDirectory(t *testing.T) {
 	tests := []struct {
@@ -25,7 +58,7 @@ func TestDirectoryBase_SetAndGetParentDirectory(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				directoryBase := files.NewDirectoryBase()
+				directoryBase := filesgeneric.NewDirectoryBase()
 
 				tempDir, err := os.MkdirTemp("", "test_direcotry")
 				require.NoError(t, err)
