@@ -11,6 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -29,7 +30,7 @@ import (
 // The downside of this is the poor performance and the possiblity to see
 // in the process table which operations where done.
 type CommandExecutorDirectory struct {
-	DirectoryBase
+	filesgeneric.DirectoryBase
 	commandExecutor commandexecutorinterfaces.CommandExecutor
 	dirPath         string
 }

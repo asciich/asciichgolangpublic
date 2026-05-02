@@ -20,7 +20,7 @@ func getYayInContainer(ctx context.Context, t *testing.T) (*yay.Yay, containerin
 	require.NoError(t, err)
 
 	err = container.Run(ctx, &dockeroptions.DockerRunContainerOptions{
-		ImageName: "archlinux:base-20250727.0.390543",
+		ImageName: "archlinux:base-20260419.0.517065",
 		Command:   []string{"sleep", "2m"},
 	})
 	require.NoError(t, err)

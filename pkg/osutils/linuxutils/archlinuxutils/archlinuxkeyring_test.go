@@ -21,7 +21,7 @@ func Test_UpdateArchlinuxKeyringPackage(t *testing.T) {
 	ctx := getCtx()
 
 	// Let's take an fixed image version where we know the package is outdated:
-	const imageName = "archlinux:base-20250727.0.390543"
+	const imageName = "archlinux:base-20260419.0.517065"
 
 	container, err := nativedocker.NewDocker().GetContainerByName("test-update-archlinux-keyring")
 	require.NoError(t, err)
