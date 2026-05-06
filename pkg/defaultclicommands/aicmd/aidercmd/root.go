@@ -11,6 +11,7 @@ func NewAiderCmd() *cobra.Command {
 	cmd.AddCommand(
 		NewBuildContainerImageCmd(),
 		NewShowRunCommandCmd(),
+		NewRunAiderCmd(), // Add this line
 	)
 
 	return cmd
