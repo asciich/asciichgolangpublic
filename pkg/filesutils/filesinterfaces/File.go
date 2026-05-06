@@ -24,8 +24,11 @@ type File interface {
 	GetBaseName() (baseName string, err error)
 	GetDeepCopy() (deepCopy File)
 	GetHostDescription() (hostDescription string, err error)
+
+	// Returns the path on the local machine. If the path is not available locally an error is returned.
 	GetLocalPath() (localPath string, err error)
 	GetLocalPathOrEmptyStringIfUnset() (localPath string, err error)
+
 	GetParentDirectory(ctx context.Context) (parentDirectory Directory, err error)
 	GetPath() (path string, err error)
 	GetSizeBytes(ctx context.Context) (fileSize int64, err error)
