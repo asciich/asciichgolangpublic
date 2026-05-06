@@ -7,3 +7,4 @@ asciich_root_ca.crt
 __debug_*
 ./asciichgolangpublic
 *.patch
+.aider*
