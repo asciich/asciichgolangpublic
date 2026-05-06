@@ -85,18 +85,11 @@ func (d *Directory) GetDirName() (dirName string, err error) {
 func (d *Directory) GetFileInDirectory(pathToFile ...string) (file filesinterfaces.File, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
-func (d *Directory) GetHostDescription() (hostDescription string, err error) {
-	return "", tracederrors.TracedErrorNotImplemented()
-}
-func (d *Directory) GetLocalPath() (localPath string, err error) {
-	return "", tracederrors.TracedErrorNotImplemented()
-}
+
 func (d *Directory) GetParentDirectory(ctx context.Context) (parentDirectory filesinterfaces.Directory, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
-func (d *Directory) GetPath() (dirPath string, err error) {
-	return "", tracederrors.TracedErrorNotImplemented()
-}
+
 func (d *Directory) GetSubDirectory(ctx context.Context, path ...string) (subDirectory filesinterfaces.Directory, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
