@@ -102,7 +102,7 @@ func GetRunCommand(noninteractive bool) ([]string, error) {
 		"aider-local:latest",
 		"aider",
 		"--model",
-		"ollama_chat/qwen2.5-coder:7b",
+		"ollama_chat/qwen3.5:9b",
 		"--no-auto-commits",
 		"--no-show-release-notes",
 	}
