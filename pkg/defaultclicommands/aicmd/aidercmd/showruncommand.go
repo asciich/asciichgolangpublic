@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/aiutils/aiderutils"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
 
 func NewShowRunCommandCmd() *cobra.Command {
@@ -21,7 +22,7 @@ To directly run it use:
   eval $(` + os.Args[0] + ` ai aider show-run-command)
 `,
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println(strings.Join(aiderutils.GetRunCommand(), " "))
+			fmt.Println(strings.Join(mustutils.Must(aiderutils.GetRunCommand(false)), " "))
 		},
 	}
 

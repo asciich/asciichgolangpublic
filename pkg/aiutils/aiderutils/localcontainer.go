@@ -3,6 +3,7 @@ package aiderutils
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
@@ -11,7 +12,9 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/osutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 const DEFAULT_CONTAINER_NAME = "aider-local"
@@ -65,21 +68,37 @@ RUN git config --global user.name "aider" && \
 	return nil
 }
 
-func GetRunCommand() []string {
+func GetRunCommand(noninteractive bool) ([]string, error) {
 	cmd := []string{
 		"docker",
 		"run",
 		"--rm",
-		"-it",
+	}
+
+	if noninteractive {
+		cmd = append(cmd, "-t")
+	} else {
+		cmd = append(cmd, "-it")
+	}
+
+	uid := os.Getuid()
+	gid := os.Getgid()
+
+	workingDirectory, err := osutils.GetCurrentWorkingDirectoryAsString()
+	if err != nil {
+		return nil, err
+	}
+
+	extend := []string{
 		"-e",
 		"OLLAMA_API_BASE=http://host.docker.internal:11434",
 		"-v",
-		"$(pwd):/app",
+		workingDirectory + ":/app",
 		"-w",
 		"/app",
 		"--add-host=host.docker.internal:host-gateway",
 		"--user",
-		"$(id -u):$(id -g)",
+		fmt.Sprintf("%d:%d", uid, gid),
 		"aider-local:latest",
 		"aider",
 		"--model",
@@ -88,5 +107,38 @@ func GetRunCommand() []string {
 		"--no-show-release-notes",
 	}
 
-	return cmd
+	cmd = append(cmd, extend...)
+
+	return cmd, nil
+}
+
+func RunAider(ctx context.Context, prompt string, files []string) error {
+	if prompt == "" {
+		return tracederrors.TracedErrorEmptyString("prompt")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run aider noninteractively started.")
+
+	cmd, err := GetRunCommand(true)
+	if err != nil {
+		return err
+	}
+	cmd = append(cmd, "--yes", "--message", prompt)
+	if len(files) > 0 {
+		cmd = append(cmd, files...)
+	}
+
+	_, err = commandexecutorexec.RunCommand(
+		commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(ctx),
+		&parameteroptions.RunCommandOptions{
+			Command: cmd,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run aider noninteractively finished.")
+
+	return nil
 }
