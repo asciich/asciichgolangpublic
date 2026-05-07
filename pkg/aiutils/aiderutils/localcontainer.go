@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y git && \
     pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir aider-chat
 
-env HOME /aider-home
+ENV HOME=/aider-home
 RUN mkdir -p $HOME && chmod 777 $HOME
 
 WORKDIR /app
@@ -47,6 +47,14 @@ WORKDIR /app
 # Initialize Git to avoid warnings about an uninitialized repository
 RUN git config --global user.name "aider" && \
     git config --global user.email "aider@asciich.ch"
+
+# Write global aider model settings (replaces non-working AIDER_EXTRA_PARAMS)
+RUN echo '- name: ollama_chat/qwen2.5-coder:7b' > $HOME/.aider.model.settings.yml && \
+    echo '  extra_params:'                       >> $HOME/.aider.model.settings.yml && \
+    echo '    num_ctx: 32768'                    >> $HOME/.aider.model.settings.yml && \
+    echo '- name: ollama_chat/qwen3.5:9b'        >> $HOME/.aider.model.settings.yml && \
+    echo '  extra_params:'                       >> $HOME/.aider.model.settings.yml && \
+    echo '    num_ctx: 32768'                    >> $HOME/.aider.model.settings.yml
 `
 	err = nativefiles.WriteString(ctx, filepath.Join(tempDir, "Dockerfile"), content)
 	if err != nil {
@@ -102,7 +110,7 @@ func GetRunCommand(noninteractive bool) ([]string, error) {
 		"aider-local:latest",
 		"aider",
 		"--model",
-		"ollama_chat/qwen3.5:9b",
+		"ollama_chat/qwen2.5-coder:7b",
 		"--no-auto-commits",
 		"--no-show-release-notes",
 	}
