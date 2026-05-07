@@ -13,6 +13,7 @@ func NewOllamaCmd() *cobra.Command {
 		NewDescribeImageCmd(),
 		NewOcrCmd(),
 		NewRunCpuOnlyCmd(),
+		NewRunGpuCmd(),
 		NewSendPromptCmd(),
 	)
 
