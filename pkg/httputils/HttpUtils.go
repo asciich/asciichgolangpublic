@@ -18,6 +18,15 @@ func SendRequest(ctx context.Context, requestOptions *httpoptions.RequestOptions
 	return httpnativeclientoo.NewNativeClient().SendRequest(ctx, requestOptions)
 }
 
+func SendRequestAndGetBodyAsBytes(ctx context.Context, requestOptions *httpoptions.RequestOptions) (response []byte, err error) {
+	if requestOptions == nil {
+		return nil, tracederrors.TracedErrorNil("requestOptions")
+	}
+
+	return httpnativeclientoo.NewNativeClient().SendRequestAndGetBodyAsBytes(ctx, requestOptions)
+}
+
+
 func SendRequestAndGetBodyAsString(ctx context.Context, requestOptions *httpoptions.RequestOptions) (response string, err error) {
 	if requestOptions == nil {
 		return "", tracederrors.TracedErrorNil("requestOptions")

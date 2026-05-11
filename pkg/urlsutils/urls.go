@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -89,4 +90,24 @@ func SetPath(inputUrl string, path string) (string, error) {
 
 	u.Path = path
 	return u.String(), nil
+}
+
+// Returns the scheme and host (incl. port if explicitly specified):
+//
+// E.g. the inputUrl "https://example.com:123/a/path" will return
+// https://example.com:123
+func GetSchemeAndHost(inputUrl string) (string, error) {
+	if inputUrl == "" {
+		return "", tracederrors.TracedErrorEmptyString("inputUrl")
+	}
+
+	trimmed := strings.TrimSpace(inputUrl)
+	parsed, err := url.Parse(trimmed)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Failed to parse URL '%s': %w", trimmed, err)
+	}
+
+	scheme := stringsutils.EnsureSuffix(parsed.Scheme, "://")
+
+	return scheme + parsed.Host, nil
 }

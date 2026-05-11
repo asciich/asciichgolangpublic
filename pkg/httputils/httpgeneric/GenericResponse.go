@@ -53,6 +53,10 @@ func (g *GenericResponse) GetBody() (body []byte, err error) {
 	return g.body, nil
 }
 
+func (g *GenericResponse) GetBodyAsBytes() ([]byte, error) {
+	return g.GetBody()
+}
+
 func (g *GenericResponse) GetBodyAsString() (body string, err error) {
 	bodyBytes, err := g.GetBody()
 	if err != nil {

@@ -24,7 +24,7 @@ func ParseCreationDateFromSignalPictureBaseName(baseName string) (creationDate *
 	}
 
 	if !strings.HasPrefix(baseName, "signal-") {
-		return nil, tracederrors.TracedErrorf("baseName '%s' is not a singal picture base name", baseName)
+		return nil, tracederrors.TracedErrorf("baseName '%s' is not a signal picture base name", baseName)
 	}
 
 	dateString := strings.TrimPrefix(baseName, "signal-")

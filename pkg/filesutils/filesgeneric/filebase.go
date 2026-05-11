@@ -1058,7 +1058,7 @@ func (xxx *FileBase) GetCreationDateByFileName(ctx context.Context) (creationDat
 		if err != nil {
 			if strings.Contains(err.Error(), "Unable to parse date ") {
 				err = nil
-			} else if strings.Contains(err.Error(), "is not a singal picture base name") {
+			} else if strings.Contains(err.Error(), "is not a signal picture base name") {
 				err = nil
 			} else {
 				return nil, err

@@ -16,6 +16,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/latexcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/linuxcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/loggingcmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/messengercmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/monitoringcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/packagemanagercmd"
@@ -56,6 +57,7 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 		latexcmd.NewLatexCmd(),
 		linuxcmd.NewLinuxCmd(),
 		loggingcmd.NewLoggingCmd(),
+		messengercmd.NewMessengerCmd(),
 		monitoringcmd.NewMonitoringCommand(),
 		networkcmd.NewNetworkCmd(),
 		packagemanagercmd.NewPackageManagerCmd(),

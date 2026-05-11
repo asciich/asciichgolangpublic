@@ -108,8 +108,6 @@ func TestSetPort(t *testing.T) {
 	}
 }
 
-
-
 func TestSetPath(t *testing.T) {
 	tests := []struct {
 		url      string
@@ -146,4 +144,35 @@ func TestSetPath(t *testing.T) {
 		require.Error(t, err)
 		require.EqualValues(t, "", got)
 	})
+}
+
+func TestGetSchemeAndHost(t *testing.T) {
+	t.Run("empty string", func(t *testing.T) {
+		got, err := urlsutils.GetSchemeAndHost("")
+		require.Error(t, err)
+		require.Empty(t, got)
+	})
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"https://example.com:123", "https://example.com:123"},
+		{"https://example.com:123/", "https://example.com:123"},
+		{"https://example.com:123/a", "https://example.com:123"},
+		{"https://example.com:123/a/path", "https://example.com:123"},
+		{" https://example.com:123", "https://example.com:123"},
+		{" https://example.com:123/", "https://example.com:123"},
+		{" https://example.com:123/a", "https://example.com:123"},
+		{" https://example.com:123/a/path", "https://example.com:123"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			got, err := urlsutils.GetSchemeAndHost(tt.input)
+			require.NoError(t, err)
+			require.EqualValues(t, tt.expected, got)
+		})
+	}
+
 }
