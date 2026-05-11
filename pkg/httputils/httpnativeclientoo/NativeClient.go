@@ -165,6 +165,19 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httpopti
 	return response, err
 }
 
+func (c *NativeClient) SendRequestAndGetBodyAsBytes(ctx context.Context, requestOptions *httpoptions.RequestOptions) (responseBody []byte, err error) {
+	if requestOptions == nil {
+		return nil, tracederrors.TracedErrorNil("requestOptions")
+	}
+
+	response, err := c.SendRequest(ctx, requestOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.GetBodyAsBytes()
+}
+
 func (c *NativeClient) SendRequestAndGetBodyAsString(ctx context.Context, requestOptions *httpoptions.RequestOptions) (responseBody string, err error) {
 	if requestOptions == nil {
 		return "", tracederrors.TracedErrorNil("requestOptions")
