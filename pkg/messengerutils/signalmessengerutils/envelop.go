@@ -15,5 +15,28 @@ type Envelope struct {
 		ExpiresInSeconds   int    `json:"expiresInSeconds"`
 		IsExpirationUpdate bool   `json:"isExpirationUpdate"`
 		ViewOnce           bool   `json:"viewOnce"`
-	} `json:"dataMessage"`
+	} `json:"dataMessage,omitempty"`
+	SyncMessage  *SyncMessage  `json:"syncMessage,omitempty"`
+	ReceiptMessage *ReceiptMessage `json:"receiptMessage,omitempty"`
+}
+
+type SyncMessage struct {
+	SentMessage struct {
+		Destination      string `json:"destination"`
+		DestinationNumber string `json:"destinationNumber"`
+		DestinationUuid   string `json:"destinationUuid"`
+		Timestamp        int64  `json:"timestamp"`
+		Message          string `json:"message"`
+		ExpiresInSeconds int    `json:"expiresInSeconds"`
+		IsExpirationUpdate bool   `json:"isExpirationUpdate"`
+		ViewOnce         bool   `json:"viewOnce"`
+	} `json:"sentMessage,omitempty"`
+}
+
+type ReceiptMessage struct {
+	When       int64  `json:"when"`
+	IsDelivery bool   `json:"isDelivery"`
+	IsRead     bool   `json:"isRead"`
+	IsViewed   bool   `json:"isViewed"`
+	Timestamps []int64 `json:"timestamps"`
 }
