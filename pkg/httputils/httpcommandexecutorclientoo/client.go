@@ -283,7 +283,7 @@ func (h *HttpCommandExecutorClient) SendRequest(ctx context.Context, requestOpti
 		return nil, err
 	}
 
-	err = response.CheckStatusCode(http.StatusOK)
+	err = response.CheckStatusCode([]int{http.StatusOK, http.StatusCreated})
 	if err != nil {
 		return response, err
 	}
