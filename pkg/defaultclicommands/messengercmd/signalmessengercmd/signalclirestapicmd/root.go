@@ -18,6 +18,7 @@ The project can be found here:
 	cmd.AddCommand(
 		NewRunReceiveCacheServerCmd(),
 		NewSendMessageCmd(),
+		NewSendResponseCmd(),
 	)
 
 	return cmd

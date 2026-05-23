@@ -35,3 +35,23 @@ func (e *Envelope) GetContentAsString() (string, error) {
 
 	return "", tracederrors.TracedError("Unable to get signal message content as string")
 }
+
+func (e *Envelope) GetSenderAccount() (string, error) {
+	senderAccount := e.SourceNumber
+
+	if !IsAccountNumber(senderAccount) {
+		return "", tracederrors.TracedErrorf("Invalid sender account set: '%s'", senderAccount)
+	}
+
+	return senderAccount, nil
+}
+
+func (e *Envelope) GetTimestampMilliseconds() (int64, error) {
+	timestamp := e.Timestamp
+
+	if timestamp <= 0 {
+		return 0, tracederrors.TracedErrorf("Messages timestamp is set to invalid value: '%d'.", timestamp)
+	}
+
+	return timestamp, nil
+}

@@ -24,3 +24,21 @@ func (m *Message) GetContentAsString() (string, error) {
 
 	return envelope.GetContentAsString()
 }
+
+func (m *Message) GetSenderAccountAsString() (string, error) {
+	envelope, err := m.GetEnvelope()
+	if err != nil {
+		return "", err
+	}
+
+	return envelope.GetSenderAccount()
+}
+
+func (m *Message) GetTimestampMilliseconds() (int64, error) {
+	envelope, err := m.GetEnvelope()
+	if err != nil {
+		return 0, err
+	}
+
+	return envelope.GetTimestampMilliseconds()
+}
