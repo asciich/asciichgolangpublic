@@ -16,7 +16,7 @@ func NewSendMessageCmd() *cobra.Command {
 	const short = "Send a Signal message."
 
 	cmd := &cobra.Command{
-		Use: "send-message",
+		Use:   "send-message",
 		Short: short,
 		Long: short + `
 
@@ -26,7 +26,7 @@ Usage:
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
-						apiUrl, err := cmd.Flags().GetString("api-url")
+			apiUrl, err := cmd.Flags().GetString("api-url")
 			if err != nil {
 				logging.LogGoErrorFatalWithTrace(err)
 			}
@@ -67,9 +67,9 @@ Usage:
 					ctx,
 					apiUrl,
 					&messengeroptions.SendMessageOptions{
-						Message: message,
+						Message:       message,
 						SenderAccount: accountNumber,
-						Recipints: recipients,
+						Recipients:    recipients,
 					},
 				),
 			)
@@ -78,11 +78,10 @@ Usage:
 		},
 	}
 
-
 	cmd.Flags().String("api-url", "", "Url the the Signal CLI Rest API server.")
 	cmd.Flags().String("account-number", "", "Account number (phone number with +CountryCode, without spaces in between) of the sender account.")
 	cmd.Flags().StringSlice("recipients", []string{}, "Recepient numbers.")
 	cmd.Flags().String("message", "", "The message (payload) to send.")
-	
+
 	return cmd
 }

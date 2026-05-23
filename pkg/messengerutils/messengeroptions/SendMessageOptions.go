@@ -5,7 +5,7 @@ import "github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 type SendMessageOptions struct {
 	Message       string
 	SenderAccount string
-	Recipints    []string
+	Recipients    []string
 }
 
 func (s *SendMessageOptions) GetMessage() (string, error) {
@@ -25,9 +25,9 @@ func (s *SendMessageOptions) GetSenderAccount() (string, error) {
 }
 
 func (s *SendMessageOptions) GetRecipients() ([]string, error) {
-	if s.Recipints == nil {
+	if s.Recipients == nil {
 		return nil, tracederrors.TracedError("Recipients not set")
 	}
 
-	return s.Recipints, nil
+	return s.Recipients, nil
 }
