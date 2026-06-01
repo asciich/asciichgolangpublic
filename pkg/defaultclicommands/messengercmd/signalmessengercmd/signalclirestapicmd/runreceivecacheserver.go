@@ -35,10 +35,19 @@ func NewRunReceiveCacheServerCmd() *cobra.Command {
 				logging.LogFatal("Please specify --account-number")
 			}
 
+			interval, err := cmd.Flags().GetString("interval")
+			if err != nil {
+				logging.LogGoErrorFatalWithTrace(err)
+			}
+
+			if interval == "" {
+				logging.LogFatal("Please specify --interval")
+			}
+
 			mustutils.Must0(
 				signalclirestapiutils.RunReceiveCacheServer(ctx, &signalclirestapiutils.ReceiveCacheServerOptions{
 					SignalResetClientApiUrl: apiUrl,
-					Interval:                "10s",
+					Interval:                interval,
 					CacheSize:               20,
 					AccountNumber:           accountNumber,
 				}),
@@ -48,6 +57,7 @@ func NewRunReceiveCacheServerCmd() *cobra.Command {
 
 	cmd.Flags().String("api-url", "", "Url the the Signal CLI Rest API server.")
 	cmd.Flags().String("account-number", "", "Account number (phone number with +CountryCode, without spaces in between) of the receiving account.")
+	cmd.Flags().String("interval", "10s", "Check for new messages using this interval.")
 
 	return cmd
 }
