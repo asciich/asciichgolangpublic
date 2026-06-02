@@ -8,32 +8,31 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/messengerutils/messengerinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/messengerutils/messengeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func SendMessage(ctx context.Context, apiUrl string, options *messengeroptions.SendMessageOptions) error {
+func SendMessage(ctx context.Context, apiUrl string, message messengerinterfaces.Message) error {
 	if apiUrl == "" {
 		return tracederrors.TracedErrorEmptyString("apiUrl")
 	}
 
-	if options == nil {
-		return tracederrors.TracedErrorNil("options")
+	if message == nil {
+		return tracederrors.TracedErrorNil("message")
 	}
 
 	logging.LogChangedByCtxf(ctx, "Send signal message using singal cli rest api started.")
 
-	message, err := options.GetMessage()
+	content, err := message.GetContentAsString()
 	if err != nil {
 		return err
 	}
 
-	senderAccount, err := options.GetSenderAccount()
+	senderAccount, err := message.GetSenderAccountAsString()
 	if err != nil {
 		return err
 	}
 
-	recipients, err := options.GetRecipients()
+	recipients, err := message.GetRecipientsAsStringSlice()
 	if err != nil {
 		return err
 	}
@@ -43,7 +42,7 @@ func SendMessage(ctx context.Context, apiUrl string, options *messengeroptions.S
 		Number     string   `json:"number"`
 		Recipients []string `json:"recipients"`
 	}{
-		Message:    message,
+		Message:    content,
 		Number:     senderAccount,
 		Recipients: recipients,
 	}
@@ -73,7 +72,7 @@ func SendMessage(ctx context.Context, apiUrl string, options *messengeroptions.S
 	return nil
 }
 
-func SendResponse(ctx context.Context, apiUrl string, messageToRespondTo messengerinterfaces.Message, options *messengeroptions.SendMessageOptions) error {
+func SendResponse(ctx context.Context, apiUrl string, messageToRespondTo messengerinterfaces.Message, message messengerinterfaces.Message) error {
 	logging.LogChangedByCtxf(ctx, "Send response to signal message using singal cli rest api started.")
 
 	if apiUrl == "" {
@@ -84,16 +83,16 @@ func SendResponse(ctx context.Context, apiUrl string, messageToRespondTo messeng
 		return tracederrors.TracedErrorNil("messageToRespondTo")
 	}
 
-	if options == nil {
-		return tracederrors.TracedErrorNil("options")
+	if message == nil {
+		return tracederrors.TracedErrorNil("message")
 	}
 
-	message, err := options.GetMessage()
+	content, err := message.GetContentAsString()
 	if err != nil {
 		return err
 	}
 
-	senderAccount, err := options.GetSenderAccount()
+	senderAccount, err := message.GetSenderAccountAsString()
 	if err != nil {
 		return err
 	}
@@ -121,7 +120,7 @@ func SendResponse(ctx context.Context, apiUrl string, messageToRespondTo messeng
 		QuoteAuthor    string   `json:"quote_author"`
 		QuoteMessage   string   `json:"quote_message"`
 	}{
-		Message:        message,
+		Message:        content,
 		Number:         senderAccount,
 		Recipients:     []string{recipientAccount},
 		QuoteTimestamp: quoteTimestamp,

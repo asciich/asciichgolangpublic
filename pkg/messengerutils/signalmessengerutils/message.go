@@ -42,3 +42,29 @@ func (m *Message) GetTimestampMilliseconds() (int64, error) {
 
 	return envelope.GetTimestampMilliseconds()
 }
+
+func (m *Message) GetRecipientsAsStringSlice() ([]string, error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}
+
+func (m *Message) IsSenderAccount(accountToMatch string) (bool, error) {
+	if accountToMatch == "" {
+		return false, tracederrors.TracedErrorEmptyString("accountToMatch")
+	}
+
+	sender, err := m.GetSenderAccountAsString()
+	if err != nil {
+		return false, err
+	}
+
+	return sender == accountToMatch, nil
+}
+
+func (m *Message) IsDataMessage() (bool, error) {
+	envelope, err := m.GetEnvelope()
+	if err != nil {
+		return false, err
+	}
+
+	return envelope.DataMessage != nil, nil
+}

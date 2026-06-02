@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/messengerutils/messengeroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/messengerutils/messengergeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/messengerutils/signalmessengerutils"
 	"github.com/asciich/asciichgolangpublic/pkg/messengerutils/signalmessengerutils/signalclirestapiutils"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
@@ -96,7 +96,7 @@ Usage:
 					ctx,
 					apiUrl,
 					messageToQuote,
-					&messengeroptions.SendMessageOptions{
+					&messengergeneric.Message{
 						Message:       message,
 						SenderAccount: accountNumber,
 						Recipients:    []string{},
