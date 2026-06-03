@@ -114,3 +114,29 @@ func Test_GetTimestampMilliseconds(t *testing.T) {
 	require.NoError(t, err)
 	require.EqualValues(t, 1779568480623, ts)
 }
+
+func Test_IsSenderAccount(t *testing.T) {
+	t.Run("matches", func(t *testing.T) {
+		msg := &signalmessengerutils.Message{
+			Envelope: &signalmessengerutils.Envelope{
+				SourceNumber: "+411231122",
+			},
+		}
+
+		got, err := msg.IsSenderAccount("+411231122")
+		require.NoError(t, err)
+		require.True(t, got)
+	})
+
+	t.Run("mismatch", func(t *testing.T) {
+		msg := &signalmessengerutils.Message{
+			Envelope: &signalmessengerutils.Envelope{
+				SourceNumber: "+411231122",
+			},
+		}
+
+		got, err := msg.IsSenderAccount("+411111111")
+		require.NoError(t, err)
+		require.False(t, got)
+	})
+}

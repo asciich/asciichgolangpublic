@@ -9,7 +9,10 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/datetime/durationparser"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils"
+	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/messengerutils/messengerinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/messengerutils/signalmessengerutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -134,4 +137,40 @@ func RunReceiveCacheServer(ctx context.Context, options *ReceiveCacheServerOptio
 		logging.LogErrorf("Failed to start server: %v", err)
 		return err
 	}
+}
+
+func ReceiveMessagesFromCacheServer(ctx context.Context, cacheServerAddress string) ([]messengerinterfaces.Message, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
+	if cacheServerAddress == "" {
+		return nil, tracederrors.TracedErrorEmptyString("cacheServerAddress")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Receive messages from cache server '%s' started.", cacheServerAddress)
+
+	response, err := httputils.SendRequestAndGetBodyAsBytes(ctx, &httpoptions.RequestOptions{
+		Url:  cacheServerAddress,
+		Path: "messages",
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	got := []*signalmessengerutils.Message{}
+
+	err = json.Unmarshal(response, &got)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to parse received messages from cache server: %w", err)
+	}
+
+	ret := []messengerinterfaces.Message{}
+	for _, m := range got {
+		ret = append(ret, m)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Receive messages from cache server '%s' finished.", cacheServerAddress)
+
+	return ret, nil
 }
