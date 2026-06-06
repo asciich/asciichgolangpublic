@@ -37,5 +37,9 @@ func GetNewestDataMessage(ctx context.Context, messages []messengerinterfaces.Me
 		}
 	}
 
+	if msg == nil {
+		return nil, tracederrors.TracedError(ErrNoDataMessageFound)
+	}
+
 	return msg, nil
 }

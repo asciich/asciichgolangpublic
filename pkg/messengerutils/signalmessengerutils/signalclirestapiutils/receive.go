@@ -26,7 +26,7 @@ func ReceiveMessages(ctx context.Context, apiUrl string, accountNumber string) (
 		return nil, err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Receive signal messages rom signal-cli-rest-api '%s' for account number '%s' started.", apiUrl, accountNumber)
+	logging.LogInfoByCtxf(ctx, "Receive signal messages from signal-cli-rest-api '%s' for account number '%s' started.", apiUrl, accountNumber)
 
 	url := baseUrl + "/v1/receive/" + accountNumber
 
@@ -44,7 +44,7 @@ func ReceiveMessages(ctx context.Context, apiUrl string, accountNumber string) (
 		return nil, tracederrors.TracedErrorf("Unmarshal response '%s' of received signal messages failed: %w", string(response), err)
 	}
 
-	logging.LogInfoByCtxf(ctx, "Receive signal messages rom signal-cli-rest-api '%s' for account number '%s' finished. Received %d messages.", apiUrl, accountNumber, len(messages))
+	logging.LogInfoByCtxf(ctx, "Receive signal messages from signal-cli-rest-api '%s' for account number '%s' finished. Received %d messages.", apiUrl, accountNumber, len(messages))
 
 	return messages, nil
 }

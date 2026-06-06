@@ -52,6 +52,19 @@ func NewReceiveCacheServer(ctx context.Context, options *ReceiveCacheServerOptio
 
 }
 
+func (s *ReceiveCacheServer) appendMessageToCache(ctx context.Context, message *signalmessengerutils.Message) error {
+	if message == nil {
+		return tracederrors.TracedErrorNil("message")
+	}
+
+	s.cache = append(s.cache, message)
+	if len(s.cache) > s.cacheSize {
+		s.cache = s.cache[1:s.cacheSize+1]
+	}
+
+	return nil
+}
+
 func (s *ReceiveCacheServer) startReceiver(ctx context.Context, apiUrl string, interval time.Duration, accountNumber string) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
@@ -67,10 +80,7 @@ func (s *ReceiveCacheServer) startReceiver(ctx context.Context, apiUrl string, i
 		defer s.mu.Unlock()
 
 		for _, msg := range messages {
-			s.cache = append(s.cache, msg)
-			if len(s.cache) > s.cacheSize {
-				s.cache = s.cache[:len(s.cache)-1]
-			}
+			s.appendMessageToCache(ctx, msg)
 		}
 
 		logging.LogInfoByCtxf(ctx, "There are currently %d received signal messages in the cache.", len(s.cache))
