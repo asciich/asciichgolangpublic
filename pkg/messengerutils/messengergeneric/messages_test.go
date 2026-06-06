@@ -19,7 +19,7 @@ func Test_GetNewestMessage(t *testing.T) {
 	t.Run("empty list", func(t *testing.T) {
 		ctx := getCtx()
 
-		got, err := messengergeneric.GetNewestDataMessage(ctx, []messengerinterfaces.Message{})
+		got, err := messengergeneric.GetNewestDataMessage(ctx, []messengerinterfaces.Message{}, &messengergeneric.GetNewestMessageOptions{})
 		require.ErrorIs(t, err, messengergeneric.ErrEmptyMessageSlice)
 		require.Nil(t, got)
 	})
@@ -38,7 +38,7 @@ func Test_GetNewestMessage(t *testing.T) {
 			},
 		}
 
-		got, err := messengergeneric.GetNewestDataMessage(ctx, messages)
+		got, err := messengergeneric.GetNewestDataMessage(ctx, messages, &messengergeneric.GetNewestMessageOptions{})
 		require.NoError(t, err)
 		require.NotNil(t, got)
 
@@ -74,7 +74,7 @@ func Test_GetNewestMessage(t *testing.T) {
 			},
 		}
 
-		got, err := messengergeneric.GetNewestDataMessage(ctx, messages)
+		got, err := messengergeneric.GetNewestDataMessage(ctx, messages, &messengergeneric.GetNewestMessageOptions{})
 		require.NoError(t, err)
 		require.NotNil(t, got)
 
@@ -110,7 +110,7 @@ func Test_GetNewestMessage(t *testing.T) {
 			},
 		}
 
-		got, err := messengergeneric.GetNewestDataMessage(ctx, messages)
+		got, err := messengergeneric.GetNewestDataMessage(ctx, messages, &messengergeneric.GetNewestMessageOptions{})
 		require.NoError(t, err)
 		require.NotNil(t, got)
 
@@ -153,7 +153,7 @@ func Test_GetNewestMessage(t *testing.T) {
 			},
 		}
 
-		got, err := messengergeneric.GetNewestDataMessage(ctx, messages)
+		got, err := messengergeneric.GetNewestDataMessage(ctx, messages, &messengergeneric.GetNewestMessageOptions{})
 		require.NoError(t, err)
 		require.NotNil(t, got)
 
