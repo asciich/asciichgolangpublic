@@ -35,7 +35,7 @@ func GetPublicIp(ctx context.Context) (string, error) {
 
 	err = json.Unmarshal([]byte(data), decoded)
 	if err != nil {
-		return "", tracederrors.TracedErrorf("Failed to get public IP using %s : %w", GET_PUBLIC_IP_URL, err)
+		return "", tracederrors.TracedErrorf("Failed to get public IP using %s : received data is '%s': %w", GET_PUBLIC_IP_URL, data, err)
 	}
 
 	ip := decoded.ClientIp
