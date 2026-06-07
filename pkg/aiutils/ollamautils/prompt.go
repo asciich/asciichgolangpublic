@@ -128,14 +128,21 @@ func SendPrompt(ctx context.Context, prompt string, options *PromptOptions) (str
 		Stream: false,
 	}
 
-	if len(options.ImagePaths) >= 1 {
+	if len(options.ImagePaths) > 0 {
 		requestBody.Images, err = options.GetImagesAsBase64Slice(ctx)
 		if err != nil {
 			return "", err
 		}
 		logging.LogInfoByCtxf(ctx, "Added '%d' images to the request.", len(options.ImagePaths))
 	} else {
-		logging.LogInfoByCtxf(ctx, "No images are loaded and send as part of the reuqest.")
+		logging.LogInfoByCtxf(ctx, "No images are loaded and sent as part of the reuqest.")
+	}
+
+	if len(options.System) > 0 {
+		requestBody.System = options.System
+		logging.LogInfoByCtxf(ctx, "Added system parameter from PromptOptions.")
+	} else {
+		logging.LogInfoByCtxf(ctx, "No system parameter from PromptOptions to sent as part of the request.")
 	}
 
 	jsonData, err := json.Marshal(requestBody)
