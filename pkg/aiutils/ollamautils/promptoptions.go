@@ -22,6 +22,9 @@ type PromptOptions struct {
 
 	// File paths to images/ pictures to embed into the request.
 	ImagePaths []string
+
+	// An optional system prompt that sets the behavior, persona, or context of the model before the conversation starts.
+	System string
 }
 
 func (p *PromptOptions) GetDeepCopy() (*PromptOptions) {
