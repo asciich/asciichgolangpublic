@@ -35,7 +35,7 @@ func ParseCreationDateFromSignalPictureBaseName(baseName string) (creationDate *
 	}
 
 	dateString = dateString[:len(layoutString)]
-	creationDate, err = datetime.Dates().ParseStringWithGivenLayout(dateString, layoutString)
+	creationDate, err = datetime.ParseStringWithGivenLayout(dateString, layoutString)
 	if err != nil {
 		return nil, err
 	}

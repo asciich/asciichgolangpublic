@@ -1,7 +1,6 @@
 package datetime
 
 import (
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -9,17 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-type DatesService struct{}
-
-func Dates() (d *DatesService) {
-	return NewDatesService()
-}
-
-func NewDatesService() (d *DatesService) {
-	return new(DatesService)
-}
-
-func (d *DatesService) FormatAsYYYYmmdd_HHMMSSString(input *time.Time) (formated string, err error) {
+func FormatAsYYYYmmdd_HHMMSSString(input *time.Time) (formated string, err error) {
 	if input == nil {
 		return "", tracederrors.TracedError("input is nil")
 	}
@@ -28,54 +17,18 @@ func (d *DatesService) FormatAsYYYYmmdd_HHMMSSString(input *time.Time) (formated
 	return formated, nil
 }
 
-func (d *DatesService) GetCurrentYearAsString() (year string) {
+func GetCurrentYearAsString() (year string) {
 	yearInt, _, _ := time.Now().Date()
 	year = strconv.Itoa(yearInt)
 
 	return year
 }
 
-func (d *DatesService) LayoutStringYYYYmmdd_HHMMSS() (layout string) {
+func LayoutStringYYYYmmdd_HHMMSS() (layout string) {
 	return "20060102_150405"
 }
 
-func (d *DatesService) MustFormatAsYYYYmmdd_HHMMSSString(input *time.Time) (formated string) {
-	formated, err := d.FormatAsYYYYmmdd_HHMMSSString(input)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return formated
-}
-
-func (d *DatesService) MustParseString(input string) (date *time.Time) {
-	date, err := d.ParseString(input)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return date
-}
-
-func (d *DatesService) MustParseStringPrefixAsDate(input string) (parsed *time.Time) {
-	parsed, err := d.ParseStringPrefixAsDate(input)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return parsed
-}
-
-func (d *DatesService) MustParseStringWithGivenLayout(input string, layout string) (date *time.Time) {
-	date, err := d.ParseStringWithGivenLayout(input, layout)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return date
-}
-
-func (d *DatesService) ParseString(input string) (date *time.Time, err error) {
+func ParseString(input string) (date *time.Time, err error) {
 	input = strings.TrimSpace(input)
 
 	if input == "" {
@@ -93,7 +46,7 @@ func (d *DatesService) ParseString(input string) (date *time.Time, err error) {
 	}
 
 	for _, layout := range layouts {
-		date, err = d.ParseStringWithGivenLayout(input, layout)
+		date, err = ParseStringWithGivenLayout(input, layout)
 		if err != nil {
 			if strings.Contains(err.Error(), "Unable to parse as date ") {
 				continue
@@ -108,16 +61,16 @@ func (d *DatesService) ParseString(input string) (date *time.Time, err error) {
 	return nil, tracederrors.TracedErrorf("Unable to parse date '%s'", input)
 }
 
-func (d *DatesService) ParseStringPrefixAsDate(input string) (parsed *time.Time, err error) {
+func ParseStringPrefixAsDate(input string) (parsed *time.Time, err error) {
 	if input == "" {
 		return nil, tracederrors.TracedError("input is empty string")
 	}
 
-	layoutString := d.LayoutStringYYYYmmdd_HHMMSS()
+	layoutString := LayoutStringYYYYmmdd_HHMMSS()
 	if len(input) >= len(layoutString) {
 		stringToCheck := input[0:len(layoutString)]
 
-		parsed, err = d.ParseString(stringToCheck)
+		parsed, err = ParseString(stringToCheck)
 		if err != nil {
 			return nil, err
 		}
@@ -133,7 +86,7 @@ func (d *DatesService) ParseStringPrefixAsDate(input string) (parsed *time.Time,
 	return parsed, nil
 }
 
-func (d *DatesService) ParseStringWithGivenLayout(input string, layout string) (date *time.Time, err error) {
+func ParseStringWithGivenLayout(input string, layout string) (date *time.Time, err error) {
 	input = strings.TrimSpace(input)
 	layout = strings.TrimSpace(layout)
 
