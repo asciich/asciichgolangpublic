@@ -599,14 +599,14 @@ func (f *FileBase) IsYYYYmmdd_HHMMSSPrefix() (hasDatePrefix bool, err error) {
 		return false, err
 	}
 
-	layoutString := datetime.Dates().LayoutStringYYYYmmdd_HHMMSS()
+	layoutString := datetime.LayoutStringYYYYmmdd_HHMMSS()
 
 	if len(basename) < len(layoutString) {
 		return false, nil
 	}
 
 	toParse := basename[:len(layoutString)]
-	_, err = datetime.Dates().ParseStringWithGivenLayout(toParse, layoutString)
+	_, err = datetime.ParseStringWithGivenLayout(toParse, layoutString)
 	if err != nil {
 		if strings.Contains(err.Error(), "Unable to parse as date") {
 			return false, nil
@@ -771,7 +771,7 @@ func (f *FileBase) ReadAsTimeTime(ctx context.Context) (date *time.Time, err err
 		return nil, err
 	}
 
-	date, err = datetime.Dates().ParseString(contentString)
+	date, err = datetime.ParseString(contentString)
 	if err != nil {
 		return nil, err
 	}
@@ -1042,7 +1042,7 @@ func (xxx *FileBase) GetCreationDateByFileName(ctx context.Context) (creationDat
 		return nil, err
 	}
 
-	creationDate, err = datetime.Dates().ParseStringPrefixAsDate(basename)
+	creationDate, err = datetime.ParseStringPrefixAsDate(basename)
 	if err != nil {
 		if strings.Contains(err.Error(), "Unable to parse prefix ") {
 			err = nil

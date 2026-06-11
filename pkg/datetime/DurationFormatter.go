@@ -4,18 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
-
-func MustFormatDurationAsString(duration *time.Duration) (durationString string) {
-	durationString, err := FormatDurationAsString(duration)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return durationString
-}
 
 func FormatDurationAsString(duration *time.Duration) (durationString string, err error) {
 	if duration == nil {

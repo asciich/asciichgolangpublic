@@ -37,10 +37,9 @@ func TestDurationFormatterToString(t *testing.T) {
 		t.Run(
 			tt.expectedDuration,
 			func(t *testing.T) {
-				require := require.New(t)
-
-				durationString := MustFormatDurationAsString(&tt.duration)
-				require.EqualValues(tt.expectedDuration, durationString)
+				durationString, err := FormatDurationAsString(&tt.duration)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedDuration, durationString)
 			},
 		)
 	}

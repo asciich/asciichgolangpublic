@@ -10,13 +10,7 @@ import (
 )
 
 func TestDatesLayoutStringYYYYmmdd_HHMMSSS(t *testing.T) {
-
-	require := require.New(t)
-
-	require.EqualValues(
-		"20060102_150405",
-		Dates().LayoutStringYYYYmmdd_HHMMSS(),
-	)
+	require.EqualValues(t, "20060102_150405", LayoutStringYYYYmmdd_HHMMSS())
 }
 
 func TestDatesGetAsYYYYmmdd_HHMMSSString(t *testing.T) {
@@ -32,11 +26,9 @@ func TestDatesGetAsYYYYmmdd_HHMMSSString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				formated := Dates().MustFormatAsYYYYmmdd_HHMMSSString(&tt.input)
-
-				require.EqualValues(tt.expected, formated)
+				formated, err := FormatAsYYYYmmdd_HHMMSSString(&tt.input)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expected, formated)
 			},
 		)
 	}
@@ -57,10 +49,9 @@ func TestDatesParseString_UTC(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				parsed := Dates().MustParseString(tt.input)
-				require.EqualValues(tt.expectedDate, parsed.UTC())
+				parsed, err := ParseString(tt.input)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedDate, parsed.UTC())
 			},
 		)
 	}
@@ -81,10 +72,9 @@ func TestDatesParseString_CET(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				parsed := Dates().MustParseString(tt.input)
-				require.EqualValues(tt.expectedDate, parsed.UTC())
+				parsed, err := ParseString(tt.input)
+				require.NoError(t, err)
+				require.EqualValues(t, tt.expectedDate, parsed.UTC())
 			},
 		)
 	}
