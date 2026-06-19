@@ -59,14 +59,14 @@ func Chmod(ctx context.Context, path string, options *filesoptions.ChmodOptions)
 	}
 
 	if current == toSet {
-		logging.LogInfoByCtxf(ctx, "Access permissions of '%s' are already set to '%s'", path, toSetString)
+		logging.LogInfoByCtxf(ctx, "Access permissions of '%s' are already set to '%s' = '%o'", path, toSetString, toSet)
 	} else {
 		err = os.Chmod(path, os.FileMode(toSet))
 		if err != nil {
-			return tracederrors.TracedErrorf("Failed to set access permissions of '%s' to '%s': %w", path, toSetString, err)
+			return tracederrors.TracedErrorf("Failed to set access permissions of '%s' to '%s' = '%o': %w", path, toSetString, toSet, err)
 		}
 
-		logging.LogChangedByCtxf(ctx, "Access permissions of '%s' set to '%s'", path, toSetString)
+		logging.LogChangedByCtxf(ctx, "Access permissions of '%s' set to '%s' = '%o'", path, toSetString, toSet)
 	}
 
 	return nil

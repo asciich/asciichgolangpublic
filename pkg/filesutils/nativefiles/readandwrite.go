@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
@@ -38,9 +39,33 @@ func WriteBytes(ctx context.Context, pathToWrite string, content []byte, options
 		return tracederrors.TracedErrorNil("content")
 	}
 
-	err := os.WriteFile(pathToWrite, content, 0644)
+	if options == nil {
+		options = &filesoptions.WriteOptions{}
+	}
+
+	perm := options.GetPermOrDefault()
+
+	parentDir := filepath.Dir(pathToWrite)
+	err := os.MkdirAll(parentDir, os.FileMode(0755))
+	if err != nil {
+		return tracederrors.TracedErrorf("Unable to create parent directories for file '%s': %w", pathToWrite, err)
+	}
+
+	err = os.WriteFile(pathToWrite, content, perm)
 	if err != nil {
 		return tracederrors.TracedErrorf("Unable to write to file '%s': %w", pathToWrite, err)
+	}
+
+	permissionString, err := options.GetPermissionsStringOrDefault()
+	if err != nil {
+		return err
+	}
+
+	err = Chmod(ctx, pathToWrite, &filesoptions.ChmodOptions{
+		PermissionsString: permissionString,
+	})
+	if err != nil {
+		return err
 	}
 
 	logging.LogChangedByCtxf(ctx, "Wrote content to file '%s'.", pathToWrite)
