@@ -18,7 +18,7 @@ import (
 )
 
 type SSHPublicKey struct {
-	// Type. E.g. "ssh-ras" or "ssh-ed25519"
+	// Type. E.g. "ssh-rsa" or "ssh-ed25519"
 	KeyType string
 
 	// The effective key material
@@ -160,40 +160,6 @@ func (k *SSHPublicKey) LoadFromSshDir(ctx context.Context, sshDirectory filesint
 	return nil
 }
 
-func (k *SSHPublicKey) MustGetKeyHostName() (hostName string) {
-	hostName, err := k.GetKeyHostName()
-	if err != nil {
-		logging.LogFatalf("sshPublicKey.GetKeyHostName failed: '%v'", err)
-	}
-
-	return hostName
-}
-
-func (k *SSHPublicKey) MustGetKeyMaterialAsString() (keyMaterial string) {
-	keyMaterial, err := k.GetKeyMaterialAsString()
-	if err != nil {
-		logging.LogFatalf("sshPublicKey.GetKeyMaterialAsString failed: '%v'", err)
-	}
-
-	return keyMaterial
-}
-
-func (k *SSHPublicKey) MustGetKeyUserName() (keyUserName string) {
-	keyUserName, err := k.GetKeyUserName()
-	if err != nil {
-		logging.LogFatalf("sshPublicKey.GetKeyUserName failed: '%v'", err)
-	}
-
-	return keyUserName
-}
-
-func (k *SSHPublicKey) MustSetFromString(keyMaterial string) {
-	err := k.SetFromString(keyMaterial)
-	if err != nil {
-		logging.LogFatalf("sshPublicKey.SetFromString failed: '%v'", err)
-	}
-}
-
 func (k *SSHPublicKey) SetFromString(keyMaterial string) (err error) {
 	keyMaterial = strings.TrimSpace(keyMaterial)
 	if len(keyMaterial) <= 0 {
@@ -317,61 +283,6 @@ func (s *SSHPublicKey) GetKeyUserHost() (keyUserHost string, err error) {
 	return s.KeyUserHost, nil
 }
 
-func (s *SSHPublicKey) MustGetAsPublicKeyLine() (publicKeyLine string) {
-	publicKeyLine, err := s.GetAsPublicKeyLine()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return publicKeyLine
-}
-
-func (s *SSHPublicKey) MustGetKeyMaterial() (keyMaterial string) {
-	keyMaterial, err := s.GetKeyMaterial()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return keyMaterial
-}
-
-func (s *SSHPublicKey) MustGetKeyUserAtHost() (userAtHost string) {
-	userAtHost, err := s.GetKeyUserAtHost()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return userAtHost
-}
-
-func (s *SSHPublicKey) MustSetKeyMaterial(keyMaterial string) {
-	err := s.SetKeyMaterial(keyMaterial)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SSHPublicKey) MustSetKeyUserHost(keyUserHost string) {
-	err := s.SetKeyUserHost(keyUserHost)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SSHPublicKey) MustSetKeyUserName(keyUserName string) {
-	err := s.SetKeyUserName(keyUserName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SSHPublicKey) MustWriteToFile(ctx context.Context, outputFile filesinterfaces.File) {
-	err := s.WriteToFile(ctx, outputFile)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (s *SSHPublicKey) SetKeyMaterial(keyMaterial string) (err error) {
 	if keyMaterial == "" {
 		return tracederrors.TracedErrorf("keyMaterial is empty string")
@@ -433,24 +344,6 @@ func LoadPublicKeysFromFile(ctx context.Context, sshKeysFile filesinterfaces.Fil
 	logging.LogInfoByCtxf(ctx, "Load SSH public keys from file '%s' finished.", sshKeysFile)
 
 	return sshKeys, nil
-}
-
-func MustLoadPublicKeysFromFile(ctx context.Context, sshKeysFile filesinterfaces.File) (sshKeys []*SSHPublicKey) {
-	sshKeys, err := LoadPublicKeysFromFile(ctx, sshKeysFile)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return sshKeys
-}
-
-func MustLoadPublicKeyFromString(keyMaterial string) (key *SSHPublicKey) {
-	key, err := LoadPublicKeyFromString(keyMaterial)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return key
 }
 
 func LoadPublicKeyFromString(keyMaterial string) (key *SSHPublicKey, err error) {
