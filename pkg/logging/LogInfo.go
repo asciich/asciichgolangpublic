@@ -79,7 +79,12 @@ func LogInfoByCtxf(ctx context.Context, logmessage string, args ...interface{}) 
 		return
 	}
 
-	LogInfof(logmessage, args...)
+	logLinePrefix := contextutils.GetLogLinePrefixFromCtx(ctx)
+	if logLinePrefix == "" {
+		LogInfof(logmessage, args...)
+	} else {
+		LogInfoWithLinePrefixf(logmessage, logLinePrefix, args...)
+	}
 }
 
 var overrideFunctionLogInfoWithLinePrefix func(logmessage string, logLinePrefix string)
@@ -94,5 +99,14 @@ func LogInfoWithLinePrefix(logmessage string, logLinePrefix string) {
 		return
 	}
 
-	LogInfo(stringsutils.AddLinePrefix(logmessage, logLinePrefix + ": "))
+	LogInfo(stringsutils.AddLinePrefix(logmessage, logLinePrefix+": "))
+}
+
+func LogInfoWithLinePrefixf(logmessage string, logLinePrefix string, args ...interface{}) {
+	if len(args) > 0 {
+		line := fmt.Sprintf(logmessage, args...)
+		LogInfo(stringsutils.AddLinePrefix(line, logLinePrefix+": "))
+	} else {
+		LogInfo(stringsutils.AddLinePrefix(logmessage, logLinePrefix+": "))
+	}
 }

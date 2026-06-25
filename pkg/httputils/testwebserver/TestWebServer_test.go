@@ -21,7 +21,7 @@ func Test_TestWebServer_SetAndGetCertificate(t *testing.T) {
 	err := testServer.SetPort(port)
 	require.NoError(t, err)
 
-	certAndKey, err := testwebserver.GenerateCertAndKeyForTestWebserver(getCtx())
+	certAndKey, err := testwebserver.GenerateCertAndKeyForTestWebserver(ctx)
 	require.NoError(t, err)
 
 	err = testServer.SetTlsCertAndKey(ctx, certAndKey)
