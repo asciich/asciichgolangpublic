@@ -262,7 +262,6 @@ func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 		TLSConfig: t.tlsConfig,
 	}
 
-	// Wait a short moment for the port to be available.
 	// This makes it more robust when frequently started and stopped on the same port like in CI.
 	ctxTimeout, _ := context.WithTimeout(ctx, time.Second*30)
 	err = netutils.WaitPortAvailableForListening(ctxTimeout, port)

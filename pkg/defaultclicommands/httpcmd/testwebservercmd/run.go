@@ -26,6 +26,7 @@ func NewRunCmd() *cobra.Command {
 			}
 
 			testwebserver := mustutils.Must(testwebserver.GetTestWebServer(port))
+			
 
 			mustutils.Must0(testwebserver.StartInBackground(ctx))
 
@@ -38,6 +39,7 @@ func NewRunCmd() *cobra.Command {
 	}
 
 	cmd.Flags().Int("port", 80, "Port of the test webserver to listen to.")
+	cmd.Flags().Bool("tls", false, "Enable TLS.")
 
 	return cmd
 }
