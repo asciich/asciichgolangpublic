@@ -51,7 +51,7 @@ func Generate(ctx context.Context, credentialName string) (generatedCredential *
 		return nil, err
 	}
 
-	err = credential.SetByString(newPassword)
+	err = credential.SetByString(ctx, newPassword)
 	if err != nil {
 		return nil, err
 	}
@@ -271,7 +271,7 @@ func InsertFileByString(ctx context.Context, fileContent string, gopassOptions *
 		return err
 	}
 
-	err = WriteInfoToGopass(gopassPath)
+	err = WriteInfoToGopass(ctx, gopassPath)
 	if err != nil {
 		return err
 	}
@@ -336,7 +336,7 @@ func InsertFile(ctx context.Context, fileToInsert filesinterfaces.File, gopassOp
 		return err
 	}
 
-	err = WriteInfoToGopass(gopassPath)
+	err = WriteInfoToGopass(ctx, gopassPath)
 	if err != nil {
 		return err
 	}
@@ -412,7 +412,7 @@ func InsertSecret(ctx context.Context, secretToInsert string, gopassOptions *par
 	}
 
 	_, err = commandexecutorbashoo.Bash().RunCommand(
-		ctx,
+		contextutils.WithSilent(ctx),
 		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,
 		},
@@ -421,7 +421,7 @@ func InsertSecret(ctx context.Context, secretToInsert string, gopassOptions *par
 		return err
 	}
 
-	err = WriteInfoToGopass(gopassPath)
+	err = WriteInfoToGopass(ctx, gopassPath)
 	if err != nil {
 		return err
 	}
@@ -459,7 +459,7 @@ func Sync(ctx context.Context) (err error) {
 	return nil
 }
 
-func WriteInfoToGopass(gopassPath string) (err error) {
+func WriteInfoToGopass(ctx context.Context, gopassPath string) (err error) {
 	gopassPath = strings.TrimSpace(gopassPath)
 	if len(gopassPath) <= 0 {
 		return tracederrors.TracedError("gopassPath is empty string")
@@ -477,7 +477,7 @@ func WriteInfoToGopass(gopassPath string) (err error) {
 	}
 
 	_, err = commandexecutorbashoo.Bash().RunCommand(
-		contextutils.ContextSilent(),
+		contextutils.WithSilent(ctx),
 		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,
 		},
