@@ -151,7 +151,7 @@ func (c *GopassCredential) IncrementIntValue(ctx context.Context) (err error) {
 		return err
 	}
 
-	err = c.SetByInt(currentValue + 1)
+	err = c.SetByInt(ctx, currentValue + 1)
 	if err != nil {
 		return err
 	}
@@ -159,9 +159,9 @@ func (c *GopassCredential) IncrementIntValue(ctx context.Context) (err error) {
 	return err
 }
 
-func (c *GopassCredential) SetByInt(newValue int) (err error) {
+func (c *GopassCredential) SetByInt(ctx context.Context, newValue int) (err error) {
 	valueString := strconv.Itoa(newValue)
-	err = c.SetByString(valueString)
+	err = c.SetByString(ctx, valueString)
 	if err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func (c *GopassCredential) SetByInt(newValue int) (err error) {
 	return nil
 }
 
-func (c *GopassCredential) SetByString(newValue string) (err error) {
+func (c *GopassCredential) SetByString(ctx context.Context, newValue string) (err error) {
 	if strings.Contains(newValue, "\n") {
 		return tracederrors.TracedError("Unable to set copass value by string. newlines currenlty not supported.")
 	}
@@ -186,7 +186,7 @@ func (c *GopassCredential) SetByString(newValue string) (err error) {
 	}
 
 	_, err = commandexecutorbashoo.Bash().RunCommand(
-		contextutils.ContextVerbose(),
+		contextutils.WithSilent(ctx),
 		&parameteroptions.RunCommandOptions{
 			Command: insertCommand,
 		},
