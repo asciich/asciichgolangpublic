@@ -9,7 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helmparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 )
 

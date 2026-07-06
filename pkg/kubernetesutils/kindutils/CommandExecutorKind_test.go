@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 )
 
 func TestCommandExeuctorKind_GetClusterByName(t *testing.T) {

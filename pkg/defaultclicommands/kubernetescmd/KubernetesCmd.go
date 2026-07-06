@@ -3,6 +3,7 @@ package kubernetescmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/eventscmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/kindcmd"
 )
 
 func NewKubernetesCmd() *cobra.Command {
@@ -13,6 +14,7 @@ func NewKubernetesCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		eventscmd.NewEventsCmd(),
+		kindcmd.NewKindCmd(),
 		ListKindNamesCmd(),
 	)
 

@@ -12,6 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
@@ -216,7 +217,20 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 		return nil, err
 	}
 
-	outputFilePath, err := downloadedFile.GetLocalPath()
+	var outputFilePath string
+	if downloadOptions.UseSudo {
+		outputFilePath, err = tempfiles.CreateTemporaryFile(ctx)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		outputFilePath, err = downloadedFile.GetLocalPath()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	targetFilePath, err := downloadedFile.GetLocalPath()
 	if err != nil {
 		return nil, err
 	}
@@ -243,7 +257,9 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 
 	if downloadOptions.OverwriteExisting {
 		logging.LogInfoByCtxf(ctx, "Going to ensure '%s' is absent before download starts", outputFilePath)
-		err = downloadedFile.Delete(ctx, &filesoptions.DeleteOptions{})
+		err = downloadedFile.Delete(ctx, &filesoptions.DeleteOptions{
+			UseSudo: downloadOptions.UseSudo,
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -296,12 +312,19 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 		}
 	}
 
-	logging.LogChangedByCtxf(ctx, "Downloaded '%s' as file '%s'.", url, outputFilePath)
+	if downloadOptions.UseSudo {
+		err = nativefiles.Copy(ctx, outputFilePath, targetFilePath, &filesoptions.CopyOptions{UseSudo: downloadOptions.UseSudo})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	logging.LogChangedByCtxf(ctx, "Downloaded '%s' as file '%s'.", url, targetFilePath)
 
 	if downloadOptions.Sha256Sum != "" {
 		expectedSha256 := downloadOptions.Sha256Sum
 
-		logging.LogInfoByCtxf(ctx, "Going to validate downloaded file '%s' using expected sha256sum %s", outputFilePath, expectedSha256)
+		logging.LogInfoByCtxf(ctx, "Going to validate downloaded file '%s' using expected sha256sum %s", targetFilePath, expectedSha256)
 
 		sha256, err := downloadedFile.GetSha256Sum(ctx)
 		if err != nil {
@@ -309,12 +332,12 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 		}
 
 		if expectedSha256 == sha256 {
-			logging.LogInfoByCtxf(ctx, "Downloaded file '%s' matches expected sha256sum %s", outputFilePath, expectedSha256)
+			logging.LogInfoByCtxf(ctx, "Downloaded file '%s' matches expected sha256sum %s", targetFilePath, expectedSha256)
 		} else {
 			return nil, tracederrors.TracedErrorf(
 				"%w: Downloaded file '%s' has checksum '%s' and is not matching expected '%s'.",
 				httpgeneric.ErrChecksumMismatch,
-				outputFilePath,
+				targetFilePath,
 				sha256,
 				expectedSha256,
 			)

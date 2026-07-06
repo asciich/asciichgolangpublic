@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
-	"github.com/asciich/asciichgolangpublic/pkg/kindutils/kindparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils/kindparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"

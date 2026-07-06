@@ -4,9 +4,11 @@ import (
 	"context"
 	"os"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -61,9 +63,18 @@ func Chmod(ctx context.Context, path string, options *filesoptions.ChmodOptions)
 	if current == toSet {
 		logging.LogInfoByCtxf(ctx, "Access permissions of '%s' are already set to '%s' = '%o'", path, toSetString, toSet)
 	} else {
-		err = os.Chmod(path, os.FileMode(toSet))
-		if err != nil {
-			return tracederrors.TracedErrorf("Failed to set access permissions of '%s' to '%s' = '%o': %w", path, toSetString, toSet, err)
+		if options.UseSudo {
+			_, err = commandexecutorexec.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+				Command: []string{"sudo", "chmod", toSetString, path},
+			})
+			if err != nil {
+				return err
+			}
+		} else {
+			err = os.Chmod(path, os.FileMode(toSet))
+			if err != nil {
+				return tracederrors.TracedErrorf("Failed to set access permissions of '%s' to '%s' = '%o': %w", path, toSetString, toSet, err)
+			}
 		}
 
 		logging.LogChangedByCtxf(ctx, "Access permissions of '%s' set to '%s' = '%o'", path, toSetString, toSet)
