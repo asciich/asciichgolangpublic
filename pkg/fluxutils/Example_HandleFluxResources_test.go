@@ -10,7 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/kindutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
