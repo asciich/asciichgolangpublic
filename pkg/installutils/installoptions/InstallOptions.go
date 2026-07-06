@@ -5,13 +5,26 @@ import (
 )
 
 type InstallOptions struct {
-	SrcPath           string
-	SrcUrl            string
-	InstallPath       string
-	Mode              string
-	UseSudo           bool
-	ReplaceExisting   bool
-	Sha256Sum         string
+	// The source path of the file to install.
+	SrcPath string
+
+	// The source URL to the file to install.
+	// Can point as well to an archive when SrcArchivePath is set.
+	SrcUrl string
+
+	// Path in the archive to the file to install.
+	// Only used when the Src refers to archive.
+	SrcArchivePath string
+
+	InstallPath     string
+	Mode            string
+	UseSudo         bool
+	ReplaceExisting bool
+
+	// The chesum of the file to install.
+	// If the source is an archive this checksum refers to to the extracted file to install, not the archive itself.
+	Sha256Sum string
+
 	SkipTLSvalidation bool
 
 	// Perform the download and validation in a local directory before the installation.
@@ -32,12 +45,20 @@ func (i *InstallOptions) IsSourcePathSet() bool {
 	return i.SrcPath != ""
 }
 
+func (i *InstallOptions) IsSourceUrlSet() bool {
+	return i.SrcUrl != ""
+}
+
 func (i *InstallOptions) IsModeSet() bool {
 	return i.Mode != ""
 }
 
-func (i *InstallOptions) IsSourceUrlSet() bool {
-	return i.SrcUrl != ""
+func (i *InstallOptions) GetSourceArchivePath() (string, error) {
+	if i.SrcArchivePath == "" {
+		return "", tracederrors.TracedError("SrcArchivePath not set")
+	}
+
+	return i.SrcArchivePath, nil
 }
 
 func (i *InstallOptions) GetInstallPath() (installPath string, err error) {

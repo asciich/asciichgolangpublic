@@ -4,12 +4,16 @@ import (
 	"archive/tar"
 	"bufio"
 	"bytes"
+	"compress/gzip"
+	"context"
 	"errors"
 	"io"
+	"os"
 	"sort"
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -129,6 +133,36 @@ func CreateTarArchiveFromFileContentStringAndGetAsBytes(fileName string, content
 	}
 
 	return tarBytes, nil
+}
+
+func CreateTarGzArchiveFromFileContentStringAndGetAsBytes(fileName string, content string) (tarGzBytes []byte, err error) {
+	if fileName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("fileName")
+	}
+
+	if content == "" {
+		return nil, tracederrors.TracedErrorEmptyString("content")
+	}
+
+	tarBytes, err := CreateTarArchiveFromFileContentStringAndGetAsBytes(fileName, content)
+	if err != nil {
+		return nil, err
+	}
+
+	var b bytes.Buffer
+	gzWriter := gzip.NewWriter(&b)
+
+	_, err = gzWriter.Write(tarBytes)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to write tar bytes into gzip writer: '%w'", err)
+	}
+
+	err = gzWriter.Close()
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to close gzip writer: '%w'", err)
+	}
+
+	return b.Bytes(), nil
 }
 
 func CreateTarArchiveFromFileContentStringIntoWriter(fileName string, content string, ioWriter io.Writer) (err error) {
@@ -263,6 +297,129 @@ func ReadFileFromTarArchiveBytesAsString(archiveBytes []byte, fileNameToRead str
 	}
 
 	return string(contentBytes), nil
+}
+
+func ReadFileFromTarArchiveAsBytes(ctx context.Context, archivePath string, fileName string) ([]byte, error) {
+	if archivePath == "" {
+		return nil, tracederrors.TracedErrorEmptyString("arhivePath")
+	}
+
+	if fileName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("fileName")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Read '%s' from tar archive '%s' started.", fileName, archivePath)
+
+	archiveFile, err := os.Open(archivePath)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to open tar archive '%s': %w", archivePath, err)
+	}
+	defer archiveFile.Close()
+
+	// Detect gzip by magic bytes (0x1f 0x8b) instead of relying on file extension,
+	// since temp files may not have a .tar.gz suffix.
+	magicBytes := make([]byte, 2)
+	_, err = io.ReadFull(archiveFile, magicBytes)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to read magic bytes from '%s': %w", archivePath, err)
+	}
+
+	// Seek back to the beginning after reading the magic bytes.
+	_, err = archiveFile.Seek(0, io.SeekStart)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to seek back to start of '%s': %w", archivePath, err)
+	}
+
+	var tarReader *tar.Reader
+	isGzip := magicBytes[0] == 0x1f && magicBytes[1] == 0x8b
+	if isGzip {
+		gzReader, err := gzip.NewReader(archiveFile)
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to create gzip reader for '%s': %w", archivePath, err)
+		}
+		defer gzReader.Close()
+
+		tarReader = tar.NewReader(gzReader)
+	} else {
+		tarReader = tar.NewReader(archiveFile)
+	}
+
+	var content []byte
+	for {
+		header, err := tarReader.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to read tar archive '%s': %w", archivePath, err)
+		}
+
+		if header.Name == fileName {
+			if header.Typeflag != tar.TypeReg {
+				return nil, tracederrors.TracedErrorf(
+					"Entry '%s' in archive '%s' is not a regular file",
+					fileName, archivePath,
+				)
+			}
+
+			content, err = io.ReadAll(tarReader)
+			if err != nil {
+				return nil, tracederrors.TracedErrorf(
+					"Failed to read file '%s' from tar archive '%s': %w",
+					fileName, archivePath, err,
+				)
+			}
+
+			break
+		}
+	}
+
+	if content == nil {
+		return nil, tracederrors.TracedErrorf(
+			"File '%s' not found in tar archive '%s'",
+			fileName, archivePath,
+		)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Read '%s' from tar archive '%s' finished.", fileName, archivePath)
+
+	return content, nil
+}
+
+func ExtractFileFromTarArchive(ctx context.Context, archivePath string, fileName string, destPath string) error {
+	if archivePath == "" {
+		return tracederrors.TracedErrorEmptyString("archivePath")
+	}
+
+	if fileName == "" {
+		return tracederrors.TracedErrorEmptyString("fileName")
+	}
+
+	if destPath == "" {
+		return tracederrors.TracedErrorEmptyString("destPath")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Extract '%s' from tar archive '%s' to '%s' started.", fileName, archivePath, destPath)
+
+	content, err := ReadFileFromTarArchiveAsBytes(ctx, archivePath, fileName)
+	if err != nil {
+		return err
+	}
+
+	destFile, err := os.Create(destPath)
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to create destination file '%s': %w", destPath, err)
+	}
+	defer destFile.Close()
+
+	_, err = destFile.Write(content)
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to write to destination file '%s': %w", destPath, err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Extract '%s' from tar archive '%s' to '%s' finished.", fileName, archivePath, destPath)
+
+	return nil
 }
 
 func WriteFileContentBytesIntoWriter(ioWriter io.Writer, fileName string, content []byte) (err error) {

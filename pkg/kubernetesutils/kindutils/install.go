@@ -3,34 +3,28 @@ package kindutils
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils"
-	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/installutils"
+	"github.com/asciich/asciichgolangpublic/pkg/installutils/installoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 )
 
 // Installs the `kind` binary as documented here:
-//   https://kind.sigs.k8s.io/docs/user/quick-start/#installing-from-release-binaries
+//
+//	https://kind.sigs.k8s.io/docs/user/quick-start/#installing-from-release-binaries
 func InstallKind(ctx context.Context) error {
 	logging.LogInfoByCtxf(ctx, "Install kind started.")
 
-	binaryFile, err := httputils.DownloadAsFile(ctx,
-		&httpoptions.DownloadAsFileOptions{
-			RequestOptions: &httpoptions.RequestOptions{
-				Url: "https://kind.sigs.k8s.io/dl/v0.32.0/kind-linux-amd64",
-			},
-			OutputPath:        "/bin/kind",
-			OverwriteExisting: true,
-			UseSudo:           true,
-		})
-	if err != nil {
-		return err
-	}
-
-	err = binaryFile.Chmod(ctx, &filesoptions.ChmodOptions{
-		PermissionsString: "u=rwx,g=rx,o=rx",
-		UseSudo: true,
-	})
+	err := installutils.Install(
+		ctx,
+		&installoptions.InstallOptions{
+			SrcUrl:          "https://kind.sigs.k8s.io/dl/v0.32.0/kind-linux-amd64",
+			InstallPath:     "/bin/kind",
+			Mode:            "u=rwx,g=rx,o=rx",
+			UseSudo:         true,
+			ReplaceExisting: true,
+			Sha256Sum:       "50030de23cf40a18505f20426f6a8506bedf13c6e509244bd1fa9463721b0f54",
+		},
+	)
 	if err != nil {
 		return err
 	}
