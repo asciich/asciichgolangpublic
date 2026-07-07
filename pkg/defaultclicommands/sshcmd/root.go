@@ -1,10 +1,12 @@
 package sshcmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+)
 
 func NewSshCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "ssh",
+		Use:   "ssh",
 		Short: "SSH related commands",
 	}
 
