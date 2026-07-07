@@ -30,12 +30,20 @@ func CreateTemporaryFile(ctx context.Context) (string, error) {
 }
 
 func CreateTemporaryFileFromContentString(ctx context.Context, content string) (string, error) {
+	return CreateTemporaryFileFromContentBytes(ctx, []byte(content))
+}
+
+func CreateTemporaryFileFromContentBytes(ctx context.Context, content []byte) (string, error) {
+	if content == nil {
+		return "", tracederrors.TracedErrorEmptyString("content")
+	}
+
 	tempFile, err := CreateTemporaryFile(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	err = os.WriteFile(tempFile, []byte(content), 0644)
+	err = os.WriteFile(tempFile, content, 0644)
 	if err != nil {
 		return "", tracederrors.TracedErrorf("Failed to write content in temporary file '%s': %w", tempFile, err)
 	}

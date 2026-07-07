@@ -217,19 +217,6 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 		return nil, err
 	}
 
-	var outputFilePath string
-	if downloadOptions.UseSudo {
-		outputFilePath, err = tempfiles.CreateTemporaryFile(ctx)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		outputFilePath, err = downloadedFile.GetLocalPath()
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	targetFilePath, err := downloadedFile.GetLocalPath()
 	if err != nil {
 		return nil, err
@@ -248,10 +235,23 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 			}
 
 			if sha256 == downloadOptions.Sha256Sum {
-				logging.LogInfoByCtxf(ctx, "File '%s' already exists and matches sha256sum '%s'. Skip download.", outputFilePath, sha256)
+				logging.LogInfoByCtxf(ctx, "File '%s' already exists and matches sha256sum '%s'. Skip download.", targetFilePath, sha256)
 
 				return downloadedFile, nil
 			}
+		}
+	}
+
+	var outputFilePath string
+	if downloadOptions.UseSudo {
+		outputFilePath, err = tempfiles.CreateTemporaryFile(ctx)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		outputFilePath, err = downloadedFile.GetLocalPath()
+		if err != nil {
+			return nil, err
 		}
 	}
 
@@ -314,6 +314,16 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 
 	if downloadOptions.UseSudo {
 		err = nativefiles.Copy(ctx, outputFilePath, targetFilePath, &filesoptions.CopyOptions{UseSudo: downloadOptions.UseSudo})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if downloadOptions.PermissionsString != "" {
+		err = nativefiles.Chmod(ctx, targetFilePath, &filesoptions.ChmodOptions{
+			PermissionsString: downloadOptions.PermissionsString,
+			UseSudo:           downloadOptions.UseSudo,
+		})
 		if err != nil {
 			return nil, err
 		}

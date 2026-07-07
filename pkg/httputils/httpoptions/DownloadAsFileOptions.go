@@ -15,6 +15,8 @@ type DownloadAsFileOptions struct {
 	Sha256Sum string
 
 	UseSudo bool
+
+	PermissionsString string
 }
 
 func NewDownloadAsFileOptions() (d *DownloadAsFileOptions) {
