@@ -5,6 +5,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/eventscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/k9scmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/kindcmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/kubectlcmd"
 )
 
 func NewKubernetesCmd() *cobra.Command {
@@ -17,6 +18,7 @@ func NewKubernetesCmd() *cobra.Command {
 		eventscmd.NewEventsCmd(),
 		k9scmd.NewK9sCmd(),
 		kindcmd.NewKindCmd(),
+		kubectlcmd.NewKubectlCmd(),
 		ListKindNamesCmd(),
 	)
 
