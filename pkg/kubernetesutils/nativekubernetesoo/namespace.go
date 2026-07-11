@@ -693,3 +693,34 @@ func (n *NativeNamespace) ListSecretNames(ctx context.Context) ([]string, error)
 
 	return nativekubernetes.ListSecretNames(ctx, clientSet, namespaceName)
 }
+
+func (n *NativeNamespace) ListSecrets(ctx context.Context) ([]kubernetesinterfaces.Secret, error) {
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	secretNames, err := nativekubernetes.ListSecretNames(ctx, clientSet, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	secrets := []kubernetesinterfaces.Secret{}
+	for _, n := range secretNames {
+		toAdd := &NativeSecret{}
+
+		err := toAdd.SetName(n)
+		if err != nil {
+			return nil, err
+		}
+
+		secrets = append(secrets, toAdd)
+	}
+
+	return secrets, nil
+}

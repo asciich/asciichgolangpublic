@@ -29,6 +29,16 @@ func (n *NativeSecret) GetName() (string, error) {
 	return n.name, nil
 }
 
+func (n *NativeSecret) SetName(secretName string) (error) {
+	if secretName == "" {
+		return tracederrors.TracedErrorEmptyString("secretName")
+	}
+
+	n.name = secretName
+
+	return nil
+}
+
 func (n *NativeSecret) Exists(ctx context.Context) (bool, error) {
 	secretName, err := n.GetName()
 	if err != nil {
