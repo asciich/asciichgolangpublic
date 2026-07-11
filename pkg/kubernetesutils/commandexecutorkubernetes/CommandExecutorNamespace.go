@@ -3,13 +3,16 @@ package commandexecutorkubernetes
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kuberneteserrors"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -20,6 +23,14 @@ import (
 type CommandExecutorNamespace struct {
 	name              string
 	kubernetesCluster kubernetesinterfaces.KubernetesCluster
+}
+
+func (c *CommandExecutorNamespace) GetKubernetesCluster() (kubernetesinterfaces.KubernetesCluster, error) {
+	if c.kubernetesCluster == nil {
+		return nil, tracederrors.TracedError("kubernetesCluster not set")
+	}
+
+	return c.kubernetesCluster, nil
 }
 
 func NewCommandExecutorNamespace() (c *CommandExecutorNamespace) {
@@ -245,11 +256,6 @@ func (c *CommandExecutorNamespace) GetKubectlContext(ctx context.Context) (conte
 	return cluster.GetKubectlContext(ctx)
 }
 
-func (c *CommandExecutorNamespace) GetKubernetesCluster() (kubernetesCluster kubernetesinterfaces.KubernetesCluster, err error) {
-
-	return c.kubernetesCluster, nil
-}
-
 func (c *CommandExecutorNamespace) GetName() (name string, err error) {
 	if c.name == "" {
 		return "", tracederrors.TracedErrorf("name not set")
@@ -423,20 +429,245 @@ func (c *CommandExecutorNamespace) SetName(name string) (err error) {
 	return nil
 }
 
-func (c *CommandExecutorNamespace) DeleteSecretByName(ctx context.Context, name string) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+func (c *CommandExecutorNamespace) DeleteSecretByName(ctx context.Context, secretName string) error {
+	if secretName == "" {
+		return tracederrors.TracedErrorEmptyString("name")
+	}
+
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Delete secret '%s' in namespace '%s' of kubernetes '%s' started.", secretName, namespaceName, contextName)
+
+	_, err = c.RunCommandAndGetStdoutAsLines(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context",
+				contextName,
+				"--namespace",
+				namespaceName,
+				"delete",
+				"secret",
+				secretName,
+			},
+		},
+	)
+	if err == nil {
+		logging.LogChangedByCtxf(ctx, "Secret '%s' in namespace '%s' of kubernetes '%s' deleted.", secretName, namespaceName, contextName)
+	} else {
+		notFoundMessage := fmt.Sprintf("Error from server (NotFound): secrets \"%s\" not found", secretName)
+		if strings.Contains(err.Error(), notFoundMessage) {
+			logging.LogInfoByCtxf(ctx, "Secret '%s' in namespace '%s' of kubernetes '%s' already absent. Skip delete.", secretName, namespaceName, contextName)
+		} else {
+			return err
+		}
+	}
+
+	logging.LogInfoByCtxf(ctx, "Delete secret '%s' in namespace '%s' of kubernetes '%s' finished.", secretName, namespaceName, contextName)
+
+	return nil
 }
 
-func (c *CommandExecutorNamespace) SecretByNameExists(ctx context.Context, name string) (bool, error) {
-	return false, tracederrors.TracedErrorNotImplemented()
+func (c *CommandExecutorNamespace) SecretByNameExists(ctx context.Context, secretName string) (bool, error) {
+	if secretName == "" {
+		return false, tracederrors.TracedErrorEmptyString("name")
+	}
+
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return false, err
+	}
+
+	var exists bool
+	_, err = c.RunCommandAndGetStdoutAsLines(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context",
+				contextName,
+				"--namespace",
+				namespaceName,
+				"get",
+				"secret",
+				secretName,
+			},
+		},
+	)
+	if err == nil {
+		exists = true
+	} else {
+		expectedNotFoundMessage := fmt.Sprintf("Error from server (NotFound): secrets \"%s\" not found", secretName)
+		if !strings.Contains(err.Error(), expectedNotFoundMessage) {
+			return false, err
+		}
+	}
+
+	if exists {
+		logging.LogInfoByCtxf(ctx, "Secret '%s' in namespace '%s' of kubernetes '%s' exists.", secretName, namespaceName, contextName)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Secret '%s' in namespace '%s' of kubernetes '%s' does not exist.", secretName, namespaceName, contextName)
+	}
+
+	return exists, nil
+}
+
+func (c *CommandExecutorNamespace) ListSecretNames(ctx context.Context) ([]string, error) {
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "List secret names in namespace '%s' of kubernetes '%s' started.", namespaceName, contextName)
+
+	names, err := c.RunCommandAndGetStdoutAsLines(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context",
+				contextName,
+				"--namespace",
+				namespaceName,
+				"get",
+				"secrets",
+				"-o",
+				"name",
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	sort.Strings(names)
+
+	logging.LogInfoByCtxf(ctx, "List secret names in namespace '%s' of kubernetes '%s' finished.", namespaceName, contextName)
+
+	return names, err
 }
 
 func (c *CommandExecutorNamespace) GetSecretByName(name string) (secret kubernetesinterfaces.Secret, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	if name == "" {
+		return nil, tracederrors.TracedErrorEmptyString("name")
+	}
+
+	return &CommandExecutorSecret{
+		name:      name,
+		namespace: c,
+	}, nil
 }
 
-func (c *CommandExecutorNamespace) CreateSecret(ctx context.Context, name string, options *kubernetesparameteroptions.CreateSecretOptions) (createdSecret kubernetesinterfaces.Secret, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+func (c *CommandExecutorNamespace) CreateSecret(ctx context.Context, secretName string, options *kubernetesparameteroptions.CreateSecretOptions) (createdSecret kubernetesinterfaces.Secret, err error) {
+	if secretName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("secretName")
+	}
+
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	secretData, err := options.GetSecretData()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Create secret '%s' in namespace '%s' of kubernetes '%s' started.", secretName, namespaceName, contextName)
+
+	err = c.Create(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	secret, err := c.GetSecretByName(secretName)
+	if err != nil {
+		return nil, err
+	}
+
+	var create bool
+	currentData, err := secret.Read(ctx)
+	if err != nil {
+		if kuberneteserrors.IsSecretNotFoundError(err) {
+			create = true
+		} else {
+			return nil, err
+		}
+	}
+
+	if currentData != nil {
+		if reflect.DeepEqual(currentData, secretData) {
+			logging.LogInfoByCtxf(ctx, "Secret '%s' in namespace '%s' of kubernetes '%s' created.", secretName, namespaceName, contextName)
+		} else {
+			err = secret.Delete(ctx)
+			if err != nil {
+				return nil, err
+			}
+			create = true
+		}
+	}
+
+	if create {
+		command := []string{
+			"kubectl",
+			"--context",
+			contextName,
+			"--namespace",
+			namespaceName,
+			"create",
+			"secret",
+			"generic",
+			secretName,
+		}
+
+		for key, value := range secretData {
+			command = append(command, fmt.Sprintf("--from-literal=%s=%s", key, string(value)))
+		}
+
+		_, err = c.RunCommand(
+			contextutils.WithSilent(ctx), // do not expose secrets
+			&parameteroptions.RunCommandOptions{
+				Command: command,
+			},
+		)
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to create secret '%s' in namespace '%s' of kubernetes '%s': %w", secretName, namespaceName, contextName, err)
+		}
+
+		logging.LogChangedByCtxf(ctx, "Secret '%s' in namespace '%s' of kubernetes '%s' created.", secretName, namespaceName, contextName)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Create secret '%s' in namespace '%s' of kubernetes '%s' finished.", secretName, namespaceName, contextName)
+
+	return secret, nil
 }
 
 func (c *CommandExecutorNamespace) DeleteConfigMapByName(ctx context.Context, name string) (err error) {

@@ -563,15 +563,30 @@ func (c *CommandExecutorKubernetes) SetName(name string) (err error) {
 }
 
 func (c *CommandExecutorKubernetes) CreateSecret(ctx context.Context, namespaceName string, secretName string, options *kubernetesparameteroptions.CreateSecretOptions) (createdSecret kubernetesinterfaces.Secret, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.CreateSecret(ctx, secretName, options)
 }
 
 func (c *CommandExecutorKubernetes) SecretByNameExists(ctx context.Context, namespaceName string, secretName string) (exists bool, err error) {
-	return false, tracederrors.TracedErrorNotImplemented()
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return false, err
+	}
+
+	return namespace.SecretByNameExists(ctx, secretName)
 }
 
 func (c *CommandExecutorKubernetes) DeleteSecretByName(ctx context.Context, namespaceName string, secretName string) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+
+	return namespace.DeleteSecretByName(ctx, secretName)
 }
 
 func (c *CommandExecutorKubernetes) CreateConfigMap(ctx context.Context, namespaceName string, configMapName string, options *kubernetesparameteroptions.CreateConfigMapOptions) (createdConfigMap kubernetesinterfaces.ConfigMap, err error) {
