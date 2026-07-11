@@ -26,6 +26,7 @@ type Namespace interface {
 	GetRoleByName(name string) (role Role, err error)
 	GetSecretByName(name string) (secret Secret, err error)
 	ListRoleNames(ctx context.Context) ([]string, error)
+	ListSecrets(ctx context.Context) ([]Secret, error)
 	ListSecretNames(ctx context.Context) ([]string, error)
 	RoleByNameExists(ctx context.Context, name string) (exists bool, err error)
 	SecretByNameExists(ctx context.Context, name string) (exits bool, err error)

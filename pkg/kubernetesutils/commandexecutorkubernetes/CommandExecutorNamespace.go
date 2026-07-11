@@ -526,6 +526,26 @@ func (c *CommandExecutorNamespace) SecretByNameExists(ctx context.Context, secre
 	return exists, nil
 }
 
+func (c *CommandExecutorNamespace) ListSecrets(ctx context.Context) ([]kubernetesinterfaces.Secret, error) {
+	names, err := c.ListSecretNames(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	secrets := []kubernetesinterfaces.Secret{}
+
+	for _, n := range names {
+		toAdd, err := c.GetSecretByName(n)
+		if err != nil {
+			return nil, err
+		}
+
+		secrets = append(secrets, toAdd)
+	}
+
+	return secrets, nil
+}
+
 func (c *CommandExecutorNamespace) ListSecretNames(ctx context.Context) ([]string, error) {
 	contextName, err := c.GetCachedKubectlContext(ctx)
 	if err != nil {
@@ -567,7 +587,6 @@ func (c *CommandExecutorNamespace) ListSecretNames(ctx context.Context) ([]strin
 
 		names = append(names, strings.TrimPrefix(l, "secret/"))
 	}
-
 
 	sort.Strings(names)
 
