@@ -539,7 +539,7 @@ func (c *CommandExecutorNamespace) ListSecretNames(ctx context.Context) ([]strin
 
 	logging.LogInfoByCtxf(ctx, "List secret names in namespace '%s' of kubernetes '%s' started.", namespaceName, contextName)
 
-	names, err := c.RunCommandAndGetStdoutAsLines(
+	lines, err := c.RunCommandAndGetStdoutAsLines(
 		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
@@ -558,6 +558,16 @@ func (c *CommandExecutorNamespace) ListSecretNames(ctx context.Context) ([]strin
 	if err != nil {
 		return nil, err
 	}
+
+	names := []string{}
+	for _, l := range lines {
+		if !strings.HasPrefix(l, "secret/") {
+			continue
+		}
+
+		names = append(names, strings.TrimPrefix(l, "secret/"))
+	}
+
 
 	sort.Strings(names)
 

@@ -679,3 +679,17 @@ func (n *NativeNamespace) CreateObject(ctx context.Context, options *kubernetesp
 
 	return object, nil
 }
+
+func (n *NativeNamespace) ListSecretNames(ctx context.Context) ([]string, error) {
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	return nativekubernetes.ListSecretNames(ctx, clientSet, namespaceName)
+}
