@@ -172,3 +172,25 @@ func GetNamespaceUid(ctx context.Context, clientSet *kubernetes.Clientset, names
 
 	return uid, err
 }
+
+func ListSecretNames(ctx context.Context, clientSet *kubernetes.Clientset, namespaceName string) ([]string, error) {
+	if clientSet == nil {
+		return nil, tracederrors.TracedErrorNil("clientSet")
+	}
+
+	if namespaceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
+	}
+
+	secretList, err := clientSet.CoreV1().Secrets(namespaceName).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to list secrets in namespace '%s': %w", namespaceName, err)
+	}
+
+	names := make([]string, len(secretList.Items))
+	for i, secret := range secretList.Items {
+		names[i] = secret.Name
+	}
+
+	return names, nil
+}

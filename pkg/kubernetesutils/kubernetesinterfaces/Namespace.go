@@ -25,7 +25,8 @@ type Namespace interface {
 	GetObjectByNames(objectName string, objectType string) (object Object, err error)
 	GetRoleByName(name string) (role Role, err error)
 	GetSecretByName(name string) (secret Secret, err error)
-	ListRoleNames(ctx context.Context) (roleNames []string, err error)
+	ListRoleNames(ctx context.Context) ([]string, error)
+	ListSecretNames(ctx context.Context) ([]string, error)
 	RoleByNameExists(ctx context.Context, name string) (exists bool, err error)
 	SecretByNameExists(ctx context.Context, name string) (exits bool, err error)
 	WatchConfigMap(ctx context.Context, name string, onCreate func(ConfigMap), onUpdate func(ConfigMap), onDelete func(ConfigMap)) error
