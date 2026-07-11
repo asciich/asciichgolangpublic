@@ -522,7 +522,7 @@ func (n *NativeKubernetesCluster) ReadSecret(ctx context.Context, namespaceName 
 		return nil, err
 	}
 
-	return ReadSecret(ctx, clientset, namespaceName, secretName)
+	return nativekubernetes.ReadSecret(ctx, clientset, namespaceName, secretName)
 }
 
 func (n *NativeKubernetesCluster) ListNodeNames(ctx context.Context) ([]string, error) {

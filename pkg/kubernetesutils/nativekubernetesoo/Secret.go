@@ -3,9 +3,8 @@ package nativekubernetesoo
 import (
 	"context"
 
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -78,28 +77,24 @@ func (n *NativeSecret) Read(ctx context.Context) (map[string][]byte, error) {
 		return nil, err
 	}
 
-	return ReadSecret(ctx, clientset, namespaceName, secretName)
+	return nativekubernetes.ReadSecret(ctx, clientset, namespaceName, secretName)
 }
 
-func ReadSecret(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string, secretName string) (map[string][]byte, error) {
-	if clientset == nil {
-		return nil, tracederrors.TracedErrorNil("clientset")
-	}
-
-	if namespaceName == "" {
-		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
-	}
-
-	if secretName == "" {
-		return nil, tracederrors.TracedErrorEmptyString("secretName")
-	}
-
-	secret, err := clientset.CoreV1().Secrets(namespaceName).Get(ctx, secretName, metav1.GetOptions{})
+func (n *NativeSecret) Delete(ctx context.Context) error {
+	clientset, err := n.GetClientSet()
 	if err != nil {
-		if apierrors.IsNotFound(err) {
-			return nil, tracederrors.TracedErrorf("Unable to read secret '%s'. Secret does not exist in namespace '%s'", secretName, namespaceName)
-		}
+		return err
 	}
 
-	return secret.Data, nil
+	namespaceName, err := n.GetNamespaceName()
+	if err != nil {
+		return err
+	}
+
+	secretName, err := n.GetName()
+	if err != nil {
+		return err
+	}
+
+	return nativekubernetes.DeleteSecret(ctx, clientset, namespaceName, secretName)
 }

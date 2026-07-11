@@ -27,7 +27,15 @@ type NativeNamespace struct {
 	kubernetesCluster *NativeKubernetesCluster
 }
 
-func (n *NativeNamespace) GetKubernetesCluster() (*NativeKubernetesCluster, error) {
+func (n *NativeNamespace) GetNativeKubernetesCluster() (*NativeKubernetesCluster, error) {
+	if n.kubernetesCluster == nil {
+		return nil, tracederrors.TracedError("kubernetesCluster not set")
+	}
+
+	return n.kubernetesCluster, nil
+}
+
+func (n *NativeNamespace) GetKubernetesCluster() (kubernetesinterfaces.KubernetesCluster, error) {
 	if n.kubernetesCluster == nil {
 		return nil, tracederrors.TracedError("kubernetesCluster not set")
 	}
@@ -36,7 +44,7 @@ func (n *NativeNamespace) GetKubernetesCluster() (*NativeKubernetesCluster, erro
 }
 
 func (n *NativeNamespace) GetClientSet() (*kubernetes.Clientset, error) {
-	cluster, err := n.GetKubernetesCluster()
+	cluster, err := n.GetNativeKubernetesCluster()
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +53,7 @@ func (n *NativeNamespace) GetClientSet() (*kubernetes.Clientset, error) {
 }
 
 func (n *NativeNamespace) GetDynamicClient() (*dynamic.DynamicClient, error) {
-	cluster, err := n.GetKubernetesCluster()
+	cluster, err := n.GetNativeKubernetesCluster()
 	if err != nil {
 		return nil, err
 	}
@@ -223,7 +231,7 @@ func (n *NativeNamespace) CreateSecret(ctx context.Context, secretName string, o
 	}
 
 	if exists {
-		currentData, err := ReadSecret(ctx, clientset, namespaceName, secretName)
+		currentData, err := nativekubernetes.ReadSecret(ctx, clientset, namespaceName, secretName)
 		if err != nil {
 			return nil, err
 		}
@@ -542,7 +550,7 @@ func (n *NativeNamespace) WatchConfigMap(ctx context.Context, configMapName stri
 }
 
 func (n *NativeNamespace) GetDiscoveryClient() (discovery.DiscoveryInterface, error) {
-	cluster, err := n.GetKubernetesCluster()
+	cluster, err := n.GetNativeKubernetesCluster()
 	if err != nil {
 		return nil, err
 	}

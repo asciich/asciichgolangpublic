@@ -19,6 +19,7 @@ type Namespace interface {
 	Exists(ctx context.Context) (bool, error)
 	GetClusterName() (clusterName string, err error)
 	GetConfigMapByName(name string) (configMap ConfigMap, err error)
+	GetKubernetesCluster() (KubernetesCluster, error)
 	GetKubectlContext(ctx context.Context) (contextName string, err error)
 	GetName() (name string, err error)
 	GetObjectByNames(objectName string, objectType string) (object Object, err error)
