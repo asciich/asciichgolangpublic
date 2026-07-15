@@ -1,28 +1,22 @@
-package asciichgolangpublic
+package commandexecutorgit
 
 import (
 	"context"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-type GitService struct {
-}
+func GetRepositoryRootPathByPath(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, path string) (repoRootPath string, err error) {
+	if commandExecutor == nil {
+		return "", tracederrors.TracedErrorNil("commandExecutor")
+	}
 
-func Git() (git *GitService) {
-	return NewGitService()
-}
-
-func NewGitService() (g *GitService) {
-	return new(GitService)
-}
-
-func (g *GitService) GetRepositoryRootPathByPath(ctx context.Context, path string) (repoRootPath string, err error) {
 	if path == "" {
 		return "", tracederrors.TracedErrorEmptyString("path")
 	}
@@ -56,12 +50,7 @@ func (g *GitService) GetRepositoryRootPathByPath(ctx context.Context, path strin
 		)
 	}
 
-	logging.LogInfoByCtxf(
-		ctx,
-		"Found git repository root directory '%s' for local path '%s'.",
-		repoRootPath,
-		path,
-	)
+	logging.LogInfoByCtxf(ctx, "Found git repository root directory '%s' for local path '%s'.", repoRootPath, path)
 
 	return repoRootPath, nil
 }
