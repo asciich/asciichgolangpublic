@@ -13,6 +13,8 @@ func NewShellCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		NewFzfCmd(),
+
 		bashcmd.NewBashCmd(),
 		croncommandcmd.NewCronCommandCmd(),
 	)
