@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd/aidercmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd/ollamacmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd/vectordatabasecmd"
 )
 
 func NewAICmd() *cobra.Command {
@@ -17,6 +18,7 @@ func NewAICmd() *cobra.Command {
 
 		aidercmd.NewAiderCmd(),
 		ollamacmd.NewOllamaCmd(),
+		vectordatabasecmd.NewVectorDatabaseCmd(),
 	)
 
 	return cmd
