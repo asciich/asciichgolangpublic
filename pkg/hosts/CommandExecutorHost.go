@@ -14,6 +14,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfileoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
@@ -150,7 +151,7 @@ func (c *CommandExecutorHost) GetDirectoryByPath(ctx context.Context, path strin
 		return nil, err
 	}
 
-	return files.GetCommandExecutorDirectoryByPath(commandExecutor, path)
+	return commandexecutorfileoo.NewDirectory(commandExecutor, path)
 }
 
 func (c *CommandExecutorHost) GetHostDescription() (hostDescription string, err error) {

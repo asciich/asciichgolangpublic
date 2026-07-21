@@ -6,7 +6,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/commandexecutorgitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -22,7 +21,7 @@ func GetGitRepositoryByDirectory(directory filesinterfaces.Directory) (repositor
 
 	commandExecutorDirectory, ok := directory.(*files.CommandExecutorDirectory)
 	if ok {
-		return commandexecutorgitoo.NewFromDirectory(commandExecutorDirectory)
+		return commandexecutorgitoo.NewGitRepositoryFromDirectory(commandExecutorDirectory)
 	}
 
 	unknownTypeName, err := datatypes.GetTypeName(directory)
@@ -34,13 +33,4 @@ func GetGitRepositoryByDirectory(directory filesinterfaces.Directory) (repositor
 		"Unknown directory implementation '%s'. Unable to get GitRepository",
 		unknownTypeName,
 	)
-}
-
-func MustGetGitRepositoryByDirectory(directory filesinterfaces.Directory) (repository gitinterfaces.GitRepository) {
-	repository, err := GetGitRepositoryByDirectory(directory)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return repository
 }

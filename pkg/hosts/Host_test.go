@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfileoo"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
@@ -146,7 +146,7 @@ func TestHost_GetDirectoryByPath(t *testing.T) {
 				directory, err := host.GetDirectoryByPath(ctx, tt.dirPath)
 				require.NoError(t, err)
 
-				_, ok := directory.(*files.CommandExecutorDirectory)
+				_, ok := directory.(*commandexecutorfileoo.Directory)
 				require.True(t, ok)
 
 				exists, err := directory.Exists(ctx)
@@ -169,4 +169,3 @@ func TestHost_LocalHostUsesBashCommandExecutorByDefault(t *testing.T) {
 	_, ok = commandExecutor.(*commandexecutorbashoo.BashService)
 	require.True(t, ok)
 }
-
