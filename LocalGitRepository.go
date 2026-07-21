@@ -325,11 +325,7 @@ func (l *LocalGitRepository) CloneRepositoryByPathOrUrl(ctx context.Context, url
 	}
 
 	if isInitialzed {
-		logging.LogInfof(
-			"'%s' is already an initialized git repository on host '%s'. Skip clone.",
-			path,
-			hostDescription,
-		)
+		logging.LogInfoByCtxf(ctx, "'%s' is already an initialized git repository on host '%s'. Skip clone.", path, hostDescription)
 	} else {
 		const isBare = false
 		_, err = git.PlainClone(
