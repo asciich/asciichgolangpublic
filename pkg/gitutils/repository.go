@@ -1,8 +1,9 @@
-package asciichgolangpublic
+package gitutils
 
 import (
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfileoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/commandexecutorgitoo"
@@ -10,14 +11,9 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func GetGitRepositoryByDirectory(directory filesinterfaces.Directory) (repository gitinterfaces.GitRepository, err error) {
+func NewGitRepositoryFromDirectory(ctx context.Context, directory filesinterfaces.Directory) (gitinterfaces.GitRepository, error) {
 	if directory == nil {
 		return nil, tracederrors.TracedErrorNil("directory")
-	}
-
-	localDirectory, ok := directory.(*files.LocalDirectory)
-	if ok {
-		return GetLocalGitReposioryFromDirectory(localDirectory)
 	}
 
 	commandExecutorDirectory, ok := directory.(*commandexecutorfileoo.Directory)
@@ -25,13 +21,9 @@ func GetGitRepositoryByDirectory(directory filesinterfaces.Directory) (repositor
 		return commandexecutorgitoo.NewGitRepositoryFromDirectory(commandExecutorDirectory)
 	}
 
-	unknownTypeName, err := datatypes.GetTypeName(directory)
+	typeName, err := datatypes.GetTypeName(directory)
 	if err != nil {
 		return nil, err
 	}
-
-	return nil, tracederrors.TracedErrorf(
-		"Unknown directory implementation '%s'. Unable to get GitRepository",
-		unknownTypeName,
-	)
+	return nil, tracederrors.TracedErrorf("Not implemented for '%s'", typeName)
 }

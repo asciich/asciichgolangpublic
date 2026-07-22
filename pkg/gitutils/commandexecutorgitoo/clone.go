@@ -59,11 +59,7 @@ func (g *GitRepository) CloneRepositoryByPathOrUrl(ctx context.Context, pathOrUr
 	}
 
 	if isInitialized {
-		logging.LogInfof(
-			"'%s' is already an initialized git repository on host '%s'. Skip clone.",
-			path,
-			hostDescription,
-		)
+		logging.LogInfoByCtxf(ctx, "'%s' is already an initialized git repository on host '%s'. Skip clone.", path, hostDescription)
 	} else {
 		commandExecutor, err := g.GetCommandExecutor()
 		if err != nil {

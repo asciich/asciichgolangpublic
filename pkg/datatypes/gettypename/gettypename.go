@@ -5,14 +5,17 @@ import (
 	"reflect"
 )
 
-func GetTypeName(input interface{}) (typeName string, err error) {
+func GetTypeName(input any) (string, error) {
 	if input == nil {
 		return "", fmt.Errorf("input is nil")
 	}
 
 	reflectType := reflect.TypeOf(input)
+	typeName := reflectType.Name()
 
-	typeName = reflectType.Name()
+	if typeName == "" {
+		typeName = reflectType.String()
+	}
 
 	var inputAsError error
 	var ptrPrefix = ""
@@ -36,7 +39,7 @@ func GetTypeName(input interface{}) (typeName string, err error) {
 
 		var message = inputAsError.Error()
 
-		withErrorMessage, ok := err.(interface{ GetErrorMessage() (string, error) })
+		withErrorMessage, ok := input.(interface{ GetErrorMessage() (string, error) })
 		if ok {
 			tracedErrorMessage, err := withErrorMessage.GetErrorMessage()
 			if err == nil {

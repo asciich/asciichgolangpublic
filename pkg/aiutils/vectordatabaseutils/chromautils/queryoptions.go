@@ -42,7 +42,7 @@ func (o *QueryOptions) GetQuestion() (string, error) {
 
 func (o *QueryOptions) GetEmbeddingModelOrDefault() string {
 	if o.EmbeddingModel == "" {
-		return "nomic-embed-text"
+		return DEFAULT_EMBEDDING_MODEL_NAME
 	}
 	return o.EmbeddingModel
 }

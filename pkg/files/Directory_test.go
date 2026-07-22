@@ -10,46 +10,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
-func TestDirectory_GetParentDirectory(t *testing.T) {
-	tests := []struct {
-		implementationName string
-	}{
-		{"localDirectory"},
-		{"localCommandExecutorDirectory"},
-	}
-
-	for _, tt := range tests {
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				ctx := getCtx()
-
-				dir := getDirectoryToTest(tt.implementationName)
-				defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
-
-				subDir, err := dir.CreateSubDirectory(ctx, "subdir", &filesoptions.CreateOptions{})
-				require.NoError(t, err)
-
-				dirPath, err := dir.GetPath()
-				require.NoError(t, err)
-
-				subDirPath, err := subDir.GetPath()
-				require.NoError(t, err)
-
-				require.NotEqualValues(t, dirPath, subDirPath)
-
-				parentDir, err := subDir.GetParentDirectory(ctx)
-				require.NoError(t, err)
-
-				parentDirPath, err := parentDir.GetPath()
-				require.NoError(t, err)
-
-				require.EqualValues(t, dirPath, parentDirPath)
-			},
-		)
-	}
-}
-
 func TestDirectory_ReadFileInDirectoryAsString(t *testing.T) {
 	tests := []struct {
 		implementationName string

@@ -1,6 +1,6 @@
 # runbook
 
-An approach to standardize automated processes by defining them step by step including the corresponding documentation as runbook.
+A `runbook` (also called workflow in other tools) provides an easy approach to standardize automated processes by defining them step by step including the corresponding documentation as runbook.
 
 ## Examples 
 
