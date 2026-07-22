@@ -8,7 +8,7 @@ Contains various implementations to work with files:
 ## Examples
 
 * [Copy file](./nativefiles/Example_Copy_test.go)
-    * [Copy file as root using sudo](Example_CopySudo_test.go)
+    * [Copy file as root using sudo](./nativefiles/Example_CopySudo_test.go)
 * [Create directory recursively](./nativefiles/Example_CreateDirectoryRecursively_test.go)
 * [Create file and it's parent directories recursively](./nativefiles/Example_CreateFileRecursively_test.go)
 * [Get nativefileoo by path](Example_NewFileByPath_test.go)

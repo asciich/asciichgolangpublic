@@ -9,6 +9,15 @@ But it has downsides:
 - It's not real programming, it's abusing golang for scripting automation.
 - It's a security risk. Calling exec (especially with unchecked user input as parameter) leads to security issues.
 
+## Implementations
+
+* [commandexecutorbash](./commandexecutorbash/): Execute commands using bash.
+* [commandexecutorbashoo](./commandexecutorbashoo/): Object oriented bash implementation.
+* [commandexecutorexec](./commandexecutorexec/): Execute commands using exec.
+* [commandexecutorexecoo](./commandexecutorexecoo/): Object oriented exec implementation.
+* [commandexecutorpowershell](./commandexecutorpowershell/): Execute commands using PowerShell.
+* [commandexecutorpowershelloo](./commandexecutorpowershelloo/): Object oriented PowerShell implementation.
+
 ## Avoid exec calls.
 
 To avoid exec calls on the local machine set the env var accordingly:
