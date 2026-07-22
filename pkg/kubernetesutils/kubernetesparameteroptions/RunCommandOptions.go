@@ -7,16 +7,24 @@ import (
 )
 
 type RunCommandOptions struct {
-	RunCommandOptions        parameteroptions.RunCommandOptions
-	Namespace                string
-	Image                    string
-	PodName                  string
-	ContainerName            string
-	Command                  []string
-	DeleteAlreadyExistingPod bool
+	RunCommandOptions                  parameteroptions.RunCommandOptions
+	Namespace                          string
+	Image                              string
+	PodName                            string
+	ReplicaSetName                     string
+	ContainerName                      string
+	Command                            []string
+	DeleteAlreadyExistingPod           bool
+	DeleteAlreadyExistingReplicaSet    bool
 
 	// Wait until pod is in "running" state
 	WaitForPodRunning bool
+
+	// Wait until ReplicaSet has all replicas available
+	WaitForReplicaSetAvailable bool
+
+	// Number of replicas for ReplicaSet (default: 1)
+	Replicas int32
 
 	StdinBytes []byte
 }
@@ -31,8 +39,14 @@ func (r *RunCommandOptions) GetNamespaceName() (string, error) {
 
 func (r *RunCommandOptions) GetContainerName() (string, error) {
 	if r.ContainerName == "" {
-		// If the container name is not explicitly defined the same name as for the pod is used:
-		return r.GetPodName()
+		// If the container name is not explicitly defined, use the pod or ReplicaSet name:
+		if r.PodName != "" {
+			return r.GetPodName()
+		}
+		if r.ReplicaSetName != "" {
+			return r.GetReplicaSetName()
+		}
+		return "", tracederrors.TracedError("ContainerName not set and no PodName or ReplicaSetName available")
 	}
 
 	return r.ContainerName, nil
@@ -64,4 +78,19 @@ func (r *RunCommandOptions) GetCommand() ([]string, error) {
 
 func (r *RunCommandOptions) IsStinDataAvailable() bool {
 	return len(r.StdinBytes) > 0 
+}
+
+func (r *RunCommandOptions) GetReplicaSetName() (string, error) {
+	if r.ReplicaSetName == "" {
+		return "", tracederrors.TracedError("ReplicaSetName not set")
+	}
+
+	return r.ReplicaSetName, nil
+}
+
+func (r *RunCommandOptions) GetReplicas() int32 {
+	if r.Replicas <= 0 {
+		return 1
+	}
+	return r.Replicas
 }
