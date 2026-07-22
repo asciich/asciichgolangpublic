@@ -23,6 +23,13 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 * [helmutils](pkg/helmutils/): Work with helm and helmcharts.
 * [httputils](pkg/httputils/): High level easy to use HTTP client and testserver.
 * [kindutils](pkg/kindutils/): Handle KinD/ Kubernetes in Docker.
+* [netutils](pkg/netutils/): Network utilities for various network-related tasks.
+    * [dnsutils](pkg/netutils/dnsutils/): Work with DNS.
+    * [macaddresses](pkg/netutils/macaddresses/): Handle MAC addresses.
+    * [publicips](pkg/netutils/publicips/): Get public IP addresses.
+    * [vpnutils](pkg/netutils/vpnutils/): Work with VPN solutions.
+        * [headscaleutils](pkg/netutils/vpnutils/headscaleutils/): Work with Headscale.
+        * [tailscaleutils](pkg/netutils/vpnutils/tailscaleutils/): Work with Tailscale.
 * [kubernetesutils](pkg/kubernetesutils/): Work with K8s/ Kubernetes.
 * [osutils](pkg/osutils/):
 	* [unixfilepermissionsutils](pkg/osutils/unixfilepermissionsutils/): Convert human readable file permissions (also known as mode) into values and back.
