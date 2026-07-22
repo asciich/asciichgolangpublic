@@ -14,7 +14,7 @@ func Test_PodsRunSingleCommand_echoHelloWorld(t *testing.T) {
 		implementationName string
 	}{
 		{"nativeKubernetes"},
-		// {"commandExecutorKubernetes"},
+		{"commandExecutorKubernetes"},
 	}
 
 	for _, tt := range tests {
