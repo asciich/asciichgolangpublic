@@ -17,4 +17,62 @@ func TestIsStdinDataAvailable(t *testing.T) {
 		options := &kubernetesparameteroptions.RunCommandOptions{StdinBytes: []byte("example")}
 		require.True(t, options.IsStinDataAvailable())
 	})
-} 
+}
+
+func TestGetContainerName(t *testing.T) {
+	t.Run("explicit container name", func(t *testing.T) {
+		options := &kubernetesparameteroptions.RunCommandOptions{
+			ContainerName: "mycontainer",
+		}
+		name, err := options.GetContainerName()
+		require.NoError(t, err)
+		require.Equal(t, "mycontainer", name)
+	})
+
+	t.Run("fallback to pod name", func(t *testing.T) {
+		options := &kubernetesparameteroptions.RunCommandOptions{
+			PodName: "mypod",
+		}
+		name, err := options.GetContainerName()
+		require.NoError(t, err)
+		require.Equal(t, "mypod", name)
+	})
+
+	t.Run("fallback to ReplicaSet name", func(t *testing.T) {
+		options := &kubernetesparameteroptions.RunCommandOptions{
+			ReplicaSetName: "myreplicaset",
+		}
+		name, err := options.GetContainerName()
+		require.NoError(t, err)
+		require.Equal(t, "myreplicaset", name)
+	})
+
+	t.Run("pod name takes precedence over ReplicaSet name", func(t *testing.T) {
+		options := &kubernetesparameteroptions.RunCommandOptions{
+			PodName:        "mypod",
+			ReplicaSetName: "myreplicaset",
+		}
+		name, err := options.GetContainerName()
+		require.NoError(t, err)
+		require.Equal(t, "mypod", name)
+	})
+
+	t.Run("explicit container name takes precedence over pod name", func(t *testing.T) {
+		options := &kubernetesparameteroptions.RunCommandOptions{
+			ContainerName: "mycontainer",
+			PodName:       "mypod",
+		}
+		name, err := options.GetContainerName()
+		require.NoError(t, err)
+		require.Equal(t, "mycontainer", name)
+	})
+
+	t.Run("error when no name available", func(t *testing.T) {
+		options := &kubernetesparameteroptions.RunCommandOptions{}
+		name, err := options.GetContainerName()
+		require.Error(t, err)
+		require.Empty(t, name)
+		require.Contains(t, err.Error(), "ContainerName not set")
+	})
+}
+
