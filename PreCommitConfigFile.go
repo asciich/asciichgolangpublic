@@ -8,6 +8,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/changesummary"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/dependencyutils"
 	"github.com/asciich/asciichgolangpublic/pkg/dependencyutils/dependencyinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
@@ -148,7 +149,7 @@ func (p *PreCommitConfigFile) GetDependencies(ctx context.Context) (dependencies
 		return nil, err
 	}
 
-	err = DependenciesSlice().AddSourceFileForEveryEntry(dependencies, asciichgolangpublicFile)
+	err = dependencyutils.DependenciesSlice().AddSourceFileForEveryEntry(dependencies, asciichgolangpublicFile)
 	if err != nil {
 		return nil, err
 	}

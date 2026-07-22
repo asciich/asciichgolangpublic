@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package dependencyutils
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/dependencyutils/dependencyinterfaces"
