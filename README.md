@@ -28,10 +28,11 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 	* [unixfilepermissionsutils](pkg/osutils/unixfilepermissionsutils/): Convert human readable file permissions (also known as mode) into values and back.
 * [pythonutils](pkg/pythonutils/): Work with Python programming language.
 	* [virtualenvutils](pkg/pythonutils/virtualenvutils/): Work with Python's `virtualenv`.
-* [testutils](pkg/testutils/README.md):
-	* [testsuite](pkg/testutils/testsuite/README.md): An easy way to create and run test suites.
+* [runbook](pkg/runbook/): A easy way to define runbooks (also called workflows in other tools) to automatize tasks step by step.
 * [storage](pkg/storage/):
 	* [S3 storage](pkg/storage/s3/)
+* [testutils](pkg/testutils/README.md):
+	* [testsuite](pkg/testutils/testsuite/README.md): An easy way to create and run test suites.
 * [uuidutils](pkg/uuidutils/): Work with UUIDs.
 * [versionutils](pkg/versionutils/): Handle versions.
 * [x509utils](pkg/tlsutils/x509utils/): Handle X509 certificates used for TLS/SSL.

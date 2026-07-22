@@ -8,7 +8,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfileoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitgeneric"
@@ -23,7 +22,7 @@ type GitRepository struct {
 	gitgeneric.GitRepositoryBase
 }
 
-func NewFromDirectory(dir filesinterfaces.Directory) (*GitRepository, error) {
+func NewGitRepositoryFromDirectory(dir filesinterfaces.Directory) (*GitRepository, error) {
 	if dir == nil {
 		return nil, tracederrors.TracedErrorNil("dir")
 	}
@@ -33,7 +32,7 @@ func NewFromDirectory(dir filesinterfaces.Directory) (*GitRepository, error) {
 		return nil, err
 	}
 
-	cedir, ok := dir.(interface{
+	cedir, ok := dir.(interface {
 		GetCommandExecutor() (commandexecutorinterfaces.CommandExecutor, error)
 	})
 	if ok {
@@ -51,7 +50,7 @@ func NewFromDirectory(dir filesinterfaces.Directory) (*GitRepository, error) {
 	}
 
 	if hostDescription == "localhost" {
-		return NewLocalGitRepository(path)
+		return NewLocalGitRepositoryFromPath(path)
 	}
 
 	typeName, err := datatypes.GetTypeName(dir)
@@ -62,7 +61,7 @@ func NewFromDirectory(dir filesinterfaces.Directory) (*GitRepository, error) {
 	return nil, tracederrors.TracedErrorf("Unable to get new directory from: dir of type '%s' on '%s'", typeName, hostDescription)
 }
 
-func NewLocalGitRepository(path string) (*GitRepository, error) {
+func NewLocalGitRepositoryFromPath(path string) (*GitRepository, error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
@@ -107,10 +106,7 @@ func (g *GitRepository) GetRootDirectory(ctx context.Context) (rootDirectory fil
 		return nil, err
 	}
 
-	rootDirectory, err = files.GetCommandExecutorDirectoryByPath(
-		commandExecutor,
-		rootDirPath,
-	)
+	rootDirectory, err = commandexecutorfileoo.NewDirectory(commandExecutor, rootDirPath)
 	if err != nil {
 		return nil, err
 	}
@@ -137,10 +133,7 @@ func (g *GitRepository) GetRootDirectoryPath(ctx context.Context) (rootDirectory
 			return "", err
 		}
 
-		cwd, err = files.GetCommandExecutorDirectoryByPath(
-			commandExecutor,
-			path,
-		)
+		cwd, err = commandexecutorfileoo.NewDirectory(commandExecutor, path)
 		if err != nil {
 			return "", err
 		}

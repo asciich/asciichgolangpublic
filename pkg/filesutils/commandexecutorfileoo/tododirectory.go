@@ -34,9 +34,7 @@ func (d *Directory) GetHostDescription() (hostDescription string, err error) {
 	return commandExecutor.GetHostDescription()
 }
 
-func (d *Directory) GetParentDirectory(ctx context.Context) (parentDirectory filesinterfaces.Directory, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
-}
+
 
 
 func (d *Directory) ListSubDirectories(ctx context.Context, options *parameteroptions.ListDirectoryOptions) (subDirectories []filesinterfaces.Directory, err error) {

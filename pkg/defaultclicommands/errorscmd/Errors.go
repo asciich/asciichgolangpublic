@@ -12,7 +12,9 @@ func NewErrorsCommand() (errorsCmd *cobra.Command) {
 		Short: "Error and Error handling related commands",
 	}
 
-	tracederrorscmd.AddTracedErrorsCommand(errorsCmd)
+	errorsCmd.AddCommand(
+		tracederrorscmd.NewTracedErrorsCmd(),
+	)
 
 	return errorsCmd
 }

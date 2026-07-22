@@ -60,39 +60,18 @@ func (d *Directory) CopyContentToDirectory(ctx context.Context, destinationDir f
 	return tracederrors.TracedErrorNotImplemented()
 }
 
-func (d *Directory) Create(ctx context.Context, options *filesoptions.CreateOptions) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
-}
-
-func (d *Directory) CreateSubDirectory(ctx context.Context, subDirectoryName string, options *filesoptions.CreateOptions) (createdSubDirectory filesinterfaces.Directory, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
-}
-
-func (d *Directory) Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
-}
-
-func (d *Directory) Exists(ctx context.Context) (exists bool, err error) {
-	return false, tracederrors.TracedErrorNotImplemented()
-}
-
 func (d *Directory) GetBaseName() (baseName string, err error) {
 	return "", tracederrors.TracedErrorNotImplemented()
 }
+
 func (d *Directory) GetDirName() (dirName string, err error) {
 	return "", tracederrors.TracedErrorNotImplemented()
 }
+
 func (d *Directory) GetFileInDirectory(pathToFile ...string) (file filesinterfaces.File, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
-func (d *Directory) GetParentDirectory(ctx context.Context) (parentDirectory filesinterfaces.Directory, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
-}
-
-func (d *Directory) GetSubDirectory(ctx context.Context, path ...string) (subDirectory filesinterfaces.Directory, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
-}
 func (d *Directory) IsLocalDirectory() (isLocalDirectory bool, err error) {
 	return false, tracederrors.TracedErrorNotImplemented()
 }
