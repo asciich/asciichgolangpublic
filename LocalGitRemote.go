@@ -11,15 +11,6 @@ type LocalGitRemote struct {
 	RemoteUrl string
 }
 
-func MustNewLocalGitRemoteByNativeGoGitRemote(goGitRemote *git.Remote) (l *LocalGitRemote) {
-	l, err := NewLocalGitRemoteByNativeGoGitRemote(goGitRemote)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return l
-}
-
 func NewLocalGitRemote() (l *LocalGitRemote) {
 	return new(LocalGitRemote)
 }

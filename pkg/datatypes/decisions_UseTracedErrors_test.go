@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 
@@ -61,7 +62,7 @@ func Test_DatatypesReturnsNoFmtErrorf(t *testing.T) {
 	regexOkString := regexp.MustCompile(`"` + searchString + `"`)
 
 	for _, sourcePath := range goFiles {
-		if filepath.Base(sourcePath) == "gettypename.go" {
+		if slices.Contains([]string{"gettypename.go", "gettypename_test.go"}, filepath.Base(sourcePath)) {
 			// gettypename.go is the only exception to avoid cyclic import.
 			continue
 		}

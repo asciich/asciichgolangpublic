@@ -187,3 +187,19 @@ func (d *Directory) GetLocalPath() (localPath string, err error) {
 		return "", tracederrors.TracedErrorf("Directory is on '%s', not on localhost", hostDescription)
 	}
 }
+
+func (d *Directory) GetParentDirectory(ctx context.Context) (parentDirectory filesinterfaces.Directory, err error) {
+	path, err := d.GetPath()
+	if err != nil {
+		return nil, err
+	}
+
+	parentPath := filepath.Dir(path)
+
+	commandExecutor, err := d.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	return NewDirectory(commandExecutor, parentPath)
+}
