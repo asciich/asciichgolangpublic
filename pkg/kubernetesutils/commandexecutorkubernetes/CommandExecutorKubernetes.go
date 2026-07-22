@@ -660,8 +660,121 @@ func (c *CommandExecutorKubernetes) CreateObject(ctx context.Context, options *k
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
+// RunCommandInTemporaryPod runs a command in a temporary Kubernetes pod and returns the output.
+//
+// Implementation note — why we use a run → wait → logs → delete approach instead of `kubectl run --rm -i`:
+//
+// Using `kubectl run` with `-i` or `--attach` causes output to be printed twice. This is a
+// known bug tracked in https://github.com/kubernetes/kubernetes/issues/27264. The root cause
+// is a race condition: kubectl first attaches to the container's stdout/stderr while it is
+// running, and then fetches the pod logs again as a fallback to ensure no output was missed
+// during the attach phase. Since kubectl cannot determine whether the attach captured all
+// output, it defensively reads the logs a second time — resulting in every line appearing twice.
+//
+// To avoid this, we decouple the lifecycle into four explicit steps:
+//  1. `kubectl run`    — start the pod without attaching
+//  2. `kubectl wait`   — block until the pod has completed
+//  3. `kubectl logs`   — fetch the output exactly once
+//  4. `kubectl delete` — clean up the pod
 func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	namespace, err := options.GetNamespaceName()
+	if err != nil {
+		return nil, err
+	}
+
+	podName, err := options.GetPodName()
+	if err != nil {
+		return nil, err
+	}
+
+	imageName, err := options.GetImageName()
+	if err != nil {
+		return nil, err
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	commandToExecute, err := options.GetCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run command in temporary pod '%s' in namespace '%s' using container image '%s' started.", podName, namespace, imageName)
+
+
+	kubeContext, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Step 1: Start the pod without attaching.
+	runCommand := []string{
+		"kubectl", "--context", kubeContext, "run", podName,
+		"--namespace", namespace,
+		"--image", imageName,
+		"--restart=Never",
+		"--",
+	}
+	runCommand = append(runCommand, commandToExecute...)
+
+	_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command: runCommand,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Step 2: Wait for the pod to complete.
+	waitCommand := []string{
+		"kubectl", "--context", kubeContext, "wait", "pod", podName,
+		"--namespace", namespace,
+		"--for=condition=Ready",
+		"--timeout=60s",
+	}
+
+	_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command: waitCommand,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Step 3: Fetch the logs exactly once.
+	logsCommand := []string{
+		"kubectl", "--context", kubeContext, "logs", podName,
+		"--namespace", namespace,
+	}
+
+	output, err := commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command: logsCommand,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Step 4: Delete the pod to clean up.
+	deleteCommand := []string{
+		"kubectl", "--context", kubeContext, "delete", "pod", podName,
+		"--namespace", namespace,
+	}
+
+	_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command: deleteCommand,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run command in temporary pod '%s' in namespace '%s' using container image '%s' finished.", podName, namespace, imageName)
+
+	return output, nil
 }
 
 func (c *CommandExecutorKubernetes) ReadSecret(ctx context.Context, namespaceName string, secretName string) (map[string][]byte, error) {
