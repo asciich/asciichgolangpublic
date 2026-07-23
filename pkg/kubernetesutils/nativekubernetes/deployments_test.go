@@ -97,3 +97,74 @@ func Test_WaitForDeploymentDeleted(t *testing.T) {
 		require.NoError(t, err)
 	})
 }
+
+func Test_ListDeployments(t *testing.T) {
+	ctx := getCtx()
+
+	// -----
+	// Prepare test environment start ...
+	clusterName := "kubernetesutils"
+
+	// Ensure a local kind cluster is available for testing:
+	_, err := kindutils.CreateCluster(ctx, clusterName)
+	require.NoError(t, err)
+
+	config, err := nativekubernetes.GetConfig(ctx, "kind-"+clusterName)
+	require.NoError(t, err)
+
+	clientset, err := nativekubernetes.GetClientSetFromRestConfig(ctx, config)
+	require.NoError(t, err)
+
+	// ... prepare test environment finished.
+	// -----
+
+	t.Run("create and delete Deployments with list in between", func(t *testing.T) {
+		const namespaceName = "default"
+
+		deploymentNames := []string{"listdeploy-1", "listdeploy-2", "listdeploy-3"}
+
+		// Ensure all test Deployments are absent before starting
+		for _, name := range deploymentNames {
+			err = nativekubernetes.DeleteDeployment(ctx, clientset, name, namespaceName)
+			require.NoError(t, err)
+		}
+
+		// Create Deployments one by one and verify list grows
+		for i, name := range deploymentNames {
+			err = nativekubernetes.CreateDeployment(ctx, config, &kubernetesparameteroptions.RunCommandOptions{
+				Namespace:      namespaceName,
+				DeploymentName: name,
+				Image:          "ubuntu",
+				Command:        []string{"bash", "-c", "sleep 1m"},
+				Replicas:       1,
+			})
+			require.NoError(t, err)
+
+			listed, err := nativekubernetes.ListDeployments(ctx, clientset, namespaceName)
+			require.NoError(t, err)
+
+			for _, created := range deploymentNames[:i+1] {
+				require.Contains(t, listed, created)
+			}
+			for _, notYetCreated := range deploymentNames[i+1:] {
+				require.NotContains(t, listed, notYetCreated)
+			}
+		}
+
+		// Delete Deployments one by one and verify list shrinks
+		for i, name := range deploymentNames {
+			err = nativekubernetes.DeleteDeployment(ctx, clientset, name, namespaceName)
+			require.NoError(t, err)
+
+			listed, err := nativekubernetes.ListDeployments(ctx, clientset, namespaceName)
+			require.NoError(t, err)
+
+			for _, deleted := range deploymentNames[:i+1] {
+				require.NotContains(t, listed, deleted)
+			}
+			for _, stillPresent := range deploymentNames[i+1:] {
+				require.Contains(t, listed, stillPresent)
+			}
+		}
+	})
+}

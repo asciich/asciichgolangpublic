@@ -42,7 +42,7 @@ func DeletePod(ctx context.Context, clientset *kubernetes.Clientset, podName str
 		PropagationPolicy: &deletePolicy,
 	})
 	if err == nil {
-		err := WaitForPodDeleted(ctx, clientset, namespace, podName, time.Second*30)
+		err := WaitForPodDeleted(ctx, clientset, namespace, podName, time.Second*100)
 		if err != nil {
 			return err
 		}
@@ -567,4 +567,28 @@ func CopyFileToPod(ctx context.Context, config *rest.Config, localFile string, d
 	logging.LogInfoByCtxf(ctx, "Copy local file '%s' as '%s' into container '%s' of pod '%s' of namespace '%s' finished.", localFile, destPath, containerName, podName, namespaceName)
 
 	return nil
+}
+
+func ListPods(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string) ([]string, error) {
+	if clientset == nil {
+		return nil, tracederrors.TracedErrorNil("clientset")
+	}
+
+	if namespaceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
+	}
+
+	podList, err := clientset.CoreV1().Pods(namespaceName).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to list pods in namespace '%s'.", namespaceName)
+	}
+
+	podNames := []string{}
+	for _, pod := range podList.Items {
+		podNames = append(podNames, pod.Name)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Found '%d' pods in namespace '%s'.", len(podNames), namespaceName)
+
+	return podNames, nil
 }
