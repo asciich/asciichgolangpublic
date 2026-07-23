@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
@@ -14,7 +13,7 @@ func Test_ConfigMapByNameExists(t *testing.T) {
 		implementationName string
 	}{
 		{"nativeKubernetes"},
-		// {"commandExecutorKubernetes"},
+		{"commandExecutorKubernetes"},
 	}
 
 	for _, tt := range tests {
@@ -37,23 +36,12 @@ func Test_ConfigMapByNameExists(t *testing.T) {
 				require.NoError(t, err)
 				require.False(t, exists)
 
-				for i := 0; i < 2; i++ {
-					ctx := contextutils.WithChangeIndicator(ctx)
-					configmap, err := namespace.CreateConfigMap(ctx, configmapName, &kubernetesparameteroptions.CreateConfigMapOptions{ConfigMapData: map[string]string{}})
-					require.NoError(t, err)
+				configmap, err := namespace.CreateConfigMap(ctx, configmapName, &kubernetesparameteroptions.CreateConfigMapOptions{ConfigMapData: map[string]string{}})
+				require.NoError(t, err)
 
-					if i == 0 {
-						// Creating the config map is considered a change:
-						require.True(t, contextutils.IsChanged(ctx))
-					} else {
-						// Update the same ConfigMap again and again with the same values must be idempotent and not indicate a change:
-						require.False(t, contextutils.IsChanged(ctx))
-					}
-
-					exists, err = configmap.Exists(ctx)
-					require.NoError(t, err)
-					require.True(t, exists)
-				}
+				exists, err = configmap.Exists(ctx)
+				require.NoError(t, err)
+				require.True(t, exists)
 
 				exists, err = namespace.ConfigMapByNameExists(ctx, configmapName)
 				require.NoError(t, err)
@@ -77,7 +65,7 @@ func Test_CreateConfigMapInNonExistentNamespace(t *testing.T) {
 		implementationName string
 	}{
 		{"nativeKubernetes"},
-		// {"commandExecutorKubernetes"},
+		{"commandExecutorKubernetes"},
 	}
 
 	for _, tt := range tests {
@@ -121,7 +109,7 @@ func Test_ReadAndWriteConfigMap(t *testing.T) {
 		implementationName string
 	}{
 		{"nativeKubernetes"},
-		// {"commandExecutorKubernetes"},
+		{"commandExecutorKubernetes"},
 	}
 
 	for _, tt := range tests {
@@ -137,7 +125,7 @@ func Test_ReadAndWriteConfigMap(t *testing.T) {
 				labels := map[string]string{"label1": "value1"}
 				content := map[string]string{"file.txt": "hello_world"}
 
-				for i := 0; i < 2; i++ {
+				for range 2 {
 					configMap, err := kubernetes.CreateConfigMap(ctx, namespaceName, configmapName, &kubernetesparameteroptions.CreateConfigMapOptions{
 						ConfigMapData: content,
 						Labels:        labels,

@@ -590,15 +590,30 @@ func (c *CommandExecutorKubernetes) DeleteSecretByName(ctx context.Context, name
 }
 
 func (c *CommandExecutorKubernetes) CreateConfigMap(ctx context.Context, namespaceName string, configMapName string, options *kubernetesparameteroptions.CreateConfigMapOptions) (createdConfigMap kubernetesinterfaces.ConfigMap, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.CreateConfigMap(ctx, configMapName, options)
 }
 
-func (c *CommandExecutorKubernetes) ConfigMapByNameExists(ctx context.Context, namespaceName string, configmapName string) (exists bool, err error) {
-	return false, tracederrors.TracedErrorNotImplemented()
+func (c *CommandExecutorKubernetes) ConfigMapByNameExists(ctx context.Context, namespaceName string, configMapName string) (exists bool, err error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return false, err
+	}
+
+	return namespace.ConfigMapByNameExists(ctx, configMapName)
 }
 
-func (c *CommandExecutorKubernetes) DeleteConfigMapByName(ctx context.Context, namespaceName string, configmapName string) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+func (c *CommandExecutorKubernetes) DeleteConfigMapByName(ctx context.Context, namespaceName string, configMapName string) (err error) {
+	namspace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+
+	return namspace.DeleteConfigMapByName(ctx, configMapName)
 }
 
 func (c *CommandExecutorKubernetes) CheckAccessible(ctx context.Context) error {
@@ -707,7 +722,6 @@ func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context
 	}
 
 	logging.LogInfoByCtxf(ctx, "Run command in temporary pod '%s' in namespace '%s' using container image '%s' started.", podName, namespace, imageName)
-
 
 	kubeContext, err := c.GetCachedKubectlContext(ctx)
 	if err != nil {
