@@ -305,3 +305,27 @@ func WaitForDeploymentAvailable(ctx context.Context, clientSet *kubernetes.Clien
 		}
 	}
 }
+
+func ListDeployments(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string) ([]string, error) {
+	if clientset == nil {
+		return nil, tracederrors.TracedErrorNil("clientset")
+	}
+
+	if namespaceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
+	}
+
+	deploymentList, err := clientset.AppsV1().Deployments(namespaceName).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to list Deployments in namespace '%s'.", namespaceName)
+	}
+
+	deploymentNames := []string{}
+	for _, dep := range deploymentList.Items {
+		deploymentNames = append(deploymentNames, dep.Name)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Found '%d' Deployments in namespace '%s'.", len(deploymentNames), namespaceName)
+
+	return deploymentNames, nil
+}

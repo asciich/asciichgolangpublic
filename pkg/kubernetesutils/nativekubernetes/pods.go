@@ -568,3 +568,27 @@ func CopyFileToPod(ctx context.Context, config *rest.Config, localFile string, d
 
 	return nil
 }
+
+func ListPods(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string) ([]string, error) {
+	if clientset == nil {
+		return nil, tracederrors.TracedErrorNil("clientset")
+	}
+
+	if namespaceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
+	}
+
+	podList, err := clientset.CoreV1().Pods(namespaceName).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to list pods in namespace '%s'.", namespaceName)
+	}
+
+	podNames := []string{}
+	for _, pod := range podList.Items {
+		podNames = append(podNames, pod.Name)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Found '%d' pods in namespace '%s'.", len(podNames), namespaceName)
+
+	return podNames, nil
+}
