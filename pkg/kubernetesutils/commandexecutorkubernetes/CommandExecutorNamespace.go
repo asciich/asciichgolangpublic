@@ -606,6 +606,75 @@ func (c *CommandExecutorNamespace) GetSecretByName(name string) (secret kubernet
 	}, nil
 }
 
+func (c *CommandExecutorNamespace) ListConfigMaps(ctx context.Context) ([]kubernetesinterfaces.ConfigMap, error) {
+	names, err := c.ListConfigMapNames(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	configMaps := []kubernetesinterfaces.ConfigMap{}
+
+	for _, n := range names {
+		toAdd, err := c.GetConfigMapByName(n)
+		if err != nil {
+			return nil, err
+		}
+
+		configMaps = append(configMaps, toAdd)
+	}
+
+	return configMaps, nil
+}
+
+func (c *CommandExecutorNamespace) ListConfigMapNames(ctx context.Context) ([]string, error) {
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "List configmap names in namespace '%s' of kubernetes '%s' started.", namespaceName, contextName)
+
+	lines, err := c.RunCommandAndGetStdoutAsLines(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context",
+				contextName,
+				"--namespace",
+				namespaceName,
+				"get",
+				"configmaps",
+				"-o",
+				"name",
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	names := []string{}
+	for _, l := range lines {
+		if !strings.HasPrefix(l, "configmap/") {
+			continue
+		}
+
+		names = append(names, strings.TrimPrefix(l, "configmap/"))
+	}
+
+	sort.Strings(names)
+
+	logging.LogInfoByCtxf(ctx, "List configmap names in namespace '%s' of kubernetes '%s' finished.", namespaceName, contextName)
+
+	return names, err
+}
+
 func (c *CommandExecutorNamespace) CreateSecret(ctx context.Context, secretName string, options *kubernetesparameteroptions.CreateSecretOptions) (createdSecret kubernetesinterfaces.Secret, err error) {
 	if secretName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("secretName")
@@ -700,19 +769,242 @@ func (c *CommandExecutorNamespace) CreateSecret(ctx context.Context, secretName 
 }
 
 func (c *CommandExecutorNamespace) DeleteConfigMapByName(ctx context.Context, name string) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+	if name == "" {
+		return tracederrors.TracedErrorEmptyString("name")
+	}
+
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	clusterName, err := c.GetClusterName()
+	if err != nil {
+		return err
+	}
+
+	exists, err := c.ConfigMapByNameExists(ctx, name)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		_, err = c.RunCommand(
+			ctx,
+			&parameteroptions.RunCommandOptions{
+				Command: []string{
+					"kubectl",
+					"--context",
+					contextName,
+					"--namespace",
+					namespaceName,
+					"delete",
+					"configmap",
+					name,
+				},
+			},
+		)
+		if err != nil {
+			return err
+		}
+
+		logging.LogChangedByCtxf(ctx, "ConfigMap '%s' in namespace '%s' of kubernetes '%s' deleted.", name, namespaceName, contextName)
+	} else {
+		logging.LogInfoByCtxf(ctx, "ConfigMap '%s' in namespace '%s' of kubernetes '%s' already absent. Skip delete.", name, namespaceName, clusterName)
+	}
+
+	return nil
 }
 
 func (c *CommandExecutorNamespace) ConfigMapByNameExists(ctx context.Context, name string) (bool, error) {
-	return false, tracederrors.TracedErrorNotImplemented()
+	if name == "" {
+		return false, tracederrors.TracedErrorEmptyString("name")
+	}
+
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return false, err
+	}
+
+	var exists bool
+	_, err = c.RunCommandAndGetStdoutAsLines(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context",
+				contextName,
+				"--namespace",
+				namespaceName,
+				"get",
+				"configmap",
+				name,
+			},
+		},
+	)
+	if err == nil {
+		exists = true
+	} else {
+		expectedNotFoundMessage := fmt.Sprintf("Error from server (NotFound): configmaps \"%s\" not found", name)
+		if !strings.Contains(err.Error(), expectedNotFoundMessage) {
+			return false, err
+		}
+	}
+
+	if exists {
+		logging.LogInfoByCtxf(ctx, "ConfigMap '%s' in namespace '%s' of kubernetes '%s' exists.", name, namespaceName, contextName)
+	} else {
+		logging.LogInfoByCtxf(ctx, "ConfigMap '%s' in namespace '%s' of kubernetes '%s' does not exist.", name, namespaceName, contextName)
+	}
+
+	return exists, nil
 }
 
-func (c *CommandExecutorNamespace) GetConfigMapByName(name string) (secret kubernetesinterfaces.ConfigMap, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
-}
+func (c *CommandExecutorNamespace) GetConfigMapByName(name string) (configMap kubernetesinterfaces.ConfigMap, err error) {
+	if name == "" {
+		return nil, tracederrors.TracedErrorEmptyString("name")
+	}
 
+	return &CommandExecutorConfigMap{
+		name:      name,
+		namespace: c,
+	}, nil
+}
 func (c *CommandExecutorNamespace) CreateConfigMap(ctx context.Context, name string, options *kubernetesparameteroptions.CreateConfigMapOptions) (createdConfigMap kubernetesinterfaces.ConfigMap, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	if name == "" {
+		return nil, tracederrors.TracedErrorEmptyString("name")
+	}
+
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	configMapData, err := options.GetConfigMapData()
+	if err != nil {
+		return nil, err
+	}
+
+	labels := options.GetLabels()
+
+	logging.LogInfoByCtxf(ctx, "Create configmap '%s' in namespace '%s' of kubernetes '%s' started.", name, namespaceName, contextName)
+
+	err = c.Create(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	configMap, err := c.GetConfigMapByName(name)
+	if err != nil {
+		return nil, err
+	}
+
+	exists, err := configMap.Exists(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if exists {
+		currentData, err := configMap.GetAllData(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		currentLabels, err := configMap.GetAllLabels(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		if reflect.DeepEqual(currentData, configMapData) && reflect.DeepEqual(currentLabels, labels) {
+			logging.LogInfoByCtxf(ctx, "ConfigMap '%s' in namespace '%s' of kubernetes '%s' already exists and is up to date.", name, namespaceName, contextName)
+		} else {
+			err = c.DeleteConfigMapByName(ctx, name)
+			if err != nil {
+				return nil, err
+			}
+			exists = false
+		}
+	}
+
+	if !exists {
+		command := []string{
+			"kubectl",
+			"--context",
+			contextName,
+			"--namespace",
+			namespaceName,
+			"create",
+			"configmap",
+			name,
+		}
+
+		for key, value := range configMapData {
+			command = append(command, fmt.Sprintf("--from-literal=%s=%s", key, value))
+		}
+
+		_, err = c.RunCommand(
+			ctx,
+			&parameteroptions.RunCommandOptions{
+				Command: command,
+			},
+		)
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to create configmap '%s' in namespace '%s' of kubernetes '%s': %w", name, namespaceName, contextName, err)
+		}
+
+		labelsCommand := []string{}
+		if len(labels) > 0 {
+			labelsCommand = []string{
+				"kubectl",
+				"--context",
+				contextName,
+				"--namespace",
+				namespaceName,
+				"label",
+				"configmap",
+				name,
+			}
+
+			for key, value := range labels {
+				labelsCommand = append(labelsCommand, fmt.Sprintf("%s=%s", key, value))
+			}
+
+			_, err = c.RunCommand(
+				ctx,
+				&parameteroptions.RunCommandOptions{
+					Command: labelsCommand,
+				},
+			)
+			if err != nil {
+				return nil, tracederrors.TracedErrorf("Failed to create labels for configmap '%s' in namespace '%s' of kubernetes '%s': %w", name, namespaceName, contextName, err)
+			}
+		}
+
+		logging.LogChangedByCtxf(ctx, "ConfigMap '%s' in namespace '%s' of kubernetes '%s' created.", name, namespaceName, contextName)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Create configmap '%s' in namespace '%s' of kubernetes '%s' finished.", name, namespaceName, contextName)
+
+	return configMap, nil
 }
 
 func (c *CommandExecutorNamespace) WatchConfigMap(ctx context.Context, name string, onCreate func(kubernetesinterfaces.ConfigMap), onUpdate func(kubernetesinterfaces.ConfigMap), onDelete func(kubernetesinterfaces.ConfigMap)) error {
