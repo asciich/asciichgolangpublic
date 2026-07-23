@@ -13,4 +13,8 @@ For the object oriented implmenetation see [nativekubernetesoo](/pkg/kubernetesu
 * Namespaces:
     * [Create and delete namespace](Example_CreateAndDeleteNamespace_test.go)
     * [Get namespace UID](Example_GetNamespaceUID_test.go)
-* [Run temporary pod and get stdout](Example_RunPodAndGetStdout_test.go): How to run a single command in Kubernetes and get it's stdout. This shows the usage of a temporary pod just started for the single command and automatically deleted afterwards.
+* [Run temporary pod and get stdout](Example_RunPodAndGetStdout_test.go): How to run a single command in Kubernetes and get it's stdout.
+* ReplicaSets:
+    * [Create and delete ReplicaSet](Example_CreateAndDeleteReplicaSet_test.go)
+* Deployments:
+    * [Create and delete Deployment](Example_CreateAndDeleteDeployment_test.go)

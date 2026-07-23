@@ -47,14 +47,34 @@ func TestGetContainerName(t *testing.T) {
 		require.Equal(t, "myreplicaset", name)
 	})
 
-	t.Run("pod name takes precedence over ReplicaSet name", func(t *testing.T) {
+	t.Run("fallback to Deployment name", func(t *testing.T) {
+		options := &kubernetesparameteroptions.RunCommandOptions{
+			DeploymentName: "mydeployment",
+		}
+		name, err := options.GetContainerName()
+		require.NoError(t, err)
+		require.Equal(t, "mydeployment", name)
+	})
+
+	t.Run("pod name takes precedence over ReplicaSet and Deployment name", func(t *testing.T) {
 		options := &kubernetesparameteroptions.RunCommandOptions{
 			PodName:        "mypod",
 			ReplicaSetName: "myreplicaset",
+			DeploymentName: "mydeployment",
 		}
 		name, err := options.GetContainerName()
 		require.NoError(t, err)
 		require.Equal(t, "mypod", name)
+	})
+
+	t.Run("ReplicaSet name takes precedence over Deployment name", func(t *testing.T) {
+		options := &kubernetesparameteroptions.RunCommandOptions{
+			ReplicaSetName: "myreplicaset",
+			DeploymentName: "mydeployment",
+		}
+		name, err := options.GetContainerName()
+		require.NoError(t, err)
+		require.Equal(t, "myreplicaset", name)
 	})
 
 	t.Run("explicit container name takes precedence over pod name", func(t *testing.T) {
