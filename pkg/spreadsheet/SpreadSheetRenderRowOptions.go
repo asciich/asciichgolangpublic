@@ -1,7 +1,6 @@
 package spreadsheet
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -49,54 +48,6 @@ func (s *SpreadSheetRenderRowOptions) IsMinColumnWidthsSet() (isSet bool) {
 
 func (s *SpreadSheetRenderRowOptions) IsStringDelimiterSet() (isSet bool) {
 	return s.StringDelimiter != ""
-}
-
-func (s *SpreadSheetRenderRowOptions) MustGetMinColumnWidths() (minColumnWidths []int) {
-	minColumnWidths, err := s.GetMinColumnWidths()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return minColumnWidths
-}
-
-func (s *SpreadSheetRenderRowOptions) MustGetStringDelimiter() (stringDelimiter string) {
-	stringDelimiter, err := s.GetStringDelimiter()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return stringDelimiter
-}
-
-func (s *SpreadSheetRenderRowOptions) MustGetVerbose() (verbose bool) {
-	verbose, err := s.GetVerbose()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return verbose
-}
-
-func (s *SpreadSheetRenderRowOptions) MustSetMinColumnWidths(minColumnWidths []int) {
-	err := s.SetMinColumnWidths(minColumnWidths)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SpreadSheetRenderRowOptions) MustSetStringDelimiter(stringDelimiter string) {
-	err := s.SetStringDelimiter(stringDelimiter)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SpreadSheetRenderRowOptions) MustSetVerbose(verbose bool) {
-	err := s.SetVerbose(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (s *SpreadSheetRenderRowOptions) SetMinColumnWidths(minColumnWidths []int) (err error) {

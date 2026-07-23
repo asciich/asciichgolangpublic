@@ -5,7 +5,6 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -79,65 +78,6 @@ func (s *SpreadSheetRow) GetNumberOfEntries() (nEntries int, err error) {
 	}
 
 	return len(entries), nil
-}
-
-func (s *SpreadSheetRow) MustGetColumnValueAsString(columnIndex int) (columnValue string) {
-	columnValue, err := s.GetColumnValueAsString(columnIndex)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return columnValue
-}
-
-func (s *SpreadSheetRow) MustGetColumnWidths() (columnWidths []int) {
-	columnWidths, err := s.GetColumnWidths()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return columnWidths
-}
-
-func (s *SpreadSheetRow) MustGetEntries() (entries []string) {
-	entries, err := s.GetEntries()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return entries
-}
-
-func (s *SpreadSheetRow) MustGetNumberOfEntries() (nEntries int) {
-	nEntries, err := s.GetNumberOfEntries()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nEntries
-}
-
-func (s *SpreadSheetRow) MustRemoveElementAtIndex(index int) {
-	err := s.RemoveElementAtIndex(index)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SpreadSheetRow) MustRenderAsString(options *SpreadSheetRenderRowOptions) (rendered string) {
-	rendered, err := s.RenderAsString(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return rendered
-}
-
-func (s *SpreadSheetRow) MustSetEntries(entries []string) {
-	err := s.SetEntries(entries)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (s *SpreadSheetRow) RemoveElementAtIndex(index int) (err error) {

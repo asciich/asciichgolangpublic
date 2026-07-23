@@ -500,11 +500,9 @@ func (n *NativeNamespace) WatchConfigMap(ctx context.Context, configMapName stri
 
 	go func() {
 		verbose := contextutils.GetVerboseFromContext(ctx)
-		select {
-		case <-ctx.Done():
-			if verbose {
-				logging.LogInfof("Watch ConfigMap '%s' in namespace '%s' canceled.", configMapName, namespaceName)
-			}
+		<-ctx.Done()
+		if verbose {
+			logging.LogInfof("Watch ConfigMap '%s' in namespace '%s' canceled.", configMapName, namespaceName)
 		}
 	}()
 
