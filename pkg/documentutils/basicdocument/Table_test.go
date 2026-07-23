@@ -1,4 +1,4 @@
-package  basicdocument
+package basicdocument
 
 import (
 	"testing"
@@ -18,7 +18,8 @@ func Test_RenderMarkDown(t *testing.T) {
 	t.Run("only one title", func(t *testing.T) {
 		table := mustutils.Must(GetNewTable())
 		spreadsheet := mustutils.Must(table.GetSpreadSheet())
-		spreadsheet.MustSetColumnTitles([]string{"one title"})
+		err := spreadsheet.SetColumnTitles([]string{"one title"})
+		require.NoError(t, err)
 
 		rendered := table.MustRenderAsMarkdownString()
 		require.EqualValues(t, "| one title |\n| --------- |\n", rendered)
@@ -27,8 +28,12 @@ func Test_RenderMarkDown(t *testing.T) {
 	t.Run("one title one entry", func(t *testing.T) {
 		table := mustutils.Must(GetNewTable())
 		spreadsheet := mustutils.Must(table.GetSpreadSheet())
-		spreadsheet.MustSetColumnTitles([]string{"one title"})
-		spreadsheet.MustAddRow([]string{"entry"})
+
+		err := spreadsheet.SetColumnTitles([]string{"one title"})
+		require.NoError(t, err)
+
+		err = spreadsheet.AddRow([]string{"entry"})
+		require.NoError(t, err)
 
 		rendered := table.MustRenderAsMarkdownString()
 		require.EqualValues(t, "| one title |\n| --------- |\n| entry |\n", rendered)

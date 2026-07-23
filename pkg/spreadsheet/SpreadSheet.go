@@ -312,6 +312,24 @@ func (s *SpreadSheet) GetRowByIndex(rowIndex int) (row *SpreadSheetRow, err erro
 	return row, nil
 }
 
+func (s *SpreadSheet) GetRowsIncludingTitleRow() (rows []*SpreadSheetRow, err error) {
+	titleRow, err := s.GetTitleRow()
+	if err != nil {
+		return nil, err
+	}
+
+	rows = []*SpreadSheetRow{titleRow}
+
+	toAdd, err := s.GetRows()
+	if err != nil {
+		return nil, err
+	}
+
+	rows = append(rows, toAdd...)
+
+	return rows, nil
+}
+
 func (s *SpreadSheet) GetRows() (rows []*SpreadSheetRow, err error) {
 	if s.rows == nil {
 		return nil, tracederrors.TracedErrorf("rows not set")
@@ -330,186 +348,6 @@ func (s *SpreadSheet) GetTitleRow() (TitleRow *SpreadSheetRow, err error) {
 	}
 
 	return s.TitleRow, nil
-}
-
-func (s *SpreadSheet) MustAddRow(rowEntries []string) {
-	err := s.AddRow(rowEntries)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SpreadSheet) MustGetCellValueAsString(rowIndex int, columnIndex int) (cellValue string) {
-	cellValue, err := s.GetCellValueAsString(rowIndex, columnIndex)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return cellValue
-}
-
-func (s *SpreadSheet) MustGetColumnIndexByName(columnName string) (columnIndex int) {
-	columnIndex, err := s.GetColumnIndexByName(columnName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return columnIndex
-}
-
-func (s *SpreadSheet) MustGetColumnTitleAtIndexAsString(index int) (title string) {
-	title, err := s.GetColumnTitleAtIndexAsString(index)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return title
-}
-
-func (s *SpreadSheet) MustGetColumnTitlesAsStringSlice() (titles []string) {
-	titles, err := s.GetColumnTitlesAsStringSlice()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return titles
-}
-
-func (s *SpreadSheet) MustGetMaxColumnWidths() (columnWitdhs []int) {
-	columnWitdhs, err := s.GetMaxColumnWidths()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return columnWitdhs
-}
-
-func (s *SpreadSheet) MustGetMinColumnWithsAsSelectedInOptions(options *SpreadSheetRenderOptions) (columnWidths []int) {
-	columnWidths, err := s.GetMinColumnWithsAsSelectedInOptions(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return columnWidths
-}
-
-func (s *SpreadSheet) MustGetNumberOfColumns() (nColumns int) {
-	nColumns, err := s.GetNumberOfColumns()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nColumns
-}
-
-func (s *SpreadSheet) MustGetNumberOfRows() (nRows int) {
-	nRows, err := s.GetNumberOfRows()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return nRows
-}
-
-func (s *SpreadSheet) MustGetRowByIndex(rowIndex int) (row *SpreadSheetRow) {
-	row, err := s.GetRowByIndex(rowIndex)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return row
-}
-
-func (s *SpreadSheet) MustGetRows() (rows []*SpreadSheetRow) {
-	rows, err := s.GetRows()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return rows
-}
-
-func (s *SpreadSheet) MustGetTitleRow() (TitleRow *SpreadSheetRow) {
-	TitleRow, err := s.GetTitleRow()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return TitleRow
-}
-
-func (s *SpreadSheet) MustPrintAsString(options *SpreadSheetRenderOptions) {
-	err := s.PrintAsString(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SpreadSheet) MustRemoveColumnByIndex(columnIndex int) {
-	err := s.RemoveColumnByIndex(columnIndex)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SpreadSheet) MustRemoveColumnByName(columnName string) {
-	err := s.RemoveColumnByName(columnName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SpreadSheet) MustRenderAsString(options *SpreadSheetRenderOptions) (rendered string) {
-	rendered, err := s.RenderAsString(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return rendered
-}
-
-func (s *SpreadSheet) MustRenderTitleRowAsString(options *SpreadSheetRenderRowOptions) (rendered string) {
-	rendered, err := s.RenderTitleRowAsString(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return rendered
-}
-
-func (s *SpreadSheet) MustRenderToStdout(options *SpreadSheetRenderOptions) {
-	err := s.RenderToStdout(options)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SpreadSheet) MustSetColumnTitles(titles []string) {
-	err := s.SetColumnTitles(titles)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SpreadSheet) MustSetRows(rows []*SpreadSheetRow) {
-	err := s.SetRows(rows)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SpreadSheet) MustSetTitleRow(TitleRow *SpreadSheetRow) {
-	err := s.SetTitleRow(TitleRow)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SpreadSheet) MustSortByColumnByName(columnName string) {
-	err := s.SortByColumnByName(columnName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (s *SpreadSheet) PrintAsString(options *SpreadSheetRenderOptions) (err error) {
@@ -835,15 +673,6 @@ func (s *SpreadSheet) UpdateRowFoundByFirstColumnValue(searchValue string, cellI
 	entries[cellIndex] = newValue
 
 	return nil
-}
-
-func (s *SpreadSheet) MustGetRowByIndexAsStringSlice(index int) (values []string) {
-	values, err := s.GetRowByIndexAsStringSlice(index)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return values
 }
 
 func (s *SpreadSheet) GetRowByIndexAsStringSlice(index int) (values []string, err error) {

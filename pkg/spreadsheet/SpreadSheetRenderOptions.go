@@ -1,7 +1,6 @@
 package spreadsheet
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -40,70 +39,6 @@ func (s *SpreadSheetRenderOptions) GetStringDelimiter() (stringDelimiter string,
 func (s *SpreadSheetRenderOptions) GetVerbose() (verbose bool, err error) {
 
 	return s.Verbose, nil
-}
-
-func (s *SpreadSheetRenderOptions) MustGetSameColumnWidthForAllRows() (sameColumnWidthForAllRows bool) {
-	sameColumnWidthForAllRows, err := s.GetSameColumnWidthForAllRows()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return sameColumnWidthForAllRows
-}
-
-func (s *SpreadSheetRenderOptions) MustGetSkipTitle() (skipTitle bool) {
-	skipTitle, err := s.GetSkipTitle()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return skipTitle
-}
-
-func (s *SpreadSheetRenderOptions) MustGetStringDelimiter() (stringDelimiter string) {
-	stringDelimiter, err := s.GetStringDelimiter()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return stringDelimiter
-}
-
-func (s *SpreadSheetRenderOptions) MustGetVerbose() (verbose bool) {
-	verbose, err := s.GetVerbose()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return verbose
-}
-
-func (s *SpreadSheetRenderOptions) MustSetSameColumnWidthForAllRows(sameColumnWidthForAllRows bool) {
-	err := s.SetSameColumnWidthForAllRows(sameColumnWidthForAllRows)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SpreadSheetRenderOptions) MustSetSkipTitle(skipTitle bool) {
-	err := s.SetSkipTitle(skipTitle)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SpreadSheetRenderOptions) MustSetStringDelimiter(stringDelimiter string) {
-	err := s.SetStringDelimiter(stringDelimiter)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (s *SpreadSheetRenderOptions) MustSetVerbose(verbose bool) {
-	err := s.SetVerbose(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (s *SpreadSheetRenderOptions) SetSameColumnWidthForAllRows(sameColumnWidthForAllRows bool) (err error) {
