@@ -294,23 +294,7 @@ func (n *NativeNamespace) ConfigMapByNameExists(ctx context.Context, configmapNa
 		return false, err
 	}
 
-	var exists bool
-	_, err = clientset.CoreV1().ConfigMaps(namespaceName).Get(ctx, configmapName, metav1.GetOptions{})
-	if err == nil {
-		exists = true
-	} else {
-		if !errors.IsNotFound(err) {
-			return false, tracederrors.TracedErrorf("failed to get configmap '%s' in namespace '%s': %w", configmapName, namespaceName, err)
-		}
-	}
-
-	if exists {
-		logging.LogInfoByCtxf(ctx, "ConfigMap '%s' in namespace '%s' exists.", configmapName, namespaceName)
-	} else {
-		logging.LogInfoByCtxf(ctx, "ConfigMap '%s' in namespace '%s' does not exist.", configmapName, namespaceName)
-	}
-
-	return exists, nil
+	return nativekubernetes.ConfigMapExists(ctx, clientset, namespaceName, configmapName)
 }
 
 func (n *NativeNamespace) CreateConfigMap(ctx context.Context, configMapName string, options *kubernetesparameteroptions.CreateConfigMapOptions) (createdConfigMap kubernetesinterfaces.ConfigMap, err error) {
@@ -411,28 +395,12 @@ func (n *NativeNamespace) DeleteConfigMapByName(ctx context.Context, configmapNa
 		return err
 	}
 
-	exists, err := n.ConfigMapByNameExists(ctx, configmapName)
+	clientset, err := n.GetClientSet()
 	if err != nil {
 		return err
 	}
 
-	if exists {
-		clientset, err := n.GetClientSet()
-		if err != nil {
-			return err
-		}
-
-		err = clientset.CoreV1().ConfigMaps(namespaceName).Delete(ctx, configmapName, metav1.DeleteOptions{})
-		if err != nil {
-			return tracederrors.TracedErrorf("Failed to delete configmap '%s' in namespace '%s'.", configmapName, namespaceName)
-		}
-
-		logging.LogChangedByCtxf(ctx, "ConfigMap '%s' in namespace '%s' deleted.", configmapName, namespaceName)
-	} else {
-		logging.LogInfoByCtxf(ctx, "ConfigMap '%s' in namespace '%s' does not exist. Skip delete.", configmapName, namespaceName)
-	}
-
-	return nil
+	return nativekubernetes.DeleteConfigMap(ctx, clientset, namespaceName, configmapName)
 }
 
 func (n *NativeNamespace) WatchConfigMap(ctx context.Context, configMapName string, onCreate func(kubernetesinterfaces.ConfigMap), onUpdate func(kubernetesinterfaces.ConfigMap), onDelete func(kubernetesinterfaces.ConfigMap)) error {

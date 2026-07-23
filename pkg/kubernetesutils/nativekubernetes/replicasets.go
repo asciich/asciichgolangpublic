@@ -305,3 +305,27 @@ func WaitForReplicaSetAvailable(ctx context.Context, clientSet *kubernetes.Clien
 		}
 	}
 }
+
+func ListReplicaSets(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string) ([]string, error) {
+	if clientset == nil {
+		return nil, tracederrors.TracedErrorNil("clientset")
+	}
+
+	if namespaceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
+	}
+
+	replicaSetList, err := clientset.AppsV1().ReplicaSets(namespaceName).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to list ReplicaSets in namespace '%s'.", namespaceName)
+	}
+
+	replicaSetNames := []string{}
+	for _, rs := range replicaSetList.Items {
+		replicaSetNames = append(replicaSetNames, rs.Name)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Found '%d' ReplicaSets in namespace '%s'.", len(replicaSetNames), namespaceName)
+
+	return replicaSetNames, nil
+}

@@ -4,9 +4,9 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type NativeConfigMap struct {
@@ -33,12 +33,12 @@ func (n *NativeConfigMap) GetName() (string, error) {
 func (n *NativeConfigMap) Exists(ctx context.Context) (bool, error) {
 	configMapName, err := n.GetName()
 	if err != nil {
-		return false, nil
+		return false, err
 	}
 
 	namespace, err := n.GetNamespace()
 	if err != nil {
-		return false, nil
+		return false, err
 	}
 
 	return namespace.ConfigMapByNameExists(ctx, configMapName)
@@ -65,12 +65,7 @@ func (n *NativeConfigMap) GetRawResponse(ctx context.Context) (*v1.ConfigMap, er
 		return nil, err
 	}
 
-	configMap, err := clientset.CoreV1().ConfigMaps(namespaceName).Get(ctx, configMapName, metav1.GetOptions{})
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("Failed to retrieve raw config map '%s' in namespace '%s': %w", configMapName, namespaceName, err)
-	}
-
-	return configMap, nil
+	return nativekubernetes.GetConfigMap(ctx, clientset, namespaceName, configMapName)
 }
 
 func (n *NativeConfigMap) GetNamespaceName() (string, error) {
@@ -88,26 +83,67 @@ func (n *NativeConfigMap) GetNamespaceName() (string, error) {
 }
 
 func (n *NativeConfigMap) GetAllData(ctx context.Context) (map[string]string, error) {
-	rawResponse, err := n.GetRawResponse(ctx)
+	namespace, err := n.GetNamespace()
 	if err != nil {
 		return nil, err
 	}
 
-	return rawResponse.Data, nil
+	clientset, err := namespace.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := namespace.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	configMapName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	return nativekubernetes.GetConfigMapData(ctx, clientset, namespaceName, configMapName)
 }
 
 func (n *NativeConfigMap) GetAllLabels(ctx context.Context) (map[string]string, error) {
-	rawResponse, err := n.GetRawResponse(ctx)
+	namespace, err := n.GetNamespace()
 	if err != nil {
 		return nil, err
 	}
 
-	return rawResponse.Labels, nil
+	clientset, err := namespace.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := namespace.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	configMapName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	return nativekubernetes.GetConfigMapLabels(ctx, clientset, namespaceName, configMapName)
 }
 
 func (n *NativeConfigMap) GetData(ctx context.Context, fieldName string) (string, error) {
-	if fieldName == "" {
-		return "", tracederrors.TracedErrorEmptyString("fileName")
+	namespace, err := n.GetNamespace()
+	if err != nil {
+		return "", err
+	}
+
+	clientset, err := namespace.GetClientSet()
+	if err != nil {
+		return "", err
+	}
+
+	namespaceName, err := namespace.GetName()
+	if err != nil {
+		return "", err
 	}
 
 	configMapName, err := n.GetName()
@@ -115,22 +151,7 @@ func (n *NativeConfigMap) GetData(ctx context.Context, fieldName string) (string
 		return "", err
 	}
 
-	namespaceName, err := n.GetNamespaceName()
-	if err != nil {
-		return "", err
-	}
-
-	data, err := n.GetAllData(ctx)
-	if err != nil {
-		return "", err
-	}
-
-	fieldData, ok := data[fieldName]
-	if !ok {
-		return "", tracederrors.TracedErrorf("ConfigMap '%s' in namespace '%s' has no field '%s'.", configMapName, namespaceName, fieldName)
-	}
-
-	return fieldData, nil
+	return nativekubernetes.GetConfigMapField(ctx, clientset, namespaceName, configMapName, fieldName)
 }
 
 func IsConfigMapContentEqual(configMap1 map[string]string, configMap2 map[string]string) bool {
