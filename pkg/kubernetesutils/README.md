@@ -9,6 +9,10 @@ The implementation using the official k8s client-go is available as:
 ## Examples
 
 * [ConfigMap by name exists](Example_ConfigmapByNameExists_test.go)
+* [Create and delete ConfigMap](Example_CreateAndDeleteConfigMap_test.go)
+* [Create and delete Deployment](Example_CreateAndDeleteDeployment_test.go)
+* [Create and delete Pod](Example_CreateAndDeletePod_test.go)
+* [Create and delete ReplicaSet](Example_CreateAndDeleteReplicaSet_test.go)
 * The examples to exec/ run commands as additional process inside a container are in [nativekubernetes](./nativekubernetes/README.md)
 * Namespaces:
     * [Create and delete namespace](nativekubernetes/Example_CreateAndDeleteNamespace_test.go)

@@ -13,7 +13,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 )
 
 func DeleteReplicaSet(ctx context.Context, clientset *kubernetes.Clientset, replicaSetName string, namespace string) error {
@@ -54,18 +53,17 @@ func DeleteReplicaSet(ctx context.Context, clientset *kubernetes.Clientset, repl
 	return nil
 }
 
-func CreateReplicaSet(ctx context.Context, config *rest.Config, options *kubernetesparameteroptions.RunCommandOptions) error {
-	if config == nil {
-		return tracederrors.TracedErrorNil("config")
+func CreateReplicaSet(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) error {
+	if clientset == nil {
+		return tracederrors.TracedErrorNil("clientset")
+	}
+
+	if namespaceName == "" {
+		return tracederrors.TracedErrorEmptyString("namespaceName")
 	}
 
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
-	}
-
-	namespace, err := options.GetNamespaceName()
-	if err != nil {
-		return err
 	}
 
 	replicaSetName, err := options.GetReplicaSetName()
@@ -90,12 +88,7 @@ func CreateReplicaSet(ctx context.Context, config *rest.Config, options *kuberne
 
 	replicas := options.GetReplicas()
 
-	logging.LogInfoByCtxf(ctx, "Create ReplicaSet '%s' in namespace '%s' using container image '%s' started.", replicaSetName, namespace, imageName)
-
-	clientset, err := GetClientSetFromRestConfig(ctx, config)
-	if err != nil {
-		return err
-	}
+	logging.LogInfoByCtxf(ctx, "Create ReplicaSet '%s' in namespace '%s' using container image '%s' started.", replicaSetName, namespaceName, imageName)
 
 	replicaSet := &appsv1.ReplicaSet{
 		ObjectMeta: metav1.ObjectMeta{
@@ -130,16 +123,16 @@ func CreateReplicaSet(ctx context.Context, config *rest.Config, options *kuberne
 		},
 	}
 
-	logging.LogInfoByCtxf(ctx, "Going to start ReplicaSet '%s' in namespace '%s' using container image '%s'.", replicaSetName, namespace, imageName)
-	_, err = clientset.AppsV1().ReplicaSets(namespace).Create(ctx, replicaSet, metav1.CreateOptions{})
+	logging.LogInfoByCtxf(ctx, "Going to start ReplicaSet '%s' in namespace '%s' using container image '%s'.", replicaSetName, namespaceName, imageName)
+	_, err = clientset.AppsV1().ReplicaSets(namespaceName).Create(ctx, replicaSet, metav1.CreateOptions{})
 	if err != nil {
 		if apierrors.IsAlreadyExists(err) && options.DeleteAlreadyExistingReplicaSet {
-			logging.LogInfoByCtxf(ctx, "Going to delete already existing ReplicaSet '%s' in namespace '%s' before running command.", replicaSetName, namespace)
-			err = DeleteReplicaSet(ctx, clientset, replicaSetName, namespace)
+			logging.LogInfoByCtxf(ctx, "Going to delete already existing ReplicaSet '%s' in namespace '%s' before running command.", replicaSetName, namespaceName)
+			err = DeleteReplicaSet(ctx, clientset, replicaSetName, namespaceName)
 			if err != nil {
 				return err
 			}
-			_, err = clientset.AppsV1().ReplicaSets(namespace).Create(ctx, replicaSet, metav1.CreateOptions{})
+			_, err = clientset.AppsV1().ReplicaSets(namespaceName).Create(ctx, replicaSet, metav1.CreateOptions{})
 			if err != nil {
 				return tracederrors.TracedErrorf("Error creating ReplicaSet: %w", err)
 			}
@@ -149,13 +142,13 @@ func CreateReplicaSet(ctx context.Context, config *rest.Config, options *kuberne
 	}
 
 	if options.WaitForReplicaSetAvailable {
-		err = WaitForReplicaSetAvailable(ctx, clientset, namespace, replicaSetName, time.Minute*1)
+		err = WaitForReplicaSetAvailable(ctx, clientset, namespaceName, replicaSetName, time.Minute*1)
 		if err != nil {
 			return err
 		}
 	}
 
-	logging.LogInfoByCtxf(ctx, "Create ReplicaSet '%s' in namespace '%s' using container image '%s' finished.", replicaSetName, namespace, imageName)
+	logging.LogInfoByCtxf(ctx, "Create ReplicaSet '%s' in namespace '%s' using container image '%s' finished.", replicaSetName, namespaceName, imageName)
 
 	return nil
 }
@@ -328,4 +321,8 @@ func ListReplicaSets(ctx context.Context, clientset *kubernetes.Clientset, names
 	logging.LogInfoByCtxf(ctx, "Found '%d' ReplicaSets in namespace '%s'.", len(replicaSetNames), namespaceName)
 
 	return replicaSetNames, nil
+}
+
+func ListReplicaSetNames(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string) ([]string, error) {
+	return ListReplicaSets(ctx, clientset, namespaceName)
 }

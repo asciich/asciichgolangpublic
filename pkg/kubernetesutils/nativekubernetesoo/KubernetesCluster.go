@@ -172,6 +172,7 @@ func (n *NativeKubernetesCluster) GetName() (name string, err error) {
 
 	return n.name, nil
 }
+
 func (n *NativeKubernetesCluster) GetNamespaceByName(name string) (namespace kubernetesinterfaces.Namespace, err error) {
 	if name == "" {
 		return nil, tracederrors.TracedErrorEmptyString("name")
@@ -182,6 +183,34 @@ func (n *NativeKubernetesCluster) GetNamespaceByName(name string) (namespace kub
 		kubernetesCluster: n,
 	}, nil
 }
+
+func (n *NativeKubernetesCluster) GetReplicaSetByNames(namespaceName string, replicaSetName string) (kubernetesinterfaces.ReplicaSet, error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.GetReplicaSetByName(replicaSetName)
+}
+
+func (n *NativeKubernetesCluster) GetDeploymentByNames(namespaceName string, deploymentName string) (kubernetesinterfaces.Deployment, error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.GetDeploymentByName(deploymentName)
+}
+
+func (n *NativeKubernetesCluster) GetPodByNames(namespaceName string, podName string) (kubernetesinterfaces.Pod, error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.GetPodByName(podName)
+}
+
 func (n *NativeKubernetesCluster) GetObjectByNames(objectName string, objectType string, namespaceName string) (object kubernetesinterfaces.Object, err error) {
 	if objectName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("objectName")
@@ -507,13 +536,13 @@ func (n *NativeKubernetesCluster) CreateObject(ctx context.Context, options *kub
 	return namespace.CreateObject(ctx, options)
 }
 
-func (n *NativeKubernetesCluster) RunCommandInTemporaryPod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
-	config, err := n.GetConfig()
+func (n *NativeKubernetesCluster) RunCommandInTemporaryPod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
+	clientSet, err := n.GetClientSet()
 	if err != nil {
 		return nil, err
 	}
 
-	return nativekubernetes.RunCommandInTemporaryPod(ctx, config, options)
+	return nativekubernetes.RunCommandInTemporaryPod(ctx, clientSet, namespaceName, options)
 }
 
 func (n *NativeKubernetesCluster) ReadSecret(ctx context.Context, namespaceName string, secretName string) (map[string][]byte, error) {
@@ -532,4 +561,85 @@ func (n *NativeKubernetesCluster) ListNodeNames(ctx context.Context) ([]string, 
 	}
 
 	return ListNodeNames(ctx, clientset)
+}
+
+func (n *NativeKubernetesCluster) DeleteReplicaSetByNames(ctx context.Context, namespaceName string, replicaSetName string) error {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+
+	return namespace.DeleteReplicaSetByName(ctx, replicaSetName)
+}
+
+func (n *NativeKubernetesCluster) DeleteDeploymentByNames(ctx context.Context, namespaceName string, deploymentName string) error {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+
+	return namespace.DeleteDeploymentByName(ctx, deploymentName)
+}
+
+func (n *NativeKubernetesCluster) DeletePodByNames(ctx context.Context, namespaceName string, podName string) error {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+
+	return namespace.DeletePodByName(ctx, podName)
+}
+
+func (n *NativeKubernetesCluster) CreatePod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.Pod, error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.CreatePod(ctx, options)
+}
+
+func (n *NativeKubernetesCluster) CreateReplicaSet(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.ReplicaSet, error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.CreateReplicaSet(ctx, options)
+}
+
+func (n *NativeKubernetesCluster) CreateDeployment(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.Deployment, error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.CreateDeployment(ctx, options)
+}
+
+func (n *NativeKubernetesCluster) PodByNameExists(ctx context.Context, namespaceName string, podName string) (bool, error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return false, err
+	}
+
+	return namespace.PodByNameExists(ctx, podName)
+}
+
+func (n *NativeKubernetesCluster) ReplicaSetByNameExists(ctx context.Context, namespaceName string, replicaSetName string) (bool, error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return false, err
+	}
+
+	return namespace.ReplicaSetByNameExists(ctx, replicaSetName)
+}
+
+func (n *NativeKubernetesCluster) DeploymentByNameExists(ctx context.Context, namespaceName string, deploymentName string) (bool, error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return false, err
+	}
+
+	return namespace.DeploymentByNameExists(ctx, deploymentName)
 }

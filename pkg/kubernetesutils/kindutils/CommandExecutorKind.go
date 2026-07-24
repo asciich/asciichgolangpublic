@@ -54,15 +54,6 @@ func MustGetCommandExecutorKind(commandExecutor commandexecutorinterfaces.Comman
 	return kind
 }
 
-func MustGetLocalCommandExecutorKind() (kind Kind) {
-	kind, err := GetLocalCommandExecutorKind()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return kind
-}
-
 func NewCommandExecutorKind() (c *CommandExecutorKind) {
 	return new(CommandExecutorKind)
 }

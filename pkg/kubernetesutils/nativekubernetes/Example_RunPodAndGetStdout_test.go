@@ -27,8 +27,7 @@ func Test_Example_RunPodAndGetStdout(t *testing.T) {
 	// ... prepare test environment finished.
 	// -----
 
-	// Get the config to access the kubernetes cluster:
-	config, err := nativekubernetes.GetConfig(ctx, "kind-"+clusterName)
+	clientset, err := nativekubernetes.GetClientSet(ctx, "kind-"+clusterName)
 	require.NoError(t, err)
 
 	// define the pod name
@@ -37,10 +36,10 @@ func Test_Example_RunPodAndGetStdout(t *testing.T) {
 	// Run a command in a temporary pod:
 	output, err := nativekubernetes.RunCommandInTemporaryPod(
 		ctx,
-		config,
+		clientset,
+		"default",
 		&kubernetesparameteroptions.RunCommandOptions{
 			Image:                    "ubuntu",
-			Namespace:                "default",
 			PodName:                  podName,
 			DeleteAlreadyExistingPod: true,
 			Command:                  []string{"bash", "-c", "echo hello_world"},

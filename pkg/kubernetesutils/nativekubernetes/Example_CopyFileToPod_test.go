@@ -55,10 +55,10 @@ func Test_Example_CopyFileToPod(t *testing.T) {
 	// start the pod
 	err = nativekubernetes.CreatePod(
 		ctx,
-		config,
+		clientset,
+		"default",
 		&kubernetesparameteroptions.RunCommandOptions{
 			Image:                    "ubuntu",
-			Namespace:                "default",
 			PodName:                  podName,
 			DeleteAlreadyExistingPod: true,
 			Command:                  []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"}, // Same as sleep inifinity but does not ignore SIGINT
@@ -87,11 +87,15 @@ func Test_Example_CopyFileToPod(t *testing.T) {
 	require.NoError(t, err)
 
 	// Check file with correct content was uploaded:
-	commandOutput, err := nativekubernetes.Exec(ctx, config, &kubernetesparameteroptions.RunCommandOptions{
-		Namespace: namespaceName,
-		PodName:   podName,
-		Command:   []string{"cat", destPath},
-	})
+	commandOutput, err := nativekubernetes.Exec(
+		ctx,
+		config,
+		namespaceName,
+		&kubernetesparameteroptions.RunCommandOptions{
+			PodName: podName,
+			Command: []string{"cat", destPath},
+		},
+	)
 	require.NoError(t, err)
 
 	readContent, err := commandOutput.GetStdoutAsString()

@@ -8,7 +8,8 @@ import (
 )
 
 func TestCommandExeuctorKind_GetClusterByName(t *testing.T) {
-	kind := kindutils.MustGetLocalCommandExecutorKind()
+	kind, err := kindutils.GetLocalCommandExecutorKind()
+	require.NoError(t, err)
 
 	cluster, err := kind.GetClusterByName("abc")
 	require.NoError(t, err)

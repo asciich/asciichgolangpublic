@@ -53,10 +53,10 @@ func Test_Example_WriteToStdinOfExecCommand(t *testing.T) {
 	// start the pod
 	err = nativekubernetes.CreatePod(
 		ctx,
-		config,
+		clientset,
+		"default",
 		&kubernetesparameteroptions.RunCommandOptions{
 			Image:                    "ubuntu",
-			Namespace:                "default",
 			PodName:                  podName,
 			DeleteAlreadyExistingPod: true,
 			Command:                  []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"}, // Same as sleep inifinity but does not ignore SIGINT
@@ -74,9 +74,9 @@ func Test_Example_WriteToStdinOfExecCommand(t *testing.T) {
 	output, err := nativekubernetes.Exec(
 		ctx,
 		config,
+		"default",
 		&kubernetesparameteroptions.RunCommandOptions{
 			Image:                    "ubuntu",
-			Namespace:                "default",
 			PodName:                  podName,
 			DeleteAlreadyExistingPod: true,
 			Command:                  []string{"cat"},

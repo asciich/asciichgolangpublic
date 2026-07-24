@@ -8,7 +8,8 @@ import (
 )
 
 func TestCommandExecutorKindCluster_MustGetLocalCommandExecutorKind(t *testing.T) {
-	k := kindutils.MustGetLocalCommandExecutorKind()
+	k, err := kindutils.GetLocalCommandExecutorKind()
+	require.NoError(t, err)
 
 	kind, ok := k.(*kindutils.CommandExecutorKind)
 	require.True(t, ok)

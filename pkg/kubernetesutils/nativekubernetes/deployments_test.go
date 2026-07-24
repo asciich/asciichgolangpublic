@@ -44,8 +44,7 @@ func Test_CreateAndDeleteDeployment(t *testing.T) {
 
 		// check if consecutive create, delete, create, delete... works
 		for range 3 {
-			err = nativekubernetes.CreateDeployment(ctx, config, &kubernetesparameteroptions.RunCommandOptions{
-				Namespace:      namespaceName,
+			err = nativekubernetes.CreateDeployment(ctx, clientset, namespaceName, &kubernetesparameteroptions.RunCommandOptions{
 				DeploymentName: deploymentName,
 				Image:          "ubuntu",
 				Command:        []string{"bash", "-c", "sleep 1m"},
@@ -131,8 +130,7 @@ func Test_ListDeployments(t *testing.T) {
 
 		// Create Deployments one by one and verify list grows
 		for i, name := range deploymentNames {
-			err = nativekubernetes.CreateDeployment(ctx, config, &kubernetesparameteroptions.RunCommandOptions{
-				Namespace:      namespaceName,
+			err = nativekubernetes.CreateDeployment(ctx, clientset, namespaceName, &kubernetesparameteroptions.RunCommandOptions{
 				DeploymentName: name,
 				Image:          "ubuntu",
 				Command:        []string{"bash", "-c", "sleep 1m"},

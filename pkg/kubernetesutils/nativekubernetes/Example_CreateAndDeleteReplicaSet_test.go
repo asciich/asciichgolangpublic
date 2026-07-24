@@ -48,9 +48,9 @@ func Test_Example_CreateAndDeleteReplicaSet(t *testing.T) {
 	// Create the ReplicaSet with 2 replicas:
 	err = nativekubernetes.CreateReplicaSet(
 		ctx,
-		config,
+		clientset,
+		namespaceName,
 		&kubernetesparameteroptions.RunCommandOptions{
-			Namespace:      namespaceName,
 			ReplicaSetName: replicaSetName,
 			Image:          "ubuntu",
 			Command:        []string{"bash", "-c", "sleep 1m"},
@@ -66,9 +66,9 @@ func Test_Example_CreateAndDeleteReplicaSet(t *testing.T) {
 	// The create function is idempotent if DeleteAlreadyExistingReplicaSet is set:
 	err = nativekubernetes.CreateReplicaSet(
 		ctx,
-		config,
+		clientset,
+		namespaceName,
 		&kubernetesparameteroptions.RunCommandOptions{
-			Namespace:                       namespaceName,
 			ReplicaSetName:                  replicaSetName,
 			Image:                           "ubuntu",
 			Command:                         []string{"bash", "-c", "sleep 1m"},

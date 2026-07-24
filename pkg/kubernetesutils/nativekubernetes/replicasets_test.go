@@ -44,8 +44,7 @@ func Test_CreateAndDeleteReplicaSet(t *testing.T) {
 
 		// check if consecutive create, delete, create, delete... works
 		for range 3 {
-			err = nativekubernetes.CreateReplicaSet(ctx, config, &kubernetesparameteroptions.RunCommandOptions{
-				Namespace:      namespaceName,
+			err = nativekubernetes.CreateReplicaSet(ctx, clientset, namespaceName, &kubernetesparameteroptions.RunCommandOptions{
 				ReplicaSetName: replicaSetName,
 				Image:          "ubuntu",
 				Command:        []string{"bash", "-c", "sleep 1m"},
@@ -131,8 +130,7 @@ func Test_ListReplicaSets(t *testing.T) {
 
 		// Create ReplicaSets one by one and verify list grows
 		for i, name := range replicaSetNames {
-			err = nativekubernetes.CreateReplicaSet(ctx, config, &kubernetesparameteroptions.RunCommandOptions{
-				Namespace:      namespaceName,
+			err = nativekubernetes.CreateReplicaSet(ctx, clientset, namespaceName, &kubernetesparameteroptions.RunCommandOptions{
 				ReplicaSetName: name,
 				Image:          "ubuntu",
 				Command:        []string{"bash", "-c", "sleep 1m"},
