@@ -208,3 +208,13 @@ func (d *DockerRunContainerOptions) GetPortsOnHost() ([]int, error) {
 
 	return ret, nil
 }
+
+// GetCommandOrNil returns the command slice or nil if no command is set.
+// When nil is passed to the Docker API, the image's default CMD is used.
+func (o *DockerRunContainerOptions) GetCommandOrNil() []string {
+	if len(o.Command) == 0 {
+		return nil
+	}
+
+	return o.Command
+}
