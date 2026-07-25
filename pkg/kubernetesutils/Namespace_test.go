@@ -1,49 +1,12 @@
 package kubernetesutils_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/commandexecutorkubernetes"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
-
-func getCtx() context.Context {
-	return contextutils.ContextVerbose()
-}
-
-func getKubernetesByImplementationName(ctx context.Context, implementationName string) kubernetesinterfaces.KubernetesCluster {
-	clusterName := "kubernetesutils" // We use one kind cluster for all the tests here.
-
-	if implementationName == "commandExecutorKubernetes" {
-		// Ensure a local kind cluster is available for testing:
-		mustutils.Must(kindutils.CreateCluster(ctx, clusterName))
-
-		return mustutils.Must(commandexecutorkubernetes.GetClusterByName("kind-" + clusterName))
-	}
-
-	if implementationName == "nativeKubernetes" {
-		// Ensure a local kind cluster is available for testing:
-		mustutils.Must(kindutils.CreateCluster(ctx, clusterName))
-
-		return mustutils.Must(nativekubernetesoo.GetClusterByName(getCtx(), "kind-"+clusterName))
-
-	}
-
-	logging.LogFatalWithTracef(
-		"Unknown implmentation name '%s'",
-		implementationName,
-	)
-
-	return nil
-}
 
 func TestNamespace_CreateAndDeleteNamespace(t *testing.T) {
 	tests := []struct {
@@ -60,7 +23,7 @@ func TestNamespace_CreateAndDeleteNamespace(t *testing.T) {
 				ctx := getCtx()
 				const namespaceName = "testnamespace"
 
-				cluster := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				cluster := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				err := cluster.DeleteNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
