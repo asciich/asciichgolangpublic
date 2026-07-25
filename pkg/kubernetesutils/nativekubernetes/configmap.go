@@ -228,3 +228,7 @@ func ListConfigMaps(ctx context.Context, clientset *kubernetes.Clientset, namesp
 
 	return configMapNames, nil
 }
+
+func ListConfigMapNames(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string) ([]string, error) {
+	return ListConfigMaps(ctx, clientset, namespaceName)
+}

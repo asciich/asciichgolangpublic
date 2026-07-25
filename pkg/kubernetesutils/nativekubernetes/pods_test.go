@@ -44,12 +44,15 @@ func Test_CreateAndDeletePod(t *testing.T) {
 
 		// check if consecutive create, delete, create, delete... works
 		for range 3 {
-			err = nativekubernetes.CreatePod(ctx, config, &kubernetesparameteroptions.RunCommandOptions{
-				Namespace: namespaceName,
-				PodName:   podName,
-				Image:     "ubunt",
-				Command:   []string{"bash", "-c", "sleep 1m"},
-			})
+			err = nativekubernetes.CreatePod(
+				ctx,
+				clientset,
+				namespaceName,
+				&kubernetesparameteroptions.RunCommandOptions{
+					PodName: podName,
+					Image:   "ubunt",
+					Command: []string{"bash", "-c", "sleep 1m"},
+				})
 			require.NoError(t, err)
 
 			exists, err = nativekubernetes.PodExists(ctx, clientset, podName, namespaceName)
@@ -130,12 +133,15 @@ func Test_ListPods(t *testing.T) {
 
 		// Create pods one by one and verify list grows
 		for i, name := range podNames {
-			err = nativekubernetes.CreatePod(ctx, config, &kubernetesparameteroptions.RunCommandOptions{
-				Namespace: namespaceName,
-				PodName:   name,
-				Image:     "ubuntu",
-				Command:   []string{"bash", "-c", "sleep 1m"},
-			})
+			err = nativekubernetes.CreatePod(
+				ctx,
+				clientset,
+				namespaceName,
+				&kubernetesparameteroptions.RunCommandOptions{
+					PodName: name,
+					Image:   "ubuntu",
+					Command: []string{"bash", "-c", "sleep 1m"},
+				})
 			require.NoError(t, err)
 
 			listed, err := nativekubernetes.ListPods(ctx, clientset, namespaceName)

@@ -2,6 +2,7 @@ package commandexecutorkubernetes
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"slices"
@@ -54,6 +55,10 @@ func (c *CommandExecutorNamespace) Create(ctx context.Context) (err error) {
 	}
 
 	return nil
+}
+
+func (c *CommandExecutorNamespace) ListObjectNames(options *kubernetesparameteroptions.ListKubernetesObjectsOptions) ([]string, error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorNamespace) CreateRole(ctx context.Context, createOptions *kubernetesparameteroptions.CreateRoleOptions) (createdRole kubernetesinterfaces.Role, err error) {
@@ -279,6 +284,66 @@ func (c *CommandExecutorNamespace) GetObjectByNames(objectName string, objectTyp
 	}
 
 	return GetCommandExecutorObject(commandExecutor, c, objectName, objectType)
+}
+
+func (c *CommandExecutorNamespace) GetPodByName(name string) (kubernetesinterfaces.Pod, error) {
+	if name == "" {
+		return nil, tracederrors.TracedErrorEmptyString("name")
+	}
+
+	toReturn := NewCommandExecutorPod()
+
+	err := toReturn.SetName(name)
+	if err != nil {
+		return nil, err
+	}
+
+	err = toReturn.SetNamespace(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return toReturn, nil
+}
+
+func (c *CommandExecutorNamespace) GetReplicaSetByName(name string) (kubernetesinterfaces.ReplicaSet, error) {
+	if name == "" {
+		return nil, tracederrors.TracedErrorEmptyString("name")
+	}
+
+	toReturn := NewCommandExecutorReplicaSet()
+
+	err := toReturn.SetName(name)
+	if err != nil {
+		return nil, err
+	}
+
+	err = toReturn.SetNamespace(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return toReturn, nil
+}
+
+func (c *CommandExecutorNamespace) GetDeploymentByName(name string) (kubernetesinterfaces.Deployment, error) {
+	if name == "" {
+		return nil, tracederrors.TracedErrorEmptyString("name")
+	}
+
+	toReturn := NewCommandExecutorDeployment()
+
+	err := toReturn.SetName(name)
+	if err != nil {
+		return nil, err
+	}
+
+	err = toReturn.SetNamespace(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return toReturn, nil
 }
 
 func (c *CommandExecutorNamespace) GetRoleByName(name string) (role kubernetesinterfaces.Role, err error) {
@@ -675,6 +740,331 @@ func (c *CommandExecutorNamespace) ListConfigMapNames(ctx context.Context) ([]st
 	return names, err
 }
 
+func (c *CommandExecutorNamespace) CreatePod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.Pod, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	podName, err := options.GetPodName()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Create kubernetes pod '%s' started.", podName)
+
+	kubectlContext, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	imageName, err := options.GetImageName()
+	if err != nil {
+		return nil, err
+	}
+
+	containerName, err := options.GetContainerName()
+	if err != nil {
+		return nil, err
+	}
+
+	command, err := options.GetCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	if options.DeleteAlreadyExistingPod {
+		deleteCommand := []string{
+			"kubectl", "delete", "pod", podName,
+			"--context", kubectlContext,
+			"--namespace", namespaceName,
+			"--ignore-not-found",
+		}
+
+		_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command: deleteCommand,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	createCommand := []string{
+		"kubectl", "run", podName,
+		"--context", kubectlContext,
+		"--namespace", namespaceName,
+		"--image", imageName,
+		"--restart", "Never",
+		"--override-type", "strategic",
+		"--overrides", fmt.Sprintf(
+			`{"spec":{"containers":[{"name":"%s","image":"%s","command":%s,"stdin":true,"tty":true}]}}`,
+			containerName,
+			imageName,
+			toJsonStringArray(command),
+		),
+	}
+
+	_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command: createCommand,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if options.WaitForPodRunning {
+		waitCommand := []string{
+			"kubectl", "wait", "--for=condition=Ready", "pod", podName,
+			"--context", kubectlContext,
+			"--namespace", namespaceName,
+			"--timeout", "60s",
+		}
+
+		_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command: waitCommand,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	logging.LogChangedByCtxf(ctx, "Created pod '%s' in namespace '%s'.", podName, namespaceName)
+
+	logging.LogInfoByCtxf(ctx, "Create kubernetes pod '%s' finished.", podName)
+
+	return c.GetPodByName(podName)
+}
+
+func (c *CommandExecutorNamespace) CreateReplicaSet(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.ReplicaSet, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	replicaSetName, err := options.GetReplicaSetName()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Create kubernetes replicaset '%s' started.", replicaSetName)
+
+	kubectlContext, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	imageName, err := options.GetImageName()
+	if err != nil {
+		return nil, err
+	}
+
+	containerName, err := options.GetContainerName()
+	if err != nil {
+		return nil, err
+	}
+
+	command, err := options.GetCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	if options.DeleteAlreadyExistingReplicaSet {
+		deleteCommand := []string{
+			"kubectl", "delete", "replicaset", replicaSetName,
+			"--context", kubectlContext,
+			"--namespace", namespaceName,
+			"--ignore-not-found",
+		}
+
+		_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command: deleteCommand,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	manifest := fmt.Sprintf(
+		`{"apiVersion":"apps/v1","kind":"ReplicaSet","metadata":{"name":"%s","namespace":"%s"},"spec":{"replicas":1,"selector":{"matchLabels":{"app":"%s"}},"template":{"metadata":{"labels":{"app":"%s"}},"spec":{"containers":[{"name":"%s","image":"%s","command":%s}]}}}}`,
+		replicaSetName,
+		namespaceName,
+		replicaSetName,
+		replicaSetName,
+		containerName,
+		imageName,
+		toJsonStringArray(command),
+	)
+
+	createCommand := []string{
+		"kubectl", "apply", "-f", "-",
+		"--context", kubectlContext,
+		"--namespace", namespaceName,
+	}
+
+	_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command:     createCommand,
+		StdinString: manifest,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if options.WaitForReplicaSetAvailable {
+		waitCommand := []string{
+			"kubectl", "wait", "--for=condition=Ready", "pod",
+			"--selector", fmt.Sprintf("app=%s", replicaSetName),
+			"--context", kubectlContext,
+			"--namespace", namespaceName,
+			"--timeout", "60s",
+		}
+
+		_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command: waitCommand,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	logging.LogChangedByCtxf(ctx, "Created replicaset '%s' in namespace '%s'.", replicaSetName, namespaceName)
+
+	logging.LogInfoByCtxf(ctx, "Create kubernetes replicaset '%s' finished.", replicaSetName)
+
+	return c.GetReplicaSetByName(replicaSetName)
+}
+
+func (c *CommandExecutorNamespace) CreateDeployment(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.Deployment, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	deploymentName, err := options.GetDeploymentName()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Create kubernetes deployment '%s' started.", deploymentName)
+
+	kubectlContext, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	imageName, err := options.GetImageName()
+	if err != nil {
+		return nil, err
+	}
+
+	containerName, err := options.GetContainerName()
+	if err != nil {
+		return nil, err
+	}
+
+	command, err := options.GetCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	if options.DeleteAlreadyExistingDeployment {
+		deleteCommand := []string{
+			"kubectl", "delete", "deployment", deploymentName,
+			"--context", kubectlContext,
+			"--namespace", namespaceName,
+			"--ignore-not-found",
+		}
+
+		_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command: deleteCommand,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	manifest := fmt.Sprintf(
+		`{"apiVersion":"apps/v1","kind":"Deployment","metadata":{"name":"%s","namespace":"%s"},"spec":{"replicas":1,"selector":{"matchLabels":{"app":"%s"}},"template":{"metadata":{"labels":{"app":"%s"}},"spec":{"containers":[{"name":"%s","image":"%s","command":%s}]}}}}`,
+		deploymentName,
+		namespaceName,
+		deploymentName,
+		deploymentName,
+		containerName,
+		imageName,
+		toJsonStringArray(command),
+	)
+
+	createCommand := []string{
+		"kubectl", "apply", "-f", "-",
+		"--context", kubectlContext,
+		"--namespace", namespaceName,
+	}
+
+	_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command:     createCommand,
+		StdinString: manifest,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if options.WaitForDeploymentAvailable {
+		waitCommand := []string{
+			"kubectl", "wait", "--for=condition=Available", "deployment",
+			deploymentName,
+			"--context", kubectlContext,
+			"--namespace", namespaceName,
+			"--timeout", "60s",
+		}
+
+		_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command: waitCommand,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	logging.LogChangedByCtxf(ctx, "Created deployment '%s' in namespace '%s'.", deploymentName, namespaceName)
+
+	logging.LogInfoByCtxf(ctx, "Create kubernetes deployment '%s' finished.", deploymentName)
+
+	return c.GetDeploymentByName(deploymentName)
+}
+
+func toJsonStringArray(values []string) string {
+	jsonBytes, err := json.Marshal(values)
+	if err != nil {
+		return "[]"
+	}
+	return string(jsonBytes)
+}
+
 func (c *CommandExecutorNamespace) CreateSecret(ctx context.Context, secretName string, options *kubernetesparameteroptions.CreateSecretOptions) (createdSecret kubernetesinterfaces.Secret, err error) {
 	if secretName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("secretName")
@@ -1035,4 +1425,193 @@ func (c *CommandExecutorNamespace) Exists(ctx context.Context) (bool, error) {
 	}
 
 	return cluster.NamespaceByNameExists(ctx, namespaceName)
+}
+
+func (c *CommandExecutorNamespace) ListPodNames(ctx context.Context) ([]string, error) {
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "List pod names in namespace '%s' of kubernetes '%s' started.", namespaceName, contextName)
+
+	lines, err := c.RunCommandAndGetStdoutAsLines(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context",
+				contextName,
+				"--namespace",
+				namespaceName,
+				"get",
+				"pods",
+				"-o",
+				"name",
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	podNames := []string{}
+	for _, line := range lines {
+		podNames = append(podNames, strings.TrimPrefix(line, "pod/"))
+	}
+
+	sort.Strings(podNames)
+
+	logging.LogInfoByCtxf(ctx, "Found %d pods in namespace '%s'.", len(podNames), namespaceName)
+
+	return podNames, nil
+}
+
+func (c *CommandExecutorNamespace) ListDeploymentNames(ctx context.Context) ([]string, error) {
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "List deployment names in namespace '%s' of kubernetes '%s' started.", namespaceName, contextName)
+
+	lines, err := c.RunCommandAndGetStdoutAsLines(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context",
+				contextName,
+				"--namespace",
+				namespaceName,
+				"get",
+				"deployments",
+				"-o",
+				"name",
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	deploymentNames := []string{}
+	for _, line := range lines {
+		deploymentNames = append(deploymentNames, strings.TrimPrefix(line, "deployment.apps/"))
+	}
+
+	sort.Strings(deploymentNames)
+
+	logging.LogInfoByCtxf(ctx, "Found %d deployments in namespace '%s'.", len(deploymentNames), namespaceName)
+
+	return deploymentNames, nil
+}
+
+func (c *CommandExecutorNamespace) ListReplicaSetNames(ctx context.Context) ([]string, error) {
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "List replicaSet names in namespace '%s' of kubernetes '%s' started.", namespaceName, contextName)
+
+	lines, err := c.RunCommandAndGetStdoutAsLines(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context",
+				contextName,
+				"--namespace",
+				namespaceName,
+				"get",
+				"replicasets",
+				"-o",
+				"name",
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	replicaSetNames := []string{}
+	for _, line := range lines {
+		replicaSetNames = append(replicaSetNames, strings.TrimPrefix(line, "replicaset.apps/"))
+	}
+
+	sort.Strings(replicaSetNames)
+
+	logging.LogInfoByCtxf(ctx, "Found %d replicaSets in namespace '%s'.", len(replicaSetNames), namespaceName)
+
+	return replicaSetNames, nil
+}
+
+func (c *CommandExecutorNamespace) DeletePodByName(ctx context.Context, podName string) error {
+	pod, err := c.GetPodByName(podName)
+	if err != nil {
+		return err
+	}
+
+	return pod.Delete(ctx)
+}
+
+func (c *CommandExecutorNamespace) DeleteReplicaSetByName(ctx context.Context, replicaSetName string) error {
+	replicaSet, err := c.GetReplicaSetByName(replicaSetName)
+	if err != nil {
+		return err
+	}
+
+	return replicaSet.Delete(ctx)
+}
+
+func (c *CommandExecutorNamespace) DeleteDeploymentByName(ctx context.Context, deploymentName string) error {
+	deployment, err := c.GetDeploymentByName(deploymentName)
+	if err != nil {
+		return err
+	}
+
+	return deployment.Delete(ctx)
+}
+
+func (c *CommandExecutorNamespace) PodByNameExists(ctx context.Context, podName string) (bool, error) {
+	pod, err := c.GetPodByName(podName)
+	if err != nil {
+		return false, err
+	}
+
+	return pod.Exists(ctx)
+}
+
+func (c *CommandExecutorNamespace) ReplicaSetByNameExists(ctx context.Context, replicaSetName string) (bool, error) {
+	replicaSet, err := c.GetReplicaSetByName(replicaSetName)
+	if err != nil {
+		return false, err
+	}
+
+	return replicaSet.Exists(ctx)
+}
+
+func (c *CommandExecutorNamespace) DeploymentByNameExists(ctx context.Context, deploymentName string) (bool, error) {
+	deployment, err := c.GetDeploymentByName(deploymentName)
+	if err != nil {
+		return false, err
+	}
+
+	return deployment.Exists(ctx)
 }

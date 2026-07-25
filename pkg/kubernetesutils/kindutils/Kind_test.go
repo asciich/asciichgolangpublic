@@ -20,7 +20,7 @@ func getCtx() context.Context {
 
 func getKindByImplementationName(implementationName string) (kind kindutils.Kind) {
 	if implementationName == "commandExecutorKind" {
-		return kindutils.MustGetLocalCommandExecutorKind()
+		return mustutils.Must(kindutils.GetLocalCommandExecutorKind())
 	}
 
 	logging.LogFatalWithTracef(
