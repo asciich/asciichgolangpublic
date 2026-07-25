@@ -49,7 +49,8 @@ func StartAsDockerContainer(ctx context.Context, options *StartContainerOptions)
 			AdditionalEnvVars: map[string]string{
 				"RUNTIME": "local",
 			},
-			Mounts: []string{workspacePath + ":/workspace"},
+			Mounts:               []string{workspacePath + ":/workspace"},
+			SkipIfAlreadyRunning: true,
 		},
 	)
 	if err != nil {

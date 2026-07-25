@@ -17,7 +17,7 @@ func TestVersions_GetDateVersionString(t *testing.T) {
 		require.NoError(t, err)
 
 		require.Len(t, dateVersionString, len("YYYYmmdd_HHMMSS"))
-		require.NoError(t, versionutils.CheckIsDateVersionString(dateVersionString))
+		require.NoError(t, versionutils.CheckDateVersionString(dateVersionString))
 	})
 }
 
@@ -230,4 +230,120 @@ func TestVersions_SortStringSlice(t *testing.T) {
 			},
 		)
 	}
+}
+
+func TestCheckDateVersionString(t *testing.T) {
+	t.Run("valid date version string", func(t *testing.T) {
+		require.NoError(t, versionutils.CheckDateVersionString("20260725_143059"))
+	})
+
+	t.Run("valid midnight", func(t *testing.T) {
+		require.NoError(t, versionutils.CheckDateVersionString("20260101_000000"))
+	})
+
+	t.Run("valid end of day", func(t *testing.T) {
+		require.NoError(t, versionutils.CheckDateVersionString("20261231_235959"))
+	})
+
+	t.Run("empty string", func(t *testing.T) {
+		require.Error(t, versionutils.CheckDateVersionString(""))
+	})
+
+	t.Run("too short", func(t *testing.T) {
+		require.Error(t, versionutils.CheckDateVersionString("20260725"))
+	})
+
+	t.Run("too long", func(t *testing.T) {
+		require.Error(t, versionutils.CheckDateVersionString("20260725_1430591"))
+	})
+
+	t.Run("missing underscore separator", func(t *testing.T) {
+		require.Error(t, versionutils.CheckDateVersionString("20260725-143059"))
+	})
+
+	t.Run("no separator at all", func(t *testing.T) {
+		require.Error(t, versionutils.CheckDateVersionString("202607251430590"))
+	})
+
+	t.Run("letters in date part", func(t *testing.T) {
+		require.Error(t, versionutils.CheckDateVersionString("2026ab25_143059"))
+	})
+
+	t.Run("letters in time part", func(t *testing.T) {
+		require.Error(t, versionutils.CheckDateVersionString("20260725_14ab59"))
+	})
+
+	t.Run("spaces", func(t *testing.T) {
+		require.Error(t, versionutils.CheckDateVersionString("20260725 143059"))
+	})
+
+	t.Run("semantic version is not a date version", func(t *testing.T) {
+		require.Error(t, versionutils.CheckDateVersionString("1.2.3"))
+	})
+
+	t.Run("special characters", func(t *testing.T) {
+		require.Error(t, versionutils.CheckDateVersionString("2026/07/25_14:30"))
+	})
+}
+
+func TestCheckSemanticVersionString(t *testing.T) {
+	t.Run("valid three part version", func(t *testing.T) {
+		require.NoError(t, versionutils.CheckSemanticVersionString("1.2.3"))
+	})
+
+	t.Run("valid with zeros", func(t *testing.T) {
+		require.NoError(t, versionutils.CheckSemanticVersionString("0.0.0"))
+	})
+
+	t.Run("valid high numbers", func(t *testing.T) {
+		require.NoError(t, versionutils.CheckSemanticVersionString("100.200.300"))
+	})
+
+	t.Run("valid single digits", func(t *testing.T) {
+		require.NoError(t, versionutils.CheckSemanticVersionString("0.1.0"))
+	})
+
+	t.Run("empty string", func(t *testing.T) {
+		require.Error(t, versionutils.CheckSemanticVersionString(""))
+	})
+
+	t.Run("only major version", func(t *testing.T) {
+		require.Error(t, versionutils.CheckSemanticVersionString("1"))
+	})
+
+	t.Run("only major and minor", func(t *testing.T) {
+		require.Error(t, versionutils.CheckSemanticVersionString("1.2"))
+	})
+
+	t.Run("four parts", func(t *testing.T) {
+		require.Error(t, versionutils.CheckSemanticVersionString("1.2.3.4"))
+	})
+
+	t.Run("with v prefix", func(t *testing.T) {
+		require.NoError(t, versionutils.CheckSemanticVersionString("v1.2.3"))
+	})
+
+	t.Run("letters in version", func(t *testing.T) {
+		require.Error(t, versionutils.CheckSemanticVersionString("a.b.c"))
+	})
+
+	t.Run("with pre-release suffix", func(t *testing.T) {
+		require.Error(t, versionutils.CheckSemanticVersionString("1.2.3-beta"))
+	})
+
+	t.Run("with build metadata", func(t *testing.T) {
+		require.Error(t, versionutils.CheckSemanticVersionString("1.2.3+build"))
+	})
+
+	t.Run("negative numbers", func(t *testing.T) {
+		require.Error(t, versionutils.CheckSemanticVersionString("-1.2.3"))
+	})
+
+	t.Run("spaces around", func(t *testing.T) {
+		require.Error(t, versionutils.CheckSemanticVersionString(" 1.2.3 "))
+	})
+
+	t.Run("date version is not a semantic version", func(t *testing.T) {
+		require.Error(t, versionutils.CheckSemanticVersionString("20260725_143059"))
+	})
 }

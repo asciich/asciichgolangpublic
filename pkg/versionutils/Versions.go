@@ -12,8 +12,18 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func CheckIsDateVersionString(versionString string) error {
-	isVersionString := IsVersionString(versionString)
+func CheckDateVersionString(versionString string) error {
+	isVersionString := IsDateVersionString(versionString)
+
+	if isVersionString {
+		return nil
+	} else {
+		return tracederrors.TracedErrorf("'%s' is not a version string", versionString)
+	}
+}
+
+func CheckSemanticVersionString(versionString string) error {
+	isVersionString := IsSemanticVersionString(versionString)
 
 	if isVersionString {
 		return nil

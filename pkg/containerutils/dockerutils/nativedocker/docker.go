@@ -148,6 +148,10 @@ func (d *Docker) RunContainer(ctx context.Context, options *dockeroptions.Docker
 			listenIpAddress = "0.0.0.0"
 			p = strings.TrimPrefix(p, "0.0.0.0:")
 		}
+		if strings.HasPrefix(p, "127.0.0.1") {
+			listenIpAddress = "127.0.0.1"
+			p = strings.TrimPrefix(p, "127.0.0.1:")
+		}
 
 		splitted := strings.Split(p, ":")
 		if len(splitted) != 2 {
@@ -199,37 +203,53 @@ func (d *Docker) RunContainer(ctx context.Context, options *dockeroptions.Docker
 		mounts = append(mounts, toAdd)
 	}
 
-	createResult, err := cli.ContainerCreate(ctx, client.ContainerCreateOptions{
-		Name:  name,
-		Image: imageName,
-		Config: &container.Config{
-			Env: envVars,
-			Cmd: command,
-		},
-		HostConfig: &container.HostConfig{
-			AutoRemove:   autoremove,
-			PortBindings: portBindings,
-			Mounts:       mounts,
-		},
-	})
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("Failed to create container '%s': %w", name, err)
-	}
-
-	_, err = cli.ContainerStart(ctx, createResult.ID, client.ContainerStartOptions{})
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("Failed to start container '%s': %w", name, err)
-	}
-
-	ports, err := options.GetPortsOnHost()
+	exists, err := d.ContainerExists(ctx, name)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, port := range ports {
-		err := netutils.WaitTcpPortOpen(ctx, "localhost", port, time.Minute*1)
+	var skipCreation bool
+	if exists {
+		if options.SkipIfAlreadyRunning {
+			logging.LogInfoByCtxf(ctx, "Container creation will be skipped since '%s' is already running.", name)
+			skipCreation = true
+		}
+	}
+
+	if !skipCreation {
+
+		createResult, err := cli.ContainerCreate(ctx, client.ContainerCreateOptions{
+			Name:  name,
+			Image: imageName,
+			Config: &container.Config{
+				Env: envVars,
+				Cmd: command,
+			},
+			HostConfig: &container.HostConfig{
+				AutoRemove:   autoremove,
+				PortBindings: portBindings,
+				Mounts:       mounts,
+			},
+		})
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to create container '%s': %w", name, err)
+		}
+
+		_, err = cli.ContainerStart(ctx, createResult.ID, client.ContainerStartOptions{})
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to start container '%s': %w", name, err)
+		}
+
+		ports, err := options.GetPortsOnHost()
 		if err != nil {
 			return nil, err
+		}
+
+		for _, port := range ports {
+			err := netutils.WaitTcpPortOpen(ctx, "localhost", port, time.Minute*1)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
