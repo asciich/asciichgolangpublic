@@ -6,11 +6,11 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helmparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
 // Example how to install a hemlchart.
@@ -27,7 +27,7 @@ func Test_InstallHelmchart_FluxOperator(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := continuousintegration.GetDefaultKindClusterName()
+	clusterName := testutils.GetKindClusterNameForTest(t)
 	// Ensure a local kind cluster is available for testing:
 	_, err := kindutils.CreateCluster(ctx, clusterName)
 	require.NoError(t, err)

@@ -6,9 +6,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
 func getCtx() context.Context {
@@ -20,7 +20,7 @@ func TestListKindNames(t *testing.T) {
 		ctx := getCtx()
 
 		// Ensure a local kind cluster is available for testing:
-		clusterName := continuousintegration.GetDefaultKindClusterName()
+		clusterName := testutils.GetKindClusterNameForTest(t)
 		_, err := kindutils.CreateCluster(ctx, clusterName)
 
 		require.NoError(t, err)
