@@ -21,6 +21,8 @@ type DockerRunContainerOptions struct {
 
 	// If Ports are specified this waits until a connect to all ports is accepted:
 	WaitForPortsOpen bool
+
+	SkipIfAlreadyRunning bool
 }
 
 func NewDockerRunContainerOptions() (d *DockerRunContainerOptions) {
@@ -190,6 +192,7 @@ func (d *DockerRunContainerOptions) GetPortsOnHost() ([]int, error) {
 
 	for _, port := range d.Ports {
 		port = strings.TrimPrefix(port, "0.0.0.0:")
+		port = strings.TrimPrefix(port, "127.0.0.1:")
 
 		splitted := strings.Split(port, ":")
 		if len(splitted) != 2 {
