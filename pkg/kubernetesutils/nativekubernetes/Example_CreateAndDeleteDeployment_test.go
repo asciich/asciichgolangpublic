@@ -48,13 +48,13 @@ func Test_Example_CreateAndDeleteDeployment(t *testing.T) {
 	// Create the Deployment with 2 replicas:
 	err = nativekubernetes.CreateDeployment(
 		ctx,
-		config,
+		clientset,
+		namespaceName,
 		&kubernetesparameteroptions.RunCommandOptions{
-			Namespace:    namespaceName,
 			DeploymentName: deploymentName,
-			Image:        "ubuntu",
-			Command:      []string{"bash", "-c", "sleep 1m"},
-			Replicas:     2,
+			Image:          "ubuntu",
+			Command:        []string{"bash", "-c", "sleep 1m"},
+			Replicas:       2,
 		},
 	)
 	require.NoError(t, err)
@@ -66,9 +66,9 @@ func Test_Example_CreateAndDeleteDeployment(t *testing.T) {
 	// The create function is idempotent if DeleteAlreadyExistingDeployment is set:
 	err = nativekubernetes.CreateDeployment(
 		ctx,
-		config,
+		clientset,
+		namespaceName,
 		&kubernetesparameteroptions.RunCommandOptions{
-			Namespace:                       namespaceName,
 			DeploymentName:                  deploymentName,
 			Image:                           "ubuntu",
 			Command:                         []string{"bash", "-c", "sleep 1m"},

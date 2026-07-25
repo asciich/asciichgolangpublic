@@ -8,7 +8,6 @@ import (
 
 type RunCommandOptions struct {
 	RunCommandOptions                  parameteroptions.RunCommandOptions
-	Namespace                          string
 	Image                              string
 	PodName                            string
 	ReplicaSetName                     string
@@ -32,14 +31,6 @@ type RunCommandOptions struct {
 	Replicas int32
 
 	StdinBytes []byte
-}
-
-func (r *RunCommandOptions) GetNamespaceName() (string, error) {
-	if r.Namespace == "" {
-		return "", tracederrors.TracedError("Namespace not set")
-	}
-
-	return r.Namespace, nil
 }
 
 func (r *RunCommandOptions) GetContainerName() (string, error) {

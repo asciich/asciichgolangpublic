@@ -194,3 +194,27 @@ func ListSecretNames(ctx context.Context, clientSet *kubernetes.Clientset, names
 
 	return names, nil
 }
+
+func ListRoleNames(ctx context.Context, clientSet *kubernetes.Clientset, namespaceName string) ([]string, error) {
+	if clientSet == nil {
+		return nil, tracederrors.TracedErrorNil("clientSet")
+	}
+
+	if namespaceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
+	}
+
+	roleList, err := clientSet.RbacV1().Roles(namespaceName).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to list roles in namespace '%s': %w", namespaceName, err)
+	}
+
+	names := make([]string, len(roleList.Items))
+	for i, role := range roleList.Items {
+		names[i] = role.Name
+	}
+
+	logging.LogInfoByCtxf(ctx, "Found '%d' roles in namespace '%s'.", len(names), namespaceName)
+
+	return names, nil
+}

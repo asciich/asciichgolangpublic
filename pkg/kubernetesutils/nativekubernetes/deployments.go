@@ -13,7 +13,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 )
 
 func DeleteDeployment(ctx context.Context, clientset *kubernetes.Clientset, deploymentName string, namespace string) error {
@@ -54,18 +53,17 @@ func DeleteDeployment(ctx context.Context, clientset *kubernetes.Clientset, depl
 	return nil
 }
 
-func CreateDeployment(ctx context.Context, config *rest.Config, options *kubernetesparameteroptions.RunCommandOptions) error {
-	if config == nil {
-		return tracederrors.TracedErrorNil("config")
+func CreateDeployment(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) error {
+	if clientset == nil {
+		return tracederrors.TracedErrorNil("clientset")
+	}
+
+	if namespaceName == "" {
+		return tracederrors.TracedErrorEmptyString("namespaceName")
 	}
 
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
-	}
-
-	namespace, err := options.GetNamespaceName()
-	if err != nil {
-		return err
 	}
 
 	deploymentName, err := options.GetDeploymentName()
@@ -90,12 +88,7 @@ func CreateDeployment(ctx context.Context, config *rest.Config, options *kuberne
 
 	replicas := options.GetReplicas()
 
-	logging.LogInfoByCtxf(ctx, "Create Deployment '%s' in namespace '%s' using container image '%s' started.", deploymentName, namespace, imageName)
-
-	clientset, err := GetClientSetFromRestConfig(ctx, config)
-	if err != nil {
-		return err
-	}
+	logging.LogInfoByCtxf(ctx, "Create Deployment '%s' in namespace '%s' using container image '%s' started.", deploymentName, namespaceName, imageName)
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -130,16 +123,16 @@ func CreateDeployment(ctx context.Context, config *rest.Config, options *kuberne
 		},
 	}
 
-	logging.LogInfoByCtxf(ctx, "Going to start Deployment '%s' in namespace '%s' using container image '%s'.", deploymentName, namespace, imageName)
-	_, err = clientset.AppsV1().Deployments(namespace).Create(ctx, deployment, metav1.CreateOptions{})
+	logging.LogInfoByCtxf(ctx, "Going to start Deployment '%s' in namespace '%s' using container image '%s'.", deploymentName, namespaceName, imageName)
+	_, err = clientset.AppsV1().Deployments(namespaceName).Create(ctx, deployment, metav1.CreateOptions{})
 	if err != nil {
 		if apierrors.IsAlreadyExists(err) && options.DeleteAlreadyExistingDeployment {
-			logging.LogInfoByCtxf(ctx, "Going to delete already existing Deployment '%s' in namespace '%s' before running command.", deploymentName, namespace)
-			err = DeleteDeployment(ctx, clientset, deploymentName, namespace)
+			logging.LogInfoByCtxf(ctx, "Going to delete already existing Deployment '%s' in namespace '%s' before running command.", deploymentName, namespaceName)
+			err = DeleteDeployment(ctx, clientset, deploymentName, namespaceName)
 			if err != nil {
 				return err
 			}
-			_, err = clientset.AppsV1().Deployments(namespace).Create(ctx, deployment, metav1.CreateOptions{})
+			_, err = clientset.AppsV1().Deployments(namespaceName).Create(ctx, deployment, metav1.CreateOptions{})
 			if err != nil {
 				return tracederrors.TracedErrorf("Error creating Deployment: %w", err)
 			}
@@ -149,13 +142,13 @@ func CreateDeployment(ctx context.Context, config *rest.Config, options *kuberne
 	}
 
 	if options.WaitForDeploymentAvailable {
-		err = WaitForDeploymentAvailable(ctx, clientset, namespace, deploymentName, time.Minute*2)
+		err = WaitForDeploymentAvailable(ctx, clientset, namespaceName, deploymentName, time.Minute*2)
 		if err != nil {
 			return err
 		}
 	}
 
-	logging.LogInfoByCtxf(ctx, "Create Deployment '%s' in namespace '%s' using container image '%s' finished.", deploymentName, namespace, imageName)
+	logging.LogInfoByCtxf(ctx, "Create Deployment '%s' in namespace '%s' using container image '%s' finished.", deploymentName, namespaceName, imageName)
 
 	return nil
 }
@@ -328,4 +321,8 @@ func ListDeployments(ctx context.Context, clientset *kubernetes.Clientset, names
 	logging.LogInfoByCtxf(ctx, "Found '%d' Deployments in namespace '%s'.", len(deploymentNames), namespaceName)
 
 	return deploymentNames, nil
+}
+
+func ListDeploymentNames(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string) ([]string, error) {
+	return ListDeployments(ctx, clientset, namespaceName)
 }

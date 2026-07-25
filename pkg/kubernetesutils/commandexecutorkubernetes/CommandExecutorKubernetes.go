@@ -288,6 +288,33 @@ func (c *CommandExecutorKubernetes) GetKubectlContexts() (contexts []kubernetesu
 	return contexts, nil
 }
 
+func (c *CommandExecutorKubernetes) GetPodByNames(namespaceName string, podName string) (kubernetesinterfaces.Pod, error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.GetPodByName(podName)
+}
+
+func (c *CommandExecutorKubernetes) GetReplicaSetByNames(namespaceName string, replicaSetName string) (kubernetesinterfaces.ReplicaSet, error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.GetReplicaSetByName(replicaSetName)
+}
+
+func (c *CommandExecutorKubernetes) GetDeploymentByNames(namespaceName string, deploymentName string) (kubernetesinterfaces.Deployment, error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.GetDeploymentByName(deploymentName)
+}
+
 func (c *CommandExecutorKubernetes) GetNamespaceByName(name string) (namespace kubernetesinterfaces.Namespace, err error) {
 	if name == "" {
 		return nil, tracederrors.TracedErrorEmptyString("name")
@@ -691,14 +718,13 @@ func (c *CommandExecutorKubernetes) CreateObject(ctx context.Context, options *k
 //  2. `kubectl wait`   — block until the pod has completed
 //  3. `kubectl logs`   — fetch the output exactly once
 //  4. `kubectl delete` — clean up the pod
-func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
-	if options == nil {
-		return nil, tracederrors.TracedErrorNil("options")
+func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
+	if namespaceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
 	}
 
-	namespace, err := options.GetNamespaceName()
-	if err != nil {
-		return nil, err
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	podName, err := options.GetPodName()
@@ -721,7 +747,7 @@ func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context
 		return nil, err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Run command in temporary pod '%s' in namespace '%s' using container image '%s' started.", podName, namespace, imageName)
+	logging.LogInfoByCtxf(ctx, "Run command in temporary pod '%s' in namespace '%s' using container image '%s' started.", podName, namespaceName, imageName)
 
 	kubeContext, err := c.GetCachedKubectlContext(ctx)
 	if err != nil {
@@ -731,7 +757,7 @@ func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context
 	// Step 1: Start the pod without attaching.
 	runCommand := []string{
 		"kubectl", "--context", kubeContext, "run", podName,
-		"--namespace", namespace,
+		"--namespace", namespaceName,
 		"--image", imageName,
 		"--restart=Never",
 		"--",
@@ -748,7 +774,7 @@ func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context
 	// Step 2: Wait for the pod to complete.
 	waitCommand := []string{
 		"kubectl", "--context", kubeContext, "wait", "pod", podName,
-		"--namespace", namespace,
+		"--namespace", namespaceName,
 		"--for=condition=Ready",
 		"--timeout=60s",
 	}
@@ -763,7 +789,7 @@ func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context
 	// Step 3: Fetch the logs exactly once.
 	logsCommand := []string{
 		"kubectl", "--context", kubeContext, "logs", podName,
-		"--namespace", namespace,
+		"--namespace", namespaceName,
 	}
 
 	output, err := commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
@@ -776,7 +802,7 @@ func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context
 	// Step 4: Delete the pod to clean up.
 	deleteCommand := []string{
 		"kubectl", "--context", kubeContext, "delete", "pod", podName,
-		"--namespace", namespace,
+		"--namespace", namespaceName,
 	}
 
 	_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
@@ -786,7 +812,7 @@ func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context
 		return nil, err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Run command in temporary pod '%s' in namespace '%s' using container image '%s' finished.", podName, namespace, imageName)
+	logging.LogInfoByCtxf(ctx, "Run command in temporary pod '%s' in namespace '%s' using container image '%s' finished.", podName, namespaceName, imageName)
 
 	return output, nil
 }
@@ -824,4 +850,85 @@ func (c *CommandExecutorKubernetes) ListNodeNames(ctx context.Context) ([]string
 	logging.LogInfoByCtxf(ctx, "The kubernetes cluster has '%d' nodes.", len(nodeNames))
 
 	return nodeNames, nil
+}
+
+func (c *CommandExecutorKubernetes) DeletePodByNames(ctx context.Context, namespaceName string, podName string) error {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+
+	return namespace.DeletePodByName(ctx, podName)
+}
+
+func (c *CommandExecutorKubernetes) DeleteReplicaSetByNames(ctx context.Context, namespaceName string, replicaSetName string) error {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+
+	return namespace.DeleteReplicaSetByName(ctx, replicaSetName)
+}
+
+func (c *CommandExecutorKubernetes) DeleteDeploymentByNames(ctx context.Context, namespaceName string, deploymentName string) error {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+
+	return namespace.DeleteDeploymentByName(ctx, deploymentName)
+}
+
+func (c *CommandExecutorKubernetes) CreatePod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.Pod, error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.CreatePod(ctx, options)
+}
+
+func (c *CommandExecutorKubernetes) CreateReplicaSet(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.ReplicaSet, error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.CreateReplicaSet(ctx, options)
+}
+
+func (c *CommandExecutorKubernetes) CreateDeployment(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.Deployment, error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.CreateDeployment(ctx, options)
+}
+
+func (c *CommandExecutorKubernetes) PodByNameExists(ctx context.Context, namespaceName string, podName string) (bool, error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return false, err
+	}
+
+	return namespace.PodByNameExists(ctx, podName)
+}
+
+func (c *CommandExecutorKubernetes) ReplicaSetByNameExists(ctx context.Context, namespaceName string, replicaSetName string) (bool, error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return false, err
+	}
+
+	return namespace.ReplicaSetByNameExists(ctx, replicaSetName)
+}
+
+func (c *CommandExecutorKubernetes) DeploymentByNameExists(ctx context.Context, namespaceName string, deploymentName string) (bool, error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return false, err
+	}
+
+	return namespace.DeploymentByNameExists(ctx, deploymentName)
 }

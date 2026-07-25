@@ -19,6 +19,7 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -41,6 +42,186 @@ func (n *NativeNamespace) GetKubernetesCluster() (kubernetesinterfaces.Kubernete
 	}
 
 	return n.kubernetesCluster, nil
+}
+
+func (n *NativeNamespace) GetConfig() (*rest.Config, error) {
+	cluster, err := n.GetNativeKubernetesCluster()
+	if err != nil {
+
+	}
+
+	return cluster.GetConfig()
+}
+
+func (n *NativeNamespace) DeletePodByName(ctx context.Context, podName string) error {
+	pod, err := n.GetPodByName(podName)
+	if err != nil {
+		return err
+	}
+
+	return pod.Delete(ctx)
+}
+
+func (n *NativeNamespace) DeleteReplicaSetByName(ctx context.Context, replicaSetName string) error {
+	replicaSet, err := n.GetReplicaSetByName(replicaSetName)
+	if err != nil {
+		return err
+	}
+
+	return replicaSet.Delete(ctx)
+}
+
+func (n *NativeNamespace) DeleteDeploymentByName(ctx context.Context, deploymentName string) error {
+	deployment, err := n.GetDeploymentByName(deploymentName)
+	if err != nil {
+		return err
+	}
+
+	return deployment.Delete(ctx)
+}
+
+func (n *NativeNamespace) CreatePod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.Pod, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	podName, err := options.GetPodName()
+	if err != nil {
+		return nil, err
+	}
+
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	err = nativekubernetes.CreatePod(ctx, clientSet, namespaceName, options)
+	if err != nil {
+		return nil, err
+	}
+
+	return n.GetPodByName(podName)
+}
+
+func (n *NativeNamespace) CreateReplicaSet(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.ReplicaSet, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	replicaSetName, err := options.GetReplicaSetName()
+	if err != nil {
+		return nil, err
+	}
+
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	err = nativekubernetes.CreateReplicaSet(ctx, clientSet, namespaceName, options)
+	if err != nil {
+		return nil, err
+	}
+
+	return n.GetReplicaSetByName(replicaSetName)
+}
+
+func (n *NativeNamespace) CreateDeployment(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.Deployment, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	deploymentName, err := options.GetDeploymentName()
+	if err != nil {
+		return nil, err
+	}
+
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	err = nativekubernetes.CreateDeployment(ctx, clientSet, namespaceName, options)
+	if err != nil {
+		return nil, err
+	}
+
+	return n.GetDeploymentByName(deploymentName)
+}
+
+func (n *NativeNamespace) GetPodByName(podName string) (kubernetesinterfaces.Pod, error) {
+	if podName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("podName")
+	}
+
+	pod := &Pod{}
+
+	err := pod.SetName(podName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = pod.SetNamespace(n)
+	if err != nil {
+		return nil, err
+	}
+
+	return pod, nil
+}
+
+func (n *NativeNamespace) GetReplicaSetByName(replicaSetName string) (kubernetesinterfaces.ReplicaSet, error) {
+	if replicaSetName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("replicaSetName")
+	}
+
+	replicaSet := &ReplicaSet{}
+
+	err := replicaSet.SetName(replicaSetName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = replicaSet.SetNamespace(n)
+	if err != nil {
+		return nil, err
+	}
+
+	return replicaSet, nil
+}
+
+func (n *NativeNamespace) GetDeploymentByName(deploymentName string) (kubernetesinterfaces.Deployment, error) {
+	if deploymentName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("deploymentName")
+	}
+
+	deployment := &Deployment{}
+
+	err := deployment.SetName(deploymentName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = deployment.SetNamespace(n)
+	if err != nil {
+		return nil, err
+	}
+
+	return deployment, nil
 }
 
 func (n *NativeNamespace) GetClientSet() (*kubernetes.Clientset, error) {
@@ -120,7 +301,17 @@ func (n *NativeNamespace) GetRoleByName(name string) (role kubernetesinterfaces.
 }
 
 func (n *NativeNamespace) ListRoleNames(ctx context.Context) (roleNames []string, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	return nativekubernetes.ListRoleNames(ctx, clientSet, namespaceName)
 }
 
 func (n *NativeNamespace) RoleByNameExists(ctx context.Context, name string) (exists bool, err error) {
@@ -689,4 +880,128 @@ func (n *NativeNamespace) ListSecrets(ctx context.Context) ([]kubernetesinterfac
 	}
 
 	return secrets, nil
+}
+
+func (n *NativeNamespace) ListPodNames(ctx context.Context) ([]string, error) {
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	return nativekubernetes.ListPodNames(ctx, clientSet, namespaceName)
+}
+
+func (n *NativeNamespace) ListDeploymentNames(ctx context.Context) ([]string, error) {
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	return nativekubernetes.ListDeploymentNames(ctx, clientSet, namespaceName)
+}
+
+func (n *NativeNamespace) ListReplicaSetNames(ctx context.Context) ([]string, error) {
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	return nativekubernetes.ListReplicaSetNames(ctx, clientSet, namespaceName)
+}
+
+func (n *NativeNamespace) ListConfigMapNames(ctx context.Context) ([]string, error) {
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	return nativekubernetes.ListConfigMapNames(ctx, clientSet, namespaceName)
+}
+
+func (n *NativeNamespace) ListObjectNames(options *kubernetesparameteroptions.ListKubernetesObjectsOptions) ([]string, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	objectType, err := options.GetObjectType()
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := context.Background()
+	if options.Verbose {
+		ctx = contextutils.WithVerbose(ctx)
+	}
+
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	switch objectType {
+	case "pod", "pods":
+		return nativekubernetes.ListPodNames(ctx, clientSet, namespaceName)
+	case "deployment", "deployments":
+		return nativekubernetes.ListDeploymentNames(ctx, clientSet, namespaceName)
+	case "replicaset", "replicasets":
+		return nativekubernetes.ListReplicaSetNames(ctx, clientSet, namespaceName)
+	case "configmap", "configmaps":
+		return nativekubernetes.ListConfigMapNames(ctx, clientSet, namespaceName)
+	case "secret", "secrets":
+		return nativekubernetes.ListSecretNames(ctx, clientSet, namespaceName)
+	default:
+		return nil, tracederrors.TracedErrorf("Unsupported object type '%s'", objectType)
+	}
+}
+
+func (n *NativeNamespace) PodByNameExists(ctx context.Context, podName string) (bool, error) {
+	pod, err := n.GetPodByName(podName)
+	if err != nil {
+		return false, err
+	}
+
+	return pod.Exists(ctx)
+}
+
+func (n *NativeNamespace) ReplicaSetByNameExists(ctx context.Context, replicaSetName string) (bool, error) {
+	replicaSet, err := n.GetReplicaSetByName(replicaSetName)
+	if err != nil {
+		return false, err
+	}
+
+	return replicaSet.Exists(ctx)
+}
+
+func (n *NativeNamespace) DeploymentByNameExists(ctx context.Context, deploymentName string) (bool, error) {
+	deployment, err := n.GetDeploymentByName(deploymentName)
+	if err != nil {
+		return false, err
+	}
+
+	return deployment.Exists(ctx)
 }

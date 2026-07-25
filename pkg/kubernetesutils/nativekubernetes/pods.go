@@ -60,18 +60,17 @@ func DeletePod(ctx context.Context, clientset *kubernetes.Clientset, podName str
 	return nil
 }
 
-func Exec(ctx context.Context, config *rest.Config, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
+func Exec(ctx context.Context, config *rest.Config, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
 	if config == nil {
 		return nil, tracederrors.TracedErrorNil("config")
 	}
 
-	if options == nil {
-		return nil, tracederrors.TracedErrorNil("options")
+	if namespaceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
 	}
 
-	namespace, err := options.GetNamespaceName()
-	if err != nil {
-		return nil, err
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
 	}
 
 	podName, err := options.GetPodName()
@@ -89,7 +88,7 @@ func Exec(ctx context.Context, config *rest.Config, options *kubernetesparameter
 		return nil, err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Exec command in container '%s' of pod '%s' in namespace '%s' started.", containerName, podName, namespace)
+	logging.LogInfoByCtxf(ctx, "Exec command in container '%s' of pod '%s' in namespace '%s' started.", containerName, podName, namespaceName)
 
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
@@ -99,7 +98,7 @@ func Exec(ctx context.Context, config *rest.Config, options *kubernetesparameter
 	req := clientset.CoreV1().RESTClient().Post().
 		Resource("pods").
 		Name(podName).
-		Namespace(namespace).
+		Namespace(namespaceName).
 		SubResource("exec").
 		VersionedParams(&corev1.PodExecOptions{
 			Container: containerName,
@@ -139,23 +138,22 @@ func Exec(ctx context.Context, config *rest.Config, options *kubernetesparameter
 		ReturnCode: &retVal,
 	}
 
-	logging.LogInfoByCtxf(ctx, "Exec command in container '%s' of pod '%s' in namespace '%s' finished.", containerName, podName, namespace)
+	logging.LogInfoByCtxf(ctx, "Exec command in container '%s' of pod '%s' in namespace '%s' finished.", containerName, podName, namespaceName)
 
 	return output, nil
 }
 
-func CreatePod(ctx context.Context, config *rest.Config, options *kubernetesparameteroptions.RunCommandOptions) error {
-	if config == nil {
-		return tracederrors.TracedErrorNil("config")
+func CreatePod(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) error {
+	if clientset == nil {
+		return tracederrors.TracedErrorNil("clientset")
+	}
+
+	if namespaceName == "" {
+		return tracederrors.TracedErrorEmptyString("namespaceName")
 	}
 
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
-	}
-
-	namespace, err := options.GetNamespaceName()
-	if err != nil {
-		return err
 	}
 
 	podName, err := options.GetPodName()
@@ -178,12 +176,7 @@ func CreatePod(ctx context.Context, config *rest.Config, options *kubernetespara
 		return err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Create pod '%s' in namespace '%s' using container image '%s' started.", podName, namespace, imageName)
-
-	clientset, err := GetClientSetFromRestConfig(ctx, config)
-	if err != nil {
-		return err
-	}
+	logging.LogInfoByCtxf(ctx, "Create pod '%s' in namespace '%s' using container image '%s' started.", podName, namespaceName, imageName)
 
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -203,16 +196,16 @@ func CreatePod(ctx context.Context, config *rest.Config, options *kubernetespara
 		},
 	}
 
-	logging.LogInfoByCtxf(ctx, "Going to start pod '%s' in namespace '%s' using container image '%s'.", podName, namespace, imageName)
-	_, err = clientset.CoreV1().Pods(namespace).Create(ctx, pod, metav1.CreateOptions{})
+	logging.LogInfoByCtxf(ctx, "Going to start pod '%s' in namespace '%s' using container image '%s'.", podName, namespaceName, imageName)
+	_, err = clientset.CoreV1().Pods(namespaceName).Create(ctx, pod, metav1.CreateOptions{})
 	if err != nil {
 		if apierrors.IsAlreadyExists(err) && options.DeleteAlreadyExistingPod {
-			logging.LogInfoByCtxf(ctx, "Going to delete pod already existing pod '%s' in namespace '%s' before running command.", podName, namespace)
-			err = DeletePod(ctx, clientset, podName, namespace)
+			logging.LogInfoByCtxf(ctx, "Going to delete pod already existing pod '%s' in namespace '%s' before running command.", podName, namespaceName)
+			err = DeletePod(ctx, clientset, podName, namespaceName)
 			if err != nil {
 				return err
 			}
-			_, err = clientset.CoreV1().Pods(namespace).Create(ctx, pod, metav1.CreateOptions{})
+			_, err = clientset.CoreV1().Pods(namespaceName).Create(ctx, pod, metav1.CreateOptions{})
 			if err != nil {
 				return tracederrors.TracedErrorf("Error creating Pod: %w", err)
 			}
@@ -222,29 +215,28 @@ func CreatePod(ctx context.Context, config *rest.Config, options *kubernetespara
 	}
 
 	if options.WaitForPodRunning {
-		err = WaitForPodRunning(ctx, clientset, namespace, podName, time.Minute*1)
+		err = WaitForPodRunning(ctx, clientset, namespaceName, podName, time.Minute*1)
 		if err != nil {
 			return err
 		}
 	}
 
-	logging.LogInfoByCtxf(ctx, "Create pod '%s' in namespace '%s' using container image '%s' finished.", podName, namespace, imageName)
+	logging.LogInfoByCtxf(ctx, "Create pod '%s' in namespace '%s' using container image '%s' finished.", podName, namespaceName, imageName)
 
 	return nil
 }
 
-func RunCommandInTemporaryPod(ctx context.Context, config *rest.Config, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
-	if config == nil {
-		return nil, tracederrors.TracedErrorNil("config")
+func RunCommandInTemporaryPod(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
+	if clientset == nil {
+		return nil, tracederrors.TracedErrorNil("clientset")
+	}
+
+	if namespaceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
 	}
 
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
-	}
-
-	namespace, err := options.GetNamespaceName()
-	if err != nil {
-		return nil, err
 	}
 
 	podName, err := options.GetPodName()
@@ -262,29 +254,24 @@ func RunCommandInTemporaryPod(ctx context.Context, config *rest.Config, options 
 		return nil, err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Run command in temporary pod '%s' in namespace '%s' using container image '%s' started.", podName, namespace, imageName)
+	logging.LogInfoByCtxf(ctx, "Run command in temporary pod '%s' in namespace '%s' using container image '%s' started.", podName, namespaceName, imageName)
 
-	clientset, err := GetClientSetFromRestConfig(ctx, config)
-	if err != nil {
-		return nil, err
-	}
-
-	err = CreatePod(ctx, config, options)
+	err = CreatePod(ctx, clientset, namespaceName, options)
 	if err != nil {
 		return nil, err
 	}
 
 	// Ensure pod is deleted after executing the command
 	defer func() {
-		_ = DeletePod(ctx, clientset, podName, namespace)
+		_ = DeletePod(ctx, clientset, podName, namespaceName)
 	}()
 
-	err = WaitForPodSucceeded(ctx, clientset, namespace, podName, time.Minute*1)
+	err = WaitForPodSucceeded(ctx, clientset, namespaceName, podName, time.Minute*1)
 	if err != nil {
 		return nil, err
 	}
 
-	stdout, stderr, err := GetContainerLogs(ctx, clientset, namespace, podName, containerName)
+	stdout, stderr, err := GetContainerLogs(ctx, clientset, namespaceName, podName, containerName)
 	if err != nil {
 		return nil, err
 	}
@@ -296,7 +283,7 @@ func RunCommandInTemporaryPod(ctx context.Context, config *rest.Config, options 
 		Stderr:     &stderr,
 	}
 
-	logging.LogInfoByCtxf(ctx, "Run command in temporary pod '%s' in namespace '%s' using container image '%s' finished.", podName, namespace, imageName)
+	logging.LogInfoByCtxf(ctx, "Run command in temporary pod '%s' in namespace '%s' using container image '%s' finished.", podName, namespaceName, imageName)
 
 	return output, nil
 }
@@ -591,4 +578,8 @@ func ListPods(ctx context.Context, clientset *kubernetes.Clientset, namespaceNam
 	logging.LogInfoByCtxf(ctx, "Found '%d' pods in namespace '%s'.", len(podNames), namespaceName)
 
 	return podNames, nil
+}
+
+func ListPodNames(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string) ([]string, error) {
+	return ListPods(ctx, clientset, namespaceName)
 }
