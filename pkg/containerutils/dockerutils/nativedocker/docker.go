@@ -123,10 +123,7 @@ func (d *Docker) RunContainer(ctx context.Context, options *dockeroptions.Docker
 		return nil, err
 	}
 
-	command, err := options.GetCommand()
-	if err != nil {
-		return nil, err
-	}
+	command := options.GetCommandOrNil()
 
 	autoremove := !options.KeepStoppedContainer
 
