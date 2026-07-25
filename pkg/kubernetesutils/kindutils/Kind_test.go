@@ -6,7 +6,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils/kindparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -43,7 +42,7 @@ func TestKind_CreateAndDeleteCluster(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-				clusterName := continuousintegration.GetDefaultKindClusterName()
+				clusterName := testutils.GetKindClusterNameForTest(t)
 
 				kind := getKindByImplementationName(tt.implementationName)
 
@@ -85,7 +84,7 @@ func TestKind_CreateNamespace(t *testing.T) {
 			func(t *testing.T) {
 				const verbose = true
 				ctx := getCtx()
-				clusterName := continuousintegration.GetDefaultKindClusterName()
+				clusterName := testutils.GetKindClusterNameForTest(t)
 				defer kindutils.DeleteClusterByNameIfInContinuousIntegration(ctx, clusterName)
 
 				kind := getKindByImplementationName(tt.implementationName)
@@ -133,7 +132,7 @@ func TestKind_CreateMultipleWorkers(t *testing.T) {
 			func(t *testing.T) {
 				const verbose = true
 				ctx := getCtx()
-				clusterName := continuousintegration.GetDefaultKindClusterName()
+				clusterName := testutils.GetKindClusterNameForTest(t)
 				defer kindutils.DeleteClusterByNameIfInContinuousIntegration(ctx, clusterName)
 
 				kind := getKindByImplementationName(tt.implementationName)

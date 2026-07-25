@@ -23,7 +23,7 @@ func Test_ListReplicaSetNames(t *testing.T) {
 				ctx := getCtx()
 				const namespaceName = "testnamespace"
 
-				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
@@ -108,7 +108,7 @@ func Test_CreateAndDeleteReplicaSet(t *testing.T) {
 				const namespaceName = "testnamespace"
 				const replicaSetName = "testreplicaset"
 
-				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)

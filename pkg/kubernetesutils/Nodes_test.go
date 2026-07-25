@@ -22,7 +22,7 @@ func Test_ListNodeNames(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				cluster := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				cluster := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				nodeNames, err := cluster.ListNodeNames(ctx)
 				require.NoError(t, err)

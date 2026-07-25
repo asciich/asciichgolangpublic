@@ -134,3 +134,19 @@ func TestGetVersion(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, versionutils.IsSemanticVersionString(version))
 }
+
+func TestGetSessionApiKey(t *testing.T) {
+	ctx := getCtx()
+	openHands := startTestOpenHands(ctx, t)
+
+	sessionApiKey, err := openHands.GetSessionApiKey(ctx)
+	require.NoError(t, err)
+
+	require.NotEmpty(t, sessionApiKey)
+	require.Len(t, sessionApiKey, 64, "expected 64 char hex string")
+
+	for _, c := range sessionApiKey {
+		isHex := (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')
+		require.True(t, isHex, "expected hex character, got '%c'", c)
+	}
+}
