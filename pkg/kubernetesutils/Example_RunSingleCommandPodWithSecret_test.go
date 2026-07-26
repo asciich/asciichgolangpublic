@@ -44,7 +44,10 @@ func Test_Example_RunSingleCommandPodWithSecret(t *testing.T) {
 	const secretKey = "mykey"
 	const secretValue = "mysecretvalue"
 	const envVarName = "MY_SECRET_VAR"
-	const namespaceName = "default"
+	const namespaceName = "example-runsinglecommandwithsecret"
+
+	err = nativekubernetes.CreateNamespace(ctx, clientset, namespaceName)
+	require.NoError(t, err)
 
 	// Create the secret first:
 	_, err = cluster.CreateSecret(ctx, namespaceName, secretName, &kubernetesparameteroptions.CreateSecretOptions{

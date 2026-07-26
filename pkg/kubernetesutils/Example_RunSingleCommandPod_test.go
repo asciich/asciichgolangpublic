@@ -6,10 +6,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
 // This example shows how to run a single command in a temporary pod.
@@ -34,7 +34,10 @@ func Test_Example_RunSingleCommandPod(t *testing.T) {
 
 	// Define the pod name and namespace
 	const podName = "example-command-pod"
-	const namespaceName = "default"
+	const namespaceName = "example-runsinglecommandpod"
+
+	err = nativekubernetes.CreateNamespace(ctx, clientset, namespaceName)
+	require.NoError(t, err)
 
 	// Run a single command in a temporary pod:
 	output, err := nativekubernetes.RunCommandInTemporaryPod(
