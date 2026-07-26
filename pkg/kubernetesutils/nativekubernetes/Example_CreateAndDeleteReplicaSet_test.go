@@ -18,10 +18,10 @@ func Test_Example_CreateAndDeleteReplicaSet(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	config, err := nativekubernetes.GetConfig(ctx, "kind-"+clusterName)
@@ -35,7 +35,7 @@ func Test_Example_CreateAndDeleteReplicaSet(t *testing.T) {
 
 	// Define the name of the ReplicaSet we use for testing
 	const replicaSetName = "example-replicaset"
-	const namespaceName = "default"
+	namespaceName := "test-example-createanddeletereplicaset"
 
 	// Ensure the ReplicaSet is absent:
 	err = nativekubernetes.DeleteReplicaSet(ctx, clientset, replicaSetName, namespaceName)

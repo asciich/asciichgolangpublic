@@ -18,14 +18,17 @@ func Test_Example_Exec(t *testing.T) {
 
 	// define the pod name and the namespace
 	const podName = "example-run-pod"
-	const namespaceName = "default"
+	namespaceName := "test-example-exec"
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	cluster, err := kindutils.GetOrCreateSharedCluster(ctx)
+	require.NoError(t, err)
+
+	_, err = cluster.CreateNamespaceByName(ctx, namespaceName)
 	require.NoError(t, err)
 
 	// ... prepare test environment finished.
@@ -54,7 +57,7 @@ func Test_Example_Exec(t *testing.T) {
 	err = nativekubernetes.CreatePod(
 		ctx,
 		clientset,
-		"default",
+		namespaceName,
 		&kubernetesparameteroptions.RunCommandOptions{
 			Image:                    "ubuntu",
 			PodName:                  podName,
@@ -74,7 +77,7 @@ func Test_Example_Exec(t *testing.T) {
 	output, err := nativekubernetes.Exec(
 		ctx,
 		config,
-		"default",
+		namespaceName,
 		&kubernetesparameteroptions.RunCommandOptions{
 			Image:                    "ubuntu",
 			PodName:                  podName,

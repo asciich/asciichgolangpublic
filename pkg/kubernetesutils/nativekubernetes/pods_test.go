@@ -15,10 +15,10 @@ func Test_CreateAndDeletePod(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	config, err := nativekubernetes.GetConfig(ctx, "kind-"+clusterName)
@@ -27,13 +27,15 @@ func Test_CreateAndDeletePod(t *testing.T) {
 	clientset, err := nativekubernetes.GetClientSetFromRestConfig(ctx, config)
 	require.NoError(t, err)
 
+	namespaceName := "test-createanddeletepod"
+	err = nativekubernetes.CreateNamespace(ctx, clientset, namespaceName)
+	require.NoError(t, err)
 	// ... prepare test environment finished.
 	// -----
 
 	t.Run("happy path", func(t *testing.T) {
 
 		const podName = "testpod"
-		const namespaceName = "default"
 
 		err = nativekubernetes.DeletePod(ctx, clientset, podName, namespaceName)
 		require.NoError(t, err)
@@ -74,10 +76,10 @@ func Test_WaitForDeleted(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	clientset, err := nativekubernetes.GetClientSet(ctx, "kind-"+clusterName)
@@ -88,7 +90,7 @@ func Test_WaitForDeleted(t *testing.T) {
 
 	t.Run("already deleted pod", func(t *testing.T) {
 		podName := "testpod"
-		namespaceName := "default"
+		namespaceName := "test-createanddeletepod"
 
 		// Ensure pod is absent
 		err = nativekubernetes.DeletePod(ctx, clientset, podName, namespaceName)
@@ -105,10 +107,10 @@ func Test_ListPods(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	config, err := nativekubernetes.GetConfig(ctx, "kind-"+clusterName)
@@ -117,12 +119,14 @@ func Test_ListPods(t *testing.T) {
 	clientset, err := nativekubernetes.GetClientSetFromRestConfig(ctx, config)
 	require.NoError(t, err)
 
+	namespaceName := "test-listpods"
+	err = nativekubernetes.CreateNamespace(ctx, clientset, namespaceName)
+	require.NoError(t, err)
+
 	// ... prepare test environment finished.
 	// -----
 
 	t.Run("create and delete pods with list in between", func(t *testing.T) {
-		const namespaceName = "default"
-
 		podNames := []string{"listpod-1", "listpod-2", "listpod-3"}
 
 		// Ensure all test pods are absent before starting

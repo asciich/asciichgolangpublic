@@ -47,7 +47,8 @@ func StartAsDockerContainer(ctx context.Context, options *StartContainerOptions)
 			KeepStoppedContainer: false,
 			Ports:                []string{bindAddress + ":8000"},
 			AdditionalEnvVars: map[string]string{
-				"RUNTIME": "local",
+				"RUNTIME":       "local",
+				"DEFAULT_AGENT": "CodeActAgent",
 			},
 			Mounts:               []string{workspacePath + ":/workspace"},
 			SkipIfAlreadyRunning: true,
@@ -57,7 +58,20 @@ func StartAsDockerContainer(ctx context.Context, options *StartContainerOptions)
 		return nil, err
 	}
 
-	err = httputils.WaitUntilStatusCodeOK(ctx, "http://127.0.0.1:"+strconv.Itoa(port), time.Minute*2)
+	url := "http://127.0.0.1:" + strconv.Itoa(port)
+
+	err = httputils.WaitUntilStatusCodeOK(ctx, url, time.Minute*2)
+	if err != nil {
+		return nil, err
+	}
+
+	openhands, err := NewOpenHands(url)
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Going to add the default workspace.")
+	err = openhands.CreateWorkspace(ctx, "workspace", "/workspace")
 	if err != nil {
 		return nil, err
 	}

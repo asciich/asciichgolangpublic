@@ -16,10 +16,16 @@ func Test_Example_GetNamespaceUid(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	// Use the shared cluster for concurrent-safe test execution
+	const clusterName = kindutils.SharedClusterName
 
-	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	// Get or create the shared cluster (uses file-based locking)
+	cluster, err := kindutils.GetOrCreateSharedCluster(ctx)
+	require.NoError(t, err)
+
+	// Create a unique namespace for this test to avoid conflicts
+	namespaceName := "test-get-namespace-uid"
+	_, err = cluster.CreateNamespaceByName(ctx, namespaceName)
 	require.NoError(t, err)
 
 	// ... prepare test environment finished.
@@ -28,17 +34,6 @@ func Test_Example_GetNamespaceUid(t *testing.T) {
 	// Get the clientSet to access the kubernetes cluster:
 	clientset, err := nativekubernetes.GetClientSet(ctx, "kind-"+clusterName)
 	require.NoError(t, err)
-
-	// Define the name of the namespace we use for testing
-	const namespaceName = "get-ns-uid"
-
-	// Create the namespace:
-	err = nativekubernetes.CreateNamespace(ctx, clientset, namespaceName)
-	require.NoError(t, err)
-
-	exists, err := nativekubernetes.NamespaceExists(ctx, clientset, namespaceName)
-	require.NoError(t, err)
-	require.True(t, exists)
 
 	// Get the namespace UID:
 	uid, err := nativekubernetes.GetNamespaceUid(ctx, clientset, namespaceName)

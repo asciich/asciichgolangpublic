@@ -8,7 +8,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
@@ -20,16 +19,12 @@ func Test_Example_WatchConfigMap(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
 
-	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
-	require.NoError(t, err)
 	// ... prepare test environment finished.
 	// -----
 
 	// Get Kubernetes cluster:
-	cluster, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+clusterName)
+	cluster, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+testClusterName)
 	require.NoError(t, err)
 
 	// Ensure namespace exists

@@ -7,10 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils"
 	"github.com/asciich/asciichgolangpublic/pkg/fluxutils/fluxparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -27,14 +25,9 @@ func Test_HandleFluxResources(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := continuousintegration.GetDefaultKindClusterName()
 	const namespaceName = "flux-system"
-	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
-	require.NoError(t, err)
-	defer kindutils.DeleteClusterByNameIfInContinuousIntegration(ctx, clusterName)
 	// Get Kubernetes cluster:
-	cluster, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+clusterName)
+	cluster, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+testClusterName)
 	require.NoError(t, err)
 	// Install flux using flux-operator
 	_, err = fluxutils.InstallFlux(ctx, &fluxparameteroptions.InstalFluxOptions{
