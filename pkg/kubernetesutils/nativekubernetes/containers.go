@@ -15,7 +15,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-var ErrOnlyCombinedStreamAvailable = errors.New("specify the stream is not supported. Only combinded stream is availalbe by the kubernetes API, feature flag seems deactivated")
+var ErrOnlyCombinedStreamAvailable = errors.New("specify the stream is not supported. Only combined stream is available by the kubernetes API, feature flag seems deactivated")
 
 func getContainerLogsForStream(ctx context.Context, clientset *kubernetes.Clientset, namespace string, podName string, containerName string, stream string) ([]byte, error) {
 	if clientset == nil {

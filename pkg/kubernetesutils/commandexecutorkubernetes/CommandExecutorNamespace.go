@@ -798,6 +798,9 @@ func (c *CommandExecutorNamespace) CreatePod(ctx context.Context, options *kuber
 		}
 	}
 
+	// Build environment variables JSON from secrets
+	envVarsJSON := toJsonEnvVarFromSecrets(options.SecretEnvVars)
+
 	createCommand := []string{
 		"kubectl", "run", podName,
 		"--context", kubectlContext,
@@ -806,10 +809,11 @@ func (c *CommandExecutorNamespace) CreatePod(ctx context.Context, options *kuber
 		"--restart", "Never",
 		"--override-type", "strategic",
 		"--overrides", fmt.Sprintf(
-			`{"spec":{"containers":[{"name":"%s","image":"%s","command":%s,"stdin":true,"tty":true}]}}`,
+			`{"spec":{"containers":[{"name":"%s","image":"%s","command":%s,"stdin":true,"tty":true,"env":%s}]}}`,
 			containerName,
 			imageName,
 			toJsonStringArray(command),
+			envVarsJSON,
 		),
 	}
 
@@ -1059,6 +1063,39 @@ func (c *CommandExecutorNamespace) CreateDeployment(ctx context.Context, options
 
 func toJsonStringArray(values []string) string {
 	jsonBytes, err := json.Marshal(values)
+	if err != nil {
+		return "[]"
+	}
+	return string(jsonBytes)
+}
+
+// toJsonEnvVarFromSecrets builds JSON for environment variables sourced from secrets
+func toJsonEnvVarFromSecrets(secretEnvVars map[string]kubernetesparameteroptions.SecretEnvVarSource) string {
+	if len(secretEnvVars) == 0 {
+		return "[]"
+	}
+	
+	type envVar struct {
+		Name      string `json:"name"`
+		ValueFrom struct {
+			SecretKeyRef struct {
+				Name string `json:"name"`
+				Key  string `json:"key"`
+			} `json:"secretKeyRef"`
+		} `json:"valueFrom"`
+	}
+	
+	envVars := make([]envVar, 0, len(secretEnvVars))
+	for envVarName, secretSource := range secretEnvVars {
+		ev := envVar{
+			Name: envVarName,
+		}
+		ev.ValueFrom.SecretKeyRef.Name = secretSource.SecretName
+		ev.ValueFrom.SecretKeyRef.Key = secretSource.SecretKey
+		envVars = append(envVars, ev)
+	}
+	
+	jsonBytes, err := json.Marshal(envVars)
 	if err != nil {
 		return "[]"
 	}
