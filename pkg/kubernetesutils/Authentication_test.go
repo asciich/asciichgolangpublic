@@ -21,7 +21,7 @@ func Test_WhoAmI(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				userInfo, err := kubernetes.WhoAmI(ctx)
 				require.NoError(t, err)

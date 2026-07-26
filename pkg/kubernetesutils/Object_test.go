@@ -28,7 +28,7 @@ func TestKubernetesObject_CreateAndDelete(t *testing.T) {
 				ctx := getCtx()
 				const namespaceName = "testnamespace"
 
-				cluster := getKubernetesByImplementationName(ctx, tt.implementationName)
+				cluster := getKubernetesByImplementationName(ctx, t, tt.implementationName)
 				err := cluster.DeleteNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
 				require.False(t, mustutils.Must(cluster.NamespaceByNameExists(ctx, namespaceName)))
@@ -81,7 +81,7 @@ func TestKubernetesObject_ListObjects(t *testing.T) {
 
 				const namespaceName = "testnamespace"
 
-				cluster := getKubernetesByImplementationName(ctx, tt.implementationName)
+				cluster := getKubernetesByImplementationName(ctx, t, tt.implementationName)
 				err := cluster.DeleteNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
 				require.False(t, mustutils.Must(cluster.NamespaceByNameExists(ctx, namespaceName)))
@@ -160,7 +160,7 @@ func TestKubernetesObject_GetAsYamlString(t *testing.T) {
 
 				const namespaceName = "testnamespace"
 
-				cluster := getKubernetesByImplementationName(ctx, tt.implementationName)
+				cluster := getKubernetesByImplementationName(ctx, t, tt.implementationName)
 				err := cluster.DeleteNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
 				require.False(t, mustutils.Must(cluster.NamespaceByNameExists(ctx, namespaceName)))
@@ -211,7 +211,7 @@ func TestKubernetesObject_NamespaceCreateObject(t *testing.T) {
 				ctx := getCtx()
 				const namespaceName = "testnamespace"
 
-				cluster := getKubernetesByImplementationName(ctx, tt.implementationName)
+				cluster := getKubernetesByImplementationName(ctx, t, tt.implementationName)
 				err := cluster.DeleteNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
 				require.False(t, mustutils.Must(cluster.NamespaceByNameExists(ctx, namespaceName)))
@@ -267,7 +267,7 @@ func TestKubernetesObject_ClusterCreateObject(t *testing.T) {
 				ctx := getCtx()
 				const namespaceName = "testnamespace"
 
-				cluster := getKubernetesByImplementationName(ctx, tt.implementationName)
+				cluster := getKubernetesByImplementationName(ctx, t, tt.implementationName)
 				err := cluster.DeleteNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
 				require.False(t, mustutils.Must(cluster.NamespaceByNameExists(ctx, namespaceName)))

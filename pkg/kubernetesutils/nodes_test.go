@@ -1,6 +1,7 @@
 package kubernetesutils_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -22,11 +23,17 @@ func Test_ListNodeNames(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				cluster := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				cluster := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				nodeNames, err := cluster.ListNodeNames(ctx)
 				require.NoError(t, err)
-				require.EqualValues(t, tt.expectedNodeNames, nodeNames)
+				require.Len(t, nodeNames, 1)
+
+				// We can't check for the full name since there are multiple KinD cluster running in parallel.
+				// This ends in generated names like e.g. "kubernetesutils-vgkda-control-plane".
+				nodeName := nodeNames[0]
+				require.True(t, strings.HasPrefix(nodeName, "kubernetesutils-"))
+				require.True(t, strings.HasSuffix(nodeName, "-control-plane"))
 			})
 	}
 }

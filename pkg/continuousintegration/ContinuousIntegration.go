@@ -55,3 +55,23 @@ func GetDefaultKindClusterName() string {
 
 	return name
 }
+
+// GetKindClusterNameByPackageName returns a KinD cluster name based on the Go package name.
+// This ensures that parallel running tests in different packages do not interfere with each other.
+func GetKindClusterNameByPackageName(packageName string) string {
+	if packageName == "" {
+		return GetDefaultKindClusterName()
+	}
+
+	// Replace special characters with dashes to create a valid cluster name
+	clusterName := strings.ReplaceAll(packageName, "/", "-")
+	clusterName = strings.ReplaceAll(clusterName, ".", "-")
+	clusterName = strings.ReplaceAll(clusterName, "_", "-")
+
+	// In CI, add a random suffix to avoid conflicts from previous failed runs
+	if IsRunningInContinuousIntegration() {
+		return clusterName + "-" + strings.ToLower(mustutils.Must(randomgenerator.GetRandomString(5)))
+	}
+
+	return clusterName
+}

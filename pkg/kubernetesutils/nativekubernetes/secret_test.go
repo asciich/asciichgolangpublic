@@ -13,13 +13,17 @@ func Test_CreateAndDeleteSecret(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	clientset, err := nativekubernetes.GetClientSet(ctx, "kind-"+clusterName)
+	require.NoError(t, err)
+
+	namespaceName := "test-createanddeletesecret"
+	err = nativekubernetes.CreateNamespace(ctx, clientset, namespaceName)
 	require.NoError(t, err)
 
 	// ... prepare test environment finished.
@@ -27,7 +31,6 @@ func Test_CreateAndDeleteSecret(t *testing.T) {
 
 	t.Run("happy path", func(t *testing.T) {
 		const secretName = "testsecret"
-		const namespaceName = "default"
 
 		secretData := map[string][]byte{
 			"username": []byte("admin"),
@@ -69,13 +72,17 @@ func Test_DeleteSecretAlreadyAbsent(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	clientset, err := nativekubernetes.GetClientSet(ctx, "kind-"+clusterName)
+	require.NoError(t, err)
+
+	namespaceName := "test-createanddeletesecret"
+	err = nativekubernetes.CreateNamespace(ctx, clientset, namespaceName)
 	require.NoError(t, err)
 
 	// ... prepare test environment finished.
@@ -83,7 +90,6 @@ func Test_DeleteSecretAlreadyAbsent(t *testing.T) {
 
 	t.Run("already deleted secret", func(t *testing.T) {
 		const secretName = "testsecret-absent"
-		const namespaceName = "default"
 
 		// Ensure secret is absent
 		err = nativekubernetes.DeleteSecret(ctx, clientset, namespaceName, secretName)
@@ -100,10 +106,10 @@ func Test_ReadSecretNotFound(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	clientset, err := nativekubernetes.GetClientSet(ctx, "kind-"+clusterName)
@@ -114,7 +120,7 @@ func Test_ReadSecretNotFound(t *testing.T) {
 
 	t.Run("read non-existent secret returns error", func(t *testing.T) {
 		const secretName = "nonexistent-secret"
-		const namespaceName = "default"
+		namespaceName := "test-createanddeletesecret"
 
 		// Ensure secret does not exist
 		err = nativekubernetes.DeleteSecret(ctx, clientset, namespaceName, secretName)
@@ -130,21 +136,22 @@ func Test_ListSecrets(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	clientset, err := nativekubernetes.GetClientSet(ctx, "kind-"+clusterName)
 	require.NoError(t, err)
 
+	const namespaceName = "nativekubernetes-listsecrets"
+	err = nativekubernetes.CreateNamespace(ctx, clientset, namespaceName)
+	require.NoError(t, err)
 	// ... prepare test environment finished.
 	// -----
 
 	t.Run("create and delete secrets with list in between", func(t *testing.T) {
-		const namespaceName = "default"
-
 		secretNames := []string{"listsecret-1", "listsecret-2", "listsecret-3"}
 		secretData := map[string][]byte{"key": []byte("value")}
 
