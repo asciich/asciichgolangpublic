@@ -24,7 +24,7 @@ func Test_ConfigMapByNameExists(t *testing.T) {
 				const namespaceName = "testnamespace"
 				const configmapName = "configmapname"
 
-				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				namespace, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
@@ -76,7 +76,7 @@ func Test_CreateConfigMapInNonExistentNamespace(t *testing.T) {
 				const namespaceName = "testnamespace"
 				const configmapName = "configmapname"
 
-				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				// ensure namespace is absent:
 				err := kubernetes.DeleteNamespaceByName(ctx, namespaceName)
@@ -120,7 +120,7 @@ func Test_ReadAndWriteConfigMap(t *testing.T) {
 				const namespaceName = "testnamespace"
 				const configmapName = "configmapname"
 
-				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				labels := map[string]string{"label1": "value1"}
 				content := map[string]string{"file.txt": "hello_world"}

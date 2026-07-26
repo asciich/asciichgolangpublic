@@ -19,10 +19,10 @@ func Test_CreateAndDeleteConfigMap(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	config, err := nativekubernetes.GetConfig(ctx, "kind-"+clusterName)
@@ -37,7 +37,7 @@ func Test_CreateAndDeleteConfigMap(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
 
 		const configMapName = "testconfigmap"
-		const namespaceName = "default"
+		namespaceName := "test-createanddeleteconfigmap"
 
 		configMapData := map[string]string{
 			"key1": "value1",
@@ -75,10 +75,10 @@ func Test_ListConfigMaps(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	config, err := nativekubernetes.GetConfig(ctx, "kind-"+clusterName)
@@ -91,7 +91,7 @@ func Test_ListConfigMaps(t *testing.T) {
 	// -----
 
 	t.Run("create and delete ConfigMaps with list in between", func(t *testing.T) {
-		const namespaceName = "default"
+		namespaceName := "test-createanddeleteconfigmap"
 
 		configMapNames := []string{"listcm-1", "listcm-2", "listcm-3"}
 		configMapData := map[string]string{"key": "value"}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
@@ -96,4 +97,69 @@ func (o *Openhands) GetVersion(ctx context.Context) (string, error) {
 	logging.LogInfoByCtxf(ctx, "OpenHands %s is running on version %s.", url, version)
 
 	return version, nil
+}
+
+func (o *Openhands) GetSessionApiKey(ctx context.Context) (string, error) {
+	url, err := o.GetUrl()
+	if err != nil {
+		return "", err
+	}
+
+	body, err := httputils.SendRequestAndGetBodyAsBytes(
+		ctx,
+		&httpoptions.RequestOptions{
+			Url: url,
+		},
+	)
+	if err != nil {
+		return "", err
+	}
+
+	// Extract the key from: window.__AGENT_CANVAS_SESSION_API_KEY__="<key>"
+	marker := `window.__AGENT_CANVAS_SESSION_API_KEY__="`
+	content := string(body)
+
+	idx := strings.Index(content, marker)
+	if idx == -1 {
+		return "", tracederrors.TracedError("session API key not found in page")
+	}
+
+	start := idx + len(marker)
+	end := strings.Index(content[start:], `"`)
+	if end == -1 {
+		return "", tracederrors.TracedError("could not parse session API key")
+	}
+
+	apiKey := content[start : start+end]
+
+	if len(apiKey) <= 0 {
+		return "", tracederrors.TracedError("Unable to extract valid API key")
+	}
+
+	return apiKey, nil
+}
+
+func (o *Openhands) DoApiRequest(ctx context.Context, method string, path string, payload []byte) ([]byte, error) {
+	sessionKey, err := o.GetSessionApiKey(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	url, err := o.GetUrl()
+	if err != nil {
+		return nil, err
+	}
+
+	return httputils.SendRequestAndGetBodyAsBytes(
+		ctx,
+		&httpoptions.RequestOptions{
+			Url:    url + path,
+			Method: method,
+			Header: map[string]string{
+				"X-Session-API-Key": sessionKey,
+				"Content-Type":      "application/json",
+			},
+			Data: payload,
+		},
+	)
 }

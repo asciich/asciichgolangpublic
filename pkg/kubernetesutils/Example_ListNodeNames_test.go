@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 )
@@ -16,7 +17,7 @@ func Test_Example_ListNodeNames(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	clusterName := testutils.GetKindClusterNameForTest(t)
 
 	// Ensure a local kind cluster is available for testing:
 	_, err := kindutils.CreateCluster(ctx, clusterName)
@@ -32,7 +33,8 @@ func Test_Example_ListNodeNames(t *testing.T) {
 	nodeNames, err := cluster.ListNodeNames(ctx)
 	require.NoError(t, err)
 
-	// We expect the "default" namespace to be present:
-	require.Contains(t, nodeNames, "kubernetesutils-control-plane")
+	// We expect the control-plane node to be present with the generated cluster name:
+	expectedNodeName := clusterName + "-control-plane"
+	require.Contains(t, nodeNames, expectedNodeName)
 
 }

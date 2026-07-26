@@ -25,7 +25,7 @@ func Test_PodsRunSingleCommand_echoHelloWorld(t *testing.T) {
 				const namespaceName = "testnamespace"
 				const podName = "podname"
 
-				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
@@ -76,7 +76,7 @@ func Test_ListPodNames(t *testing.T) {
 				ctx := getCtx()
 				const namespaceName = "testnamespace"
 
-				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
@@ -161,7 +161,7 @@ func Test_CreateAndDeletePod(t *testing.T) {
 				const namespaceName = "testnamespace"
 				const podName = "testpod"
 
-				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)

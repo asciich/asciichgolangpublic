@@ -8,7 +8,46 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kuberneteserrors"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/commandexecutorkubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
+
+
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
+
+func getKubernetesByImplementationName(ctx context.Context, t *testing.T, implementationName string) kubernetesinterfaces.KubernetesCluster {
+	clusterName := testutils.GetKindClusterNameForTest(t)
+
+	if implementationName == "commandExecutorKubernetes" {
+		// Ensure a local kind cluster is available for testing:
+		mustutils.Must(kindutils.CreateCluster(ctx, clusterName))
+
+		return mustutils.Must(commandexecutorkubernetes.GetClusterByName("kind-" + clusterName))
+	}
+
+	if implementationName == "nativeKubernetes" {
+		// Ensure a local kind cluster is available for testing:
+		mustutils.Must(kindutils.CreateCluster(ctx, clusterName))
+
+		return mustutils.Must(nativekubernetesoo.GetClusterByName(getCtx(), "kind-"+clusterName))
+
+	}
+
+	logging.LogFatalWithTracef(
+		"Unknown implmentation name '%s'",
+		implementationName,
+	)
+
+	return nil
+}
 
 func Test_SecretByNameExists(t *testing.T) {
 	tests := []struct {
@@ -26,7 +65,7 @@ func Test_SecretByNameExists(t *testing.T) {
 				const namespaceName = "testnamespace"
 				const secretName = "secretname"
 
-				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				namespace, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
@@ -78,7 +117,7 @@ func Test_GetSecret_ErrorIfNotExist(t *testing.T) {
 				const namespaceName = "testnamespace"
 				const secretName = "secretname"
 
-				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				namespace, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
@@ -114,7 +153,7 @@ func Test_CreateSecretInNonExistentNamespace(t *testing.T) {
 				const namespaceName = "testnamespace"
 				const secretName = "secretname"
 
-				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				// ensure namespace is absent:
 				err := kubernetes.DeleteNamespaceByName(ctx, namespaceName)
@@ -158,7 +197,7 @@ func Test_SecretReadWriteUpdate(t *testing.T) {
 				const namespaceName = "testnamespace"
 				const secretName = "secretname"
 
-				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				namespace, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
@@ -242,7 +281,7 @@ func Test_ListSecretNames(t *testing.T) {
 				const secretNameB = "secretname-b"
 				const secretNameC = "secretname-c"
 
-				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				namespace, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
@@ -335,7 +374,7 @@ func Test_ListSecrets(t *testing.T) {
 				const secretNameB = "secretname-b"
 				const secretNameC = "secretname-c"
 
-				kubernetes := getKubernetesByImplementationName(getCtx(), tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				namespace, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
