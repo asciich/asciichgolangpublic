@@ -6,6 +6,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
@@ -119,7 +120,74 @@ func (c *CommandExecutorKubernetes) CreateNamespaceByName(ctx context.Context, n
 		logging.LogChangedByCtxf(ctx, "Namespace '%s' in cluster '%s' created.", name, clusterName)
 	}
 
+	err = c.WaitForDefaultServiceAccount(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+
 	return c.GetNamespaceByName(name)
+}
+
+func (c *CommandExecutorKubernetes) WaitForDefaultServiceAccount(ctx context.Context, namespaceName string) error {
+	if namespaceName == "" {
+		return tracederrors.TracedErrorEmptyString("namespaceName")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Wait for default service account in namespace '%s' started.", namespaceName)
+
+	timeoutCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
+
+	for {
+		cmd := []string{"kubectl"}
+
+		if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
+			// No context needed for in-cluster auth
+		} else {
+			kubectlContext, err := c.GetCachedKubectlContext(ctx)
+			if err != nil {
+				return err
+			}
+
+			cmd = append(cmd, "--context", kubectlContext)
+		}
+
+		cmd = append(cmd, "get", "serviceaccount", "default", "--namespace", namespaceName, "-o", "name")
+
+		output, err := c.RunCommand(
+			timeoutCtx,
+			&parameteroptions.RunCommandOptions{
+				Command:           cmd,
+				AllowAllExitCodes: true,
+			},
+		)
+		if err != nil {
+			return err
+		}
+
+		if output.IsExitSuccess() {
+			logging.LogInfoByCtxf(ctx, "Default service account in namespace '%s' is available.", namespaceName)
+			return nil
+		}
+
+		stderr, err := output.GetStderrAsString()
+		if err != nil {
+			return err
+		}
+
+		if strings.Contains(stderr, "not found") {
+			logging.LogInfoByCtxf(ctx, "Default service account in namespace '%s' not yet available, waiting...", namespaceName)
+		} else {
+			return tracederrors.TracedErrorf("Failed to check default service account in namespace '%s': %s", namespaceName, stderr)
+		}
+
+		select {
+		case <-timeoutCtx.Done():
+			return tracederrors.TracedErrorf("Timed out waiting for default service account in namespace '%s': %w", namespaceName, timeoutCtx.Err())
+		case <-time.After(1 * time.Second):
+			// retry
+		}
+	}
 }
 
 func (c *CommandExecutorKubernetes) DeleteNamespaceByName(ctx context.Context, name string) (err error) {
