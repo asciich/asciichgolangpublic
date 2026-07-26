@@ -11,6 +11,7 @@ func NewOpenHandsCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		NewConfigureGoogleAIStudioCmd(),
 		NewConfigureSwisscomMyAICmd(),
 		NewRunAsDockerContainerCmd(),
 	)
