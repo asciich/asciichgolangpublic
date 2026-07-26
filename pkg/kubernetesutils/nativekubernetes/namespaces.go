@@ -45,7 +45,47 @@ func CreateNamespace(ctx context.Context, clientSet *kubernetes.Clientset, names
 		logging.LogChangedByCtxf(ctx, "Created kubernetes namespace '%s'.", namespaceName)
 	}
 
+	err = WaitForDefaultServiceAccount(ctx, clientSet, namespaceName)
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed waiting for default service account in namespace '%s': %w", namespaceName, err)
+	}
+
 	logging.LogInfoByCtxf(ctx, "Create kubernetes namespace '%s' finished.", namespaceName)
+
+	return nil
+}
+
+func WaitForDefaultServiceAccount(ctx context.Context, clientSet *kubernetes.Clientset, namespaceName string) error {
+	if clientSet == nil {
+		return tracederrors.TracedErrorNil("clientSet")
+	}
+
+	if namespaceName == "" {
+		return tracederrors.TracedErrorEmptyString("namespaceName")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Wait for default service account in namespace '%s' started.", namespaceName)
+
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
+
+	err := wait.PollUntilContextCancel(ctx, 1*time.Second, true, func(ctx context.Context) (bool, error) {
+		_, err := clientSet.CoreV1().ServiceAccounts(namespaceName).Get(ctx, "default", metav1.GetOptions{})
+		if err != nil {
+			if errors.IsNotFound(err) {
+				logging.LogInfoByCtxf(ctx, "Default service account in namespace '%s' not yet available, waiting...", namespaceName)
+				return false, nil
+			}
+			return false, err
+		}
+		return true, nil
+	})
+
+	if err != nil {
+		return tracederrors.TracedErrorf("Timed out waiting for default service account in namespace '%s': %w", namespaceName, err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Default service account in namespace '%s' is available.", namespaceName)
 
 	return nil
 }

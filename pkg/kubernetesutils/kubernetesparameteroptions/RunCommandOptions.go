@@ -31,6 +31,25 @@ type RunCommandOptions struct {
 	Replicas int32
 
 	StdinBytes []byte
+
+	// SecretEnvVars maps environment variable names to secret names and keys
+	// Format: map[envVarName]SecretEnvVarSource
+	SecretEnvVars map[string]SecretEnvVarSource
+
+	// SecretMounts defines secrets to mount as files in the container
+	// Format: map[mountPath]SecretMountSource
+	SecretMounts map[string]SecretMountSource
+}
+
+// SecretEnvVarSource defines the source of a secret for an environment variable
+type SecretEnvVarSource struct {
+	SecretName string
+	SecretKey  string
+}
+
+// SecretMountSource defines the source of a secret to mount as files
+type SecretMountSource struct {
+	SecretName string
 }
 
 func (r *RunCommandOptions) GetContainerName() (string, error) {

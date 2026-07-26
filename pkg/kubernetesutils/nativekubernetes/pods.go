@@ -178,6 +178,46 @@ func CreatePod(ctx context.Context, clientset *kubernetes.Clientset, namespaceNa
 
 	logging.LogInfoByCtxf(ctx, "Create pod '%s' in namespace '%s' using container image '%s' started.", podName, namespaceName, imageName)
 
+	// Build environment variables from secrets
+	envVars := []corev1.EnvVar{}
+	if options.SecretEnvVars != nil {
+		for envVarName, secretSource := range options.SecretEnvVars {
+			envVars = append(envVars, corev1.EnvVar{
+				Name: envVarName,
+				ValueFrom: &corev1.EnvVarSource{
+					SecretKeyRef: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: secretSource.SecretName,
+						},
+						Key: secretSource.SecretKey,
+					},
+				},
+			})
+		}
+	}
+
+	// Build volumes and volume mounts from secrets
+	volumes := []corev1.Volume{}
+	volumeMounts := []corev1.VolumeMount{}
+	if options.SecretMounts != nil {
+		for mountPath, secretSource := range options.SecretMounts {
+			volumeName := "secret-" + secretSource.SecretName
+			volumes = append(volumes, corev1.Volume{
+				Name: volumeName,
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: secretSource.SecretName,
+					},
+				},
+			})
+			volumeMounts = append(volumeMounts, corev1.VolumeMount{
+				Name:      volumeName,
+				MountPath: mountPath,
+				ReadOnly:  true,
+			})
+		}
+	}
+
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: podName,
@@ -185,13 +225,16 @@ func CreatePod(ctx context.Context, clientset *kubernetes.Clientset, namespaceNa
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{
 				{
-					Name:    containerName,
-					Image:   imageName,
-					Command: command,
-					Stdin:   true,
-					TTY:     true,
+					Name:         containerName,
+					Image:        imageName,
+					Command:      command,
+					Stdin:        true,
+					TTY:          true,
+					Env:          envVars,
+					VolumeMounts: volumeMounts,
 				},
 			},
+			Volumes:       volumes,
 			RestartPolicy: corev1.RestartPolicyNever,
 		},
 	}
