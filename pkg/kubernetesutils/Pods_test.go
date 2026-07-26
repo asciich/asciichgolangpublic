@@ -204,3 +204,157 @@ func Test_CreateAndDeletePod(t *testing.T) {
 		)
 	}
 }
+
+func Test_RunCommandInTemporaryPod_WithSecretAsEnvVar(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		{"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "testnamespace"
+				const podName = "podname-secret-env"
+				const secretName = "test-secret"
+				const secretKey = "mykey"
+				const secretValue = "my-secret-value"
+				const envVarName = "MY_SECRET_VAR"
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
+
+				// Create namespace
+				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+
+				// Wait until default sa in created namespace exists.
+				time.Sleep(10 * time.Second)
+
+				// Create secret with test data
+				_, err = kubernetes.CreateSecret(ctx, namespaceName, secretName, &kubernetesparameteroptions.CreateSecretOptions{
+					SecretData: map[string][]byte{
+						secretKey: []byte(secretValue),
+					},
+				})
+				require.NoError(t, err)
+
+				// Ensure secret is cleaned up after test
+				defer func() {
+					_ = kubernetes.DeleteSecretByName(ctx, namespaceName, secretName)
+				}()
+
+				// Run command in temporary pod with secret as environment variable
+				output, err := kubernetes.RunCommandInTemporaryPod(
+					ctx,
+					namespaceName,
+					&kubernetesparameteroptions.RunCommandOptions{
+						Image:                    "ubuntu",
+						PodName:                  podName,
+						DeleteAlreadyExistingPod: true,
+						Command:                  []string{"bash", "-c", "printenv " + envVarName},
+						SecretEnvVars: map[string]kubernetesparameteroptions.SecretEnvVarSource{
+							envVarName: {
+								SecretName: secretName,
+								SecretKey:  secretKey,
+							},
+						},
+					},
+				)
+				require.NoError(t, err)
+
+				stdout, err := output.GetStdoutAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, secretValue+"\n", stdout)
+
+				stderr, err := output.GetStderrAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, "", stderr)
+
+				retVal, err := output.GetReturnCode()
+				require.NoError(t, err)
+				require.EqualValues(t, 0, retVal)
+			},
+		)
+	}
+}
+
+func Test_RunCommandInTemporaryPod_WithSecretAsFile(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		{"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "testnamespace"
+				const podName = "podname-secret-file"
+				const secretName = "test-secret-file"
+				const secretKey = "mykey"
+				const secretValue = "my-secret-file-value"
+				const mountPath = "/etc/secret"
+				const secretFilePath = mountPath + "/" + secretKey
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
+
+				// Create namespace
+				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+
+				// Wait until default sa in created namespace exists.
+				time.Sleep(10 * time.Second)
+
+				// Create secret with test data
+				_, err = kubernetes.CreateSecret(ctx, namespaceName, secretName, &kubernetesparameteroptions.CreateSecretOptions{
+					SecretData: map[string][]byte{
+						secretKey: []byte(secretValue),
+					},
+				})
+				require.NoError(t, err)
+
+				// Ensure secret is cleaned up after test
+				defer func() {
+					_ = kubernetes.DeleteSecretByName(ctx, namespaceName, secretName)
+				}()
+
+				// Run command in temporary pod with secret mounted as file
+				output, err := kubernetes.RunCommandInTemporaryPod(
+					ctx,
+					namespaceName,
+					&kubernetesparameteroptions.RunCommandOptions{
+						Image:                    "ubuntu",
+						PodName:                  podName,
+						DeleteAlreadyExistingPod: true,
+						Command:                  []string{"bash", "-c", "cat " + secretFilePath},
+						SecretMounts: map[string]kubernetesparameteroptions.SecretMountSource{
+							mountPath: {
+								SecretName: secretName,
+							},
+						},
+					},
+				)
+				require.NoError(t, err)
+
+				stdout, err := output.GetStdoutAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, secretValue, stdout)
+
+				stderr, err := output.GetStderrAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, "", stderr)
+
+				retVal, err := output.GetReturnCode()
+				require.NoError(t, err)
+				require.EqualValues(t, 0, retVal)
+			},
+		)
+	}
+}
