@@ -2,6 +2,7 @@ package commandexecutorkubernetes
 
 import (
 	"context"
+	"encoding/json"
 	"slices"
 	"sort"
 	"strings"
@@ -760,8 +761,18 @@ func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context
 		"--namespace", namespaceName,
 		"--image", imageName,
 		"--restart=Never",
-		"--",
 	}
+
+	// Build overrides for secrets (environment variables and mounts)
+	overrides := buildPodOverridesForSecrets(podName, options)
+	if overrides != "" {
+		runCommand = append(runCommand,
+			"--override-type", "strategic",
+			"--overrides", overrides,
+		)
+	}
+
+	runCommand = append(runCommand, "--")
 	runCommand = append(runCommand, commandToExecute...)
 
 	_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
@@ -931,4 +942,115 @@ func (c *CommandExecutorKubernetes) DeploymentByNameExists(ctx context.Context, 
 	}
 
 	return namespace.DeploymentByNameExists(ctx, deploymentName)
+}
+
+// toJsonEnvVarFromSecretsForKubectl builds JSON for environment variables sourced from secrets
+// This function is specifically designed for kubectl --overrides format
+func toJsonEnvVarFromSecretsForKubectl(secretEnvVars map[string]kubernetesparameteroptions.SecretEnvVarSource) string {
+	if secretEnvVars == nil || len(secretEnvVars) == 0 {
+		return "[]"
+	}
+
+	type envVar struct {
+		Name      string `json:"name"`
+		ValueFrom struct {
+			SecretKeyRef struct {
+				Name string `json:"name"`
+				Key  string `json:"key"`
+			} `json:"secretKeyRef"`
+		} `json:"valueFrom"`
+	}
+
+	envVars := make([]envVar, 0, len(secretEnvVars))
+	for envVarName, secretSource := range secretEnvVars {
+		ev := envVar{
+			Name: envVarName,
+		}
+		ev.ValueFrom.SecretKeyRef.Name = secretSource.SecretName
+		ev.ValueFrom.SecretKeyRef.Key = secretSource.SecretKey
+		envVars = append(envVars, ev)
+	}
+
+	jsonBytes, err := json.Marshal(envVars)
+	if err != nil {
+		return "[]"
+	}
+	return string(jsonBytes)
+}
+
+// buildPodOverridesForSecrets builds JSON overrides for pod spec including
+// both environment variables from secrets and secret volume mounts
+func buildPodOverridesForSecrets(podName string, options *kubernetesparameteroptions.RunCommandOptions) string {
+	containerOverrides := map[string]interface{}{
+		"name": podName,
+	}
+
+	hasEnvVars := options.SecretEnvVars != nil && len(options.SecretEnvVars) > 0
+	hasMounts := options.SecretMounts != nil && len(options.SecretMounts) > 0
+
+	if !hasEnvVars && !hasMounts {
+		return ""
+	}
+
+	// Build environment variables
+	if hasEnvVars {
+		envVarsJSON := toJsonEnvVarFromSecretsForKubectl(options.SecretEnvVars)
+		var envVars []interface{}
+		json.Unmarshal([]byte(envVarsJSON), &envVars)
+		containerOverrides["env"] = envVars
+	}
+
+	// Build volume mounts and volumes
+	if hasMounts {
+		volumeMounts := []map[string]interface{}{}
+		volumes := []map[string]interface{}{}
+
+		for mountPath, secretSource := range options.SecretMounts {
+			volumeName := "secret-" + secretSource.SecretName
+
+			// Volume mount for the container
+			volumeMounts = append(volumeMounts, map[string]interface{}{
+				"name":      volumeName,
+				"mountPath": mountPath,
+				"readOnly":  true,
+			})
+
+			// Volume definition for the pod
+			volumes = append(volumes, map[string]interface{}{
+				"name": volumeName,
+				"secret": map[string]interface{}{
+					"secretName": secretSource.SecretName,
+				},
+			})
+		}
+
+		containerOverrides["volumeMounts"] = volumeMounts
+
+		// Return full pod spec override with both containers and volumes
+		overrides := map[string]interface{}{
+			"spec": map[string]interface{}{
+				"containers": []map[string]interface{}{containerOverrides},
+				"volumes":    volumes,
+			},
+		}
+
+		jsonBytes, err := json.Marshal(overrides)
+		if err != nil {
+			return ""
+		}
+		return string(jsonBytes)
+	}
+
+	// Only environment variables (legacy behavior)
+	overrides := map[string]interface{}{
+		"spec": map[string]interface{}{
+			"containers": []map[string]interface{}{containerOverrides},
+		},
+	}
+
+	jsonBytes, err := json.Marshal(overrides)
+	if err != nil {
+		return ""
+	}
+	return string(jsonBytes)
 }

@@ -18,7 +18,7 @@ func Test_Example_GoogleReachable(t *testing.T) {
 
 	// Define the testsuite as temporary file:
 	testSuitePath, err := tempfiles.CreateTemporaryFileFromContentString(ctx, `---
-name: "Goolge reachable"
+name: "Google reachable"
 test_cases:
   - name: "Test HTTPS port open"
     test_type: tcp_port_open
