@@ -19,10 +19,11 @@ func Test_Example_GetClientSet(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	// Use the shared cluster for concurrent-safe test execution
+	const clusterName = kindutils.SharedClusterName
 
-	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	// Get or create the shared cluster (uses file-based locking)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	// Ensure the created cluster is used by default

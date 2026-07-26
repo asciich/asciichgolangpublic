@@ -17,10 +17,15 @@ func Test_Example_CreateAndDeleteConfigMap(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	namespaceName := "test-example-createanddeleteconfigmap"
+
+	cluster, err := kindutils.GetOrCreateSharedCluster(ctx)
+	require.NoError(t, err)
+
+	_, err = cluster.CreateNamespaceByName(ctx, namespaceName)
 	require.NoError(t, err)
 
 	clientset, err := nativekubernetes.GetClientSet(ctx, "kind-"+clusterName)
@@ -31,7 +36,6 @@ func Test_Example_CreateAndDeleteConfigMap(t *testing.T) {
 
 	// Define the name of the ConfigMap we use for testing
 	const configMapName = "example-configmap"
-	const namespaceName = "default"
 
 	configMapData := map[string]string{
 		"key1": "value1",

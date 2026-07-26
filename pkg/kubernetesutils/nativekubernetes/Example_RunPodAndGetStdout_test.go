@@ -18,10 +18,15 @@ func Test_Example_RunPodAndGetStdout(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	namespaceName := "test-get-namespace-uid"
+
+	cluster, err := kindutils.GetOrCreateSharedCluster(ctx)
+	require.NoError(t, err)
+
+	_, err = cluster.CreateNamespaceByName(ctx, namespaceName)
 	require.NoError(t, err)
 
 	// ... prepare test environment finished.
@@ -37,7 +42,7 @@ func Test_Example_RunPodAndGetStdout(t *testing.T) {
 	output, err := nativekubernetes.RunCommandInTemporaryPod(
 		ctx,
 		clientset,
-		"default",
+		namespaceName,
 		&kubernetesparameteroptions.RunCommandOptions{
 			Image:                    "ubuntu",
 			PodName:                  podName,

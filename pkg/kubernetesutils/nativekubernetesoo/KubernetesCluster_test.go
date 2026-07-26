@@ -6,7 +6,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 )
@@ -19,12 +18,12 @@ func TestListKindNames(t *testing.T) {
 	t.Run("", func(t *testing.T) {
 		ctx := getCtx()
 
-		// Ensure a local kind cluster is available for testing:
-		clusterName := continuousintegration.GetDefaultKindClusterName()
-		_, err := kindutils.CreateCluster(ctx, clusterName)
+		// Use the shared cluster for reading API information
+		const clusterName = kindutils.SharedClusterName
 
+		// Ensure a local kind cluster is available for testing:
+		_, err := kindutils.GetOrCreateSharedCluster(ctx)
 		require.NoError(t, err)
-		defer kindutils.DeleteClusterByNameIfInContinuousIntegration(ctx, clusterName)
 
 		cluster, err := nativekubernetesoo.GetDefaultCluster(ctx)
 		require.NoError(t, err)

@@ -17,10 +17,15 @@ func Test_Example_CreateAndDeleteSecret(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	namespaceName := "test-example-createanddeletesecret"
+
+	cluster, err := kindutils.GetOrCreateSharedCluster(ctx)
+	require.NoError(t, err)
+
+	_, err = cluster.CreateNamespaceByName(ctx, namespaceName)
 	require.NoError(t, err)
 
 	clientset, err := nativekubernetes.GetClientSet(ctx, "kind-"+clusterName)
@@ -31,7 +36,6 @@ func Test_Example_CreateAndDeleteSecret(t *testing.T) {
 
 	// Define the name of the Secret we use for testing
 	const secretName = "example-secret"
-	const namespaceName = "default"
 
 	secretData := map[string][]byte{
 		"username": []byte("admin"),
