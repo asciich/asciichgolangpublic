@@ -2,6 +2,7 @@ package testutils
 
 import (
 	"fmt"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -10,6 +11,26 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
+
+// GetKindClusterNameForTest returns a KinD cluster name based on the test's package name.
+// This ensures that parallel running tests in different packages do not interfere with each other.
+func GetKindClusterNameForTest(t testing.TB) string {
+	// Get the package name from the test's file path
+	_, file, _, ok := runtime.Caller(1)
+	if !ok {
+		return continuousintegration.GetDefaultKindClusterName()
+	}
+
+	// Extract package directory from file path
+	// Example: /path/to/pkg/kubernetesutils/Namespace_test.go -> kubernetesutils
+	parts := strings.Split(file, "/")
+	if len(parts) >= 2 {
+		packageName := parts[len(parts)-2]
+		return continuousintegration.GetKindClusterNameByPackageName(packageName)
+	}
+
+	return continuousintegration.GetDefaultKindClusterName()
+}
 
 func FormatAsTestname(objectToFormat interface{}) (testname string, err error) {
 	testname = ""

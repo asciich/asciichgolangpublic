@@ -25,7 +25,7 @@ func TestRole_CreateAndDeleteRole(t *testing.T) {
 				const namespaceName = "testnamespace"
 				const roleName = "testrole"
 
-				kubernetes := getKubernetesByImplementationName(ctx, tt.implementationName)
+				kubernetes := getKubernetesByImplementationName(ctx, t, tt.implementationName)
 				namespace, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
 

@@ -6,10 +6,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/continuousintegration"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils"
 	"github.com/asciich/asciichgolangpublic/pkg/helmutils/helmparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 )
 
@@ -27,16 +25,11 @@ func Test_InstallHelmchart_FluxOperator(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := continuousintegration.GetDefaultKindClusterName()
-	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
-	require.NoError(t, err)
-	defer kindutils.DeleteClusterByNameIfInContinuousIntegration(ctx, clusterName)
 	// ... prepare test environment finished.
 	// -----
 
 	// Get Kubernetes cluster:
-	cluster, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+clusterName)
+	cluster, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+testClusterName)
 	require.NoError(t, err)
 
 	// Ensure flux/ the namespace which contains flux is absent.

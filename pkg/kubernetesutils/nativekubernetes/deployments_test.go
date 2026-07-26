@@ -15,10 +15,10 @@ func Test_CreateAndDeleteDeployment(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	config, err := nativekubernetes.GetConfig(ctx, "kind-"+clusterName)
@@ -27,13 +27,15 @@ func Test_CreateAndDeleteDeployment(t *testing.T) {
 	clientset, err := nativekubernetes.GetClientSetFromRestConfig(ctx, config)
 	require.NoError(t, err)
 
+	namespaceName := "test-createanddeletedeployment"
+	err = nativekubernetes.CreateNamespace(ctx, clientset, namespaceName)
+	require.NoError(t, err)
+
 	// ... prepare test environment finished.
 	// -----
 
 	t.Run("happy path", func(t *testing.T) {
-
 		const deploymentName = "testdeployment"
-		const namespaceName = "default"
 
 		err = nativekubernetes.DeleteDeployment(ctx, clientset, deploymentName, namespaceName)
 		require.NoError(t, err)
@@ -71,10 +73,10 @@ func Test_WaitForDeploymentDeleted(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	clientset, err := nativekubernetes.GetClientSet(ctx, "kind-"+clusterName)
@@ -85,7 +87,7 @@ func Test_WaitForDeploymentDeleted(t *testing.T) {
 
 	t.Run("already deleted Deployment", func(t *testing.T) {
 		deploymentName := "testdeployment"
-		namespaceName := "default"
+		namespaceName := "test-createanddeletedeployment"
 
 		// Ensure Deployment is absent
 		err = nativekubernetes.DeleteDeployment(ctx, clientset, deploymentName, namespaceName)
@@ -102,10 +104,10 @@ func Test_ListDeployments(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	config, err := nativekubernetes.GetConfig(ctx, "kind-"+clusterName)
@@ -114,12 +116,13 @@ func Test_ListDeployments(t *testing.T) {
 	clientset, err := nativekubernetes.GetClientSetFromRestConfig(ctx, config)
 	require.NoError(t, err)
 
+	namespaceName := "test-createanddeletedeployment"
+	err = nativekubernetes.CreateNamespace(ctx, clientset, namespaceName)
+	require.NoError(t, err)
 	// ... prepare test environment finished.
 	// -----
 
 	t.Run("create and delete Deployments with list in between", func(t *testing.T) {
-		const namespaceName = "default"
-
 		deploymentNames := []string{"listdeploy-1", "listdeploy-2", "listdeploy-3"}
 
 		// Ensure all test Deployments are absent before starting

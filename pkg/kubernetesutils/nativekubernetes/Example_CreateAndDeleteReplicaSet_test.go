@@ -12,16 +12,16 @@ import (
 )
 
 // This example shows how to create and delete a ReplicaSet.
-func Test_Example_CreateAndDeleteReplicaSet(t *testing.T) {
+func Test_Example_CreateAndDeleteReplicaSet_Nativekubernetes(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.WithVerbose(context.TODO())
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	config, err := nativekubernetes.GetConfig(ctx, "kind-"+clusterName)
@@ -30,12 +30,15 @@ func Test_Example_CreateAndDeleteReplicaSet(t *testing.T) {
 	clientset, err := nativekubernetes.GetClientSetFromRestConfig(ctx, config)
 	require.NoError(t, err)
 
+	namespaceName := "test-example-createanddeletereplicaset"
+	err = nativekubernetes.CreateNamespace(ctx, clientset, namespaceName)
+	require.NoError(t, err)
+
 	// ... prepare test environment finished.
 	// -----
 
 	// Define the name of the ReplicaSet we use for testing
 	const replicaSetName = "example-replicaset"
-	const namespaceName = "default"
 
 	// Ensure the ReplicaSet is absent:
 	err = nativekubernetes.DeleteReplicaSet(ctx, clientset, replicaSetName, namespaceName)

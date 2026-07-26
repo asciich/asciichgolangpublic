@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
@@ -111,41 +112,82 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httpopti
 
 	client := http.Client{Transport: transportToUse}
 
-	request, err := http.NewRequest(method, url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	logging.LogInfoByCtxf(ctx, "http native client is used to send request to %s", request.URL.String())
-
-	if requestOptions.BasicAuth != nil {
-		request.Header.Set("Authorization", requestOptions.BasicAuth.AuthorizationValue())
-	} else {
-		if c.basicAuth != nil {
-			request.Header.Set("Authorization", c.basicAuth.AuthorizationValue())
-		}
-	}
-
-	for k, v := range requestOptions.Header {
-		request.Header.Set(k, v)
-	}
+	logging.LogInfoByCtxf(ctx, "http native client is used to send request to %s", url)
 
 	if requestOptions.Data != nil {
-		request.Body = io.NopCloser(bytes.NewReader(requestOptions.Data))
-		request.ContentLength = int64(len(requestOptions.Data))
-		logging.LogInfoByCtxf(ctx, "The request body of '%d' bytes was added for %s .", request.ContentLength, url)
+		logging.LogInfoByCtxf(ctx, "The request body of '%d' bytes was added for %s .", len(requestOptions.Data), url)
 	}
 
-	nativeResponse, err := client.Do(request)
-	if err != nil {
-		return nil, err
+	// Retry logic for transient server errors (500, 502, 503, 504)
+	var nativeResponse *http.Response
+	var lastErr error
+	maxRetries := 3
+	baseDelay := 500 * time.Millisecond
+
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		request, reqErr := http.NewRequest(method, url, nil)
+		if reqErr != nil {
+			return nil, reqErr
+		}
+
+		if requestOptions.BasicAuth != nil {
+			request.Header.Set("Authorization", requestOptions.BasicAuth.AuthorizationValue())
+		} else {
+			if c.basicAuth != nil {
+				request.Header.Set("Authorization", c.basicAuth.AuthorizationValue())
+			}
+		}
+
+		for k, v := range requestOptions.Header {
+			request.Header.Set(k, v)
+		}
+
+		if requestOptions.Data != nil {
+			request.Body = io.NopCloser(bytes.NewReader(requestOptions.Data))
+			request.ContentLength = int64(len(requestOptions.Data))
+		}
+
+		nativeResponse, lastErr = client.Do(request)
+		if lastErr != nil {
+			// Network error, retry
+			if attempt < maxRetries {
+				delay := baseDelay * time.Duration(attempt+1)
+				logging.LogInfoByCtxf(ctx, "Request failed with error '%v', retrying in %v (attempt %d/%d)...", lastErr, delay, attempt+1, maxRetries+1)
+				select {
+				case <-ctx.Done():
+					return nil, tracederrors.TracedErrorf("Context cancelled during retry: %w", ctx.Err())
+				case <-time.After(delay):
+				}
+				continue
+			}
+			return nil, lastErr
+		}
+
+		// Check if status code is a retryable server error
+		if nativeResponse.StatusCode >= 500 && nativeResponse.StatusCode <= 599 {
+			if attempt < maxRetries {
+				nativeResponse.Body.Close()
+				delay := baseDelay * time.Duration(attempt+1)
+				logging.LogInfoByCtxf(ctx, "Received server error status code %d, retrying in %v (attempt %d/%d)...", nativeResponse.StatusCode, delay, attempt+1, maxRetries+1)
+				select {
+				case <-ctx.Done():
+					return nil, tracederrors.TracedErrorf("Context cancelled during retry: %w", ctx.Err())
+				case <-time.After(delay):
+				}
+				continue
+			}
+		}
+
+		// Success or non-retryable error
+		break
 	}
+
 	defer nativeResponse.Body.Close()
 
 	response = httpgeneric.NewGenericResponse()
-	body, err := io.ReadAll(nativeResponse.Body)
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("Unable to read body as bytes: %w", err)
+	body, readErr := io.ReadAll(nativeResponse.Body)
+	if readErr != nil {
+		return nil, tracederrors.TracedErrorf("Unable to read body as bytes: %w", readErr)
 	}
 
 	err = response.SetBody(body)
@@ -163,7 +205,7 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httpopti
 		return response, err
 	}
 
-	return response, err
+	return response, nil
 }
 
 func (c *NativeClient) SendRequestAndGetBodyAsBytes(ctx context.Context, requestOptions *httpoptions.RequestOptions) (responseBody []byte, err error) {

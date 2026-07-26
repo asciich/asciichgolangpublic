@@ -19,10 +19,10 @@ func Test_CreateAndDeleteConfigMap(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	config, err := nativekubernetes.GetConfig(ctx, "kind-"+clusterName)
@@ -31,13 +31,15 @@ func Test_CreateAndDeleteConfigMap(t *testing.T) {
 	clientset, err := nativekubernetes.GetClientSetFromRestConfig(ctx, config)
 	require.NoError(t, err)
 
+	namespaceName := "test-createanddeleteconfigmap"
+	err = nativekubernetes.CreateNamespace(ctx, clientset, namespaceName)
+	require.NoError(t, err)
+
 	// ... prepare test environment finished.
 	// -----
 
 	t.Run("happy path", func(t *testing.T) {
-
 		const configMapName = "testconfigmap"
-		const namespaceName = "default"
 
 		configMapData := map[string]string{
 			"key1": "value1",
@@ -75,10 +77,10 @@ func Test_ListConfigMaps(t *testing.T) {
 
 	// -----
 	// Prepare test environment start ...
-	clusterName := "kubernetesutils"
+	const clusterName = kindutils.SharedClusterName
 
 	// Ensure a local kind cluster is available for testing:
-	_, err := kindutils.CreateCluster(ctx, clusterName)
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
 	require.NoError(t, err)
 
 	config, err := nativekubernetes.GetConfig(ctx, "kind-"+clusterName)
@@ -87,11 +89,14 @@ func Test_ListConfigMaps(t *testing.T) {
 	clientset, err := nativekubernetes.GetClientSetFromRestConfig(ctx, config)
 	require.NoError(t, err)
 
+	namespaceName := "test-createanddeleteconfigmap"
+	err = nativekubernetes.CreateNamespace(ctx, clientset, namespaceName)
+	require.NoError(t, err)
+
 	// ... prepare test environment finished.
 	// -----
 
 	t.Run("create and delete ConfigMaps with list in between", func(t *testing.T) {
-		const namespaceName = "default"
 
 		configMapNames := []string{"listcm-1", "listcm-2", "listcm-3"}
 		configMapData := map[string]string{"key": "value"}
