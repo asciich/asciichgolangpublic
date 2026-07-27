@@ -14,6 +14,7 @@ func NewOllamaCmd() *cobra.Command {
 		NewOcrCmd(),
 		NewRunCpuOnlyCmd(),
 		NewRunGpuCmd(),
+		NewRunMcpAgentCmd(),
 		NewSendPromptCmd(),
 	)
 

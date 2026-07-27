@@ -11,6 +11,7 @@ func NewChromaCmd() *cobra.Command {
 	cmd.AddCommand(
 		NewCheckReachableCmd(),
 		NewIndexDocumentsCmd(),
+		NewRunMcpServerCmd(),
 		NewQueryDocumentsCmd(),
 	)
 
