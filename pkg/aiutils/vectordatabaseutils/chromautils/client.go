@@ -24,6 +24,14 @@ type Collection struct {
 	Name string `json:"name"`
 }
 
+// QueryResult holds query results
+type QueryResult struct {
+	IDs       [][]string                 `json:"ids"`
+	Documents [][]string                 `json:"documents"`
+	Metadatas [][]map[string]interface{} `json:"metadatas"`
+	Distances [][]float32                `json:"distances"`
+}
+
 func NewClient(baseURL string) *Client {
 	return &Client{
 		baseURL:    baseURL,
@@ -171,14 +179,6 @@ func (c *Client) Add(ctx context.Context, collectionID string, ids []string, emb
 	logging.LogInfoByCtxf(ctx, "Add documents to with embeddings to the collection id='%s' on chroma %s finished.", collectionID, baseUrl)
 
 	return nil
-}
-
-// QueryResult holds query results
-type QueryResult struct {
-	IDs       [][]string                 `json:"ids"`
-	Documents [][]string                 `json:"documents"`
-	Metadatas [][]map[string]interface{} `json:"metadatas"`
-	Distances [][]float32                `json:"distances"`
 }
 
 // Query searches the collection

@@ -15,7 +15,7 @@ type SemanticVersion struct {
 	patch int
 }
 
-func NewSmanticVersionFormString(versionString string) (*SemanticVersion, error) {
+func NewSemanticVersionFromString(versionString string) (*SemanticVersion, error) {
 	semanticVersion := NewVersionSemanticVersion()
 	err := semanticVersion.SetVersionByString(versionString)
 	if err != nil {

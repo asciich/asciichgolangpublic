@@ -5,7 +5,6 @@ go 1.25.5
 require (
 	cloud.google.com/go/storage v1.43.0
 	github.com/ProtonMail/go-crypto v1.1.3
-	github.com/amikos-tech/chroma-go v0.4.1
 	github.com/containerd/errdefs v1.0.0
 	github.com/exoscale/egoscale/v3 v3.1.33
 	github.com/gavv/cobradoc v1.2.0
@@ -18,6 +17,7 @@ require (
 	github.com/itchyny/gojq v0.12.16
 	github.com/koki-develop/go-fzf v0.15.0
 	github.com/lu4p/shred v0.0.0-20201211173428-0347b645d724
+	github.com/mark3labs/mcp-go v0.57.0
 	github.com/mikefarah/yq/v4 v4.45.1
 	github.com/minio/minio-go/v7 v7.0.98
 	github.com/moby/moby/api v1.52.0
@@ -124,6 +124,7 @@ require (
 	github.com/google/gnostic-models v0.7.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/google/jsonschema-go v0.4.2 // indirect
 	github.com/google/s2a-go v0.1.8 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.13.0 // indirect
@@ -183,12 +184,13 @@ require (
 	github.com/safchain/ethtool v0.3.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/skeema/knownhosts v1.3.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
-	github.com/spf13/cast v1.7.0 // indirect
+	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
 	github.com/spf13/viper v1.18.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
@@ -202,6 +204,7 @@ require (
 	github.com/vbatts/tar-split v0.11.6 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
+	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
