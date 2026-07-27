@@ -1015,7 +1015,7 @@ func (c *CommandExecutorKubernetes) DeploymentByNameExists(ctx context.Context, 
 // toJsonEnvVarFromSecretsForKubectl builds JSON for environment variables sourced from secrets
 // This function is specifically designed for kubectl --overrides format
 func toJsonEnvVarFromSecretsForKubectl(secretEnvVars map[string]kubernetesparameteroptions.SecretEnvVarSource) string {
-	if secretEnvVars == nil || len(secretEnvVars) == 0 {
+	if len(secretEnvVars) == 0 {
 		return "[]"
 	}
 
@@ -1053,8 +1053,8 @@ func buildPodOverridesForSecrets(podName string, options *kubernetesparameteropt
 		"name": podName,
 	}
 
-	hasEnvVars := options.SecretEnvVars != nil && len(options.SecretEnvVars) > 0
-	hasMounts := options.SecretMounts != nil && len(options.SecretMounts) > 0
+	hasEnvVars := len(options.SecretEnvVars) > 0
+	hasMounts := len(options.SecretMounts) > 0
 
 	if !hasEnvVars && !hasMounts {
 		return ""
@@ -1121,4 +1121,92 @@ func buildPodOverridesForSecrets(podName string, options *kubernetesparameteropt
 		return ""
 	}
 	return string(jsonBytes)
+}
+
+// ListKindNames retrieves a sorted list of all available resource kind names
+// from the Kubernetes API server. It uses `kubectl api-resources` to query the
+// server's available resources across all API groups and versions, and returns
+// their kind names in alphabetical order.
+//
+// Returns:
+//   - []string: A sorted slice of unique resource kind names (e.g., "Pod", "Service", "Deployment").
+//   - error: An error if the kubectl command fails or the API server cannot be queried.
+func (c *CommandExecutorKubernetes) ListKindNames(ctx context.Context) ([]string, error) {
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	cmd := []string{"kubectl"}
+
+	if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
+		logging.LogInfoByCtxf(ctx, "Kubernetes in cluster authentication is used. Skip validation of kubectlContext for ListKindNames.")
+	} else {
+		kubeContext, err := c.GetCachedKubectlContext(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		cmd = append(cmd, "--context", kubeContext)
+	}
+
+	cmd = append(cmd, "api-resources", "--no-headers", "-o", "name")
+
+	output, err := commandExecutor.RunCommandAndGetStdoutAsString(ctx, &parameteroptions.RunCommandOptions{
+		Command: cmd,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Use a map to deduplicate kind names
+	kindSet := map[string]bool{}
+
+	// Parse the output using a second call that includes the KIND column
+	cmd2 := []string{"kubectl"}
+
+	if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
+		// No context needed
+	} else {
+		kubeContext, err := c.GetCachedKubectlContext(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		cmd2 = append(cmd2, "--context", kubeContext)
+	}
+
+	cmd2 = append(cmd2, "api-resources", "--no-headers")
+
+	output, err = commandExecutor.RunCommandAndGetStdoutAsString(ctx, &parameteroptions.RunCommandOptions{
+		Command: cmd2,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, line := range stringsutils.SplitLines(output, true) {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		fields := strings.Fields(line)
+		if len(fields) < 4 {
+			continue
+		}
+
+		// The KIND column is always the last field in `kubectl api-resources --no-headers`
+		kind := fields[len(fields)-1]
+		kindSet[kind] = true
+	}
+
+	apiKinds := []string{}
+	for kind := range kindSet {
+		apiKinds = append(apiKinds, kind)
+	}
+
+	sort.Strings(apiKinds)
+
+	return apiKinds, nil
 }

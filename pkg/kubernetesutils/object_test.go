@@ -302,3 +302,27 @@ func TestKubernetesObject_ClusterCreateObject(t *testing.T) {
 		)
 	}
 }
+
+func TestListKindNames(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"commandExecutorKubernetes"},
+		{"nativeKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+
+				cluster := getKubernetesByImplementationName(ctx, t, tt.implementationName)
+
+				apiVersions, err := cluster.ListKindNames(ctx)
+				require.NoError(t, err)
+				require.Contains(t, apiVersions, "Pod")
+			},
+		)
+	}
+}
