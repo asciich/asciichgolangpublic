@@ -45,7 +45,7 @@ func Test_InstallFluxOperator(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	// Check if the "flux-system" namespace is prsent:
+	// Check if the "flux-system" namespace is present:
 	exists, err = cluster.NamespaceByNameExists(ctx, "flux-system")
 	require.NoError(t, err)
 	require.True(t, exists)

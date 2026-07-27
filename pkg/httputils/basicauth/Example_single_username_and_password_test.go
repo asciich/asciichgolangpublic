@@ -29,7 +29,7 @@ func Test_BasicAuthWithSingleUsernameAndPassword(t *testing.T) {
 		w.Write([]byte("This is a basic auth protected message."))
 	}
 
-	// Add the endpoint "/protected.txt" which directly vcalls basciauth.BasicAuthSingleCredentials to do the
+	// Add the endpoint "/protected.txt" which directly calls basicauth.BasicAuthSingleCredentials to do the
 	mux.HandleFunc("/protected.txt", func(w http.ResponseWriter, r *http.Request) {
 		// The basicauth.BasicAuthSingleCredentials is used to protect our protectedEndpoint with basic auth:
 		basicauth.BasicAuthSingleCredentials(endpoint, username, password)(w, r)

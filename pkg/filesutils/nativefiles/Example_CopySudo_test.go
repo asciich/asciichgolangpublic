@@ -10,7 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 )
 
-// This Examples shows how to use the nativefiles.Cop function to copy a file as root using sudo.
+// This example shows how to use the nativefiles.Copy function to copy a file as root using sudo.
 func Test_Example_copySudo(t *testing.T) {
 	// Use a context with verbose output enabled:
 	ctx := contextutils.ContextVerbose()

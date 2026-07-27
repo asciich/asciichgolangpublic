@@ -22,7 +22,7 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 	* [gnupgutils](pkg/pgp/gnupgutils/): Handle GnuPG.
 * [helmutils](pkg/helmutils/): Work with helm and helmcharts.
 * [httputils](pkg/httputils/): High level easy to use HTTP client and testserver.
-* [kindutils](pkg/kindutils/): Handle KinD/ Kubernetes in Docker.
+* [kindutils](pkg/kubernetesutils/kindutils/): Handle KinD/ Kubernetes in Docker.
 * [netutils](pkg/netutils/): Network utilities for various network-related tasks.
     * [dnsutils](pkg/netutils/dnsutils/): Work with DNS.
     * [macaddresses](pkg/netutils/macaddresses/): Handle MAC addresses.

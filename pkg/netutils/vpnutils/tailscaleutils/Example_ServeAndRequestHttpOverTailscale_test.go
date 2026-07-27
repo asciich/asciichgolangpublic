@@ -20,7 +20,7 @@ import (
 // This example shows how to connect two tailscale nodes.
 // One is serving as HTTP server, the other one acts as a HTTP client.
 //
-// For the local setup a headscale running in a local docker container is uesd so this testcase runs independendly of the public control plane servers of tailscale.
+// For the local setup a headscale running in a local docker container is used so this testcase runs independently of the public control plane servers of tailscale.
 func Test_Example_ServeAndRequestHttpOverTailscale_test(t *testing.T) {
 	// Currently not available in Github CI:
 	continuousintegration.SkipInGithubCi(t, "Expose docker port does not work yet.")

@@ -11,7 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 )
 
-// This Examples shows how to use the nativefiles.Copy function.
+// This example shows how to use the nativefiles.Copy function.
 func Test_Example_copy(t *testing.T) {
 	// Use a context with verbose output enabled:
 	ctx := contextutils.ContextVerbose()
@@ -22,10 +22,10 @@ func Test_Example_copy(t *testing.T) {
 	// Delete the source file when the test is finished:
 	defer nativefiles.Delete(ctx, src, &filesoptions.DeleteOptions{})
 
-	// Let's create a temprary directory where we can copy the src file to:
+	// Let's create a temporary directory where we can copy the src file to:
 	dstDir, err := tempfiles.CreateTempDir(ctx)
 	require.NoError(t, err)
-	// Delet the dstDir when the test is finished:
+	// Delete the dstDir when the test is finished:
 	defer nativefiles.Delete(ctx, dstDir, &filesoptions.DeleteOptions{})
 	
 	// Define the destination path:

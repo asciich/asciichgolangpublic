@@ -11,7 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 )
 
-// Example how to install a hemlchart.
+// Example how to install a helmchart.
 // For this example the flux operator is installed.
 //
 //	Source: https://fluxcd.io/flux/installation/#install-the-flux-operator
@@ -47,7 +47,7 @@ func Test_InstallHelmchart_FluxOperator(t *testing.T) {
 	// We run the install twice to show that it's idempotent.
 	for i := 0; i < 2; i++ {
 		// Deploy flux operator using helm
-		// Equvalent helm command:
+		// Equivalent helm command:
 		// helm install flux-operator oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator --namespace flux-system --create-namespace
 		err = helmutils.InstallHelmChart(ctx, &helmparameteroptions.InstallHelmChartOptions{
 			KubernetesCluster: cluster,

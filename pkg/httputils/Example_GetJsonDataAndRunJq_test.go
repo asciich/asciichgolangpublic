@@ -49,7 +49,7 @@ func Test_Example_GetJsonDataAndRunJq(t *testing.T) {
 	require.NoError(t, err)
 	require.EqualValues(t, expectedJson, bodyString)
 
-	// Extract the value behind 'hello' out ouf the yaml response:
+	// Extract the value behind 'hello' out of the yaml response:
 	value, err := response.RunJqQueryAgainstBody(".hello")
 	require.NoError(t, err)
 	require.EqualValues(t, "world", value)
