@@ -1,11 +1,17 @@
 package nativekubernetesoo_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func Test_NativeResurce_GetApiVersion(t *testing.T) {
 	t.Run("default", func(t *testing.T) {

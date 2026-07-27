@@ -31,6 +31,7 @@ type KubernetesCluster interface {
 	GetObjectByNames(objectName string, kind string, namespaceName string) (object Object, err error)
 	GetPodByNames(namespaceName string, podName string) (Pod, error)
 	GetReplicaSetByNames(namespaceName string, replicaSetName string) (ReplicaSet, error)
+	ListKindNames(ctx context.Context) ([]string, error)
 	ListNamespaces(ctx context.Context) (namespaces []Namespace, err error)
 	ListNamespaceNames(ctx context.Context) ([]string, error)
 	ListNodeNames(ctx context.Context) ([]string, error)

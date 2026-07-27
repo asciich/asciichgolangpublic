@@ -423,6 +423,15 @@ func (n *NativeKubernetesCluster) GetDiscoveryClient() (discovery.DiscoveryInter
 	return clientset.Discovery(), nil
 }
 
+// ListKindNames retrieves a sorted list of all available resource kind names
+// from the Kubernetes API server. It uses the discovery client to query the
+// server's preferred resources across all API groups and versions, and returns
+// their kind names in alphabetical order.
+//
+// Returns:
+//   - []string: A sorted slice of unique resource kind names (e.g., "Pod", "Service", "Deployment").
+//   - error: An error if the discovery client cannot be obtained or if the API server
+//     cannot be queried for its available resources.
 func (n *NativeKubernetesCluster) ListKindNames(ctx context.Context) ([]string, error) {
 	discoveryClient, err := n.GetDiscoveryClient()
 	if err != nil {
