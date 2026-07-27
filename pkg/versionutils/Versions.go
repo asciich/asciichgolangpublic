@@ -80,7 +80,7 @@ func NewFromString(versionString string) (version Version, err error) {
 	}
 
 	if IsSemanticVersionString(versionString) {
-		return NewSmanticVersionFormString(versionString)
+		return NewSemanticVersionFromString(versionString)
 	}
 
 	return nil, tracederrors.TracedErrorf("Not implemented for versionString='%s'", versionString)
