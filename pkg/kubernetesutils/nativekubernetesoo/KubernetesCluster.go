@@ -139,7 +139,7 @@ func (n *NativeKubernetesCluster) DeleteNamespaceByName(ctx context.Context, nam
 			GracePeriodSeconds: nil, // Use default graceful termination period
 		}
 
-		err = clientset.CoreV1().Namespaces().Delete(context.TODO(), namespaceName, deleteOptions)
+		err = clientset.CoreV1().Namespaces().Delete(ctx, namespaceName, deleteOptions)
 		if err != nil {
 			return tracederrors.TracedErrorf("Failed to delete kubernetes namespace '%s': %w", namespaceName, err)
 		}
@@ -240,7 +240,7 @@ func (n *NativeKubernetesCluster) ListNamespaceNames(ctx context.Context) (names
 		return nil, err
 	}
 
-	namespaces, err := clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+	namespaces, err := clientset.CoreV1().Namespaces().List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, tracederrors.TracedErrorf("Error listing namespaces: %w", err)
 	}
@@ -302,7 +302,7 @@ func (n *NativeKubernetesCluster) WaitUntilNamespaceDeleted(ctx context.Context,
 	tStart := time.Now()
 	for {
 		if ctx.Err() != nil {
-			return tracederrors.TracedErrorf("Wait until namespace '%s' deleted failed: %w", namepaceName, err)
+			return tracederrors.TracedErrorf("Wait until namespace '%s' deleted failed: %w", namepaceName, ctx.Err())
 		}
 
 		exists, err := n.NamespaceByNameExists(ctx, namepaceName)
@@ -338,7 +338,7 @@ func (n *NativeKubernetesCluster) WaitUntilNamespaceCreated(ctx context.Context,
 	tStart := time.Now()
 	for {
 		if ctx.Err() != nil {
-			return tracederrors.TracedErrorf("Wait until namespace '%s' created failed: %w", namepaceName, err)
+			return tracederrors.TracedErrorf("Wait until namespace '%s' created failed: %w", namepaceName, ctx.Err())
 		}
 
 		exists, err := n.NamespaceByNameExists(ctx, namepaceName)
