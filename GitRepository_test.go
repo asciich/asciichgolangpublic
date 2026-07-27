@@ -557,8 +557,7 @@ func TestGitRepository_CloneRepository_idempotence(t *testing.T) {
 					require.NoError(t, err)
 				}
 
-				require.EqualValues(t,
-					mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
+require.EqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
 					mustutils.Must(clonedRepo.GetCurrentCommitHash(ctx)),
 				)
 			},
@@ -631,17 +630,9 @@ func TestGitRepository_PullAndPush(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.EqualValues(
-					t,
-					mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
-					mustutils.Must(clonedRepo.GetCurrentCommitHash(ctx)),
-				)
+				require.EqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)), mustutils.Must(clonedRepo.GetCurrentCommitHash(ctx)))
 
-				require.EqualValues(
-					t,
-					mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
-					mustutils.Must(clonedRepo2.GetCurrentCommitHash(ctx)),
-				)
+				require.EqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)), mustutils.Must(clonedRepo2.GetCurrentCommitHash(ctx)))
 
 				fileName := "abc.txt"
 				_, err = clonedRepo2.CreateFileInDirectory(ctx, fileName, &filesoptions.CreateOptions{})
@@ -658,34 +649,28 @@ func TestGitRepository_PullAndPush(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.NotEqualValues(t,
-					mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
+require.NotEqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
 					mustutils.Must(clonedRepo2.GetCurrentCommitHash(ctx)),
 				)
 
-				require.NotEqualValues(t,
-					mustutils.Must(clonedRepo.GetCurrentCommitHash(ctx)),
+require.NotEqualValues(t, mustutils.Must(clonedRepo.GetCurrentCommitHash(ctx)),
 					mustutils.Must(clonedRepo2.GetCurrentCommitHash(ctx)),
 				)
 
 				mustutils.Must0(clonedRepo2.Push(ctx))
-				require.EqualValues(t,
-					mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
+require.EqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
 					mustutils.Must(clonedRepo2.GetCurrentCommitHash(ctx)),
 				)
-				require.NotEqualValues(t,
-					mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
+require.NotEqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
 					mustutils.Must(clonedRepo.GetCurrentCommitHash(ctx)),
 				)
 
 				err = clonedRepo.Pull(ctx)
 				require.NoError(t, err)
-				require.EqualValues(t,
-					mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
+require.EqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
 					mustutils.Must(clonedRepo2.GetCurrentCommitHash(ctx)),
 				)
-				require.EqualValues(t,
-					mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
+require.EqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
 					mustutils.Must(clonedRepo.GetCurrentCommitHash(ctx)),
 				)
 			},
@@ -1722,11 +1707,7 @@ func TestGitRepository_GetGitRepositoryByDirectory(t *testing.T) {
 				gitRepo2, err := GetGitRepositoryByDirectory(repoRootDirectory)
 				require.NoError(t, err)
 
-				require.EqualValues(
-					t,
-					mustutils.Must(gitRepo.GetRootDirectoryPath(ctx)),
-					mustutils.Must(gitRepo2.GetRootDirectoryPath(ctx)),
-				)
+				require.EqualValues(t, mustutils.Must(gitRepo.GetRootDirectoryPath(ctx)), mustutils.Must(gitRepo2.GetRootDirectoryPath(ctx)))
 
 				require.Nil(t, gitRepo.CheckHasNoUncommittedChanges(ctx))
 
@@ -1877,9 +1858,7 @@ func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.EqualValues(t,
-					"commit before testing",
-					mustutils.Must(gitRepo.GetCurrentCommitMessage(ctx)),
+require.EqualValues(t, "commit before testing", mustutils.Must(gitRepo.GetCurrentCommitMessage(ctx)),
 				)
 
 				_, err = gitRepo.CommitIfUncommittedChanges(

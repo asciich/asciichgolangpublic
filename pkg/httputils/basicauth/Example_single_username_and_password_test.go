@@ -10,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/basicauth"
 )
@@ -62,7 +61,7 @@ func Test_BasicAuthWithSingleUsernameAndPassword(t *testing.T) {
 	require.NoError(t, err)
 	defer response.Body.Close()
 	// The unauthenticated requests with an unauthorized status code:
-	assert.EqualValues(t, http.StatusUnauthorized, response.StatusCode)
+	require.EqualValues(t, http.StatusUnauthorized, response.StatusCode)
 
 	// Try with the wrong credentials:
 	encodedAuth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", "wronguser", "wrongpass")))
@@ -73,7 +72,7 @@ func Test_BasicAuthWithSingleUsernameAndPassword(t *testing.T) {
 	require.NoError(t, err)
 	defer response2.Body.Close()
 	// The unauthenticated requests with an unauthorized status code:
-	assert.EqualValues(t, http.StatusUnauthorized, response2.StatusCode)
+	require.EqualValues(t, http.StatusUnauthorized, response2.StatusCode)
 
 	// Try with the correct credentials:
 	encodedAuth2 := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", username, password)))
@@ -84,7 +83,7 @@ func Test_BasicAuthWithSingleUsernameAndPassword(t *testing.T) {
 	require.NoError(t, err)
 	defer response3.Body.Close()
 	// With the correct username and password we are able to do a successful request.
-	assert.EqualValues(t, http.StatusOK, response3.StatusCode)
+	require.EqualValues(t, http.StatusOK, response3.StatusCode)
 	// And therefore we receive to message defined in the handler function at the beginning of this test:
 	content, err := io.ReadAll(response3.Body)
 	require.NoError(t,err)

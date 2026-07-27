@@ -24,21 +24,13 @@ func Test_ParseListHostsOutput(t *testing.T) {
 	t.Run("single host", func(t *testing.T) {
 		parsed, err := ansibleutils.ParseCliOutput(getCtx(), "  hosts (1):\n    one.example.net\n")
 		require.NoError(t, err)
-		require.EqualValues(
-			t,
-			[]string{"one.example.net"},
-			mustutils.Must(parsed.ListHostNames()),
-		)
+		require.EqualValues(t, []string{"one.example.net"}, mustutils.Must(parsed.ListHostNames()))
 	})
 
 	t.Run("two hosts", func(t *testing.T) {
 		parsed, err := ansibleutils.ParseCliOutput(getCtx(), "  hosts (2):\n    one.example.net\n    two.example.net")
 		require.NoError(t, err)
-		require.EqualValues(
-			t,
-			[]string{"one.example.net", "two.example.net"},
-			mustutils.Must(parsed.ListHostNames()),
-		)
+		require.EqualValues(t, []string{"one.example.net", "two.example.net"}, mustutils.Must(parsed.ListHostNames()))
 	})
 }
 

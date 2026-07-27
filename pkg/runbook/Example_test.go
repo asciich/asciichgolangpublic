@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -95,7 +94,7 @@ For this example we just check the value of 'number'.`,
 `
 	stepDocumentation, err := process.DocumentSteps()
 	require.NoError(t, err)
-	assert.EqualValues(t, expected, stepDocumentation)
+	require.EqualValues(t, expected, stepDocumentation)
 
 	// To run all steps conscutively:
 	err = process.Execute(ctx)

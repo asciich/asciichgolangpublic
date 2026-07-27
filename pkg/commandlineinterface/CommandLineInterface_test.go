@@ -62,12 +62,7 @@ func TestCommandLineInterface_IsLinePromptOnly(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedIsPromptOnly,
-					commandlineinterface.IsLinePromptOnly(tt.line),
-				)
+				require.EqualValues(t, tt.expectedIsPromptOnly, commandlineinterface.IsLinePromptOnly(tt.line))
 			},
 		)
 	}

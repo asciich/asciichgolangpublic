@@ -27,20 +27,12 @@ func TestBigIntes_FromAndToDecimalString(t *testing.T) {
 				bigInt, err := bigintutils.GetFromDecimalString(tt.inputString)
 				require.NoError(t, err)
 
-				require.EqualValues(
-					t,
-					tt.expectedValue,
-					bigInt,
-				)
+				require.EqualValues(t, tt.expectedValue, bigInt)
 
 				decimalString, err := bigintutils.ToDecimalString(bigInt)
 				require.NoError(t, err)
 
-				require.EqualValues(
-					t,
-					tt.inputString,
-					decimalString,
-				)
+				require.EqualValues(t, tt.inputString, decimalString)
 			},
 		)
 	}
@@ -59,11 +51,7 @@ func TestBigIntes_IncrementDecimalString(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		incremented, err := bigintutils.IncrementDecimalString(strconv.Itoa(i))
 		require.NoError(t, err)
-		require.EqualValues(
-			t,
-			strconv.Itoa(i+1),
-			incremented,
-		)
+		require.EqualValues(t, strconv.Itoa(i+1), incremented)
 	}
 }
 
@@ -91,11 +79,7 @@ func TestGetAsHexColonSeparatedString(t *testing.T) {
 				out, err := bigintutils.ToHexStringColonSeparated(tt.input)
 				require.NoError(t, err)
 
-				require.EqualValues(
-					t,
-					tt.expected,
-					out,
-				)
+				require.EqualValues(t, tt.expected, out)
 			},
 		)
 	}

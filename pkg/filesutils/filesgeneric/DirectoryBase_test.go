@@ -69,11 +69,7 @@ func TestDirectoryBase_SetAndGetParentDirectory(t *testing.T) {
 
 				require.NoError(t, directoryBase.SetParentDirectoryForBaseClass(directory))
 
-				require.EqualValues(
-					t,
-					mustutils.Must(directoryBase.GetParentDirectoryForBaseClass()),
-					directory,
-				)
+				require.EqualValues(t, mustutils.Must(directoryBase.GetParentDirectoryForBaseClass()), directory)
 			},
 		)
 	}
@@ -114,11 +110,7 @@ func TestDirectoryBase_ListFiles_withoutFilter(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.EqualValues(
-					t,
-					[]string{"a.log", "a.toc", "a.txt", "b.toc"},
-					fileList,
-				)
+				require.EqualValues(t, []string{"a.log", "a.toc", "a.txt", "b.toc"}, fileList)
 
 			},
 		)
@@ -161,11 +153,7 @@ func TestDirectoryBase_ListFiles(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.EqualValues(
-					t,
-					[]string{"a.log", "a.toc", "b.toc"},
-					fileList,
-				)
+				require.EqualValues(t, []string{"a.log", "a.toc", "b.toc"}, fileList)
 
 			},
 		)

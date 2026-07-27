@@ -10,11 +10,7 @@ import (
 )
 
 func Test_AnsibleInventoryConstructor(t *testing.T) {
-	require.EqualValues(
-		t,
-		"in memory ansible inventory",
-		ansibleutils.NewAnsibleInventory().Name(),
-	)
+	require.EqualValues(t, "in memory ansible inventory", ansibleutils.NewAnsibleInventory().Name())
 }
 
 func Test_AddAndGetHostnames(t *testing.T) {

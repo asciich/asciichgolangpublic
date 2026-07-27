@@ -35,11 +35,8 @@ func TestJsonRunJqAgainstJsonStringAsString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				result := MustRunJqAgainstJsonStringAsString(tt.jsonString, tt.query)
-
-				require.EqualValues(tt.expectedResult, result)
+				require.EqualValues(t, tt.expectedResult, result)
 			},
 		)
 	}
@@ -59,11 +56,8 @@ func TestJsonLoadKeyValueDict(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				result := MustLoadKeyValueStringDictFromJsonString(tt.jsonString)
-
-				require.EqualValues(tt.expectedResult, result)
+				require.EqualValues(t, tt.expectedResult, result)
 			},
 		)
 	}
@@ -83,11 +77,8 @@ func TestJsonPrettyFormatJsonString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				result := MustPrettyFormatJsonString(tt.jsonString)
-
-				require.EqualValues(tt.expectedResult, result)
+				require.EqualValues(t, tt.expectedResult, result)
 			},
 		)
 	}
@@ -109,11 +100,8 @@ func TestJsonStringToYamlString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				result := MustJsonStringToYamlString(tt.jsonString)
-
-				require.EqualValues(tt.expectedResult, result)
+				require.EqualValues(t, tt.expectedResult, result)
 			},
 		)
 	}
@@ -176,12 +164,7 @@ func TestJsonStringHas(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedResult,
-					MustJsonStringHas(tt.jsonString, tt.query, tt.keyToCheck),
-				)
+				require.EqualValues(t, tt.expectedResult, MustJsonStringHas(tt.jsonString, tt.query, tt.keyToCheck))
 			},
 		)
 	}

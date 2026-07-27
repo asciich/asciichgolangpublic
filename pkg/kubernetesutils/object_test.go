@@ -86,14 +86,7 @@ func TestKubernetesObject_ListObjects(t *testing.T) {
 				require.NoError(t, err)
 				require.False(t, mustutils.Must(cluster.NamespaceByNameExists(ctx, namespaceName)))
 
-				require.Len(
-					t,
-					mustutils.Must(cluster.ListObjects(
-						&kubernetesparameteroptions.ListKubernetesObjectsOptions{
-							Namespace:  namespaceName,
-							ObjectType: tt.objectType,
-						},
-					)),
+				require.Len(t, mustutils.Must(cluster.ListObjects( &kubernetesparameteroptions.ListKubernetesObjectsOptions{ Namespace: namespaceName, ObjectType: tt.objectType, })),
 					0,
 				)
 
@@ -112,14 +105,7 @@ func TestKubernetesObject_ListObjects(t *testing.T) {
 					require.True(t, mustutils.Must(k8sObject.Exists(ctx)))
 				}
 
-				require.Len(
-					t,
-					mustutils.Must(cluster.ListObjects(
-						&kubernetesparameteroptions.ListKubernetesObjectsOptions{
-							Namespace:  namespaceName,
-							ObjectType: tt.objectType,
-						},
-					)),
+				require.Len(t, mustutils.Must(cluster.ListObjects( &kubernetesparameteroptions.ListKubernetesObjectsOptions{ Namespace: namespaceName, ObjectType: tt.objectType, })),
 					3,
 				)
 
@@ -128,15 +114,7 @@ func TestKubernetesObject_ListObjects(t *testing.T) {
 					expectedNames = append(expectedNames, tt.objectName+strconv.Itoa(i))
 				}
 
-				require.EqualValues(
-					t,
-					expectedNames,
-					mustutils.Must(cluster.ListObjectNames(
-						&kubernetesparameteroptions.ListKubernetesObjectsOptions{
-							Namespace:  namespaceName,
-							ObjectType: tt.objectType,
-						},
-					)),
+				require.EqualValues(t, expectedNames, mustutils.Must(cluster.ListObjectNames( &kubernetesparameteroptions.ListKubernetesObjectsOptions{ Namespace: namespaceName, ObjectType: tt.objectType, })),
 				)
 			},
 		)

@@ -78,12 +78,12 @@ func TestShellLineHandlerJoin(t *testing.T) {
 // TODO enable again 				joined2 := ShellLineHandler().MustJoin([]string{"bash", "-c", joined1})
 // TODO enable again
 // TODO enable again 				expected := "bash -c 'echo '\"'\"'hello \"world'\"'\"''"
-// TODO enable again 				require.EqualValues(expected, joined2)
+// TODO enable again 				require.EqualValues(t, expected, joined2)
 // TODO enable again
 // TODO enable again 				for _, joined := range []string{joined1, joined2} {
 // TODO enable again 					executedOutput := Shell().MustRunCommandAndGetStdoutAsString(&RunCommandOptions{Command: []string{"bash", "-c", joined}})
 // TODO enable again 					executedOutput = strings.TrimSpace(executedOutput)
-// TODO enable again 					require.EqualValues("hello \"world", executedOutput)
+// TODO enable again 					require.EqualValues(t, "hello \"world", executedOutput)
 // TODO enable again 				}
 // TODO enable again 			},
 // TODO enable again 		)
@@ -108,12 +108,12 @@ func TestShellLineHandlerJoin(t *testing.T) {
 // TODO enable again				joined3 := ShellLineHandler().MustJoin([]string{"bash", "-c", joined2})
 // TODO enable again
 // TODO enable again				expected := "bash -c 'bash -c '\"'\"'echo '\"'\"'\"'\"'\"'\"'\"'\"'hello \"world'\"'\"'\"'\"'\"'\"'\"'\"''\"'\"''"
-// TODO enable again				require.EqualValues(expected, joined3)
+// TODO enable again				require.EqualValues(t, expected, joined3)
 // TODO enable again
 // TODO enable again				for _, joined := range []string{joined1, joined2, joined3} {
 // TODO enable again					executedOutput := Shell().MustRunCommandAndGetStdoutAsString(&RunCommandOptions{Command: []string{"bash", "-c", joined}})
 // TODO enable again					executedOutput = strings.TrimSpace(executedOutput)
-// TODO enable again					require.EqualValues("hello \"world", executedOutput)
+// TODO enable again					require.EqualValues(t, "hello \"world", executedOutput)
 // TODO enable again				}
 // TODO enable again			},
 // TODO enable again		)

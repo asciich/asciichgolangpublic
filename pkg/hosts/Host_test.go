@@ -56,13 +56,8 @@ func TestHostGetHostName(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				host := MustGetHostByHostname(tt.hostname)
-				require.EqualValues(
-					tt.hostname,
-					mustutils.Must(host.GetHostName()),
-				)
+				require.EqualValues(t, tt.hostname, mustutils.Must(host.GetHostName()))
 			},
 		)
 	}
@@ -81,13 +76,8 @@ func TestHostGetHostDescripion(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				host := MustGetHostByHostname(tt.hostname)
-				require.EqualValues(
-					tt.hostname,
-					mustutils.Must(host.GetHostDescription()),
-				)
+				require.EqualValues(t, tt.hostname, mustutils.Must(host.GetHostDescription()))
 			},
 		)
 	}

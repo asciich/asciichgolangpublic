@@ -317,11 +317,7 @@ func TestGitlabGroupListProjects(t *testing.T) {
 				require.Len(t, listedProjectPaths, nProjects)
 
 				for _, toCheck := range projectPaths {
-					require.True(t,
-						slices.Contains(
-							listedProjectPaths,
-							toCheck,
-						),
+require.True(t, slices.Contains( listedProjectPaths, toCheck, ),
 					)
 				}
 

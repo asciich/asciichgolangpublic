@@ -35,12 +35,7 @@ func TestPathsIsRelativePath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedIsRelative,
-					pathsutils.IsRelativePath(tt.path),
-				)
+				require.EqualValues(t, tt.expectedIsRelative, pathsutils.IsRelativePath(tt.path))
 			},
 		)
 	}
@@ -71,12 +66,7 @@ func TestPathsIsAbsolutePath(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedIsRelative,
-					pathsutils.IsAbsolutePath(tt.path),
-				)
+				require.EqualValues(t, tt.expectedIsRelative, pathsutils.IsAbsolutePath(tt.path))
 			},
 		)
 	}
@@ -103,8 +93,6 @@ func TestPaths_MatchBaseNamePattern(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				input := []string{
 					"a.txt",
 					"b.txt",
@@ -112,10 +100,7 @@ func TestPaths_MatchBaseNamePattern(t *testing.T) {
 					"b.html",
 				}
 
-				require.EqualValues(
-					tt.expectedFileList,
-					mustutils.Must(pathsutils.FilterPaths(input, tt.pathFilterOptions)),
-				)
+				require.EqualValues(t, tt.expectedFileList, mustutils.Must(pathsutils.FilterPaths(input, tt.pathFilterOptions)))
 			},
 		)
 	}
@@ -142,8 +127,6 @@ func TestPaths_MatchBaseNamePattern_recursive(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				input := []string{
 					"a.txt",
 					"b.txt",
@@ -155,10 +138,7 @@ func TestPaths_MatchBaseNamePattern_recursive(t *testing.T) {
 					"abc/b.html",
 				}
 
-				require.EqualValues(
-					tt.expectedFileList,
-					mustutils.Must(pathsutils.FilterPaths(input, tt.pathFilterOptions)),
-				)
+				require.EqualValues(t, tt.expectedFileList, mustutils.Must(pathsutils.FilterPaths(input, tt.pathFilterOptions)))
 			},
 		)
 	}
@@ -181,8 +161,6 @@ func TestPaths_ExcludeBasenamePattern_recursive(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				input := []string{
 					"a.txt",
 					"b.txt",
@@ -194,10 +172,7 @@ func TestPaths_ExcludeBasenamePattern_recursive(t *testing.T) {
 					"abc/b.html",
 				}
 
-				require.EqualValues(
-					tt.expectedFileList,
-					mustutils.Must(pathsutils.FilterPaths(input, tt.pathFilterOptions)),
-				)
+				require.EqualValues(t, tt.expectedFileList, mustutils.Must(pathsutils.FilterPaths(input, tt.pathFilterOptions)))
 			},
 		)
 	}
@@ -216,8 +191,6 @@ func TestPaths_ExcludeWholepathPattern_recursive(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				input := []string{
 					"a.txt",
 					"b.txt",
@@ -229,10 +202,7 @@ func TestPaths_ExcludeWholepathPattern_recursive(t *testing.T) {
 					"abc/b.html",
 				}
 
-				require.EqualValues(
-					tt.expectedFileList,
-					mustutils.Must(pathsutils.FilterPaths(input, tt.pathFilterOptions)),
-				)
+				require.EqualValues(t, tt.expectedFileList, mustutils.Must(pathsutils.FilterPaths(input, tt.pathFilterOptions)))
 			},
 		)
 	}
@@ -254,12 +224,7 @@ func TestPaths_GetRelativePathTo(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedOutput,
-					mustutils.Must(pathsutils.GetRelativePathTo(tt.input, tt.relativeTo)),
-				)
+				require.EqualValues(t, tt.expectedOutput, mustutils.Must(pathsutils.GetRelativePathTo(tt.input, tt.relativeTo)))
 			},
 		)
 	}
@@ -280,12 +245,7 @@ func TestPaths_GetRelativePathsTo(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedOutput,
-					mustutils.Must(pathsutils.GetRelativePathsTo(tt.input, tt.relativeTo)),
-				)
+				require.EqualValues(t, tt.expectedOutput, mustutils.Must(pathsutils.GetRelativePathsTo(tt.input, tt.relativeTo)))
 			},
 		)
 	}

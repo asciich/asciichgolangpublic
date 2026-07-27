@@ -54,8 +54,6 @@ func TestPrometheusExpositionFormatParserParseGauge(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				metricsTxt := ""
 				metricsTxt += "# HELP abc_value help text\n"
 				metricsTxt += "# TYPE abc_value gauge\n"
@@ -63,10 +61,7 @@ func TestPrometheusExpositionFormatParserParseGauge(t *testing.T) {
 
 				parsedMetrics := PrometheusExpositionFormatParser().MustParseString(metricsTxt)
 
-				require.EqualValues(
-					tt.expectedValue,
-					parsedMetrics.MustGetMetricValueAsFloat64("abc_value"),
-				)
+				require.EqualValues(t, tt.expectedValue, parsedMetrics.MustGetMetricValueAsFloat64("abc_value"))
 			},
 		)
 	}
@@ -85,8 +80,6 @@ func TestPrometheusExpositionFormatParserParseCounter(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				metricsTxt := ""
 				metricsTxt += "# HELP abc_value help text\n"
 				metricsTxt += "# TYPE abc_value counter\n"
@@ -94,10 +87,7 @@ func TestPrometheusExpositionFormatParserParseCounter(t *testing.T) {
 
 				parsedMetrics := PrometheusExpositionFormatParser().MustParseString(metricsTxt)
 
-				require.EqualValues(
-					tt.expectedValue,
-					parsedMetrics.MustGetMetricValueAsFloat64("abc_value"),
-				)
+				require.EqualValues(t, tt.expectedValue, parsedMetrics.MustGetMetricValueAsFloat64("abc_value"))
 			},
 		)
 	}

@@ -18,10 +18,8 @@ func TestTimeGetCurrentTimeAsVersionStringString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				generatedString := GetCurrentTimeAsSortableString()
-				require.Len(generatedString, len("YYYYmmdd_HHMMSS"))
+				require.Len(t, generatedString, len("YYYYmmdd_HHMMSS"))
 			},
 		)
 	}

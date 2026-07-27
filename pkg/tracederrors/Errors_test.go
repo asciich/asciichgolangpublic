@@ -22,12 +22,7 @@ func TestErrorsIsTracedError(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedIsTracedError,
-					tracederrors.IsTracedError(tt.err),
-				)
+				require.EqualValues(t, tt.expectedIsTracedError, tracederrors.IsTracedError(tt.err))
 			},
 		)
 	}

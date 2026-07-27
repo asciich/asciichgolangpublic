@@ -24,11 +24,7 @@ func functionReturningFourValuesAndAnError() (string, int, bool, uint64, error) 
 }
 
 func TestMustUtils_Must(t *testing.T) {
-	require.EqualValues(
-		t,
-		"",
-		mustutils.Must(functionReturningOneValueAndAnError()),
-	)
+	require.EqualValues(t, "", mustutils.Must(functionReturningOneValueAndAnError()))
 }
 
 func TestMustUtils_Must2(t *testing.T) {

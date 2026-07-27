@@ -31,10 +31,8 @@ func TestFloatToString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				floatAsString := MustToString(tt.input, tt.maxDigits)
-				require.EqualValues(tt.expectedOutput, floatAsString)
+				require.EqualValues(t, tt.expectedOutput, floatAsString)
 			},
 		)
 	}
@@ -72,10 +70,8 @@ func TestFloatRound(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				rounded := MustRound(tt.input, tt.digits)
-				require.EqualValues(tt.expectedOutput, rounded)
+				require.EqualValues(t, tt.expectedOutput, rounded)
 			},
 		)
 	}

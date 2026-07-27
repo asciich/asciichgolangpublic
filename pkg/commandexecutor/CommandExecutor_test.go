@@ -53,11 +53,7 @@ func TestCommandExecutor_GetDeepCopyOfCommandExecutor(t *testing.T) {
 				hostDescription, err := copy.GetHostDescription()
 				require.NoError(t, err)
 
-				require.EqualValues(
-					t,
-					expectedHostDescription,
-					hostDescription,
-				)
+				require.EqualValues(t, expectedHostDescription, hostDescription)
 			},
 		)
 	}

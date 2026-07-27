@@ -35,8 +35,7 @@ func TestMacAddressesIsStringAMacAddress(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-				require.EqualValues(tt.isMacAddress, macaddresses.IsStringAMacAddress(tt.input))
+				require.EqualValues(t, tt.isMacAddress, macaddresses.IsStringAMacAddress(tt.input))
 			},
 		)
 	}

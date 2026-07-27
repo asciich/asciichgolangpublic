@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestIsUserAbort(t *testing.T) {
@@ -111,7 +111,7 @@ func TestIsUserAbort(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.expected, IsUserAbort(tt.err))
+			require.Equal(t, tt.expected, IsUserAbort(tt.err))
 		})
 	}
 }

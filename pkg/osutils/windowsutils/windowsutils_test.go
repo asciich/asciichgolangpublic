@@ -9,22 +9,8 @@ import (
 )
 
 func TestWindowsIsRunningOnWindows(t *testing.T) {
-	tests := []struct {
-		testmessage string
-	}{
-		{"testcase"},
-	}
+	require.False(t, windowsutils.IsRunningOnWindows())
 
-	for _, tt := range tests {
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				require := require.New(t)
-
-				require.False(windowsutils.IsRunningOnWindows())
-			},
-		)
-	}
 }
 
 func TestWindowsDecodeAsString(t *testing.T) {
