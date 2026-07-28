@@ -294,7 +294,7 @@ func (n *NativeKubernetesCluster) WaitUntilNamespaceDeleted(ctx context.Context,
 		return tracederrors.TracedErrorEmptyString("namespaceName")
 	}
 
-	timeout := time.Second * 60
+	timeout := time.Second * 120
 
 	logging.LogInfoByCtxf(ctx, "Wait for kubernetes namespace '%s' to be deleted started (timeout = %s).", namepaceName, timeout)
 
