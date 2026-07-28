@@ -65,8 +65,6 @@ func TestX509CertificateCreateAndSignIntermediateCertificate(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				const verbose bool = true
 
 				// Create root CA:
@@ -79,19 +77,19 @@ func TestX509CertificateCreateAndSignIntermediateCertificate(t *testing.T) {
 					Locality:              "Zurich",
 				})
 
-				require.True(rootTempDirectory.MustExists(verbose))
+				require.True(t, rootTempDirectory.MustExists(verbose))
 				rootCrtFile := MustGetX509CertificateFileFromFile(
 					rootTempDirectory.MustGetFileInDirectory("rootCA.crt"),
 				)
 
-				require.True(rootCrtFile.MustExists(verbose))
-				require.True(rootCrtFile.MustIsX509Certificate(verbose))
-				require.True(rootCrtFile.MustIsX509RootCertificate(verbose))
-				require.False(rootCrtFile.MustIsX509IntermediateCertificate())
-				require.True(rootCrtFile.MustIsX509v3())
+				require.True(t, rootCrtFile.MustExists(verbose))
+				require.True(t, rootCrtFile.MustIsX509Certificate(verbose))
+				require.True(t, rootCrtFile.MustIsX509RootCertificate(verbose))
+				require.False(t, rootCrtFile.MustIsX509IntermediateCertificate())
+				require.True(t, rootCrtFile.MustIsX509v3())
 
 				rootKeyFile := rootTempDirectory.MustGetFileInDirectory("rootCA.key")
-				require.True(rootKeyFile.MustExists(verbose))
+				require.True(t, rootKeyFile.MustExists(verbose))
 
 				// Create intermediate certificate
 				intermediateTempDirectory := certificates.MustCreateIntermediateCertificateIntoDirectory(&X509CreateCertificateOptions{
@@ -102,15 +100,15 @@ func TestX509CertificateCreateAndSignIntermediateCertificate(t *testing.T) {
 					Locality:              "Zurich",
 				})
 
-				require.True(intermediateTempDirectory.MustExists(verbose))
+				require.True(t, intermediateTempDirectory.MustExists(verbose))
 
 				intermediateKeyFile := intermediateTempDirectory.MustGetFileInDirectory("intermediateCertificate.key")
-				require.True(intermediateKeyFile.MustExists(verbose))
+				require.True(t, intermediateKeyFile.MustExists(verbose))
 
 				intermediateCertFile := MustGetX509CertificateFileFromFile(
 					intermediateTempDirectory.MustGetFileInDirectory("intermediateCertificate.crt"),
 				)
-				require.False(intermediateCertFile.MustExists(verbose))
+				require.False(t, intermediateCertFile.MustExists(verbose))
 
 				// Sign intermediate certificate
 				certificates.MustSignIntermediateCertificate(&X509SignCertificateOptions{
@@ -124,11 +122,11 @@ func TestX509CertificateCreateAndSignIntermediateCertificate(t *testing.T) {
 					Verbose:                verbose,
 				})
 
-				require.True(intermediateCertFile.MustExists(verbose))
-				require.False(intermediateCertFile.MustIsX509RootCertificate(verbose))
-				require.True(intermediateCertFile.MustIsX509IntermediateCertificate())
-				require.True(intermediateCertFile.MustIsX509v3())
-				require.True(intermediateCertFile.MustIsX509CertificateSignedByCertificateFile(rootCrtFile, verbose))
+				require.True(t, intermediateCertFile.MustExists(verbose))
+				require.False(t, intermediateCertFile.MustIsX509RootCertificate(verbose))
+				require.True(t, intermediateCertFile.MustIsX509IntermediateCertificate())
+				require.True(t, intermediateCertFile.MustIsX509v3())
+				require.True(t, intermediateCertFile.MustIsX509CertificateSignedByCertificateFile(rootCrtFile, verbose))
 			},
 		)
 	}
@@ -163,12 +161,10 @@ func TestX509Certificates_NoTestdataCertificateUnexpired(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				toCheck := MustGetX509CertificateFileFromPath(tt.pathToCheck)
 
-				require.True(toCheck.MustIsX509Certificate(verbose))
-				require.True(toCheck.MustIsExpired(verbose))
+				require.True(t, toCheck.MustIsX509Certificate(verbose))
+				require.True(t, toCheck.MustIsExpired(verbose))
 			},
 		)
 	}

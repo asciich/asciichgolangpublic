@@ -203,21 +203,9 @@ func TestTarArchiveAddAndGetFileOnTarBytes_multipleFiles(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.EqualValues(
-					t,
-					tt.content,
-					mustutils.Must(tarutils.ReadFileFromTarArchiveBytesAsString(
-						tarArchiveBytes,
-						fileName,
-					)),
+				require.EqualValues(t, tt.content, mustutils.Must(tarutils.ReadFileFromTarArchiveBytesAsString( tarArchiveBytes, fileName)),
 				)
-				require.EqualValues(
-					t,
-					tt.content+"2",
-					mustutils.Must(tarutils.ReadFileFromTarArchiveBytesAsString(
-						tarArchiveBytes,
-						fileName2,
-					)),
+				require.EqualValues(t, tt.content+"2", mustutils.Must(tarutils.ReadFileFromTarArchiveBytesAsString( tarArchiveBytes, fileName2)),
 				)
 
 				fileList, err := tarutils.ListFileNamesFromTarArchiveBytes(tarArchiveBytes)

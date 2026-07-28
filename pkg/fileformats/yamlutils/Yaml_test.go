@@ -68,59 +68,35 @@ func TestYaml_runYqQueryAgainstYamlStringAsString(t *testing.T) {
 func Test_SplitMultiYaml(t *testing.T) {
 	t.Run("split single", func(t *testing.T) {
 		content := "a: 5"
-		require.EqualValues(
-			t,
-			[]string{"---\n" + content + "\n"},
-			yamlutils.SplitMultiYaml(content),
-		)
+		require.EqualValues(t, []string{"---\n" + content + "\n"}, yamlutils.SplitMultiYaml(content))
 	})
 
 	t.Run("split single indent", func(t *testing.T) {
 		content := "a:\n  b: 5"
-		require.EqualValues(
-			t,
-			[]string{"---\n" + content + "\n"},
-			yamlutils.SplitMultiYaml(content),
-		)
+		require.EqualValues(t, []string{"---\n" + content + "\n"}, yamlutils.SplitMultiYaml(content))
 	})
 
 	t.Run("split single and doxument start", func(t *testing.T) {
 		content := "a: 5"
-		require.EqualValues(
-			t,
-			[]string{"---\n" + content + "\n"},
-			yamlutils.SplitMultiYaml("---\n"+content),
-		)
+		require.EqualValues(t, []string{"---\n" + content + "\n"}, yamlutils.SplitMultiYaml("---\n"+content))
 	})
 
 	t.Run("split double and doxument start", func(t *testing.T) {
 		content := "a: 5"
 		content2 := "b: 1"
-		require.EqualValues(
-			t,
-			[]string{"---\n" + content + "\n", "---\n" + content2 + "\n"},
-			yamlutils.SplitMultiYaml("---\n"+content+"\n---\n"+content2),
-		)
+		require.EqualValues(t, []string{"---\n" + content + "\n", "---\n" + content2 + "\n"}, yamlutils.SplitMultiYaml("---\n"+content+"\n---\n"+content2))
 	})
 
 	t.Run("split double and multiple document start", func(t *testing.T) {
 		content := "a: 5"
 		content2 := "b: 1"
-		require.EqualValues(
-			t,
-			[]string{"---\n" + content + "\n", "---\n" + content2 + "\n"},
-			yamlutils.SplitMultiYaml("---\n"+content+"\n---\n---\n---\n"+content2),
-		)
+		require.EqualValues(t, []string{"---\n" + content + "\n", "---\n" + content2 + "\n"}, yamlutils.SplitMultiYaml("---\n"+content+"\n---\n---\n---\n"+content2))
 	})
 
 	t.Run("split double and commented out", func(t *testing.T) {
 		content := "a: 5"
 		content2 := "b: 1"
-		require.EqualValues(
-			t,
-			[]string{"---\na: 5\n#---\n#c: 16 is commented out\n", "---\n" + content2 + "\n"},
-			yamlutils.SplitMultiYaml("---\n"+content+"\n#---\n#c: 16 is commented out\n---\n---\n"+content2),
-		)
+		require.EqualValues(t, []string{"---\na: 5\n#---\n#c: 16 is commented out\n", "---\n" + content2 + "\n"}, yamlutils.SplitMultiYaml("---\n"+content+"\n#---\n#c: 16 is commented out\n---\n---\n"+content2))
 	})
 }
 
@@ -152,11 +128,7 @@ func Test_MergeMultiYaml(t *testing.T) {
 	})
 
 	t.Run("single intend", func(t *testing.T) {
-		require.EqualValues(
-			t,
-			"---\na:\n  b: 1\n",
-			yamlutils.MustMergeMultiYaml([]string{"a:\n  b: 1\n"}),
-		)
+		require.EqualValues(t, "---\na:\n b: 1\n", yamlutils.MustMergeMultiYaml([]string{"a:\n b: 1\n"}))
 	})
 }
 

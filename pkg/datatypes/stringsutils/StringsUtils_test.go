@@ -22,10 +22,8 @@ func TestStringsGetFirstLine(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				firstLine := GetFirstLine(tt.input)
-				require.EqualValues(tt.expectedOutput, firstLine)
+				require.EqualValues(t, tt.expectedOutput, firstLine)
 			},
 		)
 	}
@@ -62,10 +60,8 @@ func TestStringsGetFirstLineAndTrimSpace(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				firstLine := GetFirstLineAndTrimSpace(tt.input)
-				require.EqualValues(tt.expectedOutput, firstLine)
+				require.EqualValues(t, tt.expectedOutput, firstLine)
 			},
 		)
 	}
@@ -94,10 +90,8 @@ func TestStringsEnsureEndsWithExactlyOneLine(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				ensuredLineBreak := EnsureEndsWithExactlyOneLineBreak(tt.input)
-				require.EqualValues(tt.expectedOutput, ensuredLineBreak)
+				require.EqualValues(t, tt.expectedOutput, ensuredLineBreak)
 			},
 		)
 	}
@@ -122,10 +116,8 @@ func TestStringsRemoveTailingNewline(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				ensuredLineBreak := RemoveTailingNewline(tt.input)
-				require.EqualValues(tt.expectedOutput, ensuredLineBreak)
+				require.EqualValues(t, tt.expectedOutput, ensuredLineBreak)
 			},
 		)
 	}
@@ -148,10 +140,8 @@ func TestStringsEnsureFirstCharUppercase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				firstCharUppercased := EnsureFirstCharUppercase(tt.input)
-				require.EqualValues(tt.expectedOutput, firstCharUppercased)
+				require.EqualValues(t, tt.expectedOutput, firstCharUppercased)
 			},
 		)
 	}
@@ -174,10 +164,8 @@ func TestStringsEnsureFirstCharLowercase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				firstCharUppercased := EnsureFirstCharLowercase(tt.input)
-				require.EqualValues(tt.expectedOutput, firstCharUppercased)
+				require.EqualValues(t, tt.expectedOutput, firstCharUppercased)
 			},
 		)
 	}
@@ -205,10 +193,8 @@ func TestStringsRemoveComments(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				commentsRemoved := RemoveComments(tt.input)
-				require.EqualValues(tt.expectedOutput, commentsRemoved)
+				require.EqualValues(t, tt.expectedOutput, commentsRemoved)
 			},
 		)
 	}
@@ -238,10 +224,8 @@ func TestStringsRightFillWithSpaces(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				filled := RightFillWithSpaces(tt.input, tt.fillLenght)
-				require.EqualValues(tt.expectedOutput, filled)
+				require.EqualValues(t, tt.expectedOutput, filled)
 			},
 		)
 	}
@@ -265,12 +249,7 @@ func TestStringsHasPrefixIgnoreCase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedHasPrefix,
-					HasPrefixIgnoreCase(tt.input, tt.prefix),
-				)
+				require.EqualValues(t, tt.expectedHasPrefix, HasPrefixIgnoreCase(tt.input, tt.prefix))
 			},
 		)
 	}
@@ -296,12 +275,7 @@ func TestStringsTrimPrefixIgnoreCase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedTrimmed,
-					TrimPrefixIgnoreCase(tt.input, tt.prefix),
-				)
+				require.EqualValues(t, tt.expectedTrimmed, TrimPrefixIgnoreCase(tt.input, tt.prefix))
 			},
 		)
 	}
@@ -325,12 +299,7 @@ func TestStringsIsFirstCharLowerCase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedFirstCharLowerCase,
-					IsFirstCharLowerCase(tt.input),
-				)
+				require.EqualValues(t, tt.expectedFirstCharLowerCase, IsFirstCharLowerCase(tt.input))
 			},
 		)
 	}
@@ -354,12 +323,7 @@ func TestStringsIsFirstCharUpperCase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedFirstCharLowerCase,
-					IsFirstCharUpperCase(tt.input),
-				)
+				require.EqualValues(t, tt.expectedFirstCharLowerCase, IsFirstCharUpperCase(tt.input))
 			},
 		)
 	}
@@ -392,12 +356,7 @@ func TestStringsSplitLines(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedLines,
-					SplitLines(tt.input, true),
-				)
+				require.EqualValues(t, tt.expectedLines, SplitLines(tt.input, true))
 			},
 		)
 	}
@@ -420,12 +379,7 @@ func TestStringsSplitWords(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedWords,
-					SplitWords(tt.input),
-				)
+				require.EqualValues(t, tt.expectedWords, SplitWords(tt.input))
 			},
 		)
 	}
@@ -452,12 +406,7 @@ func TestStrings_MatchesRegex(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedMatch,
-					MustMatchesRegex(tt.input, tt.regex),
-				)
+				require.EqualValues(t, tt.expectedMatch, MustMatchesRegex(tt.input, tt.regex))
 			},
 		)
 	}
@@ -482,12 +431,7 @@ func TestStringsIsComment(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedIsComment,
-					IsComment(tt.input),
-				)
+				require.EqualValues(t, tt.expectedIsComment, IsComment(tt.input))
 			},
 		)
 	}
@@ -512,12 +456,7 @@ func TestStringsTrimSpacesLeft(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedOutput,
-					TrimSpacesLeft(tt.input),
-				)
+				require.EqualValues(t, tt.expectedOutput, TrimSpacesLeft(tt.input))
 			},
 		)
 	}
@@ -554,12 +493,7 @@ func TestStringsContainsAtLeastOneSubstring(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedContains,
-					ContainsAtLeastOneSubstring(tt.input, tt.subsrings),
-				)
+				require.EqualValues(t, tt.expectedContains, ContainsAtLeastOneSubstring(tt.input, tt.subsrings))
 			},
 		)
 	}
@@ -596,12 +530,7 @@ func TestContainsAtLeastOneSubstringIngoreCase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedContains,
-					ContainsAtLeastOneSubstringIgnoreCase(tt.input, tt.subsrings),
-				)
+				require.EqualValues(t, tt.expectedContains, ContainsAtLeastOneSubstringIgnoreCase(tt.input, tt.subsrings))
 			},
 		)
 	}
@@ -623,12 +552,7 @@ func TestStringsContainsIgnoreCase(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedContains,
-					ContainsIgnoreCase(tt.input, tt.subsring),
-				)
+				require.EqualValues(t, tt.expectedContains, ContainsIgnoreCase(tt.input, tt.subsring))
 			},
 		)
 	}
@@ -652,10 +576,8 @@ func TestStringsTrimAllLeadingAndTailingNewLines(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				output := TrimAllLeadingAndTailingNewLines(tt.input)
-				require.EqualValues(tt.expectedOutput, output)
+				require.EqualValues(t, tt.expectedOutput, output)
 			},
 		)
 	}
@@ -690,14 +612,7 @@ func TestStrings_RemoveLinesWithPrefix(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedOutput,
-					RemoveLinesWithPrefix(
-						tt.input,
-						tt.prefix,
-					),
+				require.EqualValues(t, tt.expectedOutput, RemoveLinesWithPrefix( tt.input, tt.prefix),
 				)
 			},
 		)
@@ -738,12 +653,7 @@ func TestStrings_HexStringToBytes(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.hexBytes,
-					MustHexStringToBytes(tt.hexString),
-				)
+				require.EqualValues(t, tt.hexBytes, MustHexStringToBytes(tt.hexString))
 			},
 		)
 	}
@@ -772,12 +682,7 @@ func TestStrings_ContainsLine(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedContains,
-					ContainsLine(tt.input, tt.line),
-				)
+				require.EqualValues(t, tt.expectedContains, ContainsLine(tt.input, tt.line))
 			},
 		)
 	}
@@ -828,12 +733,7 @@ func TestStrings_GetAsKeyValues(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedKeyValues,
-					MustGetAsKeyValues(tt.input),
-				)
+				require.EqualValues(t, tt.expectedKeyValues, MustGetAsKeyValues(tt.input))
 			},
 		)
 	}
@@ -853,12 +753,7 @@ func TestStrings_GetValueAsString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
-				require.EqualValues(
-					tt.expectedValue,
-					MustGetValueAsString(tt.input, tt.key),
-				)
+				require.EqualValues(t, tt.expectedValue, MustGetValueAsString(tt.input, tt.key))
 			},
 		)
 	}
@@ -879,11 +774,7 @@ func TestStrings_GetValueAsInt(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require.EqualValues(
-					t,
-					tt.expectedValue,
-					MustGetValueAsInt(tt.input, tt.key),
-				)
+				require.EqualValues(t, tt.expectedValue, MustGetValueAsInt(tt.input, tt.key))
 			},
 		)
 	}
@@ -906,11 +797,7 @@ func TestStrings_EnsureSuffix(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require.EqualValues(
-					t,
-					tt.expected,
-					EnsureSuffix(tt.input, tt.suffix),
-				)
+				require.EqualValues(t, tt.expected, EnsureSuffix(tt.input, tt.suffix))
 			},
 		)
 	}
@@ -934,11 +821,7 @@ func TestStrings_EnsurePrefix(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require.EqualValues(
-					t,
-					tt.expected,
-					EnsurePrefix(tt.input, tt.prefix),
-				)
+				require.EqualValues(t, tt.expected, EnsurePrefix(tt.input, tt.prefix))
 			},
 		)
 	}
@@ -961,11 +844,7 @@ func TestStrings_ToHexString(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require.EqualValues(
-					t,
-					tt.expected,
-					ToHexString(tt.input, tt.delimiter),
-				)
+				require.EqualValues(t, tt.expected, ToHexString(tt.input, tt.delimiter))
 			},
 		)
 	}
@@ -984,11 +863,7 @@ func TestStrings_ToHexStringSlice(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require.EqualValues(
-					t,
-					tt.expected,
-					ToHexStringSlice(tt.input),
-				)
+				require.EqualValues(t, tt.expected, ToHexStringSlice(tt.input))
 			},
 		)
 	}
@@ -1022,11 +897,7 @@ func Test_IsBeforeInAlphabeth(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require.EqualValues(
-					t,
-					tt.expected,
-					IsBeforeInAlphabeth(tt.input, tt.input2),
-				)
+				require.EqualValues(t, tt.expected, IsBeforeInAlphabeth(tt.input, tt.input2))
 			},
 		)
 	}

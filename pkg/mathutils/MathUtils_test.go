@@ -25,11 +25,7 @@ func TestMathUtils_MaxInt(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require.EqualValues(
-					t,
-					tt.expectedResult,
-					MaxInt(tt.i1, tt.i2),
-				)
+				require.EqualValues(t, tt.expectedResult, MaxInt(tt.i1, tt.i2))
 			},
 		)
 	}

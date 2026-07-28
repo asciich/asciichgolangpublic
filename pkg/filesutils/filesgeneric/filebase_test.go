@@ -58,14 +58,12 @@ func TestFileBase(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				fileBase := filesgeneric.FileBase{}
 
 				parent, err := fileBase.GetParentFileForBaseClass()
-				require.Nil(parent)
-				require.ErrorIs(err, filesgeneric.ErrFileBaseParentNotSet)
-				require.ErrorIs(err, tracederrors.ErrTracedError)
+				require.Nil(t, parent)
+				require.ErrorIs(t, err, filesgeneric.ErrFileBaseParentNotSet)
+				require.ErrorIs(t, err, tracederrors.ErrTracedError)
 			},
 		)
 	}

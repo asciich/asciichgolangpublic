@@ -27,11 +27,7 @@ func TestGetPermissionStringForAccessClass(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require.EqualValues(
-					t,
-					tt.expectedPermissionString,
-					MustGetPermissionStringForAccessClass(tt.permission),
-				)
+				require.EqualValues(t, tt.expectedPermissionString, MustGetPermissionStringForAccessClass(tt.permission))
 			},
 		)
 	}
@@ -64,11 +60,7 @@ func TestGetPermissionValueForAccessClassString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require.EqualValues(
-					t,
-					tt.expectedPermission,
-					MustGetPermissionValueForAccessClassString(tt.permission),
-				)
+				require.EqualValues(t, tt.expectedPermission, MustGetPermissionValueForAccessClassString(tt.permission))
 			},
 		)
 	}
@@ -116,11 +108,7 @@ func TestMergeClassValues(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("0o%o", tt.ExpectedPermission),
 			func(t *testing.T) {
-				require.EqualValues(
-					t,
-					tt.ExpectedPermission,
-					MustMergeClassValues(tt.User, tt.Group, tt.Others),
-				)
+				require.EqualValues(t, tt.ExpectedPermission, MustMergeClassValues(tt.User, tt.Group, tt.Others))
 			},
 		)
 	}
@@ -142,11 +130,7 @@ func TestMergeClassValuesAsString(t *testing.T) {
 		t.Run(
 			tt.ExpectedPermission,
 			func(t *testing.T) {
-				require.EqualValues(
-					t,
-					tt.ExpectedPermission,
-					MustMergeClassValuesAsString(tt.User, tt.Group, tt.Others),
-				)
+				require.EqualValues(t, tt.ExpectedPermission, MustMergeClassValuesAsString(tt.User, tt.Group, tt.Others))
 			},
 		)
 	}
@@ -211,11 +195,7 @@ func TestGetPermissionString(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require.EqualValues(
-					t,
-					tt.expectedPermissionString,
-					MustGetPermissionString(tt.permission),
-				)
+				require.EqualValues(t, tt.expectedPermissionString, MustGetPermissionString(tt.permission))
 			},
 		)
 	}
@@ -269,11 +249,7 @@ func TestGetPermissionValue(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				require.EqualValues(
-					t,
-					tt.expectedPermission,
-					MustGetPermissionsValue(tt.permission),
-				)
+				require.EqualValues(t, tt.expectedPermission, MustGetPermissionsValue(tt.permission))
 			},
 		)
 	}

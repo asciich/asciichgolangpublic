@@ -117,11 +117,7 @@ func TestTemuxWindow_ReadLastLine(t *testing.T) {
 
 				line, err := window.GetSecondLatestPaneLine()
 				require.NoError(t, err)
-				require.EqualValues(
-					t,
-					tt.testmessage,
-					line,
-				)
+				require.EqualValues(t, tt.testmessage, line)
 			},
 		)
 	}

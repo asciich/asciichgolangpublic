@@ -23,9 +23,7 @@ func TestVersions_GetDateVersionString(t *testing.T) {
 
 func TestVersions_GetSoftwareVersionEnvVarName(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		require := require.New(t)
-
-		require.EqualValues("SOFTWARE_VERSION", versionutils.GetSoftwareVersionEnvVarName())
+		require.EqualValues(t, "SOFTWARE_VERSION", versionutils.GetSoftwareVersionEnvVarName())
 	})
 }
 

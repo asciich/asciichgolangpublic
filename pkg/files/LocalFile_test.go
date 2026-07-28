@@ -40,16 +40,14 @@ func TestLocalFileIsPathSetOnEmptyFile(t *testing.T) {
 }
 
 func TestLocalFileSetAndGetPath(t *testing.T) {
-	require := require.New(t)
-
 	var localFile = files.LocalFile{}
 
 	err := localFile.SetPath("testpath")
-	require.EqualValues(nil, err)
+	require.EqualValues(t, nil, err)
 
 	receivedPath, err := localFile.GetPath()
-	require.EqualValues(nil, err)
-	require.True(strings.HasSuffix(receivedPath, "/testpath"))
+	require.EqualValues(t, nil, err)
+	require.True(t, strings.HasSuffix(receivedPath, "/testpath"))
 }
 
 // TODO: Move to File_test.go and test for all File implementations.
@@ -465,9 +463,7 @@ func TestLocalFileGetDeepCopy(t *testing.T) {
 				localTestFile := files.MustGetLocalFileByFile(testFile)
 
 				copy := testFile.GetDeepCopy()
-				require.EqualValues(
-					t,
-					mustutils.Must(testFile.GetLocalPath()),
+				require.EqualValues(t, mustutils.Must(testFile.GetLocalPath()),
 					mustutils.Must(copy.GetLocalPath()),
 				)
 				localCopy := files.MustGetLocalFileByFile(copy)

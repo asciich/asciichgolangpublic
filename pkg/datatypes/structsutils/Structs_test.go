@@ -34,10 +34,8 @@ func TestStructsIsStruct(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				isStruct := IsStruct(tt.objectToTest)
-				require.EqualValues(tt.isStruct, isStruct)
+				require.EqualValues(t, tt.isStruct, isStruct)
 			},
 		)
 	}
@@ -68,10 +66,8 @@ func TestStructsIsPointerToStruct(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				isStruct := IsPointerToStruct(tt.objectToTest)
-				require.EqualValues(tt.isPointerToStruct, isStruct)
+				require.EqualValues(t, tt.isPointerToStruct, isStruct)
 			},
 		)
 	}
@@ -102,10 +98,8 @@ func TestStructsIsStructOrPointerToStruct(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require := require.New(t)
-
 				isStruct := IsStructOrPointerToStruct(tt.objectToTest)
-				require.EqualValues(tt.isStructOrPointerToStruct, isStruct)
+				require.EqualValues(t, tt.isStructOrPointerToStruct, isStruct)
 			},
 		)
 	}

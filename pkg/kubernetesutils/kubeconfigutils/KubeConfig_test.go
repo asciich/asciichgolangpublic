@@ -113,17 +113,9 @@ func TestKubeConfig_LoadFromPath(t *testing.T) {
 				kubeConfig, err := kubeconfigutils.LoadFromFilePath(ctx, tt.path)
 				require.NoError(t, err)
 
-				require.EqualValues(
-					t,
-					[]string{tt.expectedClusterName},
-					mustutils.Must(kubeConfig.GetClusterNames()),
-				)
+				require.EqualValues(t, []string{tt.expectedClusterName}, mustutils.Must(kubeConfig.GetClusterNames()))
 
-				require.EqualValues(
-					t,
-					tt.expectedServerNames,
-					mustutils.Must(kubeConfig.GetServerNames()),
-				)
+				require.EqualValues(t, tt.expectedServerNames, mustutils.Must(kubeConfig.GetServerNames()))
 			},
 		)
 	}
@@ -258,21 +250,13 @@ func TestKubeConfig_MergeThreeConfigs(t *testing.T) {
 	merged2, err := kubeconfigutils.MergeConfig(merged1, kubeConfig2, kubeConfig3, kubeConfig1)
 	require.NoError(t, err)
 
-	require.EqualValues(
-		t,
-		[]string{"kind-cluster-a", "kind-cluster-b", "kind-cluster-c"},
-		mustutils.Must(merged2.GetClusterNames()),
-	)
+	require.EqualValues(t, []string{"kind-cluster-a", "kind-cluster-b", "kind-cluster-c"}, mustutils.Must(merged2.GetClusterNames()))
 
 	tempFilePath, err := merged2.WriteToTemporaryFileAndGetPath(ctx)
 	require.NoError(t, err)
 	defer nativefiles.Delete(ctx, tempFilePath, &filesoptions.DeleteOptions{})
 
-	require.EqualValues(
-		t,
-		[]string{"kind-cluster-a", "kind-cluster-b", "kind-cluster-c"},
-		mustutils.Must(kubeconfigutils.ListContextNamesUsingKubectl(ctx, tempFilePath)),
-	)
+	require.EqualValues(t, []string{"kind-cluster-a", "kind-cluster-b", "kind-cluster-c"}, mustutils.Must(kubeconfigutils.ListContextNamesUsingKubectl(ctx, tempFilePath)))
 }
 
 func TestKubeConfig_UpdateUserByMerge(t *testing.T) {

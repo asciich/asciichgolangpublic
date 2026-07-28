@@ -184,11 +184,7 @@ func TestSortObjectsYaml(t *testing.T) {
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
 
-		require.EqualValues(
-			t,
-			[]string{exampleDeployment1, exampleDeployment2, exampleDeployment},
-			splitted,
-		)
+		require.EqualValues(t, []string{exampleDeployment1, exampleDeployment2, exampleDeployment}, splitted)
 	})
 
 	t.Run("already sorted by kind", func(t *testing.T) {
@@ -200,11 +196,7 @@ func TestSortObjectsYaml(t *testing.T) {
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
 
-		require.EqualValues(
-			t,
-			[]string{exampleDeployment, exampleReplicaSet},
-			splitted,
-		)
+		require.EqualValues(t, []string{exampleDeployment, exampleReplicaSet}, splitted)
 	})
 
 	t.Run("Unordered by kind", func(t *testing.T) {
@@ -216,11 +208,7 @@ func TestSortObjectsYaml(t *testing.T) {
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
 
-		require.EqualValues(
-			t,
-			[]string{exampleDeployment, exampleReplicaSet},
-			splitted,
-		)
+		require.EqualValues(t, []string{exampleDeployment, exampleReplicaSet}, splitted)
 	})
 
 	t.Run("Unordered by kind and namespace", func(t *testing.T) {
@@ -232,11 +220,7 @@ func TestSortObjectsYaml(t *testing.T) {
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
 
-		require.EqualValues(
-			t,
-			[]string{exampleDeployment, exampleReplicaSet},
-			splitted,
-		)
+		require.EqualValues(t, []string{exampleDeployment, exampleReplicaSet}, splitted)
 	})
 
 	t.Run("with namespaces and kind", func(t *testing.T) {
@@ -250,10 +234,6 @@ func TestSortObjectsYaml(t *testing.T) {
 
 		splitted := yamlutils.SplitMultiYaml(sorted)
 
-		require.EqualValues(
-			t,
-			[]string{exampleDeployment1, exampleDeployment2, exampleReplicaSet, exampleDeployment},
-			splitted,
-		)
+		require.EqualValues(t, []string{exampleDeployment1, exampleDeployment2, exampleReplicaSet, exampleDeployment}, splitted)
 	})
 }

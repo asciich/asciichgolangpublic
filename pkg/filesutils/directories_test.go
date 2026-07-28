@@ -152,21 +152,10 @@ func TestDirectory_CreateSubDirectory_NoPathTraversal(t *testing.T) {
 
 				// The subdirectory path must start with the parent directory path,
 				// ensuring it is nested within it and not rooted at "/"
-				require.True(
-					t,
-					strings.HasPrefix(subDirPath, dirPath),
-					"subdirectory path '%s' must be nested under parent directory '%s' (potential path traversal)",
-					subDirPath,
-					dirPath,
-				)
+				require.True(t, strings.HasPrefix(subDirPath, dirPath), "subdirectory path '%s' must be nested under parent directory '%s' (potential path traversal)", subDirPath, dirPath)
 
 				// Explicitly ensure the subdirectory is NOT rooted at the filesystem root
-				require.False(
-					t,
-					strings.HasPrefix(subDirPath, "/subdir"),
-					"subdirectory path '%s' must not be rooted at '/' (path traversal detected)",
-					subDirPath,
-				)
+				require.False(t, strings.HasPrefix(subDirPath, "/subdir"), "subdirectory path '%s' must not be rooted at '/' (path traversal detected)", subDirPath)
 			},
 		)
 	}
