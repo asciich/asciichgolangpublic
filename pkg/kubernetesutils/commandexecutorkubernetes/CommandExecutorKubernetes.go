@@ -676,6 +676,19 @@ func (c *CommandExecutorKubernetes) SecretByNameExists(ctx context.Context, name
 	return namespace.SecretByNameExists(ctx, secretName)
 }
 
+// CheckSecretByNameExists checks if a secret exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (c *CommandExecutorKubernetes) CheckSecretByNameExists(ctx context.Context, namespaceName string, secretName string) error {
+	exists, err := c.SecretByNameExists(ctx, namespaceName, secretName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		tracederrors.TracedErrorf("Secret '%s' does not exist in namespace '%s'", secretName, namespaceName)
+	}
+	return nil
+}
+
 func (c *CommandExecutorKubernetes) DeleteSecretByName(ctx context.Context, namespaceName string, secretName string) (err error) {
 	namespace, err := c.GetNamespaceByName(namespaceName)
 	if err != nil {

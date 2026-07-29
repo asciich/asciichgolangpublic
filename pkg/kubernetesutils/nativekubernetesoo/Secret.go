@@ -29,7 +29,7 @@ func (n *NativeSecret) GetName() (string, error) {
 	return n.name, nil
 }
 
-func (n *NativeSecret) SetName(secretName string) (error) {
+func (n *NativeSecret) SetName(secretName string) error {
 	if secretName == "" {
 		return tracederrors.TracedErrorEmptyString("secretName")
 	}

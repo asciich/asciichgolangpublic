@@ -352,6 +352,20 @@ func (n *NativeNamespace) SecretByNameExists(ctx context.Context, secretName str
 	return exists, nil
 }
 
+// CheckSecretByNameExists checks if a secret exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (n *NativeNamespace) CheckSecretByNameExists(ctx context.Context, secretName string) error {
+	exists, err := n.SecretByNameExists(ctx, secretName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		namespaceName, _ := n.GetName()
+		return tracederrors.TracedErrorf("Secret '%s' does not exist in namespace '%s'", secretName, namespaceName)
+	}
+	return nil
+}
+
 func (n *NativeNamespace) DeleteSecretByName(ctx context.Context, secretName string) (err error) {
 	if secretName == "" {
 		return tracederrors.TracedErrorEmptyString("name")

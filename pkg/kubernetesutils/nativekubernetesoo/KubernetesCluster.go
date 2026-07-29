@@ -387,6 +387,19 @@ func (n *NativeKubernetesCluster) SecretByNameExists(ctx context.Context, namesp
 	return namespace.SecretByNameExists(ctx, secretName)
 }
 
+// CheckSecretByNameExists checks if a secret exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (n *NativeKubernetesCluster) CheckSecretByNameExists(ctx context.Context, namespaceName string, secretName string) error {
+	exists, err := n.SecretByNameExists(ctx, namespaceName, secretName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return tracederrors.TracedErrorf("Secret '%s' does not exist in namespace '%s'", secretName, namespaceName)
+	}
+	return nil
+}
+
 func (n *NativeKubernetesCluster) DeleteSecretByName(ctx context.Context, namespaceName string, secretName string) (err error) {
 	namespace, err := n.GetNamespaceByName(namespaceName)
 	if err != nil {
