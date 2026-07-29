@@ -11,7 +11,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-
 func InstallPackages(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, packageNames []string, options *packagemanageroptions.InstallPackageOptions) error {
 	if commandExecutor == nil {
 		return tracederrors.TracedErrorNil("commandExecutor")

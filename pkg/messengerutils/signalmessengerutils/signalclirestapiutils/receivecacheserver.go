@@ -59,7 +59,7 @@ func (s *ReceiveCacheServer) appendMessageToCache(ctx context.Context, message *
 
 	s.cache = append(s.cache, message)
 	if len(s.cache) > s.cacheSize {
-		s.cache = s.cache[1:s.cacheSize+1]
+		s.cache = s.cache[1 : s.cacheSize+1]
 	}
 
 	return nil

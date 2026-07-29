@@ -122,10 +122,10 @@ func RunCronCommand(ctx context.Context, name string, cron string, command []str
 	// -1 is used for timestamps and durations to clearly indicate "never run".
 	// -------------------------------------------------------------------------
 	jobRunsTotal.With(labels).Add(0)            // initializes the counter at 0
-	jobLastDurationSeconds.With(labels).Set(-1)  // -1 = never run
-	jobLastFinishTimestamp.With(labels).Set(-1)  // -1 = never run
-	jobLastStartTimestamp.With(labels).Set(-1)   // -1 = never run
-	jobIsRunning.With(labels).Set(0)             // 0 = idle
+	jobLastDurationSeconds.With(labels).Set(-1) // -1 = never run
+	jobLastFinishTimestamp.With(labels).Set(-1) // -1 = never run
+	jobLastStartTimestamp.With(labels).Set(-1)  // -1 = never run
+	jobIsRunning.With(labels).Set(0)            // 0 = idle
 	jobStartTimestamp.With(labels).Set(float64(time.Now().Unix()))
 
 	// -------------------------------------------------------------------------

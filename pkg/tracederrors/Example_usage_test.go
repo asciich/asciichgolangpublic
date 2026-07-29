@@ -18,7 +18,7 @@ func Test_ExampleUsage(t *testing.T) {
 	err := inThisFunctionSomethingGoesWrong()
 
 	// The retured error is a TracedError:
-	require.True(t, tracederrors.IsTracedError(err)) // returns true for all TracedErrors.
+	require.True(t, tracederrors.IsTracedError(err))                          // returns true for all TracedErrors.
 	require.False(t, tracederrors.IsTracedError(fmt.Errorf("another error"))) // returns false for all non TracedErrors.
 
 	// Get the error message

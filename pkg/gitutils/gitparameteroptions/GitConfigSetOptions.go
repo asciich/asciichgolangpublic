@@ -6,8 +6,8 @@ import (
 )
 
 type GitConfigSetOptions struct {
-	Name    string
-	Email   string
+	Name  string
+	Email string
 }
 
 func NewGitConfigSetOptions() (g *GitConfigSetOptions) {

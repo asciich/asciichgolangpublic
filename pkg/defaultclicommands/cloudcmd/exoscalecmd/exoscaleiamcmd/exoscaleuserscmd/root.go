@@ -4,7 +4,7 @@ import "github.com/spf13/cobra"
 
 func NewUsersCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "users",
+		Use:   "users",
 		Short: "Manage exoscale users",
 	}
 

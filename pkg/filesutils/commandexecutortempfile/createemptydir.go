@@ -10,8 +10,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-
-
 func CreateEmptyTemporaryDirectory(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor) (string, error) {
 	if commandExecutor == nil {
 		return "", tracederrors.TracedErrorNil("commandExecutor")

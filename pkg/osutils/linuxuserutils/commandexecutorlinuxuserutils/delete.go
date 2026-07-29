@@ -38,7 +38,7 @@ func Delete(ctx context.Context, commandExecutor commandexecutorinterfaces.Comma
 
 	if exists {
 		logging.LogInfoByCtxf(ctx, "Going to delete linux user '%s' on '%s'.", userName, hostDescription)
-		
+
 		cmd := []string{"userdel"}
 
 		if options.Force {

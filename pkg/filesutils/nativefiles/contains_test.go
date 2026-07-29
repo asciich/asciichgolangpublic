@@ -15,7 +15,7 @@ func TestContains(t *testing.T) {
 
 		tempFile, err := tempfiles.CreateTemporaryFile(ctx)
 		require.NoError(t, err)
-		defer func() { _ = nativefiles.Delete(ctx, tempFile, &filesoptions.DeleteOptions{})}()
+		defer func() { _ = nativefiles.Delete(ctx, tempFile, &filesoptions.DeleteOptions{}) }()
 
 		contains, err := nativefiles.Contains(ctx, tempFile, "hello world")
 		require.NoError(t, err)
@@ -27,7 +27,7 @@ func TestContains(t *testing.T) {
 
 		tempFile, err := tempfiles.CreateTemporaryFileFromContentString(ctx, "hello world")
 		require.NoError(t, err)
-		defer func() { _ = nativefiles.Delete(ctx, tempFile, &filesoptions.DeleteOptions{})}()
+		defer func() { _ = nativefiles.Delete(ctx, tempFile, &filesoptions.DeleteOptions{}) }()
 
 		contains, err := nativefiles.Contains(ctx, tempFile, "hello")
 		require.NoError(t, err)
@@ -39,7 +39,7 @@ func TestContains(t *testing.T) {
 
 		tempFile, err := tempfiles.CreateTemporaryFileFromContentString(ctx, "hello world")
 		require.NoError(t, err)
-		defer func() { _ = nativefiles.Delete(ctx, tempFile, &filesoptions.DeleteOptions{})}()
+		defer func() { _ = nativefiles.Delete(ctx, tempFile, &filesoptions.DeleteOptions{}) }()
 
 		contains, err := nativefiles.Contains(ctx, tempFile, "not included")
 		require.NoError(t, err)

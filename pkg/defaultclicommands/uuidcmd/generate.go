@@ -10,7 +10,7 @@ import (
 
 func NewGenerateCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "generate",
+		Use:   "generate",
 		Short: "Generate UUID",
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)

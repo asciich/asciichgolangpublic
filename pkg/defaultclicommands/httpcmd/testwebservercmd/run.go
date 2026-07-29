@@ -26,7 +26,6 @@ func NewRunCmd() *cobra.Command {
 			}
 
 			testwebserver := mustutils.Must(testwebserver.GetTestWebServer(port))
-			
 
 			mustutils.Must0(testwebserver.StartInBackground(ctx))
 

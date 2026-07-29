@@ -71,8 +71,6 @@ func (f *File) String() (path string) {
 	return ""
 }
 
-
-
 func (f *File) GetCommandExecutor() (commandexecutorinterfaces.CommandExecutor, error) {
 	if f.commandExecutor == nil {
 		return nil, tracederrors.TracedError("commandExecutor not set")

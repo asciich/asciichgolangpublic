@@ -1,7 +1,7 @@
 package httputilsinterfaces
 
 type Response interface {
-	CheckStatusCode(expectedStatusCodes []int) error 
+	CheckStatusCode(expectedStatusCodes []int) error
 	GetBodyAsBytes() (body []byte, err error)
 	GetBodyAsString() (body string, err error)
 	IsStatusCode(expectedStatusCode int) bool

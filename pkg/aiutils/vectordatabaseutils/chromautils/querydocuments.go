@@ -86,12 +86,11 @@ Question: %s`, ragContext, question)
 // --- Query Result Display ---
 
 type QueryDocumentsResult struct {
-	Answer         string
-	SourceChunks   []string
-	SourceFiles    []string
-	Distances      []float32
+	Answer       string
+	SourceChunks []string
+	SourceFiles  []string
+	Distances    []float32
 }
-
 
 func QueryDocuments(ctx context.Context, options *QueryOptions) (*QueryDocumentsResult, error) {
 	if options == nil {

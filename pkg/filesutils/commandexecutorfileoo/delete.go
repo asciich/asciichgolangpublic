@@ -16,7 +16,6 @@ func (f *File) Delete(ctx context.Context, options *filesoptions.DeleteOptions) 
 	return commandexecutorfile.Delete(ctx, commandExecutor, path, options)
 }
 
-
 func (d *Directory) Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error) {
 	commandExecutor, dirPath, err := d.GetCommandExecutorAndDirectoryPath()
 	if err != nil {

@@ -24,7 +24,7 @@ func Test_docker_images(t *testing.T) {
 				const imageName = "ubuntu:23.04"
 
 				docker := getDockerImplementationByName(tt.implementationName)
-				
+
 				err := docker.RemoveImage(ctx, imageName)
 				require.NoError(t, err)
 				exists, err := docker.ImageExists(ctx, imageName)
@@ -38,11 +38,11 @@ func Test_docker_images(t *testing.T) {
 				name, err := image.GetName()
 				require.NoError(t, err)
 				require.EqualValues(t, imageName, name)
-				
+
 				exists, err = docker.ImageExists(ctx, imageName)
 				require.NoError(t, err)
 				require.True(t, exists)
-				
+
 				exists, err = image.Exists(ctx)
 				require.NoError(t, err)
 				require.True(t, exists)
@@ -53,7 +53,7 @@ func Test_docker_images(t *testing.T) {
 				exists, err = docker.ImageExists(ctx, imageName)
 				require.NoError(t, err)
 				require.False(t, exists)
-				
+
 				exists, err = image.Exists(ctx)
 				require.NoError(t, err)
 				require.False(t, exists)

@@ -7,4 +7,3 @@ type GitlabListProjectsOptions struct {
 func NewGitlabListProjectsOptions() (g *GitlabListProjectsOptions) {
 	return new(GitlabListProjectsOptions)
 }
-

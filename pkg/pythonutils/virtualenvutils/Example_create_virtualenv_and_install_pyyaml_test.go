@@ -29,7 +29,7 @@ func Test_CreateVirtualenvAndInstallPyyaml(t *testing.T) {
 
 	// Create the virtuelenv with pyyaml installed
 	ve, err := virtualenvutils.CreateVirtualEnv(ctx, &virtualenvutils.CreateVirtualenvOptions{
-		Path: vEnvPath,
+		Path:     vEnvPath,
 		Packages: []string{"pyyaml"},
 	})
 	require.NoError(t, err)
@@ -37,6 +37,6 @@ func Test_CreateVirtualenvAndInstallPyyaml(t *testing.T) {
 
 	// Check pyyaml installed
 	pyyamlInstalled, err := ve.IsPackageInstalled(ctx, "pyyaml")
-	require.NoError(t,err)
+	require.NoError(t, err)
 	require.True(t, pyyamlInstalled)
 }

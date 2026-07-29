@@ -19,9 +19,9 @@ func TestGenerate(t *testing.T) {
 }
 
 func TestIsUuid(t *testing.T) {
-	tests := []struct{
-		name string
-		input string
+	tests := []struct {
+		name     string
+		input    string
 		expected bool
 	}{
 		{"empty", "", false},
@@ -29,7 +29,7 @@ func TestIsUuid(t *testing.T) {
 		{"k8s ns uid", "b913691f-eaf8-4ac0-a872-f1e2881c3ec9", true},
 		{"generated", uuidutils.Generate(getCtx()), true},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			require.EqualValues(t, tt.expected, uuidutils.IsUuid(tt.input))

@@ -14,8 +14,8 @@ import (
 )
 
 type TestSuite struct {
-	Name        string              `yaml:"name"`
-	Description string              `yaml:"description"`
+	Name        string               `yaml:"name"`
+	Description string               `yaml:"description"`
 	TestCases   []*testcase.TestCase `yaml:"test_cases"`
 }
 
@@ -73,7 +73,6 @@ func (t *TestSuite) Run(ctx context.Context) (testutilsinterfaces.TestResult, er
 	}
 
 	result := &testresults.TestResult{}
-
 
 	logging.LogInfoByCtxf(ctx, "Run test suite '%s' started.", name)
 

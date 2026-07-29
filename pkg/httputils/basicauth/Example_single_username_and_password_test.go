@@ -86,6 +86,6 @@ func Test_BasicAuthWithSingleUsernameAndPassword(t *testing.T) {
 	require.EqualValues(t, http.StatusOK, response3.StatusCode)
 	// And therefore we receive to message defined in the handler function at the beginning of this test:
 	content, err := io.ReadAll(response3.Body)
-	require.NoError(t,err)
+	require.NoError(t, err)
 	require.EqualValues(t, "This is a basic auth protected message.", string(content))
 }

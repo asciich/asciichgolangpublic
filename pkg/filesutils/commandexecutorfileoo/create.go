@@ -16,7 +16,6 @@ func (f *File) Create(ctx context.Context, options *filesoptions.CreateOptions) 
 	return commandexecutorfile.CreateFile(ctx, commandexecutor, path, options)
 }
 
-
 func (d *Directory) Create(ctx context.Context, options *filesoptions.CreateOptions) (err error) {
 	commandexecutor, path, err := d.GetCommandExecutorAndDirectoryPath()
 	if err != nil {

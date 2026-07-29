@@ -39,7 +39,7 @@ func Test_Example_copySudo(t *testing.T) {
 	// And both file have the same content:
 	content1, err := nativefiles.ReadAsString(ctx, src, &filesoptions.ReadOptions{})
 	require.NoError(t, err)
-	content2, err := nativefiles.ReadAsString(ctx, dst,&filesoptions.ReadOptions{UseSudo: true})
+	content2, err := nativefiles.ReadAsString(ctx, dst, &filesoptions.ReadOptions{UseSudo: true})
 	require.NoError(t, err)
 	require.EqualValues(t, content1, content2)
 	require.EqualValues(t, "hello world", content2)

@@ -7,7 +7,7 @@ import (
 
 func NewPackageManagerCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "packagemanager",
+		Use:   "packagemanager",
 		Short: "Packagemanager related commmands",
 	}
 

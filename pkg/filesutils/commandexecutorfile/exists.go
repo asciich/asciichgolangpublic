@@ -65,7 +65,6 @@ func FileExists(ctx context.Context, commandExecutor commandexecutorinterfaces.C
 	return exists, nil
 }
 
-
 func DirectoryExists(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, directoryPath string) (bool, error) {
 	if commandExecutor == nil {
 		return false, tracederrors.TracedErrorNil("commandExecutor")

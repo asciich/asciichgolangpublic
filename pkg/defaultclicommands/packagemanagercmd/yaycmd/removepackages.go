@@ -66,7 +66,7 @@ This command is idempotent: If yay is already installed it will be used without 
 			}
 
 			mustutils.Must0(yay.RemovePackages(ctx, commandExecutor, packages, &packagemanageroptions.RemovePackageOptions{
-				UseSudo:             useSudo,
+				UseSudo: useSudo,
 			}))
 
 			logging.LogGoodByCtxf(ctx, "Removeed yay packages '%v' on '%s'.", packages, hostDescription)

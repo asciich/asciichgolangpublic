@@ -10,7 +10,7 @@ import (
 
 func NewInstallKindCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "install",
+		Use:   "install",
 		Short: "Install KinD on the local machine as documented on the official project website https://kind.sigs.k8s.io/docs/user/quick-start/#installing-from-release-binaries .",
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)

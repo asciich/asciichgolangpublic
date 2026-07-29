@@ -45,4 +45,3 @@ func GetAnsiblePlaybookPath(options any) (string, error) {
 
 	return path + "-playbook", nil
 }
-

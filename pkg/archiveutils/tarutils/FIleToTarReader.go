@@ -32,7 +32,7 @@ func FileToTarReader(localFilePath string, options *tarparameteroptions.FileToTa
 	if err != nil {
 		return nil, tracederrors.TracedErrorf("failed to create tar header: %w", err)
 	}
-	
+
 	// Set the name inside the tar:
 	if options.OverrideFileName == "" {
 		header.Name = path.Base(localFilePath)
@@ -44,7 +44,7 @@ func FileToTarReader(localFilePath string, options *tarparameteroptions.FileToTa
 
 		header.Name = name
 	}
-	
+
 	if err := tw.WriteHeader(header); err != nil {
 		return nil, tracederrors.TracedErrorf("failed to write tar header: %w", err)
 	}

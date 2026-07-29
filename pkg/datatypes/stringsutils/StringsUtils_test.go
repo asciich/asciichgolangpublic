@@ -612,8 +612,7 @@ func TestStrings_RemoveLinesWithPrefix(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%v", tt),
 			func(t *testing.T) {
-				require.EqualValues(t, tt.expectedOutput, RemoveLinesWithPrefix( tt.input, tt.prefix),
-				)
+				require.EqualValues(t, tt.expectedOutput, RemoveLinesWithPrefix(tt.input, tt.prefix))
 			},
 		)
 	}

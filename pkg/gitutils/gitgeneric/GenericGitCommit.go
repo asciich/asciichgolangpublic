@@ -1,4 +1,5 @@
 package gitgeneric
+
 import (
 	"context"
 	"sort"

@@ -35,21 +35,21 @@ UUID=b411dc99-f0a0-4c87-9e05-184977be8539 /home ext4 defaults                   
 		require.NoError(t, err)
 
 		require.Len(t, entries, 4)
-		
+
 		require.EqualValues(t, "UUID=0a3407de-014b-458b-b5c1-848e92a327a3", entries[0].Device)
 		require.EqualValues(t, "/", entries[0].Dir)
 		require.EqualValues(t, "ext4", entries[0].Type)
 		require.EqualValues(t, "defaults", entries[0].Options)
 		require.EqualValues(t, "0", entries[0].Dump)
 		require.EqualValues(t, "1", entries[0].Fsck)
-				
+
 		require.EqualValues(t, "UUID=CBB6-24F2", entries[1].Device)
 		require.EqualValues(t, "/boot", entries[1].Dir)
 		require.EqualValues(t, "vfat", entries[1].Type)
 		require.EqualValues(t, "defaults,nodev,nosuid,noexec,fmask=0177,dmask=0077", entries[1].Options)
 		require.EqualValues(t, "0", entries[1].Dump)
 		require.EqualValues(t, "2", entries[1].Fsck)
-		
+
 		require.EqualValues(t, "UUID=f9fe0b69-a280-415d-a03a-a32752370dee", entries[2].Device)
 		require.EqualValues(t, "none", entries[2].Dir)
 		require.EqualValues(t, "swap", entries[2].Type)

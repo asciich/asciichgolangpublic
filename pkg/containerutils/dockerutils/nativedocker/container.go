@@ -566,7 +566,7 @@ func (c *Container) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, op
 			attach.HijackedResponse.CloseWrite()
 			attach.HijackedResponse.Close()
 			cli.Close()
-			_, err:= WaitUntilExecFinished(ctx, execId)
+			_, err := WaitUntilExecFinished(ctx, execId)
 			return err
 		},
 		WriteFunc: func(p []byte) (n int, err error) {

@@ -62,7 +62,7 @@ func CreateDirectory(ctx context.Context, path string, options *filesoptions.Cre
 			if err != nil {
 				return tracederrors.TracedErrorf("Failed to create directory '%s' using sudo: %w", path, err)
 			} else {
-				logging.LogChangedByCtxf(ctx, "Created directory '%s' using sudo.", path)	
+				logging.LogChangedByCtxf(ctx, "Created directory '%s' using sudo.", path)
 			}
 		} else {
 			err := os.MkdirAll(path, 0755)

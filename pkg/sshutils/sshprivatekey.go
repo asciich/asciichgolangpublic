@@ -7,4 +7,3 @@ type SSHPrivateKey struct {
 	// The effective key material
 	KeyMaterial string
 }
-

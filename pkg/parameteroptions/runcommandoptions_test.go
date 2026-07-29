@@ -37,7 +37,7 @@ func TestRunCommandOptions_GetCommand(t *testing.T) {
 		{"timeout", &parameteroptions.RunCommandOptions{TimeoutString: "1m", Command: []string{"echo", "hello", "world"}}, []string{"echo", "hello", "world"}},
 		{"sudo timeout", &parameteroptions.RunCommandOptions{RunAsRoot: true, TimeoutString: "1m", Command: []string{"echo", "hello", "world"}}, []string{"echo", "hello", "world"}},
 		{"timeout another user", &parameteroptions.RunCommandOptions{RunAsUser: "testuser", TimeoutString: "1m", Command: []string{"echo", "hello", "world"}}, []string{"echo", "hello", "world"}},
-		{"sudo timeout another user", &parameteroptions.RunCommandOptions{UseSudoToRunAsUser: true , RunAsUser:  "testuser", TimeoutString: "1m", Command: []string{"echo", "hello", "world"}}, []string{"echo", "hello", "world"}},
+		{"sudo timeout another user", &parameteroptions.RunCommandOptions{UseSudoToRunAsUser: true, RunAsUser: "testuser", TimeoutString: "1m", Command: []string{"echo", "hello", "world"}}, []string{"echo", "hello", "world"}},
 	}
 
 	for _, tt := range tests {
@@ -48,7 +48,6 @@ func TestRunCommandOptions_GetCommand(t *testing.T) {
 		})
 	}
 }
-
 
 func TestRunCommandOptions_GetFullCommand(t *testing.T) {
 	// This test ensures the GetFullCommand returns:
@@ -80,7 +79,7 @@ func TestRunCommandOptions_GetFullCommand(t *testing.T) {
 		{"timeout", &parameteroptions.RunCommandOptions{TimeoutString: "1m", Command: []string{"echo", "hello", "world"}}, []string{"timeout", "60", "echo", "hello", "world"}},
 		{"sudo timeout", &parameteroptions.RunCommandOptions{RunAsRoot: true, TimeoutString: "1m", Command: []string{"echo", "hello", "world"}}, []string{"timeout", "60", "sudo", "echo", "hello", "world"}},
 		{"timeout another user", &parameteroptions.RunCommandOptions{RunAsUser: "testuser", TimeoutString: "1m", Command: []string{"echo", "hello", "world"}}, []string{"timeout", "60", "su", "testuser", "-c", "echo hello world"}},
-		{"sudo timeout another user", &parameteroptions.RunCommandOptions{UseSudoToRunAsUser: true , RunAsUser:  "testuser", TimeoutString: "1m", Command: []string{"echo", "hello", "world"}}, []string{"timeout", "60", "sudo", "su", "testuser", "-c", "echo hello world"}},
+		{"sudo timeout another user", &parameteroptions.RunCommandOptions{UseSudoToRunAsUser: true, RunAsUser: "testuser", TimeoutString: "1m", Command: []string{"echo", "hello", "world"}}, []string{"timeout", "60", "sudo", "su", "testuser", "-c", "echo hello world"}},
 	}
 
 	for _, tt := range tests {

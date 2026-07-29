@@ -116,7 +116,7 @@ func Test_ExtractFileFromArchive(t *testing.T) {
 				defer nativefiles.Delete(ctx, archivePath, &filesoptions.DeleteOptions{})
 
 				destPath, err := tempfiles.CreateTemporaryFile(ctx)
-				require.NoError(t,err)
+				require.NoError(t, err)
 				defer nativefiles.Delete(ctx, destPath, &filesoptions.DeleteOptions{})
 
 				err = tarutils.ExtractFileFromTarArchive(
@@ -203,10 +203,8 @@ func TestTarArchiveAddAndGetFileOnTarBytes_multipleFiles(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				require.EqualValues(t, tt.content, mustutils.Must(tarutils.ReadFileFromTarArchiveBytesAsString( tarArchiveBytes, fileName)),
-				)
-				require.EqualValues(t, tt.content+"2", mustutils.Must(tarutils.ReadFileFromTarArchiveBytesAsString( tarArchiveBytes, fileName2)),
-				)
+				require.EqualValues(t, tt.content, mustutils.Must(tarutils.ReadFileFromTarArchiveBytesAsString(tarArchiveBytes, fileName)))
+				require.EqualValues(t, tt.content+"2", mustutils.Must(tarutils.ReadFileFromTarArchiveBytesAsString(tarArchiveBytes, fileName2)))
 
 				fileList, err := tarutils.ListFileNamesFromTarArchiveBytes(tarArchiveBytes)
 				require.NoError(t, err)

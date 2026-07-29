@@ -68,7 +68,7 @@ func installFromSourceUrl(ctx context.Context, commandExecutor commandexecutorin
 
 		logging.LogInfoByCtxf(ctx, "Copy locally downloaded temporary file '%s' to '%s' as '%s'.", downloadedFilePath, hostDescription, installPath)
 		err = downloadeFile.CopyToFile(
-			ctx, 
+			ctx,
 			installedFile,
 			&filesoptions.CopyOptions{
 				UseSudo: options.UseSudo,

@@ -24,7 +24,7 @@ func Test_ExampleNewFileByPath(t *testing.T) {
 
 	// Get the local file:
 	file, err := nativefilesoo.NewFileByPath(filePath)
-	require.NoError(t,err)
+	require.NoError(t, err)
 
 	// Now we can work with this file in an object oriented way.
 	// We read the size for example:

@@ -27,7 +27,7 @@ type PromptOptions struct {
 	System string
 }
 
-func (p *PromptOptions) GetDeepCopy() (*PromptOptions) {
+func (p *PromptOptions) GetDeepCopy() *PromptOptions {
 	copy := new(PromptOptions)
 
 	*copy = *p

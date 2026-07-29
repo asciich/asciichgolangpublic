@@ -24,4 +24,3 @@ func (f *File) Exists(ctx context.Context) (bool, error) {
 
 	return nativefiles.Exists(ctx, path), nil
 }
-

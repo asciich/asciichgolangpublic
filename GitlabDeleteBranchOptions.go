@@ -4,7 +4,6 @@ type GitlabDeleteBranchOptions struct {
 	// By default the delete function waits until the deleted branch is not returned in the branch list anymore to avoid race conditions (branch is deleted but still listed by gitlab.)
 	// SkipWaitForDeletion = true will skip this check/wait.
 	SkipWaitForDeletion bool
-
 }
 
 func NewGitlabDeleteBranchOptions() (g *GitlabDeleteBranchOptions) {

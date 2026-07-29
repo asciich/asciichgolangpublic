@@ -15,10 +15,10 @@ func Test_GenerateSelfSignedCertificateAndEncodeAsPem(t *testing.T) {
 
 	// Generate a self signed certificate and key:
 	certKeyPair, err := x509utils.CreateSelfSignedCertificate(ctx, &x509utils.X509CreateCertificateOptions{
-		CommonName: "example.example.net",
-		Organization: "Example org",
-		Locality: "Zurich",
-		CountryName: "CH",
+		CommonName:     "example.example.net",
+		Organization:   "Example org",
+		Locality:       "Zurich",
+		CountryName:    "CH",
 		PrivateKeySize: 1024,
 	})
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func Test_GenerateSelfSignedCertificateAndEncodeAsPem(t *testing.T) {
 	// Encode generated certificate as PEM:
 	pem, err := x509utils.EncodeCertificateAsPEMString(cert)
 	require.NoError(t, err)
-	
+
 	// pem does now contain the generated certificate as PEM string:
 	require.True(t, strings.HasPrefix(pem, "-----BEGIN CERTIFICATE-----"))
 }

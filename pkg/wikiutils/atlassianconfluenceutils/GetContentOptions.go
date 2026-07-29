@@ -1,5 +1,5 @@
 package atlassianconfluenceutils
 
-type GetContentOptions struct{
+type GetContentOptions struct {
 	PrettyPrint bool
 }

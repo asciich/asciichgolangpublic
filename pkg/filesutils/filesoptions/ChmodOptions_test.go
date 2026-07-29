@@ -10,7 +10,7 @@ import (
 func Test_GetPermissionsString(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
 		options := filesoptions.ChmodOptions{}
-		
+
 		permissionsString, err := options.GetPermissionsString()
 		require.Error(t, err)
 		require.Empty(t, permissionsString)
@@ -25,12 +25,12 @@ func Test_GetPermissionsString(t *testing.T) {
 		require.NoError(t, err)
 		require.EqualValues(t, "u=r", permissionsString)
 	})
-} 
+}
 
 func Test_GetPermissions(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
 		options := filesoptions.ChmodOptions{}
-		
+
 		permissions, err := options.GetPermissions()
 		require.Error(t, err)
 		require.Zero(t, permissions)

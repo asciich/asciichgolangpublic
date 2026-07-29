@@ -32,7 +32,6 @@ func GeneratePreauthKeyForUser(ctx context.Context, commandExecutor commandexecu
 		return "", err
 	}
 
-
 	preauthKey, err := commandExecutor.RunCommandAndGetStdoutAsString(ctx, &parameteroptions.RunCommandOptions{
 		Command: []string{"headscale", "preauthkeys", "create", "--user", strconv.Itoa(id)},
 	})

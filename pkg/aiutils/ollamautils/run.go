@@ -27,7 +27,6 @@ func RunCpuOnly(ctx context.Context) error {
 	return nil
 }
 
-
 // Start ollama in a docker container in CPU only/ no GPU mode.
 func RunGPU(ctx context.Context) error {
 	logging.LogInfoByCtxf(ctx, "Run ollama in cpu only mode started.")

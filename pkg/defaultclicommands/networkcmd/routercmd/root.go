@@ -7,7 +7,7 @@ import (
 
 func NewRouterCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "router",
+		Use:   "router",
 		Short: "Router related commands.",
 	}
 

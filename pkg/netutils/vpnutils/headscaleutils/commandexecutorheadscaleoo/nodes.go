@@ -6,7 +6,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/netutils/vpnutils/headscaleutils/commandexecutorheadscale"
 )
 
-
 func (c *CommandExecutorHeadscale) ListNodeNames(ctx context.Context) ([]string, error) {
 	commandExectuor, err := c.GetCommandExecutor()
 	if err != nil {

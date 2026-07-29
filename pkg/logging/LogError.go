@@ -67,7 +67,7 @@ func OverrideLogErrorByCtx(overrideFunction func(ctx context.Context, logmessage
 	overrideFunctionLogErrorByCtx = overrideFunction
 }
 
-func LogErrorByCtx(ctx context.Context, logmessage string, ) {
+func LogErrorByCtx(ctx context.Context, logmessage string) {
 	if overrideFunctionLogErrorByCtx != nil {
 		overrideFunctionLogErrorByCtx(ctx, logmessage)
 		return

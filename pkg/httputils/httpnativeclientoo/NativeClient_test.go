@@ -14,7 +14,7 @@ func TestNativeClient_SendRequest(t *testing.T) {
 		baseUrl   string
 		port      int
 		basicAuth *httpoptions.BasicAuth
-	}	
+	}
 	type args struct {
 		ctx            context.Context
 		requestOptions *httpoptions.RequestOptions
