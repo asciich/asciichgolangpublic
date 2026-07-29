@@ -817,3 +817,7 @@ func (c *CommandExecutorFile) OpenAsReadCloser(ctx context.Context) (io.ReadClos
 
 	return commandexecutorfile.OpenAsReadCloser(ctx, commandExecutor, filePath)
 }
+
+func (c *CommandExecutorFile) IsStaticallyLinkedBinary(ctx context.Context) (isStaticallyLinked bool, err error) {
+return false, tracederrors.TracedErrorNotImplemented()
+}

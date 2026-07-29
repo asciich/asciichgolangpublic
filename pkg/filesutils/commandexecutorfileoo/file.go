@@ -1,11 +1,13 @@
 package commandexecutorfileoo
 
 import (
+	"context"
 	"path/filepath"
 	"slices"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -79,4 +81,18 @@ func (f *File) GetLocalPath() (localPath string, err error) {
 
 		return "", tracederrors.TracedErrorf("File is on '%s', not on localhost", hostDescription)
 	}
+}
+
+func (f *File) IsStaticallyLinkedBinary(ctx context.Context) (isStaticallyLinked bool, err error) {
+	commandExecutor, err := f.GetCommandExecutor()
+	if err != nil {
+		return false, err
+	}
+
+	path, err := f.GetPath()
+	if err != nil {
+		return false, err
+	}
+
+	return commandexecutorfile.IsStaticallyLinkedBinary(ctx, commandExecutor, path)
 }
