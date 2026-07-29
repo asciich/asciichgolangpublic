@@ -27,27 +27,27 @@ func Test_EventMatchesOptions(t *testing.T) {
 		event := &v1.Event{}
 		event.Namespace = "abc"
 
-require.False(t, nativekubernetesoo.EventMatchesOptions( event, &kubernetesutils.WatchEventOptions{Namespace: "abc"}, ))
+		require.False(t, nativekubernetesoo.EventMatchesOptions(event, &kubernetesutils.WatchEventOptions{Namespace: "abc"}))
 	})
 
 	t.Run("event involvedOpject namespace", func(t *testing.T) {
 		event := &v1.Event{}
 		event.InvolvedObject.Namespace = "abc"
 
-require.True(t, nativekubernetesoo.EventMatchesOptions( event, &kubernetesutils.WatchEventOptions{Namespace: "abc"}, ))
+		require.True(t, nativekubernetesoo.EventMatchesOptions(event, &kubernetesutils.WatchEventOptions{Namespace: "abc"}))
 	})
 
 	t.Run("kind matches", func(t *testing.T) {
 		event := &v1.Event{}
 		event.InvolvedObject.Kind = "abc"
 
-require.True(t, nativekubernetesoo.EventMatchesOptions( event, &kubernetesutils.WatchEventOptions{InvolvedObjectKind: "abc"}, ))
+		require.True(t, nativekubernetesoo.EventMatchesOptions(event, &kubernetesutils.WatchEventOptions{InvolvedObjectKind: "abc"}))
 	})
 
 	t.Run("kind matches ignorecase", func(t *testing.T) {
 		event := &v1.Event{}
 		event.InvolvedObject.Kind = "ABC"
 
-require.True(t, nativekubernetesoo.EventMatchesOptions( event, &kubernetesutils.WatchEventOptions{InvolvedObjectKind: "abc"}, ))
+		require.True(t, nativekubernetesoo.EventMatchesOptions(event, &kubernetesutils.WatchEventOptions{InvolvedObjectKind: "abc"}))
 	})
 }

@@ -206,6 +206,7 @@ func (c *CommandExecutorNamespace) GetCachedKubectlContext(ctx context.Context) 
 	}
 
 	commandExecutorKubernetes, ok := kubernetes.(*CommandExecutorKubernetes)
+
 	if !ok {
 		typeName, err := datatypes.GetTypeName(kubernetes)
 		if err != nil {
@@ -450,6 +451,19 @@ func (c *CommandExecutorNamespace) RoleByNameExists(ctx context.Context, name st
 	}
 
 	return exists, nil
+}
+
+// CheckSecretByNameExists checks if a secret exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (c *CommandExecutorNamespace) CheckSecretByNameExists(ctx context.Context, secretName string) error {
+	exists, err := c.SecretByNameExists(ctx, secretName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return tracederrors.TracedErrorf("Secret '%s' does not exist in namespace '%s'", secretName, "unknown")
+	}
+	return nil
 }
 
 func (c *CommandExecutorNamespace) RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
@@ -1074,7 +1088,7 @@ func toJsonEnvVarFromSecrets(secretEnvVars map[string]kubernetesparameteroptions
 	if len(secretEnvVars) == 0 {
 		return "[]"
 	}
-	
+
 	type envVar struct {
 		Name      string `json:"name"`
 		ValueFrom struct {
@@ -1084,7 +1098,7 @@ func toJsonEnvVarFromSecrets(secretEnvVars map[string]kubernetesparameteroptions
 			} `json:"secretKeyRef"`
 		} `json:"valueFrom"`
 	}
-	
+
 	envVars := make([]envVar, 0, len(secretEnvVars))
 	for envVarName, secretSource := range secretEnvVars {
 		ev := envVar{
@@ -1094,7 +1108,7 @@ func toJsonEnvVarFromSecrets(secretEnvVars map[string]kubernetesparameteroptions
 		ev.ValueFrom.SecretKeyRef.Key = secretSource.SecretKey
 		envVars = append(envVars, ev)
 	}
-	
+
 	jsonBytes, err := json.Marshal(envVars)
 	if err != nil {
 		return "[]"
