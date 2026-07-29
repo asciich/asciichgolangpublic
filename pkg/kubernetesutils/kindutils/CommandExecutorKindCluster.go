@@ -63,13 +63,3 @@ func (k *CommandExecutorKindCluster) SetClusterName(clusterName string) error {
 	k.clusterName = clusterName
 	return nil
 }
-
-// GetName returns the cluster name without the "kind-" prefix.
-// This overrides the GetName method from CommandExecutorKubernetes.
-func (k *CommandExecutorKindCluster) GetName() (name string, err error) {
-	if k.clusterName == "" {
-		// Fallback to the embedded implementation if clusterName is not set
-		return k.CommandExecutorKubernetes.GetName()
-	}
-	return k.clusterName, nil
-}
