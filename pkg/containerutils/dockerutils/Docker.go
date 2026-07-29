@@ -40,6 +40,7 @@ func GetDockerOnLocalHost() (dockerinterfaces.Docker, error) {
 	return nativedocker.NewDocker(), nil
 }
 
+// List container images on localhost.
 func ListContainerNames(ctx context.Context) ([]string, error) {
 	docker, err := GetDockerOnLocalHost()
 	if err != nil {
@@ -47,4 +48,14 @@ func ListContainerNames(ctx context.Context) ([]string, error) {
 	}
 
 	return docker.ListContainerNames(ctx)
+}
+
+// Pull container image on localhost.
+func PullContainerImage(ctx context.Context, imageName string) (containerinterfaces.Image, error) {
+	docker, err := GetDockerOnLocalHost()
+	if err != nil {
+		return nil, err
+	}
+
+	return docker.PullImage(ctx, imageName)
 }

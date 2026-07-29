@@ -8,7 +8,8 @@ import (
 
 type CommandExecutorKindCluster struct {
 	commandexecutorkubernetes.CommandExecutorKubernetes
-	kind Kind
+	kind        Kind
+	clusterName string
 }
 
 func NewCommandExecutorKindCluster() (k *CommandExecutorKindCluster) {
@@ -46,4 +47,29 @@ func (k *CommandExecutorKindCluster) SetKind(kind Kind) (err error) {
 	k.kind = kind
 
 	return nil
+}
+
+func (k *CommandExecutorKindCluster) GetClusterName() (string, error) {
+	if k.clusterName == "" {
+		return "", tracederrors.TracedError("clusterName not set")
+	}
+	return k.clusterName, nil
+}
+
+func (k *CommandExecutorKindCluster) SetClusterName(clusterName string) error {
+	if clusterName == "" {
+		return tracederrors.TracedErrorEmptyString("clusterName")
+	}
+	k.clusterName = clusterName
+	return nil
+}
+
+// GetName returns the cluster name without the "kind-" prefix.
+// This overrides the GetName method from CommandExecutorKubernetes.
+func (k *CommandExecutorKindCluster) GetName() (name string, err error) {
+	if k.clusterName == "" {
+		// Fallback to the embedded implementation if clusterName is not set
+		return k.CommandExecutorKubernetes.GetName()
+	}
+	return k.clusterName, nil
 }

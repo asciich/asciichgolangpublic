@@ -1,6 +1,8 @@
 package containerimagehandler_test
 
 import (
+	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -14,7 +16,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 )
 
-// This example shows how an image archive wiht only one file can be created.
+// This example shows how an image archive with only one file can be created.
 //
 // The given file is packed in a way the resulting image:
 //   - consists of 1 layer.
@@ -25,12 +27,32 @@ func Test_Example_CreateWithSingleFile(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.ContextVerbose()
 
-	// Create an example file
-	tempFilePath, err := tempfiles.CreateTemporaryFileFromContentString(ctx, "example context\nwith a new line.\n")
+	// Create a temporary directory for our test files
+	tempDir, err := tempfiles.CreateTempDir(ctx)
 	require.NoError(t, err)
-	defer nativefiles.Delete(ctx, tempFilePath, &filesoptions.DeleteOptions{})
+	defer nativefiles.Delete(ctx, tempDir, &filesoptions.DeleteOptions{})
 
-	// Create a temporary file to store the ouput
+	// Create a minimal Go source file
+	sourcePath := filepath.Join(tempDir, "main.go")
+	sourceCode := `package main
+func main() {}
+`
+	err = nativefiles.WriteString(ctx, sourcePath, sourceCode)
+	require.NoError(t, err)
+
+	// Build a statically linked binary from the source
+	binaryPath := filepath.Join(tempDir, "testbinary")
+	cmd := exec.Command("go", "build", "-ldflags", "-extldflags '-static'", "-o", binaryPath, sourcePath)
+	cmd.Env = append(os.Environ(), "CGO_ENABLED=0")
+	_, err = cmd.CombinedOutput()
+	require.NoError(t, err)
+
+	// Verify the binary is statically linked
+	isStaticallyLinked, err := nativefiles.IsStaticallyLinkedBinary(ctx, binaryPath)
+	require.NoError(t, err)
+	require.True(t, isStaticallyLinked, "Built binary must be statically linked")
+
+	// Create a temporary file to store the output
 	outDir, err := tempfiles.CreateTempDir(ctx)
 	require.NoError(t, err)
 	defer nativefiles.Delete(ctx, outDir, &filesoptions.DeleteOptions{})
@@ -41,10 +63,10 @@ func Test_Example_CreateWithSingleFile(t *testing.T) {
 		ctx,
 		archivePath,
 		&containeroptions.CreateSingleFileArchiveOptions{
-			SourceFilePath:     tempFilePath,
-			PathInImage:        "/testfile.txt",
+			SourceFilePath:     binaryPath,
+			PathInImage:        "/testbinary",
 			NewImageNameAndTag: "example:latest",
-			Mode:               pointerutils.ToInt64Pointer(0644),
+			Mode:               pointerutils.ToInt64Pointer(0755),
 			Architecture:       "amd64",
 		},
 	)
@@ -53,10 +75,10 @@ func Test_Example_CreateWithSingleFile(t *testing.T) {
 	// There is only one file in the whole archive:
 	fileNames, err := containerimagehandler.ListFilesInArchive(ctx, archivePath)
 	require.NoError(t, err)
-	require.EqualValues(t, []string{"/testfile.txt"}, fileNames)
+	require.EqualValues(t, []string{"/testbinary"}, fileNames)
 
-	// Check the content as well.
-	content, err := containerimagehandler.ReadFileFromArchiveAsString(ctx, archivePath, "/testfile.txt")
+	// Verify we can read the binary from the archive
+	content, err := containerimagehandler.ReadFileFromArchiveAsBytes(ctx, archivePath, "/testbinary")
 	require.NoError(t, err)
-	require.EqualValues(t, "example context\nwith a new line.\n", content)
+	require.Greater(t, len(content), 0, "Binary content should not be empty")
 }

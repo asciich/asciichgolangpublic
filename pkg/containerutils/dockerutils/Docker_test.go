@@ -51,9 +51,19 @@ func TestDocker_GetHostDescription(t *testing.T) {
 }
 
 func Test_ListContainerNames(t *testing.T) {
+	list, err := dockerutils.ListContainerNames(getCtx())
+	require.NoError(t, err)
+	require.NotNil(t, list)
+}
+
+func Test_PullContainerImage(t *testing.T) {
 	t.Run("", func(t *testing.T) {
-		list, err := dockerutils.ListContainerNames(getCtx())
+		image, err := dockerutils.PullContainerImage(getCtx(), "alpine:latest")
 		require.NoError(t, err)
-		require.NotNil(t, list)
+		require.NotNil(t, image)
+
+		name, err := image.GetName()
+		require.NoError(t, err)
+		require.EqualValues(t, "alpine:latest", name)
 	})
 }

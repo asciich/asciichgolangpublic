@@ -90,15 +90,21 @@ Example packing this binary itself into a container:
 				logging.LogFatal("Please specify --architecture. " + architectureHelp)
 			}
 
+			skipStaticLinkCheck, err := cmd.Flags().GetBool("skip-static-link-check")
+			if err != nil {
+				logging.LogGoErrorFatalWithTrace(err)
+			}
+
 			mustutils.Must0(containerimagehandler.CreateSingleFileArchive(
 				ctx,
 				archive,
 				&containeroptions.CreateSingleFileArchiveOptions{
-					SourceFilePath:     srcPath,
-					PathInImage:        pathInImage,
-					NewImageNameAndTag: newTag,
-					Mode:               pointerutils.ToInt64Pointer(int64(mode)),
-					Architecture:       architecture,
+					SourceFilePath:      srcPath,
+					PathInImage:         pathInImage,
+					NewImageNameAndTag:  newTag,
+					Mode:                pointerutils.ToInt64Pointer(int64(mode)),
+					Architecture:        architecture,
+					SkipStaticLinkCheck: skipStaticLinkCheck,
 				},
 			))
 
@@ -112,6 +118,7 @@ Example packing this binary itself into a container:
 	cmd.Flags().String("new-tag", "", "New image name and tag. Use '<name>:<tag>' .")
 	cmd.Flags().String("mode", "u=rw,g=r,o=r", "File mode for the file to add.")
 	cmd.Flags().String("architecture", "", "Architecture of the container image. "+architectureHelp)
+	cmd.Flags().Bool("skip-static-link-check", false, "Skip the check for statically linked binaries. Only use this if you know what you are doing.")
 
 	return cmd
 }

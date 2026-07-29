@@ -69,11 +69,8 @@ func main() {}
 
 				cmd := exec.Command("go", "build", "-ldflags", "-extldflags '-static'", "-o", binaryPath, sourcePath)
 				cmd.Env = append(os.Environ(), "CGO_ENABLED=0")
-				output, err := cmd.CombinedOutput()
-				if err != nil {
-					t.Logf("Skipping static binary test: failed to compile static binary: %v, output: %s", err, string(output))
-					t.Skip("Cannot create statically linked binary for testing")
-				}
+				_, err = cmd.CombinedOutput()
+				require.NoError(t, err)
 
 				cleanup := func() {
 					nativefiles.Delete(ctx, tempDir, &filesoptions.DeleteOptions{})

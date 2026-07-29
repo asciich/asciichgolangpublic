@@ -45,15 +45,6 @@ func GetLocalCommandExecutorKind() (kind Kind, err error) {
 	return GetCommandExecutorKind(commandexecutorbashoo.Bash())
 }
 
-func MustGetCommandExecutorKind(commandExecutor commandexecutorinterfaces.CommandExecutor) (kind Kind) {
-	kind, err := GetCommandExecutorKind(commandExecutor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return kind
-}
-
 func NewCommandExecutorKind() (c *CommandExecutorKind) {
 	return new(CommandExecutorKind)
 }
@@ -289,6 +280,11 @@ func (c *CommandExecutorKind) GetClusterByName(clusterName string) (cluster kube
 	toReturn := NewCommandExecutorKindCluster()
 
 	err = toReturn.SetName("kind-" + clusterName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = toReturn.SetClusterName(clusterName)
 	if err != nil {
 		return nil, err
 	}
