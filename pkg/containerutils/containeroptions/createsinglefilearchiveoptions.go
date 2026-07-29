@@ -20,6 +20,12 @@ type CreateSingleFileArchiveOptions struct {
 
 	// Architexture, usually "amd64" or "arm" (32bit) or "arm64"
 	Architecture string
+
+	// SkipStaticLinkCheck disables the check for statically linked binaries.
+	// By default, CreateSingleFileArchive verifies that the source binary is statically linked,
+	// as dynamically linked binaries will not work in a minimal container without required libraries.
+	// Set this to true to bypass the check if you know what you are doing.
+	SkipStaticLinkCheck bool
 }
 
 func (a *CreateSingleFileArchiveOptions) GetSourceFilePath() (string, error) {
@@ -60,4 +66,8 @@ func (a *CreateSingleFileArchiveOptions) GetArchitecture() (string, error) {
 	}
 
 	return a.Architecture, nil
+}
+
+func (a *CreateSingleFileArchiveOptions) GetSkipStaticLinkCheck() bool {
+return a.SkipStaticLinkCheck
 }

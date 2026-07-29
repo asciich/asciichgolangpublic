@@ -7,7 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 )
 
-func TestCommandExecutorKindCluster_MustGetLocalCommandExecutorKind(t *testing.T) {
+func TestCommandExecutorKindCluster_GetLocalCommandExecutorKind(t *testing.T) {
 	k, err := kindutils.GetLocalCommandExecutorKind()
 	require.NoError(t, err)
 
@@ -18,3 +18,4 @@ func TestCommandExecutorKindCluster_MustGetLocalCommandExecutorKind(t *testing.T
 	require.NoError(t, err)
 	require.NotNil(t, c)
 }
+
