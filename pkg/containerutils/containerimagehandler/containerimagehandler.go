@@ -19,6 +19,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -251,6 +252,18 @@ func CreateSingleFileArchive(ctx context.Context, outputPath string, options *co
 	srcFilePath, err := options.GetSourceFilePath()
 	if err != nil {
 		return err
+	}
+
+	// Check if the binary is statically linked (unless SkipStaticLinkCheck is enabled)
+	if !options.GetSkipStaticLinkCheck() {
+		isStaticallyLinked, err := nativefiles.IsStaticallyLinkedBinary(ctx, srcFilePath)
+		if err != nil {
+			return tracederrors.TracedErrorf("Failed to check if '%s' is statically linked: %w.", srcFilePath, err)
+		}
+		if !isStaticallyLinked {
+			return tracederrors.TracedErrorf("The source file '%s' is not a statically linked binary.", srcFilePath)
+		}
+		logging.LogInfoByCtxf(ctx, "Verified that '%s' is statically linked.", srcFilePath)
 	}
 
 	pathInArchive, err := options.GetPathInImage()
