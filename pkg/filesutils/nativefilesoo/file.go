@@ -8,6 +8,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -81,4 +82,13 @@ func (f *File) ReadFirstNBytes(ctx context.Context, numberOfBytesToRead int) (fi
 	firstBytes = firstBytes[:readBytes]
 
 	return firstBytes, nil
+}
+
+func (f *File) IsStaticallyLinkedBinary(ctx context.Context) (isStaticallyLinked bool, err error) {
+	path, err := f.GetPath()
+	if err != nil {
+		return false, err
+	}
+
+	return nativefiles.IsStaticallyLinkedBinary(ctx, path)
 }

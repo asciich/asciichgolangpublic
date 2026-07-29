@@ -593,3 +593,7 @@ func (l *LocalFile) GetAccessPermissionsString() (permissionsString string, err 
 
 	return nativefiles.GetAccessPermissionsString(path)
 }
+
+func (l *LocalFile) IsStaticallyLinkedBinary(ctx context.Context) (isStaticallyLinked bool, err error) {
+return false, tracederrors.TracedErrorNotImplemented()
+}

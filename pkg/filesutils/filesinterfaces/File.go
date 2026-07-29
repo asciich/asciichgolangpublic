@@ -33,6 +33,7 @@ type File interface {
 	GetPath() (path string, err error)
 	GetSizeBytes(ctx context.Context) (fileSize int64, err error)
 	GetUriAsString() (uri string, err error)
+	IsStaticallyLinkedBinary(ctx context.Context) (isStaticallyLinked bool, err error)
 	MoveToPath(ctx context.Context, destPath string, useSudo bool) (movedFile File, err error)
 	OpenAsReadCloser(ctx context.Context) (io.ReadCloser, error)
 	OpenAsWriteCloser(ctx context.Context, options *filesoptions.WriteOptions) (io.WriteCloser, error)

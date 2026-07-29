@@ -2,6 +2,11 @@
 
 Handle local files and directories in a go native way.
 
+## Implementation Details
+
+This package uses only Go standard library functions and avoids external command execution (no `exec` calls). For example:
+- `IsStaticallyLinkedBinary` uses Go's `debug/elf` package to parse ELF binaries instead of calling the external `file` command.
+
 ## Examples
 
 * [Copy file](Example_Copy_test.go)
