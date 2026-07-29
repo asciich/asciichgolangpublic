@@ -21,8 +21,8 @@ const CODE_BRIGHT_YELLOW = "\033[0;93m"
 const CODE_CYAN = "\033[0;36m"
 const CODE_GREEN = "\033[0;32m"
 const CODE_MANGENTA = "\033[0;35m"
-const CODE_RED= "\033[0;31m"
-const CODE_WHITE="\033[0;37m"
+const CODE_RED = "\033[0;31m"
+const CODE_WHITE = "\033[0;37m"
 const CODE_YELLOW = "\033[0;33m"
 
 func GetCodeGray() string {

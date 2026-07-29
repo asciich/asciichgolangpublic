@@ -9,7 +9,7 @@ import (
 
 func NewBuildContainerImageCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "build-container-image",
+		Use:   "build-container-image",
 		Short: "Build a local docker container image to run aider.",
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)

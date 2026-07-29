@@ -8,7 +8,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 )
 
-
 func Test_IsCacheIndicatorPresent(t *testing.T) {
 	t.Run("not present", func(t *testing.T) {
 		require.False(t, contextutils.IsCacheIndicatorPresent(context.Background()))

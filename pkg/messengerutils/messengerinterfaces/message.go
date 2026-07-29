@@ -1,6 +1,6 @@
 package messengerinterfaces
 
-type Message interface{
+type Message interface {
 	GetContentAsString() (string, error)
 	GetSenderAccountAsString() (string, error)
 	GetRecipientsAsStringSlice() ([]string, error)

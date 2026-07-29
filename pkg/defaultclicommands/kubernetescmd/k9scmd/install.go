@@ -10,7 +10,7 @@ import (
 
 func NewInstallK9sCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "install",
+		Use:   "install",
 		Short: "Install k9s from https://github.com/derailed/k9s/releases .",
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)

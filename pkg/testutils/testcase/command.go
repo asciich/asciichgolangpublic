@@ -78,7 +78,6 @@ func (t *TestCaseExecutorCommand) Run(ctx context.Context) (testutilsinterfaces.
 		return nil, err
 	}
 
-
 	err = result.SetTimeEnd(&tEnd)
 	if err != nil {
 		return nil, err

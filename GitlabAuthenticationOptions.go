@@ -92,4 +92,3 @@ func (g *GitlabAuthenticationOptions) SetGitlabUrl(gitlabUrl string) (err error)
 
 	return nil
 }
-

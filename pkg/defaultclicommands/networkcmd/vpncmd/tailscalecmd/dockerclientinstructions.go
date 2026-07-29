@@ -8,7 +8,7 @@ import (
 
 func NewDockerClientInstructionsCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "docker-client-instructions",
+		Use:   "docker-client-instructions",
 		Short: "Show the instructions how to run a local tailscale client in docker.",
 		Run: func(cmd *cobra.Command, args []string) {
 			instructions := `

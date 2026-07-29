@@ -95,4 +95,3 @@ func TestGetContainerName(t *testing.T) {
 		require.Contains(t, err.Error(), "ContainerName not set")
 	})
 }
-

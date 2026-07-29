@@ -27,4 +27,3 @@ func WriteMinimalConfigAsTemporaryFile(ctx context.Context) (string, error) {
 
 	return temporaryFilePath, nil
 }
-

@@ -137,8 +137,8 @@ func AddFileToArchive(ctx context.Context, archivePath string, options *containe
 
 	newImage, err := AddFileToImage(ctx, image, &containeroptions.AddFileToImageOptions{
 		SourceFilePath: srcFilePath,
-		PathInImage: pathInArchive,
-		Mode: options.Mode,
+		PathInImage:    pathInArchive,
+		Mode:           options.Mode,
 	})
 	if err != nil {
 		return err

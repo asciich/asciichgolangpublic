@@ -83,7 +83,6 @@ func Test_Options_GetAnsibleGalaxyPath(t *testing.T) {
 	})
 }
 
-
 func Test_Options_GetAnsiblePlaybookPath(t *testing.T) {
 	t.Run("nil fails", func(t *testing.T) {
 		path, err := ansibleparemeteroptions.GetAnsiblePlaybookPath(nil)

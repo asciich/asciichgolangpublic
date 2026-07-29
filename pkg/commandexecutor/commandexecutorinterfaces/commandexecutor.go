@@ -13,8 +13,8 @@ type CommandExecutor interface {
 	GetDeepCopyAsCommandExecutor() CommandExecutor
 
 	GetHostDescription() (string, error)
-	
-	// Run a command, wait until it's finished and get the whole output as CommandOutput. 
+
+	// Run a command, wait until it's finished and get the whole output as CommandOutput.
 	RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error)
 
 	// Run a command in background giving you the possibility to read the stdout as stream.

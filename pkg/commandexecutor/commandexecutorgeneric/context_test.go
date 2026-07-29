@@ -37,10 +37,8 @@ func Test_WithLiveOutputOnStdout(t *testing.T) {
 	})
 
 	t.Run("if verbose", func(t *testing.T) {
-		require.False(t, commandexecutorgeneric.IsLiveOutputOnStdoutEnabled( commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(contextutils.ContextSilent())),
-		)
+		require.False(t, commandexecutorgeneric.IsLiveOutputOnStdoutEnabled(commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(contextutils.ContextSilent())))
 
-		require.True(t, commandexecutorgeneric.IsLiveOutputOnStdoutEnabled( commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(contextutils.ContextVerbose())),
-		)
+		require.True(t, commandexecutorgeneric.IsLiveOutputOnStdoutEnabled(commandexecutorgeneric.WithLiveOutputOnStdoutIfVerbose(contextutils.ContextVerbose())))
 	})
 }

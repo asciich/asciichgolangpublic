@@ -4,7 +4,7 @@ import "github.com/spf13/cobra"
 
 func NewCronCommandCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "cron-command",
+		Use:   "cron-command",
 		Short: "Run a command periodiacally as defined by a cron interval.",
 	}
 

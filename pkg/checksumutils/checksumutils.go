@@ -111,7 +111,7 @@ func GetSha256SumFromFile(ctx context.Context, path string) (checksum string, er
 	}
 
 	logging.LogInfoByCtxf(ctx, "Get sha256 sum of file '%s' started.", path)
-	
+
 	if err = ctx.Err(); err != nil {
 		return "", tracederrors.TracedErrorEmptyString("context error before opening file: %w", err)
 	}

@@ -151,7 +151,7 @@ func (c *GopassCredential) IncrementIntValue(ctx context.Context) (err error) {
 		return err
 	}
 
-	err = c.SetByInt(ctx, currentValue + 1)
+	err = c.SetByInt(ctx, currentValue+1)
 	if err != nil {
 		return err
 	}

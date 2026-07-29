@@ -43,7 +43,7 @@ type KubernetesCluster interface {
 	ReplicaSetByNameExists(ctx context.Context, namespaceName string, replicaSetName string) (bool, error)
 	RunCommandInTemporaryPod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error)
 	SecretByNameExists(ctx context.Context, namespaceName string, secretName string) (exists bool, err error)
-        CheckSecretByNameExists(ctx context.Context, namespaceName string, secretName string) error
+	CheckSecretByNameExists(ctx context.Context, namespaceName string, secretName string) error
 	WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.WaitForPodsOptions) error
 	WhoAmI(ctx context.Context) (*kubernetesimplementationindependend.UserInfo, error)
 }

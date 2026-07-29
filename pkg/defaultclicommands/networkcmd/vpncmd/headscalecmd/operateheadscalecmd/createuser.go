@@ -9,7 +9,7 @@ import (
 
 func NewCreateUserCmd(options *OperateOptions) *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "create-user",
+		Use:   "create-user",
 		Short: "Create a headscale user.",
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)

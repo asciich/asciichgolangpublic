@@ -5,8 +5,8 @@ import (
 )
 
 type GitlabCreateTagOptions struct {
-	Name    string
-	Ref     string
+	Name string
+	Ref  string
 }
 
 func NewGitlabCreateTagOptions() (g *GitlabCreateTagOptions) {

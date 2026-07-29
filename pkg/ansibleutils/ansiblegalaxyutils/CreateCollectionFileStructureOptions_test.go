@@ -81,7 +81,6 @@ func Test_GetName(t *testing.T) {
 	})
 }
 
-
 func Test_GetNamespace(t *testing.T) {
 	t.Run("Not set", func(t *testing.T) {
 		options := &ansiblegalaxyutils.CreateCollectionFileStructureOptions{}

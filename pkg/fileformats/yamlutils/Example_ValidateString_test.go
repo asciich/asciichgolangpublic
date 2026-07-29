@@ -29,7 +29,7 @@ func Test_Example_ValidateString(t *testing.T) {
 		err := yamlutils.Validate(content, &yamlutils.ValidateOptions{})
 
 		// The error indicates no valid YAML:
-		require.Error(t,err)
+		require.Error(t, err)
 		require.ErrorIs(t, err, yamlutils.ErrInvalidYamlEmptyString)
 	})
 
@@ -41,7 +41,7 @@ func Test_Example_ValidateString(t *testing.T) {
 		err := yamlutils.Validate(content, &yamlutils.ValidateOptions{})
 
 		// The error indicates no valid YAML:
-		require.Error(t,err)
+		require.Error(t, err)
 		require.ErrorIs(t, err, yamlutils.ErrInvalidYaml)
 	})
 

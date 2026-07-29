@@ -27,7 +27,7 @@ func Test_Example_move(t *testing.T) {
 	require.NoError(t, err)
 	// Delete the dstDir when the test is finished:
 	defer nativefiles.Delete(ctx, dstDir, &filesoptions.DeleteOptions{})
-	
+
 	// Define the destination path:
 	dst := filepath.Join(dstDir, "dst")
 	// The dst file does not exist yet:

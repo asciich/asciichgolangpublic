@@ -108,6 +108,6 @@ func PointersEqual(ptr1 interface{}, ptr2 interface{}) (addressEqual bool, err e
 	return addressEqual, nil
 }
 
-func ToInt64Pointer(data int64) (*int64) {
+func ToInt64Pointer(data int64) *int64 {
 	return &data
 }

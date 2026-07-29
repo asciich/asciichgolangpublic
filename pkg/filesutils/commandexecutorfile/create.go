@@ -52,7 +52,6 @@ func CreateFile(ctx context.Context, commandExecutor commandexecutorinterfaces.C
 	return nil
 }
 
-
 func CreateDirectory(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, path string, options *filesoptions.CreateOptions) error {
 	if commandExecutor == nil {
 		return tracederrors.TracedErrorNil("commandExecutor")

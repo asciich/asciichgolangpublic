@@ -29,7 +29,6 @@ func (g *GitlabCreateReleaseOptions) GetName() (name string, err error) {
 	return g.Name, nil
 }
 
-
 func (g *GitlabCreateReleaseOptions) SetDescription(description string) (err error) {
 	if description == "" {
 		return tracederrors.TracedErrorf("description is empty string")

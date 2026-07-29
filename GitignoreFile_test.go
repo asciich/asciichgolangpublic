@@ -102,7 +102,7 @@ func TestGitignoreFileContainsIgnoreOnEmptyFile(t *testing.T) {
 
 				gitignoreFile, err := GetGitignoreFileByFile(emptyFile)
 				require.NoError(t, err)
-				defer gitignoreFile.Delete(ctx,&filesoptions.DeleteOptions{})
+				defer gitignoreFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				require.True(t, mustutils.Must(gitignoreFile.Exists(ctx)))
 				containsIgnore, err := gitignoreFile.ContainsIgnore("abc")

@@ -22,8 +22,8 @@ func Test_Example_ValidateSignature(t *testing.T) {
 
 	// Generate a new key pair:
 	privateKey, publicKey, err := nativegnupg.GenerateKeyPair(ctx, &gnupgoptions.GenerateKeyPairOptions{
-		Name: "reto",
-		Email: "reto@example.com",
+		Name:    "reto",
+		Email:   "reto@example.com",
 		Comment: "Example key",
 		RSABits: 1024,
 	})

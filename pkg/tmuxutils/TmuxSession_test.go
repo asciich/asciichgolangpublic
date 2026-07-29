@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/tmuxutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/tmuxutils"
 )
 
 func getCtx() context.Context {

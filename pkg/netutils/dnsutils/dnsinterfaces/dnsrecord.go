@@ -1,6 +1,6 @@
 package dnsinterfaces
 
-type DnsRecord interface{
+type DnsRecord interface {
 	GetRecordType() (string, error)
 	GetName() (string, error)
 	GetContent() (string, error)

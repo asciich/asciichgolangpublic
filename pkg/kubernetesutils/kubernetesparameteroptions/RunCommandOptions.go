@@ -7,16 +7,16 @@ import (
 )
 
 type RunCommandOptions struct {
-	RunCommandOptions                  parameteroptions.RunCommandOptions
-	Image                              string
-	PodName                            string
-	ReplicaSetName                     string
-	DeploymentName                     string
-	ContainerName                      string
-	Command                            []string
-	DeleteAlreadyExistingPod           bool
-	DeleteAlreadyExistingReplicaSet    bool
-	DeleteAlreadyExistingDeployment    bool
+	RunCommandOptions               parameteroptions.RunCommandOptions
+	Image                           string
+	PodName                         string
+	ReplicaSetName                  string
+	DeploymentName                  string
+	ContainerName                   string
+	Command                         []string
+	DeleteAlreadyExistingPod        bool
+	DeleteAlreadyExistingReplicaSet bool
+	DeleteAlreadyExistingDeployment bool
 
 	// Wait until pod is in "running" state
 	WaitForPodRunning bool
@@ -95,7 +95,7 @@ func (r *RunCommandOptions) GetCommand() ([]string, error) {
 }
 
 func (r *RunCommandOptions) IsStinDataAvailable() bool {
-	return len(r.StdinBytes) > 0 
+	return len(r.StdinBytes) > 0
 }
 
 func (r *RunCommandOptions) GetReplicaSetName() (string, error) {

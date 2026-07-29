@@ -23,4 +23,3 @@ func (f *File) GetSizeBytes(ctx context.Context) (fileSize int64, err error) {
 
 	return nativefiles.GetSizeBytes(ctx, path)
 }
-

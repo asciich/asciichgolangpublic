@@ -34,7 +34,7 @@ func GetProcessProcStatusFileValueAsInt(ctx context.Context, valueName string) (
 	return value, err
 }
 
-func  GetProcessDefaultDirectoryModeAsFsFileMode(ctx context.Context) (defaultMode fs.FileMode, err error) {
+func GetProcessDefaultDirectoryModeAsFsFileMode(ctx context.Context) (defaultMode fs.FileMode, err error) {
 	defaultModeInt, err := GetProcessDefaultDirectoryModeAsInt(ctx)
 	if err != nil {
 		return 0, err
@@ -44,7 +44,7 @@ func  GetProcessDefaultDirectoryModeAsFsFileMode(ctx context.Context) (defaultMo
 	return defaultMode, nil
 }
 
-func  GetProcessDefaultDirectoryModeAsInt(ctx context.Context) (defaultMode int, err error) {
+func GetProcessDefaultDirectoryModeAsInt(ctx context.Context) (defaultMode int, err error) {
 	umask, err := GetUmask(ctx)
 	if err != nil {
 		return -1, err
@@ -55,12 +55,12 @@ func  GetProcessDefaultDirectoryModeAsInt(ctx context.Context) (defaultMode int,
 	return defaultMode, nil
 }
 
-func  GetProcessId() (processId int) {
+func GetProcessId() (processId int) {
 	processId = os.Getpid()
 	return processId
 }
 
-func  GetProcessProcDirectory(ctx context.Context) (procDirectory filesinterfaces.Directory, err error) {
+func GetProcessProcDirectory(ctx context.Context) (procDirectory filesinterfaces.Directory, err error) {
 	pid := GetProcessId()
 	procDirectory, err = files.GetLocalDirectoryByPath(ctx, fmt.Sprintf("/proc/%d", pid))
 	if err != nil {

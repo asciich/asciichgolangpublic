@@ -7,7 +7,7 @@ import (
 
 func NewCloudCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "cloud",
+		Use:   "cloud",
 		Short: "(Public-) cloud related commands.",
 	}
 

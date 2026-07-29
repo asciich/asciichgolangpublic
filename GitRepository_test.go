@@ -557,7 +557,7 @@ func TestGitRepository_CloneRepository_idempotence(t *testing.T) {
 					require.NoError(t, err)
 				}
 
-require.EqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
+				require.EqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
 					mustutils.Must(clonedRepo.GetCurrentCommitHash(ctx)),
 				)
 			},
@@ -649,28 +649,28 @@ func TestGitRepository_PullAndPush(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-require.NotEqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
+				require.NotEqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
 					mustutils.Must(clonedRepo2.GetCurrentCommitHash(ctx)),
 				)
 
-require.NotEqualValues(t, mustutils.Must(clonedRepo.GetCurrentCommitHash(ctx)),
+				require.NotEqualValues(t, mustutils.Must(clonedRepo.GetCurrentCommitHash(ctx)),
 					mustutils.Must(clonedRepo2.GetCurrentCommitHash(ctx)),
 				)
 
 				mustutils.Must0(clonedRepo2.Push(ctx))
-require.EqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
+				require.EqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
 					mustutils.Must(clonedRepo2.GetCurrentCommitHash(ctx)),
 				)
-require.NotEqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
+				require.NotEqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
 					mustutils.Must(clonedRepo.GetCurrentCommitHash(ctx)),
 				)
 
 				err = clonedRepo.Pull(ctx)
 				require.NoError(t, err)
-require.EqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
+				require.EqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
 					mustutils.Must(clonedRepo2.GetCurrentCommitHash(ctx)),
 				)
-require.EqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
+				require.EqualValues(t, mustutils.Must(upstreamRepo.GetCurrentCommitHash(ctx)),
 					mustutils.Must(clonedRepo.GetCurrentCommitHash(ctx)),
 				)
 			},
@@ -1858,8 +1858,7 @@ func TestGitRepository_CommitIfUncommittedChanges(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-require.EqualValues(t, "commit before testing", mustutils.Must(gitRepo.GetCurrentCommitMessage(ctx)),
-				)
+				require.EqualValues(t, "commit before testing", mustutils.Must(gitRepo.GetCurrentCommitMessage(ctx)))
 
 				_, err = gitRepo.CommitIfUncommittedChanges(
 					ctx,

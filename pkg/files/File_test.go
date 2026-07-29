@@ -135,7 +135,6 @@ func TestFile_MoveToPath(t *testing.T) {
 	}
 }
 
-
 func TestFile_String(t *testing.T) {
 	tests := []struct {
 		implementationName string

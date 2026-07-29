@@ -34,12 +34,11 @@ func Test_IsValidCollectionName(t *testing.T) {
 	t.Run("tailing underscore is invalid", func(t *testing.T) {
 		require.False(t, ansiblegalaxyutils.IsValidCollectionName("b_"))
 		require.False(t, ansiblegalaxyutils.IsValidCollectionName("ab_"))
-	})	
-	
+	})
+
 	t.Run("valid without underscore", func(t *testing.T) {
 		require.True(t, ansiblegalaxyutils.IsValidCollectionName("abcdef"))
 	})
-
 
 	t.Run("valid with underscore", func(t *testing.T) {
 		require.True(t, ansiblegalaxyutils.IsValidCollectionName("a_bcdef"))
@@ -68,7 +67,6 @@ func Test_IsValidCollectionName(t *testing.T) {
 	})
 }
 
-
 func Test_CheckValidCollectionName(t *testing.T) {
 	t.Run("empty string", func(t *testing.T) {
 		require.Error(t, ansiblegalaxyutils.CheckValidCollectionName(""))
@@ -96,12 +94,11 @@ func Test_CheckValidCollectionName(t *testing.T) {
 	t.Run("tailing underscore is invalid", func(t *testing.T) {
 		require.Error(t, ansiblegalaxyutils.CheckValidCollectionName("b_"))
 		require.Error(t, ansiblegalaxyutils.CheckValidCollectionName("ab_"))
-	})	
-	
+	})
+
 	t.Run("valid without underscore", func(t *testing.T) {
 		require.NoError(t, ansiblegalaxyutils.CheckValidCollectionName("abcdef"))
 	})
-
 
 	t.Run("valid with underscore", func(t *testing.T) {
 		require.NoError(t, ansiblegalaxyutils.CheckValidCollectionName("a_bcdef"))

@@ -49,8 +49,8 @@ func Test_WriteMininalPlaybookExecutingRoles(t *testing.T) {
 		playbookPath, err := ansibleplaybook.WriteTemporaryMinimalPlaybookExecutingRoles(
 			ctx,
 			&ansibleplaybook.MinimalPlaybookOptions{
-				Hostname: "example-host",
-				Roles:    []string{"role1", "role2"},
+				Hostname:   "example-host",
+				Roles:      []string{"role1", "role2"},
 				RemoteUser: "root",
 			},
 		)

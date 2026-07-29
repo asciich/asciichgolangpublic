@@ -77,7 +77,7 @@ func (g *GenericResponse) GetStatusCode() (statusCode int, err error) {
 func (g *GenericResponse) CheckStatusCode(expectedStatusCodes []int) error {
 	for _, toCheck := range expectedStatusCodes {
 		if g.IsStatusCode(toCheck) {
-			return nil 
+			return nil
 		}
 	}
 

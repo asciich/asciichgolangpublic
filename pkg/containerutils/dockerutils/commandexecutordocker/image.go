@@ -8,7 +8,7 @@ import (
 
 type Image struct {
 	docker *CommandExecutorDocker
-	name                  string
+	name   string
 }
 
 func (i *Image) SetName(name string) error {

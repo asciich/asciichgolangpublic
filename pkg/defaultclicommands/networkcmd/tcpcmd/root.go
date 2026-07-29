@@ -4,7 +4,7 @@ import "github.com/spf13/cobra"
 
 func NewTcpCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "tcp",
+		Use:   "tcp",
 		Short: "TCP related commands.",
 	}
 

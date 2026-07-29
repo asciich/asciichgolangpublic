@@ -18,8 +18,8 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/types"
 
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containeroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 

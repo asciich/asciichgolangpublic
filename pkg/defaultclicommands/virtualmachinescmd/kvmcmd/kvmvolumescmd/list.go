@@ -11,7 +11,7 @@ import (
 
 func NewListCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "list",
+		Use:   "list",
 		Short: "List KVM volumes",
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx, kvmHypervisor := kvmcmdutils.GetCtxAndKvmHypervisor(cmd)

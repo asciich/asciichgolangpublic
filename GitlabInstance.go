@@ -175,7 +175,7 @@ func (g *GitlabInstance) Authenticate(ctx context.Context, authOptions *GitlabAu
 		if err != nil {
 			return err
 		}
-		
+
 		accessToken, err := gopassutils.GetCredentialValueAsString(ctx, getSecretOptions)
 		if err != nil {
 			return err

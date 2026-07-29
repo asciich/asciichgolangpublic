@@ -69,5 +69,5 @@ func (a *CreateSingleFileArchiveOptions) GetArchitecture() (string, error) {
 }
 
 func (a *CreateSingleFileArchiveOptions) GetSkipStaticLinkCheck() bool {
-return a.SkipStaticLinkCheck
+	return a.SkipStaticLinkCheck
 }

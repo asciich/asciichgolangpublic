@@ -189,7 +189,7 @@ func TestGitlabCommitGetIsMergeCommit(t *testing.T) {
 
 				latestCommitAfterWrite, err := branch.GetLatestCommit(ctx)
 				require.NoError(t, err)
-				
+
 				latestHash, err := latestCommit.GetCommitHash()
 				require.NoError(t, err)
 				afterWriteHash, err := latestCommitAfterWrite.GetCommitHash()

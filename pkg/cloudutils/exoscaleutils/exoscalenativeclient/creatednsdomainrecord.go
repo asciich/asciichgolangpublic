@@ -59,7 +59,7 @@ func CreateDnsDomainRecord(ctx context.Context, client *v3.Client, domainName st
 
 	if !options.AllowMultipleEntries {
 		existingRecords, err := ListDomainRecords(ctx, client, domainName, &dnsoptions.ListDnsDomainRecordOptions{
-			Name: recordName,
+			Name:       recordName,
 			RecordType: recordType,
 		})
 		if err != nil {

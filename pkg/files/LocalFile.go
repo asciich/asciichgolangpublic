@@ -595,5 +595,5 @@ func (l *LocalFile) GetAccessPermissionsString() (permissionsString string, err 
 }
 
 func (l *LocalFile) IsStaticallyLinkedBinary(ctx context.Context) (isStaticallyLinked bool, err error) {
-return false, tracederrors.TracedErrorNotImplemented()
+	return false, tracederrors.TracedErrorNotImplemented()
 }

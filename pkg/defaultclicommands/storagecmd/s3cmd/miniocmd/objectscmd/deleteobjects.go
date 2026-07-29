@@ -38,7 +38,5 @@ func NewDeleteObjectsCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Comman
 		},
 	}
 
-
-
 	return cmd
 }

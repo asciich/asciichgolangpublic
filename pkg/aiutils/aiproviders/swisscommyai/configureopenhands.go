@@ -34,6 +34,9 @@ func AddLlmProfileToOpenhands(ctx context.Context, openHandsUrl string) error {
 		ApiKey:  apiKey,
 		BaseUrl: "https://code.myai.swisscom.ch/v1",
 	})
+	if err != nil {
+		return err
+	}
 
 	logging.LogInfoByCtxf(ctx, "Add LLM profile for myai of Swisscom to openhands '%s' finished.", openHandsUrl)
 

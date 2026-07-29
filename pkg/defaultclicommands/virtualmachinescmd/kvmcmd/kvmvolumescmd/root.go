@@ -2,9 +2,9 @@ package kvmvolumescmd
 
 import "github.com/spf13/cobra"
 
-func NewVolumesCmd() *cobra.Command{
+func NewVolumesCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "volumes",
+		Use:   "volumes",
 		Short: "KVM volumes related commands.",
 	}
 

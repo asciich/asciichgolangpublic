@@ -201,7 +201,7 @@ func TestGenerateSshKeyPair_SshKeygenValidation(t *testing.T) {
 
 	// Both must contain the same key material. Trim trailing whitespace/newlines
 	// since ssh-keygen may append a trailing newline that differs from ours.
-require.Equal(t, strings.TrimSpace(string(writtenPub)),
+	require.Equal(t, strings.TrimSpace(string(writtenPub)),
 		strings.TrimSpace(string(derivedPub)),
 		"public key file does not match the public key derived from the private key by ssh-keygen",
 	)

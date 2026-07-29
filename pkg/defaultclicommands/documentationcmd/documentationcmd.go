@@ -4,7 +4,7 @@ import "github.com/spf13/cobra"
 
 func NewDocumentationCmd(rootCmd *cobra.Command) *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "documentation",
+		Use:   "documentation",
 		Short: "Commands for documentation.",
 	}
 

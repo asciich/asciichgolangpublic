@@ -17,5 +17,5 @@ func Generate(ctx context.Context) string {
 
 func IsUuid(input string) bool {
 	_, err := uuid.Parse(input)
-	return err == nil 
+	return err == nil
 }
