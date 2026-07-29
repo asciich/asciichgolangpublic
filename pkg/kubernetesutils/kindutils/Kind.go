@@ -58,3 +58,19 @@ func DeleteClusterByNameIfInContinuousIntegration(ctx context.Context, clusterNa
 
 	return nil
 }
+
+// GetLocalKindCluster returns a Kind cluster instance for the given cluster name.
+// It uses the local command executor to interact with the Kind cluster.
+// The cluster must already exist or be created separately.
+func GetLocalKindCluster(clusterName string) (kubernetesinterfaces.KubernetesCluster, error) {
+	if clusterName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("clusterName")
+	}
+
+	kind, err := GetLocalCommandExecutorKind()
+	if err != nil {
+		return nil, err
+	}
+
+	return kind.GetClusterByName(clusterName)
+}
