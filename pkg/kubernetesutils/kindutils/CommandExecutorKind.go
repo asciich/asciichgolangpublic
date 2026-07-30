@@ -41,6 +41,15 @@ func GetCommandExecutorKind(commandExecutor commandexecutorinterfaces.CommandExe
 	return toReturn, nil
 }
 
+func GetCommandExecutorKindCluster(commandExecutor commandexecutorinterfaces.CommandExecutor, clusterName string) (kubernetesinterfaces.KubernetesCluster, error) {
+	kind, err := GetCommandExecutorKind(commandExecutor)
+	if err != nil {
+		return nil, err
+	}
+
+	return kind.GetClusterByName(clusterName)
+}
+
 func GetLocalCommandExecutorKind() (kind Kind, err error) {
 	return GetCommandExecutorKind(commandexecutorbashoo.Bash())
 }
