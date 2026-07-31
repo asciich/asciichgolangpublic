@@ -665,3 +665,31 @@ func (n *NativeKubernetesCluster) DeploymentByNameExists(ctx context.Context, na
 
 	return namespace.DeploymentByNameExists(ctx, deploymentName)
 }
+
+
+func (n *NativeKubernetesCluster) CronJobByNameExists(ctx context.Context, namespaceName string, cronJobName string) (exists bool, err error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return false, err
+	}
+
+	return namespace.CronJobByNameExists(ctx, cronJobName)
+}
+
+func (n *NativeKubernetesCluster) CreateCronJob(ctx context.Context, namespaceName string, cronJobName string, schedule string, image string, command []string, labels map[string]string) (createdCronJob kubernetesinterfaces.CronJob, err error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.CreateCronJob(ctx, cronJobName, schedule, image, command, labels)
+}
+
+func (n *NativeKubernetesCluster) DeleteCronJobByName(ctx context.Context, namespaceName string, cronJobName string) (err error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+
+	return namespace.DeleteCronJobByName(ctx, cronJobName)
+}

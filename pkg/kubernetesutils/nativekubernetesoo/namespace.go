@@ -1019,3 +1019,88 @@ func (n *NativeNamespace) DeploymentByNameExists(ctx context.Context, deployment
 
 	return deployment.Exists(ctx)
 }
+
+
+func (n *NativeNamespace) CronJobByNameExists(ctx context.Context, cronJobName string) (bool, error) {
+	if cronJobName == "" {
+		return false, tracederrors.TracedErrorEmptyString("cronJobName")
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return false, err
+	}
+
+	clientset, err := n.GetClientSet()
+	if err != nil {
+		return false, err
+	}
+
+	return nativekubernetes.CronJobExists(ctx, clientset, namespaceName, cronJobName)
+}
+
+func (n *NativeNamespace) CreateCronJob(ctx context.Context, cronJobName string, schedule string, image string, command []string, labels map[string]string) (createdCronJob kubernetesinterfaces.CronJob, err error) {
+	if cronJobName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("cronJobName")
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	clientset, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	err = nativekubernetes.CreateCronJob(ctx, clientset, namespaceName, cronJobName, schedule, image, command, labels)
+	if err != nil {
+		return nil, err
+	}
+
+	return n.GetCronJobByName(cronJobName)
+}
+
+func (n *NativeNamespace) GetCronJobByName(name string) (cronJob kubernetesinterfaces.CronJob, err error) {
+	if name == "" {
+		return nil, tracederrors.TracedErrorEmptyString("name")
+	}
+
+	return &NativeCronJob{
+		name:      name,
+		namespace: n,
+	}, nil
+}
+
+func (n *NativeNamespace) DeleteCronJobByName(ctx context.Context, cronJobName string) (err error) {
+	if cronJobName == "" {
+		return tracederrors.TracedErrorEmptyString("cronJobName")
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return err
+	}
+
+	clientset, err := n.GetClientSet()
+	if err != nil {
+		return err
+	}
+
+	return nativekubernetes.DeleteCronJob(ctx, clientset, namespaceName, cronJobName)
+}
+
+func (n *NativeNamespace) ListCronJobNames(ctx context.Context) ([]string, error) {
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	return nativekubernetes.ListCronJobNames(ctx, clientSet, namespaceName)
+}

@@ -5,6 +5,8 @@ Work with kubernetes.
 The implementation using the official k8s client-go is available as:
 * [non object oriented implementation](/pkg/kubernetesutils/nativekubernetes/)
 * [object oriented implementation](/pkg/kubernetesutils/nativekubernetesoo/) which is on a higher abstraction layer than the non object oriented one.
+The implementation using exec to call `kubectl` or other commands is available as:
+* [commandexecutorkubernetes](/pkg/kubernetesutils/commandexecutorkubernetes/)
 
 ## Examples
 

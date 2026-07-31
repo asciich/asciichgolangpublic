@@ -1666,3 +1666,202 @@ func (c *CommandExecutorNamespace) DeploymentByNameExists(ctx context.Context, d
 
 	return deployment.Exists(ctx)
 }
+
+func (c *CommandExecutorNamespace) CronJobByNameExists(ctx context.Context, cronJobName string) (bool, error) {
+	if cronJobName == "" {
+		return false, tracederrors.TracedErrorEmptyString("cronJobName")
+	}
+
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return false, err
+	}
+
+	var exists bool
+	_, err = c.RunCommandAndGetStdoutAsLines(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context",
+				contextName,
+				"--namespace",
+				namespaceName,
+				"get",
+				"cronjob",
+				cronJobName,
+			},
+		},
+	)
+	if err == nil {
+		exists = true
+	} else {
+		expectedNotFoundMessage := fmt.Sprintf("Error from server (NotFound): cronjobs.batch \"%s\" not found", cronJobName)
+		if !strings.Contains(err.Error(), expectedNotFoundMessage) {
+			return false, err
+		}
+	}
+
+	if exists {
+		logging.LogInfoByCtxf(ctx, "CronJob '%s' in namespace '%s' of kubernetes '%s' exists.", cronJobName, namespaceName, contextName)
+	} else {
+		logging.LogInfoByCtxf(ctx, "CronJob '%s' in namespace '%s' of kubernetes '%s' does not exist.", cronJobName, namespaceName, contextName)
+	}
+
+	return exists, nil
+}
+
+func (c *CommandExecutorNamespace) CreateCronJob(ctx context.Context, cronJobName string, schedule string, image string, command []string, labels map[string]string) (kubernetesinterfaces.CronJob, error) {
+	if cronJobName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("cronJobName")
+	}
+
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	cmd := []string{
+		"kubectl",
+		"--context", contextName,
+		"--namespace", namespaceName,
+		"create", "cronjob", cronJobName,
+		"--schedule", schedule,
+		"--image", image,
+	}
+
+	if len(command) > 0 {
+		cmd = append(cmd, "--")
+		cmd = append(cmd, command...)
+	}
+
+	for key, value := range labels {
+		cmd = append(cmd, "--label", key+"="+value)
+	}
+
+	_, err = c.RunCommandAndGetStdoutAsLines(ctx, &parameteroptions.RunCommandOptions{
+		Command: cmd,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Created CronJob '%s' in namespace '%s' of kubernetes '%s'.", cronJobName, namespaceName, contextName)
+
+	return c.GetCronJobByName(cronJobName)
+}
+
+func (c *CommandExecutorNamespace) DeleteCronJobByName(ctx context.Context, cronJobName string) error {
+	if cronJobName == "" {
+		return tracederrors.TracedErrorEmptyString("cronJobName")
+	}
+
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	exists, err := c.CronJobByNameExists(ctx, cronJobName)
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		logging.LogInfoByCtxf(ctx, "CronJob '%s' in namespace '%s' does not exist. Skip delete.", cronJobName, namespaceName)
+		return nil
+	}
+
+	_, err = c.RunCommandAndGetStdoutAsLines(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context",
+				contextName,
+				"--namespace",
+				namespaceName,
+				"delete",
+				"cronjob",
+				cronJobName,
+			},
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Deleted CronJob '%s' in namespace '%s'.", cronJobName, namespaceName)
+	return nil
+}
+
+func (c *CommandExecutorNamespace) GetCronJobByName(name string) (kubernetesinterfaces.CronJob, error) {
+	if name == "" {
+		return nil, tracederrors.TracedErrorEmptyString("name")
+	}
+
+	return &CommandExecutorCronJob{
+		name:      name,
+		namespace: c,
+	}, nil
+}
+
+func (c *CommandExecutorNamespace) ListCronJobNames(ctx context.Context) ([]string, error) {
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	lines, err := c.RunCommandAndGetStdoutAsLines(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context",
+				contextName,
+				"--namespace",
+				namespaceName,
+				"get",
+				"cronjob",
+				"-o",
+				"name",
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	names := []string{}
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		parts := strings.SplitN(line, "/", 2)
+		if len(parts) == 2 {
+			names = append(names, parts[1])
+		}
+	}
+
+	return names, nil
+}
