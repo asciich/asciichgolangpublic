@@ -49,4 +49,9 @@ type Namespace interface {
 	SecretByNameExists(ctx context.Context, name string) (exits bool, err error)
 	WatchConfigMap(ctx context.Context, name string, onCreate func(ConfigMap), onUpdate func(ConfigMap), onDelete func(ConfigMap)) error
 	WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, options *kubernetesparameteroptions.WaitForPodsOptions) error
+	CronJobByNameExists(ctx context.Context, cronJobName string) (bool, error)
+	CreateCronJob(ctx context.Context, cronJobName string, schedule string, image string, command []string, labels map[string]string) (CronJob, error)
+	DeleteCronJobByName(ctx context.Context, cronJobName string) (err error)
+	GetCronJobByName(name string) (CronJob, error)
+	ListCronJobNames(ctx context.Context) ([]string, error)
 }

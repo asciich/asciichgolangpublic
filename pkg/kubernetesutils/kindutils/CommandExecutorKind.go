@@ -372,3 +372,15 @@ func (c *CommandExecutorKind) SetCommandExecutor(commandExecutor commandexecutor
 
 	return nil
 }
+// CronJob stub implementations
+func (k *CommandExecutorKind) CronJobByNameExists(ctx context.Context, namespaceName string, cronJobName string) (exists bool, err error) {
+	return false, tracederrors.TracedErrorNotImplemented()
+}
+
+func (k *CommandExecutorKind) CreateCronJob(ctx context.Context, namespaceName string, cronJobName string, schedule string, image string, command []string, labels map[string]string) (kubernetesinterfaces.CronJob, error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}
+
+func (k *CommandExecutorKind) DeleteCronJobByName(ctx context.Context, namespaceName string, cronJobName string) error {
+	return tracederrors.TracedErrorNotImplemented()
+}

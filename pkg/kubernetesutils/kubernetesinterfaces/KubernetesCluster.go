@@ -46,4 +46,7 @@ type KubernetesCluster interface {
 	CheckSecretByNameExists(ctx context.Context, namespaceName string, secretName string) error
 	WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.WaitForPodsOptions) error
 	WhoAmI(ctx context.Context) (*kubernetesimplementationindependend.UserInfo, error)
+	CronJobByNameExists(ctx context.Context, namespaceName string, cronJobName string) (exists bool, err error)
+	CreateCronJob(ctx context.Context, namespaceName string, cronJobName string, schedule string, image string, command []string, labels map[string]string) (CronJob, error)
+	DeleteCronJobByName(ctx context.Context, namespaceName string, cronJobName string) (err error)
 }

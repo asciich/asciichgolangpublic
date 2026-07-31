@@ -108,3 +108,7 @@ This info will also be printed as part of [`TracedError`](/pkg/tracederrors/).
 It's recommended to use [`TracedError`](/pkg/tracederrors/) whenever an error occurs with a custom error message to provide additional debug information. 
 
 See the [tracederrors package](/pkg/tracederrors/) for details.
+
+## System-prompt
+
+- Use the `file_editor` to modify files. There is no need to use shell commands for this.
