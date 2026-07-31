@@ -726,3 +726,12 @@ func (c *CommandExecutorHost) RunCommandAndGetStdinAsIoWriteCloser(ctx context.C
 
 	return commandExecuor.RunCommandAndGetStdinAsIoWriteCloser(ctx, options)
 }
+
+func (c *CommandExecutorHost) GetCPUArchitecture(ctx context.Context) (string, error) {
+	commandExecuor, err := c.GetCommandExecutor()
+	if err != nil {
+		return "", err
+	}
+
+	return commandExecuor.GetCPUArchitecture(ctx)
+}

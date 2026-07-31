@@ -5,12 +5,10 @@ Work with kubernetes.
 The implementation using the official k8s client-go is available as:
 * [non object oriented implementation](/pkg/kubernetesutils/nativekubernetes/)
 * [object oriented implementation](/pkg/kubernetesutils/nativekubernetesoo/) which is on a higher abstraction layer than the non object oriented one.
-The implementation using exec to call `kubectl` or other commands is available as:
+The implementation using exec to call `kubectl` or other commands is useful when jumphosts are in between. It is available as:
 * [commandexecutorkubernetes](/pkg/kubernetesutils/commandexecutorkubernetes/)
 
 ## Examples
-
-### Check*ByNameExists Examples
 
 * [Check ConfigMap by name exists](Example_ConfigmapByNameExists_test.go)
 * [Check Secret by name exists](Example_CheckSecretByNameExists_test.go)
@@ -19,9 +17,6 @@ The implementation using exec to call `kubectl` or other commands is available a
 * [Check ReplicaSet by name exists](Example_CheckReplicaSetByNameExists_test.go)
 * [Check Deployment by name exists](Example_CheckDeploymentByNameExists_test.go)
 * [Check CronJob by name exists](Example_CheckCronJobByNameExists_test.go)
-
-### Other Examples
-
 * [Create and delete ConfigMap](Example_CreateAndDeleteConfigMap_test.go)
 * [Create and delete Deployment](Example_CreateAndDeleteDeployment_test.go)
 * [Create and delete Pod](Example_CreateAndDeletePod_test.go)
