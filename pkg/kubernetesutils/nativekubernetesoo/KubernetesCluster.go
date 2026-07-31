@@ -400,6 +400,71 @@ func (n *NativeKubernetesCluster) CheckSecretByNameExists(ctx context.Context, n
 	return nil
 }
 
+// CheckNamespaceByNameExists checks if a namespace exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (n *NativeKubernetesCluster) CheckNamespaceByNameExists(ctx context.Context, namespaceName string) error {
+	exists, err := n.NamespaceByNameExists(ctx, namespaceName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return tracederrors.TracedErrorf("Namespace '%s' does not exist", namespaceName)
+	}
+	return nil
+}
+
+// CheckPodByNameExists checks if a pod exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (n *NativeKubernetesCluster) CheckPodByNameExists(ctx context.Context, namespaceName string, podName string) error {
+	exists, err := n.PodByNameExists(ctx, namespaceName, podName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return tracederrors.TracedErrorf("Pod '%s' does not exist in namespace '%s'", podName, namespaceName)
+	}
+	return nil
+}
+
+// CheckReplicaSetByNameExists checks if a replicaSet exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (n *NativeKubernetesCluster) CheckReplicaSetByNameExists(ctx context.Context, namespaceName string, replicaSetName string) error {
+	exists, err := n.ReplicaSetByNameExists(ctx, namespaceName, replicaSetName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return tracederrors.TracedErrorf("ReplicaSet '%s' does not exist in namespace '%s'", replicaSetName, namespaceName)
+	}
+	return nil
+}
+
+// CheckDeploymentByNameExists checks if a deployment exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (n *NativeKubernetesCluster) CheckDeploymentByNameExists(ctx context.Context, namespaceName string, deploymentName string) error {
+	exists, err := n.DeploymentByNameExists(ctx, namespaceName, deploymentName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return tracederrors.TracedErrorf("Deployment '%s' does not exist in namespace '%s'", deploymentName, namespaceName)
+	}
+	return nil
+}
+
+// CheckCronJobByNameExists checks if a cronJob exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (n *NativeKubernetesCluster) CheckCronJobByNameExists(ctx context.Context, namespaceName string, cronJobName string) error {
+	exists, err := n.CronJobByNameExists(ctx, namespaceName, cronJobName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return tracederrors.TracedErrorf("CronJob '%s' does not exist in namespace '%s'", cronJobName, namespaceName)
+	}
+	return nil
+}
+
 func (n *NativeKubernetesCluster) DeleteSecretByName(ctx context.Context, namespaceName string, secretName string) (err error) {
 	namespace, err := n.GetNamespaceByName(namespaceName)
 	if err != nil {

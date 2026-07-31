@@ -98,6 +98,60 @@ func Test_SecretByNameExists(t *testing.T) {
 	}
 }
 
+func Test_CheckSecretByNameExists(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		{"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "testnamespace"
+				const secretName = "secretname"
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
+
+				namespace, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+
+				err = namespace.DeleteSecretByName(ctx, secretName)
+				require.NoError(t, err)
+
+				err = kubernetes.CheckSecretByNameExists(ctx, namespaceName, secretName)
+				require.Error(t, err)
+
+				err = namespace.CheckSecretByNameExists(ctx, secretName)
+				require.Error(t, err)
+
+				_, err = namespace.CreateSecret(ctx, secretName, &kubernetesparameteroptions.CreateSecretOptions{SecretData: map[string][]byte{}})
+				require.NoError(t, err)
+
+				err = kubernetes.CheckSecretByNameExists(ctx, namespaceName, secretName)
+				require.NoError(t, err)
+
+				err = namespace.CheckSecretByNameExists(ctx, secretName)
+				require.NoError(t, err)
+
+				for i := 0; i < 2; i++ {
+					err = namespace.DeleteSecretByName(ctx, secretName)
+					require.NoError(t, err)
+
+					err = kubernetes.CheckSecretByNameExists(ctx, namespaceName, secretName)
+					require.Error(t, err)
+
+					err = namespace.CheckSecretByNameExists(ctx, secretName)
+					require.Error(t, err)
+				}
+			},
+		)
+	}
+}
+
 func Test_GetSecret_ErrorIfNotExist(t *testing.T) {
 	tests := []struct {
 		implementationName string
