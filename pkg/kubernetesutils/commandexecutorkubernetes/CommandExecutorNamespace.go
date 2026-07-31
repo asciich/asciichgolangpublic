@@ -466,6 +466,72 @@ func (c *CommandExecutorNamespace) CheckSecretByNameExists(ctx context.Context, 
 	return nil
 }
 
+// CheckNamespaceByNameExists checks if a namespace exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (c *CommandExecutorNamespace) CheckNamespaceByNameExists(ctx context.Context) error {
+	exists, err := c.Exists(ctx)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		namespaceName, _ := c.GetName()
+		return tracederrors.TracedErrorf("Namespace '%s' does not exist", namespaceName)
+	}
+	return nil
+}
+
+// CheckPodByNameExists checks if a pod exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (c *CommandExecutorNamespace) CheckPodByNameExists(ctx context.Context, podName string) error {
+	exists, err := c.PodByNameExists(ctx, podName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return tracederrors.TracedErrorf("Pod '%s' does not exist in namespace '%s'", podName, "unknown")
+	}
+	return nil
+}
+
+// CheckReplicaSetByNameExists checks if a replicaSet exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (c *CommandExecutorNamespace) CheckReplicaSetByNameExists(ctx context.Context, replicaSetName string) error {
+	exists, err := c.ReplicaSetByNameExists(ctx, replicaSetName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return tracederrors.TracedErrorf("ReplicaSet '%s' does not exist in namespace '%s'", replicaSetName, "unknown")
+	}
+	return nil
+}
+
+// CheckDeploymentByNameExists checks if a deployment exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (c *CommandExecutorNamespace) CheckDeploymentByNameExists(ctx context.Context, deploymentName string) error {
+	exists, err := c.DeploymentByNameExists(ctx, deploymentName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return tracederrors.TracedErrorf("Deployment '%s' does not exist in namespace '%s'", deploymentName, "unknown")
+	}
+	return nil
+}
+
+// CheckCronJobByNameExists checks if a cronJob exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (c *CommandExecutorNamespace) CheckCronJobByNameExists(ctx context.Context, cronJobName string) error {
+	exists, err := c.CronJobByNameExists(ctx, cronJobName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return tracederrors.TracedErrorf("CronJob '%s' does not exist in namespace '%s'", cronJobName, "unknown")
+	}
+	return nil
+}
+
 func (c *CommandExecutorNamespace) RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
 	if runCommandOptions == nil {
 		return nil, tracederrors.TracedErrorNil("runCommandOptions")

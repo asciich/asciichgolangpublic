@@ -10,6 +10,8 @@ import (
 
 type KubernetesCluster interface {
 	CheckAccessible(ctx context.Context) error
+	CheckNamespaceByNameExists(ctx context.Context, namespaceName string) error
+	CheckSecretByNameExists(ctx context.Context, namespaceName string, secretName string) error
 	ConfigMapByNameExists(ctx context.Context, namespaceName string, configMapName string) (exists bool, err error)
 	CreateConfigMap(ctx context.Context, namespaceName string, configMapName string, options *kubernetesparameteroptions.CreateConfigMapOptions) (createdConfigMap ConfigMap, err error)
 	CreateDeployment(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (Deployment, error)
@@ -24,6 +26,7 @@ type KubernetesCluster interface {
 	DeleteReplicaSetByNames(ctx context.Context, namespaceName string, replicaSetName string) error
 	DeleteSecretByName(ctx context.Context, namespaceName string, secretName string) (err error)
 	DeploymentByNameExists(ctx context.Context, namespaceName string, deploymentName string) (bool, error)
+	CheckDeploymentByNameExists(ctx context.Context, namespaceName string, deploymentName string) error
 	GetDeploymentByNames(namespaceName string, deploymentName string) (Deployment, error)
 	GetKubectlContext(ctx context.Context) (contextName string, err error)
 	GetName() (name string, err error)
@@ -39,14 +42,16 @@ type KubernetesCluster interface {
 	ListObjectNames(options *kubernetesparameteroptions.ListKubernetesObjectsOptions) (objectNames []string, err error)
 	NamespaceByNameExists(ctx context.Context, namespaceName string) (bool, error)
 	PodByNameExists(ctx context.Context, namespaceName string, podName string) (bool, error)
+	CheckPodByNameExists(ctx context.Context, namespaceName string, podName string) error
 	ReadSecret(ctx context.Context, namespaceName string, secretName string) (map[string][]byte, error)
 	ReplicaSetByNameExists(ctx context.Context, namespaceName string, replicaSetName string) (bool, error)
+	CheckReplicaSetByNameExists(ctx context.Context, namespaceName string, replicaSetName string) error
 	RunCommandInTemporaryPod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error)
 	SecretByNameExists(ctx context.Context, namespaceName string, secretName string) (exists bool, err error)
-	CheckSecretByNameExists(ctx context.Context, namespaceName string, secretName string) error
 	WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.WaitForPodsOptions) error
 	WhoAmI(ctx context.Context) (*kubernetesimplementationindependend.UserInfo, error)
 	CronJobByNameExists(ctx context.Context, namespaceName string, cronJobName string) (exists bool, err error)
+	CheckCronJobByNameExists(ctx context.Context, namespaceName string, cronJobName string) error
 	CreateCronJob(ctx context.Context, namespaceName string, cronJobName string, schedule string, image string, command []string, labels map[string]string) (CronJob, error)
 	DeleteCronJobByName(ctx context.Context, namespaceName string, cronJobName string) (err error)
 }

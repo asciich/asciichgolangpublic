@@ -689,6 +689,71 @@ func (c *CommandExecutorKubernetes) CheckSecretByNameExists(ctx context.Context,
 	return nil
 }
 
+// CheckNamespaceByNameExists checks if a namespace exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (c *CommandExecutorKubernetes) CheckNamespaceByNameExists(ctx context.Context, namespaceName string) error {
+	exists, err := c.NamespaceByNameExists(ctx, namespaceName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		tracederrors.TracedErrorf("Namespace '%s' does not exist", namespaceName)
+	}
+	return nil
+}
+
+// CheckPodByNameExists checks if a pod exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (c *CommandExecutorKubernetes) CheckPodByNameExists(ctx context.Context, namespaceName string, podName string) error {
+	exists, err := c.PodByNameExists(ctx, namespaceName, podName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		tracederrors.TracedErrorf("Pod '%s' does not exist in namespace '%s'", podName, namespaceName)
+	}
+	return nil
+}
+
+// CheckReplicaSetByNameExists checks if a replicaSet exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (c *CommandExecutorKubernetes) CheckReplicaSetByNameExists(ctx context.Context, namespaceName string, replicaSetName string) error {
+	exists, err := c.ReplicaSetByNameExists(ctx, namespaceName, replicaSetName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		tracederrors.TracedErrorf("ReplicaSet '%s' does not exist in namespace '%s'", replicaSetName, namespaceName)
+	}
+	return nil
+}
+
+// CheckDeploymentByNameExists checks if a deployment exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (c *CommandExecutorKubernetes) CheckDeploymentByNameExists(ctx context.Context, namespaceName string, deploymentName string) error {
+	exists, err := c.DeploymentByNameExists(ctx, namespaceName, deploymentName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		tracederrors.TracedErrorf("Deployment '%s' does not exist in namespace '%s'", deploymentName, namespaceName)
+	}
+	return nil
+}
+
+// CheckCronJobByNameExists checks if a cronJob exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (c *CommandExecutorKubernetes) CheckCronJobByNameExists(ctx context.Context, namespaceName string, cronJobName string) error {
+	exists, err := c.CronJobByNameExists(ctx, namespaceName, cronJobName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		tracederrors.TracedErrorf("CronJob '%s' does not exist in namespace '%s'", cronJobName, namespaceName)
+	}
+	return nil
+}
+
 func (c *CommandExecutorKubernetes) DeleteSecretByName(ctx context.Context, namespaceName string, secretName string) (err error) {
 	namespace, err := c.GetNamespaceByName(namespaceName)
 	if err != nil {
