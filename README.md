@@ -8,6 +8,7 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 
 ## Provided functionality
 
+* [ansibleutils](pkg/ansibleutils/): Work with Ansible.
 * [commandexecutor](pkg/commandexecutor/): Run arbitrary shell commands ([exec](pkg/commandexecutor/commandexecutorexecoo/), [bash](pkg/commandexecutor/commandexecutorbashoo/), [powershell](pkg/commandexecutor/commandexecutorpowershelloo/)). 
 * [containerutils](pkg/containerutils/): Work with containers.
 	* [containerimagehandler](pkg/containerutils/containerimagehandler/): Handle container images without the need of a container runtime (e.g. no Docker required.)
@@ -36,12 +37,15 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 * [pythonutils](pkg/pythonutils/): Work with Python programming language.
 	* [virtualenvutils](pkg/pythonutils/virtualenvutils/): Work with Python's `virtualenv`.
 * [runbook](pkg/runbook/): A easy way to define runbooks (also called workflows in other tools) to automatize tasks step by step.
+* [sshutils](pkg/sshutils/): SSH utilities for key generation, management, and client operations.
 * [storage](pkg/storage/):
 	* [S3 storage](pkg/storage/s3/)
 * [testutils](pkg/testutils/README.md):
 	* [testsuite](pkg/testutils/testsuite/README.md): An easy way to create and run test suites.
 * [uuidutils](pkg/uuidutils/): Work with UUIDs.
 * [versionutils](pkg/versionutils/): Handle versions.
+* [vmutils](pkg/vmutils/): Utils for VirtualMachine handling.
+	* [kvmutils](pkg/vmutils/kvmutils/): KVM/QEMU virtual machine utilities using libvirt.
 * [x509utils](pkg/tlsutils/x509utils/): Handle X509 certificates used for TLS/SSL.
 
 ## Design choices, principles and background information

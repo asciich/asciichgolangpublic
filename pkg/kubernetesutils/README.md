@@ -11,13 +11,15 @@ The implementation using exec to call `kubectl` or other commands is useful when
 ## Examples
 
 * [Check ConfigMap by name exists](Example_ConfigmapByNameExists_test.go)
+* [Check CronJob by name exists](Example_CheckCronJobByNameExists_test.go)
+* [CronJob by name exists](Example_CronjobByNameExists_test.go)
 * [Check Secret by name exists](Example_CheckSecretByNameExists_test.go)
 * [Check Namespace by name exists](Example_CheckNamespaceByNameExists_test.go)
 * [Check Pod by name exists](Example_CheckPodByNameExists_test.go)
 * [Check ReplicaSet by name exists](Example_CheckReplicaSetByNameExists_test.go)
 * [Check Deployment by name exists](Example_CheckDeploymentByNameExists_test.go)
-* [Check CronJob by name exists](Example_CheckCronJobByNameExists_test.go)
 * [Create and delete ConfigMap](Example_CreateAndDeleteConfigMap_test.go)
+* [Create and delete CronJob](Example_CreateAndDeleteCronJob_test.go)
 * [Create and delete Deployment](Example_CreateAndDeleteDeployment_test.go)
 * [Create and delete Pod](Example_CreateAndDeletePod_test.go)
 * [Create and delete ReplicaSet](Example_CreateAndDeleteReplicaSet_test.go)

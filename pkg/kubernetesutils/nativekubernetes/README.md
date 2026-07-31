@@ -18,6 +18,8 @@ For the object oriented implmenetation see [nativekubernetesoo](/pkg/kubernetesu
     * [Create and delete ReplicaSet](Example_CreateAndDeleteReplicaSet_test.go)
 * Deployments:
     * [Create and delete Deployment](Example_CreateAndDeleteDeployment_test.go)
+* CronJobs:
+    * [Create and delete CronJob](Example_CreateAndDeleteCronjob_test.go)
 * Secrets:
     * [Create and delete Secret](Example_CreateAndDeleteSecret_test.go)
 * ConfigMaps:
