@@ -1,13 +1,16 @@
-package hosts
+package hosts_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/hosts"
 )
 
 func TestCommandExecutorHost_HostnameOfLocalhost(t *testing.T) {
-	host := MustGetLocalCommandExecutorHost()
+	host, err := hosts.GetLocalCommandExecutorHost()
+	require.NoError(t, err)
+
 	hostName, err := host.GetHostName()
 	require.NoError(t, err)
 	require.EqualValues(t, "localhost", hostName)
@@ -16,7 +19,7 @@ func TestCommandExecutorHost_HostnameOfLocalhost(t *testing.T) {
 func Test_CommandExecutorHost_GetCpuArchitecture(t *testing.T) {
 	ctx := getCtx()
 
-	host, err := GetHostByHostname("localhost")
+	host, err := hosts.GetHostByHostname("localhost")
 	require.NoError(t, err)
 
 	commandExecutor := host.GetDeepCopyAsCommandExecutor()

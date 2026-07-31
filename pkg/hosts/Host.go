@@ -6,9 +6,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/sshutils/commandexecutorsshclient"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -16,6 +14,8 @@ import (
 
 // Host like a VM, Laptop, Desktop, Server.
 type Host interface {
+	commandexecutorinterfaces.CommandExecutor
+
 	CheckReachable(verbose bool) (err error)
 
 	GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor
@@ -25,10 +25,6 @@ type Host interface {
 	GetHostName() (hostName string, err error)
 	GetSshPublicKeyOfUserAsString(ctx context.Context, username string) (publicKey string, err error)
 	InstallBinary(ctx context.Context, installOptions *parameteroptions.InstallOptions) (installedFile filesinterfaces.File, err error)
-	RunCommand(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error)
-
-	// All methods below this line can be implemented by embedding the `CommandExecutorBase` struct:
-	RunCommandAndGetStdoutAsString(ctx context.Context, runCommandOptions *parameteroptions.RunCommandOptions) (stdout string, err error)
 }
 
 func GetHostByHostname(hostname string) (host Host, err error) {
@@ -56,31 +52,4 @@ func GetLocalCommandExecutorHost() (host Host, err error) {
 
 func GetLocalHost() (host Host, err error) {
 	return GetHostByHostname("localhost")
-}
-
-func MustGetHostByHostname(hostname string) (host Host) {
-	host, err := GetHostByHostname(hostname)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return host
-}
-
-func MustGetLocalCommandExecutorHost() (host Host) {
-	host, err := GetLocalCommandExecutorHost()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return host
-}
-
-func MustGetLocalHost() (host Host) {
-	host, err := GetLocalHost()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return host
 }

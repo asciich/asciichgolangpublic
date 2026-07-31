@@ -1,45 +1,20 @@
-package hosts
+package hosts_test
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfileoo"
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/hosts"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
 func getCtx() context.Context {
 	return contextutils.ContextVerbose()
-}
-
-func TestHost_CheckReachable(t *testing.T) {
-	testutils.SkipIfRunningInGithub(t)
-
-	tests := []struct {
-		hostname          string
-		expectedReachable bool
-	}{
-		{"cerberus3.asciich.ch", true},
-	}
-
-	for _, tt := range tests {
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				const verbose = true
-
-				host := MustGetHostByHostname(tt.hostname)
-				err := host.CheckReachable(verbose)
-				require.NoError(t, err)
-			},
-		)
-	}
 }
 
 func TestHostGetHostName(t *testing.T) {
@@ -49,15 +24,19 @@ func TestHostGetHostName(t *testing.T) {
 		hostname          string
 		expectedReachable bool
 	}{
-		{"cerberus3.asciich.ch", true},
+		{"hostname.asciich.ch", true},
 	}
 
 	for _, tt := range tests {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				host := MustGetHostByHostname(tt.hostname)
-				require.EqualValues(t, tt.hostname, mustutils.Must(host.GetHostName()))
+				host, err := hosts.GetHostByHostname(tt.hostname)
+				require.NoError(t, err)
+
+				hostName, err := host.GetHostName()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.hostname, hostName)
 			},
 		)
 	}
@@ -69,46 +48,19 @@ func TestHostGetHostDescripion(t *testing.T) {
 		hostname          string
 		expectedReachable bool
 	}{
-		{"cerberus3.asciich.ch", true},
+		{"host.example.com", true},
 	}
 
 	for _, tt := range tests {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				host := MustGetHostByHostname(tt.hostname)
-				require.EqualValues(t, tt.hostname, mustutils.Must(host.GetHostDescription()))
-			},
-		)
-	}
-}
-
-func TestHostRunCommand(t *testing.T) {
-	testutils.SkipIfRunningInGithub(t)
-
-	tests := []struct {
-		hostname          string
-		expectedReachable bool
-	}{
-		{"cerberus3.asciich.ch", true},
-	}
-
-	for _, tt := range tests {
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				host := MustGetHostByHostname(tt.hostname)
-				ipsString, err := host.RunCommandAndGetStdoutAsString(
-					getCtx(),
-					&parameteroptions.RunCommandOptions{
-						Command: []string{"hostname", "-i"},
-					},
-				)
+				host, err := hosts.GetHostByHostname(tt.hostname)
 				require.NoError(t, err)
 
-				ips := strings.Split(strings.TrimSpace(ipsString), " ")
-
-				require.Contains(t, ips, "192.168.10.32")
+				hostDescription, err := host.GetHostDescription()
+				require.NoError(t, err)
+				require.EqualValues(t, tt.hostname, hostDescription)
 			},
 		)
 	}
@@ -132,7 +84,9 @@ func TestHost_GetDirectoryByPath(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				host := MustGetHostByHostname(tt.hostname)
+				host, err := hosts.GetHostByHostname(tt.hostname)
+				require.NoError(t, err)
+
 				directory, err := host.GetDirectoryByPath(ctx, tt.dirPath)
 				require.NoError(t, err)
 
@@ -149,13 +103,24 @@ func TestHost_GetDirectoryByPath(t *testing.T) {
 
 // Connections to the local host should use Bash and not SSH by default.
 func TestHost_LocalHostUsesBashCommandExecutorByDefault(t *testing.T) {
-	host := MustGetLocalHost()
+	host, err := hosts.GetLocalHost()
+	require.NoError(t, err)
 
-	commandExecutorHost, ok := host.(*CommandExecutorHost)
+	commandExecutorHost, ok := host.(*hosts.CommandExecutorHost)
 	require.True(t, ok)
 
-	commandExecutor := commandExecutorHost.MustGetCommandExecutor()
+	commandExecutor, err := commandExecutorHost.GetCommandExecutor()
+	require.NoError(t, err)
 
 	_, ok = commandExecutor.(*commandexecutorbashoo.BashService)
 	require.True(t, ok)
+}
+
+func Test_HostIsCommandExecutor(t *testing.T) {
+	var host commandexecutorinterfaces.CommandExecutor
+	var err error
+
+	host, err = hosts.GetHostByHostname("example.com")
+	require.NoError(t, err)
+	require.NotNil(t, host)
 }

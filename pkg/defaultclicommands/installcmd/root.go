@@ -63,7 +63,8 @@ func cliInstall(ctx context.Context, binaryName string) {
 		logging.LogFatalWithTrace("binaryName is empty string after evaluation.")
 	}
 
-	mustutils.Must(hosts.MustGetLocalHost().InstallBinary(
+	localhost := mustutils.Must(hosts.GetLocalHost())
+	mustutils.Must(localhost.InstallBinary(
 		ctx,
 		&parameteroptions.InstallOptions{
 			SourcePath:       srcPath,
