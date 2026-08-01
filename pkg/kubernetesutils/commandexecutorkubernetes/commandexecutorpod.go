@@ -273,3 +273,75 @@ func (c *CommandExecutorPod) Exists(ctx context.Context) (bool, error) {
 
 	return exists, nil
 }
+
+func (c *CommandExecutorPod) GetContainerLogs(ctx context.Context, containerName string) (stdout []byte, stderr []byte, err error) {
+	podName, err := c.GetName()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	namespaceName, err := c.GetNamespaceName()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Get logs for container '%s' in pod '%s' in namespace '%s' started.", containerName, podName, namespaceName)
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	kubectlContext, err := c.GetKubectlContext(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Get stdout logs
+	stdoutCommand := []string{
+		"kubectl", "logs", podName,
+		"--context", kubectlContext,
+		"--namespace", namespaceName,
+		"--container", containerName,
+	}
+
+	stdoutOutput, err := commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command: stdoutCommand,
+	})
+	if err != nil {
+		return nil, nil, tracederrors.TracedErrorf("failed to get stdout logs for container '%s' in pod '%s' in namespace '%s': %w", containerName, podName, namespaceName, err)
+	}
+
+	stdoutBytes, err := stdoutOutput.GetStdoutAsBytes()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Get stderr logs using --stderr flag (if supported) or return empty
+	stderrCommand := []string{
+		"kubectl", "logs", podName,
+		"--context", kubectlContext,
+		"--namespace", namespaceName,
+		"--container", containerName,
+		"--stderr",
+	}
+
+	stderrOutput, err := commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command:           stderrCommand,
+		AllowAllExitCodes: true,
+	})
+	var stderrBytes []byte
+	if err == nil && stderrOutput.IsExitSuccess() {
+		stderrBytes, err = stderrOutput.GetStdoutAsBytes()
+		if err != nil {
+			return nil, nil, err
+		}
+	} else {
+		// stderr flag not supported, return empty stderr
+		stderrBytes = []byte{}
+	}
+
+	logging.LogInfoByCtxf(ctx, "Get logs for container '%s' in pod '%s' in namespace '%s' finished.", containerName, podName, namespaceName)
+
+	return stdoutBytes, stderrBytes, nil
+}

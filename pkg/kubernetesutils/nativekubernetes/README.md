@@ -6,21 +6,23 @@ For the object oriented implmenetation see [nativekubernetesoo](/pkg/kubernetesu
 
 ## Examples
 
-* [Copy file to pod](Example_CopyFileToPod_test.go): Copy a local file to a pod/container.
-* [Exec](Example_ExecExample_test.go): Run command in already existing pod/container.
-    * [Write to stdin of exec command](Example_WriteToStdinOfExecCommand_test.go)
 * [Get clientset](Example_GetClientSet_test.go): Get the k8s client-go clientset.
+* ConfigMaps:
+    * [Create and delete ConfigMap](Example_CreateAndDeleteConfigmap_test.go)
+* CronJobs:
+    * [Create and delete CronJob](Example_CreateAndDeleteCronjob_test.go)
+* Deployments:
+    * [Create and delete Deployment](Example_CreateAndDeleteDeployment_test.go)
 * Namespaces:
     * [Create and delete namespace](Example_CreateAndDeleteNamespace_test.go)
     * [Get namespace UID](Example_GetNamespaceUID_test.go)
-* [Run temporary pod and get stdout](Example_RunPodAndGetStdout_test.go): How to run a single command in Kubernetes and get it's stdout.
+* Pods:
+    * [Copy file to pod](Example_CopyFileToPod_test.go): Copy a local file to a pod/container.
+    * [Exec](Example_ExecExample_test.go): Run command in already existing pod/container.
+        * [Write to stdin of exec command](Example_WriteToStdinOfExecCommand_test.go)
+    * [Get pod logs](Example_GetPodLogs_test.go): Fetch logs from a container running in a pod.
+    * [Run temporary pod and get stdout](Example_RunPodAndGetStdout_test.go): How to run a single command in Kubernetes and get it's stdout.
 * ReplicaSets:
     * [Create and delete ReplicaSet](Example_CreateAndDeleteReplicaSet_test.go)
-* Deployments:
-    * [Create and delete Deployment](Example_CreateAndDeleteDeployment_test.go)
-* CronJobs:
-    * [Create and delete CronJob](Example_CreateAndDeleteCronjob_test.go)
 * Secrets:
     * [Create and delete Secret](Example_CreateAndDeleteSecret_test.go)
-* ConfigMaps:
-    * [Create and delete ConfigMap](Example_CreateAndDeleteConfigmap_test.go)

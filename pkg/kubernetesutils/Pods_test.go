@@ -358,3 +358,78 @@ func Test_RunCommandInTemporaryPod_WithSecretAsFile(t *testing.T) {
 		)
 	}
 }
+
+func Test_GetContainerLogs(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		{"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "test-getcontainerlogs"
+				const podName = "test-pod-logs"
+				const containerName = "test-container"
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
+
+				// Create namespace
+				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+
+				// Wait until default sa in created namespace exists.
+				time.Sleep(10 * time.Second)
+
+				// Ensure pod is absent before test and cleaned up after
+				defer func() {
+					_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+				}()
+				_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+
+				// Create a pod that writes to stdout and stderr
+				_, err = kubernetes.CreatePod(
+					ctx,
+					namespaceName,
+					&kubernetesparameteroptions.RunCommandOptions{
+						PodName:                  podName,
+						ContainerName:            containerName,
+						Image:                    "ubuntu",
+						Command:                  []string{"bash", "-c", "echo 'stdout message'; echo 'stderr message' >&2; sleep 10"},
+						DeleteAlreadyExistingPod: true,
+						WaitForPodRunning:        true,
+					},
+				)
+				require.NoError(t, err)
+
+				// Get pod object to test GetContainerLogs
+				pod, err := kubernetes.GetPodByNames(namespaceName, podName)
+				require.NoError(t, err)
+
+				t.Run("GetContainerLogs", func(t *testing.T) {
+					stdout, stderr, err := pod.GetContainerLogs(ctx, containerName)
+					require.NoError(t, err)
+					require.Contains(t, string(stdout), "stdout message")
+
+					// Some Kubernetes APIs don't support separate stderr stream
+					// In that case, stderr will be empty and both messages are in stdout
+					if len(stderr) > 0 {
+						require.Contains(t, string(stderr), "stderr message")
+					} else {
+						// Verify combined logs contain both messages
+						require.Contains(t, string(stdout), "stderr message")
+					}
+				})
+
+				t.Run("GetContainerLogs_invalidContainer", func(t *testing.T) {
+					_, _, err := pod.GetContainerLogs(ctx, "nonexistent-container")
+					require.Error(t, err)
+				})
+			},
+		)
+	}
+}

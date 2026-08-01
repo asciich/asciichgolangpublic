@@ -109,3 +109,22 @@ func (p *Pod) Exists(ctx context.Context) (bool, error) {
 
 	return nativekubernetes.PodExists(ctx, clientSet, podName, namespaceName)
 }
+
+func (p *Pod) GetContainerLogs(ctx context.Context, containerName string) (stdout []byte, stderr []byte, err error) {
+	podName, err := p.GetName()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	namespaceName, err := p.GetNamespaceName()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	clientSet, err := p.GetClientSet()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return nativekubernetes.GetContainerLogs(ctx, clientSet, namespaceName, podName, containerName)
+}
