@@ -10,12 +10,15 @@ import (
 )
 
 type TestCase struct {
-	Name        string `yaml:"name"`
-	TestType    string `yaml:"test_type"`
-	Command     string `yaml:"command,omitempty"`
-	Description string `yaml:"description"`
-	Port        string `yaml:"port,omitempty"`
-	Host        string `yaml:"host,omitempty"`
+	Name         string `yaml:"name"`
+	TestType     string `yaml:"test_type"`
+	Command      string `yaml:"command,omitempty"`
+	Description  string `yaml:"description"`
+	Port         string `yaml:"port,omitempty"`
+	Host         string `yaml:"host,omitempty"`
+	Namespace    string `yaml:"namespace,omitempty"`
+	Cluster      string `yaml:"cluster,omitempty"`
+	ResourceName string `yaml:"resource_name,omitempty"`
 
 	data any
 }
@@ -63,6 +66,30 @@ func (t *TestCase) GetPort() (int, error) {
 	}
 
 	return port, nil
+}
+
+func (t *TestCase) GetNamespace() (string, error) {
+	if t.Namespace == "" {
+		return "", tracederrors.TracedError("namespace not set")
+	}
+
+	return t.Namespace, nil
+}
+
+func (t *TestCase) GetCluster() (string, error) {
+	if t.Cluster == "" {
+		return "", tracederrors.TracedError("cluster not set")
+	}
+
+	return t.Cluster, nil
+}
+
+func (t *TestCase) GetResourceName() (string, error) {
+	if t.ResourceName == "" {
+		return "", tracederrors.TracedError("resource_name not set")
+	}
+
+	return t.ResourceName, nil
 }
 
 func (t *TestCase) Run(ctx context.Context) (testutilsinterfaces.TestResult, error) {

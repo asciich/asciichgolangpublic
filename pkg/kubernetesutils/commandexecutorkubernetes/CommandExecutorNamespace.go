@@ -1527,7 +1527,72 @@ func (c *CommandExecutorNamespace) WaitUntilAllPodsInNamespaceAreRunning(ctx con
 }
 
 func (c *CommandExecutorNamespace) CreateObject(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (kubernetesinterfaces.Object, error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	yamlString, err := options.GetYamlString()
+	if err != nil {
+		return nil, err
+	}
+
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Create object in namespace '%s' of kubernetes '%s' started.", namespaceName, contextName)
+
+	// Check if namespace exists and create if needed
+	if !options.SkipNamespaceCreation {
+		exists, err := c.Exists(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if !exists {
+			err = c.Create(ctx)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// Use kubectl apply with YAML from stdin
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	command := []string{
+		"kubectl",
+		"apply",
+		"-f",
+		"-",
+		"--context",
+		contextName,
+		"--namespace",
+		namespaceName,
+	}
+
+	_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command:     command,
+		StdinString: yamlString,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Object created in namespace '%s' of kubernetes '%s' successfully.", namespaceName, contextName)
+
+	// Return nil since we can't determine the exact object type from YAML
+	// without additional parsing. The caller should use specific GetXByName methods
+	// to get the created object if needed.
+	return nil, nil
 }
 
 func (c *CommandExecutorNamespace) Exists(ctx context.Context) (bool, error) {
