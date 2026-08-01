@@ -2,6 +2,10 @@
 
 High level easy to use HTTP client and testserver.
 
+## Subpackages
+
+* [basicauth](./basicauth/): Simple basic auth protection for HTTP endpoints.
+
 ## Examples
 
 * [BasicAuth protection for http endpoints](basicauth/README.md)

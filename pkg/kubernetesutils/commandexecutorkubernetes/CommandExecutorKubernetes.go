@@ -683,8 +683,9 @@ func (c *CommandExecutorKubernetes) CheckSecretByNameExists(ctx context.Context,
 	if err != nil {
 		return err
 	}
+	
 	if !exists {
-		tracederrors.TracedErrorf("Secret '%s' does not exist in namespace '%s'", secretName, namespaceName)
+		return tracederrors.TracedErrorf("Secret '%s' does not exist in namespace '%s'", secretName, namespaceName)
 	}
 	return nil
 }
@@ -697,7 +698,7 @@ func (c *CommandExecutorKubernetes) CheckNamespaceByNameExists(ctx context.Conte
 		return err
 	}
 	if !exists {
-		tracederrors.TracedErrorf("Namespace '%s' does not exist", namespaceName)
+		return tracederrors.TracedErrorf("Namespace '%s' does not exist", namespaceName)
 	}
 	return nil
 }
@@ -710,7 +711,7 @@ func (c *CommandExecutorKubernetes) CheckPodByNameExists(ctx context.Context, na
 		return err
 	}
 	if !exists {
-		tracederrors.TracedErrorf("Pod '%s' does not exist in namespace '%s'", podName, namespaceName)
+		return tracederrors.TracedErrorf("Pod '%s' does not exist in namespace '%s'", podName, namespaceName)
 	}
 	return nil
 }
@@ -723,7 +724,7 @@ func (c *CommandExecutorKubernetes) CheckReplicaSetByNameExists(ctx context.Cont
 		return err
 	}
 	if !exists {
-		tracederrors.TracedErrorf("ReplicaSet '%s' does not exist in namespace '%s'", replicaSetName, namespaceName)
+		return tracederrors.TracedErrorf("ReplicaSet '%s' does not exist in namespace '%s'", replicaSetName, namespaceName)
 	}
 	return nil
 }
@@ -736,7 +737,7 @@ func (c *CommandExecutorKubernetes) CheckDeploymentByNameExists(ctx context.Cont
 		return err
 	}
 	if !exists {
-		tracederrors.TracedErrorf("Deployment '%s' does not exist in namespace '%s'", deploymentName, namespaceName)
+		return tracederrors.TracedErrorf("Deployment '%s' does not exist in namespace '%s'", deploymentName, namespaceName)
 	}
 	return nil
 }
@@ -749,7 +750,7 @@ func (c *CommandExecutorKubernetes) CheckCronJobByNameExists(ctx context.Context
 		return err
 	}
 	if !exists {
-		tracederrors.TracedErrorf("CronJob '%s' does not exist in namespace '%s'", cronJobName, namespaceName)
+		return tracederrors.TracedErrorf("CronJob '%s' does not exist in namespace '%s'", cronJobName, namespaceName)
 	}
 	return nil
 }

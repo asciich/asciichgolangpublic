@@ -15,6 +15,7 @@ But it has downsides:
 * [commandexecutorbashoo](./commandexecutorbashoo/): Object oriented bash implementation.
 * [commandexecutorexec](./commandexecutorexec/): Execute commands using exec.
 * [commandexecutorexecoo](./commandexecutorexecoo/): Object oriented exec implementation.
+* [commandexecutorgeneric](./commandexecutorgeneric/): Generic command executor functionality.
 * [commandexecutorpowershell](./commandexecutorpowershell/): Execute commands using PowerShell.
 * [commandexecutorpowershelloo](./commandexecutorpowershelloo/): Object oriented PowerShell implementation.
 
