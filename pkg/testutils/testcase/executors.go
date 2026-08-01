@@ -9,6 +9,13 @@ func LoadExecuctors() ([]testutilsinterfaces.TestCaseExecutor, error) {
 	return []testutilsinterfaces.TestCaseExecutor{
 		&TestCaseExecutorCommand{},
 		&TestCaseExecutorTcpPortOpen{},
+		&TestCaseExecutorKubernetesNamespaceExists{},
+		&TestCaseExecutorKubernetesPodExists{},
+		&TestCaseExecutorKubernetesReplicaSetExists{},
+		&TestCaseExecutorKubernetesConfigMapExists{},
+		&TestCaseExecutorKubernetesSecretExists{},
+		&TestCaseExecutorKubernetesDeploymentExists{},
+		&TestCaseExecutorKubernetesCronJobExists{},
 	}, nil
 }
 

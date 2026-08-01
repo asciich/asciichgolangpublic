@@ -68,3 +68,30 @@ func (t *TestCaseExecutorBase) GetPort() (int, error) {
 
 	return testCase.GetPort()
 }
+
+func (t *TestCaseExecutorBase) GetNamespace() (string, error) {
+	testCase, err := t.GetDataAsTestCase()
+	if err != nil {
+		return "", err
+	}
+
+	return testCase.GetNamespace()
+}
+
+func (t *TestCaseExecutorBase) GetCluster() (string, error) {
+	testCase, err := t.GetDataAsTestCase()
+	if err != nil {
+		return "", err
+	}
+
+	return testCase.GetCluster()
+}
+
+func (t *TestCaseExecutorBase) GetResourceName() (string, error) {
+	testCase, err := t.GetDataAsTestCase()
+	if err != nil {
+		return "", err
+	}
+
+	return testCase.GetResourceName()
+}
