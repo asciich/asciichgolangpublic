@@ -372,6 +372,7 @@ func (c *CommandExecutorKind) SetCommandExecutor(commandExecutor commandexecutor
 
 	return nil
 }
+
 // CronJob stub implementations
 func (k *CommandExecutorKind) CronJobByNameExists(ctx context.Context, namespaceName string, cronJobName string) (exists bool, err error) {
 	return false, tracederrors.TracedErrorNotImplemented()

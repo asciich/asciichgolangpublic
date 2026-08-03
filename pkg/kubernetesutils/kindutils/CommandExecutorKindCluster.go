@@ -1,8 +1,8 @@
 package kindutils
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/commandexecutorkubernetes"
 	"context"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/commandexecutorkubernetes"
 
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -66,6 +66,7 @@ func (k *CommandExecutorKindCluster) SetClusterName(clusterName string) error {
 	k.clusterName = clusterName
 	return nil
 }
+
 // CronJob stub implementations
 func (c *CommandExecutorKindCluster) CronJobByNameExists(ctx context.Context, namespaceName string, cronJobName string) (exists bool, err error) {
 	return false, tracederrors.TracedErrorNotImplemented()

@@ -36,7 +36,7 @@ func Test_Example_CheckPodByNameExists(t *testing.T) {
 	_, err = namespace.CreatePod(ctx, &kubernetesparameteroptions.RunCommandOptions{
 		Image:   "busybox",
 		Command: []string{"sleep", "3600"},
-		PodName:    podName,
+		PodName: podName,
 	})
 	require.NoError(t, err)
 	// ... prepare test environment finished.
