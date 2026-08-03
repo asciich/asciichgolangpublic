@@ -564,6 +564,15 @@ func CopyFileToPod(ctx context.Context, config *rest.Config, localFile string, d
 		return err
 	}
 
+	// Verify that the pod exists
+	_, err = clientset.CoreV1().Pods(namespaceName).Get(ctx, podName, metav1.GetOptions{})
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			return tracederrors.TracedErrorf("pod '%s' not found in namespace '%s'", podName, namespaceName)
+		}
+		return tracederrors.TracedErrorf("failed to get pod '%s' in namespace '%s': %w", podName, namespaceName, err)
+	}
+
 	req := clientset.CoreV1().RESTClient().Post().
 		Resource("pods").
 		Name(podName).
@@ -591,7 +600,7 @@ func CopyFileToPod(ctx context.Context, config *rest.Config, localFile string, d
 		Tty:    false,
 	})
 	if err != nil {
-
+		return tracederrors.TracedErrorf("failed to copy file to pod: %w", err)
 	}
 
 	logging.LogInfoByCtxf(ctx, "Copy local file '%s' as '%s' into container '%s' of pod '%s' of namespace '%s' finished.", localFile, destPath, containerName, podName, namespaceName)

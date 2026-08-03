@@ -18,6 +18,9 @@ For the object oriented implmenetation see [nativekubernetesoo](/pkg/kubernetesu
     * [Get namespace UID](Example_GetNamespaceUID_test.go)
 * Pods:
     * [Copy file to pod](Example_CopyFileToPod_test.go): Copy a local file to a pod/container.
+    * [Copy local file to pod](Example_CopyLocalFileToPod_test.go): Comprehensive examples showing how to copy files to containers (similar to `kubectl cp`).
+        * [Binary file copy](Example_CopyLocalFileToPod_test.go): Copy binary files to containers.
+        * [Nested directory copy](Example_CopyLocalFileToPod_test.go): Copy files to nested directories in containers.
     * [Exec](Example_ExecExample_test.go): Run command in already existing pod/container.
         * [Write to stdin of exec command](Example_WriteToStdinOfExecCommand_test.go)
     * [Get pod logs](Example_GetPodLogs_test.go): Fetch logs from a container running in a pod.
