@@ -1090,7 +1090,6 @@ func (n *NativeNamespace) DeploymentByNameExists(ctx context.Context, deployment
 	return deployment.Exists(ctx)
 }
 
-
 func (n *NativeNamespace) CronJobByNameExists(ctx context.Context, cronJobName string) (bool, error) {
 	if cronJobName == "" {
 		return false, tracederrors.TracedErrorEmptyString("cronJobName")

@@ -34,10 +34,10 @@ func Test_Example_CheckReplicaSetByNameExists(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = namespace.CreateReplicaSet(ctx, &kubernetesparameteroptions.RunCommandOptions{
-		Image:    "busybox",
-		Command:  []string{"sleep", "3600"},
-		ReplicaSetName:     replicaSetName,
-		Replicas: 1,
+		Image:          "busybox",
+		Command:        []string{"sleep", "3600"},
+		ReplicaSetName: replicaSetName,
+		Replicas:       1,
 	})
 	require.NoError(t, err)
 	// ... prepare test environment finished.

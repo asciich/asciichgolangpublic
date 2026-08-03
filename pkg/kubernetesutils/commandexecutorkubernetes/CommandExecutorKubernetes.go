@@ -683,7 +683,7 @@ func (c *CommandExecutorKubernetes) CheckSecretByNameExists(ctx context.Context,
 	if err != nil {
 		return err
 	}
-	
+
 	if !exists {
 		return tracederrors.TracedErrorf("Secret '%s' does not exist in namespace '%s'", secretName, namespaceName)
 	}

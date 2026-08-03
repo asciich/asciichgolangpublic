@@ -731,7 +731,6 @@ func (n *NativeKubernetesCluster) DeploymentByNameExists(ctx context.Context, na
 	return namespace.DeploymentByNameExists(ctx, deploymentName)
 }
 
-
 func (n *NativeKubernetesCluster) CronJobByNameExists(ctx context.Context, namespaceName string, cronJobName string) (exists bool, err error) {
 	namespace, err := n.GetNamespaceByName(namespaceName)
 	if err != nil {

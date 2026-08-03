@@ -34,10 +34,10 @@ func Test_Example_CheckDeploymentByNameExists(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = namespace.CreateDeployment(ctx, &kubernetesparameteroptions.RunCommandOptions{
-		Image:    "busybox",
-		Command:  []string{"sleep", "3600"},
-		DeploymentName:     deploymentName,
-		Replicas: 1,
+		Image:          "busybox",
+		Command:        []string{"sleep", "3600"},
+		DeploymentName: deploymentName,
+		Replicas:       1,
 	})
 	require.NoError(t, err)
 	// ... prepare test environment finished.
