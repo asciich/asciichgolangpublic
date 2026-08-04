@@ -9,10 +9,35 @@ import (
 
 func NewListPartitionsCmd() *cobra.Command {
 	const short = "List partitions of the diskimage --image-path."
+	const long = short + `
+
+Example usage:
+
+  $ a-helper storage disk-image list-partitions --image-path=rpi.img
+  Partition table type: MBR
+  Disk image: rpi.img
+  Partitions found: 2
+
+    Partition 1:
+      Start LBA:  16384
+      Size LBA:   1048576
+      Size Bytes: 536870912
+      Bootable:   false
+      FileSystem: FAT32 (LBA)
+      Type Code:  0x0C
+
+    Partition 2:
+      Start LBA:  1064960
+      Size LBA:   4620288
+      Size Bytes: 2365587456
+      Bootable:   false
+      FileSystem: Linux
+      Type Code:  0x83`
 
 	cmd := &cobra.Command{
 		Use:   "list-partitions",
 		Short: short,
+		Long:  long,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			imagePath, err := cmd.Flags().GetString("image-path")
 			if err != nil {

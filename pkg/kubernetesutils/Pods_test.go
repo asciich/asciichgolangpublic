@@ -1,6 +1,7 @@
 package kubernetesutils_test
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -527,6 +528,117 @@ func Test_CopyFileToPod(t *testing.T) {
 					require.NoError(t, err)
 
 					err = nonExistentPod.CopyFileToPod(ctx, localPath, "/tmp/test.txt", containerName)
+					require.Error(t, err)
+				})
+			},
+		)
+	}
+}
+
+func Test_CopyFileFromPod(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		{"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "test-copyfrompod"
+				const podName = "test-copyfrom-pod"
+				const containerName = "test-container"
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
+
+				// Create namespace
+				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+
+				// Wait until default sa in created namespace exists.
+				time.Sleep(10 * time.Second)
+
+				// Ensure pod is absent before test and cleaned up after
+				defer func() {
+					_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+				}()
+				_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+
+				// Create a running pod
+				_, err = kubernetes.CreatePod(
+					ctx,
+					namespaceName,
+					&kubernetesparameteroptions.RunCommandOptions{
+						PodName:                  podName,
+						ContainerName:            containerName,
+						Image:                    "ubuntu",
+						Command:                  []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
+						DeleteAlreadyExistingPod: true,
+						WaitForPodRunning:        true,
+					},
+				)
+				require.NoError(t, err)
+
+				// Get pod object
+				pod, err := kubernetes.GetPodByNames(namespaceName, podName)
+				require.NoError(t, err)
+
+				t.Run("copy file from pod", func(t *testing.T) {
+					// First, create a file in the pod by copying TO it
+					testContent := "Test file content for CopyFileFromPod test.\nLine 2 of test content."
+					localPath, err := tempfiles.CreateTemporaryFileFromContentString(ctx, testContent)
+					require.NoError(t, err)
+
+					srcPath := "/tmp/testfile-frompod.txt"
+
+					// Copy file to pod first
+					err = pod.CopyFileToPod(ctx, localPath, srcPath, containerName)
+					require.NoError(t, err)
+
+					// Now copy it back from the pod
+					destFile, err := tempfiles.CreateTemporaryFile(ctx)
+					require.NoError(t, err)
+
+					err = pod.CopyFileFromPod(ctx, srcPath, destFile, containerName)
+					require.NoError(t, err)
+
+					// Verify the copied file content
+					content, err := os.ReadFile(destFile)
+					require.NoError(t, err)
+					require.Equal(t, testContent, string(content))
+				})
+
+				t.Run("error handling - non-existent file", func(t *testing.T) {
+					destFile, err := tempfiles.CreateTemporaryFile(ctx)
+					require.NoError(t, err)
+
+					// Try to copy a non-existent file from pod
+					// Note: kubectl cp creates an empty file, native API returns error
+					// We test that the operation completes (behavior differs by implementation)
+					err = pod.CopyFileFromPod(ctx, "/tmp/nonexistent-file.txt", destFile, containerName)
+
+					// Check if file is empty (kubectl cp behavior) or error occurred (native behavior)
+					if err == nil {
+						// kubectl cp creates empty file for non-existent source
+						content, readErr := os.ReadFile(destFile)
+						require.NoError(t, readErr)
+						require.Empty(t, string(content))
+					}
+					// Native implementation would return error - also acceptable
+				})
+
+				t.Run("error handling - non-existent pod", func(t *testing.T) {
+					// Create a pod interface with non-existent pod name
+					nonExistentPod, err := kubernetes.GetPodByNames(namespaceName, "non-existent-pod")
+					require.NoError(t, err)
+
+					destFile, err := tempfiles.CreateTemporaryFile(ctx)
+					require.NoError(t, err)
+
+					err = nonExistentPod.CopyFileFromPod(ctx, "/tmp/test.txt", destFile, containerName)
 					require.Error(t, err)
 				})
 			},

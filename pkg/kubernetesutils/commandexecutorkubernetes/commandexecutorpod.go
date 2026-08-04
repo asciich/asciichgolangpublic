@@ -394,3 +394,53 @@ func (c *CommandExecutorPod) CopyFileToPod(ctx context.Context, localFile string
 
 	return nil
 }
+
+func (c *CommandExecutorPod) CopyFileFromPod(ctx context.Context, srcPath string, destFile string, containerName string) error {
+	podName, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	namespaceName, err := c.GetNamespaceName()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Copy file '%s' from container '%s' of pod '%s' of namespace '%s' to local '%s' started.", srcPath, containerName, podName, namespaceName, destFile)
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return err
+	}
+
+	kubectlContext, err := c.GetKubectlContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Use kubectl cp to copy the file from pod
+	copyCommand := []string{
+		"kubectl", "cp",
+		"--context", kubectlContext,
+		"--namespace", namespaceName,
+		podName + ":" + srcPath,
+		destFile,
+		"-c", containerName,
+	}
+
+	output, err := commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command: copyCommand,
+	})
+	if err != nil {
+		return tracederrors.TracedErrorf("failed to copy file from pod '%s' in namespace '%s': %w", podName, namespaceName, err)
+	}
+
+	if !output.IsExitSuccess() {
+		stderr, _ := output.GetStderrAsString()
+		return tracederrors.TracedErrorf("kubectl cp failed for pod '%s' in namespace '%s': %s", podName, namespaceName, stderr)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Copy file '%s' from container '%s' of pod '%s' of namespace '%s' to local '%s' finished.", srcPath, containerName, podName, namespaceName, destFile)
+
+	return nil
+}
