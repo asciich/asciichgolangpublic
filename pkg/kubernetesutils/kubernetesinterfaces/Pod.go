@@ -11,4 +11,5 @@ type Pod interface {
 	GetNamespace() (namespace Namespace, err error)
 	GetContainerLogs(ctx context.Context, containerName string) (stdout []byte, stderr []byte, err error)
 	CopyFileToPod(ctx context.Context, localFile string, destPath string, containerName string) error
+	CopyFileFromPod(ctx context.Context, srcPath string, destFile string, containerName string) error
 }

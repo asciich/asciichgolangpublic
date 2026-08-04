@@ -147,3 +147,22 @@ func (p *Pod) CopyFileToPod(ctx context.Context, localFile string, destPath stri
 
 	return nativekubernetes.CopyFileToPod(ctx, config, localFile, destPath, podName, containerName, namespaceName)
 }
+
+func (p *Pod) CopyFileFromPod(ctx context.Context, srcPath string, destFile string, containerName string) error {
+	podName, err := p.GetName()
+	if err != nil {
+		return err
+	}
+
+	namespaceName, err := p.GetNamespaceName()
+	if err != nil {
+		return err
+	}
+
+	config, err := p.namespace.GetConfig()
+	if err != nil {
+		return err
+	}
+
+	return nativekubernetes.CopyFileFromPod(ctx, config, podName, namespaceName, containerName, srcPath, destFile)
+}
