@@ -128,3 +128,22 @@ func (p *Pod) GetContainerLogs(ctx context.Context, containerName string) (stdou
 
 	return nativekubernetes.GetContainerLogs(ctx, clientSet, namespaceName, podName, containerName)
 }
+
+func (p *Pod) CopyFileToPod(ctx context.Context, localFile string, destPath string, containerName string) error {
+	podName, err := p.GetName()
+	if err != nil {
+		return err
+	}
+
+	namespaceName, err := p.GetNamespaceName()
+	if err != nil {
+		return err
+	}
+
+	config, err := p.namespace.GetConfig()
+	if err != nil {
+		return err
+	}
+
+	return nativekubernetes.CopyFileToPod(ctx, config, localFile, destPath, podName, containerName, namespaceName)
+}

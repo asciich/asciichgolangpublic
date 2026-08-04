@@ -5,7 +5,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/storageutils"
+	"github.com/asciich/asciichgolangpublic/pkg/storage/storageutils"
 )
 
 func NewSyncCmd() *cobra.Command {

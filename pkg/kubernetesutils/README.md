@@ -26,6 +26,10 @@ The implementation using exec to call `kubectl` or other commands is useful when
 * [Run single command in temporary pod](Example_RunSingleCommandPod_test.go)
 * [Run single command in temporary pod with secret](Example_RunSingleCommandPodWithSecret_test.go)
 * [Run single command in temporary pod with secret as file](Example_RunSingleCommandPodWithSecretAsFile_test.go)
+* [Copy file to pod](Example_CopyFileToPod_test.go): Copy a local file to a container running in a pod (similar to `kubectl cp`).
+    * [Native Kubernetes implementation](Example_CopyFileToPod_test.go): Using the native Kubernetes API
+    * [Command Executor implementation](Example_CopyFileToPod_test.go): Using kubectl cp command
+    * [Nested directory copy](Example_CopyFileToPod_test.go): Copy files to nested directories
 * The examples to exec/ run commands as additional process inside a container are in [nativekubernetes](./nativekubernetes/README.md)
 * Namespaces:
     * [Create and delete namespace](nativekubernetes/Example_CreateAndDeleteNamespace_test.go)
