@@ -28,6 +28,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/cobra v1.10.1
 	github.com/stretchr/testify v1.11.1
+	github.com/ulikunitz/xz v0.5.15
 	gitlab.com/gitlab-org/api/client-go v0.121.0
 	golang.org/x/crypto v0.46.0
 	golang.org/x/net v0.48.0

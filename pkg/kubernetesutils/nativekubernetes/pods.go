@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -604,6 +605,91 @@ func CopyFileToPod(ctx context.Context, config *rest.Config, localFile string, d
 	}
 
 	logging.LogInfoByCtxf(ctx, "Copy local file '%s' as '%s' into container '%s' of pod '%s' of namespace '%s' finished.", localFile, destPath, containerName, podName, namespaceName)
+
+	return nil
+}
+
+// CopyFileFromPod copies a file from a container in a pod to the local filesystem
+// Similar to: kubectl cp <namespace>/<pod>:<container> <local-path>
+func CopyFileFromPod(ctx context.Context, config *rest.Config, podName string, namespaceName string, containerName string, srcPath string, destFile string) error {
+	if config == nil {
+		return tracederrors.TracedErrorNil("config")
+	}
+	if podName == "" {
+		return tracederrors.TracedErrorEmptyString("podName")
+	}
+	if namespaceName == "" {
+		return tracederrors.TracedErrorEmptyString("namespaceName")
+	}
+	if containerName == "" {
+		return tracederrors.TracedErrorEmptyString("containerName")
+	}
+	if srcPath == "" {
+		return tracederrors.TracedErrorEmptyString("srcPath")
+	}
+	if destFile == "" {
+		return tracederrors.TracedErrorEmptyString("destFile")
+	}
+
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return tracederrors.TracedErrorf("failed to create kubernetes client: %w", err)
+	}
+
+	// Validate pod exists before attempting copy
+	_, err = clientset.CoreV1().Pods(namespaceName).Get(ctx, podName, metav1.GetOptions{})
+	if err != nil {
+		return tracederrors.TracedErrorf("pod '%s' not found in namespace '%s': %w", podName, namespaceName, err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Copy file '%s' from container '%s' of pod '%s' of namespace '%s' to local '%s' started.", srcPath, containerName, podName, namespaceName, destFile)
+
+	// Create the destination directory if it doesn't exist
+	destDir := filepath.Dir(destFile)
+	if err := os.MkdirAll(destDir, 0755); err != nil {
+		return tracederrors.TracedErrorf("failed to create destination directory '%s': %w", destDir, err)
+	}
+
+	// Create destination file
+	destFileHandle, err := os.Create(destFile)
+	if err != nil {
+		return tracederrors.TracedErrorf("failed to create destination file '%s': %w", destFile, err)
+	}
+	defer destFileHandle.Close()
+
+	// Use kubectl exec to cat the file and stream it back
+	req := clientset.CoreV1().RESTClient().
+		Post().
+		Resource("pods").
+		Name(podName).
+		Namespace(namespaceName).
+		SubResource("exec").
+		VersionedParams(&corev1.PodExecOptions{
+			Container: containerName,
+			Command:   []string{"cat", srcPath},
+			Stdin:     false,
+			Stdout:    true,
+			Stderr:    true,
+			TTY:       false,
+		}, scheme.ParameterCodec)
+
+	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
+	if err != nil {
+		return tracederrors.TracedErrorf("failed to create executor: %w", err)
+	}
+
+	var stderr bytes.Buffer
+	err = exec.StreamWithContext(ctx, remotecommand.StreamOptions{
+		Stdin:  nil,
+		Stdout: destFileHandle,
+		Stderr: &stderr,
+		Tty:    false,
+	})
+	if err != nil {
+		return tracederrors.TracedErrorf("failed to copy file from pod: %w", err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Copy file '%s' from container '%s' of pod '%s' of namespace '%s' to local '%s' finished.", srcPath, containerName, podName, namespaceName, destFile)
 
 	return nil
 }
