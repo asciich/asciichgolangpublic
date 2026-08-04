@@ -9,7 +9,7 @@ func NewDiskImageCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		NewDiskImageCmd(),
+		NewListPartitionsCmd(),
 	)
 
 	return cmd

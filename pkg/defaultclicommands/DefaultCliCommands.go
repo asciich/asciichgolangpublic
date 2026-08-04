@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/containercmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/datetimecmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/documentationcmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/embeddedsystemscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/errorscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/filescmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/gitlabcmd"
@@ -50,6 +51,7 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 		containercmd.NewContainerCmd(),
 		datetimecmd.NewDateTimeCmd(),
 		documentationcmd.NewDocumentationCmd(rootCmd),
+		embeddedsystemscmd.NewEmbeddedSystemsCmd(),
 		errorscmd.NewErrorsCommand(),
 		filescmd.NewFilesCmd(),
 		gitlabcmd.NewGitlabCommand(),
