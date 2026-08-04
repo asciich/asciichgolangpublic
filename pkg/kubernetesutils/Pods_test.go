@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
@@ -427,6 +428,105 @@ func Test_GetContainerLogs(t *testing.T) {
 
 				t.Run("GetContainerLogs_invalidContainer", func(t *testing.T) {
 					_, _, err := pod.GetContainerLogs(ctx, "nonexistent-container")
+					require.Error(t, err)
+				})
+			},
+		)
+	}
+}
+
+func Test_CopyFileToPod(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		{"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "test-copyfiletopod"
+				const podName = "test-copyfile-pod"
+				const containerName = "test-container"
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
+
+				// Create namespace
+				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+
+				// Wait until default sa in created namespace exists.
+				time.Sleep(10 * time.Second)
+
+				// Ensure pod is absent before test and cleaned up after
+				defer func() {
+					_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+				}()
+				_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+
+				// Create a running pod
+				_, err = kubernetes.CreatePod(
+					ctx,
+					namespaceName,
+					&kubernetesparameteroptions.RunCommandOptions{
+						PodName:                  podName,
+						ContainerName:            containerName,
+						Image:                    "ubuntu",
+						Command:                  []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
+						DeleteAlreadyExistingPod: true,
+						WaitForPodRunning:        true,
+					},
+				)
+				require.NoError(t, err)
+
+				// Get pod object
+				pod, err := kubernetes.GetPodByNames(namespaceName, podName)
+				require.NoError(t, err)
+
+				t.Run("copy file to pod", func(t *testing.T) {
+					// Create a temporary file with test content
+					testContent := "Test file content for CopyFileToPod test.\nLine 2 of test content."
+					localPath, err := tempfiles.CreateTemporaryFileFromContentString(ctx, testContent)
+					require.NoError(t, err)
+
+					destPath := "/tmp/testfile.txt"
+
+					// Copy file to pod
+					err = pod.CopyFileToPod(ctx, localPath, destPath, containerName)
+					require.NoError(t, err)
+
+					// For now, just verify the copy succeeded without error
+					// Content verification would require Exec support in the Pod interface
+				})
+
+				t.Run("copy file to nested directory", func(t *testing.T) {
+					// Create a temporary file
+					testContent := "File in nested directory"
+					localPath, err := tempfiles.CreateTemporaryFileFromContentString(ctx, testContent)
+					require.NoError(t, err)
+
+					destPath := "/tmp/nested/dir/testfile.txt"
+
+					// Copy file to nested directory (will fail if directory doesn't exist)
+					// This tests that the implementation handles nested paths correctly
+					err = pod.CopyFileToPod(ctx, localPath, destPath, containerName)
+					// Expect error since directory doesn't exist - this is expected behavior
+					// kubectl cp and native API both require parent directories to exist
+					require.Error(t, err)
+				})
+
+				t.Run("error handling - non-existent pod", func(t *testing.T) {
+					localPath, err := tempfiles.CreateTemporaryFileFromContentString(ctx, "test")
+					require.NoError(t, err)
+
+					// Create a pod interface with non-existent pod name
+					nonExistentPod, err := kubernetes.GetPodByNames(namespaceName, "non-existent-pod")
+					require.NoError(t, err)
+
+					err = nonExistentPod.CopyFileToPod(ctx, localPath, "/tmp/test.txt", containerName)
 					require.Error(t, err)
 				})
 			},
