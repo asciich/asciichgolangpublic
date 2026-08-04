@@ -2,6 +2,7 @@ package storagecmd
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/diskimagecmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/s3cmd"
 )
 
@@ -12,6 +13,7 @@ func NewStorageCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		diskimagecmd.NewDiskImageCmd(),
 		s3cmd.NewS3Cmd(),
 
 		NewSpeedTestCmd(),

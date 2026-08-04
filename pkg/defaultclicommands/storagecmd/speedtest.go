@@ -6,7 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/bytesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/storageutils"
+	"github.com/asciich/asciichgolangpublic/pkg/storage/storageutils"
 )
 
 func NewSpeedTestCmd() *cobra.Command {
