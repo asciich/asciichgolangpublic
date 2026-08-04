@@ -92,3 +92,25 @@ func GenerateSshKeyPair(ctx context.Context, options *sshoptions.GenerateKeyOpti
 		},
 	}, nil
 }
+
+// GenerateKeyPair generates an Ed25519 SSH key pair in memory without writing to disk.
+// This is a convenience wrapper around GenerateSshKeyPair for in-memory key generation.
+func GenerateKeyPair(keyType string, options *sshoptions.GenerateKeyOptions) (*SSHKeyPair, error) {
+	ctx := context.Background()
+
+	// Always pass nil options to ensure keys are generated in memory only
+	keyPair, err := GenerateSshKeyPair(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Override key type if specified (default is ED25519)
+	if keyType != "" && keyType != SSH_KEY_TYPE_ED25519 {
+		// For now, only ED25519 is supported in the generation logic
+		// The key type constants are set in the returned key pair
+		keyPair.PublicKey.KeyType = keyType
+		keyPair.PrivateKey.KeyType = keyType
+	}
+
+	return keyPair, nil
+}

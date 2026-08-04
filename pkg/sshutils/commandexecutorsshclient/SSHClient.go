@@ -2,6 +2,7 @@ package commandexecutorsshclient
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"strings"
 
@@ -18,8 +19,11 @@ import (
 
 type SSHClient struct {
 	commandexecutorgeneric.CommandExecutorBase
-	hostName    string
-	sshUserName string
+	hostName            string
+	sshUserName         string
+	sshPort             int  // SSH port (default: 0 means use SSH default)
+	skipHostKeyChecking bool // Only for test environments - must be explicitly enabled
+	sshPrivateKeyFile   string
 }
 
 func GetSshClientByHostName(hostName string) (sshClient *SSHClient, err error) {
@@ -178,12 +182,30 @@ func (s *SSHClient) getCommandToUse(options *parameteroptions.RunCommandOptions)
 		return nil, err
 	}
 
-	commandToUse := options.GetDeepCopy()
-	commandToUse.Command = []string{
-		"ssh",
-		userAtHost,
-		commandString,
+	// Build SSH command with optional port and private key
+	sshArgs := []string{"ssh"}
+
+	// Add private key file if configured
+	if s.sshPrivateKeyFile != "" {
+		sshArgs = append(sshArgs, "-i", s.sshPrivateKeyFile)
 	}
+
+	// Only add non-interactive options when explicitly enabled (for test environments)
+	if s.skipHostKeyChecking {
+		sshArgs = append(sshArgs,
+			"-o", "StrictHostKeyChecking=no",
+			"-o", "UserKnownHostsFile=/dev/null",
+			"-o", "BatchMode=yes",
+		)
+	}
+
+	if s.sshPort != 0 {
+		sshArgs = append(sshArgs, "-p", fmt.Sprintf("%d", s.sshPort))
+	}
+	sshArgs = append(sshArgs, userAtHost, commandString)
+
+	commandToUse := options.GetDeepCopy()
+	commandToUse.Command = sshArgs
 
 	return commandToUse, nil
 }
@@ -220,6 +242,30 @@ func (s *SSHClient) SetSshUserName(sshUserName string) (err error) {
 	s.sshUserName = sshUserName
 
 	return nil
+}
+
+func (s *SSHClient) SetSshPort(sshPort int) (err error) {
+	if sshPort <= 0 {
+		return tracederrors.TracedErrorf("Invalid SSH port: %d", sshPort)
+	}
+	s.sshPort = sshPort
+	return nil
+}
+
+func (s *SSHClient) SetSkipHostKeyChecking(skip bool) {
+	s.skipHostKeyChecking = skip
+}
+
+func (s *SSHClient) SetSshPrivateKeyFile(privateKeyFilePath string) (err error) {
+	if privateKeyFilePath == "" {
+		return tracederrors.TracedErrorEmptyString(privateKeyFilePath)
+	}
+	s.sshPrivateKeyFile = privateKeyFilePath
+	return nil
+}
+
+func (s *SSHClient) GetSshPrivateKeyFile() string {
+	return s.sshPrivateKeyFile
 }
 
 func (s *SSHClient) RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error) {

@@ -216,3 +216,61 @@ func TestReturnedSshKeyPair(t *testing.T) {
 	err = keyPair.Validate(ctx)
 	require.NoError(t, err)
 }
+
+// TestGenerateKeyPair_InMemory verifies that GenerateKeyPair creates a valid
+// SSH key pair entirely in memory without writing any files to disk.
+func TestGenerateKeyPair_InMemory(t *testing.T) {
+	ctx := getCtx()
+
+	// Generate key pair in memory
+	keyPair, err := sshutils.GenerateKeyPair(sshutils.SSH_KEY_TYPE_ED25519, nil)
+	require.NoError(t, err, "GenerateKeyPair should not fail")
+	require.NotNil(t, keyPair, "key pair should not be nil")
+
+	// Validate the key pair structure
+	err = keyPair.Validate(ctx)
+	require.NoError(t, err, "key pair validation should succeed")
+
+	// Verify key type is set correctly
+	require.Equal(t, sshutils.SSH_KEY_TYPE_ED25519, keyPair.PublicKey.KeyType, "public key type should be ED25519")
+	require.Equal(t, sshutils.SSH_KEY_TYPE_ED25519, keyPair.PrivateKey.KeyType, "private key type should be ED25519")
+
+	// Verify key material is not empty
+	require.NotEmpty(t, keyPair.PublicKey.KeyMaterial, "public key material should not be empty")
+	require.NotEmpty(t, keyPair.PrivateKey.KeyMaterial, "private key material should not be empty")
+
+	// Verify the public key can be parsed
+	_, _, _, _, err = ssh.ParseAuthorizedKey([]byte(keyPair.PublicKey.KeyMaterial))
+	require.NoError(t, err, "public key material should be parseable")
+
+	// Verify the private key can be parsed
+	_, err = ssh.ParsePrivateKey([]byte(keyPair.PrivateKey.KeyMaterial))
+	require.NoError(t, err, "private key material should be parseable")
+}
+
+// TestGenerateKeyPair_DefaultKeyType verifies that GenerateKeyPair defaults to ED25519
+func TestGenerateKeyPair_DefaultKeyType(t *testing.T) {
+	// Generate key pair with empty key type (should default to ED25519)
+	keyPair, err := sshutils.GenerateKeyPair("", nil)
+	require.NoError(t, err)
+	require.NotNil(t, keyPair)
+
+	// Should default to ED25519
+	require.Equal(t, sshutils.SSH_KEY_TYPE_ED25519, keyPair.PublicKey.KeyType)
+	require.Equal(t, sshutils.SSH_KEY_TYPE_ED25519, keyPair.PrivateKey.KeyType)
+}
+
+// TestGenerateKeyPair_KeysAreUnique verifies that successive calls produce different keys
+func TestGenerateKeyPair_KeysAreUnique(t *testing.T) {
+	keyPair1, err := sshutils.GenerateKeyPair(sshutils.SSH_KEY_TYPE_ED25519, nil)
+	require.NoError(t, err)
+
+	keyPair2, err := sshutils.GenerateKeyPair(sshutils.SSH_KEY_TYPE_ED25519, nil)
+	require.NoError(t, err)
+
+	// The key material should be different
+	require.NotEqual(t, keyPair1.PublicKey.KeyMaterial, keyPair2.PublicKey.KeyMaterial,
+		"successive calls should produce different keys")
+	require.NotEqual(t, keyPair1.PrivateKey.KeyMaterial, keyPair2.PrivateKey.KeyMaterial,
+		"successive calls should produce different keys")
+}

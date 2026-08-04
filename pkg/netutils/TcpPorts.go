@@ -152,3 +152,23 @@ func WaitPortAvailableForListening(ctx context.Context, port int) error {
 	logging.LogInfoByCtxf(ctx, "Wait for port '%d' available for listening finished. The port is availabe for listening.", port)
 	return nil
 }
+
+// GetNextFreePort finds the next free TCP port starting from startPort.
+// It tries ports sequentially until it finds one that's available or reaches 65535.
+func GetNextFreePort(ctx context.Context, startPort int) (int, error) {
+	if startPort <= 0 || startPort > 65535 {
+		return 0, tracederrors.TracedErrorf("Invalid start port '%d'. Port must be between 1 and 65535", startPort)
+	}
+
+	for port := startPort; port <= 65535; port++ {
+		addr := fmt.Sprintf(":%d", port)
+		listener, err := net.Listen("tcp", addr)
+		if err != nil {
+			continue // Port is in use, try next
+		}
+		listener.Close()
+		logging.LogInfoByCtxf(ctx, "Next free port found with start port = %d is %d.", startPort, port)
+		return port, nil
+	}
+	return 0, tracederrors.TracedErrorf("no free port found starting from %d", startPort)
+}

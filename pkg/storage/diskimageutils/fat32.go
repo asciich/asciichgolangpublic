@@ -3,29 +3,20 @@ package diskimageutils
 import (
 	"context"
 	"encoding/binary"
+	"io"
 	"os"
+	"path"
 	"strings"
 
+	"github.com/diskfs/go-diskfs"
+	"github.com/diskfs/go-diskfs/disk"
+	"github.com/diskfs/go-diskfs/filesystem"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 const (
-	fat32SectorSize        = 512
-	fat32SectorsPerCluster = 8 // 4KB clusters
-	fat32ReservedSectors   = 32
-	fat32NumberOfFATs      = 2
-	fat32MediaType         = 0xF8
-	fat32FSInfoSectorNum   = 1
-	fat32BackupBootSector  = 6
-	fat32RootDirCluster    = 2
-	fat32EOFMarker         = 0x0FFFFFF8
-	fat32ClusterInUse      = 0x0FFFFFFF
-	fat32BootSignature     = 0xAA55
-	fat32FSInfoSignature1  = 0x41615252
-	fat32FSInfoSignature2  = 0x61417272
-	fat32FSInfoSignature3  = 0xAA550000
-	fat32MinImageSize      = 33 * 1024 * 1024
+	fat32MinImageSize = 33 * 1024 * 1024
 )
 
 // CreateFat32Options configures the FAT32 image creation.
@@ -56,59 +47,23 @@ func CreateFat32Image(ctx context.Context, outputPath string, options *CreateFat
 
 	logging.LogInfoByCtxf(ctx, "Create FAT32 image '%s' with size '%d' bytes started.", outputPath, options.SizeBytes)
 
-	totalSectors := uint32(options.SizeBytes / fat32SectorSize)
-	fatSizeSectors := fat32CalculateFATSize(totalSectors)
-
-	dataStartSector := uint32(fat32ReservedSectors) + fat32NumberOfFATs*fatSizeSectors
-	dataSectors := totalSectors - dataStartSector
-	totalClusters := dataSectors / fat32SectorsPerCluster
-
-	volumeLabel := fat32PadVolumeLabel(options.VolumeLabel)
-
-	file, err := os.Create(outputPath)
+	d, err := diskfs.Create(outputPath, options.SizeBytes, diskfs.Raw, diskfs.SectorSizeDefault)
 	if err != nil {
-		return tracederrors.TracedErrorf("Failed to create image file '%s': %w", outputPath, err)
+		return tracederrors.TracedErrorf("Failed to create disk image '%s': %w", outputPath, err)
 	}
-	defer file.Close()
 
-	err = file.Truncate(options.SizeBytes)
+	spec := disk.FilesystemSpec{
+		Partition:   0,
+		FSType:      filesystem.TypeFat32,
+		VolumeLabel: options.VolumeLabel,
+	}
+
+	_, err = d.CreateFilesystem(spec)
 	if err != nil {
 		os.Remove(outputPath)
-		return tracederrors.TracedErrorf("Failed to allocate image file '%s': %w", outputPath, err)
+		return tracederrors.TracedErrorf("Failed to create FAT32 filesystem on '%s': %w", outputPath, err)
 	}
 
-	bootSector := fat32BuildBootSector(totalSectors, fatSizeSectors, volumeLabel)
-	_, err = file.WriteAt(bootSector, 0)
-	if err != nil {
-		os.Remove(outputPath)
-		return tracederrors.TracedErrorf("Failed to write boot sector: %w", err)
-	}
-
-	_, err = file.WriteAt(bootSector, int64(fat32BackupBootSector)*fat32SectorSize)
-	if err != nil {
-		os.Remove(outputPath)
-		return tracederrors.TracedErrorf("Failed to write backup boot sector: %w", err)
-	}
-
-	fsInfo := fat32BuildFSInfoSector(totalClusters)
-	_, err = file.WriteAt(fsInfo, int64(fat32FSInfoSectorNum)*fat32SectorSize)
-	if err != nil {
-		os.Remove(outputPath)
-		return tracederrors.TracedErrorf("Failed to write FSInfo sector: %w", err)
-	}
-
-	fatTable := fat32BuildFATTable(fatSizeSectors)
-	for i := uint32(0); i < fat32NumberOfFATs; i++ {
-		fatOffset := int64(fat32ReservedSectors+i*fatSizeSectors) * fat32SectorSize
-		_, err = file.WriteAt(fatTable, fatOffset)
-		if err != nil {
-			os.Remove(outputPath)
-			return tracederrors.TracedErrorf("Failed to write FAT table %d: %w", i+1, err)
-		}
-	}
-
-	logging.LogInfoByCtxf(ctx, "FAT32 image created: totalSectors=%d, fatSizeSectors=%d, totalClusters=%d, dataStartSector=%d.",
-		totalSectors, fatSizeSectors, totalClusters, dataStartSector)
 	logging.LogInfoByCtxf(ctx, "Create FAT32 image '%s' with size '%d' bytes finished.", outputPath, options.SizeBytes)
 
 	return nil
@@ -124,25 +79,14 @@ func Fat32ListFiles(ctx context.Context, imagePath string) ([]string, error) {
 
 	logging.LogInfoByCtxf(ctx, "List files in FAT32 image '%s' started.", imagePath)
 
-	file, err := os.Open(imagePath)
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("Failed to open FAT32 image '%s': %w", imagePath, err)
-	}
-	defer file.Close()
-
-	bpb, err := fat32ReadBPB(file)
-	if err != nil {
-		return nil, err
-	}
-
-	fat, err := fat32ReadFAT(file, bpb)
+	fs, err := fat32OpenFilesystem(imagePath)
 	if err != nil {
 		return nil, err
 	}
 
 	results := []string{"."}
 
-	err = fat32ListDirectory(file, bpb, fat, bpb.rootCluster, ".", &results)
+	err = fat32ListDirectoryRecursive(fs, "/", ".", &results)
 	if err != nil {
 		return nil, err
 	}
@@ -167,80 +111,30 @@ func Fat32WriteFile(ctx context.Context, imagePath string, filePath string, cont
 
 	logging.LogInfoByCtxf(ctx, "Write file '%s' to FAT32 image '%s' started. Size: '%d' bytes.", filePath, imagePath, len(content))
 
-	file, err := os.OpenFile(imagePath, os.O_RDWR, 0644)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to open FAT32 image '%s': %w", imagePath, err)
-	}
-	defer file.Close()
-
-	bpb, err := fat32ReadBPB(file)
+	fs, err := fat32OpenFilesystemReadWrite(imagePath)
 	if err != nil {
 		return err
 	}
 
-	fat, err := fat32ReadFAT(file, bpb)
-	if err != nil {
-		return err
-	}
+	normalizedPath := fat32NormalizePath(filePath)
 
-	parts := fat32SplitPath(filePath)
-	if len(parts) == 0 {
-		return tracederrors.TracedErrorf("Invalid file path '%s'.", filePath)
-	}
-
-	dirCluster := bpb.rootCluster
-	for i := 0; i < len(parts)-1; i++ {
-		existingCluster, found, err := fat32FindEntryInDirectory(file, bpb, fat, dirCluster, parts[i], true)
-		if err != nil {
-			return err
-		}
-
-		if found {
-			dirCluster = existingCluster
-		} else {
-			newCluster, err := fat32AllocateCluster(fat)
-			if err != nil {
-				return err
-			}
-
-			err = fat32ZeroCluster(file, bpb, newCluster)
-			if err != nil {
-				return err
-			}
-
-			err = fat32AddDirectoryEntry(file, bpb, fat, dirCluster, parts[i], newCluster, 0, true)
-			if err != nil {
-				return err
-			}
-
-			dirCluster = newCluster
-		}
-	}
-
-	fileName := parts[len(parts)-1]
-	fileSize := uint32(len(content))
-
-	var firstCluster uint32
-	if fileSize > 0 {
-		firstCluster, err = fat32WriteContent(file, bpb, fat, content)
+	// Create parent directories
+	dir := path.Dir(normalizedPath)
+	if dir != "/" && dir != "." {
+		err = fat32MkdirAll(fs, dir)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = fat32AddDirectoryEntry(file, bpb, fat, dirCluster, fileName, firstCluster, fileSize, false)
+	file, err := fs.OpenFile(normalizedPath, os.O_CREATE|os.O_RDWR)
 	if err != nil {
-		return err
+		return tracederrors.TracedErrorf("Failed to open file '%s' for writing in FAT32 image '%s': %w", filePath, imagePath, err)
 	}
 
-	err = fat32WriteFAT(file, bpb, fat)
+	_, err = file.Write(content)
 	if err != nil {
-		return err
-	}
-
-	err = fat32UpdateFSInfo(file, bpb, fat)
-	if err != nil {
-		return err
+		return tracederrors.TracedErrorf("Failed to write content to file '%s' in FAT32 image '%s': %w", filePath, imagePath, err)
 	}
 
 	logging.LogInfoByCtxf(ctx, "Write file '%s' to FAT32 image '%s' finished.", filePath, imagePath)
@@ -262,79 +156,21 @@ func Fat32ReadFile(ctx context.Context, imagePath string, filePath string) ([]by
 
 	logging.LogInfoByCtxf(ctx, "Read file '%s' from FAT32 image '%s' started.", filePath, imagePath)
 
-	file, err := os.Open(imagePath)
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("Failed to open FAT32 image '%s': %w", imagePath, err)
-	}
-	defer file.Close()
-
-	bpb, err := fat32ReadBPB(file)
+	fs, err := fat32OpenFilesystem(imagePath)
 	if err != nil {
 		return nil, err
 	}
 
-	fat, err := fat32ReadFAT(file, bpb)
+	normalizedPath := fat32NormalizePath(filePath)
+
+	file, err := fs.OpenFile(normalizedPath, os.O_RDONLY)
 	if err != nil {
-		return nil, err
-	}
-
-	parts := fat32SplitPath(filePath)
-	if len(parts) == 0 {
-		return nil, tracederrors.TracedErrorf("Invalid file path '%s'.", filePath)
-	}
-
-	dirCluster := bpb.rootCluster
-	for i := 0; i < len(parts)-1; i++ {
-		cluster, found, err := fat32FindEntryInDirectory(file, bpb, fat, dirCluster, parts[i], true)
-		if err != nil {
-			return nil, err
-		}
-		if !found {
-			return nil, tracederrors.TracedErrorf("Directory '%s' not found in FAT32 image '%s'.", parts[i], imagePath)
-		}
-		dirCluster = cluster
-	}
-
-	fileName := parts[len(parts)-1]
-	fileEntry, err := fat32FindFileEntry(file, bpb, fat, dirCluster, fileName)
-	if err != nil {
-		return nil, err
-	}
-
-	if fileEntry == nil {
 		return nil, tracederrors.TracedErrorf("File '%s' not found in FAT32 image '%s'.", filePath, imagePath)
 	}
 
-	if fileEntry.size == 0 {
-		logging.LogInfoByCtxf(ctx, "Read file '%s' from FAT32 image '%s' finished. Size: 0 bytes.", filePath, imagePath)
-		return []byte{}, nil
-	}
-
-	clusterChain := fat32GetClusterChain(fat, fileEntry.cluster)
-	clusterBytes := fat32GetClusterSize(bpb)
-	content := make([]byte, 0, fileEntry.size)
-
-	remaining := int(fileEntry.size)
-	for _, cluster := range clusterChain {
-		offset := fat32ClusterToOffset(bpb, cluster)
-		buf := make([]byte, clusterBytes)
-
-		_, err := file.ReadAt(buf, offset)
-		if err != nil {
-			return nil, tracederrors.TracedErrorf("Failed to read cluster %d: %w", cluster, err)
-		}
-
-		readSize := clusterBytes
-		if remaining < readSize {
-			readSize = remaining
-		}
-
-		content = append(content, buf[:readSize]...)
-		remaining -= readSize
-
-		if remaining <= 0 {
-			break
-		}
+	content, err := io.ReadAll(file)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to read file '%s' from FAT32 image '%s': %w", filePath, imagePath, err)
 	}
 
 	logging.LogInfoByCtxf(ctx, "Read file '%s' from FAT32 image '%s' finished. Size: '%d' bytes.", filePath, imagePath, len(content))
@@ -343,13 +179,13 @@ func Fat32ReadFile(ctx context.Context, imagePath string, filePath string) ([]by
 }
 
 // Fat32Exists checks if a file or directory exists at 'path' in a FAT32 image.
-func Fat32Exists(ctx context.Context, imagePath string, path string) (bool, error) {
+func Fat32Exists(ctx context.Context, imagePath string, filePath string) (bool, error) {
 	if imagePath == "" {
 		return false, tracederrors.TracedErrorEmptyString("imagePath")
 	}
 
-	if path == "" {
-		return false, tracederrors.TracedErrorEmptyString("path")
+	if filePath == "" {
+		return false, tracederrors.TracedErrorEmptyString("filePath")
 	}
 
 	files, err := Fat32ListFiles(ctx, imagePath)
@@ -357,7 +193,7 @@ func Fat32Exists(ctx context.Context, imagePath string, path string) (bool, erro
 		return false, err
 	}
 
-	searchPath := "./" + strings.TrimPrefix(strings.TrimPrefix(path, "/"), "./")
+	searchPath := "./" + strings.TrimPrefix(strings.TrimPrefix(filePath, "/"), "./")
 	for _, f := range files {
 		if strings.EqualFold(f, searchPath) {
 			return true, nil
@@ -367,61 +203,118 @@ func Fat32Exists(ctx context.Context, imagePath string, path string) (bool, erro
 	return false, nil
 }
 
-// --- Internal types ---
+// Fat32DeleteFile deletes a file at 'filePath' from a FAT32 image.
+//
+// The 'filePath' must use forward slashes as separator (e.g. "test/a.txt").
+// This operates at the raw level by marking the directory entry as deleted (0xE5)
+// and freeing the associated FAT cluster chain.
+func Fat32DeleteFile(ctx context.Context, imagePath string, filePath string) error {
+	if imagePath == "" {
+		return tracederrors.TracedErrorEmptyString("imagePath")
+	}
 
-type fat32BPB struct {
+	if filePath == "" {
+		return tracederrors.TracedErrorEmptyString("filePath")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Delete file '%s' from FAT32 image '%s' started.", filePath, imagePath)
+
+	file, err := os.OpenFile(imagePath, os.O_RDWR, 0644)
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to open FAT32 image '%s': %w", imagePath, err)
+	}
+	defer file.Close()
+
+	bpb, err := fat32DeleteReadBPB(file)
+	if err != nil {
+		return err
+	}
+
+	fat, err := fat32DeleteReadFAT(file, bpb)
+	if err != nil {
+		return err
+	}
+
+	parts := fat32DeleteSplitPath(filePath)
+	if len(parts) == 0 {
+		return tracederrors.TracedErrorf("Invalid file path '%s'.", filePath)
+	}
+
+	// Navigate to parent directory
+	dirCluster := bpb.rootCluster
+	for i := 0; i < len(parts)-1; i++ {
+		cluster, found, err := fat32DeleteFindDirectory(file, bpb, fat, dirCluster, parts[i])
+		if err != nil {
+			return err
+		}
+		if !found {
+			return tracederrors.TracedErrorf("Directory '%s' not found in FAT32 image '%s'.", parts[i], imagePath)
+		}
+		dirCluster = cluster
+	}
+
+	// Find and delete the file entry
+	fileName := parts[len(parts)-1]
+	fileCluster, err := fat32DeleteMarkEntry(file, bpb, fat, dirCluster, fileName)
+	if err != nil {
+		return err
+	}
+
+	// Free the cluster chain
+	if fileCluster >= 2 && fileCluster < 0x0FFFFFF8 {
+		fat32DeleteFreeClusterChain(fat, fileCluster)
+	}
+
+	// Write updated FAT back
+	err = fat32DeleteWriteFAT(file, bpb, fat)
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Delete file '%s' from FAT32 image '%s' finished.", filePath, imagePath)
+
+	return nil
+}
+
+// --- Internal types and functions for delete ---
+
+type fat32DeleteBPB struct {
 	sectorSize      uint16
 	sectorsPerClust uint8
 	reservedSectors uint16
 	numberOfFATs    uint8
 	fatSizeSectors  uint32
 	rootCluster     uint32
-	totalSectors    uint32
 	dataStartSector uint32
-	totalClusters   uint32
-	fsInfoSector    uint16
 }
 
-type fat32DirEntry struct {
-	name        string
-	cluster     uint32
-	size        uint32
-	isDirectory bool
-}
-
-// --- Internal functions ---
-
-func fat32ReadBPB(file *os.File) (*fat32BPB, error) {
-	bs := make([]byte, fat32SectorSize)
+func fat32DeleteReadBPB(file *os.File) (*fat32DeleteBPB, error) {
+	bs := make([]byte, 512)
 	_, err := file.ReadAt(bs, 0)
 	if err != nil {
 		return nil, tracederrors.TracedErrorf("Failed to read boot sector: %w", err)
 	}
 
 	sig := binary.LittleEndian.Uint16(bs[510:512])
-	if sig != fat32BootSignature {
+	if sig != 0xAA55 {
 		return nil, tracederrors.TracedErrorf("Invalid boot sector signature: 0x%04X.", sig)
 	}
 
-	bpb := &fat32BPB{
+	bpb := &fat32DeleteBPB{
 		sectorSize:      binary.LittleEndian.Uint16(bs[11:13]),
 		sectorsPerClust: bs[13],
 		reservedSectors: binary.LittleEndian.Uint16(bs[14:16]),
 		numberOfFATs:    bs[16],
 		fatSizeSectors:  binary.LittleEndian.Uint32(bs[36:40]),
 		rootCluster:     binary.LittleEndian.Uint32(bs[44:48]),
-		totalSectors:    binary.LittleEndian.Uint32(bs[32:36]),
-		fsInfoSector:    binary.LittleEndian.Uint16(bs[48:50]),
 	}
 
 	bpb.dataStartSector = uint32(bpb.reservedSectors) + uint32(bpb.numberOfFATs)*bpb.fatSizeSectors
-	dataSectors := bpb.totalSectors - bpb.dataStartSector
-	bpb.totalClusters = dataSectors / uint32(bpb.sectorsPerClust)
 
 	return bpb, nil
 }
 
-func fat32ReadFAT(file *os.File, bpb *fat32BPB) ([]uint32, error) {
+func fat32DeleteReadFAT(file *os.File, bpb *fat32DeleteBPB) ([]uint32, error) {
 	fatBytes := make([]byte, bpb.fatSizeSectors*uint32(bpb.sectorSize))
 	fatOffset := int64(bpb.reservedSectors) * int64(bpb.sectorSize)
 
@@ -439,7 +332,7 @@ func fat32ReadFAT(file *os.File, bpb *fat32BPB) ([]uint32, error) {
 	return fat, nil
 }
 
-func fat32WriteFAT(file *os.File, bpb *fat32BPB, fat []uint32) error {
+func fat32DeleteWriteFAT(file *os.File, bpb *fat32DeleteBPB, fat []uint32) error {
 	fatBytes := make([]byte, bpb.fatSizeSectors*uint32(bpb.sectorSize))
 	for i := 0; i < len(fat) && i*4 < len(fatBytes); i++ {
 		binary.LittleEndian.PutUint32(fatBytes[i*4:i*4+4], fat[i])
@@ -456,19 +349,19 @@ func fat32WriteFAT(file *os.File, bpb *fat32BPB, fat []uint32) error {
 	return nil
 }
 
-func fat32ClusterToOffset(bpb *fat32BPB, cluster uint32) int64 {
+func fat32DeleteClusterToOffset(bpb *fat32DeleteBPB, cluster uint32) int64 {
 	return int64(bpb.dataStartSector)*int64(bpb.sectorSize) + int64(cluster-2)*int64(bpb.sectorsPerClust)*int64(bpb.sectorSize)
 }
 
-func fat32GetClusterSize(bpb *fat32BPB) int {
+func fat32DeleteGetClusterSize(bpb *fat32DeleteBPB) int {
 	return int(bpb.sectorsPerClust) * int(bpb.sectorSize)
 }
 
-func fat32GetClusterChain(fat []uint32, startCluster uint32) []uint32 {
+func fat32DeleteGetClusterChain(fat []uint32, startCluster uint32) []uint32 {
 	chain := []uint32{}
 	cluster := startCluster
 
-	for cluster >= 2 && cluster < fat32EOFMarker {
+	for cluster >= 2 && cluster < 0x0FFFFFF8 {
 		chain = append(chain, cluster)
 		if int(cluster) >= len(fat) {
 			break
@@ -479,76 +372,13 @@ func fat32GetClusterChain(fat []uint32, startCluster uint32) []uint32 {
 	return chain
 }
 
-func fat32ListDirectory(file *os.File, bpb *fat32BPB, fat []uint32, dirCluster uint32, prefix string, results *[]string) error {
-	clusterChain := fat32GetClusterChain(fat, dirCluster)
-	clusterBytes := fat32GetClusterSize(bpb)
-
-	for _, cluster := range clusterChain {
-		offset := fat32ClusterToOffset(bpb, cluster)
-		buf := make([]byte, clusterBytes)
-
-		_, err := file.ReadAt(buf, offset)
-		if err != nil {
-			return tracederrors.TracedErrorf("Failed to read directory cluster %d: %w", cluster, err)
-		}
-
-		for i := 0; i < clusterBytes; i += 32 {
-			entry := buf[i : i+32]
-
-			if entry[0] == 0x00 {
-				return nil
-			}
-
-			if entry[0] == 0xE5 {
-				continue
-			}
-
-			if entry[11] == 0x0F {
-				continue
-			}
-
-			name := fat32ParseShortName(entry)
-			if name == "." || name == ".." {
-				continue
-			}
-
-			attr := entry[11]
-			isDir := (attr & 0x10) != 0
-
-			entryPath := prefix + "/" + name
-			*results = append(*results, entryPath)
-
-			if isDir {
-				entryCluster := uint32(binary.LittleEndian.Uint16(entry[20:22]))<<16 | uint32(binary.LittleEndian.Uint16(entry[26:28]))
-				err := fat32ListDirectory(file, bpb, fat, entryCluster, entryPath, results)
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
-
-	return nil
-}
-
-func fat32ParseShortName(entry []byte) string {
-	name := strings.TrimRight(string(entry[0:8]), " ")
-	ext := strings.TrimRight(string(entry[8:11]), " ")
-
-	if ext != "" {
-		return strings.ToLower(name + "." + ext)
-	}
-
-	return strings.ToLower(name)
-}
-
-func fat32FindEntryInDirectory(file *os.File, bpb *fat32BPB, fat []uint32, dirCluster uint32, name string, isDir bool) (uint32, bool, error) {
-	clusterChain := fat32GetClusterChain(fat, dirCluster)
-	clusterBytes := fat32GetClusterSize(bpb)
+func fat32DeleteFindDirectory(file *os.File, bpb *fat32DeleteBPB, fat []uint32, dirCluster uint32, name string) (uint32, bool, error) {
+	clusterChain := fat32DeleteGetClusterChain(fat, dirCluster)
+	clusterBytes := fat32DeleteGetClusterSize(bpb)
 	searchName := strings.ToUpper(name)
 
 	for _, cluster := range clusterChain {
-		offset := fat32ClusterToOffset(bpb, cluster)
+		offset := fat32DeleteClusterToOffset(bpb, cluster)
 		buf := make([]byte, clusterBytes)
 
 		_, err := file.ReadAt(buf, offset)
@@ -567,26 +397,18 @@ func fat32FindEntryInDirectory(file *os.File, bpb *fat32BPB, fat []uint32, dirCl
 				continue
 			}
 
+			// Skip LFN entries
 			if entry[11] == 0x0F {
 				continue
 			}
 
 			attr := entry[11]
-			entryIsDir := (attr & 0x10) != 0
-
-			if isDir != entryIsDir {
-				continue
+			if (attr & 0x10) == 0 {
+				continue // Not a directory
 			}
 
-			entryName := strings.TrimRight(string(entry[0:8]), " ")
-			entryExt := strings.TrimRight(string(entry[8:11]), " ")
-
-			fullName := entryName
-			if entryExt != "" {
-				fullName = entryName + "." + entryExt
-			}
-
-			if strings.ToUpper(fullName) == searchName {
+			entryName := fat32DeleteGetEntryName(entry)
+			if strings.ToUpper(entryName) == searchName {
 				entryCluster := uint32(binary.LittleEndian.Uint16(entry[20:22]))<<16 | uint32(binary.LittleEndian.Uint16(entry[26:28]))
 				return entryCluster, true, nil
 			}
@@ -596,426 +418,202 @@ func fat32FindEntryInDirectory(file *os.File, bpb *fat32BPB, fat []uint32, dirCl
 	return 0, false, nil
 }
 
-func fat32FindFileEntry(file *os.File, bpb *fat32BPB, fat []uint32, dirCluster uint32, name string) (*fat32DirEntry, error) {
-	clusterChain := fat32GetClusterChain(fat, dirCluster)
-	clusterBytes := fat32GetClusterSize(bpb)
+// fat32DeleteMarkEntry finds the file entry in the directory and marks it as deleted (0xE5).
+// Also marks any associated LFN entries as deleted.
+// Returns the start cluster of the deleted file.
+func fat32DeleteMarkEntry(file *os.File, bpb *fat32DeleteBPB, fat []uint32, dirCluster uint32, name string) (uint32, error) {
+	clusterChain := fat32DeleteGetClusterChain(fat, dirCluster)
+	clusterBytes := fat32DeleteGetClusterSize(bpb)
 	searchName := strings.ToUpper(name)
 
 	for _, cluster := range clusterChain {
-		offset := fat32ClusterToOffset(bpb, cluster)
+		offset := fat32DeleteClusterToOffset(bpb, cluster)
 		buf := make([]byte, clusterBytes)
 
 		_, err := file.ReadAt(buf, offset)
 		if err != nil {
-			return nil, tracederrors.TracedErrorf("Failed to read directory cluster %d: %w", cluster, err)
+			return 0, tracederrors.TracedErrorf("Failed to read directory cluster %d: %w", cluster, err)
 		}
 
 		for i := 0; i < clusterBytes; i += 32 {
 			entry := buf[i : i+32]
 
 			if entry[0] == 0x00 {
-				return nil, nil
+				return 0, tracederrors.TracedErrorf("File '%s' not found for deletion.", name)
 			}
 
 			if entry[0] == 0xE5 {
 				continue
 			}
 
+			// Skip LFN entries for now, we'll handle them when we find the matching short entry
 			if entry[11] == 0x0F {
 				continue
 			}
 
 			attr := entry[11]
 			if (attr & 0x10) != 0 {
-				continue
+				continue // Skip directories
 			}
 
-			entryName := strings.TrimRight(string(entry[0:8]), " ")
-			entryExt := strings.TrimRight(string(entry[8:11]), " ")
+			entryName := fat32DeleteGetEntryName(entry)
+			if strings.ToUpper(entryName) == searchName {
+				fileCluster := uint32(binary.LittleEndian.Uint16(entry[20:22]))<<16 | uint32(binary.LittleEndian.Uint16(entry[26:28]))
 
-			fullName := entryName
-			if entryExt != "" {
-				fullName = entryName + "." + entryExt
-			}
+				// Mark preceding LFN entries as deleted
+				fat32DeleteMarkLFNEntries(buf, i)
 
-			if strings.ToUpper(fullName) == searchName {
-				entryCluster := uint32(binary.LittleEndian.Uint16(entry[20:22]))<<16 | uint32(binary.LittleEndian.Uint16(entry[26:28]))
-				entrySize := binary.LittleEndian.Uint32(entry[28:32])
+				// Mark the short name entry as deleted
+				buf[i] = 0xE5
 
-				return &fat32DirEntry{
-					name:        fullName,
-					cluster:     entryCluster,
-					size:        entrySize,
-					isDirectory: false,
-				}, nil
-			}
-		}
-	}
-
-	return nil, nil
-}
-
-func fat32AllocateCluster(fat []uint32) (uint32, error) {
-	for i := uint32(2); i < uint32(len(fat)); i++ {
-		if fat[i] == 0 {
-			fat[i] = fat32EOFMarker
-			return i, nil
-		}
-	}
-
-	return 0, tracederrors.TracedErrorf("FAT32 image is full, no free clusters available.")
-}
-
-func fat32ZeroCluster(file *os.File, bpb *fat32BPB, cluster uint32) error {
-	offset := fat32ClusterToOffset(bpb, cluster)
-	zeros := make([]byte, fat32GetClusterSize(bpb))
-
-	_, err := file.WriteAt(zeros, offset)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to zero cluster %d: %w", cluster, err)
-	}
-
-	return nil
-}
-
-func fat32WriteContent(file *os.File, bpb *fat32BPB, fat []uint32, content []byte) (uint32, error) {
-	clusterBytes := fat32GetClusterSize(bpb)
-	remaining := content
-	var firstCluster uint32
-	var prevCluster uint32
-
-	for len(remaining) > 0 {
-		cluster, err := fat32AllocateCluster(fat)
-		if err != nil {
-			return 0, err
-		}
-
-		if firstCluster == 0 {
-			firstCluster = cluster
-		}
-
-		if prevCluster != 0 {
-			fat[prevCluster] = cluster
-		}
-
-		writeSize := clusterBytes
-		if len(remaining) < writeSize {
-			writeSize = len(remaining)
-		}
-
-		buf := make([]byte, clusterBytes)
-		copy(buf, remaining[:writeSize])
-
-		offset := fat32ClusterToOffset(bpb, cluster)
-		_, err = file.WriteAt(buf, offset)
-		if err != nil {
-			return 0, tracederrors.TracedErrorf("Failed to write content to cluster %d: %w", cluster, err)
-		}
-
-		remaining = remaining[writeSize:]
-		prevCluster = cluster
-	}
-
-	return firstCluster, nil
-}
-
-func fat32AddDirectoryEntry(file *os.File, bpb *fat32BPB, fat []uint32, dirCluster uint32, name string, fileCluster uint32, fileSize uint32, isDir bool) error {
-	shortName := fat32FormatShortName(name)
-	clusterChain := fat32GetClusterChain(fat, dirCluster)
-	clusterBytes := fat32GetClusterSize(bpb)
-
-	for _, cluster := range clusterChain {
-		offset := fat32ClusterToOffset(bpb, cluster)
-		buf := make([]byte, clusterBytes)
-
-		_, err := file.ReadAt(buf, offset)
-		if err != nil {
-			return tracederrors.TracedErrorf("Failed to read directory cluster %d: %w", cluster, err)
-		}
-
-		for i := 0; i < clusterBytes; i += 32 {
-			if buf[i] == 0x00 || buf[i] == 0xE5 {
-				entry := fat32BuildDirectoryEntry(shortName, fileCluster, fileSize, isDir)
-				copy(buf[i:i+32], entry)
-
+				// Write modified buffer back
 				_, err = file.WriteAt(buf, offset)
 				if err != nil {
-					return tracederrors.TracedErrorf("Failed to write directory entry: %w", err)
+					return 0, tracederrors.TracedErrorf("Failed to write deleted entry: %w", err)
 				}
 
-				return nil
+				return fileCluster, nil
 			}
 		}
 	}
 
-	newCluster, err := fat32AllocateCluster(fat)
-	if err != nil {
-		return err
-	}
-
-	lastCluster := clusterChain[len(clusterChain)-1]
-	fat[lastCluster] = newCluster
-
-	err = fat32ZeroCluster(file, bpb, newCluster)
-	if err != nil {
-		return err
-	}
-
-	offset := fat32ClusterToOffset(bpb, newCluster)
-	buf := make([]byte, clusterBytes)
-	entry := fat32BuildDirectoryEntry(shortName, fileCluster, fileSize, isDir)
-	copy(buf[0:32], entry)
-
-	_, err = file.WriteAt(buf, offset)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to write directory entry in new cluster: %w", err)
-	}
-
-	return nil
+	return 0, tracederrors.TracedErrorf("File '%s' not found for deletion.", name)
 }
 
-func fat32BuildDirectoryEntry(shortName [11]byte, cluster uint32, fileSize uint32, isDir bool) []byte {
-	entry := make([]byte, 32)
-
-	copy(entry[0:11], shortName[:])
-
-	if isDir {
-		entry[11] = 0x10
-	} else {
-		entry[11] = 0x20
+// fat32DeleteMarkLFNEntries marks all LFN entries preceding the short entry at position shortEntryOffset as deleted.
+func fat32DeleteMarkLFNEntries(buf []byte, shortEntryOffset int) {
+	// Walk backwards from the short entry and mark all consecutive LFN entries
+	for j := shortEntryOffset - 32; j >= 0; j -= 32 {
+		if buf[j] == 0xE5 || buf[j] == 0x00 {
+			break
+		}
+		if buf[j+11] != 0x0F {
+			break // Not an LFN entry
+		}
+		buf[j] = 0xE5
 	}
-
-	binary.LittleEndian.PutUint16(entry[20:22], uint16(cluster>>16))
-	binary.LittleEndian.PutUint16(entry[26:28], uint16(cluster&0xFFFF))
-
-	if !isDir {
-		binary.LittleEndian.PutUint32(entry[28:32], fileSize)
-	}
-
-	return entry
 }
 
-func fat32FormatShortName(name string) [11]byte {
-	var result [11]byte
-	for i := range result {
-		result[i] = ' '
+func fat32DeleteFreeClusterChain(fat []uint32, startCluster uint32) {
+	cluster := startCluster
+
+	for cluster >= 2 && cluster < 0x0FFFFFF8 {
+		if int(cluster) >= len(fat) {
+			break
+		}
+		next := fat[cluster]
+		fat[cluster] = 0
+		cluster = next
 	}
-
-	upper := strings.ToUpper(name)
-	dotIndex := strings.LastIndex(upper, ".")
-
-	if dotIndex >= 0 {
-		baseName := upper[:dotIndex]
-		ext := upper[dotIndex+1:]
-
-		n := len(baseName)
-		if n > 8 {
-			n = 8
-		}
-		copy(result[0:n], []byte(baseName[:n]))
-
-		e := len(ext)
-		if e > 3 {
-			e = 3
-		}
-		copy(result[8:8+e], []byte(ext[:e]))
-	} else {
-		n := len(upper)
-		if n > 8 {
-			n = 8
-		}
-		copy(result[0:n], []byte(upper[:n]))
-	}
-
-	return result
 }
 
-func fat32SplitPath(path string) []string {
-	path = strings.TrimPrefix(path, "/")
-	path = strings.TrimPrefix(path, "./")
-	path = strings.TrimSuffix(path, "/")
+func fat32DeleteGetEntryName(entry []byte) string {
+	name := strings.TrimRight(string(entry[0:8]), " ")
+	ext := strings.TrimRight(string(entry[8:11]), " ")
 
-	if path == "" {
+	if ext != "" {
+		return name + "." + ext
+	}
+
+	return name
+}
+
+func fat32DeleteSplitPath(filePath string) []string {
+	filePath = strings.TrimPrefix(filePath, "/")
+	filePath = strings.TrimPrefix(filePath, "./")
+	filePath = strings.TrimSuffix(filePath, "/")
+
+	if filePath == "" {
 		return nil
 	}
 
-	return strings.Split(path, "/")
+	return strings.Split(filePath, "/")
 }
 
-func fat32UpdateFSInfo(file *os.File, bpb *fat32BPB, fat []uint32) error {
-	fsInfoOffset := int64(bpb.fsInfoSector) * int64(bpb.sectorSize)
-	fs := make([]byte, bpb.sectorSize)
-
-	_, err := file.ReadAt(fs, fsInfoOffset)
+func fat32OpenFilesystemReadWrite(imagePath string) (filesystem.FileSystem, error) {
+	d, err := diskfs.Open(imagePath, diskfs.WithOpenMode(diskfs.ReadWriteExclusive))
 	if err != nil {
-		return tracederrors.TracedErrorf("Failed to read FSInfo sector: %w", err)
+		return nil, tracederrors.TracedErrorf("Failed to open disk image '%s' for read-write: %w", imagePath, err)
 	}
 
-	var freeCount uint32
-	var nextFree uint32
-	for i := uint32(2); i < uint32(len(fat)); i++ {
-		if fat[i] == 0 {
-			freeCount++
-			if nextFree == 0 {
-				nextFree = i
+	fs, err := d.GetFilesystem(0)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to get FAT32 filesystem from '%s': %w", imagePath, err)
+	}
+
+	return fs, nil
+}
+
+// --- Internal functions ---
+
+func fat32OpenFilesystem(imagePath string) (filesystem.FileSystem, error) {
+	d, err := diskfs.Open(imagePath)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to open disk image '%s': %w", imagePath, err)
+	}
+
+	fs, err := d.GetFilesystem(0)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to get FAT32 filesystem from '%s': %w", imagePath, err)
+	}
+
+	return fs, nil
+}
+
+func fat32ListDirectoryRecursive(fs filesystem.FileSystem, dirPath string, prefix string, results *[]string) error {
+	entries, err := fs.ReadDir(dirPath)
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to read directory '%s': %w", dirPath, err)
+	}
+
+	for _, entry := range entries {
+		name := entry.Name()
+		if name == "." || name == ".." {
+			continue
+		}
+
+		// Skip volume label entries (they appear as root-level non-dir, size 0, no extension)
+		if dirPath == "/" && !entry.IsDir() && entry.Size() == 0 && !strings.Contains(name, ".") {
+			continue
+		}
+
+		entryPath := prefix + "/" + name
+		*results = append(*results, entryPath)
+
+		if entry.IsDir() {
+			subDirPath := path.Join(dirPath, name)
+			err := fat32ListDirectoryRecursive(fs, subDirPath, entryPath, results)
+			if err != nil {
+				return err
 			}
 		}
-	}
-
-	binary.LittleEndian.PutUint32(fs[488:492], freeCount)
-	binary.LittleEndian.PutUint32(fs[492:496], nextFree)
-
-	_, err = file.WriteAt(fs, fsInfoOffset)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to write FSInfo sector: %w", err)
 	}
 
 	return nil
 }
 
-func fat32BuildBootSector(totalSectors uint32, fatSizeSectors uint32, volumeLabel [11]byte) []byte {
-	bs := make([]byte, fat32SectorSize)
+func fat32MkdirAll(fs filesystem.FileSystem, dirPath string) error {
+	parts := strings.Split(strings.Trim(dirPath, "/"), "/")
+	current := ""
 
-	// Jump boot code
-	bs[0] = 0xEB
-	bs[1] = 0x58
-	bs[2] = 0x90
-
-	// OEM Name
-	copy(bs[3:11], []byte("MSWIN4.1"))
-
-	// Bytes per sector
-	binary.LittleEndian.PutUint16(bs[11:13], fat32SectorSize)
-
-	// Sectors per cluster
-	bs[13] = fat32SectorsPerCluster
-
-	// Reserved sectors
-	binary.LittleEndian.PutUint16(bs[14:16], fat32ReservedSectors)
-
-	// Number of FATs
-	bs[16] = fat32NumberOfFATs
-
-	// Root entry count (0 for FAT32)
-	binary.LittleEndian.PutUint16(bs[17:19], 0)
-
-	// Total sectors 16 (0 for FAT32)
-	binary.LittleEndian.PutUint16(bs[19:21], 0)
-
-	// Media type
-	bs[21] = fat32MediaType
-
-	// FAT size 16 (0 for FAT32)
-	binary.LittleEndian.PutUint16(bs[22:24], 0)
-
-	// Sectors per track
-	binary.LittleEndian.PutUint16(bs[24:26], 63)
-
-	// Number of heads
-	binary.LittleEndian.PutUint16(bs[26:28], 255)
-
-	// Hidden sectors
-	binary.LittleEndian.PutUint32(bs[28:32], 0)
-
-	// Total sectors 32
-	binary.LittleEndian.PutUint32(bs[32:36], totalSectors)
-
-	// FAT size 32
-	binary.LittleEndian.PutUint32(bs[36:40], fatSizeSectors)
-
-	// Ext flags (mirroring enabled)
-	binary.LittleEndian.PutUint16(bs[40:42], 0)
-
-	// FS version
-	binary.LittleEndian.PutUint16(bs[42:44], 0)
-
-	// Root cluster
-	binary.LittleEndian.PutUint32(bs[44:48], fat32RootDirCluster)
-
-	// FSInfo sector
-	binary.LittleEndian.PutUint16(bs[48:50], fat32FSInfoSectorNum)
-
-	// Backup boot sector
-	binary.LittleEndian.PutUint16(bs[50:52], fat32BackupBootSector)
-
-	// Drive number
-	bs[64] = 0x80
-
-	// Reserved
-	bs[65] = 0x00
-
-	// Boot signature
-	bs[66] = 0x29
-
-	// Volume serial number
-	binary.LittleEndian.PutUint32(bs[67:71], 0x12345678)
-
-	// Volume label
-	copy(bs[71:82], volumeLabel[:])
-
-	// File system type
-	copy(bs[82:90], []byte("FAT32   "))
-
-	// Boot sector signature
-	binary.LittleEndian.PutUint16(bs[510:512], fat32BootSignature)
-
-	return bs
-}
-
-func fat32BuildFSInfoSector(totalClusters uint32) []byte {
-	fs := make([]byte, fat32SectorSize)
-
-	binary.LittleEndian.PutUint32(fs[0:4], fat32FSInfoSignature1)
-
-	binary.LittleEndian.PutUint32(fs[484:488], fat32FSInfoSignature2)
-
-	// Free cluster count (total clusters minus 1 for root dir)
-	binary.LittleEndian.PutUint32(fs[488:492], totalClusters-1)
-
-	// Next free cluster
-	binary.LittleEndian.PutUint32(fs[492:496], 3)
-
-	binary.LittleEndian.PutUint32(fs[508:512], fat32FSInfoSignature3)
-
-	return fs
-}
-
-func fat32BuildFATTable(fatSizeSectors uint32) []byte {
-	fat := make([]byte, int(fatSizeSectors)*fat32SectorSize)
-
-	// Entry 0: Media type marker
-	binary.LittleEndian.PutUint32(fat[0:4], 0x0FFFFF00|uint32(fat32MediaType))
-
-	// Entry 1: End of chain marker
-	binary.LittleEndian.PutUint32(fat[4:8], fat32ClusterInUse)
-
-	// Entry 2: Root directory cluster (end of chain)
-	binary.LittleEndian.PutUint32(fat[8:12], fat32EOFMarker)
-
-	return fat
-}
-
-func fat32CalculateFATSize(totalSectors uint32) uint32 {
-	dataSectors := totalSectors - fat32ReservedSectors
-	entries := (dataSectors * fat32SectorSize) / (fat32SectorsPerCluster*fat32SectorSize + fat32NumberOfFATs*4)
-	fatSizeBytes := (entries + 2) * 4
-	fatSizeSectors := (fatSizeBytes + fat32SectorSize - 1) / fat32SectorSize
-	return fatSizeSectors
-}
-
-func fat32PadVolumeLabel(label string) [11]byte {
-	var result [11]byte
-	for i := range result {
-		result[i] = ' '
-	}
-	if label != "" {
-		n := len(label)
-		if n > 11 {
-			n = 11
+	for _, part := range parts {
+		current = current + "/" + part
+		err := fs.Mkdir(current)
+		if err != nil {
+			// Ignore error if directory already exists
+			if !strings.Contains(err.Error(), "already exists") {
+				return tracederrors.TracedErrorf("Failed to create directory '%s': %w", current, err)
+			}
 		}
-		copy(result[:n], []byte(label[:n]))
-	} else {
-		copy(result[:], []byte("NO NAME    "))
 	}
-	return result
+
+	return nil
+}
+
+func fat32NormalizePath(filePath string) string {
+	filePath = strings.TrimPrefix(filePath, "./")
+	if !strings.HasPrefix(filePath, "/") {
+		filePath = "/" + filePath
+	}
+	return filePath
 }
