@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/archiveutils/tarutils"
@@ -22,6 +24,24 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/remotecommand"
 )
+
+// extractExitCodeFromError attempts to extract an exit code from an error message
+// matching the pattern "command terminated with exit code X".
+// Returns the exit code and true if successful, or 0 and false otherwise.
+func extractExitCodeFromError(err error) (int, bool) {
+	if err == nil {
+		return 0, false
+	}
+	re := regexp.MustCompile(`exit code (\d+)`)
+	matches := re.FindStringSubmatch(err.Error())
+	if len(matches) == 2 {
+		code, parseErr := strconv.Atoi(matches[1])
+		if parseErr == nil {
+			return code, true
+		}
+	}
+	return 0, false
+}
 
 func DeletePod(ctx context.Context, clientset *kubernetes.Clientset, podName string, namespace string) error {
 	if clientset == nil {
@@ -61,7 +81,7 @@ func DeletePod(ctx context.Context, clientset *kubernetes.Clientset, podName str
 	return nil
 }
 
-func Exec(ctx context.Context, config *rest.Config, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
+func Exec(ctx context.Context, config *rest.Config, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (*commandoutput.CommandOutput, error) {
 	if config == nil {
 		return nil, tracederrors.TracedErrorNil("config")
 	}
@@ -124,14 +144,19 @@ func Exec(ctx context.Context, config *rest.Config, namespaceName string, option
 		streamOptions.Stdin = bytes.NewReader(options.StdinBytes)
 	}
 
+	var retVal int
 	err = exec.StreamWithContext(ctx, streamOptions)
 	if err != nil {
-		return nil, tracederrors.TracedErrorf("Error executing command: %s", err)
+		exitCode, ok := extractExitCodeFromError(err)
+		if ok && options.RunCommandOptions.AllowAllExitCodes {
+			retVal = exitCode
+		} else {
+			return nil, tracederrors.TracedErrorf("Error executing command: %s", err)
+		}
 	}
 
 	stdoutBytes := stdout.Bytes()
 	stderrBytes := stderr.Bytes()
-	var retVal int
 
 	output := &commandoutput.CommandOutput{
 		Stdout:     &stdoutBytes,
@@ -144,7 +169,7 @@ func Exec(ctx context.Context, config *rest.Config, namespaceName string, option
 	return output, nil
 }
 
-func CreatePod(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) error {
+func CreatePod(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) error {
 	if clientset == nil {
 		return tracederrors.TracedErrorNil("clientset")
 	}
@@ -270,7 +295,7 @@ func CreatePod(ctx context.Context, clientset *kubernetes.Clientset, namespaceNa
 	return nil
 }
 
-func RunCommandInTemporaryPod(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
+func RunCommandInTemporaryPod(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (*commandoutput.CommandOutput, error) {
 	if clientset == nil {
 		return nil, tracederrors.TracedErrorNil("clientset")
 	}
@@ -328,6 +353,98 @@ func RunCommandInTemporaryPod(ctx context.Context, clientset *kubernetes.Clients
 	}
 
 	logging.LogInfoByCtxf(ctx, "Run command in temporary pod '%s' in namespace '%s' using container image '%s' finished.", podName, namespaceName, imageName)
+
+	return output, nil
+}
+
+// RunCommand executes a command in an existing pod and returns the output.
+// Unlike RunCommandInTemporaryPod, this function does not create a new pod but executes
+// the command in an already running pod using kubectl exec semantics.
+func RunCommand(ctx context.Context, config *rest.Config, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (*commandoutput.CommandOutput, error) {
+	if config == nil {
+		return nil, tracederrors.TracedErrorNil("config")
+	}
+
+	if namespaceName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
+	}
+
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	podName, err := options.GetPodName()
+	if err != nil {
+		return nil, err
+	}
+
+	containerName, err := options.GetContainerName()
+	if err != nil {
+		return nil, err
+	}
+
+	command, err := options.GetCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run command in pod '%s' container '%s' in namespace '%s' started.", podName, containerName, namespaceName)
+
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to create clientset: %w", err)
+	}
+
+	req := clientset.CoreV1().RESTClient().Post().
+		Resource("pods").
+		Name(podName).
+		Namespace(namespaceName).
+		SubResource("exec").
+		VersionedParams(&corev1.PodExecOptions{
+			Container: containerName,
+			Command:   command,
+			Stdin:     options.IsStinDataAvailable(),
+			Stdout:    true,
+			Stderr:    true,
+			TTY:       false,
+		}, scheme.ParameterCodec)
+
+	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to create exec: %s", err)
+	}
+
+	var stdout, stderr bytes.Buffer
+
+	streamOptions := remotecommand.StreamOptions{
+		Stdout: &stdout,
+		Stderr: &stderr,
+	}
+	if options.IsStinDataAvailable() {
+		streamOptions.Stdin = bytes.NewReader(options.StdinBytes)
+	}
+
+	var retVal int
+	err = exec.StreamWithContext(ctx, streamOptions)
+	if err != nil {
+		exitCode, ok := extractExitCodeFromError(err)
+		if ok && options.RunCommandOptions.AllowAllExitCodes {
+			retVal = exitCode
+		} else {
+			return nil, tracederrors.TracedErrorf("Error executing command: %s", err)
+		}
+	}
+
+	stdoutBytes := stdout.Bytes()
+	stderrBytes := stderr.Bytes()
+
+	output := &commandoutput.CommandOutput{
+		Stdout:     &stdoutBytes,
+		Stderr:     &stderrBytes,
+		ReturnCode: &retVal,
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run command in pod '%s' container '%s' in namespace '%s' finished.", podName, containerName, namespaceName)
 
 	return output, nil
 }

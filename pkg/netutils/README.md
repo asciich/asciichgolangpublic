@@ -19,3 +19,7 @@ Network utilities for various network-related tasks.
 * [vpnutils](./vpnutils/): Work with VPN solutions.
     * [headscaleutils](./vpnutils/headscaleutils/): Work with Headscale.
     * [tailscaleutils](./vpnutils/tailscaleutils/): Work with Tailscale.
+
+## Examples
+
+* [Get next free port](Example_GetNextFreePort_test.go)

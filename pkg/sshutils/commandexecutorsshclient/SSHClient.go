@@ -80,6 +80,14 @@ func (s *SSHClient) GetHostDescription() (hostDescription string, err error) {
 	return s.GetHostName()
 }
 
+// IsRunningOnLocalhost always returns false for SSH clients.
+// Even if the SSH host is "localhost", commands are executed through an SSH session,
+// not natively on the local machine. This distinction is important for test cases
+// that need to verify command execution paths.
+func (s *SSHClient) IsRunningOnLocalhost() (isRunningOnLocalhost bool, err error) {
+	return false, nil
+}
+
 func (s *SSHClient) GetHostName() (hostName string, err error) {
 	if s.hostName == "" {
 		return "", tracederrors.TracedErrorf("hostName not set")

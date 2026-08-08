@@ -16,6 +16,7 @@ This package uses only Go standard library functions and avoids external command
 * [Move file](Example_Move_test.go)
     * [Move file as root using sudo](Example_MoveSudo_test.go)
 
+* [Check if statically linked binary](Example_IsStaticallyLinkedBinary_test.go)
 ## For developers
 
 To run tests use:

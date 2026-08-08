@@ -354,7 +354,7 @@ func (g *GitlabMergeRequest) Merge(ctx context.Context) (mergeCommit *GitlabComm
 			return nil, err
 		}
 
-		logging.LogInfoByCtxf(ctx, "Merge reqeuest %s is already merged. Merge Commit is '%s'.", mergeRequestUrl, mergeCommitHash)
+		logging.LogInfoByCtxf(ctx, "Merge request %s is already merged. Merge Commit is '%s'.", mergeRequestUrl, mergeCommitHash)
 	} else {
 		// It's not possible to open and directly merger a MergeRequest
 		// because Gitlab has to check if a valid merge is possible.

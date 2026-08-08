@@ -54,6 +54,18 @@ func LogWarnByCtxf(ctx context.Context, logmessage string, args ...interface{}) 
 		return
 	}
 
-	message := fmt.Sprintf(logmessage, args...)
-	LogWarn(message)
+	recorder := getLogRecorderFromCtx(ctx)
+
+	var formattedMessage string
+	if len(args) > 0 {
+		formattedMessage = fmt.Sprintf(logmessage, args...)
+	} else {
+		formattedMessage = logmessage
+	}
+
+	if recorder != nil {
+		recorder.Write([]byte(formattedMessage + "\n"))
+	}
+
+	LogWarnf(logmessage, args...)
 }

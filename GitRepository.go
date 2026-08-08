@@ -17,7 +17,7 @@ func GetGitRepositoryByDirectory(directory filesinterfaces.Directory) (repositor
 
 	localDirectory, ok := directory.(*files.LocalDirectory)
 	if ok {
-		return GetLocalGitReposioryFromDirectory(localDirectory)
+		return GetLocalGitRepositoryFromDirectory(localDirectory)
 	}
 
 	commandExecutorDirectory, ok := directory.(*commandexecutorfileoo.Directory)

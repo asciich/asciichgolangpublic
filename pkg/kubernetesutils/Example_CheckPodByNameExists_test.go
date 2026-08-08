@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 func Test_Example_CheckPodByNameExists(t *testing.T) {
@@ -33,10 +34,12 @@ func Test_Example_CheckPodByNameExists(t *testing.T) {
 	namespace, err := cluster.GetNamespaceByName(namespaceName)
 	require.NoError(t, err)
 
-	_, err = namespace.CreatePod(ctx, &kubernetesparameteroptions.RunCommandOptions{
+	_, err = namespace.CreatePod(ctx, &kubernetesparameteroptions.KubernetesRunCommandOptions{
 		Image:   "busybox",
-		Command: []string{"sleep", "3600"},
 		PodName: podName,
+		RunCommandOptions: &parameteroptions.RunCommandOptions{
+			Command: []string{"sleep", "3600"},
+		},
 	})
 	require.NoError(t, err)
 	// ... prepare test environment finished.

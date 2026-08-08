@@ -36,7 +36,7 @@ type LocalGitRepository struct {
 	gitgeneric.GitRepositoryBase
 }
 
-func GetLocalGitReposioryFromDirectory(directory filesinterfaces.Directory) (repo gitinterfaces.GitRepository, err error) {
+func GetLocalGitRepositoryFromDirectory(directory filesinterfaces.Directory) (repo gitinterfaces.GitRepository, err error) {
 	if directory == nil {
 		return nil, tracederrors.TracedErrorNil("directory")
 	}
@@ -63,7 +63,7 @@ func GetLocalGitReposioryFromDirectory(directory filesinterfaces.Directory) (rep
 	return repo, nil
 }
 
-func GetLocalGitReposioryFromLocalDirectory(localDirectory *files.LocalDirectory) (l *LocalGitRepository, err error) {
+func GetLocalGitRepositoryFromLocalDirectory(localDirectory *files.LocalDirectory) (l *LocalGitRepository, err error) {
 	if localDirectory == nil {
 		return nil, tracederrors.TracedErrorNil("directory")
 	}
@@ -96,8 +96,8 @@ func GetLocalGitRepositoryByPath(path string) (l *LocalGitRepository, err error)
 	return l, nil
 }
 
-func MustGetLocalGitReposioryFromDirectory(directory filesinterfaces.Directory) (repo gitinterfaces.GitRepository) {
-	repo, err := GetLocalGitReposioryFromDirectory(directory)
+func MustGetLocalGitRepositoryFromDirectory(directory filesinterfaces.Directory) (repo gitinterfaces.GitRepository) {
+	repo, err := GetLocalGitRepositoryFromDirectory(directory)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}

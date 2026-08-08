@@ -15,7 +15,7 @@ func NewInstallKubectlCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
-			mustutils.Must0(kubectlutils.InstallKubectl(ctx))
+			mustutils.Must0(kubectlutils.InstallKubectl(ctx, kubectlutils.DefaultInstallKubectlOptions()))
 
 			logging.LogGoodByCtxf(ctx, "kubectl installed.")
 		},

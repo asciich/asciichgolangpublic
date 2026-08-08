@@ -2,6 +2,9 @@ package nativekubernetesoo
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"os"
 	"reflect"
 	"time"
 
@@ -21,6 +24,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/portforward"
+	"k8s.io/client-go/transport/spdy"
 )
 
 type NativeNamespace struct {
@@ -80,7 +85,7 @@ func (n *NativeNamespace) DeleteDeploymentByName(ctx context.Context, deployment
 	return deployment.Delete(ctx)
 }
 
-func (n *NativeNamespace) CreatePod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.Pod, error) {
+func (n *NativeNamespace) CreatePod(ctx context.Context, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (kubernetesinterfaces.Pod, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -108,7 +113,7 @@ func (n *NativeNamespace) CreatePod(ctx context.Context, options *kubernetespara
 	return n.GetPodByName(podName)
 }
 
-func (n *NativeNamespace) CreateReplicaSet(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.ReplicaSet, error) {
+func (n *NativeNamespace) CreateReplicaSet(ctx context.Context, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (kubernetesinterfaces.ReplicaSet, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -136,7 +141,7 @@ func (n *NativeNamespace) CreateReplicaSet(ctx context.Context, options *kuberne
 	return n.GetReplicaSetByName(replicaSetName)
 }
 
-func (n *NativeNamespace) CreateDeployment(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.Deployment, error) {
+func (n *NativeNamespace) CreateDeployment(ctx context.Context, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (kubernetesinterfaces.Deployment, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -859,6 +864,142 @@ func (n *NativeNamespace) WaitUntilAllPodsInNamespaceAreRunning(ctx context.Cont
 	logging.LogInfoByCtxf(ctx, "Wait until all pods in namespace '%s' are running finished. There are now '%d' pods running.", namspaceName, nPods)
 
 	return nil
+}
+
+// WaitUntilPodReady waits for a pod to reach the Running phase.
+func (n *NativeNamespace) WaitUntilPodReady(ctx context.Context, podName string, timeout time.Duration) error {
+	if podName == "" {
+		return tracederrors.TracedErrorEmptyString("podName")
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Wait until pod '%s/%s' is ready started.", namespaceName, podName)
+
+	clientset, err := n.GetClientSet()
+	if err != nil {
+		return err
+	}
+
+	// Create a context with timeout
+	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	delay := time.Second * 3
+	for {
+		err := timeoutCtx.Err()
+		if err != nil {
+			return tracederrors.TracedErrorf("Timeout waiting for pod '%s/%s' to be ready: %w", namespaceName, podName, err)
+		}
+
+		pod, err := clientset.CoreV1().Pods(namespaceName).Get(timeoutCtx, podName, metav1.GetOptions{})
+		if err != nil {
+			if errors.IsNotFound(err) {
+				logging.LogInfoByCtxf(timeoutCtx, "Pod '%s/%s' not found yet. Waiting...", namespaceName, podName)
+			} else {
+				return tracederrors.TracedErrorf("Failed to get pod '%s/%s': %w", namespaceName, podName, err)
+			}
+		} else if pod.Status.Phase == v1.PodRunning {
+			logging.LogInfoByCtxf(timeoutCtx, "Pod '%s/%s' is now in Running phase.", namespaceName, podName)
+			break
+		} else {
+			logging.LogInfoByCtxf(timeoutCtx, "Pod '%s/%s' is in phase '%s'. Waiting for Running...", namespaceName, podName, pod.Status.Phase)
+		}
+
+		logging.LogInfoByCtxf(timeoutCtx, "Wait '%s' before checking again if pod '%s/%s' is ready.", delay, namespaceName, podName)
+		time.Sleep(delay)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Wait until pod '%s/%s' is ready finished.", namespaceName, podName)
+
+	return nil
+}
+
+// StartPortForwarding starts kubectl port-forward in the background for a pod.
+// Returns a cancel function that should be called to stop the port forwarding.
+func (n *NativeNamespace) StartPortForwarding(ctx context.Context, podName string, localPort, podPort int) (cancelFunc context.CancelFunc, err error) {
+	if podName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("podName")
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Starting port forwarding for pod '%s/%s:%d' to local port %d", namespaceName, podName, podPort, localPort)
+
+	clientset, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	// Verify pod exists and is running before starting port forwarding
+	pod, err := clientset.CoreV1().Pods(namespaceName).Get(ctx, podName, metav1.GetOptions{})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to get pod '%s/%s': %w", namespaceName, podName, err)
+	}
+
+	if pod.Status.Phase != v1.PodRunning {
+		return nil, tracederrors.TracedErrorf("Pod '%s/%s' is not in Running phase (current phase: %s)", namespaceName, podName, pod.Status.Phase)
+	}
+
+	// Create a cancellable context for the port-forward process
+	forwardCtx, cancel := context.WithCancel(ctx)
+
+	// Get REST config
+	restConfig, err := n.GetConfig()
+	if err != nil {
+		cancel()
+		return nil, tracederrors.TracedErrorf("Failed to get REST config: %w", err)
+	}
+
+	// Create the port-forward request
+	req := clientset.CoreV1().RESTClient().
+		Post().
+		Resource("pods").
+		Namespace(namespaceName).
+		Name(podName).
+		SubResource("portforward")
+
+	// Configure port-forward options
+	transport, upgrader, err := spdy.RoundTripperFor(restConfig)
+	if err != nil {
+		cancel()
+		return nil, tracederrors.TracedErrorf("Failed to create SPDY transport: %w", err)
+	}
+
+	// Create the port-forward URL
+	portForwardURL := req.URL()
+	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: transport}, "POST", portForwardURL)
+
+	// Create ports specification
+	ports := []string{fmt.Sprintf("%d:%d", localPort, podPort)}
+
+	// Create port-forwarder
+	portForwarder, err := portforward.New(dialer, ports, forwardCtx.Done(), nil, os.Stdout, os.Stderr)
+	if err != nil {
+		cancel()
+		return nil, tracederrors.TracedErrorf("Failed to create port-forwarder: %w", err)
+	}
+
+	// Start port-forwarding in a goroutine
+	go func() {
+		err := portForwarder.ForwardPorts()
+		if err != nil && err != context.Canceled {
+			logging.LogErrorByCtxf(forwardCtx, "Port forwarding failed: %v", err)
+		}
+	}()
+
+	// Wait a moment for port-forwarding to establish
+	time.Sleep(2 * time.Second)
+
+	logging.LogInfoByCtxf(ctx, "Port forwarding started for pod '%s/%s:%d' -> localhost:%d", namespaceName, podName, podPort, localPort)
+
+	return cancel, nil
 }
 
 func (n *NativeNamespace) GetObjectByYamlString(yaml string) (kubernetesinterfaces.Object, error) {

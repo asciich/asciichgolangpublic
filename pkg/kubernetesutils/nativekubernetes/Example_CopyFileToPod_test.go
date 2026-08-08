@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
 )
 
@@ -60,12 +61,14 @@ func Test_Example_CopyFileToPod(t *testing.T) {
 		ctx,
 		clientset,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			Image:                    "ubuntu",
 			PodName:                  podName,
 			DeleteAlreadyExistingPod: true,
-			Command:                  []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"}, // Same as sleep inifinity but does not ignore SIGINT
-			WaitForPodRunning:        true,
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"}, // Same as sleep inifinity but does not ignore SIGINT
+			},
+			WaitForPodRunning: true,
 		},
 	)
 	require.NoError(t, err)
@@ -94,9 +97,11 @@ func Test_Example_CopyFileToPod(t *testing.T) {
 		ctx,
 		config,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			PodName: podName,
-			Command: []string{"cat", destPath},
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"cat", destPath},
+			},
 		},
 	)
 	require.NoError(t, err)

@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 func Test_CreateAndDeleteDeployment(t *testing.T) {
@@ -46,11 +47,13 @@ func Test_CreateAndDeleteDeployment(t *testing.T) {
 
 		// check if consecutive create, delete, create, delete... works
 		for range 3 {
-			err = nativekubernetes.CreateDeployment(ctx, clientset, namespaceName, &kubernetesparameteroptions.RunCommandOptions{
+			err = nativekubernetes.CreateDeployment(ctx, clientset, namespaceName, &kubernetesparameteroptions.KubernetesRunCommandOptions{
 				DeploymentName: deploymentName,
 				Image:          "ubuntu",
-				Command:        []string{"bash", "-c", "sleep 1m"},
 				Replicas:       2,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"bash", "-c", "sleep 1m"},
+				},
 			})
 			require.NoError(t, err)
 
@@ -133,11 +136,13 @@ func Test_ListDeployments(t *testing.T) {
 
 		// Create Deployments one by one and verify list grows
 		for i, name := range deploymentNames {
-			err = nativekubernetes.CreateDeployment(ctx, clientset, namespaceName, &kubernetesparameteroptions.RunCommandOptions{
+			err = nativekubernetes.CreateDeployment(ctx, clientset, namespaceName, &kubernetesparameteroptions.KubernetesRunCommandOptions{
 				DeploymentName: name,
 				Image:          "ubuntu",
-				Command:        []string{"bash", "-c", "sleep 1m"},
 				Replicas:       1,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"bash", "-c", "sleep 1m"},
+				},
 			})
 			require.NoError(t, err)
 

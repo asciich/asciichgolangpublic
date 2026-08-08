@@ -53,7 +53,7 @@ func DeleteDeployment(ctx context.Context, clientset *kubernetes.Clientset, depl
 	return nil
 }
 
-func CreateDeployment(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) error {
+func CreateDeployment(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) error {
 	if clientset == nil {
 		return tracederrors.TracedErrorNil("clientset")
 	}

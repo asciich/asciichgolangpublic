@@ -467,7 +467,7 @@ func (l *LocalDirectory) GetGitRepositoriesAsLocalGitRepositories(verbose bool) 
 
 	repoPaths := []string{}
 	for _, subDir := range subDirectories {
-		gitRepo, err := GetLocalGitReposioryFromDirectory(subDir)
+		gitRepo, err := GetLocalGitRepositoryFromDirectory(subDir)
 		if err != nil {
 			return nil, err
 		}

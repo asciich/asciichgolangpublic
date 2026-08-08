@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 func Test_Example_CheckReplicaSetByNameExists(t *testing.T) {
@@ -33,11 +34,13 @@ func Test_Example_CheckReplicaSetByNameExists(t *testing.T) {
 	namespace, err := cluster.GetNamespaceByName(namespaceName)
 	require.NoError(t, err)
 
-	_, err = namespace.CreateReplicaSet(ctx, &kubernetesparameteroptions.RunCommandOptions{
+	_, err = namespace.CreateReplicaSet(ctx, &kubernetesparameteroptions.KubernetesRunCommandOptions{
 		Image:          "busybox",
-		Command:        []string{"sleep", "3600"},
 		ReplicaSetName: replicaSetName,
 		Replicas:       1,
+		RunCommandOptions: &parameteroptions.RunCommandOptions{
+			Command: []string{"sleep", "3600"},
+		},
 	})
 	require.NoError(t, err)
 	// ... prepare test environment finished.

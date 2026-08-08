@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 // This example shows how to exec in a container and write to the stdin of this command
@@ -58,12 +59,14 @@ func Test_Example_WriteToStdinOfExecCommand(t *testing.T) {
 		ctx,
 		clientset,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			Image:                    "ubuntu",
 			PodName:                  podName,
 			DeleteAlreadyExistingPod: true,
-			Command:                  []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"}, // Same as sleep inifinity but does not ignore SIGINT
-			WaitForPodRunning:        true,
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"}, // Same as sleep inifinity but does not ignore SIGINT
+			},
+			WaitForPodRunning: true,
 		},
 	)
 	require.NoError(t, err)
@@ -78,12 +81,14 @@ func Test_Example_WriteToStdinOfExecCommand(t *testing.T) {
 		ctx,
 		config,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			Image:                    "ubuntu",
 			PodName:                  podName,
 			DeleteAlreadyExistingPod: true,
-			Command:                  []string{"cat"},
-			StdinBytes:               []byte("hello world"),
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"cat"},
+			},
+			StdinBytes: []byte("hello world"),
 		},
 	)
 	require.NoError(t, err)

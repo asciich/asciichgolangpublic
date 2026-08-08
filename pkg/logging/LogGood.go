@@ -38,9 +38,24 @@ func LogGoodByCtxf(ctx context.Context, logmessage string, args ...interface{}) 
 		return
 	}
 
-	if contextutils.GetVerboseFromContext(ctx) {
-		LogGoodf(logmessage, args...)
+	if !contextutils.GetVerboseFromContext(ctx) {
+		return
 	}
+
+	recorder := getLogRecorderFromCtx(ctx)
+
+	var formattedMessage string
+	if len(args) > 0 {
+		formattedMessage = fmt.Sprintf(logmessage, args...)
+	} else {
+		formattedMessage = logmessage
+	}
+
+	if recorder != nil {
+		recorder.Write([]byte(formattedMessage + "\n"))
+	}
+
+	LogGoodf(logmessage, args...)
 }
 
 var overrideFunctionLogGoodByCtx func(ctx context.Context, logmessage string)
@@ -55,9 +70,16 @@ func LogGoodByCtx(ctx context.Context, logmessage string) {
 		return
 	}
 
-	if contextutils.GetVerboseFromContext(ctx) {
-		LogGood(logmessage)
+	if !contextutils.GetVerboseFromContext(ctx) {
+		return
 	}
+
+	recorder := getLogRecorderFromCtx(ctx)
+	if recorder != nil {
+		recorder.Write([]byte(logmessage + "\n"))
+	}
+
+	LogGood(logmessage)
 }
 
 func LogGoodf(logmessage string, args ...interface{}) {

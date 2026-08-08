@@ -11,6 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 // ExampleCopyFileFromPod demonstrates how to copy a file from a container running in a Kubernetes pod
@@ -46,13 +47,15 @@ func ExampleCopyFileFromPod_nativeKubernetes() {
 	_, err = kubernetes.CreatePod(
 		ctx,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			Image:                    "ubuntu",
 			PodName:                  podName,
 			ContainerName:            containerName,
 			DeleteAlreadyExistingPod: true,
-			Command:                  []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
 			WaitForPodRunning:        true,
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
+			},
 		},
 	)
 	if err != nil {
@@ -129,13 +132,15 @@ func ExampleCopyFileFromPod_commandExecutor() {
 	_, err = kubernetes.CreatePod(
 		ctx,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			Image:                    "ubuntu",
 			PodName:                  podName,
 			ContainerName:            containerName,
 			DeleteAlreadyExistingPod: true,
-			Command:                  []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
 			WaitForPodRunning:        true,
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
+			},
 		},
 	)
 	if err != nil {
@@ -211,13 +216,15 @@ func ExampleCopyFileFromPod_roundTrip() {
 	_, err = kubernetes.CreatePod(
 		ctx,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			Image:                    "ubuntu",
 			PodName:                  podName,
 			ContainerName:            containerName,
 			DeleteAlreadyExistingPod: true,
-			Command:                  []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
 			WaitForPodRunning:        true,
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
+			},
 		},
 	)
 	if err != nil {
