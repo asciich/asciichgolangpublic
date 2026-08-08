@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 // This example shows how to create and delete a ReplicaSet.
@@ -53,11 +54,13 @@ func Test_Example_CreateAndDeleteReplicaSet_Nativekubernetes(t *testing.T) {
 		ctx,
 		clientset,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			ReplicaSetName: replicaSetName,
 			Image:          "ubuntu",
-			Command:        []string{"bash", "-c", "sleep 1m"},
-			Replicas:       2,
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"bash", "-c", "sleep 1m"},
+			},
+			Replicas: 2,
 		},
 	)
 	require.NoError(t, err)
@@ -71,10 +74,12 @@ func Test_Example_CreateAndDeleteReplicaSet_Nativekubernetes(t *testing.T) {
 		ctx,
 		clientset,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
-			ReplicaSetName:                  replicaSetName,
-			Image:                           "ubuntu",
-			Command:                         []string{"bash", "-c", "sleep 1m"},
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
+			ReplicaSetName: replicaSetName,
+			Image:          "ubuntu",
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"bash", "-c", "sleep 1m"},
+			},
 			Replicas:                        2,
 			DeleteAlreadyExistingReplicaSet: true,
 		},

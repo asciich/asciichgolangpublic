@@ -18,7 +18,7 @@ func TestGopassSecretOptions_GetPath(t *testing.T) {
 		{"this/is/my_my/path_2", "this/is/my_my/path_2"},
 
 		// Leading slashes "/" are removed automatically.
-		// This is expected behaviour since gopass does not work with leading slashes "/"
+		// This is expected behavior since gopass does not work with leading slashes "/"
 		{"/this/is/my/path", "this/is/my/path"},
 		{"//this/is/my/path", "this/is/my/path"},
 	}

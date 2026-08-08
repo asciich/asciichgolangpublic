@@ -5,9 +5,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/commandexecutorkubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils/testresults"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils/testutilsinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type TestCaseExecutorKubernetesNamespaceExists struct {
@@ -18,7 +22,7 @@ func (t *TestCaseExecutorKubernetesNamespaceExists) GetName() (string, error) {
 	return "kubernetes_namespace_exists", nil
 }
 
-func (t *TestCaseExecutorKubernetesNamespaceExists) Run(ctx context.Context) (testutilsinterfaces.TestResult, error) {
+func (t *TestCaseExecutorKubernetesNamespaceExists) Run(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor) (testutilsinterfaces.TestResult, error) {
 	tStart := time.Now()
 
 	name, err := t.GetTestCaseName()
@@ -28,6 +32,10 @@ func (t *TestCaseExecutorKubernetesNamespaceExists) Run(ctx context.Context) (te
 
 	result := &testresults.TestCaseResult{
 		Name: name,
+	}
+
+	if commandExecutor == nil {
+		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
 
 	namespace, err := t.GetNamespace()
@@ -40,46 +48,47 @@ func (t *TestCaseExecutorKubernetesNamespaceExists) Run(ctx context.Context) (te
 		return nil, err
 	}
 
-	// Get Kubernetes cluster:
-	kubernetesCluster, err := nativekubernetesoo.GetClusterByName(ctx, cluster)
+	// Check if running on localhost or remote
+	isLocalhost, err := commandExecutor.IsRunningOnLocalhost()
 	if err != nil {
 		return nil, err
 	}
 
-	// Check if namespace exists:
-	err = kubernetesCluster.CheckNamespaceByNameExists(ctx, namespace)
-	if err != nil {
-		// Namespace does not exist
-		tEnd := time.Now()
+	var exists bool
+	var kubernetesCluster kubernetesinterfaces.KubernetesCluster
+	if isLocalhost {
+		kubernetesCluster, err = nativekubernetesoo.GetClusterByName(ctx, cluster)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		kubernetesCluster, err = commandexecutorkubernetes.GetCommandExecutorKubernetsByName(commandExecutor, cluster)
+		if err != nil {
+			return nil, err
+		}
+	}
 
+	exists, err = kubernetesCluster.NamespaceByNameExists(ctx, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	tEnd := time.Now()
+
+	if exists {
+		err = result.SetSuccessMessage(
+			fmt.Sprintf("The Kubernetes namespace '%s' in cluster '%s' exists.", namespace, cluster),
+		)
+		if err != nil {
+			return nil, err
+		}
+	} else {
 		err = result.SetFailedMessage(
 			fmt.Sprintf("The Kubernetes namespace '%s' in cluster '%s' does not exist.", namespace, cluster),
 		)
 		if err != nil {
 			return nil, err
 		}
-
-		err = result.SetTimeStart(&tStart)
-		if err != nil {
-			return nil, err
-		}
-
-		err = result.SetTimeEnd(&tEnd)
-		if err != nil {
-			return nil, err
-		}
-
-		return result, nil
-	}
-
-	// Namespace exists
-	tEnd := time.Now()
-
-	err = result.SetSuccessMessage(
-		fmt.Sprintf("The Kubernetes namespace '%s' in cluster '%s' exists.", namespace, cluster),
-	)
-	if err != nil {
-		return nil, err
 	}
 
 	err = result.SetTimeStart(&tStart)

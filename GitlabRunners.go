@@ -134,7 +134,7 @@ func (s *GitlabRunnersService) AddRunner(ctx context.Context, newRunnerOptions *
 		return nil, err
 	}
 
-	tagsCommaSeperated, err := newRunnerOptions.GetTagsCommaSeparated()
+	tagsCommaSeparated, err := newRunnerOptions.GetTagsCommaSeparated()
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func (s *GitlabRunnersService) AddRunner(ctx context.Context, newRunnerOptions *
 			fmt.Sprintf("%s/user/runners", apiV4Url),
 			"--data", "runner_type=instance_type",
 			"--data", "description=" + runnerName,
-			"--data", "tag_list=" + tagsCommaSeperated,
+			"--data", "tag_list=" + tagsCommaSeparated,
 			"--data", "run_untagged=false",
 			"--header", "PRIVATE-TOKEN: " + privateToken,
 		}

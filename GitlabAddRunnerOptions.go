@@ -75,12 +75,12 @@ func (o *GitlabAddRunnerOptions) GetTags() (runnerTags []string, err error) {
 	return o.RunnerTags, nil
 }
 
-func (o *GitlabAddRunnerOptions) GetTagsCommaSeparated() (tagsCommaSeperated string, err error) {
+func (o *GitlabAddRunnerOptions) GetTagsCommaSeparated() (tagsCommaSeparated string, err error) {
 	tags, err := o.GetTags()
 	if err != nil {
 		return "", err
 	}
 
-	tagsCommaSeperated = strings.Join(tags, ",")
-	return tagsCommaSeperated, nil
+	tagsCommaSeparated = strings.Join(tags, ",")
+	return tagsCommaSeparated, nil
 }

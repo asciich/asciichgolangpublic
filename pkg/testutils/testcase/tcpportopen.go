@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils/testresults"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils/testutilsinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type TestCaseExecutorTcpPortOpen struct {
@@ -18,7 +21,7 @@ func (t *TestCaseExecutorTcpPortOpen) GetName() (string, error) {
 	return "tcp_port_open", nil
 }
 
-func (t *TestCaseExecutorTcpPortOpen) Run(ctx context.Context) (testutilsinterfaces.TestResult, error) {
+func (t *TestCaseExecutorTcpPortOpen) Run(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor) (testutilsinterfaces.TestResult, error) {
 	tStart := time.Now()
 
 	name, err := t.GetTestCaseName()
@@ -28,6 +31,10 @@ func (t *TestCaseExecutorTcpPortOpen) Run(ctx context.Context) (testutilsinterfa
 
 	result := &testresults.TestCaseResult{
 		Name: name,
+	}
+
+	if commandExecutor == nil {
+		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
 
 	port, err := t.GetPort()
@@ -40,9 +47,29 @@ func (t *TestCaseExecutorTcpPortOpen) Run(ctx context.Context) (testutilsinterfa
 		return nil, err
 	}
 
-	isOpen, err := netutils.IsTcpPortOpen(ctx, host, port)
+	// Check if running on localhost or remote
+	isLocalhost, err := commandExecutor.IsRunningOnLocalhost()
 	if err != nil {
 		return nil, err
+	}
+
+	var isOpen bool
+	if isLocalhost {
+		// Use native Go implementation for localhost
+		isOpen, err = netutils.IsTcpPortOpen(ctx, host, port)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// Use commandExecutor for remote execution via nc or similar
+		output, err := commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command:           []string{"nc", "-z", "-w", "5", host, fmt.Sprintf("%d", port)},
+			AllowAllExitCodes: true,
+		})
+		if err != nil {
+			return nil, err
+		}
+		isOpen = output.IsExitSuccess()
 	}
 
 	tEnd := time.Now()

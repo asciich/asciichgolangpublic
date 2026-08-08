@@ -1,13 +1,16 @@
 package commandexecutorkubernetes
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"os/exec"
 	"reflect"
 	"slices"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
@@ -206,7 +209,6 @@ func (c *CommandExecutorNamespace) GetCachedKubectlContext(ctx context.Context) 
 	}
 
 	commandExecutorKubernetes, ok := kubernetes.(*CommandExecutorKubernetes)
-
 	if !ok {
 		typeName, err := datatypes.GetTypeName(kubernetes)
 		if err != nil {
@@ -820,7 +822,7 @@ func (c *CommandExecutorNamespace) ListConfigMapNames(ctx context.Context) ([]st
 	return names, err
 }
 
-func (c *CommandExecutorNamespace) CreatePod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.Pod, error) {
+func (c *CommandExecutorNamespace) CreatePod(ctx context.Context, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (kubernetesinterfaces.Pod, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -927,7 +929,7 @@ func (c *CommandExecutorNamespace) CreatePod(ctx context.Context, options *kuber
 	return c.GetPodByName(podName)
 }
 
-func (c *CommandExecutorNamespace) CreateReplicaSet(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.ReplicaSet, error) {
+func (c *CommandExecutorNamespace) CreateReplicaSet(ctx context.Context, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (kubernetesinterfaces.ReplicaSet, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -1034,7 +1036,7 @@ func (c *CommandExecutorNamespace) CreateReplicaSet(ctx context.Context, options
 	return c.GetReplicaSetByName(replicaSetName)
 }
 
-func (c *CommandExecutorNamespace) CreateDeployment(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.Deployment, error) {
+func (c *CommandExecutorNamespace) CreateDeployment(ctx context.Context, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (kubernetesinterfaces.Deployment, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -1524,6 +1526,181 @@ func (c *CommandExecutorNamespace) WatchConfigMap(ctx context.Context, name stri
 
 func (c *CommandExecutorNamespace) WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, options *kubernetesparameteroptions.WaitForPodsOptions) error {
 	return tracederrors.TracedErrorNotImplemented()
+}
+
+// WaitUntilPodReady waits until a specific pod is in the Running phase or the timeout is reached.
+func (c *CommandExecutorNamespace) WaitUntilPodReady(ctx context.Context, podName string, timeout time.Duration) error {
+	if podName == "" {
+		return tracederrors.TracedErrorEmptyString("podName")
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Wait until pod '%s/%s' is ready started.", namespaceName, podName)
+
+	// Create a timeout context
+	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return err
+	}
+
+	contextName, err := c.GetCachedKubectlContext(timeoutCtx)
+	if err != nil {
+		return err
+	}
+
+	for {
+		// Check if context is done (includes timeout)
+		err := timeoutCtx.Err()
+		if err != nil {
+			return tracederrors.TracedErrorf("Timeout waiting for pod '%s/%s' to be ready: %w", namespaceName, podName, err)
+		}
+
+		// Get pod status using kubectl
+		command := []string{
+			"kubectl",
+			"get",
+			"pod",
+			podName,
+			"--namespace",
+			namespaceName,
+			"--context",
+			contextName,
+			"-o",
+			"jsonpath={.status.phase}",
+		}
+
+		result, err := commandExecutor.RunCommand(timeoutCtx, &parameteroptions.RunCommandOptions{
+			Command: command,
+		})
+		if err != nil {
+			return tracederrors.TracedErrorf("Failed to get pod '%s/%s' status: %w", namespaceName, podName, err)
+		}
+
+		podPhase, err := result.GetStdoutAsString()
+		if err != nil {
+			return tracederrors.TracedErrorf("Failed to parse pod phase: %w", err)
+		}
+		if podPhase == "Running" {
+			logging.LogInfoByCtxf(ctx, "Pod '%s/%s' is now in Running phase.", namespaceName, podName)
+			break
+		}
+
+		logging.LogInfoByCtxf(ctx, "Pod '%s/%s' is in phase '%s', waiting...", namespaceName, podName, podPhase)
+
+		delay := time.Second * 3
+		time.Sleep(delay)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Wait until pod '%s/%s' is ready finished.", namespaceName, podName)
+
+	return nil
+}
+
+// StartPortForwarding starts kubectl port-forward in the background for a pod.
+// Returns a cancel function that should be called to stop the port forwarding.
+func (c *CommandExecutorNamespace) StartPortForwarding(ctx context.Context, podName string, localPort, podPort int) (cancelFunc context.CancelFunc, err error) {
+	if podName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("podName")
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Starting port forwarding for pod '%s/%s:%d' to local port %d", namespaceName, podName, podPort, localPort)
+
+	// Create a cancellable context for the port-forward process
+	forwardCtx, cancel := context.WithCancel(ctx)
+
+	contextName, err := c.GetCachedKubectlContext(forwardCtx)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
+
+	// Start kubectl port-forward in background
+	portForwardCmd := exec.CommandContext(forwardCtx, "kubectl",
+		"--context", contextName,
+		"port-forward",
+		"pod/"+podName,
+		fmt.Sprintf("%d:%d", localPort, podPort),
+		"--namespace", namespaceName,
+	)
+
+	// Capture stdout and stderr for debugging
+	var stdoutBuf, stderrBuf bytes.Buffer
+	portForwardCmd.Stdout = &stdoutBuf
+	portForwardCmd.Stderr = &stderrBuf
+
+	// Start the command
+	err = portForwardCmd.Start()
+	if err != nil {
+		cancel()
+		return nil, tracederrors.TracedErrorf("Failed to start port forwarding for pod '%s/%s:%d': %w", namespaceName, podName, podPort, err)
+	}
+
+	// Monitor the process in a goroutine to detect early failures
+	go func() {
+		err := portForwardCmd.Wait()
+		if err != nil && err != context.Canceled {
+			// Log the error with stdout and stderr output
+			stdoutOutput := stdoutBuf.String()
+			stderrOutput := stderrBuf.String()
+
+			logging.LogErrorByCtxf(forwardCtx, "Port forwarding process failed: %v", err)
+			if stdoutOutput != "" {
+				logging.LogErrorByCtxf(forwardCtx, "Port forwarding stdout: %s", stdoutOutput)
+			}
+			if stderrOutput != "" {
+				logging.LogErrorByCtxf(forwardCtx, "Port forwarding stderr: %s", stderrOutput)
+			}
+		} else {
+			// Log successful output for debugging
+			stdoutOutput := stdoutBuf.String()
+			if stdoutOutput != "" {
+				logging.LogInfoByCtxf(forwardCtx, "Port forwarding output: %s", stdoutOutput)
+			}
+		}
+	}()
+
+	// Wait a moment for port-forwarding to establish
+	time.Sleep(2 * time.Second)
+
+	// Check if process is still running
+	if portForwardCmd.ProcessState != nil && portForwardCmd.ProcessState.Exited() {
+		stdoutOutput := stdoutBuf.String()
+		stderrOutput := stderrBuf.String()
+
+		cancel()
+		errMsg := fmt.Sprintf("Port forwarding process exited immediately for pod '%s/%s:%d'", namespaceName, podName, podPort)
+		if stderrOutput != "" {
+			errMsg += fmt.Sprintf(". stderr: %s", stderrOutput)
+		}
+		if stdoutOutput != "" {
+			errMsg += fmt.Sprintf(". stdout: %s", stdoutOutput)
+		}
+		return nil, tracederrors.TracedError(errMsg)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Port forwarding started for pod '%s/%s:%d' -> localhost:%d", namespaceName, podName, podPort, localPort)
+
+	// Return a cancel function that kills the process
+	return func() {
+		if portForwardCmd.Process != nil {
+			portForwardCmd.Process.Kill()
+			portForwardCmd.Wait()
+			logging.LogInfoByCtxf(ctx, "Port forwarding stopped for pod '%s/%s'", namespaceName, podName)
+		}
+		cancel()
+	}, nil
 }
 
 func (c *CommandExecutorNamespace) CreateObject(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (kubernetesinterfaces.Object, error) {

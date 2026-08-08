@@ -16,7 +16,7 @@ type DownloadMainReadmesOptions struct {
 	// Where to store the README.md files:
 	OuputPath string
 
-	// Gitlab group of projects to download the REAMDE.md files:
+	// Gitlab group of projects to download the README.md files:
 	GitlabGroupUrl string
 
 	// Ignore repos with no README.md file

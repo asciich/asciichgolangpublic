@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 func Test_CreateAndDeletePod(t *testing.T) {
@@ -51,10 +52,12 @@ func Test_CreateAndDeletePod(t *testing.T) {
 				ctx,
 				clientset,
 				namespaceName,
-				&kubernetesparameteroptions.RunCommandOptions{
+				&kubernetesparameteroptions.KubernetesRunCommandOptions{
 					PodName: podName,
 					Image:   "ubunt",
-					Command: []string{"bash", "-c", "sleep 1m"},
+					RunCommandOptions: &parameteroptions.RunCommandOptions{
+						Command: []string{"bash", "-c", "sleep 1m"},
+					},
 				})
 			require.NoError(t, err)
 
@@ -142,10 +145,12 @@ func Test_ListPods(t *testing.T) {
 				ctx,
 				clientset,
 				namespaceName,
-				&kubernetesparameteroptions.RunCommandOptions{
+				&kubernetesparameteroptions.KubernetesRunCommandOptions{
 					PodName: name,
 					Image:   "ubuntu",
-					Command: []string{"bash", "-c", "sleep 1m"},
+					RunCommandOptions: &parameteroptions.RunCommandOptions{
+						Command: []string{"bash", "-c", "sleep 1m"},
+					},
 				})
 			require.NoError(t, err)
 
@@ -207,12 +212,14 @@ func Test_CopyFileToPod(t *testing.T) {
 		ctx,
 		clientset,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			PodName:                  podName,
 			Image:                    "ubuntu",
-			Command:                  []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
 			DeleteAlreadyExistingPod: true,
 			WaitForPodRunning:        true,
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
+			},
 		})
 	require.NoError(t, err)
 
@@ -243,10 +250,12 @@ func Test_CopyFileToPod(t *testing.T) {
 			ctx,
 			config,
 			namespaceName,
-			&kubernetesparameteroptions.RunCommandOptions{
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
 				PodName:       podName,
-				Command:       []string{"cat", destPath},
 				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"cat", destPath},
+				},
 			},
 		)
 		require.NoError(t, err)
@@ -272,10 +281,12 @@ func Test_CopyFileToPod(t *testing.T) {
 			ctx,
 			config,
 			namespaceName,
-			&kubernetesparameteroptions.RunCommandOptions{
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
 				PodName:       podName,
-				Command:       []string{"mkdir", "-p", "/tmp/nested/dir"},
 				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"mkdir", "-p", "/tmp/nested/dir"},
+				},
 			},
 		)
 		require.NoError(t, err)
@@ -289,10 +300,12 @@ func Test_CopyFileToPod(t *testing.T) {
 			ctx,
 			config,
 			namespaceName,
-			&kubernetesparameteroptions.RunCommandOptions{
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
 				PodName:       podName,
-				Command:       []string{"cat", destPath},
 				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"cat", destPath},
+				},
 			},
 		)
 		require.NoError(t, err)
@@ -322,10 +335,12 @@ func Test_CopyFileToPod(t *testing.T) {
 			ctx,
 			config,
 			namespaceName,
-			&kubernetesparameteroptions.RunCommandOptions{
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
 				PodName:       podName,
-				Command:       []string{"od", "-A", "x", "-t", "x1", destPath},
 				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"od", "-A", "x", "-t", "x1", destPath},
+				},
 			},
 		)
 		require.NoError(t, err)
@@ -354,10 +369,12 @@ func Test_CopyFileToPod(t *testing.T) {
 			ctx,
 			config,
 			namespaceName,
-			&kubernetesparameteroptions.RunCommandOptions{
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
 				PodName:       podName,
-				Command:       []string{"cat", destPath},
 				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"cat", destPath},
+				},
 			},
 		)
 		require.NoError(t, err)
@@ -427,10 +444,12 @@ func Test_CopyFileToPod(t *testing.T) {
 			ctx,
 			config,
 			namespaceName,
-			&kubernetesparameteroptions.RunCommandOptions{
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
 				PodName:       podName,
-				Command:       []string{"sh", "-c", "echo '" + initialContent + "' > " + destPath},
 				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"sh", "-c", "echo '" + initialContent + "' > " + destPath},
+				},
 			},
 		)
 		require.NoError(t, err)
@@ -440,10 +459,12 @@ func Test_CopyFileToPod(t *testing.T) {
 			ctx,
 			config,
 			namespaceName,
-			&kubernetesparameteroptions.RunCommandOptions{
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
 				PodName:       podName,
-				Command:       []string{"cat", destPath},
 				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"cat", destPath},
+				},
 			},
 		)
 		require.NoError(t, err)
@@ -464,15 +485,291 @@ func Test_CopyFileToPod(t *testing.T) {
 			ctx,
 			config,
 			namespaceName,
-			&kubernetesparameteroptions.RunCommandOptions{
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
 				PodName:       podName,
-				Command:       []string{"cat", destPath},
 				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"cat", destPath},
+				},
 			},
 		)
 		require.NoError(t, err)
 		content, err = commandOutput.GetStdoutAsString()
 		require.NoError(t, err)
 		require.Equal(t, newContent, content)
+	})
+}
+
+func Test_RunCommand(t *testing.T) {
+	ctx := getCtx()
+
+	// -----
+	// Prepare test environment start ...
+	const clusterName = kindutils.SharedClusterName
+
+	// Ensure a local kind cluster is available for testing:
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
+	require.NoError(t, err)
+
+	config, err := nativekubernetes.GetConfig(ctx, "kind-"+clusterName)
+	require.NoError(t, err)
+
+	clientset, err := nativekubernetes.GetClientSetFromRestConfig(ctx, config)
+	require.NoError(t, err)
+
+	namespaceName := "test-runcommand"
+	err = nativekubernetes.CreateNamespace(ctx, clientset, namespaceName)
+	require.NoError(t, err)
+
+	const podName = "test-runcommand-pod"
+	containerName := podName
+
+	// Create a test pod that stays running
+	err = nativekubernetes.CreatePod(
+		ctx,
+		clientset,
+		namespaceName,
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
+			PodName:                  podName,
+			Image:                    "ubuntu",
+			DeleteAlreadyExistingPod: true,
+			WaitForPodRunning:        true,
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
+			},
+		})
+	require.NoError(t, err)
+
+	// Ensure pod is cleaned up after test
+	defer func() {
+		_ = nativekubernetes.DeletePod(ctx, clientset, podName, namespaceName)
+	}()
+	// ... prepare test environment finished.
+	// -----
+
+	t.Run("run simple command", func(t *testing.T) {
+		output, err := nativekubernetes.RunCommand(
+			ctx,
+			config,
+			namespaceName,
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
+				PodName:       podName,
+				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"echo", "Hello, World!"},
+				},
+			},
+		)
+		require.NoError(t, err)
+
+		stdout, err := output.GetStdoutAsString()
+		require.NoError(t, err)
+		require.Equal(t, "Hello, World!\n", stdout)
+	})
+
+	t.Run("run command with stderr", func(t *testing.T) {
+		output, err := nativekubernetes.RunCommand(
+			ctx,
+			config,
+			namespaceName,
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
+				PodName:       podName,
+				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"sh", "-c", "echo 'error message' >&2"},
+				},
+			},
+		)
+		require.NoError(t, err)
+
+		stderr, err := output.GetStderrAsString()
+		require.NoError(t, err)
+		require.Equal(t, "error message\n", stderr)
+	})
+
+	t.Run("run command with stdin", func(t *testing.T) {
+		output, err := nativekubernetes.RunCommand(
+			ctx,
+			config,
+			namespaceName,
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
+				PodName:       podName,
+				ContainerName: containerName,
+				StdinBytes:    []byte("test input from stdin"),
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"cat"},
+				},
+			},
+		)
+		require.NoError(t, err)
+
+		stdout, err := output.GetStdoutAsString()
+		require.NoError(t, err)
+		require.Equal(t, "test input from stdin", stdout)
+	})
+
+	t.Run("run command that returns non-zero exit code", func(t *testing.T) {
+		output, err := nativekubernetes.RunCommand(
+			ctx,
+			config,
+			namespaceName,
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
+				PodName:       podName,
+				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"false"},
+				},
+			},
+		)
+		// Note: The SPDY executor returns an error when command exits with non-zero
+		// This is expected behavior - the error message contains "command terminated with exit code"
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "exit code")
+		// Output may still be returned even on error
+		if output != nil {
+			require.NotNil(t, output.ReturnCode)
+		}
+	})
+
+	t.Run("run complex command with pipes", func(t *testing.T) {
+		output, err := nativekubernetes.RunCommand(
+			ctx,
+			config,
+			namespaceName,
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
+				PodName:       podName,
+				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"sh", "-c", "echo 'hello world' | grep 'hello'"},
+				},
+			},
+		)
+		require.NoError(t, err)
+
+		stdout, err := output.GetStdoutAsString()
+		require.NoError(t, err)
+		require.Equal(t, "hello world\n", stdout)
+	})
+
+	t.Run("run command in non-existent pod", func(t *testing.T) {
+		_, err := nativekubernetes.RunCommand(
+			ctx,
+			config,
+			namespaceName,
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
+				PodName:       "non-existent-pod",
+				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"echo", "test"},
+				},
+			},
+		)
+		require.Error(t, err)
+	})
+
+	t.Run("run command in non-existent container", func(t *testing.T) {
+		_, err := nativekubernetes.RunCommand(
+			ctx,
+			config,
+			namespaceName,
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
+				PodName:       podName,
+				ContainerName: "non-exitent-container",
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"echo", "test"},
+				},
+			},
+		)
+		require.Error(t, err)
+	})
+
+	t.Run("error handling - nil config", func(t *testing.T) {
+		_, err := nativekubernetes.RunCommand(
+			ctx,
+			nil,
+			namespaceName,
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
+				PodName:       podName,
+				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"echo", "test"},
+				},
+			},
+		)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "nil")
+	})
+
+	t.Run("error handling - empty namespace", func(t *testing.T) {
+		_, err := nativekubernetes.RunCommand(
+			ctx,
+			config,
+			"",
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
+				PodName:       podName,
+				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"echo", "test"},
+				},
+			},
+		)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "namespaceName")
+	})
+
+	t.Run("error handling - nil options", func(t *testing.T) {
+		_, err := nativekubernetes.RunCommand(ctx, config, namespaceName, nil)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "nil")
+	})
+
+	t.Run("error handling - missing pod name", func(t *testing.T) {
+		_, err := nativekubernetes.RunCommand(
+			ctx,
+			config,
+			namespaceName,
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
+				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"echo", "test"},
+				},
+			},
+		)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "PodName")
+	})
+
+	t.Run("error handling - missing command", func(t *testing.T) {
+		_, err := nativekubernetes.RunCommand(
+			ctx,
+			config,
+			namespaceName,
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
+				PodName:       podName,
+				ContainerName: containerName,
+			},
+		)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "Command")
+	})
+
+	t.Run("run command with multiple arguments", func(t *testing.T) {
+		output, err := nativekubernetes.RunCommand(
+			ctx,
+			config,
+			namespaceName,
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
+				PodName:       podName,
+				ContainerName: containerName,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"sh", "-c", "echo arg1 arg2 arg3"},
+				},
+			},
+		)
+		require.NoError(t, err)
+
+		stdout, err := output.GetStdoutAsString()
+		require.NoError(t, err)
+		require.Equal(t, "arg1 arg2 arg3\n", stdout)
 	})
 }

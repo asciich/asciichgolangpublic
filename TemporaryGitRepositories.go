@@ -71,7 +71,7 @@ func (t TemporaryGitRepositoriesService) CreateEmptyTemporaryGitRepository(ctx c
 		return nil, err
 	}
 
-	temporaryGitRepository, err = GetLocalGitReposioryFromDirectory(tempDirectory)
+	temporaryGitRepository, err = GetLocalGitRepositoryFromDirectory(tempDirectory)
 	if err != nil {
 		return nil, err
 	}

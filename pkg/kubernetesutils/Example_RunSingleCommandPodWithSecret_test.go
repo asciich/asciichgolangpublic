@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -72,16 +73,18 @@ func Test_Example_RunSingleCommandPodWithSecret(t *testing.T) {
 		ctx,
 		clientset,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			Image:                    "ubuntu",
 			PodName:                  podName,
 			DeleteAlreadyExistingPod: true,
-			Command:                  []string{"bash", "-c", "echo Secret value is: $" + envVarName},
 			SecretEnvVars: map[string]kubernetesparameteroptions.SecretEnvVarSource{
 				envVarName: {
 					SecretName: secretName,
 					SecretKey:  secretKey,
 				},
+			},
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"bash", "-c", "echo Secret value is: $" + envVarName},
 			},
 		},
 	)

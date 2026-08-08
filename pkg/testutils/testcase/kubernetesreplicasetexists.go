@@ -5,9 +5,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/commandexecutorkubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils/testresults"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils/testutilsinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type TestCaseExecutorKubernetesReplicaSetExists struct {
@@ -18,7 +22,7 @@ func (t *TestCaseExecutorKubernetesReplicaSetExists) GetName() (string, error) {
 	return "kubernetes_replicaset_exists", nil
 }
 
-func (t *TestCaseExecutorKubernetesReplicaSetExists) Run(ctx context.Context) (testutilsinterfaces.TestResult, error) {
+func (t *TestCaseExecutorKubernetesReplicaSetExists) Run(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor) (testutilsinterfaces.TestResult, error) {
 	tStart := time.Now()
 
 	name, err := t.GetTestCaseName()
@@ -28,6 +32,10 @@ func (t *TestCaseExecutorKubernetesReplicaSetExists) Run(ctx context.Context) (t
 
 	result := &testresults.TestCaseResult{
 		Name: name,
+	}
+
+	if commandExecutor == nil {
+		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
 
 	replicaSetName, err := t.GetResourceName()
@@ -45,52 +53,52 @@ func (t *TestCaseExecutorKubernetesReplicaSetExists) Run(ctx context.Context) (t
 		return nil, err
 	}
 
-	// Get Kubernetes cluster:
-	kubernetesCluster, err := nativekubernetesoo.GetClusterByName(ctx, cluster)
+	// Check if running on localhost or remote
+	isLocalhost, err := commandExecutor.IsRunningOnLocalhost()
 	if err != nil {
 		return nil, err
 	}
 
-	// Get namespace:
+	var exists bool
+	var kubernetesCluster kubernetesinterfaces.KubernetesCluster
+	if isLocalhost {
+		kubernetesCluster, err = nativekubernetesoo.GetClusterByName(ctx, cluster)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		kubernetesCluster, err = commandexecutorkubernetes.GetCommandExecutorKubernetsByName(commandExecutor, cluster)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	ns, err := kubernetesCluster.GetNamespaceByName(namespace)
 	if err != nil {
 		return nil, err
 	}
 
-	// Check if replicaSet exists:
-	err = ns.CheckReplicaSetByNameExists(ctx, replicaSetName)
+	exists, err = ns.ReplicaSetByNameExists(ctx, replicaSetName)
 	if err != nil {
-		// ReplicaSet does not exist
-		tEnd := time.Now()
+		return nil, err
+	}
 
-		err = result.SetFailedMessage(
-			fmt.Sprintf("The Kubernetes replicaSet '%s' in namespace '%s' cluster '%s' does not exist.", replicaSetName, namespace, cluster),
+	tEnd := time.Now()
+
+	if exists {
+		err = result.SetSuccessMessage(
+			fmt.Sprintf("The Kubernetes replicaset '%s' in namespace '%s' cluster '%s' exists.", replicaSetName, namespace, cluster),
 		)
 		if err != nil {
 			return nil, err
 		}
-
-		err = result.SetTimeStart(&tStart)
+	} else {
+		err = result.SetFailedMessage(
+			fmt.Sprintf("The Kubernetes replicaset '%s' in namespace '%s' cluster '%s' does not exist.", replicaSetName, namespace, cluster),
+		)
 		if err != nil {
 			return nil, err
 		}
-
-		err = result.SetTimeEnd(&tEnd)
-		if err != nil {
-			return nil, err
-		}
-
-		return result, nil
-	}
-
-	// ReplicaSet exists
-	tEnd := time.Now()
-
-	err = result.SetSuccessMessage(
-		fmt.Sprintf("The Kubernetes replicaSet '%s' in namespace '%s' cluster '%s' exists.", replicaSetName, namespace, cluster),
-	)
-	if err != nil {
-		return nil, err
 	}
 
 	err = result.SetTimeStart(&tStart)

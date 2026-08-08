@@ -131,7 +131,7 @@ func CreateDnsDomainRecord(ctx context.Context, client *v3.Client, domainName st
 }
 
 // Creates (or updates) the record on the DNS domain with the current public IP address.
-// This is usfull to act as dynamic DNS client.
+// This is useful to act as dynamic DNS client.
 func CreateDnsDomainRecordWithCurrentPublicAddress(ctx context.Context, client *v3.Client, domainName string, recordName string) error {
 	if client == nil {
 		return tracederrors.TracedErrorNil("client")

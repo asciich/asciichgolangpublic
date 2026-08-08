@@ -866,7 +866,7 @@ func (c *CommandExecutorKubernetes) CreateObject(ctx context.Context, options *k
 //  2. `kubectl wait`   — block until the pod has completed
 //  3. `kubectl logs`   — fetch the output exactly once
 //  4. `kubectl delete` — clean up the pod
-func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
+func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (*commandoutput.CommandOutput, error) {
 	if namespaceName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
 	}
@@ -1037,7 +1037,7 @@ func (c *CommandExecutorKubernetes) DeleteDeploymentByNames(ctx context.Context,
 	return namespace.DeleteDeploymentByName(ctx, deploymentName)
 }
 
-func (c *CommandExecutorKubernetes) CreatePod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.Pod, error) {
+func (c *CommandExecutorKubernetes) CreatePod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (kubernetesinterfaces.Pod, error) {
 	namespace, err := c.GetNamespaceByName(namespaceName)
 	if err != nil {
 		return nil, err
@@ -1046,7 +1046,7 @@ func (c *CommandExecutorKubernetes) CreatePod(ctx context.Context, namespaceName
 	return namespace.CreatePod(ctx, options)
 }
 
-func (c *CommandExecutorKubernetes) CreateReplicaSet(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.ReplicaSet, error) {
+func (c *CommandExecutorKubernetes) CreateReplicaSet(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (kubernetesinterfaces.ReplicaSet, error) {
 	namespace, err := c.GetNamespaceByName(namespaceName)
 	if err != nil {
 		return nil, err
@@ -1055,7 +1055,7 @@ func (c *CommandExecutorKubernetes) CreateReplicaSet(ctx context.Context, namesp
 	return namespace.CreateReplicaSet(ctx, options)
 }
 
-func (c *CommandExecutorKubernetes) CreateDeployment(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.Deployment, error) {
+func (c *CommandExecutorKubernetes) CreateDeployment(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (kubernetesinterfaces.Deployment, error) {
 	namespace, err := c.GetNamespaceByName(namespaceName)
 	if err != nil {
 		return nil, err
@@ -1127,7 +1127,7 @@ func toJsonEnvVarFromSecretsForKubectl(secretEnvVars map[string]kubernetesparame
 
 // buildPodOverridesForSecrets builds JSON overrides for pod spec including
 // both environment variables from secrets and secret volume mounts
-func buildPodOverridesForSecrets(podName string, options *kubernetesparameteroptions.RunCommandOptions) string {
+func buildPodOverridesForSecrets(podName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) string {
 	containerOverrides := map[string]interface{}{
 		"name": podName,
 	}

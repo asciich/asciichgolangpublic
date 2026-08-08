@@ -27,7 +27,7 @@ func getGitRepositoryToTest(implementationName string) (repo gitinterfaces.GitRe
 	ctx := getCtx()
 
 	if implementationName == "localGitRepository" {
-		repo = MustGetLocalGitReposioryFromDirectory(
+		repo = MustGetLocalGitRepositoryFromDirectory(
 			mustutils.Must(tempfilesoo.CreateEmptyTemporaryDirectory(ctx)),
 		)
 	} else if implementationName == "localCommandExecutorRepository" {
@@ -510,7 +510,7 @@ func TestGitRepository_GetRootDirectory_from_subdirectory(t *testing.T) {
 
 				require.EqualValues(t, expectedRootDirectory, mustutils.Must(repoUsingSubDir1.GetRootDirectoryPath(ctx)))
 
-				repoUsingSubDir2 := MustGetLocalGitReposioryFromDirectory(subDir)
+				repoUsingSubDir2 := MustGetLocalGitRepositoryFromDirectory(subDir)
 
 				require.EqualValues(t, expectedRootDirectory, mustutils.Must(repoUsingSubDir2.GetRootDirectoryPath(ctx)))
 			},

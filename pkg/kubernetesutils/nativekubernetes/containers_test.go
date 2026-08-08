@@ -7,6 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 func Test_GetContainerLogs(t *testing.T) {
@@ -47,13 +48,15 @@ func Test_GetContainerLogs(t *testing.T) {
 		ctx,
 		clientset,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			PodName:                  podName,
 			ContainerName:            containerName,
 			Image:                    "ubuntu",
-			Command:                  []string{"bash", "-c", "echo 'stdout message'; echo 'stderr message' >&2; sleep 10"},
 			DeleteAlreadyExistingPod: true,
 			WaitForPodRunning:        true,
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"bash", "-c", "echo 'stdout message'; echo 'stderr message' >&2; sleep 10"},
+			},
 		},
 	)
 	require.NoError(t, err)

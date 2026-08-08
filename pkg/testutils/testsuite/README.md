@@ -2,29 +2,26 @@
 
 Provides a simple way to declare test suites and run them.
 
-## Available test types
-
-| test_type                       | Comment                                                    | Example                                                                        |
-| ------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------ | 
-| `command`                       | Run an arbitrary command and pass if the exit code is `0`. | [Test Google reachable](./Example_TestGoogleReachable_test.go)                 |
-| `tcp_port_open`                 | Passes when the TCP `port` on `host` is open.              | [Test Google reachable](./Example_TestGoogleReachable_test.go)                 |
-| `kubernetes_namespace_exists`   | Checks if a Kubernetes namespace exists in a cluster.      | [Test Kubernetes Namespace Exists](./Example_KubernetesNamespaceExists_test.go)|
-| `kubernetes_pod_exists`         | Checks if a Kubernetes pod exists in a namespace.          | [Test Kubernetes Pod Exists](./Example_KubernetesPodExists_test.go)            |
-| `kubernetes_replicaset_exists`  | Checks if a Kubernetes ReplicaSet exists in a namespace.   | [Test Kubernetes ReplicaSet Exists](./Example_KubernetesReplicaSetExists_test.go)|
-| `kubernetes_configmap_exists`   | Checks if a Kubernetes ConfigMap exists in a namespace.    | [Test Kubernetes ConfigMap Exists](./Example_KubernetesConfigMapExists_test.go)|
-| `kubernetes_secret_exists`      | Checks if a Kubernetes Secret exists in a namespace.       | [Test Kubernetes Secret Exists](./Example_KubernetesSecretExists_test.go)      |
-| `kubernetes_deployment_exists`  | Checks if a Kubernetes Deployment exists in a namespace.   | [Test Kubernetes Deployment Exists](./Example_KubernetesDeploymentExists_test.go)|
-| `kubernetes_cronjob_exists`     | Checks if a Kubernetes CronJob exists in a namespace.      | [Test Kubernetes CronJob Exists](./Example_KubernetesCronJobExists_test.go)    |
-
 ## Example Configuration
 
-Here's a complete example showing all available test types:
+Here's a complete example showing all available test types including SSH:
 
 ```yaml
 ---
 name: "Complete test suite example"
+ssh_host: "localhost"                          # Optional: SSH host for remote execution
+ssh_user: "root"                               # Optional: SSH user
+ssh_port: 22222                                # Optional: SSH port (default: 22)
+ssh_skip_host_validation: true                 # Optional: Skip SSH host key validation (for testing)
+ssh_private_key_file: "/path/to/private/key"   # Optional: Path to SSH private key file
 test_cases:
-  # Command test - run any shell command
+  # Command test - run any shell command (locally or via SSH if configured)
+  - name: "Test echo command"
+    test_type: command
+    command: echo hello world
+    description: "Check if echo command works"
+
+  # Command test - run on remote SSH server
   - name: "Test curl google"
     test_type: command
     command: curl --fail https://google.com
@@ -93,28 +90,21 @@ test_cases:
     description: "Check if a specific CronJob exists"
 ```
 
-## Field Descriptions
+## Example Tests
 
-### Common Fields
+The following example test files demonstrate the usage of the testsuite package:
 
-- **name**: The name of the test case (required)
-- **test_type**: The type of test to run (required)
-- **description**: A description of what the test does (optional but recommended)
+- `Example_TestGoogleReachable_test.go` - TCP port open and command tests
+- `Example_KubernetesNamespaceExists_test.go` - Kubernetes namespace existence tests
+- `Example_KubernetesPodExists_test.go` - Kubernetes pod existence tests
+- `Example_KubernetesReplicaSetExists_test.go` - Kubernetes ReplicaSet existence tests
+- `Example_KubernetesConfigMapExists_test.go` - Kubernetes ConfigMap existence tests
+- `Example_KubernetesSecretExists_test.go` - Kubernetes Secret existence tests
+- `Example_KubernetesDeploymentExists_test.go` - Kubernetes Deployment existence tests
+- `Example_KubernetesCronJobExists_test.go` - Kubernetes CronJob existence tests
 
-### Test Type Specific Fields
+Each example test file contains both localhost and SSH jumphost test scenarios.
 
-#### command
-- **command**: The shell command to execute (required)
+## Specifications
 
-#### tcp_port_open
-- **host**: The hostname or IP address to check (required)
-- **port**: The TCP port number to check (required)
-
-#### kubernetes_namespace_exists
-- **namespace**: The name of the Kubernetes namespace to check (required)
-- **cluster**: The name of the Kubernetes cluster (required, e.g., `kind-asciichgolangpublic`)
-
-#### kubernetes_pod_exists, kubernetes_replicaset_exists, kubernetes_configmap_exists, kubernetes_secret_exists, kubernetes_deployment_exists, kubernetes_cronjob_exists
-- **resource_name**: The name of the Kubernetes resource to check (required)
-- **namespace**: The namespace where the resource should exist (required)
-- **cluster**: The name of the Kubernetes cluster (required, e.g., `kind-asciichgolangpublic`)
+For specifications see [testsuite.spec.md](testsuite.spec.md)

@@ -46,7 +46,7 @@ func TestGetCurrentCommitGoGitHash(t *testing.T) {
 	}
 }
 
-func TestLocalGitRepository_GetLocalGitReposioryFromDirectory(t *testing.T) {
+func TestLocalGitRepository_GetLocalGitRepositoryFromDirectory(t *testing.T) {
 	tests := []struct {
 		bareRepository bool
 	}{
@@ -66,7 +66,7 @@ func TestLocalGitRepository_GetLocalGitReposioryFromDirectory(t *testing.T) {
 				require.NoError(t, err)
 				require.EqualValues(t, "localhost", hostDescription)
 
-				repo, err := GetLocalGitReposioryFromDirectory(directory)
+				repo, err := GetLocalGitRepositoryFromDirectory(directory)
 				require.NoError(t, err)
 
 				repoPath, err := repo.GetPath()

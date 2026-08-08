@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -49,11 +50,13 @@ func Test_ListDeploymentNames(t *testing.T) {
 				for i, deploymentName := range deploymentNames {
 					_, err := namespace.CreateDeployment(
 						ctx,
-						&kubernetesparameteroptions.RunCommandOptions{
+						&kubernetesparameteroptions.KubernetesRunCommandOptions{
 							Image:                           "ubuntu",
 							DeploymentName:                  deploymentName,
 							DeleteAlreadyExistingDeployment: true,
-							Command:                         []string{"bash", "-c", "echo hello_world"},
+							RunCommandOptions: &parameteroptions.RunCommandOptions{
+								Command: []string{"bash", "-c", "echo hello_world"},
+							},
 						},
 					)
 					require.NoError(t, err)
@@ -127,11 +130,13 @@ func Test_CreateAndDeleteDeployment(t *testing.T) {
 					_, err := kubernetes.CreateDeployment(
 						ctx,
 						namespaceName,
-						&kubernetesparameteroptions.RunCommandOptions{
+						&kubernetesparameteroptions.KubernetesRunCommandOptions{
 							Image:                           "ubuntu",
 							DeploymentName:                  deploymentName,
 							DeleteAlreadyExistingDeployment: true,
-							Command:                         []string{"bash", "-c", "echo hello_world"},
+							RunCommandOptions: &parameteroptions.RunCommandOptions{
+								Command: []string{"bash", "-c", "echo hello_world"},
+							},
 						},
 					)
 					require.NoError(t, err)

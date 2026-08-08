@@ -5,7 +5,9 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
+	"github.com/asciich/asciichgolangpublic/pkg/hosts"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/sshutils/commandexecutorsshclient"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils/testcase"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils/testresults"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils/testutilsinterfaces"
@@ -17,6 +19,14 @@ type TestSuite struct {
 	Name        string               `yaml:"name"`
 	Description string               `yaml:"description"`
 	TestCases   []*testcase.TestCase `yaml:"test_cases"`
+
+	// Optional Jumphost configuration.
+	// When SSH is configured, tests execute on the remote host
+	SSHHost               string `yaml:"ssh_host"`
+	SSHUser               string `yaml:"ssh_user"`
+	SSHPort               int    `yaml:"ssh_port"`                 // Optional SSH port (default: 22, or custom port like 22222 for port-forwarding)
+	SSHSkipHostValidation bool   `yaml:"ssh_skip_host_validation"` // Only for test environments - disables SSH host key checking
+	SSHPrivateKeyFile     string `yaml:"ssh_private_key_file"`     // Optional path to SSH private key file (user manages lifecycle)
 }
 
 func LoadFromFile(ctx context.Context, path string) (testutilsinterfaces.TestSuite, error) {
@@ -56,6 +66,44 @@ func LoadFromBytes(ctx context.Context, testSuiteData []byte) (testutilsinterfac
 	return testSuite, nil
 }
 
+func (t *TestSuite) GetHost() (hosts.Host, error) {
+	if t.SSHHost == "" {
+		return hosts.GetLocalHost()
+	}
+
+	commandExecutor, err := commandexecutorsshclient.GetSshClientByHostName(t.SSHHost)
+	if err != nil {
+		return nil, err
+	}
+
+	if t.SSHUser != "" {
+		err = commandExecutor.SetSshUserName(t.SSHUser)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if t.SSHPort != 0 {
+		err = commandExecutor.SetSshPort(t.SSHPort)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if t.SSHSkipHostValidation {
+		commandExecutor.SetSkipHostKeyChecking(true)
+	}
+
+	if t.SSHPrivateKeyFile != "" {
+		err = commandExecutor.SetSshPrivateKeyFile(t.SSHPrivateKeyFile)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return hosts.GetCommandExecutorHostByCommandExecutor(commandExecutor)
+}
+
 func (t *TestSuite) GetName() (string, error) {
 	if t.Name == "" {
 		return "", tracederrors.TracedError("name not set")
@@ -80,6 +128,12 @@ func (t *TestSuite) Run(ctx context.Context) (testutilsinterfaces.TestResult, er
 		return nil, tracederrors.TracedErrorf("TestSuite '%s' has no test cases.", name)
 	}
 
+	// Get the host/commandExecutor for running tests
+	host, err := t.GetHost()
+	if err != nil {
+		return nil, err
+	}
+
 	totalTestCases := len(t.TestCases)
 
 	for i, testCase := range t.TestCases {
@@ -89,6 +143,12 @@ func (t *TestSuite) Run(ctx context.Context) (testutilsinterfaces.TestResult, er
 		}
 
 		logging.LogInfoByCtxf(ctx, "Run test case '%s' of test suite '%s' (%d/%d).", tcName, name, i+1, totalTestCases)
+
+		// Set the commandExecutor on the test case
+		err = testCase.SetCommandExecutor(host)
+		if err != nil {
+			return nil, err
+		}
 
 		testCaseResult, err := testCase.Run(ctx)
 		if err != nil {

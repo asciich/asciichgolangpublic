@@ -2,24 +2,41 @@ package commandexecutorkubernetes
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
 	"strings"
 	"time"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type CommandExecutorPod struct {
+	commandexecutorgeneric.CommandExecutorBase
 	name      string
 	namespace kubernetesinterfaces.Namespace
 }
 
-func NewCommandExecutorPod() (c *CommandExecutorPod) {
-	return new(CommandExecutorPod)
+func NewCommandExecutorPod() *CommandExecutorPod {
+	ret := new(CommandExecutorPod)
+	ret.SetParentCommandExecutorForBaseClass(ret)
+	return ret
+}
+
+func (c *CommandExecutorPod) RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorPod) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
 func (c *CommandExecutorPod) GetName() (name string, err error) {
@@ -443,4 +460,236 @@ func (c *CommandExecutorPod) CopyFileFromPod(ctx context.Context, srcPath string
 	logging.LogInfoByCtxf(ctx, "Copy file '%s' from container '%s' of pod '%s' of namespace '%s' to local '%s' finished.", srcPath, containerName, podName, namespaceName, destFile)
 
 	return nil
+}
+
+func (c *CommandExecutorPod) RunCommandInContainer(ctx context.Context, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (*commandoutput.CommandOutput, error) {
+	podName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetNamespaceName()
+	if err != nil {
+		return nil, err
+	}
+
+	containerName, err := options.GetContainerName()
+	if err != nil {
+		return nil, err
+	}
+
+	command, err := options.GetCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run command in pod '%s' container '%s' in namespace '%s' started.", podName, containerName, namespaceName)
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	kubectlContext, err := c.GetKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Use kubectl exec to run the command
+	execCommand := []string{
+		"kubectl", "exec", podName,
+		"--context", kubectlContext,
+		"--namespace", namespaceName,
+		"-c", containerName,
+		"--",
+	}
+	execCommand = append(execCommand, command...)
+
+	output, err := commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command: execCommand,
+	})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("failed to run command in pod '%s' in namespace '%s': %w", podName, namespaceName, err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run command in pod '%s' container '%s' in namespace '%s' finished.", podName, containerName, namespaceName)
+
+	return output, nil
+}
+
+func (c *CommandExecutorPod) GetDefaultContainerName(ctx context.Context) (string, error) {
+	podName, err := c.GetName()
+	if err != nil {
+		return "", err
+	}
+
+	namespaceName, err := c.GetNamespaceName()
+	if err != nil {
+		return "", err
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return "", err
+	}
+
+	kubectlContext, err := c.GetKubectlContext(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	// Get pod details as JSON to extract container status information
+	getCommand := []string{
+		"kubectl", "get", "pod", podName,
+		"--context", kubectlContext,
+		"--namespace", namespaceName,
+		"-o", "json",
+	}
+
+	output, err := commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command: getCommand,
+	})
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Failed to get pod '%s' in namespace '%s': %w", podName, namespaceName, err)
+	}
+
+	stdout, err := output.GetStdoutAsString()
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Failed to get stdout from command: %w", err)
+	}
+
+	// Parse the JSON to find the first running container
+	var podData map[string]interface{}
+	if err := json.Unmarshal([]byte(stdout), &podData); err != nil {
+		return "", tracederrors.TracedErrorf("Failed to parse pod JSON: %w", err)
+	}
+
+	// First try to get the container name from spec.containers (preferred for getting the defined name)
+	spec, ok := podData["spec"].(map[string]interface{})
+	if !ok {
+		return "", tracederrors.TracedErrorf("Failed to get spec from pod JSON")
+	}
+
+	containers, ok := spec["containers"].([]interface{})
+	if !ok || len(containers) == 0 {
+		return "", tracederrors.TracedErrorf("Failed to get containers from pod spec")
+	}
+
+	// Get the first container name from spec
+	// This gives us the actual container name as defined, not what kubectl might have set
+	firstContainer, ok := containers[0].(map[string]interface{})
+	if !ok {
+		return "", tracederrors.TracedErrorf("Failed to parse first container in spec")
+	}
+
+	containerName, ok := firstContainer["name"].(string)
+	if !ok || containerName == "" {
+		return "", tracederrors.TracedErrorf("Failed to get container name from spec")
+	}
+
+	// Verify the container is actually running by checking status
+	status, ok := podData["status"].(map[string]interface{})
+	if !ok {
+		return "", tracederrors.TracedErrorf("Failed to get status from pod JSON")
+	}
+
+	containerStatuses, ok := status["containerStatuses"].([]interface{})
+	if !ok {
+		return "", tracederrors.TracedErrorf("Failed to get containerStatuses from pod JSON")
+	}
+
+	// Check if any container is running
+	hasRunningContainer := false
+	for _, cs := range containerStatuses {
+		containerStatus, ok := cs.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		state, ok := containerStatus["state"].(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		// Check if the container is running
+		if _, isRunning := state["running"]; isRunning {
+			hasRunningContainer = true
+			break
+		}
+	}
+
+	if !hasRunningContainer {
+		return "", tracederrors.TracedErrorf("No running container found in pod '%s' in namespace '%s'", podName, namespaceName)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Default container name is '%s' in pod '%s'", containerName, podName)
+	return containerName, nil
+}
+
+func (c *CommandExecutorPod) GetCPUArchitecture(ctx context.Context) (string, error) {
+	return "", tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorPod) GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor {
+	ret := NewCommandExecutorPod()
+
+	*ret = *c
+
+	return ret
+}
+
+func (c *CommandExecutorPod) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	podName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	containerName, err := c.GetDefaultContainerName(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.RunCommandInContainer(ctx, &kubernetesparameteroptions.KubernetesRunCommandOptions{
+		PodName:           podName,
+		ContainerName:     containerName,
+		RunCommandOptions: options,
+	})
+}
+
+func (c *CommandExecutorPod) GetClusterName() (string, error) {
+	namespace, err := c.GetNamespace()
+	if err != nil {
+		return "", err
+	}
+
+	return namespace.GetClusterName()
+}
+
+func (c *CommandExecutorPod) GetHostDescription() (string, error) {
+	podName, err := c.GetName()
+	if err != nil {
+		return "", err
+	}
+
+	namespaceName, err := c.GetNamespaceName()
+	if err != nil {
+		return "", err
+	}
+
+	clusterName, err := c.GetClusterName()
+	if err != nil {
+		return "", err
+	}
+
+	got := fmt.Sprintf("Pod '%s' in namespace '%s' of kubernetes cluster '%s'.", podName, namespaceName, clusterName)
+
+	return got, nil
+}
+
+func (c *CommandExecutorPod) IsRunningOnLocalhost() (bool, error) {
+	return false, nil
 }

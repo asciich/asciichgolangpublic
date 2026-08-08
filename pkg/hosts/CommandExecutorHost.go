@@ -163,6 +163,17 @@ func (c *CommandExecutorHost) GetHostDescription() (hostDescription string, err 
 	return commandExecutor.GetHostDescription()
 }
 
+// IsRunningOnLocalhost delegates to the wrapped command executor.
+// This ensures that SSH clients (even to localhost) are correctly identified as non-local.
+func (c *CommandExecutorHost) IsRunningOnLocalhost() (isRunningOnLocalhost bool, err error) {
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return false, err
+	}
+
+	return commandExecutor.IsRunningOnLocalhost()
+}
+
 func (c *CommandExecutorHost) MustGetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor) {
 	commandExecutor, err := c.GetCommandExecutor()
 	if err != nil {

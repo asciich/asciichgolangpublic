@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 // ExampleCopyFileToPod demonstrates how to copy a local file to a container running in a Kubernetes pod.
@@ -59,12 +60,14 @@ func Test_ExampleCopyFileToPod(t *testing.T) {
 		ctx,
 		clientset,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			Image:                    "ubuntu",
 			PodName:                  podName,
 			DeleteAlreadyExistingPod: true,
-			Command:                  []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
-			WaitForPodRunning:        true,
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
+			},
+			WaitForPodRunning: true,
 		},
 	)
 	if err != nil {
@@ -93,10 +96,12 @@ func Test_ExampleCopyFileToPod(t *testing.T) {
 		ctx,
 		config,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			PodName:       podName,
-			Command:       []string{"cat", destPath},
 			ContainerName: containerName,
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"cat", destPath},
+			},
 		},
 	)
 	if err != nil {
@@ -152,12 +157,14 @@ func Test_ExampleCopyFileToPod_binary(t *testing.T) {
 		ctx,
 		clientset,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			Image:                    "ubuntu",
 			PodName:                  podName,
 			DeleteAlreadyExistingPod: true,
-			Command:                  []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
-			WaitForPodRunning:        true,
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
+			},
+			WaitForPodRunning: true,
 		},
 	)
 	if err != nil {
@@ -221,12 +228,14 @@ func Test_ExampleCopyFileToPod_nestedDirectory(t *testing.T) {
 		ctx,
 		clientset,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			Image:                    "ubuntu",
 			PodName:                  podName,
 			DeleteAlreadyExistingPod: true,
-			Command:                  []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
-			WaitForPodRunning:        true,
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
+			},
+			WaitForPodRunning: true,
 		},
 	)
 	if err != nil {
@@ -245,9 +254,11 @@ func Test_ExampleCopyFileToPod_nestedDirectory(t *testing.T) {
 		ctx,
 		config,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
-			PodName:       podName,
-			Command:       []string{"mkdir", "-p", "/tmp/nested/deep/path"},
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
+			PodName: podName,
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"mkdir", "-p", "/tmp/nested/deep/path"},
+			},
 			ContainerName: podName,
 		},
 	)

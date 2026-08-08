@@ -623,13 +623,22 @@ func (n *NativeKubernetesCluster) CreateObject(ctx context.Context, options *kub
 	return namespace.CreateObject(ctx, options)
 }
 
-func (n *NativeKubernetesCluster) RunCommandInTemporaryPod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
+func (n *NativeKubernetesCluster) RunCommandInTemporaryPod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (*commandoutput.CommandOutput, error) {
 	clientSet, err := n.GetClientSet()
 	if err != nil {
 		return nil, err
 	}
 
 	return nativekubernetes.RunCommandInTemporaryPod(ctx, clientSet, namespaceName, options)
+}
+
+func (n *NativeKubernetesCluster) RunCommand(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (*commandoutput.CommandOutput, error) {
+	config, err := n.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	return nativekubernetes.RunCommand(ctx, config, namespaceName, options)
 }
 
 func (n *NativeKubernetesCluster) ReadSecret(ctx context.Context, namespaceName string, secretName string) (map[string][]byte, error) {
@@ -677,7 +686,7 @@ func (n *NativeKubernetesCluster) DeletePodByNames(ctx context.Context, namespac
 	return namespace.DeletePodByName(ctx, podName)
 }
 
-func (n *NativeKubernetesCluster) CreatePod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.Pod, error) {
+func (n *NativeKubernetesCluster) CreatePod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (kubernetesinterfaces.Pod, error) {
 	namespace, err := n.GetNamespaceByName(namespaceName)
 	if err != nil {
 		return nil, err
@@ -686,7 +695,7 @@ func (n *NativeKubernetesCluster) CreatePod(ctx context.Context, namespaceName s
 	return namespace.CreatePod(ctx, options)
 }
 
-func (n *NativeKubernetesCluster) CreateReplicaSet(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.ReplicaSet, error) {
+func (n *NativeKubernetesCluster) CreateReplicaSet(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (kubernetesinterfaces.ReplicaSet, error) {
 	namespace, err := n.GetNamespaceByName(namespaceName)
 	if err != nil {
 		return nil, err
@@ -695,7 +704,7 @@ func (n *NativeKubernetesCluster) CreateReplicaSet(ctx context.Context, namespac
 	return namespace.CreateReplicaSet(ctx, options)
 }
 
-func (n *NativeKubernetesCluster) CreateDeployment(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (kubernetesinterfaces.Deployment, error) {
+func (n *NativeKubernetesCluster) CreateDeployment(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (kubernetesinterfaces.Deployment, error) {
 	namespace, err := n.GetNamespaceByName(namespaceName)
 	if err != nil {
 		return nil, err

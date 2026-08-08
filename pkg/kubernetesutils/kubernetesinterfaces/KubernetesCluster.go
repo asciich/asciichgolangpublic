@@ -14,11 +14,11 @@ type KubernetesCluster interface {
 	CheckSecretByNameExists(ctx context.Context, namespaceName string, secretName string) error
 	ConfigMapByNameExists(ctx context.Context, namespaceName string, configMapName string) (exists bool, err error)
 	CreateConfigMap(ctx context.Context, namespaceName string, configMapName string, options *kubernetesparameteroptions.CreateConfigMapOptions) (createdConfigMap ConfigMap, err error)
-	CreateDeployment(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (Deployment, error)
+	CreateDeployment(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (Deployment, error)
 	CreateNamespaceByName(ctx context.Context, namespaceName string) (createdNamespace Namespace, err error)
 	CreateObject(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (Object, error)
-	CreatePod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (Pod, error)
-	CreateReplicaSet(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (ReplicaSet, error)
+	CreatePod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (Pod, error)
+	CreateReplicaSet(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (ReplicaSet, error)
 	CreateSecret(ctx context.Context, namespaceName string, secretName string, options *kubernetesparameteroptions.CreateSecretOptions) (createdSecret Secret, err error)
 	DeleteDeploymentByNames(ctx context.Context, namespaceName string, deploymentName string) error
 	DeleteNamespaceByName(ctx context.Context, namespaceName string) (err error)
@@ -46,7 +46,7 @@ type KubernetesCluster interface {
 	ReadSecret(ctx context.Context, namespaceName string, secretName string) (map[string][]byte, error)
 	ReplicaSetByNameExists(ctx context.Context, namespaceName string, replicaSetName string) (bool, error)
 	CheckReplicaSetByNameExists(ctx context.Context, namespaceName string, replicaSetName string) error
-	RunCommandInTemporaryPod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error)
+	RunCommandInTemporaryPod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (*commandoutput.CommandOutput, error)
 	SecretByNameExists(ctx context.Context, namespaceName string, secretName string) (exists bool, err error)
 	WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.WaitForPodsOptions) error
 	WhoAmI(ctx context.Context) (*kubernetesimplementationindependend.UserInfo, error)
