@@ -58,6 +58,19 @@ func LogErrorByCtxf(ctx context.Context, logmessage string, args ...interface{})
 		return
 	}
 
+	recorder := getLogRecorderFromCtx(ctx)
+
+	var formattedMessage string
+	if len(args) > 0 {
+		formattedMessage = fmt.Sprintf(logmessage, args...)
+	} else {
+		formattedMessage = logmessage
+	}
+
+	if recorder != nil {
+		recorder.Write([]byte(formattedMessage + "\n"))
+	}
+
 	LogErrorf(logmessage, args...)
 }
 
@@ -75,6 +88,11 @@ func LogErrorByCtx(ctx context.Context, logmessage string) {
 
 	if !contextutils.GetVerboseFromContext(ctx) {
 		return
+	}
+
+	recorder := getLogRecorderFromCtx(ctx)
+	if recorder != nil {
+		recorder.Write([]byte(logmessage + "\n"))
 	}
 
 	LogError(logmessage)

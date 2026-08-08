@@ -53,7 +53,7 @@ func DeleteReplicaSet(ctx context.Context, clientset *kubernetes.Clientset, repl
 	return nil
 }
 
-func CreateReplicaSet(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string, options *kubernetesparameteroptions.RunCommandOptions) error {
+func CreateReplicaSet(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) error {
 	if clientset == nil {
 		return tracederrors.TracedErrorNil("clientset")
 	}

@@ -5,9 +5,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/commandexecutorkubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils/testresults"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils/testutilsinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type TestCaseExecutorKubernetesConfigMapExists struct {
@@ -18,7 +22,7 @@ func (t *TestCaseExecutorKubernetesConfigMapExists) GetName() (string, error) {
 	return "kubernetes_configmap_exists", nil
 }
 
-func (t *TestCaseExecutorKubernetesConfigMapExists) Run(ctx context.Context) (testutilsinterfaces.TestResult, error) {
+func (t *TestCaseExecutorKubernetesConfigMapExists) Run(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor) (testutilsinterfaces.TestResult, error) {
 	tStart := time.Now()
 
 	name, err := t.GetTestCaseName()
@@ -28,6 +32,10 @@ func (t *TestCaseExecutorKubernetesConfigMapExists) Run(ctx context.Context) (te
 
 	result := &testresults.TestCaseResult{
 		Name: name,
+	}
+
+	if commandExecutor == nil {
+		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
 
 	configMapName, err := t.GetResourceName()
@@ -45,38 +53,48 @@ func (t *TestCaseExecutorKubernetesConfigMapExists) Run(ctx context.Context) (te
 		return nil, err
 	}
 
-	// Get Kubernetes cluster:
-	kubernetesCluster, err := nativekubernetesoo.GetClusterByName(ctx, cluster)
+	// Check if running on localhost or remote
+	isLocalhost, err := commandExecutor.IsRunningOnLocalhost()
 	if err != nil {
 		return nil, err
 	}
 
-	// Get namespace:
+	var exists bool
+	var kubernetesCluster kubernetesinterfaces.KubernetesCluster
+	if isLocalhost {
+		kubernetesCluster, err = nativekubernetesoo.GetClusterByName(ctx, cluster)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		kubernetesCluster, err = commandexecutorkubernetes.GetCommandExecutorKubernetsByName(commandExecutor, cluster)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	ns, err := kubernetesCluster.GetNamespaceByName(namespace)
 	if err != nil {
 		return nil, err
 	}
 
-	// Check if configMap exists:
-	exists, err := ns.ConfigMapByNameExists(ctx, configMapName)
+	exists, err = ns.ConfigMapByNameExists(ctx, configMapName)
 	if err != nil {
 		return nil, err
 	}
 
 	tEnd := time.Now()
 
-	if !exists {
-		// ConfigMap does not exist
-		err = result.SetFailedMessage(
-			fmt.Sprintf("The Kubernetes configMap '%s' in namespace '%s' cluster '%s' does not exist.", configMapName, namespace, cluster),
+	if exists {
+		err = result.SetSuccessMessage(
+			fmt.Sprintf("The Kubernetes configmap '%s' in namespace '%s' cluster '%s' exists.", configMapName, namespace, cluster),
 		)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		// ConfigMap exists
-		err = result.SetSuccessMessage(
-			fmt.Sprintf("The Kubernetes configMap '%s' in namespace '%s' cluster '%s' exists.", configMapName, namespace, cluster),
+		err = result.SetFailedMessage(
+			fmt.Sprintf("The Kubernetes configmap '%s' in namespace '%s' cluster '%s' does not exist.", configMapName, namespace, cluster),
 		)
 		if err != nil {
 			return nil, err

@@ -55,6 +55,11 @@ func LogInfoByCtx(ctx context.Context, logmessage string) {
 		return
 	}
 
+	recorder := getLogRecorderFromCtx(ctx)
+	if recorder != nil {
+		recorder.Write([]byte(logmessage + "\n"))
+	}
+
 	logLinePrefix := contextutils.GetLogLinePrefixFromCtx(ctx)
 	if logLinePrefix == "" {
 		LogInfo(logmessage)
@@ -79,7 +84,20 @@ func LogInfoByCtxf(ctx context.Context, logmessage string, args ...interface{}) 
 		return
 	}
 
+	recorder := getLogRecorderFromCtx(ctx)
+
 	logLinePrefix := contextutils.GetLogLinePrefixFromCtx(ctx)
+	var formattedMessage string
+	if len(args) > 0 {
+		formattedMessage = fmt.Sprintf(logmessage, args...)
+	} else {
+		formattedMessage = logmessage
+	}
+
+	if recorder != nil {
+		recorder.Write([]byte(formattedMessage + "\n"))
+	}
+
 	if logLinePrefix == "" {
 		LogInfof(logmessage, args...)
 	} else {

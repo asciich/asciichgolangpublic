@@ -13,7 +13,7 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 * [containerutils](pkg/containerutils/): Work with containers.
 	* [containerimagehandler](pkg/containerutils/containerimagehandler/): Handle container images without the need of a container runtime (e.g. no Docker required.)
 * [datatypes](pkg/datatypes/):
-	* [pointerutils](pkg/datatypes/pointerutils/): Helperfunctions to handle pointer or get pointers from datatypes, usfull to initialize structs directly with pointer values.
+	* [pointerutils](pkg/datatypes/pointerutils/): Helper functions to handle pointer or get pointers from datatypes, useful to initialize structs directly with pointer values.
 * [fluxutils](pkg/fluxutils/): Work with FluxCD.
 * [fileformats](pkg/fileformats/): Work with different file formats:
 	* [jsonutils](pkg/fileformats/jsonutils/): Work with JSON
@@ -56,10 +56,10 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 		* Especially when using the provided functions to quickly automatize some stuff validating all inputs as a first step in every function helps to avoid unwanted side effects.
 	* While there were a lot of `MustABC` functions introduced this project moves towards removing them except in favor of using `mustutils.Must`
 	* `CheckAbc` functions evaluate if `Abc` is given. If given `nil`, otherwise an error is returned.
-	* As default there is no log output as silent CLI's are easier to handle if glued together e.g. in Bash scripts. While verbosity was initialy set by `verbose` bool this is projects moves towards replacing it in favor of using `context.Context`. See [`contextutils`](pkg/contextutils)
+	* As default there is no log output as silent CLI's are easier to handle if glued together e.g. in Bash scripts. While verbosity was initially set by `verbose` bool this is projects moves towards replacing it in favor of using `context.Context`. See [`contextutils`](pkg/contextutils)
 	* Short cuts and code hacks are not nice but still better than doing things by hand. They are at least a good starting point of what functionality is needed and can be improved over time.
 * Releasing:
-	* Release often: Every (small) improvement is an improvemnt and will be released as soon as possible.
+	* Release often: Every (small) improvement is an improvement and will be released as soon as possible.
 	* This repository will never reach v1: There will be always be breaking changes if needed to improve the code.
 	* Everytime the code base is touched it should look better than before.
 * Readability:

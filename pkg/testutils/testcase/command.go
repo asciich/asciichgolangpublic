@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/shellutils/shelllinehandler"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils/testresults"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils/testutilsinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type TestCaseExecutorCommand struct {
@@ -20,7 +21,7 @@ func (t *TestCaseExecutorCommand) GetName() (string, error) {
 	return "command", nil
 }
 
-func (t *TestCaseExecutorCommand) Run(ctx context.Context) (testutilsinterfaces.TestResult, error) {
+func (t *TestCaseExecutorCommand) Run(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor) (testutilsinterfaces.TestResult, error) {
 	tStart := time.Now()
 
 	name, err := t.GetTestCaseName()
@@ -30,6 +31,10 @@ func (t *TestCaseExecutorCommand) Run(ctx context.Context) (testutilsinterfaces.
 
 	result := &testresults.TestCaseResult{
 		Name: name,
+	}
+
+	if commandExecutor == nil {
+		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
 
 	command, err := t.GetCommand()
@@ -42,7 +47,7 @@ func (t *TestCaseExecutorCommand) Run(ctx context.Context) (testutilsinterfaces.
 		return nil, err
 	}
 
-	output, err := commandexecutorexec.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+	output, err := commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
 		Command:           splitted,
 		AllowAllExitCodes: true,
 	})

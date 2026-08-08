@@ -6,14 +6,13 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-type RunCommandOptions struct {
-	RunCommandOptions               parameteroptions.RunCommandOptions
+type KubernetesRunCommandOptions struct {
+	RunCommandOptions               *parameteroptions.RunCommandOptions
 	Image                           string
 	PodName                         string
 	ReplicaSetName                  string
 	DeploymentName                  string
 	ContainerName                   string
-	Command                         []string
 	DeleteAlreadyExistingPod        bool
 	DeleteAlreadyExistingReplicaSet bool
 	DeleteAlreadyExistingDeployment bool
@@ -52,7 +51,7 @@ type SecretMountSource struct {
 	SecretName string
 }
 
-func (r *RunCommandOptions) GetContainerName() (string, error) {
+func (r *KubernetesRunCommandOptions) GetContainerName() (string, error) {
 	if r.ContainerName == "" {
 		// If the container name is not explicitly defined, use the pod, ReplicaSet, or Deployment name:
 		if r.PodName != "" {
@@ -70,7 +69,7 @@ func (r *RunCommandOptions) GetContainerName() (string, error) {
 	return r.ContainerName, nil
 }
 
-func (r *RunCommandOptions) GetPodName() (string, error) {
+func (r *KubernetesRunCommandOptions) GetPodName() (string, error) {
 	if r.PodName == "" {
 		return "", tracederrors.TracedError("PodName not set")
 	}
@@ -78,7 +77,7 @@ func (r *RunCommandOptions) GetPodName() (string, error) {
 	return r.PodName, nil
 }
 
-func (r *RunCommandOptions) GetImageName() (string, error) {
+func (r *KubernetesRunCommandOptions) GetImageName() (string, error) {
 	if r.Image == "" {
 		return "", tracederrors.TracedError("ImageName not set")
 	}
@@ -86,19 +85,33 @@ func (r *RunCommandOptions) GetImageName() (string, error) {
 	return r.Image, nil
 }
 
-func (r *RunCommandOptions) GetCommand() ([]string, error) {
-	if len(r.Command) <= 0 {
-		return nil, tracederrors.TracedError("Command not set")
+func (r *KubernetesRunCommandOptions) GetRunCommandOptions() (*parameteroptions.RunCommandOptions, error) {
+	if r.RunCommandOptions == nil {
+		return nil, tracederrors.TracedError("RunCommandOptions not set")
 	}
 
-	return slicesutils.GetDeepCopyOfStringsSlice(r.Command), nil
+	return r.RunCommandOptions, nil
 }
 
-func (r *RunCommandOptions) IsStinDataAvailable() bool {
+func (r *KubernetesRunCommandOptions) GetCommand() ([]string, error) {
+	runCommandOptions, err := r.GetRunCommandOptions()
+	if err != nil {
+		return nil, err
+	}
+
+	got, err := runCommandOptions.GetCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	return slicesutils.GetDeepCopyOfStringsSlice(got), nil
+}
+
+func (r *KubernetesRunCommandOptions) IsStinDataAvailable() bool {
 	return len(r.StdinBytes) > 0
 }
 
-func (r *RunCommandOptions) GetReplicaSetName() (string, error) {
+func (r *KubernetesRunCommandOptions) GetReplicaSetName() (string, error) {
 	if r.ReplicaSetName == "" {
 		return "", tracederrors.TracedError("ReplicaSetName not set")
 	}
@@ -106,14 +119,14 @@ func (r *RunCommandOptions) GetReplicaSetName() (string, error) {
 	return r.ReplicaSetName, nil
 }
 
-func (r *RunCommandOptions) GetReplicas() int32 {
+func (r *KubernetesRunCommandOptions) GetReplicas() int32 {
 	if r.Replicas <= 0 {
 		return 1
 	}
 	return r.Replicas
 }
 
-func (r *RunCommandOptions) GetDeploymentName() (string, error) {
+func (r *KubernetesRunCommandOptions) GetDeploymentName() (string, error) {
 	if r.DeploymentName == "" {
 		return "", tracederrors.TracedError("DeploymentName not set")
 	}

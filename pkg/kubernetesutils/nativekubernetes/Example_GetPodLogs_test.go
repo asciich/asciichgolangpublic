@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 // This example shows how to fetch logs from a container running in a k8s pod.
@@ -59,13 +60,15 @@ func Test_Example_GetPodLogs(t *testing.T) {
 		ctx,
 		clientset,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			PodName:                  podName,
 			ContainerName:            containerName,
 			Image:                    "ubuntu",
 			DeleteAlreadyExistingPod: true,
-			Command:                  []string{"bash", "-c", "echo 'Hello from stdout'; echo 'Error from stderr' >&2; sleep 10"},
-			WaitForPodRunning:        true,
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"bash", "-c", "echo 'Hello from stdout'; echo 'Error from stderr' >&2; sleep 10"},
+			},
+			WaitForPodRunning: true,
 		},
 	)
 	require.NoError(t, err)

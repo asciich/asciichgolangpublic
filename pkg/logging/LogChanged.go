@@ -38,6 +38,18 @@ func LogChangedByCtxf(ctx context.Context, logmessage string, args ...interface{
 	contextutils.SetChangeIndicator(ctx, true)
 
 	if verbose {
+		recorder := getLogRecorderFromCtx(ctx)
+		var formattedMessage string
+		if len(args) > 0 {
+			formattedMessage = fmt.Sprintf(logmessage, args...)
+		} else {
+			formattedMessage = logmessage
+		}
+
+		if recorder != nil {
+			recorder.Write([]byte(formattedMessage + "\n"))
+		}
+
 		LogChangedf(logmessage, args...)
 	}
 }
@@ -48,6 +60,11 @@ func LogChangedByCtx(ctx context.Context, logmessage string) {
 	contextutils.SetChangeIndicator(ctx, true)
 
 	if verbose {
+		recorder := getLogRecorderFromCtx(ctx)
+		if recorder != nil {
+			recorder.Write([]byte(logmessage + "\n"))
+		}
+
 		LogChanged(logmessage)
 	}
 }

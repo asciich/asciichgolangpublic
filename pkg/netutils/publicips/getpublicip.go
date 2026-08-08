@@ -13,7 +13,7 @@ import (
 const GET_PUBLIC_IP_URL = "https://asciich.ch/what_is_my_ip.php"
 
 // Get the own public IP address.
-// Usfull when behind a NAS to get the public address from inside the natted network.
+// Useful when behind a NAS to get the public address from inside the natted network.
 func GetPublicIp(ctx context.Context) (string, error) {
 	logging.LogInfoByCtxf(ctx, "Get public IP address started.")
 

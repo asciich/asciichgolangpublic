@@ -131,7 +131,7 @@ func Exists(ctx context.Context, commandExecutor commandexecutorinterfaces.Comma
 		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
-				"bash",
+				"sh",
 				"-c",
 				fmt.Sprintf(
 					"test -e '%s' && echo yes || echo no",

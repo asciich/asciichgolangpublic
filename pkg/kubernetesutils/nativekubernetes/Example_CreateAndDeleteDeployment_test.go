@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
 // This example shows how to create and delete a Deployment.
@@ -58,11 +59,13 @@ func Test_Example_CreateAndDeleteDeployment(t *testing.T) {
 		ctx,
 		clientset,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			DeploymentName: deploymentName,
 			Image:          "ubuntu",
-			Command:        []string{"bash", "-c", "sleep 1m"},
-			Replicas:       2,
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"bash", "-c", "sleep 1m"},
+			},
+			Replicas: 2,
 		},
 	)
 	require.NoError(t, err)
@@ -76,10 +79,12 @@ func Test_Example_CreateAndDeleteDeployment(t *testing.T) {
 		ctx,
 		clientset,
 		namespaceName,
-		&kubernetesparameteroptions.RunCommandOptions{
-			DeploymentName:                  deploymentName,
-			Image:                           "ubuntu",
-			Command:                         []string{"bash", "-c", "sleep 1m"},
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
+			DeploymentName: deploymentName,
+			Image:          "ubuntu",
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command: []string{"bash", "-c", "sleep 1m"},
+			},
 			Replicas:                        2,
 			DeleteAlreadyExistingDeployment: true,
 		},

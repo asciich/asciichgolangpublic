@@ -2,6 +2,7 @@ package kubernetesinterfaces
 
 import (
 	"context"
+	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 )
@@ -16,13 +17,16 @@ type Namespace interface {
 	ConfigMapByNameExists(ctx context.Context, name string) (exits bool, err error)
 	Create(ctx context.Context) (err error)
 	CreateConfigMap(ctx context.Context, name string, options *kubernetesparameteroptions.CreateConfigMapOptions) (createdConfigMap ConfigMap, err error)
-	CreateDeployment(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (Deployment, error)
+	CreateDeployment(ctx context.Context, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (Deployment, error)
 	CreateObject(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (Object, error)
-	CreatePod(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (Pod, error)
-	CreateReplicaSet(ctx context.Context, options *kubernetesparameteroptions.RunCommandOptions) (ReplicaSet, error)
+	CreatePod(ctx context.Context, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (Pod, error)
+	CreateReplicaSet(ctx context.Context, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (ReplicaSet, error)
 	CreateRole(ctx context.Context, createOptions *kubernetesparameteroptions.CreateRoleOptions) (createdRole Role, err error)
 	CreateSecret(ctx context.Context, name string, options *kubernetesparameteroptions.CreateSecretOptions) (createdSecret Secret, err error)
+	CreateCronJob(ctx context.Context, cronJobName string, schedule string, image string, command []string, labels map[string]string) (CronJob, error)
+	CronJobByNameExists(ctx context.Context, cronJobName string) (bool, error)
 	DeleteConfigMapByName(ctx context.Context, name string) (err error)
+	DeleteCronJobByName(ctx context.Context, cronJobName string) (err error)
 	DeleteDeploymentByName(ctx context.Context, name string) (err error)
 	DeletePodByName(ctx context.Context, name string) (err error)
 	DeleteReplicaSetByName(ctx context.Context, name string) (err error)
@@ -32,6 +36,7 @@ type Namespace interface {
 	Exists(ctx context.Context) (bool, error)
 	GetClusterName() (clusterName string, err error)
 	GetConfigMapByName(name string) (configMap ConfigMap, err error)
+	GetCronJobByName(name string) (CronJob, error)
 	GetDeploymentByName(name string) (Deployment, error)
 	GetKubernetesCluster() (KubernetesCluster, error)
 	GetKubectlContext(ctx context.Context) (contextName string, err error)
@@ -42,6 +47,7 @@ type Namespace interface {
 	GetRoleByName(name string) (Role, error)
 	GetSecretByName(name string) (Secret, error)
 	ListConfigMapNames(ctx context.Context) ([]string, error)
+	ListCronJobNames(ctx context.Context) ([]string, error)
 	ListDeploymentNames(ctx context.Context) ([]string, error)
 	ListObjectNames(options *kubernetesparameteroptions.ListKubernetesObjectsOptions) (objectNames []string, err error)
 	ListPodNames(ctx context.Context) ([]string, error)
@@ -53,11 +59,8 @@ type Namespace interface {
 	ReplicaSetByNameExists(ctx context.Context, replicaSetName string) (bool, error)
 	RoleByNameExists(ctx context.Context, name string) (exists bool, err error)
 	SecretByNameExists(ctx context.Context, name string) (exits bool, err error)
-	WatchConfigMap(ctx context.Context, name string, onCreate func(ConfigMap), onUpdate func(ConfigMap), onDelete func(ConfigMap)) error
+	StartPortForwarding(ctx context.Context, podName string, localPort, podPort int) (cancelFunc context.CancelFunc, err error)
 	WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, options *kubernetesparameteroptions.WaitForPodsOptions) error
-	CronJobByNameExists(ctx context.Context, cronJobName string) (bool, error)
-	CreateCronJob(ctx context.Context, cronJobName string, schedule string, image string, command []string, labels map[string]string) (CronJob, error)
-	DeleteCronJobByName(ctx context.Context, cronJobName string) (err error)
-	GetCronJobByName(name string) (CronJob, error)
-	ListCronJobNames(ctx context.Context) ([]string, error)
+	WaitUntilPodReady(ctx context.Context, podName string, timeout time.Duration) error
+	WatchConfigMap(ctx context.Context, name string, onCreate func(ConfigMap), onUpdate func(ConfigMap), onDelete func(ConfigMap)) error
 }

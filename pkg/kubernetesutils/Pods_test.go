@@ -1,6 +1,8 @@
 package kubernetesutils_test
 
 import (
+	"fmt"
+	"net"
 	"os"
 	"testing"
 	"time"
@@ -8,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -32,17 +35,16 @@ func Test_PodsRunSingleCommand_echoHelloWorld(t *testing.T) {
 				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
 
-				// Wait until default sa in created namespace exists.
-				time.Sleep(10 * time.Second)
-
 				output, err := kubernetes.RunCommandInTemporaryPod(
 					ctx,
 					namespaceName,
-					&kubernetesparameteroptions.RunCommandOptions{
+					&kubernetesparameteroptions.KubernetesRunCommandOptions{
 						Image:                    "ubuntu",
 						PodName:                  podName,
 						DeleteAlreadyExistingPod: true,
-						Command:                  []string{"bash", "-c", "echo hello_world"},
+						RunCommandOptions: &parameteroptions.RunCommandOptions{
+							Command: []string{"bash", "-c", "echo hello_world"},
+						},
 					},
 				)
 				require.NoError(t, err)
@@ -104,11 +106,13 @@ func Test_ListPodNames(t *testing.T) {
 				for i, podName := range podNames {
 					_, err := namespace.CreatePod(
 						ctx,
-						&kubernetesparameteroptions.RunCommandOptions{
+						&kubernetesparameteroptions.KubernetesRunCommandOptions{
 							Image:                    "ubuntu",
 							PodName:                  podName,
 							DeleteAlreadyExistingPod: true,
-							Command:                  []string{"bash", "-c", "echo hello_world"},
+							RunCommandOptions: &parameteroptions.RunCommandOptions{
+								Command: []string{"bash", "-c", "echo hello_world"},
+							},
 						},
 					)
 					require.NoError(t, err)
@@ -182,11 +186,13 @@ func Test_CreateAndDeletePod(t *testing.T) {
 					_, err := kubernetes.CreatePod(
 						ctx,
 						namespaceName,
-						&kubernetesparameteroptions.RunCommandOptions{
+						&kubernetesparameteroptions.KubernetesRunCommandOptions{
 							Image:                    "ubuntu",
 							PodName:                  podName,
 							DeleteAlreadyExistingPod: true,
-							Command:                  []string{"bash", "-c", "echo hello_world"},
+							RunCommandOptions: &parameteroptions.RunCommandOptions{
+								Command: []string{"bash", "-c", "echo hello_world"},
+							},
 						},
 					)
 					require.NoError(t, err)
@@ -233,9 +239,6 @@ func Test_RunCommandInTemporaryPod_WithSecretAsEnvVar(t *testing.T) {
 				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
 
-				// Wait until default sa in created namespace exists.
-				time.Sleep(10 * time.Second)
-
 				// Create secret with test data
 				_, err = kubernetes.CreateSecret(ctx, namespaceName, secretName, &kubernetesparameteroptions.CreateSecretOptions{
 					SecretData: map[string][]byte{
@@ -253,11 +256,13 @@ func Test_RunCommandInTemporaryPod_WithSecretAsEnvVar(t *testing.T) {
 				output, err := kubernetes.RunCommandInTemporaryPod(
 					ctx,
 					namespaceName,
-					&kubernetesparameteroptions.RunCommandOptions{
+					&kubernetesparameteroptions.KubernetesRunCommandOptions{
 						Image:                    "ubuntu",
 						PodName:                  podName,
 						DeleteAlreadyExistingPod: true,
-						Command:                  []string{"bash", "-c", "printenv " + envVarName},
+						RunCommandOptions: &parameteroptions.RunCommandOptions{
+							Command: []string{"bash", "-c", "printenv " + envVarName},
+						},
 						SecretEnvVars: map[string]kubernetesparameteroptions.SecretEnvVarSource{
 							envVarName: {
 								SecretName: secretName,
@@ -311,9 +316,6 @@ func Test_RunCommandInTemporaryPod_WithSecretAsFile(t *testing.T) {
 				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
 
-				// Wait until default sa in created namespace exists.
-				time.Sleep(10 * time.Second)
-
 				// Create secret with test data
 				_, err = kubernetes.CreateSecret(ctx, namespaceName, secretName, &kubernetesparameteroptions.CreateSecretOptions{
 					SecretData: map[string][]byte{
@@ -331,11 +333,13 @@ func Test_RunCommandInTemporaryPod_WithSecretAsFile(t *testing.T) {
 				output, err := kubernetes.RunCommandInTemporaryPod(
 					ctx,
 					namespaceName,
-					&kubernetesparameteroptions.RunCommandOptions{
+					&kubernetesparameteroptions.KubernetesRunCommandOptions{
 						Image:                    "ubuntu",
 						PodName:                  podName,
 						DeleteAlreadyExistingPod: true,
-						Command:                  []string{"bash", "-c", "cat " + secretFilePath},
+						RunCommandOptions: &parameteroptions.RunCommandOptions{
+							Command: []string{"bash", "-c", "cat " + secretFilePath},
+						},
 						SecretMounts: map[string]kubernetesparameteroptions.SecretMountSource{
 							mountPath: {
 								SecretName: secretName,
@@ -384,9 +388,6 @@ func Test_GetContainerLogs(t *testing.T) {
 				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
 
-				// Wait until default sa in created namespace exists.
-				time.Sleep(10 * time.Second)
-
 				// Ensure pod is absent before test and cleaned up after
 				defer func() {
 					_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
@@ -397,13 +398,15 @@ func Test_GetContainerLogs(t *testing.T) {
 				_, err = kubernetes.CreatePod(
 					ctx,
 					namespaceName,
-					&kubernetesparameteroptions.RunCommandOptions{
+					&kubernetesparameteroptions.KubernetesRunCommandOptions{
 						PodName:                  podName,
 						ContainerName:            containerName,
 						Image:                    "ubuntu",
-						Command:                  []string{"bash", "-c", "echo 'stdout message'; echo 'stderr message' >&2; sleep 10"},
 						DeleteAlreadyExistingPod: true,
 						WaitForPodRunning:        true,
+						RunCommandOptions: &parameteroptions.RunCommandOptions{
+							Command: []string{"bash", "-c", "echo 'stdout message'; echo 'stderr message' >&2; sleep 10"},
+						},
 					},
 				)
 				require.NoError(t, err)
@@ -436,6 +439,173 @@ func Test_GetContainerLogs(t *testing.T) {
 	}
 }
 
+func Test_WaitUntilPodReady(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		{"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "test-wait-pod-ready"
+				const podName = "wait-pod-test"
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
+
+				// Create namespace
+				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+
+				// Ensure pod is absent before test and cleaned up after
+				defer func() {
+					_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+				}()
+				_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+
+				// Create a pod
+				_, err = kubernetes.CreatePod(
+					ctx,
+					namespaceName,
+					&kubernetesparameteroptions.KubernetesRunCommandOptions{
+						PodName:                  podName,
+						Image:                    "ubuntu",
+						DeleteAlreadyExistingPod: true,
+						// Don't wait for pod here - we want to test WaitUntilPodReady
+						WaitForPodRunning: false,
+						RunCommandOptions: &parameteroptions.RunCommandOptions{
+							Command: []string{"bash", "-c", "sleep 60"},
+						},
+					},
+				)
+				require.NoError(t, err)
+
+				// Get namespace to test WaitUntilPodReady
+				namespace, err := kubernetes.GetNamespaceByName(namespaceName)
+				require.NoError(t, err)
+
+				// Wait for pod to become ready
+				err = namespace.WaitUntilPodReady(ctx, podName, 60*time.Second)
+				require.NoError(t, err, "Pod should become ready within timeout")
+
+				// Verify pod is actually in Running phase
+				exists, err := namespace.PodByNameExists(ctx, podName)
+				require.NoError(t, err)
+				require.True(t, exists, "Pod should exist and be running")
+			},
+		)
+	}
+}
+
+func Test_StartPortForwarding(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		{"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "test-port-forward"
+				const podName = "port-forward-pod"
+				const localPort = 28080
+				const podPort = 80
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
+
+				// Create namespace
+				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+
+				// Ensure pod is absent before test and cleaned up after
+				defer func() {
+					_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+				}()
+				_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+
+				// Create a pod with nginx
+				_, err = kubernetes.CreatePod(
+					ctx,
+					namespaceName,
+					&kubernetesparameteroptions.KubernetesRunCommandOptions{
+						PodName: podName,
+						Image:   "nginx:alpine",
+						RunCommandOptions: &parameteroptions.RunCommandOptions{
+							Command: []string{"nginx", "-g", "daemon off;"},
+						},
+						DeleteAlreadyExistingPod: true,
+						WaitForPodRunning:        true,
+					},
+				)
+				require.NoError(t, err)
+
+				// Get namespace to test StartPortForwarding
+				namespace, err := kubernetes.GetNamespaceByName(namespaceName)
+				require.NoError(t, err)
+
+				// Start port forwarding
+				cancel, err := namespace.StartPortForwarding(ctx, podName, localPort, podPort)
+				require.NoError(t, err, "StartPortForwarding should succeed")
+
+				// Ensure port forwarding is stopped after test
+				defer cancel()
+
+				// Wait for port forwarding to establish
+				time.Sleep(2 * time.Second)
+
+				// Verify we can connect to the forwarded port
+				conn, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%d", localPort), 5*time.Second)
+				require.NoError(t, err, "Should be able to connect to forwarded port")
+				defer conn.Close()
+
+				t.Logf("Successfully tested port forwarding: localhost:%d -> %s/%s:%d", localPort, namespaceName, podName, podPort)
+			},
+		)
+	}
+}
+
+func Test_StartPortForwarding_InvalidPod(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		{"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "test-port-forward-invalid"
+				const podName = "nonexistent-pod"
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
+
+				// Create namespace
+				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+
+				// Get namespace to test StartPortForwarding
+				namespace, err := kubernetes.GetNamespaceByName(namespaceName)
+				require.NoError(t, err)
+
+				// Try to start port forwarding for non-existent pod - should fail
+				_, err = namespace.StartPortForwarding(ctx, podName, 28080, 80)
+				require.Error(t, err, "StartPortForwarding should fail for non-existent pod")
+			},
+		)
+	}
+}
+
 func Test_CopyFileToPod(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -459,9 +629,6 @@ func Test_CopyFileToPod(t *testing.T) {
 				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
 
-				// Wait until default sa in created namespace exists.
-				time.Sleep(10 * time.Second)
-
 				// Ensure pod is absent before test and cleaned up after
 				defer func() {
 					_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
@@ -472,13 +639,16 @@ func Test_CopyFileToPod(t *testing.T) {
 				_, err = kubernetes.CreatePod(
 					ctx,
 					namespaceName,
-					&kubernetesparameteroptions.RunCommandOptions{
-						PodName:                  podName,
-						ContainerName:            containerName,
-						Image:                    "ubuntu",
-						Command:                  []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
+					&kubernetesparameteroptions.KubernetesRunCommandOptions{
+						PodName:       podName,
+						ContainerName: containerName,
+						Image:         "ubuntu",
+
 						DeleteAlreadyExistingPod: true,
 						WaitForPodRunning:        true,
+						RunCommandOptions: &parameteroptions.RunCommandOptions{
+							Command: []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
+						},
 					},
 				)
 				require.NoError(t, err)
@@ -558,9 +728,6 @@ func Test_CopyFileFromPod(t *testing.T) {
 				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
 
-				// Wait until default sa in created namespace exists.
-				time.Sleep(10 * time.Second)
-
 				// Ensure pod is absent before test and cleaned up after
 				defer func() {
 					_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
@@ -571,13 +738,15 @@ func Test_CopyFileFromPod(t *testing.T) {
 				_, err = kubernetes.CreatePod(
 					ctx,
 					namespaceName,
-					&kubernetesparameteroptions.RunCommandOptions{
+					&kubernetesparameteroptions.KubernetesRunCommandOptions{
 						PodName:                  podName,
 						ContainerName:            containerName,
 						Image:                    "ubuntu",
-						Command:                  []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
 						DeleteAlreadyExistingPod: true,
 						WaitForPodRunning:        true,
+						RunCommandOptions: &parameteroptions.RunCommandOptions{
+							Command: []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
+						},
 					},
 				)
 				require.NoError(t, err)
@@ -641,6 +810,195 @@ func Test_CopyFileFromPod(t *testing.T) {
 					err = nonExistentPod.CopyFileFromPod(ctx, "/tmp/test.txt", destFile, containerName)
 					require.Error(t, err)
 				})
+			},
+		)
+	}
+}
+
+func Test_RunCommand(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		{"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "test-run-command"
+				const podName = "run-cmd-pod"
+				const containerName = "test-container"
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
+
+				// Create namespace
+				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+
+				// Ensure pod is absent before test and cleaned up after
+				defer func() {
+					_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+				}()
+				_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+
+				// Create a running pod
+				_, err = kubernetes.CreatePod(
+					ctx,
+					namespaceName,
+					&kubernetesparameteroptions.KubernetesRunCommandOptions{
+						PodName:                  podName,
+						ContainerName:            containerName,
+						Image:                    "ubuntu",
+						DeleteAlreadyExistingPod: true,
+						WaitForPodRunning:        true,
+						RunCommandOptions: &parameteroptions.RunCommandOptions{
+							Command: []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
+						},
+					},
+				)
+				require.NoError(t, err)
+
+				// Get pod object
+				pod, err := kubernetes.GetPodByNames(namespaceName, podName)
+				require.NoError(t, err)
+
+				t.Run("verify command runs inside container", func(t *testing.T) {
+					// Run hostname command to verify we're inside the container
+					// Container hostname should match the pod name pattern
+					output, err := pod.RunCommandInContainer(
+						ctx,
+						&kubernetesparameteroptions.KubernetesRunCommandOptions{
+							ContainerName: containerName,
+							RunCommandOptions: &parameteroptions.RunCommandOptions{
+								Command: []string{"hostname"},
+							},
+						},
+					)
+					require.NoError(t, err)
+
+					stdout, err := output.GetStdoutAsString()
+					require.NoError(t, err)
+
+					// Hostname inside container should be the pod name
+					// This proves the command ran inside the container, not on the host
+					require.Contains(t, stdout, podName, "Command output should contain pod name in hostname")
+				})
+
+				t.Run("verify command runs with container-specific environment", func(t *testing.T) {
+					// Check KUBERNETES_SERVICE_HOST which is only set inside pods
+					output, err := pod.RunCommandInContainer(
+						ctx,
+						&kubernetesparameteroptions.KubernetesRunCommandOptions{
+							ContainerName: containerName,
+							RunCommandOptions: &parameteroptions.RunCommandOptions{
+								Command: []string{"bash", "-c", "echo $KUBERNETES_SERVICE_HOST"},
+							},
+						},
+					)
+					require.NoError(t, err)
+
+					stdout, err := output.GetStdoutAsString()
+					require.NoError(t, err)
+
+					// KUBERNETES_SERVICE_HOST should be set inside the pod
+					// This environment variable is automatically set by Kubernetes for all pods
+					require.NotEmpty(t, stdout, "KUBERNETES_SERVICE_HOST should be set inside container")
+					require.NotEqual(t, "\n", stdout, "KUBERNETES_SERVICE_HOST should have a value")
+				})
+
+				t.Run("verify command can access container filesystem", func(t *testing.T) {
+					// Check for container-specific paths
+					output, err := pod.RunCommand(
+						ctx,
+						&parameteroptions.RunCommandOptions{
+							Command: []string{"test", "-d", "/var/lib/apt"},
+						},
+					)
+					require.NoError(t, err)
+
+					// Exit code 0 means the directory exists (Ubuntu container)
+					retVal, err := output.GetReturnCode()
+					require.NoError(t, err)
+					require.Equal(t, 0, retVal, "Ubuntu container should have /var/lib/apt directory")
+				})
+			},
+		)
+	}
+}
+
+func Test_PodRunCommand_echoHelloWorld(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		{"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "test-pod-run-command"
+				const podName = "pod-run-cmd"
+				const containerName = "test-container"
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
+
+				// Create namespace
+				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+
+				// Ensure pod is absent before test and cleaned up after
+				defer func() {
+					_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+				}()
+				_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+
+				// Create a running pod
+				_, err = kubernetes.CreatePod(
+					ctx,
+					namespaceName,
+					&kubernetesparameteroptions.KubernetesRunCommandOptions{
+						PodName:                  podName,
+						ContainerName:            containerName,
+						Image:                    "ubuntu",
+						DeleteAlreadyExistingPod: true,
+						WaitForPodRunning:        true,
+						RunCommandOptions: &parameteroptions.RunCommandOptions{
+							Command: []string{"sh", "-c", "trap \"echo Caught SIGTERM, exiting...; exit 0\" TERM; while true; do sleep .1; done"},
+						},
+					},
+				)
+				require.NoError(t, err)
+
+				// Get pod object
+				pod, err := kubernetes.GetPodByNames(namespaceName, podName)
+				require.NoError(t, err)
+
+				// Run command in the pod using Pod.RunCommand method
+				output, err := pod.RunCommand(
+					ctx,
+					&parameteroptions.RunCommandOptions{
+						Command: []string{"bash", "-c", "echo hello_world_from_pod"},
+					},
+				)
+				require.NoError(t, err)
+
+				stdout, err := output.GetStdoutAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, "hello_world_from_pod\n", stdout)
+
+				stderr, err := output.GetStderrAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, "", stderr)
+
+				retVal, err := output.GetReturnCode()
+				require.NoError(t, err)
+				require.EqualValues(t, 0, retVal)
 			},
 		)
 	}

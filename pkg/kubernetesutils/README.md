@@ -34,6 +34,11 @@ The implementation using exec to call `kubectl` or other commands is useful when
     * [Native Kubernetes implementation](Example_CopyFileFromPod_test.go): Using the native Kubernetes API
     * [Command Executor implementation](Example_CopyFileFromPod_test.go): Using kubectl cp command
     * [Round-trip example](Example_CopyFileFromPod_test.go): Copy file to pod and back to verify integrity
+* [Run command in existing pod](Pods_test.go): Execute commands in a running pod using the Pod.RunCommand method.
+    * [Native Kubernetes implementation](Example_RunCommandPod_test.go): Using the native Kubernetes API
+    * [Command Executor implementation](Example_RunCommandPod_test.go): Using kubectl exec command
+    * [Multiple commands example](Example_RunCommandPod_test.go): Running multiple commands in the same pod
+    * [Exit code example](Example_RunCommandPod_test.go): Checking command exit codes
 * The examples to exec/ run commands as additional process inside a container are in [nativekubernetes](./nativekubernetes/README.md)
 * Namespaces:
     * [Create and delete namespace](nativekubernetes/Example_CreateAndDeleteNamespace_test.go)
@@ -43,3 +48,8 @@ The implementation using exec to call `kubectl` or other commands is useful when
 * [Secret by name exists](Example_SecretByNameExists_test.go)
 * [Read and write secret](Example_SecretReadAndWrite_test.go)
 * [Watch ConfigMap. Get callback on create, update, delete](Example_WatchConfigMap_test.go)
+
+* [Wait for pod ready](Example_WaitPodReady_test.go)
+## Specifications
+
+See [kubernetesutils.spec.md](kubernetesutils.spec.md)

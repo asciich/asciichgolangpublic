@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils/testutilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -20,7 +21,8 @@ type TestCase struct {
 	Cluster      string `yaml:"cluster,omitempty"`
 	ResourceName string `yaml:"resource_name,omitempty"`
 
-	data any
+	data            any
+	commandExecutor commandexecutorinterfaces.CommandExecutor
 }
 
 func (t *TestCase) GetName() (string, error) {
@@ -92,6 +94,16 @@ func (t *TestCase) GetResourceName() (string, error) {
 	return t.ResourceName, nil
 }
 
+func (t *TestCase) SetCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) error {
+	if commandExecutor == nil {
+		return tracederrors.TracedErrorNil("commandExecutor")
+	}
+
+	t.commandExecutor = commandExecutor
+
+	return nil
+}
+
 func (t *TestCase) Run(ctx context.Context) (testutilsinterfaces.TestResult, error) {
 	name, err := t.GetName()
 	if err != nil {
@@ -110,7 +122,11 @@ func (t *TestCase) Run(ctx context.Context) (testutilsinterfaces.TestResult, err
 		return nil, err
 	}
 
-	result, err := executor.Run(ctx)
+	if t.commandExecutor == nil {
+		return nil, tracederrors.TracedError("commandExecutor not set on TestCase. TestSuite must call SetCommandExecutor before Run.")
+	}
+
+	result, err := executor.Run(ctx, t.commandExecutor)
 	if err != nil {
 		return nil, err
 	}
