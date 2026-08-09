@@ -25,7 +25,7 @@ func FileExists(ctx context.Context, commandExecutor commandexecutorinterfaces.C
 		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
-				"bash",
+				"sh",
 				"-c",
 				fmt.Sprintf(
 					"test -f '%s' && echo yes || echo no",
@@ -78,7 +78,7 @@ func DirectoryExists(ctx context.Context, commandExecutor commandexecutorinterfa
 		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
-				"bash",
+				"sh",
 				"-c",
 				fmt.Sprintf(
 					"test -d '%s' && echo yes || echo no",
