@@ -773,3 +773,82 @@ func Test_RunCommand(t *testing.T) {
 		require.Equal(t, "arg1 arg2 arg3\n", stdout)
 	})
 }
+
+func Test_RunCommandInTemporaryPod_ReturnsOutputOnError(t *testing.T) {
+	ctx := getCtx()
+
+	const clusterName = kindutils.SharedClusterName
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
+	require.NoError(t, err)
+
+	config, err := nativekubernetes.GetConfig(ctx, "kind-"+clusterName)
+	require.NoError(t, err)
+
+	clientset, err := nativekubernetes.GetClientSetFromRestConfig(ctx, config)
+	require.NoError(t, err)
+
+	namespaceName := "test-temp-pod-output"
+	err = nativekubernetes.CreateNamespace(ctx, clientset, namespaceName)
+	require.NoError(t, err)
+
+	defer func() {
+		_ = nativekubernetes.DeleteNamespace(ctx, clientset, namespaceName)
+	}()
+
+	t.Run("returns output when command fails", func(t *testing.T) {
+		output, err := nativekubernetes.RunCommandInTemporaryPod(
+			ctx,
+			clientset,
+			namespaceName,
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
+				Image:                    "debian:latest",
+				PodName:                  "test-fail-pod",
+				DeleteAlreadyExistingPod: true,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"sh", "-c", "echo 'stdout message'; echo 'stderr message' >&2; exit 1"},
+				},
+			},
+		)
+
+		require.Error(t, err)
+		require.NotNil(t, output)
+
+		stdout, err := output.GetStdoutAsString()
+		require.NoError(t, err)
+		require.Contains(t, stdout, "stdout message")
+
+		require.NoError(t, err)
+		require.Contains(t, stdout, "stderr message")
+
+		returnCode, err := output.GetReturnCode()
+		require.NoError(t, err)
+		require.Equal(t, 1, returnCode)
+	})
+
+	t.Run("returns output when command succeeds", func(t *testing.T) {
+		output, err := nativekubernetes.RunCommandInTemporaryPod(
+			ctx,
+			clientset,
+			namespaceName,
+			&kubernetesparameteroptions.KubernetesRunCommandOptions{
+				Image:                    "debian:latest",
+				PodName:                  "test-success-pod",
+				DeleteAlreadyExistingPod: true,
+				RunCommandOptions: &parameteroptions.RunCommandOptions{
+					Command: []string{"echo", "success output"},
+				},
+			},
+		)
+
+		require.NoError(t, err)
+		require.NotNil(t, output)
+
+		stdout, err := output.GetStdoutAsString()
+		require.NoError(t, err)
+		require.Contains(t, stdout, "success output")
+
+		returnCode, err := output.GetReturnCode()
+		require.NoError(t, err)
+		require.Equal(t, 0, returnCode)
+	})
+}

@@ -47,6 +47,7 @@ The implementation using exec to call `kubectl` or other commands is useful when
 * [List node names](Example_ListNodeNames_test.go)
 * [Secret by name exists](Example_SecretByNameExists_test.go)
 * [Read and write secret](Example_SecretReadAndWrite_test.go)
+* [Validate SSH key in secret](Example_ValidateSSHKeyInSecret_test.go): Test if a Kubernetes secret contains a valid SSH private key by attempting to SSH into a target host.
 * [Watch ConfigMap. Get callback on create, update, delete](Example_WatchConfigMap_test.go)
 
 * [Wait for pod ready](Example_WaitPodReady_test.go)
