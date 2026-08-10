@@ -3,8 +3,10 @@ package commandexecutorkubernetes
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -15,6 +17,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/fileformats/jsonutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kuberneteserrors"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
@@ -1301,4 +1304,239 @@ func (c *CommandExecutorKubernetes) CreateCronJob(ctx context.Context, namespace
 
 func (c *CommandExecutorKubernetes) DeleteCronJobByName(ctx context.Context, namespaceName string, cronJobName string) (err error) {
 	return tracederrors.TracedErrorNotImplemented()
+}
+
+// ValidateSSHKeyInSecret tests if a Kubernetes secret contains a valid SSH private key
+// by creating a temporary pod with the key mounted and attempting to SSH into a target host.
+// This implementation uses kubectl commands to create and manage the temporary pod.
+func (c *CommandExecutorKubernetes) ValidateSSHKeyInSecret(
+	ctx context.Context,
+	options *kubernetesparameteroptions.ValidateSshKeyInSecretOptions,
+) (bool, error) {
+	logging.LogInfoByCtxf(ctx, "Validate SSH key in secret '%s' started.", options.SecretName)
+
+	if options == nil {
+		return false, tracederrors.TracedErrorNil("options")
+	}
+
+	if err := options.Validate(); err != nil {
+		return false, err
+	}
+
+	// Check if secret exists before creating pod
+	exists, err := c.SecretByNameExists(ctx, options.Namespace, options.SecretName)
+	if err != nil {
+		return false, tracederrors.TracedErrorf("failed to check if secret '%s' exists in namespace '%s': %w", options.SecretName, options.Namespace, err)
+	}
+	if !exists {
+		return false, tracederrors.TracedErrorf("%w: secret '%s' in namespace '%s' of kubernetes '%s'", kuberneteserrors.ErrSecretNotFound, options.SecretName, options.Namespace, c.name)
+	}
+
+	podName := "ssh-test-" + options.SecretName
+	mountPath := "/etc/ssh-key"
+	keyFilePath := mountPath + "/" + options.SecretKey
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return false, err
+	}
+
+	kubeContext, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	// Build SSH command with strict options for non-interactive testing
+	sshArgs := "-o BatchMode=yes"
+	if options.SkipHostKeyValidation {
+		sshArgs += " -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+	}
+	sshArgs += fmt.Sprintf(" -o ConnectTimeout=%s -o ConnectionAttempts=%d", options.ConnectionTimeout, options.ConnectionAttempts)
+
+	sshCommand := fmt.Sprintf(
+		"apt-get update && apt-get install -y openssh-client && "+
+			"chmod 600 %s && "+
+			"ssh -i %s -p %d %s %s@%s 'echo SSH_SUCCESS'",
+		keyFilePath,
+		keyFilePath,
+		options.TargetPort,
+		sshArgs,
+		options.TargetUser,
+		options.TargetHost,
+	)
+
+	// Create pod YAML with secret volume mount
+	podYaml := fmt.Sprintf(`
+apiVersion: v1
+kind: Pod
+metadata:
+  name: %s
+  namespace: %s
+spec:
+  containers:
+  - name: ssh-test
+    image: debian:latest
+    command:
+    - bash
+    - -c
+    - |
+      %s
+    volumeMounts:
+    - name: ssh-key-volume
+      mountPath: %s
+      readOnly: true
+  volumes:
+  - name: ssh-key-volume
+    secret:
+      secretName: %s
+  restartPolicy: Never
+`, podName, options.Namespace, sshCommand, mountPath, options.SecretName)
+
+	// Delete existing pod if it exists
+	_, _ = commandExecutor.RunCommand(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context", kubeContext,
+				"--namespace", options.Namespace,
+				"delete", "pod", podName,
+				"--ignore-not-found=true",
+			},
+		},
+	)
+
+	// Create the pod using stdin to pass the YAML
+	createOutput, err := commandExecutor.RunCommand(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context", kubeContext,
+				"--namespace", options.Namespace,
+				"apply",
+				"-f",
+				"-",
+			},
+			StdinString: podYaml,
+		},
+	)
+	if err != nil {
+		return false, tracederrors.TracedErrorf("failed to create SSH test pod: %w", err)
+	}
+	_ = createOutput // Output not needed, just checking error
+
+	// Wait for pod to complete (up to 60 seconds)
+	_, err = commandExecutor.RunCommand(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context", kubeContext,
+				"--namespace", options.Namespace,
+				"wait",
+				"--for=condition=Ready",
+				"pod/" + podName,
+				"--timeout=60s",
+			},
+			TimeoutString: "70 seconds",
+		},
+	)
+	if err != nil {
+		// Pod might have failed, try to get logs anyway
+		logging.LogInfoByCtxf(ctx, "Pod did not reach Ready state, attempting to get logs: %v", err)
+	}
+
+	// Get pod logs
+	logsOutput, logsErr := commandExecutor.RunCommand(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context", kubeContext,
+				"--namespace", options.Namespace,
+				"logs",
+				podName,
+			},
+			AllowAllExitCodes: true,
+		},
+	)
+
+	// Get pod exit code
+	exitCodeOutput, _ := commandExecutor.RunCommand(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context", kubeContext,
+				"--namespace", options.Namespace,
+				"get",
+				"pod",
+				podName,
+				"-o",
+				"jsonpath={.status.containerStatuses[0].state.terminated.exitCode}",
+			},
+			AllowAllExitCodes: true,
+		},
+	)
+
+	// Clean up pod
+	_, _ = commandExecutor.RunCommand(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context", kubeContext,
+				"--namespace", options.Namespace,
+				"delete",
+				"pod",
+				podName,
+				"--ignore-not-found=true",
+			},
+		},
+	)
+
+	// Check for errors in pod creation/execution
+	if logsErr != nil {
+		logging.LogInfoByCtxf(ctx, "Failed to get pod logs: %v", logsErr)
+		return false, nil
+	}
+
+	stdout, err := logsOutput.GetStdoutAsString()
+	if err != nil {
+		return false, tracederrors.TracedErrorf("failed to get stdout: %w", err)
+	}
+
+	exitCodeStr, _ := exitCodeOutput.GetStdoutAsString()
+	exitCode := 1
+	if exitCodeStr != "" {
+		if code, parseErr := strconv.Atoi(strings.TrimSpace(exitCodeStr)); parseErr == nil {
+			exitCode = code
+		}
+	}
+
+	// Check if SSH connection succeeded
+	if exitCode == 0 && strings.Contains(stdout, "SSH_SUCCESS") {
+		logging.LogInfoByCtxf(ctx, "SSH key validation successful for host %s@%s:%d", options.TargetUser, options.TargetHost, options.TargetPort)
+		logging.LogInfoByCtxf(ctx, "Validate SSH key in secret '%s' finished successfully.", options.SecretName)
+		return true, nil
+	}
+
+	stderr, _ := logsOutput.GetStderrAsString()
+
+	// Log failure details
+	logging.LogInfoByCtxf(
+		ctx,
+		"SSH key validation failed for host %s@%s:%d (exit code: %s, stdout: %s, stderr: %s)",
+		options.TargetUser,
+		options.TargetHost,
+		options.TargetPort,
+		strings.TrimSpace(exitCodeStr),
+		strings.TrimSpace(stdout),
+		strings.TrimSpace(stderr),
+	)
+
+	logging.LogInfoByCtxf(ctx, "Validate SSH key in secret '%s' finished with failure.", options.SecretName)
+
+	return false, nil
 }

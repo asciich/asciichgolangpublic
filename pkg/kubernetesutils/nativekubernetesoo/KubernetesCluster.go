@@ -766,3 +766,21 @@ func (n *NativeKubernetesCluster) DeleteCronJobByName(ctx context.Context, names
 
 	return namespace.DeleteCronJobByName(ctx, cronJobName)
 }
+
+func (n *NativeKubernetesCluster) ValidateSSHKeyInSecret(
+	ctx context.Context,
+	options *kubernetesparameteroptions.ValidateSshKeyInSecretOptions,
+) (bool, error) {
+	logging.LogInfoByCtxf(ctx, "Validate SSH key in secret '%s' started.", options.SecretName)
+
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return false, err
+	}
+
+	success, err := nativekubernetes.ValidateSSHKeyInSecret(ctx, clientSet, options)
+
+	logging.LogInfoByCtxf(ctx, "Validate SSH key in secret '%s' finished.", options.SecretName)
+
+	return success, err
+}

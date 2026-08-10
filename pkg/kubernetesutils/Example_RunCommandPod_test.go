@@ -332,7 +332,7 @@ func ExamplePod_RunCommand_withExitCode() {
 		&kubernetesparameteroptions.KubernetesRunCommandOptions{
 			ContainerName: containerName,
 			RunCommandOptions: &parameteroptions.RunCommandOptions{
-				Command: []string{"bash", "-c", "echo error && exit 1"},
+				Command:           []string{"bash", "-c", "echo error && exit 1"},
 				AllowAllExitCodes: true, // Otherwise an error would be returned.
 			},
 		},
@@ -342,7 +342,7 @@ func ExamplePod_RunCommand_withExitCode() {
 	}
 
 	exitCode2, err := output2.GetReturnCode()
-	
+
 	fmt.Printf("First command exit code: %d\n", exitCode1)
 	fmt.Printf("Second command exit code: %d\n", exitCode2)
 

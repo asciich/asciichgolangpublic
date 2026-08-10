@@ -48,6 +48,7 @@ type KubernetesCluster interface {
 	CheckReplicaSetByNameExists(ctx context.Context, namespaceName string, replicaSetName string) error
 	RunCommandInTemporaryPod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (*commandoutput.CommandOutput, error)
 	SecretByNameExists(ctx context.Context, namespaceName string, secretName string) (exists bool, err error)
+	ValidateSSHKeyInSecret(ctx context.Context, options *kubernetesparameteroptions.ValidateSshKeyInSecretOptions) (bool, error)
 	WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.WaitForPodsOptions) error
 	WhoAmI(ctx context.Context) (*kubernetesimplementationindependend.UserInfo, error)
 	CronJobByNameExists(ctx context.Context, namespaceName string, cronJobName string) (exists bool, err error)

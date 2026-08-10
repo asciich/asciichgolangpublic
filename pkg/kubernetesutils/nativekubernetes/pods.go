@@ -8,13 +8,16 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/archiveutils/tarutils"
 	"github.com/asciich/asciichgolangpublic/pkg/archiveutils/tarutils/tarparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kuberneteserrors"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -336,20 +339,32 @@ func RunCommandInTemporaryPod(ctx context.Context, clientset *kubernetes.Clients
 	}()
 
 	err = WaitForPodSucceeded(ctx, clientset, namespaceName, podName, time.Minute*1)
-	if err != nil {
-		return nil, err
+
+	// Always get logs, even if the pod failed
+	stdout, stderr, logsErr := GetContainerLogs(ctx, clientset, namespaceName, podName, containerName)
+	if logsErr != nil {
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("pod '%s' in namespace '%s' failed and unable to retrieve logs: %w", podName, namespaceName, err)
+		}
+		return nil, logsErr
 	}
 
-	stdout, stderr, err := GetContainerLogs(ctx, clientset, namespaceName, podName, containerName)
+	// Determine return code based on whether pod succeeded or failed
+	retVal := 0
 	if err != nil {
-		return nil, err
+		// Pod failed, set return code to 1
+		retVal = 1
 	}
 
-	var retVal = 0
 	output := &commandoutput.CommandOutput{
 		ReturnCode: &retVal,
 		Stdout:     &stdout,
 		Stderr:     &stderr,
+	}
+
+	// Return output with error if pod failed
+	if err != nil {
+		return output, err
 	}
 
 	logging.LogInfoByCtxf(ctx, "Run command in temporary pod '%s' in namespace '%s' using container image '%s' finished.", podName, namespaceName, imageName)
@@ -637,7 +652,7 @@ func WaitForPodSucceeded(ctx context.Context, clientSet *kubernetes.Clientset, n
 			}
 			// If pod is in a failed state, exit early
 			if pod.Status.Phase == corev1.PodFailed {
-				return tracederrors.TracedErrorf("pod '%s' in namespace '%s' failed", podName, namespace)
+				return tracederrors.TracedErrorf("%w: pod '%s' in namespace '%s' failed", kuberneteserrors.ErrPodInFailedState, podName, namespace)
 			}
 		case <-timer.C:
 			return tracederrors.TracedErrorf("timeout waiting for pod '%s' in namespace '%s' to be succeeded", podName, namespace)
@@ -837,4 +852,134 @@ func ListPods(ctx context.Context, clientset *kubernetes.Clientset, namespaceNam
 
 func ListPodNames(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string) ([]string, error) {
 	return ListPods(ctx, clientset, namespaceName)
+}
+
+// ValidateSSHKeyInSecret tests if a Kubernetes secret contains a valid SSH private key
+// by creating a temporary pod with the key mounted and attempting to SSH into a target host.
+// The function:
+// 1. Creates a temporary pod with the SSH private key mounted from the secret
+// 2. Installs openssh-client in the pod
+// 3. Attempts SSH connection to the target host
+// 4. Returns true if authentication succeeds, false otherwise
+// 5. Cleans up the temporary pod
+func ValidateSSHKeyInSecret(
+	ctx context.Context,
+	clientset *kubernetes.Clientset,
+	options *kubernetesparameteroptions.ValidateSshKeyInSecretOptions,
+) (bool, error) {
+	if clientset == nil {
+		return false, tracederrors.TracedErrorNil("clientset")
+	}
+
+	if options == nil {
+		return false, tracederrors.TracedErrorNil("options")
+	}
+
+	if err := options.Validate(); err != nil {
+		return false, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Validate SSH key in secret '%s' in namespace '%s' started.", options.SecretName, options.Namespace)
+
+	podName := "ssh-test-" + options.SecretName
+	mountPath := "/etc/ssh-key"
+	keyFilePath := mountPath + "/" + options.SecretKey
+
+	// Build SSH command with strict options for non-interactive testing
+	sshArgs := "-o BatchMode=yes"
+	if options.SkipHostKeyValidation {
+		sshArgs += " -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+	}
+	sshArgs += fmt.Sprintf(" -o ConnectTimeout=%s -o ConnectionAttempts=%d", options.ConnectionTimeout, options.ConnectionAttempts)
+
+	sshCommand := []string{
+		"bash", "-c",
+		fmt.Sprintf(
+			"apt-get update && apt-get install -y openssh-client && "+
+				"chmod 600 %s && "+
+				"ssh -i %s -p %d %s %s@%s 'echo SSH_SUCCESS'",
+			keyFilePath,
+			keyFilePath,
+			options.TargetPort,
+			sshArgs,
+			options.TargetUser,
+			options.TargetHost,
+		),
+	}
+
+	output, err := RunCommandInTemporaryPod(
+		ctx,
+		clientset,
+		options.Namespace,
+		&kubernetesparameteroptions.KubernetesRunCommandOptions{
+			Image:                    "debian:latest",
+			PodName:                  podName,
+			DeleteAlreadyExistingPod: true,
+			SecretMounts: map[string]kubernetesparameteroptions.SecretMountSource{
+				mountPath: {
+					SecretName: options.SecretName,
+				},
+			},
+			RunCommandOptions: &parameteroptions.RunCommandOptions{
+				Command:           sshCommand,
+				TimeoutString:     "60 seconds",
+				AllowAllExitCodes: true,
+			},
+		},
+	)
+
+	// Handle pod failure - RunCommandInTemporaryPod now returns output with error
+	if err != nil {
+		// Check if it's a pod failure error - if so, we should have output
+		if strings.Contains(err.Error(), "pod '"+podName+"' in namespace '"+options.Namespace+"' failed") {
+			logging.LogInfoByCtxf(ctx, "SSH test pod failed, checking output...")
+			// Output should be available from RunCommandInTemporaryPod
+			if output == nil {
+				return false, tracederrors.TracedErrorf("SSH test pod failed and no output available: %w", err)
+			}
+		} else {
+			return false, tracederrors.TracedErrorf("failed to run SSH test pod: %w", err)
+		}
+	}
+
+	returnCode, err := output.GetReturnCode()
+	if err != nil {
+		return false, tracederrors.TracedErrorf("failed to get return code: %w", err)
+	}
+
+	stdout, err := output.GetStdoutAsString()
+	if err != nil {
+		return false, tracederrors.TracedErrorf("failed to get stdout: %w", err)
+	}
+
+	stderr, err := output.GetStderrAsString()
+	if err != nil {
+		return false, tracederrors.TracedErrorf("failed to get stderr: %w", err)
+	}
+
+	// Check if SSH connection succeeded
+	// Success is indicated by:
+	// 1. Return code 0
+	// 2. Output contains "SSH_SUCCESS"
+	if returnCode == 0 && strings.Contains(stdout, "SSH_SUCCESS") {
+		logging.LogInfoByCtxf(ctx, "SSH key validation successful for host %s@%s:%d", options.TargetUser, options.TargetHost, options.TargetPort)
+		logging.LogInfoByCtxf(ctx, "Validate SSH key in secret '%s' in namespace '%s' finished successfully.", options.SecretName, options.Namespace)
+		return true, nil
+	}
+
+	// Log failure details
+	logging.LogInfoByCtxf(
+		ctx,
+		"SSH key validation failed for host %s@%s:%d (exit code: %d, stdout: %s, stderr: %s)",
+		options.TargetUser,
+		options.TargetHost,
+		options.TargetPort,
+		returnCode,
+		strings.TrimSpace(stdout),
+		strings.TrimSpace(stderr),
+	)
+
+	logging.LogInfoByCtxf(ctx, "Validate SSH key in secret '%s' in namespace '%s' finished with failure.", options.SecretName, options.Namespace)
+
+	return false, nil
 }
