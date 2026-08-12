@@ -846,7 +846,16 @@ func (c *CommandExecutorKubernetes) WhoAmI(ctx context.Context) (*kubernetesimpl
 }
 
 func (c *CommandExecutorKubernetes) WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.WaitForPodsOptions) error {
-	return tracederrors.TracedErrorNotImplemented()
+	if namespaceName == "" {
+		return tracederrors.TracedErrorEmptyString("namespaceName")
+	}
+
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+
+	return namespace.WaitUntilAllPodsInNamespaceAreRunning(ctx, options)
 }
 
 func (c *CommandExecutorKubernetes) CreateObject(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (kubernetesinterfaces.Object, error) {
@@ -1539,4 +1548,570 @@ spec:
 	logging.LogInfoByCtxf(ctx, "Validate SSH key in secret '%s' finished with failure.", options.SecretName)
 
 	return false, nil
+}
+
+func (c *CommandExecutorKubernetes) CreateClusterRole(ctx context.Context, createOptions *kubernetesparameteroptions.CreateClusterRoleOptions) (createdClusterRole kubernetesinterfaces.ClusterRole, err error) {
+	if createOptions == nil {
+		return nil, tracederrors.TracedErrorNil("createOptions")
+	}
+
+	roleName, err := createOptions.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	exists, err := c.ClusterRoleByNameExists(ctx, roleName)
+	if err != nil {
+		return nil, err
+	}
+
+	if exists {
+		logging.LogInfoByCtxf(ctx, "ClusterRole '%s' already exists.", roleName)
+	} else {
+		verbs, err := createOptions.GetVerbs()
+		if err != nil {
+			return nil, err
+		}
+
+		resources, err := createOptions.GetResorces()
+		if err != nil {
+			return nil, err
+		}
+
+		apiGroups, err := createOptions.GetAPIGroups()
+		if err != nil {
+			return nil, err
+		}
+
+		commandExecutor, err := c.GetCommandExecutor()
+		if err != nil {
+			return nil, err
+		}
+
+		cmd := []string{"kubectl"}
+
+		if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
+			// No context needed for in-cluster auth
+		} else {
+			kubeContext, err := c.GetCachedKubectlContext(ctx)
+			if err != nil {
+				return nil, err
+			}
+			cmd = append(cmd, "--context", kubeContext)
+		}
+
+		cmd = append(cmd,
+			"create", "clusterrole", roleName,
+			"--verb="+strings.Join(verbs, ","),
+			"--resource="+strings.Join(resources, ","),
+		)
+
+		// kubectl create clusterrole doesn't have a direct --api-groups flag in the same way,
+		// so we use dry-run + apply approach for full control
+		// Actually, kubectl create clusterrole does not support --api-groups directly.
+		// We'll use a YAML-based approach instead.
+
+		// Build the ClusterRole YAML
+		apiGroupsYaml := ""
+		for _, ag := range apiGroups {
+			apiGroupsYaml += fmt.Sprintf("    - \"%s\"\n", ag)
+		}
+
+		resourcesYaml := ""
+		for _, r := range resources {
+			resourcesYaml += fmt.Sprintf("    - \"%s\"\n", r)
+		}
+
+		verbsYaml := ""
+		for _, v := range verbs {
+			verbsYaml += fmt.Sprintf("    - \"%s\"\n", v)
+		}
+
+		clusterRoleYaml := fmt.Sprintf(`apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: %s
+rules:
+  - apiGroups:
+%s    resources:
+%s    verbs:
+%s`, roleName, apiGroupsYaml, resourcesYaml, verbsYaml)
+
+		applyCmd := []string{"kubectl"}
+
+		if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
+			// No context needed
+		} else {
+			kubeContext, err := c.GetCachedKubectlContext(ctx)
+			if err != nil {
+				return nil, err
+			}
+			applyCmd = append(applyCmd, "--context", kubeContext)
+		}
+
+		applyCmd = append(applyCmd, "apply", "-f", "-")
+
+		_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command:     applyCmd,
+			StdinString: clusterRoleYaml,
+		})
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("failed to create ClusterRole '%s': %w", roleName, err)
+		}
+
+		logging.LogChangedByCtxf(ctx, "Created ClusterRole '%s'.", roleName)
+	}
+
+	return c.GetClusterRoleByName(roleName)
+}
+
+func (c *CommandExecutorKubernetes) DeleteClusterRoleByName(ctx context.Context, roleName string) (err error) {
+	if roleName == "" {
+		return tracederrors.TracedErrorEmptyString("roleName")
+	}
+
+	exists, err := c.ClusterRoleByNameExists(ctx, roleName)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		commandExecutor, err := c.GetCommandExecutor()
+		if err != nil {
+			return err
+		}
+
+		cmd := []string{"kubectl"}
+
+		if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
+			// No context needed
+		} else {
+			kubeContext, err := c.GetCachedKubectlContext(ctx)
+			if err != nil {
+				return err
+			}
+			cmd = append(cmd, "--context", kubeContext)
+		}
+
+		cmd = append(cmd, "delete", "clusterrole", roleName)
+
+		_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command: cmd,
+		})
+		if err != nil {
+			return tracederrors.TracedErrorf("failed to delete ClusterRole '%s': %w", roleName, err)
+		}
+
+		logging.LogChangedByCtxf(ctx, "ClusterRole '%s' deleted.", roleName)
+	} else {
+		logging.LogChangedByCtxf(ctx, "ClusterRole '%s' already absent.", roleName)
+	}
+
+	return nil
+}
+
+func (c *CommandExecutorKubernetes) GetClusterRoleByName(roleName string) (kubernetesinterfaces.ClusterRole, error) {
+	if roleName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("roleName")
+	}
+
+	toReturn := NewCommandExecutorClusterRole()
+
+	err := toReturn.SetName(roleName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = toReturn.SetKubernetesCluster(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return toReturn, nil
+}
+
+func (c *CommandExecutorKubernetes) ClusterRoleByNameExists(ctx context.Context, roleName string) (exists bool, err error) {
+	if roleName == "" {
+		return false, tracederrors.TracedErrorEmptyString("roleName")
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return false, err
+	}
+
+	cmd := []string{"kubectl"}
+
+	if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
+		// No context needed
+	} else {
+		kubeContext, err := c.GetCachedKubectlContext(ctx)
+		if err != nil {
+			return false, err
+		}
+		cmd = append(cmd, "--context", kubeContext)
+	}
+
+	cmd = append(cmd, "get", "clusterrole", roleName, "-o", "name")
+
+	output, err := commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command:           cmd,
+		AllowAllExitCodes: true,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	if output.IsExitSuccess() {
+		logging.LogInfoByCtxf(ctx, "ClusterRole '%s' exists.", roleName)
+		return true, nil
+	}
+
+	logging.LogInfoByCtxf(ctx, "ClusterRole '%s' does not exist.", roleName)
+	return false, nil
+}
+
+func (c *CommandExecutorKubernetes) CreateClusterRoleBinding(ctx context.Context, createOptions *kubernetesparameteroptions.CreateClusterRoleBindingOptions) (createdClusterRoleBinding kubernetesinterfaces.ClusterRoleBinding, err error) {
+	if createOptions == nil {
+		return nil, tracederrors.TracedErrorNil("createOptions")
+	}
+
+	bindingName, err := createOptions.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	exists, err := c.ClusterRoleBindingByNameExists(ctx, bindingName)
+	if err != nil {
+		return nil, err
+	}
+
+	if exists {
+		logging.LogInfoByCtxf(ctx, "ClusterRoleBinding '%s' already exists.", bindingName)
+	} else {
+		roleRef, err := createOptions.GetRoleRef()
+		if err != nil {
+			return nil, err
+		}
+
+		subjects, err := createOptions.GetSubjects()
+		if err != nil {
+			return nil, err
+		}
+
+		subjectKind, err := createOptions.GetSubjectKind()
+		if err != nil {
+			return nil, err
+		}
+
+		subjectNamespace, err := createOptions.GetSubjectNamespace()
+		if err != nil {
+			return nil, err
+		}
+
+		commandExecutor, err := c.GetCommandExecutor()
+		if err != nil {
+			return nil, err
+		}
+
+		// Build subjects YAML
+		subjectsYaml := ""
+		for _, subject := range subjects {
+			subjectsYaml += fmt.Sprintf(`  - kind: %s
+    name: %s
+    namespace: %s
+`, subjectKind, subject, subjectNamespace)
+		}
+
+		clusterRoleBindingYaml := fmt.Sprintf(`apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: %s
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: %s
+subjects:
+%s`, bindingName, roleRef, subjectsYaml)
+
+		cmd := []string{"kubectl"}
+
+		if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
+			// No context needed
+		} else {
+			kubeContext, err := c.GetCachedKubectlContext(ctx)
+			if err != nil {
+				return nil, err
+			}
+			cmd = append(cmd, "--context", kubeContext)
+		}
+
+		cmd = append(cmd, "apply", "-f", "-")
+
+		_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command:     cmd,
+			StdinString: clusterRoleBindingYaml,
+		})
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("failed to create ClusterRoleBinding '%s': %w", bindingName, err)
+		}
+
+		logging.LogChangedByCtxf(ctx, "Created ClusterRoleBinding '%s'.", bindingName)
+	}
+
+	return c.GetClusterRoleBindingByName(bindingName)
+}
+
+func (c *CommandExecutorKubernetes) DeleteClusterRoleBindingByName(ctx context.Context, bindingName string) (err error) {
+	if bindingName == "" {
+		return tracederrors.TracedErrorEmptyString("bindingName")
+	}
+
+	exists, err := c.ClusterRoleBindingByNameExists(ctx, bindingName)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		commandExecutor, err := c.GetCommandExecutor()
+		if err != nil {
+			return err
+		}
+
+		cmd := []string{"kubectl"}
+
+		if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
+			// No context needed
+		} else {
+			kubeContext, err := c.GetCachedKubectlContext(ctx)
+			if err != nil {
+				return err
+			}
+			cmd = append(cmd, "--context", kubeContext)
+		}
+
+		cmd = append(cmd, "delete", "clusterrolebinding", bindingName)
+
+		_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command: cmd,
+		})
+		if err != nil {
+			return tracederrors.TracedErrorf("failed to delete ClusterRoleBinding '%s': %w", bindingName, err)
+		}
+
+		logging.LogChangedByCtxf(ctx, "ClusterRoleBinding '%s' deleted.", bindingName)
+	} else {
+		logging.LogChangedByCtxf(ctx, "ClusterRoleBinding '%s' already absent.", bindingName)
+	}
+
+	return nil
+}
+
+func (c *CommandExecutorKubernetes) GetClusterRoleBindingByName(bindingName string) (kubernetesinterfaces.ClusterRoleBinding, error) {
+	if bindingName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("bindingName")
+	}
+
+	toReturn := NewCommandExecutorClusterRoleBinding()
+
+	err := toReturn.SetName(bindingName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = toReturn.SetKubernetesCluster(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return toReturn, nil
+}
+
+func (c *CommandExecutorKubernetes) ClusterRoleBindingByNameExists(ctx context.Context, bindingName string) (exists bool, err error) {
+	if bindingName == "" {
+		return false, tracederrors.TracedErrorEmptyString("bindingName")
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return false, err
+	}
+
+	cmd := []string{"kubectl"}
+
+	if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
+		// No context needed
+	} else {
+		kubeContext, err := c.GetCachedKubectlContext(ctx)
+		if err != nil {
+			return false, err
+		}
+		cmd = append(cmd, "--context", kubeContext)
+	}
+
+	cmd = append(cmd, "get", "clusterrolebinding", bindingName, "-o", "name")
+
+	output, err := commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command:           cmd,
+		AllowAllExitCodes: true,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	if output.IsExitSuccess() {
+		logging.LogInfoByCtxf(ctx, "ClusterRoleBinding '%s' exists.", bindingName)
+		return true, nil
+	}
+
+	logging.LogInfoByCtxf(ctx, "ClusterRoleBinding '%s' does not exist.", bindingName)
+	return false, nil
+}
+
+func (c *CommandExecutorKubernetes) CreateRole(ctx context.Context, namespaceName string, createOptions *kubernetesparameteroptions.CreateRoleOptions) (createdRole kubernetesinterfaces.Role, err error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+	return namespace.CreateRole(ctx, createOptions)
+}
+
+func (c *CommandExecutorKubernetes) DeleteRoleByName(ctx context.Context, namespaceName string, roleName string) (err error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+	return namespace.DeleteRoleByName(ctx, roleName)
+}
+
+func (c *CommandExecutorKubernetes) GetRoleByName(namespaceName string, roleName string) (kubernetesinterfaces.Role, error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+	return namespace.GetRoleByName(roleName)
+}
+
+func (c *CommandExecutorKubernetes) RoleByNameExists(ctx context.Context, namespaceName string, roleName string) (exists bool, err error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return false, err
+	}
+	return namespace.RoleByNameExists(ctx, roleName)
+}
+
+func (c *CommandExecutorKubernetes) CreateRoleBinding(ctx context.Context, namespaceName string, createOptions *kubernetesparameteroptions.CreateRoleBindingOptions) (createdRoleBinding kubernetesinterfaces.RoleBinding, err error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+	return namespace.CreateRoleBinding(ctx, createOptions)
+}
+
+func (c *CommandExecutorKubernetes) DeleteRoleBindingByName(ctx context.Context, namespaceName string, roleBindingName string) (err error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+	return namespace.DeleteRoleBindingByName(ctx, roleBindingName)
+}
+
+func (c *CommandExecutorKubernetes) GetRoleBindingByName(namespaceName string, roleBindingName string) (kubernetesinterfaces.RoleBinding, error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+	return namespace.GetRoleBindingByName(roleBindingName)
+}
+
+func (c *CommandExecutorKubernetes) RoleBindingByNameExists(ctx context.Context, namespaceName string, roleBindingName string) (exists bool, err error) {
+	namespace, err := c.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return false, err
+	}
+	return namespace.RoleBindingByNameExists(ctx, roleBindingName)
+}
+
+func (c *CommandExecutorKubernetes) ListClusterRoleNames(ctx context.Context) ([]string, error) {
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	cmd := []string{"kubectl"}
+
+	if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
+		// No context needed
+	} else {
+		kubeContext, err := c.GetCachedKubectlContext(ctx)
+		if err != nil {
+			return nil, err
+		}
+		cmd = append(cmd, "--context", kubeContext)
+	}
+
+	cmd = append(cmd, "get", "clusterroles", "-o", "name")
+
+	output, err := commandExecutor.RunCommandAndGetStdoutAsString(ctx, &parameteroptions.RunCommandOptions{
+		Command: cmd,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	names := []string{}
+	for _, line := range stringsutils.SplitLines(output, true) {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		line = strings.TrimPrefix(line, "clusterrole.rbac.authorization.k8s.io/")
+		names = append(names, line)
+	}
+
+	sort.Strings(names)
+
+	return names, nil
+}
+
+func (c *CommandExecutorKubernetes) ListClusterRoleBindingNames(ctx context.Context) ([]string, error) {
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	cmd := []string{"kubectl"}
+
+	if kubernetesutils.IsInClusterAuthenticationAvailable(ctx) {
+		// No context needed
+	} else {
+		kubeContext, err := c.GetCachedKubectlContext(ctx)
+		if err != nil {
+			return nil, err
+		}
+		cmd = append(cmd, "--context", kubeContext)
+	}
+
+	cmd = append(cmd, "get", "clusterrolebindings", "-o", "name")
+
+	output, err := commandExecutor.RunCommandAndGetStdoutAsString(ctx, &parameteroptions.RunCommandOptions{
+		Command: cmd,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	names := []string{}
+	for _, line := range stringsutils.SplitLines(output, true) {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		line = strings.TrimPrefix(line, "clusterrolebinding.rbac.authorization.k8s.io/")
+		names = append(names, line)
+	}
+
+	sort.Strings(names)
+
+	return names, nil
 }

@@ -23,6 +23,7 @@ The implementation using exec to call `kubectl` or other commands is useful when
 * [Create and delete Deployment](Example_CreateAndDeleteDeployment_test.go)
 * [Create and delete Pod](Example_CreateAndDeletePod_test.go)
 * [Create and delete ReplicaSet](Example_CreateAndDeleteReplicaSet_test.go)
+* [Create and delete Role](Example_CreateAndDeleteRole_test.go)
 * [Run single command in temporary pod](Example_RunSingleCommandPod_test.go)
 * [Run single command in temporary pod with secret](Example_RunSingleCommandPodWithSecret_test.go)
 * [Run single command in temporary pod with secret as file](Example_RunSingleCommandPodWithSecretAsFile_test.go)
@@ -49,8 +50,8 @@ The implementation using exec to call `kubectl` or other commands is useful when
 * [Read and write secret](Example_SecretReadAndWrite_test.go)
 * [Validate SSH key in secret](Example_ValidateSSHKeyInSecret_test.go): Test if a Kubernetes secret contains a valid SSH private key by attempting to SSH into a target host.
 * [Watch ConfigMap. Get callback on create, update, delete](Example_WatchConfigMap_test.go)
-
 * [Wait for pod ready](Example_WaitPodReady_test.go)
+
 ## Specifications
 
 See [kubernetesutils.spec.md](kubernetesutils.spec.md)

@@ -16,6 +16,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	v1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -52,7 +53,7 @@ func (n *NativeNamespace) GetKubernetesCluster() (kubernetesinterfaces.Kubernete
 func (n *NativeNamespace) GetConfig() (*rest.Config, error) {
 	cluster, err := n.GetNativeKubernetesCluster()
 	if err != nil {
-
+		return nil, err
 	}
 
 	return cluster.GetConfig()
@@ -262,19 +263,123 @@ func (n *NativeNamespace) Create(ctx context.Context) (err error) {
 }
 
 func (n *NativeNamespace) CreateRole(ctx context.Context, createOptions *kubernetesparameteroptions.CreateRoleOptions) (createdRole kubernetesinterfaces.Role, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	if createOptions == nil {
+		return nil, tracederrors.TracedErrorNil("createOptions")
+	}
+
+	roleName, err := createOptions.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	exists, err := n.RoleByNameExists(ctx, roleName)
+	if err != nil {
+		return nil, err
+	}
+
+	if exists {
+		logging.LogInfoByCtxf(ctx, "Role '%s' in namespace '%s' already exists.", roleName, namespaceName)
+	} else {
+		verbs, err := createOptions.GetVerbs()
+		if err != nil {
+			return nil, err
+		}
+
+		resources, err := createOptions.GetResorces()
+		if err != nil {
+			return nil, err
+		}
+
+		apiGroups, err := createOptions.GetAPIGroups()
+		if err != nil {
+			return nil, err
+		}
+
+		role := &rbacv1.Role{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      roleName,
+				Namespace: namespaceName,
+			},
+			Rules: []rbacv1.PolicyRule{
+				{
+					Verbs:     verbs,
+					Resources: resources,
+					APIGroups: apiGroups,
+				},
+			},
+		}
+
+		_, err = clientSet.RbacV1().Roles(namespaceName).Create(ctx, role, metav1.CreateOptions{})
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("failed to create Role '%s' in namespace '%s': %w", roleName, namespaceName, err)
+		}
+
+		logging.LogChangedByCtxf(ctx, "Created Role '%s' in namespace '%s'.", roleName, namespaceName)
+	}
+
+	return n.GetRoleByName(roleName)
 }
 
 func (n *NativeNamespace) DeleteRoleByName(ctx context.Context, name string) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+	if name == "" {
+		return tracederrors.TracedErrorEmptyString("name")
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return err
+	}
+
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return err
+	}
+
+	exists, err := n.RoleByNameExists(ctx, name)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		err = clientSet.RbacV1().Roles(namespaceName).Delete(ctx, name, metav1.DeleteOptions{})
+		if err != nil {
+			return tracederrors.TracedErrorf("failed to delete Role '%s' in namespace '%s': %w", name, namespaceName, err)
+		}
+
+		logging.LogChangedByCtxf(ctx, "Role '%s' in namespace '%s' deleted.", name, namespaceName)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Role '%s' in namespace '%s' does not exist. Skip delete.", name, namespaceName)
+	}
+
+	return nil
 }
 
 func (n *NativeNamespace) GetClusterName() (clusterName string, err error) {
-	return "", tracederrors.TracedErrorNotImplemented()
+	cluster, err := n.GetNativeKubernetesCluster()
+	if err != nil {
+		return "", err
+	}
+
+	return cluster.GetName()
 }
 
 func (n *NativeNamespace) GetKubectlContext(ctx context.Context) (contextName string, err error) {
-	return "", tracederrors.TracedErrorNotImplemented()
+	cluster, err := n.GetNativeKubernetesCluster()
+	if err != nil {
+		return "", err
+	}
+
+	return cluster.GetKubectlContext(ctx)
 }
 
 func (n *NativeNamespace) GetName() (name string, err error) {
@@ -302,7 +407,23 @@ func (n *NativeNamespace) GetObjectByNames(objectName string, objectKind string)
 }
 
 func (n *NativeNamespace) GetRoleByName(name string) (role kubernetesinterfaces.Role, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	if name == "" {
+		return nil, tracederrors.TracedErrorEmptyString("name")
+	}
+
+	toReturn := &NativeRole{}
+
+	err = toReturn.SetName(name)
+	if err != nil {
+		return nil, err
+	}
+
+	err = toReturn.SetNamespace(n)
+	if err != nil {
+		return nil, err
+	}
+
+	return toReturn, nil
 }
 
 func (n *NativeNamespace) ListRoleNames(ctx context.Context) (roleNames []string, err error) {
@@ -320,7 +441,32 @@ func (n *NativeNamespace) ListRoleNames(ctx context.Context) (roleNames []string
 }
 
 func (n *NativeNamespace) RoleByNameExists(ctx context.Context, name string) (exists bool, err error) {
-	return false, tracederrors.TracedErrorNotImplemented()
+	if name == "" {
+		return false, tracederrors.TracedErrorEmptyString("name")
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return false, err
+	}
+
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return false, err
+	}
+
+	_, err = clientSet.RbacV1().Roles(namespaceName).Get(ctx, name, metav1.GetOptions{})
+	if err == nil {
+		logging.LogInfoByCtxf(ctx, "Role '%s' in namespace '%s' exists.", name, namespaceName)
+		return true, nil
+	}
+
+	if !errors.IsNotFound(err) {
+		return false, tracederrors.TracedErrorf("failed to get Role '%s' in namespace '%s': %w", name, namespaceName, err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Role '%s' in namespace '%s' does not exist.", name, namespaceName)
+	return false, nil
 }
 
 func (n *NativeNamespace) SecretByNameExists(ctx context.Context, secretName string) (bool, error) {
@@ -1313,4 +1459,147 @@ func (n *NativeNamespace) ListCronJobNames(ctx context.Context) ([]string, error
 	}
 
 	return nativekubernetes.ListCronJobNames(ctx, clientSet, namespaceName)
+}
+
+func (n *NativeNamespace) CreateRoleBinding(ctx context.Context, createOptions *kubernetesparameteroptions.CreateRoleBindingOptions) (createdRoleBinding kubernetesinterfaces.RoleBinding, err error) {
+	if createOptions == nil {
+		return nil, tracederrors.TracedErrorNil("createOptions")
+	}
+	bindingName, err := createOptions.GetName()
+	if err != nil {
+		return nil, err
+	}
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+	exists, err := n.RoleBindingByNameExists(ctx, bindingName)
+	if err != nil {
+		return nil, err
+	}
+	if exists {
+		logging.LogInfoByCtxf(ctx, "RoleBinding '%s' in namespace '%s' already exists.", bindingName, namespaceName)
+	} else {
+		roleRef, err := createOptions.GetRoleRef()
+		if err != nil {
+			return nil, err
+		}
+		subjects, err := createOptions.GetSubjects()
+		if err != nil {
+			return nil, err
+		}
+		subjectKind, err := createOptions.GetSubjectKind()
+		if err != nil {
+			return nil, err
+		}
+		subjectList := make([]rbacv1.Subject, len(subjects))
+		for i, subject := range subjects {
+			subjectList[i] = rbacv1.Subject{Kind: subjectKind, Name: subject}
+		}
+		binding := &rbacv1.RoleBinding{
+			ObjectMeta: metav1.ObjectMeta{Name: bindingName, Namespace: namespaceName},
+			RoleRef:    rbacv1.RoleRef{Kind: "Role", Name: roleRef},
+			Subjects:   subjectList,
+		}
+		_, err = clientSet.RbacV1().RoleBindings(namespaceName).Create(ctx, binding, metav1.CreateOptions{})
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("failed to create RoleBinding '%s' in namespace '%s': %w", bindingName, namespaceName, err)
+		}
+		logging.LogChangedByCtxf(ctx, "Created RoleBinding '%s' in namespace '%s'.", bindingName, namespaceName)
+	}
+	return n.GetRoleBindingByName(bindingName)
+}
+
+func (n *NativeNamespace) DeleteRoleBindingByName(ctx context.Context, name string) (err error) {
+	if name == "" {
+		return tracederrors.TracedErrorEmptyString("name")
+	}
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return err
+	}
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return err
+	}
+	exists, err := n.RoleBindingByNameExists(ctx, name)
+	if err != nil {
+		return err
+	}
+	if exists {
+		err = clientSet.RbacV1().RoleBindings(namespaceName).Delete(ctx, name, metav1.DeleteOptions{})
+		if err != nil {
+			return tracederrors.TracedErrorf("failed to delete RoleBinding '%s' in namespace '%s': %w", name, namespaceName, err)
+		}
+		logging.LogChangedByCtxf(ctx, "RoleBinding '%s' in namespace '%s' deleted.", name, namespaceName)
+	} else {
+		logging.LogChangedByCtxf(ctx, "RoleBinding '%s' in namespace '%s' already absent.", name, namespaceName)
+	}
+	return nil
+}
+
+func (n *NativeNamespace) GetRoleBindingByName(name string) (kubernetesinterfaces.RoleBinding, error) {
+	if name == "" {
+		return nil, tracederrors.TracedErrorEmptyString("name")
+	}
+	toReturn := &NativeRoleBinding{}
+	err := toReturn.SetName(name)
+	if err != nil {
+		return nil, err
+	}
+	err = toReturn.SetNamespace(n)
+	if err != nil {
+		return nil, err
+	}
+	return toReturn, nil
+}
+
+func (n *NativeNamespace) ListRoleBindingNames(ctx context.Context) ([]string, error) {
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+	bindingList, err := clientSet.RbacV1().RoleBindings(namespaceName).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to list RoleBindings: %w", err)
+	}
+	names := make([]string, len(bindingList.Items))
+	for i, binding := range bindingList.Items {
+		names[i] = binding.Name
+	}
+	return names, nil
+}
+
+func (n *NativeNamespace) RoleBindingByNameExists(ctx context.Context, name string) (exists bool, err error) {
+	if name == "" {
+		return false, tracederrors.TracedErrorEmptyString("name")
+	}
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return false, err
+	}
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return false, err
+	}
+	bindingList, err := clientSet.RbacV1().RoleBindings(namespaceName).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return false, tracederrors.TracedErrorf("Failed to list RoleBindings: %w", err)
+	}
+	for _, binding := range bindingList.Items {
+		if binding.Name == name {
+			logging.LogInfoByCtxf(ctx, "RoleBinding '%s' in namespace '%s' exists.", name, namespaceName)
+			return true, nil
+		}
+	}
+	logging.LogInfoByCtxf(ctx, "RoleBinding '%s' in namespace '%s' does not exist.", name, namespaceName)
+	return false, nil
 }

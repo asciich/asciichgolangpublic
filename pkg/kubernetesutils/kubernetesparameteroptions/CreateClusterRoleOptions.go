@@ -4,18 +4,18 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-type CreateRoleOptions struct {
+type CreateClusterRoleOptions struct {
 	Name      string
 	Verbs     []string
 	Resorces  []string
 	APIGroups []string
 }
 
-func NewCreateRoleOptions() (c *CreateRoleOptions) {
-	return new(CreateRoleOptions)
+func NewCreateClusterRoleOptions() (c *CreateClusterRoleOptions) {
+	return new(CreateClusterRoleOptions)
 }
 
-func (c *CreateRoleOptions) GetName() (name string, err error) {
+func (c *CreateClusterRoleOptions) GetName() (name string, err error) {
 	if c.Name == "" {
 		return "", tracederrors.TracedErrorf("Name not set")
 	}
@@ -23,7 +23,7 @@ func (c *CreateRoleOptions) GetName() (name string, err error) {
 	return c.Name, nil
 }
 
-func (c *CreateRoleOptions) GetResorces() (resorces []string, err error) {
+func (c *CreateClusterRoleOptions) GetResorces() (resorces []string, err error) {
 	if c.Resorces == nil {
 		return nil, tracederrors.TracedErrorf("Resorces not set")
 	}
@@ -35,7 +35,7 @@ func (c *CreateRoleOptions) GetResorces() (resorces []string, err error) {
 	return c.Resorces, nil
 }
 
-func (c *CreateRoleOptions) GetVerbs() (verbs []string, err error) {
+func (c *CreateClusterRoleOptions) GetVerbs() (verbs []string, err error) {
 	if c.Verbs == nil {
 		return nil, tracederrors.TracedErrorf("Verbs not set")
 	}
@@ -47,7 +47,7 @@ func (c *CreateRoleOptions) GetVerbs() (verbs []string, err error) {
 	return c.Verbs, nil
 }
 
-func (c *CreateRoleOptions) GetAPIGroups() (apiGroups []string, err error) {
+func (c *CreateClusterRoleOptions) GetAPIGroups() (apiGroups []string, err error) {
 	if c.APIGroups == nil {
 		return nil, tracederrors.TracedErrorf("APIGroups not set")
 	}
@@ -59,7 +59,7 @@ func (c *CreateRoleOptions) GetAPIGroups() (apiGroups []string, err error) {
 	return c.APIGroups, nil
 }
 
-func (c *CreateRoleOptions) SetName(name string) (err error) {
+func (c *CreateClusterRoleOptions) SetName(name string) (err error) {
 	if name == "" {
 		return tracederrors.TracedErrorf("name is empty string")
 	}
@@ -69,7 +69,7 @@ func (c *CreateRoleOptions) SetName(name string) (err error) {
 	return nil
 }
 
-func (c *CreateRoleOptions) SetResorces(resorces []string) (err error) {
+func (c *CreateClusterRoleOptions) SetResorces(resorces []string) (err error) {
 	if resorces == nil {
 		return tracederrors.TracedErrorf("resorces is nil")
 	}
@@ -83,7 +83,7 @@ func (c *CreateRoleOptions) SetResorces(resorces []string) (err error) {
 	return nil
 }
 
-func (c *CreateRoleOptions) SetVerbs(verbs []string) (err error) {
+func (c *CreateClusterRoleOptions) SetVerbs(verbs []string) (err error) {
 	if verbs == nil {
 		return tracederrors.TracedErrorf("verbs is nil")
 	}
@@ -97,7 +97,7 @@ func (c *CreateRoleOptions) SetVerbs(verbs []string) (err error) {
 	return nil
 }
 
-func (c *CreateRoleOptions) SetAPIGroups(apiGroups []string) (err error) {
+func (c *CreateClusterRoleOptions) SetAPIGroups(apiGroups []string) (err error) {
 	if apiGroups == nil {
 		return tracederrors.TracedErrorf("apiGroups is nil")
 	}

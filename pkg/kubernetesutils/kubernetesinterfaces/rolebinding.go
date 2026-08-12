@@ -2,7 +2,7 @@ package kubernetesinterfaces
 
 import "context"
 
-type Role interface {
+type RoleBinding interface {
 	GetName() (name string, err error)
 	GetNamespace() (namespace Namespace, err error)
 	Exists(ctx context.Context) (exists bool, err error)
