@@ -1,6 +1,8 @@
 package commandexecutorkubernetes
 
 import (
+	"context"
+
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -41,4 +43,32 @@ func (c *CommandExecutorRole) SetNamespace(namespace kubernetesinterfaces.Namesp
 	c.namespace = namespace
 
 	return nil
+}
+
+func (c *CommandExecutorRole) Exists(ctx context.Context) (exists bool, err error) {
+	roleName, err := c.GetName()
+	if err != nil {
+		return false, err
+	}
+
+	namespaceObj, err := c.GetNamespace()
+	if err != nil {
+		return false, err
+	}
+
+	return namespaceObj.RoleByNameExists(ctx, roleName)
+}
+
+func (c *CommandExecutorRole) Delete(ctx context.Context) (err error) {
+	roleName, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	namespaceObj, err := c.GetNamespace()
+	if err != nil {
+		return err
+	}
+
+	return namespaceObj.DeleteRoleByName(ctx, roleName)
 }

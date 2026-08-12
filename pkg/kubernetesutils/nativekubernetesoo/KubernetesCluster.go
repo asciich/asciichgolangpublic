@@ -15,6 +15,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 
 	authenticationv1 "k8s.io/api/authentication/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
@@ -783,4 +784,330 @@ func (n *NativeKubernetesCluster) ValidateSSHKeyInSecret(
 	logging.LogInfoByCtxf(ctx, "Validate SSH key in secret '%s' finished.", options.SecretName)
 
 	return success, err
+}
+
+func (n *NativeKubernetesCluster) CreateClusterRole(ctx context.Context, createOptions *kubernetesparameteroptions.CreateClusterRoleOptions) (createdClusterRole kubernetesinterfaces.ClusterRole, err error) {
+	if createOptions == nil {
+		return nil, tracederrors.TracedErrorNil("createOptions")
+	}
+	roleName, err := createOptions.GetName()
+	if err != nil {
+		return nil, err
+	}
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+	exists, err := n.ClusterRoleByNameExists(ctx, roleName)
+	if err != nil {
+		return nil, err
+	}
+	if exists {
+		logging.LogInfoByCtxf(ctx, "ClusterRole '%s' already exists.", roleName)
+	} else {
+		verbs, err := createOptions.GetVerbs()
+		if err != nil {
+			return nil, err
+		}
+		resources, err := createOptions.GetResorces()
+		if err != nil {
+			return nil, err
+		}
+		apiGroups, err := createOptions.GetAPIGroups()
+		if err != nil {
+			return nil, err
+		}
+		role := &rbacv1.ClusterRole{
+			ObjectMeta: metav1.ObjectMeta{Name: roleName, Labels: map[string]string{}},
+			Rules:      []rbacv1.PolicyRule{{Verbs: verbs, Resources: resources, APIGroups: apiGroups}},
+		}
+		_, err = clientSet.RbacV1().ClusterRoles().Create(ctx, role, metav1.CreateOptions{})
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("failed to create ClusterRole '%s': %w", roleName, err)
+		}
+		logging.LogChangedByCtxf(ctx, "Created ClusterRole '%s'.", roleName)
+	}
+	return n.GetClusterRoleByName(roleName)
+}
+
+func (n *NativeKubernetesCluster) DeleteClusterRoleByName(ctx context.Context, roleName string) (err error) {
+	if roleName == "" {
+		return tracederrors.TracedErrorEmptyString("roleName")
+	}
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return err
+	}
+	exists, err := n.ClusterRoleByNameExists(ctx, roleName)
+	if err != nil {
+		return err
+	}
+	if exists {
+		err = clientSet.RbacV1().ClusterRoles().Delete(ctx, roleName, metav1.DeleteOptions{})
+		if err != nil {
+			return tracederrors.TracedErrorf("failed to delete ClusterRole '%s': %w", roleName, err)
+		}
+		logging.LogChangedByCtxf(ctx, "ClusterRole '%s' deleted.", roleName)
+	} else {
+		logging.LogChangedByCtxf(ctx, "ClusterRole '%s' already absent.", roleName)
+	}
+	return nil
+}
+
+func (n *NativeKubernetesCluster) GetClusterRoleByName(roleName string) (kubernetesinterfaces.ClusterRole, error) {
+	if roleName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("roleName")
+	}
+	toReturn := &NativeClusterRole{}
+
+	err := toReturn.SetName(roleName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = toReturn.SetKubernetesCluster(n)
+	if err != nil {
+		return nil, err
+	}
+
+	return toReturn, nil
+}
+
+func (n *NativeKubernetesCluster) ClusterRoleByNameExists(ctx context.Context, roleName string) (exists bool, err error) {
+	if roleName == "" {
+		return false, tracederrors.TracedErrorEmptyString("roleName")
+	}
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return false, err
+	}
+	roleList, err := clientSet.RbacV1().ClusterRoles().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return false, tracederrors.TracedErrorf("Failed to list ClusterRoles: %w", err)
+	}
+	for _, role := range roleList.Items {
+		if role.Name == roleName {
+			logging.LogInfoByCtxf(ctx, "ClusterRole '%s' exists.", roleName)
+			return true, nil
+		}
+	}
+	logging.LogInfoByCtxf(ctx, "ClusterRole '%s' does not exist.", roleName)
+	return false, nil
+}
+func (n *NativeKubernetesCluster) CreateClusterRoleBinding(ctx context.Context, createOptions *kubernetesparameteroptions.CreateClusterRoleBindingOptions) (createdClusterRoleBinding kubernetesinterfaces.ClusterRoleBinding, err error) {
+	if createOptions == nil {
+		return nil, tracederrors.TracedErrorNil("createOptions")
+	}
+	bindingName, err := createOptions.GetName()
+	if err != nil {
+		return nil, err
+	}
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+	exists, err := n.ClusterRoleBindingByNameExists(ctx, bindingName)
+	if err != nil {
+		return nil, err
+	}
+	if exists {
+		logging.LogInfoByCtxf(ctx, "ClusterRoleBinding '%s' already exists.", bindingName)
+	} else {
+		roleRef, err := createOptions.GetRoleRef()
+		if err != nil {
+			return nil, err
+		}
+		subjects, err := createOptions.GetSubjects()
+		if err != nil {
+			return nil, err
+		}
+		subjectKind, err := createOptions.GetSubjectKind()
+		if err != nil {
+			return nil, err
+		}
+		subjectNamespace, err := createOptions.GetSubjectNamespace()
+		if err != nil {
+			return nil, err
+		}
+		subjectList := make([]rbacv1.Subject, len(subjects))
+		for i, subject := range subjects {
+			subjectList[i] = rbacv1.Subject{
+				Kind:      subjectKind,
+				Name:      subject,
+				Namespace: subjectNamespace,
+			}
+		}
+		binding := &rbacv1.ClusterRoleBinding{
+			ObjectMeta: metav1.ObjectMeta{Name: bindingName},
+			RoleRef:    rbacv1.RoleRef{Kind: "ClusterRole", Name: roleRef, APIGroup: "rbac.authorization.k8s.io"},
+			Subjects:   subjectList,
+		}
+		_, err = clientSet.RbacV1().ClusterRoleBindings().Create(ctx, binding, metav1.CreateOptions{})
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("failed to create ClusterRoleBinding '%s': %w", bindingName, err)
+		}
+		logging.LogChangedByCtxf(ctx, "Created ClusterRoleBinding '%s'.", bindingName)
+	}
+	return n.GetClusterRoleBindingByName(bindingName)
+}
+
+func (n *NativeKubernetesCluster) DeleteClusterRoleBindingByName(ctx context.Context, bindingName string) (err error) {
+	if bindingName == "" {
+		return tracederrors.TracedErrorEmptyString("bindingName")
+	}
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return err
+	}
+	exists, err := n.ClusterRoleBindingByNameExists(ctx, bindingName)
+	if err != nil {
+		return err
+	}
+	if exists {
+		err = clientSet.RbacV1().ClusterRoleBindings().Delete(ctx, bindingName, metav1.DeleteOptions{})
+		if err != nil {
+			return tracederrors.TracedErrorf("failed to delete ClusterRoleBinding '%s': %w", bindingName, err)
+		}
+		logging.LogChangedByCtxf(ctx, "ClusterRoleBinding '%s' deleted.", bindingName)
+	} else {
+		logging.LogChangedByCtxf(ctx, "ClusterRoleBinding '%s' already absent.", bindingName)
+	}
+	return nil
+}
+
+func (n *NativeKubernetesCluster) GetClusterRoleBindingByName(bindingName string) (kubernetesinterfaces.ClusterRoleBinding, error) {
+	if bindingName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("bindingName")
+	}
+	toReturn := &NativeClusterRoleBinding{}
+
+	err := toReturn.SetName(bindingName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = toReturn.SetKubernetesCluster(n)
+	if err != nil {
+		return nil, err
+	}
+
+	return toReturn, nil
+}
+
+func (n *NativeKubernetesCluster) ClusterRoleBindingByNameExists(ctx context.Context, bindingName string) (exists bool, err error) {
+	if bindingName == "" {
+		return false, tracederrors.TracedErrorEmptyString("bindingName")
+	}
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return false, err
+	}
+	bindingList, err := clientSet.RbacV1().ClusterRoleBindings().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return false, tracederrors.TracedErrorf("Failed to list ClusterRoleBindings: %w", err)
+	}
+	for _, binding := range bindingList.Items {
+		if binding.Name == bindingName {
+			logging.LogInfoByCtxf(ctx, "ClusterRoleBinding '%s' exists.", bindingName)
+			return true, nil
+		}
+	}
+	logging.LogInfoByCtxf(ctx, "ClusterRoleBinding '%s' does not exist.", bindingName)
+	return false, nil
+}
+
+func (n *NativeKubernetesCluster) ListClusterRoleNames(ctx context.Context) ([]string, error) {
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+	roleList, err := clientSet.RbacV1().ClusterRoles().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to list ClusterRoles: %w", err)
+	}
+	names := make([]string, len(roleList.Items))
+	for i, role := range roleList.Items {
+		names[i] = role.Name
+	}
+	return names, nil
+}
+
+func (n *NativeKubernetesCluster) ListClusterRoleBindingNames(ctx context.Context) ([]string, error) {
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+	bindingList, err := clientSet.RbacV1().ClusterRoleBindings().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to list ClusterRoleBindings: %w", err)
+	}
+	names := make([]string, len(bindingList.Items))
+	for i, binding := range bindingList.Items {
+		names[i] = binding.Name
+	}
+	return names, nil
+}
+
+func (n *NativeKubernetesCluster) CreateRole(ctx context.Context, namespaceName string, createOptions *kubernetesparameteroptions.CreateRoleOptions) (createdRole kubernetesinterfaces.Role, err error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+	return namespace.CreateRole(ctx, createOptions)
+}
+
+func (n *NativeKubernetesCluster) DeleteRoleByName(ctx context.Context, namespaceName string, roleName string) (err error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+	return namespace.DeleteRoleByName(ctx, roleName)
+}
+
+func (n *NativeKubernetesCluster) GetRoleByName(namespaceName string, roleName string) (kubernetesinterfaces.Role, error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+	return namespace.GetRoleByName(roleName)
+}
+
+func (n *NativeKubernetesCluster) RoleByNameExists(ctx context.Context, namespaceName string, roleName string) (exists bool, err error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return false, err
+	}
+	return namespace.RoleByNameExists(ctx, roleName)
+}
+
+func (n *NativeKubernetesCluster) CreateRoleBinding(ctx context.Context, namespaceName string, createOptions *kubernetesparameteroptions.CreateRoleBindingOptions) (createdRoleBinding kubernetesinterfaces.RoleBinding, err error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+	return namespace.CreateRoleBinding(ctx, createOptions)
+}
+
+func (n *NativeKubernetesCluster) DeleteRoleBindingByName(ctx context.Context, namespaceName string, roleBindingName string) (err error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+	return namespace.DeleteRoleBindingByName(ctx, roleBindingName)
+}
+
+func (n *NativeKubernetesCluster) GetRoleBindingByName(namespaceName string, roleBindingName string) (kubernetesinterfaces.RoleBinding, error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+	return namespace.GetRoleBindingByName(roleBindingName)
+}
+
+func (n *NativeKubernetesCluster) RoleBindingByNameExists(ctx context.Context, namespaceName string, roleBindingName string) (exists bool, err error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return false, err
+	}
+	return namespace.RoleBindingByNameExists(ctx, roleBindingName)
 }

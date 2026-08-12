@@ -2173,3 +2173,246 @@ func (c *CommandExecutorNamespace) ListCronJobNames(ctx context.Context) ([]stri
 
 	return names, nil
 }
+
+func (c *CommandExecutorNamespace) CreateRoleBinding(ctx context.Context, createOptions *kubernetesparameteroptions.CreateRoleBindingOptions) (createdRoleBinding kubernetesinterfaces.RoleBinding, err error) {
+	if createOptions == nil {
+		return nil, tracederrors.TracedErrorNil("createOptions")
+	}
+
+	bindingName, err := createOptions.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	clusterName, err := c.GetClusterName()
+	if err != nil {
+		return nil, err
+	}
+
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	exists, err := c.RoleBindingByNameExists(ctx, bindingName)
+	if err != nil {
+		return nil, err
+	}
+
+	if exists {
+		logging.LogInfoByCtxf(ctx, "RoleBinding '%s' in namespace '%s' in kubernetes cluster '%s' already exists.", bindingName, namespaceName, clusterName)
+	} else {
+		roleRef, err := createOptions.GetRoleRef()
+		if err != nil {
+			return nil, err
+		}
+
+		subjects, err := createOptions.GetSubjects()
+		if err != nil {
+			return nil, err
+		}
+
+		subjectKind, err := createOptions.GetSubjectKind()
+		if err != nil {
+			return nil, err
+		}
+
+		command := []string{
+			"kubectl",
+			"--context", contextName,
+			"--namespace", namespaceName,
+			"create", "rolebinding", bindingName,
+			"--role=" + roleRef,
+		}
+
+		for _, subject := range subjects {
+			switch subjectKind {
+			case "ServiceAccount":
+				command = append(command, fmt.Sprintf("--serviceaccount=%s:%s", namespaceName, subject))
+			case "User":
+				command = append(command, "--user="+subject)
+			case "Group":
+				command = append(command, "--group="+subject)
+			default:
+				return nil, tracederrors.TracedErrorf("unsupported subject kind '%s'", subjectKind)
+			}
+		}
+
+		_, err = c.RunCommand(
+			ctx,
+			&parameteroptions.RunCommandOptions{
+				Command: command,
+			},
+		)
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("failed to create RoleBinding '%s' in namespace '%s': %w", bindingName, namespaceName, err)
+		}
+
+		logging.LogChangedByCtxf(ctx, "Created RoleBinding '%s' in namespace '%s' in kubernetes cluster '%s'.", bindingName, namespaceName, clusterName)
+	}
+
+	return c.GetRoleBindingByName(bindingName)
+}
+
+func (c *CommandExecutorNamespace) DeleteRoleBindingByName(ctx context.Context, name string) (err error) {
+	if name == "" {
+		return tracederrors.TracedErrorEmptyString("name")
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	clusterName, err := c.GetClusterName()
+	if err != nil {
+		return err
+	}
+
+	exists, err := c.RoleBindingByNameExists(ctx, name)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		contextName, err := c.GetCachedKubectlContext(ctx)
+		if err != nil {
+			return err
+		}
+
+		_, err = c.RunCommand(
+			ctx,
+			&parameteroptions.RunCommandOptions{
+				Command: []string{
+					"kubectl",
+					"--context", contextName,
+					"--namespace", namespaceName,
+					"delete", "rolebinding", name,
+				},
+			},
+		)
+		if err != nil {
+			return err
+		}
+
+		logging.LogChangedByCtxf(ctx, "RoleBinding '%s' in namespace '%s' in kubernetes cluster '%s' deleted.", name, namespaceName, clusterName)
+	} else {
+		logging.LogChangedByCtxf(ctx, "RoleBinding '%s' in namespace '%s' in kubernetes cluster '%s' already absent.", name, namespaceName, clusterName)
+	}
+
+	return nil
+}
+
+func (c *CommandExecutorNamespace) GetRoleBindingByName(name string) (kubernetesinterfaces.RoleBinding, error) {
+	if name == "" {
+		return nil, tracederrors.TracedErrorEmptyString("name")
+	}
+
+	toReturn := NewCommandExecutorRoleBinding()
+
+	err := toReturn.SetName(name)
+	if err != nil {
+		return nil, err
+	}
+
+	err = toReturn.SetNamespace(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return toReturn, nil
+}
+
+func (c *CommandExecutorNamespace) ListRoleBindingNames(ctx context.Context) ([]string, error) {
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	lines, err := c.RunCommandAndGetStdoutAsLines(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context", contextName,
+				"--namespace", namespaceName,
+				"get", "rolebindings",
+				"-o", "name",
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	roleBindingNames := []string{}
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		splitted := strings.Split(line, "/")
+		if len(splitted) != 2 {
+			return nil, tracederrors.TracedErrorf(
+				"Unable to get rolebinding name out of line='%s'.",
+				line,
+			)
+		}
+
+		bindingName := splitted[1]
+		if bindingName == "" {
+			return nil, tracederrors.TracedErrorf(
+				"bindingName is empty string after evaluation of line '%s'",
+				line,
+			)
+		}
+
+		roleBindingNames = append(roleBindingNames, bindingName)
+	}
+
+	sort.Strings(roleBindingNames)
+
+	return roleBindingNames, nil
+}
+
+func (c *CommandExecutorNamespace) RoleBindingByNameExists(ctx context.Context, name string) (exists bool, err error) {
+	if name == "" {
+		return false, tracederrors.TracedErrorEmptyString("name")
+	}
+
+	roleBindingNames, err := c.ListRoleBindingNames(contextutils.WithSilent(ctx))
+	if err != nil {
+		return false, err
+	}
+
+	exists = slices.Contains(roleBindingNames, name)
+
+	clusterName, err := c.GetClusterName()
+	if err != nil {
+		return false, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return false, err
+	}
+
+	if exists {
+		logging.LogInfoByCtxf(ctx, "RoleBinding '%s' in namespace '%s' in kubernetes cluster '%s' exists.", name, namespaceName, clusterName)
+	} else {
+		logging.LogInfoByCtxf(ctx, "RoleBinding '%s' in namespace '%s' in kubernetes cluster '%s' does not exist.", name, namespaceName, clusterName)
+	}
+
+	return exists, nil
+}
