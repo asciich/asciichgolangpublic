@@ -578,3 +578,77 @@ func (c *Container) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, op
 
 	return ret, nil
 }
+
+func (c *Container) GetLogs(ctx context.Context) ([]byte, []byte, error) {
+	name, err := c.GetName()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	cli, err := client.New(client.FromEnv)
+	if err != nil {
+		return nil, nil, tracederrors.TracedErrorf("unable to create docker client: %w", err)
+	}
+	defer cli.Close()
+
+	logs, err := cli.ContainerLogs(ctx, name, client.ContainerLogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+	})
+	if err != nil {
+		return nil, nil, tracederrors.TracedErrorf("Failed to get logs for container '%s': %w", name, err)
+	}
+	defer logs.Close()
+
+	// Docker logs are returned in a multiplexed format
+	// Use stdcopy.StdCopy to separate stdout and stderr
+	var stdout, stderr bytes.Buffer
+	_, err = stdcopy.StdCopy(&stdout, &stderr, logs)
+	if err != nil {
+		return nil, nil, tracederrors.TracedErrorf("Failed to demultiplex logs for container '%s': %w", name, err)
+	}
+
+	// Return empty byte slices if no data, never return nil for successful operations
+	stdoutBytes := stdout.Bytes()
+	stderrBytes := stderr.Bytes()
+	
+	if stdoutBytes == nil {
+		stdoutBytes = []byte{}
+	}
+	if stderrBytes == nil {
+		stderrBytes = []byte{}
+	}
+
+	return stdoutBytes, stderrBytes, nil
+}
+
+func (c *Container) WaitUntilFinished(ctx context.Context, timeout time.Duration) error {
+	name, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		// Check if context is cancelled
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+
+		isRunning, err := c.IsRunning(ctx)
+		if err != nil {
+			return err
+		}
+
+		if !isRunning {
+			return nil
+		}
+
+		// Wait a bit before checking again
+		time.Sleep(time.Millisecond * 100)
+	}
+
+	return tracederrors.TracedErrorf("Container '%s' did not finish within timeout %v", name, timeout)
+}

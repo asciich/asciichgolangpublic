@@ -858,19 +858,19 @@ func (n *NativeKubernetesCluster) GetClusterRoleByName(roleName string) (kuberne
 	if roleName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("roleName")
 	}
-	toReturn := &NativeClusterRole{}
+	ret := &NativeClusterRole{}
 
-	err := toReturn.SetName(roleName)
+	err := ret.SetName(roleName)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetKubernetesCluster(n)
+	err = ret.SetKubernetesCluster(n)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func (n *NativeKubernetesCluster) ClusterRoleByNameExists(ctx context.Context, roleName string) (exists bool, err error) {
@@ -979,19 +979,19 @@ func (n *NativeKubernetesCluster) GetClusterRoleBindingByName(bindingName string
 	if bindingName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("bindingName")
 	}
-	toReturn := &NativeClusterRoleBinding{}
+	ret := &NativeClusterRoleBinding{}
 
-	err := toReturn.SetName(bindingName)
+	err := ret.SetName(bindingName)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetKubernetesCluster(n)
+	err = ret.SetKubernetesCluster(n)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func (n *NativeKubernetesCluster) ClusterRoleBindingByNameExists(ctx context.Context, bindingName string) (exists bool, err error) {

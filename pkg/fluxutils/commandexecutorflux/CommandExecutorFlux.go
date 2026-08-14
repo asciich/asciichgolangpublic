@@ -208,9 +208,9 @@ func (c *CommandExecutorFlux) GetDeployedFlux(cluster kubernetesinterfaces.Kuber
 		return nil, err
 	}
 
-	toReturn := new(CommandExecutorDeployedFlux)
-	toReturn.commandExecutor = commandExecutor
-	toReturn.cluster = cluster
+	ret := new(CommandExecutorDeployedFlux)
+	ret.commandExecutor = commandExecutor
+	ret.cluster = cluster
 
-	return toReturn, nil
+	return ret, nil
 }

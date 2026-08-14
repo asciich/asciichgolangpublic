@@ -3,6 +3,7 @@ package dockerinterfaces
 import (
 	"context"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
 )
@@ -25,8 +26,11 @@ type Docker interface {
 
 	PullImage(ctx context.Context, imageName string) (containerinterfaces.Image, error)
 
-	RemoveImage(ctx context.Context, imageName string) error
+	RemoveImage(ctx context.Context, imageName string, options *dockeroptions.RemoveOptions) error
 	RunContainer(ctx context.Context, options *dockeroptions.DockerRunContainerOptions) (containerinterfaces.Container, error)
+	BuildImage(ctx context.Context, options *dockeroptions.BuildContainerOptions) (containerinterfaces.Image, error)
 
 	RemoveContainer(ctx context.Context, name string, options *dockeroptions.RemoveOptions) error
+
+	RunCommandInTemporaryContainer(ctx context.Context, options *dockeroptions.DockerRunContainerOptions) (*commandoutput.CommandOutput, error)
 }

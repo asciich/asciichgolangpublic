@@ -1,6 +1,7 @@
 package commandexecutordocker
 
 import (
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -59,4 +60,22 @@ func (i *Image) Exists(ctx context.Context) (bool, error) {
 	}
 
 	return docker.ImageExists(ctx, name)
+}
+
+func (i *Image) Remove(ctx context.Context, options *dockeroptions.RemoveOptions) error {
+	name, err := i.GetName()
+	if err != nil {
+		return err
+	}
+
+	docker, err := i.GetDocker()
+	if err != nil {
+		return err
+	}
+
+	if options == nil {
+		options = &dockeroptions.RemoveOptions{}
+	}
+
+	return docker.RemoveImage(ctx, name, options)
 }

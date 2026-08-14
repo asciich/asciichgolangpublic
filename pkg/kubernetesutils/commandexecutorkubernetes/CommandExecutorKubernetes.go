@@ -41,19 +41,19 @@ func GetCommandExecutorKubernetsByName(commandExecutor commandexecutorinterfaces
 		return nil, tracederrors.TracedErrorEmptyString("clusterName")
 	}
 
-	toReturn := NewCommandExecutorKubernetes()
+	ret := NewCommandExecutorKubernetes()
 
-	err = toReturn.SetCommandExecutor(commandExecutor)
+	err = ret.SetCommandExecutor(commandExecutor)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetName(clusterName)
+	err = ret.SetName(clusterName)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func GetClusterByName(clusterName string) (kubernetes kubernetesinterfaces.KubernetesCluster, err error) {
@@ -392,19 +392,19 @@ func (c *CommandExecutorKubernetes) GetNamespaceByName(name string) (namespace k
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
 
-	toReturn := NewCommandExecutorNamespace()
+	ret := NewCommandExecutorNamespace()
 
-	err = toReturn.SetName(name)
+	err = ret.SetName(name)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetKubernetesCluster(c)
+	err = ret.SetKubernetesCluster(c)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func (c *CommandExecutorKubernetes) GetObjectByNames(objectName string, objectType string, namespaceName string) (object kubernetesinterfaces.Object, err error) {
@@ -1715,19 +1715,19 @@ func (c *CommandExecutorKubernetes) GetClusterRoleByName(roleName string) (kuber
 		return nil, tracederrors.TracedErrorEmptyString("roleName")
 	}
 
-	toReturn := NewCommandExecutorClusterRole()
+	ret := NewCommandExecutorClusterRole()
 
-	err := toReturn.SetName(roleName)
+	err := ret.SetName(roleName)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetKubernetesCluster(c)
+	err = ret.SetKubernetesCluster(c)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func (c *CommandExecutorKubernetes) ClusterRoleByNameExists(ctx context.Context, roleName string) (exists bool, err error) {
@@ -1912,19 +1912,19 @@ func (c *CommandExecutorKubernetes) GetClusterRoleBindingByName(bindingName stri
 		return nil, tracederrors.TracedErrorEmptyString("bindingName")
 	}
 
-	toReturn := NewCommandExecutorClusterRoleBinding()
+	ret := NewCommandExecutorClusterRoleBinding()
 
-	err := toReturn.SetName(bindingName)
+	err := ret.SetName(bindingName)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetKubernetesCluster(c)
+	err = ret.SetKubernetesCluster(c)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func (c *CommandExecutorKubernetes) ClusterRoleBindingByNameExists(ctx context.Context, bindingName string) (exists bool, err error) {
