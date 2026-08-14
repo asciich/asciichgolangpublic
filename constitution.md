@@ -33,6 +33,8 @@
 ## Documentation
 
 - All `Example_*_test.go` files are meant for documentation. They must all be listed and linked in the corresponding `README.md`. This is done as a bullet point list. 
+- All package names mentioned in a markdown file must be a link to the README.md of the mentioned package.
+
 
 ## Testing
 

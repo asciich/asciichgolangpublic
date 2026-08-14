@@ -15,7 +15,7 @@ import (
 
 // This example shows how to run a single command in a temporary pod.
 // The pod is created automatically, executes the command, and is deleted afterwards.
-func Test_Example_RunSingleCommandPod(t *testing.T) {
+func Test_Example_RunCommandInTemporaryPod(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.WithVerbose(context.TODO())
 

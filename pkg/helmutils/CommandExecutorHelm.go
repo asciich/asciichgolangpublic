@@ -22,14 +22,14 @@ func GetCommandExecutorHelm(executor commandexecutorinterfaces.CommandExecutor) 
 		return nil, tracederrors.TracedErrorNil("executor")
 	}
 
-	toReturn := NewcommandExecutorHelm()
+	ret := NewcommandExecutorHelm()
 
-	err = toReturn.SetCommandExecutor(executor)
+	err = ret.SetCommandExecutor(executor)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func GetLocalCommandExecutorHelm() (helm helminterfaces.Helm, err error) {

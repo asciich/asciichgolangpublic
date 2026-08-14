@@ -13,6 +13,7 @@ type DockerRunContainerOptions struct {
 	ImageName            string
 	Name                 string
 	Command              []string
+	EntryPoint           []string
 	Ports                []string
 	Mounts               []string
 	KeepStoppedContainer bool
@@ -23,6 +24,9 @@ type DockerRunContainerOptions struct {
 	WaitForPortsOpen bool
 
 	SkipIfAlreadyRunning bool
+
+	// If set to true, the caller will wait until the container has finished execution.
+	WaitUntilContainerFinished bool
 }
 
 func NewDockerRunContainerOptions() (d *DockerRunContainerOptions) {
@@ -36,6 +40,10 @@ func (d *DockerRunContainerOptions) GetDeepCopy() *DockerRunContainerOptions {
 
 	if d.Command != nil {
 		copy.Command = slicesutils.GetDeepCopyOfStringsSlice(d.Command)
+	}
+
+	if d.EntryPoint != nil {
+		copy.EntryPoint = slicesutils.GetDeepCopyOfStringsSlice(d.EntryPoint)
 	}
 
 	if d.Ports != nil {
@@ -93,6 +101,14 @@ func (d *DockerRunContainerOptions) GetPorts() (ports []string, err error) {
 func (d *DockerRunContainerOptions) GetUseHostNet() (useHostNet bool, err error) {
 
 	return d.UseHostNet, nil
+}
+
+func (d *DockerRunContainerOptions) GetWaitUntilContainerFinished() (waitUntilContainerFinished bool) {
+	return d.WaitUntilContainerFinished
+}
+
+func (d *DockerRunContainerOptions) SetWaitUntilContainerFinished(waitUntilContainerFinished bool) {
+	d.WaitUntilContainerFinished = waitUntilContainerFinished
 }
 
 func (d *DockerRunContainerOptions) SetCommand(command []string) (err error) {
@@ -220,4 +236,37 @@ func (o *DockerRunContainerOptions) GetCommandOrNil() []string {
 	}
 
 	return o.Command
+}
+
+// GetEntryPointOrNil returns the entrypoint slice or nil if no entrypoint is set.
+// When nil is passed to the Docker API, the image's default ENTRYPOINT is used.
+// When an empty slice []string{} is explicitly set, the image's ENTRYPOINT is overwritten to be empty.
+func (o *DockerRunContainerOptions) GetEntryPointOrNil() []string {
+	if o.EntryPoint == nil {
+		return nil
+	}
+
+	return o.EntryPoint
+}
+
+// SetEntryPoint sets the entrypoint for the container.
+// An empty slice []string{} is allowed and will overwrite the image's default ENTRYPOINT.
+func (o *DockerRunContainerOptions) SetEntryPoint(entryPoint []string) (err error) {
+	if entryPoint == nil {
+		return tracederrors.TracedErrorf("entryPoint is nil")
+	}
+
+	o.EntryPoint = entryPoint
+
+	return nil
+}
+
+// GetEntryPoint returns the entrypoint or an error if not set.
+// Note: This returns an error if EntryPoint is nil, but will return an empty slice if explicitly set to []string{}.
+func (o *DockerRunContainerOptions) GetEntryPoint() (entryPoint []string, err error) {
+	if o.EntryPoint == nil {
+		return nil, tracederrors.TracedErrorf("EntryPoint not set")
+	}
+
+	return o.EntryPoint, nil
 }

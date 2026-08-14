@@ -1,6 +1,7 @@
 package nativedocker
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -12,10 +13,12 @@ import (
 	"time"
 
 	"github.com/containerd/errdefs"
+	"github.com/moby/moby/api/pkg/stdcopy"
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/api/types/mount"
 	"github.com/moby/moby/api/types/network"
 	"github.com/moby/moby/client"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockergeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockerinterfaces"
@@ -124,6 +127,7 @@ func (d *Docker) RunContainer(ctx context.Context, options *dockeroptions.Docker
 	}
 
 	command := options.GetCommandOrNil()
+	entrypoint := options.GetEntryPointOrNil()
 
 	autoremove := !options.KeepStoppedContainer
 
@@ -222,8 +226,9 @@ func (d *Docker) RunContainer(ctx context.Context, options *dockeroptions.Docker
 			Name:  name,
 			Image: imageName,
 			Config: &container.Config{
-				Env: envVars,
-				Cmd: command,
+				Env:        envVars,
+				Cmd:        command,
+				Entrypoint: entrypoint,
 			},
 			HostConfig: &container.HostConfig{
 				AutoRemove:   autoremove,
@@ -387,7 +392,7 @@ func (d *Docker) PullImage(ctx context.Context, imageName string) (containerinte
 	return d.GetImageByName(imageName)
 }
 
-func (d *Docker) RemoveImage(ctx context.Context, imageName string) error {
+func (d *Docker) RemoveImage(ctx context.Context, imageName string, options *dockeroptions.RemoveOptions) error {
 	if imageName == "" {
 		return tracederrors.TracedErrorEmptyString("imageName")
 	}
@@ -404,7 +409,14 @@ func (d *Docker) RemoveImage(ctx context.Context, imageName string) error {
 		}
 		defer cli.Close()
 
-		_, err = cli.ImageRemove(ctx, imageName, client.ImageRemoveOptions{})
+		force := false
+		if options != nil {
+			force = options.Force
+		}
+
+		_, err = cli.ImageRemove(ctx, imageName, client.ImageRemoveOptions{
+			Force: force,
+		})
 		if err != nil {
 			return tracederrors.TracedErrorf("Unable to remove image '%s': %w", imageName, err)
 		}
@@ -483,4 +495,208 @@ func WaitUntilExecFinished(ctx context.Context, execId string) (int, error) {
 	logging.LogInfoByCtxf(ctx, "Wait until exec '%s' finished finished. Exit code is %d.", execId, exitCode)
 
 	return exitCode, nil
+}
+
+// RunCommandInTemporaryContainer runs a command in a temporary Docker container and returns the output.
+//
+// Implementation note — why we use a run → wait → logs → delete approach:
+// This mirrors the Kubernetes implementation to provide a consistent API across container orchestration platforms.
+// The container is created with AutoRemove=false for explicit control, and we manually remove it
+// to ensure deterministic cleanup.
+//
+// Steps:
+//  1. `ContainerCreate` — create and start the container without attaching
+//  2. `ContainerWait`   — block until the container has completed
+//  3. `ContainerLogs`   — fetch the output exactly once
+//  4. `ContainerRemove` — clean up the container
+func (d *Docker) RunCommandInTemporaryContainer(ctx context.Context, options *dockeroptions.DockerRunContainerOptions) (*commandoutput.CommandOutput, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	containerName, err := options.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	imageName, err := options.GetImageName()
+	if err != nil {
+		return nil, err
+	}
+
+	command := options.GetCommandOrNil()
+	entrypoint := options.GetEntryPointOrNil()
+
+	logging.LogInfoByCtxf(ctx, "Run command in temporary container '%s' using container image '%s' started.", containerName, imageName)
+
+	// First, ensure any existing container with this name is removed
+	err = d.RemoveContainer(ctx, containerName, &dockeroptions.RemoveOptions{Force: true})
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = d.PullImage(ctx, imageName)
+	if err != nil {
+		return nil, err
+	}
+
+	cli, err := client.New(client.FromEnv)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to create docker client: %w", err)
+	}
+	defer cli.Close()
+
+	envVars := []string{}
+	if len(options.AdditionalEnvVars) > 0 {
+		envVars, err = environmentvariables.SetEnvVarsInStringSlice(envVars, options.AdditionalEnvVars)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	portBindings := network.PortMap{}
+	for _, p := range options.Ports {
+		listenIpAddress := "127.0.0.1"
+		if strings.HasPrefix(p, "0.0.0.0:") {
+			listenIpAddress = "0.0.0.0"
+			p = strings.TrimPrefix(p, "0.0.0.0:")
+		}
+		if strings.HasPrefix(p, "127.0.0.1:") {
+			listenIpAddress = "127.0.0.1"
+			p = strings.TrimPrefix(p, "127.0.0.1:")
+		}
+
+		splitted := strings.Split(p, ":")
+		if len(splitted) != 2 {
+			return nil, tracederrors.TracedErrorf("Unsupported port mapping '%s' to start docker container '%s'", p, containerName)
+		}
+
+		hostPortNumber, err := strconv.Atoi(splitted[0])
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to parse host port '%s': %w", splitted[0], err)
+		}
+
+		containerPortNumber, err := strconv.Atoi(splitted[1])
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to parse container port '%s': %w", splitted[1], err)
+		}
+
+		localhostIp, err := netip.ParseAddr(listenIpAddress)
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to parse hostIP '%s': %w", listenIpAddress, err)
+		}
+
+		hostBinding := network.PortBinding{
+			HostIP:   localhostIp,
+			HostPort: strconv.Itoa(hostPortNumber),
+		}
+
+		containerPort, err := network.ParsePort(fmt.Sprintf("%d/tcp", containerPortNumber))
+		if err != nil {
+			return nil, err
+		}
+
+		portBindings[containerPort] = []network.PortBinding{hostBinding}
+	}
+
+	mounts := []mount.Mount{}
+	for _, m := range options.Mounts {
+		splitted := strings.Split(m, ":")
+		if len(splitted) != 2 {
+			return nil, tracederrors.TracedErrorf("Failed to process mount: '%s'.", m)
+		}
+
+		toAdd := mount.Mount{
+			Type:     mount.TypeBind,
+			Source:   splitted[0],
+			Target:   splitted[1],
+			ReadOnly: false,
+		}
+
+		mounts = append(mounts, toAdd)
+	}
+
+	// Step 1: Create and start the container
+	createResult, err := cli.ContainerCreate(ctx, client.ContainerCreateOptions{
+		Name:  containerName,
+		Image: imageName,
+		Config: &container.Config{
+			Env:        envVars,
+			Cmd:        command,
+			Entrypoint: entrypoint,
+		},
+		HostConfig: &container.HostConfig{
+			AutoRemove:   false, // We handle removal explicitly
+			PortBindings: portBindings,
+			Mounts:       mounts,
+		},
+	})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to create container '%s': %w", containerName, err)
+	}
+
+	_, err = cli.ContainerStart(ctx, createResult.ID, client.ContainerStartOptions{})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to start container '%s': %w", containerName, err)
+	}
+
+	// Step 2: Wait for the container to complete
+	waitResult := cli.ContainerWait(ctx, createResult.ID, client.ContainerWaitOptions{})
+
+	// Wait for the result or error
+	var exitCode int64
+	select {
+	case err := <-waitResult.Error:
+		return nil, tracederrors.TracedErrorf("Error waiting for container '%s': %w", containerName, err)
+	case result := <-waitResult.Result:
+		exitCode = result.StatusCode
+	}
+
+	// Step 3: Fetch the logs exactly once
+	logs, err := cli.ContainerLogs(ctx, createResult.ID, client.ContainerLogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+	})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to get logs for container '%s': %w", containerName, err)
+	}
+	defer logs.Close()
+
+	// Docker logs are returned in a multiplexed format
+	// Use stdcopy.StdCopy to separate stdout and stderr
+	var stdout, stderr bytes.Buffer
+	_, err = stdcopy.StdCopy(&stdout, &stderr, logs)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to demultiplex logs for container '%s': %w", containerName, err)
+	}
+
+	// Create CommandOutput from the logs
+	output := &commandoutput.CommandOutput{}
+	err = output.SetStdout(stdout.Bytes())
+	if err != nil {
+		return nil, err
+	}
+	err = output.SetStderr(stderr.Bytes())
+	if err != nil {
+		return nil, err
+	}
+	err = output.SetReturnCode(int(exitCode))
+	if err != nil {
+		return nil, err
+	}
+
+	// Step 4: Delete the container to clean up
+	removeOptions := client.ContainerRemoveOptions{
+		Force:         true,
+		RemoveVolumes: false,
+	}
+	_, err = cli.ContainerRemove(ctx, createResult.ID, removeOptions)
+	if err != nil {
+		// Log the error but don't fail the operation since we already got the output
+		logging.LogErrorByCtxf(ctx, "Failed to remove temporary container '%s': %v", containerName, err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run command in temporary container '%s' using container image '%s' finished.", containerName, imageName)
+
+	return output, nil
 }

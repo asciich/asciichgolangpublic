@@ -88,18 +88,18 @@ func NewTracedErrorType() (t *TracedErrorType) {
 }
 
 func TracedErrorEmptyString(stringVarName string, errorToUnwrap ...error) (tracedError error) {
-	var toReturn TracedErrorType = TracedErrorf("'%s' is empty string", stringVarName).(TracedErrorType)
+	var ret TracedErrorType = TracedErrorf("'%s' is empty string", stringVarName).(TracedErrorType)
 
-	toReturn.errorsToUnwrap = append(toReturn.errorsToUnwrap, ErrTracedErrorEmptyString)
-	toReturn.errorsToUnwrap = append(toReturn.errorsToUnwrap, errorToUnwrap...)
+	ret.errorsToUnwrap = append(ret.errorsToUnwrap, ErrTracedErrorEmptyString)
+	ret.errorsToUnwrap = append(ret.errorsToUnwrap, errorToUnwrap...)
 
-	return toReturn
+	return ret
 }
 
 func TracedErrorNil(nilVarName string) (tracedError error) {
-	var toReturn TracedErrorType = TracedErrorf("'%s' is nil", nilVarName).(TracedErrorType)
-	toReturn.errorsToUnwrap = append(toReturn.errorsToUnwrap, ErrTracedErrorNil)
-	return toReturn
+	var ret TracedErrorType = TracedErrorf("'%s' is nil", nilVarName).(TracedErrorType)
+	ret.errorsToUnwrap = append(ret.errorsToUnwrap, ErrTracedErrorNil)
+	return ret
 }
 
 func TracedErrorNilf(formatString string, args ...interface{}) (tracedError error) {
@@ -108,9 +108,9 @@ func TracedErrorNilf(formatString string, args ...interface{}) (tracedError erro
 }
 
 func TracedErrorNotImplemented() (tracedError error) {
-	var toReturn TracedErrorType = TracedError("Not implemented").(TracedErrorType)
-	toReturn.errorsToUnwrap = append(toReturn.errorsToUnwrap, ErrTracedErrorNotImplemented)
-	return toReturn
+	var ret TracedErrorType = TracedError("Not implemented").(TracedErrorType)
+	ret.errorsToUnwrap = append(ret.errorsToUnwrap, ErrTracedErrorNotImplemented)
+	return ret
 }
 
 func (t TracedErrorType) GetErrorMessage() (errorMessage string, err error) {

@@ -24,9 +24,11 @@ The implementation using exec to call `kubectl` or other commands is useful when
 * [Create and delete Pod](Example_CreateAndDeletePod_test.go)
 * [Create and delete ReplicaSet](Example_CreateAndDeleteReplicaSet_test.go)
 * [Create and delete Role](Example_CreateAndDeleteRole_test.go)
+* [Create and delete ClusterRole](Example_CreateAndDeleteClusterRole_test.go)
 * [Run single command in temporary pod](Example_RunSingleCommandPod_test.go)
 * [Run single command in temporary pod with secret](Example_RunSingleCommandPodWithSecret_test.go)
 * [Run single command in temporary pod with secret as file](Example_RunSingleCommandPodWithSecretAsFile_test.go)
+* [Run command in temporary pod](Example_RunCommandInTemporaryPod_test.go)
 * [Copy file to pod](Example_CopyFileToPod_test.go): Copy a local file to a container running in a pod (similar to `kubectl cp`).
     * [Native Kubernetes implementation](Example_CopyFileToPod_test.go): Using the native Kubernetes API
     * [Command Executor implementation](Example_CopyFileToPod_test.go): Using kubectl cp command

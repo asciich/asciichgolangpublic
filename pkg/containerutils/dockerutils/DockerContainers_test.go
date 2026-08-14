@@ -6,6 +6,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerinterfaces"
@@ -85,7 +86,7 @@ func TestContainers_Container_Run(t *testing.T) {
 
 				if tt.enforcePullImage {
 					// Delete the image so the run command is forced to perform a pull before the container can be started:
-					err := docker.RemoveImage(ctx, imageName)
+					err := docker.RemoveImage(ctx, imageName, &dockeroptions.RemoveOptions{})
 					require.NoError(t, err)
 				} else {
 					// Ensure the image is already present so no pull is needed to run the container:
@@ -171,7 +172,7 @@ func TestContainers_Container_RunCommand(t *testing.T) {
 
 				if tt.enforcePullImage {
 					// Delete the image so the run command is forced to perform a pull before the container can be started:
-					err := docker.RemoveImage(ctx, imageName)
+					err := docker.RemoveImage(ctx, imageName, &dockeroptions.RemoveOptions{})
 					require.NoError(t, err)
 				} else {
 					// Ensure the image is already present so no pull is needed to run the container:
@@ -430,5 +431,131 @@ func Test_RunCommandAndGetStdinAsIoWriteCloser(t *testing.T) {
 			require.NoError(t, err)
 			require.EqualValues(t, "hello world.\n", content)
 		})
+	}
+}
+
+func Test_Container_GetLogs(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeDocker"},
+		{"commandExectuorDockerContainer"},
+	}
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt)+"_both",
+			func(t *testing.T) {
+				ctx := getCtx()
+
+				const containerName = "test-get-logs"
+
+				container, _ := getDockerContainerToTest(t, tt.implementationName, containerName)
+				err := container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+				require.NoError(t, err)
+				defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+
+				// Run a container that produces output and exits
+				err = container.Run(ctx, &dockeroptions.DockerRunContainerOptions{
+					ImageName:            "alpine:latest",
+					Command:              []string{"sh", "-c", "echo 'stdout message' && echo 'stderr message' >&2"},
+					KeepStoppedContainer: true,
+				})
+				require.NoError(t, err)
+				defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+
+				// Wait for container to finish using WaitUntilFinished
+				err = container.WaitUntilFinished(ctx, time.Second*30)
+				require.NoError(t, err)
+
+				// Get logs
+				stdout, stderr, err := container.GetLogs(ctx)
+				require.NoError(t, err)
+
+				// Verify logs contain expected messages
+				stdoutStr := string(stdout)
+				stderrStr := string(stderr)
+
+				require.EqualValues(t, stdoutStr, "stdout message\n")
+				require.EqualValues(t, stderrStr, "stderr message\n")
+			},
+		)
+
+		t.Run(
+			testutils.MustFormatAsTestname(tt)+"_stdout",
+			func(t *testing.T) {
+				ctx := getCtx()
+
+				const containerName = "test-get-logs"
+
+				container, _ := getDockerContainerToTest(t, tt.implementationName, containerName)
+				err := container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+				require.NoError(t, err)
+				defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+
+				// Run a container that produces output and exits
+				err = container.Run(ctx, &dockeroptions.DockerRunContainerOptions{
+					ImageName:            "alpine:latest",
+					Command:              []string{"sh", "-c", "echo 'stdout message'"},
+					KeepStoppedContainer: true,
+				})
+				require.NoError(t, err)
+				defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+
+				// Wait for container to finish using WaitUntilFinished
+				err = container.WaitUntilFinished(ctx, time.Second*30)
+				require.NoError(t, err)
+
+				// Get logs
+				stdout, stderr, err := container.GetLogs(ctx)
+				require.NoError(t, err)
+
+				// Verify logs contain expected messages
+				stdoutStr := string(stdout)
+				require.NotNil(t, stderr)
+				stderrStr := string(stderr)
+
+				require.EqualValues(t, stdoutStr, "stdout message\n")
+				require.EqualValues(t, stderrStr, "")
+			},
+		)
+
+		t.Run(
+			testutils.MustFormatAsTestname(tt)+"_stdout",
+			func(t *testing.T) {
+				ctx := getCtx()
+
+				const containerName = "test-get-logs"
+
+				container, _ := getDockerContainerToTest(t, tt.implementationName, containerName)
+				err := container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+				require.NoError(t, err)
+				defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+
+				// Run a container that produces output and exits
+				err = container.Run(ctx, &dockeroptions.DockerRunContainerOptions{
+					ImageName:            "alpine:latest",
+					Command:              []string{"sh", "-c", "echo 'stderr message' >&2"},
+					KeepStoppedContainer: true,
+				})
+				require.NoError(t, err)
+				defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+
+				// Wait for container to finish using WaitUntilFinished
+				err = container.WaitUntilFinished(ctx, time.Second*30)
+				require.NoError(t, err)
+
+				// Get logs
+				stdout, stderr, err := container.GetLogs(ctx)
+				require.NoError(t, err)
+
+				// Verify logs contain expected messages
+				require.NotNil(t, stdout)
+				stdoutStr := string(stdout)
+				stderrStr := string(stderr)
+
+				require.EqualValues(t, stdoutStr, "")
+				require.EqualValues(t, stderrStr, "stderr message\n")
+			},
+		)
 	}
 }

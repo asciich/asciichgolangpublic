@@ -294,19 +294,19 @@ func (c *CommandExecutorNamespace) GetPodByName(name string) (kubernetesinterfac
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
 
-	toReturn := NewCommandExecutorPod()
+	ret := NewCommandExecutorPod()
 
-	err := toReturn.SetName(name)
+	err := ret.SetName(name)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetNamespace(c)
+	err = ret.SetNamespace(c)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func (c *CommandExecutorNamespace) GetReplicaSetByName(name string) (kubernetesinterfaces.ReplicaSet, error) {
@@ -314,19 +314,19 @@ func (c *CommandExecutorNamespace) GetReplicaSetByName(name string) (kubernetesi
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
 
-	toReturn := NewCommandExecutorReplicaSet()
+	ret := NewCommandExecutorReplicaSet()
 
-	err := toReturn.SetName(name)
+	err := ret.SetName(name)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetNamespace(c)
+	err = ret.SetNamespace(c)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func (c *CommandExecutorNamespace) GetDeploymentByName(name string) (kubernetesinterfaces.Deployment, error) {
@@ -334,19 +334,19 @@ func (c *CommandExecutorNamespace) GetDeploymentByName(name string) (kubernetesi
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
 
-	toReturn := NewCommandExecutorDeployment()
+	ret := NewCommandExecutorDeployment()
 
-	err := toReturn.SetName(name)
+	err := ret.SetName(name)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetNamespace(c)
+	err = ret.SetNamespace(c)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func (c *CommandExecutorNamespace) GetRoleByName(name string) (role kubernetesinterfaces.Role, err error) {
@@ -354,19 +354,19 @@ func (c *CommandExecutorNamespace) GetRoleByName(name string) (role kubernetesin
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
 
-	toReturn := NewCommandExecutorRole()
+	ret := NewCommandExecutorRole()
 
-	err = toReturn.SetName(name)
+	err = ret.SetName(name)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetNamespace(c)
+	err = ret.SetNamespace(c)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func (c *CommandExecutorNamespace) ListRoleNames(ctx context.Context) (roleNames []string, err error) {
@@ -2313,19 +2313,19 @@ func (c *CommandExecutorNamespace) GetRoleBindingByName(name string) (kubernetes
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
 
-	toReturn := NewCommandExecutorRoleBinding()
+	ret := NewCommandExecutorRoleBinding()
 
-	err := toReturn.SetName(name)
+	err := ret.SetName(name)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetNamespace(c)
+	err = ret.SetNamespace(c)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func (c *CommandExecutorNamespace) ListRoleBindingNames(ctx context.Context) ([]string, error) {

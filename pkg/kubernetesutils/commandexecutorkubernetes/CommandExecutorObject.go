@@ -39,29 +39,29 @@ func GetCommandExecutorObject(commandExectutor commandexecutorinterfaces.Command
 		return nil, tracederrors.TracedErrorEmptyString("objectType")
 	}
 
-	toReturn := NewCommandExecutorObject()
+	ret := NewCommandExecutorObject()
 
-	err = toReturn.SetCommandExecutor(commandExectutor)
+	err = ret.SetCommandExecutor(commandExectutor)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetNamespace(namespace)
+	err = ret.SetNamespace(namespace)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetName(objectName)
+	err = ret.SetName(objectName)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetTypeName(objectType)
+	err = ret.SetTypeName(objectType)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func NewCommandExecutorObject() (c *CommandExecutorObject) {
