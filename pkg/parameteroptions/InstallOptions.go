@@ -12,6 +12,14 @@ type InstallOptions struct {
 	InstallationPath      string
 	InstallBashCompletion bool
 	UseSudoToInstall      bool
+
+	// Owner of the installed binary.
+	// Often "root" for system wide installed binaries.
+	Owner string
+
+	// Group of the installed binary.
+	// Often "root" for system wide installed binaries.
+	Group string
 }
 
 func NewInstallOptions() (i *InstallOptions) {

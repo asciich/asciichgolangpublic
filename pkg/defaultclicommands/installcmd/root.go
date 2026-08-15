@@ -46,7 +46,10 @@ Usage:
 }
 
 func cliInstall(ctx context.Context, binaryName string) {
-	srcPath := os.Args[0]
+	srcPath, err := os.Executable()
+	if err != nil {
+		logging.LogGoErrorFatalWithTrace(err)
+	}
 
 	if srcPath == "" {
 		logging.LogFatalWithTrace("binaryName is empty string after evaluation.")
@@ -71,6 +74,8 @@ func cliInstall(ctx context.Context, binaryName string) {
 			InstallationPath: filepath.Join("/bin", binaryName),
 			UseSudoToInstall: true,
 			BinaryName:       binaryName,
+			Owner:            "root",
+			Group:            "root",
 		},
 	))
 

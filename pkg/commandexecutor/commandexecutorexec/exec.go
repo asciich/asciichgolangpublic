@@ -271,6 +271,11 @@ func RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *paramete
 		return nil, err
 	}
 
+	fullCommandJoined, err := options.GetJoinedFullCommand()
+	if err != nil {
+		return nil, err
+	}
+
 	cmd := exec.Command(fullCommand[0])
 	if len(fullCommand) > 0 {
 		cmd = exec.Command(fullCommand[0], fullCommand[1:]...)
@@ -290,6 +295,12 @@ func RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *paramete
 		return nil, tracederrors.TracedErrorf("Failed to start command: %w", err)
 	}
 
+	// Wait for the command in a goroutine and capture the exit error.
+	waitErr := make(chan error, 1)
+	go func() {
+		waitErr <- cmd.Wait()
+	}()
+
 	ret := &ioutils.ReadCloser{
 		CloseFunc: func() error {
 			err := stdout.Close()
@@ -297,33 +308,21 @@ func RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *paramete
 				return tracederrors.TracedErrorf("Failed to close stdout: %w", err)
 			}
 
-			done := make(chan error, 1)
-			go func() {
-				done <- cmd.Wait()
-			}()
-
-			select {
-			case <-time.After(10 * time.Second):
-				err := cmd.Process.Kill()
-				if err != nil {
-					if !errors.Is(err, os.ErrProcessDone) {
-						return tracederrors.TracedErrorf("Failed to kill command in ReadCloser: %w", err)
-					}
-				}
-				logging.LogInfoByCtxf(ctx, "Killed ReadCloser process.")
-			case err := <-done:
-				// Process finished before the timeout
-				if err != nil {
-					logging.LogErrorByCtxf(ctx, "ReadCloser process finished with error: %v\n", err)
-				} else {
-					logging.LogInfoByCtxf(ctx, "ReadCloser process finished successfully")
-				}
-			}
-
 			return nil
 		},
 		ReadFunc: func(p []byte) (n int, err error) {
-			return stdout.Read(p)
+			n, err = stdout.Read(p)
+			if err == io.EOF {
+				// stdout reached EOF, now check if the command exited successfully.
+				cmdErr := <-waitErr
+				if cmdErr != nil {
+					return n, tracederrors.TracedErrorf(
+						"Command '%s' failed: %w", fullCommandJoined, cmdErr,
+					)
+				}
+				return n, io.EOF
+			}
+			return n, err
 		},
 	}
 
@@ -364,17 +363,20 @@ func RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *paramete
 		return nil, tracederrors.TracedErrorf("Failed to start command: %w", err)
 	}
 
+	// Wait for the command in a goroutine and capture the exit error.
+	waitDone := make(chan struct{})
+	var cmdErr error
+	go func() {
+		cmdErr = cmd.Wait()
+		close(waitDone)
+	}()
+
 	ret := &ioutils.WriteCloser{
 		CloseFunc: func() error {
 			err := stdin.Close()
 			if err != nil {
 				return tracederrors.TracedErrorf("Failed to close stdin: %w", err)
 			}
-
-			done := make(chan error, 1)
-			go func() {
-				done <- cmd.Wait()
-			}()
 
 			select {
 			case <-time.After(10 * time.Second):
@@ -384,20 +386,45 @@ func RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *paramete
 						return tracederrors.TracedErrorf("Failed to kill command in WriteCloser: %w", err)
 					}
 				}
-				logging.LogInfoByCtxf(ctx, "Killed WriteCloser process '%s' .", fullCommandJoined)
-			case err := <-done:
-				// Process finished before the timeout
-				if err != nil {
-					logging.LogErrorByCtxf(ctx, "WriteCloser command '%s' finished with error: %v\n", fullCommandJoined, err)
-				} else {
-					logging.LogInfoByCtxf(ctx, "WriteCloser command '%s' finished successfully", fullCommandJoined)
+				logging.LogInfoByCtxf(ctx, "Killed WriteCloser process '%s'.", fullCommandJoined)
+			case <-waitDone:
+				if cmdErr != nil {
+					logging.LogErrorByCtxf(ctx, "WriteCloser command '%s' finished with error: %v\n", fullCommandJoined, cmdErr)
+					return tracederrors.TracedErrorf("Command '%s' failed: %w", fullCommandJoined, cmdErr)
 				}
+				logging.LogInfoByCtxf(ctx, "WriteCloser command '%s' finished successfully", fullCommandJoined)
 			}
 
 			return nil
 		},
 		WriteFunc: func(p []byte) (n int, err error) {
-			return stdin.Write(p)
+			// Check if the command has already exited with an error.
+			select {
+			case <-waitDone:
+				if cmdErr != nil {
+					return 0, tracederrors.TracedErrorf(
+						"Command '%s' failed: %w", fullCommandJoined, cmdErr,
+					)
+				}
+			default:
+				// Command still running, proceed with write.
+			}
+
+			n, err = stdin.Write(p)
+			if err != nil {
+				// Write failed, check if command exited.
+				select {
+				case <-waitDone:
+					if cmdErr != nil {
+						return n, tracederrors.TracedErrorf(
+							"Command '%s' failed: %w", fullCommandJoined, cmdErr,
+						)
+					}
+				default:
+				}
+				return n, tracederrors.TracedErrorf("Failed to write to stdin: %w", err)
+			}
+			return n, nil
 		},
 	}
 

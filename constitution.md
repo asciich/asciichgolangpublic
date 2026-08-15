@@ -29,6 +29,17 @@
         mustutils.Must0(kubernetes.DeleteClusterRoleByName(ctx, roleName))
         }// end of the function
         ```
+- Avoid creating `tracederrors` without assigning them to a variable or return them.
+    - Example:
+        - This is highly likely a mistake:
+            ```golang
+            tracederrors.TracedErrorf("ReadCloser process for command '%s' finished with error: %w", fullCommandJoined, err) // missing return statement in front of the line
+            ```
+        - And must be returned:
+            ```golang
+            return tracederrors.TracedErrorf("ReadCloser process for command '%s' finished with error: %w", fullCommandJoined, err) // correct
+            ```
+
 
 ## Documentation
 
