@@ -1603,3 +1603,17 @@ func (n *NativeNamespace) RoleBindingByNameExists(ctx context.Context, name stri
 	logging.LogInfoByCtxf(ctx, "RoleBinding '%s' in namespace '%s' does not exist.", name, namespaceName)
 	return false, nil
 }
+
+func (n *NativeNamespace) Delete(ctx context.Context) error {
+	clientset, err := n.GetClientSet()
+	if err != nil {
+		return err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return err
+	}
+
+	return nativekubernetes.DeleteNamespace(ctx, clientset, namespaceName)
+}

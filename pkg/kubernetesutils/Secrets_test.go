@@ -11,12 +11,11 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kuberneteserrors"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetestestsshserver"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"github.com/asciich/asciichgolangpublic/pkg/netutils"
 	"github.com/asciich/asciichgolangpublic/pkg/sshutils"
-	"github.com/asciich/asciichgolangpublic/pkg/sshutils/testsshserver"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -524,27 +523,8 @@ func Test_ValidateSSHKeyInSecret(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				// Find next free port for test SSH server
-				freePort, err := netutils.GetNextFreePort(ctx, 2222)
-				require.NoError(t, err)
-
-				// Start a test SSH server
-				sshServer := &testsshserver.TestSshServer{
-					Username: "testuser",
-					Password: "testpassword",
-					Port:     freePort,
-				}
-
-				err = sshServer.StartSshServerInBackground(ctx)
-				require.NoError(t, err)
-
-				// Ensure SSH server is stopped at the end
-				defer func() {
-					_ = sshServer.Stop(ctx)
-				}()
-
 				// Generate an SSH key pair for testing
-				keyPair, err := sshutils.GenerateKeyPair("", nil)
+				keyPair, err := sshutils.GenerateKeyPair(sshutils.SSH_KEY_TYPE_ED25519, nil)
 				require.NoError(t, err)
 
 				err = keyPair.Validate(ctx)
@@ -556,23 +536,34 @@ func Test_ValidateSSHKeyInSecret(t *testing.T) {
 
 				// -----
 				// Prepare test environment start ...
-				clusterName := testutils.GetKindClusterNameForTest(t)
-
-				// Ensure a local kind cluster is available for testing:
-				mustutils.Must(kindutils.CreateCluster(ctx, clusterName))
+				kubernetes, err := kindutils.GetOrCreateSharedCluster(ctx)
+				require.NoError(t, err)
 				// ... prepare test environment finished.
 				// -----
-
-				// Get Kubernetes cluster:
-				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
 
 				const namespaceName = "test-ssh-validation"
 				const secretName = "ssh-key-secret"
 				const secretKey = "id_ed25519"
+				const sshServerPodName = "ssh-server-validate"
+				const sshUsername = "testuser"
 
 				// Create namespace
 				namespace, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
+				defer namespace.Delete(ctx)
+
+				// Deploy a test SSH server with public key authentication in the cluster
+				publicKeyString := keyPair.PublicKey.KeyMaterial
+
+				sshServerPod, err := kubernetestestsshserver.StartTestSshServerInCluster(ctx, kubernetes, &kubernetestestsshserver.StartTestSshServerOptions{
+					KubernetesNamespace: namespaceName,
+					PodName:             sshServerPodName,
+					SSHUsername:         sshUsername,
+					SSHPublicKey:        publicKeyString,
+				})
+				require.NoError(t, err)
+				require.NotNil(t, sshServerPod)
+				defer sshServerPod.Delete(ctx)
 
 				// Ensure secret is absent before starting:
 				err = namespace.DeleteSecretByName(ctx, secretName)
@@ -596,29 +587,26 @@ func Test_ValidateSSHKeyInSecret(t *testing.T) {
 				require.NoError(t, err)
 				require.True(t, exists)
 
+				// The SSH server is reachable via its Service DNS
+				sshServerHost := sshServerPodName + "." + namespaceName + ".svc.cluster.local"
+
 				// Test 1: Validate SSH key with correct credentials (should succeed)
-				// Note: This test will fail because the test SSH server uses password auth,
-				// not key-based auth. We're testing the infrastructure here.
-				// For a real test, we would need to set up the SSH server with the public key.
 				success, err := kubernetes.ValidateSSHKeyInSecret(
 					ctx,
 					&kubernetesparameteroptions.ValidateSshKeyInSecretOptions{
 						Namespace:             namespaceName,
 						SecretName:            secretName,
 						SecretKey:             secretKey,
-						TargetHost:            "172.17.0.6",
-						TargetUser:            "testuser",
-						TargetPort:            freePort,
+						TargetHost:            sshServerHost,
+						TargetUser:            sshUsername,
+						TargetPort:            22,
 						SkipHostKeyValidation: true,
-						ConnectionTimeout:     "10 seconds",
+						ConnectionTimeout:     "10",
 						ConnectionAttempts:    1,
 					},
 				)
-
-				// The validation should fail because the test SSH server doesn't have the public key
-				// but it should not error - it should return false
 				require.NoError(t, err)
-				require.False(t, success, "SSH validation should fail because test server uses password auth, not key auth")
+				require.True(t, success, "SSH validation should succeed with matching key pair")
 
 				// Test 2: Validate with non-existent secret (should error)
 				success, err = kubernetes.ValidateSSHKeyInSecret(
@@ -627,10 +615,12 @@ func Test_ValidateSSHKeyInSecret(t *testing.T) {
 						Namespace:             namespaceName,
 						SecretName:            "non-existent-secret",
 						SecretKey:             secretKey,
-						TargetHost:            "172.17.0.6",
-						TargetUser:            "testuser",
-						TargetPort:            freePort,
+						TargetHost:            sshServerHost,
+						TargetUser:            sshUsername,
+						TargetPort:            22,
 						SkipHostKeyValidation: true,
+						ConnectionTimeout:     "10",
+						ConnectionAttempts:    1,
 					},
 				)
 				require.Error(t, err)
@@ -644,9 +634,11 @@ func Test_ValidateSSHKeyInSecret(t *testing.T) {
 						SecretName:            secretName,
 						SecretKey:             secretKey,
 						TargetHost:            "nonexistent-host.invalid",
-						TargetUser:            "testuser",
+						TargetUser:            sshUsername,
 						TargetPort:            22,
 						SkipHostKeyValidation: true,
+						ConnectionTimeout:     "5",
+						ConnectionAttempts:    1,
 					},
 				)
 				// This might error or return false depending on DNS resolution

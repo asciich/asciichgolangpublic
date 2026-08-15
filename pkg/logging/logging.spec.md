@@ -1,4 +1,8 @@
-# logging Specifications
+# logging specifications
+
+This are the specifications for the [`logging` package](README.md).
+
+This document extends the [constitution.md](/constitution.md).
 
 ## Implementation
 

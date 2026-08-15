@@ -21,6 +21,15 @@ The [constitution.md](constitution.md) has to be applied to the whole repo and i
     For specifications see [<packagename>.spec.md](<packagename>.spec.md)
     ```
 - Specifications are hierarchically organized. Every <packagename>.spec.md counts for the subdirectories/ subpackages as well.
+    - Ensure every <packagename>.spec.md has the header:
+        ```markdown
+        # <packagename> specifications
+
+        This are the specifications for the [`<packagename>` package](README.md).
+        
+        This document extends the parent specifications [parent.spec.md](../parent.spec.md). // If there is a parent specification available.
+        This document extends the [constitution.md](/constitution.md). // If there is no parent specification available.
+        ```
 
 ## Consistency check
 

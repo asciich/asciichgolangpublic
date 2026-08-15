@@ -88,6 +88,18 @@ test_cases:
     namespace: default
     cluster: kind-asciichgolangpublic
     description: "Check if a specific CronJob exists"
+
+  # Kubernetes validate SSH key in secret test - validate that an SSH private key stored in a secret can authenticate
+  - name: "Test SSH key validation succeeds"
+    test_type: kubernetes_validate_ssh_key_in_secret
+    resource_name: ssh-private-key-secret
+    secret_key: id_ed25519
+    namespace: default
+    cluster: kind-asciichgolangpublic
+    target_host: ssh-server.default.svc.cluster.local
+    target_user: testuser
+    target_port: 22
+    description: "Check that a valid SSH key in a secret can authenticate"
 ```
 
 ## Example Tests

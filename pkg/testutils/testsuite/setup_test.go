@@ -43,7 +43,7 @@ func SetupSSHServerInKind(ctx context.Context, t testing.TB, cluster kubernetesi
 		}
 	}
 
-	// Create ServiceAccount with READONLY access
+	// Create ServiceAccount
 	serviceAccountName := "ssh-readonly-sa"
 	serviceAccountYaml := fmt.Sprintf(`
 apiVersion: v1
@@ -61,8 +61,8 @@ metadata:
 	}
 	t.Logf("Created ServiceAccount '%s' in namespace '%s'", serviceAccountName, namespaceName)
 
-	// Create ClusterRole with READONLY permissions (get, list, watch)
-	// Note: Using ClusterRole instead of Role because we need access to cluster-scoped resources like namespaces
+	// Create ClusterRole with permissions needed for test execution
+	// Includes read-only for most resources, plus create/delete/patch for pods (needed by ValidateSSHKeyInSecret)
 	roleName := "ssh-readonly-clusterrole"
 	clusterRoleYaml := fmt.Sprintf(`
 apiVersion: rbac.authorization.k8s.io/v1
@@ -71,7 +71,10 @@ metadata:
   name: %s
 rules:
 - apiGroups: [""]
-  resources: ["pods", "services", "configmaps", "secrets", "namespaces", "nodes"]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "list", "watch", "create", "delete", "patch"]
+- apiGroups: [""]
+  resources: ["services", "configmaps", "secrets", "namespaces", "nodes"]
   verbs: ["get", "list", "watch"]
 - apiGroups: ["apps"]
   resources: ["deployments", "replicasets"]
