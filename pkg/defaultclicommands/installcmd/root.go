@@ -71,6 +71,8 @@ func cliInstall(ctx context.Context, binaryName string) {
 			InstallationPath: filepath.Join("/bin", binaryName),
 			UseSudoToInstall: true,
 			BinaryName:       binaryName,
+			Owner:            "root",
+			Group:            "root",
 		},
 	))
 

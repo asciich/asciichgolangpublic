@@ -13,7 +13,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfileoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
@@ -137,6 +136,9 @@ func (c *CommandExecutorHost) GetSshPublicKeyOfUserAsString(ctx context.Context,
 }
 
 func (c *CommandExecutorHost) GetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor, err error) {
+	if c.commandExecutor == nil {
+		return nil, tracederrors.TracedError("commandExecutor not set")
+	}
 
 	return c.commandExecutor, nil
 }
@@ -314,7 +316,7 @@ func (h *CommandExecutorHost) GetComment() (comment string, err error) {
 
 func (h *CommandExecutorHost) GetFileByPath(path string) (file filesinterfaces.File, err error) {
 	if path == "" {
-		return nil, err
+		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
 
 	commandExecutor, err := h.GetCommandExecutor()
@@ -322,7 +324,7 @@ func (h *CommandExecutorHost) GetFileByPath(path string) (file filesinterfaces.F
 		return nil, err
 	}
 
-	file, err = files.GetCommandExecutorFileByPath(commandExecutor, path)
+	file, err = commandexecutorfileoo.New(commandExecutor, path)
 	if err != nil {
 		return nil, err
 	}
@@ -384,16 +386,18 @@ func (h *CommandExecutorHost) InstallBinary(ctx context.Context, installOptions 
 		return nil, err
 	}
 
-	err = installedFile.Chown(
-		ctx,
-		&parameteroptions.ChownOptions{
-			UserName:  "root",
-			GroupName: "root",
-			UseSudo:   installOptions.UseSudoToInstall,
-		},
-	)
-	if err != nil {
-		return nil, err
+	if installOptions.Group != "" || installOptions.Owner != "" {
+		err = installedFile.Chown(
+			ctx,
+			&parameteroptions.ChownOptions{
+				UserName:  installOptions.Owner,
+				GroupName: installOptions.Group,
+				UseSudo:   installOptions.UseSudoToInstall,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	logging.LogChangedByCtxf(ctx, "Install '%s' as '%s' on host '%s' finished.", sourceFilePath, binaryName, hostName)
