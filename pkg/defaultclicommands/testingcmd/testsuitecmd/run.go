@@ -10,9 +10,34 @@ import (
 )
 
 func NewRunCmd() *cobra.Command {
+	const short = "Run a test suite."
+
 	cmd := &cobra.Command{
 		Use:   "run",
-		Short: "Run a test suite.",
+		Short: short,
+		Long: short + `
+
+Run one or more test suite files specified as arguments.
+
+Each provided file path is executed sequentially. The test results are logged
+after each suite completes. If any test suite fails, execution stops immediately
+with a fatal error.
+
+Examples:
+  # Run a single test suite file
+  testsuite run ./my_tests.yaml
+
+  # Run multiple test suite files
+  testsuite run ./suite1.yaml ./suite2.yaml
+
+Arguments:
+  At least one file path to a test suite definition file must be provided.
+
+Exit behavior:
+  - Exits with a fatal error if no arguments are provided.
+  - Exits with a fatal error if any test suite does not pass.
+  - Logs a success message if all test suites pass.
+`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
@@ -28,6 +53,8 @@ func NewRunCmd() *cobra.Command {
 					logging.LogFatal("Test suite failed.")
 				}
 			}
+
+			logging.LogGoodByCtxf(ctx, "All tests in '%v' passed.", args)
 		},
 	}
 

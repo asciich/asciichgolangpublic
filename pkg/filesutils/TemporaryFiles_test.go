@@ -92,7 +92,7 @@ func TestTemporaryFilesCreateFromFile(t *testing.T) {
 				require.NoError(t, err)
 				defer tempFile.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				content, err = sourceFile.ReadAsString(ctx)
+				content, err = tempFile.ReadAsString(ctx)
 				require.NoError(t, err)
 				require.EqualValues(t, tt.content, content)
 			},
