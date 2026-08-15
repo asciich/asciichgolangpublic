@@ -3,6 +3,7 @@ package containerinterfaces
 import (
 	"context"
 	"io"
+	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
@@ -39,6 +40,12 @@ type Container interface {
 
 	RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error)
 	RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error)
+
+	// GetLogs returns the stdout and stderr logs of the container.
+	GetLogs(ctx context.Context) ([]byte, []byte, error)
+
+	// WaitUntilFinished waits until the container finishes execution or the timeout is reached.
+	WaitUntilFinished(ctx context.Context, timeout time.Duration) error
 
 	// These Commands can be implemented by embedding the `CommandExecutorBase` struct:
 	IsRunningOnLocalhost() (bool, error)

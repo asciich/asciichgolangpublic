@@ -49,9 +49,9 @@ func GenerateCertAndKeyForTestWebserver(ctx context.Context) (certAndKeyPair *x5
 }
 
 func GetTlsTestWebServer(ctx context.Context, port int) (webServer httputilsinterfaces.Server, err error) {
-	toReturn := NewTestWebServer()
+	ret := NewTestWebServer()
 
-	err = toReturn.SetPort(port)
+	err = ret.SetPort(port)
 	if err != nil {
 		return nil, err
 	}
@@ -61,12 +61,12 @@ func GetTlsTestWebServer(ctx context.Context, port int) (webServer httputilsinte
 		return nil, err
 	}
 
-	err = toReturn.SetTlsCertAndKey(ctx, certAndKey)
+	err = ret.SetTlsCertAndKey(ctx, certAndKey)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func (t *TestWebServer) GetTlsCert() (cert *x509.Certificate, err error) {
@@ -84,14 +84,14 @@ func (t *TestWebServer) GetTlsCert() (cert *x509.Certificate, err error) {
 }
 
 func GetTestWebServer(port int) (webServer httputilsinterfaces.Server, err error) {
-	toReturn := NewTestWebServer()
+	ret := NewTestWebServer()
 
-	err = toReturn.SetPort(port)
+	err = ret.SetPort(port)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func GetRunningTestWebServer(ctx context.Context, port int) (httputilsinterfaces.Server, error) {

@@ -121,6 +121,11 @@ func TestRole_CreateAndDeleteRoleBinding(t *testing.T) {
 				namespace, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 				require.NoError(t, err)
 
+				// Cleanup
+				defer func() {
+					_ = namespace.DeleteRoleByName(ctx, roleName)
+				}()
+
 				// Create a Role first
 				mustutils.Must0(namespace.DeleteRoleByName(ctx, roleName))
 				_, err = namespace.CreateRole(
@@ -156,9 +161,6 @@ func TestRole_CreateAndDeleteRoleBinding(t *testing.T) {
 					require.NoError(t, err)
 					require.False(t, mustutils.Must(namespace.RoleBindingByNameExists(ctx, bindingName)))
 				}
-
-				// Cleanup
-				mustutils.Must0(namespace.DeleteRoleByName(ctx, roleName))
 			},
 		)
 	}
@@ -181,6 +183,11 @@ func TestRole_CreateAndDeleteClusterRoleBinding(t *testing.T) {
 				const bindingName = "testclusterrolebinding"
 
 				kubernetes := getKubernetesByImplementationName(ctx, t, tt.implementationName)
+
+				// Cleanup
+				defer func() {
+					_ = kubernetes.DeleteClusterRoleByName(ctx, roleName)
+				}()
 
 				// Create a ClusterRole first
 				mustutils.Must0(kubernetes.DeleteClusterRoleByName(ctx, roleName))
@@ -218,9 +225,6 @@ func TestRole_CreateAndDeleteClusterRoleBinding(t *testing.T) {
 					require.NoError(t, err)
 					require.False(t, mustutils.Must(kubernetes.ClusterRoleBindingByNameExists(ctx, bindingName)))
 				}
-
-				// Cleanup
-				mustutils.Must0(kubernetes.DeleteClusterRoleByName(ctx, roleName))
 			},
 		)
 	}

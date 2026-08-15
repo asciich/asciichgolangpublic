@@ -1,6 +1,7 @@
 package nativedocker
 
 import (
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -39,4 +40,17 @@ func (i *Image) Exists(ctx context.Context) (bool, error) {
 	}
 
 	return NewDocker().ImageExists(ctx, name)
+}
+
+func (i *Image) Remove(ctx context.Context, options *dockeroptions.RemoveOptions) error {
+	name, err := i.GetName()
+	if err != nil {
+		return err
+	}
+
+	if options == nil {
+		options = &dockeroptions.RemoveOptions{}
+	}
+
+	return NewDocker().RemoveImage(ctx, name, options)
 }

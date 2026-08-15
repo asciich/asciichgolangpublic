@@ -532,3 +532,85 @@ func (c *CommandExecutorDockerContainer) GetHostDescription() (string, error) {
 
 	return hostDescription, nil
 }
+
+func (c *CommandExecutorDockerContainer) GetLogs(ctx context.Context) ([]byte, []byte, error) {
+	name, err := c.GetName()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Get logs - docker logs command outputs both stdout and stderr
+	// By default, docker logs sends both stdout and stderr to the terminal
+	// We'll capture them together since docker doesn't separate them in the logs command
+	output, err := commandExecutor.RunCommand(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command:           []string{"docker", "logs", name},
+			AllowAllExitCodes: true,
+		},
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	stdout, err := output.GetStdoutAsBytes()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	stderrPtr, err := output.GetStderr()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Return empty byte slice if stderr is nil, never return nil for successful operations
+	var stderr []byte
+	if stderrPtr != nil {
+		stderr = *stderrPtr
+	} else {
+		stderr = []byte{}
+	}
+
+	// Return empty byte slice if stdout is nil, never return nil for successful operations
+	if stdout == nil {
+		stdout = []byte{}
+	}
+
+	return stdout, stderr, nil
+}
+
+func (c *CommandExecutorDockerContainer) WaitUntilFinished(ctx context.Context, timeout time.Duration) error {
+	name, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		// Check if context is cancelled
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+
+		isRunning, err := c.IsRunning(ctx)
+		if err != nil {
+			return err
+		}
+
+		if !isRunning {
+			return nil
+		}
+
+		// Wait a bit before checking again
+		time.Sleep(time.Millisecond * 100)
+	}
+
+	return tracederrors.TracedErrorf("Container '%s' did not finish within timeout %v", name, timeout)
+}

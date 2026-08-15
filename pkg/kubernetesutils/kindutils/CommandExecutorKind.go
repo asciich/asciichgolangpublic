@@ -31,14 +31,14 @@ func GetCommandExecutorKind(commandExecutor commandexecutorinterfaces.CommandExe
 		return nil, tracederrors.TracedErrorNil("commandExectuor")
 	}
 
-	toReturn := NewCommandExecutorKind()
+	ret := NewCommandExecutorKind()
 
-	err = toReturn.SetCommandExecutor(commandExecutor)
+	err = ret.SetCommandExecutor(commandExecutor)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func GetCommandExecutorKindCluster(commandExecutor commandexecutorinterfaces.CommandExecutor, clusterName string) (kubernetesinterfaces.KubernetesCluster, error) {
@@ -286,19 +286,19 @@ func (c *CommandExecutorKind) GetClusterByName(clusterName string) (cluster kube
 		return nil, tracederrors.TracedErrorEmptyString("clusterName")
 	}
 
-	toReturn := NewCommandExecutorKindCluster()
+	ret := NewCommandExecutorKindCluster()
 
-	err = toReturn.SetName("kind-" + clusterName)
+	err = ret.SetName("kind-" + clusterName)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetClusterName(clusterName)
+	err = ret.SetClusterName(clusterName)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetKind(c)
+	err = ret.SetKind(c)
 	if err != nil {
 		return nil, err
 	}
@@ -308,12 +308,12 @@ func (c *CommandExecutorKind) GetClusterByName(clusterName string) (cluster kube
 		return nil, err
 	}
 
-	err = toReturn.SetCommandExecutor(commandExecutor)
+	err = ret.SetCommandExecutor(commandExecutor)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func (c *CommandExecutorKind) GetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor, err error) {

@@ -38,14 +38,14 @@ func GetCommandExecutorHostByCommandExecutor(commandExecutor commandexecutorinte
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
 
-	toReturn := NewCommandExecutorHost()
+	ret := NewCommandExecutorHost()
 
-	err = toReturn.SetCommandExecutor(commandExecutor)
+	err = ret.SetCommandExecutor(commandExecutor)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func MustGetCommandExecutorHostByCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) (host Host) {

@@ -64,16 +64,16 @@ func (s *SSHClient) CheckReachable(ctx context.Context) (err error) {
 }
 
 func (s *SSHClient) GetDeepCopyAsCommandExecutor() (copy commandexecutorinterfaces.CommandExecutor) {
-	toReturn := NewSSHClient()
+	ret := NewSSHClient()
 
-	*toReturn = *s
+	*ret = *s
 
-	err := toReturn.SetParentCommandExecutorForBaseClass(toReturn)
+	err := ret.SetParentCommandExecutorForBaseClass(ret)
 	if err != nil {
 		logging.LogGoErrorFatal(err)
 	}
 
-	return toReturn
+	return ret
 }
 
 func (s *SSHClient) GetHostDescription() (hostDescription string, err error) {

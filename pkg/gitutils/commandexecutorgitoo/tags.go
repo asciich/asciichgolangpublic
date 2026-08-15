@@ -68,24 +68,24 @@ func (g *GitRepository) GetTagByName(name string) (tag gitinterfaces.GitTag, err
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
 
-	toReturn := gitgeneric.NewGitRepositoryTag()
+	ret := gitgeneric.NewGitRepositoryTag()
 
-	err = toReturn.SetName(name)
+	err = ret.SetName(name)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetName(name)
+	err = ret.SetName(name)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetGitRepository(g)
+	err = ret.SetGitRepository(g)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func (g *GitRepository) GetHashByTagName(tagName string) (hash string, err error) {

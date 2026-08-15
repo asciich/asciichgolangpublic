@@ -411,19 +411,19 @@ func (n *NativeNamespace) GetRoleByName(name string) (role kubernetesinterfaces.
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
 
-	toReturn := &NativeRole{}
+	ret := &NativeRole{}
 
-	err = toReturn.SetName(name)
+	err = ret.SetName(name)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetNamespace(n)
+	err = ret.SetNamespace(n)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func (n *NativeNamespace) ListRoleNames(ctx context.Context) (roleNames []string, err error) {
@@ -1546,16 +1546,16 @@ func (n *NativeNamespace) GetRoleBindingByName(name string) (kubernetesinterface
 	if name == "" {
 		return nil, tracederrors.TracedErrorEmptyString("name")
 	}
-	toReturn := &NativeRoleBinding{}
-	err := toReturn.SetName(name)
+	ret := &NativeRoleBinding{}
+	err := ret.SetName(name)
 	if err != nil {
 		return nil, err
 	}
-	err = toReturn.SetNamespace(n)
+	err = ret.SetNamespace(n)
 	if err != nil {
 		return nil, err
 	}
-	return toReturn, nil
+	return ret, nil
 }
 
 func (n *NativeNamespace) ListRoleBindingNames(ctx context.Context) ([]string, error) {

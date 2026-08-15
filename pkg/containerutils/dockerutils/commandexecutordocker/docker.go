@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
@@ -34,7 +35,7 @@ func GetCommandExecutorDocker(commandExecutor commandexecutorinterfaces.CommandE
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
 
-	toReturn := NewCommandExecutorDocker()
+	ret := NewCommandExecutorDocker()
 
 	isRunningOnLocalhost, err := commandExecutor.IsRunningOnLocalhost()
 	if err != nil {
@@ -58,12 +59,12 @@ func GetCommandExecutorDocker(commandExecutor commandexecutorinterfaces.CommandE
 		return nil, err
 	}
 
-	err = toReturn.SetHost(host)
+	err = ret.SetHost(host)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, err
+	return ret, err
 }
 
 func GetCommandExecutorDockerOnHost(host hosts.Host) (docker dockerinterfaces.Docker, err error) {
@@ -71,14 +72,14 @@ func GetCommandExecutorDockerOnHost(host hosts.Host) (docker dockerinterfaces.Do
 		return nil, tracederrors.TracedErrorNil("host")
 	}
 
-	toReturn := NewCommandExecutorDocker()
+	ret := NewCommandExecutorDocker()
 
-	err = toReturn.SetHost(host)
+	err = ret.SetHost(host)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func GetLocalCommandExecutorDocker() (docker dockerinterfaces.Docker, err error) {
@@ -134,18 +135,18 @@ func (c *CommandExecutorDocker) GetContainerById(id string) (containerinterfaces
 		return nil, tracederrors.TracedErrorEmptyString("id")
 	}
 
-	toReturn := NewCommandExecutorDockerContainer()
-	err := toReturn.SetId(id)
+	ret := NewCommandExecutorDockerContainer()
+	err := ret.SetId(id)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetDocker(c)
+	err = ret.SetDocker(c)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func (c *CommandExecutorDocker) GetContainerByName(containerName string) (dockerContainer containerinterfaces.Container, err error) {
@@ -153,18 +154,18 @@ func (c *CommandExecutorDocker) GetContainerByName(containerName string) (docker
 		return nil, tracederrors.TracedError("containerName is empty string")
 	}
 
-	toReturn := NewCommandExecutorDockerContainer()
-	err = toReturn.SetName(containerName)
+	ret := NewCommandExecutorDockerContainer()
+	err = ret.SetName(containerName)
 	if err != nil {
 		return nil, err
 	}
 
-	err = toReturn.SetDocker(c)
+	err = ret.SetDocker(c)
 	if err != nil {
 		return nil, err
 	}
 
-	return toReturn, nil
+	return ret, nil
 }
 
 func (c *CommandExecutorDocker) GetHost() (host hosts.Host, err error) {
@@ -251,6 +252,30 @@ func (c *CommandExecutorDocker) RunCommandAndGetStdoutAsString(ctx context.Conte
 	return commandExecutor.RunCommandAndGetStdoutAsString(ctx, runOptions)
 }
 
+// appendEntryPointToCommand appends the --entrypoint flag to a docker command.
+// It distinguishes between:
+//   - nil: EntryPoint not set, don't add --entrypoint flag (use image default)
+//   - empty slice ([]string{}): Explicitly overwrite entrypoint to empty string
+//   - non-empty slice: Use the first element as entrypoint
+func appendEntryPointToCommand(command []string, entryPoint []string) []string {
+	if entryPoint == nil {
+		// Not set, don't modify the entrypoint
+		return command
+	}
+
+	if len(entryPoint) == 0 {
+		// Explicitly overwrite entrypoint to empty
+		command = append(command, "--entrypoint", "")
+	} else {
+		// Use specified entrypoint
+		command = append(command, "--entrypoint", entryPoint[0])
+		// Additional entrypoint args are not supported by docker --entrypoint flag,
+		// they should be part of Command instead.
+	}
+
+	return command
+}
+
 func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *dockeroptions.DockerRunContainerOptions) (startedContainer containerinterfaces.Container, err error) {
 	if runOptions == nil {
 		return nil, tracederrors.TracedError("runOptions is nil")
@@ -308,6 +333,9 @@ func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *do
 	for _, mount := range runOptions.Mounts {
 		startCommand = append(startCommand, "-v", mount)
 	}
+
+	// Add entrypoint if specified (nil = not set, empty = overwrite to empty, non-empty = use value)
+	startCommand = appendEntryPointToCommand(startCommand, runOptions.EntryPoint)
 
 	startCommand = append(startCommand, imageName)
 
@@ -522,7 +550,7 @@ func (c *CommandExecutorDocker) ImageExists(ctx context.Context, imageName strin
 	return false, tracederrors.TracedErrorf("Unknown docker output on stderr: %w", err)
 }
 
-func (c *CommandExecutorDocker) RemoveImage(ctx context.Context, imageName string) error {
+func (c *CommandExecutorDocker) RemoveImage(ctx context.Context, imageName string, options *dockeroptions.RemoveOptions) error {
 	if imageName == "" {
 		return tracederrors.TracedErrorEmptyString("imageName")
 	}
@@ -538,10 +566,21 @@ func (c *CommandExecutorDocker) RemoveImage(ctx context.Context, imageName strin
 			return err
 		}
 
+		force := false
+		if options != nil {
+			force = options.Force
+		}
+
+		command := []string{"docker", "rmi"}
+		if force {
+			command = append(command, "--force")
+		}
+		command = append(command, imageName)
+
 		_, err = commandExecutor.RunCommand(
 			ctx,
 			&parameteroptions.RunCommandOptions{
-				Command: []string{"docker", "rmi", imageName},
+				Command: command,
 			},
 		)
 		if err != nil {
@@ -580,4 +619,143 @@ func (c *CommandExecutorDocker) RemoveContainer(ctx context.Context, containerNa
 	}
 
 	return container.Remove(ctx, options)
+}
+
+// RunCommandInTemporaryContainer runs a command in a temporary Docker container and returns the output.
+//
+// Implementation note — why we use a run → wait → logs → delete approach:
+// This mirrors the Kubernetes implementation to provide a consistent API across container orchestration platforms.
+// The container is created with --rm flag for automatic cleanup, but we also explicitly remove it
+// to ensure deterministic cleanup and to have full control over the lifecycle.
+//
+// Steps:
+//  1. `docker run`    — start the container with --rm flag without attaching
+//  2. `docker wait`   — block until the container has completed
+//  3. `docker logs`   — fetch the output exactly once
+//  4. `docker rm`     — clean up the container (redundant with --rm but ensures cleanup)
+func (c *CommandExecutorDocker) RunCommandInTemporaryContainer(ctx context.Context, options *dockeroptions.DockerRunContainerOptions) (*commandoutput.CommandOutput, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	containerName, err := options.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	imageName, err := options.GetImageName()
+	if err != nil {
+		return nil, err
+	}
+
+	commandToExecute, err := options.GetCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run command in temporary container '%s' using container image '%s' started.", containerName, imageName)
+
+	// First, ensure any existing container with this name is removed
+	err = c.RemoveContainer(ctx, containerName, &dockeroptions.RemoveOptions{Force: true})
+	if err != nil {
+		return nil, err
+	}
+
+	// Step 1: Start the container without attaching
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	runCommand := []string{
+		"docker", "run",
+		"--name", containerName,
+		"--detach",
+	}
+
+	// Add environment variables
+	for envName, envValue := range options.AdditionalEnvVars {
+		runCommand = append(runCommand, "-e", fmt.Sprintf("%s=%s", envName, envValue))
+	}
+
+	// Add ports
+	for _, port := range options.Ports {
+		runCommand = append(runCommand, "-p", port)
+	}
+
+	// Add mounts
+	for _, mount := range options.Mounts {
+		runCommand = append(runCommand, "-v", mount)
+	}
+
+	// Add entrypoint if specified (nil = not set, empty = overwrite to empty, non-empty = use value)
+	runCommand = appendEntryPointToCommand(runCommand, options.EntryPoint)
+
+	runCommand = append(runCommand, imageName)
+	runCommand = append(runCommand, commandToExecute...)
+
+	_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command: runCommand,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Step 2: Wait for the container to complete and get the exit code
+	waitCommand := []string{
+		"docker", "wait", containerName,
+	}
+
+	waitOutput, err := commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command: waitCommand,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Step 3: Fetch the logs exactly once
+	logsCommand := []string{
+		"docker", "logs", containerName,
+	}
+
+	output, err := commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command: logsCommand,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Set the return code from the wait command
+	exitCodeStr, err := waitOutput.GetStdoutAsString()
+	if err != nil {
+		logging.LogErrorByCtxf(ctx, "Failed to get exit code from wait command: %v", err)
+	} else {
+		exitCodeStr = strings.TrimSpace(exitCodeStr)
+		exitCode, err := strconv.Atoi(exitCodeStr)
+		if err != nil {
+			logging.LogErrorByCtxf(ctx, "Failed to parse exit code '%s': %v", exitCodeStr, err)
+		} else {
+			err = output.SetReturnCode(exitCode)
+			if err != nil {
+				logging.LogErrorByCtxf(ctx, "Failed to set return code: %v", err)
+			}
+		}
+	}
+
+	// Step 4: Delete the container to clean up
+	deleteCommand := []string{
+		"docker", "rm", "-f", containerName,
+	}
+
+	_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command: deleteCommand,
+	})
+	if err != nil {
+		// Log the error but don't fail the operation since we already got the output
+		logging.LogErrorByCtxf(ctx, "Failed to remove temporary container '%s': %v", containerName, err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Run command in temporary container '%s' using container image '%s' finished.", containerName, imageName)
+
+	return output, nil
 }
