@@ -1,5 +1,9 @@
 # dockerutils specifications
 
+This are the specifications for the [`dockerutils` package](README.md).
+
+This document extends the parent specifications [containerutils.spec.md](../containerutils.spec.md).
+
 ## Implementation
 
 - For building containers use the `BuildContainerOptions` with at least these options:

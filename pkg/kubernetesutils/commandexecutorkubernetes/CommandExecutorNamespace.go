@@ -1648,9 +1648,11 @@ func (c *CommandExecutorNamespace) StartPortForwarding(ctx context.Context, podN
 	}
 
 	// Monitor the process in a goroutine to detect early failures
+	waitDone := make(chan struct{})
 	go func() {
+		defer close(waitDone)
 		err := portForwardCmd.Wait()
-		if err != nil && err != context.Canceled {
+		if err != nil && forwardCtx.Err() == nil {
 			// Log the error with stdout and stderr output
 			stdoutOutput := stdoutBuf.String()
 			stderrOutput := stderrBuf.String()
@@ -1692,14 +1694,19 @@ func (c *CommandExecutorNamespace) StartPortForwarding(ctx context.Context, podN
 
 	logging.LogInfoByCtxf(ctx, "Port forwarding started for pod '%s/%s:%d' -> localhost:%d", namespaceName, podName, podPort, localPort)
 
-	// Return a cancel function that kills the process
+	// Return a cancel function that kills the process and waits for the goroutine to finish
 	return func() {
+		cancel() // Cancel context first — this sends SIGKILL to the process via CommandContext
 		if portForwardCmd.Process != nil {
-			portForwardCmd.Process.Kill()
-			portForwardCmd.Wait()
-			logging.LogInfoByCtxf(ctx, "Port forwarding stopped for pod '%s/%s'", namespaceName, podName)
+			portForwardCmd.Process.Kill() // Ensure process is killed even if context cancel didn't do it
 		}
-		cancel()
+		// Wait for the monitoring goroutine to finish (it holds the only Wait() call)
+		select {
+		case <-waitDone:
+			logging.LogInfoByCtxf(ctx, "Port forwarding stopped for pod '%s/%s'", namespaceName, podName)
+		case <-time.After(5 * time.Second):
+			logging.LogErrorByCtxf(ctx, "Timed out waiting for port forwarding process to exit for pod '%s/%s'", namespaceName, podName)
+		}
 	}, nil
 }
 
@@ -2415,4 +2422,18 @@ func (c *CommandExecutorNamespace) RoleBindingByNameExists(ctx context.Context, 
 	}
 
 	return exists, nil
+}
+
+func (c *CommandExecutorNamespace) Delete(ctx context.Context) error {
+	kubernetesCluster, err := c.GetKubernetesCluster()
+	if err != nil {
+		return err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	return kubernetesCluster.DeleteNamespaceByName(ctx, namespaceName)
 }

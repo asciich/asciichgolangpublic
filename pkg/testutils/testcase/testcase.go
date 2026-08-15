@@ -20,6 +20,10 @@ type TestCase struct {
 	Namespace    string `yaml:"namespace,omitempty"`
 	Cluster      string `yaml:"cluster,omitempty"`
 	ResourceName string `yaml:"resource_name,omitempty"`
+	SecretKey    string `yaml:"secret_key" json:"secret_key"`
+	TargetHost   string `yaml:"target_host" json:"target_host"`
+	TargetUser   string `yaml:"target_user" json:"target_user"`
+	TargetPort   int    `yaml:"target_port" json:"target_port"`
 
 	data            any
 	commandExecutor commandexecutorinterfaces.CommandExecutor
@@ -146,4 +150,32 @@ func (t *TestCase) SetData(data any) error {
 	t.data = data
 
 	return nil
+}
+
+func (t *TestCase) GetSecretKey() (string, error) {
+	if t.SecretKey == "" {
+		return "", tracederrors.TracedErrorEmptyString("SecretKey")
+	}
+	return t.SecretKey, nil
+}
+
+func (t *TestCase) GetTargetHost() (string, error) {
+	if t.TargetHost == "" {
+		return "", tracederrors.TracedErrorEmptyString("TargetHost")
+	}
+	return t.TargetHost, nil
+}
+
+func (t *TestCase) GetTargetUser() (string, error) {
+	if t.TargetUser == "" {
+		return "", tracederrors.TracedErrorEmptyString("TargetUser")
+	}
+	return t.TargetUser, nil
+}
+
+func (t *TestCase) GetTargetPort() (int, error) {
+	if t.TargetPort <= 0 {
+		return 0, tracederrors.TracedError("TargetPort not set")
+	}
+	return t.TargetPort, nil
 }

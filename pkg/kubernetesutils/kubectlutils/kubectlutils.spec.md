@@ -1,6 +1,8 @@
 # kubectlutils specifications
 
-These file contains the specification for the `kubectlutils` package and it's subpackages.
+This are the specifications for the [`kubectlutils` package](README.md).
+
+This document extends the parent specifications [kubernetesutils.spec.md](../kubernetesutils.spec.md).
 
 ## Testing
 

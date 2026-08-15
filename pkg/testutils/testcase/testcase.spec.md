@@ -1,6 +1,8 @@
 # testcase specifications
 
-These file contains the specification for the `testcase` package and it's subpackages.
+This are the specifications for the [`testcase` package](README.md).
+
+This document extends the [constitution.md](/constitution.md).
 
 ## Implementation
 

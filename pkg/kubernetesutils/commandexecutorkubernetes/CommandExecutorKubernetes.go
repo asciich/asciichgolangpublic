@@ -1360,13 +1360,17 @@ func (c *CommandExecutorKubernetes) ValidateSSHKeyInSecret(
 	if options.SkipHostKeyValidation {
 		sshArgs += " -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 	}
-	sshArgs += fmt.Sprintf(" -o ConnectTimeout=%s -o ConnectionAttempts=%d", options.ConnectionTimeout, options.ConnectionAttempts)
+
+	timeoutSeconds, err := options.GetConnectionTimeoutSeconds()
+	if err != nil {
+		return false, err
+	}
+
+	sshArgs += fmt.Sprintf(" -o ConnectTimeout=%s -o ConnectionAttempts=%d", timeoutSeconds, options.ConnectionAttempts)
 
 	sshCommand := fmt.Sprintf(
-		"apt-get update && apt-get install -y openssh-client && "+
-			"chmod 600 %s && "+
-			"ssh -i %s -p %d %s %s@%s 'echo SSH_SUCCESS'",
-		keyFilePath,
+		"cp %s /tmp/ssh_key && chmod 600 /tmp/ssh_key && "+
+			"ssh -i /tmp/ssh_key -p %d %s %s@%s 'echo SSH_SUCCESS'",
 		keyFilePath,
 		options.TargetPort,
 		sshArgs,
@@ -1374,7 +1378,7 @@ func (c *CommandExecutorKubernetes) ValidateSSHKeyInSecret(
 		options.TargetHost,
 	)
 
-	// Create pod YAML with secret volume mount
+	// Create pod YAML with secret volume mount using Alpine SSH client image
 	podYaml := fmt.Sprintf(`
 apiVersion: v1
 kind: Pod
@@ -1384,9 +1388,9 @@ metadata:
 spec:
   containers:
   - name: ssh-test
-    image: debian:latest
+    image: kroniak/ssh-client:latest
     command:
-    - bash
+    - sh
     - -c
     - |
       %s
@@ -1435,8 +1439,8 @@ spec:
 	}
 	_ = createOutput // Output not needed, just checking error
 
-	// Wait for pod to complete (up to 60 seconds)
-	_, err = commandExecutor.RunCommand(
+	// Wait for the pod to start running first
+	_, _ = commandExecutor.RunCommand(
 		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
@@ -1448,12 +1452,30 @@ spec:
 				"pod/" + podName,
 				"--timeout=60s",
 			},
-			TimeoutString: "70 seconds",
+			TimeoutString:     "70 seconds",
+			AllowAllExitCodes: true,
+		},
+	)
+
+	// Wait for the pod to complete (terminate) — condition=Ready=False means the container has finished
+	_, err = commandExecutor.RunCommand(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context", kubeContext,
+				"--namespace", options.Namespace,
+				"wait",
+				"--for=condition=Ready=False",
+				"pod/" + podName,
+				"--timeout=60s",
+			},
+			TimeoutString:     "70 seconds",
+			AllowAllExitCodes: true,
 		},
 	)
 	if err != nil {
-		// Pod might have failed, try to get logs anyway
-		logging.LogInfoByCtxf(ctx, "Pod did not reach Ready state, attempting to get logs: %v", err)
+		logging.LogInfoByCtxf(ctx, "Pod did not complete within timeout: %v", err)
 	}
 
 	// Get pod logs

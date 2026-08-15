@@ -26,6 +26,7 @@ type Namespace interface {
 	CreateSecret(ctx context.Context, name string, options *kubernetesparameteroptions.CreateSecretOptions) (createdSecret Secret, err error)
 	CreateCronJob(ctx context.Context, cronJobName string, schedule string, image string, command []string, labels map[string]string) (CronJob, error)
 	CronJobByNameExists(ctx context.Context, cronJobName string) (bool, error)
+	Delete(context.Context) error
 	DeleteConfigMapByName(ctx context.Context, name string) (err error)
 	DeleteCronJobByName(ctx context.Context, cronJobName string) (err error)
 	DeleteDeploymentByName(ctx context.Context, name string) (err error)

@@ -50,3 +50,7 @@
 	    	panic(err)
 	    }
         ```
+
+## Container handing
+
+- Avoid installing things in containers. Use container images which already include what is needed. Relying on the package servers is not a good practice.

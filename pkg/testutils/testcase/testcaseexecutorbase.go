@@ -95,3 +95,39 @@ func (t *TestCaseExecutorBase) GetResourceName() (string, error) {
 
 	return testCase.GetResourceName()
 }
+
+func (t *TestCaseExecutorBase) GetSecretKey() (string, error) {
+	testCase, err := t.GetDataAsTestCase()
+	if err != nil {
+		return "", err
+	}
+
+	return testCase.GetSecretKey()
+}
+
+func (t *TestCaseExecutorBase) GetTargetHost() (string, error) {
+	testCase, err := t.GetDataAsTestCase()
+	if err != nil {
+		return "", err
+	}
+
+	return testCase.GetTargetHost()
+}
+
+func (t *TestCaseExecutorBase) GetTargetUser() (string, error) {
+	testCase, err := t.GetDataAsTestCase()
+	if err != nil {
+		return "", err
+	}
+
+	return testCase.GetTargetUser()
+}
+
+func (t *TestCaseExecutorBase) GetTargetPort() (int, error) {
+	testCase, err := t.GetDataAsTestCase()
+	if err != nil {
+		return 0, err
+	}
+
+	return testCase.GetTargetPort()
+}

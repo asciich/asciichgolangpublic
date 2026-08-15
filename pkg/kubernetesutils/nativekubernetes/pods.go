@@ -858,7 +858,7 @@ func ListPodNames(ctx context.Context, clientset *kubernetes.Clientset, namespac
 // by creating a temporary pod with the key mounted and attempting to SSH into a target host.
 // The function:
 // 1. Creates a temporary pod with the SSH private key mounted from the secret
-// 2. Installs openssh-client in the pod
+// 2. Copies the key to a writable location (secret volumes are read-only)
 // 3. Attempts SSH connection to the target host
 // 4. Returns true if authentication succeeds, false otherwise
 // 5. Cleans up the temporary pod
@@ -890,15 +890,22 @@ func ValidateSSHKeyInSecret(
 	if options.SkipHostKeyValidation {
 		sshArgs += " -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 	}
-	sshArgs += fmt.Sprintf(" -o ConnectTimeout=%s -o ConnectionAttempts=%d", options.ConnectionTimeout, options.ConnectionAttempts)
 
+	timeoutSeconds, err := options.GetConnectionTimeoutSeconds()
+	if err != nil {
+		return false, err
+	}
+
+	sshArgs += fmt.Sprintf(" -o ConnectTimeout=%s -o ConnectionAttempts=%d", timeoutSeconds, options.ConnectionAttempts)
+
+	// Use kroniak/ssh-client (Alpine-based with openssh-client pre-installed)
+	// Copy key from read-only secret mount to /tmp for chmod
 	sshCommand := []string{
-		"bash", "-c",
+		"sh", "-c",
 		fmt.Sprintf(
-			"apt-get update && apt-get install -y openssh-client && "+
-				"chmod 600 %s && "+
-				"ssh -i %s -p %d %s %s@%s 'echo SSH_SUCCESS'",
-			keyFilePath,
+			"cp %s /tmp/ssh_key && "+
+				"chmod 600 /tmp/ssh_key && "+
+				"ssh -i /tmp/ssh_key -p %d %s %s@%s 'echo SSH_SUCCESS'",
 			keyFilePath,
 			options.TargetPort,
 			sshArgs,
@@ -912,7 +919,7 @@ func ValidateSSHKeyInSecret(
 		clientset,
 		options.Namespace,
 		&kubernetesparameteroptions.KubernetesRunCommandOptions{
-			Image:                    "debian:latest",
+			Image:                    "kroniak/ssh-client:latest",
 			PodName:                  podName,
 			DeleteAlreadyExistingPod: true,
 			SecretMounts: map[string]kubernetesparameteroptions.SecretMountSource{

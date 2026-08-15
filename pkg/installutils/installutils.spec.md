@@ -1,6 +1,8 @@
 # installutils specifications
 
-These file contains the specification for the `installutils` package and it's subpackages.
+This are the specifications for the [`installutils` package](README.md).
+
+This document extends the [constitution.md](/constitution.md).
 
 ## documentation
 

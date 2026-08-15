@@ -16,6 +16,7 @@ func LoadExecuctors() ([]testutilsinterfaces.TestCaseExecutor, error) {
 		&TestCaseExecutorKubernetesSecretExists{},
 		&TestCaseExecutorKubernetesDeploymentExists{},
 		&TestCaseExecutorKubernetesCronJobExists{},
+		&TestCaseExecutorKubernetesValidateSshKeyInSecret{},
 	}, nil
 }
 
