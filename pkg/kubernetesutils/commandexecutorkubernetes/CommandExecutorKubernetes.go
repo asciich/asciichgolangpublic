@@ -1363,8 +1363,7 @@ func (c *CommandExecutorKubernetes) ValidateSSHKeyInSecret(
 	sshArgs += fmt.Sprintf(" -o ConnectTimeout=%s -o ConnectionAttempts=%d", options.ConnectionTimeout, options.ConnectionAttempts)
 
 	sshCommand := fmt.Sprintf(
-		"apt-get update && apt-get install -y openssh-client && "+
-			"chmod 600 %s && "+
+		"chmod 600 %s && "+
 			"ssh -i %s -p %d %s %s@%s 'echo SSH_SUCCESS'",
 		keyFilePath,
 		keyFilePath,
@@ -1374,7 +1373,7 @@ func (c *CommandExecutorKubernetes) ValidateSSHKeyInSecret(
 		options.TargetHost,
 	)
 
-	// Create pod YAML with secret volume mount
+	// Create pod YAML with secret volume mount using Alpine SSH client image
 	podYaml := fmt.Sprintf(`
 apiVersion: v1
 kind: Pod
@@ -1384,9 +1383,9 @@ metadata:
 spec:
   containers:
   - name: ssh-test
-    image: debian:latest
+    image: kroniak/ssh-client:latest
     command:
-    - bash
+    - sh
     - -c
     - |
       %s

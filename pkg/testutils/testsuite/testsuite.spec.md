@@ -1,13 +1,8 @@
 # testsuite specifications
 
-This file contains the specifications for the `testsuite` package and its subpackages.
+This are the specifications for the [`testsuite` package](README.md).
 
-## Documentation
-
-- The [README.md](README.md) must contain a section `Example Configuration`:
-    - An example entry per available testcase must be present.
-    - The testsuite configuration must show all available configuration fields.
-- Besides the list of all available `Example_*_test.go` there is no need to document the test setup further in the [README.md](README.md).
+This document extends the [constitution.md](/constitution.md).
 
 ## Implementation
 
@@ -30,3 +25,10 @@ This file contains the specifications for the `testsuite` package and its subpac
         - Do not perform the `kubectl` installation in `TestSetupSSHServerInKind`, as it is part of `SetupSSHServerInKind`
         - Validate kubectl by running `kubectl get ns` and verifying the output contains the expected namespace.
 
+## Documentation
+
+- The [README.md](README.md) must contain a section `Example Configuration`:
+    - An example entry per available testcase must be present.
+    - The testsuite configuration must show all available configuration fields.
+- Besides the list of all available `Example_*_test.go` there is no need to document the test setup further in the [README.md](README.md).
+    - All `Example_*_test.go` packages must link to the corresponding go file.

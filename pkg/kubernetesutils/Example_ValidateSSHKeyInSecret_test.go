@@ -41,6 +41,7 @@ func Test_Example_ValidateSSHKeyInSecret(t *testing.T) {
 
 	namespace, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
 	require.NoError(t, err)
+	defer namespace.Delete(ctx)
 
 	err = namespace.DeleteSecretByName(ctx, secretName)
 	require.NoError(t, err)
@@ -72,8 +73,8 @@ func Test_Example_ValidateSSHKeyInSecret(t *testing.T) {
 		ConnectionAttempts:    1,
 	}
 	success, err := kubernetes.ValidateSSHKeyInSecret(ctx, options)
-
-	t.Logf("SSH validation result: success=%v, err=%v", success, err)
+	require.NoError(t, err)
+	require.True(t, success)
 
 	err = kubernetes.DeleteNamespaceByName(ctx, namespaceName)
 	require.NoError(t, err)

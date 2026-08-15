@@ -2416,3 +2416,17 @@ func (c *CommandExecutorNamespace) RoleBindingByNameExists(ctx context.Context, 
 
 	return exists, nil
 }
+
+func (c *CommandExecutorNamespace) Delete(ctx context.Context) error {
+	kubernetesCluster, err := c.GetKubernetesCluster()
+	if err != nil {
+		return err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	return kubernetesCluster.DeleteNamespaceByName(ctx, namespaceName)
+}
