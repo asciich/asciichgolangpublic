@@ -190,6 +190,69 @@ func Test_GetSecret_ErrorIfNotExist(t *testing.T) {
 	}
 }
 
+func Test_ReadSecret(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		{"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "testnamespace"
+				const secretName = "testsecret"
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
+
+				namespace, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+
+				// Ensure secret is absent before starting:
+				err = namespace.DeleteSecretByName(ctx, secretName)
+				require.NoError(t, err)
+
+				// Test 1: ReadSecret on non-existent secret should return ErrSecretNotFound
+				data, err := kubernetes.ReadSecret(ctx, namespaceName, secretName)
+				require.ErrorIs(t, err, kuberneteserrors.ErrSecretNotFound)
+				require.True(t, kuberneteserrors.IsSecretNotFoundError(err))
+				require.Nil(t, data)
+
+				// Test 2: Create secret and read it back
+				secretData := map[string][]byte{
+					"key1": []byte("value1"),
+					"key2": []byte("value2"),
+				}
+				_, err = namespace.CreateSecret(ctx, secretName, &kubernetesparameteroptions.CreateSecretOptions{SecretData: secretData})
+				require.NoError(t, err)
+
+				readData, err := kubernetes.ReadSecret(ctx, namespaceName, secretName)
+				require.NoError(t, err)
+				require.Equal(t, secretData, readData)
+
+				// Test 3: Update secret and verify read returns updated data
+				updatedData := map[string][]byte{
+					"key1": []byte("newvalue1"),
+					"key3": []byte("value3"),
+				}
+				_, err = namespace.CreateSecret(ctx, secretName, &kubernetesparameteroptions.CreateSecretOptions{SecretData: updatedData})
+				require.NoError(t, err)
+
+				readData, err = kubernetes.ReadSecret(ctx, namespaceName, secretName)
+				require.NoError(t, err)
+				require.Equal(t, updatedData, readData)
+
+				// Cleanup:
+				err = namespace.DeleteSecretByName(ctx, secretName)
+				require.NoError(t, err)
+			},
+		)
+	}
+}
+
 func Test_CreateSecretInNonExistentNamespace(t *testing.T) {
 	tests := []struct {
 		implementationName string
