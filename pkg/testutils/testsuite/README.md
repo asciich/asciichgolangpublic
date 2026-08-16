@@ -27,6 +27,12 @@ test_cases:
     command: curl --fail https://google.com
     description: "Check if we can reach Google using curl"
 
+  # Kind cluster exists test - check if a kind cluster exists by name
+  - name: "Test kind cluster exists"
+    test_type: kind_cluster_exists
+    cluster: kind-asciichgolangpublic
+    description: "Check if the kind cluster exists"
+
   # TCP port open test - check if a port is open on a host
   - name: "Test HTTPS port open"
     test_type: tcp_port_open
@@ -107,6 +113,7 @@ test_cases:
 The following example test files demonstrate the usage of the testsuite package:
 
 - `Example_TestGoogleReachable_test.go` - TCP port open and command tests
+- `Example_KindClusterExists_test.go` - Kind cluster existence tests
 - `Example_KubernetesNamespaceExists_test.go` - Kubernetes namespace existence tests
 - `Example_KubernetesPodExists_test.go` - Kubernetes pod existence tests
 - `Example_KubernetesReplicaSetExists_test.go` - Kubernetes ReplicaSet existence tests
@@ -114,6 +121,7 @@ The following example test files demonstrate the usage of the testsuite package:
 - `Example_KubernetesSecretExists_test.go` - Kubernetes Secret existence tests
 - `Example_KubernetesDeploymentExists_test.go` - Kubernetes Deployment existence tests
 - `Example_KubernetesCronJobExists_test.go` - Kubernetes CronJob existence tests
+- `Example_KubernetesValidateSshKeyInSecret_test.go` - Kubernetes SSH key validation in Secret tests
 
 Each example test file contains both localhost and SSH jumphost test scenarios.
 
