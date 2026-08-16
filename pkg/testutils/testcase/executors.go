@@ -8,6 +8,7 @@ import (
 func LoadExecuctors() ([]testutilsinterfaces.TestCaseExecutor, error) {
 	return []testutilsinterfaces.TestCaseExecutor{
 		&TestCaseExecutorCommand{},
+		&TestCaseExecutorKindClusterExists{},
 		&TestCaseExecutorTcpPortOpen{},
 		&TestCaseExecutorKubernetesNamespaceExists{},
 		&TestCaseExecutorKubernetesPodExists{},
