@@ -1,5 +1,8 @@
 package testsuite_test
 
+// There is meanwhile the kubernetestestsshserver package available.
+// TODO: All functionality of this file must go into the kubernetestestsshserver pacakge to make reduce code duplication and make it reuseable.
+
 import (
 	"context"
 	"fmt"

@@ -121,6 +121,7 @@ This document extends the [constitution.md](/constitution.md).
     - The `TestSetupSSHServerInKind` ensures this procedure works. Make sure it validates the `kubectl` is available and executable in the SSH server pod after the setup as this is needed to run kubernetes related tests.
         - Do not perform the `kubectl` installation in `TestSetupSSHServerInKind`, as it is part of `SetupSSHServerInKind`
         - Validate kubectl by running `kubectl get ns` and verifying the output contains the expected namespace.
+    - `KinD` related tests can't run over SSH as the pod in the cluster does not see the docker socket nor anything else to check for `KinD` functionality.
 
 ## Documentation
 
