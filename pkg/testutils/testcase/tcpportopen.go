@@ -82,9 +82,12 @@ func (t *TestCaseExecutorTcpPortOpen) Run(ctx context.Context, commandExecutor c
 			return nil, err
 		}
 	} else {
-		err := result.SetFailedMessage(
-			fmt.Sprintf("The TCP port '%d' on '%s' is not open.", port, host),
-		)
+		baseMessage := fmt.Sprintf("The TCP port '%d' on '%s' is not open.", port, host)
+		failedMessage, err := t.FormatFailedMessage(baseMessage)
+		if err != nil {
+			return nil, err
+		}
+		err = result.SetFailedMessage(failedMessage)
 		if err != nil {
 			return nil, err
 		}

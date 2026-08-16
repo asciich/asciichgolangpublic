@@ -93,9 +93,12 @@ func (t *TestCaseExecutorKubernetesSecretExists) Run(ctx context.Context, comman
 			return nil, err
 		}
 	} else {
-		err = result.SetFailedMessage(
-			fmt.Sprintf("The Kubernetes secret '%s' in namespace '%s' cluster '%s' does not exist.", secretName, namespace, cluster),
-		)
+		baseMessage := fmt.Sprintf("The Kubernetes secret '%s' in namespace '%s' cluster '%s' does not exist.", secretName, namespace, cluster)
+		failedMessage, err := t.FormatFailedMessage(baseMessage)
+		if err != nil {
+			return nil, err
+		}
+		err = result.SetFailedMessage(failedMessage)
 		if err != nil {
 			return nil, err
 		}

@@ -76,9 +76,12 @@ func (t *TestCaseExecutorKindClusterExists) Run(ctx context.Context, commandExec
 			return nil, err
 		}
 	} else {
-		err = result.SetFailedMessage(
-			fmt.Sprintf("The kind cluster '%s' does not exist.", cluster),
-		)
+		baseMessage := fmt.Sprintf("The kind cluster '%s' does not exist.", cluster)
+		failedMessage, err := t.FormatFailedMessage(baseMessage)
+		if err != nil {
+			return nil, err
+		}
+		err = result.SetFailedMessage(failedMessage)
 		if err != nil {
 			return nil, err
 		}

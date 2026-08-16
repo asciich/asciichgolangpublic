@@ -70,9 +70,12 @@ func (t *TestCaseExecutorCommand) Run(ctx context.Context, commandExecutor comma
 			return nil, err
 		}
 	} else {
-		err := result.SetFailedMessage(
-			fmt.Sprintf("The test command '%s' failed and exited with code %d.", command, exitCode),
-		)
+		baseMessage := fmt.Sprintf("The test command '%s' failed and exited with code %d.", command, exitCode)
+		failedMessage, err := t.FormatFailedMessage(baseMessage)
+		if err != nil {
+			return nil, err
+		}
+		err = result.SetFailedMessage(failedMessage)
 		if err != nil {
 			return nil, err
 		}

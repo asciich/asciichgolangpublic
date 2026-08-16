@@ -93,9 +93,12 @@ func (t *TestCaseExecutorKubernetesCronJobExists) Run(ctx context.Context, comma
 			return nil, err
 		}
 	} else {
-		err = result.SetFailedMessage(
-			fmt.Sprintf("The Kubernetes cronjob '%s' in namespace '%s' cluster '%s' does not exist.", cronJobName, namespace, cluster),
-		)
+		baseMessage := fmt.Sprintf("The Kubernetes cronjob '%s' in namespace '%s' cluster '%s' does not exist.", cronJobName, namespace, cluster)
+		failedMessage, err := t.FormatFailedMessage(baseMessage)
+		if err != nil {
+			return nil, err
+		}
+		err = result.SetFailedMessage(failedMessage)
 		if err != nil {
 			return nil, err
 		}
