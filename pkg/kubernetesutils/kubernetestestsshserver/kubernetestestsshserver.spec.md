@@ -22,6 +22,7 @@ This document extends the parent specifications [kubernetesutils.spec.md](../kub
     - `SSHPublicKey` as string (optional) - The SSH public key for key-based authentication
     - `Image` as string (optional) - The container image to use for the SSH server (defaults to a standard SSH server image)
     - `SSHPort` as optional int. If not set use `22` as default.
+    - `InstallKubectl` as optional bool. If set `kubectl` is installed insed the SSH server pod.
 - Use a dedicated file per Options `struct` to separate the options from the implementation on file level.
 - The function returns a `kubernetesinterfaces.Pod` that represents the SSH server pod.
 - The SSH server pod must be properly cleaned up by calling `Delete(ctx context.Context)` on the returned pod.
@@ -49,3 +50,4 @@ This document extends the parent specifications [kubernetesutils.spec.md](../kub
 - There are other test SSH server implementations in this repository:
     - A link in the [README.md](README.md) must be added for every additional implementation.
     - A linke back to this implementation must be added to all other implementations README.md files.
+- These test servers are quite important for this repo to ensure proper functionalty. Therefore a Link to the SSH test server implementations must be placed in the main [README.md](/README.md).
