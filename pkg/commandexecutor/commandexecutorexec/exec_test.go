@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
@@ -193,6 +194,36 @@ func Test_RunCommandAndGetStdoutAsIoReadCloser(t *testing.T) {
 	}
 }
 
+func Test_RunCommandAndGetStdoutAsIoReadCloser_failingCommand(t *testing.T) {
+	tests := []struct {
+		command []string
+	}{
+		{[]string{"bash", "-c", "echo partial output && exit 1"}},
+		{[]string{"false"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+
+				readCloser, err := commandexecutorexec.RunCommandAndGetStdoutAsIoReadCloser(
+					ctx,
+					&parameteroptions.RunCommandOptions{
+						Command: tt.command,
+					},
+				)
+				require.NoError(t, err)
+				defer readCloser.Close()
+
+				_, err = io.ReadAll(readCloser)
+				require.Error(t, err)
+			},
+		)
+	}
+}
+
 func Test_RunCommandAndGetStdinAsIoWriteCloser(t *testing.T) {
 	tests := []struct {
 		input string
@@ -228,6 +259,42 @@ func Test_RunCommandAndGetStdinAsIoWriteCloser(t *testing.T) {
 				got, err := nativefiles.ReadAsString(ctx, tempFile, &filesoptions.ReadOptions{})
 				require.NoError(t, err)
 				require.EqualValues(t, tt.input, got)
+			},
+		)
+	}
+}
+
+func Test_RunCommandAndGetStdinAsIoWriteCloser_failingCommand(t *testing.T) {
+	tests := []struct {
+		command []string
+	}{
+		{[]string{"bash", "-c", "exit 1"}},
+		{[]string{"false"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+
+				writeCloser, err := commandexecutorexec.RunCommandAndGetStdinAsIoWriteCloser(
+					ctx,
+					&parameteroptions.RunCommandOptions{
+						Command: tt.command,
+					},
+				)
+				require.NoError(t, err)
+
+				// Wait a moment so the process is closed for sure.
+				// Otherwise we migth hit a race condition.
+				time.Sleep(1 * time.Second)
+
+				_, err = fmt.Fprint(writeCloser, "some input")
+				require.Error(t, err)
+
+				err = writeCloser.Close()
+				require.Error(t, err)
 			},
 		)
 	}
