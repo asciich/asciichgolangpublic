@@ -131,3 +131,30 @@ func (t *TestCaseExecutorBase) GetTargetPort() (int, error) {
 
 	return testCase.GetTargetPort()
 }
+
+func (t *TestCaseExecutorBase) GetRunbookLinks() ([]string, error) {
+	testCase, err := t.GetDataAsTestCase()
+	if err != nil {
+		return nil, err
+	}
+
+	return testCase.GetRunbookLinks()
+}
+
+func (t *TestCaseExecutorBase) GetHintsForInvestigation() (string, error) {
+	testCase, err := t.GetDataAsTestCase()
+	if err != nil {
+		return "", err
+	}
+
+	return testCase.GetHintsForInvestigation()
+}
+
+func (t *TestCaseExecutorBase) FormatFailedMessage(baseMessage string) (string, error) {
+	testCase, err := t.GetDataAsTestCase()
+	if err != nil {
+		return "", err
+	}
+
+	return testCase.FormatFailedMessage(baseMessage), nil
+}

@@ -93,9 +93,12 @@ func (t *TestCaseExecutorKubernetesConfigMapExists) Run(ctx context.Context, com
 			return nil, err
 		}
 	} else {
-		err = result.SetFailedMessage(
-			fmt.Sprintf("The Kubernetes configmap '%s' in namespace '%s' cluster '%s' does not exist.", configMapName, namespace, cluster),
-		)
+		baseMessage := fmt.Sprintf("The Kubernetes configmap '%s' in namespace '%s' cluster '%s' does not exist.", configMapName, namespace, cluster)
+		failedMessage, err := t.FormatFailedMessage(baseMessage)
+		if err != nil {
+			return nil, err
+		}
+		err = result.SetFailedMessage(failedMessage)
 		if err != nil {
 			return nil, err
 		}

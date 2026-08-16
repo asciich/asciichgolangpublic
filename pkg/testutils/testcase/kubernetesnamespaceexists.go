@@ -83,9 +83,12 @@ func (t *TestCaseExecutorKubernetesNamespaceExists) Run(ctx context.Context, com
 			return nil, err
 		}
 	} else {
-		err = result.SetFailedMessage(
-			fmt.Sprintf("The Kubernetes namespace '%s' in cluster '%s' does not exist.", namespace, cluster),
-		)
+		baseMessage := fmt.Sprintf("The Kubernetes namespace '%s' in cluster '%s' does not exist.", namespace, cluster)
+		failedMessage, err := t.FormatFailedMessage(baseMessage)
+		if err != nil {
+			return nil, err
+		}
+		err = result.SetFailedMessage(failedMessage)
 		if err != nil {
 			return nil, err
 		}

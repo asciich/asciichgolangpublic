@@ -159,3 +159,115 @@ func TestSetData_ErrorWhenNil(t *testing.T) {
 	err := tc.SetData(nil)
 	assert.Error(t, err)
 }
+
+func TestGetRunbookLinks_ReturnsSingleString(t *testing.T) {
+	testCase := &testcase.TestCase{
+		RunbookLinks: "https://example.com/runbook",
+	}
+
+	links, err := testCase.GetRunbookLinks()
+	require.NoError(t, err)
+	require.Len(t, links, 1)
+	require.Equal(t, "https://example.com/runbook", links[0])
+}
+
+func TestGetRunbookLinks_ReturnsMultipleStrings(t *testing.T) {
+	testCase := &testcase.TestCase{
+		RunbookLinks: []any{"https://example.com/runbook1", "https://example.com/runbook2"},
+	}
+
+	links, err := testCase.GetRunbookLinks()
+	require.NoError(t, err)
+	require.Len(t, links, 2)
+	require.Equal(t, "https://example.com/runbook1", links[0])
+	require.Equal(t, "https://example.com/runbook2", links[1])
+}
+
+func TestGetRunbookLinks_ErrorWhenNil(t *testing.T) {
+	testCase := &testcase.TestCase{
+		RunbookLinks: nil,
+	}
+
+	links, err := testCase.GetRunbookLinks()
+	require.Error(t, err)
+	require.Nil(t, links)
+}
+
+func TestGetRunbookLinks_ErrorWhenEmptyString(t *testing.T) {
+	testCase := &testcase.TestCase{
+		RunbookLinks: "",
+	}
+
+	links, err := testCase.GetRunbookLinks()
+	require.Error(t, err)
+	require.Nil(t, links)
+}
+
+func TestGetRunbookLinks_ErrorWhenEmptySlice(t *testing.T) {
+	testCase := &testcase.TestCase{
+		RunbookLinks: []any{},
+	}
+
+	links, err := testCase.GetRunbookLinks()
+	require.Error(t, err)
+	require.Nil(t, links)
+}
+
+func TestGetHintsForInvestigation_ReturnsHints(t *testing.T) {
+	testCase := &testcase.TestCase{
+		HintsForInvestigation: "Check the logs for errors",
+	}
+
+	hints, err := testCase.GetHintsForInvestigation()
+	require.NoError(t, err)
+	require.Equal(t, "Check the logs for errors", hints)
+}
+
+func TestGetHintsForInvestigation_ErrorWhenEmpty(t *testing.T) {
+	testCase := &testcase.TestCase{
+		HintsForInvestigation: "",
+	}
+
+	hints, err := testCase.GetHintsForInvestigation()
+	require.Error(t, err)
+	require.Empty(t, hints)
+}
+
+func TestFormatFailedMessage_WithRunbookLinksAndHints(t *testing.T) {
+	testCase := &testcase.TestCase{
+		RunbookLinks:          []any{"https://example.com/runbook1", "https://example.com/runbook2"},
+		HintsForInvestigation: "Check the logs",
+	}
+
+	message := testCase.FormatFailedMessage("Test failed")
+	require.Contains(t, message, "Test failed")
+	require.Contains(t, message, "Runbook links:")
+	require.Contains(t, message, "https://example.com/runbook1")
+	require.Contains(t, message, "https://example.com/runbook2")
+	require.Contains(t, message, "Hints for investigation: Check the logs")
+}
+
+func TestFormatFailedMessage_WithoutRunbookLinksAndHints(t *testing.T) {
+	testCase := &testcase.TestCase{
+		RunbookLinks:          nil,
+		HintsForInvestigation: "",
+	}
+
+	message := testCase.FormatFailedMessage("Test failed")
+	require.Contains(t, message, "Test failed")
+	require.Contains(t, message, "No runbook_links set.")
+	require.Contains(t, message, "No hints_for_investigation set.")
+}
+
+func TestFormatFailedMessage_WithSingleRunbookLink(t *testing.T) {
+	testCase := &testcase.TestCase{
+		RunbookLinks:          "https://example.com/runbook",
+		HintsForInvestigation: "Check the logs",
+	}
+
+	message := testCase.FormatFailedMessage("Test failed")
+	require.Contains(t, message, "Test failed")
+	require.Contains(t, message, "Runbook links:")
+	require.Contains(t, message, "https://example.com/runbook")
+	require.Contains(t, message, "Hints for investigation: Check the logs")
+}

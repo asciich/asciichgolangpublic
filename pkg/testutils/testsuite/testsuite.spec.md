@@ -15,6 +15,8 @@ This document extends the [constitution.md](/constitution.md).
     - `name`: A unique, descriptive name for the test case.
     - `test_type`: The type of test to execute.
     - `description`: A human-readable description of what the test validates.
+    - `runbook_links`: A single string or a list of multiple strings containing URLs to the runbook to follow if the test fails. This Link must be shown when the testcase failed as part of the error message to help the user to investigate. If no runbook_links are set show a message there are no runbook_links set.
+    - `hints_for_investigation`: An optional single string containing hints for the user to investigate if the test fails. This must be shown when the testcase failed as part of the error message to help the user to investigate. If no hints_for_investigation are set show a message there are no hints_for_investigation set.
 - If SSH configuration is provided at the suite level (`ssh_host`, `ssh_user`, etc.), command-based tests execute on the remote host via SSH.
 
 #### Available Test Types

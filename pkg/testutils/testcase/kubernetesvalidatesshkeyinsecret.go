@@ -110,10 +110,13 @@ func (t *TestCaseExecutorKubernetesValidateSshKeyInSecret) Run(ctx context.Conte
 
 	// If there's an error (e.g. secret not found), treat it as a failed test case, not an infrastructure error
 	if err != nil {
-		err = result.SetFailedMessage(
-			fmt.Sprintf("SSH key validation failed for secret '%s' in namespace '%s' cluster '%s': %v",
-				secretName, namespace, cluster, err),
-		)
+		baseMessage := fmt.Sprintf("SSH key validation failed for secret '%s' in namespace '%s' cluster '%s': %v",
+			secretName, namespace, cluster, err)
+		failedMessage, formatErr := t.FormatFailedMessage(baseMessage)
+		if formatErr != nil {
+			return nil, formatErr
+		}
+		err = result.SetFailedMessage(failedMessage)
 		if err != nil {
 			return nil, err
 		}
@@ -126,10 +129,13 @@ func (t *TestCaseExecutorKubernetesValidateSshKeyInSecret) Run(ctx context.Conte
 			return nil, err
 		}
 	} else {
-		err = result.SetFailedMessage(
-			fmt.Sprintf("The SSH key in secret '%s' (key '%s') in namespace '%s' cluster '%s' failed to authenticate to '%s@%s:%d'.",
-				secretName, secretKey, namespace, cluster, targetUser, targetHost, targetPort),
-		)
+		baseMessage := fmt.Sprintf("The SSH key in secret '%s' (key '%s') in namespace '%s' cluster '%s' failed to authenticate to '%s@%s:%d'.",
+			secretName, secretKey, namespace, cluster, targetUser, targetHost, targetPort)
+		failedMessage, formatErr := t.FormatFailedMessage(baseMessage)
+		if formatErr != nil {
+			return nil, formatErr
+		}
+		err = result.SetFailedMessage(failedMessage)
 		if err != nil {
 			return nil, err
 		}

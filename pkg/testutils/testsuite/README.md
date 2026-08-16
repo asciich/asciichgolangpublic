@@ -20,18 +20,27 @@ test_cases:
     test_type: command
     command: echo hello world
     description: "Check if echo command works"
+    runbook_links:
+      - "https://runbooks.example.com/command-tests"
+    hints_for_investigation: "Check if the shell is available and PATH is set correctly."
 
   # Command test - run on remote SSH server
   - name: "Test curl google"
     test_type: command
     command: curl --fail https://google.com
     description: "Check if we can reach Google using curl"
+    runbook_links: "https://runbooks.example.com/network-tests"
+    hints_for_investigation: "Verify network connectivity and DNS resolution."
 
   # Kind cluster exists test - check if a kind cluster exists by name
   - name: "Test kind cluster exists"
     test_type: kind_cluster_exists
     cluster: kind-asciichgolangpublic
     description: "Check if the kind cluster exists"
+    runbook_links:
+      - "https://runbooks.example.com/kind-cluster"
+      - "https://kind.sigs.k8s.io/docs/user/quick-start/"
+    hints_for_investigation: "Run 'kind get clusters' to list available clusters."
 
   # TCP port open test - check if a port is open on a host
   - name: "Test HTTPS port open"
@@ -39,6 +48,8 @@ test_cases:
     port: 443
     host: google.com
     description: "Check if the HTTPS port 443 is open on google.com"
+    runbook_links: "https://runbooks.example.com/network-ports"
+    hints_for_investigation: "Check firewall rules and network policies."
 
   # Kubernetes namespace exists test
   - name: "Test default namespace exists"
@@ -46,6 +57,8 @@ test_cases:
     namespace: default
     cluster: kind-asciichgolangpublic
     description: "Check if the default namespace exists"
+    runbook_links: "https://runbooks.example.com/kubernetes-namespaces"
+    hints_for_investigation: "Run 'kubectl get namespaces' to list all namespaces."
 
   # Kubernetes pod exists test
   - name: "Test pod exists"
@@ -54,6 +67,8 @@ test_cases:
     namespace: default
     cluster: kind-asciichgolangpublic
     description: "Check if a specific pod exists"
+    runbook_links: "https://runbooks.example.com/kubernetes-pods"
+    hints_for_investigation: "Run 'kubectl get pods -n default' to list pods in the namespace."
 
   # Kubernetes ReplicaSet exists test
   - name: "Test replicaSet exists"
@@ -62,6 +77,8 @@ test_cases:
     namespace: default
     cluster: kind-asciichgolangpublic
     description: "Check if a specific ReplicaSet exists"
+    runbook_links: "https://runbooks.example.com/kubernetes-replicasets"
+    hints_for_investigation: "Run 'kubectl get replicasets -n default' to list ReplicaSets."
 
   # Kubernetes ConfigMap exists test
   - name: "Test configMap exists"
@@ -70,6 +87,8 @@ test_cases:
     namespace: default
     cluster: kind-asciichgolangpublic
     description: "Check if a specific ConfigMap exists"
+    runbook_links: "https://runbooks.example.com/kubernetes-configmaps"
+    hints_for_investigation: "Run 'kubectl get configmaps -n default' to list ConfigMaps."
 
   # Kubernetes Secret exists test
   - name: "Test secret exists"
@@ -78,6 +97,8 @@ test_cases:
     namespace: default
     cluster: kind-asciichgolangpublic
     description: "Check if a specific Secret exists"
+    runbook_links: "https://runbooks.example.com/kubernetes-secrets"
+    hints_for_investigation: "Run 'kubectl get secrets -n default' to list Secrets."
 
   # Kubernetes Deployment exists test
   - name: "Test deployment exists"
@@ -86,6 +107,8 @@ test_cases:
     namespace: default
     cluster: kind-asciichgolangpublic
     description: "Check if a specific Deployment exists"
+    runbook_links: "https://runbooks.example.com/kubernetes-deployments"
+    hints_for_investigation: "Run 'kubectl get deployments -n default' to list Deployments."
 
   # Kubernetes CronJob exists test
   - name: "Test cronJob exists"
@@ -94,6 +117,8 @@ test_cases:
     namespace: default
     cluster: kind-asciichgolangpublic
     description: "Check if a specific CronJob exists"
+    runbook_links: "https://runbooks.example.com/kubernetes-cronjobs"
+    hints_for_investigation: "Run 'kubectl get cronjobs -n default' to list CronJobs."
 
   # Kubernetes validate SSH key in secret test - validate that an SSH private key stored in a secret can authenticate
   - name: "Test SSH key validation succeeds"
@@ -106,6 +131,8 @@ test_cases:
     target_user: testuser
     target_port: 22
     description: "Check that a valid SSH key in a secret can authenticate"
+    runbook_links: "https://runbooks.example.com/kubernetes-ssh-validation"
+    hints_for_investigation: "Verify the SSH key in the secret matches the authorized_keys on the target host."
 ```
 
 ## Example Tests
