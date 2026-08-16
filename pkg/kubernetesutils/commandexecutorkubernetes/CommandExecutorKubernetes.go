@@ -988,7 +988,53 @@ func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context
 }
 
 func (c *CommandExecutorKubernetes) ReadSecret(ctx context.Context, namespaceName string, secretName string) (map[string][]byte, error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Get secret '%s' in namespace '%s' of kubernetes '%s' started.", secretName, namespaceName, contextName)
+
+	output, err := c.RunCommand(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context",
+				contextName,
+				"--namespace",
+				namespaceName,
+				"get",
+				"secret",
+				secretName,
+				"-o",
+				"json",
+			},
+		},
+	)
+	if err != nil {
+		expectedNotFound := fmt.Sprintf("Error from server (NotFound): secrets \"%s\" not found", secretName)
+		if strings.Contains(err.Error(), expectedNotFound) {
+			return nil, tracederrors.TracedErrorf("%w: secret '%s' in namespace '%s' of kubernetes '%s'", kuberneteserrors.ErrSecretNotFound, secretName, namespaceName, contextName)
+		}
+		return nil, err
+	}
+
+	stdout, err := output.GetStdoutAsBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	var secret struct {
+		Data map[string][]byte `json:"data"`
+	}
+	if err := json.Unmarshal(stdout, &secret); err != nil {
+		return nil, fmt.Errorf("failed to parse secret JSON: %w", err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Get secret '%s' in namespace '%s' of kubernetes '%s' finished.", secretName, namespaceName, contextName)
+
+	return secret.Data, nil
 }
 
 func (c *CommandExecutorKubernetes) ListNodeNames(ctx context.Context) ([]string, error) {
