@@ -5,7 +5,9 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/hosts"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsinterfaces"
+
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/shellutils/shelllinehandler"
@@ -13,10 +15,10 @@ import (
 )
 
 type KubernetesControlplaneHost struct {
-	hosts.Host
+	hostsutilsinterfaces.Host
 }
 
-func GetKubernetesControlplaneByHost(host hosts.Host) (kubernetesControlplaneHost *KubernetesControlplaneHost, err error) {
+func GetKubernetesControlplaneByHost(host hostsutilsinterfaces.Host) (kubernetesControlplaneHost *KubernetesControlplaneHost, err error) {
 	if host == nil {
 		return nil, tracederrors.TracedErrorNil("host")
 	}
@@ -32,7 +34,7 @@ func GetKubernetesControlplaneByHostname(hostname string) (kubernetesControlplan
 		return nil, tracederrors.TracedError("hostname is empty string")
 	}
 
-	host, err := hosts.GetHostByHostname(hostname)
+	host, err := hostsutils.GetHostByHostname(hostname)
 	if err != nil {
 		return nil, err
 	}

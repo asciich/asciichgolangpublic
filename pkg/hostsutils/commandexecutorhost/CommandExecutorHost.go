@@ -1,4 +1,4 @@
-package hosts
+package commandexecutorhost
 
 import (
 	"context"
@@ -18,6 +18,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/ftputils"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -32,7 +33,7 @@ type CommandExecutorHost struct {
 
 // Get a Host by a CommandExecutor capable of executing commands on the Host.
 // E.g. for SSH a SSHCLient can be used.
-func GetCommandExecutorHostByCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) (host Host, err error) {
+func GetCommandExecutorHostByCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) (host hostsutilsinterfaces.Host, err error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -45,15 +46,6 @@ func GetCommandExecutorHostByCommandExecutor(commandExecutor commandexecutorinte
 	}
 
 	return ret, nil
-}
-
-func MustGetCommandExecutorHostByCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) (host Host) {
-	host, err := GetCommandExecutorHostByCommandExecutor(commandExecutor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return host
 }
 
 func NewCommandExecutorHost() (c *CommandExecutorHost) {
@@ -174,38 +166,6 @@ func (c *CommandExecutorHost) IsRunningOnLocalhost() (isRunningOnLocalhost bool,
 	}
 
 	return commandExecutor.IsRunningOnLocalhost()
-}
-
-func (c *CommandExecutorHost) MustGetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor) {
-	commandExecutor, err := c.GetCommandExecutor()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return commandExecutor
-}
-
-func (c *CommandExecutorHost) MustIsReachable(verbose bool) (isReachable bool) {
-	isReachable, err := c.IsReachable(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isReachable
-}
-
-func (c *CommandExecutorHost) MustSetCommandExecutor(commandExecutor commandexecutorinterfaces.CommandExecutor) {
-	err := c.SetCommandExecutor(commandExecutor)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (c *CommandExecutorHost) MustWaitUntilReachable(renewHostKey bool, verbose bool) {
-	err := c.WaitUntilReachable(renewHostKey, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (c *CommandExecutorHost) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
@@ -471,109 +431,6 @@ func (h *CommandExecutorHost) IsTcpPortOpen(portNumber int, verbose bool) (isOpe
 	}
 
 	return isOpen, nil
-}
-
-func (h *CommandExecutorHost) MustAddSshHostKeyToKnownHosts(verbose bool) {
-	err := h.AddSshHostKeyToKnownHosts(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (h *CommandExecutorHost) MustCheckFtpPortOpen(verbose bool) {
-	err := h.CheckFtpPortOpen(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (h *CommandExecutorHost) MustCheckReachable(verbose bool) {
-	err := h.CheckReachable(verbose)
-	if err != nil {
-		logging.LogFatalf("host.CheckReachableBySsh failed: '%v'", err)
-	}
-}
-
-func (h *CommandExecutorHost) MustGetComment() (comment string) {
-	comment, err := h.GetComment()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return comment
-}
-
-func (h *CommandExecutorHost) MustGetHostDescription() (hostDescription string) {
-	hostDescription, err := h.GetHostDescription()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hostDescription
-}
-
-func (h *CommandExecutorHost) MustGetHostName() (hostname string) {
-	hostname, err := h.GetHostName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return hostname
-}
-
-func (h *CommandExecutorHost) MustIsFtpPortOpen(verbose bool) (isOpen bool) {
-	isOpen, err := h.IsFtpPortOpen(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isOpen
-}
-
-func (h *CommandExecutorHost) MustIsPingable(verbose bool) (isPingable bool) {
-	isPingable, err := h.IsPingable(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isPingable
-}
-
-func (h *CommandExecutorHost) MustIsTcpPortOpen(portNumber int, verbose bool) (isOpen bool) {
-	isOpen, err := h.IsTcpPortOpen(portNumber, verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return isOpen
-}
-
-func (h *CommandExecutorHost) MustRemoveSshHostKeyFromKnownHosts(verbose bool) {
-	err := h.RemoveSshHostKeyFromKnownHosts(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (h *CommandExecutorHost) MustRenewSshHostKey(verbose bool) {
-	err := h.RenewSshHostKey(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (h *CommandExecutorHost) MustSetComment(comment string) {
-	err := h.SetComment(comment)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (h *CommandExecutorHost) MustWaitUntilPingable(verbose bool) {
-	err := h.WaitUntilPingable(verbose)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
 }
 
 func (h *CommandExecutorHost) RemoveSshHostKeyFromKnownHosts(verbose bool) (err error) {

@@ -12,14 +12,15 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
-	"github.com/asciich/asciichgolangpublic/pkg/hosts"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type KVMHypervisor struct {
-	host hosts.Host
+	host hostsutilsinterfaces.Host
 
 	// Run kvm commands and connection directly on localhost instead of using SSH.
 	useLocalhost bool
@@ -34,7 +35,7 @@ func GetKvmHypervisorByHostName(hostname string) (kvmHypervisor *KVMHypervisor, 
 		return GetKvmHypervisorOnLocalhost()
 	}
 
-	host, err := hosts.GetHostByHostname(hostname)
+	host, err := hostsutils.GetHostByHostname(hostname)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +43,7 @@ func GetKvmHypervisorByHostName(hostname string) (kvmHypervisor *KVMHypervisor, 
 	return GetKvmHypervisorByHost(host)
 }
 
-func GetKvmHypervisorByHost(host hosts.Host) (kvmHypervisor *KVMHypervisor, err error) {
+func GetKvmHypervisorByHost(host hostsutilsinterfaces.Host) (kvmHypervisor *KVMHypervisor, err error) {
 	if host == nil {
 		return nil, tracederrors.TracedError("host is nil")
 	}
@@ -151,7 +152,7 @@ func (k *KVMHypervisor) CreateVm(ctx context.Context, createOptions *KvmCreateVm
 	return createdVm, nil
 }
 
-func (k *KVMHypervisor) GetHost() (host hosts.Host, err error) {
+func (k *KVMHypervisor) GetHost() (host hostsutilsinterfaces.Host, err error) {
 	if k.host == nil {
 		return nil, tracederrors.TracedError("host not set")
 	}
@@ -620,7 +621,7 @@ func (k *KVMHypervisor) RunKvmCommandAndGetStdout(ctx context.Context, kvmComman
 	return stdout, nil
 }
 
-func (k *KVMHypervisor) SetHost(host hosts.Host) (err error) {
+func (k *KVMHypervisor) SetHost(host hostsutilsinterfaces.Host) (err error) {
 	if host == nil {
 		return tracederrors.TracedError("nost is nil")
 	}
