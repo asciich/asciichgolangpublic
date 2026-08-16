@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"slices"
+	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
@@ -63,12 +64,15 @@ func (c *CommandExecutorKind) ClusterByNameExists(ctx context.Context, clusterNa
 		return false, tracederrors.TracedErrorEmptyString("clusterName")
 	}
 
+	// Strip the "kind-" prefix if present, since kind get clusters returns names without prefix
+	clusterNameWithoutPrefix := strings.TrimPrefix(clusterName, "kind-")
+
 	clusterNames, err := c.ListClusterNames(contextutils.WithSilent(ctx))
 	if err != nil {
 		return false, err
 	}
 
-	exists = slices.Contains(clusterNames, clusterName)
+	exists = slices.Contains(clusterNames, clusterNameWithoutPrefix)
 
 	hostDescription, err := c.GetHostDescription()
 	if err != nil {
