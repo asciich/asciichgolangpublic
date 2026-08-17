@@ -18,21 +18,22 @@ func GetHostByHostname(hostname string) (host hostsutilsinterfaces.Host, err err
 		return nil, tracederrors.TracedError("hostname is empty string")
 	}
 
-	var commandExecutor commandexecutorinterfaces.CommandExecutor
 	if hostname == "localhost" {
-		commandExecutor = commandexecutorbashoo.Bash()
-	} else {
-		commandExecutor, err = commandexecutorsshclient.GetSshClientByHostName(hostname)
-		if err != nil {
-			return nil, err
-		}
+		return nativehost.NewNativeHost(), nil
+	}
+
+	var commandExecutor commandexecutorinterfaces.CommandExecutor
+	commandExecutor, err = commandexecutorsshclient.GetSshClientByHostName(hostname)
+	if err != nil {
+		return nil, err
 	}
 
 	return commandexecutorhost.GetCommandExecutorHostByCommandExecutor(commandExecutor)
 }
 
 func GetLocalCommandExecutorHost() (host hostsutilsinterfaces.Host, err error) {
-	return GetHostByHostname("localhost")
+	commandExecutor := commandexecutorbashoo.Bash()
+	return commandexecutorhost.GetCommandExecutorHostByCommandExecutor(commandExecutor)
 }
 
 func GetLocalHost() (host hostsutilsinterfaces.Host, err error) {
