@@ -19,7 +19,9 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/hosts"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/commandexecutorhost"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -27,7 +29,7 @@ import (
 
 type CommandExecutorDocker struct {
 	commandexecutorgeneric.CommandExecutorBase
-	host hosts.Host
+	host hostsutilsinterfaces.Host
 }
 
 func GetCommandExecutorDocker(commandExecutor commandexecutorinterfaces.CommandExecutor) (docker dockerinterfaces.Docker, err error) {
@@ -54,7 +56,7 @@ func GetCommandExecutorDocker(commandExecutor commandexecutorinterfaces.CommandE
 		)
 	}
 
-	host, err := hosts.GetLocalCommandExecutorHost()
+	host, err := hostsutils.GetLocalCommandExecutorHost()
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +69,7 @@ func GetCommandExecutorDocker(commandExecutor commandexecutorinterfaces.CommandE
 	return ret, err
 }
 
-func GetCommandExecutorDockerOnHost(host hosts.Host) (docker dockerinterfaces.Docker, err error) {
+func GetCommandExecutorDockerOnHost(host hostsutilsinterfaces.Host) (docker dockerinterfaces.Docker, err error) {
 	if host == nil {
 		return nil, tracederrors.TracedErrorNil("host")
 	}
@@ -114,7 +116,7 @@ func (c *CommandExecutorDocker) GetCommandExecutor() (commandExecutor commandexe
 		return nil, err
 	}
 
-	commandExecutorHost, ok := host.(*hosts.CommandExecutorHost)
+	commandExecutorHost, ok := host.(*commandexecutorhost.CommandExecutorHost)
 	if !ok {
 		typeString, err := datatypes.GetTypeName(host)
 		if err != nil {
@@ -168,7 +170,7 @@ func (c *CommandExecutorDocker) GetContainerByName(containerName string) (docker
 	return ret, nil
 }
 
-func (c *CommandExecutorDocker) GetHost() (host hosts.Host, err error) {
+func (c *CommandExecutorDocker) GetHost() (host hostsutilsinterfaces.Host, err error) {
 	if c.host == nil {
 		return nil, tracederrors.TracedError("host not set")
 	}
@@ -363,7 +365,7 @@ func (c *CommandExecutorDocker) RunContainer(ctx context.Context, runOptions *do
 	return startedContainer, nil
 }
 
-func (c *CommandExecutorDocker) SetHost(host hosts.Host) (err error) {
+func (c *CommandExecutorDocker) SetHost(host hostsutilsinterfaces.Host) (err error) {
 	if host == nil {
 		return tracederrors.TracedError("host not set")
 	}

@@ -5,7 +5,9 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
-	"github.com/asciich/asciichgolangpublic/pkg/hosts"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/commandexecutorhost"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/sshutils/commandexecutorsshclient"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils/testcase"
@@ -66,9 +68,9 @@ func LoadFromBytes(ctx context.Context, testSuiteData []byte) (testutilsinterfac
 	return testSuite, nil
 }
 
-func (t *TestSuite) GetHost() (hosts.Host, error) {
+func (t *TestSuite) GetHost() (hostsutilsinterfaces.Host, error) {
 	if t.SSHHost == "" {
-		return hosts.GetLocalHost()
+		return hostsutils.GetLocalHost()
 	}
 
 	commandExecutor, err := commandexecutorsshclient.GetSshClientByHostName(t.SSHHost)
@@ -101,7 +103,7 @@ func (t *TestSuite) GetHost() (hosts.Host, error) {
 		}
 	}
 
-	return hosts.GetCommandExecutorHostByCommandExecutor(commandExecutor)
+	return commandexecutorhost.GetCommandExecutorHostByCommandExecutor(commandExecutor)
 }
 
 func (t *TestSuite) GetName() (string, error) {

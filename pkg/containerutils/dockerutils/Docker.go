@@ -7,11 +7,11 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/commandexecutordocker"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockerinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/nativedocker"
-	"github.com/asciich/asciichgolangpublic/pkg/hosts"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func GetDockerContainerOnHost(host hosts.Host, containerName string) (dockerContainer containerinterfaces.Container, err error) {
+func GetDockerContainerOnHost(host hostsutilsinterfaces.Host, containerName string) (dockerContainer containerinterfaces.Container, err error) {
 	if host == nil {
 		return nil, tracederrors.TracedErrorNil("host")
 	}
@@ -28,7 +28,7 @@ func GetDockerContainerOnHost(host hosts.Host, containerName string) (dockerCont
 	return docker.GetContainerByName(containerName)
 }
 
-func GetDockerOnHost(host hosts.Host) (docker dockerinterfaces.Docker, err error) {
+func GetDockerOnHost(host hostsutilsinterfaces.Host) (docker dockerinterfaces.Docker, err error) {
 	if host == nil {
 		return nil, tracederrors.TracedErrorNil("host")
 	}

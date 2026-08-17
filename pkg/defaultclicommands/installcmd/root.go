@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbash"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/hosts"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -66,7 +66,7 @@ func cliInstall(ctx context.Context, binaryName string) {
 		logging.LogFatalWithTrace("binaryName is empty string after evaluation.")
 	}
 
-	localhost := mustutils.Must(hosts.GetLocalHost())
+	localhost := mustutils.Must(hostsutils.GetLocalHost())
 	mustutils.Must(localhost.InstallBinary(
 		ctx,
 		&parameteroptions.InstallOptions{
