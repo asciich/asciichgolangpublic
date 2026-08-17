@@ -61,6 +61,41 @@
 	    	panic(err)
 	    }
         ```
+- Unit Test Structure:
+    - Use t.Run subtests for distinct assertions
+        - When a single test function validates multiple distinct behaviors or cases, each case must be wrapped in its own t.Run subtest. This provides clearer test output, allows individual subtests to be run in isolation, and makes failures easier to identify.
+        - Instead of:
+            ```golang
+            func TestHost_GetHostByHostnameReturnsCorrectType(t *testing.T) {
+                host, err := hostsutils.GetHostByHostname("localhost")
+                require.NoError(t, err)
+                _, ok := host.(*nativehost.NativeHost)
+                require.True(t, ok, "GetHostByHostname('localhost') must return a NativeHost")
+
+                host, err = hostsutils.GetHostByHostname("example.com")
+                require.NoError(t, err)
+                _, ok = host.(*commandexecutorhost.CommandExecutorHost)
+                require.True(t, ok, "GetHostByHostname('example.com') must return a CommandExecutorHost")
+            }
+            ```
+        - Use:
+            ```
+            func TestHost_GetHostByHostnameReturnsCorrectType(t *testing.T) {
+                t.Run("localhost must return NativeHost", func(t *testing.T) {
+                    host, err := hostsutils.GetHostByHostname("localhost")
+                    require.NoError(t, err)
+                    _, ok := host.(*nativehost.NativeHost)
+                    require.True(t, ok, "GetHostByHostname('localhost') must return a NativeHost")
+                })
+
+                t.Run("any other hostname must return a CommandExecutorHost", func(t *testing.T) {
+                    host, err := hostsutils.GetHostByHostname("example.com")
+                    require.NoError(t, err)
+                    _, ok := host.(*commandexecutorhost.CommandExecutorHost)
+                    require.True(t, ok, "GetHostByHostname('example.com') must return a CommandExecutorHost")
+                })
+            }
+            ```
 
 ## Container handing
 

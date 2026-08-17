@@ -144,6 +144,22 @@ func TestHost_LocalHostReturnsNativeHost(t *testing.T) {
 	require.True(t, ok)
 }
 
+func TestHost_GetHostByHostnameReturnsCorrectType(t *testing.T) {
+	t.Run("localhost must return NativeHost", func(t *testing.T) {
+		host, err := hostsutils.GetHostByHostname("localhost")
+		require.NoError(t, err)
+		_, ok := host.(*nativehost.NativeHost)
+		require.True(t, ok, "GetHostByHostname('localhost') must return a NativeHost")
+	})
+
+	t.Run("any other hostname must return a CommandExecutorHost", func(t *testing.T) {
+		host, err := hostsutils.GetHostByHostname("example.com")
+		require.NoError(t, err)
+		_, ok := host.(*commandexecutorhost.CommandExecutorHost)
+		require.True(t, ok, "GetHostByHostname('example.com') must return a CommandExecutorHost")
+	})
+}
+
 func Test_HostIsCommandExecutor(t *testing.T) {
 	var host commandexecutorinterfaces.CommandExecutor
 	var err error
@@ -274,11 +290,11 @@ func TestHost_GetDeepCopy(t *testing.T) {
 			func(t *testing.T) {
 				host := getHostByImplementationName(t, tt.implementationName)
 
-				copy := host.GetDeepCopyAsCommandExecutor()
-				require.NotNil(t, copy)
+				ret := host.GetDeepCopyAsCommandExecutor()
+				require.NotNil(t, ret)
 
 				// Verify the copy has the same host description
-				desc, err := copy.GetHostDescription()
+				desc, err := ret.GetHostDescription()
 				require.NoError(t, err)
 				origDesc, err := host.GetHostDescription()
 				require.NoError(t, err)
