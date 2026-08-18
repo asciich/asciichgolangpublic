@@ -17,7 +17,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils"
-	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
+	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils/genericx509utils"
+	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils/x509options"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 
 	_ "embed"
@@ -35,10 +36,10 @@ type TestWebServer struct {
 	tlsConfig          *tls.Config
 }
 
-func GenerateCertAndKeyForTestWebserver(ctx context.Context) (certAndKeyPair *x509utils.X509CertKeyPair, err error) {
-	return x509utils.CreateSelfSignedCertificate(
+func GenerateCertAndKeyForTestWebserver(ctx context.Context) (certAndKeyPair *genericx509utils.X509CertKeyPair, err error) {
+	return genericx509utils.CreateSelfSignedCertificate(
 		ctx,
-		&x509utils.X509CreateCertificateOptions{
+		&x509options.X509CreateCertificateOptions{
 			Organization:   "localorg",
 			CommonName:     "localhost",
 			CountryName:    "CH",
@@ -80,7 +81,7 @@ func (t *TestWebServer) GetTlsCert() (cert *x509.Certificate, err error) {
 
 	tlsCert := t.tlsConfig.Certificates[0]
 
-	return x509utils.TlsCertToX509Cert(&tlsCert)
+	return genericx509utils.TlsCertToX509Cert(&tlsCert)
 }
 
 func GetTestWebServer(port int) (webServer httputilsinterfaces.Server, err error) {
@@ -300,7 +301,7 @@ func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 	return nil
 }
 
-func (t *TestWebServer) SetTlsCertAndKey(ctx context.Context, certAndKey *x509utils.X509CertKeyPair) (err error) {
+func (t *TestWebServer) SetTlsCertAndKey(ctx context.Context, certAndKey *genericx509utils.X509CertKeyPair) (err error) {
 	if certAndKey == nil {
 		return tracederrors.TracedErrorNil("certAndKey")
 	}

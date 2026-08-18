@@ -15,7 +15,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -128,21 +127,6 @@ func (c *GopassCredential) GetName() (name string, err error) {
 	}
 
 	return c.name, nil
-}
-
-func (c *GopassCredential) GetSslCertificate(ctx context.Context) (sslCert *x509utils.X509Certificate, err error) {
-	contentBytes, err := c.GetAsBytes(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	sslCert = x509utils.NewX509Certificate()
-	err = sslCert.LoadFromBytes(contentBytes)
-	if err != nil {
-		return nil, err
-	}
-
-	return sslCert, nil
 }
 
 func (c *GopassCredential) IncrementIntValue(ctx context.Context) (err error) {

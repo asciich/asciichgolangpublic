@@ -40,3 +40,90 @@ func Test_OpenAsWriteCloser(t *testing.T) {
 		require.EqualValues(t, "hello world", got)
 	})
 }
+
+func Test_WriteBytes(t *testing.T) {
+	t.Run("nil commandExecutor", func(t *testing.T) {
+		ctx := getCtx()
+
+		err := commandexecutorfile.WriteBytes(ctx, nil, "/tmp/test.txt", []byte("hello"))
+		require.Error(t, err)
+	})
+
+	t.Run("empty path", func(t *testing.T) {
+		ctx := getCtx()
+
+		err := commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), "", []byte("hello"))
+		require.Error(t, err)
+	})
+
+	t.Run("nil content", func(t *testing.T) {
+		ctx := getCtx()
+
+		err := commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), "/tmp/test.txt", nil)
+		require.Error(t, err)
+	})
+
+	t.Run("write and read back hello world", func(t *testing.T) {
+		ctx := getCtx()
+
+		tempFile, err := tempfiles.CreateTemporaryFile(ctx)
+		require.NoError(t, err)
+		defer nativefiles.Delete(ctx, tempFile, &filesoptions.DeleteOptions{})
+
+		content := []byte("hello world")
+		err = commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), tempFile, content)
+		require.NoError(t, err)
+
+		got, err := nativefiles.ReadAsString(ctx, tempFile, &filesoptions.ReadOptions{})
+		require.NoError(t, err)
+		require.EqualValues(t, "hello world", got)
+	})
+
+	t.Run("write binary content", func(t *testing.T) {
+		ctx := getCtx()
+
+		tempFile, err := tempfiles.CreateTemporaryFile(ctx)
+		require.NoError(t, err)
+		defer nativefiles.Delete(ctx, tempFile, &filesoptions.DeleteOptions{})
+
+		content := []byte{0x00, 0x01, 0x02, 0xFF, 0xFE, 0xFD}
+		err = commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), tempFile, content)
+		require.NoError(t, err)
+
+		got, err := nativefiles.ReadAsBytes(ctx, tempFile)
+		require.NoError(t, err)
+		require.EqualValues(t, content, got)
+	})
+
+	t.Run("write empty content", func(t *testing.T) {
+		ctx := getCtx()
+
+		tempFile, err := tempfiles.CreateTemporaryFile(ctx)
+		require.NoError(t, err)
+		defer nativefiles.Delete(ctx, tempFile, &filesoptions.DeleteOptions{})
+
+		content := []byte{}
+		err = commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), tempFile, content)
+		require.NoError(t, err)
+
+		got, err := nativefiles.ReadAsBytes(ctx, tempFile)
+		require.NoError(t, err)
+		require.EqualValues(t, content, got)
+	})
+
+	t.Run("write multiline content", func(t *testing.T) {
+		ctx := getCtx()
+
+		tempFile, err := tempfiles.CreateTemporaryFile(ctx)
+		require.NoError(t, err)
+		defer nativefiles.Delete(ctx, tempFile, &filesoptions.DeleteOptions{})
+
+		content := []byte("line1\nline2\nline3\n")
+		err = commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), tempFile, content)
+		require.NoError(t, err)
+
+		got, err := nativefiles.ReadAsString(ctx, tempFile, &filesoptions.ReadOptions{})
+		require.NoError(t, err)
+		require.EqualValues(t, "line1\nline2\nline3\n", got)
+	})
+}

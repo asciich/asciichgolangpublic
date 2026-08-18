@@ -1,4 +1,4 @@
-package x509utils
+package x509options
 
 import (
 	"fmt"

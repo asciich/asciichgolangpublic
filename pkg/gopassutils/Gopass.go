@@ -17,7 +17,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
-	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
+	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils/genericx509utils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -225,7 +225,7 @@ func GetSslCertificate(ctx context.Context, getOptions *parameteroptions.GopassS
 		return nil, err
 	}
 
-	cert, err = x509utils.LoadCertificateFromPEMString(credential)
+	cert, err = genericx509utils.ReadCertFromString(credential)
 	if err != nil {
 		return nil, err
 	}
@@ -372,7 +372,7 @@ func InsertX509Certificate(ctx context.Context, cert *x509.Certificate, gopassOp
 		return tracederrors.TracedErrorNil("gopassOptions")
 	}
 
-	encodedCert, err := x509utils.EncodeCertificateAsPEMString(cert)
+	encodedCert, err := genericx509utils.WriteCertificateAsPEMString(cert)
 	if err != nil {
 		return err
 	}
