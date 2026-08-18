@@ -1,6 +1,8 @@
 package httpclientcmd
 
 import (
+	"strings"
+
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/httpcmd/httpclientcmd/httpclientcmdoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpnativeclientoo"
@@ -31,4 +33,11 @@ func NewClientCmd(options *httpclientcmdoptions.HttpClientCmdOptions) *cobra.Com
 
 func defaultGetClient() httputilsinterfaces.Client {
 	return httpnativeclientoo.NewNativeClient()
+}
+
+func normalizeUrl(url string) string {
+	if !strings.Contains(url, "://") {
+		return "https://" + url
+	}
+	return url
 }

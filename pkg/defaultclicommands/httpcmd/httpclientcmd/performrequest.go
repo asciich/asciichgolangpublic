@@ -22,7 +22,7 @@ func NewPerformRequestCmd(options *httpclientcmdoptions.HttpClientCmdOptions) *c
 				logging.LogFatal("Please specify exactly one URL")
 			}
 
-			url := args[0]
+			url := normalizeUrl(args[0])
 
 			if url == "" {
 				logging.LogFatal("Please specify exactly one URL. Given argument is empty string")
