@@ -18,7 +18,7 @@ import (
 const defaultPrivateKeySize = 4096
 const defaultValidityDays = 365
 
-func CreateRootCa(ctx context.Context, options *x509options.X509CreateCertificateOptions) (caCertAndKey *X509CertKeyPair, err error) {
+func CreateRootCaCertificate(ctx context.Context, options *x509options.X509CreateCertificateOptions) (caCertAndKey *X509CertKeyPair, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}

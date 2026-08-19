@@ -12,7 +12,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils/genericx509utils"
-	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils/nativex509utils"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils/x509options"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -78,7 +77,7 @@ func GeneratePrivateKey(ctx context.Context, commandExecutor commandexecutorinte
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
 
-	return nativex509utils.GeneratePrivateKey(ctx)
+	return genericx509utils.GeneratePrivateKey(ctx)
 }
 
 func CreateRootCaCertificate(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, options *x509options.X509CreateCertificateOptions) (caCertAndKey *genericx509utils.X509CertKeyPair, err error) {
@@ -90,7 +89,7 @@ func CreateRootCaCertificate(ctx context.Context, commandExecutor commandexecuto
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	return nativex509utils.CreateRootCaCertificate(ctx, options)
+	return genericx509utils.CreateRootCaCertificate(ctx, options)
 }
 
 func CreateIntermediateCertificate(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, options *x509options.X509CreateCertificateOptions) (intermediateCert *genericx509utils.X509CertKeyPair, err error) {
@@ -102,7 +101,7 @@ func CreateIntermediateCertificate(ctx context.Context, commandExecutor commande
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	return nativex509utils.CreateIntermediateCertificate(ctx, options)
+	return genericx509utils.CreateIntermediateCertificate(ctx, options)
 }
 
 func CreateSelfSignedCertificate(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, options *x509options.X509CreateCertificateOptions) (selfSignedCertAndKey *genericx509utils.X509CertKeyPair, err error) {
@@ -114,7 +113,7 @@ func CreateSelfSignedCertificate(ctx context.Context, commandExecutor commandexe
 		return nil, tracederrors.TracedErrorNil("options")
 	}
 
-	return nativex509utils.CreateSelfSignedCertificate(ctx, options)
+	return genericx509utils.CreateSelfSignedCertificate(ctx, options)
 }
 
 func CreateSignedIntermediateCertificate(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, options *x509options.X509CreateCertificateOptions, rootCaCertAndKey *genericx509utils.X509CertKeyPair) (intermediateCertAndKey *genericx509utils.X509CertKeyPair, err error) {
@@ -130,7 +129,7 @@ func CreateSignedIntermediateCertificate(ctx context.Context, commandExecutor co
 		return nil, tracederrors.TracedErrorNil("rootCaCertAndKey")
 	}
 
-	return nativex509utils.CreateSignedIntermediateCertificate(ctx, options, rootCaCertAndKey)
+	return genericx509utils.CreateSignedIntermediateCertificate(ctx, options, rootCaCertAndKey)
 }
 
 func CreateSignedEndEntityCertificate(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, options *x509options.X509CreateCertificateOptions, caCertAndKey *genericx509utils.X509CertKeyPair) (endEntityCertAndKey *genericx509utils.X509CertKeyPair, err error) {
@@ -146,5 +145,5 @@ func CreateSignedEndEntityCertificate(ctx context.Context, commandExecutor comma
 		return nil, tracederrors.TracedErrorNil("caCertAndKey")
 	}
 
-	return nativex509utils.CreateSignedEndEntityCertificate(ctx, options, caCertAndKey)
+	return genericx509utils.CreateSignedEndEntityCertificate(ctx, options, caCertAndKey)
 }

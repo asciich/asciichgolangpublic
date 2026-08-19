@@ -111,3 +111,21 @@ func GetSchemeAndHost(inputUrl string) (string, error) {
 
 	return scheme + parsed.Host, nil
 }
+
+// GetHostAndPort extracts the host and port from a URL.
+// If no port is explicitly specified, returns empty string for port.
+func GetHostAndPort(inputUrl string) (host string, port string, err error) {
+	if inputUrl == "" {
+		return "", "", tracederrors.TracedErrorEmptyString("inputUrl")
+	}
+
+	parsed, err := url.Parse(inputUrl)
+	if err != nil {
+		return "", "", tracederrors.TracedErrorf("Failed to parse URL '%s': %w", inputUrl, err)
+	}
+
+	host = parsed.Hostname()
+	port = parsed.Port()
+
+	return host, port, nil
+}

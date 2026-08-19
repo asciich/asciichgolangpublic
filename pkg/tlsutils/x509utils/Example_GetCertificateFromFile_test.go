@@ -25,7 +25,7 @@ func ExampleReadCertificateFromFile() {
 	ctx := contextutils.ContextVerbose()
 
 	// Create a test certificate
-	rootCaCertAndKey, err := genericx509utils.CreateRootCa(
+	rootCaCertAndKey, err := genericx509utils.CreateRootCaCertificate(
 		ctx,
 		&x509options.X509CreateCertificateOptions{
 			CountryName:    "CH",

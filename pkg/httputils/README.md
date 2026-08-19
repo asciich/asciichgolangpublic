@@ -17,6 +17,7 @@ High level easy to use HTTP client and testserver.
     * [GET request of a nonexisting page: 404 not found](Example_PerformGetRequest404_test.go)
     * [GET JSON data and run jq](Example_GetJsonDataAndRunJq_test.go)
     * [GET YAML data and run yq](Example_GetYamlDataAndRunYq_test.go)
+    * [GET request and log certificate infos](Example_GetRequestAndLogCertificateInfos_test.go)
 * HTTPClient:
     * [Set base URL on client](Example_SetBaseUrlOnClient_test.go): This is useful if many requests are send to the same webserver using the same client.
 * [POST request](Example_PostRequest_test.go)

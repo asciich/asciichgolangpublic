@@ -55,13 +55,13 @@ func Test_CreateRootCa(t *testing.T) {
 	ctx := contextutils.ContextVerbose()
 
 	t.Run("nil options returns error", func(t *testing.T) {
-		pair, err := genericx509utils.CreateRootCa(ctx, nil)
+		pair, err := genericx509utils.CreateRootCaCertificate(ctx, nil)
 		require.Error(t, err)
 		require.Nil(t, pair)
 	})
 
 	t.Run("returns valid root CA cert", func(t *testing.T) {
-		pair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		pair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 		require.NotNil(t, pair)
 
@@ -71,7 +71,7 @@ func Test_CreateRootCa(t *testing.T) {
 	})
 
 	t.Run("root CA has correct subject fields", func(t *testing.T) {
-		pair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		pair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		cert, err := pair.GetX509Certificate()
@@ -84,7 +84,7 @@ func Test_CreateRootCa(t *testing.T) {
 	})
 
 	t.Run("root CA is a CA certificate", func(t *testing.T) {
-		pair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		pair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		cert, err := pair.GetX509Certificate()
@@ -94,7 +94,7 @@ func Test_CreateRootCa(t *testing.T) {
 	})
 
 	t.Run("root CA is self signed", func(t *testing.T) {
-		pair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		pair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		cert, err := pair.GetX509Certificate()
@@ -104,7 +104,7 @@ func Test_CreateRootCa(t *testing.T) {
 	})
 
 	t.Run("root CA is detected as root CA", func(t *testing.T) {
-		pair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		pair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		cert, err := pair.GetX509Certificate()
@@ -116,7 +116,7 @@ func Test_CreateRootCa(t *testing.T) {
 	})
 
 	t.Run("root CA key matches cert", func(t *testing.T) {
-		pair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		pair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		err = pair.CheckKeyMatchingCert()
@@ -124,7 +124,7 @@ func Test_CreateRootCa(t *testing.T) {
 	})
 
 	t.Run("root CA can verify its own signature", func(t *testing.T) {
-		pair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		pair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		cert, err := pair.GetX509Certificate()
@@ -136,10 +136,10 @@ func Test_CreateRootCa(t *testing.T) {
 	})
 
 	t.Run("two root CAs have different serial numbers", func(t *testing.T) {
-		pair1, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		pair1, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
-		pair2, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		pair2, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		cert1, err := pair1.GetX509Certificate()
@@ -277,7 +277,7 @@ func Test_CreateSignedIntermediateCertificate(t *testing.T) {
 	ctx := contextutils.ContextVerbose()
 
 	t.Run("nil options returns error", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		pair, err := genericx509utils.CreateSignedIntermediateCertificate(ctx, nil, rootPair)
@@ -292,7 +292,7 @@ func Test_CreateSignedIntermediateCertificate(t *testing.T) {
 	})
 
 	t.Run("returns valid signed intermediate cert", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		intPair, err := genericx509utils.CreateSignedIntermediateCertificate(ctx, getDefaultIntermediateOptions(), rootPair)
@@ -305,7 +305,7 @@ func Test_CreateSignedIntermediateCertificate(t *testing.T) {
 	})
 
 	t.Run("signed intermediate has correct subject fields", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		intPair, err := genericx509utils.CreateSignedIntermediateCertificate(ctx, getDefaultIntermediateOptions(), rootPair)
@@ -321,7 +321,7 @@ func Test_CreateSignedIntermediateCertificate(t *testing.T) {
 	})
 
 	t.Run("signed intermediate is a CA certificate", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		intPair, err := genericx509utils.CreateSignedIntermediateCertificate(ctx, getDefaultIntermediateOptions(), rootPair)
@@ -334,7 +334,7 @@ func Test_CreateSignedIntermediateCertificate(t *testing.T) {
 	})
 
 	t.Run("signed intermediate is not self signed", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		intPair, err := genericx509utils.CreateSignedIntermediateCertificate(ctx, getDefaultIntermediateOptions(), rootPair)
@@ -347,7 +347,7 @@ func Test_CreateSignedIntermediateCertificate(t *testing.T) {
 	})
 
 	t.Run("signed intermediate is detected as intermediate", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		intPair, err := genericx509utils.CreateSignedIntermediateCertificate(ctx, getDefaultIntermediateOptions(), rootPair)
@@ -362,7 +362,7 @@ func Test_CreateSignedIntermediateCertificate(t *testing.T) {
 	})
 
 	t.Run("signed intermediate is signed by root CA", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		intPair, err := genericx509utils.CreateSignedIntermediateCertificate(ctx, getDefaultIntermediateOptions(), rootPair)
@@ -379,7 +379,7 @@ func Test_CreateSignedIntermediateCertificate(t *testing.T) {
 	})
 
 	t.Run("signed intermediate key matches cert", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		intPair, err := genericx509utils.CreateSignedIntermediateCertificate(ctx, getDefaultIntermediateOptions(), rootPair)
@@ -390,7 +390,7 @@ func Test_CreateSignedIntermediateCertificate(t *testing.T) {
 	})
 
 	t.Run("signed intermediate issuer matches root CA subject", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		intPair, err := genericx509utils.CreateSignedIntermediateCertificate(ctx, getDefaultIntermediateOptions(), rootPair)
@@ -409,7 +409,7 @@ func Test_CreateSignedEndEntityCertificate(t *testing.T) {
 	ctx := contextutils.ContextVerbose()
 
 	t.Run("nil options returns error", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		pair, err := genericx509utils.CreateSignedEndEntityCertificate(ctx, nil, rootPair)
@@ -424,7 +424,7 @@ func Test_CreateSignedEndEntityCertificate(t *testing.T) {
 	})
 
 	t.Run("returns valid signed end entity cert", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		eePair, err := genericx509utils.CreateSignedEndEntityCertificate(ctx, getDefaultEndEntityOptions(), rootPair)
@@ -437,7 +437,7 @@ func Test_CreateSignedEndEntityCertificate(t *testing.T) {
 	})
 
 	t.Run("end entity has correct subject fields", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		eePair, err := genericx509utils.CreateSignedEndEntityCertificate(ctx, getDefaultEndEntityOptions(), rootPair)
@@ -453,7 +453,7 @@ func Test_CreateSignedEndEntityCertificate(t *testing.T) {
 	})
 
 	t.Run("end entity is not a CA certificate", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		eePair, err := genericx509utils.CreateSignedEndEntityCertificate(ctx, getDefaultEndEntityOptions(), rootPair)
@@ -466,7 +466,7 @@ func Test_CreateSignedEndEntityCertificate(t *testing.T) {
 	})
 
 	t.Run("end entity is detected as end entity", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		eePair, err := genericx509utils.CreateSignedEndEntityCertificate(ctx, getDefaultEndEntityOptions(), rootPair)
@@ -481,7 +481,7 @@ func Test_CreateSignedEndEntityCertificate(t *testing.T) {
 	})
 
 	t.Run("end entity is signed by CA", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		eePair, err := genericx509utils.CreateSignedEndEntityCertificate(ctx, getDefaultEndEntityOptions(), rootPair)
@@ -498,7 +498,7 @@ func Test_CreateSignedEndEntityCertificate(t *testing.T) {
 	})
 
 	t.Run("end entity key matches cert", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		eePair, err := genericx509utils.CreateSignedEndEntityCertificate(ctx, getDefaultEndEntityOptions(), rootPair)
@@ -509,7 +509,7 @@ func Test_CreateSignedEndEntityCertificate(t *testing.T) {
 	})
 
 	t.Run("end entity issuer matches CA subject", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		eePair, err := genericx509utils.CreateSignedEndEntityCertificate(ctx, getDefaultEndEntityOptions(), rootPair)
@@ -524,7 +524,7 @@ func Test_CreateSignedEndEntityCertificate(t *testing.T) {
 	})
 
 	t.Run("end entity has common name as SAN", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		eePair, err := genericx509utils.CreateSignedEndEntityCertificate(ctx, getDefaultEndEntityOptions(), rootPair)
@@ -537,7 +537,7 @@ func Test_CreateSignedEndEntityCertificate(t *testing.T) {
 	})
 
 	t.Run("end entity with additional SANs", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		options := &x509options.X509CreateCertificateOptions{
@@ -560,13 +560,13 @@ func Test_CreateSignedEndEntityCertificate(t *testing.T) {
 	})
 
 	t.Run("end entity is not signed by unrelated CA", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		eePair, err := genericx509utils.CreateSignedEndEntityCertificate(ctx, getDefaultEndEntityOptions(), rootPair)
 		require.NoError(t, err)
 
-		unrelatedPair, err := genericx509utils.CreateRootCa(ctx, &x509options.X509CreateCertificateOptions{
+		unrelatedPair, err := genericx509utils.CreateRootCaCertificate(ctx, &x509options.X509CreateCertificateOptions{
 			CountryName:    "FR",
 			Organization:   "UnrelatedOrg",
 			CommonName:     "UnrelatedRoot",
@@ -585,7 +585,7 @@ func Test_CreateSignedEndEntityCertificate(t *testing.T) {
 	})
 
 	t.Run("full chain root-intermediate-end entity is valid", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		intPair, err := genericx509utils.CreateSignedIntermediateCertificate(ctx, getDefaultIntermediateOptions(), rootPair)

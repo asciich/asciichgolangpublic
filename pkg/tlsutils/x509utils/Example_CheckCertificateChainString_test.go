@@ -17,7 +17,7 @@ func Test_CheckCertificateChainString(t *testing.T) {
 	// Preparation start
 	//
 	// Generate the rootCA
-	rootCaCertAndKey, err := genericx509utils.CreateRootCa(
+	rootCaCertAndKey, err := genericx509utils.CreateRootCaCertificate(
 		ctx,
 		&x509options.X509CreateCertificateOptions{
 			CountryName:    "CH",

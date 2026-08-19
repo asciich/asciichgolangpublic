@@ -2,7 +2,10 @@ package httpcommandexecutorclientoo
 
 import (
 	"context"
+	"crypto/x509"
+	"encoding/pem"
 	"net/http"
+	"regexp"
 
 	"github.com/asciich/asciichgolangpublic/pkg/applications/curlutils"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
@@ -283,6 +286,21 @@ func (h *HttpCommandExecutorClient) SendRequest(ctx context.Context, requestOpti
 		return nil, err
 	}
 
+	// Collect certificates if requested
+	if requestOptions.CollectCertificates {
+		certificates, err := h.collectCertificatesUsingOpenSSL(ctx, url)
+		if err != nil {
+			return nil, err
+		}
+
+		if genericResp, ok := response.(*httpgeneric.GenericResponse); ok {
+			err = genericResp.SetServerCertificates(certificates)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
 	err = response.CheckStatusCode([]int{http.StatusOK, http.StatusCreated})
 	if err != nil {
 		return response, err
@@ -331,4 +349,80 @@ func (h *HttpCommandExecutorClient) SetPort(port int) error {
 }
 func (h *HttpCommandExecutorClient) SetBasicAuth(*httpoptions.BasicAuth) error {
 	return tracederrors.TracedErrorNotImplemented()
+}
+
+// parseCertificatesFromPEM parses PEM-encoded certificates from a string
+func parseCertificatesFromPEM(pemData string) ([]*x509.Certificate, error) {
+	var certificates []*x509.Certificate
+	
+	// Regex to match PEM blocks
+	pemBlockRegex := regexp.MustCompile(`-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----`)
+	matches := pemBlockRegex.FindAllString(pemData, -1)
+	
+	for _, match := range matches {
+		block, _ := pem.Decode([]byte(match))
+		if block == nil || block.Type != "CERTIFICATE" {
+			continue
+		}
+		
+		cert, err := x509.ParseCertificate(block.Bytes)
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("failed to parse certificate: %w", err)
+		}
+		
+		certificates = append(certificates, cert)
+	}
+	
+	return certificates, nil
+}
+
+// collectCertificatesUsingOpenSSL collects certificates from a server using openssl
+func (h *HttpCommandExecutorClient) collectCertificatesUsingOpenSSL(ctx context.Context, url string) ([]*x509.Certificate, error) {
+	commandExecutor, err := h.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+	
+	// Parse host and port from URL
+	host, port, err := urlsutils.GetHostAndPort(url)
+	if err != nil {
+		return nil, err
+	}
+	
+	if port == "" {
+		port = "443"
+	}
+	
+	logging.LogInfoByCtxf(ctx, "Collecting certificates from %s:%s using openssl", host, port)
+	
+	// Use openssl s_client to get the certificate chain
+	command := []string{"openssl", "s_client", "-connect", host + ":" + port, "-showcerts"}
+	
+	output, err := commandExecutor.RunCommand(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: command,
+		},
+	)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("failed to run openssl s_client: %w", err)
+	}
+	
+	stdout, err := output.GetStdoutAsString()
+	if err != nil {
+		return nil, err
+	}
+	
+	certificates, err := parseCertificatesFromPEM(stdout)
+	if err != nil {
+		return nil, err
+	}
+	
+	if len(certificates) == 0 {
+		return nil, tracederrors.TracedError("no certificates found in openssl output")
+	}
+	
+	logging.LogInfoByCtxf(ctx, "Collected %d certificate(s) from %s:%s", len(certificates), host, port)
+	
+	return certificates, nil
 }
