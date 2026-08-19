@@ -30,7 +30,7 @@ func GeneratePrivateKey(ctx context.Context) (privateKey crypto.PrivateKey, err 
 }
 
 func CreateRootCaCertificate(ctx context.Context, options *x509options.X509CreateCertificateOptions) (*genericx509utils.X509CertKeyPair, error) {
-	return genericx509utils.CreateRootCa(ctx, options)
+	return genericx509utils.CreateRootCaCertificate(ctx, options)
 }
 
 func CreateIntermediateCertificate(ctx context.Context, options *x509options.X509CreateCertificateOptions) (*genericx509utils.X509CertKeyPair, error) {

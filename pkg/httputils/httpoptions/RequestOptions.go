@@ -37,6 +37,10 @@ type RequestOptions struct {
 
 	// The payload to send to the server:
 	Data []byte
+
+	// Collect certificates from the server response
+	// If set to true, the response will contain the server's certificate chain
+	CollectCertificates bool
 }
 
 func NewRequestOptions() (r *RequestOptions) {

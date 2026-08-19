@@ -27,7 +27,7 @@ func Test_TlsCertToX509Cert(t *testing.T) {
 	})
 
 	t.Run("valid tls cert returns x509 cert", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		certPEM, err := genericx509utils.WriteCertAsBytes(rootPair.Cert)
@@ -46,7 +46,7 @@ func Test_TlsCertToX509Cert(t *testing.T) {
 	})
 
 	t.Run("returned cert has correct subject fields", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		certPEM, err := genericx509utils.WriteCertAsBytes(rootPair.Cert)

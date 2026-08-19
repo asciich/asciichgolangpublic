@@ -14,6 +14,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
+	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils/commandexecutorx509utils"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils/genericx509utils"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils/nativex509utils"
@@ -36,8 +37,19 @@ type x509Implementation struct {
 }
 
 // getX509Implementations returns all implementations to test.
+// This includes the convenience functions from the x509utils package itself.
 func getX509Implementations() []x509Implementation {
 	return []x509Implementation{
+		{
+			Name:                                "x509utils",
+			ReadCertificateFromFile:             x509utils.ReadCertificateFromFile,
+			CreateRootCaCertificate:             x509utils.CreateRootCaCertificate,
+			CreateIntermediateCertificate:       x509utils.CreateIntermediateCertificate,
+			CreateSelfSignedCertificate:         x509utils.CreateSelfSignedCertificate,
+			CreateSignedIntermediateCertificate: x509utils.CreateSignedIntermediateCertificate,
+			CreateSignedEndEntityCertificate:    x509utils.CreateSignedEndEntityCertificate,
+			GeneratePrivateKey:                  x509utils.GeneratePrivateKey,
+		},
 		{
 			Name:                                "nativex509utils",
 			ReadCertificateFromFile:             nativex509utils.ReadCertificateFromFile,
@@ -498,6 +510,7 @@ func Test_CreateIntermediateCertificate(t *testing.T) {
 }
 
 // --- CreateSelfSignedCertificate ---
+
 func Test_CreateSelfSignedCertificate(t *testing.T) {
 	implementations := getX509Implementations()
 

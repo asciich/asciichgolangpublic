@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"io"
 	"net/http"
 	"os"
@@ -110,6 +111,22 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httpopti
 		return nil, tracederrors.TracedError("TransportToUse is nil after evaluation.")
 	}
 
+	// Store certificates if requested
+	var collectedCerts []*x509.Certificate
+	if requestOptions.CollectCertificates {
+		originalVerifyConnection := transportToUse.TLSClientConfig.VerifyConnection
+		transportToUse.TLSClientConfig.VerifyConnection = func(state tls.ConnectionState) error {
+			collectedCerts = make([]*x509.Certificate, len(state.PeerCertificates))
+			for i, cert := range state.PeerCertificates {
+				collectedCerts[i] = cert
+			}
+			if originalVerifyConnection != nil {
+				return originalVerifyConnection(state)
+			}
+			return nil
+		}
+	}
+
 	client := http.Client{Transport: transportToUse}
 
 	logging.LogInfoByCtxf(ctx, "http native client is used to send request to %s", url)
@@ -198,6 +215,16 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httpopti
 	err = response.SetStatusCode(nativeResponse.StatusCode)
 	if err != nil {
 		return nil, err
+	}
+
+	// Set collected certificates if requested
+	if requestOptions.CollectCertificates && collectedCerts != nil {
+		if genericResp, ok := response.(*httpgeneric.GenericResponse); ok {
+			err = genericResp.SetServerCertificates(collectedCerts)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	err = response.CheckStatusCode([]int{http.StatusOK, http.StatusCreated})

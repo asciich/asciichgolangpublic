@@ -95,6 +95,27 @@ func GetTestWebServer(port int) (webServer httputilsinterfaces.Server, err error
 	return ret, nil
 }
 
+func GetTestWebServerWithTLS(port int) (webServer httputilsinterfaces.Server, err error) {
+	ret := NewTestWebServer()
+
+	err = ret.SetPort(port)
+	if err != nil {
+		return nil, err
+	}
+
+	certAndKey, err := GenerateCertAndKeyForTestWebserver(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	err = ret.SetTlsCertAndKey(context.Background(), certAndKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return ret, nil
+}
+
 func GetRunningTestWebServer(ctx context.Context, port int) (httputilsinterfaces.Server, error) {
 	webserver, err := GetTestWebServer(port)
 	if err != nil {
@@ -355,7 +376,12 @@ func (t *TestWebServer) GetUrl() (string, error) {
 		return "", err
 	}
 
-	url := fmt.Sprintf("http://localhost:%d", port)
+	protocol := "http"
+	if t.tlsConfig != nil {
+		protocol = "https"
+	}
+
+	url := fmt.Sprintf("%s://localhost:%d", protocol, port)
 
 	return url, nil
 }

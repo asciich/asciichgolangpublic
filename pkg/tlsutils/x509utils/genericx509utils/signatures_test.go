@@ -634,7 +634,7 @@ func Test_CheckCertificateChainString(t *testing.T) {
 	})
 
 	t.Run("single cert is not a valid chain", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		rootPEM, err := genericx509utils.WriteCertAsString(rootPair.Cert)
@@ -645,7 +645,7 @@ func Test_CheckCertificateChainString(t *testing.T) {
 	})
 
 	t.Run("valid full chain ee-int-root", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		intPair, err := genericx509utils.CreateSignedIntermediateCertificate(ctx, getDefaultIntermediateOptions(), rootPair)
@@ -668,7 +668,7 @@ func Test_CheckCertificateChainString(t *testing.T) {
 	})
 
 	t.Run("wrong order root-int-ee returns error", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		intPair, err := genericx509utils.CreateSignedIntermediateCertificate(ctx, getDefaultIntermediateOptions(), rootPair)
@@ -691,10 +691,10 @@ func Test_CheckCertificateChainString(t *testing.T) {
 	})
 
 	t.Run("unrelated certs are not a valid chain", func(t *testing.T) {
-		rootPair1, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair1, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
-		rootPair2, err := genericx509utils.CreateRootCa(ctx, &x509options.X509CreateCertificateOptions{
+		rootPair2, err := genericx509utils.CreateRootCaCertificate(ctx, &x509options.X509CreateCertificateOptions{
 			CountryName:    "FR",
 			Organization:   "OtherOrg",
 			CommonName:     "OtherRoot",
@@ -714,7 +714,7 @@ func Test_CheckCertificateChainString(t *testing.T) {
 	})
 
 	t.Run("only end entity cert without CA is not valid", func(t *testing.T) {
-		rootPair, err := genericx509utils.CreateRootCa(ctx, getDefaultRootCaOptions())
+		rootPair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
 		eePair, err := genericx509utils.CreateSignedEndEntityCertificate(ctx, getDefaultEndEntityOptions(), rootPair)

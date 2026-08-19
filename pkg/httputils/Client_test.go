@@ -588,3 +588,107 @@ func TestClient_GetRequestUsingTls_insecure(t *testing.T) {
 		)
 	}
 }
+
+// Test certificate collection for all HTTP client implementations
+func TestClient_GetRequest_CollectCertificates(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeClient"},
+		{"commandExecutorExec"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const port int = 9124
+
+				testServer := mustutils.Must(testwebserver.GetTlsTestWebServer(ctx, port))
+				defer testServer.Stop(ctx)
+
+				err := testServer.StartInBackground(ctx)
+				require.NoError(t, err)
+
+				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				response, err := client.SendRequest(
+					ctx,
+					&httpoptions.RequestOptions{
+						Url:                 "https://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
+						Method:              "GET",
+						SkipTLSvalidation:   true,
+						CollectCertificates: true,
+					},
+				)
+				require.NoError(t, err)
+
+				// Test GetServerEndEntitiyCertificate
+				leafCert, err := response.GetServerEndEntitiyCertificate(ctx)
+				require.NoError(t, err)
+				require.NotNil(t, leafCert)
+				require.NotEmpty(t, leafCert.Subject.CommonName)
+
+				// Test GetServerCertificateChain
+				certChain, err := response.GetServerCertificateChain(ctx)
+				require.NoError(t, err)
+				require.NotEmpty(t, certChain)
+				require.Len(t, certChain, 1)
+				require.Equal(t, leafCert, certChain[0])
+
+				// Test LogCertInfo (should not error)
+				err = response.LogCertInfo(ctx)
+				require.NoError(t, err)
+			},
+		)
+	}
+}
+
+// Test that certificate collection is optional and doesn't break normal requests
+func TestClient_GetRequest_WithoutCollectCertificates(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeClient"},
+		{"commandExecutorExec"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const port int = 9124
+
+				testServer := mustutils.Must(testwebserver.GetTlsTestWebServer(ctx, port))
+				defer testServer.Stop(ctx)
+
+				err := testServer.StartInBackground(ctx)
+				require.NoError(t, err)
+
+				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				response, err := client.SendRequest(
+					ctx,
+					&httpoptions.RequestOptions{
+						Url:                 "https://localhost:" + strconv.Itoa(mustutils.Must(testServer.GetPort())) + "/hello_world.txt",
+						Method:              "GET",
+						SkipTLSvalidation:   true,
+						CollectCertificates: false,
+					},
+				)
+				require.NoError(t, err)
+
+				// Without collecting certificates, these methods should return errors
+				_, err = response.GetServerEndEntitiyCertificate(ctx)
+				require.Error(t, err)
+
+				_, err = response.GetServerCertificateChain(ctx)
+				require.Error(t, err)
+
+				err = response.LogCertInfo(ctx)
+				require.Error(t, err)
+			},
+		)
+	}
+}
+
