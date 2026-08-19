@@ -1,4 +1,4 @@
-package x509utils
+package genericx509utils
 
 import (
 	"crypto"

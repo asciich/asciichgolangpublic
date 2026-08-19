@@ -6,7 +6,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
+	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils/genericx509utils"
+	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils/x509options"
 )
 
 func Test_GenerateSelfSignedCertificateAndEncodeAsPem(t *testing.T) {
@@ -14,7 +15,7 @@ func Test_GenerateSelfSignedCertificateAndEncodeAsPem(t *testing.T) {
 	ctx := contextutils.ContextVerbose()
 
 	// Generate a self signed certificate and key:
-	certKeyPair, err := x509utils.CreateSelfSignedCertificate(ctx, &x509utils.X509CreateCertificateOptions{
+	certKeyPair, err := genericx509utils.CreateSelfSignedCertificate(ctx, &x509options.X509CreateCertificateOptions{
 		CommonName:     "example.example.net",
 		Organization:   "Example org",
 		Locality:       "Zurich",
@@ -28,7 +29,7 @@ func Test_GenerateSelfSignedCertificateAndEncodeAsPem(t *testing.T) {
 	require.NoError(t, err)
 
 	// Encode generated certificate as PEM:
-	pem, err := x509utils.EncodeCertificateAsPEMString(cert)
+	pem, err := genericx509utils.WriteCertificateAsPEMString(cert)
 	require.NoError(t, err)
 
 	// pem does now contain the generated certificate as PEM string:

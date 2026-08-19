@@ -75,3 +75,22 @@ func GetPublicKeyFromPrivateKey(privateKey crypto.PrivateKey) (publicKey crypto.
 
 	return withPublic.Public(), nil
 }
+
+func IsPrivateKeyEqual(key1 crypto.PrivateKey, key2 crypto.PrivateKey) (bool, error) {
+	if key1 == nil {
+		return false, tracederrors.TracedErrorNil("key1")
+	}
+
+	if key2 == nil {
+		return false, tracederrors.TracedErrorNil("key2")
+	}
+
+	withEqual, ok := key1.(interface {
+		Equal(other crypto.PrivateKey) bool
+	})
+	if !ok {
+		return false, tracederrors.TracedError("key1 does not implement Equal function to other private keys")
+	}
+
+	return withEqual.Equal(key2), nil
+}

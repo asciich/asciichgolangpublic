@@ -1,4 +1,4 @@
-package x509utils
+package x509options
 
 import (
 	"context"
@@ -571,19 +571,6 @@ func (x *X509CreateCertificateOptions) MustSetSerialNumber(serialNumber string) 
 
 func (x *X509CreateCertificateOptions) IsSerialNumberSet() (isSet bool) {
 	return x.SerialNumber != ""
-}
-
-func (x *X509CreateCertificateOptions) GetSerialNumberOrGenerateIfUnsetBigInt(ctx context.Context) (serialNumber *big.Int, err error) {
-	if !x.IsSerialNumberSet() {
-		serial, err := GenerateCertificateSerialNumberAsString(ctx)
-		if err != nil {
-			return nil, err
-		}
-
-		x.SerialNumber = serial
-	}
-
-	return x.GetSerialNumberAsBigInt()
 }
 
 func (x *X509CreateCertificateOptions) GetSerialNumberAsBigInt() (serialNumber *big.Int, err error) {

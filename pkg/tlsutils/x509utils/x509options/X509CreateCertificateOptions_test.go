@@ -1,4 +1,4 @@
-package x509utils_test
+package x509options_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils"
+	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils/x509options"
 )
 
 func getCtx() context.Context {
@@ -15,7 +15,7 @@ func getCtx() context.Context {
 
 func Test_CreateCertOptions_GetValidityDuration(t *testing.T) {
 	t.Run("default duration", func(t *testing.T) {
-		options := &x509utils.X509CreateCertificateOptions{}
+		options := &x509options.X509CreateCertificateOptions{}
 		duration, err := options.GetValidityDurationAsString()
 		require.NoError(t, err)
 		require.EqualValues(t, "1months15d", duration)
@@ -25,19 +25,19 @@ func Test_CreateCertOptions_GetValidityDuration(t *testing.T) {
 func Test_GetPrivateKeySizeOrDefaultIfUnset(t *testing.T) {
 	ctx := getCtx()
 	t.Run("key size unset", func(t *testing.T) {
-		options := &x509utils.X509CreateCertificateOptions{}
+		options := &x509options.X509CreateCertificateOptions{}
 		require.EqualValues(t, 4096, options.GetPrivateKeySizeOrDefaultIfUnset(ctx))
 	})
 
 	t.Run("key size set to 1024", func(t *testing.T) {
-		options := &x509utils.X509CreateCertificateOptions{
+		options := &x509options.X509CreateCertificateOptions{
 			PrivateKeySize: 1024,
 		}
 		require.EqualValues(t, 1024, options.GetPrivateKeySizeOrDefaultIfUnset(ctx))
 	})
 
 	t.Run("key size set to 4096", func(t *testing.T) {
-		options := &x509utils.X509CreateCertificateOptions{
+		options := &x509options.X509CreateCertificateOptions{
 			PrivateKeySize: 4096,
 		}
 		require.EqualValues(t, 4096, options.GetPrivateKeySizeOrDefaultIfUnset(ctx))

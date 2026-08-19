@@ -35,3 +35,35 @@ func OpenAsWriteCloser(ctx context.Context, commandExecutor commandexecutorinter
 		},
 	)
 }
+
+func WriteBytes(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, path string, content []byte) error {
+	if commandExecutor == nil {
+		return tracederrors.TracedErrorNil("commandExecutor")
+	}
+
+	if path == "" {
+		return tracederrors.TracedErrorEmptyString("path")
+	}
+
+	if content == nil {
+		return tracederrors.TracedErrorNil("content")
+	}
+
+	writer, err := OpenAsWriteCloser(ctx, commandExecutor, path, &filesoptions.WriteOptions{})
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.Write(content)
+	if err != nil {
+		_ = writer.Close()
+		return tracederrors.TracedErrorf("Failed to write bytes to '%s': %w", path, err)
+	}
+
+	err = writer.Close()
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to close writer for '%s': %w", path, err)
+	}
+
+	return nil
+}
