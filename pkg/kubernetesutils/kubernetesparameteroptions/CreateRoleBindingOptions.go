@@ -5,9 +5,9 @@ import (
 )
 
 type CreateRoleBindingOptions struct {
-	Name      string
-	RoleRef   string
-	Subjects  []string
+	Name        string
+	RoleRef     string
+	Subjects    []string
 	SubjectKind string // "User", "Group", or "ServiceAccount"
 }
 

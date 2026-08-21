@@ -611,7 +611,7 @@ func (c *Container) GetLogs(ctx context.Context) ([]byte, []byte, error) {
 	// Return empty byte slices if no data, never return nil for successful operations
 	stdoutBytes := stdout.Bytes()
 	stderrBytes := stderr.Bytes()
-	
+
 	if stdoutBytes == nil {
 		stdoutBytes = []byte{}
 	}

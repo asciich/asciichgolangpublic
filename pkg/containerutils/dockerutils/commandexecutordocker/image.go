@@ -1,8 +1,8 @@
 package commandexecutordocker
 
 import (
-	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
 	"context"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
 
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )

@@ -583,3 +583,74 @@ func Test_GetSubjectStringForOpenssl(t *testing.T) {
 		require.NotContains(t, result, "/CN=")
 	})
 }
+
+func Test_GetInfoString(t *testing.T) {
+	t.Run("nil cert", func(t *testing.T) {
+		result, err := genericx509utils.GetInfoString(nil)
+		require.Error(t, err)
+		require.Empty(t, result)
+	})
+
+	t.Run("returns info string with all fields", func(t *testing.T) {
+		certPEM := generateCertWithSubject(t, "/C=CH/O=TestOrg/CN=my-ca.example.com", 365)
+		cert, err := genericx509utils.ReadCertFromString(certPEM)
+		require.NoError(t, err)
+
+		result, err := genericx509utils.GetInfoString(cert)
+		require.NoError(t, err)
+		require.NotEmpty(t, result)
+		require.Contains(t, result, "CN: my-ca.example.com")
+		require.Contains(t, result, "Serial Number:")
+		require.Contains(t, result, "Not Before:")
+		require.Contains(t, result, "Not After:")
+	})
+
+	t.Run("contains colon separated serial number", func(t *testing.T) {
+		certPEM := generateCertWithSubject(t, "/C=CH/O=TestOrg/CN=TestCert", 1)
+		cert, err := genericx509utils.ReadCertFromString(certPEM)
+		require.NoError(t, err)
+
+		result, err := genericx509utils.GetInfoString(cert)
+		require.NoError(t, err)
+
+		serial, err := genericx509utils.GetSerialNumberAsHexColonSeparated(cert)
+		require.NoError(t, err)
+		require.Contains(t, result, serial)
+	})
+
+	t.Run("does not contain newlines", func(t *testing.T) {
+		certPEM := generateCertWithSubject(t, "/C=CH/O=TestOrg/CN=TestCert", 30)
+		cert, err := genericx509utils.ReadCertFromString(certPEM)
+		require.NoError(t, err)
+
+		result, err := genericx509utils.GetInfoString(cert)
+		require.NoError(t, err)
+		require.NotContains(t, result, "\n")
+		require.NotContains(t, result, "\r")
+	})
+
+	t.Run("contains human readable dates", func(t *testing.T) {
+		certPEM := generateCertWithSubject(t, "/C=CH/O=TestOrg/CN=TestCert", 365)
+		cert, err := genericx509utils.ReadCertFromString(certPEM)
+		require.NoError(t, err)
+
+		result, err := genericx509utils.GetInfoString(cert)
+		require.NoError(t, err)
+
+		notBefore := cert.NotBefore.Format(time.RFC1123)
+		notAfter := cert.NotAfter.Format(time.RFC1123)
+		require.Contains(t, result, notBefore)
+		require.Contains(t, result, notAfter)
+	})
+
+	t.Run("empty common name", func(t *testing.T) {
+		certPEM := generateCertWithSubject(t, "/C=CH/O=TestOrg", 1)
+		cert, err := genericx509utils.ReadCertFromString(certPEM)
+		require.NoError(t, err)
+
+		result, err := genericx509utils.GetInfoString(cert)
+		require.NoError(t, err)
+		require.Contains(t, result, "CN: ")
+		require.Contains(t, result, "Serial Number:")
+	})
+}
