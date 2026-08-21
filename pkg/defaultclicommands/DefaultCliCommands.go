@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/ansiblecmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/certificatescmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/cloudcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/containercmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/datetimecmd"
@@ -47,6 +48,7 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 	rootCmd.AddCommand(
 		aicmd.NewAICmd(),
 		ansiblecmd.NewAnsibleCmd(),
+		certificatescmd.NewCertificatesCmd(),
 		cloudcmd.NewCloudCmd(),
 		containercmd.NewContainerCmd(),
 		datetimecmd.NewDateTimeCmd(),

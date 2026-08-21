@@ -11,20 +11,20 @@ import (
 )
 
 type TestCase struct {
-	Name         string   `yaml:"name"`
-	TestType     string   `yaml:"test_type"`
-	Command      string   `yaml:"command,omitempty"`
-	Description  string   `yaml:"description"`
-	Port         string   `yaml:"port,omitempty"`
-	Host         string   `yaml:"host,omitempty"`
-	Namespace    string   `yaml:"namespace,omitempty"`
-	Cluster      string   `yaml:"cluster,omitempty"`
-	ResourceName string   `yaml:"resource_name,omitempty"`
-	SecretKey    string   `yaml:"secret_key" json:"secret_key"`
-	TargetHost   string   `yaml:"target_host" json:"target_host"`
-	TargetUser   string   `yaml:"target_user" json:"target_user"`
-	TargetPort   int      `yaml:"target_port" json:"target_port"`
-	RunbookLinks any      `yaml:"runbook_links,omitempty"`
+	Name                  string `yaml:"name"`
+	TestType              string `yaml:"test_type"`
+	Command               string `yaml:"command,omitempty"`
+	Description           string `yaml:"description"`
+	Port                  string `yaml:"port,omitempty"`
+	Host                  string `yaml:"host,omitempty"`
+	Namespace             string `yaml:"namespace,omitempty"`
+	Cluster               string `yaml:"cluster,omitempty"`
+	ResourceName          string `yaml:"resource_name,omitempty"`
+	SecretKey             string `yaml:"secret_key" json:"secret_key"`
+	TargetHost            string `yaml:"target_host" json:"target_host"`
+	TargetUser            string `yaml:"target_user" json:"target_user"`
+	TargetPort            int    `yaml:"target_port" json:"target_port"`
+	RunbookLinks          any    `yaml:"runbook_links,omitempty"`
 	HintsForInvestigation string `yaml:"hints_for_investigation,omitempty"`
 
 	data            any

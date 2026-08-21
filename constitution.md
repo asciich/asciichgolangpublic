@@ -39,7 +39,8 @@
             ```golang
             return tracederrors.TracedErrorf("ReadCloser process for command '%s' finished with error: %w", fullCommandJoined, err) // correct
             ```
-
+- For filenames:
+    - Do not use `_methods<.extension>` suffix. Instead of `add_methods.go` use `add.go`.
 
 ## Documentation
 

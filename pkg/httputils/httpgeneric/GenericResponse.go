@@ -17,9 +17,9 @@ import (
 // This is the generic response type.
 // It can also be seen as the default response to use.
 type GenericResponse struct {
-	body                []byte
-	statusCode          int
-	serverCertificates  []*x509.Certificate
+	body               []byte
+	statusCode         int
+	serverCertificates []*x509.Certificate
 }
 
 func NewGenericResponse() (g *GenericResponse) {
@@ -161,7 +161,7 @@ func (g *GenericResponse) LogCertInfo(ctx context.Context) error {
 		logging.LogInfoByCtxf(ctx, "  Serial Number: %s", formatSerialNumber(cert.SerialNumber))
 		logging.LogInfoByCtxf(ctx, "  Valid From: %s", cert.NotBefore.Format("2006-01-02 15:04:05 UTC"))
 		logging.LogInfoByCtxf(ctx, "  Valid Until: %s", cert.NotAfter.Format("2006-01-02 15:04:05 UTC"))
-		
+
 		if len(cert.DNSNames) > 0 {
 			logging.LogInfoByCtxf(ctx, "  DNS Names: %v", cert.DNSNames)
 		}

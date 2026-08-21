@@ -691,4 +691,3 @@ func TestClient_GetRequest_WithoutCollectCertificates(t *testing.T) {
 		)
 	}
 }
-

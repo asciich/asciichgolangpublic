@@ -94,7 +94,7 @@ func GetAdditionalSans(cert *x509.Certificate) ([]string, error) {
 	}
 
 	sans := cert.DNSNames
-	if sans == nil || len(sans) == 0 {
+	if len(sans) == 0 {
 		return nil, tracederrors.TracedError("no additional SANs found in certificate")
 	}
 
@@ -264,4 +264,33 @@ func GetSubjectStringForOpenssl(cert *x509.Certificate) (string, error) {
 	}
 
 	return strings.Join(parts, ""), nil
+}
+
+func GetInfoString(cert *x509.Certificate) (string, error) {
+	if cert == nil {
+		return "", tracederrors.TracedErrorNil("cert")
+	}
+
+	commonName, err := GetCommonName(cert)
+	if err != nil {
+		return "", err
+	}
+
+	serial, err := GetSerialNumberAsHexColonSeparated(cert)
+	if err != nil {
+		return "", err
+	}
+
+	notBefore := cert.NotBefore.Format(time.RFC1123)
+	notAfter := cert.NotAfter.Format(time.RFC1123)
+
+	infoString := fmt.Sprintf(
+		"CN: %s, Serial Number: %s, Not Before: %s, Not After: %s",
+		commonName,
+		serial,
+		notBefore,
+		notAfter,
+	)
+
+	return infoString, nil
 }

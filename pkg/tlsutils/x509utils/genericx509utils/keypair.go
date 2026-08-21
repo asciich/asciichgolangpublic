@@ -13,6 +13,24 @@ type X509CertKeyPair struct {
 	Key  crypto.PrivateKey
 }
 
+func (x *X509CertKeyPair) GetCertAsPEMString() (string, error) {
+	cert, err := x.GetX509Certificate()
+	if err != nil {
+		return "", err
+	}
+
+	return WriteCertificateAsPEMString(cert)
+}
+
+func (x *X509CertKeyPair) GetCertAsPEMBytes() ([]byte, error) {
+	cert, err := x.GetX509Certificate()
+	if err != nil {
+		return nil, err
+	}
+
+	return WriteCertificateAsPEMBytes(cert)
+}
+
 func (x *X509CertKeyPair) GetX509Certificate() (*x509.Certificate, error) {
 	if x.Cert == nil {
 		return nil, tracederrors.TracedError("Cert not set")
