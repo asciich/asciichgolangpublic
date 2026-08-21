@@ -2,24 +2,56 @@ package commandexecutorfileoo
 
 import (
 	"context"
+	"path/filepath"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func (f *File) AppendBytes(ctx context.Context, toWrite []byte) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+	commandExecutor, err := f.GetCommandExecutor()
+	if err != nil {
+		return err
+	}
+
+	path, err := f.GetPath()
+	if err != nil {
+		return err
+	}
+
+	return commandexecutorfile.AppendBytes(ctx, commandExecutor, path, toWrite)
 }
 
 func (f *File) AppendString(ctx context.Context, toWrite string) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+	commandExecutor, err := f.GetCommandExecutor()
+	if err != nil {
+		return err
+	}
+
+	path, err := f.GetPath()
+	if err != nil {
+		return err
+	}
+
+	return commandexecutorfile.AppendString(ctx, commandExecutor, path, toWrite)
 }
 
 func (f *File) Chown(ctx context.Context, options *parameteroptions.ChownOptions) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+	commandExecutor, err := f.GetCommandExecutor()
+	if err != nil {
+		return err
+	}
+
+	path, err := f.GetPath()
+	if err != nil {
+		return err
+	}
+
+	return commandexecutorfile.Chown(ctx, commandExecutor, path, options)
 }
 
 func (f *File) GetDeepCopy() (deepCopy filesinterfaces.File) {
@@ -39,39 +71,79 @@ func (f *File) GetDeepCopy() (deepCopy filesinterfaces.File) {
 }
 
 func (f *File) GetLocalPathOrEmptyStringIfUnset() (localPath string, err error) {
-	return "", tracederrors.TracedErrorNotImplemented()
+	if f.path == "" {
+		return "", nil
+	}
+	return f.GetLocalPath()
 }
 
 func (f *File) GetParentDirectory(ctx context.Context) (parentDirectory filesinterfaces.Directory, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
-}
-
-func (f *File) GetPath() (path string, err error) {
-	if f.path == "" {
-		return "", tracederrors.TracedError("path not set")
+	path, err := f.GetPath()
+	if err != nil {
+		return nil, err
 	}
 
-	return f.path, nil
+	parentPath := filepath.Dir(path)
+
+	commandExecutor, err := f.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	return NewDirectory(commandExecutor, parentPath)
 }
 
 func (f *File) GetUriAsString() (uri string, err error) {
-	return "", tracederrors.TracedErrorNotImplemented()
+	path, err := f.GetPath()
+	if err != nil {
+		return "", err
+	}
+
+	return path, nil
 }
 
 func (f *File) MoveToPath(ctx context.Context, destPath string, useSudo bool) (movedFile filesinterfaces.File, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	commandExecutor, err := f.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	path, err := f.GetPath()
+	if err != nil {
+		return nil, err
+	}
+
+	options := &filesoptions.MoveOptions{
+		UseSudo: useSudo,
+	}
+
+	err = commandexecutorfile.Move(ctx, commandExecutor, path, destPath, options)
+	if err != nil {
+		return nil, err
+	}
+
+	return New(commandExecutor, destPath)
 }
 
 func (f *File) SecurelyDelete(ctx context.Context) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+	commandExecutor, err := f.GetCommandExecutor()
+	if err != nil {
+		return err
+	}
+
+	path, err := f.GetPath()
+	if err != nil {
+		return err
+	}
+
+	return commandexecutorfile.SecurelyDelete(ctx, commandExecutor, path)
 }
 
 func (f *File) String() (path string) {
-	logging.LogFatalWithTrace("Not implemented")
-	return ""
+	return f.path
 }
 
-func (f *File) GetCommandExecutor() (commandexecutorinterfaces.CommandExecutor, error) {
+func (f *File) GetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor, err error) {
 	if f.commandExecutor == nil {
 		return nil, tracederrors.TracedError("commandExecutor not set")
 	}

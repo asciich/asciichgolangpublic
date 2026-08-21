@@ -55,12 +55,28 @@ func getFileToTest(implementationName string, path string) (fileToTest filesinte
 		return mustutils.Must(commandexecutorfileoo.New(commandexecutorbashoo.Bash(), path))
 	}
 
-	if implementationName == "nativefilesoo" {
+	if implementationName == "nativefilesoo" || implementationName == "nativedirectoryoo" {
 		return mustutils.Must(nativefilesoo.NewFileByPath(path))
 	}
 
 	logging.LogFatalWithTracef("Unknown implementation name '%s'", implementationName)
 	return nil
+}
+
+func getTemporaryDirectoryToTest(implementationName string) (dirToTest filesinterfaces.Directory) {
+	ctx := getCtx()
+
+	temporaryDirPath := mustutils.Must(tempfiles.CreateTempDir(ctx))
+
+	// Map implementation names
+	if implementationName == "commandExecutorFileExec" {
+		implementationName = "commandexecutorfileoo"
+	}
+	if implementationName == "commandExecutorFileBash" {
+		implementationName = "commandexecutorfileoo"
+	}
+
+	return getDirectoryToTest(implementationName, temporaryDirPath)
 }
 
 func TestTemporaryFilesCreateFromFile(t *testing.T) {
