@@ -41,7 +41,7 @@ func (d *Directory) CopyContentToDirectory(ctx context.Context, destinationDir f
 		if err != nil {
 			return err
 		}
-		
+
 		destFile, err := destinationDir.GetFileInDirectory(baseName)
 		if err != nil {
 			return err
@@ -72,7 +72,14 @@ func (d *Directory) GetBaseName() (baseName string, err error) {
 }
 
 func (d *Directory) GetDirName() (dirName string, err error) {
-	return d.GetBaseName()
+	path, err := d.GetPath()
+	if err != nil {
+		return "", err
+	}
+
+	dirName = filepath.Dir(path)
+
+	return dirName, nil
 }
 
 func (d *Directory) GetHostDescription() (hostDescription string, err error) {
@@ -110,6 +117,8 @@ func (d *Directory) ListSubDirectories(ctx context.Context, options *parameterop
 	if err != nil {
 		return nil, err
 	}
+
+	slices.Sort(foundPaths)
 
 	subDirectories = make([]filesinterfaces.Directory, 0)
 	for _, entryPath := range foundPaths {

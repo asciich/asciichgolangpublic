@@ -84,6 +84,14 @@ func NewCommandExecutorDirectory(commandExecutor commandexecutorinterfaces.Comma
 	return c, nil
 }
 
+func (c *CommandExecutorDirectory) CreateFilesInDirectory(ctx context.Context, paths []string, options *filesoptions.CreateOptions) (createdFiles []filesinterfaces.File, err error) {
+	return nil, tracederrors.TracedErrorNotImplemented()
+}
+
+func (c *CommandExecutorDirectory) IsEmptyDirectory(ctx context.Context) (bool, error) {
+	return false, tracederrors.TracedErrorNotImplemented()
+}
+
 func (c *CommandExecutorDirectory) Chmod(ctx context.Context, chmodOptions *filesoptions.ChmodOptions) (err error) {
 	if chmodOptions == nil {
 		return tracederrors.TracedErrorNil("chmodOptions")

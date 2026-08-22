@@ -1,6 +1,7 @@
 package filesutils_test
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -8,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
+	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -18,15 +20,13 @@ func Test_CreateFileUsingSudo(t *testing.T) {
 	tests := []struct {
 		implementationName string
 	}{
-		{"localFile"},
-		{"localCommandExecutorFile"},
 		{"commandExecutorFileExec"},
 		{"commandExecutorFileBash"},
 		{"nativefilesoo"},
 	}
 
 	for _, tt := range tests {
-		t.Run("no root permission denied", func(t *testing.T) {
+		t.Run("no root permission denied "+tt.implementationName, func(t *testing.T) {
 			ctx := getCtx()
 
 			const testPath = "/testfile"
@@ -46,7 +46,7 @@ func Test_CreateFileUsingSudo(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run("with root permission granted", func(t *testing.T) {
+		t.Run("with root permission granted "+tt.implementationName, func(t *testing.T) {
 			const envName = "RUN_SUDO_TEST"
 			if os.Getenv(envName) != "1" {
 				t.Skipf("Sudo tests skipped since '%s' not set.'", envName)
@@ -69,7 +69,7 @@ func Test_CreateFileUsingSudo(t *testing.T) {
 			t.Run("chmod "+tt.implementationName+" "+permissionString, func(t *testing.T) {
 				ctx := getCtx()
 
-				testfile := getTemporaryFileToTest(tt.implementationName)
+				testfile := getTestFileToTest(tt.implementationName)
 				defer func() {
 					err := testfile.Delete(ctx, &filesoptions.DeleteOptions{})
 					require.NoError(t, err)
@@ -97,12 +97,15 @@ func TestFile_WriteString_ReadAsString(t *testing.T) {
 	tests := []struct {
 		implementationName string
 		content            string
-	}{
-		{"localFile", "hello world"},
-		{"localCommandExecutorFile", "hello world"},
-		{"commandExecutorFileExec", "hello world"},
-		{"commandExecutorFileBash", "hello world"},
-		{"nativefilesoo", "hello world"},
+	}{}
+
+	for _, impl := range allFileImplementations {
+		for _, content := range []string{"hello world"} {
+			tests = append(tests, struct {
+				implementationName string
+				content            string
+			}{impl, content})
+		}
 	}
 
 	for _, tt := range tests {
@@ -111,7 +114,7 @@ func TestFile_WriteString_ReadAsString(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				fileToTest := getTemporaryFileToTest(tt.implementationName)
+				fileToTest := getTestFileToTest(tt.implementationName)
 				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				err := fileToTest.WriteString(ctx, tt.content, &filesoptions.WriteOptions{})
@@ -126,49 +129,102 @@ func TestFile_WriteString_ReadAsString(t *testing.T) {
 }
 
 func TestFile_Exists(t *testing.T) {
-	tests := []struct {
-		implementationName string
-	}{
-		{"localFile"},
-		{"localCommandExecutorFile"},
-		{"commandExecutorFileExec"},
-		{"commandExecutorFileBash"},
-		{"nativefilesoo"},
-	}
+	for _, impl := range allFileImplementations {
+		t.Run(impl, func(t *testing.T) {
+			ctx := getCtx()
 
-	for _, tt := range tests {
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				ctx := getCtx()
+			fileToTest := getTestFileToTest(impl)
+			defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				fileToTest := getTemporaryFileToTest(tt.implementationName)
-				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
+			exists, err := fileToTest.Exists(ctx)
+			require.NoError(t, err)
+			require.True(t, exists)
 
-				exists, err := fileToTest.Exists(ctx)
-				require.NoError(t, err)
-				require.True(t, exists)
+			err = fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
+			require.NoError(t, err)
 
-				err = fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
-				require.NoError(t, err)
-
-				exists, err = fileToTest.Exists(ctx)
-				require.NoError(t, err)
-				require.False(t, exists)
-			},
-		)
+			exists, err = fileToTest.Exists(ctx)
+			require.NoError(t, err)
+			require.False(t, exists)
+		})
 	}
 }
 
 func TestFile_Truncate(t *testing.T) {
+	for _, impl := range allFileImplementations {
+		t.Run(impl, func(t *testing.T) {
+			ctx := getCtx()
+
+			fileToTest := getTestFileToTest(impl)
+			defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
+
+			for i := 0; i < 10; i++ {
+				err := fileToTest.Truncate(ctx, int64(i))
+				require.NoError(t, err)
+
+				sizeBytes, err := fileToTest.GetSizeBytes(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, sizeBytes, int64(i))
+			}
+
+			err := fileToTest.Truncate(ctx, 0)
+			require.NoError(t, err)
+
+			sizeBytes, err := fileToTest.GetSizeBytes(ctx)
+			require.NoError(t, err)
+			require.EqualValues(t, sizeBytes, 0)
+		})
+	}
+}
+
+func TestFile_GetSizeBytes(t *testing.T) {
+	for _, impl := range allFileImplementations {
+		t.Run(impl, func(t *testing.T) {
+			ctx := getCtx()
+
+			fileToTest := getTestFileToTest(impl)
+			defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
+
+			for i := 0; i < 10; i++ {
+				err := fileToTest.WriteString(ctx, strings.Repeat("a", i), &filesoptions.WriteOptions{})
+				require.NoError(t, err)
+
+				sizeBytes, err := fileToTest.GetSizeBytes(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, int64(i), sizeBytes)
+			}
+
+			err := fileToTest.WriteString(ctx, "", &filesoptions.WriteOptions{})
+			require.NoError(t, err)
+
+			sizeBytes, err := fileToTest.GetSizeBytes(ctx)
+			require.NoError(t, err)
+			require.EqualValues(t, int64(0), sizeBytes)
+		})
+	}
+}
+
+func TestFile_ContainsLine(t *testing.T) {
 	tests := []struct {
 		implementationName string
-	}{
-		{"localFile"},
-		{"localCommandExecutorFile"},
-		{"commandExecutorFileExec"},
-		{"commandExecutorFileBash"},
-		{"nativefilesoo"},
+		line               string
+		expectedContains   bool
+	}{}
+
+	for _, impl := range allFileImplementations {
+		for _, tc := range []struct {
+			line             string
+			expectedContains bool
+		}{
+			{"hello", false},
+			{"hello world", true},
+		} {
+			tests = append(tests, struct {
+				implementationName string
+				line               string
+				expectedContains   bool
+			}{impl, tc.line, tc.expectedContains})
+		}
 	}
 
 	for _, tt := range tests {
@@ -177,65 +233,88 @@ func TestFile_Truncate(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				fileToTest := getTemporaryFileToTest(tt.implementationName)
+				fileToTest := getTestFileToTest(tt.implementationName)
 				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				for i := 0; i < 10; i++ {
-					err := fileToTest.Truncate(ctx, int64(i))
-					require.NoError(t, err)
-
-					sizeBytes, err := fileToTest.GetSizeBytes(ctx)
-					require.NoError(t, err)
-					require.EqualValues(t, sizeBytes, int64(i))
-				}
-
-				err := fileToTest.Truncate(ctx, 0)
+				err := fileToTest.WriteString(ctx, "this is a\nhello world\nexample text.\n", &filesoptions.WriteOptions{})
 				require.NoError(t, err)
 
-				sizeBytes, err := fileToTest.GetSizeBytes(ctx)
+				containsLine, err := fileToTest.ContainsLine(ctx, tt.line)
 				require.NoError(t, err)
-				require.EqualValues(t, sizeBytes, 0)
+
+				require.EqualValues(t, tt.expectedContains, containsLine)
 			},
 		)
 	}
 }
 
-func TestFile_GetSizeBytes(t *testing.T) {
-	tests := []struct {
-		implementationName string
-	}{
-		{"localFile"},
-		{"localCommandExecutorFile"},
-		{"commandExecutorFileExec"},
-		{"commandExecutorFileBash"},
-		{"nativefilesoo"},
+func TestFile_MoveToPath2(t *testing.T) {
+	for _, impl := range allFileImplementations {
+		t.Run(impl, func(t *testing.T) {
+			ctx := getCtx()
+
+			fileToTest := getTestFileToTest(impl)
+			defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
+
+			destFile := getTestFileToTest(impl)
+			defer destFile.Delete(ctx, &filesoptions.DeleteOptions{})
+			destFile.Delete(ctx, &filesoptions.DeleteOptions{})
+
+			exists, err := fileToTest.Exists(ctx)
+			require.NoError(t, err)
+			require.True(t, exists)
+
+			exists, err = destFile.Exists(ctx)
+			require.NoError(t, err)
+			require.False(t, exists)
+
+			destFilePath, err := destFile.GetPath()
+			require.NoError(t, err)
+
+			movedFile, err := fileToTest.MoveToPath(ctx, destFilePath, false)
+			require.NoError(t, err)
+
+			movedFilePath, err := movedFile.GetPath()
+			require.NoError(t, err)
+			destFilePath, err = destFile.GetPath()
+			require.NoError(t, err)
+
+			require.EqualValues(t, movedFilePath, destFilePath)
+
+			movedHostDescription, err := movedFile.GetHostDescription()
+			require.NoError(t, err)
+			destHostDescription, err := destFile.GetHostDescription()
+			require.NoError(t, err)
+
+			require.EqualValues(t, movedHostDescription, destHostDescription)
+
+			exists, err = fileToTest.Exists(ctx)
+			require.NoError(t, err)
+			require.False(t, exists)
+
+			exists, err = destFile.Exists(ctx)
+			require.NoError(t, err)
+			require.True(t, exists)
+		})
 	}
+}
 
-	for _, tt := range tests {
-		t.Run(
-			testutils.MustFormatAsTestname(tt),
-			func(t *testing.T) {
-				ctx := getCtx()
+func TestFile_String2(t *testing.T) {
+	for _, impl := range allFileImplementations {
+		t.Run(impl, func(t *testing.T) {
+			ctx := getCtx()
 
-				fileToTest := getTemporaryFileToTest(tt.implementationName)
-				defer fileToTest.Delete(ctx, &filesoptions.DeleteOptions{})
+			toTest := getTestFileToTest(impl)
+			defer toTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				for i := 0; i < 10; i++ {
-					err := fileToTest.WriteString(ctx, strings.Repeat("a", i), &filesoptions.WriteOptions{})
-					require.NoError(t, err)
+			path, err := toTest.GetPath()
+			require.NoError(t, err)
+			stringOutput := toTest.String()
+			sprintf := fmt.Sprintf("'%s'", toTest)
 
-					sizeBytes, err := fileToTest.GetSizeBytes(ctx)
-					require.NoError(t, err)
-					require.EqualValues(t, int64(i), sizeBytes)
-				}
-
-				err := fileToTest.WriteString(ctx, "", &filesoptions.WriteOptions{})
-				require.NoError(t, err)
-
-				sizeBytes, err := fileToTest.GetSizeBytes(ctx)
-				require.NoError(t, err)
-				require.EqualValues(t, int64(0), sizeBytes)
-			},
-		)
+			require.True(t, pathsutils.IsAbsolutePath(path))
+			require.EqualValues(t, path, stringOutput)
+			require.EqualValues(t, "'"+path+"'", sprintf)
+		})
 	}
 }

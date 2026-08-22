@@ -276,6 +276,14 @@ func GetBaseName(path string) (string, error) {
 	return filepath.Base(path), nil
 }
 
+func GetDirName(path string) (string, error) {
+	if path == "" {
+		return "", tracederrors.TracedErrorEmptyString("path")
+	}
+
+	return filepath.Dir(path), nil
+}
+
 // GetParentDirectoryPath returns the parent directory path.
 func GetParentDirectoryPath(path string) (string, error) {
 	if path == "" {

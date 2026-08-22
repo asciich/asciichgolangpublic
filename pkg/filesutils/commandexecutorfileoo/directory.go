@@ -7,6 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
@@ -202,4 +203,36 @@ func (d *Directory) GetParentDirectory(ctx context.Context) (parentDirectory fil
 	}
 
 	return NewDirectory(commandExecutor, parentPath)
+}
+
+func (d *Directory) CreateFilesInDirectory(ctx context.Context, paths []string, options *filesoptions.CreateOptions) (createdFiles []filesinterfaces.File, err error) {
+	if len(paths) <= 0 {
+		return nil, tracederrors.TracedErrorNil("paths")
+	}
+
+	createdFiles = []filesinterfaces.File{}
+	for _, path := range paths {
+		createdFile, err := d.CreateFileInDirectory(ctx, path, options)
+		if err != nil {
+			return nil, err
+		}
+
+		createdFiles = append(createdFiles, createdFile)
+	}
+
+	return createdFiles, nil
+}
+
+func (d *Directory) IsEmptyDirectory(ctx context.Context) (isEmpty bool, err error) {
+	path, err := d.GetPath()
+	if err != nil {
+		return false, err
+	}
+
+	commandExecutor, err := d.GetCommandExecutor()
+	if err != nil {
+		return false, err
+	}
+
+	return commandexecutorfile.IsEmptyDirectory(ctx, commandExecutor, path)
 }
