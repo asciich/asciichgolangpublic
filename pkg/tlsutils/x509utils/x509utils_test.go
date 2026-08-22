@@ -417,7 +417,7 @@ func Test_CreateRootCaCertificate(t *testing.T) {
 			pair, err := impl.CreateRootCaCertificate(ctx, options)
 			require.NoError(t, err)
 
-			err = pair.CheckKeyMatchingCert()
+			err = pair.CheckKeyMatchingCertificate()
 			require.NoError(t, err)
 		})
 
@@ -503,7 +503,7 @@ func Test_CreateIntermediateCertificate(t *testing.T) {
 			pair, err := impl.CreateIntermediateCertificate(ctx, options)
 			require.NoError(t, err)
 
-			err = pair.CheckKeyMatchingCert()
+			err = pair.CheckKeyMatchingCertificate()
 			require.NoError(t, err)
 		})
 	}
@@ -574,7 +574,7 @@ func Test_CreateSelfSignedCertificate(t *testing.T) {
 			pair, err := impl.CreateSelfSignedCertificate(ctx, options)
 			require.NoError(t, err)
 
-			err = pair.CheckKeyMatchingCert()
+			err = pair.CheckKeyMatchingCertificate()
 			require.NoError(t, err)
 		})
 
@@ -729,7 +729,7 @@ func Test_CreateSignedIntermediateCertificate(t *testing.T) {
 			intPair, err := impl.CreateSignedIntermediateCertificate(ctx, getDefaultIntermediateOptions(), rootPair)
 			require.NoError(t, err)
 
-			err = intPair.CheckKeyMatchingCert()
+			err = intPair.CheckKeyMatchingCertificate()
 			require.NoError(t, err)
 		})
 
@@ -874,7 +874,7 @@ func Test_CreateSignedEndEntityCertificate(t *testing.T) {
 			eePair, err := impl.CreateSignedEndEntityCertificate(ctx, getDefaultEndEntityOptions(), rootPair)
 			require.NoError(t, err)
 
-			err = eePair.CheckKeyMatchingCert()
+			err = eePair.CheckKeyMatchingCertificate()
 			require.NoError(t, err)
 		})
 
@@ -983,7 +983,7 @@ func Test_CreateRootCaCertificate_implementations_produce_consistent_results(t *
 			require.NoError(t, err)
 			require.True(t, isRootCa)
 
-			err = pair.CheckKeyMatchingCert()
+			err = pair.CheckKeyMatchingCertificate()
 			require.NoError(t, err)
 		})
 	}
@@ -1054,11 +1054,11 @@ func Test_FullChain_across_implementations(t *testing.T) {
 			require.True(t, isChain)
 
 			// Validate all keys match their certs
-			err = rootPair.CheckKeyMatchingCert()
+			err = rootPair.CheckKeyMatchingCertificate()
 			require.NoError(t, err)
-			err = intPair.CheckKeyMatchingCert()
+			err = intPair.CheckKeyMatchingCertificate()
 			require.NoError(t, err)
-			err = eePair.CheckKeyMatchingCert()
+			err = eePair.CheckKeyMatchingCertificate()
 			require.NoError(t, err)
 		})
 	}
