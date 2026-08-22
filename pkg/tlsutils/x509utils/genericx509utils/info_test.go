@@ -600,6 +600,7 @@ func Test_GetInfoString(t *testing.T) {
 		require.NoError(t, err)
 		require.NotEmpty(t, result)
 		require.Contains(t, result, "CN: my-ca.example.com")
+		require.Contains(t, result, "SANs(0): ")
 		require.Contains(t, result, "Serial Number:")
 		require.Contains(t, result, "Not Before:")
 		require.Contains(t, result, "Not After:")
@@ -651,6 +652,31 @@ func Test_GetInfoString(t *testing.T) {
 		result, err := genericx509utils.GetInfoString(cert)
 		require.NoError(t, err)
 		require.Contains(t, result, "CN: ")
+		require.Contains(t, result, "SANs(0): ")
 		require.Contains(t, result, "Serial Number:")
+	})
+
+	t.Run("includes SANs when present", func(t *testing.T) {
+		expectedSans := []string{"www.example.com", "api.example.com"}
+		certPEM := generateCertWithSANs(t, "/C=CH/O=TestOrg/CN=example.com", expectedSans)
+		cert, err := genericx509utils.ReadCertFromString(certPEM)
+		require.NoError(t, err)
+
+		result, err := genericx509utils.GetInfoString(cert)
+		require.NoError(t, err)
+		require.Contains(t, result, "SANs(2):")
+		require.Contains(t, result, "www.example.com")
+		require.Contains(t, result, "api.example.com")
+	})
+
+	t.Run("SANs are comma separated", func(t *testing.T) {
+		expectedSans := []string{"a.example.com", "b.example.com"}
+		certPEM := generateCertWithSANs(t, "/C=CH/O=TestOrg/CN=example.com", expectedSans)
+		cert, err := genericx509utils.ReadCertFromString(certPEM)
+		require.NoError(t, err)
+
+		result, err := genericx509utils.GetInfoString(cert)
+		require.NoError(t, err)
+		require.Contains(t, result, "a.example.com, b.example.com")
 	})
 }
