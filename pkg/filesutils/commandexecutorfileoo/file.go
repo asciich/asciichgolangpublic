@@ -65,6 +65,14 @@ func (f *File) GetBaseName() (string, error) {
 	return baseName, nil
 }
 
+func (f *File) GetPath() (path string, err error) {
+	if f.path == "" {
+		return "", tracederrors.TracedError("path not set")
+	}
+
+	return f.path, nil
+}
+
 func (f *File) GetLocalPath() (localPath string, err error) {
 	isLocalDirectory, err := f.IsLocalFile(contextutils.ContextSilent())
 	if err != nil {

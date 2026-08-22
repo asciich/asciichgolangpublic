@@ -195,3 +195,114 @@ func Delete(ctx context.Context, pathToDelete string, options *filesoptions.Dele
 
 	return nil
 }
+
+// AppendBytes appends bytes to a file.
+func AppendBytes(ctx context.Context, path string, toWrite []byte) error {
+	if path == "" {
+		return tracederrors.TracedErrorEmptyString("path")
+	}
+
+	if toWrite == nil {
+		return tracederrors.TracedErrorNil("toWrite")
+	}
+
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return tracederrors.TracedErrorf("Unable to open file '%s' for append: %w", path, err)
+	}
+	defer file.Close()
+
+	_, err = file.Write(toWrite)
+	if err != nil {
+		return tracederrors.TracedErrorf("Unable to append to file '%s': %w", path, err)
+	}
+
+	logging.LogChangedByCtxf(ctx, "Appended bytes to file '%s'.", path)
+
+	return nil
+}
+
+// AppendString appends a string to a file.
+func AppendString(ctx context.Context, path string, toWrite string) error {
+	return AppendBytes(ctx, path, []byte(toWrite))
+}
+
+// Chown changes the ownership of a file or directory.
+func Chown(ctx context.Context, path string, options *parameteroptions.ChownOptions) error {
+	if path == "" {
+		return tracederrors.TracedErrorEmptyString("path")
+	}
+
+	if options == nil {
+		return tracederrors.TracedErrorNil("options")
+	}
+
+	userAndGroup, err := options.GetUserAndOptionallyGroupForChownCommand()
+	if err != nil {
+		return err
+	}
+
+	if options.UseSudo {
+		logging.LogInfoByCtxf(ctx, "Chown '%s' to '%s' using sudo started.", path, userAndGroup)
+		_, err := commandexecutorexec.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command: []string{"sudo", "chown", userAndGroup, path},
+		})
+		if err != nil {
+			return tracederrors.TracedErrorf("Failed to chown '%s' to '%s' using sudo: %w", path, userAndGroup, err)
+		}
+	} else {
+		logging.LogInfoByCtxf(ctx, "Chown '%s' to '%s' started.", path, userAndGroup)
+		// For non-sudo chown, we'd need to use syscall.Chown which requires root or file owner
+		// For now, we'll use the command executor approach even for local
+		_, err := commandexecutorexec.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command: []string{"chown", userAndGroup, path},
+		})
+		if err != nil {
+			return tracederrors.TracedErrorf("Failed to chown '%s' to '%s': %w", path, userAndGroup, err)
+		}
+	}
+
+	logging.LogChangedByCtxf(ctx, "Changed ownership of '%s' to '%s'.", path, userAndGroup)
+
+	return nil
+}
+
+// GetBaseName returns the base name of a path.
+func GetBaseName(path string) (string, error) {
+	if path == "" {
+		return "", tracederrors.TracedErrorEmptyString("path")
+	}
+
+	return filepath.Base(path), nil
+}
+
+// GetParentDirectoryPath returns the parent directory path.
+func GetParentDirectoryPath(path string) (string, error) {
+	if path == "" {
+		return "", tracederrors.TracedErrorEmptyString("path")
+	}
+
+	parentPath := filepath.Dir(path)
+	if parentPath == "" {
+		return "", tracederrors.TracedError("parentPath is empty string after evaluation.")
+	}
+
+	return parentPath, nil
+}
+
+// MoveToPath moves a file to a destination path.
+func MoveToPath(ctx context.Context, src string, destPath string, useSudo bool) error {
+	if src == "" {
+		return tracederrors.TracedErrorEmptyString("src")
+	}
+
+	if destPath == "" {
+		return tracederrors.TracedErrorEmptyString("destPath")
+	}
+
+	options := &filesoptions.MoveOptions{
+		UseSudo: useSudo,
+	}
+
+	return Move(ctx, src, destPath, options)
+}
