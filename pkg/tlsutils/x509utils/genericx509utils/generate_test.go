@@ -119,7 +119,7 @@ func Test_CreateRootCa(t *testing.T) {
 		pair, err := genericx509utils.CreateRootCaCertificate(ctx, getDefaultRootCaOptions())
 		require.NoError(t, err)
 
-		err = pair.CheckKeyMatchingCert()
+		err = pair.CheckKeyMatchingCertificate()
 		require.NoError(t, err)
 	})
 
@@ -197,7 +197,7 @@ func Test_CreateIntermediateCertificate(t *testing.T) {
 		pair, err := genericx509utils.CreateIntermediateCertificate(ctx, getDefaultIntermediateOptions())
 		require.NoError(t, err)
 
-		err = pair.CheckKeyMatchingCert()
+		err = pair.CheckKeyMatchingCertificate()
 		require.NoError(t, err)
 	})
 }
@@ -258,7 +258,7 @@ func Test_CreateSelfSignedCertificate(t *testing.T) {
 		pair, err := genericx509utils.CreateSelfSignedCertificate(ctx, getDefaultSelfSignedOptions())
 		require.NoError(t, err)
 
-		err = pair.CheckKeyMatchingCert()
+		err = pair.CheckKeyMatchingCertificate()
 		require.NoError(t, err)
 	})
 
@@ -385,7 +385,7 @@ func Test_CreateSignedIntermediateCertificate(t *testing.T) {
 		intPair, err := genericx509utils.CreateSignedIntermediateCertificate(ctx, getDefaultIntermediateOptions(), rootPair)
 		require.NoError(t, err)
 
-		err = intPair.CheckKeyMatchingCert()
+		err = intPair.CheckKeyMatchingCertificate()
 		require.NoError(t, err)
 	})
 
@@ -504,7 +504,7 @@ func Test_CreateSignedEndEntityCertificate(t *testing.T) {
 		eePair, err := genericx509utils.CreateSignedEndEntityCertificate(ctx, getDefaultEndEntityOptions(), rootPair)
 		require.NoError(t, err)
 
-		err = eePair.CheckKeyMatchingCert()
+		err = eePair.CheckKeyMatchingCertificate()
 		require.NoError(t, err)
 	})
 

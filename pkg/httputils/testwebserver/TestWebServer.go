@@ -327,7 +327,7 @@ func (t *TestWebServer) SetTlsCertAndKey(ctx context.Context, certAndKey *generi
 		return tracederrors.TracedErrorNil("certAndKey")
 	}
 
-	err = certAndKey.CheckKeyMatchingCert()
+	err = certAndKey.CheckKeyMatchingCertificate()
 	if err != nil {
 		return err
 	}

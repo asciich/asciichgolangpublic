@@ -1,6 +1,7 @@
 package genericx509utils_test
 
 import (
+	"context"
 	"crypto"
 	"os"
 	"os/exec"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
+	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils/genericx509utils"
 )
 
@@ -195,7 +197,7 @@ func Test_X509CertKeyPair_CheckKeyMatchingCert(t *testing.T) {
 	t.Run("matching cert and key returns no error", func(t *testing.T) {
 		pair := loadCertAndKeyPair(t, "/C=CH/O=CheckOrg/CN=CheckCert")
 
-		err := pair.CheckKeyMatchingCert()
+		err := pair.CheckKeyMatchingCertificate()
 		require.NoError(t, err)
 	})
 
@@ -210,14 +212,14 @@ func Test_X509CertKeyPair_CheckKeyMatchingCert(t *testing.T) {
 
 		pair := &genericx509utils.X509CertKeyPair{Cert: cert, Key: key}
 
-		err = pair.CheckKeyMatchingCert()
+		err = pair.CheckKeyMatchingCertificate()
 		require.Error(t, err)
 	})
 
 	t.Run("cert not set returns error", func(t *testing.T) {
 		pair := &genericx509utils.X509CertKeyPair{}
 
-		err := pair.CheckKeyMatchingCert()
+		err := pair.CheckKeyMatchingCertificate()
 		require.Error(t, err)
 	})
 }
@@ -253,5 +255,120 @@ func Test_X509CertKeyPair_GetPublicKey(t *testing.T) {
 		certPubKeyWithEqual, ok := certPubKey.(interface{ Equal(x crypto.PublicKey) bool })
 		require.True(t, ok)
 		require.True(t, certPubKeyWithEqual.Equal(pubKey))
+	})
+}
+
+func Test_X509CertKeyPair_WriteCertificatePemToFile(t *testing.T) {
+	t.Run("nil toWrite returns error", func(t *testing.T) {
+		pair := loadCertAndKeyPair(t, "/C=CH/O=WriteCertOrg/CN=WriteCert")
+
+		err := pair.WriteCertificatePemToFile(context.Background(), nil)
+		require.Error(t, err)
+	})
+
+	t.Run("writes certificate PEM to file", func(t *testing.T) {
+		pair := loadCertAndKeyPair(t, "/C=CH/O=WriteCertFileOrg/CN=WriteCertFile")
+
+		tmpDir := t.TempDir()
+		certPath := filepath.Join(tmpDir, "cert.pem")
+		certFile := files.MustNewLocalFileByPath(certPath)
+
+		err := pair.WriteCertificatePemToFile(context.Background(), certFile)
+		require.NoError(t, err)
+
+		content, err := os.ReadFile(certPath)
+		require.NoError(t, err)
+		require.NotEmpty(t, content)
+		require.Contains(t, string(content), "BEGIN CERTIFICATE")
+		require.Contains(t, string(content), "END CERTIFICATE")
+
+		certReadBack, err := genericx509utils.ReadCertFromString(string(content))
+		require.NoError(t, err)
+
+		originalCert, err := pair.GetX509Certificate()
+		require.NoError(t, err)
+		require.True(t, originalCert.Equal(certReadBack))
+	})
+
+	t.Run("written certificate has correct subject", func(t *testing.T) {
+		pair := loadCertAndKeyPair(t, "/C=DE/L=Munich/O=SubjectWriteOrg/CN=SubjectWriteCert")
+
+		tmpDir := t.TempDir()
+		certPath := filepath.Join(tmpDir, "cert.pem")
+		certFile := files.MustNewLocalFileByPath(certPath)
+
+		err := pair.WriteCertificatePemToFile(context.Background(), certFile)
+		require.NoError(t, err)
+
+		content, err := os.ReadFile(certPath)
+		require.NoError(t, err)
+
+		certReadBack, err := genericx509utils.ReadCertFromString(string(content))
+		require.NoError(t, err)
+		require.Equal(t, "DE", certReadBack.Subject.Country[0])
+		require.Equal(t, "Munich", certReadBack.Subject.Locality[0])
+		require.Equal(t, "SubjectWriteOrg", certReadBack.Subject.Organization[0])
+		require.Equal(t, "SubjectWriteCert", certReadBack.Subject.CommonName)
+	})
+}
+
+func Test_X509CertKeyPair_WritePrivateKeyToFile(t *testing.T) {
+	t.Run("nil toWrite returns error", func(t *testing.T) {
+		pair := loadCertAndKeyPair(t, "/C=CH/O=WriteKeyOrg/CN=WriteKey")
+
+		err := pair.WritePrivateKeyToFile(context.Background(), nil)
+		require.Error(t, err)
+	})
+
+	t.Run("writes private key PEM to file", func(t *testing.T) {
+		pair := loadCertAndKeyPair(t, "/C=CH/O=WriteKeyFileOrg/CN=WriteKeyFile")
+
+		tmpDir := t.TempDir()
+		keyPath := filepath.Join(tmpDir, "key.pem")
+		keyFile := files.MustNewLocalFileByPath(keyPath)
+
+		err := pair.WritePrivateKeyToFile(context.Background(), keyFile)
+		require.NoError(t, err)
+
+		content, err := os.ReadFile(keyPath)
+		require.NoError(t, err)
+		require.NotEmpty(t, content)
+		require.Contains(t, string(content), "BEGIN PRIVATE KEY")
+		require.Contains(t, string(content), "END PRIVATE KEY")
+
+		keyReadBack, err := cryptoutils.LoadPrivateKeyFromPEMString(string(content))
+		require.NoError(t, err)
+		require.NotNil(t, keyReadBack)
+
+		originalKey, err := pair.GetPrivateKey()
+		require.NoError(t, err)
+
+		keyEqual, ok := originalKey.(interface{ Equal(x crypto.PrivateKey) bool })
+		require.True(t, ok)
+		require.True(t, keyEqual.Equal(keyReadBack))
+	})
+
+	t.Run("written key can decrypt data encrypted by certificate public key", func(t *testing.T) {
+		pair := loadCertAndKeyPair(t, "/C=CH/O=DecryptTestOrg/CN=DecryptTest")
+
+		tmpDir := t.TempDir()
+		keyPath := filepath.Join(tmpDir, "key.pem")
+		keyFile := files.MustNewLocalFileByPath(keyPath)
+
+		err := pair.WritePrivateKeyToFile(context.Background(), keyFile)
+		require.NoError(t, err)
+
+		content, err := os.ReadFile(keyPath)
+		require.NoError(t, err)
+
+		keyReadBack, err := cryptoutils.LoadPrivateKeyFromPEMString(string(content))
+		require.NoError(t, err)
+
+		cert, err := pair.GetX509Certificate()
+		require.NoError(t, err)
+
+		publicKey := cert.PublicKey
+		require.NotNil(t, publicKey)
+		require.Equal(t, keyReadBack.(interface{ Public() crypto.PublicKey }).Public(), publicKey)
 	})
 }

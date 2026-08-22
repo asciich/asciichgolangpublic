@@ -14,6 +14,7 @@
 - Generic functions like `GetCommonName(cert *x509.Certificae) (string, error)` which do not require network or file accees are implemented in the subpackage `genericx509utils`.
 - For the inmemory representation of a certificate use `*x509.Certificate`.
 - The `ReadCertificateFromFile(ctx context.Context, pathToRead string) (*x509.Certificate, error)` reads a file from disk.
+- Do not shorten `Certificate` to `Cert` in function names. Instead of `IsKeyMatchingCert` use `IsKeyMatchingCertificate`.
 
 ## Tests
 

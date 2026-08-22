@@ -77,7 +77,7 @@ func Test_AddAndRemoveCert(t *testing.T) {
 				certKeyPair, err := x509utils.CreateRootCaCertificate(ctx, options)
 				require.NoError(t, err)
 
-				certPEMString, err := certKeyPair.GetCertAsPEMString()
+				certPEMString, err := certKeyPair.GetCertificateAsPEMString()
 				require.NoError(t, err)
 
 				// 2. Get baseline of installed certificates
