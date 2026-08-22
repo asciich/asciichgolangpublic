@@ -162,7 +162,12 @@ func (d *Directory) GetBaseName() (baseName string, err error) {
 }
 
 func (d *Directory) GetDirName() (dirName string, err error) {
-	return d.GetBaseName()
+	path, err := d.GetPath()
+	if err != nil {
+		return "", err
+	}
+
+	return nativefiles.GetDirName(path)
 }
 
 func (d *Directory) GetFileInDirectory(pathToFile ...string) (file filesinterfaces.File, err error) {
@@ -215,7 +220,6 @@ func (d *Directory) ListFiles(ctx context.Context, listFileOptions *parameteropt
 
 	return files, nil
 }
-
 func (d *Directory) ListSubDirectories(ctx context.Context, options *parameteroptions.ListDirectoryOptions) (subDirectories []filesinterfaces.Directory, err error) {
 	path, err := d.GetPath()
 	if err != nil {
@@ -226,22 +230,49 @@ func (d *Directory) ListSubDirectories(ctx context.Context, options *parameterop
 		options = &parameteroptions.ListDirectoryOptions{}
 	}
 
-	// Read directory entries directly
-	entries, err := os.ReadDir(path)
-	if err != nil {
-		return nil, err
-	}
-
 	subDirectories = make([]filesinterfaces.Directory, 0)
-	for _, entry := range entries {
-		// Check if it's a directory
-		if entry.IsDir() {
-			entryPath := filepath.Join(path, entry.Name())
+
+	if options.Recursive {
+		err = filepath.WalkDir(path, func(entryPath string, entry os.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if !entry.IsDir() {
+				return nil
+			}
+
+			// Skip the root directory itself
+			if entryPath == path {
+				return nil
+			}
+
 			subDir, err := NewDirectoryByPath(entryPath)
 			if err != nil {
-				return nil, err
+				return err
 			}
+
 			subDirectories = append(subDirectories, subDir)
+			return nil
+		})
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		entries, err := os.ReadDir(path)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, entry := range entries {
+			if entry.IsDir() {
+				entryPath := filepath.Join(path, entry.Name())
+				subDir, err := NewDirectoryByPath(entryPath)
+				if err != nil {
+					return nil, err
+				}
+				subDirectories = append(subDirectories, subDir)
+			}
 		}
 	}
 

@@ -140,3 +140,26 @@ func (d *Directory) Exists(ctx context.Context) (exists bool, err error) {
 	exists = nativefiles.Exists(ctx, path)
 	return exists, nil
 }
+
+func (d *Directory) CreateFilesInDirectory(ctx context.Context, paths []string, options *filesoptions.CreateOptions) (createdFiles []filesinterfaces.File, err error) {
+	createdFiles = make([]filesinterfaces.File, 0, len(paths))
+
+	for _, path := range paths {
+		createdFile, err := d.CreateFileInDirectory(ctx, path, options)
+		if err != nil {
+			return nil, err
+		}
+		createdFiles = append(createdFiles, createdFile)
+	}
+
+	return createdFiles, nil
+}
+
+func (d *Directory) IsEmptyDirectory(ctx context.Context) (isEmpty bool, err error) {
+	path, err := d.GetPath()
+	if err != nil {
+		return false, err
+	}
+
+	return nativefiles.IsEmptyDirectory(ctx, path)
+}

@@ -1,46 +1,45 @@
 package filesgeneric_test
 
 import (
+	"context"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
-func getDirectoryToTest(implementationName string) (directory filesinterfaces.Directory) {
-	tempDir, err := os.MkdirTemp("", "test_dir")
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
+func getDirectoryToTest(ctx context.Context, t *testing.T, implementationName string) (directory filesinterfaces.Directory) {
+	tempDir, err := tempfiles.CreateTempDir(ctx)
+	require.NoError(t, err)
 
-	if implementationName == "localDirectory" {
-		ctx := contextutils.ContextVerbose()
-		dir, err := files.GetLocalDirectoryByPath(ctx, tempDir)
-		if err != nil {
-			logging.LogGoErrorFatal(err)
-		}
+	if strings.EqualFold(implementationName, "nativeDirectory") {
+		dir, err := nativefilesoo.NewDirectoryByPath(tempDir)
+		require.NoError(t, err)
 
 		return dir
 	}
 
-	if implementationName == "localCommandExecutorDirectory" {
-		return mustutils.Must(files.GetLocalCommandExecutorDirectoryByPath(tempDir))
+	if strings.EqualFold(implementationName, "commandexecutordirectory") {
+		dir, err := nativefilesoo.NewDirectoryByPath(tempDir)
+		require.NoError(t, err)
+
+		return dir
 	}
 
 	logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)
-	err = os.Remove(tempDir)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
+	require.NoError(t, filesutils.Delete(ctx, tempDir, &filesoptions.DeleteOptions{}))
 
 	return nil
 }
@@ -79,8 +78,8 @@ func TestDirectoryBase_ListFiles_withoutFilter(t *testing.T) {
 	tests := []struct {
 		fileImplementationToTest string
 	}{
-		{"localDirectory"},
-		{"localCommandExecutorDirectory"},
+		{"nativeDirectory"},
+		{"commandexecutordirectory"},
 	}
 
 	for _, tt := range tests {
@@ -89,7 +88,7 @@ func TestDirectoryBase_ListFiles_withoutFilter(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				directory := getDirectoryToTest(tt.fileImplementationToTest)
+				directory := getDirectoryToTest(ctx, t, tt.fileImplementationToTest)
 
 				defer directory.Delete(ctx, &filesoptions.DeleteOptions{})
 
@@ -121,8 +120,8 @@ func TestDirectoryBase_ListFiles(t *testing.T) {
 	tests := []struct {
 		fileImplementationToTest string
 	}{
-		{"localDirectory"},
-		{"localCommandExecutorDirectory"},
+		{"nativeDirectory"},
+		{"commandexecutordirectory"},
 	}
 
 	for _, tt := range tests {
@@ -131,7 +130,7 @@ func TestDirectoryBase_ListFiles(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				directory := getDirectoryToTest(tt.fileImplementationToTest)
+				directory := getDirectoryToTest(ctx, t, tt.fileImplementationToTest)
 
 				defer directory.Delete(ctx, &filesoptions.DeleteOptions{})
 
@@ -164,8 +163,8 @@ func TestDirectoryBase_DeleteFilesMatching(t *testing.T) {
 	tests := []struct {
 		fileImplementationToTest string
 	}{
-		{"localDirectory"},
-		{"localCommandExecutorDirectory"},
+		{"nativeDirectory"},
+		{"commandexecutordirectory"},
 	}
 
 	for _, tt := range tests {
@@ -174,7 +173,7 @@ func TestDirectoryBase_DeleteFilesMatching(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				directory := getDirectoryToTest(tt.fileImplementationToTest)
+				directory := getDirectoryToTest(ctx, t, tt.fileImplementationToTest)
 
 				txtFile, err := directory.CreateFileInDirectory(ctx, "a.txt", &filesoptions.CreateOptions{})
 				require.NoError(t, err)
