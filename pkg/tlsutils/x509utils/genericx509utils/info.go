@@ -276,6 +276,13 @@ func GetInfoString(cert *x509.Certificate) (string, error) {
 		return "", err
 	}
 
+	sans, err := GetAdditionalSansOrEmptySliceIfUnset(cert)
+	if err != nil {
+		return "", err
+	}
+
+	sansString := strings.Join(sans, ", ")
+
 	serial, err := GetSerialNumberAsHexColonSeparated(cert)
 	if err != nil {
 		return "", err
@@ -285,8 +292,10 @@ func GetInfoString(cert *x509.Certificate) (string, error) {
 	notAfter := cert.NotAfter.Format(time.RFC1123)
 
 	infoString := fmt.Sprintf(
-		"CN: %s, Serial Number: %s, Not Before: %s, Not After: %s",
+		"CN: %s,  SANs(%d): %s, Serial Number: %s, Not Before: %s, Not After: %s",
 		commonName,
+		len(sans),
+		sansString,
 		serial,
 		notBefore,
 		notAfter,
