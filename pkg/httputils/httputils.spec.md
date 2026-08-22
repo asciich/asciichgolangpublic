@@ -1,5 +1,9 @@
 # httputils specifications
 
+This are the specifications for the [`httputils` package](README.md).
+
+This document extends the [constitution.md](/constitution.md).
+
 ## Implementation
 
 - The `httputils` package itself contains only convenience functions to using the `httpnativeclientoo`. The actual implementation has to be done in:

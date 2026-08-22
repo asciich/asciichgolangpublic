@@ -1,5 +1,9 @@
 # copilotutils specifications
 
+This are the specifications for the [`copilotutils` package](README.md).
+
+This document extends the parent specifications [aiutils.spec.md](../aiutils.spec.md).
+
 - `RunCopilotCliContainer` can be used to spin a container to running copilot CLI as agent in an isolated way.
     - The argument of type `RunCopilotCliContainerOptions` provides at least:
         - `WorkspacePath`. This path is mounted as workspace and is optional. If not set the whole agent runs on a temporary workspace inside the container.

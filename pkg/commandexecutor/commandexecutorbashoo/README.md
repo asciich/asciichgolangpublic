@@ -1,8 +1,8 @@
-# commandexecutorexecoo package
+# commandexecutorbashoo package
 
-Object oriented bash [commandexectuor](/pkg/commandexecutor/) implementation.
+Object oriented bash [commandexecutor](/pkg/commandexecutor/) implementation.
 
-For the non object orientated implemenations see [commandexectuorbash](/pkg/commandexecutor/commandexecutorexec/).
+For the non object oriented implementations see [commandexecutorbash](/pkg/commandexecutor/commandexecutorexec/).
 
 ## Examples
 

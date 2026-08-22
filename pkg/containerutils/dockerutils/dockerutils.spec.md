@@ -9,7 +9,7 @@ This document extends the parent specifications [containerutils.spec.md](../cont
 - For building containers use the `BuildContainerOptions` with at least these options:
     - `ImageNameAndTag`
     - For specifying the Dockerfile exclusively one must be set:
-        - `DockerfilePath`: The path to an already exisitng Dockerfile.
+        - `DockerfilePath`: The path to an already existing Dockerfile.
         - `DockerfileContent`: Option to directly set the Dockerfile content.
 - The `Container` interface must provide a `GetLogs(ctx context.Context) ([]byte, []byte, err)` function to return stdout and stderr.
     - Only return `nil` when there is an error. If fetching the log is successful return a empty `[]byte{}` if there is no stderr or stdout data.

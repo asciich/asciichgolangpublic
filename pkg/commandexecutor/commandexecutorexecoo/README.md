@@ -1,8 +1,8 @@
 # commandexecutorexecoo package
 
-Object oriented exec [commandexectuor](/pkg/commandexecutor/) implementation.
+Object oriented exec [commandexecutor](/pkg/commandexecutor/) implementation.
 
-For the non object orientated implemenations see [commandexectuorexec](/pkg/commandexecutor/commandexecutorexec/).
+For the non object oriented implementations see [commandexecutorexec](/pkg/commandexecutor/commandexecutorexec/).
 
 ## Examples
 

@@ -2,7 +2,7 @@
 
 Non object oriented implementation using the [official client-go library](https://github.com/kubernetes/client-go) to interact with kubernetes.
 
-For the object oriented implmenetation see [nativekubernetesoo](/pkg/kubernetesutils/nativekubernetesoo/).
+For the object oriented implementation see [nativekubernetesoo](/pkg/kubernetesutils/nativekubernetesoo/).
 
 ## Race Condition Handling
 

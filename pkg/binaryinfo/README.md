@@ -1,4 +1,4 @@
-# packaga binaryinfo
+# binaryinfo package
 
 The aim of this package is to provide information about the build golang binary itself.
 

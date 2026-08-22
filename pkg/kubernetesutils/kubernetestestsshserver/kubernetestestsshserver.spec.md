@@ -27,7 +27,7 @@ This document extends the parent specifications [kubernetesutils.spec.md](../kub
 - The function returns a `kubernetesinterfaces.Pod` that represents the SSH server pod.
 - The SSH server pod must be properly cleaned up by calling `Delete(ctx context.Context)` on the returned pod.
 - Reuse existing implementations:
-    - For the SSH keypair generation there is already an implementaion in the `sshutils` package available.
+    - For the SSH keypair generation there is already an implementation in the `sshutils` package available.
 
 ## Testing
 
