@@ -2,6 +2,7 @@ package commandexecutorfile
 
 import (
 	"context"
+	"path/filepath"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
@@ -36,6 +37,13 @@ func CreateFile(ctx context.Context, commandExecutor commandexecutorinterfaces.C
 	if exists {
 		logging.LogInfoByCtxf(ctx, "File '%s' on '%s' already exists. Skip file creation.", path, hostDescription)
 	} else {
+		// Ensure the parent directory exists before creating the file.
+		parentDir := filepath.Dir(path)
+		err = CreateDirectory(ctx, commandExecutor, parentDir, &filesoptions.CreateOptions{})
+		if err != nil {
+			return err
+		}
+
 		_, err := commandExecutor.RunCommand(
 			ctx,
 			&parameteroptions.RunCommandOptions{

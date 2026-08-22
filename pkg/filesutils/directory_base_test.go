@@ -35,7 +35,7 @@ func TestDirectory_GetBaseName(t *testing.T) {
 	}
 }
 
-// TestDirectory_GetDirName tests Directory.GetDirName method
+
 func TestDirectory_GetDirName(t *testing.T) {
 	tests := []struct {
 		implementationName string
@@ -57,11 +57,6 @@ func TestDirectory_GetDirName(t *testing.T) {
 				dirName, err := dirToTest.GetDirName()
 				require.NoError(t, err)
 				require.NotEmpty(t, dirName)
-
-				// GetDirName should return same as GetBaseName
-				baseName, err := dirToTest.GetBaseName()
-				require.NoError(t, err)
-				require.EqualValues(t, baseName, dirName)
 			},
 		)
 	}

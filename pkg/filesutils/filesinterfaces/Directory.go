@@ -32,10 +32,13 @@ type Directory interface {
 	// All methods below this line can be implemented by embedding the `DirectoryBase` struct:
 	CheckExists(ctx context.Context) (err error)
 	CreateFileInDirectory(ctx context.Context, path string, options *filesoptions.CreateOptions) (createdFile File, err error)
+	CreateFileInDirectoryFromString(ctx context.Context, content string, path ...string) (createdFile File, err error)
+	CreateFilesInDirectory(ctx context.Context, paths []string, options *filesoptions.CreateOptions) (createdFiles []File, err error)
 	GetFilePathInDirectory(path ...string) (filePath string, err error)
 	GetPathAndHostDescription() (dirPath string, hostDescription string, err error)
 	DeleteFilesMatching(ctx context.Context, listFileOptons *parameteroptions.ListFileOptions) (err error)
 	FileInDirectoryExists(ctx context.Context, path ...string) (exists bool, err error)
+	IsEmptyDirectory(ctx context.Context) (bool, error)
 	ListFilePaths(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (filePaths []string, err error)
 	ListSubDirectoryPaths(ctx context.Context, options *parameteroptions.ListDirectoryOptions) (subDirectoryPaths []string, err error)
 	ReadFileInDirectoryAsInt64(ctx context.Context, path ...string) (content int64, err error)

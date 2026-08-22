@@ -162,46 +162,6 @@ func (l *LocalDirectory) CopyContentToLocalDirectory(destDirectory *LocalDirecto
 	return nil
 }
 
-/* TODO move or remove
-func (l *LocalDirectory) CopyFileToTemporaryFile(verbose bool, filePath ...string) (copy File, err error) {
-	if len(filePath) <= 0 {
-		return nil, tracederrors.TracedErrorEmptyString("filePath")
-	}
-
-	fileToCopy, err := l.GetFileInDirectory(filePath...)
-	if err != nil {
-		return nil, err
-	}
-
-	copy, err = TemporaryFiles().CreateTemporaryFileFromFile(fileToCopy, verbose)
-	if err != nil {
-		return nil, err
-	}
-
-	return copy, nil
-}
-*/
-
-/* TODO move or remove
-func (l *LocalDirectory) CopyFileToTemporaryFileAsLocalFile(verbose bool, filePath ...string) (copy *LocalFile, err error) {
-	if len(filePath) <= 0 {
-		return nil, tracederrors.TracedErrorEmptyString("filePath")
-	}
-
-	interfaceCopy, err := l.CopyFileToTemporaryFile(verbose, filePath...)
-	if err != nil {
-		return nil, err
-	}
-
-	copy, ok := interfaceCopy.(*LocalFile)
-	if !ok {
-		return nil, tracederrors.TracedErrorf("Internal error: Unable to convert to *LocalFile: '%v'", interfaceCopy)
-	}
-
-	return copy, nil
-}
-*/
-
 func (l *LocalDirectory) Create(ctx context.Context, options *filesoptions.CreateOptions) (err error) {
 	exists, err := l.Exists(ctx)
 	if err != nil {

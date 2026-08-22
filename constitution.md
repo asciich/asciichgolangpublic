@@ -152,6 +152,7 @@ pkg/<domain>/<packagename>/
 	    	panic(err)
 	    }
         ```
+    - Use `t.NoError(t, err)` to check for errors. Do not use less specific `t.Nil(t, err)`.
 - Unit Test Structure:
     - Use t.Run subtests for distinct assertions
         - When a single test function validates multiple distinct behaviors or cases, each case must be wrapped in its own t.Run subtest. This provides clearer test output, allows individual subtests to be run in isolation, and makes failures easier to identify.
