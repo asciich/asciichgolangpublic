@@ -3,8 +3,10 @@ package miniocmd
 import (
 	"context"
 
+	"github.com/minio/madmin-go/v3"
 	"github.com/minio/minio-go/v7"
 	"github.com/spf13/cobra"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/s3cmd/miniocmd/admincmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/s3cmd/miniocmd/bucketscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/s3cmd/miniocmd/miniocmdoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/s3cmd/miniocmd/objectscmd"
@@ -29,6 +31,10 @@ func NewMinioCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
 		options.GetClient = defaultGetClient
 	}
 
+	if options.GetAdminClient == nil {
+		options.GetAdminClient = defaultGetAdminClient
+	}
+
 	use := "minio"
 	if options.OverrideUse != "" {
 		use = options.OverrideUse
@@ -42,6 +48,7 @@ func NewMinioCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
 	cmd.AddCommand(
 		bucketscmd.NewBucketsCmd(options),
 		objectscmd.NewObjectsCmd(options),
+		admincmd.NewAdminCmd(options),
 	)
 
 	cmd.PersistentFlags().String("endpoint", "", "The minio endpoint/ server to use.")
@@ -52,6 +59,11 @@ func NewMinioCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
 func defaultGetClient(ctx context.Context, cmd *cobra.Command) *minio.Client {
 	endpoint := defaultGetEndpoint(ctx, cmd)
 	return mustutils.Must(nativeminioclient.NewClientFromEnvVars(ctx, endpoint, &s3options.NewS3ClientOptions{}))
+}
+
+func defaultGetAdminClient(ctx context.Context, cmd *cobra.Command) *madmin.AdminClient {
+	endpoint := defaultGetEndpoint(ctx, cmd)
+	return mustutils.Must(nativeminioclient.NewAdminClientFromEnvVars(ctx, endpoint, &s3options.NewS3ClientOptions{}))
 }
 
 func defaultGetEndpoint(ctx context.Context, cmd *cobra.Command) string {

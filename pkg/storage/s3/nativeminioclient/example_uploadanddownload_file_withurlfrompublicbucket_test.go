@@ -32,7 +32,7 @@ func Test_Example_UploadAndDownload_File_withUrlFromPublicBucket_test(t *testing
 	err = nativedocker.RemoveContainer(ctx, containerName, &dockeroptions.RemoveOptions{Force: true})
 	require.NoError(t, err)
 
-	_, err = nativedocker.RunContainer(ctx, &dockeroptions.DockerRunContainerOptions{
+	container, err := nativedocker.RunContainer(ctx, &dockeroptions.DockerRunContainerOptions{
 		Name:      containerName,
 		ImageName: "quay.io/minio/minio",
 		Command:   []string{"server", "/data", "--console-address", ":9001"},
@@ -44,6 +44,7 @@ func Test_Example_UploadAndDownload_File_withUrlFromPublicBucket_test(t *testing
 		WaitForPortsOpen: true,
 	})
 	require.NoError(t, err)
+	defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
 
 	time.Sleep(time.Second * 2)
 	//defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
