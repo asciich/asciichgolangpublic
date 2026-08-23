@@ -13,6 +13,7 @@ func NewBucketsCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
 
 	cmd.AddCommand(
 		NewListBucketsCmd(options),
+		NewCreateBucketCmd(options),
 	)
 
 	return cmd
