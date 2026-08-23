@@ -1,4 +1,4 @@
-# nativeminiclient
+# nativeminioclient
 
 This implementation can be used to manage Minio installations as well as working with the data stored in it.
 

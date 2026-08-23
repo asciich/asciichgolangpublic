@@ -1,5 +1,5 @@
 # commandexecutorpowershelloo package
 
-Object oriented powershell [commandexectuor](/pkg/commandexecutor/) implementation.
+Object oriented powershell [commandexecutor](/pkg/commandexecutor/) implementation.
 
-For the non object oriented implementation see [commandexectuorpowershell](/pkg/commandexecutor/commandexecutorpowershell/).
+For the non object oriented implementation see [commandexecutorpowershell](/pkg/commandexecutor/commandexecutorpowershell/).

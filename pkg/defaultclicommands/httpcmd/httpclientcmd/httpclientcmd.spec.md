@@ -1,5 +1,9 @@
 # httpclientcmd specifications
 
+This are the specifications for the [`httpclientcmd` package](README.md).
+
+This document extends the parent specifications [httpcmd.spec.md](../httpcmd.spec.md).
+
 ## Implementation
 
 - The default scheme to use is `https://`:

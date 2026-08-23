@@ -1,4 +1,8 @@
-# truststoreutils Specifications
+# truststoreutils specifications
+
+This are the specifications for the [`truststoreutils` package](README.md).
+
+This document extends the [constitution.md](/constitution.md).
 
 ## Overview
 
@@ -7,6 +11,7 @@
 ---
 
 ## Architecture
+
 
 ### Interfaces
 

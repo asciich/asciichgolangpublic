@@ -1,4 +1,8 @@
-# nativehost
+# nativehost specifications
+
+This are the specifications for the [`nativehost` package](README.md).
+
+This document extends the parent specifications [hostutils.spec.md](../hostutils.spec.md).
 
 ## Implementation
 

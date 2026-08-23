@@ -1,5 +1,9 @@
 # genericx509utils specifications
 
+This are the specifications for the [`genericx509utils` package](README.md).
+
+This document extends the parent specifications [x509utils.spec.md](../x509utils.spec.md).
+
 ## Implementation:
 
 - The `X509CertKeyPair` is used to hold the private key and the corresponding certificate.

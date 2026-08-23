@@ -1,4 +1,4 @@
-# commandexectuorexec package
+# commandexecutorexec package
 
 Exec implementation to run commands.
 

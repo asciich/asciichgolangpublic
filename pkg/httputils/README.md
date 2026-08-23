@@ -21,3 +21,7 @@ High level easy to use HTTP client and testserver.
 * HTTPClient:
     * [Set base URL on client](Example_SetBaseUrlOnClient_test.go): This is useful if many requests are send to the same webserver using the same client.
 * [POST request](Example_PostRequest_test.go)
+
+## Specifications
+
+For specifications see [httputils.spec.md](httputils.spec.md)

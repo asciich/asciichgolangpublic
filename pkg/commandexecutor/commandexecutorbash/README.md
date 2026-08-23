@@ -1,4 +1,4 @@
-# commandexectuorexec package
+# commandexecutorbash package
 
 Bash implementation to run commands inside a bash.
 

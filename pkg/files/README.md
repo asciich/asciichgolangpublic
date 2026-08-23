@@ -1,3 +1,3 @@
 # files package
 
-The goal is to move everyithing from this pacakge to the [filesutils](/pkg/filesutils/)
+The goal is to move everything from this package to the [filesutils](/pkg/filesutils/)

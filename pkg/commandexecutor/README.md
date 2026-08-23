@@ -1,4 +1,4 @@
-# commandexector
+# commandexecutor package
 
 CommandExecutors have an important role in this library since they allow us to:
 - Execute commands on remote systems like (jump-)hosts reachable over the SSH.
