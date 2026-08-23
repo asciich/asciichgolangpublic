@@ -108,7 +108,7 @@ Usage:
 		},
 	}
 
-	cmd.Flags().String("api-url", "", "Url the the Signal CLI Rest API server.")
+	cmd.Flags().String("api-url", "", "Url of the Signal CLI Rest API server.")
 	cmd.Flags().String("account-number", "", "Account number (phone number with +CountryCode, without spaces in between) of the sender account.")
 	cmd.Flags().String("message", "", "The message (payload) to send.")
 	cmd.Flags().Int64("quote-timestamp", 0, "The timestamp of the message to quote in milliseconds.")

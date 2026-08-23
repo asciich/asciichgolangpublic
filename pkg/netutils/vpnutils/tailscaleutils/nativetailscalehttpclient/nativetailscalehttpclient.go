@@ -127,7 +127,7 @@ func (h *HttpClient) SendRequest(ctx context.Context, options *httpoptions.Reque
 
 	optionsToUse := options.GetDeepCopy()
 
-	// By using the the tailscale client in the transport the request is send over tailscale:
+	// By using the tailscale client in the transport the request is send over tailscale:
 	optionsToUse.TransportToUse = &http.Transport{
 		DialContext: srv.Dial,
 	}

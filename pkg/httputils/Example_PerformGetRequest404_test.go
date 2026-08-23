@@ -43,7 +43,7 @@ func Test_Example_PerformGetRequest404(t *testing.T) {
 	require.Error(t, err)
 	require.ErrorIs(t, err, httpgeneric.ErrUnexpectedStatusCode)
 
-	// Even the the return value was not ok the response is returned:
+	// Even though the return value was not ok the response is returned:
 	require.NotNil(t, response)
 
 	// The status code of the response is 404:

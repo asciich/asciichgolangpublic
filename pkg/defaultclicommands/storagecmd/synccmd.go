@@ -11,7 +11,7 @@ import (
 func NewSyncCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "sync",
-		Short: "Flush OS write cache to the storage. Same as the the 'sync' CLI command.",
+		Short: "Flush OS write cache to the storage. Same as the 'sync' CLI command.",
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
