@@ -1,6 +1,7 @@
 package nativeminioclient
 
 import (
+	"time"
 	"context"
 	"fmt"
 
@@ -16,7 +17,7 @@ type ServerInfoResult struct {
 type ServerOnlineStatus struct {
 	Endpoint string
 	IsOnline bool
-	Uptime   int64
+	Uptime   time.Duration
 }
 
 // ServerOnlineStatusResult contains the results of server online status check
@@ -94,7 +95,7 @@ func CheckServerOnlineStatus(ctx context.Context, adminClient *madmin.AdminClien
 		result.ServerStatuses = append(result.ServerStatuses, ServerOnlineStatus{
 			Endpoint: server.Endpoint,
 			IsOnline: isOnline,
-			Uptime:   server.Uptime,
+			Uptime:   time.Duration(server.Uptime) * time.Second,
 		})
 	}
 

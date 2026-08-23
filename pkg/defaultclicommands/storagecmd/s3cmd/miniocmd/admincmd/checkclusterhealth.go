@@ -7,6 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/s3cmd/miniocmd/miniocmdoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/datetime"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/nativeminioclient"
 )
@@ -39,7 +40,8 @@ func NewCheckClusterHealthCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.C
 				if serverStatus.IsOnline {
 					status = "ONLINE"
 				}
-				logging.LogInfoByCtxf(ctx, "  Node %s: %s (Uptime: %d)", serverStatus.Endpoint, status, serverStatus.Uptime)
+				uptimeStr := mustutils.Must(datetime.FormatDurationAsString(&serverStatus.Uptime))
+				logging.LogInfoByCtxf(ctx, "  Node %s: %s (Uptime: %s)", serverStatus.Endpoint, status, uptimeStr)
 			}
 
 			// Log all disks and their status

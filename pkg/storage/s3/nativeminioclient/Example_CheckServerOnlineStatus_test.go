@@ -65,6 +65,6 @@ func Test_Example_CheckServerOnlineStatus_test(t *testing.T) {
 		fmt.Printf("  Server %d:\n", i+1)
 		fmt.Printf("    Endpoint: %s\n", status.Endpoint)
 		fmt.Printf("    Is Online: %v\n", status.IsOnline)
-		fmt.Printf("    Uptime: %d seconds\n", status.Uptime)
+		fmt.Printf("    Uptime: %v\n", status.Uptime)
 	}
 }

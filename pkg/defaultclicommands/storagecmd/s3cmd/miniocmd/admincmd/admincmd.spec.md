@@ -7,7 +7,8 @@
 - The command `admin` is used to group all minio admin related commands.
     - The `check-cluster-health` must is used to check the whole cluster health.
         - Log the cluster status
-        - Log all nodes and its status
+        - Log all nodes and its status.
+            - The uptime of the node must be in a human readable format. Reuse existing libraries in this repo.
         - Log all disks and its status
         - Show a LogGood... message when everything is ok and exit 0.
         - Use LogFatal with an error message otherwise (this automatically exists != 0).
