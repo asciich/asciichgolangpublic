@@ -15,6 +15,12 @@ func NewShowDownloadUrlCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Comm
 	cmd := &cobra.Command{
 		Use:   "show-download-url",
 		Short: "Show the download URL of the specified object key in the --bucket",
+		Long: `Show the download URL of the specified object key in the --bucket.
+
+Usage example:
+  # Show the download URL for an object
+  asciich objects show-download-url object-key --bucket my-bucket
+`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

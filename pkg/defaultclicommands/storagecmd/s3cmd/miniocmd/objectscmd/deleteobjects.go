@@ -12,6 +12,12 @@ func NewDeleteObjectsCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Comman
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete the given objects in the S3 --bucket.",
+		Long: `Delete the given objects in the S3 --bucket.
+
+Usage example:
+  # Delete multiple objects from a bucket
+  asciich objects delete object-key-1 object-key-2 object-key-3 --bucket my-bucket
+`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
