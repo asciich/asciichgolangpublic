@@ -32,7 +32,7 @@ func (f *File) GetAccessPermissions() (permission int, err error) {
 		return 0, err
 	}
 
-	return commandexecutorfile.GetAccessPermissions(commandExecutor, path)
+	return commandexecutorfile.GetAccessPermissions(commandExecutor, path, false)
 }
 
 func (f *File) GetAccessPermissionsString() (permissionString string, err error) {
@@ -46,5 +46,5 @@ func (f *File) GetAccessPermissionsString() (permissionString string, err error)
 		return "", err
 	}
 
-	return commandexecutorfile.GetAccessPermissionsString(commandExecutor, path)
+	return commandexecutorfile.GetAccessPermissionsString(commandExecutor, path, false)
 }

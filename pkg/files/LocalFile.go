@@ -582,7 +582,7 @@ func (l *LocalFile) GetAccessPermissions() (permissions int, err error) {
 		return 0, err
 	}
 
-	return nativefiles.GetAccessPermissions(path)
+	return nativefiles.GetAccessPermissions(path, false)
 }
 
 func (l *LocalFile) GetAccessPermissionsString() (permissionsString string, err error) {

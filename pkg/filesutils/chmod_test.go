@@ -21,7 +21,7 @@ func TestFile_Chmod(t *testing.T) {
 		require.NoError(t, err)
 
 		executor := commandexecutorbashoo.Bash()
-		permissions, err := commandexecutorfile.GetAccessPermissionsString(executor, pathToTest)
+		permissions, err := commandexecutorfile.GetAccessPermissionsString(executor, pathToTest, false)
 		require.NoError(t, err)
 		require.NotEqualValues(t, "u=rw,g=r,o=r", permissions)
 
@@ -31,7 +31,7 @@ func TestFile_Chmod(t *testing.T) {
 			})
 			require.NoError(t, err)
 
-			permissions, err = commandexecutorfile.GetAccessPermissionsString(executor, pathToTest)
+			permissions, err = commandexecutorfile.GetAccessPermissionsString(executor, pathToTest, false)
 			require.NoError(t, err)
 			require.EqualValues(t, "u=rw,g=r,o=r", permissions)
 		}

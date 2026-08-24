@@ -31,5 +31,5 @@ func (f *File) GetAccessPermissions() (int, error) {
 		return 0, err
 	}
 
-	return nativefiles.GetAccessPermissions(path)
+	return nativefiles.GetAccessPermissions(path, false)
 }

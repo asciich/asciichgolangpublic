@@ -29,22 +29,22 @@ func TestChmod(t *testing.T) {
 
 func TestGetAccessPermissions(t *testing.T) {
 	t.Run("nil commandExecutor returns error", func(t *testing.T) {
-		perms, err := commandexecutorfile.GetAccessPermissions(nil, "/tmp")
+		perms, err := commandexecutorfile.GetAccessPermissions(nil, "/tmp", false)
 		require.Error(t, err)
 		require.Zero(t, perms)
 	})
 	t.Run("empty path returns error", func(t *testing.T) {
-		perms, err := commandexecutorfile.GetAccessPermissions(commandexecutorexecoo.Exec(), "")
+		perms, err := commandexecutorfile.GetAccessPermissions(commandexecutorexecoo.Exec(), "", false)
 		require.Error(t, err)
 		require.Zero(t, perms)
 	})
 	t.Run("/tmp returns valid permissions", func(t *testing.T) {
-		perms, err := commandexecutorfile.GetAccessPermissions(commandexecutorexecoo.Exec(), "/tmp")
+		perms, err := commandexecutorfile.GetAccessPermissions(commandexecutorexecoo.Exec(), "/tmp", false)
 		require.NoError(t, err)
 		require.NotZero(t, perms)
 	})
 	t.Run("nonexistent file returns error", func(t *testing.T) {
-		perms, err := commandexecutorfile.GetAccessPermissions(commandexecutorexecoo.Exec(), "/nonexistent/file")
+		perms, err := commandexecutorfile.GetAccessPermissions(commandexecutorexecoo.Exec(), "/nonexistent/file", false)
 		require.Error(t, err)
 		require.Zero(t, perms)
 	})
@@ -52,12 +52,12 @@ func TestGetAccessPermissions(t *testing.T) {
 
 func TestGetAccessPermissionsString(t *testing.T) {
 	t.Run("/etc/hostname returns valid permissions string", func(t *testing.T) {
-		perms, err := commandexecutorfile.GetAccessPermissionsString(commandexecutorexecoo.Exec(), "/etc/hostname")
+		perms, err := commandexecutorfile.GetAccessPermissionsString(commandexecutorexecoo.Exec(), "/etc/hostname", false)
 		require.NoError(t, err)
 		require.NotEmpty(t, perms)
 	})
 	t.Run("nonexistent file returns error", func(t *testing.T) {
-		perms, err := commandexecutorfile.GetAccessPermissionsString(commandexecutorexecoo.Exec(), "/nonexistent/file")
+		perms, err := commandexecutorfile.GetAccessPermissionsString(commandexecutorexecoo.Exec(), "/nonexistent/file", false)
 		require.Error(t, err)
 		require.Empty(t, perms)
 	})
