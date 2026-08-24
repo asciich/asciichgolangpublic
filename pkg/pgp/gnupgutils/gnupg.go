@@ -44,3 +44,47 @@ func CheckSignatureValid(ctx context.Context, signatureFile filesinterfaces.File
 func CheckSingnatureByPathValid(ctx context.Context, signaturePath string, toValidatePath string) error {
 	return commandexecutorgnupg.CheckSingnatureByPathValid(ctx, commandexecutorexecoo.Exec(), signaturePath, toValidatePath)
 }
+
+func SignContentString(ctx context.Context, content string, options *gnupgoptions.SignOption) (string, error) {
+	if content == "" {
+		return "", tracederrors.TracedErrorEmptyString("content")
+	}
+
+	commandExecutor := commandexecutorexecoo.Exec()
+	return commandexecutorgnupg.SignContentString(ctx, commandExecutor, content, options)
+}
+
+func SignContentBytes(ctx context.Context, content []byte, options *gnupgoptions.SignOption) ([]byte, error) {
+	if content == nil {
+		return nil, tracederrors.TracedErrorNil("content")
+	}
+
+	commandExecutor := commandexecutorexecoo.Exec()
+	return commandexecutorgnupg.SignContentBytes(ctx, commandExecutor, content, options)
+}
+
+func CheckSignatureValidForContentString(ctx context.Context, signature string, content string) error {
+	if signature == "" {
+		return tracederrors.TracedErrorEmptyString("signature")
+	}
+
+	if content == "" {
+		return tracederrors.TracedErrorEmptyString("content")
+	}
+
+	commandExecutor := commandexecutorexecoo.Exec()
+	return commandexecutorgnupg.CheckSignatureValidForContentString(ctx, commandExecutor, signature, content)
+}
+
+func CheckSignatureValidForContentBytes(ctx context.Context, signature []byte, content []byte) error {
+	if signature == nil {
+		return tracederrors.TracedErrorNil("signature")
+	}
+
+	if content == nil {
+		return tracederrors.TracedErrorNil("content")
+	}
+
+	commandExecutor := commandexecutorexecoo.Exec()
+	return commandexecutorgnupg.CheckSignatureValidForContentBytes(ctx, commandExecutor, signature, content)
+}

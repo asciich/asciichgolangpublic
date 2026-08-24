@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strings"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/asciich/asciichgolangpublic/pkg/checksumutils"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -476,4 +478,31 @@ func GetDownloadUrl(ctx context.Context, client *minio.Client, bucketName string
 	url = url.JoinPath(bucketName, objectKey)
 
 	return url.String(), nil
+}
+
+func GetDownloadUrlByEndpoint(ctx context.Context, endpoint string, bucketName string, objectKey string) (string, error) {
+	if endpoint == "" {
+		return "", tracederrors.TracedErrorEmptyString("endpoint")
+	}
+
+	if bucketName == "" {
+		return "", tracederrors.TracedErrorEmptyString("bucketName")
+	}
+
+	if objectKey == "" {
+		return "", tracederrors.TracedErrorEmptyString("objectKey")
+	}
+
+	var url string
+	if !strings.HasPrefix(endpoint, "http") {
+		url += "https://"
+	}
+
+	url += endpoint
+	url = stringsutils.EnsureSuffix(url, "/")
+	url += strings.TrimPrefix(bucketName, "/")
+	url = stringsutils.EnsureSuffix(url, "/")
+	url += strings.TrimPrefix(objectKey, "/")
+
+	return url, nil
 }

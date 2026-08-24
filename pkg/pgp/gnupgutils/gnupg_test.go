@@ -97,3 +97,74 @@ func TestGnuPg_SignAndValidate_File(t *testing.T) {
 		)
 	}
 }
+
+func TestGnuPg_SignContentString(t *testing.T) {
+	testutils.SkipIfRunningInGithub(t)
+
+	tests := []struct {
+		contentString string
+		asciiArmor    bool
+	}{
+		{"hello world", true},
+		{"hello world", false},
+		{"another test content\nwith newlines", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+
+				signature, err := gnupgutils.SignContentString(
+					ctx,
+					tt.contentString,
+					&gnupgoptions.SignOption{
+						AsciiArmor: tt.asciiArmor,
+					},
+				)
+				require.NoError(t, err)
+				require.NotEmpty(t, signature)
+
+				err = gnupgutils.CheckSignatureValidForContentString(ctx, signature, tt.contentString)
+				require.NoError(t, err)
+			},
+		)
+	}
+}
+
+func TestGnuPg_SignContentBytes(t *testing.T) {
+	testutils.SkipIfRunningInGithub(t)
+
+	tests := []struct {
+		contentBytes []byte
+		asciiArmor   bool
+	}{
+		{[]byte("hello world"), true},
+		{[]byte("hello world"), false},
+		{[]byte{0x00, 0x01, 0x02, 0x03, 0xFF}, true},
+		{[]byte("binary content with newlines\nand more\n"), true},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+
+				signature, err := gnupgutils.SignContentBytes(
+					ctx,
+					tt.contentBytes,
+					&gnupgoptions.SignOption{
+						AsciiArmor: tt.asciiArmor,
+					},
+				)
+				require.NoError(t, err)
+				require.NotEmpty(t, signature)
+
+				err = gnupgutils.CheckSignatureValidForContentBytes(ctx, signature, tt.contentBytes)
+				require.NoError(t, err)
+			},
+		)
+	}
+}
