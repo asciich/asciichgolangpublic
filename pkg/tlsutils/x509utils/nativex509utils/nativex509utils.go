@@ -7,6 +7,8 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils/genericx509utils"
@@ -25,6 +27,22 @@ func ReadCertificateFromFile(ctx context.Context, pathToRead string) (cert *x509
 	}
 
 	return genericx509utils.ReadCertFromBytes(content)
+}
+
+func ReadCertificateFromFileOrStdin(ctx context.Context, pathToRead string) (cert *x509.Certificate, err error) {
+	if pathToRead == "" {
+		return nil, tracederrors.TracedErrorEmptyString("pathToRead")
+	}
+
+	if pathToRead == "-" {
+		content, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to read from stdin: %w", err)
+		}
+		return genericx509utils.ReadCertFromBytes(content)
+	}
+
+	return ReadCertificateFromFile(ctx, pathToRead)
 }
 
 func GeneratePrivateKey(ctx context.Context) (privateKey crypto.PrivateKey, err error) {

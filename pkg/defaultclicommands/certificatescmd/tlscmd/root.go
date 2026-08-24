@@ -10,6 +10,7 @@ func NewTlsCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		NewGetFromWebserverCmd(),
+		NewShowInfoCmd(),
 	)
 
 	return cmd
