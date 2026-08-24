@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
@@ -12,23 +14,32 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func GetAccessPermissions(path string) (int, error) {
+func GetAccessPermissions(path string, useSudo bool) (int, error) {
 	if path == "" {
 		return 0, tracederrors.TracedErrorEmptyString("path")
 	}
 
-	fileInfo, err := os.Stat(path)
-	if err != nil {
-		return 0, tracederrors.TracedErrorf("Unable to get fileInfo of '%s': %w", path, err)
+	var perm int
+	var err error
+	if useSudo {
+		perm, err = commandexecutorfile.GetAccessPermissions(commandexecutorexecoo.Exec(), path, useSudo)
+		if err != nil {
+			return 0, err
+		}
+	} else {
+		fileInfo, err := os.Stat(path)
+		if err != nil {
+			return 0, tracederrors.TracedErrorf("Unable to get fileInfo of '%s': %w", path, err)
+		}
+
+		perm = int(fileInfo.Mode().Perm())
 	}
 
-	perm := fileInfo.Mode().Perm()
-
-	return int(perm), nil
+	return perm, nil
 }
 
 func GetAccessPermissionsString(path string) (string, error) {
-	permissions, err := GetAccessPermissions(path)
+	permissions, err := GetAccessPermissions(path, false)
 	if err != nil {
 		return "", err
 	}
@@ -50,7 +61,7 @@ func Chmod(ctx context.Context, path string, options *filesoptions.ChmodOptions)
 		return err
 	}
 
-	current, err := GetAccessPermissions(path)
+	current, err := GetAccessPermissions(path, options.UseSudo)
 	if err != nil {
 		return err
 	}

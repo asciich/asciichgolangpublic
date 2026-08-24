@@ -51,7 +51,7 @@ func Test_InstallFromSourceUrl(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, contextutils.IsChanged(ctxInstall))
 
-		modeString, err := commandexecutorfile.GetAccessPermissionsString(commandExecutor, installPath)
+		modeString, err := commandexecutorfile.GetAccessPermissionsString(commandExecutor, installPath, false)
 		require.NoError(t, err)
 		require.EqualValues(t, "u=rwx,g=,o=", modeString)
 
@@ -90,7 +90,7 @@ func Test_InstallFromSourceUrl(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, contextutils.IsChanged(ctxInstall))
 
-		modeString, err := commandexecutorfile.GetAccessPermissionsString(commandExecutor, installPath)
+		modeString, err := commandexecutorfile.GetAccessPermissionsString(commandExecutor, installPath, false)
 		require.NoError(t, err)
 		require.EqualValues(t, "u=rwx,g=,o=", modeString)
 
@@ -105,7 +105,7 @@ func Test_InstallFromSourceUrl(t *testing.T) {
 		require.NoError(t, err)
 		require.False(t, contextutils.IsChanged(ctxInstall))
 
-		modeString, err = commandexecutorfile.GetAccessPermissionsString(commandExecutor, installPath)
+		modeString, err = commandexecutorfile.GetAccessPermissionsString(commandExecutor, installPath, false)
 		require.NoError(t, err)
 		require.EqualValues(t, "u=rwx,g=,o=", modeString)
 
@@ -145,7 +145,7 @@ func Test_InstallFromSourceUrl(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, contextutils.IsChanged(ctxInstall))
 
-		modeString, err := commandexecutorfile.GetAccessPermissionsString(commandExecutor, installPath)
+		modeString, err := commandexecutorfile.GetAccessPermissionsString(commandExecutor, installPath, false)
 		require.NoError(t, err)
 		require.EqualValues(t, "u=rwx,g=,o=", modeString)
 
@@ -160,7 +160,7 @@ func Test_InstallFromSourceUrl(t *testing.T) {
 		require.NoError(t, err)
 		require.False(t, contextutils.IsChanged(ctxInstall))
 
-		modeString, err = commandexecutorfile.GetAccessPermissionsString(commandExecutor, installPath)
+		modeString, err = commandexecutorfile.GetAccessPermissionsString(commandExecutor, installPath, false)
 		require.NoError(t, err)
 		require.EqualValues(t, "u=rwx,g=,o=", modeString)
 

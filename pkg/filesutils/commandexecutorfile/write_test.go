@@ -45,21 +45,21 @@ func Test_WriteBytes(t *testing.T) {
 	t.Run("nil commandExecutor", func(t *testing.T) {
 		ctx := getCtx()
 
-		err := commandexecutorfile.WriteBytes(ctx, nil, "/tmp/test.txt", []byte("hello"))
+		err := commandexecutorfile.WriteBytes(ctx, nil, "/tmp/test.txt", []byte("hello"), &filesoptions.WriteOptions{})
 		require.Error(t, err)
 	})
 
 	t.Run("empty path", func(t *testing.T) {
 		ctx := getCtx()
 
-		err := commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), "", []byte("hello"))
+		err := commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), "", []byte("hello"), &filesoptions.WriteOptions{})
 		require.Error(t, err)
 	})
 
 	t.Run("nil content", func(t *testing.T) {
 		ctx := getCtx()
 
-		err := commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), "/tmp/test.txt", nil)
+		err := commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), "/tmp/test.txt", nil, &filesoptions.WriteOptions{})
 		require.Error(t, err)
 	})
 
@@ -71,7 +71,7 @@ func Test_WriteBytes(t *testing.T) {
 		defer nativefiles.Delete(ctx, tempFile, &filesoptions.DeleteOptions{})
 
 		content := []byte("hello world")
-		err = commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), tempFile, content)
+		err = commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), tempFile, content, &filesoptions.WriteOptions{})
 		require.NoError(t, err)
 
 		got, err := nativefiles.ReadAsString(ctx, tempFile, &filesoptions.ReadOptions{})
@@ -87,7 +87,7 @@ func Test_WriteBytes(t *testing.T) {
 		defer nativefiles.Delete(ctx, tempFile, &filesoptions.DeleteOptions{})
 
 		content := []byte{0x00, 0x01, 0x02, 0xFF, 0xFE, 0xFD}
-		err = commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), tempFile, content)
+		err = commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), tempFile, content, &filesoptions.WriteOptions{})
 		require.NoError(t, err)
 
 		got, err := nativefiles.ReadAsBytes(ctx, tempFile)
@@ -103,7 +103,7 @@ func Test_WriteBytes(t *testing.T) {
 		defer nativefiles.Delete(ctx, tempFile, &filesoptions.DeleteOptions{})
 
 		content := []byte{}
-		err = commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), tempFile, content)
+		err = commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), tempFile, content, &filesoptions.WriteOptions{})
 		require.NoError(t, err)
 
 		got, err := nativefiles.ReadAsBytes(ctx, tempFile)
@@ -119,7 +119,7 @@ func Test_WriteBytes(t *testing.T) {
 		defer nativefiles.Delete(ctx, tempFile, &filesoptions.DeleteOptions{})
 
 		content := []byte("line1\nline2\nline3\n")
-		err = commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), tempFile, content)
+		err = commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), tempFile, content, &filesoptions.WriteOptions{})
 		require.NoError(t, err)
 
 		got, err := nativefiles.ReadAsString(ctx, tempFile, &filesoptions.ReadOptions{})

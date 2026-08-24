@@ -32,7 +32,7 @@ func Chmod(ctx context.Context, commandExecutor commandexecutorinterfaces.Comman
 		return err
 	}
 
-	currentPermissions, err := GetAccessPermissions(commandExecutor, path)
+	currentPermissions, err := GetAccessPermissions(commandExecutor, path, options.UseSudo)
 	if err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func Chmod(ctx context.Context, commandExecutor commandexecutorinterfaces.Comman
 	return nil
 }
 
-func GetAccessPermissions(commandexecutor commandexecutorinterfaces.CommandExecutor, path string) (int, error) {
+func GetAccessPermissions(commandexecutor commandexecutorinterfaces.CommandExecutor, path string, useSudo bool) (int, error) {
 	if commandexecutor == nil {
 		return 0, tracederrors.TracedErrorNil("commandexecutor")
 	}
@@ -82,10 +82,16 @@ func GetAccessPermissions(commandexecutor commandexecutorinterfaces.CommandExecu
 		return 0, tracederrors.TracedErrorEmptyString("path")
 	}
 
+	cmd := []string{"stat", "-c", "%a", path}
+
+	if useSudo {
+		cmd = append([]string{"sudo"}, cmd...)
+	}
+
 	output, err := commandexecutor.RunCommandAndGetStdoutAsString(
 		contextutils.ContextSilent(),
 		&parameteroptions.RunCommandOptions{
-			Command: []string{"stat", "-c", "%a", path},
+			Command: cmd,
 		},
 	)
 	if err != nil {
@@ -102,8 +108,8 @@ func GetAccessPermissions(commandexecutor commandexecutorinterfaces.CommandExecu
 	return int(permissions64), nil
 }
 
-func GetAccessPermissionsString(commandexecutor commandexecutorinterfaces.CommandExecutor, path string) (string, error) {
-	permissions, err := GetAccessPermissions(commandexecutor, path)
+func GetAccessPermissionsString(commandexecutor commandexecutorinterfaces.CommandExecutor, path string, useSudo bool) (string, error) {
+	permissions, err := GetAccessPermissions(commandexecutor, path, useSudo)
 	if err != nil {
 		return "", err
 	}

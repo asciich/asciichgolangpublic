@@ -10,6 +10,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils/genericx509utils"
 	"github.com/asciich/asciichgolangpublic/pkg/tlsutils/x509utils/x509options"
@@ -62,7 +63,7 @@ func WriteCertificateToFile(ctx context.Context, commandExecutor commandexecutor
 		return err
 	}
 
-	err = commandexecutorfile.WriteBytes(ctx, commandExecutor, pathToWrite, certBytes)
+	err = commandexecutorfile.WriteBytes(ctx, commandExecutor, pathToWrite, certBytes, &filesoptions.WriteOptions{})
 	if err != nil {
 		return err
 	}

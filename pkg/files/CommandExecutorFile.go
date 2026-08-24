@@ -792,7 +792,7 @@ func (c *CommandExecutorFile) GetAccessPermissions() (permissions int, err error
 		return 0, err
 	}
 
-	return commandexecutorfile.GetAccessPermissions(commandexecutor, path)
+	return commandexecutorfile.GetAccessPermissions(commandexecutor, path, false)
 }
 
 func (c *CommandExecutorFile) GetAccessPermissionsString() (permissionsString string, err error) {
@@ -806,7 +806,7 @@ func (c *CommandExecutorFile) GetAccessPermissionsString() (permissionsString st
 		return "", err
 	}
 
-	return commandexecutorfile.GetAccessPermissionsString(commandexecutor, path)
+	return commandexecutorfile.GetAccessPermissionsString(commandexecutor, path, false)
 }
 
 // already moved to commandexecutorfile

@@ -36,7 +36,7 @@ func OpenAsWriteCloser(ctx context.Context, commandExecutor commandexecutorinter
 	)
 }
 
-func WriteBytes(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, path string, content []byte) error {
+func WriteBytes(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, path string, content []byte, options *filesoptions.WriteOptions) error {
 	if commandExecutor == nil {
 		return tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -49,7 +49,11 @@ func WriteBytes(ctx context.Context, commandExecutor commandexecutorinterfaces.C
 		return tracederrors.TracedErrorNil("content")
 	}
 
-	writer, err := OpenAsWriteCloser(ctx, commandExecutor, path, &filesoptions.WriteOptions{})
+	if options == nil {
+		options = &filesoptions.WriteOptions{}
+	}
+
+	writer, err := OpenAsWriteCloser(ctx, commandExecutor, path, options)
 	if err != nil {
 		return err
 	}

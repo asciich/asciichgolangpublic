@@ -43,17 +43,23 @@ func WriteBytes(ctx context.Context, pathToWrite string, content []byte, options
 		options = &filesoptions.WriteOptions{}
 	}
 
-	perm := options.GetPermOrDefault()
+	if options.UseSudo {
+		err := commandexecutorfile.WriteBytes(ctx, commandexecutorexecoo.Exec(), pathToWrite, content, &filesoptions.WriteOptions{UseSudo: options.UseSudo})
+		if err != nil {
+			return err
+		}
+	} else {
+		perm := options.GetPermOrDefault()
+		parentDir := filepath.Dir(pathToWrite)
+		err := os.MkdirAll(parentDir, os.FileMode(0755))
+		if err != nil {
+			return tracederrors.TracedErrorf("Unable to create parent directories for file '%s': %w", pathToWrite, err)
+		}
 
-	parentDir := filepath.Dir(pathToWrite)
-	err := os.MkdirAll(parentDir, os.FileMode(0755))
-	if err != nil {
-		return tracederrors.TracedErrorf("Unable to create parent directories for file '%s': %w", pathToWrite, err)
-	}
-
-	err = os.WriteFile(pathToWrite, content, perm)
-	if err != nil {
-		return tracederrors.TracedErrorf("Unable to write to file '%s': %w", pathToWrite, err)
+		err = os.WriteFile(pathToWrite, content, perm)
+		if err != nil {
+			return tracederrors.TracedErrorf("Unable to write to file '%s': %w", pathToWrite, err)
+		}
 	}
 
 	permissionString, err := options.GetPermissionsStringOrDefault()
@@ -63,6 +69,7 @@ func WriteBytes(ctx context.Context, pathToWrite string, content []byte, options
 
 	err = Chmod(ctx, pathToWrite, &filesoptions.ChmodOptions{
 		PermissionsString: permissionString,
+		UseSudo:           options.UseSudo,
 	})
 	if err != nil {
 		return err

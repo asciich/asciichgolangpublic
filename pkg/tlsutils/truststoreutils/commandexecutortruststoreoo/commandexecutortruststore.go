@@ -8,6 +8,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -45,7 +46,7 @@ func (c *CommandExecutorTrustStore) AddCaCertificateFromString(ctx context.Conte
 
 	// Write the cert to a temporary file on the target machine
 	tempPath := "/tmp/truststore-cert-install.crt"
-	err := commandexecutorfile.WriteBytes(ctx, c.commandExecutor, tempPath, []byte(caCertPEM))
+	err := commandexecutorfile.WriteBytes(ctx, c.commandExecutor, tempPath, []byte(caCertPEM), &filesoptions.WriteOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to write certificate to temp file: %w", err)
 	}
