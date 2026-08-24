@@ -15,6 +15,12 @@ func NewListObjectsCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command 
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List the objects in the S3 --bucket.",
+		Long: `List the objects in the S3 --bucket.
+
+Usage example:
+  # List all objects in a bucket
+  asciich objects list --bucket my-bucket
+`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
