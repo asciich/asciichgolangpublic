@@ -1,4 +1,8 @@
-# minio admincmd specifications
+# admincmd specifications
+
+This are the specifications for the [`admincmd` package](README.md).
+
+This document extends the parent specifications [miniocmd.spec.md](../miniocmd.spec.md).
 
 ## Implementation
 

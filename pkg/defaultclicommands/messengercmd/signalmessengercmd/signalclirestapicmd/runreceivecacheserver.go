@@ -55,7 +55,7 @@ func NewRunReceiveCacheServerCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("api-url", "", "Url the the Signal CLI Rest API server.")
+	cmd.Flags().String("api-url", "", "Url of the Signal CLI Rest API server.")
 	cmd.Flags().String("account-number", "", "Account number (phone number with +CountryCode, without spaces in between) of the receiving account.")
 	cmd.Flags().String("interval", "10s", "Check for new messages using this interval.")
 

@@ -1,5 +1,9 @@
 # bucketscmd specifications
 
+This are the specifications for the [`bucketscmd` package](README.md).
+
+This document extends the parent specifications [miniocmd.spec.md](../miniocmd.spec.md).
+
 ## Implementation
 
 - The `buckets` command must implement the following subcommands:
