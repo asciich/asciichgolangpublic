@@ -20,6 +20,11 @@ func NewHttpRequestCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "http-request",
 		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` network vpn tailscale http-request`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

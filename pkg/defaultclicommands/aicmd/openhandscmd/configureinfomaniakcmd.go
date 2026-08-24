@@ -21,16 +21,7 @@ func NewConfigureInfomaniakCmd() *cobra.Command {
 Needs the env var '` + infomaniak.API_KEY_ENV_VAR_NAME + `' set.
 
 Usage:
-  ` + os.Args[0] + ` ai openhands run-as-docker-container --port=8000 --container-name=openhands --reachable-by-other-machines --verbose
-
-Full example:
-1. Start openhands as container on port 8000:
-  ` + os.Args[0] + ` ai openhands run-as-docker-container --port=8000 --container-name=openhands --reachable-by-other-machines --verbose
-2. Configure it to work with Infomaniak:
-  ` + infomaniak.API_KEY_ENV_VAR_NAME + `=<YOUR_API_KEY> ` + os.Args[0] + ` ai openhands configure-infomaniak --verbose --url=http://localhost:8000 --product-id=110247
-
-To get your API Key or see usage visit https://www.infomaniak.com/en/hosting/ai-tools .
-`,
+  ` + os.Args[0] + ` ai openhands configure-infomaniak` + os.Args[0] + ` ai openhands configure-infomaniak` + infomaniak.API_KEY_ENV_VAR_NAME + `=<YOUR_API_KEY> ` + os.Args[0] + ` ai openhands configure-infomaniak`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

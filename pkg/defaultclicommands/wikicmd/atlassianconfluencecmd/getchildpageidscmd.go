@@ -2,6 +2,7 @@ package atlassianconfluencecmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -11,9 +12,16 @@ import (
 )
 
 func NewGetChildPageIdsCmd() *cobra.Command {
+	const short = "Prints out all child ids of the given wiki page. Use the URL or Id to specify the page to query."
+
 	cmd := &cobra.Command{
 		Use:   "get-child-page-ids",
-		Short: "Prints out all child ids of the given wiki page. Use the URL or Id to specify the page to query.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` wiki atlassianconfluence get-child-page-ids`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

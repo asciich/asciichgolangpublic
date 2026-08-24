@@ -2,7 +2,7 @@
 
 This are the specifications for the [`dockerutils` package](README.md).
 
-This document extends the parent specifications [containerutils.spec.md](../containerutils.spec.md).
+This document extends the [constitution.md](/constitution.md).
 
 ## Implementation
 

@@ -2,6 +2,7 @@ package raspbianimagecmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -14,6 +15,11 @@ func NewDownloadCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "download",
 		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` embeddedsystems raspberrypi raspbian raspbianimage download`,
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

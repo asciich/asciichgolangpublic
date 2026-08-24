@@ -22,6 +22,19 @@ type GitRepository struct {
 	gitgeneric.GitRepositoryBase
 }
 
+func NewGitRepositoryFromPath(path string) (*GitRepository, error) {
+	if path == "" {
+		return nil, tracederrors.TracedErrorEmptyString("path")
+	}
+
+	dir, err := commandexecutorfileoo.NewDirectory(commandexecutorexecoo.Exec(), path)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewGitRepositoryFromDirectory(dir)
+}
+
 func NewGitRepositoryFromDirectory(dir filesinterfaces.Directory) (*GitRepository, error) {
 	if dir == nil {
 		return nil, tracederrors.TracedErrorNil("dir")

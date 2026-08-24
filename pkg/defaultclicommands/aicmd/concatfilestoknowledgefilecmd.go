@@ -20,8 +20,7 @@ func NewConcatFilesToKnowledgeFileCmd() *cobra.Command {
 		Long: short + `
 
 Usage:
-    ` + os.Args[0] + ` ai concat-files-to-knowledge-file --verbose [toplevel dir with knowledgefiles] > documentation.markdown
-`,
+    ` + os.Args[0] + ` ai concat-files-to-knowledge-file`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

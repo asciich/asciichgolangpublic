@@ -26,24 +26,7 @@ Configuration can be provided either via a YAML config file or via CLI flags.
 CLI flags take precedence over the config file.
 
 Example using CLI flags:
-  ` + os.Args[0] + ` ai ollama run-mcp-agent \
-    --ollama-url='http://localhost:11434' \
-    --llm-model='llama3.1' \
-    --mcp-server='chroma-docs=http://localhost:3001/sse' \
-    --mcp-server='git-search=http://localhost:3002/sse' \
-    --verbose
-
-Example using config file:
-  ` + os.Args[0] + ` ai ollama run-mcp-agent --config='config.yaml' --verbose
-
-Example config.yaml:
-  ollama:
-    url: "http://localhost:11434"
-    model: "llama3.1"
-  mcp_servers:
-    - name: "chroma-docs"
-      url: "http://localhost:3001/sse"
-`,
+  ` + os.Args[0] + ` ai ollama run-mcp-agent` + os.Args[0] + ` ai ollama run-mcp-agent`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

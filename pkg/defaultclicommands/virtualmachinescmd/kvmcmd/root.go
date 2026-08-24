@@ -5,12 +5,19 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/virtualmachinescmd/kvmcmd/kvmstorageppolscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/virtualmachinescmd/kvmcmd/kvmvmscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/virtualmachinescmd/kvmcmd/kvmvolumescmd"
+	"os"
 )
 
 func NewKvmCmd() *cobra.Command {
+	const short = "kvm (kernel based virtual machine) related commands."
+
 	cmd := &cobra.Command{
 		Use:   "kvm",
-		Short: "kvm (kernel based virtual machine) related commands.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` virtualmachines kvm kvm`,
 	}
 
 	cmd.AddCommand(

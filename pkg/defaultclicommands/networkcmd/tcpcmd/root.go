@@ -1,11 +1,20 @@
 package tcpcmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+	"os"
+)
 
 func NewTcpCmd() *cobra.Command {
+	const short = "TCP related commands."
+
 	cmd := &cobra.Command{
 		Use:   "tcp",
-		Short: "TCP related commands.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` network tcp tcp`,
 	}
 
 	cmd.AddCommand(

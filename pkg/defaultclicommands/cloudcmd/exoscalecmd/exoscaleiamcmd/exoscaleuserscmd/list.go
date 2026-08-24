@@ -22,7 +22,7 @@ func NewListCmd() *cobra.Command {
 
 Usage:
 	# Export the credentails as ` + exoscalenativeclient.ENV_VAR_EXOSCALE_API_KEY + `and ` + exoscalenativeclient.ENV_VAR_EXOSCALE_API_SECRET + `
-	` + os.Args[0] + ` cloud exoscale iam users list`,
+	` + os.Args[0] + ` cloud exoscale exoscaleiam exoscaleusers list`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

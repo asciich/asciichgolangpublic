@@ -1,5 +1,9 @@
 # tlscmd specifications
 
+This are the specifications for the [`tlscmd` package](README.md).
+
+This document extends the parent specifications [defaultclicommands.spec.md](../../defaultclicommands.spec.md).
+
 ## Implementation
 
 - This package does not implement logic itself:

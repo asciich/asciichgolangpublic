@@ -1,5 +1,9 @@
 # objectscmd specifications
 
+This are the specifications for the [`objectscmd` package](README.md).
+
+This document extends the [constitution.md](/constitution.md).
+
 ## Implementations
 
 - The `objects` command must at least implement these sub commands:

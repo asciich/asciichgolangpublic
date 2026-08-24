@@ -21,11 +21,7 @@ func NewCreateRecordWithPublicIp() *cobra.Command {
 		Long: short + `
 		
 To create or update the record "dynamic.example.com" use:
-	` + os.Args[0] + ` cloud exoscale dns create-record-with-public-ip --verbose --domain="example.com" --record="dynamic"
-	
-To create and update the record "dynamic.example.com" every 30seconds use:
-	` + os.Args[0] + ` cloud exoscale dns create-record-with-public-ip --verbose --domain="example.com" --record="dynamic" --interval="30seconds"
-`,
+	` + os.Args[0] + ` cloud exoscale exoscaledns create-record-with-public-ip` + os.Args[0] + ` cloud exoscale exoscaledns create-record-with-public-ip`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

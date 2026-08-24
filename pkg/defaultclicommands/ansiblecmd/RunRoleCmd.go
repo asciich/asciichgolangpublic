@@ -7,12 +7,20 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"os"
 )
 
 func NewRunRoleCmd() *cobra.Command {
+	const short = "Run the ansible --role against the given --host."
+
 	cmd := &cobra.Command{
 		Use:   "run-role",
-		Short: "Run the ansible --role against the given --host.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` ansible run-role`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

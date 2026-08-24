@@ -2,7 +2,7 @@
 
 This are the specifications for the [`commandexecutorfile` package](README.md).
 
-This document extends the parent specifications [filesutils.spec.md](../filesutils.spec.md).
+This document extends the [constitution.md](/constitution.md).
 
 ## Implementation
 

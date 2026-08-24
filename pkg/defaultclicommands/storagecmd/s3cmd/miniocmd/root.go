@@ -2,6 +2,7 @@ package miniocmd
 
 import (
 	"context"
+	"os"
 
 	"github.com/minio/madmin-go/v3"
 	"github.com/minio/minio-go/v7"
@@ -40,9 +41,15 @@ func NewMinioCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
 		use = options.OverrideUse
 	}
 
+	const short = "Minio (S3 compatible server) related commands."
+
 	cmd := &cobra.Command{
 		Use:   use,
-		Short: "Minio (S3 compatible server) related commands.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` [command]`,
 	}
 
 	cmd.AddCommand(

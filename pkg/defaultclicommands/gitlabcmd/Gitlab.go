@@ -5,12 +5,19 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/gitlabcmd/gitlabmetricscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/gitlabcmd/pipelineschedulescmd"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"os"
 )
 
 func NewGitlabCommand() (cmd *cobra.Command) {
+	const short = "Gitlab related commands"
+
 	cmd = &cobra.Command{
 		Use:   "gitlab",
-		Short: "Gitlab related commands",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` gitlab gitlab`,
 	}
 
 	cmd.AddCommand(

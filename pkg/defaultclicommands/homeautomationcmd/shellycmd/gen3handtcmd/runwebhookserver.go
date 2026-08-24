@@ -6,12 +6,20 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/homeautomation/shelly/gen3handt"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"os"
 )
 
 func NewRunWebsocketServerCmd() *cobra.Command {
+	const short = "Run a websocket server on --port to receive the temperature and humidity for given --sensor-name."
+
 	cmd := &cobra.Command{
 		Use:   "run-websocket-server",
-		Short: "Run a websocket server on --port to receive the temperature and humidity for given --sensor-name.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` homeautomation shelly gen3handt run-websocket-server`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

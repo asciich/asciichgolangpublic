@@ -1,11 +1,20 @@
 package publicipscmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+	"os"
+)
 
 func NewPublicIpsCmd() *cobra.Command {
+	const short = "Commands related to public IPs."
+
 	cmd := &cobra.Command{
 		Use:   "public-ips",
-		Short: "Commands related to public IPs.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` network publicips public-ips`,
 	}
 
 	cmd.AddCommand(

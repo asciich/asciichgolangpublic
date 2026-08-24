@@ -2,6 +2,7 @@ package kvmstorageppolscmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/virtualmachinescmd/kvmcmd/kvmcmdutils"
@@ -10,9 +11,16 @@ import (
 )
 
 func NewListCmd() *cobra.Command {
+	const short = "List storage pools"
+
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List storage pools",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` virtualmachines kvm kvmstorageppols list`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx, kvmHypervisor := kvmcmdutils.GetCtxAndKvmHypervisor(cmd)
 

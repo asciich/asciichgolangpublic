@@ -1,11 +1,20 @@
 package kvmstorageppolscmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+	"os"
+)
 
 func NewStoragePoolsCmd() *cobra.Command {
+	const short = "KVM storage pools related commands"
+
 	cmd := &cobra.Command{
 		Use:   "storage-pools",
-		Short: "KVM storage pools related commands",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` virtualmachines kvm kvmstorageppols storage-pools`,
 	}
 
 	cmd.AddCommand(

@@ -2,6 +2,7 @@ package operateheadscalecmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -10,9 +11,16 @@ import (
 )
 
 func NewListUsersCmd(options *OperateOptions) *cobra.Command {
+	const short = "List headscale users."
+
 	cmd := &cobra.Command{
 		Use:   "list-users",
-		Short: "List headscale users.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` network vpn headscale operate list-users`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

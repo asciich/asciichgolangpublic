@@ -1,10 +1,14 @@
 # defaultclicommands specifications
 
+This are the specifications for the [`defaultclicommands` package](README.md).
+
+This document extends the [constitution.md](/constitution.md).
+
 ##  Implementation
 
-- This package and all its subpackages are ment to wire up the commands with the actual implementation.
+- This package and all its subpackages are meant to wire up the commands with the actual implementation.
     - Do not add additional functions or logic in the `defaultclicommands` package or its subpackages.
-    - If functionality is missing add the implementation a the corresponding subpackage of `pkg`.
+    - If functionality is missing add the implementation at the corresponding subpackage of `pkg`.
 - Add a usage example in the `Long` description for every `cobra.Command`.
     - Begin the `Long` description by reusing the `short` one:
         - Example:

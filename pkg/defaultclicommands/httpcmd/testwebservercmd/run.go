@@ -7,12 +7,20 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/userinteraction"
+	"os"
 )
 
 func NewRunCmd() *cobra.Command {
+	const short = "Run the test webserver locally on given --port"
+
 	cmd := &cobra.Command{
 		Use:   "run",
-		Short: "Run the test webserver locally on given --port",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` http testwebserver run`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

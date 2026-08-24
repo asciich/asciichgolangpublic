@@ -5,12 +5,20 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"os"
 )
 
 func NewCreateUserCmd(options *OperateOptions) *cobra.Command {
+	const short = "Create a headscale user."
+
 	cmd := &cobra.Command{
 		Use:   "create-user",
-		Short: "Create a headscale user.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` network vpn headscale operate create-user`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

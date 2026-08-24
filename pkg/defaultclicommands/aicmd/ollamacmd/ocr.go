@@ -2,6 +2,7 @@ package ollamacmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/aiutils/ollamautils"
@@ -11,9 +12,16 @@ import (
 )
 
 func NewOcrCmd() *cobra.Command {
+	const short = "Uses an llm to detect the characters shown in the image. OCR means 'Optical Character Recognition'"
+
 	cmd := &cobra.Command{
 		Use:   "ocr",
-		Short: "Uses an llm to detect the characters shown in the image. OCR means 'Optical Character Recognition'",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` ai ollama ocr`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

@@ -6,12 +6,20 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/storage/storageutils"
+	"os"
 )
 
 func NewSyncCmd() *cobra.Command {
+	const short = "Flush OS write cache to the storage. Same as the 'sync' CLI command."
+
 	cmd := &cobra.Command{
 		Use:   "sync",
-		Short: "Flush OS write cache to the storage. Same as the 'sync' CLI command.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` storage sync`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

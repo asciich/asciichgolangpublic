@@ -14,9 +14,16 @@ import (
 )
 
 func NewListCommand() (cmd *cobra.Command) {
+	const short = "List scheduled pipelines for given project url"
+
 	cmd = &cobra.Command{
 		Use:   "list",
-		Short: "List scheduled pipelines for given project url",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` gitlab pipelineschedules list`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

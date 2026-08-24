@@ -4,12 +4,19 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/errorscmd/tracederrorscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"os"
 )
 
 func NewErrorsCommand() (errorsCmd *cobra.Command) {
+	const short = "Error and Error handling related commands"
+
 	errorsCmd = &cobra.Command{
 		Use:   "errors",
-		Short: "Error and Error handling related commands",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` errors errors`,
 	}
 
 	errorsCmd.AddCommand(

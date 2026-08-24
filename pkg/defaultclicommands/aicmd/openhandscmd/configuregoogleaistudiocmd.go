@@ -21,16 +21,7 @@ func NewConfigureGoogleAIStudioCmd() *cobra.Command {
 Needs the env var '` + googleaistudio.API_KEY_ENV_VAR_NAME + `' set.
 
 Usage:
-  ` + os.Args[0] + ` ai openhands run-as-docker-container --port=8000 --container-name=openhands --reachable-by-other-machines --verbose
-
-Full example:
-1. Start openhands as container on port 8000:
-  ` + os.Args[0] + ` ai openhands run-as-docker-container --port=8000 --container-name=openhands --reachable-by-other-machines --verbose
-2. Configure it to work with Google AI Studio:
-  ` + googleaistudio.API_KEY_ENV_VAR_NAME + `=<YOUR_API_KEY> ` + os.Args[0] + ` ai openhands configure-google-ai-studio --verbose --url=http://localhost:8000
-
-To get your API Key or see usage visit https://aistudio.google.com/api-keys .
-`,
+  ` + os.Args[0] + ` ai openhands configure-google-ai-studio` + os.Args[0] + ` ai openhands configure-google-ai-studio` + googleaistudio.API_KEY_ENV_VAR_NAME + `=<YOUR_API_KEY> ` + os.Args[0] + ` ai openhands configure-google-ai-studio`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

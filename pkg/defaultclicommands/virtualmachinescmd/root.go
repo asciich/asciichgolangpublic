@@ -3,12 +3,19 @@ package virtualmachinescmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/virtualmachinescmd/kvmcmd"
+	"os"
 )
 
 func NewVirtualMachinesCmd() *cobra.Command {
+	const short = "Virtual machines and hypervisor related commands"
+
 	cmd := &cobra.Command{
 		Use:   "virtual-machines",
-		Short: "Virtual machines and hypervisor related commands",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` virtualmachines virtual-machines`,
 	}
 
 	cmd.AddCommand(

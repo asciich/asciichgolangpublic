@@ -6,6 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/messengerutils/signalmessengerutils/signalclirestapiutils"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"os"
 )
 
 func NewRunReceiveCacheServerCmd() *cobra.Command {
@@ -14,6 +15,11 @@ func NewRunReceiveCacheServerCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "run-receive-cache-server",
 		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` messenger signalmessenger signalclirestapi run-receive-cache-server`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

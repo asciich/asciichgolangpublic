@@ -25,22 +25,7 @@ Authentication is done via the COPILOT_GITHUB_TOKEN environment variable
 which must be set before running this command.
 
 Example:
-  ` + os.Args[0] + ` ai copilot run-in-copilot-cli-container \
-    --prompt='Refactor main.go to use dependency injection' \
-    --system-prompt='You are a helpful coding assistant.' \
-    --workspace-path='/home/user/project' \
-    --git-user-name='John Doe' \
-    --git-user-email='john@example.com' \
-    --git-config-path='~/.gitconfig' \
-    --ssh-config-path='~/.ssh/config' \
-    --ssh-agent \
-    --verbose
-
-Example without workspace (uses temporary workspace inside container):
-  ` + os.Args[0] + ` ai copilot run-in-copilot-cli-container \
-    --prompt='Write a hello world in Go' \
-    --verbose
-`,
+  ` + os.Args[0] + ` ai copilot run-in-copilot-cli-container` + os.Args[0] + ` ai copilot run-in-copilot-cli-container`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

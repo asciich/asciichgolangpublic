@@ -6,14 +6,22 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"os"
 )
 
 const DOWNLOAD_AS_ARCHIVE_USE = "download-as-archive"
 
 func NewDownloadAsArchiveCmd() *cobra.Command {
+	const short = "Download a container image from a registry to a local archive file. This does no require docker or another deamon running."
+
 	cmd := &cobra.Command{
 		Use:   DOWNLOAD_AS_ARCHIVE_USE,
-		Short: "Download a container image from a registry to a local archive file. This does no require docker or another deamon running.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` [command]`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

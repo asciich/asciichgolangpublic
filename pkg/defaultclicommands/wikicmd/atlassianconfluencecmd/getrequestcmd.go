@@ -2,6 +2,7 @@ package atlassianconfluencecmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -16,6 +17,11 @@ func NewGetRequestCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-request",
 		Short: shortDescription,
+		Long: shortDescription + `
+
+Usage:
+    ` + os.Args[0] + ` wiki atlassianconfluence get-request`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

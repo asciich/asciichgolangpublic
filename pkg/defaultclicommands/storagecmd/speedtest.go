@@ -7,12 +7,20 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/storage/storageutils"
+	"os"
 )
 
 func NewSpeedTestCmd() *cobra.Command {
+	const short = "Perform a storage speed test by writing and reading the --file of given --size."
+
 	cmd := &cobra.Command{
 		Use:   "speed-test",
-		Short: "Perform a storage speed test by writing and reading the --file of given --size.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` storage speed-test`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

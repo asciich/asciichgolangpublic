@@ -26,11 +26,7 @@ Can be used to pack a single statically linked binary into a container image wit
 
 Example packing this binary itself into a container:
   1. Pack the binary into a container:
-	` + os.Args[0] + ` container images archive create-single-file-archive --verbose --archive=pack-example-latest.tar --new-tag=pack-example:latest  --src-path="$(which ` + os.Args[0] + ` )" --path-in-image=/` + os.Args[0] + ` --mode="u=rwx,g=rx,o=rx" --architecture="amd64"
-  2. Load the container:
-	cat pack-example-latest.tar | docker load
-  3. Run the binary in the container:
-	docker run --rm -it pack-example:latest /` + os.Args[0] + `
+	` + os.Args[0] + ` container images archive create-single-file-archive` + os.Args[0] + ` container images archive create-single-file-archive` + os.Args[0] + ` container images archive create-single-file-archive` + os.Args[0] + `
 `,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)

@@ -2,6 +2,7 @@ package localdevcmd
 
 import (
 	"context"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/nativedocker"
@@ -16,9 +17,15 @@ const CONTAINER_NAME = headscalelocaldevserver.DEFAULT_CONTAINER_NAME
 const DEFAULT_PORT = headscalelocaldevserver.DEFAULT_PORT
 
 func NewLocalDevCmd() *cobra.Command {
+	const short = "Local headscale development environment based on the headscale/headscale docker container."
+
 	cmd := &cobra.Command{
 		Use:   "local-dev",
-		Short: "Local headscale development environment based on the headscale/headscale docker container.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` network vpn headscale localdev local-dev`,
 	}
 
 	cmd.AddCommand(

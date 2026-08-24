@@ -2,6 +2,7 @@ package headscalecmd
 
 import (
 	"context"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/vpncmd/headscalecmd/localdevcmd"
@@ -12,9 +13,15 @@ import (
 )
 
 func NewHeadscaleCmd() *cobra.Command {
+	const short = "Headscale is an open source, self-hosted implementation of the Tailscale control server."
+
 	cmd := &cobra.Command{
 		Use:   "headscale",
-		Short: "Headscale is an open source, self-hosted implementation of the Tailscale control server.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` network vpn headscale headscale`,
 	}
 
 	cmd.AddCommand(

@@ -7,12 +7,19 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd/ollamacmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd/openhandscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd/vectordatabasecmd"
+	"os"
 )
 
 func NewAICmd() *cobra.Command {
+	const short = "Artificial inteligence related commands."
+
 	cmd := &cobra.Command{
 		Use:   "ai",
-		Short: "Artificial inteligence related commands.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` ai ai`,
 	}
 
 	cmd.AddCommand(

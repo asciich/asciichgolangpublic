@@ -3,12 +3,19 @@ package pfsensecmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils/routerutils/pfsenseutils"
+	"os"
 )
 
 func NewPfSenseCmd() *cobra.Command {
+	const short = "pfsense related commands."
+
 	cmd := &cobra.Command{
 		Use:   "pfsense",
-		Short: "pfsense related commands.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` network router pfsense pfsense`,
 	}
 
 	AddSubCommandsAndPersistentFlags(cmd)

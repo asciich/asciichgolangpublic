@@ -21,8 +21,7 @@ func NewSendMessageCmd() *cobra.Command {
 		Long: short + `
 
 Usage:
-` + os.Args[0] + ` messenger signal signal-cli-rest-api send-message --api-url=https://url-of-singal-cli-rest-api --account-number +4... --recipients +4... [--recipients +4...] --message="hello world"
-`,
+` + os.Args[0] + ` messenger signalmessenger signalclirestapi send-message`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

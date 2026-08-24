@@ -18,9 +18,16 @@ import (
 )
 
 func NewExposeMetricsCommand() (cmd *cobra.Command) {
+	const short = "Expose selected gitlab metrics using prometheus exporter."
+
 	cmd = &cobra.Command{
 		Use:   "expose-prometheus-metrics",
-		Short: "Expose selected gitlab metrics using prometheus exporter.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` gitlab gitlabmetrics expose-prometheus-metrics`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

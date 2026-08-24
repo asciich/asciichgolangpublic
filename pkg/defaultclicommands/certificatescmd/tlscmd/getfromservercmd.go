@@ -2,6 +2,7 @@ package tlscmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -17,6 +18,11 @@ func NewGetFromWebserverCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-from-server",
 		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` certificates tls get-from-server`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

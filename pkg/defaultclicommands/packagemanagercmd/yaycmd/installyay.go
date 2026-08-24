@@ -9,12 +9,20 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/osutils"
 	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/packagemanageroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/yay"
+	"os"
 )
 
 func NewInstallYayCmd() *cobra.Command {
+	const short = "Install the yay package manager itself."
+
 	cmd := &cobra.Command{
 		Use:   "install-yay",
-		Short: "Install the yay package manager itself.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` packagemanager yay install-yay`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 			ctx = contextutils.WithChangeIndicator(ctx)

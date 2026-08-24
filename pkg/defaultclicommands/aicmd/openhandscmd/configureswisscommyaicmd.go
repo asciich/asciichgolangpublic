@@ -21,16 +21,7 @@ func NewConfigureSwisscomMyAICmd() *cobra.Command {
 Needs the env var '` + swisscommyai.API_KEY_ENV_VAR_NAME + `' set.
 
 Usage:
-  ` + os.Args[0] + ` ai openhands run-as-docker-container --port=8000 --container-name=openhands --reachable-by-other-machines --verbose
-
-Full example:
-1. Start openhands as container on port 8000:
-  ` + os.Args[0] + ` ai openhands run-as-docker-container --port=8000 --container-name=openhands --reachable-by-other-machines --verbose
-2. Configure it to work with myAI:
-  ` + swisscommyai.API_KEY_ENV_VAR_NAME + `=<YOUR_API_KEY> ` + os.Args[0] + ` ai openhands configure-swisscom-myai --verbose --url=http://localhost:8000
-
-To get your API key or see usage visit https://myai.swisscom.ch/settings/api .
-`,
+  ` + os.Args[0] + ` ai openhands configure-swisscom-myai` + os.Args[0] + ` ai openhands configure-swisscom-myai` + swisscommyai.API_KEY_ENV_VAR_NAME + `=<YOUR_API_KEY> ` + os.Args[0] + ` ai openhands configure-swisscom-myai`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

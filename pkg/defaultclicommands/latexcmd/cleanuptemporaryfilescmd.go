@@ -1,6 +1,8 @@
 package latexcmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
@@ -10,10 +12,16 @@ import (
 )
 
 func NewCleanupTemporaryFilesCmd() *cobra.Command {
+	const short = "Cleanup temporary latex files in given directory"
+
 	cmd := &cobra.Command{
 		Use:   "cleanup-temporary-files",
-		Short: "Cleanup temporary latex files in given directory",
-		Long:  "Cleanup temporary latex files in given directory",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` latex cleanup-temporary-files`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

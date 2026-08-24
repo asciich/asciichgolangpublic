@@ -1,11 +1,20 @@
 package kvmvolumescmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+	"os"
+)
 
 func NewVolumesCmd() *cobra.Command {
+	const short = "KVM volumes related commands."
+
 	cmd := &cobra.Command{
 		Use:   "volumes",
-		Short: "KVM volumes related commands.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` virtualmachines kvm kvmvolumes volumes`,
 	}
 
 	cmd.AddCommand(

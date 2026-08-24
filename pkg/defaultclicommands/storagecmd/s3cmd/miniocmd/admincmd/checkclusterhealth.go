@@ -2,20 +2,28 @@ package admincmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datetime"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/s3cmd/miniocmd/miniocmdoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
-	"github.com/asciich/asciichgolangpublic/pkg/datetime"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/nativeminioclient"
 )
 
 func NewCheckClusterHealthCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
+	const short = "Check the whole cluster health."
+
 	cmd := &cobra.Command{
 		Use:   "check-cluster-health",
-		Short: "Check the whole cluster health.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` storage s3 minio admin check-cluster-health`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

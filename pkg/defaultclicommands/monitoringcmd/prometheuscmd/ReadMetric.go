@@ -3,6 +3,7 @@ package prometheuscmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -11,9 +12,16 @@ import (
 )
 
 func NewReadMetricCmd() (cmd *cobra.Command) {
+	const short = "Read the value of the --metric-name from the given --metrics-page-url"
+
 	cmd = &cobra.Command{
 		Use:   "read-metric-value",
-		Short: "Read the value of the --metric-name from the given --metrics-page-url",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` monitoring prometheus read-metric-value`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

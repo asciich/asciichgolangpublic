@@ -2,6 +2,7 @@ package eventscmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -12,9 +13,16 @@ import (
 )
 
 func NewWatchCmd() *cobra.Command {
+	const short = "Watch K8s events"
+
 	cmd := &cobra.Command{
 		Use:   "watch",
-		Short: "Watch K8s events",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` kubernetes events watch`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

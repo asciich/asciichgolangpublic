@@ -1,11 +1,20 @@
 package tailscalecmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+	"os"
+)
 
 func NewTailscaleCmd() *cobra.Command {
+	const short = "Tailscale related commands"
+
 	cmd := &cobra.Command{
 		Use:   "tailscale",
-		Short: "Tailscale related commands",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` network vpn tailscale tailscale`,
 	}
 
 	cmd.AddCommand(

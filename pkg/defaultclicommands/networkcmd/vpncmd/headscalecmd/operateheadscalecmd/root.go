@@ -1,6 +1,8 @@
 package operateheadscalecmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 )
 
@@ -13,9 +15,15 @@ func NewOperateCmd(options *OperateOptions) *cobra.Command {
 		panic("options.GetHeadScale is nil")
 	}
 
+	const short = "Operate the HeadScale running on the localhost."
+
 	cmd := &cobra.Command{
 		Use:   options.GetRootCmdUse(),
-		Short: options.GetRootCmdShort(),
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` network vpn headscale operate`,
 	}
 
 	cmd.AddCommand(

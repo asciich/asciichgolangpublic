@@ -2,6 +2,7 @@ package aidercmd
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -13,11 +14,16 @@ import (
 )
 
 func NewRunAiderCmd() *cobra.Command {
+	const short = "Runs Aider with a given message and files."
+
 	cmd := &cobra.Command{
 		Use:   "run-aider",
-		Short: "Runs Aider with a given message and files.",
-		Long: `This command starts Aider, processes the provided message and files,
-and then exits.`,
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` ai aider run-aider`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

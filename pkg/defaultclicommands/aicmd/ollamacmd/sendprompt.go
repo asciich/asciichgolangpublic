@@ -18,6 +18,11 @@ func NewSendPromptCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "send-prompt",
 		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` ai ollama send-prompt`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

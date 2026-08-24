@@ -22,8 +22,7 @@ func NewSendResponseCmd() *cobra.Command {
 		Long: short + `
 
 Usage:
-` + os.Args[0] + ` messenger signal signal-cli-rest-api send-response --api-url=https://url-of-singal-cli-rest-api --account-number +4... --message="this is the response" --quote-timestamp="1779570020369" --quote-author="+4.." --quote-message="this is the quoted message"
-`,
+` + os.Args[0] + ` messenger signalmessenger signalclirestapi send-response`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

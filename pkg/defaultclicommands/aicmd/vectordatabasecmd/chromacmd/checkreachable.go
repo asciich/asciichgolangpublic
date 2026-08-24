@@ -6,12 +6,20 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"os"
 )
 
 func NewCheckReachableCmd() *cobra.Command {
+	const short = "Check if given --chroma-url instance is reachable."
+
 	cmd := &cobra.Command{
 		Use:   "check-reachable",
-		Short: "Check if given --chroma-url instance is reachable.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` ai vectordatabase chroma check-reachable`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

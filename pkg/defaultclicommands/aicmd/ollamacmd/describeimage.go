@@ -2,6 +2,7 @@ package ollamacmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/aiutils/ollamautils"
@@ -11,9 +12,16 @@ import (
 )
 
 func NewDescribeImageCmd() *cobra.Command {
+	const short = "Uses an llm to describe whats shown on the given image."
+
 	cmd := &cobra.Command{
 		Use:   "describe-image",
-		Short: "Uses an llm to describe whats shown on the given image.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` ai ollama describe-image`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
