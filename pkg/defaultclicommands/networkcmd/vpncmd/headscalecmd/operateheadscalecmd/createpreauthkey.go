@@ -2,6 +2,7 @@ package operateheadscalecmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -11,9 +12,16 @@ import (
 )
 
 func NewCreatePreauthKeyCmd(options *OperateOptions) *cobra.Command {
+	const short = "Create a preauth key for a the specified headscale user."
+
 	cmd := &cobra.Command{
 		Use:   "create-preauth-key",
-		Short: "Create a preauth key for a the specified headscale user.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` network vpn headscale operate create-preauth-key`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

@@ -2,6 +2,7 @@ package httpclientcmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -12,9 +13,16 @@ import (
 )
 
 func NewGetCmd(options *httpclientcmdoptions.HttpClientCmdOptions) *cobra.Command {
+	const short = "Send get request and print response body to stdout."
+
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "Send get request and print response body to stdout.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` http httpclient get`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

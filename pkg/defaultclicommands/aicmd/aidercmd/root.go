@@ -1,11 +1,20 @@
 package aidercmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+	"os"
+)
 
 func NewAiderCmd() *cobra.Command {
+	const short = "aider related commands"
+
 	cmd := &cobra.Command{
 		Use:   "aider",
-		Short: "aider related commands",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` ai aider aider`,
 	}
 
 	cmd.AddCommand(

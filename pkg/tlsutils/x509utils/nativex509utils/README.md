@@ -6,4 +6,4 @@ This package provides X509 certificate operations using native Go libraries with
 
 ## Specifications
 
-For specifications see [native509utils.spec.md](native509utils.spec.md)
+For specifications see [nativex509utils.spec.md](nativex509utils.spec.md)

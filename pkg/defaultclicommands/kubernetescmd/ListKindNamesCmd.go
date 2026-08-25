@@ -2,6 +2,7 @@ package kubernetescmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -10,9 +11,16 @@ import (
 )
 
 func ListKindNamesCmd() *cobra.Command {
+	const short = "List all known kind names in the default kubernetes cluster."
+
 	cmd := &cobra.Command{
 		Use:   "list-kind-names",
-		Short: "List all known kind names in the default kubernetes cluster.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` kubernetes list-kind-names`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

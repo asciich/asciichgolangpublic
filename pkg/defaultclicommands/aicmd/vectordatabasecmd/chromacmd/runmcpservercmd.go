@@ -18,8 +18,7 @@ func NewRunMcpServerCmd() *cobra.Command {
 		Long: short + `
 
 Example usage:
-  ` + os.Args[0] + ` ai vector-database chroma run-mcp-server --port=3001 --ollama-url='http://localhost:11434' --chroma-url='http://chroma.example.com' --chroma-collection-name="examplecollection" --verbose
-`,
+  ` + os.Args[0] + ` ai vectordatabase chroma run-mcp-server`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

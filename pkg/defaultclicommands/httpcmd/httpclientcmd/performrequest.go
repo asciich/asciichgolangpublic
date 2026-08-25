@@ -2,6 +2,7 @@ package httpclientcmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -12,9 +13,16 @@ import (
 )
 
 func NewPerformRequestCmd(options *httpclientcmdoptions.HttpClientCmdOptions) *cobra.Command {
+	const short = "Perform a request and print response body to stdout. Use --method to specify the used in the request."
+
 	cmd := &cobra.Command{
 		Use:   "perform-request",
-		Short: "Perform a request and print response body to stdout. Use --method to specify the used in the request.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` http httpclient perform-request`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

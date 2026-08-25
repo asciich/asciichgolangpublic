@@ -6,14 +6,21 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfileoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/commandexecutorgitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/nativegitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func NewGitRepositoryFromDirectory(ctx context.Context, directory filesinterfaces.Directory) (gitinterfaces.GitRepository, error) {
 	if directory == nil {
 		return nil, tracederrors.TracedErrorNil("directory")
+	}
+
+	nativefilesdirectory, ok := directory.(*nativefilesoo.Directory)
+	if ok {
+		return nativegitoo.NewGitRepositoryFromDirectory(nativefilesdirectory)
 	}
 
 	commandExecutorDirectory, ok := directory.(*commandexecutorfileoo.Directory)

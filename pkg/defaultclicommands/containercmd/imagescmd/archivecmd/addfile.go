@@ -9,12 +9,20 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils/unixfilepermissionsutils"
+	"os"
 )
 
 func NewAddFileCmd() *cobra.Command {
+	const short = "Add a file to a container image archive. This will create new file layer in the image archive."
+
 	cmd := &cobra.Command{
 		Use:   "add-file",
-		Short: "Add a file to a container image archive. This will create new file layer in the image archive.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` container images archive add-file`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

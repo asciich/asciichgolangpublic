@@ -2,6 +2,7 @@ package kvmvmscmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/virtualmachinescmd/kvmcmd/kvmcmdutils"
@@ -10,9 +11,16 @@ import (
 )
 
 func NewListCmd() *cobra.Command {
+	const short = "List KVM virtual machines."
+
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List KVM virtual machines.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` virtualmachines kvm kvmvms list`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx, kvmHypervisor := kvmcmdutils.GetCtxAndKvmHypervisor(cmd)
 

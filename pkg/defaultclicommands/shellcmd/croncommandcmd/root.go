@@ -1,11 +1,20 @@
 package croncommandcmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+	"os"
+)
 
 func NewCronCommandCmd() *cobra.Command {
+	const short = "Run a command periodiacally as defined by a cron interval."
+
 	cmd := &cobra.Command{
 		Use:   "cron-command",
-		Short: "Run a command periodiacally as defined by a cron interval.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` shell croncommand cron-command`,
 	}
 
 	cmd.AddCommand(

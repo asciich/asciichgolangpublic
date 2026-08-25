@@ -2,6 +2,7 @@ package publicipscmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -10,14 +11,16 @@ import (
 )
 
 func NewGetPublicIpCmd() *cobra.Command {
-	short := "Get the current public IP address. When in a natted network this command can be used to get the public IP address of the router."
+	const short = "Get the current public IP address."
 
 	cmd := &cobra.Command{
 		Use:   "get-public-ip",
 		Short: short,
 		Long: short + `
 
-This function creates a webrequest to ` + publicips.GET_PUBLIC_IP_URL + ` which sends back the public client IP.`,
+Usage:
+    ` + os.Args[0] + ` network publicips get-public-ip`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

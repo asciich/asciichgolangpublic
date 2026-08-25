@@ -132,6 +132,45 @@ pkg/<domain>/<packagename>/
     ```
 - Additionally, dedicated tests validate that all implementations return the **exact same result** for identical inputs.
 
+## Logging
+
+- Functions which perform IO or otherwise take longer **must** log a "started" and a "finished" message.
+- Use `logging.LogInfoByCtxf` with a context parameter for both messages.
+- The "started" message is logged **before** the main work begins.
+- The "finished" message is logged **after** the work completes successfully, ideally including a summary (e.g. count of results).
+- Example:
+    ```golang
+    func ListObjectNames(ctx context.Context, client *minio.Client, bucketName string) ([]string, error) {
+    	if client == nil {
+    		return nil, tracederrors.TracedErrorNil("client")
+    	}
+
+    	if bucketName == "" {
+    		return nil, tracederrors.TracedErrorEmptyString("bucketName")
+    	}
+
+    	logging.LogInfoByCtxf(ctx, "List objects in bucket '%s' started.", bucketName)
+
+    	objectChannel := client.ListObjects(ctx, bucketName, minio.ListObjectsOptions{
+    		Recursive: true,
+    	})
+
+    	objectNames := []string{}
+    	for object := range objectChannel {
+    		if object.Err != nil {
+    			return nil, tracederrors.TracedErrorf("There is an object.Err while listing the object in the bucket '%s': %w", bucketName, object.Err)
+    		}
+    		objectNames = append(objectNames, object.Key)
+    	}
+
+    	sort.Strings(objectNames)
+
+    	logging.LogInfoByCtxf(ctx, "List objects in bucket '%s' finished. There are '%d' objects in the bucket.", bucketName, len(objectNames))
+
+    	return objectNames, nil
+    }
+    ```
+
 ## Documentation
 
 - All `Example_*_test.go` files are meant for documentation. They must all be listed and linked in the corresponding `README.md`. This is done as a bullet point list. 
@@ -153,6 +192,7 @@ pkg/<domain>/<packagename>/
 	    }
         ```
     - Use `t.NoError(t, err)` to check for errors. Do not use less specific `t.Nil(t, err)`.
+- Test files must use the external test package (e.g. `package nativegit_test` instead of `package nativegit`) to ensure only exported API is tested.
 - Unit Test Structure:
     - Use t.Run subtests for distinct assertions
         - When a single test function validates multiple distinct behaviors or cases, each case must be wrapped in its own t.Run subtest. This provides clearer test output, allows individual subtests to be run in isolation, and makes failures easier to identify.

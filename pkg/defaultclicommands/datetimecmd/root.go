@@ -1,11 +1,20 @@
 package datetimecmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+	"os"
+)
 
 func NewDateTimeCmd() *cobra.Command {
+	const short = "Date or time related commands"
+
 	cmd := &cobra.Command{
 		Use:   "datetime",
-		Short: "Date or time related commands",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` datetime datetime`,
 	}
 
 	cmd.AddCommand(

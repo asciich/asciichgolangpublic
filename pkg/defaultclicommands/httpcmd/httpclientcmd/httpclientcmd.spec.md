@@ -2,7 +2,7 @@
 
 This are the specifications for the [`httpclientcmd` package](README.md).
 
-This document extends the parent specifications [httpcmd.spec.md](../httpcmd.spec.md).
+This document extends the [constitution.md](/constitution.md).
 
 ## Implementation
 

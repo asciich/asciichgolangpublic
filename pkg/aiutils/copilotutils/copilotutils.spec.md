@@ -2,7 +2,7 @@
 
 This are the specifications for the [`copilotutils` package](README.md).
 
-This document extends the parent specifications [aiutils.spec.md](../aiutils.spec.md).
+This document extends the [constitution.md](/constitution.md).
 
 - `RunCopilotCliContainer` can be used to spin a container to running copilot CLI as agent in an isolated way.
     - The argument of type `RunCopilotCliContainerOptions` provides at least:

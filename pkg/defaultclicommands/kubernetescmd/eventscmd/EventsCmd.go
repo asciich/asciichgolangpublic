@@ -1,11 +1,20 @@
 package eventscmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+	"os"
+)
 
 func NewEventsCmd() *cobra.Command {
+	const short = "Kubernetes events related commands."
+
 	cmd := &cobra.Command{
 		Use:   "events",
-		Short: "Kubernetes events related commands.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` kubernetes events events`,
 	}
 
 	cmd.AddCommand(

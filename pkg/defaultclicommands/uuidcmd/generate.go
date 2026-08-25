@@ -2,6 +2,7 @@ package uuidcmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -9,9 +10,16 @@ import (
 )
 
 func NewGenerateCmd() *cobra.Command {
+	const short = "Generate UUID"
+
 	cmd := &cobra.Command{
 		Use:   "generate",
-		Short: "Generate UUID",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` uuid generate`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

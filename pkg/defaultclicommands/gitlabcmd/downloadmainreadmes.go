@@ -6,12 +6,20 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"os"
 )
 
 func NewDownloadMainReadmesCmd() *cobra.Command {
+	const short = "Download the main readmes of the given gitlab group URL."
+
 	cmd := &cobra.Command{
 		Use:   "download-main-readmes",
-		Short: "Download the main readmes of the given gitlab group URL.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` gitlab download-main-readmes`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

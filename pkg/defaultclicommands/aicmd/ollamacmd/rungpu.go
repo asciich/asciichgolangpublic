@@ -6,6 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"os"
 )
 
 func NewRunGpuCmd() *cobra.Command {
@@ -14,6 +15,11 @@ func NewRunGpuCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "run-gpu",
 		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` ai ollama run-gpu`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

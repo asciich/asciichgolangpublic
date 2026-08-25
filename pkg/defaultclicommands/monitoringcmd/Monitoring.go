@@ -4,12 +4,19 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/monitoringcmd/prometheuscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"os"
 )
 
 func NewMonitoringCommand() (cmd *cobra.Command) {
+	const short = "Monitoring related commands."
+
 	cmd = &cobra.Command{
 		Use:   "monitoring",
-		Short: "Monitoring related commands.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` monitoring monitoring`,
 	}
 
 	cmd.AddCommand(prometheuscmd.NewPrometheusCommand())

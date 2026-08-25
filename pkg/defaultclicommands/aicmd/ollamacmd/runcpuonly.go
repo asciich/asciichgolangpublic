@@ -6,6 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
+	"os"
 )
 
 func NewRunCpuOnlyCmd() *cobra.Command {
@@ -14,6 +15,11 @@ func NewRunCpuOnlyCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "run-cpu-only",
 		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` ai ollama run-cpu-only`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

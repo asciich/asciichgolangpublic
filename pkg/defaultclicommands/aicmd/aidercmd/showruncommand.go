@@ -19,8 +19,7 @@ func NewShowRunCommandCmd() *cobra.Command {
 		Long: short + `
 
 To directly run it use:
-  eval $(` + os.Args[0] + ` ai aider show-run-command)
-`,
+  eval $(` + os.Args[0] + ` ai aider show-run-command`,
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println(strings.Join(mustutils.Must(aiderutils.GetRunCommand(false)), " "))
 		},

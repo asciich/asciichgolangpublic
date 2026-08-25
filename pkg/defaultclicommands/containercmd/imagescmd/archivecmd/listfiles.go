@@ -2,6 +2,7 @@ package archivecmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/containerimagehandler"
@@ -11,9 +12,16 @@ import (
 )
 
 func NewListFilesCmd() *cobra.Command {
+	const short = "List all files in an image archive."
+
 	cmd := &cobra.Command{
 		Use:   "list-files",
-		Short: "List all files in an image archive.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` container images archive list-files`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

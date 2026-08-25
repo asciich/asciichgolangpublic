@@ -6,12 +6,20 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/wikiutils/atlassianconfluenceutils"
+	"os"
 )
 
 func NewDownloadPageCmd() *cobra.Command {
+	const short = "Download the given wiki page into the --output-dir."
+
 	cmd := &cobra.Command{
 		Use:   "download-page",
-		Short: "Download the given wiki page into the --output-dir.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` wiki atlassianconfluence download-page`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

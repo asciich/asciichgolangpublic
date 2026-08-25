@@ -1,6 +1,7 @@
 package httpclientcmd
 
 import (
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -18,9 +19,15 @@ func NewClientCmd(options *httpclientcmdoptions.HttpClientCmdOptions) *cobra.Com
 		options.GetClient = defaultGetClient
 	}
 
+	const short = "HTTP client functions"
+
 	cmd := &cobra.Command{
 		Use:   "client",
-		Short: "HTTP client functions",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` http httpclient client`,
 	}
 
 	cmd.AddCommand(

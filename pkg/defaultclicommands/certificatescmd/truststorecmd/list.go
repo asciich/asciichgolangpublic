@@ -1,6 +1,7 @@
 package truststorecmd
 
 import (
+	"os"
 	"slices"
 
 	"github.com/spf13/cobra"
@@ -18,6 +19,11 @@ func NewListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` certificates truststore list`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

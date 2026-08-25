@@ -20,7 +20,7 @@ func NewGetSystemNameCmd() *cobra.Command {
 		Long: short + `
 
 Usage:
-  PFSENSE_PASSWORD="<Your PASSWORD>" ` + os.Args[0] + ` network router pfsense get-system-name --url="https://192.168.1.1" --username=admin --verbose`,
+  PFSENSE_PASSWORD="<Your PASSWORD>" ` + os.Args[0] + ` network router pfsense get-system-name`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

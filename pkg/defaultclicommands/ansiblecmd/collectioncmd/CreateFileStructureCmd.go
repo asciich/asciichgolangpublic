@@ -1,6 +1,7 @@
 package collectioncmd
 
 import (
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -11,9 +12,16 @@ import (
 )
 
 func NewCreateFileStructureCmd() *cobra.Command {
+	const short = "Create collection file structure in given directory path. Useful as a starting point to write your own collection."
+
 	cmd := &cobra.Command{
 		Use:   "create-file-structure",
-		Short: "Create collection file structure in given directory path. Useful as a starting point to write your own collection.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` ansible collection create-file-structure`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

@@ -6,12 +6,19 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/k9scmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/kindcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/kubectlcmd"
+	"os"
 )
 
 func NewKubernetesCmd() *cobra.Command {
+	const short = "Kubernetes related commands."
+
 	cmd := &cobra.Command{
 		Use:   "kubernetes",
-		Short: "Kubernetes related commands.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` kubernetes kubernetes`,
 	}
 
 	cmd.AddCommand(

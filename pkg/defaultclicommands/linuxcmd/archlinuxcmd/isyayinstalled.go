@@ -12,9 +12,16 @@ import (
 )
 
 func NewIsYayInstalledCmd() *cobra.Command {
+	const short = "Check if yay is installed. Returns 0 if yay is installed, 1 otherwise."
+
 	cmd := &cobra.Command{
 		Use:   "is-yay-installed",
-		Short: "Check if yay is installed. Returns 0 if yay is installed, 1 otherwise.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` linux archlinux is-yay-installed`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

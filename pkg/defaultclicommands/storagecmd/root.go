@@ -4,12 +4,19 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/diskimagecmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/s3cmd"
+	"os"
 )
 
 func NewStorageCmd() *cobra.Command {
+	const short = "Storage related commands"
+
 	cmd := &cobra.Command{
 		Use:   "storage",
-		Short: "Storage related commands",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` storage storage`,
 	}
 
 	cmd.AddCommand(

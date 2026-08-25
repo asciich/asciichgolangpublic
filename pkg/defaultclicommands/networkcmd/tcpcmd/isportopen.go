@@ -18,8 +18,7 @@ func NewIsPortOpenCmd() *cobra.Command {
 		Long: short + `
 
 Usage:
-    ` + os.Args[0] + ` network tcp is-port-open --host="localhost" --port=22
-    `,
+    ` + os.Args[0] + ` network tcp is-port-open`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

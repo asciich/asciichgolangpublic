@@ -2,6 +2,7 @@ package tlscmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -17,7 +18,12 @@ func NewShowInfoCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "show-info",
 		Short: short,
-		Args:  cobra.ExactArgs(1),
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` certificates tls show-info`,
+
+		Args: cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

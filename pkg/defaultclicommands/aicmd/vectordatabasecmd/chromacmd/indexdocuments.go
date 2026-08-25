@@ -18,8 +18,7 @@ func NewIndexDocumentsCmd() *cobra.Command {
 		Long: short + `
 
 Example usage for indexing all documents in the current directory:
-  ` + os.Args[0] + ` ai vector-database chroma index-documents --documents-dir='.' --ollama-url='http://localhost:11434' --chroma-url='http://chroma.example.com' --chroma-collection-name="examplecollection" --basename-regex='.*\\.md$' --verbose
-`,
+  ` + os.Args[0] + ` ai vectordatabase chroma index-documents`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

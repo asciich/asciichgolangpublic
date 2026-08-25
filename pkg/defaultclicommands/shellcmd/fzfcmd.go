@@ -26,14 +26,7 @@ The selected line(s) are written to stdout.
 
 Examples:
   # Select a file to open
-  ls | ` + os.Args[0] + ` shell fzf | xargs vim
-
-  # Select a git branch to checkout
-  git branch | ` + os.Args[0] + ` shell fzf | xargs git checkout
-
-  # Select from an input file
-  ` + os.Args[0] + ` shell fzf --input-file /path/to/list.txt | xargs echo
-`,
+  ls | ` + os.Args[0] + ` shell fzf` + os.Args[0] + ` shell fzf` + os.Args[0] + ` shell fzf`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

@@ -2,14 +2,22 @@ package tailscalecmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 )
 
 func NewDockerClientInstructionsCmd() *cobra.Command {
+	const short = "Show the instructions how to run a local tailscale client in docker."
+
 	cmd := &cobra.Command{
 		Use:   "docker-client-instructions",
-		Short: "Show the instructions how to run a local tailscale client in docker.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` network vpn tailscale docker-client-instructions`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			instructions := `
 Start tailscale in container:

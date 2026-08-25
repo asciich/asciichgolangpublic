@@ -2,6 +2,7 @@ package exoscalednscmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/cloudutils/exoscaleutils/exoscalenativeclientoo"
@@ -11,9 +12,16 @@ import (
 )
 
 func NewListDomainsCmd() *cobra.Command {
+	const short = "List all DNS domains."
+
 	cmd := &cobra.Command{
 		Use:   "list-domains",
-		Short: "List all DNS domains.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` cloud exoscale exoscaledns list-domains`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

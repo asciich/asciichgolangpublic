@@ -19,8 +19,7 @@ func NewRunAsDockerContainerCmd() *cobra.Command {
 		Long: short + `
 
 Usage:
-  ` + os.Args[0] + ` ai openhands run-as-docker-container --port=8000 --container-name=openhands --reachable-by-other-machines --verbose
-`,
+  ` + os.Args[0] + ` ai openhands run-as-docker-container`,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

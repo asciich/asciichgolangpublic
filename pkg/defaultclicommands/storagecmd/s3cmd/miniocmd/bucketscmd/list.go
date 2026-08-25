@@ -2,6 +2,7 @@ package bucketscmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -12,9 +13,16 @@ import (
 )
 
 func NewListBucketsCmd(options *miniocmdoptions.MinioCmdOptions) *cobra.Command {
+	const short = "List buckets."
+
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List buckets.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` storage s3 minio buckets list`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 

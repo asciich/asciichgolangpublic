@@ -1,11 +1,20 @@
 package kubectlcmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+	"os"
+)
 
 func NewKubectlCmd() *cobra.Command {
+	const short = "kubectl related commands."
+
 	cmd := &cobra.Command{
 		Use:   "kubectl",
-		Short: "kubectl related commands.",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` kubernetes kubectl kubectl`,
 	}
 
 	cmd.AddCommand(

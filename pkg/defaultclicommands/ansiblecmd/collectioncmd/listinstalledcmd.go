@@ -2,6 +2,7 @@ package collectioncmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/ansibleutils/ansiblegalaxyutils"
@@ -11,9 +12,16 @@ import (
 )
 
 func NewListInstalledCmd() *cobra.Command {
+	const short = "List installed ansible galaxy collections"
+
 	cmd := &cobra.Command{
 		Use:   "list-installed",
-		Short: "List installed ansible galaxy collections",
+		Short: short,
+		Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` ansible collection list-installed`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 			installed := mustutils.Must(ansiblegalaxyutils.ListInstalledCollections(ctx, &ansiblegalaxyutils.ListInstalledCollectionsOptions{
