@@ -35,7 +35,6 @@ func TestDirectory_GetBaseName(t *testing.T) {
 	}
 }
 
-
 func TestDirectory_GetDirName(t *testing.T) {
 	tests := []struct {
 		implementationName string

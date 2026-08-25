@@ -23,7 +23,7 @@ This document extends the [constitution.md](/constitution.md).
 
             [Additional description, links, hints]
 
-            Usage:
+            Usage example:
                 ` + os.Args[0] + ` ai concat-files-to-knowledge-file --verbose [toplevel dir with knowledgefiles] > documentation.markdown
 
             [Additional Usage examples]

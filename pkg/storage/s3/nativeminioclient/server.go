@@ -1,9 +1,9 @@
 package nativeminioclient
 
 import (
-	"time"
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/minio/madmin-go/v3"
 )

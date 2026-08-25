@@ -12,9 +12,9 @@ import (
 // TestFile_GetParentDirectory tests GetParentDirectory method
 func TestFile_GetParentDirectory(t *testing.T) {
 	tests := []struct {
-		implementationName   string
-		filePath             string
-		expectedParentPath   string
+		implementationName string
+		filePath           string
+		expectedParentPath string
 	}{
 		{"nativefilesoo", "/tmp/testfile.txt", "/tmp"},
 		{"nativefilesoo", "/tmp/subdir/file.txt", "/tmp/subdir"},
