@@ -32,3 +32,29 @@ func InitializeEmptyGitRepository(ctx context.Context, path string) (ret *git.Re
 
 	return ret, nil
 }
+
+func GetRepositoryRootPathByPath(ctx context.Context, path string) (rootPath string, err error) {
+	if path == "" {
+		return "", tracederrors.TracedErrorEmptyString("path")
+	}
+
+	logging.LogInfoByCtxf(ctx, "Get repository root path for '%s' started.", path)
+
+	repo, err := git.PlainOpenWithOptions(path, &git.PlainOpenOptions{
+		DetectDotGit: true,
+	})
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Failed to open git repository at '%s': %w", path, err)
+	}
+
+	worktree, err := repo.Worktree()
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Failed to get worktree for repository at '%s': %w", path, err)
+	}
+
+	rootPath = worktree.Filesystem.Root()
+
+	logging.LogInfoByCtxf(ctx, "Get repository root path for '%s' finished: '%s'.", path, rootPath)
+
+	return rootPath, nil
+}

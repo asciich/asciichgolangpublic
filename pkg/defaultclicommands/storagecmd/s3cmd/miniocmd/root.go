@@ -11,6 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/s3cmd/miniocmd/bucketscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/s3cmd/miniocmd/miniocmdoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/s3cmd/miniocmd/objectscmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd/s3cmd/miniocmd/userscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/nativeminioclient"
@@ -56,6 +57,7 @@ Usage:
 		bucketscmd.NewBucketsCmd(options),
 		objectscmd.NewObjectsCmd(options),
 		admincmd.NewAdminCmd(options),
+		userscmd.NewUsersCmd(options),
 	)
 
 	cmd.PersistentFlags().String("endpoint", "", "The minio endpoint/ server to use.")

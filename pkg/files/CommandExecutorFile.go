@@ -451,7 +451,6 @@ func (c *CommandExecutorFile) GetParentDirectory(ctx context.Context) (parentDir
 	return parentDirectory, nil
 }
 
-
 func (c *CommandExecutorFile) GetPath() (path string, err error) {
 	isRunningOnLocalhost, err := c.IsRunningOnLocalhost()
 	if err != nil {

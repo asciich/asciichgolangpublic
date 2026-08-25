@@ -343,7 +343,9 @@ func Test_X509CertKeyPair_WritePrivateKeyToFile(t *testing.T) {
 		originalKey, err := pair.GetPrivateKey()
 		require.NoError(t, err)
 
-		keyEqual, ok := originalKey.(interface{ Equal(x crypto.PrivateKey) bool })
+		keyEqual, ok := originalKey.(interface {
+			Equal(x crypto.PrivateKey) bool
+		})
 		require.True(t, ok)
 		require.True(t, keyEqual.Equal(keyReadBack))
 	})
