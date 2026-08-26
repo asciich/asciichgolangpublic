@@ -175,6 +175,14 @@ func (o *CommandOutput) GetStderrAsStringOrEmptyIfUnset() (stderr string) {
 	return string(*o.Stderr)
 }
 
+func (o *CommandOutput) GetStdoutAsStringOrEmptyIfUnset() (stderr string) {
+	if o.Stdout == nil {
+		return ""
+	}
+
+	return string(*o.Stdout)
+}
+
 func (o *CommandOutput) GetStdoutAsBytes() (stdout []byte, err error) {
 	if o.Stdout == nil {
 		return nil, tracederrors.TracedError("stdout is not set")
