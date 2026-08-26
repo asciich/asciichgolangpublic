@@ -1,4 +1,8 @@
-# s3cmd - userscmd specifications
+# userscmd specifications
+
+This are the specifications for the [`userscmd` package](README.md).
+
+This document extends the [constitution.md](/constitution.md).
 
 ## Implementation
 
