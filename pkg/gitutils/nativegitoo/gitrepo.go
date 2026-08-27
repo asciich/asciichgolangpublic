@@ -13,6 +13,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
@@ -128,11 +129,65 @@ func (n *NativeGitRepository) AddFileByPath(ctx context.Context, pathToAdd strin
 }
 
 func (n *NativeGitRepository) CloneRepository(ctx context.Context, repository gitinterfaces.GitRepository) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+	if repository == nil {
+		return tracederrors.TracedErrorNil("repository")
+	}
+
+	repoHostDescription, err := repository.GetHostDescription()
+	if err != nil {
+		return err
+	}
+
+	hostDescription, err := n.GetHostDescription()
+	if err != nil {
+		return err
+	}
+
+	if hostDescription != repoHostDescription {
+		return tracederrors.TracedErrorf(
+			"Only implemented for two repositories on the same host. But repository from host '%s' should be cloned to host '%s'",
+			repoHostDescription,
+			hostDescription,
+		)
+	}
+
+	pathToClone, err := repository.GetPath()
+	if err != nil {
+		return err
+	}
+
+	return n.CloneRepositoryByPathOrUrl(ctx, pathToClone)
 }
 
 func (n *NativeGitRepository) CloneToTemporaryRepository(ctx context.Context) (gitinterfaces.GitRepository, error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
+	path, hostDescription, err := n.GetPathAndHostDescription()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Cloning repository '%s' to temporary repository on '%s' started.", path, hostDescription)
+
+	// Create a temporary directory
+	tempDir, err := tempfiles.CreateTempDir(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a new NativeGitRepository from the temporary directory
+	clonedRepo, err := NewGitRepositoryFromPath(tempDir)
+	if err != nil {
+		return nil, err
+	}
+
+	// Clone the repository
+	err = clonedRepo.CloneRepositoryByPathOrUrl(ctx, path)
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Cloning repository '%s' to temporary repository on '%s' finished.", path, hostDescription)
+
+	return clonedRepo, nil
 }
 
 func (n *NativeGitRepository) Commit(ctx context.Context, commitOptions *gitparameteroptions.GitCommitOptions) (createdCommit gitinterfaces.GitCommit, err error) {
@@ -204,7 +259,30 @@ func (n *NativeGitRepository) Commit(ctx context.Context, commitOptions *gitpara
 }
 
 func (n *NativeGitRepository) CommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool, err error) {
-	return false, tracederrors.TracedErrorNotImplemented()
+	if hash == "" {
+		return false, tracederrors.TracedErrorEmptyString("hash")
+	}
+
+	path, err := n.GetPath()
+	if err != nil {
+		return false, err
+	}
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return false, tracederrors.TracedErrorf("Open git repository '%s' failed: %w", path, err)
+	}
+
+	commitHash := plumbing.NewHash(hash)
+	commitObject, err := repo.CommitObject(commitHash)
+	if err != nil {
+		return false, tracederrors.TracedErrorf("Get commit object for hash '%s' failed: %w", hash, err)
+	}
+
+	// A commit has a parent if it has at least one parent commit
+	hasParentCommit = len(commitObject.ParentHashes) > 0
+
+	return hasParentCommit, nil
 }
 
 func (n *NativeGitRepository) Create(ctx context.Context, options *filesoptions.CreateOptions) (err error) {
@@ -253,7 +331,21 @@ func (n *NativeGitRepository) CreateTag(ctx context.Context, createOptions *gitp
 }
 
 func (n *NativeGitRepository) Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+	path, hostDescription, err := n.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Delete git repository '%s' on '%s' started.", path, hostDescription)
+
+	err = nativefiles.Delete(ctx, path, options)
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Delete git repository '%s' on '%s' finished.", path, hostDescription)
+
+	return nil
 }
 
 func (n *NativeGitRepository) DirectoryByPathExists(ctx context.Context, path ...string) (exists bool, err error) {
@@ -325,7 +417,22 @@ func (n *NativeGitRepository) GetCurrentCommit(ctx context.Context) (commit giti
 }
 
 func (n *NativeGitRepository) GetCurrentCommitHash(ctx context.Context) (currentCommitHash string, err error) {
-	return "", tracederrors.TracedErrorNotImplemented()
+	path, err := n.GetPath()
+	if err != nil {
+		return "", err
+	}
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Open git repository '%s' failed: %w", path, err)
+	}
+
+	head, err := repo.Head()
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Get HEAD for git repository '%s' failed: %w", path, err)
+	}
+
+	return head.Hash().String(), nil
 }
 
 func (n *NativeGitRepository) GetGitStatusOutput(ctx context.Context) (output string, err error) {

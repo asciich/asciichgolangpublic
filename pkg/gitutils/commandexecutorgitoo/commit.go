@@ -117,7 +117,48 @@ func (g *GitRepository) GetCommitByHash(hash string) (gitinterfaces.GitCommit, e
 }
 
 func (g *GitRepository) CommitHasParentCommitByCommitHash(hash string) (hasParentCommit bool, err error) {
-	return false, tracederrors.TracedErrorNotImplemented()
+	if hash == "" {
+		return false, tracederrors.TracedErrorEmptyString("hash")
+	}
+
+	path, hostDescription, err := g.GetPathAndHostDescription()
+	if err != nil {
+		return false, err
+	}
+
+	logging.LogInfoByCtxf(contextutils.ContextVerbose(), "Check if commit '%s' has a parent commit in git repository '%s' on '%s' started.", hash, path, hostDescription)
+
+	// Use git rev-parse <hash>^@ to get the parents of the commit
+	// If the commit has no parents (root commit), this will return nothing
+	// If the commit has parents, this will return the parent hash(es)
+	stdout, err := g.RunGitCommandAndGetStdoutAsString(
+		contextutils.ContextSilent(),
+		[]string{"rev-parse", hash + "^@"},
+	)
+	if err != nil {
+		// If the command fails, the commit might be a root commit with no parents
+		// Try another approach: check if rev-parse <hash>^ returns error
+		_, err2 := g.RunGitCommandAndGetStdoutAsString(
+			contextutils.ContextSilent(),
+			[]string{"rev-parse", hash + "^"},
+		)
+		if err2 != nil {
+			// Both commands failed, this is a root commit with no parents
+			logging.LogInfoByCtxf(contextutils.ContextVerbose(), "Check if commit '%s' has a parent commit in git repository '%s' on '%s' finished. hasParentCommit=false (root commit).", hash, path, hostDescription)
+			return false, nil
+		}
+		return false, err
+	}
+
+	stdout = strings.TrimSpace(stdout)
+
+	// If stdout is empty, the commit has no parents
+	// If stdout contains parent hashes, the commit has parents
+	hasParentCommit = stdout != ""
+
+	logging.LogInfoByCtxf(contextutils.ContextVerbose(), "Check if commit '%s' has a parent commit in git repository '%s' on '%s' finished. hasParentCommit=%v.", hash, path, hostDescription, hasParentCommit)
+
+	return hasParentCommit, nil
 }
 
 func (g *GitRepository) GetAuthorEmailByCommitHash(hash string) (authorEmail string, err error) {
