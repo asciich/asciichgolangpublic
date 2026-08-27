@@ -32,7 +32,7 @@ The [constitution.md](constitution.md) has to be applied to the whole repo and i
         ```
 - Whenever a `<packagename>.spec.md` exists the corresponding `README.md` in the same directory must exist as well.
 - A `README.md` without `<packagename>.spec.md` is totally fine.
-- Packages without `<packagename>.spec.md` and without `READMME.md` are allowed. They only need to be added if their content adds value.
+- Packages without `<packagename>.spec.md` and without `README.md` are allowed. They only need to be added if their content adds value.
 
 ## Consistency check
 
