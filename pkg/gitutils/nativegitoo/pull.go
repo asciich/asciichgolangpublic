@@ -39,3 +39,7 @@ func (n *NativeGitRepository) Pull(ctx context.Context) (err error) {
 
 	return nil
 }
+
+func (n *NativeGitRepository) Fetch(ctx context.Context) (err error) {
+	return tracederrors.TracedErrorNotImplemented()
+}

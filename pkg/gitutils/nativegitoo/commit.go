@@ -2,11 +2,14 @@ package nativegitoo
 
 import (
 	"context"
+	"path/filepath"
 	"time"
 
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -214,4 +217,273 @@ func (c *NativeGitCommit) GetNewestTagVersionString(ctx context.Context) (versio
 	}
 
 	return newestVersion.String(), nil
+}
+
+func (n *NativeGitRepository) GetAuthorEmailByCommitHash(hash string) (authorEmail string, err error) {
+	if hash == "" {
+		return "", tracederrors.TracedErrorEmptyString("hash")
+	}
+
+	path, err := n.GetPath()
+	if err != nil {
+		return "", err
+	}
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Open git repository '%s' failed: %w", path, err)
+	}
+
+	hashObj := plumbing.NewHash(hash)
+	commitObject, err := repo.CommitObject(hashObj)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Get commit object for hash '%s' failed: %w", hash, err)
+	}
+
+	return commitObject.Author.Email, nil
+}
+
+func (n *NativeGitRepository) GetAuthorStringByCommitHash(hash string) (authorString string, err error) {
+	if hash == "" {
+		return "", tracederrors.TracedErrorEmptyString("hash")
+	}
+
+	path, err := n.GetPath()
+	if err != nil {
+		return "", err
+	}
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Open git repository '%s' failed: %w", path, err)
+	}
+
+	hashObj := plumbing.NewHash(hash)
+	commitObject, err := repo.CommitObject(hashObj)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Get commit object for hash '%s' failed: %w", hash, err)
+	}
+
+	return commitObject.Author.String(), nil
+}
+
+func (n *NativeGitRepository) GetDirectoryByPath(ctx context.Context, pathToSubDir ...string) (subDir filesinterfaces.Directory, err error) {
+	repoPath, err := n.GetPath()
+	if err != nil {
+		return nil, err
+	}
+
+	fullPath := filepath.Join(repoPath, filepath.Join(pathToSubDir...))
+
+	return nativefilesoo.NewDirectoryByPath(fullPath)
+}
+
+func (n *NativeGitRepository) GetCommitAgeDurationByCommitHash(hash string) (ageDuration *time.Duration, err error) {
+	if hash == "" {
+		return nil, tracederrors.TracedErrorEmptyString("hash")
+	}
+
+	path, err := n.GetPath()
+	if err != nil {
+		return nil, err
+	}
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Open git repository '%s' failed: %w", path, err)
+	}
+
+	hashObj := plumbing.NewHash(hash)
+	commitObject, err := repo.CommitObject(hashObj)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Get commit object for hash '%s' failed: %w", hash, err)
+	}
+
+	age := time.Since(commitObject.Author.When)
+	return &age, nil
+}
+
+func (n *NativeGitRepository) GetCommitAgeSecondsByCommitHash(hash string) (ageSeconds float64, err error) {
+	if hash == "" {
+		return 0, tracederrors.TracedErrorEmptyString("hash")
+	}
+
+	path, err := n.GetPath()
+	if err != nil {
+		return 0, err
+	}
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return 0, tracederrors.TracedErrorf("Open git repository '%s' failed: %w", path, err)
+	}
+
+	hashObj := plumbing.NewHash(hash)
+	commitObject, err := repo.CommitObject(hashObj)
+	if err != nil {
+		return 0, tracederrors.TracedErrorf("Get commit object for hash '%s' failed: %w", hash, err)
+	}
+
+	age := time.Since(commitObject.Author.When)
+	return age.Seconds(), nil
+}
+
+func (n *NativeGitRepository) GetCommitMessageByCommitHash(hash string) (commitMessage string, err error) {
+	if hash == "" {
+		return "", tracederrors.TracedErrorEmptyString("hash")
+	}
+
+	path, err := n.GetPath()
+	if err != nil {
+		return "", err
+	}
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Open git repository '%s' failed: %w", path, err)
+	}
+
+	hashObj := plumbing.NewHash(hash)
+	commitObject, err := repo.CommitObject(hashObj)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Get commit object for hash '%s' failed: %w", hash, err)
+	}
+
+	return commitObject.Message, nil
+}
+
+func (n *NativeGitRepository) GetCommitParentsByCommitHash(ctx context.Context, hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []gitinterfaces.GitCommit, err error) {
+	if hash == "" {
+		return nil, tracederrors.TracedErrorEmptyString("hash")
+	}
+
+	path, err := n.GetPath()
+	if err != nil {
+		return nil, err
+	}
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Open git repository '%s' failed: %w", path, err)
+	}
+
+	hashObj := plumbing.NewHash(hash)
+	commitObject, err := repo.CommitObject(hashObj)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Get commit object for hash '%s' failed: %w", hash, err)
+	}
+
+	commitParents = []gitinterfaces.GitCommit{}
+	for _, parentHash := range commitObject.ParentHashes {
+		commitParents = append(commitParents, NewNativeGitCommit(parentHash.String(), n))
+	}
+
+	return commitParents, nil
+}
+
+func (n *NativeGitRepository) GetCommitTimeByCommitHash(hash string) (commitTime *time.Time, err error) {
+	if hash == "" {
+		return nil, tracederrors.TracedErrorEmptyString("hash")
+	}
+
+	path, err := n.GetPath()
+	if err != nil {
+		return nil, err
+	}
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Open git repository '%s' failed: %w", path, err)
+	}
+
+	hashObj := plumbing.NewHash(hash)
+	commitObject, err := repo.CommitObject(hashObj)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Get commit object for hash '%s' failed: %w", hash, err)
+	}
+
+	commitTimeVal := commitObject.Author.When
+	return &commitTimeVal, nil
+}
+
+func (n *NativeGitRepository) GetCurrentCommit(ctx context.Context) (commit gitinterfaces.GitCommit, err error) {
+	currentHash, err := n.GetCurrentCommitHash(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewNativeGitCommit(currentHash, n), nil
+}
+
+func (n *NativeGitRepository) GetCurrentCommitHash(ctx context.Context) (currentCommitHash string, err error) {
+	path, err := n.GetPath()
+	if err != nil {
+		return "", err
+	}
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Open git repository '%s' failed: %w", path, err)
+	}
+
+	head, err := repo.Head()
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Get HEAD for git repository '%s' failed: %w", path, err)
+	}
+
+	return head.Hash().String(), nil
+}
+
+func (n *NativeGitRepository) GetGitStatusOutput(ctx context.Context) (output string, err error) {
+	path, err := n.GetPath()
+	if err != nil {
+		return "", err
+	}
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Open git repository '%s' failed: %w", path, err)
+	}
+
+	worktree, err := repo.Worktree()
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Get worktree for git repository '%s' failed: %w", path, err)
+	}
+
+	status, err := worktree.Status()
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Get git status for repository '%s' failed: %w", path, err)
+	}
+
+	return status.String(), nil
+}
+
+func (n *NativeGitRepository) GetHashByTagName(tagName string) (hash string, err error) {
+	if tagName == "" {
+		return "", tracederrors.TracedErrorEmptyString("tagName")
+	}
+
+	path, err := n.GetPath()
+	if err != nil {
+		return "", err
+	}
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Open git repository '%s' failed: %w", path, err)
+	}
+
+	tagRef, err := repo.Tag(tagName)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Get tag '%s' failed: %w", tagName, err)
+	}
+
+	tagObj, err := repo.TagObject(tagRef.Hash())
+	if err == nil {
+		// Annotated tag - get the target commit
+		return tagObj.Target.String(), nil
+	}
+
+	// Lightweight tag - return the tag hash directly
+	return tagRef.Hash().String(), nil
 }
