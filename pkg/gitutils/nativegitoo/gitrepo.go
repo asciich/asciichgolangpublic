@@ -298,9 +298,6 @@ func (n *NativeGitRepository) Create(ctx context.Context, options *filesoptions.
 	logging.LogInfoByCtxf(ctx, "Create directory for git repository '%s' on '%s' started.", path, hostDescription)
 
 	exists := nativefiles.Exists(ctx, path)
-	if err != nil {
-		return err
-	}
 
 	if exists {
 		logging.LogInfoByCtxf(ctx, "Directory '%s' on '%s' already exists.", path, hostDescription)
@@ -326,9 +323,6 @@ func (n *NativeGitRepository) CreateSubDirectory(ctx context.Context, subDirecto
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
-func (n *NativeGitRepository) CreateTag(ctx context.Context, createOptions *gitparameteroptions.GitRepositoryCreateTagOptions) (createdTag gitinterfaces.GitTag, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
-}
 
 func (n *NativeGitRepository) Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error) {
 	path, hostDescription, err := n.GetPathAndHostDescription()
@@ -356,10 +350,6 @@ func (n *NativeGitRepository) Exists(ctx context.Context) (exists bool, err erro
 	return false, tracederrors.TracedErrorNotImplemented()
 }
 
-func (n *NativeGitRepository) Fetch(ctx context.Context) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
-}
-
 func (n *NativeGitRepository) FileByPathExists(ctx context.Context, path string) (exists bool, err error) {
 	if path == "" {
 		return false, tracederrors.TracedErrorEmptyString("path")
@@ -373,74 +363,8 @@ func (n *NativeGitRepository) FileByPathExists(ctx context.Context, path string)
 	fullPath := filepath.Join(repoPath, path)
 
 	exists = nativefiles.Exists(ctx, fullPath)
-	if err != nil {
-		return false, err
-	}
 
 	return exists, nil
-}
-
-func (n *NativeGitRepository) GetAuthorEmailByCommitHash(hash string) (authorEmail string, err error) {
-	return "", tracederrors.TracedErrorNotImplemented()
-}
-
-func (n *NativeGitRepository) GetAuthorStringByCommitHash(hash string) (authorString string, err error) {
-	return "", tracederrors.TracedErrorNotImplemented()
-}
-
-func (n *NativeGitRepository) GetDirectoryByPath(ctx context.Context, pathToSubDir ...string) (subDir filesinterfaces.Directory, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
-}
-
-func (n *NativeGitRepository) GetCommitAgeDurationByCommitHash(hash string) (ageDuration *time.Duration, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
-}
-
-func (n *NativeGitRepository) GetCommitAgeSecondsByCommitHash(hash string) (ageSeconds float64, err error) {
-	return 0, tracederrors.TracedErrorNotImplemented()
-}
-
-func (n *NativeGitRepository) GetCommitMessageByCommitHash(hash string) (commitMessage string, err error) {
-	return "", tracederrors.TracedErrorNotImplemented()
-}
-
-func (n *NativeGitRepository) GetCommitParentsByCommitHash(ctx context.Context, hash string, options *parameteroptions.GitCommitGetParentsOptions) (commitParents []gitinterfaces.GitCommit, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
-}
-
-func (n *NativeGitRepository) GetCommitTimeByCommitHash(hash string) (commitTime *time.Time, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
-}
-
-func (n *NativeGitRepository) GetCurrentCommit(ctx context.Context) (commit gitinterfaces.GitCommit, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
-}
-
-func (n *NativeGitRepository) GetCurrentCommitHash(ctx context.Context) (currentCommitHash string, err error) {
-	path, err := n.GetPath()
-	if err != nil {
-		return "", err
-	}
-
-	repo, err := git.PlainOpen(path)
-	if err != nil {
-		return "", tracederrors.TracedErrorf("Open git repository '%s' failed: %w", path, err)
-	}
-
-	head, err := repo.Head()
-	if err != nil {
-		return "", tracederrors.TracedErrorf("Get HEAD for git repository '%s' failed: %w", path, err)
-	}
-
-	return head.Hash().String(), nil
-}
-
-func (n *NativeGitRepository) GetGitStatusOutput(ctx context.Context) (output string, err error) {
-	return "", tracederrors.TracedErrorNotImplemented()
-}
-
-func (n *NativeGitRepository) GetHashByTagName(tagName string) (hash string, err error) {
-	return "", tracederrors.TracedErrorNotImplemented()
 }
 
 func (n *NativeGitRepository) GetPath() (path string, err error) {
@@ -623,18 +547,6 @@ func (n *NativeGitRepository) ListFilePaths(ctx context.Context, listFileOptions
 }
 
 func (n *NativeGitRepository) ListFiles(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (files []filesinterfaces.File, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
-}
-
-func (n *NativeGitRepository) ListTagNames(ctx context.Context) (tagNames []string, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
-}
-
-func (n *NativeGitRepository) ListTags(ctx context.Context) (tags []gitinterfaces.GitTag, err error) {
-	return nil, tracederrors.TracedErrorNotImplemented()
-}
-
-func (n *NativeGitRepository) ListTagsForCommitHash(ctx context.Context, hash string) (tags []gitinterfaces.GitTag, err error) {
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 

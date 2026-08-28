@@ -3,14 +3,33 @@ package commandexecutorgitoo
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 func (g *GitRepository) GetGitStatusOutput(ctx context.Context) (output string, err error) {
-	return "", tracederrors.TracedErrorNotImplemented()
+	path, hostDescription, err := g.GetPathAndHostDescription()
+	if err != nil {
+		return "", err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Get git status for repository '%s' on '%s' started.", path, hostDescription)
+
+	output, err = g.RunGitCommandAndGetStdoutAsString(
+		ctx,
+		[]string{"status", "--porcelain"},
+	)
+	if err != nil {
+		return "", err
+	}
+
+	output = strings.TrimSpace(output)
+
+	logging.LogInfoByCtxf(ctx, "Get git status for repository '%s' on '%s' finished.", path, hostDescription)
+
+	return output, nil
 }
 
 func (g *GitRepository) HasUncommittedChanges(ctx context.Context) (hasUncommitedChanges bool, err error) {
