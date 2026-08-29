@@ -272,12 +272,24 @@ func (g *GitRepository) PushTagsToRemote(ctx context.Context, remoteName string)
 		return err
 	}
 
-	_, err = g.RunGitCommand(ctx, []string{"push", remoteName, "--tags"})
+	logging.LogInfoByCtxf(ctx, "Push tags of git repository '%s' on '%s' to remote '%s' started.", path, hostDescription, remoteName)
+
+	commandOutput, err := g.RunGitCommand(ctx, []string{"push", remoteName, "--tags"})
 	if err != nil {
+		// Check if the error is due to already being up-to-date
+		stdout, stdoutErr := commandOutput.GetStdoutAsString()
+		stderr, stderrErr := commandOutput.GetStderrAsString()
+		if stdoutErr == nil && stderrErr == nil {
+			output := stdout + stderr
+			if containsIgnoreCase(output, "already up-to-date") {
+				logging.LogInfoByCtxf(ctx, "Git repository '%s' on '%s' tags are already up to date with remote '%s'.", path, hostDescription, remoteName)
+				return nil
+			}
+		}
 		return err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Pushed tags of git repository '%s' on host '%s' to remote '%s'.", path, hostDescription, remoteName)
+	logging.LogChangedByCtxf(ctx, "Pushed tags of git repository '%s' on '%s' to remote '%s'.", path, hostDescription, remoteName)
 
 	return nil
 }
@@ -287,17 +299,33 @@ func (g *GitRepository) PushToRemote(ctx context.Context, remoteName string) (er
 		return tracederrors.TracedError("remoteName is empty string")
 	}
 
-	_, err = g.RunGitCommand(ctx, []string{"push", remoteName})
-	if err != nil {
-		return err
-	}
-
 	path, hostDescription, err := g.GetPathAndHostDescription()
 	if err != nil {
 		return err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Pushed git repository '%s' on host '%s' to remote '%s'.", path, hostDescription, remoteName)
+	logging.LogInfoByCtxf(ctx, "Push git repository '%s' on '%s' to remote '%s' started.", path, hostDescription, remoteName)
+
+	commandOutput, err := g.RunGitCommand(ctx, []string{"push", remoteName})
+	if err != nil {
+		// Check if the error is due to already being up-to-date
+		stdout, stdoutErr := commandOutput.GetStdoutAsString()
+		stderr, stderrErr := commandOutput.GetStderrAsString()
+		if stdoutErr == nil && stderrErr == nil {
+			output := stdout + stderr
+			if containsIgnoreCase(output, "already up-to-date") {
+				logging.LogInfoByCtxf(ctx, "Git repository '%s' on '%s' is already up to date with remote '%s'.", path, hostDescription, remoteName)
+				return nil
+			}
+		}
+		return err
+	}
+
+	logging.LogChangedByCtxf(ctx, "Pushed git repository '%s' on '%s' to remote '%s'.", path, hostDescription, remoteName)
 
 	return nil
+}
+
+func containsIgnoreCase(s, substr string) bool {
+	return strings.Contains(strings.ToLower(s), strings.ToLower(substr))
 }
