@@ -810,10 +810,14 @@ func (n *NativeGitRepository) PushTagsToRemote(ctx context.Context, remoteName s
 		RefSpecs:   refspecs,
 	})
 	if err != nil {
+		if err == git.NoErrAlreadyUpToDate {
+			logging.LogInfoByCtxf(ctx, "Git repository '%s' on '%s' tags are already up to date with remote '%s'.", path, hostDescription, remoteName)
+			return nil
+		}
 		return tracederrors.TracedErrorf("Push tags to remote '%s' from git repository '%s' on '%s' failed: %w", remoteName, path, hostDescription, err)
 	}
 
-	logging.LogInfoByCtxf(ctx, "Pushed tags of git repository '%s' on '%s' to remote '%s'.", path, hostDescription, remoteName)
+	logging.LogChangedByCtxf(ctx, "Pushed tags of git repository '%s' on '%s' to remote '%s'.", path, hostDescription, remoteName)
 
 	return nil
 }
@@ -839,13 +843,18 @@ func (n *NativeGitRepository) PushToRemote(ctx context.Context, remoteName strin
 		RemoteName: remoteName,
 	})
 	if err != nil {
+		if err == git.NoErrAlreadyUpToDate {
+			logging.LogInfoByCtxf(ctx, "Git repository '%s' on '%s' is already up to date with remote '%s'.", path, hostDescription, remoteName)
+			return nil
+		}
 		return tracederrors.TracedErrorf("Push to remote '%s' from git repository '%s' on '%s' failed: %w", remoteName, path, hostDescription, err)
 	}
 
-	logging.LogInfoByCtxf(ctx, "Push git repository '%s' on '%s' to remote '%s' finished.", path, hostDescription, remoteName)
+	logging.LogChangedByCtxf(ctx, "Pushed git repository '%s' on '%s' to remote '%s'.", path, hostDescription, remoteName)
 
 	return nil
 }
+
 
 func (n *NativeGitRepository) SetGitConfig(ctx context.Context, options *gitparameteroptions.GitConfigSetOptions) (err error) {
 	if options == nil {

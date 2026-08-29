@@ -16,6 +16,9 @@
         ```golang
         return toReturn, nil
         ```
+- Public/ exported functions must be written in an idempotent way.
+    - Use `logging.LogChanged...` to log which change was performed.
+    - Use `logging.LogInfo...` if desired state is already in place.
 - Use `defer` instead of cleanup calls at the end of a function. 
   This rule counts as well for test cases.
   Since all functions are implemented in an idempotent way it is safe to use `defer`:
