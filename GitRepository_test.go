@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/commandexecutorgitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
@@ -2030,4 +2031,42 @@ func Test_CheckExists(t *testing.T) {
 			},
 		)
 	}
+}
+
+func TestGetGitRepositoryByDirectory_NativeFilesOO(t *testing.T) {
+	ctx := getCtx()
+
+	// Create a temporary directory using nativefilesoo
+	tempDir, err := nativefilesoo.NewDirectoryByPath("/tmp/test-nativefilesoo-gitrepo")
+	require.NoError(t, err)
+	defer tempDir.Delete(ctx, &filesoptions.DeleteOptions{})
+
+	// Create the directory
+	err = tempDir.Create(ctx, &filesoptions.CreateOptions{})
+	require.NoError(t, err)
+
+	// Try to get GitRepository from nativefilesoo.Directory
+	repo, err := GetGitRepositoryByDirectory(tempDir)
+	require.NoError(t, err)
+	require.NotNil(t, repo)
+
+	// Initialize the repository
+	err = repo.Init(
+		ctx,
+		&parameteroptions.CreateRepositoryOptions{
+			InitializeWithEmptyCommit:   true,
+			InitializeWithDefaultAuthor: true,
+		},
+	)
+	require.NoError(t, err)
+
+	// Verify it's a valid git repository
+	isRepo, err := repo.IsGitRepository(ctx)
+	require.NoError(t, err)
+	require.True(t, isRepo)
+
+	// Verify we can get the path
+	path, err := repo.GetPath()
+	require.NoError(t, err)
+	require.NotEmpty(t, path)
 }
