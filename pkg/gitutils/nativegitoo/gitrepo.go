@@ -93,7 +93,54 @@ func (n *NativeGitRepository) SetPath(path string) error {
 }
 
 func (n *NativeGitRepository) AddRemote(ctx context.Context, options *gitparameteroptions.GitRemoteAddOptions) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+	if options == nil {
+		return tracederrors.TracedErrorNil("options")
+	}
+
+	remoteName, err := options.GetRemoteName()
+	if err != nil {
+		return err
+	}
+
+	remoteUrl, err := options.GetRemoteUrl()
+	if err != nil {
+		return err
+	}
+
+	path, hostDescription, err := n.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Add remote '%s' as '%s' to git repository '%s' on '%s' started.", remoteUrl, remoteName, path, hostDescription)
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return tracederrors.TracedErrorf("Open git repository '%s' on '%s' failed: %w", path, hostDescription, err)
+	}
+
+	// Check if remote already exists
+	_, err = repo.Remote(remoteName)
+	if err == nil {
+		// Remote exists, remove it first to update URL
+		err = repo.DeleteRemote(remoteName)
+		if err != nil {
+			return tracederrors.TracedErrorf("Delete existing remote '%s' in git repository '%s' on '%s' failed: %w", remoteName, path, hostDescription, err)
+		}
+	}
+
+	// Add the remote
+	_, err = repo.CreateRemote(&config.RemoteConfig{
+		Name: remoteName,
+		URLs: []string{remoteUrl},
+	})
+	if err != nil {
+		return tracederrors.TracedErrorf("Create remote '%s' with url '%s' in git repository '%s' on '%s' failed: %w", remoteName, remoteUrl, path, hostDescription, err)
+	}
+
+	logging.LogChangedByCtxf(ctx, "Added remote '%s' as '%s' to git repository '%s' on '%s'.", remoteUrl, remoteName, path, hostDescription)
+
+	return nil
 }
 
 func (n *NativeGitRepository) AddFileByPath(ctx context.Context, pathToAdd string) (err error) {
@@ -472,7 +519,37 @@ func (n *NativeGitRepository) HasInitialCommit(ctx context.Context) (hasInitialC
 }
 
 func (n *NativeGitRepository) HasUncommittedChanges(ctx context.Context) (hasUncommitedChanges bool, err error) {
-	return false, tracederrors.TracedErrorNotImplemented()
+	path, hostDescription, err := n.GetPathAndHostDescription()
+	if err != nil {
+		return false, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Check for uncommitted changes in git repository '%s' on '%s'.", path, hostDescription)
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return false, tracederrors.TracedErrorf("Open git repository '%s' on '%s' failed: %w", path, hostDescription, err)
+	}
+
+	worktree, err := repo.Worktree()
+	if err != nil {
+		return false, tracederrors.TracedErrorf("Get worktree for git repository '%s' on '%s' failed: %w", path, hostDescription, err)
+	}
+
+	status, err := worktree.Status()
+	if err != nil {
+		return false, tracederrors.TracedErrorf("Get status for git repository '%s' on '%s' failed: %w", path, hostDescription, err)
+	}
+
+	hasUncommitedChanges = !status.IsClean()
+
+	if hasUncommitedChanges {
+		logging.LogInfoByCtxf(ctx, "Git repository '%s' on '%s' has uncommitted changes.", path, hostDescription)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Git repository '%s' on '%s' has no uncommitted changes.", path, hostDescription)
+	}
+
+	return hasUncommitedChanges, nil
 }
 func (n *NativeGitRepository) IsBareRepository(ctx context.Context) (isBareRepository bool, err error) {
 	path, err := n.GetPath()
@@ -551,19 +628,139 @@ func (n *NativeGitRepository) ListFiles(ctx context.Context, listFileOptions *pa
 }
 
 func (n *NativeGitRepository) RemoteByNameExists(ctx context.Context, remoteName string) (remoteExists bool, err error) {
-	return false, tracederrors.TracedErrorNotImplemented()
+	if remoteName == "" {
+		return false, tracederrors.TracedErrorEmptyString("remoteName")
+	}
+
+	path, hostDescription, err := n.GetPathAndHostDescription()
+	if err != nil {
+		return false, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Check if remote '%s' exists in git repository '%s' on '%s'.", remoteName, path, hostDescription)
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return false, tracederrors.TracedErrorf("Open git repository '%s' on '%s' failed: %w", path, hostDescription, err)
+	}
+
+	_, err = repo.Remote(remoteName)
+	if err == nil {
+		remoteExists = true
+		logging.LogInfoByCtxf(ctx, "Remote '%s' exists in git repository '%s' on '%s'.", remoteName, path, hostDescription)
+	} else if err == git.ErrRemoteNotFound {
+		remoteExists = false
+		logging.LogInfoByCtxf(ctx, "Remote '%s' does not exist in git repository '%s' on '%s'.", remoteName, path, hostDescription)
+	} else {
+		return false, tracederrors.TracedErrorf("Get remote '%s' in git repository '%s' on '%s' failed: %w", remoteName, path, hostDescription, err)
+	}
+
+	return remoteExists, nil
 }
 
 func (n *NativeGitRepository) RemoteConfigurationExists(ctx context.Context, config gitinterfaces.GitRemoteConfig) (exists bool, err error) {
-	return false, tracederrors.TracedErrorNotImplemented()
+	if config == nil {
+		return false, tracederrors.TracedErrorNil("config")
+	}
+
+	remoteConfigs, err := n.GetRemoteConfigs(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	for _, toCheck := range remoteConfigs {
+		if config.Equals(toCheck) {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func (n *NativeGitRepository) RemoveRemoteByName(ctx context.Context, remoteName string) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+	if remoteName == "" {
+		return tracederrors.TracedErrorEmptyString("remoteName")
+	}
+
+	path, hostDescription, err := n.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Remove remote '%s' from git repository '%s' on '%s' started.", remoteName, path, hostDescription)
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return tracederrors.TracedErrorf("Open git repository '%s' on '%s' failed: %w", path, hostDescription, err)
+	}
+
+	// Check if remote exists
+	_, err = repo.Remote(remoteName)
+	if err == git.ErrRemoteNotFound {
+		logging.LogInfoByCtxf(ctx, "Remote '%s' does not exist in git repository '%s' on '%s'. Skip removal.", remoteName, path, hostDescription)
+		return nil
+	}
+	if err != nil {
+		return tracederrors.TracedErrorf("Get remote '%s' in git repository '%s' on '%s' failed: %w", remoteName, path, hostDescription, err)
+	}
+
+	err = repo.DeleteRemote(remoteName)
+	if err != nil {
+		return tracederrors.TracedErrorf("Delete remote '%s' from git repository '%s' on '%s' failed: %w", remoteName, path, hostDescription, err)
+	}
+
+	logging.LogChangedByCtxf(ctx, "Removed remote '%s' from git repository '%s' on '%s'.", remoteName, path, hostDescription)
+
+	return nil
 }
 
 func (n *NativeGitRepository) PullFromRemote(ctx context.Context, pullOptions *gitparameteroptions.GitPullFromRemoteOptions) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+	if pullOptions == nil {
+		return tracederrors.TracedErrorNil("pullOptions")
+	}
+
+	remoteName, err := pullOptions.GetRemoteName()
+	if err != nil {
+		return err
+	}
+
+	branchName, err := pullOptions.GetBranchName()
+	if err != nil {
+		return err
+	}
+
+	path, hostDescription, err := n.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Pull from remote '%s' branch '%s' in git repository '%s' on '%s' started.", remoteName, branchName, path, hostDescription)
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return tracederrors.TracedErrorf("Open git repository '%s' on '%s' failed: %w", path, hostDescription, err)
+	}
+
+	worktree, err := repo.Worktree()
+	if err != nil {
+		return tracederrors.TracedErrorf("Get worktree for git repository '%s' on '%s' failed: %w", path, hostDescription, err)
+	}
+
+	err = worktree.PullContext(ctx, &git.PullOptions{
+		RemoteName:    remoteName,
+		ReferenceName: plumbing.NewBranchReferenceName(branchName),
+	})
+	if err != nil {
+		if err == git.NoErrAlreadyUpToDate {
+			logging.LogInfoByCtxf(ctx, "Git repository '%s' on '%s' is already up to date with remote '%s' branch '%s'.", path, hostDescription, remoteName, branchName)
+		} else {
+			return tracederrors.TracedErrorf("Pull from remote '%s' branch '%s' in git repository '%s' on '%s' failed: %w", remoteName, branchName, path, hostDescription, err)
+		}
+	}
+
+	logging.LogInfoByCtxf(ctx, "Pull from remote '%s' branch '%s' in git repository '%s' on '%s' finished.", remoteName, branchName, path, hostDescription)
+
+	return nil
 }
 
 func (n *NativeGitRepository) Push(ctx context.Context) (err error) {
@@ -571,11 +768,83 @@ func (n *NativeGitRepository) Push(ctx context.Context) (err error) {
 }
 
 func (n *NativeGitRepository) PushTagsToRemote(ctx context.Context, remoteName string) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+	if remoteName == "" {
+		return tracederrors.TracedErrorEmptyString("remoteName")
+	}
+
+	path, hostDescription, err := n.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Push tags of git repository '%s' on '%s' to remote '%s' started.", path, hostDescription, remoteName)
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return tracederrors.TracedErrorf("Open git repository '%s' on '%s' failed: %w", path, hostDescription, err)
+	}
+
+	// Get all tags
+	tags, err := repo.Tags()
+	if err != nil {
+		return tracederrors.TracedErrorf("Get tags from git repository '%s' on '%s' failed: %w", path, hostDescription, err)
+	}
+
+	// Build refspecs for all tags
+	var refspecs []config.RefSpec
+	err = tags.ForEach(func(ref *plumbing.Reference) error {
+		refspecs = append(refspecs, config.RefSpec(ref.Name().String()+":"+ref.Name().String()))
+		return nil
+	})
+	if err != nil {
+		return tracederrors.TracedErrorf("Iterate tags in git repository '%s' on '%s' failed: %w", path, hostDescription, err)
+	}
+
+	if len(refspecs) == 0 {
+		logging.LogInfoByCtxf(ctx, "No tags to push in git repository '%s' on '%s'.", path, hostDescription)
+		return nil
+	}
+
+	err = repo.Push(&git.PushOptions{
+		RemoteName: remoteName,
+		RefSpecs:   refspecs,
+	})
+	if err != nil {
+		return tracederrors.TracedErrorf("Push tags to remote '%s' from git repository '%s' on '%s' failed: %w", remoteName, path, hostDescription, err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Pushed tags of git repository '%s' on '%s' to remote '%s'.", path, hostDescription, remoteName)
+
+	return nil
 }
 
 func (n *NativeGitRepository) PushToRemote(ctx context.Context, remoteName string) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+	if remoteName == "" {
+		return tracederrors.TracedErrorEmptyString("remoteName")
+	}
+
+	path, hostDescription, err := n.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Push git repository '%s' on '%s' to remote '%s' started.", path, hostDescription, remoteName)
+
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		return tracederrors.TracedErrorf("Open git repository '%s' on '%s' failed: %w", path, hostDescription, err)
+	}
+
+	err = repo.Push(&git.PushOptions{
+		RemoteName: remoteName,
+	})
+	if err != nil {
+		return tracederrors.TracedErrorf("Push to remote '%s' from git repository '%s' on '%s' failed: %w", remoteName, path, hostDescription, err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Push git repository '%s' on '%s' to remote '%s' finished.", path, hostDescription, remoteName)
+
+	return nil
 }
 
 func (n *NativeGitRepository) SetGitConfig(ctx context.Context, options *gitparameteroptions.GitConfigSetOptions) (err error) {
