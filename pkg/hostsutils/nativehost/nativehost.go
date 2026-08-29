@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
@@ -59,69 +59,15 @@ func (n *NativeHost) GetHostName() (hostName string, err error) {
 }
 
 func (n *NativeHost) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (commandOutput *commandoutput.CommandOutput, err error) {
-	if options == nil {
-		return nil, tracederrors.TracedErrorNil("options")
-	}
-
-	if len(options.Command) == 0 {
-		return nil, tracederrors.TracedError("options.Command is empty")
-	}
-
-	cmd := exec.CommandContext(ctx, options.Command[0], options.Command[1:]...)
-
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		// Create CommandOutput with error
-		commandOutput = commandoutput.NewCommandOutput()
-		err2 := commandOutput.SetStdoutByString(string(output))
-		if err2 != nil {
-			return nil, err2
-		}
-		commandOutput.SetCmdRunError(err)
-		// Try to get return code from exit error
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			commandOutput.SetReturnCode(exitErr.ExitCode())
-		}
-		return commandOutput, err
-	}
-
-	// Create CommandOutput with success
-	commandOutput = commandoutput.NewCommandOutput()
-	err = commandOutput.SetStdoutByString(string(output))
-	if err != nil {
-		return nil, err
-	}
-	err = commandOutput.SetReturnCode(0)
-	if err != nil {
-		return nil, err
-	}
-	return commandOutput, nil
+	return commandexecutorexec.RunCommand(ctx, options)
 }
 
 func (n *NativeHost) RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error) {
-	if options == nil {
-		return nil, tracederrors.TracedErrorNil("options")
-	}
-
-	if len(options.Command) == 0 {
-		return nil, tracederrors.TracedError("options.Command is empty")
-	}
-
-	cmd := exec.CommandContext(ctx, options.Command[0], options.Command[1:]...)
-	return cmd.StdoutPipe()
+	return commandexecutorexec.RunCommandAndGetStdoutAsIoReadCloser(ctx, options)
 }
 
 func (n *NativeHost) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error) {
-	if options == nil {
-		return nil, tracederrors.TracedErrorNil("options")
-	}
-
-	if len(options.Command) == 0 {
-		return nil, tracederrors.TracedError("options.Command is empty")
-	}
-
-	cmd := exec.CommandContext(ctx, options.Command[0], options.Command[1:]...)
-	return cmd.StdinPipe()
+	return commandexecutorexec.RunCommandAndGetStdinAsIoWriteCloser(ctx, options)
 }
 
 func (n *NativeHost) GetDirectoryByPath(ctx context.Context, path string) (directory filesinterfaces.Directory, err error) {
