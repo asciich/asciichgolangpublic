@@ -9,6 +9,17 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
+func newResolverWithServerLogging(ctx context.Context) *net.Resolver {
+	return &net.Resolver{
+		PreferGo: true,
+		Dial: func(dialCtx context.Context, network, address string) (net.Conn, error) {
+			logging.LogInfoByCtxf(ctx, "DNS server used: '%s'", address)
+			var dialer net.Dialer
+			return dialer.DialContext(dialCtx, network, address)
+		},
+	}
+}
+
 func DnsLookupIpV4(ctx context.Context, fqdn string) (ipV4Addresses []string, err error) {
 	if fqdn == "" {
 		return nil, tracederrors.TracedErrorEmptyString("fqdn")
@@ -16,7 +27,8 @@ func DnsLookupIpV4(ctx context.Context, fqdn string) (ipV4Addresses []string, er
 
 	logging.LogInfoByCtxf(ctx, "Going to perform DNS lookup for fqdn='%s'", fqdn)
 
-	ips, err := net.LookupIP(fqdn)
+	resolver := newResolverWithServerLogging(ctx)
+	ips, err := resolver.LookupIP(ctx, "ip4", fqdn)
 	if err != nil {
 		return nil, tracederrors.TracedErrorf("LookupIp failed for hostname '%s': %w", fqdn, err)
 	}
@@ -40,7 +52,9 @@ func DnsLookupIpV4(ctx context.Context, fqdn string) (ipV4Addresses []string, er
 }
 
 func DnsReverseLookup(ctx context.Context, ipAddress string) (fqdns []string, err error) {
-	fqdns, err = net.LookupAddr(ipAddress)
+	resolver := newResolverWithServerLogging(ctx)
+
+	fqdns, err = resolver.LookupAddr(ctx, ipAddress)
 	if err != nil {
 		return nil, tracederrors.TracedErrorf(
 			"Unable to reverse lookup ipAddress '%s': %w",
@@ -49,7 +63,7 @@ func DnsReverseLookup(ctx context.Context, ipAddress string) (fqdns []string, er
 		)
 	}
 
-	logging.LogInfoByCtxf(ctx, "Resolved IP address '%s' to  '%v'", ipAddress, fqdns)
+	logging.LogInfoByCtxf(ctx, "Resolved IP address '%s' to '%v'", ipAddress, fqdns)
 
 	return fqdns, nil
 }
