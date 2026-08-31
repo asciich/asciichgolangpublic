@@ -6,8 +6,8 @@ This document extends the [constitution.md](/constitution.md).
 
 ## Implementation
 
-- The commands in this package only orchestrate the logic of the `nativeminioclient` client.
-    - If a function is missing implement it in the `nativeminioclient` and only reuse it here.
+- The commands in this package only orchestrate the logic of the [`nativeminioclient`](../../../../storage/s3/nativeminioclient/README.md) client.
+    - If a function is missing implement it in the [`nativeminioclient`](../../../../storage/s3/nativeminioclient/README.md) and only reuse it here.
 - The command `admin` is used to group all minio admin related commands.
     - The `check-cluster-health` must is used to check the whole cluster health.
         - Log the cluster status

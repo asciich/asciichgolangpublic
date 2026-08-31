@@ -7,6 +7,10 @@ Contains various implementations to work with files:
 * [tempfile](./tempfiles/): Create temporary files and directories.
 * [tempfileoo](./tempfilesoo/): Create temporary files and directories in a object oriented way.
 
+## Specifications
+
+For specifications see [filesutils.spec.md](filesutils.spec.md)
+
 ## Examples
 
 * [Copy file](./nativefiles/Example_Copy_test.go)

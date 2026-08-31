@@ -1,5 +1,9 @@
 # fileinfo specifications
 
-## Testings
+This are the specifications for the [`fileinfo` package](README.md).
 
-- All exported functions of the `FileInfo` struct must be unittested.
+This document extends the [constitution.md](/constitution.md).
+
+## Testing
+
+- All exported functions of the `FileInfo` struct must be unit tested.

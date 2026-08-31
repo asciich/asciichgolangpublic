@@ -1,5 +1,9 @@
 # dnsutils specifications
 
+This are the specifications for the [`dnsutils` package](README.md).
+
+This document extends the [constitution.md](/constitution.md).
+
 ## Implementation
 
 - Whenever DNS was resolved log:
