@@ -7,7 +7,7 @@ The [constitution.md](constitution.md) has to be applied to the whole repo and i
 ## Editing files
 
 - Always use `sudo` to make you owner of the files or directories to adjust.
-- Use the `file_editor` to modify files. There is no need to use shell commands for this.
+- Use the `file_editor` to modify files. There is no need to use shell commands for this. Do only small changes at once to ensure the generated JSON is valid and parseable. More but small changes are preferd.
 - After file edit is done check all `README.md` besides the files modified. Keep all of them up to date.
 
 

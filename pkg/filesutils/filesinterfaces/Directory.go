@@ -3,6 +3,7 @@ package filesinterfaces
 import (
 	"context"
 
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/fileinfo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
@@ -28,6 +29,8 @@ type Directory interface {
 	IsLocalDirectory() (isLocalDirectory bool, err error)
 	ListFiles(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (files []File, err error)
 	ListSubDirectories(ctx context.Context, options *parameteroptions.ListDirectoryOptions) (subDirectories []Directory, err error)
+	GetAlphabeticallyLastFile(ctx context.Context) (lastFile File, err error)
+	GetFileInfoOfFilesInDirectory(ctx context.Context, options *parameteroptions.ListFileOptions) ([]*fileinfo.FileInfo, error)
 
 	// All methods below this line can be implemented by embedding the `DirectoryBase` struct:
 	CheckExists(ctx context.Context) (err error)

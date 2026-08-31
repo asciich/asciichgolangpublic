@@ -11,9 +11,11 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfileoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
@@ -289,6 +291,8 @@ func TestDirectory_ListSubDirectories_RelativePaths(t *testing.T) {
 			_, err = test2.CreateSubDirectory(ctx, "c", &filesoptions.CreateOptions{})
 			require.NoError(t, err)
 
+			// --- ReturnRelativePaths: true ---
+
 			subDirectoryList, err := testDirectory.ListSubDirectoryPaths(
 				ctx,
 				&parameteroptions.ListDirectoryOptions{
@@ -317,6 +321,37 @@ func TestDirectory_ListSubDirectories_RelativePaths(t *testing.T) {
 			require.EqualValues(t, "test2/a", subDirectoryList[2])
 			require.EqualValues(t, "test2/b", subDirectoryList[3])
 			require.EqualValues(t, "test2/c", subDirectoryList[4])
+
+			// --- ReturnRelativePaths: false ---
+
+			subDirectoryList, err = testDirectory.ListSubDirectoryPaths(
+				ctx,
+				&parameteroptions.ListDirectoryOptions{
+					Recursive:           false,
+					ReturnRelativePaths: false,
+				},
+			)
+			require.NoError(t, err)
+
+			require.Len(t, subDirectoryList, 2)
+			require.EqualValues(t, tempPath+"/test1", subDirectoryList[0])
+			require.EqualValues(t, tempPath+"/test2", subDirectoryList[1])
+
+			subDirectoryList, err = testDirectory.ListSubDirectoryPaths(
+				ctx,
+				&parameteroptions.ListDirectoryOptions{
+					Recursive:           true,
+					ReturnRelativePaths: false,
+				},
+			)
+			require.NoError(t, err)
+
+			require.Len(t, subDirectoryList, 5)
+			require.EqualValues(t, tempPath+"/test1", subDirectoryList[0])
+			require.EqualValues(t, tempPath+"/test2", subDirectoryList[1])
+			require.EqualValues(t, tempPath+"/test2/a", subDirectoryList[2])
+			require.EqualValues(t, tempPath+"/test2/b", subDirectoryList[3])
+			require.EqualValues(t, tempPath+"/test2/c", subDirectoryList[4])
 		})
 	}
 }
@@ -594,6 +629,114 @@ func TestDirectory_CreateFilesInDirectory_Idempotent(t *testing.T) {
 				require.NoError(t, err)
 				require.Len(t, createdFiles, 2)
 			}
+		})
+	}
+}
+
+// This test validates the convenience function added to filesutils package.
+// It therefore on purpose does not loop over all implementations.
+func TestDirectory_NewDirectoryByPath(t *testing.T) {
+	ctx := getCtx()
+
+	tempDirPath, err := tempfiles.CreateTempDir(ctx)
+	require.NoError(t, err)
+	defer nativefiles.Delete(ctx, tempDirPath, &filesoptions.DeleteOptions{})
+
+	dir, err := filesutils.NewDirectoryByPath(tempDirPath)
+	require.NoError(t, err)
+
+	exists, err := dir.Exists(ctx)
+	require.NoError(t, err)
+	require.True(t, exists)
+}
+
+func TestDirectory_GetAlphabeticallyLastFile(t *testing.T) {
+	for _, impl := range allDirectoryImplementations {
+		t.Run(impl, func(t *testing.T) {
+			ctx := getCtx()
+
+			tempPath, err := tempfilesoo.CreateEmptyTemporaryDirectoryAndGetPath(ctx)
+			require.NoError(t, err)
+
+			dir := getDirectoryToTest(impl, tempPath)
+			defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
+
+			// Test with empty directory - should return error
+			lastFile, err := dir.GetAlphabeticallyLastFile(ctx)
+			require.Error(t, err)
+			require.Nil(t, lastFile)
+
+			// Create files with different names
+			filesToCreate := []string{"alpha.txt", "beta.txt", "gamma.txt", "delta.txt"}
+			createdFiles, err := dir.CreateFilesInDirectory(ctx, filesToCreate, &filesoptions.CreateOptions{})
+			require.NoError(t, err)
+			require.Len(t, createdFiles, 4)
+
+			// Get the alphabetically last file
+			lastFile, err = dir.GetAlphabeticallyLastFile(ctx)
+			require.NoError(t, err)
+			require.NotNil(t, lastFile)
+
+			// The last file alphabetically should be "gamma.txt"
+			baseName, err := lastFile.GetBaseName()
+			require.NoError(t, err)
+			require.EqualValues(t, "gamma.txt", baseName)
+		})
+	}
+}
+
+func TestDirectory_GetAlphabeticallyLastFile_WithSingleFile(t *testing.T) {
+	for _, impl := range allDirectoryImplementations {
+		t.Run(impl, func(t *testing.T) {
+			ctx := getCtx()
+
+			tempPath, err := tempfilesoo.CreateEmptyTemporaryDirectoryAndGetPath(ctx)
+			require.NoError(t, err)
+
+			dir := getDirectoryToTest(impl, tempPath)
+			defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
+
+			// Create a single file
+			_, err = dir.WriteStringToFile(ctx, "onlyfile.txt", "content", &filesoptions.WriteOptions{})
+			require.NoError(t, err)
+
+			// Get the alphabetically last file (should be the only file)
+			lastFile, err := dir.GetAlphabeticallyLastFile(ctx)
+			require.NoError(t, err)
+			require.NotNil(t, lastFile)
+
+			baseName, err := lastFile.GetBaseName()
+			require.NoError(t, err)
+			require.EqualValues(t, "onlyfile.txt", baseName)
+		})
+	}
+}
+
+func TestDirectory_GetAlphabeticallyLastFile_WithNumbers(t *testing.T) {
+	for _, impl := range allDirectoryImplementations {
+		t.Run(impl, func(t *testing.T) {
+			ctx := getCtx()
+
+			tempPath, err := tempfilesoo.CreateEmptyTemporaryDirectoryAndGetPath(ctx)
+			require.NoError(t, err)
+
+			dir := getDirectoryToTest(impl, tempPath)
+			defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
+
+			// Create files with numbers in names (alphabetical sorting, not numeric)
+			filesToCreate := []string{"file1.txt", "file10.txt", "file2.txt"}
+			_, err = dir.CreateFilesInDirectory(ctx, filesToCreate, &filesoptions.CreateOptions{})
+			require.NoError(t, err)
+
+			// Get the alphabetically last file
+			// Alphabetically: file1.txt < file10.txt < file2.txt
+			lastFile, err := dir.GetAlphabeticallyLastFile(ctx)
+			require.NoError(t, err)
+			require.NotNil(t, lastFile)
+
+			baseName, err := lastFile.GetBaseName()
+			require.NoError(t, err)
+			require.EqualValues(t, "file2.txt", baseName)
 		})
 	}
 }

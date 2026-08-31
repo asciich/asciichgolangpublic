@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/fileinfo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -338,9 +339,9 @@ func (d *DirectoryBase) ListSubDirectoryPaths(ctx context.Context, options *para
 			if err != nil {
 				return nil, err
 			}
-
-			subDirectoryPaths = append(subDirectoryPaths, toAdd)
 		}
+
+		subDirectoryPaths = append(subDirectoryPaths, toAdd)
 	}
 
 	sort.Strings(subDirectoryPaths)
@@ -446,4 +447,81 @@ func (d *DirectoryBase) SetParentDirectoryForBaseClass(parentDirectoryForBaseCla
 	d.parentDirectoryForBaseClass = parentDirectoryForBaseClass
 
 	return nil
+}
+
+func (d *DirectoryBase) GetAlphabeticallyLastFile(ctx context.Context) (lastFile filesinterfaces.File, err error) {
+	parent, err := d.GetParentDirectoryForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	files, err := parent.ListFiles(ctx, &parameteroptions.ListFileOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(files) == 0 {
+		path, pathErr := parent.GetPath()
+		if pathErr != nil {
+			return nil, tracederrors.TracedErrorf("directory is empty and failed to get path: %w", err)
+		}
+		return nil, tracederrors.TracedErrorf("directory '%s' is empty", path)
+	}
+
+	// Sort files alphabetically by basename
+	sort.Slice(files, func(i, j int) bool {
+		nameI, errI := files[i].GetBaseName()
+		nameJ, errJ := files[j].GetBaseName()
+		if errI != nil || errJ != nil {
+			return false
+		}
+		return strings.Compare(nameI, nameJ) < 0
+	})
+
+	// Return the last file (alphabetically)
+	return files[len(files)-1], nil
+}
+
+func (d *DirectoryBase) GetFileInfoOfFilesInDirectory(ctx context.Context, options *parameteroptions.ListFileOptions) ([]*fileinfo.FileInfo, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	parent, err := d.GetParentDirectoryForBaseClass()
+	if err != nil {
+		return nil, err
+	}
+
+	// Reuse ListFiles to respect all options in ListFileOptions
+	files, err := parent.ListFiles(ctx, options)
+	if err != nil {
+		return nil, err
+	}
+
+	fileInfos := make([]*fileinfo.FileInfo, 0, len(files))
+	for _, file := range files {
+		fileInfo := fileinfo.NewFileInfo()
+
+		path, err := file.GetPath()
+		if err != nil {
+			return nil, err
+		}
+		err = fileInfo.SetPath(path)
+		if err != nil {
+			return nil, err
+		}
+
+		sizeBytes, err := file.GetSizeBytes(ctx)
+		if err != nil {
+			return nil, err
+		}
+		err = fileInfo.SetSizeBytes(sizeBytes)
+		if err != nil {
+			return nil, err
+		}
+
+		fileInfos = append(fileInfos, fileInfo)
+	}
+
+	return fileInfos, nil
 }
