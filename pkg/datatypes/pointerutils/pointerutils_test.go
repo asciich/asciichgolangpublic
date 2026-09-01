@@ -88,3 +88,54 @@ func TestToPointer(t *testing.T) {
 		require.True(t, pointerutils.IsPointer(pointer))
 	})
 }
+
+func TestCheckIsPointer(t *testing.T) {
+	t.Run("not a pointer", func(t *testing.T) {
+		err := pointerutils.CheckIsPointer(5)
+		require.Error(t, err)
+	})
+
+	t.Run("is a pointer", func(t *testing.T) {
+		err := pointerutils.CheckIsPointer(&constIntForTesting)
+		require.NoError(t, err)
+	})
+
+	t.Run("nil", func(t *testing.T) {
+		err := pointerutils.CheckIsPointer(nil)
+		require.Error(t, err)
+	})
+}
+
+func TestGetMemoryAddressAsUInt64(t *testing.T) {
+	t.Run("nil input", func(t *testing.T) {
+		addr, err := pointerutils.GetMemoryAddressAsUInt64(nil)
+		require.Error(t, err)
+		require.EqualValues(t, 0, addr)
+	})
+
+	t.Run("valid pointer", func(t *testing.T) {
+		addr, err := pointerutils.GetMemoryAddressAsUInt64(&constIntForTesting)
+		require.NoError(t, err)
+		require.NotEqual(t, 0, addr)
+	})
+}
+
+func TestGetMemoryAddressAsUIntPtr(t *testing.T) {
+	t.Run("nil input", func(t *testing.T) {
+		addr, err := pointerutils.GetMemoryAddressAsUIntPtr(nil)
+		require.Error(t, err)
+		require.EqualValues(t, 0, addr)
+	})
+
+	t.Run("not a pointer", func(t *testing.T) {
+		addr, err := pointerutils.GetMemoryAddressAsUIntPtr(5)
+		require.Error(t, err)
+		require.EqualValues(t, 0, addr)
+	})
+
+	t.Run("valid pointer", func(t *testing.T) {
+		addr, err := pointerutils.GetMemoryAddressAsUIntPtr(&constIntForTesting)
+		require.NoError(t, err)
+		require.NotEqual(t, 0, addr)
+	})
+}

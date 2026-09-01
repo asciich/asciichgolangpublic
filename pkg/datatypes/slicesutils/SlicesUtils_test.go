@@ -449,3 +449,262 @@ func Test_GetInitializedIntSliceWithZeros(t *testing.T) {
 		require.EqualValues(t, []int{}, slicesutils.GetInitializedIntSliceWithZeros(-5))
 	})
 }
+
+func TestSlices_AddPrefixToEachString(t *testing.T) {
+	tests := []struct {
+		input    []string
+		prefix   string
+		expected []string
+	}{
+		{[]string{"a", "b"}, "pre", []string{"prea", "preb"}},
+		{[]string{}, "pre", []string{}},
+		{nil, "pre", []string{}},
+	}
+
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%v", tt), func(t *testing.T) {
+			result := slicesutils.AddPrefixToEachString(tt.input, tt.prefix)
+			require.EqualValues(t, tt.expected, result)
+		})
+	}
+}
+
+func TestSlices_AddSuffixToEachString(t *testing.T) {
+	tests := []struct {
+		input    []string
+		suffix   string
+		expected []string
+	}{
+		{[]string{"a", "b"}, "suf", []string{"asuf", "bsuf"}},
+		{[]string{}, "suf", []string{}},
+		{nil, "suf", []string{}},
+	}
+
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%v", tt), func(t *testing.T) {
+			result := slicesutils.AddSuffixToEachString(tt.input, tt.suffix)
+			require.EqualValues(t, tt.expected, result)
+		})
+	}
+}
+
+func TestSlices_AtLeastOneElementStartsWith(t *testing.T) {
+	t.Run("at least one matches", func(t *testing.T) {
+		result := slicesutils.AtLeastOneElementStartsWith([]string{"hello", "world"}, "hel")
+		require.True(t, result)
+	})
+
+	t.Run("none matches", func(t *testing.T) {
+		result := slicesutils.AtLeastOneElementStartsWith([]string{"hello", "world"}, "foo")
+		require.False(t, result)
+	})
+
+	t.Run("empty slice", func(t *testing.T) {
+		result := slicesutils.AtLeastOneElementStartsWith([]string{}, "foo")
+		require.False(t, result)
+	})
+}
+
+func TestSlices_ByteSlicesEqual(t *testing.T) {
+	t.Run("equal", func(t *testing.T) {
+		result := slicesutils.ByteSlicesEqual([]byte{1, 2}, []byte{1, 2})
+		require.True(t, result)
+	})
+
+	t.Run("not equal", func(t *testing.T) {
+		result := slicesutils.ByteSlicesEqual([]byte{1, 2}, []byte{1, 3})
+		require.False(t, result)
+	})
+
+	t.Run("both nil", func(t *testing.T) {
+		result := slicesutils.ByteSlicesEqual(nil, nil)
+		require.False(t, result)
+	})
+
+	t.Run("one nil", func(t *testing.T) {
+		result := slicesutils.ByteSlicesEqual([]byte{1}, nil)
+		require.False(t, result)
+	})
+}
+
+func TestSlices_ContainsAllStrings(t *testing.T) {
+	t.Run("contains all", func(t *testing.T) {
+		result := slicesutils.ContainsAllStrings([]string{"a", "b", "c"}, []string{"a", "b"})
+		require.True(t, result)
+	})
+
+	t.Run("missing one", func(t *testing.T) {
+		result := slicesutils.ContainsAllStrings([]string{"a", "b"}, []string{"a", "c"})
+		require.False(t, result)
+	})
+
+	t.Run("empty toCheck", func(t *testing.T) {
+		result := slicesutils.ContainsAllStrings([]string{"a", "b"}, []string{})
+		require.False(t, result)
+	})
+}
+
+func TestSlices_ContainsEmptyString(t *testing.T) {
+	t.Run("has empty", func(t *testing.T) {
+		result := slicesutils.ContainsEmptyString([]string{"a", "", "b"})
+		require.True(t, result)
+	})
+
+	t.Run("no empty", func(t *testing.T) {
+		result := slicesutils.ContainsEmptyString([]string{"a", "b"})
+		require.False(t, result)
+	})
+
+	t.Run("empty slice", func(t *testing.T) {
+		result := slicesutils.ContainsEmptyString([]string{})
+		require.False(t, result)
+	})
+}
+
+func TestSlices_ContainsNoEmptyStrings(t *testing.T) {
+	t.Run("no empty", func(t *testing.T) {
+		result := slicesutils.ContainsNoEmptyStrings([]string{"a", "b"})
+		require.True(t, result)
+	})
+
+	t.Run("has empty", func(t *testing.T) {
+		result := slicesutils.ContainsNoEmptyStrings([]string{"a", "", "b"})
+		require.False(t, result)
+	})
+}
+
+func TestSlices_ContainsOnlyUniqeStrings(t *testing.T) {
+	t.Run("all unique", func(t *testing.T) {
+		result := slicesutils.ContainsOnlyUniqeStrings([]string{"a", "b", "c"})
+		require.True(t, result)
+	})
+
+	t.Run("has duplicate", func(t *testing.T) {
+		result := slicesutils.ContainsOnlyUniqeStrings([]string{"a", "b", "a"})
+		require.False(t, result)
+	})
+}
+
+func TestSlices_CountStrings(t *testing.T) {
+	t.Run("count occurrences", func(t *testing.T) {
+		result := slicesutils.CountStrings([]string{"a", "b", "a", "a"}, "a")
+		require.Equal(t, 3, result)
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		result := slicesutils.CountStrings([]string{"a", "b"}, "c")
+		require.Equal(t, 0, result)
+	})
+}
+
+func TestSlices_GetStringElementsNotInOtherSlice(t *testing.T) {
+	t.Run("some not in other", func(t *testing.T) {
+		result := slicesutils.GetStringElementsNotInOtherSlice([]string{"a", "b", "c"}, []string{"b", "c"})
+		require.Equal(t, []string{"a"}, result)
+	})
+
+	t.Run("all in other", func(t *testing.T) {
+		result := slicesutils.GetStringElementsNotInOtherSlice([]string{"a", "b"}, []string{"a", "b", "c"})
+		require.Equal(t, []string{}, result)
+	})
+}
+
+func TestSlices_RemoveEmptyStrings(t *testing.T) {
+	t.Run("has empty", func(t *testing.T) {
+		result := slicesutils.RemoveEmptyStrings([]string{"a", "", "b", ""})
+		require.Equal(t, []string{"a", "b"}, result)
+	})
+
+	t.Run("no empty", func(t *testing.T) {
+		result := slicesutils.RemoveEmptyStrings([]string{"a", "b"})
+		require.Equal(t, []string{"a", "b"}, result)
+	})
+}
+
+func TestSlices_RemoveString(t *testing.T) {
+	t.Run("remove existing", func(t *testing.T) {
+		result := slicesutils.RemoveString([]string{"a", "b", "c"}, "b")
+		require.Equal(t, []string{"a", "c"}, result)
+	})
+
+	t.Run("remove non-existing", func(t *testing.T) {
+		result := slicesutils.RemoveString([]string{"a", "b"}, "c")
+		require.Equal(t, []string{"a", "b"}, result)
+	})
+}
+
+func TestSlices_RemoveStringEntryAtIndex(t *testing.T) {
+	t.Run("valid index", func(t *testing.T) {
+		result := slicesutils.RemoveStringEntryAtIndex([]string{"a", "b", "c"}, 1)
+		require.Equal(t, []string{"a", "c"}, result)
+	})
+
+	t.Run("index out of bounds", func(t *testing.T) {
+		result := slicesutils.RemoveStringEntryAtIndex([]string{"a", "b"}, 5)
+		require.Equal(t, []string{"a", "b"}, result)
+	})
+}
+
+func TestSlices_SortStringSliceAndRemoveDuplicates(t *testing.T) {
+	t.Run("with duplicates", func(t *testing.T) {
+		result := slicesutils.SortStringSliceAndRemoveDuplicates([]string{"c", "a", "b", "a"})
+		require.Equal(t, []string{"a", "b", "c"}, result)
+	})
+
+	t.Run("already sorted", func(t *testing.T) {
+		result := slicesutils.SortStringSliceAndRemoveDuplicates([]string{"a", "b", "c"})
+		require.Equal(t, []string{"a", "b", "c"}, result)
+	})
+}
+
+func TestSlices_SortStringSliceAndRemoveEmpty(t *testing.T) {
+	t.Run("with empty", func(t *testing.T) {
+		result := slicesutils.SortStringSliceAndRemoveEmpty([]string{"c", "", "a", "b"})
+		require.Equal(t, []string{"a", "b", "c"}, result)
+	})
+
+	t.Run("no empty", func(t *testing.T) {
+		result := slicesutils.SortStringSliceAndRemoveEmpty([]string{"c", "a", "b"})
+		require.Equal(t, []string{"a", "b", "c"}, result)
+	})
+}
+
+func TestSlices_SplitStrings(t *testing.T) {
+	t.Run("split", func(t *testing.T) {
+		result := slicesutils.SplitStrings([]string{"a-b", "c-d"}, "-")
+		require.Equal(t, []string{"a", "b", "c", "d"}, result)
+	})
+
+	t.Run("no separator", func(t *testing.T) {
+		result := slicesutils.SplitStrings([]string{"ab", "cd"}, "-")
+		require.Equal(t, []string{"ab", "cd"}, result)
+	})
+}
+
+func TestSlices_SplitStringsAndRemoveEmpty(t *testing.T) {
+	t.Run("split with empty", func(t *testing.T) {
+		result := slicesutils.SplitStringsAndRemoveEmpty([]string{"a-", "c-d"}, "-")
+		require.Equal(t, []string{"a", "c", "d"}, result)
+	})
+}
+
+func TestSlices_ToLower(t *testing.T) {
+	t.Run("mixed case", func(t *testing.T) {
+		result := slicesutils.ToLower([]string{"Hello", "WORLD"})
+		require.Equal(t, []string{"hello", "world"}, result)
+	})
+}
+
+func TestSlices_TrimAllPrefix(t *testing.T) {
+	t.Run("trim prefix", func(t *testing.T) {
+		result := slicesutils.TrimAllPrefix([]string{"prea", "preb"}, "pre")
+		require.Equal(t, []string{"a", "b"}, result)
+	})
+}
+
+func TestSlices_TrimPrefix(t *testing.T) {
+	t.Run("trim prefix", func(t *testing.T) {
+		result := slicesutils.TrimPrefix([]string{"prea", "preb"}, "pre")
+		require.Equal(t, []string{"a", "b"}, result)
+	})
+}
