@@ -233,3 +233,77 @@ func Test_ListFieldNames(t *testing.T) {
 		require.EqualValues(t, []string{"A", "B"}, names)
 	})
 }
+
+func Test_HasField(t *testing.T) {
+	t.Run("nil struct", func(t *testing.T) {
+		hasField, err := HasField(nil, "A")
+		require.Error(t, err)
+		require.False(t, hasField)
+	})
+
+	t.Run("empty field name", func(t *testing.T) {
+		type OneField struct {
+			A string
+		}
+
+		hasField, err := HasField(OneField{}, "")
+		require.Error(t, err)
+		require.False(t, hasField)
+	})
+
+	t.Run("struct with no fields", func(t *testing.T) {
+		type Empty struct{}
+
+		hasField, err := HasField(Empty{}, "A")
+		require.NoError(t, err)
+		require.False(t, hasField)
+	})
+
+	t.Run("struct with no fields ptr", func(t *testing.T) {
+		type Empty struct{}
+
+		hasField, err := HasField(&Empty{}, "A")
+		require.NoError(t, err)
+		require.False(t, hasField)
+	})
+
+	t.Run("struct has field", func(t *testing.T) {
+		type OneField struct {
+			A string
+		}
+
+		hasField, err := HasField(OneField{}, "A")
+		require.NoError(t, err)
+		require.True(t, hasField)
+	})
+
+	t.Run("struct has field ptr", func(t *testing.T) {
+		type OneField struct {
+			A string
+		}
+
+		hasField, err := HasField(&OneField{}, "A")
+		require.NoError(t, err)
+		require.True(t, hasField)
+	})
+
+	t.Run("struct does not have field", func(t *testing.T) {
+		type OneField struct {
+			A string
+		}
+
+		hasField, err := HasField(OneField{}, "B")
+		require.NoError(t, err)
+		require.False(t, hasField)
+	})
+
+	t.Run("struct does not have field ptr", func(t *testing.T) {
+		type OneField struct {
+			A string
+		}
+
+		hasField, err := HasField(&OneField{}, "B")
+		require.NoError(t, err)
+		require.False(t, hasField)
+	})
+}

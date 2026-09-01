@@ -1145,7 +1145,7 @@ func TestStrings_GetFirstLineWithoutCommentAndTrimSpace(t *testing.T) {
 func TestStrings_GetNumberOfLinesWithPrefix(t *testing.T) {
 	tests := []struct {
 		input    string
-		prefix  string
+		prefix   string
 		trim     bool
 		expected int
 	}{
@@ -1166,9 +1166,9 @@ func TestStrings_GetNumberOfLinesWithPrefix(t *testing.T) {
 
 func TestStrings_HasAtLeastOnePrefix(t *testing.T) {
 	tests := []struct {
-		toCheck    string
-		prefixes   []string
-		expected    bool
+		toCheck  string
+		prefixes []string
+		expected bool
 	}{
 		{"", []string{}, false},
 		{"test", []string{"pre"}, false},
@@ -1186,10 +1186,10 @@ func TestStrings_HasAtLeastOnePrefix(t *testing.T) {
 
 func TestStrings_HasPrefixAndSuffix(t *testing.T) {
 	tests := []struct {
-		input        string
-		prefix      string
-		suffix      string
-		expected    bool
+		input    string
+		prefix   string
+		suffix   string
+		expected bool
 	}{
 		{"test", "pre", "suf", false},
 		{"pretestsuf", "pre", "suf", true},
@@ -1303,7 +1303,6 @@ func TestStrings_ToSnakeCase(t *testing.T) {
 	}
 }
 
-
 func TestStrings_MustGetAsKeyValues(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1374,3 +1373,209 @@ func TestStrings_MustMatchesRegex_Panic(t *testing.T) {
 	})
 }
 
+func TestStrings_ContainsAllIgnoreCase(t *testing.T) {
+	t.Run("all substrings found", func(t *testing.T) {
+		result := ContainsAllIgnoreCase("Hello World", []string{"hello", "world"})
+		require.True(t, result)
+	})
+
+	t.Run("not all substrings found", func(t *testing.T) {
+		result := ContainsAllIgnoreCase("Hello World", []string{"hello", "foo"})
+		require.False(t, result)
+	})
+
+	t.Run("empty substrings", func(t *testing.T) {
+		result := ContainsAllIgnoreCase("Hello World", []string{})
+		require.True(t, result)
+	})
+
+	t.Run("nil substrings", func(t *testing.T) {
+		result := ContainsAllIgnoreCase("Hello World", nil)
+		require.True(t, result)
+	})
+}
+
+func TestStrings_ContainsCommentOnly(t *testing.T) {
+	t.Run("comment only", func(t *testing.T) {
+		result := ContainsCommentOnly("// comment")
+		require.True(t, result)
+	})
+
+	t.Run("content with comment", func(t *testing.T) {
+		result := ContainsCommentOnly("code\n// comment")
+		require.False(t, result)
+	})
+
+	t.Run("empty string", func(t *testing.T) {
+		result := ContainsCommentOnly("")
+		require.False(t, result)
+	})
+
+	t.Run("whitespace only", func(t *testing.T) {
+		result := ContainsCommentOnly("   ")
+		require.False(t, result)
+	})
+}
+
+func TestStrings_RemoveCommentMarkers(t *testing.T) {
+	t.Run("with comment markers", func(t *testing.T) {
+		result := RemoveCommentMarkers("// comment\n// line2")
+		require.Equal(t, "comment\nline2", result)
+	})
+
+	t.Run("empty string", func(t *testing.T) {
+		result := RemoveCommentMarkers("")
+		require.Equal(t, "", result)
+	})
+}
+
+func TestStrings_RemoveCommentsAndTrimSpace(t *testing.T) {
+	t.Run("with comments", func(t *testing.T) {
+		result := RemoveCommentsAndTrimSpace("code\n// comment")
+		require.Equal(t, "code", result)
+	})
+
+	t.Run("empty string", func(t *testing.T) {
+		result := RemoveCommentsAndTrimSpace("")
+		require.Equal(t, "", result)
+	})
+}
+
+func TestStrings_RemoveSurroundingQuotationMarks(t *testing.T) {
+	t.Run("with quotes", func(t *testing.T) {
+		result := RemoveSurroundingQuotationMarks("\"hello\"")
+		require.Equal(t, "hello", result)
+	})
+
+	t.Run("without quotes", func(t *testing.T) {
+		result := RemoveSurroundingQuotationMarks("hello")
+		require.Equal(t, "hello", result)
+	})
+
+	t.Run("empty string", func(t *testing.T) {
+		result := RemoveSurroundingQuotationMarks("")
+		require.Equal(t, "", result)
+	})
+
+	t.Run("only opening quote", func(t *testing.T) {
+		result := RemoveSurroundingQuotationMarks("\"hello")
+		require.Equal(t, "\"hello", result)
+	})
+}
+
+func TestStrings_RepeatReplaceAll(t *testing.T) {
+	t.Run("multiple replacements", func(t *testing.T) {
+		result := RepeatReplaceAll("aaa", "a", "b")
+		require.Equal(t, "bbb", result)
+	})
+
+	t.Run("no match", func(t *testing.T) {
+		result := RepeatReplaceAll("hello", "x", "y")
+		require.Equal(t, "hello", result)
+	})
+
+	t.Run("empty input", func(t *testing.T) {
+		result := RepeatReplaceAll("", "a", "b")
+		require.Equal(t, "", result)
+	})
+
+	t.Run("empty search", func(t *testing.T) {
+		result := RepeatReplaceAll("hello", "", "x")
+		require.Equal(t, "hello", result)
+	})
+}
+
+func TestStrings_TrimAllLeadingNewLines(t *testing.T) {
+	result := TrimAllLeadingNewLines("\n\n\nhello")
+	require.Equal(t, "hello", result)
+}
+
+func TestStrings_TrimAllPrefix(t *testing.T) {
+	t.Run("multiple prefixes", func(t *testing.T) {
+		result := TrimAllPrefix("xxxhello", "x")
+		require.Equal(t, "hello", result)
+	})
+
+	t.Run("no prefix", func(t *testing.T) {
+		result := TrimAllPrefix("hello", "x")
+		require.Equal(t, "hello", result)
+	})
+
+	t.Run("empty input", func(t *testing.T) {
+		result := TrimAllPrefix("", "x")
+		require.Equal(t, "", result)
+	})
+
+	t.Run("empty prefix", func(t *testing.T) {
+		result := TrimAllPrefix("hello", "")
+		require.Equal(t, "hello", result)
+	})
+}
+
+func TestStrings_TrimAllSuffix(t *testing.T) {
+	t.Run("multiple suffixes", func(t *testing.T) {
+		result := TrimAllSuffix("helloxxx", "x")
+		require.Equal(t, "hello", result)
+	})
+
+	t.Run("no suffix", func(t *testing.T) {
+		result := TrimAllSuffix("hello", "x")
+		require.Equal(t, "hello", result)
+	})
+
+	t.Run("empty input", func(t *testing.T) {
+		result := TrimAllSuffix("", "x")
+		require.Equal(t, "", result)
+	})
+
+	t.Run("empty suffix", func(t *testing.T) {
+		result := TrimAllSuffix("hello", "")
+		require.Equal(t, "hello", result)
+	})
+}
+
+func TestStrings_TrimAllTailingNewLines(t *testing.T) {
+	result := TrimAllTailingNewLines("hello\n\n\n")
+	require.Equal(t, "hello", result)
+}
+
+func TestStrings_TrimPrefixAndSuffix(t *testing.T) {
+	result := TrimPrefixAndSuffix("<hello>", "<", ">")
+	require.Equal(t, "hello", result)
+}
+
+func TestStrings_TrimSpaceForEveryLine(t *testing.T) {
+	t.Run("reconstructs lines", func(t *testing.T) {
+		result := TrimSpaceForEveryLine("hello\nworld")
+		require.Equal(t, "hello\nworld", result)
+	})
+}
+
+func TestStrings_TrimSpacesRight(t *testing.T) {
+	result := TrimSpacesRight("hello  \t\n")
+	require.Equal(t, "hello", result)
+}
+
+func TestStrings_TrimSuffixAndSpace(t *testing.T) {
+	t.Run("suffix at end", func(t *testing.T) {
+		result := TrimSuffixAndSpace("hello!", "!")
+		require.Equal(t, "hello", result)
+	})
+
+	t.Run("suffix with trailing space", func(t *testing.T) {
+		result := TrimSuffixAndSpace("hello!  ", "!")
+		require.Equal(t, "hello!", result)
+	})
+}
+
+func TestStrings_TrimSuffixUntilAbsent(t *testing.T) {
+	t.Run("multiple suffixes", func(t *testing.T) {
+		result := TrimSuffixUntilAbsent("hello!!!", "!")
+		require.Equal(t, "hello", result)
+	})
+
+	t.Run("no suffix", func(t *testing.T) {
+		result := TrimSuffixUntilAbsent("hello", "!")
+		require.Equal(t, "hello", result)
+	})
+}

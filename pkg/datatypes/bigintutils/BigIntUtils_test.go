@@ -196,3 +196,41 @@ func Test_GetRandomBigIntByInts(t *testing.T) {
 		require.True(t, bigintutils.EqualsInts(big.NewInt(-3), bigInt))
 	})
 }
+
+func Test_AddIntToDecimalString(t *testing.T) {
+	t.Run("empty decimal", func(t *testing.T) {
+		result, err := bigintutils.AddIntToDecimalString("", 1)
+		require.Error(t, err)
+		require.EqualValues(t, "", result)
+	})
+
+	t.Run("add positive", func(t *testing.T) {
+		result, err := bigintutils.AddIntToDecimalString("100", 50)
+		require.NoError(t, err)
+		require.EqualValues(t, "150", result)
+	})
+
+	t.Run("add negative", func(t *testing.T) {
+		result, err := bigintutils.AddIntToDecimalString("100", -50)
+		require.NoError(t, err)
+		require.EqualValues(t, "50", result)
+	})
+
+	t.Run("add zero", func(t *testing.T) {
+		result, err := bigintutils.AddIntToDecimalString("100", 0)
+		require.NoError(t, err)
+		require.EqualValues(t, "100", result)
+	})
+
+	t.Run("negative decimal add positive", func(t *testing.T) {
+		result, err := bigintutils.AddIntToDecimalString("-100", 50)
+		require.NoError(t, err)
+		require.EqualValues(t, "-50", result)
+	})
+
+	t.Run("zero add positive", func(t *testing.T) {
+		result, err := bigintutils.AddIntToDecimalString("0", 1)
+		require.NoError(t, err)
+		require.EqualValues(t, "1", result)
+	})
+}

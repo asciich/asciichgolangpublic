@@ -76,3 +76,15 @@ func TestFloatRound(t *testing.T) {
 		)
 	}
 }
+
+func TestRound_Error(t *testing.T) {
+	rounded, err := Round(1.0, -1)
+	require.Error(t, err)
+	require.EqualValues(t, -1.0, rounded)
+}
+
+func TestToString_Error(t *testing.T) {
+	result, err := ToString(1.0, -1)
+	require.Error(t, err)
+	require.EqualValues(t, "", result)
+}
