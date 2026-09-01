@@ -1013,3 +1013,364 @@ def
 		require.EqualValues(t, expected, got)
 	})
 }
+
+func TestStrings_NewStringsService(t *testing.T) {
+	service := NewStringsService()
+	require.NotNil(t, service)
+	require.IsType(t, &StringsService{}, service)
+}
+
+func TestStrings_Strings(t *testing.T) {
+	service := Strings()
+	require.NotNil(t, service)
+	require.IsType(t, &StringsService{}, service)
+}
+
+func TestStrings_FirstCharToUpper(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"", ""},
+		{"a", "A"},
+		{"abc", "Abc"},
+		{"ABC", "ABC"},
+		{"123", "123"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			result := FirstCharToUpper(tt.input)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestStrings_CountLines(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{"", 0},
+		{"test", 1},
+		{"test\n", 2},
+		{"test\ntest2", 2},
+		{"test\ntest2\n", 3},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			result := CountLines(tt.input)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestStrings_EnsureEndsWithLineBreak(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"", "\n"},
+		{"test", "test\n"},
+		{"test\n", "test\n"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			result := EnsureEndsWithLineBreak(tt.input)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestStrings_EnsureEndsWithExactlyOneLineBreak(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"", "\n"},
+		{"test", "test\n"},
+		{"test\n", "test\n"},
+		{"test\n\n", "test\n"},
+		{"test\n\n\n", "test\n"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			result := EnsureEndsWithExactlyOneLineBreak(tt.input)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestStrings_RemoveTailingNewline(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"", ""},
+		{"test", "test"},
+		{"test\n", "test"},
+		{"test\n\n", "test\n"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			result := RemoveTailingNewline(tt.input)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestStrings_GetFirstLineWithoutCommentAndTrimSpace(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"", ""},
+		{"test", "test"},
+		{"# comment\ntest", "test"},
+		{"// comment\n\ttest", "test"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			result := GetFirstLineWithoutCommentAndTrimSpace(tt.input)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestStrings_GetNumberOfLinesWithPrefix(t *testing.T) {
+	tests := []struct {
+		input    string
+		prefix  string
+		trim     bool
+		expected int
+	}{
+		{"", "", false, 0},
+		{"test", "test", false, 1},
+		{"test2\ntest", "test", false, 2},
+		{"test\ntest", "test", false, 2},
+		{"test\n test", "test", true, 2},
+	}
+
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%v", tt), func(t *testing.T) {
+			result := GetNumberOfLinesWithPrefix(tt.input, tt.prefix, tt.trim)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestStrings_HasAtLeastOnePrefix(t *testing.T) {
+	tests := []struct {
+		toCheck    string
+		prefixes   []string
+		expected    bool
+	}{
+		{"", []string{}, false},
+		{"test", []string{"pre"}, false},
+		{"pretest", []string{"pre"}, true},
+		{"test", []string{"pre", "te"}, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%v", tt), func(t *testing.T) {
+			result := HasAtLeastOnePrefix(tt.toCheck, tt.prefixes)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestStrings_HasPrefixAndSuffix(t *testing.T) {
+	tests := []struct {
+		input        string
+		prefix      string
+		suffix      string
+		expected    bool
+	}{
+		{"test", "pre", "suf", false},
+		{"pretestsuf", "pre", "suf", true},
+		{"pretest", "pre", "suf", false},
+		{"testsuf", "pre", "suf", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%v", tt), func(t *testing.T) {
+			result := HasPrefixAndSuffix(tt.input, tt.prefix, tt.suffix)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestStrings_SplitAndGetLastElement(t *testing.T) {
+	tests := []struct {
+		input    string
+		token    string
+		expected string
+	}{
+		{"", "/", ""},
+		{"test", "/", "test"},
+		{"a/b/c", "/", "c"},
+		{"a/b/c/d", "/", "d"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			result := SplitAndGetLastElement(tt.input, tt.token)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestStrings_SplitAtSpacesAndRemoveEmptyStrings(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []string
+	}{
+		{"", []string{}},
+		{"test", []string{"test"}},
+		{"a b c", []string{"a", "b", "c"}},
+		{"a  b", []string{"a", "b"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			result := SplitAtSpacesAndRemoveEmptyStrings(tt.input)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestStrings_SplitFirstLineAndContent(t *testing.T) {
+	tests := []struct {
+		input      string
+		expLine    string
+		expContent string
+	}{
+		{"", "", ""},
+		{"test", "test", ""},
+		{"test\ncontent", "test", "content"},
+		{"line1\nline2\nline3", "line1", "line2\nline3"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			line, content := SplitFirstLineAndContent(tt.input)
+			require.Equal(t, tt.expLine, line)
+			require.Equal(t, tt.expContent, content)
+		})
+	}
+}
+
+func TestStrings_ToPascalCase(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"", ""},
+		{"test", "Test"},
+		{"hello world", "HelloWorld"},
+		{"go lang", "GoLang"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			result := ToPascalCase(tt.input)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestStrings_ToSnakeCase(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"", ""},
+		{"test", "test"},
+		{"hello world", "hello_world"},
+		{"Go Lang", "go_lang"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			result := ToSnakeCase(tt.input)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+
+func TestStrings_MustGetAsKeyValues(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected map[string]string
+	}{
+		{"", map[string]string{}},
+		{"key=value", map[string]string{"key": "value"}},
+		{"key1=value1\nkey2=value2", map[string]string{"key1": "value1", "key2": "value2"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			result := MustGetAsKeyValues(tt.input)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestStrings_MustGetAsKeyValues_Panic(t *testing.T) {
+	require.Panics(t, func() {
+		MustGetAsKeyValues("invalid line without delimiter")
+	})
+}
+
+func TestStrings_MustGetValueAsString(t *testing.T) {
+	input := "key1=value1\nkey2=value2"
+	result := MustGetValueAsString(input, "key1")
+	require.Equal(t, "value1", result)
+}
+
+func TestStrings_MustGetValueAsString_Panic(t *testing.T) {
+	require.Panics(t, func() {
+		MustGetValueAsString("key=value", "nonexistent")
+	})
+}
+
+func TestStrings_MustGetValueAsInt(t *testing.T) {
+	input := "key1=123\nkey2=456"
+	result := MustGetValueAsInt(input, "key1")
+	require.Equal(t, 123, result)
+}
+
+func TestStrings_MustGetValueAsInt_Panic(t *testing.T) {
+	require.Panics(t, func() {
+		MustGetValueAsInt("key=notanumber", "key")
+	})
+}
+
+func TestStrings_MustHexStringToBytes(t *testing.T) {
+	result := MustHexStringToBytes("48656c6c6f")
+	require.Equal(t, []byte("Hello"), result)
+}
+
+func TestStrings_MustHexStringToBytes_Panic(t *testing.T) {
+	require.Panics(t, func() {
+		MustHexStringToBytes("invalid hex")
+	})
+}
+
+func TestStrings_MustMatchesRegex(t *testing.T) {
+	result := MustMatchesRegex("test123", "test\\d+")
+	require.True(t, result)
+}
+
+func TestStrings_MustMatchesRegex_Panic(t *testing.T) {
+	require.Panics(t, func() {
+		MustMatchesRegex("test", "[invalid")
+	})
+}
+
