@@ -54,7 +54,7 @@ func TestDirectory_GetFileInfoOfFilesInDirectory(t *testing.T) {
 				// Verify file info
 				for _, fileInfo := range fileInfos {
 					require.NotNil(t, fileInfo)
-					
+
 					path, err := fileInfo.GetPath()
 					require.NoError(t, err)
 					require.NotEmpty(t, path)
@@ -238,7 +238,7 @@ func TestDirectory_GetFileInfoOfFilesInDirectory_NilOptions(t *testing.T) {
 // TestFileInfo_GetPath tests FileInfo.GetPath method
 func TestFileInfo_GetPath(t *testing.T) {
 	fileInfo := fileinfo.NewFileInfo()
-	
+
 	// Test with empty path
 	_, err := fileInfo.GetPath()
 	require.Error(t, err)
@@ -255,7 +255,7 @@ func TestFileInfo_GetPath(t *testing.T) {
 // TestFileInfo_GetSizeBytes tests FileInfo.GetSizeBytes method
 func TestFileInfo_GetSizeBytes(t *testing.T) {
 	fileInfo := fileinfo.NewFileInfo()
-	
+
 	// Test with default size (0)
 	size, err := fileInfo.GetSizeBytes()
 	require.NoError(t, err)
@@ -273,7 +273,7 @@ func TestFileInfo_GetSizeBytes(t *testing.T) {
 // TestFileInfo_GetPathAndSizeBytes tests FileInfo.GetPathAndSizeBytes method
 func TestFileInfo_GetPathAndSizeBytes(t *testing.T) {
 	fileInfo := fileinfo.NewFileInfo()
-	
+
 	// Test with empty path
 	_, _, err := fileInfo.GetPathAndSizeBytes()
 	require.Error(t, err)

@@ -105,7 +105,6 @@ func Test_Pull(t *testing.T) {
 	}
 }
 
-
 func Test_Fetch(t *testing.T) {
 	var tests = []struct {
 		implementationName string

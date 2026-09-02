@@ -4,8 +4,8 @@ import (
 	"context"
 	"os"
 
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 )
 
 func CreateEmptyTemporaryDirectory(ctx context.Context) (temporaryDirectory filesinterfaces.Directory, err error) {
@@ -14,7 +14,7 @@ func CreateEmptyTemporaryDirectory(ctx context.Context) (temporaryDirectory file
 		return nil, err
 	}
 
-	temporaryDirectory, err = files.GetLocalDirectoryByPath(ctx, dirPath)
+	temporaryDirectory, err = nativefilesoo.NewDirectoryByPath(dirPath)
 	if err != nil {
 		return nil, err
 	}

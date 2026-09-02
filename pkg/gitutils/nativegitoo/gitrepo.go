@@ -370,7 +370,6 @@ func (n *NativeGitRepository) CreateSubDirectory(ctx context.Context, subDirecto
 	return nil, tracederrors.TracedErrorNotImplemented()
 }
 
-
 func (n *NativeGitRepository) Delete(ctx context.Context, options *filesoptions.DeleteOptions) (err error) {
 	path, hostDescription, err := n.GetPathAndHostDescription()
 	if err != nil {
@@ -854,7 +853,6 @@ func (n *NativeGitRepository) PushToRemote(ctx context.Context, remoteName strin
 
 	return nil
 }
-
 
 func (n *NativeGitRepository) SetGitConfig(ctx context.Context, options *gitparameteroptions.GitConfigSetOptions) (err error) {
 	if options == nil {

@@ -3,9 +3,9 @@ package ansiblegalaxyutils
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -16,7 +16,7 @@ func CreateFileStructure(ctx context.Context, path string, options *CreateCollec
 		return tracederrors.TracedErrorEmptyString("path")
 	}
 
-	dir, err := files.GetLocalDirectoryByPath(ctx, path)
+	dir, err := nativefilesoo.NewDirectoryByPath(path)
 	if err != nil {
 		return err
 	}

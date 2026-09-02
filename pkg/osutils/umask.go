@@ -6,8 +6,8 @@ import (
 	"io/fs"
 	"os"
 
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 )
 
 // Get umask of the current process
@@ -62,7 +62,7 @@ func GetProcessId() (processId int) {
 
 func GetProcessProcDirectory(ctx context.Context) (procDirectory filesinterfaces.Directory, err error) {
 	pid := GetProcessId()
-	procDirectory, err = files.GetLocalDirectoryByPath(ctx, fmt.Sprintf("/proc/%d", pid))
+	procDirectory, err = nativefilesoo.NewDirectoryByPath(fmt.Sprintf("/proc/%d", pid))
 	if err != nil {
 		return nil, err
 	}

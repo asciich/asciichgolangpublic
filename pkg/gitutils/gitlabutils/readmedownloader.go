@@ -6,8 +6,8 @@ import (
 	"errors"
 
 	"github.com/asciich/asciichgolangpublic"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -48,7 +48,7 @@ func DownloadMainReadmes(ctx context.Context, options *DownloadMainReadmesOption
 		return err
 	}
 
-	outDir, err := files.GetLocalDirectoryByPath(ctx, options.OuputPath)
+	outDir, err := nativefilesoo.NewDirectoryByPath(options.OuputPath)
 	if err != nil {
 		return err
 	}

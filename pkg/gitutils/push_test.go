@@ -55,7 +55,6 @@ func Test_PushToRemote(t *testing.T) {
 	}
 }
 
-
 func Test_PushTagsToRemote(t *testing.T) {
 	var tests = []struct {
 		implementationName string
