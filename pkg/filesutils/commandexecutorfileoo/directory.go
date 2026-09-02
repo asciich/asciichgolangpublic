@@ -122,7 +122,7 @@ func (d *Directory) CreateSubDirectory(ctx context.Context, subDirectoryName str
 		return nil, tracederrors.TracedErrorEmptyString("subDirectoryName")
 	}
 
-	createdSubDirectory, err = d.GetSubDirectory(ctx, subDirectoryName)
+	createdSubDirectory, err = d.GetDirectoryByPath(ctx, subDirectoryName)
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +135,7 @@ func (d *Directory) CreateSubDirectory(ctx context.Context, subDirectoryName str
 	return createdSubDirectory, nil
 }
 
-func (d *Directory) GetSubDirectory(ctx context.Context, path ...string) (subDirectory filesinterfaces.Directory, err error) {
+func (d *Directory) GetDirectoryByPath(ctx context.Context, path ...string) (subDirectory filesinterfaces.Directory, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedErrorNil("path")
 	}

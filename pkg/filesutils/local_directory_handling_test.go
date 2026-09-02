@@ -140,7 +140,7 @@ func TestDirectoryGetSubDirectory(t *testing.T) {
 		homeDir, err := files.GetLocalDirectoryByPath(ctx, "/home/")
 		require.NoError(t, err)
 
-		subDir, err := homeDir.GetSubDirectory(ctx, "testfile")
+		subDir, err := homeDir.GetDirectoryByPath(ctx, "testfile")
 		require.NoError(t, err)
 
 		localPath, err := subDir.GetLocalPath()
@@ -154,7 +154,7 @@ func TestDirectoryGetSubDirectory(t *testing.T) {
 		homeDir, err := files.GetLocalDirectoryByPath(ctx, "/home/")
 		require.NoError(t, err)
 
-		subDir, err := homeDir.GetSubDirectory(ctx, "subdir", "another_file")
+		subDir, err := homeDir.GetDirectoryByPath(ctx, "subdir", "another_file")
 		require.NoError(t, err)
 
 		localPath, err := subDir.GetLocalPath()
@@ -394,7 +394,7 @@ func TestDirectoryCreate(t *testing.T) {
 				tempDir := getDirectoryToTest(tt.implementationName, tempPath)
 				defer tempDir.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				subDir, err := tempDir.GetSubDirectory(ctx, tt.subDirPath...)
+				subDir, err := tempDir.GetDirectoryByPath(ctx, tt.subDirPath...)
 				require.NoError(t, err)
 
 				exists, err := subDir.Exists(ctx)

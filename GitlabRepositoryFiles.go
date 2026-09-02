@@ -148,8 +148,8 @@ func (g *GitlabRepositoryFiles) GetFileAndDirectoryNames(ctx context.Context, re
 	return fileNames, nil
 }
 
-// TODO: should be ListFileNames
-func (g *GitlabRepositoryFiles) GetFileNames(ctx context.Context, ref string) (fileNames []string, err error) {
+// ListFileNames returns all file names in the repository at the given ref.
+func (g *GitlabRepositoryFiles) ListFileNames(ctx context.Context, ref string) (fileNames []string, err error) {
 	if ref == "" {
 		return nil, tracederrors.TracedErrorEmptyString("ref")
 	}
@@ -186,7 +186,7 @@ func (g *GitlabRepositoryFiles) GetFiles(ctx context.Context, ref string) (files
 		return nil, err
 	}
 
-	fileNames, err := g.GetFileNames(ctx, ref)
+	fileNames, err := g.ListFileNames(ctx, ref)
 	if err != nil {
 		return nil, err
 	}
@@ -384,7 +384,7 @@ func (g *GitlabRepositoryFiles) HasRepositoryFiles(ctx context.Context, branchNa
 		return false, tracederrors.TracedErrorEmptyString("branchName")
 	}
 
-	fileNameList, err := g.GetFileNames(ctx, branchName)
+	fileNameList, err := g.ListFileNames(ctx, branchName)
 	if err != nil {
 		return false, err
 	}

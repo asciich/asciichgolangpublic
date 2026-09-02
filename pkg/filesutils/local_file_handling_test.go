@@ -626,7 +626,7 @@ func TestFileSortBlocksInFile(t *testing.T) {
 	tests := []TestCase{}
 	ctx := getCtx()
 
-	testDataDirectory, err := getRepoRootDir(ctx, t).GetSubDirectory(ctx, "testdata", "File", "SortBlocksInFile")
+	testDataDirectory, err := getRepoRootDir(ctx, t).GetDirectoryByPath(ctx, "testdata", "File", "SortBlocksInFile")
 	require.NoError(t, err)
 
 	for _, impl := range allFileImplementations {

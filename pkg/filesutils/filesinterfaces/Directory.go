@@ -24,8 +24,7 @@ type Directory interface {
 	GetParentDirectory(ctx context.Context) (parentDirectory Directory, err error)
 	// Returns the absolute path to the file without any indication of the host.
 	GetPath() (dirPath string, err error)
-	// TODO rename GetSubDirectory with GetDirectoryByPath to make it consistent.
-	GetSubDirectory(ctx context.Context, path ...string) (subDirectory Directory, err error)
+	GetDirectoryByPath(ctx context.Context, path ...string) (subDirectory Directory, err error)
 	IsLocalDirectory() (isLocalDirectory bool, err error)
 	ListFiles(ctx context.Context, listFileOptions *parameteroptions.ListFileOptions) (files []File, err error)
 	ListSubDirectories(ctx context.Context, options *parameteroptions.ListDirectoryOptions) (subDirectories []Directory, err error)

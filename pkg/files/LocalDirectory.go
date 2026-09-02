@@ -508,7 +508,7 @@ func (l *LocalDirectory) GetPath() (dirPath string, err error) {
 	return dirPath, nil
 }
 
-func (l *LocalDirectory) GetSubDirectory(ctx context.Context, path ...string) (subDirectory filesinterfaces.Directory, err error) {
+func (l *LocalDirectory) GetDirectoryByPath(ctx context.Context, path ...string) (subDirectory filesinterfaces.Directory, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedError("path has no elements")
 	}
@@ -532,7 +532,7 @@ func (l *LocalDirectory) GetSubDirectory(ctx context.Context, path ...string) (s
 }
 
 func (l *LocalDirectory) GetSubDirectoryAndLocalPath(ctx context.Context, path ...string) (subDirectory filesinterfaces.Directory, subDirectoryPath string, err error) {
-	subDirectory, err = l.GetSubDirectory(ctx, path...)
+	subDirectory, err = l.GetDirectoryByPath(ctx, path...)
 	if err != nil {
 		return nil, "", err
 	}
@@ -746,7 +746,7 @@ func (l *LocalDirectory) SubDirectoryExists(ctx context.Context, subDirName stri
 		return false, tracederrors.TracedErrorEmptyString("subDirName")
 	}
 
-	subDir, err := l.GetSubDirectory(ctx, subDirName)
+	subDir, err := l.GetDirectoryByPath(ctx, subDirName)
 	if err != nil {
 		return false, err
 	}

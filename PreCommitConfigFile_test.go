@@ -23,7 +23,7 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 
 	tests := []TestCase{}
 
-	testDataDirectory, err := MustGetLocalGitRepositoryByPath(".").GetSubDirectory(ctx, "testdata", "PreCommitConfigFile", "UpdateDependency")
+	testDataDirectory, err := MustGetLocalGitRepositoryByPath(".").GetDirectoryByPath(ctx, "testdata", "PreCommitConfigFile", "UpdateDependency")
 	require.NoError(t, err)
 	for _, testDirectory := range mustutils.Must(testDataDirectory.ListSubDirectories(ctx, &parameteroptions.ListDirectoryOptions{Recursive: false})) {
 		localPath, err := testDirectory.GetLocalPath()
