@@ -41,7 +41,7 @@ func GetDirectoryInHomeDirectory(path ...string) (fileInUnsersHome filesinterfac
 	}
 
 	ctx := contextutils.ContextVerbose()
-	fileInUnsersHome, err = usersHome.GetSubDirectory(ctx, path...)
+	fileInUnsersHome, err = usersHome.GetDirectoryByPath(ctx, path...)
 	if err != nil {
 		return nil, err
 	}

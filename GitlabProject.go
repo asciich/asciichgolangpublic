@@ -572,7 +572,7 @@ func (g *GitlabProject) GetFilesNames(ctx context.Context, ref string) (fileName
 		return nil, err
 	}
 
-	fileNames, err = repositoryFiles.GetFileNames(ctx, ref)
+	fileNames, err = repositoryFiles.ListFileNames(ctx, ref)
 	if err != nil {
 		return nil, err
 	}

@@ -23,7 +23,7 @@ func EnableLoggingToUsersHome(applicationName string, verbose bool) (logFilePath
 		return nil, err
 	}
 
-	logsDir, err := homeDir.GetSubDirectory("logs")
+	logsDir, err := homeDir.GetDirectoryByPath("logs")
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func EnableLoggingToUsersHome(applicationName string, verbose bool) (logFilePath
 		return nil, err
 	}
 
-	applicationLogsDir, err := logsDir.GetSubDirectory(applicationName)
+	applicationLogsDir, err := logsDir.GetDirectoryByPath(applicationName)
 	if err != nil {
 		return nil, err
 	}

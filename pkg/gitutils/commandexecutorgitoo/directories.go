@@ -12,5 +12,5 @@ func (g *GitRepository) GetDirectoryByPath(ctx context.Context, pathToSubDir ...
 		return nil, tracederrors.TracedError("pathToSubdir has no elements")
 	}
 
-	return g.GetSubDirectory(ctx, pathToSubDir...)
+	return g.GetDirectoryByPath(ctx, pathToSubDir...)
 }

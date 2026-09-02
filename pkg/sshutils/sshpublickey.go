@@ -367,7 +367,7 @@ func GetCurrentUsersSshDirectory() (sshDir filesinterfaces.Directory, err error)
 	}
 
 	ctx := contextutils.ContextSilent()
-	sshDir, err = homeDir.GetSubDirectory(ctx, ".ssh")
+	sshDir, err = homeDir.GetDirectoryByPath(ctx, ".ssh")
 	if err != nil {
 		return nil, err
 	}

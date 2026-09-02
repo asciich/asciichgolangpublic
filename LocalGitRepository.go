@@ -977,7 +977,7 @@ func (l *LocalGitRepository) GetDirectoryByPath(ctx context.Context, pathToSubDi
 		return nil, tracederrors.TracedError("pathToSubdir has no elements")
 	}
 
-	return l.GetSubDirectory(ctx, pathToSubDir...)
+	return l.LocalDirectory.GetDirectoryByPath(ctx, pathToSubDir...)
 }
 
 func (l *LocalGitRepository) GetGitStatusOutput(ctx context.Context) (output string, err error) {

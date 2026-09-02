@@ -1,6 +1,8 @@
 package shelllinehandler_test
 
 import (
+	"os/exec"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -38,8 +40,8 @@ func TestShellLineHandlerJoin(t *testing.T) {
 		{[]string{"echo"}, "echo"},
 		{[]string{"echo", ""}, "echo ''"},
 		{[]string{"echo", " "}, "echo ' '"},
-		{[]string{"echo", "abc\"abc"}, "echo 'abc\"abc'"},     // evalated using python -c "import shlex; print(shlex.join(['echo', 'abc\"abc']))"
-		{[]string{"echo", "abc'abc"}, "echo 'abc'\"'\"'abc'"}, // evalated using python -c "import shlex; print(shlex.join(['echo', 'abc\'abc']))"
+		{[]string{"echo", "abc\"abc"}, "echo 'abc\"abc'"},
+		{[]string{"echo", "abc'abc"}, "echo 'abc'\"'\"'abc'"},
 		{[]string{"echo", "hello"}, "echo hello"},
 		{[]string{"echo", "hello world"}, "echo 'hello world'"},
 		{[]string{"echo", "hello\nworld"}, "echo 'hello\nworld'"},
@@ -61,61 +63,73 @@ func TestShellLineHandlerJoin(t *testing.T) {
 	}
 }
 
-// TODO enable again func TestShellLineHandlerJoinTwice(t *testing.T) {
-// TODO enable again 	tests := []struct {
-// TODO enable again 		testcase string
-// TODO enable again 	}{
-// TODO enable again 		{"testcase"},
-// TODO enable again 	}
-// TODO enable again
-// TODO enable again 	for _, tt := range tests {
-// TODO enable again 		t.Run(
-// TODO enable again 			testutils.MustFormatAsTestname(tt),
-// TODO enable again 			func(t *testing.T) {
-// TODO enable again 				require := require.New(t)
-// TODO enable again
-// TODO enable again 				joined1 := ShellLineHandler().MustJoin([]string{"echo", "hello \"world"})
-// TODO enable again 				joined2 := ShellLineHandler().MustJoin([]string{"bash", "-c", joined1})
-// TODO enable again
-// TODO enable again 				expected := "bash -c 'echo '\"'\"'hello \"world'\"'\"''"
-// TODO enable again 				require.EqualValues(t, expected, joined2)
-// TODO enable again
-// TODO enable again 				for _, joined := range []string{joined1, joined2} {
-// TODO enable again 					executedOutput := Shell().MustRunCommandAndGetStdoutAsString(&RunCommandOptions{Command: []string{"bash", "-c", joined}})
-// TODO enable again 					executedOutput = strings.TrimSpace(executedOutput)
-// TODO enable again 					require.EqualValues(t, "hello \"world", executedOutput)
-// TODO enable again 				}
-// TODO enable again 			},
-// TODO enable again 		)
-// TODO enable again 	}
-// TODO enable again }
+func TestShellLineHandlerJoinTwice(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
 
-// TODO enable againfunc TestShellLineHandlerJoinThreeTimes(t *testing.T) {
-// TODO enable again	tests := []struct {
-// TODO enable again		testcase string
-// TODO enable again	}{
-// TODO enable again		{"testcase"},
-// TODO enable again	}
-// TODO enable again
-// TODO enable again	for _, tt := range tests {
-// TODO enable again		t.Run(
-// TODO enable again			testutils.MustFormatAsTestname(tt),
-// TODO enable again			func(t *testing.T) {
-// TODO enable again				require := require.New(t)
-// TODO enable again
-// TODO enable again				joined1 := ShellLineHandler().MustJoin([]string{"echo", "hello \"world"})
-// TODO enable again				joined2 := ShellLineHandler().MustJoin([]string{"bash", "-c", joined1})
-// TODO enable again				joined3 := ShellLineHandler().MustJoin([]string{"bash", "-c", joined2})
-// TODO enable again
-// TODO enable again				expected := "bash -c 'bash -c '\"'\"'echo '\"'\"'\"'\"'\"'\"'\"'\"'hello \"world'\"'\"'\"'\"'\"'\"'\"'\"''\"'\"''"
-// TODO enable again				require.EqualValues(t, expected, joined3)
-// TODO enable again
-// TODO enable again				for _, joined := range []string{joined1, joined2, joined3} {
-// TODO enable again					executedOutput := Shell().MustRunCommandAndGetStdoutAsString(&RunCommandOptions{Command: []string{"bash", "-c", joined}})
-// TODO enable again					executedOutput = strings.TrimSpace(executedOutput)
-// TODO enable again					require.EqualValues(t, "hello \"world", executedOutput)
-// TODO enable again				}
-// TODO enable again			},
-// TODO enable again		)
-// TODO enable again	}
-// TODO enable again}
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				require := require.New(t)
+
+				joined1, err := shelllinehandler.Join([]string{"echo", "hello \"world"})
+				require.NoError(err)
+
+				joined2, err := shelllinehandler.Join([]string{"bash", "-c", joined1})
+				require.NoError(err)
+
+				expected := "bash -c 'echo '\"'\"'hello \"world'\"'\"''"
+				require.EqualValues(expected, joined2)
+
+				for _, joined := range []string{joined1, joined2} {
+					cmd := exec.Command("bash", "-c", joined)
+					output, err := cmd.Output()
+					require.NoError(err)
+					executedOutput := strings.TrimSpace(string(output))
+					require.EqualValues("hello \"world", executedOutput)
+				}
+			},
+		)
+	}
+}
+
+func TestShellLineHandlerJoinThreeTimes(t *testing.T) {
+	tests := []struct {
+		testcase string
+	}{
+		{"testcase"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				require := require.New(t)
+
+				joined1, err := shelllinehandler.Join([]string{"echo", "hello \"world"})
+				require.NoError(err)
+
+				joined2, err := shelllinehandler.Join([]string{"bash", "-c", joined1})
+				require.NoError(err)
+
+				joined3, err := shelllinehandler.Join([]string{"bash", "-c", joined2})
+				require.NoError(err)
+
+				expected := "bash -c 'bash -c '\"'\"'echo '\"'\"'\"'\"'\"'\"'\"'\"'hello \"world'\"'\"'\"'\"'\"'\"'\"'\"''\"'\"''"
+				require.EqualValues(expected, joined3)
+
+				for _, joined := range []string{joined1, joined2, joined3} {
+					cmd := exec.Command("bash", "-c", joined)
+					output, err := cmd.Output()
+					require.NoError(err)
+					executedOutput := strings.TrimSpace(string(output))
+					require.EqualValues("hello \"world", executedOutput)
+				}
+			},
+		)
+	}
+}

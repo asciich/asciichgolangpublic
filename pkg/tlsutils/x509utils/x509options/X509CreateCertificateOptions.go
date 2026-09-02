@@ -130,42 +130,6 @@ func (o *X509CreateCertificateOptions) GetDeepCopy() (copy *X509CreateCertificat
 	return copy
 }
 
-/* TODO move to gopass
-func (o *X509CreateCertificateOptions) GetIntermediateCertificateGopassCredential() (certificate *GopassCredential, err error) {
-	if o.IntermediateCertificateInGopass == nil {
-		return nil, tracederrors.TracedError("IntermediateCertificateKeyInGopass not set")
-	}
-
-	optionsToUse := o.IntermediateCertificateInGopass.GetDeepCopy()
-	optionsToUse.SecretBasename = "intermediateCertificate.crt"
-
-	certificate, err = Gopass().GetCredential(optionsToUse)
-	if err != nil {
-		return nil, err
-	}
-
-	return certificate, nil
-}
-*/
-
-/* TODO move to gopass
-func (o *X509CreateCertificateOptions) GetIntermediateCertificateKeyGopassCredential() (key *GopassCredential, err error) {
-	if o.IntermediateCertificateInGopass == nil {
-		return nil, tracederrors.TracedError("IntermediateCertificateKeyInGopass not set")
-	}
-
-	optionsToUse := o.IntermediateCertificateInGopass.GetDeepCopy()
-	optionsToUse.SecretBasename = "intermediateCertificate.key"
-
-	key, err = Gopass().GetCredential(optionsToUse)
-	if err != nil {
-		return nil, err
-	}
-
-	return key, nil
-}
-*/
-
 func (o *X509CreateCertificateOptions) GetKeyOutputFilePath() (keyOutputPath string, err error) {
 	if len(o.KeyOutputFilePath) <= 0 {
 		return "", tracederrors.TracedError("KeyOutputFilePath not set")

@@ -213,7 +213,7 @@ func (c *CommandExecutorDirectory) CreateSubDirectory(ctx context.Context, subDi
 		return nil, tracederrors.TracedErrorEmptyString("subDirectoryName")
 	}
 
-	createdSubDirectory, err = c.GetSubDirectory(ctx, subDirectoryName)
+	createdSubDirectory, err = c.GetDirectoryByPath(ctx, subDirectoryName)
 	if err != nil {
 		return nil, err
 	}
@@ -489,7 +489,7 @@ func (c *CommandExecutorDirectory) GetPath() (path string, err error) {
 }
 
 // Already moved to commandexecutorfileoo
-func (c *CommandExecutorDirectory) GetSubDirectory(ctx context.Context, path ...string) (subDirectory filesinterfaces.Directory, err error) {
+func (c *CommandExecutorDirectory) GetDirectoryByPath(ctx context.Context, path ...string) (subDirectory filesinterfaces.Directory, err error) {
 	if len(path) <= 0 {
 		return nil, tracederrors.TracedErrorNil("path")
 	}
@@ -671,7 +671,7 @@ func (c *CommandExecutorDirectory) ListSubDirectories(ctx context.Context, optio
 
 	subDirectories = []filesinterfaces.Directory{}
 	for _, pathToAdd := range pathsToAdd {
-		toAdd, err := c.GetSubDirectory(ctx, pathToAdd)
+		toAdd, err := c.GetDirectoryByPath(ctx, pathToAdd)
 		if err != nil {
 			return nil, err
 		}

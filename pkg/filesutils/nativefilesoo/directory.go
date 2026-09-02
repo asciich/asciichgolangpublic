@@ -82,7 +82,7 @@ func (d *Directory) GetParentDirectory(ctx context.Context) (filesinterfaces.Dir
 	return NewDirectoryByPath(parentPath)
 }
 
-func (d *Directory) GetSubDirectory(ctx context.Context, subdirPath ...string) (filesinterfaces.Directory, error) {
+func (d *Directory) GetDirectoryByPath(ctx context.Context, subdirPath ...string) (filesinterfaces.Directory, error) {
 	if len(subdirPath) <= 0 {
 		return nil, tracederrors.TracedError("path is empty or nil")
 	}
@@ -100,7 +100,7 @@ func (d *Directory) GetSubDirectory(ctx context.Context, subdirPath ...string) (
 }
 
 func (d *Directory) CreateSubDirectory(ctx context.Context, subDirectoryName string, options *filesoptions.CreateOptions) (filesinterfaces.Directory, error) {
-	subDir, err := d.GetSubDirectory(ctx, subDirectoryName)
+	subDir, err := d.GetDirectoryByPath(ctx, subDirectoryName)
 	if err != nil {
 		return nil, err
 	}
