@@ -49,8 +49,8 @@ func Test_ListFilesWithSymlinks(t *testing.T) {
 		require.NoError(t, err)
 		defer func() { _ = nativefiles.Delete(ctx, dir, &filesoptions.DeleteOptions{}) }()
 
-		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "a.txt")))
-		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "b.txt")))
+		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "a.txt"), &filesoptions.CreateOptions{}))
+		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "b.txt"), &filesoptions.CreateOptions{}))
 
 		fileList, err := nativefiles.ListFiles(ctx, dir, &parameteroptions.ListFileOptions{})
 		require.NoError(t, err)
@@ -73,11 +73,11 @@ func Test_ListFilesWithSymlinks(t *testing.T) {
 		defer func() { _ = nativefiles.Delete(ctx, dir2, &filesoptions.DeleteOptions{}) }()
 
 		// regular files
-		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "a.txt")))
-		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "b.txt")))
+		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "a.txt"), &filesoptions.CreateOptions{}))
+		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "b.txt"), &filesoptions.CreateOptions{}))
 
 		// symlink
-		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir2, "target")))
+		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir2, "target"), &filesoptions.CreateOptions{}))
 		require.NoError(t, nativefiles.CreateSymlink(ctx, filepath.Join(dir2, "target"), filepath.Join(dir, "c.txt")))
 
 		fileList, err := nativefiles.ListFiles(ctx, dir, &parameteroptions.ListFileOptions{})
@@ -102,16 +102,16 @@ func Test_ListFilesWithSymlinks(t *testing.T) {
 		defer func() { _ = nativefiles.Delete(ctx, dir2, &filesoptions.DeleteOptions{}) }()
 
 		// regular files
-		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "a.txt")))
-		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "b.txt")))
+		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "a.txt"), &filesoptions.CreateOptions{}))
+		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "b.txt"), &filesoptions.CreateOptions{}))
 		require.NoError(t, nativefiles.CreateDirectory(ctx, filepath.Join(dir, "directory"), &filesoptions.CreateOptions{}))
-		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "directory", "c.txt")))
-		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "directory", "d.txt")))
+		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "directory", "c.txt"), &filesoptions.CreateOptions{}))
+		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir, "directory", "d.txt"), &filesoptions.CreateOptions{}))
 
 		// symlink
 		require.NoError(t, nativefiles.CreateDirectory(ctx, filepath.Join(dir2, "target"), &filesoptions.CreateOptions{}))
-		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir2, "target", "e.txt")))
-		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir2, "target", "f.txt")))
+		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir2, "target", "e.txt"), &filesoptions.CreateOptions{}))
+		require.NoError(t, nativefiles.Create(ctx, filepath.Join(dir2, "target", "f.txt"), &filesoptions.CreateOptions{}))
 		require.NoError(t, nativefiles.CreateSymlink(ctx, filepath.Join(dir2, "target"), filepath.Join(dir, "symlink")))
 
 		fileList, err := nativefiles.ListFiles(ctx, dir, &parameteroptions.ListFileOptions{})

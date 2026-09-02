@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
@@ -125,7 +125,7 @@ func TestGitRepository_IsGitRepository(t *testing.T) {
 
 				path, err := repo.GetPath()
 				require.NoError(t, err)
-				_, err = files.Directories().CreateLocalDirectoryByPath(ctx, path, &filesoptions.CreateOptions{})
+				err = filesutils.CreateDirectory(ctx, path, &filesoptions.CreateOptions{})
 				require.NoError(t, err)
 
 				// The directory exists but is empty which is not a git directory:

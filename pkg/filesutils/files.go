@@ -20,3 +20,11 @@ func Delete(ctx context.Context, path string, options *filesoptions.DeleteOption
 func WriteString(ctx context.Context, pathToWrite string, content string) error {
 	return nativefiles.WriteString(ctx, pathToWrite, content)
 }
+
+func Create(ctx context.Context, path string, options *filesoptions.CreateOptions) error {
+	return nativefiles.Create(ctx, path, options)
+}
+
+func CreateDirectory(ctx context.Context, path string, options *filesoptions.CreateOptions) error {
+	return nativefiles.CreateDirectory(ctx, path, options)
+}

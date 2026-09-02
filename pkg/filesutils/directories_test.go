@@ -464,49 +464,6 @@ func TestDirectory_ListSubDirectories2(t *testing.T) {
 	}
 }
 
-func TestDirectoriesCreateLocalDirectoryByPath(t *testing.T) {
-	for _, impl := range allDirectoryImplementations {
-		t.Run(impl, func(t *testing.T) {
-			ctx := getCtx()
-
-			tempPath, err := tempfilesoo.CreateEmptyTemporaryDirectoryAndGetPath(ctx)
-			require.NoError(t, err)
-
-			directory := getDirectoryToTest(impl, tempPath)
-			defer directory.Delete(ctx, &filesoptions.DeleteOptions{})
-
-			exists, err := directory.Exists(ctx)
-			require.NoError(t, err)
-			require.True(t, exists)
-
-			for i := 0; i < 2; i++ {
-				err = directory.Delete(ctx, &filesoptions.DeleteOptions{})
-				require.NoError(t, err)
-
-				exists, err = directory.Exists(ctx)
-				require.NoError(t, err)
-				require.False(t, exists)
-			}
-
-			for i := 0; i < 2; i++ {
-				localPath, err := directory.GetLocalPath()
-				require.NoError(t, err)
-
-				createdDir, err := files.Directories().CreateLocalDirectoryByPath(ctx, localPath, &filesoptions.CreateOptions{})
-				require.NoError(t, err)
-
-				dirExists, err := directory.Exists(ctx)
-				require.NoError(t, err)
-				require.True(t, dirExists)
-
-				createdExists, err := createdDir.Exists(ctx)
-				require.NoError(t, err)
-				require.True(t, createdExists)
-			}
-		})
-	}
-}
-
 func TestDirectory_IsEmptyDirectory(t *testing.T) {
 	for _, impl := range allDirectoryImplementations {
 		t.Run(impl, func(t *testing.T) {

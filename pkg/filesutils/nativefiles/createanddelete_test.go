@@ -33,7 +33,7 @@ func Test_CreateAndDeleteFile(t *testing.T) {
 		// Create the file again
 		// Is done twice to test idempotence.
 		for range 2 {
-			err = nativefiles.Create(ctx, filePath)
+			err = nativefiles.Create(ctx, filePath, &filesoptions.CreateOptions{})
 			require.NoError(t, err)
 
 			require.True(t, nativefiles.Exists(ctx, filePath))

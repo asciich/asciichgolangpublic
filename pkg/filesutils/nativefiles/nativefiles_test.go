@@ -92,7 +92,7 @@ func Test_Create(t *testing.T) {
 	ctx := getCtx()
 
 	t.Run("empty string", func(t *testing.T) {
-		err := nativefiles.Create(ctx, "")
+		err := nativefiles.Create(ctx, "", &filesoptions.CreateOptions{})
 		require.Error(t, err)
 	})
 
@@ -104,13 +104,13 @@ func Test_Create(t *testing.T) {
 		require.False(t, nativefiles.IsFile(ctx, testPath))
 
 		ctx := contextutils.WithChangeIndicator(ctx)
-		err = nativefiles.Create(ctx, testPath)
+		err = nativefiles.Create(ctx, testPath, &filesoptions.CreateOptions{})
 		require.NoError(t, err)
 		require.True(t, nativefiles.IsFile(ctx, testPath))
 		require.True(t, contextutils.IsChanged(ctx))
 
 		ctx = contextutils.WithChangeIndicator(ctx)
-		err = nativefiles.Create(ctx, testPath)
+		err = nativefiles.Create(ctx, testPath, &filesoptions.CreateOptions{})
 		require.NoError(t, err)
 		require.True(t, nativefiles.IsFile(ctx, testPath))
 		require.False(t, contextutils.IsChanged(ctx))
