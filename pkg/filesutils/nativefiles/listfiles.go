@@ -26,21 +26,21 @@ func ListFiles(ctx context.Context, path string, listOptions *parameteroptions.L
 	listOptions.OnlyFiles = true
 
 	filePathList := []string{}
-	
+
 	if listOptions.NonRecursive {
 		// Non-recursive listing using ReadDir
 		entries, err := os.ReadDir(path)
 		if err != nil {
 			return nil, tracederrors.TracedErrorf("Unable to read directory '%s': %w", path, err)
 		}
-		
+
 		for _, entry := range entries {
 			if entry.IsDir() {
 				continue
 			}
-			
+
 			entryPath := filepath.Join(path, entry.Name())
-			
+
 			isSymlink, err := IsSymlinkToDirectory(contextutils.WithSilent(ctx), entryPath)
 			if err != nil {
 				return nil, err
@@ -106,7 +106,7 @@ func ListFiles(ctx context.Context, path string, listOptions *parameteroptions.L
 			return nil, tracederrors.TracedErrorf("Unable to filepath.Walk: '%w'", err)
 		}
 	}
-	
+
 	filePathList = slicesutils.RemoveEmptyStrings(filePathList)
 
 	filePathList, err := pathsutils.FilterPaths(filePathList, listOptions)

@@ -740,3 +740,84 @@ func TestDirectory_GetAlphabeticallyLastFile_WithNumbers(t *testing.T) {
 		})
 	}
 }
+
+func TestDirectory_SubDirectoryExists(t *testing.T) {
+	for _, impl := range allDirectoryImplementations {
+		t.Run(impl, func(t *testing.T) {
+			ctx := getCtx()
+
+			tempPath, err := tempfilesoo.CreateEmptyTemporaryDirectoryAndGetPath(ctx)
+			require.NoError(t, err)
+
+			dir := getDirectoryToTest(impl, tempPath)
+			defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
+
+			// Test with non-existing subdirectory
+			exists, err := dir.SubDirectoryExists(ctx, "nonexistent")
+			require.NoError(t, err)
+			require.False(t, exists)
+
+			// Create a subdirectory
+			_, err = dir.CreateSubDirectory(ctx, "subdir", &filesoptions.CreateOptions{})
+			require.NoError(t, err)
+
+			// Test with existing subdirectory
+			exists, err = dir.SubDirectoryExists(ctx, "subdir")
+			require.NoError(t, err)
+			require.True(t, exists)
+		})
+	}
+}
+
+func TestDirectory_SubDirectoryExists_EmptyString(t *testing.T) {
+	for _, impl := range allDirectoryImplementations {
+		t.Run(impl, func(t *testing.T) {
+			ctx := getCtx()
+
+			tempPath, err := tempfilesoo.CreateEmptyTemporaryDirectoryAndGetPath(ctx)
+			require.NoError(t, err)
+
+			dir := getDirectoryToTest(impl, tempPath)
+			defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
+
+			// Test with empty string - should return error
+			exists, err := dir.SubDirectoryExists(ctx, "")
+			require.Error(t, err)
+			require.False(t, exists)
+		})
+	}
+}
+
+func TestDirectory_SubDirectoryExists_NestedSubDirectory(t *testing.T) {
+	for _, impl := range allDirectoryImplementations {
+		t.Run(impl, func(t *testing.T) {
+			ctx := getCtx()
+
+			tempPath, err := tempfilesoo.CreateEmptyTemporaryDirectoryAndGetPath(ctx)
+			require.NoError(t, err)
+
+			dir := getDirectoryToTest(impl, tempPath)
+			defer dir.Delete(ctx, &filesoptions.DeleteOptions{})
+
+			// Create nested subdirectories
+			_, err = dir.CreateSubDirectory(ctx, "level1", &filesoptions.CreateOptions{})
+			require.NoError(t, err)
+
+			level1Dir, err := dir.GetDirectoryByPath(ctx, "level1")
+			require.NoError(t, err)
+
+			_, err = level1Dir.CreateSubDirectory(ctx, "level2", &filesoptions.CreateOptions{})
+			require.NoError(t, err)
+
+			// Test with nested subdirectory path
+			exists, err := dir.SubDirectoryExists(ctx, "level1/level2")
+			require.NoError(t, err)
+			require.True(t, exists)
+
+			// Test with non-existing nested subdirectory
+			exists, err = dir.SubDirectoryExists(ctx, "level1/nonexistent")
+			require.NoError(t, err)
+			require.False(t, exists)
+		})
+	}
+}

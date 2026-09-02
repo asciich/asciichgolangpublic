@@ -6,8 +6,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorgeneric"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -107,7 +107,7 @@ func (p *PreCommitService) RunInGitRepository(ctx context.Context, gitRepo gitin
 		return err
 	}
 
-	localDir, err := files.GetLocalDirectoryByPath(ctx, localPath)
+	localDir, err := nativefilesoo.NewDirectoryByPath(localPath)
 	if err != nil {
 		return err
 	}

@@ -22,6 +22,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
@@ -643,21 +644,6 @@ func (l *LocalGitRepository) GetAsGoGitRepository() (goGitRepository *git.Reposi
 	return goGitRepository, nil
 }
 
-func (l *LocalGitRepository) GetAsLocalDirectory() (localDirectory *files.LocalDirectory, err error) {
-	localPath, err := l.GetLocalPath()
-	if err != nil {
-		return nil, err
-	}
-
-	ctx := contextutils.ContextVerbose()
-	localDirectory, err = files.GetLocalDirectoryByPath(ctx, localPath)
-	if err != nil {
-		return nil, err
-	}
-
-	return localDirectory, nil
-}
-
 func (l *LocalGitRepository) GetAsLocalGitRepository() (localGitRepository *LocalGitRepository, err error) {
 	localPath, err := l.GetLocalPath()
 	if err != nil {
@@ -1217,7 +1203,7 @@ func (l *LocalGitRepository) GetRootDirectory(ctx context.Context) (rootDirector
 		return nil, err
 	}
 
-	rootDirectory, err = files.GetLocalDirectoryByPath(ctx, rootDirectoryPath)
+	rootDirectory, err = nativefilesoo.NewDirectoryByPath(rootDirectoryPath)
 	if err != nil {
 		return nil, err
 	}
@@ -1234,7 +1220,7 @@ func (l *LocalGitRepository) GetRootDirectoryPath(ctx context.Context) (rootDire
 	searchedFromPath := pathToCheck
 
 	for {
-		localDirToCheck, err := files.GetLocalDirectoryByPath(ctx, pathToCheck)
+		localDirToCheck, err := nativefilesoo.NewDirectoryByPath(pathToCheck)
 		if err != nil {
 			return "", nil
 		}

@@ -525,3 +525,21 @@ func (d *DirectoryBase) GetFileInfoOfFilesInDirectory(ctx context.Context, optio
 
 	return fileInfos, nil
 }
+
+func (d *DirectoryBase) SubDirectoryExists(ctx context.Context, subDirPath string) (bool, error) {
+	if subDirPath == "" {
+		return false, tracederrors.TracedErrorEmptyString("subDirPath")
+	}
+
+	parent, err := d.GetParentDirectoryForBaseClass()
+	if err != nil {
+		return false, err
+	}
+
+	subDir, err := parent.GetDirectoryByPath(ctx, subDirPath)
+	if err != nil {
+		return false, err
+	}
+
+	return subDir.Exists(ctx)
+}

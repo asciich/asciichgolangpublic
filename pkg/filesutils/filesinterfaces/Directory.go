@@ -48,4 +48,5 @@ type Directory interface {
 	ReadFileInDirectoryAsString(ctx context.Context, path ...string) (content string, err error)
 	ReadFirstLineOfFileInDirectoryAsString(ctx context.Context, path ...string) (firstLine string, err error)
 	WriteStringToFile(ctx context.Context, path string, content string, options *filesoptions.WriteOptions) (writtenFile File, err error)
+	SubDirectoryExists(ctx context.Context, subDirPath string) (bool, error)
 }

@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/commandexecutorgitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
@@ -48,7 +48,7 @@ func (g *TemporaryGitRepositoriesService) CreateTemporaryGitRepositoryAndAddData
 		return nil, err
 	}
 
-	destDir, err := files.GetLocalDirectoryByPath(ctx, localPath)
+	destDir, err := nativefilesoo.NewDirectoryByPath(localPath)
 	if err != nil {
 		return nil, err
 	}

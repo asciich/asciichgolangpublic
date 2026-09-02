@@ -6,7 +6,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -33,7 +33,7 @@ func GetRepositoryRootPathByPath(ctx context.Context, commandExecutor commandexe
 
 	repoRootPath = strings.TrimSpace(repoRootPath)
 
-	repoRootDir, err := files.GetLocalDirectoryByPath(ctx, repoRootPath)
+	repoRootDir, err := nativefilesoo.NewDirectoryByPath(repoRootPath)
 	if err != nil {
 		return "", err
 	}

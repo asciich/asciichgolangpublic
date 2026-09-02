@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -31,7 +31,7 @@ Usage:
 
 			directoryPath := args[0]
 
-			dirToCleanUp := mustutils.Must(files.GetLocalDirectoryByPath(ctx, directoryPath))
+			dirToCleanUp := mustutils.Must(nativefilesoo.NewDirectoryByPath(directoryPath))
 
 			mustutils.Must0(dirToCleanUp.DeleteFilesMatching(
 				ctx,
