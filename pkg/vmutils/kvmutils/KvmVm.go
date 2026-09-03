@@ -98,7 +98,7 @@ func (k *KvmVm) GetMacAddress(ctx context.Context) (macAddress string, err error
 		return "", err
 	}
 
-	macAddress, err = LibvirtXmls().GetMacAddressFromXmlString(domainXml)
+	macAddress, err = GetMacAddressFromXmlString(domainXml)
 	if err != nil {
 		return "", err
 	}

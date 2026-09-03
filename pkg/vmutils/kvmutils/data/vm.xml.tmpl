@@ -1,0 +1,113 @@
+<domain type='kvm'>
+  <name>{{ .VM_NAME }}</name>
+
+  <metadata>
+    <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
+      <libosinfo:os id="http://archlinux.org/archlinux/rolling"/>
+    </libosinfo:libosinfo>
+  </metadata>
+
+  <memory unit='KiB'>2097152</memory>
+  <currentMemory unit='KiB'>2097152</currentMemory>
+  <vcpu placement='static'>2</vcpu>
+
+  <os>
+    <type arch='x86_64' machine='q35'>hvm</type>
+    <boot dev='hd'/>
+  </os>
+
+  <features>
+    <acpi/>
+    <apic/>
+    <vmport state='off'/>
+  </features>
+
+  <cpu mode='host-passthrough' check='none' migratable='on'/>
+
+  <clock offset='utc'>
+    <timer name='rtc' tickpolicy='catchup'/>
+    <timer name='pit' tickpolicy='delay'/>
+    <timer name='hpet' present='no'/>
+  </clock>
+
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>destroy</on_crash>
+
+  <pm>
+    <suspend-to-mem enabled='no'/>
+    <suspend-to-disk enabled='no'/>
+  </pm>
+
+  <devices>
+    <emulator>/usr/bin/qemu-system-x86_64</emulator>
+
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2'/>
+      <source file='{{ .DISK_PATH }}'/>
+      <target dev='vda' bus='virtio'/>
+    </disk>
+
+    <controller type='usb' index='0' model='qemu-xhci' ports='15'/>
+    <controller type='pci' index='0' model='pcie-root'/>
+    <controller type='pci' index='1' model='pcie-root-port'/>
+    <controller type='pci' index='2' model='pcie-root-port'/>
+    <controller type='pci' index='3' model='pcie-root-port'/>
+    <controller type='pci' index='4' model='pcie-root-port'/>
+    <controller type='pci' index='5' model='pcie-root-port'/>
+    <controller type='pci' index='6' model='pcie-root-port'/>
+    <controller type='pci' index='7' model='pcie-root-port'/>
+    <controller type='pci' index='8' model='pcie-root-port'/>
+    <controller type='sata' index='0'/>
+    <controller type='virtio-serial' index='0'/>
+
+    <interface type='network'>
+      <mac address='{{ .MAC_ADDRESS }}'/>
+      <source network='default'/>
+      <model type='virtio'/>
+    </interface>
+
+    <serial type='pty'>
+      <target type='isa-serial' port='0'>
+        <model name='isa-serial'/>
+      </target>
+    </serial>
+    <console type='pty'>
+      <target type='serial' port='0'/>
+    </console>
+
+    <channel type='unix'>
+      <target type='virtio' name='org.qemu.guest_agent.0'/>
+    </channel>
+    <channel type='spicevmc'>
+      <target type='virtio' name='com.redhat.spice.0'/>
+    </channel>
+
+    <input type='tablet' bus='usb'/>
+    <input type='mouse' bus='ps2'/>
+    <input type='keyboard' bus='ps2'/>
+
+    <graphics type='spice' autoport='yes' listen='127.0.0.1'>
+      <listen type='address' address='127.0.0.1'/>
+      <image compression='off'/>
+    </graphics>
+
+    <sound model='ich9'/>
+    <audio id='1' type='spice'/>
+
+    <video>
+      <model type='virtio' heads='1' primary='yes'/>
+    </video>
+
+    <redirdev bus='usb' type='spicevmc'/>
+    <redirdev bus='usb' type='spicevmc'/>
+
+    <watchdog model='itco' action='reset'/>
+
+    <memballoon model='virtio'/>
+
+    <rng model='virtio'>
+      <backend model='random'>/dev/urandom</backend>
+    </rng>
+  </devices>
+</domain>
