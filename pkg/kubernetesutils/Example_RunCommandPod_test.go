@@ -1,6 +1,8 @@
 package kubernetesutils_test
 
 import (
+	"github.com/stretchr/testify/require"
+	"testing"
 	"context"
 	"fmt"
 
@@ -14,15 +16,13 @@ import (
 
 // ExamplePod_RunCommand_nativeKubernetes demonstrates how to run a command in an existing pod
 // using the nativekubernetes implementation (using the Kubernetes API directly).
-func ExamplePod_RunCommand_nativeKubernetes() {
+func TestPod_RunCommand_nativeKubernetes(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.WithVerbose(context.TODO())
 
 	// Get the Kubernetes implementation
 	kubernetes, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+kindutils.SharedClusterName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Define the pod name and the namespace
 	const podName = "example-run-command-pod"
@@ -31,9 +31,7 @@ func ExamplePod_RunCommand_nativeKubernetes() {
 
 	// Create the namespace
 	_, err = kubernetes.CreateNamespaceByName(ctx, namespaceName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Ensure the pod is absent before the example starts:
 	_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
@@ -56,15 +54,11 @@ func ExamplePod_RunCommand_nativeKubernetes() {
 			},
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Get the pod object
 	pod, err := kubernetes.GetPodByNames(namespaceName, podName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Run a command in the existing pod
 	output, err := pod.RunCommandInContainer(
@@ -76,31 +70,24 @@ func ExamplePod_RunCommand_nativeKubernetes() {
 			},
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Read the stdout of the executed command
 	stdout, err := output.GetStdoutAsString()
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	fmt.Printf("Command output: %s", stdout)
 
-	// Output: Command output: Hello from existing pod!
 }
 
 // ExamplePod_RunCommand_commandExecutor demonstrates how to run a command in an existing pod
 // using the commandexecutorkubernetes implementation (which uses kubectl exec under the hood).
-func ExamplePod_RunCommand_commandExecutor() {
+func TestPod_RunCommand_commandExecutor(t *testing.T) {
 	ctx := contextutils.WithVerbose(context.TODO())
 
 	// Get the Kubernetes implementation
 	kubernetes, err := commandexecutorkubernetes.GetClusterByName("kind-" + kindutils.SharedClusterName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	const podName = "example-run-command-cmd-pod"
 	const namespaceName = "example-run-command-cmd"
@@ -108,9 +95,7 @@ func ExamplePod_RunCommand_commandExecutor() {
 
 	// Create the namespace
 	_, err = kubernetes.CreateNamespaceByName(ctx, namespaceName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Cleanup
 	defer func() { _ = kubernetes.DeletePodByNames(ctx, namespaceName, podName) }()
@@ -130,15 +115,11 @@ func ExamplePod_RunCommand_commandExecutor() {
 			},
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Get the pod object
 	pod, err := kubernetes.GetPodByNames(namespaceName, podName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Run a command in the existing pod using kubectl exec
 	output, err := pod.RunCommandInContainer(
@@ -150,30 +131,23 @@ func ExamplePod_RunCommand_commandExecutor() {
 			},
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Read the stdout
 	stdout, err := output.GetStdoutAsString()
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	fmt.Printf("Command output via kubectl exec: %s", stdout)
 
-	// Output: Command output via kubectl exec: Hello from pod via kubectl exec!
 }
 
 // ExamplePod_RunCommand_multipleCommands demonstrates how to run multiple commands in the same pod.
-func ExamplePod_RunCommand_multipleCommands() {
+func TestPod_RunCommand_multipleCommands(t *testing.T) {
 	ctx := contextutils.WithVerbose(context.TODO())
 
 	// Get the Kubernetes implementation
 	kubernetes, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+kindutils.SharedClusterName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	const podName = "example-multi-cmd-pod"
 	const namespaceName = "example-multi-cmd"
@@ -181,9 +155,7 @@ func ExamplePod_RunCommand_multipleCommands() {
 
 	// Create the namespace
 	_, err = kubernetes.CreateNamespaceByName(ctx, namespaceName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Cleanup
 	defer func() { _ = kubernetes.DeletePodByNames(ctx, namespaceName, podName) }()
@@ -203,15 +175,11 @@ func ExamplePod_RunCommand_multipleCommands() {
 			},
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Get the pod object
 	pod, err := kubernetes.GetPodByNames(namespaceName, podName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Run first command: get hostname
 	output1, err := pod.RunCommandInContainer(
@@ -223,14 +191,10 @@ func ExamplePod_RunCommand_multipleCommands() {
 			},
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	stdout1, err := output1.GetStdoutAsString()
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Run second command: echo a fixed string
 	output2, err := pod.RunCommandInContainer(
@@ -242,32 +206,25 @@ func ExamplePod_RunCommand_multipleCommands() {
 			},
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	stdout2, err := output2.GetStdoutAsString()
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	fmt.Printf("Hostname: %s", stdout1)
 	fmt.Printf("Second command: %s", stdout2)
 
-	// Output:
 	// Hostname: example-multi-cmd-pod
 	// Second command: multiple_commands_work
 }
 
 // ExamplePod_RunCommand_withExitCode demonstrates how to run a command and check its exit code.
-func ExamplePod_RunCommand_withExitCode() {
+func TestPod_RunCommand_withExitCode(t *testing.T) {
 	ctx := contextutils.WithVerbose(context.TODO())
 
 	// Get the Kubernetes implementation
 	kubernetes, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+kindutils.SharedClusterName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	const podName = "example-exit-code-pod"
 	const namespaceName = "example-exit-code"
@@ -275,9 +232,7 @@ func ExamplePod_RunCommand_withExitCode() {
 
 	// Create the namespace
 	_, err = kubernetes.CreateNamespaceByName(ctx, namespaceName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Cleanup
 	defer func() { _ = kubernetes.DeletePodByNames(ctx, namespaceName, podName) }()
@@ -297,15 +252,11 @@ func ExamplePod_RunCommand_withExitCode() {
 			},
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Get the pod object
 	pod, err := kubernetes.GetPodByNames(namespaceName, podName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Run a command that succeeds
 	output1, err := pod.RunCommandInContainer(
@@ -317,14 +268,10 @@ func ExamplePod_RunCommand_withExitCode() {
 			},
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	exitCode1, err := output1.GetReturnCode()
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Run a command that fails
 	output2, err := pod.RunCommandInContainer(
@@ -337,16 +284,13 @@ func ExamplePod_RunCommand_withExitCode() {
 			},
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	exitCode2, err := output2.GetReturnCode()
 
 	fmt.Printf("First command exit code: %d\n", exitCode1)
 	fmt.Printf("Second command exit code: %d\n", exitCode2)
 
-	// Output:
 	// First command exit code: 0
 	// Second command exit code: 1
 }

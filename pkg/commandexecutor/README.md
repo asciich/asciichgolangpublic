@@ -9,15 +9,16 @@ But it has downsides:
 - It's not real programming, it's abusing golang for scripting automation.
 - It's a security risk. Calling exec (especially with unchecked user input as parameter) leads to security issues.
 
-## Implementations
+## Subpackages
 
-* [commandexecutorbash](./commandexecutorbash/): Execute commands using bash.
-* [commandexecutorbashoo](./commandexecutorbashoo/): Object oriented bash implementation.
-* [commandexecutorexec](./commandexecutorexec/): Execute commands using exec.
-* [commandexecutorexecoo](./commandexecutorexecoo/): Object oriented exec implementation.
-* [commandexecutorgeneric](./commandexecutorgeneric/): Generic command executor functionality.
-* [commandexecutorpowershell](./commandexecutorpowershell/): Execute commands using PowerShell.
-* [commandexecutorpowershelloo](./commandexecutorpowershelloo/): Object oriented PowerShell implementation.
+* [commandexecutorbash](./commandexecutorbash/README.md): Execute commands using bash.
+* [commandexecutorbashoo](./commandexecutorbashoo/README.md): Object oriented bash implementation.
+* [commandexecutorexec](./commandexecutorexec/README.md): Execute commands using exec.
+* [commandexecutorexecoo](./commandexecutorexecoo/README.md): Object oriented exec implementation.
+* [commandexecutorgeneric](./commandexecutorgeneric/README.md): Generic command executor functionality.
+* [commandexecutorinterfaces](./commandexecutorinterfaces/README.md): Interfaces for command executor implementations.
+* [commandexecutorpowershell](./commandexecutorpowershell/README.md): Execute commands using PowerShell.
+* [commandexecutorpowershelloo](./commandexecutorpowershelloo/README.md): Object oriented PowerShell implementation.
 
 ## Avoid exec calls.
 

@@ -13,16 +13,19 @@ import (
 // Returns the absolute path to the executable if found.
 // Returns ErrExecutableNotFound if the command is not found.
 // This is a Go-native implementation of the Unix 'which' command.
+// This function uses os/exec directly as specified in constitution.md.
 func Which(command string) (string, error) {
 	if command == "" {
 		return "", tracederrors.TracedErrorEmptyString("command")
 	}
 
+	// Use exec.LookPath which is the Go-native way to find executables in PATH
 	path, err := exec.LookPath(command)
 	if err != nil {
 		return "", tracederrors.TracedErrorf("%w: %s", ErrExecutableNotFound, command)
 	}
 
+	// Ensure we return an absolute path
 	if !filepath.IsAbs(path) {
 		absPath, err := filepath.Abs(path)
 		if err != nil {

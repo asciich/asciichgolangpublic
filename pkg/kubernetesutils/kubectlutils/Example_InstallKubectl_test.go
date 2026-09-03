@@ -2,12 +2,15 @@ package kubectlutils_test
 
 import (
 	"context"
+	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubectlutils"
 )
 
-func ExampleInstallKubectl_customPath() {
+func TestInstallKubectl_customPath(t *testing.T) {
 	// Create a context with verbose logging
 	ctx := contextutils.WithVerbose(context.TODO())
 
@@ -20,9 +23,7 @@ func ExampleInstallKubectl_customPath() {
 	}
 
 	err := kubectlutils.InstallKubectl(ctx, options)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// kubectl is now installed at ~/.local/bin/kubectl
 }

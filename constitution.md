@@ -19,7 +19,7 @@
 - Public/ exported functions must be written in an idempotent way.
     - Use `logging.LogChanged...` to log which change was performed.
     - Use `logging.LogInfo...` if desired state is already in place.
-- Use `defer` instead of cleanup calls at the end of a function. 
+- Use `defer` instead of cleanup calls at the end of a function.
   This rule counts as well for test cases.
   Since all functions are implemented in an idempotent way it is safe to use `defer`:
     - Use:
@@ -44,7 +44,11 @@
             ```
 - For filenames:
     - Do not use `_methods<.extension>` suffix. Instead of `add_methods.go` use `add.go`.
-
+- This repository is organized in many sub packages which must be used to reduce duplicated code.
+    - Only explicit listed packages can import `os/exec` directly. All other must reuse the functions provided by the `commandexecutor` package:
+        - The `commandexecutor` package must use the `os/exec` directly.
+        - The `osutils` package must use `os/exec` in the `func Which(command string) (string, error)` implementation. 
+        
 ## Package Organization: Native and CommandExecutor Implementations
 
 - For packages where functions interact with files, network, or external systems, provide **two implementation subpackages**:
@@ -176,7 +180,7 @@ pkg/<domain>/<packagename>/
 
 ## Documentation
 
-- All `Example_*_test.go` files are meant for documentation. They must all be listed and linked in the corresponding `README.md`. This is done as a bullet point list. 
+- All `Example_*_test.go` files are meant for documentation. They must all be listed and linked in the corresponding `README.md`. This is done as a bullet point list.
 - All package names mentioned in a markdown file must be a link to the README.md of the mentioned package.
 
 

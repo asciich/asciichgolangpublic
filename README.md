@@ -4,12 +4,12 @@
 
 This module helps to write infrastructure and/or automation related microservices and CLIs easier and faster.
 By providing a lot of convenience functions, sanity checks during runtime and detailed error messages it can be used to write easy to understand software to automate repeatable work.
-The focus is on ease of use and developer speed instead of algorithm speed and computer resource efficiency. 
+The focus is on ease of use and developer speed instead of algorithm speed and computer resource efficiency.
 
 ## Provided functionality
 
 * [ansibleutils](pkg/ansibleutils/): Work with Ansible.
-* [commandexecutor](pkg/commandexecutor/): Run arbitrary shell commands ([exec](pkg/commandexecutor/commandexecutorexecoo/), [bash](pkg/commandexecutor/commandexecutorbashoo/), [powershell](pkg/commandexecutor/commandexecutorpowershelloo/)). 
+* [commandexecutor](pkg/commandexecutor/): Run arbitrary shell commands ([exec](pkg/commandexecutor/commandexecutorexecoo/), [bash](pkg/commandexecutor/commandexecutorbashoo/), [powershell](pkg/commandexecutor/commandexecutorpowershelloo/)).
 * [containerutils](pkg/containerutils/): Work with containers.
 	* [containerimagehandler](pkg/containerutils/containerimagehandler/): Handle container images without the need of a container runtime (e.g. no Docker required.)
 * [datatypes](pkg/datatypes/):
@@ -109,6 +109,6 @@ This info will also be printed as part of [`TracedError`](/pkg/tracederrors/).
 
 ## Errors
 
-It's recommended to use [`TracedError`](/pkg/tracederrors/) whenever an error occurs with a custom error message to provide additional debug information. 
+It's recommended to use [`TracedError`](/pkg/tracederrors/) whenever an error occurs with a custom error message to provide additional debug information.
 
 See the [tracederrors package](/pkg/tracederrors/) for details.

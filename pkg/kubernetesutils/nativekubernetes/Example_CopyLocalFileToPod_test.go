@@ -1,6 +1,7 @@
 package nativekubernetes_test
 
 import (
+	"github.com/stretchr/testify/require"
 	"context"
 	"fmt"
 	"testing"
@@ -25,32 +26,22 @@ func Test_ExampleCopyFileToPod(t *testing.T) {
 
 	// Get the cluster
 	cluster, err := kindutils.GetOrCreateSharedCluster(ctx)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Create the namespace
 	_, err = cluster.CreateNamespaceByName(ctx, namespaceName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Get the config and clientset to access the kubernetes cluster:
 	config, err := nativekubernetes.GetConfig(ctx, "kind-"+kindutils.SharedClusterName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	clientset, err := nativekubernetes.GetClientSet(ctx, "kind-"+kindutils.SharedClusterName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Ensure the pod is absent before the example starts:
 	err = nativekubernetes.DeletePod(ctx, clientset, podName, namespaceName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Ensure pod is deleted at the end of the example:
 	defer func() { _ = nativekubernetes.DeletePod(ctx, clientset, podName, namespaceName) }()
@@ -70,24 +61,18 @@ func Test_ExampleCopyFileToPod(t *testing.T) {
 			WaitForPodRunning: true,
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Create a temporary file with some content
 	testContent := "Hello from local file! This content will be copied to the container."
 	localPath, err := tempfiles.CreateTemporaryFileFromContentString(ctx, testContent)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Copy file to container
 	destPath := "/tmp/example-file.txt"
 	containerName := podName
 	err = nativekubernetes.CopyFileToPod(ctx, config, localPath, destPath, podName, containerName, namespaceName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	fmt.Printf("Successfully copied file to %s in pod %s\n", destPath, podName)
 
@@ -104,14 +89,10 @@ func Test_ExampleCopyFileToPod(t *testing.T) {
 			},
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	readContent, err := commandOutput.GetStdoutAsString()
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	if readContent == testContent {
 		fmt.Println("File content verified successfully!")
@@ -127,25 +108,17 @@ func Test_ExampleCopyFileToPod_binary(t *testing.T) {
 
 	// Get the cluster
 	cluster, err := kindutils.GetOrCreateSharedCluster(ctx)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Create the namespace
 	_, err = cluster.CreateNamespaceByName(ctx, namespaceName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	config, err := nativekubernetes.GetConfig(ctx, "kind-"+kindutils.SharedClusterName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	clientset, err := nativekubernetes.GetClientSet(ctx, "kind-"+kindutils.SharedClusterName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Cleanup
 	defer func() {
@@ -167,24 +140,18 @@ func Test_ExampleCopyFileToPod_binary(t *testing.T) {
 			WaitForPodRunning: true,
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Create a temporary binary file
 	binaryContent := []byte{0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A} // PNG magic number
 	localPath, err := tempfiles.CreateTemporaryFileFromContentBytes(ctx, binaryContent)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Copy binary file to container
 	destPath := "/tmp/example-binary.bin"
 	containerName := podName
 	err = nativekubernetes.CopyFileToPod(ctx, config, localPath, destPath, podName, containerName, namespaceName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	fmt.Printf("Successfully copied binary file to %s in pod %s\n", destPath, podName)
 }
@@ -198,25 +165,17 @@ func Test_ExampleCopyFileToPod_nestedDirectory(t *testing.T) {
 
 	// Get the cluster
 	cluster, err := kindutils.GetOrCreateSharedCluster(ctx)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Create the namespace
 	_, err = cluster.CreateNamespaceByName(ctx, namespaceName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	config, err := nativekubernetes.GetConfig(ctx, "kind-"+kindutils.SharedClusterName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	clientset, err := nativekubernetes.GetClientSet(ctx, "kind-"+kindutils.SharedClusterName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Cleanup
 	defer func() {
@@ -238,16 +197,12 @@ func Test_ExampleCopyFileToPod_nestedDirectory(t *testing.T) {
 			WaitForPodRunning: true,
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Create a temporary file
 	testContent := "File in nested directory"
 	localPath, err := tempfiles.CreateTemporaryFileFromContentString(ctx, testContent)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Create the nested directory first
 	_, err = nativekubernetes.Exec(
@@ -262,17 +217,13 @@ func Test_ExampleCopyFileToPod_nestedDirectory(t *testing.T) {
 			ContainerName: podName,
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Copy file to nested directory in container
 	destPath := "/tmp/nested/deep/path/example-file.txt"
 	containerName := podName
 	err = nativekubernetes.CopyFileToPod(ctx, config, localPath, destPath, podName, containerName, namespaceName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	fmt.Printf("Successfully copied file to nested directory %s in pod %s\n", destPath, podName)
 }

@@ -2,11 +2,20 @@
 
 Work with kubernetes.
 
+## Subpackages
+
+* [commandexecutorkubernetes](./commandexecutorkubernetes/README.md): Kubernetes operations using kubectl commands (works remotely via SSH).
+* [nativekubernetes](./nativekubernetes/README.md): Native Kubernetes operations using client-go library (local only).
+* [nativekubernetesoo](./nativekubernetesoo/README.md): Object-oriented wrapper around nativekubernetes.
+* [kubernetestestsshserver](./kubernetestestsshserver/README.md): Test SSH server for Kubernetes testing.
+* [kindutils](./kindutils/README.md): KIND (Kubernetes IN Docker) utilities.
+* [kubectlutils](./kubectlutils/README.md): kubectl command utilities.
+
 The implementation using the official k8s client-go is available as:
-* [non object oriented implementation](/pkg/kubernetesutils/nativekubernetes/)
-* [object oriented implementation](/pkg/kubernetesutils/nativekubernetesoo/) which is on a higher abstraction layer than the non object oriented one.
+* [non object oriented implementation](nativekubernetes/README.md)
+* [object oriented implementation](nativekubernetesoo/README.md) which is on a higher abstraction layer than the non object oriented one.
 The implementation using exec to call `kubectl` or other commands is useful when jumphosts are in between. It is available as:
-* [commandexecutorkubernetes](/pkg/kubernetesutils/commandexecutorkubernetes/)
+* [commandexecutorkubernetes](commandexecutorkubernetes/README.md)
 
 ## Examples
 

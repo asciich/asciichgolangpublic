@@ -1,11 +1,9 @@
 package commandexecutorkubernetes
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"os/exec"
 	"reflect"
 	"slices"
 	"sort"
@@ -1626,49 +1624,49 @@ func (c *CommandExecutorNamespace) StartPortForwarding(ctx context.Context, podN
 		return nil, err
 	}
 
-	// Start kubectl port-forward in background
-	portForwardCmd := exec.CommandContext(forwardCtx, "kubectl",
-		"--context", contextName,
-		"port-forward",
-		"pod/"+podName,
-		fmt.Sprintf("%d:%d", localPort, podPort),
-		"--namespace", namespaceName,
+	// Get the command executor to run kubectl port-forward
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		cancel()
+		return nil, err
+	}
+
+	// Start kubectl port-forward in background using the command executor
+	// We use RunCommandAndGetStdoutAsIoReadCloser to get a stream we can monitor
+	stdoutReader, err := commandExecutor.RunCommandAndGetStdoutAsIoReadCloser(
+		forwardCtx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context", contextName,
+				"port-forward",
+				"pod/" + podName,
+				fmt.Sprintf("%d:%d", localPort, podPort),
+				"--namespace", namespaceName,
+			},
+		},
 	)
-
-	// Capture stdout and stderr for debugging
-	var stdoutBuf, stderrBuf bytes.Buffer
-	portForwardCmd.Stdout = &stdoutBuf
-	portForwardCmd.Stderr = &stderrBuf
-
-	// Start the command
-	err = portForwardCmd.Start()
 	if err != nil {
 		cancel()
 		return nil, tracederrors.TracedErrorf("Failed to start port forwarding for pod '%s/%s:%d': %w", namespaceName, podName, podPort, err)
 	}
 
-	// Monitor the process in a goroutine to detect early failures
+	// Monitor the stdout in a goroutine to detect when the process ends
 	waitDone := make(chan struct{})
 	go func() {
 		defer close(waitDone)
-		err := portForwardCmd.Wait()
-		if err != nil && forwardCtx.Err() == nil {
-			// Log the error with stdout and stderr output
-			stdoutOutput := stdoutBuf.String()
-			stderrOutput := stderrBuf.String()
+		defer stdoutReader.Close()
 
-			logging.LogErrorByCtxf(forwardCtx, "Port forwarding process failed: %v", err)
-			if stdoutOutput != "" {
-				logging.LogErrorByCtxf(forwardCtx, "Port forwarding stdout: %s", stdoutOutput)
-			}
-			if stderrOutput != "" {
-				logging.LogErrorByCtxf(forwardCtx, "Port forwarding stderr: %s", stderrOutput)
-			}
-		} else {
-			// Log successful output for debugging
-			stdoutOutput := stdoutBuf.String()
-			if stdoutOutput != "" {
-				logging.LogInfoByCtxf(forwardCtx, "Port forwarding output: %s", stdoutOutput)
+		// Read until EOF or error
+		buf := make([]byte, 1024)
+		for {
+			_, err := stdoutReader.Read(buf)
+			if err != nil {
+				// EOF or error means process ended
+				if forwardCtx.Err() == nil {
+					logging.LogErrorByCtxf(forwardCtx, "Port forwarding process ended: %v", err)
+				}
+				return
 			}
 		}
 	}()
@@ -1676,31 +1674,12 @@ func (c *CommandExecutorNamespace) StartPortForwarding(ctx context.Context, podN
 	// Wait a moment for port-forwarding to establish
 	time.Sleep(2 * time.Second)
 
-	// Check if process is still running
-	if portForwardCmd.ProcessState != nil && portForwardCmd.ProcessState.Exited() {
-		stdoutOutput := stdoutBuf.String()
-		stderrOutput := stderrBuf.String()
-
-		cancel()
-		errMsg := fmt.Sprintf("Port forwarding process exited immediately for pod '%s/%s:%d'", namespaceName, podName, podPort)
-		if stderrOutput != "" {
-			errMsg += fmt.Sprintf(". stderr: %s", stderrOutput)
-		}
-		if stdoutOutput != "" {
-			errMsg += fmt.Sprintf(". stdout: %s", stdoutOutput)
-		}
-		return nil, tracederrors.TracedError(errMsg)
-	}
-
 	logging.LogInfoByCtxf(ctx, "Port forwarding started for pod '%s/%s:%d' -> localhost:%d", namespaceName, podName, podPort, localPort)
 
-	// Return a cancel function that kills the process and waits for the goroutine to finish
+	// Return a cancel function that cancels the context to stop the process
 	return func() {
-		cancel() // Cancel context first — this sends SIGKILL to the process via CommandContext
-		if portForwardCmd.Process != nil {
-			portForwardCmd.Process.Kill() // Ensure process is killed even if context cancel didn't do it
-		}
-		// Wait for the monitoring goroutine to finish (it holds the only Wait() call)
+		cancel() // Cancel context to stop the process
+		// Wait for the monitoring goroutine to finish
 		select {
 		case <-waitDone:
 			logging.LogInfoByCtxf(ctx, "Port forwarding stopped for pod '%s/%s'", namespaceName, podName)

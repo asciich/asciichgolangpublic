@@ -6,6 +6,11 @@ While this mostly bases on the `commandexecutorhost` package and therefore hosts
 - `GetLocalCommandExecutorHost()` returns a `commandexecutorhost` based `localhost`
 - `GetLocalHost()` returns a [`nativehost`](nativehost/README.md) based `localhost`.
 
+## Subpackages
+
+* [commandexecutorhost](./commandexecutorhost/README.md): Host operations using command executor (works remotely via SSH).
+* [nativehost](./nativehost/README.md): Native host implementation using Go standard library.
+
 ## Specifications
 
-For specifications see [hostutils.spec.md](hostutils.spec.md)
+For specifications see [hostsutils.spec.md](hostsutils.spec.md)

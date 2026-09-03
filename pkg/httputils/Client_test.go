@@ -27,25 +27,21 @@ func getCtx() context.Context {
 	return contextutils.ContextVerbose()
 }
 
-func getClientByImplementationName(implementationName string) (client httputilsinterfaces.Client) {
+func getClientByImplementationName(t *testing.T, implementationName string) (client httputilsinterfaces.Client) {
 	if implementationName == "nativeClient" {
 		return httpnativeclientoo.NewNativeClient()
 	}
 
 	if implementationName == "commandExecutorExec" {
 		client, err := httpcommandexecutorclientoo.NewClient(commandexecutorexecoo.Exec())
-		if err != nil {
-			panic(err)
-		}
+		require.NoError(t, err)
 
 		return client
 	}
 
 	if implementationName == "commandExecutorBash" {
 		client, err := httpcommandexecutorclientoo.NewClient(commandexecutorbashoo.Bash())
-		if err != nil {
-			panic(err)
-		}
+		require.NoError(t, err)
 
 		return client
 	}
@@ -95,7 +91,7 @@ func TestClient_GetRequest_RootPage_PortInUrl(t *testing.T) {
 				url, err := testServer.GetUrl()
 				require.NoError(t, err)
 
-				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(t, tt.implementationName)
 				var response httputilsinterfaces.Response
 				response, err = client.SendRequest(
 					ctx,
@@ -150,7 +146,7 @@ func TestClient_GetRequest_RootPage_PortInRequest(t *testing.T) {
 				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(t, tt.implementationName)
 				var response httputilsinterfaces.Response
 				response, err = client.SendRequest(
 					ctx,
@@ -206,7 +202,7 @@ func TestClient_GetRequest_RootPage_PortOnClientLevel(t *testing.T) {
 				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(t, tt.implementationName)
 
 				// Compared to other test cases the port is set here:
 				err = client.SetPort(mustutils.Must(testServer.GetPort()))
@@ -265,7 +261,7 @@ func TestClient_GetRequestBodyAsString_RootPage_PortInUrl(t *testing.T) {
 				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(t, tt.implementationName)
 				responseBody, err := client.SendRequestAndGetBodyAsString(
 					ctx,
 					&httpoptions.RequestOptions{
@@ -316,7 +312,7 @@ func TestClient_GetRequest_404_PortInUrl(t *testing.T) {
 				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(t, tt.implementationName)
 				response, err := client.SendRequest(
 					ctx,
 					&httpoptions.RequestOptions{
@@ -365,7 +361,7 @@ func TestClient_DownloadAsFile_ChecksumMismatch(t *testing.T) {
 
 				const expectedOutput = "hello world\n"
 
-				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(t, tt.implementationName)
 				_, err = client.DownloadAsFile(
 					ctx,
 					&httpoptions.DownloadAsFileOptions{
@@ -416,7 +412,7 @@ func TestClient_DownloadAsFile(t *testing.T) {
 
 				const expectedOutput = "hello world\n"
 
-				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(t, tt.implementationName)
 				ctxDownload := contextutils.WithChangeIndicator(ctx)
 				downloadedFile, err := client.DownloadAsFile(
 					ctxDownload,
@@ -486,7 +482,7 @@ func TestClient_DownloadAsTempraryFile(t *testing.T) {
 				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(t, tt.implementationName)
 				ctx = contextutils.WithChangeIndicator(ctx)
 				downloadedFile, err := client.DownloadAsTemporaryFile(
 					ctx,
@@ -533,7 +529,7 @@ func TestClient_GetRequestAndRunYqQuery(t *testing.T) {
 				err = testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(t, tt.implementationName)
 				output, err := client.SendRequestAndRunYqQueryAgainstBody(
 					ctx,
 					&httpoptions.RequestOptions{
@@ -573,7 +569,7 @@ func TestClient_GetRequestUsingTls_insecure(t *testing.T) {
 				err := testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(t, tt.implementationName)
 				output, err := client.SendRequestAndGetBodyAsString(
 					ctx,
 					&httpoptions.RequestOptions{
@@ -611,7 +607,7 @@ func TestClient_GetRequest_CollectCertificates(t *testing.T) {
 				err := testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(t, tt.implementationName)
 				response, err := client.SendRequest(
 					ctx,
 					&httpoptions.RequestOptions{
@@ -666,7 +662,7 @@ func TestClient_GetRequest_WithoutCollectCertificates(t *testing.T) {
 				err := testServer.StartInBackground(ctx)
 				require.NoError(t, err)
 
-				var client httputilsinterfaces.Client = getClientByImplementationName(tt.implementationName)
+				var client httputilsinterfaces.Client = getClientByImplementationName(t, tt.implementationName)
 				response, err := client.SendRequest(
 					ctx,
 					&httpoptions.RequestOptions{

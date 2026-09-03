@@ -61,7 +61,7 @@ This document extends the [constitution.md](/constitution.md).
 ## Testing
 
 - Every mentioned implementation requires a test for both the `nativekubernetes` and `commandexecutorkubernetes` based implementation.
-- If a test requires a SSH server do not use the `testsshserver` package, start a test SSH server as pod in the cluster using `kubernetestestsshserver`. 
+- If a test requires a SSH server do not use the `testsshserver` package, start a test SSH server as pod in the cluster using `kubernetestestsshserver`.
 - Preferably use the shared cluster for testing:
     - Run the initailization of it in every test case using the shared cluster as one of the first steps:
         ```golang

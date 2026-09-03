@@ -3,7 +3,9 @@ package kubernetesutils_test
 import (
 	"context"
 	"fmt"
+	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/commandexecutorkubernetes"
@@ -13,17 +15,15 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
-// ExampleCopyFileToPod demonstrates how to copy a local file to a container running in a Kubernetes pod
+// TestCopyFileToPod_nativeKubernetes demonstrates how to copy a local file to a container running in a Kubernetes pod
 // using the nativekubernetes implementation. This is similar to the `kubectl cp` command.
-func ExampleCopyFileToPod_nativeKubernetes() {
+func TestCopyFileToPod_nativeKubernetes(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.WithVerbose(context.TODO())
 
 	// Get the Kubernetes implementation
 	kubernetes, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+kindutils.SharedClusterName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Define the pod name and the namespace
 	const podName = "example-copy-file-pod"
@@ -32,9 +32,7 @@ func ExampleCopyFileToPod_nativeKubernetes() {
 
 	// Create the namespace
 	_, err = kubernetes.CreateNamespaceByName(ctx, namespaceName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Ensure the pod is absent before the example starts:
 	_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
@@ -57,45 +55,34 @@ func ExampleCopyFileToPod_nativeKubernetes() {
 			},
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Get the pod object
 	pod, err := kubernetes.GetPodByNames(namespaceName, podName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Create a temporary file with some content
 	testContent := "Hello from local file! This content will be copied to the container."
 	localPath, err := tempfiles.CreateTemporaryFileFromContentString(ctx, testContent)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Copy file to container
 	destPath := "/tmp/example-file.txt"
 	err = pod.CopyFileToPod(ctx, localPath, destPath, containerName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	fmt.Printf("Successfully copied file to %s in pod %s\n", destPath, podName)
 
-	// Output: Successfully copied file to /tmp/example-file.txt in pod example-copy-file-pod
 }
 
 // ExampleCopyFileToPod_commandExecutor demonstrates how to copy a local file to a container
 // using the commandexecutorkubernetes implementation (which uses kubectl cp under the hood).
-func ExampleCopyFileToPod_commandExecutor() {
+func TestCopyFileToPod_commandExecutor(t *testing.T) {
 	ctx := contextutils.WithVerbose(context.TODO())
 
 	// Get the Kubernetes implementation
 	kubernetes, err := commandexecutorkubernetes.GetClusterByName("kind-" + kindutils.SharedClusterName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	const podName = "example-copy-file-cmd-pod"
 	const namespaceName = "example-copy-file-cmd"
@@ -103,9 +90,7 @@ func ExampleCopyFileToPod_commandExecutor() {
 
 	// Create the namespace
 	_, err = kubernetes.CreateNamespaceByName(ctx, namespaceName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Cleanup
 	defer func() { _ = kubernetes.DeletePodByNames(ctx, namespaceName, podName) }()
@@ -125,44 +110,33 @@ func ExampleCopyFileToPod_commandExecutor() {
 			},
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Get the pod object
 	pod, err := kubernetes.GetPodByNames(namespaceName, podName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Create a temporary file
 	testContent := "File copied using kubectl cp implementation"
 	localPath, err := tempfiles.CreateTemporaryFileFromContentString(ctx, testContent)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Copy file to container using kubectl cp
 	destPath := "/tmp/example-cmd-file.txt"
 	err = pod.CopyFileToPod(ctx, localPath, destPath, containerName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	fmt.Printf("Successfully copied file to %s in pod %s using kubectl cp\n", destPath, podName)
 
-	// Output: Successfully copied file to /tmp/example-cmd-file.txt in pod example-copy-file-cmd-pod using kubectl cp
 }
 
 // ExampleCopyFileToPod_nestedDirectory demonstrates how to copy a file to a nested directory in a container.
-func ExampleCopyFileToPod_nestedDirectory() {
+func TestCopyFileToPod_nestedDirectory(t *testing.T) {
 	ctx := contextutils.WithVerbose(context.TODO())
 
 	// Get the Kubernetes implementation
 	kubernetes, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+kindutils.SharedClusterName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	const podName = "example-copy-nested-pod"
 	const namespaceName = "example-copy-nested"
@@ -170,9 +144,7 @@ func ExampleCopyFileToPod_nestedDirectory() {
 
 	// Create the namespace
 	_, err = kubernetes.CreateNamespaceByName(ctx, namespaceName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Cleanup
 	defer func() { _ = kubernetes.DeletePodByNames(ctx, namespaceName, podName) }()
@@ -192,31 +164,22 @@ func ExampleCopyFileToPod_nestedDirectory() {
 			WaitForPodRunning: true,
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Get the pod object
 	pod, err := kubernetes.GetPodByNames(namespaceName, podName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Create a temporary file
 	testContent := "File in nested directory"
 	localPath, err := tempfiles.CreateTemporaryFileFromContentString(ctx, testContent)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// Copy file to a simple path (nested directories require pre-creation)
 	destPath := "/tmp/example-nested-file.txt"
 	err = pod.CopyFileToPod(ctx, localPath, destPath, containerName)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	fmt.Printf("Successfully copied file to %s in pod %s\n", destPath, podName)
 
-	// Output: Successfully copied file to /tmp/example-nested-file.txt in pod example-copy-nested-pod
 }

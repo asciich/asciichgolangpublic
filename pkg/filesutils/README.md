@@ -1,11 +1,21 @@
 # filesutils package
 
 Contains various implementations to work with files:
-* [commandexecutorfileoo](./commandexecutorfileoo/): File operations using command executor (object oriented).
-* [nativefiles](./nativefiles/): Handle local files using go native/ std library commands.
-* [nativefilesoo](./nativefilesoo/): Object oriented native file operations.
-* [tempfile](./tempfiles/): Create temporary files and directories.
-* [tempfileoo](./tempfilesoo/): Create temporary files and directories in a object oriented way.
+
+## Subpackages
+
+* [commandexecutorfile](./commandexecutorfile/README.md): File operations using command executor.
+* [commandexecutorfileoo](./commandexecutorfileoo/README.md): File operations using command executor (object oriented).
+* [commandexecutortempfile](./commandexecutortempfile/README.md): Temporary file operations using command executor.
+* [commandexecutortempfilesoo](./commandexecutortempfilesoo/README.md): Temporary file operations using command executor (object oriented).
+* [fileinfo](./fileinfo/README.md): File information utilities.
+* [nativefiles](./nativefiles/README.md): Handle local files using go native/ std library commands.
+* [nativefilesoo](./nativefilesoo/README.md): Object oriented native file operations.
+* [tempfiles](./tempfiles/README.md): Create temporary files and directories.
+* [tempfilesoo](./tempfilesoo/README.md): Create temporary files and directories in a object oriented way.
+* [filesoptions](./filesoptions/README.md): File operation options.
+* [filesinterfaces](./filesinterfaces/README.md): File interfaces.
+* [filesgeneric](./filesgeneric/README.md): Generic file utilities (pure in-memory operations).
 
 ## Specifications
 
