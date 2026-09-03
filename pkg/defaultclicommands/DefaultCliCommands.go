@@ -27,6 +27,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/shellcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/sshcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/storagecmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/templatescmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/testingcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/uuidcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/versioncmd"
@@ -71,6 +72,7 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 		shellcmd.NewShellCmd(),
 		sshcmd.NewSshCmd(),
 		storagecmd.NewStorageCmd(),
+		templatescmd.NewTemplatesCmd(),
 		testingcmd.NewTestingCmd(),
 		uuidcmd.NewUuidCmd(),
 		versioncmd.NewVersionCmd(),

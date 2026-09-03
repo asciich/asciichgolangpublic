@@ -7,12 +7,14 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/netutils/macaddresses"
+	"github.com/asciich/asciichgolangpublic/pkg/templateutils/gotemplateutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	libvirtxml "libvirt.org/libvirt-go-xml"
 )
 
-// TODO enable again //go:embed data/LibvirtXmls/VmOnLaptop/vm_on_laptop.xml.tmpl
-// TODO enable again var vm_on_laptopt_xml_tmpl string
+//go:embed data/vm.xml.tmpl
+var vm_on_laptopt_xml_tmpl string
 
 type LibvirtXmlsService struct{}
 
@@ -25,8 +27,6 @@ func NewLibvirtXmlsService() (libvirtXmls *LibvirtXmlsService) {
 }
 
 func (l *LibvirtXmlsService) CreateXmlForVmOnLatopAsString(createOptions *KvmCreateVmOptions) (libvirtXml string, err error) {
-	return "", tracederrors.TracedErrorNotImplemented()
-	/* TODO enable again
 	if createOptions == nil {
 		return "", tracederrors.TracedError("createOptions is nil")
 	}
@@ -46,12 +46,14 @@ func (l *LibvirtXmlsService) CreateXmlForVmOnLatopAsString(createOptions *KvmCre
 		return "", err
 	}
 
-	_, err = MacAddresses().CheckStringIsAMacAddress(macAddress)
+	err = macaddresses.CheckStringIsAMacAddress(macAddress)
+
+	err = macaddresses.CheckStringIsAMacAddress(macAddress)
 	if err != nil {
 		return "", err
 	}
 
-	libvirtXml, err = GoTemplate().RenderTemplateFromStringAsString(
+	libvirtXml, err = gotemplateutils.RenderTemplateFromStringAsString(
 		vm_on_laptopt_xml_tmpl,
 		map[string]interface{}{
 			"VM_NAME":     vmName,
@@ -64,10 +66,9 @@ func (l *LibvirtXmlsService) CreateXmlForVmOnLatopAsString(createOptions *KvmCre
 	}
 
 	return libvirtXml, nil
-	*/
 }
 
-func (l *LibvirtXmlsService) GetMacAddressFromXmlString(libvirtXml string) (macAddress string, err error) {
+func GetMacAddressFromXmlString(libvirtXml string) (macAddress string, err error) {
 	if libvirtXml == "" {
 		return "", tracederrors.TracedError("libvirtXml is empty string")
 	}
