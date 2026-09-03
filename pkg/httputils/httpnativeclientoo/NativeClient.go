@@ -117,9 +117,7 @@ func (c *NativeClient) SendRequest(ctx context.Context, requestOptions *httpopti
 		originalVerifyConnection := transportToUse.TLSClientConfig.VerifyConnection
 		transportToUse.TLSClientConfig.VerifyConnection = func(state tls.ConnectionState) error {
 			collectedCerts = make([]*x509.Certificate, len(state.PeerCertificates))
-			for i, cert := range state.PeerCertificates {
-				collectedCerts[i] = cert
-			}
+			copy(collectedCerts, state.PeerCertificates)
 			if originalVerifyConnection != nil {
 				return originalVerifyConnection(state)
 			}

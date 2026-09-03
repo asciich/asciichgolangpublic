@@ -25,7 +25,7 @@ func getCtx() context.Context {
 //
 // Use defer file.Delete(verbose) to after calling this function to ensure
 // the file is deleted after the test is over.
-func getFileToTest(implementationName string) (file filesinterfaces.File) {
+func getFileToTest(t *testing.T, implementationName string) (file filesinterfaces.File) {
 	ctx := getCtx()
 
 	if implementationName == "localFile" {
@@ -33,9 +33,7 @@ func getFileToTest(implementationName string) (file filesinterfaces.File) {
 		file, err = files.GetLocalFileByPath(
 			mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)),
 		)
-		if err != nil {
-			panic(err)
-		}
+		require.NoError(t, err)
 	} else if implementationName == "localCommandExecutorFile" {
 		file = mustutils.Must(files.GetLocalCommandExecutorFileByPath(
 			mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)),
@@ -66,7 +64,7 @@ func TestGnuPg_SignAndValidate_File(t *testing.T) {
 				const verbose bool = true
 				ctx := getCtx()
 
-				toTest := getFileToTest(tt.implementationName)
+				toTest := getFileToTest(t, tt.implementationName)
 				defer toTest.Delete(ctx, &filesoptions.DeleteOptions{})
 
 				signatureFile, err := mustutils.Must(toTest.GetParentDirectory(ctx)).GetFileInDirectory(
