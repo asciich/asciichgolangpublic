@@ -13,7 +13,11 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func Create(ctx context.Context, path string) error {
+func Create(ctx context.Context, path string, options *filesoptions.CreateOptions) error {
+	if options == nil {
+		options = &filesoptions.CreateOptions{}
+	}
+
 	if path == "" {
 		return tracederrors.TracedErrorEmptyString("path")
 	}
@@ -21,22 +25,34 @@ func Create(ctx context.Context, path string) error {
 	if IsFile(contextutils.WithSilent(ctx), path) {
 		logging.LogInfoByCtxf(ctx, "File '%s' already exists. Skip create.", path)
 	} else {
-		err := CreateDirectory(ctx, filepath.Dir(path), &filesoptions.CreateOptions{})
+		err := CreateDirectory(ctx, filepath.Dir(path), &filesoptions.CreateOptions{UseSudo: options.UseSudo})
 		if err != nil {
 			return err
 		}
 
-		file, err := os.OpenFile(path, os.O_RDONLY|os.O_CREATE, 0666)
-		if err != nil {
-			return tracederrors.TracedErrorf("Failed to create file '%s': %w", path, err)
-		}
+		if options.UseSudo {
+			logging.LogInfoByCtxf(ctx, "Going to create file '%s' using sudo. Please enter your password if asked by sudo.", path)
+			_, err := commandexecutorexec.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+				Command: []string{"sudo", "touch", path},
+			})
+			if err != nil {
+				return tracederrors.TracedErrorf("Failed to create file '%s' using sudo: %w", path, err)
+			} else {
+				logging.LogChangedByCtxf(ctx, "Created file '%s' using sudo.", path)
+			}
+		} else {
+			file, err := os.OpenFile(path, os.O_RDONLY|os.O_CREATE, 0666)
+			if err != nil {
+				return tracederrors.TracedErrorf("Failed to create file '%s': %w", path, err)
+			}
 
-		err = file.Close()
-		if err != nil {
-			return tracederrors.TracedErrorf("Failed to close created file '%s': %w", path, err)
-		}
+			err = file.Close()
+			if err != nil {
+				return tracederrors.TracedErrorf("Failed to close created file '%s': %w", path, err)
+			}
 
-		logging.LogChangedByCtxf(ctx, "Created file '%s'.", path)
+			logging.LogChangedByCtxf(ctx, "Created file '%s'.", path)
+		}
 	}
 
 	return nil

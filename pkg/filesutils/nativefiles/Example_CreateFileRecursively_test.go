@@ -29,7 +29,7 @@ func Test_Example_CreateFileRecursively(t *testing.T) {
 	require.False(t, nativefiles.Exists(ctx, testFile))
 
 	// Create the file
-	err = nativefiles.Create(ctx, testFile)
+	err = nativefiles.Create(ctx, testFile, &filesoptions.CreateOptions{})
 	require.NoError(t, err)
 
 	// The testFile should now exists:

@@ -13,7 +13,7 @@ func (f *File) Create(ctx context.Context, options *filesoptions.CreateOptions) 
 		return err
 	}
 
-	return nativefiles.Create(ctx, path)
+	return nativefiles.Create(ctx, path, options)
 }
 
 func (f *File) Exists(ctx context.Context) (bool, error) {
