@@ -12,7 +12,9 @@ import (
 type Host interface {
 	commandexecutorinterfaces.CommandExecutor
 
-	CheckReachable(verbose bool) (err error)
+	CheckReachable(ctx context.Context) (err error)
+	IsReachable(ctx context.Context) (bool, error)
+	WaitUntilReachable(ctx context.Context, renewHostKey bool) error
 
 	GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor
 

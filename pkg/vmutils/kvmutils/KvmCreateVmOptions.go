@@ -1,6 +1,7 @@
 package kvmutils
 
 import (
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -51,6 +52,19 @@ func (k *KvmCreateVmOptions) GetVmName() (vmName string, err error) {
 	}
 
 	return k.VmName, nil
+}
+
+func (k *KvmCreateVmOptions) SetDiskImageByPath(path string) error {
+	if path == "" {
+		return tracederrors.TracedErrorEmptyString("path")
+	}
+
+	file, err := filesutils.NewFileByPath(path)
+	if err != nil {
+		return err
+	}
+
+	return k.SetDiskImage(file)
 }
 
 func (k *KvmCreateVmOptions) SetDiskImage(diskImage filesinterfaces.File) (err error) {

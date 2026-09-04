@@ -12,6 +12,30 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
+func GetHostByHostnameAndSshUserName(hostname string, sshUserName string) (host hostsutilsinterfaces.Host, err error) {
+	hostname = strings.TrimSpace(hostname)
+	if hostname == "" {
+		return nil, tracederrors.TracedErrorEmptyString("hostname")
+	}
+
+	sshUserName = strings.TrimSpace(sshUserName)
+	if sshUserName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("sshUserName")
+	}
+
+	client, err := commandexecutorsshclient.GetSshClientByHostName(hostname)
+	if err != nil {
+		return nil, err
+	}
+
+	err = client.SetSshUserName(sshUserName)
+	if err != nil {
+		return nil, err
+	}
+
+	return commandexecutorhost.GetCommandExecutorHostByCommandExecutor(client)
+}
+
 func GetHostByHostname(hostname string) (host hostsutilsinterfaces.Host, err error) {
 	hostname = strings.TrimSpace(hostname)
 	if len(hostname) <= 0 {
