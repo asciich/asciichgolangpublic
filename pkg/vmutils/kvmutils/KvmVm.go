@@ -7,9 +7,10 @@ import (
 )
 
 type KvmVm struct {
-	vmId       *int
-	cachedName string
-	hypervisor *KVMHypervisor
+	vmId        *int
+	cachedName  string
+	cachedState string
+	hypervisor  *KVMHypervisor
 }
 
 func NewKvmVm() (kvmVm *KvmVm) {
@@ -29,6 +30,14 @@ func (k *KvmVm) GetCachedName() (cachedName string, err error) {
 	}
 
 	return k.cachedName, nil
+}
+
+func (k *KvmVm) GetCachedState() (cachedState string, err error) {
+	if len(k.cachedState) <= 0 {
+		return "", tracederrors.TracedError("cachedState not set")
+	}
+
+	return k.cachedState, nil
 }
 
 func (k *KvmVm) GetDomainXmlAsString(ctx context.Context) (domainXml string, err error) {
@@ -118,12 +127,31 @@ func (k *KvmVm) GetVmId() (vmId *int, err error) {
 	return k.vmId, nil
 }
 
+func (k *KvmVm) IsRunning() (isRunning bool, err error) {
+	cachedState, err := k.GetCachedState()
+	if err != nil {
+		return false, err
+	}
+
+	return cachedState == "running", nil
+}
+
 func (k *KvmVm) SetCachedName(cachedName string) (err error) {
 	if len(cachedName) <= 0 {
 		return tracederrors.TracedError("cachedName is empty string")
 	}
 
 	k.cachedName = cachedName
+
+	return nil
+}
+
+func (k *KvmVm) SetCachedState(cachedState string) (err error) {
+	if len(cachedState) <= 0 {
+		return tracederrors.TracedError("cachedState is empty string")
+	}
+
+	k.cachedState = cachedState
 
 	return nil
 }

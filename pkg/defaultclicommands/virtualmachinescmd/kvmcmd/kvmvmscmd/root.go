@@ -1,8 +1,9 @@
 package kvmvmscmd
 
 import (
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 func NewVmsCmd() *cobra.Command {
@@ -18,7 +19,9 @@ Usage:
 	}
 
 	cmd.AddCommand(
+		NewGetXmlCmd(),
 		NewListCmd(),
+		NewResetCmd(),
 	)
 
 	return cmd

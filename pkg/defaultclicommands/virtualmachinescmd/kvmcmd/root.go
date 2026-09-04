@@ -1,11 +1,13 @@
 package kvmcmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/virtualmachinescmd/kvmcmd/kvmnetworkscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/virtualmachinescmd/kvmcmd/kvmstorageppolscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/virtualmachinescmd/kvmcmd/kvmvmscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/virtualmachinescmd/kvmcmd/kvmvolumescmd"
-	"os"
 )
 
 func NewKvmCmd() *cobra.Command {
@@ -21,6 +23,7 @@ Usage:
 	}
 
 	cmd.AddCommand(
+		kvmnetworkscmd.NewNetworksCmd(),
 		kvmstorageppolscmd.NewStoragePoolsCmd(),
 		kvmvmscmd.NewVmsCmd(),
 		kvmvolumescmd.NewVolumesCmd(),
