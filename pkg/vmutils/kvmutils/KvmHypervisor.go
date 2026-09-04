@@ -358,6 +358,9 @@ func (k *KVMHypervisor) ListVms(ctx context.Context) (vms []*KvmVm, err error) {
 
 		vmName := splitted[1]
 
+		// Undo the "shut off" -> "shut_off" normalization to store the real libvirt state.
+		vmState := strings.ReplaceAll(splitted[2], "shut_off", "shut off")
+
 		vmIdString := splitted[0]
 		if vmIdString != "-" {
 			vmId, err := strconv.Atoi(vmIdString)
@@ -375,6 +378,12 @@ func (k *KVMHypervisor) ListVms(ctx context.Context) (vms []*KvmVm, err error) {
 		if err != nil {
 			return nil, err
 		}
+
+		err = vmToAdd.SetCachedState(vmState)
+		if err != nil {
+			return nil, err
+		}
+
 		vms = append(vms, vmToAdd)
 	}
 
@@ -676,4 +685,193 @@ func (k *KVMHypervisor) VolumeByNameExists(ctx context.Context, volumeName strin
 	}
 
 	return false, nil
+}
+
+func (k *KVMHypervisor) ListNetworkNames(ctx context.Context) (networkNames []string, err error) {
+	networks, err := k.ListNetworks(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	networkNames = []string{}
+	for _, network := range networks {
+		nameToAdd, err := network.GetName()
+		if err != nil {
+			return nil, err
+		}
+
+		networkNames = append(networkNames, nameToAdd)
+	}
+
+	return networkNames, nil
+}
+
+func (k *KVMHypervisor) ListNetworks(ctx context.Context) (networks []*KvmNetwork, err error) {
+	logging.LogInfoByCtxf(ctx, "List networks on kvm hypervisor started.")
+
+	hostname, err := k.GetHostName()
+	if err != nil {
+		return nil, err
+	}
+
+	// --all also lists inactive networks (e.g. an inactive 'default' network).
+	listNetworkOutput, err := k.RunKvmCommandAndGetStdout(ctx, []string{"net-list", "--all"})
+	if err != nil {
+		return nil, err
+	}
+
+	firstLine, unparsedOutput := stringsutils.SplitFirstLineAndContent(listNetworkOutput)
+	firstLine = strings.TrimSpace(firstLine)
+	if !strings.HasPrefix(firstLine, "Name") {
+		return nil, tracederrors.TracedErrorf("Unexpected first line of list network output: '%s'", firstLine)
+	}
+
+	secondLine, unparsedOutput := stringsutils.SplitFirstLineAndContent(unparsedOutput)
+	secondLine = strings.TrimSpace(secondLine)
+	if strings.Count(secondLine, "-") < 5 {
+		return nil, tracederrors.TracedErrorf("Unexpected second line of list network output: '%s'", secondLine)
+	}
+
+	networks = []*KvmNetwork{}
+	for _, line := range stringsutils.SplitLines(unparsedOutput, true) {
+		line = strings.TrimSpace(line)
+		if len(line) <= 0 {
+			continue
+		}
+
+		splitted := stringsutils.SplitAtSpacesAndRemoveEmptyStrings(line)
+		if len(splitted) != 4 {
+			return nil, tracederrors.TracedErrorf("Unable to split list network line '%v' : '%v'", line, splitted)
+		}
+
+		networkToAdd := NewKvmNetwork()
+
+		err = networkToAdd.SetHypervisor(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = networkToAdd.SetName(splitted[0])
+		if err != nil {
+			return nil, err
+		}
+
+		err = networkToAdd.SetState(splitted[1])
+		if err != nil {
+			return nil, err
+		}
+
+		err = networkToAdd.SetAutostart(splitted[2])
+		if err != nil {
+			return nil, err
+		}
+
+		err = networkToAdd.SetPersistent(splitted[3])
+		if err != nil {
+			return nil, err
+		}
+
+		networks = append(networks, networkToAdd)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Collected '%d' networks on kvm host '%s'", len(networks), hostname)
+
+	logging.LogInfoByCtxf(ctx, "List networks on kvm hypervisor finished.")
+
+	return networks, nil
+}
+
+func (k *KVMHypervisor) NetworkByNameExists(ctx context.Context, networkName string) (networkExists bool, err error) {
+	if networkName == "" {
+		return false, tracederrors.TracedErrorEmptyString("networkName")
+	}
+
+	networkNames, err := k.ListNetworkNames(contextutils.WithSilent(ctx))
+	if err != nil {
+		return false, err
+	}
+
+	return slices.Contains(networkNames, networkName), nil
+}
+
+func (k *KVMHypervisor) StartNetworkByName(ctx context.Context, networkName string) (err error) {
+	if networkName == "" {
+		return tracederrors.TracedErrorEmptyString("networkName")
+	}
+
+	hostname, err := k.GetHostName()
+	if err != nil {
+		return err
+	}
+
+	networks, err := k.ListNetworks(contextutils.WithSilent(ctx))
+	if err != nil {
+		return err
+	}
+
+	for _, network := range networks {
+		nameToCheck, err := network.GetName()
+		if err != nil {
+			return err
+		}
+
+		if nameToCheck != networkName {
+			continue
+		}
+
+		isActive, err := network.IsActive()
+		if err != nil {
+			return err
+		}
+
+		if isActive {
+			logging.LogInfoByCtxf(ctx, "Network '%s' is already active on kvm host '%s'.", networkName, hostname)
+			return nil
+		}
+
+		_, err = k.RunKvmCommandAndGetStdout(ctx, []string{"net-start", networkName})
+		if err != nil {
+			return err
+		}
+
+		logging.LogChangedByCtxf(ctx, "Network '%s' started on kvm host '%s'.", networkName, hostname)
+		return nil
+	}
+
+	return tracederrors.TracedErrorf("No network named '%s' found on kvm host '%s'.", networkName, hostname)
+}
+
+func (k *KVMHypervisor) ResetVm(ctx context.Context, name string) (err error) {
+	if name == "" {
+		return tracederrors.TracedErrorEmptyString("name")
+	}
+
+	hostName, err := k.GetHostName()
+	if err != nil {
+		return err
+	}
+
+	vm, err := k.GetVmByName(ctx, name)
+	if err != nil {
+		return err
+	}
+
+	isRunning, err := vm.IsRunning()
+	if err != nil {
+		return err
+	}
+
+	if !isRunning {
+		logging.LogInfoByCtxf(ctx, "Vm '%s' is not running on host '%s'. Skip reset.", name, hostName)
+		return nil
+	}
+
+	_, err = k.RunKvmCommandAndGetStdout(ctx, []string{"reset", name})
+	if err != nil {
+		return err
+	}
+
+	logging.LogChangedByCtxf(ctx, "Vm '%s' reset on host '%s'.", name, hostName)
+
+	return nil
 }

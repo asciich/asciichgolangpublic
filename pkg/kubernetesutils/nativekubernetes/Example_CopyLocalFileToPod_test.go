@@ -1,9 +1,9 @@
 package nativekubernetes_test
 
 import (
-	"github.com/stretchr/testify/require"
 	"context"
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"

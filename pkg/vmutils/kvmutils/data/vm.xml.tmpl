@@ -79,28 +79,20 @@
     <channel type='unix'>
       <target type='virtio' name='org.qemu.guest_agent.0'/>
     </channel>
-    <channel type='spicevmc'>
-      <target type='virtio' name='com.redhat.spice.0'/>
-    </channel>
 
     <input type='tablet' bus='usb'/>
     <input type='mouse' bus='ps2'/>
     <input type='keyboard' bus='ps2'/>
 
-    <graphics type='spice' autoport='yes' listen='127.0.0.1'>
+    <graphics type='vnc' port='-1' autoport='yes' listen='127.0.0.1'>
       <listen type='address' address='127.0.0.1'/>
-      <image compression='off'/>
     </graphics>
 
     <sound model='ich9'/>
-    <audio id='1' type='spice'/>
 
     <video>
       <model type='virtio' heads='1' primary='yes'/>
     </video>
-
-    <redirdev bus='usb' type='spicevmc'/>
-    <redirdev bus='usb' type='spicevmc'/>
 
     <watchdog model='itco' action='reset'/>
 
