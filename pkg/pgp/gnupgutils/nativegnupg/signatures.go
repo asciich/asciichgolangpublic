@@ -38,18 +38,18 @@ func DetachSignFile(ctx context.Context, path string, privateKey []byte) (signat
 
 	fileToSign, err := os.Open(path)
 	if err != nil {
-		tracederrors.TracedErrorf("Failed to open file for signing: %w", err)
+		return nil, tracederrors.TracedErrorf("Failed to open file for signing: %w", err)
 	}
 	defer fileToSign.Close()
 
 	var sigBuf bytes.Buffer
 	sigWriter, err := armor.Encode(&sigBuf, "PGP SIGNATURE", nil)
 	if err != nil {
-		tracederrors.TracedErrorf("Failed to create armor encoder for signature: %w", err)
+		return nil, tracederrors.TracedErrorf("Failed to create armor encoder for signature: %w", err)
 	}
 
 	if err := openpgp.DetachSign(sigWriter, entity, fileToSign, &packet.Config{}); err != nil {
-		tracederrors.TracedErrorf("Failed to sign file: %w", err)
+		return nil, tracederrors.TracedErrorf("Failed to sign file: %w", err)
 	}
 	sigWriter.Close()
 
