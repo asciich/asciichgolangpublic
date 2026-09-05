@@ -270,7 +270,7 @@ data:
 		Version:     "v1.36.2",
 	}
 
-	err = kubectlutils.InstallKubectlOnCommandExecutor(ctx, pod, installOptions)
+	err = kubectlutils.InstallKubectlUsingCommandExecutor(ctx, pod, installOptions)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to install kubectl in SSH server pod: %w", err)
 	}
