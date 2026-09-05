@@ -187,14 +187,14 @@ func (c *CommandExecutorHost) SetCommandExecutor(commandExecutor commandexecutor
 	return nil
 }
 
-func (h *CommandExecutorHost) AddSshHostKeyToKnownHosts(verbose bool) (err error) {
+func (h *CommandExecutorHost) AddSshHostKeyToKnownHosts(ctx context.Context) (err error) {
 	hostname, err := h.GetHostName()
 	if err != nil {
 		return err
 	}
 
 	_, err = commandexecutorbashoo.Bash().RunCommand(
-		contextutils.GetVerbosityContextByBool(verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{
 				fmt.Sprintf("ssh-keyscan -H '%s' >> ${HOME}/.ssh/known_hosts", hostname),
@@ -205,9 +205,7 @@ func (h *CommandExecutorHost) AddSshHostKeyToKnownHosts(verbose bool) (err error
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof("Added host key of '%s' from known hosts", hostname)
-	}
+	logging.LogInfoByCtxf(ctx, "Added host key of '%s' from known hosts", hostname)
 
 	return nil
 }
@@ -239,8 +237,8 @@ func (h *CommandExecutorHost) CheckFtpPortOpen(verbose bool) (err error) {
 	return nil
 }
 
-func (h *CommandExecutorHost) CheckReachable(verbose bool) (err error) {
-	isReachable, err := h.IsReachable(verbose)
+func (h *CommandExecutorHost) CheckReachable(ctx context.Context) (err error) {
+	isReachable, err := h.IsReachable(ctx)
 	if err != nil {
 		return err
 	}
@@ -251,15 +249,10 @@ func (h *CommandExecutorHost) CheckReachable(verbose bool) (err error) {
 	}
 
 	if isReachable {
-		if verbose {
-			logging.LogInfof("Host '%s' is reachable by SSH.", hostname)
-		}
+		logging.LogInfoByCtxf(ctx, "Host '%s' is reachable by SSH.", hostname)
 	} else {
 		errorMessage := fmt.Sprintf("Host '%s' is reachable by SSH.", hostname)
-		if verbose {
-			logging.LogError(errorMessage)
-		}
-
+		logging.LogErrorByCtxf(ctx, errorMessage)
 		return tracederrors.TracedError(errorMessage)
 	}
 
@@ -401,9 +394,9 @@ func (h *CommandExecutorHost) IsPingable(verbose bool) (isPingable bool, err err
 	return false, tracederrors.TracedErrorf("Unexpected stdout: '%v'", stdout)
 }
 
-func (h *CommandExecutorHost) IsReachable(verbose bool) (isReachable bool, err error) {
+func (h *CommandExecutorHost) IsReachable(ctx context.Context) (isReachable bool, err error) {
 	_, err = h.RunCommandAndGetStdoutAsString(
-		contextutils.GetVerbosityContextByBool(verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"echo", "hello"},
 		},
@@ -433,14 +426,13 @@ func (h *CommandExecutorHost) IsTcpPortOpen(portNumber int, verbose bool) (isOpe
 	return isOpen, nil
 }
 
-func (h *CommandExecutorHost) RemoveSshHostKeyFromKnownHosts(verbose bool) (err error) {
+func (h *CommandExecutorHost) RemoveSshHostKeyFromKnownHosts(ctx context.Context) (err error) {
 	hostname, err := h.GetHostName()
 	if err != nil {
 		return err
 	}
 
-	_, err = commandexecutorbashoo.Bash().RunCommand(
-		contextutils.GetVerbosityContextByBool(verbose),
+	_, err = commandexecutorbashoo.Bash().RunCommand(ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"ssh-keygen", "-R", hostname},
 		},
@@ -449,20 +441,18 @@ func (h *CommandExecutorHost) RemoveSshHostKeyFromKnownHosts(verbose bool) (err 
 		return err
 	}
 
-	if verbose {
-		logging.LogInfof("Removed host key of '%s' from known hosts", hostname)
-	}
+	logging.LogInfoByCtxf(ctx, "Removed host key of '%s' from known hosts", hostname)
 
 	return nil
 }
 
-func (h *CommandExecutorHost) RenewSshHostKey(verbose bool) (err error) {
-	err = h.RemoveSshHostKeyFromKnownHosts(verbose)
+func (h *CommandExecutorHost) RenewSshHostKey(ctx context.Context) (err error) {
+	err = h.RemoveSshHostKeyFromKnownHosts(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = h.AddSshHostKeyToKnownHosts(verbose)
+	err = h.AddSshHostKeyToKnownHosts(ctx)
 	if err != nil {
 		return err
 	}
@@ -525,7 +515,7 @@ func (h *CommandExecutorHost) WaitUntilPingable(verbose bool) (err error) {
 	}
 }
 
-func (h *CommandExecutorHost) WaitUntilReachable(renewHostKey bool, verbose bool) (err error) {
+func (h *CommandExecutorHost) WaitUntilReachable(ctx context.Context, renewHostKey bool) (err error) {
 	hostname, err := h.GetHostName()
 	if err != nil {
 		return err
@@ -537,13 +527,13 @@ func (h *CommandExecutorHost) WaitUntilReachable(renewHostKey bool, verbose bool
 
 	for {
 		if renewHostKey {
-			err = h.RenewSshHostKey(verbose)
+			err = h.RenewSshHostKey(ctx)
 			if err != nil {
 				logging.LogWarn("Renewing host key failed, but error is ignored in WaitUntilReachableBySsh since running in a retry loop.")
 			}
 		}
 
-		isReachableBySsh, err := h.IsReachable(verbose)
+		isReachableBySsh, err := h.IsReachable(ctx)
 		if err != nil {
 			return nil
 		}
@@ -551,29 +541,23 @@ func (h *CommandExecutorHost) WaitUntilReachable(renewHostKey bool, verbose bool
 		elapsedTime := time.Since(t_start)
 
 		if isReachableBySsh {
-			if verbose {
-				logging.LogGoodf("Host '%s' is reachable by SSH after '%v'", hostname, elapsedTime)
-			}
+			logging.LogGoodByCtxf(ctx, "Host '%s' is reachable by SSH after '%v'", hostname, elapsedTime)
 			return nil
 		}
 
 		if elapsedTime > timeout {
 			errorMessage := fmt.Sprintf("Host '%s' is not reachable by SSH after '%v'", hostname, elapsedTime)
-			if verbose {
-				logging.LogError(errorMessage)
-			}
+			logging.LogErrorByCtx(ctx, errorMessage)
 			return tracederrors.TracedError(errorMessage)
 		}
 
-		if verbose {
-			logging.LogInfof(
-				"Wait '%v' for host '%s' to get reachable by SSH. Total '%v' left, elapsed time so far: '%v'.",
-				delayBetweenPings,
-				hostname,
-				timeout-elapsedTime,
-				elapsedTime,
-			)
-		}
+		logging.LogInfoByCtxf(ctx,
+			"Wait '%v' for host '%s' to get reachable by SSH. Total '%v' left, elapsed time so far: '%v'.",
+			delayBetweenPings,
+			hostname,
+			timeout-elapsedTime,
+			elapsedTime,
+		)
 	}
 }
 

@@ -183,9 +183,11 @@ func TestHost_CheckReachable(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
+				ctx := getCtx()
+
 				host := getHostByImplementationName(t, tt.implementationName)
 
-				err := host.CheckReachable(true)
+				err := host.CheckReachable(ctx)
 				require.NoError(t, err)
 			},
 		)

@@ -132,13 +132,13 @@ func (n *NativeHost) GetSshPublicKeyOfUserAsString(ctx context.Context, userName
 	return "", tracederrors.TracedErrorf("No SSH public key for user '%s' on host '%s' found.", userName, hostDescription)
 }
 
-func (n *NativeHost) CheckReachable(verbose bool) (err error) {
+func (n *NativeHost) CheckReachable(ctx context.Context) (err error) {
 	hostDescription, err := n.GetHostDescription()
 	if err != nil {
 		return err
 	}
 
-	isReachable, err := n.IsReachable(verbose)
+	isReachable, err := n.IsReachable(ctx)
 	if err != nil {
 		return err
 	}
@@ -150,9 +150,9 @@ func (n *NativeHost) CheckReachable(verbose bool) (err error) {
 	return nil
 }
 
-func (n *NativeHost) IsReachable(verbose bool) (isReachable bool, err error) {
+func (n *NativeHost) IsReachable(ctx context.Context) (isReachable bool, err error) {
 	_, err = n.RunCommandAndGetStdoutAsString(
-		contextutils.GetVerbosityContextByBool(verbose),
+		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"echo", "hello"},
 		},
@@ -338,7 +338,7 @@ func (n *NativeHost) WaitUntilPingable(verbose bool) (err error) {
 	}
 }
 
-func (n *NativeHost) WaitUntilReachable(renewHostKey bool, verbose bool) (err error) {
+func (n *NativeHost) WaitUntilReachable(ctx context.Context, renewHostKey bool) (err error) {
 	hostname, err := n.GetHostName()
 	if err != nil {
 		return err
@@ -349,7 +349,7 @@ func (n *NativeHost) WaitUntilReachable(renewHostKey bool, verbose bool) (err er
 	delayBetweenPings := 2 * time.Second
 
 	for {
-		isReachable, err := n.IsReachable(verbose)
+		isReachable, err := n.IsReachable(ctx)
 		if err != nil {
 			return nil
 		}
@@ -357,29 +357,23 @@ func (n *NativeHost) WaitUntilReachable(renewHostKey bool, verbose bool) (err er
 		elapsedTime := time.Since(t_start)
 
 		if isReachable {
-			if verbose {
-				logging.LogGoodf("Host '%s' is reachable after '%v'", hostname, elapsedTime)
-			}
+			logging.LogGoodByCtxf(ctx, "Host '%s' is reachable after '%v'", hostname, elapsedTime)
 			return nil
 		}
 
 		if elapsedTime > timeout {
 			errorMessage := fmt.Sprintf("Host '%s' is not reachable after '%v'", hostname, elapsedTime)
-			if verbose {
-				logging.LogError(errorMessage)
-			}
+			logging.LogErrorByCtxf(ctx, errorMessage)
 			return tracederrors.TracedError(errorMessage)
 		}
 
-		if verbose {
-			logging.LogInfof(
-				"Wait '%v' for host '%s' to get reachable. Total '%v' left, elapsed time so far: '%v'.",
-				delayBetweenPings,
-				hostname,
-				timeout-elapsedTime,
-				elapsedTime,
-			)
-		}
+		logging.LogInfoByCtxf(ctx,
+			"Wait '%v' for host '%s' to get reachable. Total '%v' left, elapsed time so far: '%v'.",
+			delayBetweenPings,
+			hostname,
+			timeout-elapsedTime,
+			elapsedTime,
+		)
 
 		time.Sleep(delayBetweenPings)
 	}

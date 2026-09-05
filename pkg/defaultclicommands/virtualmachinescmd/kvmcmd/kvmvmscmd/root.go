@@ -19,6 +19,8 @@ Usage:
 	}
 
 	cmd.AddCommand(
+		NewDeleteCmd(),
+		NewGetVncPortCmd(),
 		NewGetXmlCmd(),
 		NewListCmd(),
 		NewResetCmd(),
