@@ -7,6 +7,43 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
+func TestGopassSecretOptions_GetDeepCopy(t *testing.T) {
+	t.Run("nil fields", func(t *testing.T) {
+		original := NewGopassSecretOptions()
+		copy := original.GetDeepCopy()
+
+		require.EqualValues(t, original.SecretPath, copy.SecretPath)
+		require.EqualValues(t, original.Overwrite, copy.Overwrite)
+
+		// Modify copy
+		copy.SecretPath = "modified/path"
+		copy.Overwrite = !original.Overwrite
+
+		// Original should be unchanged
+		require.EqualValues(t, "", original.SecretPath)
+		require.EqualValues(t, false, original.Overwrite)
+	})
+
+	t.Run("with values", func(t *testing.T) {
+		original := &GopassSecretOptions{
+			SecretPath: "my/secret/path",
+			Overwrite:  true,
+		}
+		copy := original.GetDeepCopy()
+
+		require.EqualValues(t, original.SecretPath, copy.SecretPath)
+		require.EqualValues(t, original.Overwrite, copy.Overwrite)
+
+		// Modify copy
+		copy.SecretPath = "modified/path"
+		copy.Overwrite = false
+
+		// Original should be unchanged
+		require.EqualValues(t, "my/secret/path", original.SecretPath)
+		require.True(t, original.Overwrite)
+	})
+}
+
 func TestGopassSecretOptions_GetPath(t *testing.T) {
 	tests := []struct {
 		path         string

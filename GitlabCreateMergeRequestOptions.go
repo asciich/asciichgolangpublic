@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"sort"
 
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -30,6 +31,11 @@ func (g *GitlabCreateMergeRequestOptions) GetAssignToSelf() (assignToSelf bool) 
 func (g *GitlabCreateMergeRequestOptions) GetDeepCopy() (copy *GitlabCreateMergeRequestOptions) {
 	copy = NewGitlabCreateMergeRequestOptions()
 	*copy = *g
+
+	if g.Labels != nil {
+		copy.Labels = slicesutils.GetDeepCopyOfStringsSlice(g.Labels)
+	}
+
 	return copy
 }
 

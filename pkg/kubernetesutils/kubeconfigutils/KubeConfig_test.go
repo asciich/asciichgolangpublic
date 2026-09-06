@@ -485,3 +485,193 @@ func Test_GetAndSetCurrentContext(t *testing.T) {
 	})
 
 }
+
+// Test_GetDeepCopy_ShallowCopyBug reproduces the bug where GetDeepCopy() creates a shallow copy
+// instead of a deep copy, causing the original config to be modified when the copy is modified.
+// This bug causes kubectl to fail when loading merged kubeconfigs because the original config
+// data gets corrupted during the merge process.
+//
+// These tests will FAIL until the GetDeepCopy() function is fixed to create a true deep copy.
+func Test_GetDeepCopy_ShallowCopyBug(t *testing.T) {
+	t.Run("GetDeepCopy should not share cluster slice with original", func(t *testing.T) {
+		ctx := getCtx()
+
+		// Load original config
+		original, err := kubeconfigutils.LoadFromFilePath(ctx, "./testdata/cluster-a.yaml")
+		require.NoError(t, err)
+
+		// Get the original cluster server URL before copy
+		originalServerBefore, err := original.GetClusterServerUrlAsString("kind-cluster-a")
+		require.NoError(t, err)
+		require.EqualValues(t, "https://127.0.0.1:36435", originalServerBefore)
+
+		// Create a copy
+		copy := original.GetDeepCopy()
+
+		// Modify the copy by updating the cluster entry
+		updatedCluster := &kubeconfigutils.KubeConfigCluster{
+			Name: "kind-cluster-a",
+			Cluster: kubeconfigutils.KubeConfigClusterCluster{
+				Server:                   "https://modified-server:9999",
+				CertificateAuthorityData: "modified-cert-data",
+			},
+		}
+		err = copy.AddClusterEntry(updatedCluster)
+		require.NoError(t, err)
+
+		// The original should NOT be modified
+		originalServerAfter, err := original.GetClusterServerUrlAsString("kind-cluster-a")
+		require.NoError(t, err)
+
+		// This assertion will FAIL with current implementation, proving the bug exists
+		require.EqualValues(t, originalServerBefore, originalServerAfter,
+			"BUG: Original config was modified when modifying the copy! GetDeepCopy() creates a shallow copy, not a deep copy.")
+	})
+
+	t.Run("GetDeepCopy should not share context slice with original", func(t *testing.T) {
+		ctx := getCtx()
+
+		// Load original config
+		original, err := kubeconfigutils.LoadFromFilePath(ctx, "./testdata/cluster-a.yaml")
+		require.NoError(t, err)
+
+		// Get the original context user before copy
+		originalUserBefore, err := original.GetUserNameByContextName(ctx, "kind-cluster-a")
+		require.NoError(t, err)
+		require.EqualValues(t, "kind-cluster-a", originalUserBefore)
+
+		// Create a copy
+		copy := original.GetDeepCopy()
+
+		// Modify the copy by updating the context entry
+		updatedContext := &kubeconfigutils.KubeConfigContext{
+			Name: "kind-cluster-a",
+			Context: struct {
+				Cluster   string `yaml:"cluster"`
+				Namespace string `yaml:"namespace"`
+				User      string `yaml:"user"`
+			}{
+				Cluster: "kind-cluster-a",
+				User:    "modified-user",
+			},
+		}
+		err = copy.AddContextEntry(updatedContext)
+		require.NoError(t, err)
+
+		// The original should NOT be modified
+		originalUserAfter, err := original.GetUserNameByContextName(ctx, "kind-cluster-a")
+		require.NoError(t, err)
+
+		// This assertion will FAIL with current implementation, proving the bug exists
+		require.EqualValues(t, originalUserBefore, originalUserAfter,
+			"BUG: Original config context was modified when modifying the copy!")
+	})
+
+	t.Run("GetDeepCopy should not share user slice with original", func(t *testing.T) {
+		ctx := getCtx()
+
+		// Load original config
+		original, err := kubeconfigutils.LoadFromFilePath(ctx, "./testdata/cluster-a.yaml")
+		require.NoError(t, err)
+
+		// Get the original user key data before copy
+		originalKeyDataBefore, err := original.GetClientKeyDataForUser("kind-cluster-a")
+		require.NoError(t, err)
+		require.NotEmpty(t, originalKeyDataBefore)
+
+		// Create a copy
+		copy := original.GetDeepCopy()
+
+		// Modify the copy by updating the user entry
+		updatedUser := &kubeconfigutils.KubeConfigUser{
+			Name: "kind-cluster-a",
+			User: struct {
+				ClientCertificateData string `yaml:"client-certificate-data"`
+				ClientKeyData         string `yaml:"client-key-data"`
+				Username              string `yaml:"username"`
+				Password              string `yaml:"password"`
+			}{
+				ClientKeyData: "modified-key-data",
+			},
+		}
+		err = copy.AddUserEntry(updatedUser)
+		require.NoError(t, err)
+
+		// The original should NOT be modified
+		originalKeyDataAfter, err := original.GetClientKeyDataForUser("kind-cluster-a")
+		require.NoError(t, err)
+
+		// This assertion will FAIL with current implementation, proving the bug exists
+		require.EqualValues(t, originalKeyDataBefore, originalKeyDataAfter,
+			"BUG: Original config user was modified when modifying the copy!")
+	})
+
+	t.Run("MergeConfig should not corrupt original config", func(t *testing.T) {
+		ctx := getCtx()
+
+		// Load two configs
+		configA, err := kubeconfigutils.LoadFromFilePath(ctx, "./testdata/cluster-a.yaml")
+		require.NoError(t, err)
+
+		configB, err := kubeconfigutils.LoadFromFilePath(ctx, "./testdata/cluster-b.yaml")
+		require.NoError(t, err)
+
+		// Capture original state of configA before merge
+		originalAServerBefore, err := configA.GetClusterServerUrlAsString("kind-cluster-a")
+		require.NoError(t, err)
+		originalAContextsBefore, err := configA.ListContextNames(ctx)
+		require.NoError(t, err)
+
+		// Merge configs (this should NOT modify configA or configB)
+		_, err = kubeconfigutils.MergeConfig(configA, configB)
+		require.NoError(t, err)
+
+		// Check if configA was corrupted by the merge
+		originalAServerAfter, err := configA.GetClusterServerUrlAsString("kind-cluster-a")
+		require.NoError(t, err)
+
+		originalAContextsAfter, err := configA.ListContextNames(ctx)
+		require.NoError(t, err)
+
+		// These assertions will FAIL with current implementation, proving the bug exists
+		require.EqualValues(t, originalAServerBefore, originalAServerAfter,
+			"BUG: MergeConfig corrupted configA's cluster data!")
+		require.EqualValues(t, originalAContextsBefore, originalAContextsAfter,
+			"BUG: MergeConfig corrupted configA's context data!")
+	})
+
+	t.Run("MergeConfig with overlapping cluster names corrupts original", func(t *testing.T) {
+		ctx := getCtx()
+
+		// Load two configs where both have the same cluster name
+		configA, err := kubeconfigutils.LoadFromFilePath(ctx, "./testdata/cluster-a.yaml")
+		require.NoError(t, err)
+
+		// Load update config that has the same cluster name but different server
+		configUpdate, err := kubeconfigutils.LoadFromFilePath(ctx, "./testdata/cluster-a_update_server.yaml")
+		require.NoError(t, err)
+
+		// Capture original state before merge
+		originalServerBefore, err := configA.GetClusterServerUrlAsString("kind-cluster-a")
+		require.NoError(t, err)
+		require.EqualValues(t, "https://127.0.0.1:36435", originalServerBefore)
+
+		// The update config should have a different server
+		updateServer, err := configUpdate.GetClusterServerUrlAsString("kind-cluster-a")
+		require.NoError(t, err)
+		require.EqualValues(t, "https://127.0.0.1:36436", updateServer)
+		require.NotEqualValues(t, originalServerBefore, updateServer)
+
+		// Merge configs - this SHOULD NOT modify configA
+		_, err = kubeconfigutils.MergeConfig(configA, configUpdate)
+		require.NoError(t, err)
+
+		// Check if configA was corrupted
+		originalServerAfter, err := configA.GetClusterServerUrlAsString("kind-cluster-a")
+		require.NoError(t, err)
+
+		// BUG: configA's server will be changed to the update server value
+		require.EqualValues(t, originalServerBefore, originalServerAfter,
+			"BUG: MergeConfig corrupted configA's cluster data when merging overlapping cluster names!")
+	})
+}

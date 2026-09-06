@@ -21,7 +21,7 @@ func prepareInstallOptions(options *InstallKubeadmOptions) (*installoptions.Inst
 
 	// Set defaults for any unset options
 	if options.InstallPath == "" {
-		options.InstallPath = "/bin/kubeadm"
+		options.InstallPath = "/bin/kubelet"
 	}
 	if options.Version == "" {
 		options.Version = "v1.36.2"

@@ -252,7 +252,7 @@ func (h *CommandExecutorHost) CheckReachable(ctx context.Context) (err error) {
 		logging.LogInfoByCtxf(ctx, "Host '%s' is reachable by SSH.", hostname)
 	} else {
 		errorMessage := fmt.Sprintf("Host '%s' is reachable by SSH.", hostname)
-		logging.LogErrorByCtxf(ctx, errorMessage)
+		logging.LogErrorByCtxf(ctx, "%s", errorMessage)
 		return tracederrors.TracedError(errorMessage)
 	}
 
