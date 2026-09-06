@@ -58,11 +58,11 @@ func GenerateKeyPair(ctx context.Context, options *gnupgoptions.GenerateKeyPairO
 	var pubKeyBuf bytes.Buffer
 	pubKeyWriter, err := armor.Encode(&pubKeyBuf, "PGP PUBLIC KEY BLOCK", nil)
 	if err != nil {
-		tracederrors.TracedErrorf("Failed to create armor encoder: %w", err)
+		return nil, nil, tracederrors.TracedErrorf("Failed to create armor encoder: %w", err)
 	}
 	err = entity.Serialize(pubKeyWriter)
 	if err != nil {
-		tracederrors.TracedErrorf("Failed to serialize public key: %w", err)
+		return nil, nil, tracederrors.TracedErrorf("Failed to serialize public key: %w", err)
 	}
 	pubKeyWriter.Close()
 
@@ -71,11 +71,11 @@ func GenerateKeyPair(ctx context.Context, options *gnupgoptions.GenerateKeyPairO
 	var privateKeyBuf bytes.Buffer
 	privateKeyWriter, err := armor.Encode(&privateKeyBuf, "PGP PRIVATE KEY BLOCK", nil)
 	if err != nil {
-		tracederrors.TracedErrorf("Failed to create armor encoder: %w", err)
+		return nil, nil, tracederrors.TracedErrorf("Failed to create armor encoder: %w", err)
 	}
 	err = entity.SerializePrivate(privateKeyWriter, nil)
 	if err != nil {
-		tracederrors.TracedErrorf("Failed to serialize public key: %w", err)
+		return nil, nil, tracederrors.TracedErrorf("Failed to serialize private key: %w", err)
 	}
 	privateKeyWriter.Close()
 

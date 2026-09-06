@@ -94,7 +94,7 @@ func MakeBucketPublicReadable(ctx context.Context, client *minio.Client, bucketN
 
 	err := client.SetBucketPolicy(ctx, bucketName, policy)
 	if err != nil {
-		tracederrors.TracedErrorf("Error setting bucket policy: %w", err)
+		return tracederrors.TracedErrorf("Error setting bucket policy: %w", err)
 	}
 
 	logging.LogInfoByCtxf(ctx, "Make bucket '%s' public readable finished.", bucketName)

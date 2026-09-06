@@ -49,6 +49,17 @@ func InstallPackages(ctx context.Context, commandExecutor commandexecutorinterfa
 			}
 		}
 
+		if options.UpdateKeyringFirst {
+			err := UpdateArchLinuxKeyringPackage(
+				ctx,
+				commandExecutor,
+				options.UseSudo,
+			)
+			if err != nil {
+				return err
+			}
+		}
+
 		command := []string{"pacman", "-S", "--noconfirm"}
 
 		if options.Force {

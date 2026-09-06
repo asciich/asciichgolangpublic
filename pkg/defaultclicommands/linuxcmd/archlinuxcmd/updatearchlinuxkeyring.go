@@ -7,13 +7,13 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/osutils"
-	"github.com/asciich/asciichgolangpublic/pkg/osutils/linuxutils/archlinuxutils"
+	"github.com/asciich/asciichgolangpublic/pkg/packagemanager/pacman"
 )
 
 func NewUpdateArchlinuxKeyringCmd() *cobra.Command {
 	const short = "Update the 'archlinux-keyring' package."
 
-	runbook := archlinuxutils.NewUpdateArchLinuxKeyringPackageRunbook(nil, false)
+	runbook := pacman.NewUpdateArchLinuxKeyringPackageRunbook(nil, false)
 	runbookDocumentation, err := runbook.DocumentSteps()
 	if err != nil {
 		panic(err)
@@ -43,7 +43,7 @@ This is achieved by:
 			}
 
 			commandExectuor := commandexecutorexecoo.NewExec()
-			runbook := archlinuxutils.NewUpdateArchLinuxKeyringPackageRunbook(commandExectuor, useSudo)
+			runbook := pacman.NewUpdateArchLinuxKeyringPackageRunbook(commandExectuor, useSudo)
 			mustutils.Must0(runbook.Execute(ctx))
 
 			logging.LogGoodByCtx(ctx, "archlinux-keyring updated.")

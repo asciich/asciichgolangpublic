@@ -175,7 +175,7 @@ func (t *TestSshServer) StartSshServer(ctx context.Context) error {
 
 	hostKey, err := t.generateHostKey()
 	if err != nil {
-		tracederrors.TracedErrorf("Failed to generate host key: %w", err)
+		return tracederrors.TracedErrorf("Failed to generate host key: %w", err)
 	}
 
 	config := &ssh.ServerConfig{
