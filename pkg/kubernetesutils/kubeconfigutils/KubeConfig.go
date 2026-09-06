@@ -162,12 +162,28 @@ func MergeConfig(configs ...*KubeConfig) (merged *KubeConfig, err error) {
 	return merged, nil
 }
 
-func (k *KubeConfig) GetDeepCopy() (copy *KubeConfig) {
-	copy = new(KubeConfig)
+func (k *KubeConfig) GetDeepCopy() (result *KubeConfig) {
+	result = new(KubeConfig)
 
-	*copy = *k
+	*result = *k
 
-	return copy
+	// Deep copy the slices to avoid sharing underlying arrays with the original
+	if k.Clusters != nil {
+		result.Clusters = make([]KubeConfigCluster, len(k.Clusters))
+		copy(result.Clusters, k.Clusters)
+	}
+
+	if k.Contexts != nil {
+		result.Contexts = make([]KubeConfigContext, len(k.Contexts))
+		copy(result.Contexts, k.Contexts)
+	}
+
+	if k.Users != nil {
+		result.Users = make([]KubeConfigUser, len(k.Users))
+		copy(result.Users, k.Users)
+	}
+
+	return result
 }
 
 func (k *KubeConfig) GetClusterEntryByName(name string) (cluster *KubeConfigCluster, err error) {

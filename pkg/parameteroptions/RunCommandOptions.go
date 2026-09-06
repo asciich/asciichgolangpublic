@@ -1,6 +1,7 @@
 package parameteroptions
 
 import (
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/mapsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datetime/durationparser"
 	"github.com/asciich/asciichgolangpublic/pkg/shellutils/shelllinehandler"
@@ -83,6 +84,15 @@ func (o *RunCommandOptions) GetCommand() ([]string, error) {
 func (o *RunCommandOptions) GetDeepCopy() (deepCopy *RunCommandOptions) {
 	deepCopy = NewRunCommandOptions()
 	*deepCopy = *o
+
+	if o.Command != nil {
+		deepCopy.Command = slicesutils.GetDeepCopyOfStringsSlice(o.Command)
+	}
+
+	if o.AdditionalEnvVars != nil {
+		deepCopy.AdditionalEnvVars = mapsutils.DeepCopyStringsMap(o.AdditionalEnvVars)
+	}
+
 	return deepCopy
 }
 

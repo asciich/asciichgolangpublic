@@ -390,4 +390,3 @@ func TestGetPackageManagerType(t *testing.T) {
 		t.Errorf("Expected PackageManagerAptGet, got %s", pmType)
 	}
 }
-

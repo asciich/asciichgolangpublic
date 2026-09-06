@@ -363,7 +363,7 @@ func (n *NativeHost) WaitUntilReachable(ctx context.Context, renewHostKey bool) 
 
 		if elapsedTime > timeout {
 			errorMessage := fmt.Sprintf("Host '%s' is not reachable after '%v'", hostname, elapsedTime)
-			logging.LogErrorByCtxf(ctx, errorMessage)
+			logging.LogErrorByCtxf(ctx, "%s", errorMessage)
 			return tracederrors.TracedError(errorMessage)
 		}
 

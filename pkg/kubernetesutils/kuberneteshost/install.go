@@ -101,14 +101,25 @@ func NewInstallRunbook(commandExecutor commandexecutorinterfaces.CommandExecutor
 					if err != nil {
 						return err
 					}
-
 					return nil
 				},
 			},
 			&runbook.Step{
 				Name:        "enable-kubelet",
-				Description: "Enable the kubelet service so it starts on boot.",
+				Description: "Install the kubelet systemd service and enable it so it starts on boot.",
 				Run: func(ctx context.Context) error {
+					// Install the kubelet systemd unit and the kubeadm drop-in.
+					err := kubeletutils.InstallKubeletServiceUsingCommandExecutor(ctx, commandExecutor, &kubeletutils.InstallKubeletServiceOptions{})
+					if err != nil {
+						return err
+					}
+
+					// Enable and start the kubelet service.
+					err = kubeletutils.StartAndEnableKubeletUsingCommandExecutor(ctx, commandExecutor)
+					if err != nil {
+						return err
+					}
+
 					return nil
 				},
 			},

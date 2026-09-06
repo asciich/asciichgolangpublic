@@ -1,6 +1,7 @@
 package parameteroptions
 
 import (
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -199,6 +200,18 @@ func (o *ListFileOptions) GetDeepCopy() (deepCopy *ListFileOptions) {
 	deepCopy = new(ListFileOptions)
 
 	*deepCopy = *o
+
+	if o.MatchBasenamePattern != nil {
+		deepCopy.MatchBasenamePattern = slicesutils.GetDeepCopyOfStringsSlice(o.MatchBasenamePattern)
+	}
+
+	if o.ExcludeBasenamePattern != nil {
+		deepCopy.ExcludeBasenamePattern = slicesutils.GetDeepCopyOfStringsSlice(o.ExcludeBasenamePattern)
+	}
+
+	if o.ExcludePatternWholepath != nil {
+		deepCopy.ExcludePatternWholepath = slicesutils.GetDeepCopyOfStringsSlice(o.ExcludePatternWholepath)
+	}
 
 	return deepCopy
 }

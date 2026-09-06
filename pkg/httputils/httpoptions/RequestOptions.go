@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/mapsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -51,6 +53,14 @@ func (r *RequestOptions) GetDeepCopy() (copy *RequestOptions) {
 	copy = new(RequestOptions)
 
 	*copy = *r
+
+	if r.Header != nil {
+		copy.Header = mapsutils.DeepCopyStringsMap(r.Header)
+	}
+
+	if r.Data != nil {
+		copy.Data = slicesutils.GetDeepCopyOfByteSlice(r.Data)
+	}
 
 	return copy
 }

@@ -235,6 +235,8 @@ pkg/<domain>/<packagename>/
                 })
             }
             ```
+- All deep copy related functions need unittest (e.g. `GetDeepCopy()`).
+    - It's imporatant to validate maps and slices are handled correclty by the deep copy functions.
 
 ## Container handing
 
