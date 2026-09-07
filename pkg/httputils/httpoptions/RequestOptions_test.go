@@ -36,7 +36,7 @@ func TestRequestOptions_GetDeepCopy(t *testing.T) {
 	t.Run("with Header map", func(t *testing.T) {
 		original := httpoptions.NewRequestOptions()
 		original.Header = map[string]string{
-			"Content-Type": "application/json",
+			"Content-Type":  "application/json",
 			"Authorization": "Bearer token",
 		}
 

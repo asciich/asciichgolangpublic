@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -295,6 +296,14 @@ func GetBaseName(path string) (string, error) {
 func GetDirName(path string) (string, error) {
 	if path == "" {
 		return "", tracederrors.TracedErrorEmptyString("path")
+	}
+
+	if path == "." {
+		var err error
+		path, err = pathsutils.GetAbsolutePath(path)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	return filepath.Dir(path), nil
