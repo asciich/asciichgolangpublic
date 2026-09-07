@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/asciich/asciichgolangpublic/pkg/archiveutils/tarutils"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httputilsinterfaces"
@@ -248,6 +249,26 @@ func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 
 	t.mux.HandleFunc("/hello_world2.txt", func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "hello world2\n")
+	})
+
+	t.mux.HandleFunc("/hello_world.tar", func(w http.ResponseWriter, r *http.Request) {
+		tarContent, err := tarutils.CreateTarArchiveFromFileContentStringAndGetAsBytes("hello_world.txt", "hello world\n")
+		if err != nil {
+			http.Error(w, "500 internal server error", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/x-tar")
+		w.Write(tarContent)
+	})
+
+	t.mux.HandleFunc("/hello_world.tar.gz", func(w http.ResponseWriter, r *http.Request) {
+		tarGzContent, err := tarutils.CreateTarGzArchiveFromFileContentStringAndGetAsBytes("hello_world.txt", "hello world\n")
+		if err != nil {
+			http.Error(w, "500 internal server error", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/gzip")
+		w.Write(tarGzContent)
 	})
 
 	t.mux.HandleFunc("/example1.yaml", func(w http.ResponseWriter, r *http.Request) {
