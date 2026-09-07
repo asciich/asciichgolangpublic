@@ -1,6 +1,10 @@
 package installoptions
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -66,7 +70,18 @@ func (i *InstallOptions) GetInstallPath() (installPath string, err error) {
 		return "", tracederrors.TracedErrorf("InstallPath not set")
 	}
 
-	return i.InstallPath, nil
+	// Expand tilde to home directory
+	if strings.HasPrefix(i.InstallPath, "~") {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return "", tracederrors.TracedErrorf("Failed to get home directory: %w", err)
+		}
+		installPath = filepath.Join(homeDir, i.InstallPath[1:])
+	} else {
+		installPath = i.InstallPath
+	}
+
+	return installPath, nil
 }
 
 func (i *InstallOptions) GetMode() (mode string, err error) {
