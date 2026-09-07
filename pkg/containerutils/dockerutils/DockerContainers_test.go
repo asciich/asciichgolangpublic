@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -16,10 +17,17 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/pathsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
+
+// Since we delete the image in this tests:
+// Use a pinned ubuntu version not used in other packages might tested at the same time.
+const ubuntImageName = "ubuntu:26.04"
 
 func getCtx() context.Context {
 	return contextutils.ContextVerbose()
@@ -55,6 +63,39 @@ func getDockerContainerToTest(t *testing.T, implementationName string, container
 	logging.LogFatalWithTracef("Unkown implementaion name: '%s'", implementationName)
 
 	return nil, nil
+}
+
+func TestUbuntuImageNameNotUsedInOtherPackages(t *testing.T) {
+	// This is a repo test to test the repo configuration, not the implementation itself.
+	// To avoid race conditions during testing we use a dedicated tagged ubuntu image.
+	ctx := getCtx()
+
+	repoRoot, err := gitutils.GetRepositoryRootPathByPath(ctx, ".")
+	require.NoError(t, err)
+
+	toCheck := ubuntImageName
+	require.NotEmpty(t, toCheck)
+
+	goFiles, err := nativefiles.ListFiles(ctx, repoRoot, &parameteroptions.ListFileOptions{
+		MatchBasenamePattern: []string{`.*\.go`},
+	})
+	require.NoError(t, err)
+	require.GreaterOrEqual(t, len(goFiles), 500)
+
+	packagePath, err := pathsutils.GetAbsolutePath(".")
+	require.NoError(t, err)
+	require.GreaterOrEqual(t, len(packagePath), 10)
+
+	for _, f := range goFiles {
+		if filepath.Dir(f) == packagePath {
+			continue
+		}
+
+		contains, err := nativefiles.Contains(contextutils.WithSilent(ctx), f, toCheck)
+		require.NoError(t, err)
+
+		require.Falsef(t, contains, "The file '%s' contains the same image as used in the package '%s'. To avoid race conditions the '%s' package should be the only one using the image and tag '%s'.", f, packagePath, packagePath, toCheck)
+	}
 }
 
 func TestContainers_Container_Run(t *testing.T) {
@@ -162,7 +203,7 @@ func TestContainers_Container_RunCommand(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				const containername = "test-run-container"
-				const imageName = "ubuntu:latest"
+				const imageName = ubuntImageName
 				ctx := getCtx()
 
 				container, docker := getDockerContainerToTest(t, tt.implementationName, containername)

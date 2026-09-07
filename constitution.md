@@ -235,6 +235,20 @@ pkg/<domain>/<packagename>/
                 })
             }
             ```
+- Testing internal/private functions:
+    - By default, private functions are **not** tested directly. They are tested indirectly through the exported API that calls them (see the external test package rule above).
+    - Only if direct testing of a private function is truly required, place these tests in a dedicated file named `<package_name>_internals_test.go`.
+        - This file **must** use the internal test package, i.e. `package <package_name>` **without** the `_test` suffix.
+            - Use:
+                ```golang
+                package nativegit
+                ```
+            - Instead of:
+                ```golang
+                package nativegit_test
+                ```
+        - This is the **only** exception to the external test package rule. All tests of exported API must still reside in external test packages (`package <package_name>_test`).
+        - Keep tests of private functions isolated in the `<package_name>_internals_test.go` file so that the separation between public API tests and internal tests stays explicit and easy to find.
 - All deep copy related functions need unittest (e.g. `GetDeepCopy()`).
     - It's imporatant to validate maps and slices are handled correclty by the deep copy functions.
 
