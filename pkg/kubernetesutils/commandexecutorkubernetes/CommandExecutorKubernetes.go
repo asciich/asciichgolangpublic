@@ -193,52 +193,6 @@ func (c *CommandExecutorKubernetes) WaitForDefaultServiceAccount(ctx context.Con
 	}
 }
 
-func (c *CommandExecutorKubernetes) DeleteNamespaceByName(ctx context.Context, name string) (err error) {
-	if name == "" {
-		return tracederrors.TracedErrorEmptyString("name")
-	}
-
-	exists, err := c.NamespaceByNameExists(ctx, name)
-	if err != nil {
-		return err
-	}
-
-	clusterName, err := c.GetName()
-	if err != nil {
-		return err
-	}
-
-	if exists {
-
-		context, err := c.GetCachedKubectlContext(ctx)
-		if err != nil {
-			return err
-		}
-
-		_, err = c.RunCommand(
-			ctx,
-			&parameteroptions.RunCommandOptions{
-				Command: []string{
-					"kubectl",
-					"--context",
-					context,
-					"delete",
-					"namespace",
-					name,
-				},
-			},
-		)
-		if err != nil {
-			return err
-		}
-
-		logging.LogChangedByCtxf(ctx, "Namespace '%s' in cluster '%s' deleted.", name, clusterName)
-	} else {
-		logging.LogInfoByCtxf(ctx, "Namespace '%s' already absent in cluster '%s'.", name, clusterName)
-	}
-
-	return nil
-}
 
 func (c *CommandExecutorKubernetes) GetCachedContextName() (cachedContextName string, err error) {
 	if c.cachedContextName == "" {

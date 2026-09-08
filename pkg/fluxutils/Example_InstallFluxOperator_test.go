@@ -20,11 +20,6 @@ func Test_InstallFluxOperator(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.WithVerbose(context.TODO())
 
-	// -----
-	// Prepare test environment start ...
-	// ... prepare test environment finished.
-	// -----
-
 	// Get Kubernetes cluster:
 	cluster, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+testClusterName)
 	require.NoError(t, err)
