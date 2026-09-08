@@ -30,7 +30,7 @@ func Test_CommandExecutorHost_GetCpuArchitecture(t *testing.T) {
 	host, err := hostsutils.GetHostByHostname("localhost")
 	require.NoError(t, err)
 
-	commandExecutor := host.GetDeepCopyAsCommandExecutor()
+	commandExecutor := host.GetDeepCopy()
 
 	arch, err := commandExecutor.GetCPUArchitecture(ctx)
 	require.NoError(t, err)

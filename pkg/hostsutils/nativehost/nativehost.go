@@ -38,17 +38,13 @@ func NewNativeHost() (host hostsutilsinterfaces.Host) {
 	return n
 }
 
-func (n *NativeHost) GetDeepCopy() *NativeHost {
+func (n *NativeHost) GetDeepCopy() commandexecutorinterfaces.CommandExecutor {
 	ret := &NativeHost{}
 	err := ret.SetParentCommandExecutorForBaseClass(ret)
 	if err != nil {
 		panic(err)
 	}
 	return ret
-}
-
-func (n *NativeHost) GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor {
-	return n.GetDeepCopy()
 }
 
 func (n *NativeHost) GetHostDescription() (hostDescription string, err error) {

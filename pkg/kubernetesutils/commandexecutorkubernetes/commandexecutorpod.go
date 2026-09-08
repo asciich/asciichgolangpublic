@@ -630,7 +630,7 @@ func (c *CommandExecutorPod) GetCPUArchitecture(ctx context.Context) (string, er
 	return "", tracederrors.TracedErrorNotImplemented()
 }
 
-func (c *CommandExecutorPod) GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor {
+func (c *CommandExecutorPod) GetDeepCopy() commandexecutorinterfaces.CommandExecutor {
 	ret := NewCommandExecutorPod()
 
 	*ret = *c

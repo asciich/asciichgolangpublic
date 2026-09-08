@@ -65,7 +65,7 @@ func (s *SSHClient) CheckReachable(ctx context.Context) (err error) {
 	return tracederrors.TracedErrorf("host '%v' is not reachable", hostname)
 }
 
-func (s *SSHClient) GetDeepCopyAsCommandExecutor() (copy commandexecutorinterfaces.CommandExecutor) {
+func (s *SSHClient) GetDeepCopy() (copy commandexecutorinterfaces.CommandExecutor) {
 	ret := NewSSHClient()
 
 	*ret = *s

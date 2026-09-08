@@ -102,10 +102,6 @@ func (c *CommandExecutorDocker) GetDeepCopy() *CommandExecutorDocker {
 	return ret
 }
 
-func (c *CommandExecutorDocker) GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor {
-	return c.GetDeepCopy()
-}
-
 func (c *CommandExecutorDocker) GetDeepCopyAsDocker() dockerinterfaces.Docker {
 	return c.GetDeepCopy()
 }

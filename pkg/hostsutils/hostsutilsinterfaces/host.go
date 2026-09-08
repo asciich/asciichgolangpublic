@@ -16,8 +16,6 @@ type Host interface {
 	IsReachable(ctx context.Context) (bool, error)
 	WaitUntilReachable(ctx context.Context, renewHostKey bool) error
 
-	GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor
-
 	GetDirectoryByPath(ctx context.Context, path string) (directory filesinterfaces.Directory, err error)
 	GetHostDescription() (hostDescription string, err error)
 	GetHostName() (hostName string, err error)
