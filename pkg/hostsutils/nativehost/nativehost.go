@@ -17,6 +17,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils"
@@ -339,44 +340,7 @@ func (n *NativeHost) WaitUntilPingable(verbose bool) (err error) {
 }
 
 func (n *NativeHost) WaitUntilReachable(ctx context.Context, renewHostKey bool) (err error) {
-	hostname, err := n.GetHostName()
-	if err != nil {
-		return err
-	}
-
-	t_start := time.Now()
-	timeout := 60 * time.Second
-	delayBetweenPings := 2 * time.Second
-
-	for {
-		isReachable, err := n.IsReachable(ctx)
-		if err != nil {
-			return nil
-		}
-
-		elapsedTime := time.Since(t_start)
-
-		if isReachable {
-			logging.LogGoodByCtxf(ctx, "Host '%s' is reachable after '%v'", hostname, elapsedTime)
-			return nil
-		}
-
-		if elapsedTime > timeout {
-			errorMessage := fmt.Sprintf("Host '%s' is not reachable after '%v'", hostname, elapsedTime)
-			logging.LogErrorByCtxf(ctx, "%s", errorMessage)
-			return tracederrors.TracedError(errorMessage)
-		}
-
-		logging.LogInfoByCtxf(ctx,
-			"Wait '%v' for host '%s' to get reachable. Total '%v' left, elapsed time so far: '%v'.",
-			delayBetweenPings,
-			hostname,
-			timeout-elapsedTime,
-			elapsedTime,
-		)
-
-		time.Sleep(delayBetweenPings)
-	}
+	return hostgeneric.WaitUntilReachable(ctx, n, renewHostKey)
 }
 
 func (n *NativeHost) CheckFtpPortOpen(verbose bool) (err error) {
@@ -413,18 +377,7 @@ func (n *NativeHost) SetComment(comment string) (err error) {
 	return tracederrors.TracedError("SetComment not implemented for NativeHost")
 }
 
-// AddSshHostKeyToKnownHosts is not applicable for NativeHost since it represents localhost.
-// SSH connections to localhost use the bash command executor, not SSH protocol.
-func (n *NativeHost) AddSshHostKeyToKnownHosts(verbose bool) (err error) {
-	return tracederrors.TracedError("AddSshHostKeyToKnownHosts not applicable for NativeHost (localhost)")
-}
-
-// RemoveSshHostKeyFromKnownHosts is not applicable for NativeHost since it represents localhost.
-func (n *NativeHost) RemoveSshHostKeyFromKnownHosts(verbose bool) (err error) {
-	return tracederrors.TracedError("RemoveSshHostKeyFromKnownHosts not applicable for NativeHost (localhost)")
-}
-
 // RenewSshHostKey is not applicable for NativeHost since it represents localhost.
-func (n *NativeHost) RenewSshHostKey(verbose bool) (err error) {
+func (n *NativeHost) RenewSshHostKey(ctx context.Context) (err error) {
 	return tracederrors.TracedError("RenewSshHostKey not applicable for NativeHost (localhost)")
 }

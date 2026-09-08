@@ -351,6 +351,16 @@ func (t *TestSshServer) handleExecCommand(channel ssh.Channel, command string) {
 		channel.SendRequest("exit-status", false, ssh.Marshal(struct {
 			Status uint32
 		}{Status: 0}))
+	case "echo hello":
+		io.WriteString(channel, "hello\n")
+		channel.SendRequest("exit-status", false, ssh.Marshal(struct {
+			Status uint32
+		}{Status: 0}))
+	case "echo hallo":
+		io.WriteString(channel, "hallo\n")
+		channel.SendRequest("exit-status", false, ssh.Marshal(struct {
+			Status uint32
+		}{Status: 0}))
 	case "exit":
 		io.WriteString(channel, "Goodbye!\n")
 		channel.SendRequest("exit-status", false, ssh.Marshal(struct {

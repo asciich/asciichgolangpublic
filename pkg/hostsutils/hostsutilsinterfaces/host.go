@@ -23,4 +23,6 @@ type Host interface {
 	GetHostName() (hostName string, err error)
 	GetSshPublicKeyOfUserAsString(ctx context.Context, username string) (publicKey string, err error)
 	InstallBinary(ctx context.Context, installOptions *parameteroptions.InstallOptions) (installedFile filesinterfaces.File, err error)
+
+	RenewSshHostKey(ctx context.Context) error
 }

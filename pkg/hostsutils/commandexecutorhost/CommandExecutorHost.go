@@ -18,6 +18,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/ftputils"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils"
@@ -249,9 +250,9 @@ func (h *CommandExecutorHost) CheckReachable(ctx context.Context) (err error) {
 	}
 
 	if isReachable {
-		logging.LogInfoByCtxf(ctx, "Host '%s' is reachable by SSH.", hostname)
+		logging.LogInfoByCtxf(ctx, "Host '%s' is reachable.", hostname)
 	} else {
-		errorMessage := fmt.Sprintf("Host '%s' is reachable by SSH.", hostname)
+		errorMessage := fmt.Sprintf("Host '%s' is reachable.", hostname)
 		logging.LogErrorByCtxf(ctx, "%s", errorMessage)
 		return tracederrors.TracedError(errorMessage)
 	}
@@ -516,49 +517,7 @@ func (h *CommandExecutorHost) WaitUntilPingable(verbose bool) (err error) {
 }
 
 func (h *CommandExecutorHost) WaitUntilReachable(ctx context.Context, renewHostKey bool) (err error) {
-	hostname, err := h.GetHostName()
-	if err != nil {
-		return err
-	}
-
-	t_start := time.Now()
-	timeout := 60 * time.Second
-	delayBetweenPings := 2 * time.Second
-
-	for {
-		if renewHostKey {
-			err = h.RenewSshHostKey(ctx)
-			if err != nil {
-				logging.LogWarn("Renewing host key failed, but error is ignored in WaitUntilReachableBySsh since running in a retry loop.")
-			}
-		}
-
-		isReachableBySsh, err := h.IsReachable(ctx)
-		if err != nil {
-			return nil
-		}
-
-		elapsedTime := time.Since(t_start)
-
-		if isReachableBySsh {
-			logging.LogGoodByCtxf(ctx, "Host '%s' is reachable by SSH after '%v'", hostname, elapsedTime)
-			return nil
-		}
-
-		if elapsedTime > timeout {
-			errorMessage := fmt.Sprintf("Host '%s' is not reachable by SSH after '%v'", hostname, elapsedTime)
-			logging.LogErrorByCtx(ctx, errorMessage)
-			return tracederrors.TracedError(errorMessage)
-		}
-
-		logging.LogInfoByCtxf(ctx,
-			"Wait '%v' for host '%s' to get reachable by SSH. Total '%v' left, elapsed time so far: '%v'.",
-			delayBetweenPings,
-			hostname,
-			timeout-elapsedTime,
-			elapsedTime,
-		)
-	}
+	return hostgeneric.WaitUntilReachable(ctx, h, renewHostKey)
 }
 
 func (j *CommandExecutorHost) GetHostName() (hostName string, err error) {
