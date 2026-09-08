@@ -12,8 +12,10 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/netutils/netutilserrors"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/shellutils/shelllinehandler"
+	"github.com/asciich/asciichgolangpublic/pkg/sshutils/sshutilsgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -226,12 +228,23 @@ func (s *SSHClient) RunCommand(ctx context.Context, options *parameteroptions.Ru
 
 	commandOutput, err = commandexecutorexecoo.Exec().RunCommand(ctx, commandToUse)
 	if err != nil {
+		// The system ssh binary reports a refused TCP connection like:
+		//   "ssh: connect to host localhost port 2223: Connection refused"
+		// Tag it with the well-known sentinel so callers can use
+		// netutilserrors.IsConnectionRefusedError.
+		if sshutilsgeneric.IsSshConnectionRefused(err, commandOutput) {
+			return nil, tracederrors.TracedErrorf(
+				"%w: %w",
+				netutilserrors.ErrConnectionRefused,
+				err,
+			)
+		}
+
 		return nil, err
 	}
 
 	return commandOutput, nil
 }
-
 func (s *SSHClient) SetHostName(hostName string) (err error) {
 	if hostName == "" {
 		return tracederrors.TracedErrorf("hostName is empty string")
