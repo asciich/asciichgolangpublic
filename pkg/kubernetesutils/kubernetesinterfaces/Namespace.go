@@ -13,11 +13,13 @@ type Namespace interface {
 	CheckPodByNameExists(ctx context.Context, podName string) error
 	CheckReplicaSetByNameExists(ctx context.Context, replicaSetName string) error
 	CheckDeploymentByNameExists(ctx context.Context, deploymentName string) error
+	CheckDaemonSetByNameExists(ctx context.Context, daemonSetName string) error
 	CheckCronJobByNameExists(ctx context.Context, cronJobName string) error
 	ConfigMapByNameExists(ctx context.Context, name string) (exits bool, err error)
 	Create(ctx context.Context) (err error)
 	CreateConfigMap(ctx context.Context, name string, options *kubernetesparameteroptions.CreateConfigMapOptions) (createdConfigMap ConfigMap, err error)
 	CreateDeployment(ctx context.Context, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (Deployment, error)
+	CreateDaemonSet(ctx context.Context, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (DaemonSet, error)
 	CreateObject(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (Object, error)
 	CreatePod(ctx context.Context, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (Pod, error)
 	CreateReplicaSet(ctx context.Context, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (ReplicaSet, error)
@@ -30,17 +32,20 @@ type Namespace interface {
 	DeleteConfigMapByName(ctx context.Context, name string) (err error)
 	DeleteCronJobByName(ctx context.Context, cronJobName string) (err error)
 	DeleteDeploymentByName(ctx context.Context, name string) (err error)
+	DeleteDaemonSetByName(ctx context.Context, name string) (err error)
 	DeletePodByName(ctx context.Context, name string) (err error)
 	DeleteReplicaSetByName(ctx context.Context, name string) (err error)
 	DeleteRoleByName(ctx context.Context, name string) (err error)
 	DeleteRoleBindingByName(ctx context.Context, name string) (err error)
 	DeleteSecretByName(ctx context.Context, name string) (err error)
 	DeploymentByNameExists(ctx context.Context, deploymentName string) (bool, error)
+	DaemonSetByNameExists(ctx context.Context, daemonSetName string) (bool, error)
 	Exists(ctx context.Context) (bool, error)
 	GetClusterName() (clusterName string, err error)
 	GetConfigMapByName(name string) (configMap ConfigMap, err error)
 	GetCronJobByName(name string) (CronJob, error)
 	GetDeploymentByName(name string) (Deployment, error)
+	GetDaemonSetByName(name string) (DaemonSet, error)
 	GetKubernetesCluster() (KubernetesCluster, error)
 	GetKubectlContext(ctx context.Context) (contextName string, err error)
 	GetName() (name string, err error)
@@ -53,6 +58,7 @@ type Namespace interface {
 	ListConfigMapNames(ctx context.Context) ([]string, error)
 	ListCronJobNames(ctx context.Context) ([]string, error)
 	ListDeploymentNames(ctx context.Context) ([]string, error)
+	ListDaemonSetNames(ctx context.Context) ([]string, error)
 	ListObjectNames(options *kubernetesparameteroptions.ListKubernetesObjectsOptions) (objectNames []string, err error)
 	ListPodNames(ctx context.Context) ([]string, error)
 	ListReplicaSetNames(ctx context.Context) ([]string, error)

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/ciliumutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubeadmutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubectlutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubeletutils"
@@ -110,6 +111,11 @@ func NewInstallRunbook(commandExecutor commandexecutorinterfaces.CommandExecutor
 				Run: func(ctx context.Context) error {
 					// Install the kubelet systemd unit and the kubeadm drop-in.
 					err := kubeletutils.InstallKubeletServiceUsingCommandExecutor(ctx, commandExecutor, &kubeletutils.InstallKubeletServiceOptions{})
+					if err != nil {
+						return err
+					}
+
+					err = ciliumutils.InstallCiliumCliUsingCommandExecutor(ctx, commandExecutor, &ciliumutils.InstallCiliumOptions{})
 					if err != nil {
 						return err
 					}

@@ -12,10 +12,12 @@ type KubernetesRunCommandOptions struct {
 	PodName                         string
 	ReplicaSetName                  string
 	DeploymentName                  string
+	DaemonSetName                   string
 	ContainerName                   string
 	DeleteAlreadyExistingPod        bool
 	DeleteAlreadyExistingReplicaSet bool
 	DeleteAlreadyExistingDeployment bool
+	DeleteAlreadyExistingDaemonSet  bool
 
 	// Wait until pod is in "running" state
 	WaitForPodRunning bool
@@ -25,6 +27,9 @@ type KubernetesRunCommandOptions struct {
 
 	// Wait until Deployment has all replicas available
 	WaitForDeploymentAvailable bool
+
+	// Wait until DaemonSet has all desired pods available
+	WaitForDaemonSetAvailable bool
 
 	// Number of replicas for ReplicaSet/Deployment (default: 1)
 	Replicas int32
@@ -53,7 +58,7 @@ type SecretMountSource struct {
 
 func (r *KubernetesRunCommandOptions) GetContainerName() (string, error) {
 	if r.ContainerName == "" {
-		// If the container name is not explicitly defined, use the pod, ReplicaSet, or Deployment name:
+		// If the container name is not explicitly defined, use the pod, ReplicaSet, Deployment, or DaemonSet name:
 		if r.PodName != "" {
 			return r.GetPodName()
 		}
@@ -63,7 +68,10 @@ func (r *KubernetesRunCommandOptions) GetContainerName() (string, error) {
 		if r.DeploymentName != "" {
 			return r.GetDeploymentName()
 		}
-		return "", tracederrors.TracedError("ContainerName not set and no PodName, ReplicaSetName, or DeploymentName available")
+		if r.DaemonSetName != "" {
+			return r.GetDaemonSetName()
+		}
+		return "", tracederrors.TracedError("ContainerName not set and no PodName, ReplicaSetName, DeploymentName, or DaemonSetName available")
 	}
 
 	return r.ContainerName, nil
@@ -132,4 +140,12 @@ func (r *KubernetesRunCommandOptions) GetDeploymentName() (string, error) {
 	}
 
 	return r.DeploymentName, nil
+}
+
+func (r *KubernetesRunCommandOptions) GetDaemonSetName() (string, error) {
+	if r.DaemonSetName == "" {
+		return "", tracederrors.TracedError("DaemonSetName not set")
+	}
+
+	return r.DaemonSetName, nil
 }

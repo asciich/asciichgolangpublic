@@ -1335,6 +1335,8 @@ func (n *NativeNamespace) ListObjectNames(options *kubernetesparameteroptions.Li
 	}
 
 	switch objectType {
+	case "daemonset", "daemonsets":
+		return nativekubernetes.ListDaemonSetNames(ctx, clientSet, namespaceName)
 	case "pod", "pods":
 		return nativekubernetes.ListPodNames(ctx, clientSet, namespaceName)
 	case "deployment", "deployments":
@@ -1616,4 +1618,98 @@ func (n *NativeNamespace) Delete(ctx context.Context) error {
 	}
 
 	return nativekubernetes.DeleteNamespace(ctx, clientset, namespaceName)
+}
+
+func (n *NativeNamespace) CreateDaemonSet(ctx context.Context, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (kubernetesinterfaces.DaemonSet, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	daemonSetName, err := options.GetDaemonSetName()
+	if err != nil {
+		return nil, err
+	}
+
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	err = nativekubernetes.CreateDaemonSet(ctx, clientSet, namespaceName, options)
+	if err != nil {
+		return nil, err
+	}
+
+	return n.GetDaemonSetByName(daemonSetName)
+}
+
+func (n *NativeNamespace) GetDaemonSetByName(daemonSetName string) (kubernetesinterfaces.DaemonSet, error) {
+	if daemonSetName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("daemonSetName")
+	}
+
+	daemonSet := &DaemonSet{}
+
+	err := daemonSet.SetName(daemonSetName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = daemonSet.SetNamespace(n)
+	if err != nil {
+		return nil, err
+	}
+
+	return daemonSet, nil
+}
+
+func (n *NativeNamespace) DeleteDaemonSetByName(ctx context.Context, daemonSetName string) error {
+	daemonSet, err := n.GetDaemonSetByName(daemonSetName)
+	if err != nil {
+		return err
+	}
+
+	return daemonSet.Delete(ctx)
+}
+
+func (n *NativeNamespace) DaemonSetByNameExists(ctx context.Context, daemonSetName string) (bool, error) {
+	daemonSet, err := n.GetDaemonSetByName(daemonSetName)
+	if err != nil {
+		return false, err
+	}
+
+	return daemonSet.Exists(ctx)
+}
+
+// CheckDaemonSetByNameExists checks if a daemonSet exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (n *NativeNamespace) CheckDaemonSetByNameExists(ctx context.Context, daemonSetName string) error {
+	exists, err := n.DaemonSetByNameExists(ctx, daemonSetName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		namespaceName, _ := n.GetName()
+		return tracederrors.TracedErrorf("DaemonSet '%s' does not exist in namespace '%s'", daemonSetName, namespaceName)
+	}
+	return nil
+}
+
+func (n *NativeNamespace) ListDaemonSetNames(ctx context.Context) ([]string, error) {
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := n.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	return nativekubernetes.ListDaemonSetNames(ctx, clientSet, namespaceName)
 }
