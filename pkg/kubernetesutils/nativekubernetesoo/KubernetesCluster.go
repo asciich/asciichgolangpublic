@@ -18,11 +18,20 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
+
+// fluxInstanceGVR is the GroupVersionResource of the flux-operator's FluxInstance
+// custom resource (fluxinstances.fluxcd.controlplane.io).
+var fluxInstanceGVR = schema.GroupVersionResource{
+	Group:    "fluxcd.controlplane.io",
+	Version:  "v1",
+	Resource: "fluxinstances",
+}
 
 type NativeKubernetesCluster struct {
 	name   string
@@ -116,46 +125,6 @@ func (n *NativeKubernetesCluster) GetClientSet() (*kubernetes.Clientset, error) 
 	}
 
 	return n.clientSetCache, nil
-}
-
-func (n *NativeKubernetesCluster) DeleteNamespaceByName(ctx context.Context, namespaceName string) (err error) {
-	if namespaceName == "" {
-		return tracederrors.TracedErrorEmptyString("namespaceName")
-	}
-
-	exists, err := n.NamespaceByNameExists(ctx, namespaceName)
-	if err != nil {
-		return err
-	}
-
-	if exists {
-		clientset, err := n.GetClientSet()
-		if err != nil {
-			return err
-		}
-
-		deletePolicy := metav1.DeletePropagationForeground // This ensures child objects are deleted before the namespace
-		deleteOptions := metav1.DeleteOptions{
-			PropagationPolicy:  &deletePolicy,
-			GracePeriodSeconds: nil, // Use default graceful termination period
-		}
-
-		err = clientset.CoreV1().Namespaces().Delete(ctx, namespaceName, deleteOptions)
-		if err != nil {
-			return tracederrors.TracedErrorf("Failed to delete kubernetes namespace '%s': %w", namespaceName, err)
-		}
-
-		logging.LogChangedByCtxf(ctx, "Namespace '%s' deleted.", namespaceName)
-
-		err = n.WaitUntilNamespaceDeleted(ctx, namespaceName)
-		if err != nil {
-			return err
-		}
-	} else {
-		logging.LogInfoByCtxf(ctx, "Namespace '%s' already absent. Skip delete.", namespaceName)
-	}
-
-	return nil
 }
 
 func (n *NativeKubernetesCluster) GetKubectlContext(ctx context.Context) (contextName string, err error) {
