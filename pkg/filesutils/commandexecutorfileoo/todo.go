@@ -62,7 +62,7 @@ func (f *File) GetDeepCopy() (deepCopy filesinterfaces.File) {
 	}
 
 	if f.commandExecutor != nil {
-		copy.commandExecutor = f.commandExecutor.GetDeepCopyAsCommandExecutor()
+		copy.commandExecutor = f.commandExecutor.GetDeepCopy()
 	}
 
 	copy.path = f.path

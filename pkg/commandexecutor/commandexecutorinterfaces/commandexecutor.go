@@ -10,7 +10,7 @@ import (
 
 // A CommandExecutor is able to run a command like Exec or bash does.
 type CommandExecutor interface {
-	GetDeepCopyAsCommandExecutor() CommandExecutor
+	GetDeepCopy() CommandExecutor
 
 	GetHostDescription() (string, error)
 

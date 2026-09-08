@@ -358,7 +358,7 @@ func (c *CommandExecutorFile) GetDeepCopy() (deepCopy filesinterfaces.File) {
 	*d = *c
 
 	if c.commandExecutor != nil {
-		d.commandExecutor = c.commandExecutor.GetDeepCopyAsCommandExecutor()
+		d.commandExecutor = c.commandExecutor.GetDeepCopy()
 	}
 
 	return d

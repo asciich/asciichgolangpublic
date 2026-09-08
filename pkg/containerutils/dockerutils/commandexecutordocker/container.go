@@ -39,7 +39,7 @@ func NewCommandExecutorDockerContainer() (c *CommandExecutorDockerContainer) {
 	return container
 }
 
-func (c *CommandExecutorDockerContainer) GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor {
+func (c *CommandExecutorDockerContainer) GetDeepCopy() commandexecutorinterfaces.CommandExecutor {
 	ret := &CommandExecutorDockerContainer{
 		name: c.name,
 		id:   c.id,

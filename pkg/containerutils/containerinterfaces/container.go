@@ -13,7 +13,7 @@ import (
 
 type Container interface {
 	// Get a deep copy of the instance:
-	GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor
+	GetDeepCopy() commandexecutorinterfaces.CommandExecutor
 
 	// Get the name of the container.
 	GetName() (string, error)

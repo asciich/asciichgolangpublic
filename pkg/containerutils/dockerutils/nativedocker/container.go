@@ -40,7 +40,7 @@ func NewContainer(name string) (*Container, error) {
 	return ret, nil
 }
 
-func (c *Container) GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor {
+func (c *Container) GetDeepCopy() commandexecutorinterfaces.CommandExecutor {
 	return &Container{
 		name: c.name,
 	}

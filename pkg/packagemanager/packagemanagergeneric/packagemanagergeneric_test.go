@@ -19,7 +19,7 @@ import (
 // testCommandExecutor is a test helper that implements the CommandExecutor interface
 type testCommandExecutor struct{}
 
-func (t *testCommandExecutor) GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor {
+func (t *testCommandExecutor) GetDeepCopy() commandexecutorinterfaces.CommandExecutor {
 	return &testCommandExecutor{}
 }
 
