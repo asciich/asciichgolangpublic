@@ -252,8 +252,8 @@ pkg/<domain>/<packagename>/
         - This is the **only** exception to the external test package rule. All tests of exported API must still reside in external test packages (`package <package_name>_test`).
         - Keep tests of private functions isolated in the `<package_name>_internals_test.go` file so that the separation between public API tests and internal tests stays explicit and easy to find.
 - All deep copy related functions need unittest (e.g. `GetDeepCopy()`).
-    - It's imporatant to validate maps and slices are handled correclty by the deep copy functions.
+    - It's important to validate maps and slices are handled correctly by the deep copy functions.
 
-## Container handing
+## Container handling
 
 - Avoid installing things in containers. Use container images which already include what is needed. Relying on the package servers is not a good practice.
