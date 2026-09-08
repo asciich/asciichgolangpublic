@@ -15,6 +15,7 @@ type KubernetesCluster interface {
 	ConfigMapByNameExists(ctx context.Context, namespaceName string, configMapName string) (exists bool, err error)
 	CreateConfigMap(ctx context.Context, namespaceName string, configMapName string, options *kubernetesparameteroptions.CreateConfigMapOptions) (createdConfigMap ConfigMap, err error)
 	CreateDeployment(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (Deployment, error)
+	CreateDaemonSet(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (DaemonSet, error)
 	CreateNamespaceByName(ctx context.Context, namespaceName string) (createdNamespace Namespace, err error)
 	CreateObject(ctx context.Context, options *kubernetesparameteroptions.CreateObjectOptions) (Object, error)
 	CreatePod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (Pod, error)
@@ -25,6 +26,7 @@ type KubernetesCluster interface {
 	CreateClusterRoleBinding(ctx context.Context, createOptions *kubernetesparameteroptions.CreateClusterRoleBindingOptions) (createdClusterRoleBinding ClusterRoleBinding, err error)
 	CreateSecret(ctx context.Context, namespaceName string, secretName string, options *kubernetesparameteroptions.CreateSecretOptions) (createdSecret Secret, err error)
 	DeleteDeploymentByNames(ctx context.Context, namespaceName string, deploymentName string) error
+	DeleteDaemonSetByNames(ctx context.Context, namespaceName string, daemonSetName string) error
 	DeleteNamespaceByName(ctx context.Context, namespaceName string) (err error)
 	DeletePodByNames(ctx context.Context, namespaceName string, podName string) error
 	DeleteReplicaSetByNames(ctx context.Context, namespaceName string, replicaSetName string) error
@@ -35,7 +37,10 @@ type KubernetesCluster interface {
 	DeleteSecretByName(ctx context.Context, namespaceName string, secretName string) (err error)
 	DeploymentByNameExists(ctx context.Context, namespaceName string, deploymentName string) (bool, error)
 	CheckDeploymentByNameExists(ctx context.Context, namespaceName string, deploymentName string) error
+	DaemonSetByNameExists(ctx context.Context, namespaceName string, daemonSetName string) (bool, error)
+	CheckDaemonSetByNameExists(ctx context.Context, namespaceName string, daemonSetName string) error
 	GetDeploymentByNames(namespaceName string, deploymentName string) (Deployment, error)
+	GetDaemonSetByNames(namespaceName string, daemonSetName string) (DaemonSet, error)
 	GetKubectlContext(ctx context.Context) (contextName string, err error)
 	GetName() (name string, err error)
 	GetNamespaceByName(name string) (namespace Namespace, err error)

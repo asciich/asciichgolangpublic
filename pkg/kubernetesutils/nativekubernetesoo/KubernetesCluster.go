@@ -1080,3 +1080,52 @@ func (n *NativeKubernetesCluster) RoleBindingByNameExists(ctx context.Context, n
 	}
 	return namespace.RoleBindingByNameExists(ctx, roleBindingName)
 }
+
+func (n *NativeKubernetesCluster) GetDaemonSetByNames(namespaceName string, daemonSetName string) (kubernetesinterfaces.DaemonSet, error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.GetDaemonSetByName(daemonSetName)
+}
+
+func (n *NativeKubernetesCluster) CreateDaemonSet(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (kubernetesinterfaces.DaemonSet, error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return namespace.CreateDaemonSet(ctx, options)
+}
+
+func (n *NativeKubernetesCluster) DeleteDaemonSetByNames(ctx context.Context, namespaceName string, daemonSetName string) error {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return err
+	}
+
+	return namespace.DeleteDaemonSetByName(ctx, daemonSetName)
+}
+
+func (n *NativeKubernetesCluster) DaemonSetByNameExists(ctx context.Context, namespaceName string, daemonSetName string) (bool, error) {
+	namespace, err := n.GetNamespaceByName(namespaceName)
+	if err != nil {
+		return false, err
+	}
+
+	return namespace.DaemonSetByNameExists(ctx, daemonSetName)
+}
+
+// CheckDaemonSetByNameExists checks if a daemonSet exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (n *NativeKubernetesCluster) CheckDaemonSetByNameExists(ctx context.Context, namespaceName string, daemonSetName string) error {
+	exists, err := n.DaemonSetByNameExists(ctx, namespaceName, daemonSetName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return tracederrors.TracedErrorf("DaemonSet '%s' does not exist in namespace '%s'", daemonSetName, namespaceName)
+	}
+	return nil
+}

@@ -2426,3 +2426,207 @@ func (c *CommandExecutorNamespace) Delete(ctx context.Context) error {
 
 	return kubernetesCluster.DeleteNamespaceByName(ctx, namespaceName)
 }
+
+func (c *CommandExecutorNamespace) GetDaemonSetByName(name string) (kubernetesinterfaces.DaemonSet, error) {
+	if name == "" {
+		return nil, tracederrors.TracedErrorEmptyString("name")
+	}
+
+	ret := NewCommandExecutorDaemonSet()
+
+	err := ret.SetName(name)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ret.SetNamespace(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return ret, nil
+}
+
+func (c *CommandExecutorNamespace) CreateDaemonSet(ctx context.Context, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (kubernetesinterfaces.DaemonSet, error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	daemonSetName, err := options.GetDaemonSetName()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Create kubernetes daemonset '%s' started.", daemonSetName)
+
+	kubectlContext, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	imageName, err := options.GetImageName()
+	if err != nil {
+		return nil, err
+	}
+
+	containerName, err := options.GetContainerName()
+	if err != nil {
+		return nil, err
+	}
+
+	command, err := options.GetCommand()
+	if err != nil {
+		return nil, err
+	}
+
+	if options.DeleteAlreadyExistingDaemonSet {
+		deleteCommand := []string{
+			"kubectl", "delete", "daemonset", daemonSetName,
+			"--context", kubectlContext,
+			"--namespace", namespaceName,
+			"--ignore-not-found",
+		}
+
+		_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command: deleteCommand,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	manifest := fmt.Sprintf(
+		`{"apiVersion":"apps/v1","kind":"DaemonSet","metadata":{"name":"%s","namespace":"%s"},"spec":{"selector":{"matchLabels":{"app":"%s"}},"template":{"metadata":{"labels":{"app":"%s"}},"spec":{"containers":[{"name":"%s","image":"%s","command":%s}]}}}}`,
+		daemonSetName,
+		namespaceName,
+		daemonSetName,
+		daemonSetName,
+		containerName,
+		imageName,
+		toJsonStringArray(command),
+	)
+
+	createCommand := []string{
+		"kubectl", "apply", "-f", "-",
+		"--context", kubectlContext,
+		"--namespace", namespaceName,
+	}
+
+	_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+		Command:     createCommand,
+		StdinString: manifest,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if options.WaitForDaemonSetAvailable {
+		// Note: DaemonSets don't support `kubectl wait --for=condition=Available`.
+		// Use `kubectl rollout status` to wait until the DaemonSet is fully rolled out.
+		waitCommand := []string{
+			"kubectl", "rollout", "status", "daemonset", daemonSetName,
+			"--context", kubectlContext,
+			"--namespace", namespaceName,
+			"--timeout", "60s",
+		}
+
+		_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command: waitCommand,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	logging.LogChangedByCtxf(ctx, "Created daemonset '%s' in namespace '%s'.", daemonSetName, namespaceName)
+
+	logging.LogInfoByCtxf(ctx, "Create kubernetes daemonset '%s' finished.", daemonSetName)
+
+	return c.GetDaemonSetByName(daemonSetName)
+}
+
+func (c *CommandExecutorNamespace) DeleteDaemonSetByName(ctx context.Context, daemonSetName string) error {
+	daemonSet, err := c.GetDaemonSetByName(daemonSetName)
+	if err != nil {
+		return err
+	}
+
+	return daemonSet.Delete(ctx)
+}
+
+func (c *CommandExecutorNamespace) DaemonSetByNameExists(ctx context.Context, daemonSetName string) (bool, error) {
+	daemonSet, err := c.GetDaemonSetByName(daemonSetName)
+	if err != nil {
+		return false, err
+	}
+
+	return daemonSet.Exists(ctx)
+}
+
+// CheckDaemonSetByNameExists checks if a daemonSet exists by name.
+// Returns nil if it exists, error if it does not exist.
+func (c *CommandExecutorNamespace) CheckDaemonSetByNameExists(ctx context.Context, daemonSetName string) error {
+	exists, err := c.DaemonSetByNameExists(ctx, daemonSetName)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return tracederrors.TracedErrorf("DaemonSet '%s' does not exist in namespace '%s'", daemonSetName, "unknown")
+	}
+	return nil
+}
+
+func (c *CommandExecutorNamespace) ListDaemonSetNames(ctx context.Context) ([]string, error) {
+	contextName, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName, err := c.GetName()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "List daemonset names in namespace '%s' of kubernetes '%s' started.", namespaceName, contextName)
+
+	lines, err := c.RunCommandAndGetStdoutAsLines(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{
+				"kubectl",
+				"--context",
+				contextName,
+				"--namespace",
+				namespaceName,
+				"get",
+				"daemonsets",
+				"-o",
+				"name",
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	daemonSetNames := []string{}
+	for _, line := range lines {
+		daemonSetNames = append(daemonSetNames, strings.TrimPrefix(line, "daemonset.apps/"))
+	}
+
+	sort.Strings(daemonSetNames)
+
+	logging.LogInfoByCtxf(ctx, "Found %d daemonsets in namespace '%s'.", len(daemonSetNames), namespaceName)
+
+	return daemonSetNames, nil
+}
