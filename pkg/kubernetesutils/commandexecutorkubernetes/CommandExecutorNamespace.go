@@ -1653,6 +1653,7 @@ func (c *CommandExecutorNamespace) StartPortForwarding(ctx context.Context, podN
 
 	// Monitor the stdout in a goroutine to detect when the process ends
 	waitDone := make(chan struct{})
+	errChan := make(chan error, 1)
 	go func() {
 		defer close(waitDone)
 		defer stdoutReader.Close()
@@ -1666,13 +1667,22 @@ func (c *CommandExecutorNamespace) StartPortForwarding(ctx context.Context, podN
 				if forwardCtx.Err() == nil {
 					logging.LogErrorByCtxf(forwardCtx, "Port forwarding process ended: %v", err)
 				}
+				// Send error to channel for the caller to receive
+				errChan <- err
 				return
 			}
 		}
 	}()
 
-	// Wait a moment for port-forwarding to establish
-	time.Sleep(2 * time.Second)
+	// Wait for port-forwarding to establish or fail
+	select {
+	case err := <-errChan:
+		// Port-forwarding failed immediately
+		cancel()
+		return nil, tracederrors.TracedErrorf("Failed to start port forwarding for pod '%s/%s:%d': %w", namespaceName, podName, podPort, err)
+	case <-time.After(2 * time.Second):
+		// Port-forwarding appears to have started successfully
+	}
 
 	logging.LogInfoByCtxf(ctx, "Port forwarding started for pod '%s/%s:%d' -> localhost:%d", namespaceName, podName, podPort, localPort)
 
