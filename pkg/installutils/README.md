@@ -20,4 +20,8 @@ For specifications see [installutils.spec.md](installutils.spec.md)
 
 ## Examples
 
-Examples are documented in the subpackage READMEs.
+* [Install from archive](Example_InstallFromArchive_test.go)
+* [Install from file](Example_InstallFromFile_test.go)
+* [Install from URL](Example_InstallFromUrl_test.go)
+
+Examples are documented in the subpackage READMEs as well.
