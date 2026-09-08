@@ -42,12 +42,14 @@
             ```golang
             return tracederrors.TracedErrorf("ReadCloser process for command '%s' finished with error: %w", fullCommandJoined, err) // correct
             ```
+- Instead of `tracederrors.TracedError(err.Error())` use `tracederrors.TracedError(err)`. This function has built-in `error` handling.
 - For filenames:
     - Do not use `_methods<.extension>` suffix. Instead of `add_methods.go` use `add.go`.
 - This repository is organized in many sub packages which must be used to reduce duplicated code.
     - Only explicit listed packages can import `os/exec` directly. All other must reuse the functions provided by the `commandexecutor` package:
         - The `commandexecutor` package must use the `os/exec` directly.
-        - The `osutils` package must use `os/exec` in the `func Which(command string) (string, error)` implementation. 
+        - The `osutils` package must use `os/exec` in the `func Which(command string) (string, error)` implementation.
+        - The `nativefiles` or `nativefilesoo` package must be used instead of `os.MkdirAll` or `os.Create`.
         
 ## Package Organization: Native and CommandExecutor Implementations
 

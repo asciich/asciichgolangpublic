@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
@@ -333,6 +334,13 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 	}
 
 	logging.LogInfoByCtxf(ctx, "Going to download: '%s' as file '%s'.", url, outputFilePath)
+
+	// Create parent directory if it does not exist
+	parentDir := filepath.Dir(outputFilePath)
+	err = nativefiles.CreateDirectory(ctx, parentDir, &filesoptions.CreateOptions{})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to create parent directory '%s': %w", parentDir, err)
+	}
 
 	outFd, err := os.Create(outputFilePath)
 	if err != nil {
