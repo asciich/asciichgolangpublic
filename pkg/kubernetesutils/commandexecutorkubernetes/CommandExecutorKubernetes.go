@@ -193,7 +193,6 @@ func (c *CommandExecutorKubernetes) WaitForDefaultServiceAccount(ctx context.Con
 	}
 }
 
-
 func (c *CommandExecutorKubernetes) GetCachedContextName() (cachedContextName string, err error) {
 	if c.cachedContextName == "" {
 		return "", tracederrors.TracedErrorf("cachedContextName not set")

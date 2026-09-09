@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -55,7 +56,10 @@ func TestHost_WaitUntilReachable(t *testing.T) {
 				host := getHostByImplementationName(t, tt.implementationName)
 
 				// localhost must always be reachable, so this must return without error.
-				err := host.WaitUntilReachable(ctx, tt.renewHostKey)
+				err := host.WaitUntilReachable(ctx, &hostsutilsoptions.WaitUntilReachableOptions{
+					RenewHostKey: tt.renewHostKey,
+				})
+
 				require.NoError(t, err)
 			},
 		)

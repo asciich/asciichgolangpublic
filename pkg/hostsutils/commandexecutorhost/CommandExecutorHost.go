@@ -20,6 +20,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/ftputils"
 	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -512,8 +513,8 @@ func (h *CommandExecutorHost) WaitUntilPingable(verbose bool) (err error) {
 	}
 }
 
-func (h *CommandExecutorHost) WaitUntilReachable(ctx context.Context, renewHostKey bool) (err error) {
-	return hostgeneric.WaitUntilReachable(ctx, h, renewHostKey)
+func (h *CommandExecutorHost) WaitUntilReachable(ctx context.Context, options *hostsutilsoptions.WaitUntilReachableOptions) (err error) {
+	return hostgeneric.WaitUntilReachable(ctx, h, options)
 }
 
 func (j *CommandExecutorHost) GetHostName() (hostName string, err error) {

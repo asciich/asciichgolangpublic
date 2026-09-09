@@ -113,6 +113,14 @@ func (s *SshClient) RunCommand(ctx context.Context, options *parameteroptions.Ru
 			)
 		}
 
+		if sshutilsgeneric.IsNoRouteToHost(err, nil) {
+			return nil, tracederrors.TracedErrorf(
+				"%w: %w",
+				netutilserrors.ErrNoRouteToHost,
+				err,
+			)
+		}
+
 		return nil, tracederrors.TracedErrorf("Failed to dial SSH server: %w", err)
 	}
 	defer client.Close()
