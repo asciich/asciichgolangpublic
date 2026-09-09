@@ -19,6 +19,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -335,8 +336,8 @@ func (n *NativeHost) WaitUntilPingable(verbose bool) (err error) {
 	}
 }
 
-func (n *NativeHost) WaitUntilReachable(ctx context.Context, renewHostKey bool) (err error) {
-	return hostgeneric.WaitUntilReachable(ctx, n, renewHostKey)
+func (n *NativeHost) WaitUntilReachable(ctx context.Context, options *hostsutilsoptions.WaitUntilReachableOptions) (err error) {
+	return hostgeneric.WaitUntilReachable(ctx, n, options)
 }
 
 func (n *NativeHost) CheckFtpPortOpen(verbose bool) (err error) {
@@ -376,4 +377,8 @@ func (n *NativeHost) SetComment(comment string) (err error) {
 // RenewSshHostKey is not applicable for NativeHost since it represents localhost.
 func (n *NativeHost) RenewSshHostKey(ctx context.Context) (err error) {
 	return tracederrors.TracedError("RenewSshHostKey not applicable for NativeHost (localhost)")
+}
+
+func (n *NativeHost) AddSshHostKeyToKnownHosts(ctx context.Context) (err error) {
+	return tracederrors.TracedError("AddSshHostKeyToKnownHosts not applicable for NativeHost (localhost)")
 }

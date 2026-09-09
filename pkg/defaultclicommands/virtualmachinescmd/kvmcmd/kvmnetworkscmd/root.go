@@ -20,6 +20,7 @@ Usage:
 
 	cmd.AddCommand(
 		NewListCmd(),
+		NewSetDhcpStartIpCmd(),
 		NewStartCmd(),
 	)
 

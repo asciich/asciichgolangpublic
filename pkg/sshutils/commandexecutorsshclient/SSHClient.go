@@ -240,6 +240,14 @@ func (s *SSHClient) RunCommand(ctx context.Context, options *parameteroptions.Ru
 			)
 		}
 
+		if sshutilsgeneric.IsNoRouteToHost(err, commandOutput) {
+			return nil, tracederrors.TracedErrorf(
+				"%w: %w",
+				netutilserrors.ErrNoRouteToHost,
+				err,
+			)
+		}
+
 		return nil, err
 	}
 

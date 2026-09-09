@@ -5,6 +5,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 )
 
@@ -14,7 +15,7 @@ type Host interface {
 
 	CheckReachable(ctx context.Context) (err error)
 	IsReachable(ctx context.Context) (bool, error)
-	WaitUntilReachable(ctx context.Context, renewHostKey bool) error
+	WaitUntilReachable(ctx context.Context, options *hostsutilsoptions.WaitUntilReachableOptions) error
 
 	GetDirectoryByPath(ctx context.Context, path string) (directory filesinterfaces.Directory, err error)
 	GetHostDescription() (hostDescription string, err error)
@@ -22,5 +23,6 @@ type Host interface {
 	GetSshPublicKeyOfUserAsString(ctx context.Context, username string) (publicKey string, err error)
 	InstallBinary(ctx context.Context, installOptions *parameteroptions.InstallOptions) (installedFile filesinterfaces.File, err error)
 
+	AddSshHostKeyToKnownHosts(ctx context.Context) error
 	RenewSshHostKey(ctx context.Context) error
 }

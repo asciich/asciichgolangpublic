@@ -875,3 +875,22 @@ func (k *KVMHypervisor) ResetVm(ctx context.Context, name string) (err error) {
 
 	return nil
 }
+
+func (k *KVMHypervisor) GetNetworkByName(networkName string) (network *KvmNetwork, err error) {
+	if networkName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("networkName")
+	}
+
+	network = NewKvmNetwork()
+	err = network.SetName(networkName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = network.SetHypervisor(k)
+	if err != nil {
+		return nil, err
+	}
+
+	return network, nil
+}
