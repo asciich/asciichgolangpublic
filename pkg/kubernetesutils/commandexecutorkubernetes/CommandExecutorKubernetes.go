@@ -894,11 +894,12 @@ func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context
 		return nil, err
 	}
 
-	// Step 2: Wait for the pod to complete.
+	// Step 2: Wait for the pod to complete (Succeeded phase).
+	// Wait for pod phase to be Succeeded to ensure the command has finished executing.
 	waitCommand := []string{
 		"kubectl", "--context", kubeContext, "wait", "pod", podName,
 		"--namespace", namespaceName,
-		"--for=condition=Ready",
+		"--for=jsonpath={.status.phase}=Succeeded",
 		"--timeout=60s",
 	}
 
@@ -1456,7 +1457,8 @@ spec:
 		},
 	)
 
-	// Wait for the pod to complete (terminate) — condition=Ready=False means the container has finished
+	// Wait for the pod to complete (Succeeded phase).
+	// Wait for pod phase to be Succeeded to ensure the command has finished executing.
 	_, err = commandExecutor.RunCommand(
 		ctx,
 		&parameteroptions.RunCommandOptions{
@@ -1465,7 +1467,7 @@ spec:
 				"--context", kubeContext,
 				"--namespace", options.Namespace,
 				"wait",
-				"--for=condition=Ready=False",
+				"--for=jsonpath={.status.phase}=Succeeded",
 				"pod/" + podName,
 				"--timeout=60s",
 			},
