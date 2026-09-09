@@ -92,7 +92,7 @@ func NewCommandExecutorDocker() (c *CommandExecutorDocker) {
 	return new(CommandExecutorDocker)
 }
 
-func (c *CommandExecutorDocker) GetDeepCopy() *CommandExecutorDocker {
+func (c *CommandExecutorDocker) GetDeepCopy() commandexecutorinterfaces.CommandExecutor {
 	ret := NewCommandExecutorDocker()
 
 	if c.host != nil {
@@ -102,12 +102,8 @@ func (c *CommandExecutorDocker) GetDeepCopy() *CommandExecutorDocker {
 	return ret
 }
 
-func (c *CommandExecutorDocker) GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor {
-	return c.GetDeepCopy()
-}
-
 func (c *CommandExecutorDocker) GetDeepCopyAsDocker() dockerinterfaces.Docker {
-	return c.GetDeepCopy()
+	return c.GetDeepCopy().(*CommandExecutorDocker)
 }
 
 func (c *CommandExecutorDocker) GetCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor, err error) {

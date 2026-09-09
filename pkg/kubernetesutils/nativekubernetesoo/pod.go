@@ -30,7 +30,7 @@ func NewPod() *Pod {
 	return ret
 }
 
-func (p *Pod) GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor {
+func (p *Pod) GetDeepCopy() commandexecutorinterfaces.CommandExecutor {
 	ret := &Pod{}
 	*ret = *p
 

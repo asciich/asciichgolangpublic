@@ -1,21 +1,15 @@
 package commandexecutor_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
-
-func getCtx() context.Context {
-	return contextutils.ContextVerbose()
-}
 
 func getCommandExecutorByImplementationName(implementationName string) (commandExecutor commandexecutorinterfaces.CommandExecutor) {
 	if implementationName == "Bash" {
@@ -45,7 +39,7 @@ func TestCommandExecutor_GetDeepCopyOfCommandExecutor(t *testing.T) {
 			func(t *testing.T) {
 				commandExecutor := getCommandExecutorByImplementationName(tt.implementationName)
 
-				copy := commandExecutor.GetDeepCopyAsCommandExecutor()
+				copy := commandExecutor.GetDeepCopy()
 
 				expectedHostDescription, err := commandExecutor.GetHostDescription()
 				require.NoError(t, err)

@@ -292,7 +292,7 @@ func TestHost_GetDeepCopy(t *testing.T) {
 			func(t *testing.T) {
 				host := getHostByImplementationName(t, tt.implementationName)
 
-				ret := host.GetDeepCopyAsCommandExecutor()
+				ret := host.GetDeepCopy()
 				require.NotNil(t, ret)
 
 				// Verify the copy has the same host description

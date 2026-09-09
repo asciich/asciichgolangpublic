@@ -13,7 +13,7 @@ func (n *SshClient) GetCPUArchitecture(ctx context.Context) (string, error) {
 	return "", tracederrors.TracedErrorNotImplemented()
 }
 
-func (n *SshClient) GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor {
+func (n *SshClient) GetDeepCopy() commandexecutorinterfaces.CommandExecutor {
 	panic("Not implemented")
 }
 

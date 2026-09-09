@@ -59,13 +59,13 @@ func NewCommandExecutorHost() (c *CommandExecutorHost) {
 	return c
 }
 
-func (c *CommandExecutorHost) GetDeepCopy() *CommandExecutorHost {
+func (c *CommandExecutorHost) GetDeepCopy() commandexecutorinterfaces.CommandExecutor {
 	ret := &CommandExecutorHost{
 		Comment: c.Comment,
 	}
 
 	if c.commandExecutor != nil {
-		ret.commandExecutor = c.commandExecutor.GetDeepCopyAsCommandExecutor()
+		ret.commandExecutor = c.commandExecutor.GetDeepCopy()
 	}
 
 	err := ret.SetParentCommandExecutorForBaseClass(ret)
@@ -74,10 +74,6 @@ func (c *CommandExecutorHost) GetDeepCopy() *CommandExecutorHost {
 	}
 
 	return ret
-}
-
-func (c *CommandExecutorHost) GetDeepCopyAsCommandExecutor() commandexecutorinterfaces.CommandExecutor {
-	return c.GetDeepCopy()
 }
 
 func (c *CommandExecutorHost) GetFileInUsersHome(ctx context.Context, userName string, path string) (file filesinterfaces.File, err error) {
