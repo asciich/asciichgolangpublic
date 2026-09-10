@@ -4,9 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -37,7 +37,7 @@ func GetGitlabCiYamlFileByPath(filePath string) (gitlabCiYamlFile *GitlabCiYamlF
 		return nil, tracederrors.TracedError("filePath is empty string")
 	}
 
-	localFile, err := files.GetLocalFileByPath(filePath)
+	localFile, err := nativefilesoo.NewFileByPath(filePath)
 	if err != nil {
 		return nil, err
 	}

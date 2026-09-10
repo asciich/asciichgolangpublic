@@ -6,9 +6,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
@@ -30,7 +30,7 @@ func getFileToTest(t *testing.T, implementationName string) (file filesinterface
 
 	if implementationName == "localFile" {
 		var err error
-		file, err = files.GetLocalFileByPath(
+		file, err = nativefilesoo.NewFileByPath(
 			mustutils.Must(tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)),
 		)
 		require.NoError(t, err)

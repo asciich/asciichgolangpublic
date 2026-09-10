@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -26,8 +26,7 @@ var allDirectoryImplementations = []string{
 
 func Test_LocalDirectoryFulfillsDirectoryInterface(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		ctx := getCtx()
-		dir, err := files.GetLocalDirectoryByPath(ctx, ".")
+		dir, err := nativefilesoo.NewDirectoryByPath(".")
 		require.NoError(t, err)
 		require.NotNil(t, dir)
 
@@ -83,8 +82,7 @@ func TestDirectoryExists(t *testing.T) {
 
 func TestDirectoryGetFileInDirectory(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		ctx := getCtx()
-		homeDir, err := files.GetLocalDirectoryByPath(ctx, "/home/")
+		homeDir, err := nativefilesoo.NewDirectoryByPath("/home/")
 		require.NoError(t, err)
 
 		file, err := homeDir.GetFileInDirectory("testfile")
@@ -97,8 +95,7 @@ func TestDirectoryGetFileInDirectory(t *testing.T) {
 	})
 
 	t.Run("with sub path", func(t *testing.T) {
-		ctx := getCtx()
-		homeDir, err := files.GetLocalDirectoryByPath(ctx, "/home/")
+		homeDir, err := nativefilesoo.NewDirectoryByPath("/home/")
 		require.NoError(t, err)
 
 		file, err := homeDir.GetFileInDirectory("subdir", "another_file")
@@ -113,8 +110,7 @@ func TestDirectoryGetFileInDirectory(t *testing.T) {
 
 func TestDirectoryGetFilePathInDirectory(t *testing.T) {
 	t.Run("testfile in home", func(t *testing.T) {
-		ctx := getCtx()
-		homeDir, err := files.GetLocalDirectoryByPath(ctx, "/home/")
+		homeDir, err := nativefilesoo.NewDirectoryByPath("/home/")
 		require.NoError(t, err)
 
 		path, err := homeDir.GetFilePathInDirectory("testfile")
@@ -123,8 +119,7 @@ func TestDirectoryGetFilePathInDirectory(t *testing.T) {
 	})
 
 	t.Run("testfile subdir in home", func(t *testing.T) {
-		ctx := getCtx()
-		homeDir, err := files.GetLocalDirectoryByPath(ctx, "/home/")
+		homeDir, err := nativefilesoo.NewDirectoryByPath("/home/")
 		require.NoError(t, err)
 
 		path, err := homeDir.GetFilePathInDirectory("subdir", "another_file")
@@ -137,7 +132,7 @@ func TestDirectoryGetFilePathInDirectory(t *testing.T) {
 func TestDirectoryGetSubDirectory(t *testing.T) {
 	t.Run("single file", func(t *testing.T) {
 		ctx := getCtx()
-		homeDir, err := files.GetLocalDirectoryByPath(ctx, "/home/")
+		homeDir, err := nativefilesoo.NewDirectoryByPath("/home/")
 		require.NoError(t, err)
 
 		subDir, err := homeDir.GetDirectoryByPath(ctx, "testfile")
@@ -151,7 +146,7 @@ func TestDirectoryGetSubDirectory(t *testing.T) {
 
 	t.Run("subdir and file", func(t *testing.T) {
 		ctx := getCtx()
-		homeDir, err := files.GetLocalDirectoryByPath(ctx, "/home/")
+		homeDir, err := nativefilesoo.NewDirectoryByPath("/home/")
 		require.NoError(t, err)
 
 		subDir, err := homeDir.GetDirectoryByPath(ctx, "subdir", "another_file")
@@ -243,8 +238,7 @@ func TestDirectoryGetLocalPathIsAbsolute(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				ctx := getCtx()
-				localDir, err := files.GetLocalDirectoryByPath(ctx, tt.pathToTest)
+				localDir, err := nativefilesoo.NewDirectoryByPath(tt.pathToTest)
 				require.NoError(t, err)
 
 				localPath, err := localDir.GetLocalPath()
@@ -424,8 +418,6 @@ func TestDirectoryGetPathReturnsAbsoluteValue(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				ctx := contextutils.ContextVerbose()
-
 				startPath, err := os.Getwd()
 				if err != nil {
 					t.Fatalf("%v", err)
@@ -440,7 +432,7 @@ func TestDirectoryGetPathReturnsAbsoluteValue(t *testing.T) {
 					defer os.Chdir(startPath)
 					defer waitGroup.Done()
 
-					directory, err := files.GetLocalDirectoryByPath(ctx, tt.path)
+					directory, err := nativefilesoo.NewDirectoryByPath(tt.path)
 					require.NoError(t, err)
 
 					path1, err = directory.GetLocalPath()

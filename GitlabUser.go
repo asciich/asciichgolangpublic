@@ -3,8 +3,8 @@ package asciichgolangpublic
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/sshutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -129,7 +129,7 @@ func (u *GitlabUser) AddSshKeysFromFilePath(ctx context.Context, sshKeyFilePath 
 		return tracederrors.TracedError("sshKeyFilePath is empty string")
 	}
 
-	sshKeyFile, err := files.GetLocalFileByPath(sshKeyFilePath)
+	sshKeyFile, err := nativefilesoo.NewFileByPath(sshKeyFilePath)
 	if err != nil {
 		return err
 	}

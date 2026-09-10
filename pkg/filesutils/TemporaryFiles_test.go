@@ -39,7 +39,7 @@ func getTemporaryFileToTest(implementationName string) (fileToTest filesinterfac
 func getFileToTest(implementationName string, path string) (fileToTest filesinterfaces.File) {
 	// Deprecated: use nativefilesoo instead:
 	if implementationName == "localFile" {
-		return mustutils.Must(files.GetLocalFileByPath(path))
+		return mustutils.Must(nativefilesoo.NewFileByPath(path))
 	}
 
 	// Deprecated: use the commandExecutorfileoo implementeations below in the next if statements.

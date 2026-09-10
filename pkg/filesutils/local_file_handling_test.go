@@ -15,6 +15,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
@@ -229,7 +230,7 @@ func TestFileGetBaseName(t *testing.T) {
 				var file filesinterfaces.File
 				var err error
 
-				file, err = files.GetLocalFileByPath(tt.path)
+				file, err = nativefilesoo.NewFileByPath(tt.path)
 				require.NoError(t, err)
 
 				baseName, err := file.GetBaseName()
@@ -421,7 +422,7 @@ func TestFileGetLocalPathIsAbsolute(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				localFile, err := files.GetLocalFileByPath(tt.pathToTest)
+				localFile, err := nativefilesoo.NewFileByPath(tt.pathToTest)
 				require.NoError(t, err)
 
 				localPath, err := localFile.GetLocalPath()
@@ -577,7 +578,7 @@ func TestFile_GetPathReturnsAbsoluteValue(t *testing.T) {
 					defer os.Chdir(startPath)
 					defer waitGroup.Done()
 
-					file, err := files.GetLocalFileByPath(tt.path)
+					file, err := nativefilesoo.NewFileByPath(tt.path)
 					require.NoError(t, err)
 					path1, err = file.GetPath()
 					require.NoError(t, err)
@@ -611,7 +612,7 @@ func getRepoRootDir(ctx context.Context, t *testing.T) (repoRoot filesinterfaces
 	require.NoError(t, err)
 	path = strings.TrimSpace(path)
 
-	repoRoot, err = files.GetLocalDirectoryByPath(ctx, path)
+	repoRoot, err = nativefilesoo.NewDirectoryByPath(path)
 	require.NoError(t, err)
 
 	return repoRoot
@@ -641,7 +642,7 @@ func TestFileSortBlocksInFile(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				testDataDir, err := files.GetLocalDirectoryByPath(ctx, tt.testDataDir)
+				testDataDir, err := nativefilesoo.NewDirectoryByPath(tt.testDataDir)
 				require.NoError(t, err)
 
 				testInput, err := testDataDir.ReadFileInDirectoryAsString(ctx, "input")
@@ -875,7 +876,7 @@ func TestFileGetParentDirectoryPath(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-				testFile, err := files.GetLocalFileByPath(tt.inputPath)
+				testFile, err := nativefilesoo.NewFileByPath(tt.inputPath)
 				require.NoError(t, err)
 
 				parentPath, err := testFile.GetParentDirectoryPath(ctx)
@@ -1140,7 +1141,7 @@ func TestFileEnsureEndsWithLineBreakOnNonExistingFile(t *testing.T) {
 			tempFile, err := os.CreateTemp("", "testfile")
 			require.NoError(t, err)
 
-			nonExistingFile, err := files.GetLocalFileByPath(tempFile.Name())
+			nonExistingFile, err := nativefilesoo.NewFileByPath(tempFile.Name())
 			require.NoError(t, err)
 			defer func() { _ = nonExistingFile.Delete(ctx, &filesoptions.DeleteOptions{}) }()
 			err = nonExistingFile.Delete(ctx, &filesoptions.DeleteOptions{})
@@ -1263,7 +1264,7 @@ func Test_SecureDelete(t *testing.T) {
 			testPath, err := tempfilesoo.CreateEmptyTemporaryFileAndGetPath(ctx)
 			require.True(t, nativefiles.IsFile(ctx, testPath))
 
-			localFile, err := files.GetLocalFileByPath(testPath)
+			localFile, err := nativefilesoo.NewFileByPath(testPath)
 			require.NoError(t, err)
 			exists, err := localFile.Exists(ctx)
 			require.NoError(t, err)
