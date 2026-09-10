@@ -50,7 +50,65 @@
         - The `commandexecutor` package must use the `os/exec` directly.
         - The `osutils` package must use `os/exec` in the `func Which(command string) (string, error)` implementation.
         - The `nativefiles` or `nativefilesoo` package must be used instead of `os.MkdirAll` or `os.Create`.
-        
+
+## IP Address Handling
+
+- Whenever an IP address has to be **validated** or is taken as an **input parameter**, the functions provided by the [iputils](./pkg/iputils/README.md) package **must** be used. Do **not** reimplement IP validation logic (e.g. calling `net.ParseIP` directly) anywhere else in the repository.
+
+### Available functions
+
+The `iputils` package provides two flavors of validation for each IP variant:
+
+- **Boolean check** (`Is...`): returns `(bool, error)`. The `error` is only non-nil for invalid input such as an empty string. The `bool` reports whether the address is valid.
+    - `IsValidIP(ctx, ip)` – valid IPv4 **or** IPv6.
+    - `IsValidIPv4(ctx, ip)` – valid IPv4 only.
+    - `IsValidIPv6(ctx, ip)` – valid IPv6 only.
+- **Assertion check** (`Check...`): returns `error`. Returns `nil` if valid, an empty-string error for empty input, or the matching sentinel error otherwise.
+    - `CheckValidIP(ctx, ip)` – returns `ErrInvalidIP` if invalid.
+    - `CheckValidIPv4(ctx, ip)` – returns `ErrInvalidIPv4` if invalid.
+    - `CheckValidIPv6(ctx, ip)` – returns `ErrInvalidIPv6` if invalid.
+
+### Choosing between `Is...` and `Check...`
+
+- Use the **`Check...`** functions when an invalid IP is an error condition (e.g. validating an input parameter at the start of a function). They integrate directly with the standard early-return error handling:
+    ```golang
+    func ConnectToHost(ctx context.Context, ip string) error {
+        err := iputils.CheckValidIP(ctx, ip)
+        if err != nil {
+            return err
+        }
+
+        // ... continue with a guaranteed valid IP
+    }
+    ```
+- Use the **`Is...`** functions when validity is a normal branching decision rather than an error (e.g. deciding between an IPv4 and IPv6 code path):
+    ```golang
+    isV4, err := iputils.IsValidIPv4(ctx, ip)
+    if err != nil {
+        return err
+    }
+
+    if isV4 {
+        // handle IPv4
+    } else {
+        // handle IPv6
+    }
+    ```
+
+### Sentinel errors and their helpers
+
+- The package exposes the sentinel errors `ErrInvalidIP`, `ErrInvalidIPv4`, and `ErrInvalidIPv6`.
+- To inspect an error returned by the `Check...` functions, use the provided predicates instead of comparing errors directly. They correctly handle wrapped errors via `errors.Is`:
+    - `IsInvalidIPError(err)` – true for any invalid-IP sentinel (`ErrInvalidIP`, `ErrInvalidIPv4`, or `ErrInvalidIPv6`).
+    - `IsInvalidIPv4Error(err)` – true only for `ErrInvalidIPv4`.
+    - `IsInvalidIPv6Error(err)` – true only for `ErrInvalidIPv6`.
+
+### Conventions
+
+- All `iputils` functions take a `context.Context` as their first parameter and log a validation result via `logging.LogInfoByCtxf`. Always pass a proper context through.
+- Empty input strings must be treated as an error (`tracederrors.TracedErrorEmptyString("ip")`), never silently as "invalid". This distinguishes a programming/usage error (missing value) from a genuinely invalid IP.
+- Because `iputils` operates purely on in-memory data (no file/network I/O), it does **not** require `native...` / `commandexecutor...` dual implementations (see [Generic Functions](#generic-functions)).
+
 ## Package Organization: Native and CommandExecutor Implementations
 
 - For packages where functions interact with files, network, or external systems, provide **two implementation subpackages**:
