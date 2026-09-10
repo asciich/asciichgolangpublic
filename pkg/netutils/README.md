@@ -15,6 +15,7 @@ Network utilities for various network-related tasks.
 
 * [dnsutils](./dnsutils/): Work with DNS.
 * [macaddresses](./macaddresses/): Handle MAC addresses.
+* [iputils](./iputils/): Handle IP addresses (IPv4 and IPv6).
 * [publicips](./publicips/): Get public IP addresses.
 * [vpnutils](./vpnutils/): Work with VPN solutions.
     * [headscaleutils](./vpnutils/headscaleutils/): Work with Headscale.
