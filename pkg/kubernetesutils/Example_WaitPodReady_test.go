@@ -8,7 +8,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
 // Test_Example_WaitPodReady demonstrates how to wait for a pod to become ready.
@@ -19,6 +21,18 @@ import (
 func Test_Example_WaitPodReady(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.WithVerbose(context.TODO())
+
+	// -----
+	// Prepare test environment start ...
+
+	testClusterName = testutils.GetKindClusterNameForTest(&testing.T{})
+	_, err := kindutils.CreateCluster(ctx, testClusterName)
+	if err != nil {
+		panic("Failed to create test cluster: " + err.Error())
+	}
+
+	// ... prepare test environment finished.
+	// -----
 
 	// Get Kubernetes cluster
 	cluster, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+testClusterName)
