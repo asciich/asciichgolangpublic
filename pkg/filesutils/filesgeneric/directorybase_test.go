@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
@@ -62,7 +61,7 @@ func TestDirectoryBase_SetAndGetParentDirectory(t *testing.T) {
 				tempDir, err := os.MkdirTemp("", "test_direcotry")
 				require.NoError(t, err)
 
-				directory, err := files.GetLocalDirectoryByPath(ctx, tempDir)
+				directory, err := nativefilesoo.NewDirectoryByPath(tempDir)
 				require.NoError(t, err)
 				defer directory.Delete(ctx, &filesoptions.DeleteOptions{})
 

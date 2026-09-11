@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -43,7 +43,7 @@ func LoadFromFilePath(ctx context.Context, path string) (config *KubeConfig, err
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
 
-	file, err := files.GetLocalFileByPath(path)
+	file, err := nativefilesoo.NewFileByPath(path)
 	if err != nil {
 		return nil, err
 	}
@@ -439,7 +439,7 @@ func (k *KubeConfig) WriteToFileByPath(ctx context.Context, path string) (err er
 		return tracederrors.TracedErrorEmptyString(path)
 	}
 
-	outFile, err := files.GetLocalFileByPath(path)
+	outFile, err := nativefilesoo.NewFileByPath(path)
 	if err != nil {
 		return err
 	}

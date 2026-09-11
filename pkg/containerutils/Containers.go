@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/files"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -14,7 +14,7 @@ import (
 func IsRunningInsideContainer(ctx context.Context) (isRunningInContainer bool, err error) {
 	const procFilePath string = "/proc/1/cgroup"
 
-	procFile, err := files.GetLocalFileByPath(procFilePath)
+	procFile, err := nativefilesoo.NewFileByPath(procFilePath)
 	if err != nil {
 		return false, err
 	}

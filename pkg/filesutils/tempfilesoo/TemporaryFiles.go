@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -60,7 +60,7 @@ func CreateFromString(ctx context.Context, content string) (temporaryFile filesi
 		return nil, err
 	}
 
-	return files.GetLocalFileByPath(path)
+	return nativefilesoo.NewFileByPath(path)
 }
 
 func CreateFromStringAndGetPath(ctx context.Context, content string) (temporaryFilePath string, err error) {
@@ -87,7 +87,7 @@ func CreateNamedTemporaryFile(ctx context.Context, fileName string) (temporaryfi
 		return nil, err
 	}
 
-	temporaryfile, err = files.GetLocalFileByPath(tmpPath)
+	temporaryfile, err = nativefilesoo.NewFileByPath(tmpPath)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +174,7 @@ func CreateTemporaryFileFromPath(ctx context.Context, filePathToCopyAsTemporaryF
 
 	pathToUse := strings.Join(filePathToCopyAsTemporaryFile, "/")
 
-	fileToCopy, err := files.GetLocalFileByPath(pathToUse)
+	fileToCopy, err := nativefilesoo.NewFileByPath(pathToUse)
 	if err != nil {
 		return nil, err
 	}

@@ -11,8 +11,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/fileformats/yamlutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -50,7 +50,7 @@ func JsonFileByPathHas(ctx context.Context, jsonFilePath string, query string, k
 		return false, tracederrors.TracedErrorEmptyString("keyToCheck")
 	}
 
-	jsonFile, err := files.GetLocalFileByPath(jsonFilePath)
+	jsonFile, err := nativefilesoo.NewFileByPath(jsonFilePath)
 	if err != nil {
 		return false, err
 	}
@@ -129,7 +129,7 @@ func JsonStringToYamlFileByPath(jsonString string, outputFilePath string, verbos
 		return nil, tracederrors.TracedErrorEmptyString("outputFilePath")
 	}
 
-	outputFile, err = files.GetLocalFileByPath(outputFilePath)
+	outputFile, err = nativefilesoo.NewFileByPath(outputFilePath)
 	if err != nil {
 		return nil, err
 	}

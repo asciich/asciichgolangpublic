@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -36,7 +36,7 @@ func createTempFileAndGetPath() (path string) {
 // the file is deleted after the test is over.
 func getFileToTest(implementationName string) (file filesinterfaces.File) {
 	if implementationName == "localFile" {
-		return mustutils.Must(files.GetLocalFileByPath(createTempFileAndGetPath()))
+		return mustutils.Must(nativefilesoo.NewFileByPath(createTempFileAndGetPath()))
 	}
 
 	if implementationName == "localCommandExecutorFile" {

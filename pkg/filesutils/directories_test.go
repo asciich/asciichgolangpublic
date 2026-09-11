@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfileoo"
@@ -27,8 +26,7 @@ import (
 
 func getDirectoryToTest(implementationName string, testPath string) (directory filesinterfaces.Directory) {
 	if implementationName == "localDirectory" {
-		ctx := contextutils.ContextVerbose()
-		dir, err := files.GetLocalDirectoryByPath(ctx, testPath)
+		dir, err := nativefilesoo.NewDirectoryByPath(testPath)
 		if err != nil {
 			logging.LogGoErrorFatal(err)
 		}
