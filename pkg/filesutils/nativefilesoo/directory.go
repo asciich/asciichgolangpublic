@@ -21,11 +21,18 @@ func NewDirectoryByPath(path string) (filesinterfaces.Directory, error) {
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
 
-	ret := &Directory{
-		path: path,
+	// Convert relative paths to absolute paths at creation time
+	// to ensure the path remains consistent regardless of current working directory
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("failed to convert path to absolute: %v", err)
 	}
 
-	err := ret.SetParentDirectoryForBaseClass(ret)
+	ret := &Directory{
+		path: absPath,
+	}
+
+	err = ret.SetParentDirectoryForBaseClass(ret)
 	if err != nil {
 		panic(err)
 	}

@@ -12,10 +12,10 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
@@ -280,7 +280,7 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 		return nil, err
 	}
 
-	downloadedFile, err = files.GetLocalFileByPath(outputPath)
+	downloadedFile, err = nativefilesoo.NewFileByPath(outputPath)
 	if err != nil {
 		return nil, err
 	}

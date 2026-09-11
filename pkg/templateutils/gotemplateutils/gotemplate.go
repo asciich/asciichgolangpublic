@@ -6,8 +6,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -42,7 +42,7 @@ func RenderTemplateFromFilePathAsString(ctx context.Context, inputFilePath strin
 		return "", tracederrors.TracedError("variables is nil")
 	}
 
-	inputFile, err := files.GetLocalFileByPath(inputFilePath)
+	inputFile, err := nativefilesoo.NewFileByPath(inputFilePath)
 	if err != nil {
 		return "", err
 	}

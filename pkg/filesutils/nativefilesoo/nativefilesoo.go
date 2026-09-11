@@ -204,7 +204,12 @@ func (d *Directory) ListFiles(ctx context.Context, listFileOptions *parameteropt
 		listFileOptions = &parameteroptions.ListFileOptions{}
 	}
 
-	filePaths, err := nativefiles.ListFiles(ctx, path, listFileOptions)
+	// Always get absolute paths from nativefiles.ListFiles by ensuring ReturnRelativePaths is false
+	// for internal file object creation. The relative path conversion is handled by ListFilePaths.
+	listOptionsForFiles := listFileOptions.GetDeepCopy()
+	listOptionsForFiles.ReturnRelativePaths = false
+
+	filePaths, err := nativefiles.ListFiles(ctx, path, listOptionsForFiles)
 	if err != nil {
 		return nil, err
 	}

@@ -9,9 +9,9 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/userutils"
@@ -140,7 +140,7 @@ func (k *SSHPublicKey) LoadFromSshDir(ctx context.Context, sshDirectory filesint
 	}
 
 	keyFilePath := filepath.Join(sshDirPath, "id_rsa.pub")
-	keyFile, err := files.GetLocalFileByPath(keyFilePath)
+	keyFile, err := nativefilesoo.NewFileByPath(keyFilePath)
 	if err != nil {
 		return err
 	}

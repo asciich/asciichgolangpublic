@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
@@ -22,11 +23,18 @@ func NewFileByPath(path string) (filesinterfaces.File, error) {
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
 
-	ret := &File{
-		path: path,
+	// Convert relative paths to absolute paths at creation time
+	// to ensure the path remains consistent regardless of current working directory
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("failed to convert path to absolute: %v", err)
 	}
 
-	err := ret.SetParentFileForBaseClass(ret)
+	ret := &File{
+		path: absPath,
+	}
+
+	err = ret.SetParentFileForBaseClass(ret)
 	if err != nil {
 		panic(err)
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/files"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -48,7 +49,7 @@ func GetPreCommitConfigByLocalPath(localPath string) (preCommitConfigFile *PreCo
 		return nil, tracederrors.TracedErrorEmptyString("localPath")
 	}
 
-	file, err := files.GetLocalFileByPath(localPath)
+	file, err := nativefilesoo.NewFileByPath(localPath)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +145,7 @@ func (p *PreCommitConfigFile) GetDependencies(ctx context.Context) (dependencies
 		return nil, err
 	}
 
-	asciichgolangpublicFile, err := files.GetLocalFileByPath(localPath)
+	asciichgolangpublicFile, err := nativefilesoo.NewFileByPath(localPath)
 	if err != nil {
 		return nil, err
 	}
