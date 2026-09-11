@@ -37,6 +37,33 @@ type BootstrapControlPlaneOptions struct {
 	// workloads can be scheduled on this node (useful for single-node clusters).
 	// Default: false
 	UntaintControlPlane bool
+
+	// ControlPlaneEndpoint is passed to
+	// "kubeadm init --control-plane-endpoint" when set.
+	// This is typically the shared/virtual IP (VIP) provided by KubeVip so the
+	// API server is reachable through a stable, highly-available address instead
+	// of a single node's IP. Can be an IP or a "host:port" value.
+	// Optional: leave empty for single-endpoint (non-HA) setups.
+	// Default: "" (kubeadm uses the advertise address directly).
+	ControlPlaneEndpoint string
+
+	// EnableKubeVip explicitly activates KubeVip for this control-plane node.
+	// When true, a KubeVip static-pod manifest is deployed into
+	// "/etc/kubernetes/manifests" before "kubeadm init" runs so the virtual IP
+	// (see ControlPlaneEndpoint) is served and reachable while the control-plane
+	// bootstraps.
+	// Requires ControlPlaneEndpoint and KubeVipInterface to be set.
+	// Default: false (KubeVip is not activated).
+	EnableKubeVip bool
+
+	// KubeVipInterface is the network interface KubeVip binds the VIP to
+	// (e.g. "eth0"). Required when EnableKubeVip is true.
+	KubeVipInterface string
+
+	// KubeVipVersion is the KubeVip image version to render the manifest with
+	// (e.g. "v0.8.7").
+	// Optional: a built-in default is used when empty.
+	KubeVipVersion string
 }
 
 // DefaultBootstrapControlPlaneOptions returns the default options for
@@ -76,6 +103,10 @@ func NewBootstrapControlPlaneRunbook(commandExecutor commandexecutorinterfaces.C
 						PodNetworkCidr:            options.PodNetworkCidr,
 						ApiServerAdvertiseAddress: options.ApiServerAdvertiseAddress,
 						KubernetesVersion:         options.KubernetesVersion,
+						ControlPlaneEndpoint:      options.ControlPlaneEndpoint,
+						EnableKubeVip:             options.EnableKubeVip,
+						KubeVipInterface:          options.KubeVipInterface,
+						KubeVipVersion:            options.KubeVipVersion,
 					})
 				},
 			},

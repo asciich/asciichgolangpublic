@@ -85,6 +85,24 @@ func InitControlPlaneUsingCommandExecutor(ctx context.Context, commandExecutor c
 		return nil
 	}
 
+	// KubeVip must serve the VIP before "kubeadm init" contacts the
+	// control-plane endpoint, so deploy its static-pod manifest first.
+	if options.EnableKubeVip {
+		if options.ControlPlaneEndpoint == "" {
+			return tracederrors.TracedError("EnableKubeVip is set but ControlPlaneEndpoint is empty: the VIP KubeVip advertises must be provided")
+		}
+
+		err = DeployKubeVipManifestUsingCommandExecutor(ctx, commandExecutor, &DeployKubeVipManifestOptions{
+			Vip:       vipAddressFromControlPlaneEndpoint(options.ControlPlaneEndpoint),
+			Interface: options.KubeVipInterface,
+			Version:   options.KubeVipVersion,
+			UseSudo:   options.UseSudo,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
 	command := []string{"kubeadm", "init"}
 	if options.PodNetworkCidr != "" {
 		command = append(command, "--pod-network-cidr="+options.PodNetworkCidr)
@@ -94,6 +112,9 @@ func InitControlPlaneUsingCommandExecutor(ctx context.Context, commandExecutor c
 	}
 	if options.KubernetesVersion != "" {
 		command = append(command, "--kubernetes-version="+options.KubernetesVersion)
+	}
+	if options.ControlPlaneEndpoint != "" {
+		command = append(command, "--control-plane-endpoint="+options.ControlPlaneEndpoint)
 	}
 
 	_, err = commandExecutor.RunCommand(
