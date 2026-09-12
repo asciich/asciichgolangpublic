@@ -2,6 +2,8 @@ package kvmutils
 
 import (
 	"context"
+	"encoding/xml"
+	"fmt"
 	"slices"
 	"strconv"
 	"strings"
@@ -17,6 +19,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsoptions"
 )
 
 type KVMHypervisor struct {
@@ -71,7 +75,7 @@ func NewKVMHypervisor() (kvmHypervisor *KVMHypervisor) {
 	return new(KVMHypervisor)
 }
 
-func (k *KVMHypervisor) CreateVm(ctx context.Context, createOptions *KvmCreateVmOptions) (createdVm *KvmVm, err error) {
+func (k *KVMHypervisor) CreateVm(ctx context.Context, createOptions *kvmutilsoptions.KvmCreateVmOptions) (createdVm *KvmVm, err error) {
 	if createOptions == nil {
 		return nil, tracederrors.TracedError("createOptions is nil")
 	}
@@ -122,7 +126,7 @@ func (k *KVMHypervisor) CreateVm(ctx context.Context, createOptions *KvmCreateVm
 	}
 	defer vmXml.Delete(ctx, &filesoptions.DeleteOptions{})
 
-	err = LibvirtXmls().WriteXmlForVmOnLatopToFile(ctx, createOptions, vmXml)
+	err = kvmutilsgeneric.WriteXmlForVmOnLatopToFile(ctx, createOptions, vmXml)
 	if err != nil {
 		return nil, err
 	}
@@ -489,7 +493,7 @@ func (k *KVMHypervisor) GetVolumes(ctx context.Context) (volumes []*KvmVolume, e
 	return volumes, nil
 }
 
-func (k *KVMHypervisor) RemoveVm(ctx context.Context, removeOptions *KvmRemoveVmOptions) (err error) {
+func (k *KVMHypervisor) RemoveVm(ctx context.Context, removeOptions *kvmutilsoptions.KvmRemoveVmOptions) (err error) {
 	if removeOptions == nil {
 		return tracederrors.TracedError("removeOptions is nil")
 	}
@@ -893,4 +897,73 @@ func (k *KVMHypervisor) GetNetworkByName(networkName string) (network *KvmNetwor
 	}
 
 	return network, nil
+}
+
+func (k *KVMHypervisor) GetParsedNetworkXml(ctx context.Context, networkName string) (*kvmutilsgeneric.KvmNetworkXml, error) {
+	if networkName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("networkName")
+	}
+
+	stdout, err := k.RunKvmCommandAndGetStdout(ctx, []string{"net-dumpxml", networkName})
+	if err != nil {
+		return nil, err
+	}
+
+	parsed := &kvmutilsgeneric.KvmNetworkXml{}
+	err = xml.Unmarshal([]byte(stdout), parsed)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to parse net-dumpxml output for network '%s': %w", networkName, err)
+	}
+
+	return parsed, nil
+}
+
+func (k *KVMHypervisor) DeleteIpDhcpRangeInNetwork(ctx context.Context, networkName string, startIp string, endIp string) error {
+	if networkName == "" {
+		return tracederrors.TracedErrorEmptyString("networkName")
+	}
+
+	if startIp == "" {
+		return tracederrors.TracedErrorEmptyString("startIp")
+	}
+
+	if endIp == "" {
+		return tracederrors.TracedErrorEmptyString("endIp")
+	}
+
+	xml := fmt.Sprintf("<range start='%s' end='%s'/>", startIp, endIp)
+	_, err := k.RunKvmCommandAndGetStdout(
+		ctx,
+		[]string{"net-update", networkName, "delete", "ip-dhcp-range", xml, "--live", "--config"},
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (k *KVMHypervisor) AddIpDhcpRangeInNetwork(ctx context.Context, networkName string, startIp string, endIp string) error {
+	if networkName == "" {
+		return tracederrors.TracedErrorEmptyString("networkName")
+	}
+
+	if startIp == "" {
+		return tracederrors.TracedErrorEmptyString("startIp")
+	}
+
+	if endIp == "" {
+		return tracederrors.TracedErrorEmptyString("endIp")
+	}
+
+	xml := fmt.Sprintf("<range start='%s' end='%s'/>", startIp, endIp)
+	_, err := k.RunKvmCommandAndGetStdout(
+		ctx,
+		[]string{"net-update", networkName, "add", "ip-dhcp-range", xml, "--live", "--config"},
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
