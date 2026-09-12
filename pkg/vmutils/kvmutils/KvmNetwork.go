@@ -2,15 +2,15 @@ package kvmutils
 
 import (
 	"context"
-	"encoding/xml"
-	"fmt"
 
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsinterfaces"
 )
 
 type KvmNetwork struct {
-	hypervisor *KVMHypervisor
+	hypervisor kvmutilsinterfaces.Hypervisor
 
 	name       string
 	state      string
@@ -18,30 +18,11 @@ type KvmNetwork struct {
 	persistent string
 }
 
-// Parsed representation of the relevant parts of 'virsh net-dumpxml <name>'.
-type kvmNetworkXml struct {
-	XMLName xml.Name `xml:"network"`
-	Name    string   `xml:"name"`
-	Forward struct {
-		Mode string `xml:"mode,attr"`
-	} `xml:"forward"`
-	Ip struct {
-		Address string `xml:"address,attr"`
-		Netmask string `xml:"netmask,attr"`
-		Dhcp    struct {
-			Range struct {
-				Start string `xml:"start,attr"`
-				End   string `xml:"end,attr"`
-			} `xml:"range"`
-		} `xml:"dhcp"`
-	} `xml:"ip"`
-}
-
 func NewKvmNetwork() (ret *KvmNetwork) {
 	return new(KvmNetwork)
 }
 
-func (n *KvmNetwork) SetHypervisor(hypervisor *KVMHypervisor) (err error) {
+func (n *KvmNetwork) SetHypervisor(hypervisor kvmutilsinterfaces.Hypervisor) (err error) {
 	if hypervisor == nil {
 		return tracederrors.TracedError("hypervisor is nil")
 	}
@@ -51,7 +32,7 @@ func (n *KvmNetwork) SetHypervisor(hypervisor *KVMHypervisor) (err error) {
 	return nil
 }
 
-func (n *KvmNetwork) GetHypervisor() (hypervisor *KVMHypervisor, err error) {
+func (n *KvmNetwork) GetHypervisor() (hypervisor kvmutilsinterfaces.Hypervisor, err error) {
 	if n.hypervisor == nil {
 		return nil, tracederrors.TracedError("hypervisor not set")
 	}
@@ -141,7 +122,7 @@ func (n *KvmNetwork) GetPersistent() (persistent string, err error) {
 }
 
 // getParsedXml runs 'virsh net-dumpxml <name>' and parses the relevant parts.
-func (n *KvmNetwork) getParsedXml(ctx context.Context) (parsed *kvmNetworkXml, err error) {
+func (n *KvmNetwork) getParsedXml(ctx context.Context) (parsed *kvmutilsgeneric.KvmNetworkXml, err error) {
 	name, err := n.GetName()
 	if err != nil {
 		return nil, err
@@ -152,18 +133,7 @@ func (n *KvmNetwork) getParsedXml(ctx context.Context) (parsed *kvmNetworkXml, e
 		return nil, err
 	}
 
-	stdout, err := hypervisor.RunKvmCommandAndGetStdout(ctx, []string{"net-dumpxml", name})
-	if err != nil {
-		return nil, err
-	}
-
-	parsed = &kvmNetworkXml{}
-	err = xml.Unmarshal([]byte(stdout), parsed)
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("Failed to parse net-dumpxml output for network '%s': %w", name, err)
-	}
-
-	return parsed, nil
+	return hypervisor.GetParsedNetworkXml(ctx, name)
 }
 
 // GetForwardMode returns the libvirt forward mode of the network
@@ -279,23 +249,14 @@ func (n *KvmNetwork) SetDhcpStartIp(ctx context.Context, startIp string) (err er
 		return nil
 	}
 
-	oldRangeXml := fmt.Sprintf("<range start='%s' end='%s'/>", currentStart, currentEnd)
-	newRangeXml := fmt.Sprintf("<range start='%s' end='%s'/>", startIp, currentEnd)
-
 	// libvirt only allows adding or deleting DHCP ranges, so delete the current
 	// range first and then add the new one.
-	_, err = hypervisor.RunKvmCommandAndGetStdout(
-		ctx,
-		[]string{"net-update", name, "delete", "ip-dhcp-range", oldRangeXml, "--live", "--config"},
-	)
+	err = hypervisor.DeleteIpDhcpRangeInNetwork(ctx, name, currentStart, currentEnd)
 	if err != nil {
 		return err
 	}
 
-	_, err = hypervisor.RunKvmCommandAndGetStdout(
-		ctx,
-		[]string{"net-update", name, "add", "ip-dhcp-range", newRangeXml, "--live", "--config"},
-	)
+	err = hypervisor.AddIpDhcpRangeInNetwork(ctx, name, currentStart, currentEnd)
 	if err != nil {
 		return err
 	}

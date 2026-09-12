@@ -7,6 +7,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsoptions"
 )
 
 type KvmVm struct {
@@ -48,7 +50,7 @@ func (k *KvmVm) Delete(ctx context.Context) error {
 
 	return hypervisor.RemoveVm(
 		ctx,
-		&KvmRemoveVmOptions{
+		&kvmutilsoptions.KvmRemoveVmOptions{
 			VmName: name,
 		},
 	)
@@ -129,7 +131,7 @@ func (k *KvmVm) GetMacAddress(ctx context.Context) (macAddress string, err error
 		return "", err
 	}
 
-	macAddress, err = GetMacAddressFromXmlString(domainXml)
+	macAddress, err = kvmutilsgeneric.GetMacAddressFromXmlString(domainXml)
 	if err != nil {
 		return "", err
 	}
@@ -143,7 +145,7 @@ func (k *KvmVm) GetNetworkName(ctx context.Context) (networkName string, err err
 		return "", err
 	}
 
-	networkName, err = GetNetworkNameFromXmlString(domainXml)
+	networkName, err = kvmutilsgeneric.GetNetworkNameFromXmlString(domainXml)
 	if err != nil {
 		return "", err
 	}
@@ -303,7 +305,7 @@ func (k *KvmVm) GetVncPort(ctx context.Context) (vncPort int, err error) {
 		return -1, err
 	}
 
-	vncPort, err = GetVncPortFromXmlString(domainXml)
+	vncPort, err = kvmutilsgeneric.GetVncPortFromXmlString(domainXml)
 	if err != nil {
 		return -1, err
 	}

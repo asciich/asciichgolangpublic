@@ -1,4 +1,4 @@
-package kvmutils
+package kvmutilsoptions
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils"

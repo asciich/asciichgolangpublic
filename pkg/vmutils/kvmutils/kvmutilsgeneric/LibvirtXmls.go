@@ -1,4 +1,4 @@
-package kvmutils
+package kvmutilsgeneric
 
 import (
 	"context"
@@ -11,23 +11,14 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/netutils/macaddresses"
 	"github.com/asciich/asciichgolangpublic/pkg/templateutils/gotemplateutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsoptions"
 	libvirtxml "libvirt.org/libvirt-go-xml"
 )
 
 //go:embed data/vm.xml.tmpl
-var vm_on_laptopt_xml_tmpl string
+var vmXmlTemplate string
 
-type LibvirtXmlsService struct{}
-
-func LibvirtXmls() (libvirtXmls *LibvirtXmlsService) {
-	return NewLibvirtXmlsService()
-}
-
-func NewLibvirtXmlsService() (libvirtXmls *LibvirtXmlsService) {
-	return new(LibvirtXmlsService)
-}
-
-func (l *LibvirtXmlsService) CreateXmlForVmAsString(createOptions *KvmCreateVmOptions) (libvirtXml string, err error) {
+func CreateXmlForVmAsString(createOptions *kvmutilsoptions.KvmCreateVmOptions) (libvirtXml string, err error) {
 	if createOptions == nil {
 		return "", tracederrors.TracedError("createOptions is nil")
 	}
@@ -53,7 +44,7 @@ func (l *LibvirtXmlsService) CreateXmlForVmAsString(createOptions *KvmCreateVmOp
 	}
 
 	libvirtXml, err = gotemplateutils.RenderTemplateFromStringAsString(
-		vm_on_laptopt_xml_tmpl,
+		vmXmlTemplate,
 		map[string]any{
 			"VM_NAME":     vmName,
 			"DISK_PATH":   diskPath,
@@ -175,7 +166,7 @@ func GetVncPortFromXmlString(domainXml string) (vncPort int, err error) {
 	return -1, tracederrors.TracedError("No VNC graphics device found in domain XML.")
 }
 
-func (l *LibvirtXmlsService) WriteXmlForVmOnLatopToFile(ctx context.Context, createOptions *KvmCreateVmOptions, outputFile filesinterfaces.File) (err error) {
+func WriteXmlForVmOnLatopToFile(ctx context.Context, createOptions *kvmutilsoptions.KvmCreateVmOptions, outputFile filesinterfaces.File) (err error) {
 	if createOptions == nil {
 		return tracederrors.TracedError("createOptions is nil")
 	}
@@ -184,7 +175,7 @@ func (l *LibvirtXmlsService) WriteXmlForVmOnLatopToFile(ctx context.Context, cre
 		return tracederrors.TracedError("outputFile is nil")
 	}
 
-	xmlString, err := l.CreateXmlForVmAsString(createOptions)
+	xmlString, err := CreateXmlForVmAsString(createOptions)
 	if err != nil {
 		return err
 	}
