@@ -393,8 +393,11 @@ func (h *CommandExecutorHost) IsPingable(verbose bool) (isPingable bool, err err
 }
 
 func (h *CommandExecutorHost) IsReachable(ctx context.Context) (isReachable bool, err error) {
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
 	_, err = h.RunCommandAndGetStdoutAsString(
-		ctx,
+		ctxWithTimeout,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"echo", "hello"},
 		},

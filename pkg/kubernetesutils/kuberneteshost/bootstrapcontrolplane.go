@@ -64,6 +64,12 @@ type BootstrapControlPlaneOptions struct {
 	// (e.g. "v0.8.7").
 	// Optional: a built-in default is used when empty.
 	KubeVipVersion string
+
+	// UploadCerts adds "--upload-certs" to "kubeadm init" so control-plane
+	// certificates are uploaded to the "kubeadm-certs" secret, enabling
+	// additional control-plane nodes to join the same cluster.
+	// Default: false
+	UploadCerts bool
 }
 
 // DefaultBootstrapControlPlaneOptions returns the default options for
@@ -107,6 +113,7 @@ func NewBootstrapControlPlaneRunbook(commandExecutor commandexecutorinterfaces.C
 						EnableKubeVip:             options.EnableKubeVip,
 						KubeVipInterface:          options.KubeVipInterface,
 						KubeVipVersion:            options.KubeVipVersion,
+						UploadCerts:               options.UploadCerts,
 					})
 				},
 			},

@@ -46,6 +46,12 @@ type InitControlPlaneOptions struct {
 	// UseSudo determines if sudo should be used.
 	// Default: true
 	UseSudo bool
+
+	// UploadCerts adds "--upload-certs" to "kubeadm init" so control-plane
+	// certificates are uploaded to the "kubeadm-certs" secret, enabling
+	// additional control-plane nodes to join.
+	// Default: false
+	UploadCerts bool
 }
 
 // DefaultInitControlPlaneOptions returns the default options for initializing a

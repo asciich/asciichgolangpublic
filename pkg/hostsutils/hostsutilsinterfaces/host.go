@@ -14,6 +14,9 @@ type Host interface {
 	commandexecutorinterfaces.CommandExecutor
 
 	CheckReachable(ctx context.Context) (err error)
+
+	EnableTimeDateCtlNtp(ctx context.Context) (err error)
+
 	IsReachable(ctx context.Context) (bool, error)
 	WaitUntilReachable(ctx context.Context, options *hostsutilsoptions.WaitUntilReachableOptions) error
 
@@ -25,4 +28,6 @@ type Host interface {
 
 	AddSshHostKeyToKnownHosts(ctx context.Context) error
 	RenewSshHostKey(ctx context.Context) error
+
+	SetHostName(ctx context.Context, hostname string) error
 }

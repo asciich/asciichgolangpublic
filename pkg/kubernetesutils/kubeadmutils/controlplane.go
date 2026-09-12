@@ -113,6 +113,9 @@ func InitControlPlaneUsingCommandExecutor(ctx context.Context, commandExecutor c
 	if options.KubernetesVersion != "" {
 		command = append(command, "--kubernetes-version="+options.KubernetesVersion)
 	}
+	if options.UploadCerts {
+		command = append(command, "--upload-certs")
+	}
 	if options.ControlPlaneEndpoint != "" {
 		command = append(command, "--control-plane-endpoint="+options.ControlPlaneEndpoint)
 	}
