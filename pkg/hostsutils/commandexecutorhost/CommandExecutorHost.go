@@ -484,7 +484,7 @@ func (h *CommandExecutorHost) WaitUntilPingable(verbose bool) (err error) {
 	for {
 		isPingable, err := h.IsPingable(verbose)
 		if err != nil {
-			return nil
+			return err
 		}
 
 		elapsedTime := time.Since(t_start)

@@ -567,7 +567,7 @@ func (k *KVMHypervisor) RemoveVolumeByName(ctx context.Context, volumeName strin
 
 		err = volume.Remove(ctx)
 		if err != nil {
-			return nil
+			return err
 		}
 
 		logging.LogChangedf("Volume '%s' on KVM hypervisor '%s' deleted.", volumeName, hostname)

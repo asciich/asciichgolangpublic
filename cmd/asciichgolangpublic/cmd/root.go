@@ -8,7 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands"
 )
 
-func NewRootCmd() *cobra.Command {
+func NewRootCmd() (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:   "asciichgolangpublic",
 		Short: "System admin helper",
@@ -16,14 +16,18 @@ func NewRootCmd() *cobra.Command {
 
 	err := defaultclicommands.AddDefaultCommands(cmd)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return cmd
+	return cmd, nil
 }
 
 func Execute() {
-	rootCmd := NewRootCmd()
+	rootCmd, err := NewRootCmd()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

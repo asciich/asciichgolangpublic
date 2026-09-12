@@ -1,6 +1,6 @@
-# hostutils specifications
+# hostsutils specifications
 
-This are the specifications for the [`hostutils` package](README.md).
+This are the specifications for the [`hostsutils` package](README.md).
 
 This document extends the [constitution.md](/constitution.md).
 
@@ -11,5 +11,5 @@ This document extends the [constitution.md](/constitution.md).
 
 ## Testing
 
-- Tests in the `hostutils` package are meant to test both implementations behave the same way.
+- Tests in the `hostsutils` package are meant to test both implementations behave the same way.
     - Each test therefore uses a for loop to run the same test for both implementations available.

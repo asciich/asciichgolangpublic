@@ -43,6 +43,40 @@
             return tracederrors.TracedErrorf("ReadCloser process for command '%s' finished with error: %w", fullCommandJoined, err) // correct
             ```
 - Instead of `tracederrors.TracedError(err.Error())` use `tracederrors.TracedError(err)`. This function has built-in `error` handling.
+- Avoid silent `nil` error returns:
+    - Instead of
+        ```golang
+        func doSomething() error {
+            err := stepA()
+            if err != nil {
+                return nil // Usually this indicates a programming mistake. Correct to return err if it makes sense.
+            }
+
+            err := stepB()
+            if err != nil {
+                return err
+            }
+
+            return nil 
+        }
+        ```
+    - Use:
+        ```golang
+        func doSomething() error {
+            err := stepA()
+            if err != nil {
+                logging.LogInfoByCtxf(ctx, "Reason why its ok to ignore this: %s", err) // If there is really a reason to return nil here add a log message explaining why.
+                return nil 
+            }
+
+            err := stepB()
+            if err != nil {
+                return err
+            }
+
+            return nil 
+        }
+        ```
 - For filenames:
     - Do not use `_methods<.extension>` suffix. Instead of `add_methods.go` use `add.go`.
 - This repository is organized in many sub packages which must be used to reduce duplicated code.

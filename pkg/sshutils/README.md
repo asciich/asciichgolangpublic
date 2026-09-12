@@ -15,3 +15,7 @@ To run tests use:
 ```bash
 bash -c "cd $(git rev-parse --show-toplevel) && go test -v ./pkg/sshutils/..."
 ```
+
+## Specifications
+
+For specifications see [sshutils.spec.md](sshutils.spec.md) and [constitution.md](/constitution.md).
