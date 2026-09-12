@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/subtle"
 	"errors"
 	"fmt"
 	"io"
@@ -22,9 +23,10 @@ import (
 )
 
 type TestSshServer struct {
-	Username string
-	Password string
-	Port     int
+	Username       string
+	Password       string
+	Port           int
+	AuthorizedKeys []ssh.PublicKey // Optional: SSH key-based authentication
 
 	cancelMux sync.Mutex
 	cancel    func()
@@ -187,6 +189,31 @@ func (t *TestSshServer) StartSshServer(ctx context.Context) error {
 			}
 			return nil, fmt.Errorf("password rejected for %q", c.User())
 		},
+
+		PublicKeyCallback: func(c ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error) {
+			if len(t.AuthorizedKeys) == 0 {
+				return nil, fmt.Errorf("no authorized keys configured")
+			}
+			if c.User() != t.Username {
+				return nil, fmt.Errorf("unknown user %q", c.User())
+			}
+			for _, authorizedKey := range t.AuthorizedKeys {
+				if subtle.ConstantTimeCompare(authorizedKey.Marshal(), key.Marshal()) == 1 {
+					return nil, nil // Authentication successful
+				}
+			}
+			return nil, fmt.Errorf("public key not authorized for user %q", c.User())
+		},
+	}
+
+	// If no authorized keys are configured, disable public key authentication
+	if len(t.AuthorizedKeys) == 0 {
+		config.PublicKeyCallback = nil
+	}
+
+	// If no password is configured, disable password authentication
+	if t.Password == "" {
+		config.PasswordCallback = nil
 	}
 
 	config.AddHostKey(hostKey)
