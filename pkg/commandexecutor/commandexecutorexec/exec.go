@@ -81,9 +81,12 @@ func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions
 		)
 	}
 
-	cmd := exec.Command(command[0])
+	// Use CommandContext so the process is killed when the context is cancelled
+	// or its deadline is exceeded. This closes the pipes and unblocks the
+	// stdout scanner below.
+	cmd := exec.CommandContext(ctx, command[0])
 	if len(command) > 1 {
-		cmd = exec.Command(command[0], command[1:]...)
+		cmd = exec.CommandContext(ctx, command[0], command[1:]...)
 	}
 
 	var stderr bytes.Buffer
@@ -199,6 +202,17 @@ func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions
 
 	err = cmd.Wait()
 	if err != nil {
+		// If the context was cancelled or its deadline exceeded, the process was
+		// killed by CommandContext. Surface the context error so callers can
+		// react to it (e.g. timeouts in IsReachable).
+		if ctxErr := ctx.Err(); ctxErr != nil {
+			return nil, tracederrors.TracedErrorf(
+				"Command '%s' on '%s' aborted by context: %w",
+				commandJoined,
+				hostDescription,
+				ctxErr,
+			)
+		}
 		commandOutput.SetCmdRunError(err)
 	}
 
@@ -277,9 +291,9 @@ func RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *paramete
 		return nil, err
 	}
 
-	cmd := exec.Command(fullCommand[0])
+	cmd := exec.CommandContext(ctx, fullCommand[0])
 	if len(fullCommand) > 0 {
-		cmd = exec.Command(fullCommand[0], fullCommand[1:]...)
+		cmd = exec.CommandContext(ctx, fullCommand[0], fullCommand[1:]...)
 	}
 
 	stdout, err := cmd.StdoutPipe()
@@ -346,9 +360,9 @@ func RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *paramete
 		return nil, err
 	}
 
-	cmd := exec.Command(fullCommand[0])
+	cmd := exec.CommandContext(ctx, fullCommand[0])
 	if len(fullCommand) > 0 {
-		cmd = exec.Command(fullCommand[0], fullCommand[1:]...)
+		cmd = exec.CommandContext(ctx, fullCommand[0], fullCommand[1:]...)
 	}
 
 	stdin, err := cmd.StdinPipe()
