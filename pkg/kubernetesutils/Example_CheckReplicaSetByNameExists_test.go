@@ -15,11 +15,8 @@ func Test_Example_CheckReplicaSetByNameExists(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.WithVerbose(context.TODO())
 
-	// -----
-	// Prepare test environment start ...
-
-	// ... prepare test environment finished.
-	// -----
+	// Note: Test environment setup is performed once in TestMain() for all tests.
+	// See: Kubernetesutils_main_test.go
 
 	// Get Kubernetes cluster:
 	cluster, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+testClusterName)
