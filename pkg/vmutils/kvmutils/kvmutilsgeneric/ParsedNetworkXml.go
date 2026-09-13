@@ -20,3 +20,27 @@ type KvmNetworkXml struct {
 		} `xml:"dhcp"`
 	} `xml:"ip"`
 }
+
+func (x *KvmNetworkXml) GetForwardMode() (string, error) {
+	return x.Forward.Mode, nil
+}
+
+func (x *KvmNetworkXml) GetIpAddress() (string, error) {
+	ip := x.Ip.Address
+	return ip, nil
+}
+
+func (x *KvmNetworkXml) GetIpNetmask() (string, error) {
+	netmask := x.Ip.Netmask
+	return netmask, nil
+}
+
+func (x *KvmNetworkXml) GetIpDhcpRangeStart() (string, error) {
+	start := x.Ip.Dhcp.Range.Start
+	return start, nil
+}
+
+func (x *KvmNetworkXml) GetIpDhcpRangeEnd() (string, error) {
+	end := x.Ip.Dhcp.Range.End
+	return end, nil
+}

@@ -7,6 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils"
+	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsinterfaces"
 )
 
 func GetCtxAndHostname(cmd *cobra.Command) (context.Context, string) {
@@ -24,7 +25,7 @@ func GetCtxAndHostname(cmd *cobra.Command) (context.Context, string) {
 	return ctx, hostname
 }
 
-func GetCtxAndKvmHypervisor(cmd *cobra.Command) (context.Context, *kvmutils.KVMHypervisor) {
+func GetCtxAndKvmHypervisor(cmd *cobra.Command) (context.Context, kvmutilsinterfaces.Hypervisor) {
 	ctx, hostname := GetCtxAndHostname(cmd)
 
 	hypervisor, err := kvmutils.GetKvmHypervisorByHostName(hostname)

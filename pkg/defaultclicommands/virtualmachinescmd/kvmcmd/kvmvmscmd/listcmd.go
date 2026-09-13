@@ -42,7 +42,7 @@ Usage:
 					macAddress := "-"
 					ipAddress := "-"
 
-					if isRunning := mustutils.Must(vm.IsRunning()); isRunning {
+					if isRunning := mustutils.Must(vm.IsRunning(ctx)); isRunning {
 						if network, err := vm.GetNetworkName(ctx); err == nil {
 							networkName = network
 						}

@@ -1,13 +1,10 @@
-package kvmutils
+package kvmutilsgeneric
 
 import (
 	"context"
-	"strings"
 
-	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
-	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsoptions"
 )
 
@@ -15,7 +12,7 @@ type KvmVm struct {
 	vmId        *int
 	cachedName  string
 	cachedState string
-	hypervisor  *KVMHypervisor
+	hypervisor  kvmutilsinterfaces.Hypervisor
 }
 
 func NewKvmVm() (kvmVm *KvmVm) {
@@ -48,7 +45,7 @@ func (k *KvmVm) Delete(ctx context.Context) error {
 		return err
 	}
 
-	return hypervisor.RemoveVm(
+	return hypervisor.DeleteVm(
 		ctx,
 		&kvmutilsoptions.KvmRemoveVmOptions{
 			VmName: name,
@@ -75,7 +72,7 @@ func (k *KvmVm) GetDomainXmlAsString(ctx context.Context) (domainXml string, err
 		return "", err
 	}
 
-	domainXml, err = hypervisor.RunKvmCommandAndGetStdout(ctx, []string{"dumpxml", vmName})
+	domainXml, err = hypervisor.GetDomainXmlAsString(ctx, vmName)
 	if err != nil {
 		return "", err
 	}
@@ -83,7 +80,7 @@ func (k *KvmVm) GetDomainXmlAsString(ctx context.Context) (domainXml string, err
 	return domainXml, nil
 }
 
-func (k *KvmVm) GetHypervisor() (hypervisor *KVMHypervisor, err error) {
+func (k *KvmVm) GetHypervisor() (hypervisor kvmutilsinterfaces.Hypervisor, err error) {
 	if k.hypervisor == nil {
 		return nil, tracederrors.TracedErrorf("hypervisor not set")
 	}
@@ -99,7 +96,7 @@ func (k *KvmVm) GetId() (id int, err error) {
 	return *(k.vmId), nil
 }
 
-func (k *KvmVm) GetInfo(ctx context.Context) (vmInfo *KvmVmInfo, err error) {
+func (k *KvmVm) GetInfo(ctx context.Context) (vmInfo kvmutilsinterfaces.VmInfo, err error) {
 	vmInfo = NewKvmVmInfo()
 
 	vmName, err := k.GetCachedName()
@@ -131,7 +128,7 @@ func (k *KvmVm) GetMacAddress(ctx context.Context) (macAddress string, err error
 		return "", err
 	}
 
-	macAddress, err = kvmutilsgeneric.GetMacAddressFromXmlString(domainXml)
+	macAddress, err = GetMacAddressFromXmlString(domainXml)
 	if err != nil {
 		return "", err
 	}
@@ -145,7 +142,7 @@ func (k *KvmVm) GetNetworkName(ctx context.Context) (networkName string, err err
 		return "", err
 	}
 
-	networkName, err = kvmutilsgeneric.GetNetworkNameFromXmlString(domainXml)
+	networkName, err = GetNetworkNameFromXmlString(domainXml)
 	if err != nil {
 		return "", err
 	}
@@ -165,7 +162,7 @@ func (k *KvmVm) GetVmId() (vmId *int, err error) {
 	return k.vmId, nil
 }
 
-func (k *KvmVm) IsRunning() (isRunning bool, err error) {
+func (k *KvmVm) IsRunning(ctx context.Context) (isRunning bool, err error) {
 	cachedState, err := k.GetCachedState()
 	if err != nil {
 		return false, err
@@ -194,7 +191,7 @@ func (k *KvmVm) SetCachedState(cachedState string) (err error) {
 	return nil
 }
 
-func (k *KvmVm) SetHypervisor(hypervisor *KVMHypervisor) (err error) {
+func (k *KvmVm) SetHypervisor(hypervisor kvmutilsinterfaces.Hypervisor) (err error) {
 	if hypervisor == nil {
 		return tracederrors.TracedErrorf("hypervisor is nil")
 	}
@@ -232,71 +229,12 @@ func (k *KvmVm) GetIpAddress(ctx context.Context) (ipAddress string, err error) 
 		return "", err
 	}
 
-	// Try multiple sources in order so both NAT ('default') and bridged ('br0') VMs work:
-	//   - agent: queries the qemu-guest-agent inside the VM (works for any network if the agent runs).
-	//   - lease: reads libvirt's dnsmasq DHCP leases (works for the NAT 'default' network).
-	//   - arp:   reads the host's ARP table (works for bridged setups if there is an ARP entry).
-	for _, source := range []string{"agent", "lease", "arp"} {
-		// Use silent context so the individual (expected to sometimes fail) lookups do not spam the log.
-		ipAddress, err = k.getIpAddressBySource(contextutils.WithSilent(ctx), source)
-		if err == nil && ipAddress != "" {
-			return ipAddress, nil
-		}
-	}
-
-	return "", tracederrors.TracedErrorf("No IPv4 address found for VM '%s' (tried sources agent, lease, arp).", vmName)
-}
-
-func (k *KvmVm) getIpAddressBySource(ctx context.Context, source string) (ipAddress string, err error) {
-	if source == "" {
-		return "", tracederrors.TracedErrorEmptyString("source")
-	}
-
 	hypervisor, err := k.GetHypervisor()
 	if err != nil {
 		return "", err
 	}
 
-	vmName, err := k.GetCachedName()
-	if err != nil {
-		return "", err
-	}
-
-	output, err := hypervisor.RunKvmCommandAndGetStdout(ctx, []string{"domifaddr", vmName, "--source", source})
-	if err != nil {
-		return "", err
-	}
-
-	for _, line := range stringsutils.SplitLines(output, true) {
-		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
-		}
-
-		// Skip header and separator lines.
-		if strings.HasPrefix(line, "Name") {
-			continue
-		}
-		if strings.Count(line, "-") > 5 {
-			continue
-		}
-
-		splitted := stringsutils.SplitAtSpacesAndRemoveEmptyStrings(line)
-		if len(splitted) != 4 {
-			continue
-		}
-
-		if splitted[2] != "ipv4" {
-			continue
-		}
-
-		// splitted[3] is like "192.168.122.94/24" -> strip the CIDR suffix.
-		ipAddress = strings.SplitN(splitted[3], "/", 2)[0]
-
-		return ipAddress, nil
-	}
-
-	return "", tracederrors.TracedErrorf("No IPv4 address found for VM '%s' via source '%s'.", vmName, source)
+	return hypervisor.GetIpAddress(ctx, vmName)
 }
 
 func (k *KvmVm) GetVncPort(ctx context.Context) (vncPort int, err error) {
@@ -305,7 +243,7 @@ func (k *KvmVm) GetVncPort(ctx context.Context) (vncPort int, err error) {
 		return -1, err
 	}
 
-	vncPort, err = kvmutilsgeneric.GetVncPortFromXmlString(domainXml)
+	vncPort, err = GetVncPortFromXmlString(domainXml)
 	if err != nil {
 		return -1, err
 	}

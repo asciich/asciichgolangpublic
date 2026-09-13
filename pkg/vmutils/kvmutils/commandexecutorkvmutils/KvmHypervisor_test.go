@@ -1,10 +1,11 @@
-package kvmutils
+package commandexecutorkvmutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
+	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/commandexecutorkvmutils"
 )
 
 func TestKvmHypervisorGetHostNameWhenUsingLocalhost(t *testing.T) {
@@ -18,7 +19,7 @@ func TestKvmHypervisorGetHostNameWhenUsingLocalhost(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				hypervisor, err := GetKvmHypervisorOnLocalhost()
+				hypervisor, err := commandexecutorkvmutils.GetKvmHypervisorOnLocalhost()
 				require.NoError(t, err)
 				hostname, err := hypervisor.GetHostName()
 				require.EqualValues(t, "localhost_connection", hostname)
