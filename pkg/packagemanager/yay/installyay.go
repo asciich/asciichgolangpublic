@@ -86,7 +86,7 @@ func InstallYay(ctx context.Context, commandExecutor commandexecutorinterfaces.C
 
 	hostDescription, err := commandExecutor.GetHostDescription()
 	if err != nil {
-		return nil
+		return err
 	}
 
 	logging.LogInfoByCtxf(ctx, "Install yay on '%s' started.", hostDescription)

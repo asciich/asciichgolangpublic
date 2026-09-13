@@ -16,4 +16,4 @@ All functions in this package take an additional `commandExecutor` parameter com
 
 ## Specifications
 
-For specifications see [installutils.spec.md](../installutils.spec.md) and [constitution.md](/constitution.md).
+For specifications see [commandexecutorinstall.spec.md](commandexecutorinstall.spec.md), [installutils.spec.md](../installutils.spec.md) and [constitution.md](/constitution.md).

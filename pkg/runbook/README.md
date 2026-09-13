@@ -9,3 +9,7 @@ A `runbook` (also called workflow in other tools) provides an easy approach to s
 ## Available runbooks
 
 - [`UpdateArchLinuxKeyringPackageRunbook`](../osutils/linuxutils/archlinuxutils/archlinuxkeyring.go) - Update the archlinux-keyring package containing all signing keys
+
+## Specifications
+
+For specifications see [runbook.spec.md](runbook.spec.md) and [constitution.md](/constitution.md).

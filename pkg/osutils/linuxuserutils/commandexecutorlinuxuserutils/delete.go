@@ -26,14 +26,14 @@ func Delete(ctx context.Context, commandExecutor commandexecutorinterfaces.Comma
 
 	hostDescription, err := commandExecutor.GetHostDescription()
 	if err != nil {
-		return nil
+		return err
 	}
 
 	logging.LogInfoByCtxf(ctx, "Delete linux user '%s' on '%s' started.", userName, hostDescription)
 
 	exists, err := Exists(ctx, commandExecutor, userName)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	if exists {

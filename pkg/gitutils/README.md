@@ -20,4 +20,4 @@ This package follows the dual-implementation pattern described in [constitution.
 
 ## Specifications
 
-For specifications see [constitution.md](/constitution.md).
+For specifications see [gitutils.spec.md](gitutils.spec.md) and [constitution.md](/constitution.md).

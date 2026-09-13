@@ -302,7 +302,7 @@ func (n *NativeHost) WaitUntilPingable(verbose bool) (err error) {
 	for {
 		isPingable, err := n.IsPingable(verbose)
 		if err != nil {
-			return nil
+			return err
 		}
 
 		elapsedTime := time.Since(t_start)
