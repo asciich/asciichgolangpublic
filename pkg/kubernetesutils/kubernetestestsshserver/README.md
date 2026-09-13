@@ -9,4 +9,4 @@ Deploy a SSH server for testing purposes as pod inside the kubernetes cluster.
 
 ## Specifications
 
-See [kubernetestestsshserver.spec.md](kubernetestestsshserver.spec.md)
+For specifications see [kubernetestestsshserver.spec.md](kubernetestestsshserver.spec.md)

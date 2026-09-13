@@ -65,4 +65,4 @@ The implementation using exec to call `kubectl` or other commands is useful when
 
 ## Specifications
 
-See [kubernetesutils.spec.md](kubernetesutils.spec.md)
+For specifications see [kubernetesutils.spec.md](kubernetesutils.spec.md)
