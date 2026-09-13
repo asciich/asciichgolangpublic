@@ -24,7 +24,7 @@ Usage:
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx, kvmHypervisor := kvmcmdutils.GetCtxAndKvmHypervisor(cmd)
 
-			volumeNames := mustutils.Must(kvmHypervisor.GetVolumeNames(ctx))
+			volumeNames := mustutils.Must(kvmHypervisor.ListVolumeNames(ctx))
 
 			for _, vn := range volumeNames {
 				fmt.Println(vn)

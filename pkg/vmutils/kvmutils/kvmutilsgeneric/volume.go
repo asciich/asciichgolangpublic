@@ -1,15 +1,15 @@
-package kvmutils
+package kvmutilsgeneric
 
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsinterfaces"
 )
 
 type KvmVolume struct {
 	name        string
-	storagePool *KvmStoragePool
+	storagePool kvmutilsinterfaces.StoragePool
 }
 
 func NewKvmVolume() (kvmVolume *KvmVolume) {
@@ -30,7 +30,7 @@ func (v *KvmVolume) GetHostName() (hostname string, err error) {
 	return hostname, nil
 }
 
-func (v *KvmVolume) GetHypervisor() (hypervisor *KVMHypervisor, err error) {
+func (v *KvmVolume) GetHypervisor() (hypervisor kvmutilsinterfaces.Hypervisor, err error) {
 	pool, err := v.GetStoragePool()
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (v *KvmVolume) GetName() (name string, err error) {
 	return v.name, nil
 }
 
-func (v *KvmVolume) GetStoragePool() (storagePool *KvmStoragePool, err error) {
+func (v *KvmVolume) GetStoragePool() (storagePool kvmutilsinterfaces.StoragePool, err error) {
 	if v.storagePool == nil {
 		return nil, tracederrors.TracedError("storage pool not set")
 	}
@@ -74,12 +74,7 @@ func (v *KvmVolume) GetStoragePoolName() (storagePoolName string, err error) {
 	return storagePoolName, nil
 }
 
-func (v *KvmVolume) Remove(ctx context.Context) (err error) {
-	hostname, err := v.GetHostName()
-	if err != nil {
-		return err
-	}
-
+func (v *KvmVolume) Delete(ctx context.Context) (err error) {
 	hypervisor, err := v.GetHypervisor()
 	if err != nil {
 		return err
@@ -90,19 +85,12 @@ func (v *KvmVolume) Remove(ctx context.Context) (err error) {
 		return err
 	}
 
-	poolName, err := v.GetStoragePoolName()
+	storagePoolName, err := v.GetStoragePoolName()
 	if err != nil {
 		return err
 	}
 
-	_, err = hypervisor.RunKvmCommand(ctx, []string{"vol-delete", "--pool", poolName, volumeName})
-	if err != nil {
-		return err
-	}
-
-	logging.LogInfoByCtxf(ctx, "KVM volume '%s' on storage pool '%s' on host '%v' deleted.", volumeName, poolName, hostname)
-
-	return nil
+	return hypervisor.DeleteVolumeByName(ctx, storagePoolName, volumeName)
 }
 
 func (v *KvmVolume) SetName(name string) (err error) {
@@ -115,7 +103,7 @@ func (v *KvmVolume) SetName(name string) (err error) {
 	return nil
 }
 
-func (v *KvmVolume) SetStoragePool(storagePool *KvmStoragePool) (err error) {
+func (v *KvmVolume) SetStoragePool(storagePool kvmutilsinterfaces.StoragePool) (err error) {
 	if storagePool == nil {
 		return tracederrors.TracedError("storagePool is nil")
 	}

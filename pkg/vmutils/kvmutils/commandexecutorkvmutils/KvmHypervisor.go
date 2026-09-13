@@ -1,4 +1,4 @@
-package kvmutils
+package commandexecutorkvmutils
 
 import (
 	"context"
@@ -14,54 +14,23 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
-	"github.com/asciich/asciichgolangpublic/pkg/hostsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsoptions"
 )
 
-type KVMHypervisor struct {
+type CommandExecutrKvmHypervisor struct {
 	host hostsutilsinterfaces.Host
 
 	// Run kvm commands and connection directly on localhost instead of using SSH.
 	useLocalhost bool
 }
 
-func GetKvmHypervisorByHostName(hostname string) (kvmHypervisor *KVMHypervisor, err error) {
-	if hostname == "" {
-		return nil, tracederrors.TracedErrorEmptyString("hostname")
-	}
-
-	if hostname == "localhost" {
-		return GetKvmHypervisorOnLocalhost()
-	}
-
-	host, err := hostsutils.GetHostByHostname(hostname)
-	if err != nil {
-		return nil, err
-	}
-
-	return GetKvmHypervisorByHost(host)
-}
-
-func GetKvmHypervisorByHost(host hostsutilsinterfaces.Host) (kvmHypervisor *KVMHypervisor, err error) {
-	if host == nil {
-		return nil, tracederrors.TracedError("host is nil")
-	}
-
-	kvmHypervisor = NewKVMHypervisor()
-	err = kvmHypervisor.SetHost(host)
-	if err != nil {
-		return nil, err
-	}
-
-	return kvmHypervisor, nil
-}
-
-func GetKvmHypervisorOnLocalhost() (kvmHypervisor *KVMHypervisor, err error) {
+func GetKvmHypervisorOnLocalhost() (kvmHypervisor *CommandExecutrKvmHypervisor, err error) {
 	kvmHypervisor = NewKVMHypervisor()
 	err = kvmHypervisor.SetUseLocalhost(true)
 	if err != nil {
@@ -71,11 +40,11 @@ func GetKvmHypervisorOnLocalhost() (kvmHypervisor *KVMHypervisor, err error) {
 	return kvmHypervisor, nil
 }
 
-func NewKVMHypervisor() (kvmHypervisor *KVMHypervisor) {
-	return new(KVMHypervisor)
+func NewKVMHypervisor() (kvmHypervisor *CommandExecutrKvmHypervisor) {
+	return new(CommandExecutrKvmHypervisor)
 }
 
-func (k *KVMHypervisor) CreateVm(ctx context.Context, createOptions *kvmutilsoptions.KvmCreateVmOptions) (createdVm *KvmVm, err error) {
+func (k *CommandExecutrKvmHypervisor) CreateVm(ctx context.Context, createOptions *kvmutilsoptions.KvmCreateVmOptions) (createdVm kvmutilsinterfaces.VM, err error) {
 	if createOptions == nil {
 		return nil, tracederrors.TracedError("createOptions is nil")
 	}
@@ -156,7 +125,7 @@ func (k *KVMHypervisor) CreateVm(ctx context.Context, createOptions *kvmutilsopt
 	return createdVm, nil
 }
 
-func (k *KVMHypervisor) GetHost() (host hostsutilsinterfaces.Host, err error) {
+func (k *CommandExecutrKvmHypervisor) GetHost() (host hostsutilsinterfaces.Host, err error) {
 	if k.host == nil {
 		return nil, tracederrors.TracedError("host not set")
 	}
@@ -164,7 +133,7 @@ func (k *KVMHypervisor) GetHost() (host hostsutilsinterfaces.Host, err error) {
 	return k.host, nil
 }
 
-func (k *KVMHypervisor) GetHostName() (hostname string, err error) {
+func (k *CommandExecutrKvmHypervisor) GetHostName() (hostname string, err error) {
 	if k.useLocalhost {
 		return "localhost_connection", nil
 	}
@@ -182,7 +151,7 @@ func (k *KVMHypervisor) GetHostName() (hostname string, err error) {
 	return hostname, nil
 }
 
-func (k *KVMHypervisor) ListStoragePoolNames(ctx context.Context) (storagePoolNames []string, err error) {
+func (k *CommandExecutrKvmHypervisor) ListStoragePoolNames(ctx context.Context) (storagePoolNames []string, err error) {
 	storagePools, err := k.ListStoragePools(ctx)
 	if err != nil {
 		return nil, err
@@ -201,7 +170,37 @@ func (k *KVMHypervisor) ListStoragePoolNames(ctx context.Context) (storagePoolNa
 	return
 }
 
-func (k *KVMHypervisor) ListStoragePools(ctx context.Context) (storagePools []*KvmStoragePool, err error) {
+func (k *CommandExecutrKvmHypervisor) GetStoragePoolByName(ctx context.Context, storagePoolName string) (kvmutilsinterfaces.StoragePool, error) {
+	if storagePoolName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("storagePoolName")
+	}
+
+	list, err := k.ListStoragePools(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var got kvmutilsinterfaces.StoragePool
+	for _, p := range list {
+		name, err := p.GetName()
+		if err != nil {
+			return nil, err
+		}
+
+		if name == storagePoolName {
+			got = p
+			break
+		}
+	}
+
+	if got == nil {
+		return nil, tracederrors.TracedErrorf("KVM storage pool '%s' not found.", storagePoolName)
+	}
+
+	return got, nil
+}
+
+func (k *CommandExecutrKvmHypervisor) ListStoragePools(ctx context.Context) (storagePools []*kvmutilsgeneric.KvmStoragePool, err error) {
 	logging.LogInfoByCtxf(ctx, "Get storage pools on kvm hypervisor started.")
 
 	hostname, err := k.GetHostName()
@@ -226,7 +225,7 @@ func (k *KVMHypervisor) ListStoragePools(ctx context.Context) (storagePools []*K
 		return nil, tracederrors.TracedErrorf("Unexpected second line of list pool output: '%s'", secondLine)
 	}
 
-	storagePools = []*KvmStoragePool{}
+	storagePools = []*kvmutilsgeneric.KvmStoragePool{}
 	for _, line := range stringsutils.SplitLines(unparsedOutput, true) {
 		line = strings.TrimSpace(line)
 		if len(line) <= 0 {
@@ -239,7 +238,7 @@ func (k *KVMHypervisor) ListStoragePools(ctx context.Context) (storagePools []*K
 		}
 
 		nameToAdd := splitted[0]
-		poolToAdd := NewKvmStoragePool()
+		poolToAdd := kvmutilsgeneric.NewKvmStoragePool()
 		err = poolToAdd.SetName(nameToAdd)
 		if err != nil {
 			return nil, err
@@ -260,13 +259,13 @@ func (k *KVMHypervisor) ListStoragePools(ctx context.Context) (storagePools []*K
 	return storagePools, nil
 }
 
-func (k *KVMHypervisor) GetUseLocalhost() (useLocalhost bool, err error) {
+func (k *CommandExecutrKvmHypervisor) GetUseLocalhost() (useLocalhost bool, err error) {
 
 	return k.useLocalhost, nil
 }
 
-func (k *KVMHypervisor) GetVmById(vmId int) (vm *KvmVm, err error) {
-	vm = NewKvmVm()
+func (k *CommandExecutrKvmHypervisor) GetVmById(vmId int) (vm kvmutilsinterfaces.VM, err error) {
+	vm = kvmutilsgeneric.NewKvmVm()
 
 	err = vm.SetHypervisor(k)
 	if err != nil {
@@ -281,7 +280,7 @@ func (k *KVMHypervisor) GetVmById(vmId int) (vm *KvmVm, err error) {
 	return vm, nil
 }
 
-func (k *KVMHypervisor) GetVmByName(ctx context.Context, vmName string) (vm *KvmVm, err error) {
+func (k *CommandExecutrKvmHypervisor) GetVmByName(ctx context.Context, vmName string) (vm kvmutilsinterfaces.VM, err error) {
 	if vmName == "" {
 		return nil, tracederrors.TracedError("vmName")
 	}
@@ -305,13 +304,13 @@ func (k *KVMHypervisor) GetVmByName(ctx context.Context, vmName string) (vm *Kvm
 	return nil, tracederrors.TracedErrorf("No VM named '%s' found", vmName)
 }
 
-func (k *KVMHypervisor) GetVmInfoList(ctx context.Context) (vmInfos []*KvmVmInfo, err error) {
+func (k *CommandExecutrKvmHypervisor) GetVmInfoList(ctx context.Context) (vmInfos []kvmutilsinterfaces.VmInfo, err error) {
 	vms, err := k.ListVms(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	vmInfos = []*KvmVmInfo{}
+	vmInfos = []kvmutilsinterfaces.VmInfo{}
 	for _, vm := range vms {
 		infoToAdd, err := vm.GetInfo(ctx)
 		if err != nil {
@@ -324,7 +323,7 @@ func (k *KVMHypervisor) GetVmInfoList(ctx context.Context) (vmInfos []*KvmVmInfo
 	return vmInfos, nil
 }
 
-func (k *KVMHypervisor) ListVms(ctx context.Context) (vms []*KvmVm, err error) {
+func (k *CommandExecutrKvmHypervisor) ListVms(ctx context.Context) (vms []kvmutilsinterfaces.VM, err error) {
 	listOutput, err := k.RunKvmCommandAndGetStdout(ctx, []string{"list", "--all"})
 	if err != nil {
 		return nil, err
@@ -341,7 +340,7 @@ func (k *KVMHypervisor) ListVms(ctx context.Context) (vms []*KvmVm, err error) {
 		return nil, tracederrors.TracedErrorf("Unexpected second line '%s'. Full output is '%s'.", secondLine, listOutput)
 	}
 
-	vms = []*KvmVm{}
+	vms = []kvmutilsinterfaces.VM{}
 	for _, line := range stringsutils.SplitLines(unparsedOutput, true) {
 		if len(strings.TrimSpace(line)) <= 0 {
 			continue
@@ -354,7 +353,7 @@ func (k *KVMHypervisor) ListVms(ctx context.Context) (vms []*KvmVm, err error) {
 			return nil, tracederrors.TracedErrorf("Failed to split line '%s'", line)
 		}
 
-		vmToAdd := NewKvmVm()
+		var vmToAdd kvmutilsinterfaces.VM = kvmutilsgeneric.NewKvmVm()
 		err = vmToAdd.SetHypervisor(k)
 		if err != nil {
 			return nil, err
@@ -396,7 +395,7 @@ func (k *KVMHypervisor) ListVms(ctx context.Context) (vms []*KvmVm, err error) {
 	return vms, nil
 }
 
-func (k *KVMHypervisor) ListVmNames(ctx context.Context) (vmNames []string, err error) {
+func (k *CommandExecutrKvmHypervisor) ListVmNames(ctx context.Context) (vmNames []string, err error) {
 	vms, err := k.ListVms(ctx)
 	if err != nil {
 		return nil, err
@@ -415,7 +414,7 @@ func (k *KVMHypervisor) ListVmNames(ctx context.Context) (vmNames []string, err 
 	return vmNames, nil
 }
 
-func (k *KVMHypervisor) GetVolumeByName(ctx context.Context, volumeName string) (volume *KvmVolume, err error) {
+func (k *CommandExecutrKvmHypervisor) GetVolumeByName(ctx context.Context, volumeName string) (volume kvmutilsinterfaces.Volume, err error) {
 	if len(volumeName) <= 0 {
 		return nil, tracederrors.TracedError("volumeName is empty string")
 	}
@@ -444,7 +443,7 @@ func (k *KVMHypervisor) GetVolumeByName(ctx context.Context, volumeName string) 
 	return nil, tracederrors.TracedErrorf("No volume '%s' found on hypervisor '%s'.", volumeName, hostname)
 }
 
-func (k *KVMHypervisor) GetVolumeNames(ctx context.Context) (volumeNames []string, err error) {
+func (k *CommandExecutrKvmHypervisor) ListVolumeNames(ctx context.Context) (volumeNames []string, err error) {
 	volumes, err := k.GetVolumes(ctx)
 	if err != nil {
 		return nil, err
@@ -463,7 +462,7 @@ func (k *KVMHypervisor) GetVolumeNames(ctx context.Context) (volumeNames []strin
 	return volumeNames, nil
 }
 
-func (k *KVMHypervisor) GetVolumes(ctx context.Context) (volumes []*KvmVolume, err error) {
+func (k *CommandExecutrKvmHypervisor) GetVolumes(ctx context.Context) (volumes []kvmutilsinterfaces.Volume, err error) {
 	logging.LogInfoByCtxf(ctx, "Get storage pools on kvm hypervisor started.")
 
 	hostname, err := k.GetHostName()
@@ -471,14 +470,14 @@ func (k *KVMHypervisor) GetVolumes(ctx context.Context) (volumes []*KvmVolume, e
 		return nil, err
 	}
 
-	volumes = []*KvmVolume{}
+	volumes = []kvmutilsinterfaces.Volume{}
 	storagePools, err := k.ListStoragePools(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, storagePool := range storagePools {
-		volumesToAdd, err := storagePool.GetVolumes(ctx)
+		volumesToAdd, err := storagePool.ListVolumes(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -493,7 +492,7 @@ func (k *KVMHypervisor) GetVolumes(ctx context.Context) (volumes []*KvmVolume, e
 	return volumes, nil
 }
 
-func (k *KVMHypervisor) RemoveVm(ctx context.Context, removeOptions *kvmutilsoptions.KvmRemoveVmOptions) (err error) {
+func (k *CommandExecutrKvmHypervisor) DeleteVm(ctx context.Context, removeOptions *kvmutilsoptions.KvmRemoveVmOptions) (err error) {
 	if removeOptions == nil {
 		return tracederrors.TracedError("removeOptions is nil")
 	}
@@ -544,7 +543,7 @@ func (k *KVMHypervisor) RemoveVm(ctx context.Context, removeOptions *kvmutilsopt
 	return nil
 }
 
-func (k *KVMHypervisor) RemoveVolumeByName(ctx context.Context, volumeName string) (err error) {
+func (k *CommandExecutrKvmHypervisor) RemoveVolumeByName(ctx context.Context, volumeName string) (err error) {
 	if len(volumeName) <= 0 {
 		return tracederrors.TracedError("voluemName is empty string")
 	}
@@ -565,7 +564,7 @@ func (k *KVMHypervisor) RemoveVolumeByName(ctx context.Context, volumeName strin
 			return err
 		}
 
-		err = volume.Remove(ctx)
+		err = volume.Delete(ctx)
 		if err != nil {
 			return err
 		}
@@ -578,7 +577,7 @@ func (k *KVMHypervisor) RemoveVolumeByName(ctx context.Context, volumeName strin
 	return nil
 }
 
-func (k *KVMHypervisor) RunKvmCommand(ctx context.Context, kvmCommand []string) (commandOutput *commandoutput.CommandOutput, err error) {
+func (k *CommandExecutrKvmHypervisor) RunKvmCommand(ctx context.Context, kvmCommand []string) (commandOutput *commandoutput.CommandOutput, err error) {
 	if kvmCommand == nil {
 		return nil, tracederrors.TracedError("kvmCommand is nil")
 	}
@@ -620,7 +619,7 @@ func (k *KVMHypervisor) RunKvmCommand(ctx context.Context, kvmCommand []string) 
 	return commandOutput, nil
 }
 
-func (k *KVMHypervisor) RunKvmCommandAndGetStdout(ctx context.Context, kvmCommand []string) (stdout string, err error) {
+func (k *CommandExecutrKvmHypervisor) RunKvmCommandAndGetStdout(ctx context.Context, kvmCommand []string) (stdout string, err error) {
 	commandOutput, err := k.RunKvmCommand(ctx, kvmCommand)
 	if err != nil {
 		return "", err
@@ -634,7 +633,7 @@ func (k *KVMHypervisor) RunKvmCommandAndGetStdout(ctx context.Context, kvmComman
 	return stdout, nil
 }
 
-func (k *KVMHypervisor) SetHost(host hostsutilsinterfaces.Host) (err error) {
+func (k *CommandExecutrKvmHypervisor) SetHost(host hostsutilsinterfaces.Host) (err error) {
 	if host == nil {
 		return tracederrors.TracedError("nost is nil")
 	}
@@ -644,12 +643,12 @@ func (k *KVMHypervisor) SetHost(host hostsutilsinterfaces.Host) (err error) {
 	return nil
 }
 
-func (k *KVMHypervisor) SetUseLocalhost(useLocalhost bool) (err error) {
+func (k *CommandExecutrKvmHypervisor) SetUseLocalhost(useLocalhost bool) (err error) {
 	k.useLocalhost = useLocalhost
 	return nil
 }
 
-func (k *KVMHypervisor) VmByNameExists(ctx context.Context, vmName string) (vmExists bool, err error) {
+func (k *CommandExecutrKvmHypervisor) VmByNameExists(ctx context.Context, vmName string) (vmExists bool, err error) {
 	if len(vmName) <= 0 {
 		return false, tracederrors.TracedError("vmName is empty string")
 	}
@@ -667,7 +666,7 @@ func (k *KVMHypervisor) VmByNameExists(ctx context.Context, vmName string) (vmEx
 	}
 }
 
-func (k *KVMHypervisor) VolumeByNameExists(ctx context.Context, volumeName string) (volumeExists bool, err error) {
+func (k *CommandExecutrKvmHypervisor) VolumeByNameExists(ctx context.Context, volumeName string) (volumeExists bool, err error) {
 	if len(volumeName) <= 0 {
 		return false, tracederrors.TracedError("volumeName is empty string")
 	}
@@ -691,7 +690,7 @@ func (k *KVMHypervisor) VolumeByNameExists(ctx context.Context, volumeName strin
 	return false, nil
 }
 
-func (k *KVMHypervisor) ListNetworkNames(ctx context.Context) (networkNames []string, err error) {
+func (k *CommandExecutrKvmHypervisor) ListNetworkNames(ctx context.Context) (networkNames []string, err error) {
 	networks, err := k.ListNetworks(ctx)
 	if err != nil {
 		return nil, err
@@ -710,7 +709,7 @@ func (k *KVMHypervisor) ListNetworkNames(ctx context.Context) (networkNames []st
 	return networkNames, nil
 }
 
-func (k *KVMHypervisor) ListNetworks(ctx context.Context) (networks []*KvmNetwork, err error) {
+func (k *CommandExecutrKvmHypervisor) ListNetworks(ctx context.Context) (networks []kvmutilsinterfaces.Network, err error) {
 	logging.LogInfoByCtxf(ctx, "List networks on kvm hypervisor started.")
 
 	hostname, err := k.GetHostName()
@@ -736,7 +735,7 @@ func (k *KVMHypervisor) ListNetworks(ctx context.Context) (networks []*KvmNetwor
 		return nil, tracederrors.TracedErrorf("Unexpected second line of list network output: '%s'", secondLine)
 	}
 
-	networks = []*KvmNetwork{}
+	networks = []kvmutilsinterfaces.Network{}
 	for _, line := range stringsutils.SplitLines(unparsedOutput, true) {
 		line = strings.TrimSpace(line)
 		if len(line) <= 0 {
@@ -748,7 +747,7 @@ func (k *KVMHypervisor) ListNetworks(ctx context.Context) (networks []*KvmNetwor
 			return nil, tracederrors.TracedErrorf("Unable to split list network line '%v' : '%v'", line, splitted)
 		}
 
-		networkToAdd := NewKvmNetwork()
+		networkToAdd := kvmutilsgeneric.NewNetwork()
 
 		err = networkToAdd.SetHypervisor(k)
 		if err != nil {
@@ -785,7 +784,7 @@ func (k *KVMHypervisor) ListNetworks(ctx context.Context) (networks []*KvmNetwor
 	return networks, nil
 }
 
-func (k *KVMHypervisor) NetworkByNameExists(ctx context.Context, networkName string) (networkExists bool, err error) {
+func (k *CommandExecutrKvmHypervisor) NetworkByNameExists(ctx context.Context, networkName string) (networkExists bool, err error) {
 	if networkName == "" {
 		return false, tracederrors.TracedErrorEmptyString("networkName")
 	}
@@ -798,7 +797,7 @@ func (k *KVMHypervisor) NetworkByNameExists(ctx context.Context, networkName str
 	return slices.Contains(networkNames, networkName), nil
 }
 
-func (k *KVMHypervisor) StartNetworkByName(ctx context.Context, networkName string) (err error) {
+func (k *CommandExecutrKvmHypervisor) StartNetworkByName(ctx context.Context, networkName string) (err error) {
 	if networkName == "" {
 		return tracederrors.TracedErrorEmptyString("networkName")
 	}
@@ -845,7 +844,7 @@ func (k *KVMHypervisor) StartNetworkByName(ctx context.Context, networkName stri
 	return tracederrors.TracedErrorf("No network named '%s' found on kvm host '%s'.", networkName, hostname)
 }
 
-func (k *KVMHypervisor) ResetVm(ctx context.Context, name string) (err error) {
+func (k *CommandExecutrKvmHypervisor) ResetVm(ctx context.Context, name string) (err error) {
 	if name == "" {
 		return tracederrors.TracedErrorEmptyString("name")
 	}
@@ -860,7 +859,7 @@ func (k *KVMHypervisor) ResetVm(ctx context.Context, name string) (err error) {
 		return err
 	}
 
-	isRunning, err := vm.IsRunning()
+	isRunning, err := vm.IsRunning(ctx)
 	if err != nil {
 		return err
 	}
@@ -880,13 +879,13 @@ func (k *KVMHypervisor) ResetVm(ctx context.Context, name string) (err error) {
 	return nil
 }
 
-func (k *KVMHypervisor) GetNetworkByName(networkName string) (network *KvmNetwork, err error) {
+func (k *CommandExecutrKvmHypervisor) GetNetworkByName(networkName string) (kvmutilsinterfaces.Network, error) {
 	if networkName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("networkName")
 	}
 
-	network = NewKvmNetwork()
-	err = network.SetName(networkName)
+	network := kvmutilsgeneric.NewNetwork()
+	err := network.SetName(networkName)
 	if err != nil {
 		return nil, err
 	}
@@ -899,7 +898,7 @@ func (k *KVMHypervisor) GetNetworkByName(networkName string) (network *KvmNetwor
 	return network, nil
 }
 
-func (k *KVMHypervisor) GetParsedNetworkXml(ctx context.Context, networkName string) (*kvmutilsgeneric.KvmNetworkXml, error) {
+func (k *CommandExecutrKvmHypervisor) GetParsedNetworkXml(ctx context.Context, networkName string) (kvmutilsinterfaces.KvmNetworkXml, error) {
 	if networkName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("networkName")
 	}
@@ -918,7 +917,7 @@ func (k *KVMHypervisor) GetParsedNetworkXml(ctx context.Context, networkName str
 	return parsed, nil
 }
 
-func (k *KVMHypervisor) DeleteIpDhcpRangeInNetwork(ctx context.Context, networkName string, startIp string, endIp string) error {
+func (k *CommandExecutrKvmHypervisor) DeleteIpDhcpRangeInNetwork(ctx context.Context, networkName string, startIp string, endIp string) error {
 	if networkName == "" {
 		return tracederrors.TracedErrorEmptyString("networkName")
 	}
@@ -943,7 +942,7 @@ func (k *KVMHypervisor) DeleteIpDhcpRangeInNetwork(ctx context.Context, networkN
 	return nil
 }
 
-func (k *KVMHypervisor) AddIpDhcpRangeInNetwork(ctx context.Context, networkName string, startIp string, endIp string) error {
+func (k *CommandExecutrKvmHypervisor) AddIpDhcpRangeInNetwork(ctx context.Context, networkName string, startIp string, endIp string) error {
 	if networkName == "" {
 		return tracederrors.TracedErrorEmptyString("networkName")
 	}
@@ -966,4 +965,188 @@ func (k *KVMHypervisor) AddIpDhcpRangeInNetwork(ctx context.Context, networkName
 	}
 
 	return nil
+}
+
+func (k *CommandExecutrKvmHypervisor) GetHostDescription() (string, error) {
+	host, err := k.GetHost()
+	if err != nil {
+		return "", err
+	}
+
+	return host.GetHostDescription()
+}
+
+func (k *CommandExecutrKvmHypervisor) DeleteVolumeByName(ctx context.Context, storagePoolName string, volumeName string) error {
+	if storagePoolName == "" {
+		return tracederrors.TracedErrorEmptyString(storagePoolName)
+	}
+
+	if volumeName == "" {
+		return tracederrors.TracedErrorEmptyString(volumeName)
+	}
+
+	hostDescription, err := k.GetHostDescription()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Remove KVM volume '%s' of storage pool '%s' on hypervisor '%s' started.", volumeName, storagePoolName, hostDescription)
+
+	_, err = k.RunKvmCommand(ctx, []string{"vol-delete", "--pool", storagePoolName, volumeName})
+	if err != nil {
+		return err
+	}
+
+	logging.LogChangedByCtxf(ctx, "Remove KVM volume '%s' of storage pool '%s' on hypervisor '%s' deleted.", volumeName, storagePoolName, hostDescription)
+
+	logging.LogInfoByCtxf(ctx, "Remove KVM volume '%s' of storage pool '%s' on hypervisor '%s' finished.", volumeName, storagePoolName, hostDescription)
+
+	return nil
+}
+
+func (k *CommandExecutrKvmHypervisor) ListVolumes(ctx context.Context, storagePoolName string) ([]kvmutilsinterfaces.Volume, error) {
+	if storagePoolName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("storagePoolName")
+	}
+
+	hostname, err := k.GetHostName()
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Get volumes in storage pool '%s' on kvm hypervisor '%s' started.", storagePoolName, hostname)
+
+	listPoolOutput, err := k.RunKvmCommandAndGetStdout(ctx, []string{"vol-list", "--pool", storagePoolName})
+	if err != nil {
+		return nil, err
+	}
+
+	firstLine, unparsedOutput := stringsutils.SplitFirstLineAndContent(listPoolOutput)
+	firstLine = strings.TrimSpace(firstLine)
+	if !strings.HasPrefix(firstLine, "Name") {
+		return nil, tracederrors.TracedErrorf("Unexpected first line of list volumes output: '%s'", firstLine)
+	}
+
+	secondLine, unparsedOutput := stringsutils.SplitFirstLineAndContent(unparsedOutput)
+	secondLine = strings.TrimSpace(secondLine)
+	if strings.Count(secondLine, "-") < 5 {
+		return nil, tracederrors.TracedErrorf("Unexpected second line of list volumes output: '%s'", secondLine)
+	}
+
+	storagePool, err := k.GetStoragePoolByName(ctx, storagePoolName)
+	if err != nil {
+		return nil, err
+	}
+
+	volumes := []kvmutilsinterfaces.Volume{}
+	for _, line := range stringsutils.SplitLines(unparsedOutput, true) {
+		line = strings.TrimSpace(line)
+		if len(line) <= 0 {
+			continue
+		}
+
+		splitted := stringsutils.SplitAtSpacesAndRemoveEmptyStrings(line)
+		if len(splitted) != 2 {
+			return nil, tracederrors.TracedErrorf("Unable to splitt list volume line '%v' : '%v'", line, splitted)
+		}
+
+		nameToAdd := splitted[0]
+		volumeToAdd := kvmutilsgeneric.NewKvmVolume()
+		err = volumeToAdd.SetName(nameToAdd)
+		if err != nil {
+			return nil, err
+		}
+
+		err = volumeToAdd.SetStoragePool(storagePool)
+		if err != nil {
+			return nil, err
+		}
+
+		volumes = append(volumes, volumeToAdd)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Collected '%d' storage pools on kvm host '%s'", len(volumes), hostname)
+
+	logging.LogInfoByCtxf(ctx, "Get volumes in storage pool '%s' on kvm hypervisor '%s' finished.", storagePoolName, hostname)
+
+	return volumes, nil
+}
+
+func (k *CommandExecutrKvmHypervisor) GetDomainXmlAsString(ctx context.Context, vmName string) (domainXml string, err error) {
+	if vmName == "" {
+		return "", tracederrors.TracedErrorEmptyString("vmName")
+	}
+
+	domainXml, err = k.RunKvmCommandAndGetStdout(ctx, []string{"dumpxml", vmName})
+	if err != nil {
+		return "", err
+	}
+
+	return domainXml, nil
+}
+
+func (k *CommandExecutrKvmHypervisor) GetIpAddress(ctx context.Context, vmName string) (string, error) {
+	if vmName == "" {
+		return "", tracederrors.TracedErrorEmptyString("vmName")
+	}
+
+	// Try multiple sources in order so both NAT ('default') and bridged ('br0') VMs work:
+	//   - agent: queries the qemu-guest-agent inside the VM (works for any network if the agent runs).
+	//   - lease: reads libvirt's dnsmasq DHCP leases (works for the NAT 'default' network).
+	//   - arp:   reads the host's ARP table (works for bridged setups if there is an ARP entry).
+	for _, source := range []string{"agent", "lease", "arp"} {
+		// Use silent context so the individual (expected to sometimes fail) lookups do not spam the log.
+		ipAddress, err := k.getIpAddressBySource(contextutils.WithSilent(ctx), vmName, source)
+		if err == nil && ipAddress != "" {
+			return ipAddress, nil
+		}
+	}
+
+	return "", tracederrors.TracedErrorf("No IPv4 address found for VM '%s' (tried sources agent, lease, arp).", vmName)
+}
+
+func (k *CommandExecutrKvmHypervisor) getIpAddressBySource(ctx context.Context, vmName string, source string) (ipAddress string, err error) {
+	if vmName == "" {
+		return "", tracederrors.TracedErrorEmptyString("vmName")
+	}
+
+	if source == "" {
+		return "", tracederrors.TracedErrorEmptyString("source")
+	}
+
+	output, err := k.RunKvmCommandAndGetStdout(ctx, []string{"domifaddr", vmName, "--source", source})
+	if err != nil {
+		return "", err
+	}
+
+	for _, line := range stringsutils.SplitLines(output, true) {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		// Skip header and separator lines.
+		if strings.HasPrefix(line, "Name") {
+			continue
+		}
+		if strings.Count(line, "-") > 5 {
+			continue
+		}
+
+		splitted := stringsutils.SplitAtSpacesAndRemoveEmptyStrings(line)
+		if len(splitted) != 4 {
+			continue
+		}
+
+		if splitted[2] != "ipv4" {
+			continue
+		}
+
+		// splitted[3] is like "192.168.122.94/24" -> strip the CIDR suffix.
+		ipAddress = strings.SplitN(splitted[3], "/", 2)[0]
+
+		return ipAddress, nil
+	}
+
+	return "", tracederrors.TracedErrorf("No IPv4 address found for VM '%s' via source '%s'.", vmName, source)
 }

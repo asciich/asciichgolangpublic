@@ -1,19 +1,19 @@
-package kvmutils
+package kvmutilsgeneric
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-type KvmVmInfo struct {
+type VmInfo struct {
 	Name       string `json:"name"`
 	MacAddress string `json:"mac_address"`
 }
 
-func NewKvmVmInfo() (k *KvmVmInfo) {
-	return new(KvmVmInfo)
+func NewKvmVmInfo() (k *VmInfo) {
+	return new(VmInfo)
 }
 
-func (k *KvmVmInfo) GetMacAddress() (macAddress string, err error) {
+func (k *VmInfo) GetMacAddress() (macAddress string, err error) {
 	if k.MacAddress == "" {
 		return "", tracederrors.TracedErrorf("MacAddress not set")
 	}
@@ -21,7 +21,7 @@ func (k *KvmVmInfo) GetMacAddress() (macAddress string, err error) {
 	return k.MacAddress, nil
 }
 
-func (k *KvmVmInfo) GetName() (name string, err error) {
+func (k *VmInfo) GetName() (name string, err error) {
 	if k.Name == "" {
 		return "", tracederrors.TracedErrorf("Name not set")
 	}
@@ -29,7 +29,7 @@ func (k *KvmVmInfo) GetName() (name string, err error) {
 	return k.Name, nil
 }
 
-func (k *KvmVmInfo) GetNameAndMacAddress() (name string, macAddress string, err error) {
+func (k *VmInfo) GetNameAndMacAddress() (name string, macAddress string, err error) {
 	name, err = k.GetName()
 	if err != nil {
 		return "", "", err
@@ -43,7 +43,7 @@ func (k *KvmVmInfo) GetNameAndMacAddress() (name string, macAddress string, err 
 	return name, macAddress, nil
 }
 
-func (k *KvmVmInfo) SetMacAddress(macAddress string) (err error) {
+func (k *VmInfo) SetMacAddress(macAddress string) (err error) {
 	if macAddress == "" {
 		return tracederrors.TracedErrorf("macAddress is empty string")
 	}
@@ -53,7 +53,7 @@ func (k *KvmVmInfo) SetMacAddress(macAddress string) (err error) {
 	return nil
 }
 
-func (k *KvmVmInfo) SetName(name string) (err error) {
+func (k *VmInfo) SetName(name string) (err error) {
 	if name == "" {
 		return tracederrors.TracedErrorf("name is empty string")
 	}

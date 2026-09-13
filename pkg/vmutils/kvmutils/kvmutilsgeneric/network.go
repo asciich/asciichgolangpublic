@@ -1,15 +1,14 @@
-package kvmutils
+package kvmutilsgeneric
 
 import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
-	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsinterfaces"
 )
 
-type KvmNetwork struct {
+type Network struct {
 	hypervisor kvmutilsinterfaces.Hypervisor
 
 	name       string
@@ -18,11 +17,11 @@ type KvmNetwork struct {
 	persistent string
 }
 
-func NewKvmNetwork() (ret *KvmNetwork) {
-	return new(KvmNetwork)
+func NewNetwork() (ret *Network) {
+	return new(Network)
 }
 
-func (n *KvmNetwork) SetHypervisor(hypervisor kvmutilsinterfaces.Hypervisor) (err error) {
+func (n *Network) SetHypervisor(hypervisor kvmutilsinterfaces.Hypervisor) (err error) {
 	if hypervisor == nil {
 		return tracederrors.TracedError("hypervisor is nil")
 	}
@@ -32,7 +31,7 @@ func (n *KvmNetwork) SetHypervisor(hypervisor kvmutilsinterfaces.Hypervisor) (er
 	return nil
 }
 
-func (n *KvmNetwork) GetHypervisor() (hypervisor kvmutilsinterfaces.Hypervisor, err error) {
+func (n *Network) GetHypervisor() (hypervisor kvmutilsinterfaces.Hypervisor, err error) {
 	if n.hypervisor == nil {
 		return nil, tracederrors.TracedError("hypervisor not set")
 	}
@@ -40,7 +39,7 @@ func (n *KvmNetwork) GetHypervisor() (hypervisor kvmutilsinterfaces.Hypervisor, 
 	return n.hypervisor, nil
 }
 
-func (n *KvmNetwork) SetName(name string) (err error) {
+func (n *Network) SetName(name string) (err error) {
 	if name == "" {
 		return tracederrors.TracedErrorEmptyString("name")
 	}
@@ -50,7 +49,7 @@ func (n *KvmNetwork) SetName(name string) (err error) {
 	return nil
 }
 
-func (n *KvmNetwork) GetName() (name string, err error) {
+func (n *Network) GetName() (name string, err error) {
 	if n.name == "" {
 		return "", tracederrors.TracedError("name not set")
 	}
@@ -58,7 +57,7 @@ func (n *KvmNetwork) GetName() (name string, err error) {
 	return n.name, nil
 }
 
-func (n *KvmNetwork) SetState(state string) (err error) {
+func (n *Network) SetState(state string) (err error) {
 	if state == "" {
 		return tracederrors.TracedErrorEmptyString("state")
 	}
@@ -68,7 +67,7 @@ func (n *KvmNetwork) SetState(state string) (err error) {
 	return nil
 }
 
-func (n *KvmNetwork) GetState() (state string, err error) {
+func (n *Network) GetState() (state string, err error) {
 	if n.state == "" {
 		return "", tracederrors.TracedError("state not set")
 	}
@@ -76,7 +75,7 @@ func (n *KvmNetwork) GetState() (state string, err error) {
 	return n.state, nil
 }
 
-func (n *KvmNetwork) IsActive() (isActive bool, err error) {
+func (n *Network) IsActive() (isActive bool, err error) {
 	state, err := n.GetState()
 	if err != nil {
 		return false, err
@@ -85,7 +84,7 @@ func (n *KvmNetwork) IsActive() (isActive bool, err error) {
 	return state == "active", nil
 }
 
-func (n *KvmNetwork) SetAutostart(autostart string) (err error) {
+func (n *Network) SetAutostart(autostart string) (err error) {
 	if autostart == "" {
 		return tracederrors.TracedErrorEmptyString("autostart")
 	}
@@ -95,7 +94,7 @@ func (n *KvmNetwork) SetAutostart(autostart string) (err error) {
 	return nil
 }
 
-func (n *KvmNetwork) GetAutostart() (autostart string, err error) {
+func (n *Network) GetAutostart() (autostart string, err error) {
 	if n.autostart == "" {
 		return "", tracederrors.TracedError("autostart not set")
 	}
@@ -103,7 +102,7 @@ func (n *KvmNetwork) GetAutostart() (autostart string, err error) {
 	return n.autostart, nil
 }
 
-func (n *KvmNetwork) SetPersistent(persistent string) (err error) {
+func (n *Network) SetPersistent(persistent string) (err error) {
 	if persistent == "" {
 		return tracederrors.TracedErrorEmptyString("persistent")
 	}
@@ -113,7 +112,7 @@ func (n *KvmNetwork) SetPersistent(persistent string) (err error) {
 	return nil
 }
 
-func (n *KvmNetwork) GetPersistent() (persistent string, err error) {
+func (n *Network) GetPersistent() (persistent string, err error) {
 	if n.persistent == "" {
 		return "", tracederrors.TracedError("persistent not set")
 	}
@@ -122,7 +121,7 @@ func (n *KvmNetwork) GetPersistent() (persistent string, err error) {
 }
 
 // getParsedXml runs 'virsh net-dumpxml <name>' and parses the relevant parts.
-func (n *KvmNetwork) getParsedXml(ctx context.Context) (parsed *kvmutilsgeneric.KvmNetworkXml, err error) {
+func (n *Network) getParsedXml(ctx context.Context) (parsed kvmutilsinterfaces.KvmNetworkXml, err error) {
 	name, err := n.GetName()
 	if err != nil {
 		return nil, err
@@ -139,17 +138,17 @@ func (n *KvmNetwork) getParsedXml(ctx context.Context) (parsed *kvmutilsgeneric.
 // GetForwardMode returns the libvirt forward mode of the network
 // (e.g. "nat", "route", "bridge", "open"). An empty string means the network
 // is isolated (no <forward> element).
-func (n *KvmNetwork) GetForwardMode(ctx context.Context) (forwardMode string, err error) {
+func (n *Network) GetForwardMode(ctx context.Context) (forwardMode string, err error) {
 	parsed, err := n.getParsedXml(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	return parsed.Forward.Mode, nil
+	return parsed.GetForwardMode()
 }
 
 // IsNatted returns true if the network uses NAT forwarding.
-func (n *KvmNetwork) IsNatted(ctx context.Context) (isNatted bool, err error) {
+func (n *Network) IsNatted(ctx context.Context) (isNatted bool, err error) {
 	forwardMode, err := n.GetForwardMode(ctx)
 	if err != nil {
 		return false, err
@@ -160,44 +159,61 @@ func (n *KvmNetwork) IsNatted(ctx context.Context) (isNatted bool, err error) {
 
 // GetGatewayIp returns the host/gateway IP address of the network
 // (e.g. "192.168.122.1").
-func (n *KvmNetwork) GetGatewayIp(ctx context.Context) (gatewayIp string, err error) {
+func (n *Network) GetGatewayIp(ctx context.Context) (gatewayIp string, err error) {
 	parsed, err := n.getParsedXml(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	if parsed.Ip.Address == "" {
+	ip, err := parsed.GetIpAddress()
+	if err != nil {
+		return "", err
+	}
+
+	if ip == "" {
 		name, _ := n.GetName()
 		return "", tracederrors.TracedErrorf("Network '%s' has no IP address configured.", name)
 	}
 
-	return parsed.Ip.Address, nil
+	return ip, nil
 }
 
 // GetNetmask returns the netmask of the network (e.g. "255.255.255.0").
-func (n *KvmNetwork) GetNetmask(ctx context.Context) (netmask string, err error) {
+func (n *Network) GetNetmask(ctx context.Context) (netmask string, err error) {
 	parsed, err := n.getParsedXml(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	if parsed.Ip.Netmask == "" {
+	netmask, err = parsed.GetIpNetmask()
+	if err != nil {
+		return "", err
+	}
+
+	if netmask == "" {
 		name, _ := n.GetName()
 		return "", tracederrors.TracedErrorf("Network '%s' has no netmask configured.", name)
 	}
 
-	return parsed.Ip.Netmask, nil
+	return netmask, nil
 }
 
 // GetDhcpRange returns the DHCP range (start and end IP) of the network.
-func (n *KvmNetwork) GetDhcpRange(ctx context.Context) (rangeStart string, rangeEnd string, err error) {
+func (n *Network) GetDhcpRange(ctx context.Context) (rangeStart string, rangeEnd string, err error) {
 	parsed, err := n.getParsedXml(ctx)
 	if err != nil {
 		return "", "", err
 	}
 
-	rangeStart = parsed.Ip.Dhcp.Range.Start
-	rangeEnd = parsed.Ip.Dhcp.Range.End
+	rangeStart, err = parsed.GetIpDhcpRangeStart()
+	if err != nil {
+		return "", "", err
+	}
+
+	rangeEnd, err = parsed.GetIpDhcpRangeEnd()
+	if err != nil {
+		return "", "", err
+	}
 
 	if rangeStart == "" || rangeEnd == "" {
 		name, _ := n.GetName()
@@ -215,7 +231,7 @@ func (n *KvmNetwork) GetDhcpRange(ctx context.Context) (rangeStart string, range
 // the current range and adds the new one. The change is applied live and
 // persisted (equivalent to two 'virsh net-update <name> delete/add
 // ip-dhcp-range ... --live --config' calls).
-func (n *KvmNetwork) SetDhcpStartIp(ctx context.Context, startIp string) (err error) {
+func (n *Network) SetDhcpStartIp(ctx context.Context, startIp string) (err error) {
 	if startIp == "" {
 		return tracederrors.TracedErrorEmptyString("startIp")
 	}
