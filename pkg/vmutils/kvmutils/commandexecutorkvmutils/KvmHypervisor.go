@@ -304,7 +304,7 @@ func (k *CommandExecutrKvmHypervisor) GetVmByName(ctx context.Context, vmName st
 	return nil, tracederrors.TracedErrorf("No VM named '%s' found", vmName)
 }
 
-func (k *CommandExecutrKvmHypervisor) GetVmInfoList(ctx context.Context) (vmInfos []kvmutilsinterfaces.VmInfo, err error) {
+func (k *CommandExecutrKvmHypervisor) ListVmInfos(ctx context.Context) (vmInfos []kvmutilsinterfaces.VmInfo, err error) {
 	vms, err := k.ListVms(ctx)
 	if err != nil {
 		return nil, err

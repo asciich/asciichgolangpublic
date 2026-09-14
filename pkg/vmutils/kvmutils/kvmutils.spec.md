@@ -9,4 +9,4 @@ This document extends the [constitution.md](/constitution.md).
 - Naming:
     - Instead of `poolName` use `storagePoolName` as variable name to be more explicit.
     - Prefer `delete` over `remove`:
-        - Use `DeleteVM` instead of `RemoveVM`.
+        - Use `DeleteVM` instead of `RemoveVM`. This implies as well to use `KvmDeleteVmOptions` instead of `KvmRemoveVmOptions`.

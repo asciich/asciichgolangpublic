@@ -9,6 +9,8 @@ import (
 type Hypervisor interface {
 	AddIpDhcpRangeInNetwork(ctx context.Context, networkName string, startIp string, endIp string) error
 
+	CreateVm(ctx context.Context, createOptions *kvmutilsoptions.KvmCreateVmOptions) (createdVm VM, err error)
+
 	DeleteIpDhcpRangeInNetwork(ctx context.Context, networkName string, startIp string, endIp string) error
 	DeleteVolumeByName(ctx context.Context, storagePoolName string, volumeName string) error
 	DeleteVm(ctx context.Context, options *kvmutilsoptions.KvmRemoveVmOptions) error
@@ -28,9 +30,13 @@ type Hypervisor interface {
 	ListStoragePoolNames(ctx context.Context) ([]string, error)
 	ListVolumes(ctx context.Context, storagePoolName string) ([]Volume, error)
 	ListVolumeNames(ctx context.Context) ([]string, error)
+	ListVmInfos(ctx context.Context) (vmInfos []VmInfo, err error)
+	ListVmNames(ctx context.Context) (vmNames []string, err error)
 	ListVms(ctx context.Context) ([]VM, error)
 
 	ResetVm(ctx context.Context, vmName string) error
 
 	StartNetworkByName(ctx context.Context, networkName string) error
+
+	VmByNameExists(ctx context.Context, vmName string) (bool, error)
 }
