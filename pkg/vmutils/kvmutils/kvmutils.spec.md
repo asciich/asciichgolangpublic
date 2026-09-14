@@ -1,8 +1,12 @@
 # kvmutils specifications
 
+This are the specifications for the [`kvmutils` package](README.md).
+
+This document extends the [constitution.md](/constitution.md).
+
 ## Implementation
 
 - Naming:
     - Instead of `poolName` use `storagePoolName` as variable name to be more explicit.
-    - Prefere `delete` over `remove`:
+    - Prefer `delete` over `remove`:
         - Use `DeleteVM` instead of `RemoveVM`.

@@ -12,7 +12,7 @@
         ```golang
         return ret, nil
         ```
-    - Insead of:
+    - Instead of:
         ```golang
         return toReturn, nil
         ```
@@ -20,7 +20,7 @@
     - Use `logging.LogChanged...` to log which change was performed.
     - Use `logging.LogInfo...` if desired state is already in place.
 - Use `defer` instead of cleanup calls at the end of a function.
-  This rule counts as well for test cases.
+  This rule also applies to test cases.
   Since all functions are implemented in an idempotent way it is safe to use `defer`:
     - Use:
         ```golang
