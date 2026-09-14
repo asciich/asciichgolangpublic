@@ -6,6 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/commandexecutorkvmutils"
 	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/nativekvmutils"
 )
 
 func GetKvmHypervisorByHostName(hostname string) (kvmutilsinterfaces.Hypervisor, error) {
@@ -40,7 +41,7 @@ func GetKvmHypervisorByHost(host hostsutilsinterfaces.Host) (kvmutilsinterfaces.
 }
 
 func GetKvmHypervisorOnLocalhost() (kvmutilsinterfaces.Hypervisor, error) {
-	kvmHypervisor := commandexecutorkvmutils.NewKVMHypervisor()
+	kvmHypervisor := nativekvmutils.NewKvmHypervisor()
 	err := kvmHypervisor.SetUseLocalhost(true)
 	if err != nil {
 		return nil, err

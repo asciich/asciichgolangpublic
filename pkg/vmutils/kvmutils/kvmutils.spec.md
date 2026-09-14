@@ -8,5 +8,6 @@ This document extends the [constitution.md](/constitution.md).
 
 - Naming:
     - Instead of `poolName` use `storagePoolName` as variable name to be more explicit.
+    - Use `NewKvmHypervisor` instead of `NewKVMHypervisor` as it's more readable.
     - Prefer `delete` over `remove`:
         - Use `DeleteVM` instead of `RemoveVM`. This implies as well to use `KvmDeleteVmOptions` instead of `KvmRemoveVmOptions`.
