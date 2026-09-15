@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 
@@ -73,7 +74,8 @@ func Test_WaitPortAvailableForListening(t *testing.T) {
 		require.Error(t, err)
 		require.False(t, isAvailable)
 
-		var closed = false
+		var closed bool
+		var closedMux sync.Mutex
 		cWaitOpen := make(chan int, 10)
 
 		go func() {
@@ -87,7 +89,9 @@ func Test_WaitPortAvailableForListening(t *testing.T) {
 
 			err = ln.Close()
 			require.NoError(t, err)
+			closedMux.Lock()
 			closed = true
+			closedMux.Unlock()
 
 			logging.LogInfoByCtxf(ctx, "Port '%d' closed for testing.", testport)
 		}()
@@ -96,7 +100,10 @@ func Test_WaitPortAvailableForListening(t *testing.T) {
 
 		err = netutils.WaitPortAvailableForListening(ctx, testport)
 		require.NoError(t, err)
-		require.True(t, closed)
+		closedMux.Lock()
+		isClosed := closed
+		closedMux.Unlock()
+		require.True(t, isClosed)
 	})
 
 	t.Run("timeout", func(t *testing.T) {
@@ -107,7 +114,8 @@ func Test_WaitPortAvailableForListening(t *testing.T) {
 		require.Error(t, err)
 		require.False(t, isAvailable)
 
-		var closed = false
+		var closed bool
+		var closedMux sync.Mutex
 		cWaitOpen := make(chan int, 10)
 
 		go func() {
@@ -121,7 +129,9 @@ func Test_WaitPortAvailableForListening(t *testing.T) {
 
 			err = ln.Close()
 			require.NoError(t, err)
+			closedMux.Lock()
 			closed = true
+			closedMux.Unlock()
 
 			logging.LogInfoByCtxf(ctx, "Port '%d' closed for testing.", testport)
 		}()
@@ -132,6 +142,9 @@ func Test_WaitPortAvailableForListening(t *testing.T) {
 		defer cancel()
 		err = netutils.WaitPortAvailableForListening(ctx, testport)
 		require.Error(t, err)
-		require.False(t, closed)
+		closedMux.Lock()
+		isClosed := closed
+		closedMux.Unlock()
+		require.False(t, isClosed)
 	})
 }
