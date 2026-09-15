@@ -23,9 +23,7 @@ func getCtx() context.Context {
 
 // Run a simple command and check the output.
 //
-// Hint: For convenience there is a RunCommandAndGetStdoutAsString() function available
-//
-//	in case only stdout is needed after a successful exec.
+// Hint: For convenience there is a RunCommandAndGetStdoutAsString() function available in case only stdout is needed after a successful exec.
 func TestExecRunCommand(t *testing.T) {
 	tests := []struct {
 		command        []string

@@ -200,6 +200,11 @@ func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions
 		}
 	}
 
+	// Check for scanner errors after the loop completes
+	if err := scanner.Err(); err != nil {
+		return nil, tracederrors.TracedErrorf("Error reading command output: %w", err)
+	}
+
 	err = cmd.Wait()
 	if err != nil {
 		// If the context was cancelled or its deadline exceeded, the process was
@@ -382,8 +387,11 @@ func RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *paramete
 	// Wait for the command in a goroutine and capture the exit error.
 	waitDone := make(chan struct{})
 	var cmdErr error
+	var cmdErrMux sync.Mutex
 	go func() {
+		cmdErrMux.Lock()
 		cmdErr = cmd.Wait()
+		cmdErrMux.Unlock()
 		close(waitDone)
 	}()
 
@@ -404,9 +412,12 @@ func RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *paramete
 				}
 				logging.LogInfoByCtxf(ctx, "Killed WriteCloser process '%s'.", fullCommandJoined)
 			case <-waitDone:
-				if cmdErr != nil {
-					logging.LogErrorByCtxf(ctx, "WriteCloser command '%s' finished with error: %v\n", fullCommandJoined, cmdErr)
-					return tracederrors.TracedErrorf("Command '%s' failed: %w", fullCommandJoined, cmdErr)
+				cmdErrMux.Lock()
+				currentCmdErr := cmdErr
+				cmdErrMux.Unlock()
+				if currentCmdErr != nil {
+					logging.LogErrorByCtxf(ctx, "WriteCloser command '%s' finished with error: %v\n", fullCommandJoined, currentCmdErr)
+					return tracederrors.TracedErrorf("Command '%s' failed: %w", fullCommandJoined, currentCmdErr)
 				}
 				logging.LogInfoByCtxf(ctx, "WriteCloser command '%s' finished successfully", fullCommandJoined)
 			}
@@ -417,9 +428,12 @@ func RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *paramete
 			// Check if the command has already exited with an error.
 			select {
 			case <-waitDone:
-				if cmdErr != nil {
+				cmdErrMux.Lock()
+				currentCmdErr := cmdErr
+				cmdErrMux.Unlock()
+				if currentCmdErr != nil {
 					return 0, tracederrors.TracedErrorf(
-						"Command '%s' failed: %w", fullCommandJoined, cmdErr,
+						"Command '%s' failed: %w", fullCommandJoined, currentCmdErr,
 					)
 				}
 			default:
@@ -431,9 +445,12 @@ func RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *paramete
 				// Write failed, check if command exited.
 				select {
 				case <-waitDone:
-					if cmdErr != nil {
+					cmdErrMux.Lock()
+					currentCmdErr := cmdErr
+					cmdErrMux.Unlock()
+					if currentCmdErr != nil {
 						return n, tracederrors.TracedErrorf(
-							"Command '%s' failed: %w", fullCommandJoined, cmdErr,
+							"Command '%s' failed: %w", fullCommandJoined, currentCmdErr,
 						)
 					}
 				default:

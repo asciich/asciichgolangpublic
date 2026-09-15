@@ -41,6 +41,7 @@ func (t *TestSshServer) StartSshServerInBackground(ctx context.Context) error {
 	}
 
 	var finished bool
+	var finishedMux sync.Mutex
 	go func() {
 		err := t.StartSshServer(ctx)
 		if err == nil {
@@ -48,7 +49,9 @@ func (t *TestSshServer) StartSshServerInBackground(ctx context.Context) error {
 		} else {
 			logging.LogErrorf("TestSshServer exited with error: %v", err)
 		}
+		finishedMux.Lock()
 		finished = true
+		finishedMux.Unlock()
 	}()
 
 	var isOpen bool
@@ -62,7 +65,10 @@ func (t *TestSshServer) StartSshServerInBackground(ctx context.Context) error {
 			break
 		}
 
-		if finished {
+		finishedMux.Lock()
+		isFinished := finished
+		finishedMux.Unlock()
+		if isFinished {
 			break
 		}
 
