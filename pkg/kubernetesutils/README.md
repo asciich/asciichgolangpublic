@@ -34,7 +34,7 @@ The implementation using exec to call `kubectl` or other commands is useful when
 * [Create and delete ReplicaSet](Example_CreateAndDeleteReplicaSet_test.go)
 * [Create and delete Role](Example_CreateAndDeleteRole_test.go)
 * [Create and delete ClusterRole](Example_CreateAndDeleteClusterRole_test.go)
-* [Run single command in temporary pod](Example_RunSingleCommandPod_test.go)
+* [Run single command in temporary pod](Example_RunSingleCommandPodWithSecret_test.go)
 * [Run single command in temporary pod with secret](Example_RunSingleCommandPodWithSecret_test.go)
 * [Run single command in temporary pod with secret as file](Example_RunSingleCommandPodWithSecretAsFile_test.go)
 * [Run command in temporary pod](Example_RunCommandInTemporaryPod_test.go)

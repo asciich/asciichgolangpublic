@@ -87,8 +87,8 @@
 
 ## IP Address Handling
 
-- Whenever an IP address has to be **validated** or is taken as an **input parameter**, the functions provided by the [iputils](./pkg/iputils/README.md) package **must** be used. Do **not** reimplement IP validation logic (e.g. calling `net.ParseIP` directly) anywhere else in the repository.
-- Whenever an IP address is returned by a function, the functions provided by the [iputils](./pkg/iputils/README.md) package **must** be used to validate them before they are returned.
+- Whenever an IP address has to be **validated** or is taken as an **input parameter**, the functions provided by the [iputils](./pkg/netutils/iputils/README.md) package **must** be used. Do **not** reimplement IP validation logic (e.g. calling `net.ParseIP` directly) anywhere else in the repository.
+- Whenever an IP address is returned by a function, the functions provided by the [iputils](./pkg/netutils/iputils/README.md) package **must** be used to validate them before they are returned.
 
 ### Available functions
 
