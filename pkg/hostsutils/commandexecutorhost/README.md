@@ -16,4 +16,4 @@ All functions in this package take an additional `commandExecutor` parameter com
 
 ## Specifications
 
-For specifications see [hostutils.spec.md](../hostutils.spec.md) and [constitution.md](/constitution.md).
+For specifications see [hostsutils.spec.md](../hostsutils.spec.md) and [constitution.md](/constitution.md).
