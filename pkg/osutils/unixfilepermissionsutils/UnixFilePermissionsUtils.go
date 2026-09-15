@@ -109,15 +109,15 @@ func MustMergeClassValues(user int, group int, other int) (permission int) {
 }
 
 func MergeClassValues(user int, group int, other int) (permission int, err error) {
-	if user < 0 && user > 7 {
+	if user < 0 || user > 7 {
 		return 0, tracederrors.TracedErrorf("Invalid user access value: '%d'", user)
 	}
 
-	if group < 0 && group > 7 {
+	if group < 0 || group > 7 {
 		return 0, tracederrors.TracedErrorf("Invalid group access value: '%d'", group)
 	}
 
-	if other < 0 && other > 7 {
+	if other < 0 || other > 7 {
 		return 0, tracederrors.TracedErrorf("Invalid user access value: '%d'", other)
 	}
 
@@ -141,17 +141,17 @@ func SplitPermissionValueInClasses(permission int) (user int, group int, other i
 	}
 
 	user = permission >> 6 & 0o7
-	if user < 0 && user > 7 {
+	if user < 0 || user > 7 {
 		return 0, 0, 0, tracederrors.TracedErrorf("Invalid permissions value: '%d', user access '%d' is invalid.", permission, user)
 	}
 
 	group = permission >> 3 & 0o7
-	if group < 0 && group > 7 {
+	if group < 0 || group > 7 {
 		return 0, 0, 0, tracederrors.TracedErrorf("Invalid permissions value: '%d', group access '%d' is invalid.", permission, group)
 	}
 
 	other = permission & 0o7
-	if other < 0 && other > 7 {
+	if other < 0 || other > 7 {
 		return 0, 0, 0, tracederrors.TracedErrorf("Invalid permissions value: '%d', other access '%d' is invalid.", permission, other)
 	}
 
