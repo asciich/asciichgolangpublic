@@ -95,7 +95,7 @@ func (k *CommandExecutrKvmHypervisor) CreateVm(ctx context.Context, createOption
 	}
 	defer vmXml.Delete(ctx, &filesoptions.DeleteOptions{})
 
-	err = kvmutilsgeneric.WriteXmlForVmOnLatopToFile(ctx, createOptions, vmXml)
+	err = kvmutilsgeneric.WriteXmlForVm(ctx, createOptions, vmXml)
 	if err != nil {
 		return nil, err
 	}
