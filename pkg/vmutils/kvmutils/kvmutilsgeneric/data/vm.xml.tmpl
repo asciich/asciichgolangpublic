@@ -61,11 +61,15 @@
     <controller type='sata' index='0'/>
     <controller type='virtio-serial' index='0'/>
 
-    <interface type='network'>
+    <interface type='{{ if .BRIDGED_NETWORK_INTERFACE }}bridge{{ else }}network{{ end }}'>
       {{- if .MAC_ADDRESS }}
       <mac address='{{ .MAC_ADDRESS }}'/>
       {{- end }}
+      {{- if .BRIDGED_NETWORK_INTERFACE }}
+      <source bridge='{{ .BRIDGED_NETWORK_INTERFACE }}'/>
+      {{- else }}
       <source network='default'/>
+      {{- end }}
       <model type='virtio'/>
     </interface>
 

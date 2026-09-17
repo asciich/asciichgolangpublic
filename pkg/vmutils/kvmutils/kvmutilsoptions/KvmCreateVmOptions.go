@@ -7,9 +7,10 @@ import (
 )
 
 type KvmCreateVmOptions struct {
-	VmName     string
-	DiskImage  filesinterfaces.File
-	MacAddress string
+	VmName          string
+	DiskImage       filesinterfaces.File
+	MacAddress      string
+	BridgeInterface string
 }
 
 func NewKvmCreateVmOptions() (k *KvmCreateVmOptions) {
@@ -44,6 +45,18 @@ func (k *KvmCreateVmOptions) GetMacAddress() (macAddress string, err error) {
 	}
 
 	return k.MacAddress, nil
+}
+
+func (k *KvmCreateVmOptions) GetBridgeInterface() (bridgeInterface string, err error) {
+	if k.BridgeInterface == "" {
+		return "", tracederrors.TracedErrorf("BridgeInterface not set")
+	}
+
+	return k.BridgeInterface, nil
+}
+
+func (k *KvmCreateVmOptions) GetBridgeInterfaceOrEmptyStringIfUnset() (string, error) {
+	return k.BridgeInterface, nil
 }
 
 func (k *KvmCreateVmOptions) GetVmName() (vmName string, err error) {
@@ -83,6 +96,16 @@ func (k *KvmCreateVmOptions) SetMacAddress(macAddress string) (err error) {
 	}
 
 	k.MacAddress = macAddress
+
+	return nil
+}
+
+func (k *KvmCreateVmOptions) SetBridgeInterface(bridgeInterface string) (err error) {
+	if bridgeInterface == "" {
+		return tracederrors.TracedErrorf("bridgeInterface is empty string")
+	}
+
+	k.BridgeInterface = bridgeInterface
 
 	return nil
 }

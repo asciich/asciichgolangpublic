@@ -43,12 +43,18 @@ func CreateXmlForVmAsString(createOptions *kvmutilsoptions.KvmCreateVmOptions) (
 		}
 	}
 
+	// The bridged network interface is optional. When empty the template
+	// falls back to the libvirt 'default' network. When set the VM is
+	// attached to the given host bridge (e.g. br0).
+	bridgedNetworkInterface := createOptions.BridgeInterface
+
 	libvirtXml, err = gotemplateutils.RenderTemplateFromStringAsString(
 		vmXmlTemplate,
 		map[string]any{
-			"VM_NAME":     vmName,
-			"DISK_PATH":   diskPath,
-			"MAC_ADDRESS": macAddress,
+			"VM_NAME":                   vmName,
+			"DISK_PATH":                 diskPath,
+			"MAC_ADDRESS":               macAddress,
+			"BRIDGED_NETWORK_INTERFACE": bridgedNetworkInterface,
 		},
 	)
 	if err != nil {
@@ -128,6 +134,43 @@ func GetNetworkNameFromXmlString(libvirtXml string) (networkName string, err err
 	}
 
 	return networkName, nil
+}
+
+func GetBridgeInterfaceFromXmlString(libvirtXml string) (bridgeInterface string, err error) {
+	if libvirtXml == "" {
+		return "", tracederrors.TracedError("libvirtXml is empty string")
+	}
+
+	domcfg := &libvirtxml.Domain{}
+	err = domcfg.Unmarshal(libvirtXml)
+	if err != nil {
+		return "", tracederrors.TracedError(err.Error())
+	}
+
+	networkInterfaces := domcfg.Devices.Interfaces
+	nInterfaces := len(networkInterfaces)
+	if nInterfaces != 1 {
+		return "", tracederrors.TracedErrorf(
+			"Only exactly one network interface is supported at the moment but got '%d'",
+			nInterfaces,
+		)
+	}
+
+	source := networkInterfaces[0].Source
+	if source == nil {
+		return "", tracederrors.TracedError("interface source is nil after evaluation")
+	}
+
+	if source.Bridge == nil {
+		return "", tracederrors.TracedError("interface is not attached to a bridge")
+	}
+
+	bridgeInterface = source.Bridge.Bridge
+	if bridgeInterface == "" {
+		return "", tracederrors.TracedError("bridgeInterface is empty string after evaluation")
+	}
+
+	return bridgeInterface, nil
 }
 
 func GetVncPortFromXmlString(domainXml string) (vncPort int, err error) {
