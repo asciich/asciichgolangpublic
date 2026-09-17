@@ -39,15 +39,20 @@ func CreateFile(ctx context.Context, commandExecutor commandexecutorinterfaces.C
 	} else {
 		// Ensure the parent directory exists before creating the file.
 		parentDir := filepath.Dir(path)
-		err = CreateDirectory(ctx, commandExecutor, parentDir, &filesoptions.CreateOptions{})
+		err = CreateDirectory(ctx, commandExecutor, parentDir, &filesoptions.CreateOptions{UseSudo: options.UseSudo})
 		if err != nil {
 			return err
+		}
+
+		command := []string{"touch", path}
+		if options.UseSudo {
+			command = append([]string{"sudo"}, command...)
 		}
 
 		_, err := commandExecutor.RunCommand(
 			ctx,
 			&parameteroptions.RunCommandOptions{
-				Command: []string{"touch", path},
+				Command: command,
 			},
 		)
 		if err != nil {
@@ -86,10 +91,15 @@ func CreateDirectory(ctx context.Context, commandExecutor commandexecutorinterfa
 	if exists {
 		logging.LogInfoByCtxf(ctx, "Directory '%s' on '%s' already exists. Skip directory creation.", path, hostDescription)
 	} else {
+		command := []string{"mkdir", "-p", path}
+		if options.UseSudo {
+			command = append([]string{"sudo"}, command...)
+		}
+
 		_, err := commandExecutor.RunCommand(
 			ctx,
 			&parameteroptions.RunCommandOptions{
-				Command: []string{"mkdir", "-p", path},
+				Command: command,
 			},
 		)
 		if err != nil {

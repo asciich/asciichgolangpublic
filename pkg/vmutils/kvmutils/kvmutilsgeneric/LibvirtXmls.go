@@ -166,7 +166,7 @@ func GetVncPortFromXmlString(domainXml string) (vncPort int, err error) {
 	return -1, tracederrors.TracedError("No VNC graphics device found in domain XML.")
 }
 
-func WriteXmlForVmOnLatopToFile(ctx context.Context, createOptions *kvmutilsoptions.KvmCreateVmOptions, outputFile filesinterfaces.File) (err error) {
+func WriteXmlForVm(ctx context.Context, createOptions *kvmutilsoptions.KvmCreateVmOptions, outputFile filesinterfaces.File) (err error) {
 	if createOptions == nil {
 		return tracederrors.TracedError("createOptions is nil")
 	}
@@ -190,7 +190,7 @@ func WriteXmlForVmOnLatopToFile(ctx context.Context, createOptions *kvmutilsopti
 		return err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Created xml for laptop on VM to: '%s'", outputPath)
+	logging.LogInfoByCtxf(ctx, "Created xml for VM to: '%s'", outputPath)
 
 	return nil
 }
