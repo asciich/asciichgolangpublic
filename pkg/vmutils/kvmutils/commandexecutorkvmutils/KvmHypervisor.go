@@ -12,8 +12,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
-	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -42,87 +40,6 @@ func GetKvmHypervisorOnLocalhost() (kvmHypervisor *CommandExecutrKvmHypervisor, 
 
 func NewKVMHypervisor() (kvmHypervisor *CommandExecutrKvmHypervisor) {
 	return new(CommandExecutrKvmHypervisor)
-}
-
-func (k *CommandExecutrKvmHypervisor) CreateVm(ctx context.Context, createOptions *kvmutilsoptions.KvmCreateVmOptions) (createdVm kvmutilsinterfaces.VM, err error) {
-	if createOptions == nil {
-		return nil, tracederrors.TracedError("createOptions is nil")
-	}
-
-	vmName, err := createOptions.GetVmName()
-	if err != nil {
-		return nil, err
-	}
-
-	exists, err := k.VmByNameExists(ctx, vmName)
-	if err != nil {
-		return nil, err
-	}
-
-	if exists {
-		logging.LogInfoByCtxf(ctx, "VM '%s' already exists", vmName)
-
-		createdVm, err = k.GetVmByName(ctx, vmName)
-		if err != nil {
-			return nil, err
-		}
-
-		return createdVm, nil
-	}
-
-	diskImage, err := createOptions.GetDiskImage()
-	if err != nil {
-		return nil, err
-	}
-
-	diskImagePath, err := diskImage.GetLocalPath()
-	if err != nil {
-		return nil, err
-	}
-
-	diskImageExists, err := diskImage.Exists(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if !diskImageExists {
-		return nil, tracederrors.TracedErrorf("Disk image '%s' does not exist to create VM.", diskImagePath)
-	}
-
-	vmXml, err := tempfilesoo.CreateEmptyTemporaryFile(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer vmXml.Delete(ctx, &filesoptions.DeleteOptions{})
-
-	err = kvmutilsgeneric.WriteXmlForVm(ctx, createOptions, vmXml)
-	if err != nil {
-		return nil, err
-	}
-
-	vmXmlPath, err := vmXml.GetLocalPath()
-	if err != nil {
-		return nil, err
-	}
-
-	createOutput, err := k.RunKvmCommandAndGetStdout(
-		ctx,
-		[]string{"create", vmXmlPath},
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	logging.LogInfoByCtxf(ctx, "Output of VM '%s' creation:\n%s", vmName, createOutput)
-
-	createdVm, err = k.GetVmByName(ctx, vmName)
-	if err != nil {
-		return nil, err
-	}
-
-	logging.LogChangedByCtxf(ctx, "Vm '%s' created.", vmName)
-
-	return createdVm, nil
 }
 
 func (k *CommandExecutrKvmHypervisor) GetHost() (host hostsutilsinterfaces.Host, err error) {

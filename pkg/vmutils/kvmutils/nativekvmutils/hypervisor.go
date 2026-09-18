@@ -5,7 +5,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"net/url"
-	"strings"
 	"sync"
 
 	"github.com/digitalocean/go-libvirt"
@@ -208,88 +207,6 @@ func (k *NativeKvmHypervisor) SetUseLocalhost(useLocalhost bool) (err error) {
 	k.useLocalhost = useLocalhost
 
 	return nil
-}
-
-// ---------------------------------------------------------------------------
-// VMs / domains
-// ---------------------------------------------------------------------------
-
-func (k *NativeKvmHypervisor) CreateVm(ctx context.Context, createOptions *kvmutilsoptions.KvmCreateVmOptions) (createdVm kvmutilsinterfaces.VM, err error) {
-	if createOptions == nil {
-		return nil, tracederrors.TracedError("createOptions is nil")
-	}
-
-	vmName, err := createOptions.GetVmName()
-	if err != nil {
-		return nil, err
-	}
-
-	logging.LogInfoByCtxf(ctx, "Create KVM VM '%s' started.", vmName)
-
-	exists, err := k.VmByNameExists(ctx, vmName)
-	if err != nil {
-		return nil, err
-	}
-
-	if exists {
-		logging.LogInfoByCtxf(ctx, "VM '%s' already exists.", vmName)
-
-		createdVm, err = k.GetVmByName(ctx, vmName)
-		if err != nil {
-			return nil, err
-		}
-
-		return createdVm, nil
-	}
-
-	diskImage, err := createOptions.GetDiskImage()
-	if err != nil {
-		return nil, err
-	}
-
-	diskImagePath, err := diskImage.GetLocalPath()
-	if err != nil {
-		return nil, err
-	}
-
-	diskImageExists, err := diskImage.Exists(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if diskImageExists {
-		logging.LogInfoByCtxf(ctx, "Going to use existing disk image '%s' to create VM '%s'.", diskImagePath, vmName)
-	} else {
-		return nil, tracederrors.TracedErrorf("Disk image '%s' does not exist to create VM '%s'.", diskImagePath, vmName)
-	}
-
-	domainXml, err := kvmutilsgeneric.CreateXmlForVmAsString(createOptions)
-	if err != nil {
-		return nil, err
-	}
-
-	connection, err := k.getLibvirtConnection(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// DomainCreateXML creates and starts a transient domain from the given XML,
-	// which is the native equivalent of 'virsh create <xml>'.
-	_, err = connection.DomainCreateXML(domainXml, 0)
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("failed to create VM '%s' from XML: %w", vmName, err)
-	}
-
-	createdVm, err = k.GetVmByName(ctx, vmName)
-	if err != nil {
-		return nil, err
-	}
-
-	logging.LogChangedByCtxf(ctx, "VM '%s' created.", vmName)
-
-	logging.LogInfoByCtxf(ctx, "Create KVM VM '%s' finished.", vmName)
-
-	return createdVm, nil
 }
 
 func (k *NativeKvmHypervisor) GetVmById(vmId int) (vm kvmutilsinterfaces.VM, err error) {
@@ -1301,5 +1218,3 @@ func boolIntToVirshYesNoString(value int32) string {
 
 	return "no"
 }
-
-var _ = strings.TrimSpace // keep strings imported if trimming helpers are added later

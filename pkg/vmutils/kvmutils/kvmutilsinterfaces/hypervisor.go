@@ -2,6 +2,7 @@ package kvmutilsinterfaces
 
 import (
 	"context"
+	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsoptions"
 )
@@ -24,6 +25,10 @@ type Hypervisor interface {
 	GetNetworkByName(networkName string) (Network, error)
 	GetParsedNetworkXml(ctx context.Context, networkName string) (KvmNetworkXml, error)
 	GetVmByName(ctx context.Context, name string) (VM, error)
+	GetVmCreationDate(ctx context.Context, vmName string) (time.Time, error)
+	GetVmCreationDateRFC3339(ctx context.Context, vmName string) (string, error)
+
+	IsVmPersistent(ctx context.Context, vmName string) (isPersistent bool, err error)
 
 	ListNetworks(ctx context.Context) ([]Network, error)
 	ListNetworkNames(ctx context.Context) ([]string, error)
