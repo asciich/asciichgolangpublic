@@ -3,7 +3,7 @@ package nativekubernetesoo
 import (
 	"context"
 
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -59,7 +59,7 @@ func (n *NativeObject) GetKind() (string, error) {
 		return "", tracederrors.TracedError("kind not set")
 	}
 
-	ret, err := kubernetesimplementationindependend.SanitizeKindName(n.kind)
+	ret, err := kubernetesgeneric.SanitizeKindName(n.kind)
 	if err != nil {
 		return "", err
 	}
@@ -293,7 +293,7 @@ func (n *NativeObject) GetObjectPlural() (string, error) {
 		return "", err
 	}
 
-	return kubernetesimplementationindependend.GetObjectPlural(kind)
+	return kubernetesgeneric.GetObjectPlural(kind)
 }
 
 func (n *NativeObject) GetGroupVersionObject(ctx context.Context) (*schema.GroupVersionResource, error) {

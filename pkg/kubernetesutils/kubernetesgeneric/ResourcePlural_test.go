@@ -1,10 +1,10 @@
-package kubernetesimplementationindependend_test
+package kubernetesgeneric_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesgeneric"
 )
 
 func Test_GetObjectPlural(t *testing.T) {
@@ -22,7 +22,7 @@ func Test_GetObjectPlural(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
-			plural, err := kubernetesimplementationindependend.GetObjectPlural(tt.input)
+			plural, err := kubernetesgeneric.GetObjectPlural(tt.input)
 			require.NoError(t, err)
 			require.EqualValues(t, tt.expected, plural)
 		})

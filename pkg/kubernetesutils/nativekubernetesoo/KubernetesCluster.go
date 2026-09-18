@@ -7,7 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubeconfigutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
@@ -523,7 +523,7 @@ func (n *NativeKubernetesCluster) GetUserNameByContextName(ctx context.Context, 
 	return kubeconfigutils.GetUserNameByContextName(ctx, kubeContext)
 }
 
-func (n *NativeKubernetesCluster) WhoAmI(ctx context.Context) (*kubernetesimplementationindependend.UserInfo, error) {
+func (n *NativeKubernetesCluster) WhoAmI(ctx context.Context) (*kubernetesgeneric.UserInfo, error) {
 	clusterName, err := n.GetName()
 	if err != nil {
 		return nil, err
@@ -543,7 +543,7 @@ func (n *NativeKubernetesCluster) WhoAmI(ctx context.Context) (*kubernetesimplem
 
 	logging.LogInfoByCtxf(ctx, "Whoami: Kube config uses user '%s' to log in to cluster '%s'.", username, clusterName)
 
-	return &kubernetesimplementationindependend.UserInfo{
+	return &kubernetesgeneric.UserInfo{
 		Username: username,
 	}, nil
 }
@@ -567,7 +567,7 @@ func (n *NativeKubernetesCluster) GetNamespaceByYamlString(yaml string) (kuberne
 		return nil, tracederrors.TracedErrorEmptyString("yaml")
 	}
 
-	objectYamls, err := kubernetesimplementationindependend.UnmarshalObjectYaml(yaml)
+	objectYamls, err := kubernetesgeneric.UnmarshalObjectYaml(yaml)
 	if err != nil {
 		return nil, err
 	}

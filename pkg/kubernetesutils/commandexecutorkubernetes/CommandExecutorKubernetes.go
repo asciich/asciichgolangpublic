@@ -18,7 +18,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/fileformats/jsonutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kuberneteserrors"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -763,7 +763,7 @@ func (c *CommandExecutorKubernetes) CheckAccessible(ctx context.Context) error {
 	return err
 }
 
-func (c *CommandExecutorKubernetes) WhoAmI(ctx context.Context) (*kubernetesimplementationindependend.UserInfo, error) {
+func (c *CommandExecutorKubernetes) WhoAmI(ctx context.Context) (*kubernetesgeneric.UserInfo, error) {
 	executor, err := c.GetCommandExecutor()
 	if err != nil {
 		return nil, err
@@ -793,7 +793,7 @@ func (c *CommandExecutorKubernetes) WhoAmI(ctx context.Context) (*kubernetesimpl
 
 	logging.LogInfoByCtxf(ctx, "Whoami: Kube context '%s' uses user '%s' to log in to cluster '%s'.", kubeContext, userName, clusterName)
 
-	return &kubernetesimplementationindependend.UserInfo{
+	return &kubernetesgeneric.UserInfo{
 		Username: userName,
 	}, nil
 }

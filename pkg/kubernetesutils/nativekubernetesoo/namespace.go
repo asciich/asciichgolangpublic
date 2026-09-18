@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
@@ -1153,7 +1153,7 @@ func (n *NativeNamespace) GetObjectByYamlString(yaml string) (kubernetesinterfac
 		return nil, tracederrors.TracedErrorEmptyString("yaml")
 	}
 
-	objectYamls, err := kubernetesimplementationindependend.UnmarshalObjectYaml(yaml)
+	objectYamls, err := kubernetesgeneric.UnmarshalObjectYaml(yaml)
 	if err != nil {
 		return nil, err
 	}
