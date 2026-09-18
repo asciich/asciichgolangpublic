@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesimplementationindependend"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 )
 
@@ -73,7 +73,7 @@ type KubernetesCluster interface {
 	SecretByNameExists(ctx context.Context, namespaceName string, secretName string) (exists bool, err error)
 	ValidateSSHKeyInSecret(ctx context.Context, options *kubernetesparameteroptions.ValidateSshKeyInSecretOptions) (bool, error)
 	WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.WaitForPodsOptions) error
-	WhoAmI(ctx context.Context) (*kubernetesimplementationindependend.UserInfo, error)
+	WhoAmI(ctx context.Context) (*kubernetesgeneric.UserInfo, error)
 	CronJobByNameExists(ctx context.Context, namespaceName string, cronJobName string) (exists bool, err error)
 	CheckCronJobByNameExists(ctx context.Context, namespaceName string, cronJobName string) error
 	CreateCronJob(ctx context.Context, namespaceName string, cronJobName string, schedule string, image string, command []string, labels map[string]string) (CronJob, error)

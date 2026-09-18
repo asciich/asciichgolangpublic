@@ -257,7 +257,7 @@ func InsertFileByString(ctx context.Context, fileContent string, gopassOptions *
 	insertCommand := []string{
 		"bash",
 		"-c",
-		fmt.Sprintf("gpass cat '%s'", gopassPath),
+		fmt.Sprintf("gopass cat '%s'", gopassPath),
 	}
 
 	_, err = commandexecutorbashoo.Bash().RunCommand(

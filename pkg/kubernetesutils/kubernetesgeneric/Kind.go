@@ -1,4 +1,4 @@
-package kubernetesimplementationindependend
+package kubernetesgeneric
 
 import (
 	"strings"
