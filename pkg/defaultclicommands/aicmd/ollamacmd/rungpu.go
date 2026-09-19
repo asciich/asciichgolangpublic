@@ -1,12 +1,13 @@
 package ollamacmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/aiutils/ollamautils"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"os"
 )
 
 func NewRunGpuCmd() *cobra.Command {
@@ -16,6 +17,21 @@ func NewRunGpuCmd() *cobra.Command {
 		Use:   "run-gpu",
 		Short: short,
 		Long: short + `
+
+The GPU vendor is autodetected and the matching docker configuration is used:
+  - AMD GPUs (ROCm) are preferred if detected. The dedicated 'ollama/ollama:rocm'
+    image is used and the required device nodes '/dev/kfd' and '/dev/dri' are
+    passed through to the container.
+  - NVIDIA GPUs are used as a second option via the default 'ollama/ollama'
+    image and docker's '--gpus all' flag.
+
+If no supported GPU is detected the command fails with an error. Falling back to
+CPU only mode is intentionally not done; use the dedicated CPU only command for
+that instead.
+
+The container is started in an idempotent way: if an ollama container is already
+running nothing is changed. All run modes share the same volume mount
+'ollama:/root/.ollama' so downloaded models are reused regardless of the mode.
 
 Usage:
     ` + os.Args[0] + ` ai ollama run-gpu`,
