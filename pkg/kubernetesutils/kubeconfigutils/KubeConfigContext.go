@@ -19,3 +19,38 @@ func (k KubeConfigContext) GetUserName() (userName string, err error) {
 
 	return userName, nil
 }
+
+func (k KubeConfigContext) GetClusterName() (clusterName string, err error) {
+	clusterName = k.Context.Cluster
+	if clusterName == "" {
+		return "", tracederrors.TracedError("cluster name not set")
+	}
+
+	return clusterName, nil
+}
+
+func (k *KubeConfig) GetContextNames() (contextNames []string, err error) {
+	for _, entry := range k.Contexts {
+		toAdd := entry.Name
+		if toAdd == "" {
+			return nil, tracederrors.TracedErrorf("Got empty context name toAdd")
+		}
+
+		contextNames = append(contextNames, toAdd)
+	}
+
+	return contextNames, nil
+}
+
+func (k *KubeConfig) GetUserNames() (userNames []string, err error) {
+	for _, entry := range k.Users {
+		toAdd := entry.Name
+		if toAdd == "" {
+			return nil, tracederrors.TracedErrorf("Got empty user name toAdd")
+		}
+
+		userNames = append(userNames, toAdd)
+	}
+
+	return userNames, nil
+}

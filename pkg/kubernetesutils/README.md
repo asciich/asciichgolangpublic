@@ -10,6 +10,7 @@ Work with kubernetes.
 * [kubernetestestsshserver](./kubernetestestsshserver/README.md): Test SSH server for Kubernetes testing.
 * [kindutils](./kindutils/README.md): KIND (Kubernetes IN Docker) utilities.
 * [kubectlutils](./kubectlutils/README.md): kubectl command utilities.
+* [kubeconfigutils](./kubeconfigutils/README.md): Utilities for working with Kubernetes kubeconfig files.
 
 The implementation using the official k8s client-go is available as:
 * [non object oriented implementation](nativekubernetes/README.md)

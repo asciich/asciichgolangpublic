@@ -38,20 +38,29 @@ type KubeConfig struct {
 	Users          []KubeConfigUser    `yaml:"users"`
 }
 
-func LoadFromFilePath(ctx context.Context, path string) (config *KubeConfig, err error) {
+func LoadFromFilePath(ctx context.Context, path string) (ret *KubeConfig, err error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString("path")
 	}
+
+	logging.LogInfoByCtxf(ctx, "Load kubeconfig from path '%s' started.", path)
 
 	file, err := nativefilesoo.NewFileByPath(path)
 	if err != nil {
 		return nil, err
 	}
 
-	return LoadFromFile(ctx, file)
+	ret, err = LoadFromFile(ctx, file)
+	if err != nil {
+		return nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Load kubeconfig from path '%s' finished.", path)
+
+	return ret, nil
 }
 
-func LoadFromFile(ctx context.Context, file filesinterfaces.File) (config *KubeConfig, err error) {
+func LoadFromFile(ctx context.Context, file filesinterfaces.File) (ret *KubeConfig, err error) {
 	if file == nil {
 		return nil, tracederrors.TracedErrorNil("file")
 	}
@@ -61,21 +70,24 @@ func LoadFromFile(ctx context.Context, file filesinterfaces.File) (config *KubeC
 		return nil, err
 	}
 
+	logging.LogInfoByCtxf(ctx, "Load kubeconfig from file '%s' started.", path)
+
 	content, err := file.ReadAsBytes(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	config = new(KubeConfig)
+	ret = new(KubeConfig)
 
-	err = yaml.Unmarshal(content, config)
+	err = yaml.Unmarshal(content, ret)
 	if err != nil {
 		return nil, tracederrors.TracedErrorf("Failed to load kubeConfig '%s' as yaml: %w", path, err)
 	}
 
 	logging.LogInfoByCtxf(ctx, "Loaded kubeConfig '%s'.", path)
+	logging.LogInfoByCtxf(ctx, "Load kubeconfig from file '%s' finished.", path)
 
-	return config, nil
+	return ret, nil
 }
 
 func (k *KubeConfig) GetClusterServerUrlAsString(clusterName string) (string, error) {
@@ -107,83 +119,121 @@ func (k *KubeConfig) GetUserNameByContextName(ctx context.Context, contextName s
 	return userName, nil
 }
 
-func (k *KubeConfig) GetClusterNames() (clusterNames []string, err error) {
+func (k *KubeConfig) GetClusterNames() (ret []string, err error) {
 	for _, entry := range k.Clusters {
 		toAdd := entry.Name
 		if toAdd == "" {
 			return nil, tracederrors.TracedErrorf("Got empty cluster name toAdd")
 		}
 
-		clusterNames = append(clusterNames, toAdd)
+		ret = append(ret, toAdd)
 	}
 
-	sort.Strings(clusterNames)
+	sort.Strings(ret)
 
-	if len(clusterNames) <= 0 {
+	if len(ret) <= 0 {
 		return nil, tracederrors.TracedError("No cluster names in config found.")
 	}
 
-	return clusterNames, nil
+	return ret, nil
 }
 
-func (k *KubeConfig) GetServerNames() (serverNames []string, err error) {
+func (k *KubeConfig) GetServerNames() (ret []string, err error) {
 	for _, entry := range k.Clusters {
 		toAdd := entry.Cluster.Server
 		if toAdd == "" {
 			return nil, tracederrors.TracedErrorf("Got empty server name toAdd")
 		}
 
-		serverNames = append(serverNames, toAdd)
+		ret = append(ret, toAdd)
 	}
 
-	sort.Strings(serverNames)
+	sort.Strings(ret)
 
-	if len(serverNames) <= 0 {
+	if len(ret) <= 0 {
 		return nil, tracederrors.TracedError("No server names in config found.")
 	}
 
-	return serverNames, nil
+	return ret, nil
 }
 
-func MergeConfig(configs ...*KubeConfig) (merged *KubeConfig, err error) {
+func MergeConfig(configs ...*KubeConfig) (ret *KubeConfig, err error) {
 	if len(configs) <= 0 {
 		return nil, tracederrors.TracedError("No KubeConfig elements to merge.")
 	}
 
-	merged = configs[0].GetDeepCopy()
+	ret = configs[0].GetDeepCopy()
 
 	for _, toAdd := range configs {
-		err = merged.AddConfig(toAdd)
+		err = ret.AddConfig(toAdd)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return merged, nil
+	return ret, nil
 }
 
-func (k *KubeConfig) GetDeepCopy() (result *KubeConfig) {
-	result = new(KubeConfig)
+func (k *KubeConfig) GetDeepCopy() (ret *KubeConfig) {
+	ret = new(KubeConfig)
 
-	*result = *k
+	ret.APIVersion = k.APIVersion
+	ret.Kind = k.Kind
+	ret.CurrentContext = k.CurrentContext
 
 	// Deep copy the slices to avoid sharing underlying arrays with the original
 	if k.Clusters != nil {
-		result.Clusters = make([]KubeConfigCluster, len(k.Clusters))
-		copy(result.Clusters, k.Clusters)
+		ret.Clusters = make([]KubeConfigCluster, len(k.Clusters))
+		for i, cluster := range k.Clusters {
+			ret.Clusters[i] = KubeConfigCluster{
+				Name: cluster.Name,
+				Cluster: KubeConfigClusterCluster{
+					Server:                   cluster.Cluster.Server,
+					CertificateAuthorityData: cluster.Cluster.CertificateAuthorityData,
+				},
+			}
+		}
 	}
 
 	if k.Contexts != nil {
-		result.Contexts = make([]KubeConfigContext, len(k.Contexts))
-		copy(result.Contexts, k.Contexts)
+		ret.Contexts = make([]KubeConfigContext, len(k.Contexts))
+		for i, context := range k.Contexts {
+			ret.Contexts[i] = KubeConfigContext{
+				Name: context.Name,
+				Context: struct {
+					Cluster   string `yaml:"cluster"`
+					Namespace string `yaml:"namespace"`
+					User      string `yaml:"user"`
+				}{
+					Cluster:   context.Context.Cluster,
+					Namespace: context.Context.Namespace,
+					User:      context.Context.User,
+				},
+			}
+		}
 	}
 
 	if k.Users != nil {
-		result.Users = make([]KubeConfigUser, len(k.Users))
-		copy(result.Users, k.Users)
+		ret.Users = make([]KubeConfigUser, len(k.Users))
+		for i, user := range k.Users {
+			ret.Users[i] = KubeConfigUser{
+				Name: user.Name,
+				User: struct {
+					ClientCertificateData string `yaml:"client-certificate-data"`
+					ClientKeyData         string `yaml:"client-key-data"`
+					Username              string `yaml:"username"`
+					Password              string `yaml:"password"`
+				}{
+					ClientCertificateData: user.User.ClientCertificateData,
+					ClientKeyData:         user.User.ClientKeyData,
+					Username:              user.User.Username,
+					Password:              user.User.Password,
+				},
+			}
+		}
 	}
 
-	return result
+	return ret
 }
 
 func (k *KubeConfig) GetClusterEntryByName(name string) (cluster *KubeConfigCluster, err error) {
@@ -267,13 +317,70 @@ func (k *KubeConfig) AddConfig(toAdd *KubeConfig) (err error) {
 		return tracederrors.TracedErrorNil("toAdd")
 	}
 
-	namesToAdd, err := toAdd.GetClusterNames()
+	// Get all context names to iterate over (contexts link clusters and users)
+	contextNames, err := toAdd.GetContextNames()
 	if err != nil {
-		return err
+		// If no contexts, try to add just clusters and users
+		clusterNames, clusterErr := toAdd.GetClusterNames()
+		if clusterErr == nil {
+			for _, name := range clusterNames {
+				cluster, getErr := toAdd.GetClusterEntryByName(name)
+				if getErr != nil {
+					return getErr
+				}
+				err = k.AddClusterEntry(cluster)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		userNames, userErr := toAdd.GetUserNames()
+		if userErr == nil {
+			for _, name := range userNames {
+				user, getErr := toAdd.GetUserEntryByName(name)
+				if getErr != nil {
+					return getErr
+				}
+				err = k.AddUserEntry(user)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		// Return the original error if we couldn't add anything
+		if clusterErr != nil && userErr != nil {
+			return err
+		}
+		return nil
 	}
 
-	for _, name := range namesToAdd {
-		cluster, context, user, err := toAdd.GetClusterAndContextAndUserEntryByName(name)
+	for _, contextName := range contextNames {
+		context, err := toAdd.GetContextEntryByName(contextName)
+		if err != nil {
+			return err
+		}
+
+		// Get cluster name from context
+		clusterName, err := context.GetClusterName()
+		if err != nil {
+			return err
+		}
+
+		// Get user name from context
+		userName, err := context.GetUserName()
+		if err != nil {
+			return err
+		}
+
+		// Get the actual cluster and user entries
+		cluster, err := toAdd.GetClusterEntryByName(clusterName)
+		if err != nil {
+			return err
+		}
+
+		user, err := toAdd.GetUserEntryByName(userName)
 		if err != nil {
 			return err
 		}
@@ -457,6 +564,8 @@ func (k *KubeConfig) WriteToFile(ctx context.Context, outFile filesinterfaces.Fi
 		return err
 	}
 
+	logging.LogInfoByCtxf(ctx, "Write KubeConfig to '%s' started.", path)
+
 	content, err := k.GetAsYamlString()
 	if err != nil {
 		return err
@@ -468,18 +577,19 @@ func (k *KubeConfig) WriteToFile(ctx context.Context, outFile filesinterfaces.Fi
 	}
 
 	logging.LogChangedByCtxf(ctx, "Wrote KubeConfig to '%s'", path)
+	logging.LogInfoByCtxf(ctx, "Write KubeConfig to '%s' finished.", path)
 
 	return nil
 }
 
 // Use exec to invoke a "kubectl config get-context" with the given config "path".
 // Useful to validate if the config is understood correctly by kubectl.
-func ListContextNamesUsingKubectl(ctx context.Context, path string) (contextNames []string, err error) {
+func ListContextNamesUsingKubectl(ctx context.Context, path string) (ret []string, err error) {
 	if path == "" {
 		return nil, tracederrors.TracedErrorEmptyString(path)
 	}
 
-	contextNames, err = commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsLines(
+	ret, err = commandexecutorbashoo.Bash().RunCommandAndGetStdoutAsLines(
 		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: []string{"KUBECONFIG=" + path, "bash", "-c", "kubectl config get-contexts -o name"},
@@ -489,9 +599,9 @@ func ListContextNamesUsingKubectl(ctx context.Context, path string) (contextName
 		return nil, err
 	}
 
-	sort.Strings(contextNames)
+	sort.Strings(ret)
 
-	return contextNames, nil
+	return ret, nil
 }
 
 func (k *KubeConfig) GetClientKeyDataForUser(name string) (string, error) {
@@ -551,7 +661,7 @@ func (k *KubeConfig) GetContextNameByClusterName(ctx context.Context, clusterNam
 
 func GetKubeConfigPath(ctx context.Context) (string, error) {
 	const envVarName = "KUBECONFIG"
-	envContent := os.Getenv("envVarName")
+	envContent := os.Getenv(envVarName)
 
 	if envContent == "" {
 		return GetDefaultKubeConfigPath(ctx)
@@ -635,17 +745,17 @@ func (k *KubeConfig) SetCurrentContext(ctx context.Context, contextToUse string)
 	return nil
 }
 
-func (k *KubeConfig) ListContextNames(ctx context.Context) ([]string, error) {
+func (k *KubeConfig) ListContextNames(ctx context.Context) (ret []string, err error) {
 	if k.Contexts == nil {
 		return nil, tracederrors.TracedError("Contexts is nil")
 	}
 
-	names := []string{}
+	ret = []string{}
 	for _, context := range k.Contexts {
-		names = append(names, context.Name)
+		ret = append(ret, context.Name)
 	}
 
-	return names, nil
+	return ret, nil
 }
 
 func SetCurrentContext(ctx context.Context, contextToUse string) error {
@@ -677,5 +787,149 @@ func SetCurrentContext(ctx context.Context, contextToUse string) error {
 
 	logging.LogInfoByCtxf(ctx, "Set current kubernetes config to '%s' finished.", contextToUse)
 
+	return nil
+}
+
+// ReadCurrentKubeConfigAsString reads the currently valid kube config like kubectl does by respecting the KUBECONFIG env var.
+// It also supports the full config directly inside KUBECONFIG, not only the path.
+func ReadCurrentKubeConfigAsString(ctx context.Context) (ret string, err error) {
+	logging.LogInfoByCtxf(ctx, "Read current kubeconfig as string started.")
+
+	const envVarName = "KUBECONFIG"
+	envContent := os.Getenv(envVarName)
+
+	// Check if KUBECONFIG contains the full config directly (not a path)
+	if envContent != "" {
+		// Check if it looks like a YAML config (contains 'apiVersion:' or 'clusters:')
+		if strings.Contains(envContent, "apiVersion:") || strings.Contains(envContent, "clusters:") {
+			logging.LogInfoByCtxf(ctx, "KUBECONFIG contains inline config, returning directly.")
+			return envContent, nil
+		}
+
+		// Otherwise treat it as a path
+		logging.LogInfoByCtxf(ctx, "KUBECONFIG path '%s' is set by env var '%s'.", envContent, envVarName)
+		file, err := nativefilesoo.NewFileByPath(envContent)
+		if err != nil {
+			return "", err
+		}
+
+		content, err := file.ReadAsBytes(ctx)
+		if err != nil {
+			return "", err
+		}
+
+		logging.LogInfoByCtxf(ctx, "Read current kubeconfig as string finished.")
+		return string(content), nil
+	}
+
+	// Use default path
+	defaultPath, err := GetDefaultKubeConfigPath(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	file, err := nativefilesoo.NewFileByPath(defaultPath)
+	if err != nil {
+		return "", err
+	}
+
+	content, err := file.ReadAsBytes(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Read current kubeconfig as string finished.")
+	return string(content), nil
+}
+
+// ReadCurrentKubeConfig reads the currently valid kube config like kubectl does by respecting the KUBECONFIG env var.
+// It also supports the full config directly inside KUBECONFIG, not only the path.
+func ReadCurrentKubeConfig(ctx context.Context) (ret *KubeConfig, err error) {
+	logging.LogInfoByCtxf(ctx, "Read current kubeconfig started.")
+
+	configString, err := ReadCurrentKubeConfigAsString(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	ret = new(KubeConfig)
+	err = yaml.Unmarshal([]byte(configString), ret)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Failed to unmarshal kubeconfig: %w", err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Read current kubeconfig finished.")
+	return ret, nil
+}
+
+// AddAdditionalConfigFromString validates additionalConfig and merges it to the currently valid config.
+// If KUBECONFIG contains the full config inline, an error is returned.
+// If no config is found and KUBECONFIG is not set, it writes the new config to the default location .kube/config.
+func AddAdditionalConfigFromString(ctx context.Context, additionalConfig string) (err error) {
+	logging.LogInfoByCtxf(ctx, "Add additional config started.")
+
+	// Validate additionalConfig is valid YAML
+	additionalKubeConfig := new(KubeConfig)
+	err = yaml.Unmarshal([]byte(additionalConfig), additionalKubeConfig)
+	if err != nil {
+		return tracederrors.TracedErrorf("Invalid additional config YAML: %w", err)
+	}
+
+	const envVarName = "KUBECONFIG"
+	envContent := os.Getenv(envVarName)
+
+	// Check if KUBECONFIG contains the full config directly (not a path)
+	if envContent != "" {
+		if strings.Contains(envContent, "apiVersion:") || strings.Contains(envContent, "clusters:") {
+			return tracederrors.TracedError("Cannot merge config when KUBECONFIG contains inline config")
+		}
+	}
+
+	// Get current config path
+	var configPath string
+	if envContent == "" {
+		configPath, err = GetDefaultKubeConfigPath(ctx)
+		if err != nil {
+			return err
+		}
+	} else {
+		configPath = envContent
+	}
+
+	// Check if config file exists
+	var currentKubeConfig *KubeConfig
+	file, err := nativefilesoo.NewFileByPath(configPath)
+	if err != nil {
+		return err
+	}
+
+	exists, err := file.Exists(ctx)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		currentKubeConfig, err = LoadFromFile(ctx, file)
+		if err != nil {
+			return err
+		}
+
+		// Merge configs
+		err = currentKubeConfig.AddConfig(additionalKubeConfig)
+		if err != nil {
+			return err
+		}
+	} else {
+		// No existing config, use the additional config as the new config
+		currentKubeConfig = additionalKubeConfig
+	}
+
+	// Write the merged config back
+	err = currentKubeConfig.WriteToFileByPath(ctx, configPath)
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Add additional config finished.")
 	return nil
 }

@@ -2,6 +2,8 @@ package kubeconfigutils_test
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -673,5 +675,331 @@ func Test_GetDeepCopy_ShallowCopyBug(t *testing.T) {
 		// BUG: configA's server will be changed to the update server value
 		require.EqualValues(t, originalServerBefore, originalServerAfter,
 			"BUG: MergeConfig corrupted configA's cluster data when merging overlapping cluster names!")
+	})
+}
+
+func Test_ReadCurrentKubeConfigAsString(t *testing.T) {
+	t.Run("Read default kubeconfig path", func(t *testing.T) {
+		ctx := getCtx()
+
+		// Test reading from default path (should fail gracefully if no config exists)
+		content, err := kubeconfigutils.ReadCurrentKubeConfigAsString(ctx)
+		// May succeed if default config exists, or fail if not
+		if err == nil {
+			require.NotEmpty(t, content)
+			require.Contains(t, content, "apiVersion:")
+		}
+	})
+
+	t.Run("Read with KUBECONFIG env var set to path", func(t *testing.T) {
+		ctx := getCtx()
+
+		// Save original KUBECONFIG
+		originalKubeconfig := os.Getenv("KUBECONFIG")
+		defer os.Setenv("KUBECONFIG", originalKubeconfig)
+
+		// Set KUBECONFIG to test file
+		os.Setenv("KUBECONFIG", "./testdata/cluster-a.yaml")
+
+		content, err := kubeconfigutils.ReadCurrentKubeConfigAsString(ctx)
+		require.NoError(t, err)
+		require.Contains(t, content, "kind-cluster-a")
+	})
+
+	t.Run("Read with inline KUBECONFIG", func(t *testing.T) {
+		ctx := getCtx()
+
+		// Save original KUBECONFIG
+		originalKubeconfig := os.Getenv("KUBECONFIG")
+		defer os.Setenv("KUBECONFIG", originalKubeconfig)
+
+		// Set KUBECONFIG to inline config
+		inlineConfig := `apiVersion: v1
+kind: Config
+clusters:
+- name: test-cluster
+  cluster:
+    server: https://test-server:6443
+contexts:
+- name: test-context
+  context:
+    cluster: test-cluster
+`
+		os.Setenv("KUBECONFIG", inlineConfig)
+
+		content, err := kubeconfigutils.ReadCurrentKubeConfigAsString(ctx)
+		require.NoError(t, err)
+		require.Contains(t, content, "test-cluster")
+	})
+}
+
+func Test_ReadCurrentKubeConfig(t *testing.T) {
+	t.Run("Read current kubeconfig as struct", func(t *testing.T) {
+		ctx := getCtx()
+
+		// Save original KUBECONFIG
+		originalKubeconfig := os.Getenv("KUBECONFIG")
+		defer os.Setenv("KUBECONFIG", originalKubeconfig)
+
+		// Set KUBECONFIG to test file
+		os.Setenv("KUBECONFIG", "./testdata/cluster-a.yaml")
+
+		config, err := kubeconfigutils.ReadCurrentKubeConfig(ctx)
+		require.NoError(t, err)
+		require.NotNil(t, config)
+
+		clusterNames, err := config.GetClusterNames()
+		require.NoError(t, err)
+		require.Contains(t, clusterNames, "kind-cluster-a")
+	})
+}
+
+func Test_AddAdditionalConfigFromString(t *testing.T) {
+	t.Run("Add config to non-existing default config", func(t *testing.T) {
+		ctx := getCtx()
+
+		// Save original KUBECONFIG
+		originalKubeconfig := os.Getenv("KUBECONFIG")
+		defer os.Setenv("KUBECONFIG", originalKubeconfig)
+
+		// Set KUBECONFIG to a non-existing temp file
+		tempDir := t.TempDir()
+		tempConfigPath := filepath.Join(tempDir, "config")
+		os.Setenv("KUBECONFIG", tempConfigPath)
+
+		additionalConfig := `apiVersion: v1
+kind: Config
+clusters:
+- name: new-cluster
+  cluster:
+    server: https://new-server:6443
+contexts:
+- name: new-context
+  context:
+    cluster: new-cluster
+`
+
+		err := kubeconfigutils.AddAdditionalConfigFromString(ctx, additionalConfig)
+		require.NoError(t, err)
+
+		// Verify the config was written
+		config, err := kubeconfigutils.LoadFromFilePath(ctx, tempConfigPath)
+		require.NoError(t, err)
+
+		clusterNames, err := config.GetClusterNames()
+		require.NoError(t, err)
+		require.Contains(t, clusterNames, "new-cluster")
+	})
+
+	t.Run("Merge config with existing config", func(t *testing.T) {
+		ctx := getCtx()
+
+		// Save original KUBECONFIG
+		originalKubeconfig := os.Getenv("KUBECONFIG")
+		defer os.Setenv("KUBECONFIG", originalKubeconfig)
+
+		// Copy existing config to temp location
+		tempDir := t.TempDir()
+		tempConfigPath := filepath.Join(tempDir, "config")
+
+		sourceContent, err := os.ReadFile("./testdata/cluster-a.yaml")
+		require.NoError(t, err)
+
+		err = os.WriteFile(tempConfigPath, sourceContent, 0644)
+		require.NoError(t, err)
+
+		os.Setenv("KUBECONFIG", tempConfigPath)
+
+		// Note: AddAdditionalConfigFromString expects cluster, context, and user to all have the same name
+		additionalConfig := `apiVersion: v1
+kind: Config
+clusters:
+- name: additional-cluster
+  cluster:
+    server: https://additional-server:6443
+contexts:
+- name: additional-cluster
+  context:
+    cluster: additional-cluster
+    user: additional-cluster
+users:
+- name: additional-cluster
+  user:
+    client-certificate-data: cert-data
+    client-key-data: key-data
+`
+
+		err = kubeconfigutils.AddAdditionalConfigFromString(ctx, additionalConfig)
+		require.NoError(t, err)
+
+		// Verify both configs are present
+		config, err := kubeconfigutils.LoadFromFilePath(ctx, tempConfigPath)
+		require.NoError(t, err)
+
+		clusterNames, err := config.GetClusterNames()
+		require.NoError(t, err)
+		require.Contains(t, clusterNames, "kind-cluster-a")
+		require.Contains(t, clusterNames, "additional-cluster")
+	})
+
+	t.Run("Merge config with distinct context user and cluster names", func(t *testing.T) {
+		ctx := getCtx()
+
+		// Save original KUBECONFIG
+		originalKubeconfig := os.Getenv("KUBECONFIG")
+		defer os.Setenv("KUBECONFIG", originalKubeconfig)
+
+		// Copy existing config to temp location
+		tempDir := t.TempDir()
+		tempConfigPath := filepath.Join(tempDir, "config")
+
+		sourceContent, err := os.ReadFile("./testdata/cluster-a.yaml")
+		require.NoError(t, err)
+
+		err = os.WriteFile(tempConfigPath, sourceContent, 0644)
+		require.NoError(t, err)
+
+		os.Setenv("KUBECONFIG", tempConfigPath)
+
+		// Config with distinct names for context, user, and cluster
+		additionalConfig := `apiVersion: v1
+kind: Config
+clusters:
+- name: distinct-cluster
+  cluster:
+    server: https://distinct-cluster-server:6443
+contexts:
+- name: distinct-context
+  context:
+    cluster: distinct-cluster
+    user: distinct-user
+users:
+- name: distinct-user
+  user:
+    client-certificate-data: distinct-cert-data
+    client-key-data: distinct-key-data
+`
+
+		err = kubeconfigutils.AddAdditionalConfigFromString(ctx, additionalConfig)
+		require.NoError(t, err)
+
+		// Verify both configs are present
+		config, err := kubeconfigutils.LoadFromFilePath(ctx, tempConfigPath)
+		require.NoError(t, err)
+
+		clusterNames, err := config.GetClusterNames()
+		require.NoError(t, err)
+		require.Contains(t, clusterNames, "kind-cluster-a")
+		require.Contains(t, clusterNames, "distinct-cluster")
+
+		contextNames, err := config.ListContextNames(ctx)
+		require.NoError(t, err)
+		require.Contains(t, contextNames, "kind-cluster-a")
+		require.Contains(t, contextNames, "distinct-context")
+	})
+
+	t.Run("Merge config where context references different named cluster and user", func(t *testing.T) {
+		ctx := getCtx()
+
+		// Save original KUBECONFIG
+		originalKubeconfig := os.Getenv("KUBECONFIG")
+		defer os.Setenv("KUBECONFIG", originalKubeconfig)
+
+		// Copy existing config to temp location
+		tempDir := t.TempDir()
+		tempConfigPath := filepath.Join(tempDir, "config")
+
+		sourceContent, err := os.ReadFile("./testdata/cluster-a.yaml")
+		require.NoError(t, err)
+
+		err = os.WriteFile(tempConfigPath, sourceContent, 0644)
+		require.NoError(t, err)
+
+		os.Setenv("KUBECONFIG", tempConfigPath)
+
+		// Config where context name differs from cluster and user names
+		additionalConfig := `apiVersion: v1
+kind: Config
+clusters:
+- name: my-cluster
+  cluster:
+    server: https://my-cluster-server:6443
+- name: another-cluster
+  cluster:
+    server: https://another-cluster-server:6443
+contexts:
+- name: my-context
+  context:
+    cluster: my-cluster
+    user: my-user
+- name: another-context
+  context:
+    cluster: another-cluster
+    user: my-user
+users:
+- name: my-user
+  user:
+    client-certificate-data: my-cert-data
+    client-key-data: my-key-data
+`
+
+		err = kubeconfigutils.AddAdditionalConfigFromString(ctx, additionalConfig)
+		require.NoError(t, err)
+
+		// Verify all entries are present
+		config, err := kubeconfigutils.LoadFromFilePath(ctx, tempConfigPath)
+		require.NoError(t, err)
+
+		clusterNames, err := config.GetClusterNames()
+		require.NoError(t, err)
+		require.Contains(t, clusterNames, "kind-cluster-a")
+		require.Contains(t, clusterNames, "my-cluster")
+		require.Contains(t, clusterNames, "another-cluster")
+
+		contextNames, err := config.ListContextNames(ctx)
+		require.NoError(t, err)
+		require.Contains(t, contextNames, "kind-cluster-a")
+		require.Contains(t, contextNames, "my-context")
+		require.Contains(t, contextNames, "another-context")
+	})
+
+	t.Run("Error when KUBECONFIG contains inline config", func(t *testing.T) {
+		ctx := getCtx()
+
+		// Save original KUBECONFIG
+		originalKubeconfig := os.Getenv("KUBECONFIG")
+		defer os.Setenv("KUBECONFIG", originalKubeconfig)
+
+		// Set KUBECONFIG to inline config
+		inlineConfig := `apiVersion: v1
+kind: Config
+clusters:
+- name: inline-cluster
+  cluster:
+    server: https://inline-server:6443
+`
+		os.Setenv("KUBECONFIG", inlineConfig)
+
+		additionalConfig := `apiVersion: v1
+kind: Config
+clusters:
+- name: new-cluster
+  cluster:
+    server: https://new-server:6443
+`
+
+		err := kubeconfigutils.AddAdditionalConfigFromString(ctx, additionalConfig)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "Cannot merge config when KUBECONFIG contains inline config")
+	})
+
+	t.Run("Error on invalid YAML", func(t *testing.T) {
+		ctx := getCtx()
+
+		invalidConfig := `this is not valid yaml: [`
+
+		err := kubeconfigutils.AddAdditionalConfigFromString(ctx, invalidConfig)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "Invalid additional config YAML")
 	})
 }
