@@ -77,6 +77,7 @@
             return nil 
         }
         ```
+    - This rule applies to **library/reusable functions**, which must always return the `error`. CLI commands follow a different, fail-fast convention (see [CLI Commands](#cli-commands)).
 - For filenames:
     - Do not use `_methods<.extension>` suffix. Instead of `add_methods.go` use `add.go`.
 - This repository is organized in many sub packages which must be used to reduce duplicated code.
@@ -84,6 +85,80 @@
         - The `commandexecutor` package must use the `os/exec` directly.
         - The `osutils` package must use `os/exec` in the `func Which(command string) (string, error)` implementation.
         - The `nativefiles` or `nativefilesoo` package must be used instead of `os.MkdirAll` or `os.Create`.
+
+## CLI Commands
+
+- The distinction between **CLI commands** and **library/reusable functions** determines how errors are handled:
+    - In **CLI commands** (e.g. `cobra` command implementations) it mostly makes no sense to handle errors gracefully. Failing fast is the desired behavior. Use the `mustutils` package to fail on error.
+    - In **library/reusable functions** it is important to **always return the `error`** instead of using `panic` or `LogFatal` (see also [Avoid silent `nil` error returns](#implementation)). This keeps the functions reusable and lets the caller decide how to handle failures.
+- Do **not** introduce `...OrLogFatal` convenience functions. Instead reuse the already existing functions that return an `error` and wrap the call with `mustutils.Must...` inside the CLI command.
+    - Use:
+        ```golang
+        func NewMkdirCmd() *cobra.Command {
+            const short = "Ensure a directory exists"
+
+            cmd := &cobra.Command{
+                Use:   "mkdir",
+                Short: short,
+                Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` files mkdir <path>`,
+
+                Run: func(cmd *cobra.Command, args []string) {
+                    ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
+
+                    if len(args) != 1 {
+                        logging.LogFatal("Please specify exactly one path for the directory to create.")
+                    }
+
+                    path := args[0]
+
+                    mustutils.Must0( // Use the mustutils to fail on error ...
+                        nativefiles.CreateDirectory(ctx, path, &filesoptions.CreateOptions{}), // ... and reuse already existing functions.
+                    )
+
+                    logging.LogGoodByCtxf(ctx, "Directory '%s' ensured to exist.", path)
+                },
+            }
+
+            return cmd
+        }
+        ```
+    - Instead of:
+        ```golang
+        func NewMkdirCmd() *cobra.Command {
+            const short = "Ensure a directory exists"
+
+            cmd := &cobra.Command{
+                Use:   "mkdir",
+                Short: short,
+                Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` files mkdir <path>`,
+
+                Run: func(cmd *cobra.Command, args []string) {
+                    ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
+
+                    if len(args) != 1 {
+                        logging.LogFatal("Please specify exactly one path for the directory to create.")
+                    }
+
+                    path := args[0]
+
+                    nativefiles.MkdirAllOrLogFatal(ctx, path) // Do NOT introduce OrLogFatal functions
+
+                    logging.LogGoodByCtxf(ctx, "Directory '%s' ensured to exist.", path)
+                },
+            }
+
+            return cmd
+        }
+        ```
+- Summary of the two flavors:
+    - **CLI command** → fail fast via `mustutils.Must...` on top of an existing error-returning function.
+    - **Library/reusable function** → return the `error`, never `panic`/`LogFatal` and never provide an `...OrLogFatal` variant.
 
 ## IP Address Handling
 
