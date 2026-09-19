@@ -19,6 +19,7 @@ Usage:
 
 	cmd.AddCommand(
 		NewListCmd(),
+		NewMkdirCmd(),
 	)
 
 	return cmd
