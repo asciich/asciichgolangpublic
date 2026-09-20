@@ -33,17 +33,32 @@ The container is started in an idempotent way: if an ollama container is already
 running nothing is changed. All run modes share the same volume mount
 'ollama:/root/.ollama' so downloaded models are reused regardless of the mode.
 
+The context length (OLLAMA_CONTEXT_LENGTH) can be adjusted with the
+'--context-length' flag. When not set (or set to 0) the ollamautils default
+of 32768 is used.
+
 Usage:
-    ` + os.Args[0] + ` ai ollama run-gpu`,
+    ` + os.Args[0] + ` ai ollama run-gpu
+    ` + os.Args[0] + ` ai ollama run-gpu --context-length 8192`,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
-			mustutils.Must0(ollamautils.RunGPU(ctx))
+			contextLength := mustutils.Must(cmd.Flags().GetInt("context-length"))
+
+			mustutils.Must0(ollamautils.RunGPU(ctx, &ollamautils.RunOptions{
+				ContextLength: contextLength,
+			}))
 
 			logging.LogGoodByCtxf(ctx, "Ollama with GPU support started.")
 		},
 	}
+
+	cmd.Flags().Int(
+		"context-length",
+		0,
+		"Context length (OLLAMA_CONTEXT_LENGTH) to use. When 0 the default of 32768 is used.",
+	)
 
 	return cmd
 }

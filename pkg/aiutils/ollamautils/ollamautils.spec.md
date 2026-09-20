@@ -10,3 +10,4 @@
     - `RunGPU(ctx context.Context) error` runs in docker with autodetected GPU support.
         - If no GPU detected return an error. Falling back to CPU is no option.
     - All run commands use the same volume mount `ollama:/root/.ollama`.
+    - Default context lenght to use is `OLLAMA_CONTEXT_LENGTH=32768`. But this must be adjustable by a parameter.
