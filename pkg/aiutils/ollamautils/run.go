@@ -3,6 +3,7 @@ package ollamautils
 import (
 	"context"
 	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexec"
@@ -23,11 +24,41 @@ const (
 
 	// ollamaImageAmd is the ROCm enabled Ollama image for AMD GPUs.
 	ollamaImageAmd = "ollama/ollama:rocm"
+
+	// ollamaDefaultContextLength is the default context window (num_ctx) used
+	// for all run commands when no explicit value is provided via RunOptions.
+	// It is passed to the container as the OLLAMA_CONTEXT_LENGTH environment
+	// variable.
+	ollamaDefaultContextLength = 32768
 )
 
 // ErrNoGpuDetected is returned by RunGPU when no supported GPU could be
 // detected. Falling back to CPU only mode is intentionally not done.
 var ErrNoGpuDetected = errors.New("no supported GPU detected")
+
+// RunOptions holds the adjustable settings for the various Run* commands.
+//
+// It is intentionally passed as an optional variadic argument so existing
+// callers using e.g. RunCpuOnly(ctx) keep working while new callers can
+// override defaults using RunCpuOnly(ctx, &RunOptions{ContextLength: 8192}).
+type RunOptions struct {
+	// ContextLength sets the OLLAMA_CONTEXT_LENGTH environment variable inside
+	// the container. When it is <= 0 (or no options are given at all) the
+	// ollamaDefaultContextLength is used instead.
+	ContextLength int
+}
+
+// resolveContextLength returns the effective context length to use based on the
+// (optional) provided options, falling back to ollamaDefaultContextLength.
+func resolveContextLength(options ...*RunOptions) int {
+	for _, o := range options {
+		if o != nil && o.ContextLength > 0 {
+			return o.ContextLength
+		}
+	}
+
+	return ollamaDefaultContextLength
+}
 
 // pathExists reports whether the given path exists on the target machine.
 //
@@ -104,10 +135,15 @@ func isOllamaContainerRunning(ctx context.Context) (ret bool, err error) {
 }
 
 // runOllamaContainer runs the ollama docker container with the given extra
-// arguments (e.g. GPU related flags) and image in an idempotent way.
-func runOllamaContainer(ctx context.Context, extraArgs []string, image string) error {
+// arguments (e.g. GPU related flags), image and context length in an
+// idempotent way.
+func runOllamaContainer(ctx context.Context, extraArgs []string, image string, contextLength int) error {
 	if image == "" {
 		return tracederrors.TracedErrorEmptyString("image")
+	}
+
+	if contextLength <= 0 {
+		return tracederrors.TracedErrorf("contextLength must be greater than 0 but got '%d'", contextLength)
 	}
 
 	isRunning, err := isOllamaContainerRunning(ctx)
@@ -123,6 +159,7 @@ func runOllamaContainer(ctx context.Context, extraArgs []string, image string) e
 	command := []string{"docker", "run", "-d"}
 	command = append(command, extraArgs...)
 	command = append(command,
+		"-e", "OLLAMA_CONTEXT_LENGTH="+strconv.Itoa(contextLength),
 		"-v", ollamaVolumeMount,
 		"-p", "11434:11434",
 		"--name", ollamaContainerName,
@@ -139,16 +176,18 @@ func runOllamaContainer(ctx context.Context, extraArgs []string, image string) e
 		return err
 	}
 
-	logging.LogChangedByCtxf(ctx, "Started ollama container '%s' using image '%s'.", ollamaContainerName, image)
+	logging.LogChangedByCtxf(ctx, "Started ollama container '%s' using image '%s' with context length '%d'.", ollamaContainerName, image, contextLength)
 
 	return nil
 }
 
 // RunCpuOnly starts ollama in a docker container in CPU only / no GPU mode.
-func RunCpuOnly(ctx context.Context) error {
+func RunCpuOnly(ctx context.Context, options ...*RunOptions) error {
 	logging.LogInfoByCtxf(ctx, "Run ollama in cpu only mode started.")
 
-	err := runOllamaContainer(ctx, nil, ollamaImageCpuNvidia)
+	contextLength := resolveContextLength(options...)
+
+	err := runOllamaContainer(ctx, nil, ollamaImageCpuNvidia, contextLength)
 	if err != nil {
 		return err
 	}
@@ -159,12 +198,14 @@ func RunCpuOnly(ctx context.Context) error {
 }
 
 // RunGPUNvidia starts ollama in a docker container with nvidia GPU support.
-func RunGPUNvidia(ctx context.Context) error {
+func RunGPUNvidia(ctx context.Context, options ...*RunOptions) error {
 	logging.LogInfoByCtxf(ctx, "Run ollama with nvidia GPU support started.")
+
+	contextLength := resolveContextLength(options...)
 
 	extraArgs := []string{"--gpus", "all"}
 
-	err := runOllamaContainer(ctx, extraArgs, ollamaImageCpuNvidia)
+	err := runOllamaContainer(ctx, extraArgs, ollamaImageCpuNvidia, contextLength)
 	if err != nil {
 		return err
 	}
@@ -175,8 +216,10 @@ func RunGPUNvidia(ctx context.Context) error {
 }
 
 // RunGPUAmd starts ollama in a docker container with amd (ROCm) GPU support.
-func RunGPUAmd(ctx context.Context) error {
+func RunGPUAmd(ctx context.Context, options ...*RunOptions) error {
 	logging.LogInfoByCtxf(ctx, "Run ollama with amd GPU support started.")
+
+	contextLength := resolveContextLength(options...)
 
 	// The numeric GIDs of 'video' and 'render' from the host are required to
 	// access /dev/kfd and /dev/dri. docker's --group-add resolves *names*
@@ -203,7 +246,7 @@ func RunGPUAmd(ctx context.Context) error {
 		"--security-opt", "seccomp=unconfined",
 	}
 
-	err = runOllamaContainer(ctx, extraArgs, ollamaImageAmd)
+	err = runOllamaContainer(ctx, extraArgs, ollamaImageAmd, contextLength)
 	if err != nil {
 		return err
 	}
@@ -217,7 +260,7 @@ func RunGPUAmd(ctx context.Context) error {
 // It prefers AMD (ROCm) if an AMD GPU is detected, then nvidia.
 // If no supported GPU is detected ErrNoGpuDetected is returned; falling back
 // to CPU only mode is intentionally not an option.
-func RunGPU(ctx context.Context) error {
+func RunGPU(ctx context.Context, options ...*RunOptions) error {
 	logging.LogInfoByCtxf(ctx, "Run ollama with autodetected GPU support started.")
 
 	amdAvailable, err := IsAmdGpuAvailable(ctx)
@@ -228,7 +271,7 @@ func RunGPU(ctx context.Context) error {
 	if amdAvailable {
 		logging.LogInfoByCtxf(ctx, "AMD GPU detected. Using amd GPU support.")
 
-		err = RunGPUAmd(ctx)
+		err = RunGPUAmd(ctx, options...)
 		if err != nil {
 			return err
 		}
@@ -246,7 +289,7 @@ func RunGPU(ctx context.Context) error {
 	if nvidiaAvailable {
 		logging.LogInfoByCtxf(ctx, "Nvidia GPU detected. Using nvidia GPU support.")
 
-		err = RunGPUNvidia(ctx)
+		err = RunGPUNvidia(ctx, options...)
 		if err != nil {
 			return err
 		}
