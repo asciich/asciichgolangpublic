@@ -18,6 +18,7 @@ Usage:
 	}
 
 	cmd.AddCommand(
+		NewConfigureCmd(),
 		NewConfigureGoogleAIStudioCmd(),
 		NewConfigureInfomaniakCmd(),
 		NewConfigureSwisscomMyAICmd(),

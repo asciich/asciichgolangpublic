@@ -11,7 +11,7 @@ import (
 )
 
 func NewAICmd() *cobra.Command {
-	const short = "Artificial inteligence related commands."
+	const short = "Artificial intelligence related commands."
 
 	cmd := &cobra.Command{
 		Use:   "ai",
