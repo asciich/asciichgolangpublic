@@ -6,6 +6,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd/copilotcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd/ollamacmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd/openhandscmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd/openwebuicmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd/vectordatabasecmd"
 	"os"
 )
@@ -29,6 +30,7 @@ Usage:
 		copilotcmd.NewCopilotCmd(),
 		ollamacmd.NewOllamaCmd(),
 		openhandscmd.NewOpenHandsCmd(),
+		openwebuicmd.NewOpenWebUICmd(),
 		vectordatabasecmd.NewVectorDatabaseCmd(),
 	)
 
