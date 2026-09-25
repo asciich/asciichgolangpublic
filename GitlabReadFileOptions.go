@@ -1,6 +1,7 @@
 package asciichgolangpublic
 
 import (
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -30,8 +31,8 @@ func (g *GitlabReadFileOptions) GetDeepCopy() (deepCopy *GitlabReadFileOptions) 
 	return deepCopy
 }
 
-func (g *GitlabReadFileOptions) GetGitlabGetRepositoryFileOptions() (getOptions *GitlabGetRepositoryFileOptions, err error) {
-	getOptions = NewGitlabGetRepositoryFileOptions()
+func (g *GitlabReadFileOptions) GetGitlabGetRepositoryFileOptions() (getOptions *gitlaboptions.GitlabGetRepositoryFileOptions, err error) {
+	getOptions = gitlaboptions.NewGitlabGetRepositoryFileOptions()
 	getOptions.Path = g.Path
 	getOptions.BranchName = g.BranchName
 	return getOptions, nil
@@ -54,7 +55,7 @@ func (g *GitlabReadFileOptions) MustGetBranchName() (branchName string) {
 	return branchName
 }
 
-func (g *GitlabReadFileOptions) MustGetGitlabGetRepositoryFileOptions() (getOptions *GitlabGetRepositoryFileOptions) {
+func (g *GitlabReadFileOptions) MustGetGitlabGetRepositoryFileOptions() (getOptions *gitlaboptions.GitlabGetRepositoryFileOptions) {
 	getOptions, err := g.GetGitlabGetRepositoryFileOptions()
 	if err != nil {
 		logging.LogGoErrorFatal(err)

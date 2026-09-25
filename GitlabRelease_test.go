@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
 
@@ -238,7 +239,7 @@ func TestGitlabRelease_CreateNewPatchRelease(t *testing.T) {
 
 				_, err = project.WriteFileContentInDefaultBranch(
 					ctx,
-					&GitlabWriteFileOptions{
+					&gitlaboptions.GitlabWriteFileOptions{
 						Path:          "random.txt",
 						Content:       []byte(mustutils.Must(randomgenerator.GetRandomString(50))),
 						CommitMessage: "Dummy change to test release.",

@@ -1,15 +1,15 @@
-package asciichgolangpublic
+package gitlaboptions
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type GitlabSyncBranchOptions struct {
 	// Define the target branch where the files are synced to.
 	// Can be specified by either setting the target branch as object or by string.
-	TargetBranch     *GitlabBranch
+	TargetBranch     gitinterfaces.Branch
 	TargetBranchName string
 
 	PathsToSync []string
@@ -47,7 +47,7 @@ func (g *GitlabSyncBranchOptions) GetPathsToSync() (pathsToSync []string, err er
 	return g.PathsToSync, nil
 }
 
-func (g *GitlabSyncBranchOptions) GetTargetBranch() (targetBranch *GitlabBranch, err error) {
+func (g *GitlabSyncBranchOptions) GetTargetBranch() (gitinterfaces.Branch, error) {
 	if g.TargetBranch == nil {
 		return nil, tracederrors.TracedErrorf("TargetBranch not set")
 	}
@@ -85,68 +85,6 @@ func (g *GitlabSyncBranchOptions) IsTargetBranchSet() (isSet bool) {
 	return g.TargetBranch != nil
 }
 
-func (g *GitlabSyncBranchOptions) MustGetPathsToSync() (pathsToSync []string) {
-	pathsToSync, err := g.GetPathsToSync()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return pathsToSync
-}
-
-func (g *GitlabSyncBranchOptions) MustGetTargetBranch() (targetBranch *GitlabBranch) {
-	targetBranch, err := g.GetTargetBranch()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return targetBranch
-}
-
-func (g *GitlabSyncBranchOptions) MustGetTargetBranchName() (targetBranchName string) {
-	targetBranchName, err := g.GetTargetBranchName()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-
-	return targetBranchName
-}
-
-func (g *GitlabSyncBranchOptions) MustSetPathsToSync(pathsToSync []string) {
-	err := g.SetPathsToSync(pathsToSync)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabSyncBranchOptions) MustSetTargetBranch(targetBranch *GitlabBranch) {
-	err := g.SetTargetBranch(targetBranch)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabSyncBranchOptions) MustSetTargetBranchName(targetBranchName string) {
-	err := g.SetTargetBranchName(targetBranchName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabSyncBranchOptions) MustSetTargetBranchNameAndUnsetTargetBranchObject(targetBranchName string) {
-	err := g.SetTargetBranchNameAndUnsetTargetBranchObject(targetBranchName)
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
-func (g *GitlabSyncBranchOptions) MustUnsetTargetBranch() {
-	err := g.UnsetTargetBranch()
-	if err != nil {
-		logging.LogGoErrorFatal(err)
-	}
-}
-
 func (g *GitlabSyncBranchOptions) SetPathsToSync(pathsToSync []string) (err error) {
 	if pathsToSync == nil {
 		return tracederrors.TracedErrorf("pathsToSync is nil")
@@ -161,7 +99,7 @@ func (g *GitlabSyncBranchOptions) SetPathsToSync(pathsToSync []string) (err erro
 	return nil
 }
 
-func (g *GitlabSyncBranchOptions) SetTargetBranch(targetBranch *GitlabBranch) (err error) {
+func (g *GitlabSyncBranchOptions) SetTargetBranch(targetBranch gitinterfaces.Branch) (err error) {
 	if targetBranch == nil {
 		return tracederrors.TracedErrorf("targetBranch is nil")
 	}

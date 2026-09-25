@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions/authenticationoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -506,13 +509,13 @@ func (g *GitlabProject) GetDeepCopy() (copy *GitlabProject) {
 	return copy
 }
 
-func (g *GitlabProject) GetDefaultBranch(ctx context.Context) (defaultBranch *GitlabBranch, err error) {
+func (g *GitlabProject) GetDefaultBranch(ctx context.Context) (gitinterfaces.Branch, error) {
 	defaultBranchName, err := g.GetDefaultBranchName(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	defaultBranch, err = g.GetBranchByName(defaultBranchName)
+	defaultBranch, err := g.GetBranchByName(defaultBranchName)
 	if err != nil {
 		return nil, err
 	}
@@ -555,7 +558,7 @@ func (g *GitlabProject) GetFileInDefaultBranch(ctx context.Context, fileName str
 
 	repositoryFile, err = g.GetRepositoryFile(
 		ctx,
-		&GitlabGetRepositoryFileOptions{
+		&gitlaboptions.GitlabGetRepositoryFileOptions{
 			Path: fileName,
 		},
 	)
@@ -911,7 +914,7 @@ func (g *GitlabProject) GetRawResponse(ctx context.Context) (nativeGitlabProject
 	return nativeProject, nil
 }
 
-func (g *GitlabProject) GetRepositoryFile(ctx context.Context, options *GitlabGetRepositoryFileOptions) (repositoryFile *GitlabRepositoryFile, err error) {
+func (g *GitlabProject) GetRepositoryFile(ctx context.Context, options *gitlaboptions.GitlabGetRepositoryFileOptions) (repositoryFile *GitlabRepositoryFile, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -1113,7 +1116,7 @@ func (g *GitlabProject) SetId(id int) (err error) {
 	return nil
 }
 
-func (g *GitlabProject) WriteFileContent(ctx context.Context, options *GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile, err error) {
+func (g *GitlabProject) WriteFileContent(ctx context.Context, options *gitlaboptions.GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -1131,14 +1134,24 @@ func (g *GitlabProject) WriteFileContent(ctx context.Context, options *GitlabWri
 	return gitlabRepositoryFile, nil
 }
 
-func (g *GitlabProject) WriteFileContentInDefaultBranch(ctx context.Context, writeOptions *GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile, err error) {
+func (g *GitlabProject) WriteFileContentInDefaultBranch(ctx context.Context, writeOptions *gitlaboptions.GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile, err error) {
 	if writeOptions == nil {
 		return nil, tracederrors.TracedErrorNil("writeOptions")
 	}
 
-	defaultBranch, err := g.GetDefaultBranch(ctx)
+	defaultBranchInterface, err := g.GetDefaultBranch(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	defaultBranch, ok := defaultBranchInterface.(*GitlabBranch)
+	if !ok {
+		typeName, err := datatypes.GetTypeName(defaultBranchInterface)
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, tracederrors.TracedErrorf("defaultBranch is not of type GitlabBranch: %s", typeName)
 	}
 
 	gitlabRepositoryFile, err = defaultBranch.WriteFileContent(ctx, writeOptions)
