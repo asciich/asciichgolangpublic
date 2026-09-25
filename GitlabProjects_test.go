@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
@@ -122,7 +123,7 @@ func TestGitlabProjectsGetFileContentAsString(t *testing.T) {
 				for _, content := range []string{"a", "hello", "world"} {
 					_, err = gitlabProject.WriteFileContent(
 						ctx,
-						&GitlabWriteFileOptions{
+						&gitlaboptions.GitlabWriteFileOptions{
 							Path:          fileName,
 							Content:       []byte(content),
 							CommitMessage: "commit during automated testing",

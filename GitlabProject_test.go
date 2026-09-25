@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -39,8 +40,10 @@ func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
 				require.NoError(t, err)
 				require.True(t, exists)
 
-				defaultBranch, err := gitlabProject.GetDefaultBranch(ctx)
+				defaultBranchInt, err := gitlabProject.GetDefaultBranch(ctx)
 				require.NoError(t, err)
+				defaultBranch, ok := defaultBranchInt.(*GitlabBranch)
+				require.True(t, ok)
 				syncBranch, err := gitlabProject.CreateBranchFromDefaultBranch(ctx, "test_sync")
 				require.NoError(t, err)
 
@@ -48,7 +51,7 @@ func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
 
 				_, err = defaultBranch.WriteFileContent(
 					ctx,
-					&GitlabWriteFileOptions{
+					&gitlaboptions.GitlabWriteFileOptions{
 						Path:          filePath,
 						Content:       []byte("hello"),
 						CommitMessage: "TestGitlabProjectSyncFilesToBranch",
@@ -58,7 +61,7 @@ func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
 
 				_, err = syncBranch.WriteFileContent(
 					ctx,
-					&GitlabWriteFileOptions{
+					&gitlaboptions.GitlabWriteFileOptions{
 						Path:          filePath,
 						Content:       []byte("world"),
 						CommitMessage: "TestGitlabProjectSyncFilesToBranch",
@@ -76,7 +79,7 @@ func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
 
 				err = syncBranch.SyncFilesToBranch(
 					ctx,
-					&GitlabSyncBranchOptions{
+					&gitlaboptions.GitlabSyncBranchOptions{
 						TargetBranch: defaultBranch,
 						PathsToSync:  []string{filePath},
 					},
@@ -125,8 +128,10 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile(t *testing.T) {
 				require.NoError(t, err)
 				require.True(t, exists)
 
-				defaultBranch, err := gitlabProject.GetDefaultBranch(ctx)
+				defaultBranchInt, err := gitlabProject.GetDefaultBranch(ctx)
 				require.NoError(t, err)
+				defaultBranch, ok := defaultBranchInt.(*GitlabBranch)
+				require.True(t, ok)
 				syncBranch, err := gitlabProject.CreateBranchFromDefaultBranch(ctx, "test_sync")
 				require.NoError(t, err)
 
@@ -141,7 +146,7 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile(t *testing.T) {
 
 				_, err = syncBranch.WriteFileContent(
 					ctx,
-					&GitlabWriteFileOptions{
+					&gitlaboptions.GitlabWriteFileOptions{
 						Path:          filePath,
 						Content:       []byte("world"),
 						CommitMessage: "TestGitlabProjectSyncFilesToBranch",
@@ -159,7 +164,7 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile(t *testing.T) {
 
 				err = syncBranch.SyncFilesToBranch(
 					ctx,
-					&GitlabSyncBranchOptions{
+					&gitlaboptions.GitlabSyncBranchOptions{
 						TargetBranch: defaultBranch,
 						PathsToSync:  []string{filePath},
 					})
@@ -208,8 +213,10 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 				require.NoError(t, err)
 				require.True(t, exists)
 
-				defaultBranch, err := gitlabProject.GetDefaultBranch(ctx)
+				defaultBranchInt, err := gitlabProject.GetDefaultBranch(ctx)
 				require.NoError(t, err)
+				defaultBranch, ok := defaultBranchInt.(*GitlabBranch)
+				require.True(t, ok)
 
 				syncBranch, err := gitlabProject.CreateBranchFromDefaultBranch(ctx, "test_sync")
 				require.NoError(t, err)
@@ -225,7 +232,7 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 
 				_, err = syncBranch.WriteFileContent(
 					ctx,
-					&GitlabWriteFileOptions{
+					&gitlaboptions.GitlabWriteFileOptions{
 						Path:          filePath,
 						Content:       []byte("world"),
 						CommitMessage: "TestGitlabProjectSyncFilesToBranch",
@@ -243,7 +250,7 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 
 				mergeRequest, err := syncBranch.SyncFilesToBranchUsingMergeRequest(
 					ctx,
-					&GitlabSyncBranchOptions{
+					&gitlaboptions.GitlabSyncBranchOptions{
 						TargetBranch: defaultBranch,
 						PathsToSync:  []string{filePath},
 					},

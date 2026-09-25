@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -285,8 +287,8 @@ func (g *GitlabBranch) GetBranches() (branches *GitlabBranches, err error) {
 	return branches, nil
 }
 
-func (g *GitlabBranch) GetDeepCopy() (copy *GitlabBranch) {
-	copy = NewGitlabBranch()
+func (g *GitlabBranch) GetDeepCopy() gitinterfaces.Branch {
+	copy := NewGitlabBranch()
 
 	*copy = *g
 
@@ -500,7 +502,7 @@ func (g *GitlabBranch) GetRepositoryFile(ctx context.Context, filePath string) (
 
 	repositoryFile, err = gitlabProject.GetRepositoryFile(
 		ctx,
-		&GitlabGetRepositoryFileOptions{
+		&gitlaboptions.GitlabGetRepositoryFileOptions{
 			BranchName: branchName,
 			Path:       filePath,
 		},
@@ -598,7 +600,7 @@ func (g *GitlabBranch) SetName(name string) (err error) {
 	return nil
 }
 
-func (g *GitlabBranch) SyncFilesToBranch(ctx context.Context, options *GitlabSyncBranchOptions) (err error) {
+func (g *GitlabBranch) SyncFilesToBranch(ctx context.Context, options *gitlaboptions.GitlabSyncBranchOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
@@ -653,7 +655,7 @@ func (g *GitlabBranch) SyncFilesToBranch(ctx context.Context, options *GitlabSyn
 	return nil
 }
 
-func (g *GitlabBranch) SyncFilesToBranchUsingMergeRequest(ctx context.Context, options *GitlabSyncBranchOptions) (createdMergeRequest *GitlabMergeRequest, err error) {
+func (g *GitlabBranch) SyncFilesToBranchUsingMergeRequest(ctx context.Context, options *gitlaboptions.GitlabSyncBranchOptions) (createdMergeRequest *GitlabMergeRequest, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -773,7 +775,7 @@ func (g *GitlabBranch) SyncFilesToBranchUsingMergeRequest(ctx context.Context, o
 	return createdMergeRequest, nil
 }
 
-func (g *GitlabBranch) WriteFileContent(ctx context.Context, options *GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile, err error) {
+func (g *GitlabBranch) WriteFileContent(ctx context.Context, options *gitlaboptions.GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}

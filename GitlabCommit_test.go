@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
@@ -47,7 +48,7 @@ func TestCommitGetHash(t *testing.T) {
 
 					_, err = testProject.WriteFileContent(
 						ctx,
-						&GitlabWriteFileOptions{
+						&gitlaboptions.GitlabWriteFileOptions{
 							Path:          "testfile",
 							Content:       []byte(content),
 							BranchName:    branchName,
@@ -100,7 +101,7 @@ func TestGitlabCommitGetParentCommit(t *testing.T) {
 
 				_, err = testProject.WriteFileContent(
 					ctx,
-					&GitlabWriteFileOptions{
+					&gitlaboptions.GitlabWriteFileOptions{
 						Path:          "getParentCommit.txt",
 						Content:       []byte("only test content."),
 						CommitMessage: "For test case get parent commit",
@@ -179,7 +180,7 @@ func TestGitlabCommitGetIsMergeCommit(t *testing.T) {
 
 				_, err = branch.WriteFileContent(
 					ctx,
-					&GitlabWriteFileOptions{
+					&gitlaboptions.GitlabWriteFileOptions{
 						Path:          testFileName,
 						Content:       []byte("only test content."),
 						CommitMessage: "For TestGitlabCommitGetIsMergeCommit",

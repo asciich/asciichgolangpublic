@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package gitlaboptions
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"

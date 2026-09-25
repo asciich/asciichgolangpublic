@@ -1,15 +1,15 @@
-package asciichgolangpublic_test
+package gitlaboptions_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	asciichgolangpublic "github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 )
 
 func TestGitlabWriteFileOptions_GetDeepCopy(t *testing.T) {
 	t.Run("nil fields", func(t *testing.T) {
-		original := &asciichgolangpublic.GitlabWriteFileOptions{}
+		original := &gitlaboptions.GitlabWriteFileOptions{}
 		copy := original.GetDeepCopy()
 
 		require.EqualValues(t, original.Path, copy.Path)
@@ -31,7 +31,7 @@ func TestGitlabWriteFileOptions_GetDeepCopy(t *testing.T) {
 	})
 
 	t.Run("with Content byte slice", func(t *testing.T) {
-		original := &asciichgolangpublic.GitlabWriteFileOptions{
+		original := &gitlaboptions.GitlabWriteFileOptions{
 			Path:          "README.md",
 			BranchName:    "main",
 			CommitMessage: "Add README",
@@ -54,7 +54,7 @@ func TestGitlabWriteFileOptions_GetDeepCopy(t *testing.T) {
 	})
 
 	t.Run("with empty Content slice", func(t *testing.T) {
-		original := &asciichgolangpublic.GitlabWriteFileOptions{
+		original := &gitlaboptions.GitlabWriteFileOptions{
 			Path:          "test.txt",
 			BranchName:    "main",
 			CommitMessage: "Test",

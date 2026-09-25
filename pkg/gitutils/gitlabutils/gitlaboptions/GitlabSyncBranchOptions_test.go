@@ -1,15 +1,16 @@
-package asciichgolangpublic_test
+package gitlaboptions_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	asciichgolangpublic "github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitgeneric"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 )
 
 func TestGitlabSyncBranchOptions_GetDeepCopy(t *testing.T) {
 	t.Run("nil fields", func(t *testing.T) {
-		original := &asciichgolangpublic.GitlabSyncBranchOptions{}
+		original := &gitlaboptions.GitlabSyncBranchOptions{}
 		copy := original.GetDeepCopy()
 
 		require.EqualValues(t, original.TargetBranch, copy.TargetBranch)
@@ -26,7 +27,7 @@ func TestGitlabSyncBranchOptions_GetDeepCopy(t *testing.T) {
 	})
 
 	t.Run("with PathsToSync slice", func(t *testing.T) {
-		original := &asciichgolangpublic.GitlabSyncBranchOptions{
+		original := &gitlaboptions.GitlabSyncBranchOptions{
 			TargetBranchName: "main",
 			PathsToSync:      []string{"file1.txt", "file2.txt"},
 		}
@@ -45,11 +46,11 @@ func TestGitlabSyncBranchOptions_GetDeepCopy(t *testing.T) {
 	})
 
 	t.Run("with TargetBranch object", func(t *testing.T) {
-		originalBranch := &asciichgolangpublic.GitlabBranch{}
+		originalBranch := &gitgeneric.Branch{}
 		err := originalBranch.SetName("main")
 		require.NoError(t, err)
 
-		original := &asciichgolangpublic.GitlabSyncBranchOptions{
+		original := &gitlaboptions.GitlabSyncBranchOptions{
 			TargetBranch: originalBranch,
 		}
 		copy := original.GetDeepCopy()
@@ -72,11 +73,11 @@ func TestGitlabSyncBranchOptions_GetDeepCopy(t *testing.T) {
 	})
 
 	t.Run("with all fields set", func(t *testing.T) {
-		originalBranch := &asciichgolangpublic.GitlabBranch{}
+		originalBranch := &gitgeneric.Branch{}
 		err := originalBranch.SetName("main")
 		require.NoError(t, err)
 
-		original := &asciichgolangpublic.GitlabSyncBranchOptions{
+		original := &gitlaboptions.GitlabSyncBranchOptions{
 			TargetBranch:     originalBranch,
 			TargetBranchName: "main",
 			PathsToSync:      []string{"file1.txt", "file2.txt"},

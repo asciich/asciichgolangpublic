@@ -6,6 +6,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -30,7 +31,7 @@ func (g *GitlabRepositoryFiles) CreateEmptyFile(ctx context.Context, fileName st
 
 	createdFile, err = g.WriteFileContent(
 		ctx,
-		&GitlabWriteFileOptions{
+		&gitlaboptions.GitlabWriteFileOptions{
 			Path:          fileName,
 			Content:       []byte{},
 			CommitMessage: "Create empty file",
@@ -322,7 +323,7 @@ func (g *GitlabRepositoryFiles) GetProjectUrl(ctx context.Context) (projectUrl s
 	return projectUrl, nil
 }
 
-func (g *GitlabRepositoryFiles) GetRepositoryFile(options *GitlabGetRepositoryFileOptions) (repositoryFile *GitlabRepositoryFile, err error) {
+func (g *GitlabRepositoryFiles) GetRepositoryFile(options *gitlaboptions.GitlabGetRepositoryFileOptions) (repositoryFile *GitlabRepositoryFile, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -427,7 +428,7 @@ func (g *GitlabRepositoryFiles) SetGitlabProject(gitlabProject *GitlabProject) (
 	return nil
 }
 
-func (g *GitlabRepositoryFiles) WriteFileContent(ctx context.Context, options *GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile, err error) {
+func (g *GitlabRepositoryFiles) WriteFileContent(ctx context.Context, options *gitlaboptions.GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
