@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/precommitutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -46,7 +47,7 @@ func (p *PreCommitService) GetDefaultConfigFileName() (preCommitDefaultName stri
 	return ".pre-commit-config.yaml"
 }
 
-func (p *PreCommitService) RunInDirectory(ctx context.Context, directoy filesinterfaces.Directory, options *PreCommitRunOptions) (err error) {
+func (p *PreCommitService) RunInDirectory(ctx context.Context, directoy filesinterfaces.Directory, options *precommitutils.PreCommitRunOptions) (err error) {
 	if directoy == nil {
 		return tracederrors.TracedErrorNil("directoy")
 	}
@@ -84,7 +85,7 @@ func (p *PreCommitService) RunInDirectory(ctx context.Context, directoy filesint
 	return nil
 }
 
-func (p *PreCommitService) RunInGitRepository(ctx context.Context, gitRepo gitinterfaces.GitRepository, options *PreCommitRunOptions) (err error) {
+func (p *PreCommitService) RunInGitRepository(ctx context.Context, gitRepo gitinterfaces.GitRepository, options *precommitutils.PreCommitRunOptions) (err error) {
 	if gitRepo == nil {
 		return tracederrors.TracedErrorNil("gitRepo")
 	}

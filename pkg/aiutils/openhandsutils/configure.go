@@ -15,11 +15,11 @@ const (
 )
 
 type ConfigureLlmProfileOptions struct {
-	ProfileName  string
-	Model        string
-	BaseUrl      string
-	ApiKey       string
-	ReadFromEnv  bool
+	ProfileName string
+	Model       string
+	BaseUrl     string
+	ApiKey      string
+	ReadFromEnv bool
 }
 
 func ConfigureLlmProfile(ctx context.Context, openHandsUrl string, options *ConfigureLlmProfileOptions) error {

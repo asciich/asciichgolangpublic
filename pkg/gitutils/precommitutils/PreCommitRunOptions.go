@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package precommitutils
 
 type PreCommitRunOptions struct {
 	CommitChanges bool
