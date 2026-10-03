@@ -72,7 +72,7 @@ func GetMacAddressFromXmlString(libvirtXml string) (macAddress string, err error
 	domcfg := &libvirtxml.Domain{}
 	err = domcfg.Unmarshal(libvirtXml)
 	if err != nil {
-		return "", tracederrors.TracedError(err.Error())
+		return "", tracederrors.TracedError(err)
 	}
 
 	networkInterfaces := domcfg.Devices.Interfaces
@@ -105,7 +105,7 @@ func GetNetworkNameFromXmlString(libvirtXml string) (networkName string, err err
 	domcfg := &libvirtxml.Domain{}
 	err = domcfg.Unmarshal(libvirtXml)
 	if err != nil {
-		return "", tracederrors.TracedError(err.Error())
+		return "", tracederrors.TracedError(err)
 	}
 
 	networkInterfaces := domcfg.Devices.Interfaces
@@ -144,7 +144,7 @@ func GetBridgeInterfaceFromXmlString(libvirtXml string) (bridgeInterface string,
 	domcfg := &libvirtxml.Domain{}
 	err = domcfg.Unmarshal(libvirtXml)
 	if err != nil {
-		return "", tracederrors.TracedError(err.Error())
+		return "", tracederrors.TracedError(err)
 	}
 
 	networkInterfaces := domcfg.Devices.Interfaces

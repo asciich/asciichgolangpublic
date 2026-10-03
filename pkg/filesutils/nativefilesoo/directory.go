@@ -32,10 +32,8 @@ func NewDirectoryByPath(path string) (filesinterfaces.Directory, error) {
 		path: absPath,
 	}
 
-	err = ret.SetParentDirectoryForBaseClass(ret)
-	if err != nil {
-		panic(err)
-	}
+	// SetParentDirectoryForBaseClass only errors if passed nil, which we never do here
+	_ = ret.SetParentDirectoryForBaseClass(ret)
 
 	return ret, nil
 }

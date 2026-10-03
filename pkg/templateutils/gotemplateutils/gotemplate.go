@@ -71,13 +71,13 @@ func RenderTemplateFromStringAsString(inputString string, variables map[string]i
 
 	templ, err := template.New("test").Option("missingkey=error").Funcs(funcMap).Parse(inputString)
 	if err != nil {
-		return "", tracederrors.TracedError(err.Error())
+		return "", tracederrors.TracedError(err)
 	}
 
 	var renderWriter bytes.Buffer
 	err = templ.Execute(&renderWriter, variables)
 	if err != nil {
-		return "", tracederrors.TracedError(err.Error())
+		return "", tracederrors.TracedError(err)
 	}
 
 	rendered = renderWriter.String()

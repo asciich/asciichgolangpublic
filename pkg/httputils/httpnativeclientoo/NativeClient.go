@@ -344,7 +344,7 @@ func (n *NativeClient) DownloadAsFile(ctx context.Context, downloadOptions *http
 
 	outFd, err := os.Create(outputFilePath)
 	if err != nil {
-		return nil, tracederrors.TracedError(err.Error())
+		return nil, tracederrors.TracedError(err)
 	}
 	defer outFd.Close()
 

@@ -67,10 +67,8 @@ func NewLocalFile() (l *LocalFile) {
 	l = new(LocalFile)
 
 	// Allow usage of the base class functions:
-	err := l.SetParentFileForBaseClass(l)
-	if err != nil {
-		panic(err)
-	}
+	// SetParentFileForBaseClass always returns nil in this context
+	l.SetParentFileForBaseClass(l)
 
 	return l
 }

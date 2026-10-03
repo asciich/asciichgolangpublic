@@ -93,7 +93,7 @@ func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions
 
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
-		return nil, tracederrors.TracedError(err.Error())
+		return nil, tracederrors.TracedError(err)
 	}
 	cmd.Stderr = &stderr
 

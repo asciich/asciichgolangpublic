@@ -184,7 +184,7 @@ func LoadKeyValueInterfaceDictFromJsonString(jsonString string) (keyValues map[s
 	keyValues = map[string]interface{}{}
 	err = json.Unmarshal([]byte(jsonString), &keyValues)
 	if err != nil {
-		return nil, tracederrors.TracedError(err.Error())
+		return nil, tracederrors.TracedError(err)
 	}
 
 	return keyValues, nil
@@ -324,7 +324,7 @@ func MustRunJqAgainstJsonStringAsString(jsonString string, query string) (result
 func ParseJsonString(jsonString string) (data interface{}, err error) {
 	err = json.Unmarshal([]byte(jsonString), &data)
 	if err != nil {
-		return nil, tracederrors.TracedError(err.Error())
+		return nil, tracederrors.TracedError(err)
 	}
 
 	return data, err
@@ -382,7 +382,7 @@ func RunJqAgainstJsonStringAsBool(jsonString string, query string) (result bool,
 
 	result, err = strconv.ParseBool(resultString)
 	if err != nil {
-		return false, tracederrors.TracedError(err.Error())
+		return false, tracederrors.TracedError(err)
 	}
 
 	return result, nil
@@ -406,7 +406,7 @@ func RunJqAgainstJsonStringAsInt(jsonString string, query string) (result int, e
 
 	result, err = strconv.Atoi(resultString)
 	if err != nil {
-		return -1, tracederrors.TracedError(err.Error())
+		return -1, tracederrors.TracedError(err)
 	}
 
 	return result, nil
@@ -428,7 +428,7 @@ func RunJqAgainstJsonStringAsString(jsonString string, query string) (result str
 
 	jqQuery, err := gojq.Parse(query)
 	if err != nil {
-		return "", tracederrors.TracedError(err.Error())
+		return "", tracederrors.TracedError(err)
 	}
 	iter := jqQuery.Run(jsonData)
 
@@ -439,7 +439,7 @@ func RunJqAgainstJsonStringAsString(jsonString string, query string) (result str
 			break
 		}
 		if err, ok := v.(error); ok {
-			return "", tracederrors.TracedError(err.Error())
+			return "", tracederrors.TracedError(err)
 		}
 		switch v := v.(type) {
 		case int:
