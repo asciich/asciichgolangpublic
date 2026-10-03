@@ -72,7 +72,7 @@ func ToSecondsFloat64(durationString string) (seconds float64, err error) {
 
 		parsedValue, err := strconv.ParseFloat(unifiedDurationString, 64)
 		if err != nil {
-			return -1, tracederrors.TracedError(err.Error())
+			return -1, tracederrors.TracedError(err)
 		}
 
 		seconds = parsedValue * v
@@ -81,7 +81,7 @@ func ToSecondsFloat64(durationString string) (seconds float64, err error) {
 
 	seconds, err = strconv.ParseFloat(unifiedDurationString, 64)
 	if err != nil {
-		return -1, tracederrors.TracedError(err.Error())
+		return -1, tracederrors.TracedError(err)
 	}
 
 	return seconds, nil

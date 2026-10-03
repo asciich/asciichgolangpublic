@@ -88,7 +88,7 @@ func ParseFragmentAsHtmlNode(fragment string) (*html.Node, error) {
 
 	nodes, err := html.ParseFragment(strings.NewReader(fragment), context)
 	if err != nil {
-		panic(err)
+		return nil, tracederrors.TracedError(err)
 	}
 
 	return nodes[0], nil

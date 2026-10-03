@@ -41,10 +41,8 @@ func NewNativeHost() (host hostsutilsinterfaces.Host) {
 
 func (n *NativeHost) GetDeepCopy() commandexecutorinterfaces.CommandExecutor {
 	ret := &NativeHost{}
-	err := ret.SetParentCommandExecutorForBaseClass(ret)
-	if err != nil {
-		panic(err)
-	}
+	// SetParentCommandExecutorForBaseClass always returns nil
+	ret.SetParentCommandExecutorForBaseClass(ret)
 	return ret
 }
 

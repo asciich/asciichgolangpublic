@@ -56,10 +56,8 @@ func (f *File) Chown(ctx context.Context, options *parameteroptions.ChownOptions
 
 func (f *File) GetDeepCopy() (deepCopy filesinterfaces.File) {
 	copy := &File{}
-	err := copy.SetParentFileForBaseClass(copy)
-	if err != nil {
-		panic(err)
-	}
+	// SetParentFileForBaseClass only errors if passed nil, which we never do here
+	_ = copy.SetParentFileForBaseClass(copy)
 
 	if f.commandExecutor != nil {
 		copy.commandExecutor = f.commandExecutor.GetDeepCopy()

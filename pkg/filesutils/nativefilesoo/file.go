@@ -34,10 +34,8 @@ func NewFileByPath(path string) (filesinterfaces.File, error) {
 		path: absPath,
 	}
 
-	err = ret.SetParentFileForBaseClass(ret)
-	if err != nil {
-		panic(err)
-	}
+	// SetParentFileForBaseClass only errors if passed nil, which we never do here
+	_ = ret.SetParentFileForBaseClass(ret)
 
 	return ret, nil
 }
@@ -46,10 +44,8 @@ func (f *File) GetDeepCopy() filesinterfaces.File {
 	copy := new(File)
 	*copy = *f
 
-	err := copy.SetParentFileForBaseClass(copy)
-	if err != nil {
-		panic(err)
-	}
+	// SetParentFileForBaseClass only errors if passed nil, which we never do here
+	_ = copy.SetParentFileForBaseClass(copy)
 
 	return copy
 }

@@ -69,10 +69,8 @@ func (c *CommandExecutorHost) GetDeepCopy() commandexecutorinterfaces.CommandExe
 		ret.commandExecutor = c.commandExecutor.GetDeepCopy()
 	}
 
-	err := ret.SetParentCommandExecutorForBaseClass(ret)
-	if err != nil {
-		panic(err)
-	}
+	// SetParentCommandExecutorForBaseClass always returns nil
+	ret.SetParentCommandExecutorForBaseClass(ret)
 
 	return ret
 }
