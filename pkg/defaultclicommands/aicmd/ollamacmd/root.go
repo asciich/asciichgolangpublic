@@ -1,8 +1,9 @@
 package ollamacmd
 
 import (
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 func NewOllamaCmd() *cobra.Command {
@@ -24,6 +25,7 @@ Usage:
 		NewRunCpuOnlyCmd(),
 		NewRunGpuCmd(),
 		NewRunMcpAgentCmd(),
+		NewRunProxyCmd(),
 		NewSendPromptCmd(),
 	)
 
