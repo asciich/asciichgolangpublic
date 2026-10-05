@@ -79,7 +79,11 @@ func cliInstall(ctx context.Context, binaryName string) {
 		},
 	))
 
-	mustutils.Must(commandexecutorbash.RunOneLiner(ctx, fmt.Sprintf("%s completion bash | sudo tee /etc/bash_completion.d/%s > /dev/null", binaryName, binaryName)))
+	const bashCompletionDir = "/etc/bash_completion.d"
+	mustutils.Must(commandexecutorbash.RunOneLiner(ctx, "sudo mkdir -p "+bashCompletionDir))
+
+	completionFile := filepath.Join(bashCompletionDir, binaryName)
+	mustutils.Must(commandexecutorbash.RunOneLiner(ctx, fmt.Sprintf("%s completion bash | sudo tee %s > /dev/null", binaryName, completionFile)))
 	logging.LogChangedByCtx(ctx, "Installed bash completion")
 
 	logging.LogGoodByCtxf(ctx, "Sucessfully installed '%s'", binaryName)
