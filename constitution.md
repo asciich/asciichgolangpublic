@@ -159,6 +159,21 @@ Usage:
 - Summary of the two flavors:
     - **CLI command** → fail fast via `mustutils.Must...` on top of an existing error-returning function.
     - **Library/reusable function** → return the `error`, never `panic`/`LogFatal` and never provide an `...OrLogFatal` variant.
+- CLI flags:
+    - Instead of:
+        ```golang
+        cmd.Flags().BoolVar(&useSudo, "sudo", false, "Use sudo for the hostnamectl set-hostname command")
+        ```
+    - Use:
+        ```golang
+        cmd.Flags().Bool("sudo", false, "Use sudo for the hostnamectl set-hostname command")
+
+        // and in the Run function:
+        sudo, err := cmd.Flags().GetBool("sudo")
+        if err != nil {
+            logging.LogGoErrorFatalWithTrace(err)
+        }
+        ```
 
 ## IP Address Handling
 

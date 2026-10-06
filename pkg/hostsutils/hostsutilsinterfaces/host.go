@@ -29,5 +29,5 @@ type Host interface {
 	AddSshHostKeyToKnownHosts(ctx context.Context) error
 	RenewSshHostKey(ctx context.Context) error
 
-	SetHostName(ctx context.Context, hostname string) error
+	SetHostName(ctx context.Context, hostname string, options *hostsutilsoptions.SetHostnameOptions) error
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/filescmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/gitlabcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/homeautomationcmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/hostcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/httpcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/installcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd"
@@ -59,6 +60,7 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 		filescmd.NewFilesCmd(),
 		gitlabcmd.NewGitlabCommand(),
 		homeautomationcmd.NewHomeAutomationCmd(),
+		hostcmd.NewHostCmd(),
 		httpcmd.NewHttpCmd(),
 		installcmd.NewInstallCmd(),
 		kubernetescmd.NewKubernetesCmd(),
