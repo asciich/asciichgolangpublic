@@ -10,6 +10,8 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/cryptoutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -102,6 +104,19 @@ func (x *X509CertKeyPair) GetPublicKey() (crypto.PublicKey, error) {
 	return cryptoutils.GetPublicKeyFromPrivateKey(privateKey)
 }
 
+func (x *X509CertKeyPair) WriteCertificatePemToFilePath(ctx context.Context, toWrite string) error {
+	if toWrite == "" {
+		return tracederrors.TracedErrorEmptyString("toWrite")
+	}
+
+	certPemBytes, err := x.GetCertificateAsPEMBytes()
+	if err != nil {
+		return err
+	}
+
+	return nativefiles.WriteBytes(ctx, toWrite, certPemBytes, &filesoptions.WriteOptions{})
+}
+
 func (x *X509CertKeyPair) WriteCertificatePemToFile(ctx context.Context, toWrite filesinterfaces.File) error {
 	if toWrite == nil {
 		return tracederrors.TracedErrorNil("toWrite")
@@ -115,12 +130,14 @@ func (x *X509CertKeyPair) WriteCertificatePemToFile(ctx context.Context, toWrite
 	return toWrite.WriteBytes(ctx, certPemBytes, nil)
 }
 
-func (x *X509CertKeyPair) WritePrivateKeyToFile(ctx context.Context, toWrite filesinterfaces.File) error {
-	if toWrite == nil {
-		return tracederrors.TracedErrorNil("toWrite")
+
+func (x *X509CertKeyPair) WritePrivateKeyToFilePath(ctx context.Context, toWrite string) error {
+	if toWrite == "" {
+		return tracederrors.TracedErrorEmptyString("toWrite")
 	}
 
-	privateKey, err := x.GetPrivateKey()
+	// TODO make one function from here...
+	privateKey, err := x.GetPrivateKeyAsPEMString()
 	if err != nil {
 		return err
 	}
@@ -129,6 +146,27 @@ func (x *X509CertKeyPair) WritePrivateKeyToFile(ctx context.Context, toWrite fil
 	if err != nil {
 		return err
 	}
+	// ... to here.
+
+	return nativefiles.WriteBytes(ctx, toWrite, privateKeyBytes, &filesoptions.WriteOptions{})
+}
+
+func (x *X509CertKeyPair) WritePrivateKeyToFile(ctx context.Context, toWrite filesinterfaces.File) error {
+	if toWrite == nil {
+		return tracederrors.TracedErrorNil("toWrite")
+	}
+
+	// TODO make one function from here...
+	privateKey, err := x.GetPrivateKeyAsPEMString()
+	if err != nil {
+		return err
+	}
+
+	privateKeyBytes, err := encodePrivateKeyAsPEMBytes(privateKey)
+	if err != nil {
+		return err
+	}
+	// ... to here.
 
 	return toWrite.WriteBytes(ctx, privateKeyBytes, nil)
 }
