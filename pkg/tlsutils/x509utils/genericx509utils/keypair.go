@@ -130,23 +130,24 @@ func (x *X509CertKeyPair) WriteCertificatePemToFile(ctx context.Context, toWrite
 	return toWrite.WriteBytes(ctx, certPemBytes, nil)
 }
 
+func (x *X509CertKeyPair) getPrivateKeyAsPEMBytes() ([]byte, error) {
+	privateKey, err := x.GetPrivateKey()
+	if err != nil {
+		return nil, err
+	}
+
+	return encodePrivateKeyAsPEMBytes(privateKey)
+}
 
 func (x *X509CertKeyPair) WritePrivateKeyToFilePath(ctx context.Context, toWrite string) error {
 	if toWrite == "" {
 		return tracederrors.TracedErrorEmptyString("toWrite")
 	}
 
-	// TODO make one function from here...
-	privateKey, err := x.GetPrivateKeyAsPEMString()
+	privateKeyBytes, err := x.getPrivateKeyAsPEMBytes()
 	if err != nil {
 		return err
 	}
-
-	privateKeyBytes, err := encodePrivateKeyAsPEMBytes(privateKey)
-	if err != nil {
-		return err
-	}
-	// ... to here.
 
 	return nativefiles.WriteBytes(ctx, toWrite, privateKeyBytes, &filesoptions.WriteOptions{})
 }
@@ -156,17 +157,10 @@ func (x *X509CertKeyPair) WritePrivateKeyToFile(ctx context.Context, toWrite fil
 		return tracederrors.TracedErrorNil("toWrite")
 	}
 
-	// TODO make one function from here...
-	privateKey, err := x.GetPrivateKeyAsPEMString()
+	privateKeyBytes, err := x.getPrivateKeyAsPEMBytes()
 	if err != nil {
 		return err
 	}
-
-	privateKeyBytes, err := encodePrivateKeyAsPEMBytes(privateKey)
-	if err != nil {
-		return err
-	}
-	// ... to here.
 
 	return toWrite.WriteBytes(ctx, privateKeyBytes, nil)
 }
