@@ -39,7 +39,7 @@ func (n *NativeHost) SetHostName(ctx context.Context, hostname string, options *
 		exec := commandexecutorexecoo.Exec()
 		return commandexecutorhostsutils.SetHostName(ctx, exec, hostname, options)
 	}
-	
+
 	return n.setHostnameNatively(ctx, hostname, options)
 }
 
