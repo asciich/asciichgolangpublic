@@ -1,5 +1,23 @@
 # constitution for asciichgolangpublic
 
+## Imports
+
+- The module path of this repository is `gitlab.asciich.ch/tools/asciichgolangpublic.git`. All packages of this repository must be imported using this module path:
+    - Use:
+        ```golang
+        import (
+            "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+            "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/tracederrors"
+        )
+        ```
+    - Instead of:
+        ```golang
+        import (
+            "github.com/asciich/asciichgolangpublic/pkg/logging"
+            "github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+        )
+        ```
+
 ## Implementation
 
 - For execution on localhost the `native...` are used. Native in this case means natively implemented in golang without external `exec`
@@ -85,6 +103,38 @@
         - The `commandexecutor` package must use the `os/exec` directly.
         - The `osutils` package must use `os/exec` in the `func Which(command string) (string, error)` implementation.
         - The `nativefiles` or `nativefilesoo` package must be used instead of `os.MkdirAll` or `os.Create`.
+
+## Root Privileges
+
+- Functions which require root privileges (e.g. changing network card settings, writing to `/etc`, managing system services) **must** check if they are running as root **before** starting any work.
+    - Use `userutils.IsRunningAsRoot(ctx)` from `gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/userutils` for this check.
+    - The check is done **after** the validation of the input parameters but **before** the "started" log message and before any IO or change is performed. This way a function never leaves a half applied state behind because of missing privileges.
+    - If not running as root, return a `tracederrors` error which names the function/operation and explains that root privileges are required.
+    - Example:
+        ```golang
+        func DeactivateOffloading(ctx context.Context, networkCardName string) error {
+            if networkCardName == "" {
+                return tracederrors.TracedErrorEmptyString("networkCardName")
+            }
+
+            isRoot, err := userutils.IsRunningAsRoot(ctx)
+            if err != nil {
+                return err
+            }
+
+            if !isRoot {
+                return tracederrors.TracedErrorf("Deactivate offloading for network card '%s' requires root privileges.", networkCardName)
+            }
+
+            logging.LogInfoByCtxf(ctx, "Deactivate offloading for network card '%s' started.", networkCardName)
+
+            // ... perform the work
+        }
+        ```
+- Only require root where it is really needed:
+    - Read-only functions (e.g. `Is...`, `Get...`, `List...`) which work as a normal user **must not** require root. This keeps them usable for monitoring and checks.
+- Document in the doc comment of the function if root privileges are required.
+- In `commandexecutor...` implementations the root check must be performed on the **target machine** using the `commandexecutor` (e.g. evaluating `id -u`), since the privileges of the local user are irrelevant for remote execution.
 
 ## CLI Commands
 
