@@ -107,7 +107,8 @@
 ## Root Privileges
 
 - Functions which require root privileges (e.g. changing network card settings, writing to `/etc`, managing system services) **must** check if they are running as root **before** starting any work.
-    - Use `userutils.IsRunningAsRoot(ctx)` from `gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/userutils` for this check.
+    - Use `userutils.IsRunningAsRoot(ctx)` from `gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/userutils` for this check on localhost.
+    - Use `commandexecutoruserutils.IsRunningAsRoot(ctx, commandExecutor)` for command executors like containers and remote hosts.
     - The check is done **after** the validation of the input parameters but **before** the "started" log message and before any IO or change is performed. This way a function never leaves a half applied state behind because of missing privileges.
     - If not running as root, return a `tracederrors` error which names the function/operation and explains that root privileges are required.
     - Example:
