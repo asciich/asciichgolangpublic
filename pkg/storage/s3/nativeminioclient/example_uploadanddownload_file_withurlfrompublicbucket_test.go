@@ -14,6 +14,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/httputils"
 	"github.com/asciich/asciichgolangpublic/pkg/httputils/httpoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
+	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/minioutils"
 	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/nativeminioclient"
 	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/s3options"
 )
@@ -34,7 +35,7 @@ func Test_Example_UploadAndDownload_File_withUrlFromPublicBucket_test(t *testing
 
 	container, err := nativedocker.RunContainer(ctx, &dockeroptions.DockerRunContainerOptions{
 		Name:      containerName,
-		ImageName: "quay.io/minio/minio",
+		ImageName: minioutils.MINIO_DOCKER_IMAGE,
 		Command:   []string{"server", "/data", "--console-address", ":9001"},
 		Ports:     []string{"9000:9000"},
 		AdditionalEnvVars: map[string]string{
