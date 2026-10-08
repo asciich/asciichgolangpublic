@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
+	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/minioutils"
 	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/nativeminioclient"
 	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/s3options"
 )
@@ -30,7 +31,7 @@ func Test_Example_CheckDiskStatus_test(t *testing.T) {
 
 	container, err := nativedocker.RunContainer(ctx, &dockeroptions.DockerRunContainerOptions{
 		Name:      containerName,
-		ImageName: "quay.io/minio/minio",
+		ImageName: minioutils.MINIO_DOCKER_IMAGE,
 		Command:   []string{"server", "/data", "--console-address", ":9001"},
 		Ports:     []string{"9000:9000"},
 		AdditionalEnvVars: map[string]string{
