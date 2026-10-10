@@ -100,7 +100,7 @@ func ReadAsLines(ctx context.Context, commandExecutor commandexecutorinterfaces.
 		return nil, tracederrors.TracedErrorEmptyString("filePath")
 	}
 
-	content, err := ReadAsString(commandExecutor, filePath)
+	content, err := ReadAsString(ctx, commandExecutor, filePath)
 	if err != nil {
 		return nil, err
 	}

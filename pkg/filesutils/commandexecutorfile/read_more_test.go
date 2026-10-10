@@ -37,17 +37,20 @@ func TestReadFirstNBytes(t *testing.T) {
 
 func TestReadAsString(t *testing.T) {
 	t.Run("nil commandExecutor returns error", func(t *testing.T) {
-		str, err := commandexecutorfile.ReadAsString(nil, "/etc/hostname")
+		ctx := getCtx()
+		str, err := commandexecutorfile.ReadAsString(ctx, nil, "/etc/hostname")
 		require.Error(t, err)
 		require.Empty(t, str)
 	})
 	t.Run("empty filePath returns error", func(t *testing.T) {
-		str, err := commandexecutorfile.ReadAsString(commandexecutorexecoo.Exec(), "")
+		ctx := getCtx()
+		str, err := commandexecutorfile.ReadAsString(ctx, commandexecutorexecoo.Exec(), "")
 		require.Error(t, err)
 		require.Empty(t, str)
 	})
 	t.Run("/etc/hostname returns content", func(t *testing.T) {
-		str, err := commandexecutorfile.ReadAsString(commandexecutorexecoo.Exec(), "/etc/hostname")
+		ctx := getCtx()
+		str, err := commandexecutorfile.ReadAsString(ctx, commandexecutorexecoo.Exec(), "/etc/hostname")
 		require.NoError(t, err)
 		require.NotEmpty(t, str)
 	})
@@ -55,17 +58,20 @@ func TestReadAsString(t *testing.T) {
 
 func TestReadAsBytes(t *testing.T) {
 	t.Run("nil commandExecutor returns error", func(t *testing.T) {
-		bytes, err := commandexecutorfile.ReadAsBytes(nil, "/etc/hostname")
+		ctx := getCtx()
+		bytes, err := commandexecutorfile.ReadAsBytes(ctx, nil, "/etc/hostname")
 		require.Error(t, err)
 		require.Nil(t, bytes)
 	})
 	t.Run("empty filePath returns error", func(t *testing.T) {
-		bytes, err := commandexecutorfile.ReadAsBytes(commandexecutorexecoo.Exec(), "")
+		ctx := getCtx()
+		bytes, err := commandexecutorfile.ReadAsBytes(ctx, commandexecutorexecoo.Exec(), "")
 		require.Error(t, err)
 		require.Nil(t, bytes)
 	})
 	t.Run("/etc/hostname returns content", func(t *testing.T) {
-		bytes, err := commandexecutorfile.ReadAsBytes(commandexecutorexecoo.Exec(), "/etc/hostname")
+		ctx := getCtx()
+		bytes, err := commandexecutorfile.ReadAsBytes(ctx, commandexecutorexecoo.Exec(), "/etc/hostname")
 		require.NoError(t, err)
 		require.NotEmpty(t, bytes)
 	})
