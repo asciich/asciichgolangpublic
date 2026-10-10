@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"sync"
 	"time"
 
 	"github.com/moby/moby/api/pkg/stdcopy"
@@ -41,9 +42,15 @@ func NewContainer(name string) (*Container, error) {
 }
 
 func (c *Container) GetDeepCopy() commandexecutorinterfaces.CommandExecutor {
-	return &Container{
+	ret := &Container{
 		name: c.name,
 	}
+
+	// Without this the methods of the base class (e.g. RunCommandAndGetStdoutAsString)
+	// would not work on the copy.
+	ret.SetParentCommandExecutorForBaseClass(ret)
+
+	return ret
 }
 
 func (c *Container) SetName(name string) error {
@@ -253,6 +260,28 @@ func (c *Container) Remove(ctx context.Context, options *dockeroptions.RemoveOpt
 	return nil
 }
 
+// getExecExitCode returns the exit code of the finished exec 'execId'.
+//
+// There is a race condition returning an empty inspect while the exec is still closing.
+// Therefore the inspect is retried a few times.
+func getExecExitCode(ctx context.Context, cli *client.Client, execId string, containerName string) (int, error) {
+	for range 3 {
+		inspect, err := cli.ExecInspect(ctx, execId, client.ExecInspectOptions{})
+		if err != nil {
+			return -1, tracederrors.TracedErrorf("Failed to exec inspect for exec id='%s' and container '%s': %w", execId, containerName, err)
+		}
+
+		if inspect.ID == "" || inspect.ContainerID == "" {
+			time.Sleep(time.Millisecond * 100)
+			continue
+		}
+
+		return inspect.ExitCode, nil
+	}
+
+	return -1, tracederrors.TracedErrorf("Unable to get exit code for exec id='%s' in container '%s'", execId, containerName)
+}
+
 func (c *Container) RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions) (*commandoutput.CommandOutput, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
@@ -316,16 +345,16 @@ func (c *Container) RunCommand(ctx context.Context, options *parameteroptions.Ru
 	if isStdinSet {
 		_, err = attach.HijackedResponse.Conn.Write([]byte(options.StdinString))
 		if err != nil {
-			return nil, tracederrors.TracedErrorf("Failed to write to the stdin of container '%s' with exect id '%s': %w", name, execId, err)
+			return nil, tracederrors.TracedErrorf("Failed to write to the stdin of container '%s' with exec id '%s': %w", name, execId, err)
 		}
 
 		if cw, ok := attach.Conn.(interface{ CloseWrite() error }); ok {
 			err := cw.CloseWrite()
 			if err != nil {
-				return nil, tracederrors.TracedErrorf("Failed to close stdin of container '%s' with exect id '%s': %w", name, execId, err)
+				return nil, tracederrors.TracedErrorf("Failed to close stdin of container '%s' with exec id '%s': %w", name, execId, err)
 			}
 		} else {
-			return nil, tracederrors.TracedErrorf("Unable to close stdin of container '%s' with exect id '%s': %w", name, execId, err)
+			return nil, tracederrors.TracedErrorf("Unable to close stdin of container '%s' with exec id '%s': connection does not support CloseWrite", name, execId)
 		}
 	}
 
@@ -345,37 +374,18 @@ func (c *Container) RunCommand(ctx context.Context, options *parameteroptions.Ru
 		return nil, err
 	}
 
-	for range 3 {
-		inspect, err := cli.ExecInspect(ctx, execId, client.ExecInspectOptions{})
-		if err != nil {
-			return nil, tracederrors.TracedErrorf("Failed to exec inspect for exec id='%s' and container '%s': %w", execId, name, err)
-		}
-
-		if inspect.ID == "" || inspect.ContainerID == "" {
-			// There is a race condition returing an empty inspect while the container is still closing
-			time.Sleep(time.Millisecond * 100)
-			continue
-		}
-
-		err = output.SetReturnCode(inspect.ExitCode)
-		if err != nil {
-			return nil, err
-		}
-
-		break
+	exitCode, err := getExecExitCode(ctx, cli, execId, name)
+	if err != nil {
+		return nil, err
 	}
 
-	if !output.IsReturnCodeSet() {
-		return nil, tracederrors.TracedError("Unable to set return code for docker exec")
+	err = output.SetReturnCode(exitCode)
+	if err != nil {
+		return nil, err
 	}
 
 	if !options.AllowAllExitCodes {
 		if !output.IsExitSuccess() {
-			exitCode, err := output.GetReturnCode()
-			if err != nil {
-				return nil, err
-			}
-
 			stderr, err := output.GetStderrAsString()
 			if err != nil {
 				return nil, err
@@ -385,14 +395,9 @@ func (c *Container) RunCommand(ctx context.Context, options *parameteroptions.Ru
 		}
 	}
 
-	exitCode, err := output.GetReturnCode()
-	if err != nil {
-		return nil, err
-	}
-
 	logging.LogInfoByCtxf(ctx, "Run command '%s' in docker container '%s' finished with exit code=%d.", cmdJoined, name, exitCode)
 
-	return output, err
+	return output, nil
 }
 
 func (c *Container) Run(ctx context.Context, options *dockeroptions.DockerRunContainerOptions) error {
@@ -419,6 +424,15 @@ func (c *Container) Run(ctx context.Context, options *dockeroptions.DockerRunCon
 	return nil
 }
 
+// RunCommandAndGetStdoutAsIoReadCloser runs the command and returns its stdout as io.ReadCloser.
+//
+//   - stdout is streamed to the returned reader, stderr is collected for error messages.
+//   - After stdout reached EOF the exit code is validated. A non-zero exit code is
+//     returned as error by Read (instead of io.EOF) including stderr, unless
+//     options.AllowAllExitCodes is set.
+//   - Close() can be called at any time. Closing before EOF stops reading and skips the
+//     exit code validation (stopping early is not considered an error).
+//   - Calling Close() multiple times is safe.
 func (c *Container) RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.ReadCloser, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
@@ -478,31 +492,101 @@ func (c *Container) RunCommandAndGetStdoutAsIoReadCloser(ctx context.Context, op
 
 	pr, pw := io.Pipe()
 
+	// Closed when the background goroutine finished. Close() waits for it before
+	// closing the docker client, since the goroutine uses the client for ExecInspect.
+	copyDone := make(chan struct{})
+
+	go func() {
+		defer close(copyDone)
+
+		// stderr is only accessed inside this goroutine, so no locking is needed.
+		var stderr bytes.Buffer
+		_, err := stdcopy.StdCopy(pw, &stderr, attach.Reader)
+		if err != nil {
+			// Also happens if Close() was called before EOF: The reader is closed then
+			// and nobody receives this error anymore.
+			pw.CloseWithError(
+				tracederrors.TracedErrorf("Failed to read stdout of command '%s' in docker container '%s' with exec id '%s': %w", cmdJoined, name, execId, err),
+			)
+			return
+		}
+
+		// stdout reached EOF: Validate the exit code before signaling EOF to the reader.
+		_, err = WaitUntilExecFinished(ctx, execId)
+		if err != nil {
+			pw.CloseWithError(err)
+			return
+		}
+
+		exitCode, err := getExecExitCode(ctx, cli, execId, name)
+		if err != nil {
+			pw.CloseWithError(err)
+			return
+		}
+
+		if exitCode != 0 && !options.AllowAllExitCodes {
+			pw.CloseWithError(
+				tracederrors.TracedErrorf(
+					"Run command '%s' with stdout as io.ReadCloser in docker container '%s' failed. Exit code is: %d, stderr is\n%s",
+					cmdJoined,
+					name,
+					exitCode,
+					stderr.String(),
+				),
+			)
+			return
+		}
+
+		logging.LogInfoByCtxf(ctx, "Command '%s' with stdout as io.ReadCloser in docker container '%s' finished with exit code=%d.", cmdJoined, name, exitCode)
+
+		pw.Close() // signals EOF cleanly
+	}()
+
+	var closeOnce sync.Once
+	var closeErr error
+
 	ret := &ioutils.ReadCloser{
 		CloseFunc: func() error {
-			pr.Close()
-			attach.HijackedResponse.Close()
-			return cli.Close()
+			closeOnce.Do(func() {
+				// Unblock the goroutine: Writes to pw fail after closing pr,
+				// reads from attach.Reader fail after closing the connection.
+				pr.Close()
+				attach.HijackedResponse.Close()
+
+				// Ensure the goroutine is finished before the client is closed.
+				<-copyDone
+
+				closeErr = cli.Close()
+				if closeErr != nil {
+					closeErr = tracederrors.TracedErrorf("Failed to close docker client: %w", closeErr)
+				}
+			})
+			return closeErr
 		},
 		ReadFunc: func(p []byte) (n int, err error) {
 			return pr.Read(p)
 		},
 	}
 
-	go func() {
-		_, err := stdcopy.StdCopy(pw, io.Discard, attach.Reader)
-		if err != nil {
-			pw.CloseWithError(err) // propagates error to reader
-		} else {
-			pw.Close() // signals EOF cleanly
-		}
-	}()
-
 	logging.LogInfoByCtxf(ctx, "Run command '%s' with stdout as io.ReadCloser in docker container '%s' finished.", cmdJoined, name)
 
 	return ret, nil
 }
 
+// RunCommandAndGetStdinAsIoWriteCloser runs the command and returns its stdin as io.WriteCloser.
+//
+// Close() must be called to finish the command. It:
+//  1. Half-closes the connection (CloseWrite) so the command receives EOF on stdin
+//     after all written data is transmitted.
+//  2. Waits until stdout/stderr are fully consumed (EOF = command finished).
+//     stdout/stderr are drained in the background from the very beginning. Otherwise
+//     commands producing output (e.g. 'tee') could block, and closing the connection
+//     with unread data pending can reset it and silently drop not yet transmitted stdin data.
+//  3. Closes the connection and the client.
+//  4. Validates the exit code. A non-zero exit code returns an error including stderr
+//     unless options.AllowAllExitCodes is set.
+//
+// Calling Close() multiple times is safe, subsequent calls return the result of the first call.
 func (c *Container) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, options *parameteroptions.RunCommandOptions) (io.WriteCloser, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
@@ -561,13 +645,70 @@ func (c *Container) RunCommandAndGetStdinAsIoWriteCloser(ctx context.Context, op
 		return nil, tracederrors.TracedErrorf("Failed to exec attach for id '%s' on container '%s': %w", execId, name, err)
 	}
 
+	// Drain stdout/stderr in the background right from the start.
+	// stdout is discarded (it's a stdin writer), stderr is kept for error messages.
+	// The stderr buffer is only accessed after drainDone is received, so no locking is needed.
+	var stderr bytes.Buffer
+	drainDone := make(chan error, 1)
+	go func() {
+		_, err := stdcopy.StdCopy(io.Discard, &stderr, attach.Reader)
+		drainDone <- err
+	}()
+
+	closeAndWait := func() error {
+		defer cli.Close()
+		defer attach.HijackedResponse.Close()
+
+		// Signal EOF on stdin. All data written so far is transmitted before.
+		err := attach.HijackedResponse.CloseWrite()
+		if err != nil {
+			return tracederrors.TracedErrorf("Failed to close stdin of command '%s' in container '%s' with exec id '%s': %w", cmdJoined, name, execId, err)
+		}
+
+		// Wait until all output is consumed. EOF means the command has finished.
+		select {
+		case err = <-drainDone:
+		case <-ctx.Done():
+			return tracederrors.TracedErrorf("Context done while waiting for command '%s' in container '%s' to finish: %w", cmdJoined, name, ctx.Err())
+		}
+		if err != nil {
+			return tracederrors.TracedErrorf("Failed to read stdout and stderr of exec id '%s' on container '%s': %w", execId, name, err)
+		}
+
+		_, err = WaitUntilExecFinished(ctx, execId)
+		if err != nil {
+			return err
+		}
+
+		exitCode, err := getExecExitCode(ctx, cli, execId, name)
+		if err != nil {
+			return err
+		}
+
+		if exitCode != 0 && !options.AllowAllExitCodes {
+			return tracederrors.TracedErrorf(
+				"Run command '%s' with stdin as io.WriteCloser in docker container '%s' failed. Exit code is: %d, stderr is\n%s",
+				cmdJoined,
+				name,
+				exitCode,
+				stderr.String(),
+			)
+		}
+
+		logging.LogInfoByCtxf(ctx, "Command '%s' with stdin as io.WriteCloser in docker container '%s' finished with exit code=%d.", cmdJoined, name, exitCode)
+
+		return nil
+	}
+
+	var closeOnce sync.Once
+	var closeErr error
+
 	ret := &ioutils.WriteCloser{
 		CloseFunc: func() error {
-			attach.HijackedResponse.CloseWrite()
-			attach.HijackedResponse.Close()
-			cli.Close()
-			_, err := WaitUntilExecFinished(ctx, execId)
-			return err
+			closeOnce.Do(func() {
+				closeErr = closeAndWait()
+			})
+			return closeErr
 		},
 		WriteFunc: func(p []byte) (n int, err error) {
 			return attach.HijackedResponse.Conn.Write(p)

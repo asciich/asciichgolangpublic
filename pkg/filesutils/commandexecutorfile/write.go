@@ -5,11 +5,73 @@ import (
 	"io"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
+// verifyingWriteCloser wraps the stdin io.WriteCloser of the 'tee' command.
+//
+// Not every CommandExecutor reports a non-zero exit code of the command when
+// closing stdin (e.g. 'tee' failing because the file can not be created).
+// Therefore Close() verifies the written file exists and its size matches the
+// number of bytes written. The size is taken from the filesystem metadata
+// (GetSizeBytes uses 'stat'), the file content is not read.
+type verifyingWriteCloser struct {
+	ctx             context.Context
+	commandExecutor commandexecutorinterfaces.CommandExecutor
+	path            string
+	writeCloser     io.WriteCloser
+	bytesWritten    int64
+	closed          bool
+}
+
+func (v *verifyingWriteCloser) Write(p []byte) (int, error) {
+	n, err := v.writeCloser.Write(p)
+	v.bytesWritten += int64(n)
+	return n, err
+}
+
+// Close closes the underlying writer and verifies the result.
+// Calling Close multiple times is safe, only the first call has an effect.
+func (v *verifyingWriteCloser) Close() error {
+	if v.closed {
+		return nil
+	}
+	v.closed = true
+
+	err := v.writeCloser.Close()
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to close writer for '%s': %w", v.path, err)
+	}
+
+	sizeBytes, err := GetSizeBytes(v.ctx, v.commandExecutor, v.path)
+	if err != nil {
+		return tracederrors.TracedErrorf(
+			"Failed to verify '%s' was written: %w",
+			v.path,
+			filesgeneric.GetAsError(err),
+		)
+	}
+
+	if sizeBytes != v.bytesWritten {
+		return tracederrors.TracedErrorf(
+			"Writing '%s' failed: expected '%d' bytes but file has '%d' bytes",
+			v.path,
+			v.bytesWritten,
+			sizeBytes,
+		)
+	}
+
+	return nil
+}
+
+// OpenAsWriteCloser returns an io.WriteCloser writing to 'path'.
+//
+// Missing parent directories are created before the write command is started.
+// This must happen BEFORE starting 'tee' since 'tee' opens (and creates) the file
+// immediately on startup, not on the first write.
 func OpenAsWriteCloser(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, path string, options *filesoptions.WriteOptions) (io.WriteCloser, error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
@@ -20,7 +82,14 @@ func OpenAsWriteCloser(ctx context.Context, commandExecutor commandexecutorinter
 	}
 
 	if options == nil {
-		return nil, tracederrors.TracedErrorEmptyString("options")
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	err := CreateParentDirectory(ctx, commandExecutor, path, &filesoptions.CreateOptions{
+		UseSudo: options.UseSudo,
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	command := []string{"tee", path}
@@ -28,12 +97,26 @@ func OpenAsWriteCloser(ctx context.Context, commandExecutor commandexecutorinter
 		command = append([]string{"sudo"}, command...)
 	}
 
-	return commandExecutor.RunCommandAndGetStdinAsIoWriteCloser(
+	writeCloser, err := commandExecutor.RunCommandAndGetStdinAsIoWriteCloser(
 		ctx,
 		&parameteroptions.RunCommandOptions{
 			Command: command,
 		},
 	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &verifyingWriteCloser{
+		ctx:             ctx,
+		commandExecutor: commandExecutor,
+		path:            path,
+		writeCloser:     writeCloser,
+	}, nil
+}
+
+func WriteString(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, path string, content string, options *filesoptions.WriteOptions) error {
+	return WriteBytes(ctx, commandExecutor, path, []byte(content), options)
 }
 
 func WriteBytes(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, path string, content []byte, options *filesoptions.WriteOptions) error {
@@ -53,6 +136,7 @@ func WriteBytes(ctx context.Context, commandExecutor commandexecutorinterfaces.C
 		options = &filesoptions.WriteOptions{}
 	}
 
+	// OpenAsWriteCloser also creates missing parent directories.
 	writer, err := OpenAsWriteCloser(ctx, commandExecutor, path, options)
 	if err != nil {
 		return err
@@ -64,10 +148,6 @@ func WriteBytes(ctx context.Context, commandExecutor commandexecutorinterfaces.C
 		return tracederrors.TracedErrorf("Failed to write bytes to '%s': %w", path, err)
 	}
 
-	err = writer.Close()
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to close writer for '%s': %w", path, err)
-	}
-
-	return nil
+	// Close() also verifies the file was written correctly (see verifyingWriteCloser).
+	return writer.Close()
 }
