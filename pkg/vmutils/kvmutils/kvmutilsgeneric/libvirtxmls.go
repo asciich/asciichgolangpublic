@@ -33,6 +33,20 @@ func CreateXmlForVmAsString(createOptions *kvmutilsoptions.KvmCreateVmOptions) (
 		return "", err
 	}
 
+	// RAM size and CPU count are optional. When unset the defaults
+	// (kvmutilsoptions.DefaultVmRamSizeGb / DefaultCpuCount) are used.
+	// libvirt domain XML uses KiB as the default memory unit, so the RAM
+	// size is passed in KiB.
+	ramSizeKiB, err := createOptions.GetVmRamSizeKiBOrDefaultIfUnset()
+	if err != nil {
+		return "", err
+	}
+
+	cpuCount, err := createOptions.GetCpuCountOrDefaultIfUnset()
+	if err != nil {
+		return "", err
+	}
+
 	// The MAC address is optional. When empty libvirt auto-generates one.
 	// Only validate the format when a MAC address was explicitly provided.
 	macAddress := createOptions.MacAddress
@@ -55,6 +69,8 @@ func CreateXmlForVmAsString(createOptions *kvmutilsoptions.KvmCreateVmOptions) (
 			"DISK_PATH":                 diskPath,
 			"MAC_ADDRESS":               macAddress,
 			"BRIDGED_NETWORK_INTERFACE": bridgedNetworkInterface,
+			"RAM_SIZE_KIB":              ramSizeKiB,
+			"CPU_COUNT":                 cpuCount,
 		},
 	)
 	if err != nil {
