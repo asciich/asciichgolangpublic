@@ -7,7 +7,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
 )
 
 func TestTruncate(t *testing.T) {
@@ -46,6 +49,85 @@ func TestGetSizeBytes(t *testing.T) {
 		size, err := commandexecutorfile.GetSizeBytes(ctx, commandexecutorexecoo.Exec(), "/etc/hostname")
 		require.NoError(t, err)
 		require.Greater(t, size, int64(0))
+	})
+
+	t.Run("non exsiting file", func(t *testing.T) {
+		ctx := getCtx()
+		size, err := commandexecutorfile.GetSizeBytes(ctx, commandexecutorexecoo.Exec(), "/does/not/exist")
+		require.Error(t, err)
+		require.Zero(t, size)
+		require.True(t, filesgeneric.IsErrFileNotFound(err))
+	})
+}
+
+// Reproduces the error seen in commandexecutoriscsi.Test_EnsureInitiorNameConfig:
+//
+//	stat: unrecognized option: printf
+//	BusyBox v1.37.0 multi-call binary.
+//
+// alpine:latest uses BusyBox's stat, which doesn't support the GNU-only
+// "--printf" option.
+func TestGetSizeBytesAndIsEmptyFileInAlpineContainer(t *testing.T) {
+	ctx := getCtx()
+
+	// Get docker on local host
+	docker, err := dockerutils.GetDockerOnLocalHost()
+	require.NoError(t, err)
+
+	// Use a temporary container for testing.
+	// Different name than in the iscsi test to avoid collisions when
+	// packages are tested in parallel.
+	const containerName = "test-commandexecutorfile-alpine"
+
+	// Ensure the container is absent before we start
+	err = docker.RemoveContainer(ctx, containerName, &dockeroptions.RemoveOptions{Force: true})
+	require.NoError(t, err)
+
+	// Same container setup as in Test_EnsureInitiorNameConfig
+	container, err := docker.RunContainer(
+		ctx,
+		&dockeroptions.DockerRunContainerOptions{
+			Name:                 containerName,
+			Command:              []string{"sleep", "60s"},
+			ImageName:            "alpine:latest",
+			KeepStoppedContainer: true,
+		},
+	)
+	require.NoError(t, err)
+
+	// In any case we delete the container after this test
+	defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+
+	t.Run("GetSizeBytes of /etc/passwd returns size", func(t *testing.T) {
+		ctx := getCtx()
+
+		size, err := commandexecutorfile.GetSizeBytes(ctx, container, "/etc/passwd")
+		require.NoError(t, err)
+		require.Greater(t, size, int64(0))
+	})
+
+	t.Run("GetSizeBytes of /etc/hostname returns size", func(t *testing.T) {
+		ctx := getCtx()
+
+		size, err := commandexecutorfile.GetSizeBytes(ctx, container, "/etc/hostname")
+		require.NoError(t, err)
+		require.Greater(t, size, int64(0))
+	})
+
+	t.Run("IsEmptyFile of /etc/passwd returns false", func(t *testing.T) {
+		ctx := getCtx()
+
+		isEmpty, err := commandexecutorfile.IsEmptyFile(ctx, container, "/etc/passwd")
+		require.NoError(t, err)
+		require.False(t, isEmpty)
+	})
+
+	t.Run("IsEmptyFile of nonexistent file returns error", func(t *testing.T) {
+		ctx := getCtx()
+
+		isEmpty, err := commandexecutorfile.IsEmptyFile(ctx, container, "/tmp/this_file_does_not_exist_abc123xyz")
+		require.Error(t, err)
+		require.False(t, isEmpty)
 	})
 }
 

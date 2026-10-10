@@ -436,6 +436,34 @@ pkg/<domain>/<packagename>/
         ```
     - Use `t.NoError(t, err)` to check for errors. Do not use less specific `t.Nil(t, err)`.
 - Test files must use the external test package (e.g. `package nativegit_test` instead of `package nativegit`) to ensure only exported API is tested.
+- Reuse existing functions to set up test preconditions:
+    - Do **not** reimplement logic in tests (e.g. using raw shell commands via `RunCommand...`) if the repository already provides a function for it. The rule to reuse sub packages and avoid duplicated code (see [Implementation](#implementation)) applies to tests as well.
+    - Since all exported functions are idempotent, they can be used to directly **ensure** the desired precondition (e.g. a file is absent) instead of only **checking** it. This makes tests independent of leftovers from previous runs and of the initial state of the test environment.
+    - Use:
+        ```golang
+        t.Run("creates initiator name file when it does not exist", func(t *testing.T) {
+            err := commandexecutorfile.Delete(ctx, container, "/etc/iscsi/initiatorname.iscsi", &filesoptions.DeleteOptions{})
+            require.NoError(t, err)
+
+            // ... continue with the test logic
+        })
+        ```
+    - Instead of:
+        ```golang
+        t.Run("creates initiator name file when it does not exist", func(t *testing.T) {
+            // First ensure the file does not exist in the container
+            stdout, err := container.RunCommandAndGetStdoutAsString(
+                ctx,
+                &parameteroptions.RunCommandOptions{
+                    Command: []string{"sh", "-c", "test -f /etc/iscsi/initiatorname.iscsi && echo 'exists' || echo 'not exists'"},
+                },
+            )
+            require.NoError(t, err)
+            require.Contains(t, stdout, "not exists")
+
+            // ... continue with the test logic
+        })
+        ```
 - Unit Test Structure:
     - Use t.Run subtests for distinct assertions
         - When a single test function validates multiple distinct behaviors or cases, each case must be wrapped in its own t.Run subtest. This provides clearer test output, allows individual subtests to be run in isolation, and makes failures easier to identify.
