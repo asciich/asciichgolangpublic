@@ -1,12 +1,14 @@
 package kubernetescmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/eventscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/k9scmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/kindcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/kubectlcmd"
-	"os"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/longhorncmd"
 )
 
 func NewKubernetesCmd() *cobra.Command {
@@ -26,6 +28,7 @@ Usage:
 		k9scmd.NewK9sCmd(),
 		kindcmd.NewKindCmd(),
 		kubectlcmd.NewKubectlCmd(),
+		longhorncmd.NewLonghornCmd(),
 		ListKindNamesCmd(),
 	)
 
