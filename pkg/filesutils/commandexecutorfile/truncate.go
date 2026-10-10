@@ -12,6 +12,23 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
+func IsEmptyFile(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, path string) (bool, error) {
+	if commandExecutor == nil {
+		return false, tracederrors.TracedErrorNil("commandExecutor")
+	}
+
+	if path == "" {
+		return false, tracederrors.TracedErrorEmptyString("path")
+	}
+
+	sizeBytes, err := GetSizeBytes(ctx, commandExecutor, path)
+	if err != nil {
+		return false, err
+	}
+
+	return sizeBytes == 0, nil
+}
+
 func Truncate(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, path string, newSizeBytes int64) error {
 	if commandExecutor == nil {
 		return tracederrors.TracedErrorNil("commandExecutor")
