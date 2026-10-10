@@ -266,7 +266,7 @@ func (h *HttpCommandExecutorClient) SendRequest(ctx context.Context, requestOpti
 		return nil, err
 	}
 
-	headersContent, err := commandexecutorfile.ReadAsBytes(commandExecutor, headersFile)
+	headersContent, err := commandexecutorfile.ReadAsBytes(ctx, commandExecutor, headersFile)
 	if err != nil {
 		return nil, err
 	}

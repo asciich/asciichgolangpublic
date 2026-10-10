@@ -44,8 +44,8 @@ func ReadFirstNBytes(ctx context.Context, commandExecutor commandexecutorinterfa
 	return firstBytes, nil
 }
 
-func ReadAsString(commandExecutor commandexecutorinterfaces.CommandExecutor, filePath string) (string, error) {
-	b, err := ReadAsBytes(commandExecutor, filePath)
+func ReadAsString(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, filePath string) (string, error) {
+	b, err := ReadAsBytes(ctx, commandExecutor, filePath)
 	if err != nil {
 		return "", err
 	}
@@ -53,7 +53,7 @@ func ReadAsString(commandExecutor commandexecutorinterfaces.CommandExecutor, fil
 	return string(b), err
 }
 
-func ReadAsBytes(commandExecutor commandexecutorinterfaces.CommandExecutor, filePath string) ([]byte, error) {
+func ReadAsBytes(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, filePath string) ([]byte, error) {
 	if commandExecutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExectuor")
 	}

@@ -62,7 +62,7 @@ func ReadFileFromTarArchiveAsBytes(ctx context.Context, commandExecutor commande
 
 	logging.LogInfoByCtxf(ctx, "Read '%s' from tar archive '%s' on '%s' started.", fileName, archivePath, hostDescription)
 
-	archiveBytes, err := commandexecutorfile.ReadAsBytes(commandExecutor, archivePath)
+	archiveBytes, err := commandexecutorfile.ReadAsBytes(ctx, commandExecutor, archivePath)
 	if err != nil {
 		return nil, err
 	}

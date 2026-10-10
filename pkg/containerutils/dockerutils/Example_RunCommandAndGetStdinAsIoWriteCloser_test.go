@@ -72,7 +72,7 @@ func Test_Example_RunCommandAndGetStdinAsIoWriteCloser(t *testing.T) {
 	require.NoError(t, err)
 
 	// Read back the written file and check the content:
-	content, err := commandexecutorfile.ReadAsString(container, "/testfile")
+	content, err := commandexecutorfile.ReadAsString(ctx, container, "/testfile")
 	require.NoError(t, err)
 	require.EqualValues(t, "hello world.\n", content)
 }

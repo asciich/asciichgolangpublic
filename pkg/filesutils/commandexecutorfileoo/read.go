@@ -22,7 +22,7 @@ func (f *File) ReadAsBytes(ctx context.Context) (content []byte, err error) {
 		return nil, err
 	}
 
-	return commandexecutorfile.ReadAsBytes(commandExecutor, filePath)
+	return commandexecutorfile.ReadAsBytes(ctx, commandExecutor, filePath)
 }
 
 func (f *File) OpenAsReadCloser(ctx context.Context) (io.ReadCloser, error) {

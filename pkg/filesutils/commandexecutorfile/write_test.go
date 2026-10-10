@@ -486,7 +486,7 @@ func Test_WriteBytesInAlpineContainer(t *testing.T) {
 		err := commandexecutorfile.WriteBytes(ctx, container, path, []byte("hello world"), nil)
 		require.NoError(t, err)
 
-		got, err := commandexecutorfile.ReadAsString(container, path)
+		got, err := commandexecutorfile.ReadAsString(ctx, container, path)
 		require.NoError(t, err)
 		require.EqualValues(t, "hello world", got)
 	})
@@ -505,7 +505,7 @@ func Test_WriteBytesInAlpineContainer(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, exists)
 
-		got, err := commandexecutorfile.ReadAsString(container, path)
+		got, err := commandexecutorfile.ReadAsString(ctx, container, path)
 		require.NoError(t, err)
 		require.EqualValues(t, "created", got)
 	})
@@ -521,7 +521,7 @@ func Test_WriteBytesInAlpineContainer(t *testing.T) {
 		err := commandexecutorfile.WriteBytes(ctx, container, path, content, &filesoptions.WriteOptions{})
 		require.NoError(t, err)
 
-		got, err := commandexecutorfile.ReadAsString(container, path)
+		got, err := commandexecutorfile.ReadAsString(ctx, container, path)
 		require.NoError(t, err)
 		require.EqualValues(t, "hello world", got)
 
@@ -546,7 +546,7 @@ func Test_WriteBytesInAlpineContainer(t *testing.T) {
 		require.NoError(t, err)
 		require.EqualValues(t, len(content), size)
 
-		got, err := commandexecutorfile.ReadAsString(container, path)
+		got, err := commandexecutorfile.ReadAsString(ctx, container, path)
 		require.NoError(t, err)
 		require.True(t, bytes.Equal(content, []byte(got)))
 	})
@@ -581,7 +581,7 @@ func Test_WriteBytesInAlpineContainer(t *testing.T) {
 		err := commandexecutorfile.WriteBytes(ctx, container, path, content, &filesoptions.WriteOptions{})
 		require.NoError(t, err)
 
-		got, err := commandexecutorfile.ReadAsString(container, path)
+		got, err := commandexecutorfile.ReadAsString(ctx, container, path)
 		require.NoError(t, err)
 		require.EqualValues(t, "line1\nline2\nline3\n", got)
 
@@ -601,7 +601,7 @@ func Test_WriteBytesInAlpineContainer(t *testing.T) {
 		err := commandexecutorfile.WriteBytes(ctx, container, path, content, &filesoptions.WriteOptions{})
 		require.NoError(t, err)
 
-		got, err := commandexecutorfile.ReadAsString(container, path)
+		got, err := commandexecutorfile.ReadAsString(ctx, container, path)
 		require.NoError(t, err)
 		require.EqualValues(t, string(content), got)
 	})
@@ -619,7 +619,7 @@ func Test_WriteBytesInAlpineContainer(t *testing.T) {
 		err = commandexecutorfile.WriteBytes(ctx, container, path, []byte("short"), &filesoptions.WriteOptions{})
 		require.NoError(t, err)
 
-		got, err := commandexecutorfile.ReadAsString(container, path)
+		got, err := commandexecutorfile.ReadAsString(ctx, container, path)
 		require.NoError(t, err)
 		require.EqualValues(t, "short", got)
 
@@ -644,7 +644,7 @@ func Test_WriteBytesInAlpineContainer(t *testing.T) {
 		require.NoError(t, err)
 		require.EqualValues(t, len(content), size)
 
-		got, err := commandexecutorfile.ReadAsString(container, path)
+		got, err := commandexecutorfile.ReadAsString(ctx, container, path)
 		require.NoError(t, err)
 		require.Len(t, got, len(content))
 		require.True(t, bytes.Equal(content, []byte(got)))
@@ -657,7 +657,7 @@ func Test_WriteBytesInAlpineContainer(t *testing.T) {
 		err := commandexecutorfile.WriteBytes(ctx, container, path, []byte("hello"), &filesoptions.WriteOptions{})
 		require.NoError(t, err)
 
-		got, err := commandexecutorfile.ReadAsString(container, path)
+		got, err := commandexecutorfile.ReadAsString(ctx, container, path)
 		require.NoError(t, err)
 		require.EqualValues(t, "hello", got)
 	})

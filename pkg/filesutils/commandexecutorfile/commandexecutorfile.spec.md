@@ -12,5 +12,12 @@ This document extends the [constitution.md](/constitution.md).
 ## Testing
 
 - A unit test for all functions performing a `RunCommand` must be added.
-- For tests requiring `sudo` use docker container as provided by the `dockerutils` package.
+- For tests requiring `sudo` use docker container as provided by the `dockerutils` package and the `alpine:latest` image.
+    - Install sudo as part fo the test using:
+        ```golang
+        _, err = container.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+            Command: []string{"apk", "add", "--no-cache", "sudo"},
+        })
+        require.NoError(t, err)
+        ```
 - Test all functions with the `alpine:latest` image. It uses busybox and this package must support it.

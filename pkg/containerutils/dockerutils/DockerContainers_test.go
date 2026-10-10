@@ -468,7 +468,7 @@ func Test_RunCommandAndGetStdinAsIoWriteCloser(t *testing.T) {
 			err = writeCloser.Close()
 			require.NoError(t, err)
 
-			content, err := commandexecutorfile.ReadAsString(container, "/testfile")
+			content, err := commandexecutorfile.ReadAsString(ctx, container, "/testfile")
 			require.NoError(t, err)
 			require.EqualValues(t, "hello world.\n", content)
 		})

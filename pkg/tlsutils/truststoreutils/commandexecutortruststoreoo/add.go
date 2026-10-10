@@ -21,7 +21,7 @@ func (c *CommandExecutorTrustStore) AddCaCertificateFromFile(ctx context.Context
 		return tracederrors.TracedErrorEmptyString("path")
 	}
 
-	certBytes, err := commandexecutorfile.ReadAsBytes(c.commandExecutor, path)
+	certBytes, err := commandexecutorfile.ReadAsBytes(ctx, c.commandExecutor, path)
 	if err != nil {
 		return fmt.Errorf("failed to read certificate file: %w", err)
 	}
