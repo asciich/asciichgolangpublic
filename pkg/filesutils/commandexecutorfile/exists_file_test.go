@@ -5,6 +5,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
 )
 
@@ -57,6 +59,52 @@ func TestDirectoryExists(t *testing.T) {
 	t.Run("nonexistent directory returns false", func(t *testing.T) {
 		ctx := getCtx()
 		exists, err := commandexecutorfile.DirectoryExists(ctx, commandexecutorexecoo.Exec(), "/nonexistent/directory")
+		require.NoError(t, err)
+		require.False(t, exists)
+	})
+}
+
+func TestFileExistsAndDirectoryExistsInAlpineContainer(t *testing.T) {
+	ctx := getCtx()
+
+	docker, err := dockerutils.GetDockerOnLocalHost()
+	require.NoError(t, err)
+
+	const containerName = "test-commandexecutorfile-exists-file-alpine"
+
+	err = docker.RemoveContainer(ctx, containerName, &dockeroptions.RemoveOptions{Force: true})
+	require.NoError(t, err)
+
+	container, err := docker.RunContainer(
+		ctx,
+		&dockeroptions.DockerRunContainerOptions{
+			Name:                 containerName,
+			Command:              []string{"sleep", "60s"},
+			ImageName:            "alpine:latest",
+			KeepStoppedContainer: true,
+		},
+	)
+	require.NoError(t, err)
+
+	defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+
+	t.Run("/etc/hostname file exists in alpine", func(t *testing.T) {
+		ctx := getCtx()
+		exists, err := commandexecutorfile.FileExists(ctx, container, "/etc/hostname")
+		require.NoError(t, err)
+		require.True(t, exists)
+	})
+
+	t.Run("/tmp directory exists in alpine", func(t *testing.T) {
+		ctx := getCtx()
+		exists, err := commandexecutorfile.DirectoryExists(ctx, container, "/tmp")
+		require.NoError(t, err)
+		require.True(t, exists)
+	})
+
+	t.Run("nonexistent file returns false in alpine", func(t *testing.T) {
+		ctx := getCtx()
+		exists, err := commandexecutorfile.FileExists(ctx, container, "/nonexistent/alpine/file")
 		require.NoError(t, err)
 		require.False(t, exists)
 	})

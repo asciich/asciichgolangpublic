@@ -84,7 +84,7 @@ func (p *PackageManagerGeneric) detectPackageManager(ctx context.Context) error 
 	}
 
 	// Read /etc/os-release to detect the distribution
-	osRelease, err := commandexecutorfile.ReadAsBytes(commandExecutor, "/etc/os-release")
+	osRelease, err := commandexecutorfile.ReadAsBytes(ctx, commandExecutor, "/etc/os-release")
 	if err != nil {
 		return tracederrors.TracedErrorf("failed to read /etc/os-release: %w", err)
 	}

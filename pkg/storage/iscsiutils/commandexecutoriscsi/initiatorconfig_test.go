@@ -100,7 +100,7 @@ func Test_EnsureInitiorNameConfig(t *testing.T) {
 			require.EqualValues(t, checksum, checksum2)
 
 			// Check content:
-			content, err := commandexecutorfile.ReadAsString(container, path)
+			content, err := commandexecutorfile.ReadAsString(ctx, container, path)
 			require.NoError(t, err)
 			require.Contains(t, content, "InitiatorName=iqn.2016-04.com.open-iscsi:")
 		})

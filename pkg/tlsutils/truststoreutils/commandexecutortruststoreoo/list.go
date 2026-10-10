@@ -116,7 +116,7 @@ func (c *CommandExecutorTrustStore) readDirEntries(ctx context.Context, path str
 }
 
 func (c *CommandExecutorTrustStore) loadCertificateFromFile(ctx context.Context, path string) (*x509.Certificate, error) {
-	data, err := commandexecutorfile.ReadAsBytes(c.commandExecutor, path)
+	data, err := commandexecutorfile.ReadAsBytes(ctx, c.commandExecutor, path)
 	if err != nil {
 		return nil, err
 	}

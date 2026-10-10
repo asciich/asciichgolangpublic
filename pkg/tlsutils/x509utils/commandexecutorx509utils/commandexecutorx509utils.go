@@ -28,7 +28,7 @@ func ReadCertificateFromFile(ctx context.Context, commandExecutor commandexecuto
 
 	logging.LogInfoByCtxf(ctx, "Read certificate from file '%s' using command executor started.", pathToRead)
 
-	content, err := commandexecutorfile.ReadAsBytes(commandExecutor, pathToRead)
+	content, err := commandexecutorfile.ReadAsBytes(ctx, commandExecutor, pathToRead)
 	if err != nil {
 		return nil, err
 	}

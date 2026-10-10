@@ -5,6 +5,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils"
+	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockeroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/commandexecutorfile"
 )
 
@@ -85,6 +87,55 @@ func TestExists(t *testing.T) {
 		ctx := getCtx()
 
 		exists, err := commandexecutorfile.Exists(ctx, commandexecutorexecoo.Exec(), "/tmp/path with spaces that does not exist")
+		require.NoError(t, err)
+		require.False(t, exists)
+	})
+}
+
+func TestExistsInAlpineContainer(t *testing.T) {
+	ctx := getCtx()
+
+	docker, err := dockerutils.GetDockerOnLocalHost()
+	require.NoError(t, err)
+
+	const containerName = "test-commandexecutorfile-exists-alpine"
+
+	err = docker.RemoveContainer(ctx, containerName, &dockeroptions.RemoveOptions{Force: true})
+	require.NoError(t, err)
+
+	container, err := docker.RunContainer(
+		ctx,
+		&dockeroptions.DockerRunContainerOptions{
+			Name:                 containerName,
+			Command:              []string{"sleep", "60s"},
+			ImageName:            "alpine:latest",
+			KeepStoppedContainer: true,
+		},
+	)
+	require.NoError(t, err)
+
+	defer container.Remove(ctx, &dockeroptions.RemoveOptions{Force: true})
+
+	t.Run("/etc/hostname exists in alpine", func(t *testing.T) {
+		ctx := getCtx()
+
+		exists, err := commandexecutorfile.Exists(ctx, container, "/etc/hostname")
+		require.NoError(t, err)
+		require.True(t, exists)
+	})
+
+	t.Run("/bin/sh exists in alpine", func(t *testing.T) {
+		ctx := getCtx()
+
+		exists, err := commandexecutorfile.Exists(ctx, container, "/bin/sh")
+		require.NoError(t, err)
+		require.True(t, exists)
+	})
+
+	t.Run("nonexistent file returns false in alpine", func(t *testing.T) {
+		ctx := getCtx()
+
+		exists, err := commandexecutorfile.Exists(ctx, container, "/nonexistent/alpine/file")
 		require.NoError(t, err)
 		require.False(t, exists)
 	})

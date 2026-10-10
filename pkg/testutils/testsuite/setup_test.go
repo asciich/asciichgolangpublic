@@ -255,7 +255,7 @@ data:
 		return nil, nil, err
 	}
 
-	configInContainer, err := commandexecutorfile.ReadAsString(pod, testUserHome+"/.kube/config")
+	configInContainer, err := commandexecutorfile.ReadAsString(ctx, pod, testUserHome+"/.kube/config")
 	if err != nil {
 		return nil, nil, err
 	}

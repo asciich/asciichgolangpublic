@@ -252,7 +252,7 @@ func SignContentBytes(ctx context.Context, commandExecutor commandexecutorinterf
 	}
 
 	// Read the signature
-	signature, err = commandexecutorfile.ReadAsBytes(commandExecutor, tempSigPath)
+	signature, err = commandexecutorfile.ReadAsBytes(ctx, commandExecutor, tempSigPath)
 	if err != nil {
 		return nil, err
 	}
