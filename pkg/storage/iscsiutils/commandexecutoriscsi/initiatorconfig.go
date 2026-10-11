@@ -14,9 +14,9 @@ import (
 
 const initiatorNameFilePath = "/etc/iscsi/initiatorname.iscsi"
 
-// EnsureInitiorNameConfig ensures that the /etc/iscsi/initiatorname.iscsi file exists.
+// EnsureInitiatorNameConfig ensures that the /etc/iscsi/initiatorname.iscsi file exists.
 // If it does not exist, it creates it with a proper, new generated InitiatorName.
-func EnsureInitiorNameConfig(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, options *filesoptions.CreateOptions) error {
+func EnsureInitiatorNameConfig(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, options *filesoptions.CreateOptions) error {
 	if commandExecutor == nil {
 		return tracederrors.TracedErrorNil("commandExecutor")
 	}

@@ -16,7 +16,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/storage/iscsiutils/commandexecutoriscsi"
 )
 
-func Test_EnsureInitiorNameConfig(t *testing.T) {
+func Test_EnsureInitiatorNameConfig(t *testing.T) {
 	ctx := contextutils.ContextVerbose()
 
 	// Get docker on local host
@@ -73,7 +73,7 @@ func Test_EnsureInitiorNameConfig(t *testing.T) {
 			// Execute function under test.
 			// It must create the missing file.
 			changedCtx := contextutils.WithChangeIndicator(ctx)
-			err = commandexecutoriscsi.EnsureInitiorNameConfig(changedCtx, container, &filesoptions.CreateOptions{UseSudo: tt.UseSudo})
+			err = commandexecutoriscsi.EnsureInitiatorNameConfig(changedCtx, container, &filesoptions.CreateOptions{UseSudo: tt.UseSudo})
 			require.NoError(t, err)
 			require.True(t, contextutils.IsChanged(changedCtx))
 
@@ -86,7 +86,7 @@ func Test_EnsureInitiorNameConfig(t *testing.T) {
 
 			// Idempotence check: Running again should not change it:
 			changedCtx = contextutils.WithChangeIndicator(ctx)
-			err = commandexecutoriscsi.EnsureInitiorNameConfig(changedCtx, container, &filesoptions.CreateOptions{UseSudo: tt.UseSudo})
+			err = commandexecutoriscsi.EnsureInitiatorNameConfig(changedCtx, container, &filesoptions.CreateOptions{UseSudo: tt.UseSudo})
 			require.NoError(t, err)
 			require.False(t, contextutils.IsChanged(changedCtx))
 
