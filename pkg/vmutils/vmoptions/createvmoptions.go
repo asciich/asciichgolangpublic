@@ -2,6 +2,7 @@ package vmoptions
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsoptions"
 )
 
 type CreateVmOptions struct {
@@ -9,6 +10,8 @@ type CreateVmOptions struct {
 	DiskImageName   string
 	MacAddress      string
 	BridgeInterface string
+	VmRamSizeGb     int
+	CpuCount        int
 }
 
 func NewCreateVmOptions() (c *CreateVmOptions) {
@@ -45,6 +48,30 @@ func (c *CreateVmOptions) GetBridgeInterface() (bridgeInterface string, err erro
 	}
 
 	return c.BridgeInterface, nil
+}
+
+func (c *CreateVmOptions) GetVmRamSizeGb() (vmRamSizeGb int, err error) {
+	if c.VmRamSizeGb == 0 {
+		return 0, tracederrors.TracedErrorf("VmRamSizeGb not set")
+	}
+
+	if c.VmRamSizeGb < 0 {
+		return 0, tracederrors.TracedErrorf("Invalid VmRamSizeGb '%d'. Must be > 0.", c.VmRamSizeGb)
+	}
+
+	return c.VmRamSizeGb, nil
+}
+
+func (c *CreateVmOptions) GetCpuCount() (cpuCount int, err error) {
+	if c.CpuCount == 0 {
+		return 0, tracederrors.TracedErrorf("CpuCount not set")
+	}
+
+	if c.CpuCount < 0 {
+		return 0, tracederrors.TracedErrorf("Invalid CpuCount '%d'. Must be > 0.", c.CpuCount)
+	}
+
+	return c.CpuCount, nil
 }
 
 func (c *CreateVmOptions) SetVmName(vmName string) (err error) {
@@ -87,6 +114,44 @@ func (c *CreateVmOptions) SetBridgeInterface(bridgeInterface string) (err error)
 	return nil
 }
 
+func (c *CreateVmOptions) SetVmRamSizeGb(vmRamSizeGb int) (err error) {
+	if vmRamSizeGb <= 0 {
+		return tracederrors.TracedErrorf("Invalid vmRamSizeGb '%d'. Must be > 0.", vmRamSizeGb)
+	}
+
+	c.VmRamSizeGb = vmRamSizeGb
+
+	return nil
+}
+
+func (c *CreateVmOptions) SetCpuCount(cpuCount int) (err error) {
+	if cpuCount <= 0 {
+		return tracederrors.TracedErrorf("Invalid cpuCount '%d'. Must be > 0.", cpuCount)
+	}
+
+	c.CpuCount = cpuCount
+
+	return nil
+}
+
 func (c *CreateVmOptions) GetBridgeInterfaceOrEmptyStringIfUnset() (string, error) {
 	return c.BridgeInterface, nil
+}
+
+// Returns the RAM size in GB or kvmutilsoptions.DefaultVmRamSizeGb if unset.
+func (c *CreateVmOptions) GetVmRamSizeGbOrDefaultIfUnset() (vmRamSizeGb int, err error) {
+	if c.VmRamSizeGb == 0 {
+		return kvmutilsoptions.DefaultVmRamSizeGb, nil
+	}
+
+	return c.GetVmRamSizeGb()
+}
+
+// Returns the CPU count or kvmutilsoptions.DefaultCpuCount if unset.
+func (c *CreateVmOptions) GetCpuCountOrDefaultIfUnset() (cpuCount int, err error) {
+	if c.CpuCount == 0 {
+		return kvmutilsoptions.DefaultCpuCount, nil
+	}
+
+	return c.GetCpuCount()
 }

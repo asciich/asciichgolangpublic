@@ -7,9 +7,9 @@
     </libosinfo:libosinfo>
   </metadata>
 
-  <memory unit='KiB'>2097152</memory>
-  <currentMemory unit='KiB'>2097152</currentMemory>
-  <vcpu placement='static'>2</vcpu>
+  <memory unit='KiB'>{{ .RAM_SIZE_KIB }}</memory>
+  <currentMemory unit='KiB'>{{ .RAM_SIZE_KIB }}</currentMemory>
+  <vcpu placement='static'>{{ .CPU_COUNT }}</vcpu>
 
   <os>
     <type arch='x86_64' machine='q35'>hvm</type>
