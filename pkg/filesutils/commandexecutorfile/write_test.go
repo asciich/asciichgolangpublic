@@ -432,7 +432,7 @@ func Test_WriteBytesInAlpineContainer(t *testing.T) {
 	err = docker.RemoveContainer(ctx, containerName, &dockeroptions.RemoveOptions{Force: true})
 	require.NoError(t, err)
 
-	// Same container setup as in Test_EnsureInitiorNameConfig
+	// Same container setup as in Test_EnsureInitiatorNameConfig
 	container, err := docker.RunContainer(
 		ctx,
 		&dockeroptions.DockerRunContainerOptions{

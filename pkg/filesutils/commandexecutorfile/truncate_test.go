@@ -60,7 +60,7 @@ func TestGetSizeBytes(t *testing.T) {
 	})
 }
 
-// Reproduces the error seen in commandexecutoriscsi.Test_EnsureInitiorNameConfig:
+// Reproduces the error seen in commandexecutoriscsi.Test_EnsureInitiatorNameConfig:
 //
 //	stat: unrecognized option: printf
 //	BusyBox v1.37.0 multi-call binary.
@@ -83,7 +83,7 @@ func TestGetSizeBytesAndIsEmptyFileInAlpineContainer(t *testing.T) {
 	err = docker.RemoveContainer(ctx, containerName, &dockeroptions.RemoveOptions{Force: true})
 	require.NoError(t, err)
 
-	// Same container setup as in Test_EnsureInitiorNameConfig
+	// Same container setup as in Test_EnsureInitiatorNameConfig
 	container, err := docker.RunContainer(
 		ctx,
 		&dockeroptions.DockerRunContainerOptions{

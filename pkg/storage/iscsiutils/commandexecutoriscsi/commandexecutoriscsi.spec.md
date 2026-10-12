@@ -2,7 +2,7 @@
 
 ## Implementation
 
-- The `EnsureInitiorNameConfig` function ensures:
+- The `EnsureInitiatorNameConfig` function ensures:
     - The `/etc/iscsi/initiatorname.iscsi` exists.
     - If it does not exsit create it with a proper, new generated InitiatorName provided by the `iscsigeneric` package.
         - Example:
