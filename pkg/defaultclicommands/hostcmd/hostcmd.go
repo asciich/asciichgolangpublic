@@ -2,9 +2,9 @@ package hostcmd
 
 import (
 	"github.com/spf13/cobra"
-	"os"
 
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/hostcmd/hostnamecmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/hostcmd/hostreconcilercmd"
 )
 
 func NewHostCmd() *cobra.Command {
@@ -13,14 +13,12 @@ func NewHostCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "host",
 		Short: short,
-		Long: short + `
-
-Usage:
-    ` + os.Args[0] + ` host <subcommand>`,
+		Long:  short,
 	}
 
 	cmd.AddCommand(
 		hostnamecmd.NewHostnameCmd(),
+		hostreconcilercmd.NewHostReconcilerCmd(),
 	)
 
 	return cmd
