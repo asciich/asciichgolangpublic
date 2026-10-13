@@ -135,3 +135,45 @@ func (d *DirectorySource) loadHostConfig(ctx context.Context) (*hostConfig, erro
 
 	return ret, nil
 }
+
+// readHostConfig reads and parses the host.yaml file of the config directory.
+func (d *DirectorySource) readHostConfig(ctx context.Context) (*hostConfig, error) {
+	if d.dirPath == "" {
+		return nil, tracederrors.TracedErrorEmptyString("dirPath")
+	}
+
+	configPath := filepath.Join(d.dirPath, HostConfigFileName)
+
+	file, err := os.Open(configPath)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Unable to open host config '%s': %w", configPath, err)
+	}
+	defer file.Close()
+
+	decoder := yaml.NewDecoder(file)
+	decoder.KnownFields(true)
+
+	ret := &hostConfig{}
+	err = decoder.Decode(ret)
+	if err != nil && !errors.Is(err, io.EOF) {
+		return nil, tracederrors.TracedErrorf("Unable to parse host config '%s': %w", configPath, err)
+	}
+
+	return ret, nil
+}
+
+// GetNetworkInterfaces returns the network interfaces defined in 'network.interfaces' of the host.yaml file.
+// Returns an empty slice if no network interfaces are configured.
+func (d *DirectorySource) GetNetworkInterfaces(ctx context.Context) ([]NetworkInterface, error) {
+	config, err := d.readHostConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return a copy so callers can not modify the parsed config.
+	ret := append([]NetworkInterface{}, config.Network.Interfaces...)
+
+	logging.LogInfoByCtxf(ctx, "Read '%d' network interfaces from '%s'.", len(ret), HostConfigFileName)
+
+	return ret, nil
+}

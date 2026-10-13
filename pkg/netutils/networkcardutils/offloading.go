@@ -596,7 +596,7 @@ func generateLinkFileContent(ctx context.Context, fd int, iface *net.Interface) 
 
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "# %s\n", getLinkFilePath(networkCardName))
-	sb.WriteString("# Managed by netoworkcardutils.DeactivateOffloading. Manual changes will be overwritten.\n")
+	sb.WriteString("# Managed by networkcardutils.DeactivateOffloading. Manual changes will be overwritten.\n")
 	sb.WriteString("# Deactivates TSO/GSO/GRO/LRO, e.g. as workaround for e1000e \"Detected Hardware Unit Hang\".\n")
 	sb.WriteString("#\n")
 	sb.WriteString("# Only the first matching .link file is applied by udev. Therefore the interface name is\n")

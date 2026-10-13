@@ -9,6 +9,7 @@ func NewNetworkCardCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		NewCreateLayer2Bridge(),
 		NewDeactivateOffloading(),
 		NewIsOffloadingDeactivatedCmd(),
 	)
