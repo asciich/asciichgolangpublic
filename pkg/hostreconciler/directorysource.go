@@ -177,3 +177,20 @@ func (d *DirectorySource) GetNetworkInterfaces(ctx context.Context) ([]NetworkIn
 
 	return ret, nil
 }
+
+// GetBeforeScript returns the entries of 'before_script' of the host.yaml file.
+// Returns an empty slice if no before_script is configured.
+func (d *DirectorySource) GetBeforeScript(ctx context.Context) ([]string, error) {
+	config, err := d.readHostConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return a copy so callers can not modify the parsed config.
+	ret := append([]string{}, config.BeforeScript...)
+
+	logging.LogInfoByCtxf(ctx, "Read '%d' before_script entries from '%s'.", len(ret), HostConfigFileName)
+
+	return ret, nil
+}
+

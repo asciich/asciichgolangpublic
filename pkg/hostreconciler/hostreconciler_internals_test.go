@@ -10,8 +10,13 @@ import (
 
 // fakeSource is a Source returning fixed values for testing.
 type fakeSource struct {
+	beforeScript      []string
 	hostname          string
 	networkInterfaces []NetworkInterface
+}
+
+func (f *fakeSource) GetBeforeScript(ctx context.Context) ([]string, error) {
+	return f.beforeScript, nil
 }
 
 func (f *fakeSource) GetHostName(ctx context.Context) (string, error) {
@@ -22,9 +27,11 @@ func (f *fakeSource) GetNetworkInterfaces(ctx context.Context) ([]NetworkInterfa
 	return f.networkInterfaces, nil
 }
 
-func Test_hostConfig_ParseNetwork(t *testing.T) {
-	t.Run("network interfaces are parsed", func(t *testing.T) {
+func Test_hostConfig_Parse(t *testing.T) {
+	t.Run("full config is parsed", func(t *testing.T) {
 		content := `---
+before_script:
+  - echo hello world
 hostname: host.example.com
 network:
   interfaces:
@@ -40,6 +47,7 @@ network:
 		err := yaml.Unmarshal([]byte(content), &config)
 		require.NoError(t, err)
 
+		require.Equal(t, []string{"echo hello world"}, config.BeforeScript)
 		require.Equal(t, "host.example.com", config.Hostname)
 		require.Equal(
 			t,
@@ -52,12 +60,29 @@ network:
 		)
 	})
 
-	t.Run("network section is optional", func(t *testing.T) {
+	t.Run("multi line before_script entry is parsed", func(t *testing.T) {
+		content := `---
+before_script:
+  - |
+    echo first
+    echo second
+hostname: host.example.com
+`
+		config := hostConfig{}
+		err := yaml.Unmarshal([]byte(content), &config)
+		require.NoError(t, err)
+
+		require.Equal(t, []string{"echo first\necho second\n"}, config.BeforeScript)
+	})
+
+	t.Run("before_script and network section are optional", func(t *testing.T) {
 		config := hostConfig{}
 		err := yaml.Unmarshal([]byte("---\nhostname: host.example.com\n"), &config)
 		require.NoError(t, err)
 
+		require.Empty(t, config.BeforeScript)
 		require.Empty(t, config.Network.Interfaces)
+		require.NoError(t, validateBeforeScript(config.BeforeScript))
 		require.NoError(t, validateNetworkInterfaces(config.Network.Interfaces))
 	})
 
@@ -73,6 +98,52 @@ interfaces:
 
 		require.Len(t, config.Interfaces, 1)
 		require.False(t, config.Interfaces[0].DeactivateOffloading)
+	})
+}
+
+func Test_validateBeforeScript(t *testing.T) {
+	t.Run("valid entries", func(t *testing.T) {
+		require.NoError(t, validateBeforeScript([]string{"echo hello world", "true"}))
+	})
+
+	t.Run("nil is valid", func(t *testing.T) {
+		require.NoError(t, validateBeforeScript(nil))
+	})
+
+	t.Run("empty entry", func(t *testing.T) {
+		require.Error(t, validateBeforeScript([]string{"echo hello world", ""}))
+	})
+
+	t.Run("whitespace only entry", func(t *testing.T) {
+		require.Error(t, validateBeforeScript([]string{"  \n\t"}))
+	})
+}
+
+func Test_runBeforeScript(t *testing.T) {
+	ctx := context.TODO()
+
+	t.Run("no before_script is a no-op", func(t *testing.T) {
+		require.NoError(t, runBeforeScript(ctx, nil))
+	})
+
+	t.Run("successful entries", func(t *testing.T) {
+		require.NoError(t, runBeforeScript(ctx, []string{"echo hello world", "true"}))
+	})
+
+	t.Run("failing entry returns error", func(t *testing.T) {
+		require.Error(t, runBeforeScript(ctx, []string{"echo hello world", "exit 1"}))
+	})
+
+	t.Run("multi line entry stops at first failing command", func(t *testing.T) {
+		require.Error(t, runBeforeScript(ctx, []string{"false\necho not reached"}))
+	})
+
+	t.Run("failing command in pipe returns error", func(t *testing.T) {
+		require.Error(t, runBeforeScript(ctx, []string{"false | cat"}))
+	})
+
+	t.Run("invalid entry is rejected before execution", func(t *testing.T) {
+		require.Error(t, runBeforeScript(ctx, []string{""}))
 	})
 }
 
@@ -188,5 +259,29 @@ func Test_ReconcileOnce(t *testing.T) {
 
 		// The validation error proves ReconcileOnce stopped before calling SetHostName.
 		require.Contains(t, err.Error(), "same list item")
+	})
+
+	t.Run("empty before_script entry is rejected before anything is executed", func(t *testing.T) {
+		source := &fakeSource{
+			beforeScript: []string{""},
+			hostname:     "host.example.com",
+		}
+
+		err := ReconcileOnce(ctx, source)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "'before_script' is empty")
+	})
+
+	t.Run("failing before_script stops before the hostname is changed", func(t *testing.T) {
+		source := &fakeSource{
+			beforeScript: []string{"exit 1"},
+			hostname:     "host.example.com",
+		}
+
+		err := ReconcileOnce(ctx, source)
+		require.Error(t, err)
+
+		// The before_script error proves ReconcileOnce stopped before calling SetHostName.
+		require.Contains(t, err.Error(), "before_script entry '0' failed")
 	})
 }

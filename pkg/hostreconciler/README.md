@@ -21,12 +21,14 @@ reconciles the current host to match it: **desired state in, converged host out.
 hostname: host.example.com
 ```
 
-### Config with network interfaces
+### Full config
 
 **`host.yaml`**
 
 ```yaml
 ---
+before_script:
+  - echo hello world
 hostname: host.example.com
 network:
   interfaces:
@@ -39,14 +41,43 @@ network:
 
 ### Reference: `host.yaml`
 
-| Field                                        | Type     | Required | Default | Description                                                                 |
-|----------------------------------------------|----------|:--------:|:-------:|-----------------------------------------------------------------------------|
-| `hostname`                                   | `string` |    ✅    |         | Fully qualified hostname of the host.                                       |
-| `network`                                    | `object` |    ❌    |         | Network configuration of the host.                                          |
-| `network.interfaces`                         | `list`   |    ❌    |         | Desired configuration of network interfaces (network cards).                |
-| `network.interfaces[].name`                  | `string` |    ✅    |         | Name of the network card, e.g. `enp0` (max. 15 characters).                 |
-| `network.interfaces[].layer2_bridge`         | `string` |    ❌    |         | Layer 2 bridge to create with this network card attached, e.g. `br0`.       |
-| `network.interfaces[].deactivate_offloading`  | `bool`   |    ❌    | `false` | Deactivate TSO/GSO/GRO/LRO offloading for this network card.                |
+| Field                                         | Type       | Required | Default | Description                                                            |
+|-----------------------------------------------|------------|:--------:|:-------:|------------------------------------------------------------------------|
+| `before_script`                               | `[]string` |    ❌    |         | Shell commands executed before any change is applied to the host.      |
+| `hostname`                                    | `string`   |    ✅    |         | Fully qualified hostname of the host.                                  |
+| `network`                                     | `object`   |    ❌    |         | Network configuration of the host.                                     |
+| `network.interfaces`                          | `list`     |    ❌    |         | Desired configuration of network interfaces (network cards).           |
+| `network.interfaces[].name`                   | `string`   |    ✅    |         | Name of the network card, e.g. `enp0` (max. 15 characters).            |
+| `network.interfaces[].layer2_bridge`          | `string`   |    ❌    |         | Layer 2 bridge to create with this network card attached, e.g. `br0`.  |
+| `network.interfaces[].deactivate_offloading`  | `bool`     |    ❌    | `false` | Deactivate TSO/GSO/GRO/LRO offloading for this network card.           |
+
+## Order of a reconcile run
+
+1. Read and validate the whole `host.yaml`. If it's invalid, nothing is executed or changed.
+2. Run `before_script`. If an entry fails, no change is applied.
+3. Apply `hostname`.
+4. Reconcile `network.interfaces`.
+
+### `before_script`
+
+- The entries are executed in the given order on the host.
+- Every entry runs in its own `bash -e -o pipefail -c <entry>`:
+    - Multi-line entries (YAML block scalar `|`) stop at the first failing command.
+    - Shell state (e.g. `cd`, exported variables) is **not** shared between entries.
+- Execution stops at the first failing entry and the host is left untouched.
+- The entries run with the privileges of the hostreconciler process.
+
+⚠️ `before_script` is executed on **every** reconcile run. Write the commands in an idempotent way (e.g. `mkdir -p` instead of `mkdir`).
+
+Multi-line example:
+
+```yaml
+before_script:
+  - echo hello world
+  - |
+    mkdir -p /opt/example
+    touch /opt/example/marker
+```
 
 ### `network.interfaces[].deactivate_offloading`
 
@@ -67,24 +98,26 @@ Reconciled using `CreateLayer2Bridge` of [networkcardutils](../netutils/networkc
 
 If both are set, offloading is deactivated before the bridge is created.
 
-### Requirements
+## Requirements
 
 - Linux.
+- `bash` (only if `before_script` is configured).
 - Root privileges (only if at least one network interface has `layer2_bridge` or `deactivate_offloading: true`).
 - `layer2_bridge`: An active and enabled `systemd-networkd`.
 - `deactivate_offloading`: systemd/udev (existing `/etc/systemd/network/` directory).
 
-### Validation
+## Validation
 
-Performed for the whole config before any change is applied:
+Performed for the whole config before anything is executed or changed:
 
+- `before_script` contains no empty entries.
 - `name` is set and is a valid interface name.
 - A network interface is defined only once.
 - `layer2_bridge` (if set) is a valid interface name and differs from `name`.
 - A layer 2 bridge is used by only one network interface.
 - Nested bridges (a configured `layer2_bridge` also listed as `name`) are not supported.
 
-ℹ️ Reconciliation is **additive**:
+ℹ️ Reconciliation of network interfaces is **additive**:
 
 - Removing `layer2_bridge` (or the whole entry) does **not** remove the bridge from the host.
 - Removing `deactivate_offloading` or setting it to `false` does **not** reactivate offloading.

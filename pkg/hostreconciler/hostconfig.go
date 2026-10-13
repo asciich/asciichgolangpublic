@@ -1,6 +1,8 @@
 package hostreconciler
 
 import (
+	"strings"
+
 	"github.com/asciich/asciichgolangpublic/pkg/netutils/networkcardutils/genericnetworkcardutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -11,6 +13,9 @@ const HostConfigFileName = "host.yaml"
 
 // hostConfig represents the content of the host.yaml file.
 type hostConfig struct {
+	// Optional shell commands executed before any change is applied to the host.
+	BeforeScript []string `yaml:"before_script"`
+
 	Hostname string        `yaml:"hostname"`
 	Network  networkConfig `yaml:"network"`
 }
@@ -108,6 +113,18 @@ func validateNetworkInterfaces(interfaces []NetworkInterface) error {
 				"Layer 2 bridge '%s' of network interface '%s' is itself configured as network interface. Nested bridges are not supported.",
 				iface.Layer2Bridge, iface.Name,
 			)
+		}
+	}
+
+	return nil
+}
+
+// validateBeforeScript returns an error if an entry of the before_script is empty.
+// An empty list is valid.
+func validateBeforeScript(beforeScript []string) error {
+	for i, entry := range beforeScript {
+		if strings.TrimSpace(entry) == "" {
+			return tracederrors.TracedErrorf("Entry '%d' in 'before_script' is empty.", i)
 		}
 	}
 
