@@ -2,17 +2,24 @@ package hostreconciler
 
 import (
 	"context"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
+
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 )
+
+const testComposeContent = "services:\n  hello:\n    image: nginx:alpine\n"
 
 // fakeSource is a Source returning fixed values for testing.
 type fakeSource struct {
-	beforeScript      []string
-	hostname          string
-	networkInterfaces []NetworkInterface
+	beforeScript          []string
+	hostname              string
+	networkInterfaces     []NetworkInterface
+	dockerComposeProjects []DockerComposeProject
 }
 
 func (f *fakeSource) GetBeforeScript(ctx context.Context) ([]string, error) {
@@ -25,6 +32,18 @@ func (f *fakeSource) GetHostName(ctx context.Context) (string, error) {
 
 func (f *fakeSource) GetNetworkInterfaces(ctx context.Context) ([]NetworkInterface, error) {
 	return f.networkInterfaces, nil
+}
+
+func (f *fakeSource) GetDockerComposeProjects(ctx context.Context) ([]DockerComposeProject, error) {
+	return f.dockerComposeProjects, nil
+}
+
+// writeTestFile ensures the parent directory of 'path' exists and writes 'content' to 'path'.
+func writeTestFile(t *testing.T, ctx context.Context, path string, content string) {
+	t.Helper()
+
+	require.NoError(t, nativefiles.CreateDirectory(ctx, filepath.Dir(path), &filesoptions.CreateOptions{}))
+	require.NoError(t, nativefiles.WriteString(ctx, path, content))
 }
 
 func Test_hostConfig_Parse(t *testing.T) {
@@ -237,6 +256,203 @@ func Test_reconcileNetworkInterfaces(t *testing.T) {
 	})
 }
 
+func Test_isDockerComposeFileName(t *testing.T) {
+	t.Run("compose.yaml", func(t *testing.T) {
+		require.True(t, isDockerComposeFileName("compose.yaml"))
+	})
+
+	t.Run("docker-compose.yml", func(t *testing.T) {
+		require.True(t, isDockerComposeFileName("docker-compose.yml"))
+	})
+
+	t.Run("custom yaml file name", func(t *testing.T) {
+		require.False(t, isDockerComposeFileName("my_compose.yaml"))
+	})
+}
+
+func Test_parseDockerComposeTopLevelName(t *testing.T) {
+	t.Run("name is set", func(t *testing.T) {
+		name, err := parseDockerComposeTopLevelName("name: mydeployment\n" + testComposeContent)
+		require.NoError(t, err)
+		require.Equal(t, "mydeployment", name)
+	})
+
+	t.Run("name is not set", func(t *testing.T) {
+		name, err := parseDockerComposeTopLevelName(testComposeContent)
+		require.NoError(t, err)
+		require.Equal(t, "", name)
+	})
+
+	t.Run("invalid yaml", func(t *testing.T) {
+		_, err := parseDockerComposeTopLevelName("name: [unclosed\n")
+		require.Error(t, err)
+	})
+}
+
+func Test_validateDockerComposeProjects(t *testing.T) {
+	t.Run("valid projects", func(t *testing.T) {
+		projects := []DockerComposeProject{
+			{Name: "alpha", ComposeFilePath: "/config/docker_compose/alpha/compose.yaml"},
+			{Name: "beta", ComposeFilePath: "/config/docker_compose/beta/docker-compose.yml"},
+		}
+		require.NoError(t, validateDockerComposeProjects(projects))
+	})
+
+	t.Run("nil is valid", func(t *testing.T) {
+		require.NoError(t, validateDockerComposeProjects(nil))
+	})
+
+	t.Run("empty name", func(t *testing.T) {
+		require.Error(t, validateDockerComposeProjects([]DockerComposeProject{{ComposeFilePath: "/config/docker_compose/alpha/compose.yaml"}}))
+	})
+
+	t.Run("invalid name", func(t *testing.T) {
+		require.Error(t, validateDockerComposeProjects([]DockerComposeProject{{Name: "MyApp", ComposeFilePath: "/config/docker_compose/MyApp/compose.yaml"}}))
+	})
+
+	t.Run("relative path", func(t *testing.T) {
+		require.Error(t, validateDockerComposeProjects([]DockerComposeProject{{Name: "alpha", ComposeFilePath: "docker_compose/alpha/compose.yaml"}}))
+	})
+
+	t.Run("unsupported compose file name", func(t *testing.T) {
+		require.Error(t, validateDockerComposeProjects([]DockerComposeProject{{Name: "alpha", ComposeFilePath: "/config/docker_compose/alpha/app.yaml"}}))
+	})
+
+	t.Run("directory name differs from project name", func(t *testing.T) {
+		require.Error(t, validateDockerComposeProjects([]DockerComposeProject{{Name: "alpha", ComposeFilePath: "/config/docker_compose/beta/compose.yaml"}}))
+	})
+
+	t.Run("project defined twice", func(t *testing.T) {
+		projects := []DockerComposeProject{
+			{Name: "alpha", ComposeFilePath: "/config/docker_compose/alpha/compose.yaml"},
+			{Name: "alpha", ComposeFilePath: "/config/docker_compose/alpha/compose.yml"},
+		}
+		err := validateDockerComposeProjects(projects)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "more than once")
+	})
+}
+
+func Test_DirectorySource_GetDockerComposeProjects(t *testing.T) {
+	ctx := context.TODO()
+
+	t.Run("missing docker_compose directory returns empty list", func(t *testing.T) {
+		source := &DirectorySource{dirPath: t.TempDir()}
+
+		projects, err := source.GetDockerComposeProjects(ctx)
+		require.NoError(t, err)
+		require.Empty(t, projects)
+	})
+
+	t.Run("deployments are returned in lexical order and other entries are skipped", func(t *testing.T) {
+		configDir := t.TempDir()
+		composeDir := filepath.Join(configDir, DockerComposeDirName)
+
+		writeTestFile(t, ctx, filepath.Join(composeDir, "beta", "compose.yaml"), testComposeContent)
+		writeTestFile(t, ctx, filepath.Join(composeDir, "alpha", "docker-compose.yml"), testComposeContent)
+		writeTestFile(t, ctx, filepath.Join(composeDir, ".hidden", "compose.yaml"), testComposeContent)
+		writeTestFile(t, ctx, filepath.Join(composeDir, "README.md"), "# docs\n")
+
+		source := &DirectorySource{dirPath: configDir}
+
+		projects, err := source.GetDockerComposeProjects(ctx)
+		require.NoError(t, err)
+
+		absComposeDir, err := filepath.Abs(composeDir)
+		require.NoError(t, err)
+
+		require.Equal(
+			t,
+			[]DockerComposeProject{
+				{Name: "alpha", ComposeFilePath: filepath.Join(absComposeDir, "alpha", "docker-compose.yml")},
+				{Name: "beta", ComposeFilePath: filepath.Join(absComposeDir, "beta", "compose.yaml")},
+			},
+			projects,
+		)
+		require.NoError(t, validateDockerComposeProjects(projects))
+	})
+
+	t.Run("matching top level name is accepted", func(t *testing.T) {
+		configDir := t.TempDir()
+		writeTestFile(t, ctx, filepath.Join(configDir, DockerComposeDirName, "alpha", "compose.yaml"), "name: alpha\n"+testComposeContent)
+
+		source := &DirectorySource{dirPath: configDir}
+
+		projects, err := source.GetDockerComposeProjects(ctx)
+		require.NoError(t, err)
+		require.Len(t, projects, 1)
+		require.Equal(t, "alpha", projects[0].Name)
+	})
+
+	t.Run("different top level name is rejected", func(t *testing.T) {
+		configDir := t.TempDir()
+		writeTestFile(t, ctx, filepath.Join(configDir, DockerComposeDirName, "alpha", "compose.yaml"), "name: other\n"+testComposeContent)
+
+		source := &DirectorySource{dirPath: configDir}
+
+		_, err := source.GetDockerComposeProjects(ctx)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "differs")
+	})
+
+	t.Run("deployment without compose file is rejected", func(t *testing.T) {
+		configDir := t.TempDir()
+		require.NoError(t, nativefiles.CreateDirectory(ctx, filepath.Join(configDir, DockerComposeDirName, "alpha"), &filesoptions.CreateOptions{}))
+
+		source := &DirectorySource{dirPath: configDir}
+
+		_, err := source.GetDockerComposeProjects(ctx)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "No compose file")
+	})
+
+	t.Run("deployment with multiple compose files is rejected", func(t *testing.T) {
+		configDir := t.TempDir()
+		writeTestFile(t, ctx, filepath.Join(configDir, DockerComposeDirName, "alpha", "compose.yaml"), testComposeContent)
+		writeTestFile(t, ctx, filepath.Join(configDir, DockerComposeDirName, "alpha", "compose.yml"), testComposeContent)
+
+		source := &DirectorySource{dirPath: configDir}
+
+		_, err := source.GetDockerComposeProjects(ctx)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "Multiple compose files")
+	})
+
+	t.Run("compose file directly in docker_compose is rejected", func(t *testing.T) {
+		configDir := t.TempDir()
+		writeTestFile(t, ctx, filepath.Join(configDir, DockerComposeDirName, "my_compose.yaml"), testComposeContent)
+
+		source := &DirectorySource{dirPath: configDir}
+
+		_, err := source.GetDockerComposeProjects(ctx)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "own directory")
+	})
+
+	t.Run("invalid deployment directory name is rejected", func(t *testing.T) {
+		configDir := t.TempDir()
+		writeTestFile(t, ctx, filepath.Join(configDir, DockerComposeDirName, "MyApp", "compose.yaml"), testComposeContent)
+
+		source := &DirectorySource{dirPath: configDir}
+
+		_, err := source.GetDockerComposeProjects(ctx)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "MyApp")
+	})
+}
+
+func Test_reconcileDockerComposeProjects(t *testing.T) {
+	ctx := context.TODO()
+
+	t.Run("no docker compose projects is a no-op without docker", func(t *testing.T) {
+		require.NoError(t, reconcileDockerComposeProjects(ctx, nil))
+	})
+
+	t.Run("invalid docker compose projects are rejected before docker is used", func(t *testing.T) {
+		require.Error(t, reconcileDockerComposeProjects(ctx, []DockerComposeProject{{Name: "alpha", ComposeFilePath: "relative/compose.yaml"}}))
+	})
+}
+
 func Test_ReconcileOnce(t *testing.T) {
 	ctx := context.TODO()
 
@@ -283,5 +499,21 @@ func Test_ReconcileOnce(t *testing.T) {
 
 		// The before_script error proves ReconcileOnce stopped before calling SetHostName.
 		require.Contains(t, err.Error(), "before_script entry '0' failed")
+	})
+
+	t.Run("invalid docker compose projects are rejected before anything is executed", func(t *testing.T) {
+		source := &fakeSource{
+			// Would fail if executed, which proves validation happens before the before_script.
+			beforeScript: []string{"exit 1"},
+			hostname:     "host.example.com",
+			dockerComposeProjects: []DockerComposeProject{
+				{Name: "alpha", ComposeFilePath: "/config/docker_compose/alpha/compose.yaml"},
+				{Name: "alpha", ComposeFilePath: "/config/docker_compose/alpha/compose.yml"},
+			},
+		}
+
+		err := ReconcileOnce(ctx, source)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "more than once")
 	})
 }

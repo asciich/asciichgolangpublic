@@ -17,4 +17,8 @@ type Source interface {
 	// GetBeforeScript returns the shell commands to execute before any change is applied to the host.
 	// Returns an empty slice (and no error) if no before_script is configured.
 	GetBeforeScript(ctx context.Context) ([]string, error)
+
+	// GetDockerComposeProjects returns the docker compose projects to apply on the host in the order they must be applied.
+	// Returns an empty slice (and no error) if no docker compose projects are configured.
+	GetDockerComposeProjects(ctx context.Context) ([]DockerComposeProject, error)
 }
