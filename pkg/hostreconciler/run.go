@@ -12,10 +12,11 @@ import (
 // ReconcileOnce runs a single reconciliation of the current host against the
 // desired state provided by the given source.
 //
-// The whole desired state is read from the source and validated before anything is changed.
+// The whole desired state is read from the source and validated before anything is executed or changed.
 // If the source fails or returns an invalid state, the host is left untouched.
 //
-// The following steps are performed:
+// The following steps are performed in this order:
+//   - Runs the 'before_script' entries. If one fails, no change is applied to the host.
 //   - Applies the desired hostname.
 //   - Reconciles all desired network interfaces:
 //   - Deactivates offloading if requested (see networkcardutils.DeactivateOffloading).
@@ -24,7 +25,8 @@ import (
 // Reconciliation of network interfaces is additive: Removed bridges or offloading settings are NOT reverted.
 //
 // Only changes which differ from the desired state are applied, so it is safe
-// to call this function repeatedly (idempotent).
+// to call this function repeatedly (idempotent). Exception: The 'before_script' entries
+// are executed on every call and must be idempotent themselves.
 //
 // Requires root privileges if changes need to be applied or at least one network interface action is configured.
 func ReconcileOnce(ctx context.Context, source Source) error {
@@ -34,7 +36,17 @@ func ReconcileOnce(ctx context.Context, source Source) error {
 
 	logging.LogInfoByCtxf(ctx, "Reconcile host started.")
 
-	// Read and validate the complete desired state before anything is changed:
+	// Read and validate the complete desired state before anything is executed or changed:
+	beforeScript, err := source.GetBeforeScript(ctx)
+	if err != nil {
+		return err
+	}
+
+	err = validateBeforeScript(beforeScript)
+	if err != nil {
+		return err
+	}
+
 	hostname, err := source.GetHostName(ctx)
 	if err != nil {
 		return err
@@ -50,6 +62,12 @@ func ReconcileOnce(ctx context.Context, source Source) error {
 	}
 
 	err = validateNetworkInterfaces(networkInterfaces)
+	if err != nil {
+		return err
+	}
+
+	// Run the before_script before any change is applied:
+	err = runBeforeScript(ctx, beforeScript)
 	if err != nil {
 		return err
 	}
