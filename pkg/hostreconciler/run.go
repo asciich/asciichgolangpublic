@@ -21,14 +21,17 @@ import (
 //   - Reconciles all desired network interfaces:
 //   - Deactivates offloading if requested (see networkcardutils.DeactivateOffloading).
 //   - Ensures the layer 2 bridge exists if requested (see networkcardutils.CreateLayer2Bridge).
+//   - Ensures all services of the docker compose projects are up (one project after the other).
 //
-// Reconciliation of network interfaces is additive: Removed bridges or offloading settings are NOT reverted.
+// Reconciliation is additive: Removed bridges, offloading settings or whole docker compose projects are NOT reverted.
+// Services removed from an existing docker compose file are removed (orphans).
 //
 // Only changes which differ from the desired state are applied, so it is safe
 // to call this function repeatedly (idempotent). Exception: The 'before_script' entries
 // are executed on every call and must be idempotent themselves.
 //
 // Requires root privileges if changes need to be applied or at least one network interface action is configured.
+// Requires access to the docker daemon if at least one docker compose project is configured.
 func ReconcileOnce(ctx context.Context, source Source) error {
 	if source == nil {
 		return tracederrors.TracedErrorNil("source")
@@ -66,6 +69,16 @@ func ReconcileOnce(ctx context.Context, source Source) error {
 		return err
 	}
 
+	dockerComposeProjects, err := source.GetDockerComposeProjects(ctx)
+	if err != nil {
+		return err
+	}
+
+	err = validateDockerComposeProjects(dockerComposeProjects)
+	if err != nil {
+		return err
+	}
+
 	// Run the before_script before any change is applied:
 	err = runBeforeScript(ctx, beforeScript)
 	if err != nil {
@@ -79,6 +92,12 @@ func ReconcileOnce(ctx context.Context, source Source) error {
 	}
 
 	err = reconcileNetworkInterfaces(ctx, networkInterfaces)
+	if err != nil {
+		return err
+	}
+
+	// Docker compose is applied last so the network (e.g. bridges) is already in place.
+	err = reconcileDockerComposeProjects(ctx, dockerComposeProjects)
 	if err != nil {
 		return err
 	}

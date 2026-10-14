@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 
@@ -194,3 +195,149 @@ func (d *DirectorySource) GetBeforeScript(ctx context.Context) ([]string, error)
 	return ret, nil
 }
 
+// GetDockerComposeProjects returns the docker compose projects in the 'docker_compose' directory of the config directory.
+//
+// Expected structure:
+//
+//	<config-dir>/
+//	└── docker_compose/
+//	    └── <deployment>/
+//	        └── compose.yaml
+//
+// Rules:
+//   - Every (non hidden) subdirectory of 'docker_compose' is a deployment. Its name is the docker compose project name.
+//   - Every deployment directory must contain exactly one of 'compose.yaml', 'compose.yml', 'docker-compose.yaml' or 'docker-compose.yml'.
+//   - A top level 'name' in the compose file is optional. If set, it must equal the deployment directory name.
+//   - '*.yaml' and '*.yml' files directly inside 'docker_compose' are rejected to avoid silently ignored deployments.
+//   - Hidden entries and other files (e.g. 'README.md') directly inside 'docker_compose' are skipped.
+//   - The projects are returned in lexical order of their deployment directory names.
+//
+// Returns an empty slice if the 'docker_compose' directory does not exist.
+func (d *DirectorySource) GetDockerComposeProjects(ctx context.Context) ([]DockerComposeProject, error) {
+	if d.dirPath == "" {
+		return nil, tracederrors.TracedErrorEmptyString("dirPath")
+	}
+
+	composeDirPath, err := filepath.Abs(filepath.Join(d.dirPath, DockerComposeDirName))
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Unable to get absolute path of docker compose directory in '%s': %w", d.dirPath, err)
+	}
+
+	// os.ReadDir returns the entries sorted by file name, which defines the order of the deployments.
+	entries, err := os.ReadDir(composeDirPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			logging.LogInfoByCtxf(ctx, "Docker compose directory '%s' does not exist. No docker compose projects configured.", composeDirPath)
+			return []DockerComposeProject{}, nil
+		}
+
+		return nil, tracederrors.TracedErrorf("Unable to list docker compose directory '%s': %w", composeDirPath, err)
+	}
+
+	ret := []DockerComposeProject{}
+	for _, entry := range entries {
+		entryName := entry.Name()
+
+		if isHiddenEntryName(entryName) {
+			logging.LogInfoByCtxf(ctx, "Skip hidden entry '%s' in docker compose directory '%s'.", entryName, composeDirPath)
+			continue
+		}
+
+		if !entry.IsDir() {
+			if isYamlFileName(entryName) {
+				return nil, tracederrors.TracedErrorf(
+					"Docker compose file '%s' found directly in '%s'. Every deployment needs its own directory, e.g. '%s/<deployment>/compose.yaml'.",
+					entryName, composeDirPath, DockerComposeDirName,
+				)
+			}
+
+			logging.LogInfoByCtxf(ctx, "Skip file '%s' in docker compose directory '%s': Only deployment directories are used.", entryName, composeDirPath)
+			continue
+		}
+
+		project, err := readDockerComposeProject(filepath.Join(composeDirPath, entryName))
+		if err != nil {
+			return nil, err
+		}
+
+		ret = append(ret, project)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Read '%d' docker compose projects from '%s'.", len(ret), composeDirPath)
+
+	return ret, nil
+}
+
+// readDockerComposeProject reads the docker compose deployment in 'deploymentDirPath'.
+func readDockerComposeProject(deploymentDirPath string) (DockerComposeProject, error) {
+	if deploymentDirPath == "" {
+		return DockerComposeProject{}, tracederrors.TracedErrorEmptyString("deploymentDirPath")
+	}
+
+	projectName := filepath.Base(deploymentDirPath)
+
+	err := checkDockerComposeProjectName(projectName)
+	if err != nil {
+		return DockerComposeProject{}, tracederrors.TracedErrorf("Invalid deployment directory name '%s': %w", deploymentDirPath, err)
+	}
+
+	foundPaths := []string{}
+	for _, fileName := range dockerComposeFileNames {
+		composeFilePath := filepath.Join(deploymentDirPath, fileName)
+
+		info, err := os.Stat(composeFilePath)
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				continue
+			}
+
+			return DockerComposeProject{}, tracederrors.TracedErrorf("Unable to stat compose file '%s': %w", composeFilePath, err)
+		}
+
+		if !info.Mode().IsRegular() {
+			return DockerComposeProject{}, tracederrors.TracedErrorf("Compose file '%s' is not a regular file.", composeFilePath)
+		}
+
+		foundPaths = append(foundPaths, composeFilePath)
+	}
+
+	if len(foundPaths) == 0 {
+		return DockerComposeProject{}, tracederrors.TracedErrorf(
+			"No compose file found in deployment directory '%s'. Expected exactly one of: '%s'.",
+			deploymentDirPath, strings.Join(dockerComposeFileNames, "', '"),
+		)
+	}
+
+	if len(foundPaths) > 1 {
+		return DockerComposeProject{}, tracederrors.TracedErrorf(
+			"Multiple compose files found in deployment directory '%s': '%s'. Keep exactly one.",
+			deploymentDirPath, strings.Join(foundPaths, "', '"),
+		)
+	}
+
+	composeFilePath := foundPaths[0]
+
+	content, err := os.ReadFile(composeFilePath)
+	if err != nil {
+		return DockerComposeProject{}, tracederrors.TracedErrorf("Unable to read compose file '%s': %w", composeFilePath, err)
+	}
+
+	topLevelName, err := parseDockerComposeTopLevelName(string(content))
+	if err != nil {
+		return DockerComposeProject{}, tracederrors.TracedErrorf("Invalid compose file '%s': %w", composeFilePath, err)
+	}
+
+	if topLevelName != "" && topLevelName != projectName {
+		return DockerComposeProject{}, tracederrors.TracedErrorf(
+			"Top level 'name' '%s' in compose file '%s' differs from the deployment directory name '%s'. Remove 'name' or set it to '%s'.",
+			topLevelName, composeFilePath, projectName, projectName,
+		)
+	}
+
+	ret := DockerComposeProject{
+		Name:            projectName,
+		ComposeFilePath: composeFilePath,
+	}
+
+	return ret, nil
+}

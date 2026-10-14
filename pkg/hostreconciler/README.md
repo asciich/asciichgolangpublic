@@ -9,7 +9,11 @@ reconciles the current host to match it: **desired state in, converged host out.
 
 ```text
 <config-dir>/
-└── host.yaml
+├── host.yaml
+└── docker_compose/              (optional)
+    └── mydeployment/            ← docker compose project name
+        ├── compose.yaml
+        └── .env                 (optional)
 ```
 
 ### Minimal config
@@ -37,6 +41,14 @@ network:
       deactivate_offloading: true
 ```
 
+**`docker_compose/mydeployment/compose.yaml`**
+
+```yaml
+services:
+  hello:
+    image: nginx:alpine
+```
+
 ⚠️ All settings of a network interface must be in the **same** list item (only one `-` per interface).
 
 ### Reference: `host.yaml`
@@ -53,10 +65,11 @@ network:
 
 ## Order of a reconcile run
 
-1. Read and validate the whole `host.yaml`. If it's invalid, nothing is executed or changed.
+1. Read and validate the whole config (`host.yaml` and `docker_compose/`). If it's invalid, nothing is executed or changed.
 2. Run `before_script`. If an entry fails, no change is applied.
 3. Apply `hostname`.
 4. Reconcile `network.interfaces`.
+5. Reconcile the `docker_compose/` deployments (one after the other).
 
 ### `before_script`
 
@@ -98,6 +111,22 @@ Reconciled using `CreateLayer2Bridge` of [networkcardutils](../netutils/networkc
 
 If both are set, offloading is deactivated before the bridge is created.
 
+### `docker_compose/<deployment>/`
+
+Every deployment is reconciled using `UpByComposeYamlPath` of [commandexecutordockercomposeutils](../containerutils/dockerutils/dockercomposeutils/commandexecutordockercomposeutils/README.md)
+(equivalent to `cd docker_compose/<deployment> && docker compose up --detach --remove-orphans`):
+
+- Every subdirectory of `docker_compose/` is one deployment. The **directory name is the docker compose project name**:
+    - Only lowercase letters, digits, `-` and `_`, starting with a lowercase letter or digit.
+    - Unique by design, so deployments never treat each other's services as orphans.
+- Every deployment directory contains **exactly one** of `compose.yaml`, `compose.yml`, `docker-compose.yaml` or `docker-compose.yml`.
+- A top level `name` in the compose file is optional. If set, it must equal the deployment directory name.
+- `.env`, bind mounts, `env_file` and `build` contexts are resolved relative to the deployment directory.
+- The deployments are applied one after the other in **lexical order** of their directory names. Use prefixes like `10-`, `20-` to control the order.
+- `*.yaml` / `*.yml` files directly inside `docker_compose/` are rejected. Hidden entries and other files (e.g. `README.md`) are skipped.
+- Services removed from a compose file are removed from the host (`--remove-orphans`).
+- Idempotent: Already running services are left untouched.
+
 ## Requirements
 
 - Linux.
@@ -105,6 +134,7 @@ If both are set, offloading is deactivated before the bridge is created.
 - Root privileges (only if at least one network interface has `layer2_bridge` or `deactivate_offloading: true`).
 - `layer2_bridge`: An active and enabled `systemd-networkd`.
 - `deactivate_offloading`: systemd/udev (existing `/etc/systemd/network/` directory).
+- `docker_compose/`: Docker Compose v2 plugin (`docker compose`) and access to the docker daemon.
 
 ## Validation
 
@@ -116,8 +146,13 @@ Performed for the whole config before anything is executed or changed:
 - `layer2_bridge` (if set) is a valid interface name and differs from `name`.
 - A layer 2 bridge is used by only one network interface.
 - Nested bridges (a configured `layer2_bridge` also listed as `name`) are not supported.
+- Every deployment directory name is a valid docker compose project name.
+- Every deployment directory contains exactly one compose file which is valid YAML.
+- A top level `name` in a compose file (if set) equals its deployment directory name.
+- No compose files are placed directly inside `docker_compose/`.
 
-ℹ️ Reconciliation of network interfaces is **additive**:
+ℹ️ Reconciliation is **additive**:
 
 - Removing `layer2_bridge` (or the whole entry) does **not** remove the bridge from the host.
 - Removing `deactivate_offloading` or setting it to `false` does **not** reactivate offloading.
+- Removing a whole deployment directory does **not** stop its project. Run `docker compose -p <deployment> down` manually.
