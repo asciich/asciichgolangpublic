@@ -21,4 +21,8 @@ type Source interface {
 	// GetDockerComposeProjects returns the docker compose projects to apply on the host in the order they must be applied.
 	// Returns an empty slice (and no error) if no docker compose projects are configured.
 	GetDockerComposeProjects(ctx context.Context) ([]DockerComposeProject, error)
+
+	// GetKVMConfig returns the desired KVM configuration of the host.
+	// Returns a non nil KVMConfig with all actions disabled (and no error) if no kvm section is configured.
+	GetKVMConfig(ctx context.Context) (*KVMConfig, error)
 }

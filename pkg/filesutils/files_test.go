@@ -36,9 +36,11 @@ func Test_CreateFileUsingSudo(t *testing.T) {
 
 			// Hint: Ensure the /testfile is absent, otherwise this test failes.
 			// The idempotent written Create function will skip the attempt to create the file if it already exists.
-			require.False(t, nativefiles.Exists(ctx, testPath))
+			exists, err := nativefiles.Exists(ctx, testPath)
+			require.NoError(t, err)
+			require.False(t, exists)
 
-			err := sourceFile.Create(ctx, &filesoptions.CreateOptions{})
+			err = sourceFile.Create(ctx, &filesoptions.CreateOptions{})
 			require.Error(t, err)
 
 			require.Contains(t, strings.ToLower(err.Error()), "permission denied")

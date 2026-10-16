@@ -34,6 +34,26 @@
         ```golang
         return toReturn, nil
         ```
+- For loops with a fixed number of iterations use the integer range form (requires Go 1.22 or newer).
+  This rule also applies to test cases:
+    - Use:
+        ```golang
+        for i := range 2 {
+            // ...
+        }
+        ```
+    - Instead of:
+        ```golang
+        for i := 0; i < 2; i++ {
+            // ...
+        }
+        ```
+    - If the loop variable is not needed omit it, since an unused loop variable does not compile:
+        ```golang
+        for range 2 {
+            // ...
+        }
+        ```
 - Public/ exported functions must be written in an idempotent way.
     - Use `logging.LogChanged...` to log which change was performed.
     - Use `logging.LogInfo...` if desired state is already in place.

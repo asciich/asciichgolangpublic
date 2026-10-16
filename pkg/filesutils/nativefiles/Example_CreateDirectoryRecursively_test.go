@@ -26,19 +26,29 @@ func Test_Example_CreateDirectoryRecursively(t *testing.T) {
 	testDir := filepath.Join(testRootDir, "a", "b", "c", "testdir")
 
 	// The testDir should not exist yet:
-	require.False(t, nativefiles.Exists(ctx, testDir))
+	exists, err := nativefiles.Exists(ctx, testDir)
+	require.NoError(t, err)
+	require.False(t, exists)
 
 	// Create the directory
 	err = nativefiles.CreateDirectory(ctx, testDir, &filesoptions.CreateOptions{})
 	require.NoError(t, err)
 
-	// The testDir should now exists:
-	require.True(t, nativefiles.Exists(ctx, testDir))
+	// The testDir should now exist:
+	exists, err = nativefiles.Exists(ctx, testDir)
+	require.NoError(t, err)
+	require.True(t, exists)
 
 	// Just for visualization: The sub directories in between exist of course as well:
-	require.True(t, nativefiles.Exists(ctx, filepath.Join(testRootDir)))
-	require.True(t, nativefiles.Exists(ctx, filepath.Join(testRootDir, "a")))
-	require.True(t, nativefiles.Exists(ctx, filepath.Join(testRootDir, "a", "b")))
-	require.True(t, nativefiles.Exists(ctx, filepath.Join(testRootDir, "a", "b", "c")))
-	require.True(t, nativefiles.Exists(ctx, filepath.Join(testRootDir, "a", "b", "c", "testdir")))
+	for _, path := range []string{
+		testRootDir,
+		filepath.Join(testRootDir, "a"),
+		filepath.Join(testRootDir, "a", "b"),
+		filepath.Join(testRootDir, "a", "b", "c"),
+		filepath.Join(testRootDir, "a", "b", "c", "testdir"),
+	} {
+		exists, err = nativefiles.Exists(ctx, path)
+		require.NoError(t, err)
+		require.True(t, exists, "'%s' must exist.", path)
+	}
 }

@@ -69,7 +69,8 @@ func TestCreateTemporaryFileFromContentString(t *testing.T) {
 				require.NoError(t, err)
 				defer func() { _ = nativefiles.Delete(ctx, tmpFilePath, &filesoptions.DeleteOptions{}) }()
 
-				exists := nativefiles.Exists(ctx, tmpFilePath)
+				exists, err := nativefiles.Exists(ctx, tmpFilePath)
+				require.NoError(t, err)
 				require.True(t, exists)
 
 				got, err := nativefiles.ReadAsString(ctx, tmpFilePath, &filesoptions.ReadOptions{})
@@ -99,7 +100,8 @@ func TestCreateTemporaryFileFromContentBytes(t *testing.T) {
 				require.NoError(t, err)
 				defer func() { _ = nativefiles.Delete(ctx, tmpFilePath, &filesoptions.DeleteOptions{}) }()
 
-				exists := nativefiles.Exists(ctx, tmpFilePath)
+				exists, err := nativefiles.Exists(ctx, tmpFilePath)
+				require.NoError(t, err)
 				require.True(t, exists)
 
 				got, err := nativefiles.ReadAsString(ctx, tmpFilePath, &filesoptions.ReadOptions{})

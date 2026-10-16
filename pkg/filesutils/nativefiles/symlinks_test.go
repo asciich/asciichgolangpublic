@@ -1,6 +1,7 @@
 package nativefiles_test
 
 import (
+	"context"
 	"path/filepath"
 	"testing"
 
@@ -11,6 +12,24 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfiles"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
+
+// requireExists fails the test if the given path does not exist or the existence check returns an error.
+func requireExists(t *testing.T, ctx context.Context, path string) {
+	t.Helper()
+
+	exists, err := nativefiles.Exists(ctx, path)
+	require.NoError(t, err)
+	require.True(t, exists, "'%s' must exist.", path)
+}
+
+// requireNotExists fails the test if the given path exists or the existence check returns an error.
+func requireNotExists(t *testing.T, ctx context.Context, path string) {
+	t.Helper()
+
+	exists, err := nativefiles.Exists(ctx, path)
+	require.NoError(t, err)
+	require.False(t, exists, "'%s' must not exist.", path)
+}
 
 func Test_CreateAndDeleteSymlink(t *testing.T) {
 	t.Run("create and delete for file", func(t *testing.T) {
@@ -29,29 +48,29 @@ func Test_CreateAndDeleteSymlink(t *testing.T) {
 			err = nativefiles.Delete(ctx, symlink, &filesoptions.DeleteOptions{})
 			require.NoError(t, err)
 
-			require.True(t, nativefiles.Exists(ctx, targetFile))
-			require.False(t, nativefiles.Exists(ctx, symlink))
+			requireExists(t, ctx, targetFile)
+			requireNotExists(t, ctx, symlink)
 		}
 
 		ctxChangeIndicator := contextutils.WithChangeIndicator(ctx)
 		require.NoError(t, nativefiles.CreateSymlink(ctxChangeIndicator, targetFile, symlink))
-		require.True(t, nativefiles.Exists(ctx, targetFile))
-		require.True(t, nativefiles.Exists(ctx, symlink))
+		requireExists(t, ctx, targetFile)
+		requireExists(t, ctx, symlink)
 		require.True(t, contextutils.IsChanged(ctxChangeIndicator))
 
 		// Creating the symlink twice must be idempotent and not indicate a change:
 		ctxChangeIndicator = contextutils.WithChangeIndicator(ctx)
 		require.NoError(t, nativefiles.CreateSymlink(ctxChangeIndicator, targetFile, symlink))
-		require.True(t, nativefiles.Exists(ctx, targetFile))
-		require.True(t, nativefiles.Exists(ctx, symlink))
+		requireExists(t, ctx, targetFile)
+		requireExists(t, ctx, symlink)
 		require.False(t, contextutils.IsChanged(ctxChangeIndicator))
 
 		for range 2 {
 			err = nativefiles.Delete(ctx, symlink, &filesoptions.DeleteOptions{})
 			require.NoError(t, err)
 
-			require.True(t, nativefiles.Exists(ctx, targetFile))
-			require.False(t, nativefiles.Exists(ctx, symlink))
+			requireExists(t, ctx, targetFile)
+			requireNotExists(t, ctx, symlink)
 		}
 	})
 
@@ -71,29 +90,29 @@ func Test_CreateAndDeleteSymlink(t *testing.T) {
 			err = nativefiles.Delete(ctx, symlink, &filesoptions.DeleteOptions{})
 			require.NoError(t, err)
 
-			require.True(t, nativefiles.Exists(ctx, targetDir))
-			require.False(t, nativefiles.Exists(ctx, symlink))
+			requireExists(t, ctx, targetDir)
+			requireNotExists(t, ctx, symlink)
 		}
 
 		ctxChangeIndicator := contextutils.WithChangeIndicator(ctx)
 		require.NoError(t, nativefiles.CreateSymlink(ctxChangeIndicator, targetDir, symlink))
-		require.True(t, nativefiles.Exists(ctx, targetDir))
-		require.True(t, nativefiles.Exists(ctx, symlink))
+		requireExists(t, ctx, targetDir)
+		requireExists(t, ctx, symlink)
 		require.True(t, contextutils.IsChanged(ctxChangeIndicator))
 
 		// Creating the symlink twice must be idempotent and not indicate a change:
 		ctxChangeIndicator = contextutils.WithChangeIndicator(ctx)
 		require.NoError(t, nativefiles.CreateSymlink(ctxChangeIndicator, targetDir, symlink))
-		require.True(t, nativefiles.Exists(ctx, targetDir))
-		require.True(t, nativefiles.Exists(ctx, symlink))
+		requireExists(t, ctx, targetDir)
+		requireExists(t, ctx, symlink)
 		require.False(t, contextutils.IsChanged(ctxChangeIndicator))
 
 		for range 2 {
 			err = nativefiles.Delete(ctx, symlink, &filesoptions.DeleteOptions{})
 			require.NoError(t, err)
 
-			require.True(t, nativefiles.Exists(ctx, targetDir))
-			require.False(t, nativefiles.Exists(ctx, symlink))
+			requireExists(t, ctx, targetDir)
+			requireNotExists(t, ctx, symlink)
 		}
 	})
 }
@@ -114,16 +133,16 @@ func Test_CreateToAnotherTargetChangesTheSymlink(t *testing.T) {
 
 		symlink := filepath.Join(tempDir, "symlink")
 
-		require.True(t, nativefiles.Exists(ctx, targetFile))
-		require.True(t, nativefiles.Exists(ctx, targetFile2))
-		require.False(t, nativefiles.Exists(ctx, symlink))
+		requireExists(t, ctx, targetFile)
+		requireExists(t, ctx, targetFile2)
+		requireNotExists(t, ctx, symlink)
 
 		// Create to first target:
 		ctxChangeIndicator := contextutils.WithChangeIndicator(ctx)
 		require.NoError(t, nativefiles.CreateSymlink(ctxChangeIndicator, targetFile, symlink))
-		require.True(t, nativefiles.Exists(ctx, targetFile))
-		require.True(t, nativefiles.Exists(ctx, targetFile2))
-		require.True(t, nativefiles.Exists(ctx, symlink))
+		requireExists(t, ctx, targetFile)
+		requireExists(t, ctx, targetFile2)
+		requireExists(t, ctx, symlink)
 		require.True(t, contextutils.IsChanged(ctxChangeIndicator))
 		require.True(t, mustutils.Must(nativefiles.IsSymlinkTo(ctx, symlink, targetFile)))
 		require.False(t, mustutils.Must(nativefiles.IsSymlinkTo(ctx, symlink, targetFile2)))
@@ -131,9 +150,9 @@ func Test_CreateToAnotherTargetChangesTheSymlink(t *testing.T) {
 		// Create to first target again to check idempotence:
 		ctxChangeIndicator = contextutils.WithChangeIndicator(ctx)
 		require.NoError(t, nativefiles.CreateSymlink(ctxChangeIndicator, targetFile, symlink))
-		require.True(t, nativefiles.Exists(ctx, targetFile))
-		require.True(t, nativefiles.Exists(ctx, targetFile2))
-		require.True(t, nativefiles.Exists(ctx, symlink))
+		requireExists(t, ctx, targetFile)
+		requireExists(t, ctx, targetFile2)
+		requireExists(t, ctx, symlink)
 		require.False(t, contextutils.IsChanged(ctxChangeIndicator))
 		require.True(t, mustutils.Must(nativefiles.IsSymlinkTo(ctx, symlink, targetFile)))
 		require.False(t, mustutils.Must(nativefiles.IsSymlinkTo(ctx, symlink, targetFile2)))
@@ -141,9 +160,9 @@ func Test_CreateToAnotherTargetChangesTheSymlink(t *testing.T) {
 		// Create to second target:
 		ctxChangeIndicator = contextutils.WithChangeIndicator(ctx)
 		require.NoError(t, nativefiles.CreateSymlink(ctxChangeIndicator, targetFile2, symlink))
-		require.True(t, nativefiles.Exists(ctx, targetFile))
-		require.True(t, nativefiles.Exists(ctx, targetFile2))
-		require.True(t, nativefiles.Exists(ctx, symlink))
+		requireExists(t, ctx, targetFile)
+		requireExists(t, ctx, targetFile2)
+		requireExists(t, ctx, symlink)
 		require.True(t, contextutils.IsChanged(ctxChangeIndicator))
 		require.False(t, mustutils.Must(nativefiles.IsSymlinkTo(ctx, symlink, targetFile)))
 		require.True(t, mustutils.Must(nativefiles.IsSymlinkTo(ctx, symlink, targetFile2)))
@@ -151,9 +170,9 @@ func Test_CreateToAnotherTargetChangesTheSymlink(t *testing.T) {
 		// Create to second target again to check idempotence:
 		ctxChangeIndicator = contextutils.WithChangeIndicator(ctx)
 		require.NoError(t, nativefiles.CreateSymlink(ctxChangeIndicator, targetFile2, symlink))
-		require.True(t, nativefiles.Exists(ctx, targetFile))
-		require.True(t, nativefiles.Exists(ctx, targetFile2))
-		require.True(t, nativefiles.Exists(ctx, symlink))
+		requireExists(t, ctx, targetFile)
+		requireExists(t, ctx, targetFile2)
+		requireExists(t, ctx, symlink)
 		require.False(t, contextutils.IsChanged(ctxChangeIndicator))
 		require.False(t, mustutils.Must(nativefiles.IsSymlinkTo(ctx, symlink, targetFile)))
 		require.True(t, mustutils.Must(nativefiles.IsSymlinkTo(ctx, symlink, targetFile2)))

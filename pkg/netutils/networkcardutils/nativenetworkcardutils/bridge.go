@@ -192,14 +192,18 @@ func applySystemdNetworkdConfig(ctx context.Context, conn *dbus.Conn, interfaceI
 
 	return nil
 }
-
 func checkInterfaceBridgeable(ctx context.Context, bridgeName string, interfaceName string) error {
 	interfacePath, err := genericnetworkcardutils.GetSysClassNetPath(interfaceName)
 	if err != nil {
 		return err
 	}
 
-	if !nativefiles.Exists(ctx, interfacePath) {
+	interfaceExists, err := nativefiles.Exists(ctx, interfacePath)
+	if err != nil {
+		return err
+	}
+
+	if !interfaceExists {
 		return tracederrors.TracedErrorf("Network interface '%s' does not exist.", interfaceName)
 	}
 
@@ -217,13 +221,19 @@ func checkInterfaceBridgeable(ctx context.Context, bridgeName string, interfaceN
 		return err
 	}
 
-	if nativefiles.Exists(ctx, bridgePath) {
-		isBridge, err := isBridge(ctx, bridgeName)
+	bridgeExists, err := nativefiles.Exists(ctx, bridgePath)
+	if err != nil {
+		return err
+	}
+
+	if bridgeExists {
+		var existingIsBridge bool
+		existingIsBridge, err = isBridge(ctx, bridgeName)
 		if err != nil {
 			return err
 		}
 
-		if !isBridge {
+		if !existingIsBridge {
 			return tracederrors.TracedErrorf("Interface '%s' already exists but is not a bridge.", bridgeName)
 		}
 	}

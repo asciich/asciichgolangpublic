@@ -20,6 +20,9 @@ type fakeSource struct {
 	hostname              string
 	networkInterfaces     []NetworkInterface
 	dockerComposeProjects []DockerComposeProject
+
+	// Optional KVM config. If nil, a KVMConfig with all actions disabled is returned (same as a missing 'kvm' section).
+	kvmConfig *KVMConfig
 }
 
 func (f *fakeSource) GetBeforeScript(ctx context.Context) ([]string, error) {
@@ -38,6 +41,14 @@ func (f *fakeSource) GetDockerComposeProjects(ctx context.Context) ([]DockerComp
 	return f.dockerComposeProjects, nil
 }
 
+func (f *fakeSource) GetKVMConfig(ctx context.Context) (*KVMConfig, error) {
+	if f.kvmConfig == nil {
+		return &KVMConfig{}, nil
+	}
+
+	return f.kvmConfig, nil
+}
+
 // writeTestFile ensures the parent directory of 'path' exists and writes 'content' to 'path'.
 func writeTestFile(t *testing.T, ctx context.Context, path string, content string) {
 	t.Helper()
@@ -52,6 +63,9 @@ func Test_hostConfig_Parse(t *testing.T) {
 before_script:
   - echo hello world
 hostname: host.example.com
+kvm:
+  start: true
+  enable: true
 network:
   interfaces:
     - name: enp0
@@ -68,6 +82,7 @@ network:
 
 		require.Equal(t, []string{"echo hello world"}, config.BeforeScript)
 		require.Equal(t, "host.example.com", config.Hostname)
+		require.Equal(t, KVMConfig{Start: true, Enable: true}, config.KVM)
 		require.Equal(
 			t,
 			[]NetworkInterface{
@@ -94,15 +109,38 @@ hostname: host.example.com
 		require.Equal(t, []string{"echo first\necho second\n"}, config.BeforeScript)
 	})
 
-	t.Run("before_script and network section are optional", func(t *testing.T) {
+	t.Run("before_script, kvm and network section are optional", func(t *testing.T) {
 		config := hostConfig{}
 		err := yaml.Unmarshal([]byte("---\nhostname: host.example.com\n"), &config)
 		require.NoError(t, err)
 
 		require.Empty(t, config.BeforeScript)
 		require.Empty(t, config.Network.Interfaces)
+		require.False(t, config.KVM.hasActions())
 		require.NoError(t, validateBeforeScript(config.BeforeScript))
 		require.NoError(t, validateNetworkInterfaces(config.Network.Interfaces))
+	})
+
+	t.Run("kvm start only", func(t *testing.T) {
+		config := hostConfig{}
+		err := yaml.Unmarshal([]byte("---\nhostname: host.example.com\nkvm:\n  start: true\n"), &config)
+		require.NoError(t, err)
+
+		require.Equal(t, KVMConfig{Start: true}, config.KVM)
+	})
+
+	t.Run("kvm enable only", func(t *testing.T) {
+		config := hostConfig{}
+		err := yaml.Unmarshal([]byte("---\nhostname: host.example.com\nkvm:\n  enable: true\n"), &config)
+		require.NoError(t, err)
+
+		require.Equal(t, KVMConfig{Enable: true}, config.KVM)
+	})
+
+	t.Run("kvm with non boolean value is rejected", func(t *testing.T) {
+		config := hostConfig{}
+		err := yaml.Unmarshal([]byte("---\nhostname: host.example.com\nkvm:\n  start: maybe\n"), &config)
+		require.Error(t, err)
 	})
 
 	t.Run("deactivate_offloading defaults to false", func(t *testing.T) {
@@ -515,5 +553,51 @@ func Test_ReconcileOnce(t *testing.T) {
 		err := ReconcileOnce(ctx, source)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "more than once")
+	})
+}
+
+func Test_KVMConfig_hasActions(t *testing.T) {
+	t.Run("no actions by default", func(t *testing.T) {
+		require.False(t, (&KVMConfig{}).hasActions())
+	})
+
+	t.Run("start only", func(t *testing.T) {
+		require.True(t, (&KVMConfig{Start: true}).hasActions())
+	})
+
+	t.Run("enable only", func(t *testing.T) {
+		require.True(t, (&KVMConfig{Enable: true}).hasActions())
+	})
+
+	t.Run("start and enable", func(t *testing.T) {
+		require.True(t, (&KVMConfig{Start: true, Enable: true}).hasActions())
+	})
+}
+
+func Test_checkKVMPrivileges(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("nil config", func(t *testing.T) {
+		err := checkKVMPrivileges(ctx, nil)
+		require.Error(t, err)
+	})
+
+	t.Run("no actions never requires root", func(t *testing.T) {
+		err := checkKVMPrivileges(ctx, &KVMConfig{})
+		require.NoError(t, err)
+	})
+}
+
+func Test_reconcileKVM(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("nil config", func(t *testing.T) {
+		err := reconcileKVM(ctx, nil)
+		require.Error(t, err)
+	})
+
+	t.Run("no actions is skipped without root", func(t *testing.T) {
+		err := reconcileKVM(ctx, &KVMConfig{})
+		require.NoError(t, err)
 	})
 }

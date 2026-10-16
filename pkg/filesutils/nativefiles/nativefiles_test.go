@@ -63,28 +63,37 @@ func Test_IsDir(t *testing.T) {
 		require.True(t, nativefiles.IsDir(ctx, "/etc/"))
 	})
 }
-
 func Test_Exists(t *testing.T) {
 	ctx := getCtx()
 
 	t.Run("empty string", func(t *testing.T) {
-		require.False(t, nativefiles.Exists(ctx, ""))
+		exists, err := nativefiles.Exists(ctx, "")
+		require.Error(t, err)
+		require.False(t, exists)
 	})
 
 	t.Run("nonexisting file", func(t *testing.T) {
-		require.False(t, nativefiles.Exists(ctx, "/this/file/does/not/exist"))
+		exists, err := nativefiles.Exists(ctx, "/this/file/does/not/exist")
+		require.NoError(t, err)
+		require.False(t, exists)
 	})
 
 	t.Run("existing file", func(t *testing.T) {
-		require.True(t, nativefiles.Exists(ctx, "/etc/hosts"))
+		exists, err := nativefiles.Exists(ctx, "/etc/hosts")
+		require.NoError(t, err)
+		require.True(t, exists)
 	})
 
 	t.Run("directory", func(t *testing.T) {
-		require.True(t, nativefiles.Exists(ctx, "/etc"))
+		exists, err := nativefiles.Exists(ctx, "/etc")
+		require.NoError(t, err)
+		require.True(t, exists)
 	})
 
 	t.Run("directory2", func(t *testing.T) {
-		require.True(t, nativefiles.Exists(ctx, "/etc/"))
+		exists, err := nativefiles.Exists(ctx, "/etc/")
+		require.NoError(t, err)
+		require.True(t, exists)
 	})
 }
 

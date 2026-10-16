@@ -141,7 +141,11 @@ func CheckAllExists(ctx context.Context, pathsToCheck []string) error {
 }
 
 func CheckExists(ctx context.Context, pathToCheck string) error {
-	exists := Exists(ctx, pathToCheck)
+	exists, err := Exists(ctx, pathToCheck)
+	if err != nil {
+		return err
+	}
+
 	if exists {
 		return nil
 	}
@@ -149,15 +153,19 @@ func CheckExists(ctx context.Context, pathToCheck string) error {
 	return tracederrors.TracedErrorf("Path '%s' does not exist.", pathToCheck)
 }
 
-func Exists(ctx context.Context, pathToCheck string) bool {
+func Exists(ctx context.Context, pathToCheck string) (bool, error) {
+	if pathToCheck == "" {
+		return false, tracederrors.TracedErrorEmptyString("pathToCheck")
+	}
+
 	_, err := os.Stat(pathToCheck)
 	if err != nil {
 		logging.LogInfoByCtxf(ctx, "'%s' does not exist in file system.", pathToCheck)
-		return false
+		return false, nil
 	}
 
 	logging.LogInfoByCtxf(ctx, "'%s' exist in file system.", pathToCheck)
-	return true
+	return true, nil
 }
 
 // Delete a file or directory.
@@ -168,7 +176,12 @@ func Delete(ctx context.Context, pathToDelete string, options *filesoptions.Dele
 	}
 
 	ctxSilent := contextutils.WithSilent(ctx)
-	if Exists(ctxSilent, pathToDelete) {
+
+	exists, err := Exists(ctxSilent, pathToDelete)
+	if err != nil {
+		return err
+	}
+	if exists {
 		isDir := IsDir(ctxSilent, pathToDelete)
 		var isFile bool
 		if !isDir {

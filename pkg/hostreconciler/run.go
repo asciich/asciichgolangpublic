@@ -16,21 +16,24 @@ import (
 // If the source fails or returns an invalid state, the host is left untouched.
 //
 // The following steps are performed in this order:
-//   - Runs the 'before_script' entries. If one fails, no change is applied to the host.
-//   - Applies the desired hostname.
-//   - Reconciles all desired network interfaces:
+// - Runs the 'before_script' entries. If one fails, no change is applied to the host.
+// - Applies the desired hostname.
+// - Reconciles all desired network interfaces:
 //   - Deactivates offloading if requested (see networkcardutils.DeactivateOffloading).
 //   - Ensures the layer 2 bridge exists if requested (see networkcardutils.CreateLayer2Bridge).
-//   - Ensures all services of the docker compose projects are up (one project after the other).
+// - Reconciles KVM:
+//   - Ensures libvirtd is enabled if requested (see installkvm.Enable).
+//   - Ensures libvirtd is running if requested (see installkvm.Start).
+// - Ensures all services of the docker compose projects are up (one project after the other).
 //
-// Reconciliation is additive: Removed bridges, offloading settings or whole docker compose projects are NOT reverted.
+// Reconciliation is additive: Removed bridges, offloading settings, KVM settings or whole docker compose projects are NOT reverted.
 // Services removed from an existing docker compose file are removed (orphans).
 //
 // Only changes which differ from the desired state are applied, so it is safe
 // to call this function repeatedly (idempotent). Exception: The 'before_script' entries
 // are executed on every call and must be idempotent themselves.
 //
-// Requires root privileges if changes need to be applied or at least one network interface action is configured.
+// Requires root privileges if changes need to be applied, at least one network interface action or at least one KVM action is configured.
 // Requires access to the docker daemon if at least one docker compose project is configured.
 func ReconcileOnce(ctx context.Context, source Source) error {
 	if source == nil {
@@ -69,12 +72,27 @@ func ReconcileOnce(ctx context.Context, source Source) error {
 		return err
 	}
 
+	kvmConfig, err := source.GetKVMConfig(ctx)
+	if err != nil {
+		return err
+	}
+
+	if kvmConfig == nil {
+		return tracederrors.TracedError("source returned a nil KVM config")
+	}
+
 	dockerComposeProjects, err := source.GetDockerComposeProjects(ctx)
 	if err != nil {
 		return err
 	}
 
 	err = validateDockerComposeProjects(dockerComposeProjects)
+	if err != nil {
+		return err
+	}
+
+	// Check privileges before the before_script and any change is applied:
+	err = checkKVMPrivileges(ctx, kvmConfig)
 	if err != nil {
 		return err
 	}
@@ -92,6 +110,12 @@ func ReconcileOnce(ctx context.Context, source Source) error {
 	}
 
 	err = reconcileNetworkInterfaces(ctx, networkInterfaces)
+	if err != nil {
+		return err
+	}
+
+	// KVM is applied after the network so the bridges (e.g. 'br0') used by the virtual machines are already in place.
+	err = reconcileKVM(ctx, kvmConfig)
 	if err != nil {
 		return err
 	}

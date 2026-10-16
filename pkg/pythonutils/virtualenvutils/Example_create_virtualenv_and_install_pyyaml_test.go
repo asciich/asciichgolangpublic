@@ -25,15 +25,23 @@ func Test_CreateVirtualenvAndInstallPyyaml(t *testing.T) {
 	require.NoError(t, err)
 	defer nativefiles.Delete(ctx, tempDir, &filesoptions.DeleteOptions{})
 	vEnvPath := filepath.Join(tempDir, "ve")
-	require.False(t, nativefiles.Exists(ctx, vEnvPath))
 
-	// Create the virtuelenv with pyyaml installed
+	// The virtualenv does not exist yet:
+	exists, err := nativefiles.Exists(ctx, vEnvPath)
+	require.NoError(t, err)
+	require.False(t, exists)
+
+	// Create the virtualenv with pyyaml installed
 	ve, err := virtualenvutils.CreateVirtualEnv(ctx, &virtualenvutils.CreateVirtualenvOptions{
 		Path:     vEnvPath,
 		Packages: []string{"pyyaml"},
 	})
 	require.NoError(t, err)
-	require.True(t, nativefiles.Exists(ctx, vEnvPath))
+
+	// The virtualenv now exists:
+	exists, err = nativefiles.Exists(ctx, vEnvPath)
+	require.NoError(t, err)
+	require.True(t, exists)
 
 	// Check pyyaml installed
 	pyyamlInstalled, err := ve.IsPackageInstalled(ctx, "pyyaml")
