@@ -12,6 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorexecoo"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockercomposeutils/commandexecutordockercomposeutils"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/dockercomposeutils/dockercomposeoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/hostreconciler/hostreconcileroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -172,10 +173,14 @@ func validateDockerComposeProjects(projects []DockerComposeProject) error {
 //
 // Requires the Docker Compose v2 plugin and access to the docker daemon.
 // This function is idempotent.
-func reconcileDockerComposeProjects(ctx context.Context, projects []DockerComposeProject) error {
+func reconcileDockerComposeProjects(ctx context.Context, projects []DockerComposeProject, options *hostreconcileroptions.RunOptions) error {
 	err := validateDockerComposeProjects(projects)
 	if err != nil {
 		return err
+	}
+
+	if options == nil {
+		options = &hostreconcileroptions.RunOptions{}
 	}
 
 	if len(projects) == 0 {
@@ -196,6 +201,7 @@ func reconcileDockerComposeProjects(ctx context.Context, projects []DockerCompos
 			project.ComposeFilePath,
 			&dockercomposeoptions.UpOptions{
 				RemoveOrphans: true,
+				ForceRecreate: options.DockerComposeForceRecreate,
 			},
 		)
 		if err != nil {

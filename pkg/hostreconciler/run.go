@@ -3,6 +3,7 @@ package hostreconciler
 import (
 	"context"
 
+	"github.com/asciich/asciichgolangpublic/pkg/hostreconciler/hostreconcileroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/hostsutilsoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/hostsutils/nativehost"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -21,9 +22,11 @@ import (
 // - Reconciles all desired network interfaces:
 //   - Deactivates offloading if requested (see networkcardutils.DeactivateOffloading).
 //   - Ensures the layer 2 bridge exists if requested (see networkcardutils.CreateLayer2Bridge).
+//
 // - Reconciles KVM:
 //   - Ensures libvirtd is enabled if requested (see installkvm.Enable).
 //   - Ensures libvirtd is running if requested (see installkvm.Start).
+//
 // - Ensures all services of the docker compose projects are up (one project after the other).
 //
 // Reconciliation is additive: Removed bridges, offloading settings, KVM settings or whole docker compose projects are NOT reverted.
@@ -35,9 +38,13 @@ import (
 //
 // Requires root privileges if changes need to be applied, at least one network interface action or at least one KVM action is configured.
 // Requires access to the docker daemon if at least one docker compose project is configured.
-func ReconcileOnce(ctx context.Context, source Source) error {
+func ReconcileOnce(ctx context.Context, source Source, options *hostreconcileroptions.RunOptions) error {
 	if source == nil {
 		return tracederrors.TracedErrorNil("source")
+	}
+
+	if options == nil {
+		options = &hostreconcileroptions.RunOptions{}
 	}
 
 	logging.LogInfoByCtxf(ctx, "Reconcile host started.")
@@ -121,7 +128,7 @@ func ReconcileOnce(ctx context.Context, source Source) error {
 	}
 
 	// Docker compose is applied last so the network (e.g. bridges) is already in place.
-	err = reconcileDockerComposeProjects(ctx, dockerComposeProjects)
+	err = reconcileDockerComposeProjects(ctx, dockerComposeProjects, options)
 	if err != nil {
 		return err
 	}

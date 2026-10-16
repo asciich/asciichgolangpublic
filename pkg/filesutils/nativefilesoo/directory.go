@@ -144,9 +144,9 @@ func (d *Directory) Exists(ctx context.Context) (exists bool, err error) {
 
 	exists, err = nativefiles.Exists(ctx, path)
 	if err != nil {
-		return false, err 
+		return false, err
 	}
-	
+
 	return exists, nil
 }
 

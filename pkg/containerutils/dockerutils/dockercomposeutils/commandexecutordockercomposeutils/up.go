@@ -12,12 +12,18 @@ import (
 )
 
 // UpByComposeYamlPath ensures all services defined in the compose file 'yamlPath' are running
-// on the machine reached by 'commandExecutor'. This is the idempotent equivalent of:
+// on the machine reached by 'commandExecutor'. This is the equivalent of:
 //
-//	docker compose -f <yamlPath> up --detach [--remove-orphans]
+//	docker compose -f <yamlPath> up --detach [--remove-orphans] [--force-recreate]
 //
 // If 'options.RemoveOrphans' is set, containers of services no longer defined in the compose file are removed.
-// If all services are already running (and no orphans need to be removed) nothing is changed.
+//
+// If 'options.ForceRecreate' is set, all containers are recreated even if their configuration
+// and image haven't changed. In this case the function is intentionally NOT idempotent and
+// 'docker compose up' is always executed.
+//
+// Without 'options.ForceRecreate': if all services are already running (and no orphans need
+// to be removed) nothing is changed.
 //
 // Requires the Docker Compose v2 plugin ('docker compose') on the target machine.
 // No root privileges are required as long as the executing user has access to the docker daemon.
@@ -31,7 +37,7 @@ func UpByComposeYamlPath(ctx context.Context, commandExecutor commandexecutorint
 	}
 
 	if options == nil {
-		return tracederrors.TracedErrorNil("options")
+		options = &dockercomposeoptions.UpOptions{}
 	}
 
 	err := checkDockerComposeAvailable(ctx, commandExecutor)
@@ -57,12 +63,15 @@ func UpByComposeYamlPath(ctx context.Context, commandExecutor commandexecutorint
 		logging.LogInfoByCtxf(ctx, "Docker compose file '%s' has orphan services '%s' which are kept since RemoveOrphans is not set.", yamlPath, strings.Join(orphans, ", "))
 	}
 
-	if isUp && !removeOrphans {
+	if isUp && !removeOrphans && !options.ForceRecreate {
 		logging.LogInfoByCtxf(ctx, "All services of docker compose file '%s' are already up.", yamlPath)
 	} else {
 		command := []string{"docker", "compose", "-f", yamlPath, "up", "--detach"}
 		if options.RemoveOrphans {
 			command = append(command, "--remove-orphans")
+		}
+		if options.ForceRecreate {
+			command = append(command, "--force-recreate")
 		}
 
 		_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
@@ -72,7 +81,9 @@ func UpByComposeYamlPath(ctx context.Context, commandExecutor commandexecutorint
 			return tracederrors.TracedErrorf("Docker compose up for '%s' failed: %w", yamlPath, err)
 		}
 
-		if !isUp {
+		if options.ForceRecreate {
+			logging.LogChangedByCtxf(ctx, "Services of docker compose file '%s' force recreated.", yamlPath)
+		} else if !isUp {
 			logging.LogChangedByCtxf(ctx, "Services of docker compose file '%s' started.", yamlPath)
 		}
 

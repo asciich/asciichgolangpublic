@@ -10,6 +10,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
+	"github.com/asciich/asciichgolangpublic/pkg/hostreconciler/hostreconcileroptions"
 )
 
 const testComposeContent = "services:\n  hello:\n    image: nginx:alpine\n"
@@ -483,11 +484,11 @@ func Test_reconcileDockerComposeProjects(t *testing.T) {
 	ctx := context.TODO()
 
 	t.Run("no docker compose projects is a no-op without docker", func(t *testing.T) {
-		require.NoError(t, reconcileDockerComposeProjects(ctx, nil))
+		require.NoError(t, reconcileDockerComposeProjects(ctx, nil, &hostreconcileroptions.RunOptions{}))
 	})
 
 	t.Run("invalid docker compose projects are rejected before docker is used", func(t *testing.T) {
-		require.Error(t, reconcileDockerComposeProjects(ctx, []DockerComposeProject{{Name: "alpha", ComposeFilePath: "relative/compose.yaml"}}))
+		require.Error(t, reconcileDockerComposeProjects(ctx, []DockerComposeProject{{Name: "alpha", ComposeFilePath: "relative/compose.yaml"}}, &hostreconcileroptions.RunOptions{}))
 	})
 }
 
@@ -495,11 +496,11 @@ func Test_ReconcileOnce(t *testing.T) {
 	ctx := context.TODO()
 
 	t.Run("nil source", func(t *testing.T) {
-		require.Error(t, ReconcileOnce(ctx, nil))
+		require.Error(t, ReconcileOnce(ctx, nil, &hostreconcileroptions.RunOptions{}))
 	})
 
 	t.Run("empty hostname", func(t *testing.T) {
-		require.Error(t, ReconcileOnce(ctx, &fakeSource{}))
+		require.Error(t, ReconcileOnce(ctx, &fakeSource{}, &hostreconcileroptions.RunOptions{}))
 	})
 
 	t.Run("invalid network interfaces are rejected before the hostname is changed", func(t *testing.T) {
@@ -508,7 +509,7 @@ func Test_ReconcileOnce(t *testing.T) {
 			networkInterfaces: []NetworkInterface{{Layer2Bridge: "br0"}},
 		}
 
-		err := ReconcileOnce(ctx, source)
+		err := ReconcileOnce(ctx, source, &hostreconcileroptions.RunOptions{})
 		require.Error(t, err)
 
 		// The validation error proves ReconcileOnce stopped before calling SetHostName.
@@ -521,7 +522,7 @@ func Test_ReconcileOnce(t *testing.T) {
 			hostname:     "host.example.com",
 		}
 
-		err := ReconcileOnce(ctx, source)
+		err := ReconcileOnce(ctx, source, &hostreconcileroptions.RunOptions{})
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "'before_script' is empty")
 	})
@@ -532,7 +533,7 @@ func Test_ReconcileOnce(t *testing.T) {
 			hostname:     "host.example.com",
 		}
 
-		err := ReconcileOnce(ctx, source)
+		err := ReconcileOnce(ctx, source, &hostreconcileroptions.RunOptions{})
 		require.Error(t, err)
 
 		// The before_script error proves ReconcileOnce stopped before calling SetHostName.
@@ -550,7 +551,7 @@ func Test_ReconcileOnce(t *testing.T) {
 			},
 		}
 
-		err := ReconcileOnce(ctx, source)
+		err := ReconcileOnce(ctx, source, &hostreconcileroptions.RunOptions{})
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "more than once")
 	})
