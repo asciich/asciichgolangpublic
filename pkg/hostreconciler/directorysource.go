@@ -341,3 +341,16 @@ func readDockerComposeProject(deploymentDirPath string) (DockerComposeProject, e
 
 	return ret, nil
 }
+
+// GetKVMConfig returns the desired KVM configuration read from the 'kvm' section of the host.yaml file.
+// Returns a KVMConfig with all actions disabled (and no error) if no kvm section is configured.
+func (d *DirectorySource) GetKVMConfig(ctx context.Context) (*KVMConfig, error) {
+	config, err := d.readHostConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := config.KVM
+
+	return &ret, nil
+}

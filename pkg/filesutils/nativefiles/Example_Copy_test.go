@@ -31,17 +31,24 @@ func Test_Example_copy(t *testing.T) {
 	// Define the destination path:
 	dst := filepath.Join(dstDir, "dst")
 	// The dst file does not exist yet:
-	require.False(t, nativefiles.Exists(ctx, dst))
+	dstExists, err := nativefiles.Exists(ctx, dst)
+	require.NoError(t, err)
+	require.False(t, dstExists)
 
 	// Copy the file:
 	err = nativefiles.Copy(ctx, src, dst, &filesoptions.CopyOptions{})
 	require.NoError(t, err)
 
 	// Now both files exist:
-	require.True(t, nativefiles.Exists(ctx, src))
-	require.True(t, nativefiles.Exists(ctx, dst))
+	srcExists, err := nativefiles.Exists(ctx, src)
+	require.NoError(t, err)
+	require.True(t, srcExists)
 
-	// And both file have the same content:
+	dstExists, err = nativefiles.Exists(ctx, dst)
+	require.NoError(t, err)
+	require.True(t, dstExists)
+
+	// And both files have the same content:
 	content1, err := nativefiles.ReadAsString(ctx, src, &filesoptions.ReadOptions{})
 	require.NoError(t, err)
 	content2, err := nativefiles.ReadAsString(ctx, dst, &filesoptions.ReadOptions{})

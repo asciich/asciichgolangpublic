@@ -55,7 +55,6 @@ func IsSymlinkTo(ctx context.Context, symlink string, target string) (bool, erro
 
 	return isLinkTo, nil
 }
-
 func CreateSymlink(ctx context.Context, target string, symlink string) error {
 	if target == "" {
 		return tracederrors.TracedErrorEmptyString("target")
@@ -65,16 +64,28 @@ func CreateSymlink(ctx context.Context, target string, symlink string) error {
 		return tracederrors.TracedErrorEmptyString("symlink")
 	}
 
-	if !Exists(contextutils.WithSilent(ctx), target) {
+	targetExists, err := Exists(contextutils.WithSilent(ctx), target)
+	if err != nil {
+		return err
+	}
+
+	if !targetExists {
 		return tracederrors.TracedErrorf("Failed to create symlink '%s'. Target '%s' does not exist.", symlink, target)
 	}
 
+	symlinkExists, err := Exists(contextutils.WithSilent(ctx), symlink)
+	if err != nil {
+		return err
+	}
+
 	var createSymlink bool
-	if Exists(contextutils.WithSilent(ctx), symlink) {
-		isSymlinkTo, err := IsSymlinkTo(contextutils.WithSilent(ctx), symlink, target)
+	if symlinkExists {
+		var isSymlinkTo bool
+		isSymlinkTo, err = IsSymlinkTo(contextutils.WithSilent(ctx), symlink, target)
 		if err != nil {
 			return err
 		}
+
 		if isSymlinkTo {
 			logging.LogInfoByCtxf(ctx, "'%s' is already a symlink to '%s'.", symlink, target)
 		} else {
@@ -90,7 +101,7 @@ func CreateSymlink(ctx context.Context, target string, symlink string) error {
 	}
 
 	if createSymlink {
-		err := os.Symlink(target, symlink)
+		err = os.Symlink(target, symlink)
 		if err != nil {
 			return tracederrors.TracedErrorf("Failed to create symlink '%s': %w", symlink, err)
 		}

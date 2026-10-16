@@ -17,7 +17,11 @@ func SecureDelete(ctx context.Context, path string) error {
 		return tracederrors.TracedErrorEmptyString(path)
 	}
 
-	if Exists(contextutils.WithSilent(ctx), path) {
+	exists, err := Exists(contextutils.WithSilent(ctx), path)
+	if err != nil {
+		return err
+	}
+	if exists {
 		shredconf := shred.Conf{Times: 1, Zeros: true, Remove: true}
 		err := shredconf.Path(path)
 		if err != nil {

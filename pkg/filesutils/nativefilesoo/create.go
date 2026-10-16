@@ -22,5 +22,5 @@ func (f *File) Exists(ctx context.Context) (bool, error) {
 		return false, err
 	}
 
-	return nativefiles.Exists(ctx, path), nil
+	return nativefiles.Exists(ctx, path)
 }

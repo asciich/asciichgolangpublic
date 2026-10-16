@@ -21,10 +21,12 @@ func Test_Example_copySudo(t *testing.T) {
 	// Delete the source file when the test is finished:
 	defer nativefiles.Delete(ctx, src, &filesoptions.DeleteOptions{})
 
-	// Define the destination path. /opt is usually not writeable as root and requires sudo.:
+	// Define the destination path. /opt is usually not writeable as a normal user and requires sudo:
 	dst := "/opt/tmp_dst_file"
 	// The dst file does not exist yet:
-	require.False(t, nativefiles.Exists(ctx, dst))
+	dstExists, err := nativefiles.Exists(ctx, dst)
+	require.NoError(t, err)
+	require.False(t, dstExists)
 	// Ensure the dst file is deleted after the test:
 	defer nativefiles.Delete(ctx, dst, &filesoptions.DeleteOptions{UseSudo: true})
 
@@ -33,10 +35,15 @@ func Test_Example_copySudo(t *testing.T) {
 	require.NoError(t, err)
 
 	// Now both files exist:
-	require.True(t, nativefiles.Exists(ctx, src))
-	require.True(t, nativefiles.Exists(ctx, dst))
+	srcExists, err := nativefiles.Exists(ctx, src)
+	require.NoError(t, err)
+	require.True(t, srcExists)
 
-	// And both file have the same content:
+	dstExists, err = nativefiles.Exists(ctx, dst)
+	require.NoError(t, err)
+	require.True(t, dstExists)
+
+	// And both files have the same content:
 	content1, err := nativefiles.ReadAsString(ctx, src, &filesoptions.ReadOptions{})
 	require.NoError(t, err)
 	content2, err := nativefiles.ReadAsString(ctx, dst, &filesoptions.ReadOptions{UseSudo: true})

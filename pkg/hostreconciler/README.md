@@ -34,6 +34,9 @@ hostname: host.example.com
 before_script:
   - echo hello world
 hostname: host.example.com
+kvm:
+  start: true
+  enable: true
 network:
   interfaces:
     - name: enp0
@@ -53,23 +56,28 @@ services:
 
 ### Reference: `host.yaml`
 
-| Field                                         | Type       | Required | Default | Description                                                            |
-|-----------------------------------------------|------------|:--------:|:-------:|------------------------------------------------------------------------|
-| `before_script`                               | `[]string` |    ❌    |         | Shell commands executed before any change is applied to the host.      |
-| `hostname`                                    | `string`   |    ✅    |         | Fully qualified hostname of the host.                                  |
-| `network`                                     | `object`   |    ❌    |         | Network configuration of the host.                                     |
-| `network.interfaces`                          | `list`     |    ❌    |         | Desired configuration of network interfaces (network cards).           |
-| `network.interfaces[].name`                   | `string`   |    ✅    |         | Name of the network card, e.g. `enp0` (max. 15 characters).            |
-| `network.interfaces[].layer2_bridge`          | `string`   |    ❌    |         | Layer 2 bridge to create with this network card attached, e.g. `br0`.  |
-| `network.interfaces[].deactivate_offloading`  | `bool`     |    ❌    | `false` | Deactivate TSO/GSO/GRO/LRO offloading for this network card.           |
+| Field                                         | Type       | Required | Default | Description                                                               |
+|-----------------------------------------------|------------|:--------:|:-------:|---------------------------------------------------------------------------|
+| `before_script`                               | `[]string` |    ❌    |         | Shell commands executed before any change is applied to the host.         |
+| `hostname`                                    | `string`   |    ✅    |         | Fully qualified hostname of the host.                                     |
+| `kvm`                                         | `object`   |    ❌    |         | KVM configuration of the host.                                            |
+| `kvm.start`                                   | `bool`     |    ❌    | `false` | Install the KVM packages and ensure `libvirtd` is running.                |
+| `kvm.enable`                                  | `bool`     |    ❌    | `false` | Install the KVM packages and ensure `libvirtd` is started on boot.        |
+| `network`                                     | `object`   |    ❌    |         | Network configuration of the host.                                        |
+| `network.interfaces`                          | `list`     |    ❌    |         | Desired configuration of network interfaces (network cards).              |
+| `network.interfaces[].name`                   | `string`   |    ✅    |         | Name of the network card, e.g. `enp0` (max. 15 characters).               |
+| `network.interfaces[].layer2_bridge`          | `string`   |    ❌    |         | Layer 2 bridge to create with this network card attached, e.g. `br0`.    |
+| `network.interfaces[].deactivate_offloading`  | `bool`     |    ❌    | `false` | Deactivate TSO/GSO/GRO/LRO offloading for this network card.              |
 
 ## Order of a reconcile run
 
 1. Read and validate the whole config (`host.yaml` and `docker_compose/`). If it's invalid, nothing is executed or changed.
-2. Run `before_script`. If an entry fails, no change is applied.
-3. Apply `hostname`.
-4. Reconcile `network.interfaces`.
-5. Reconcile the `docker_compose/` deployments (one after the other).
+2. Check root privileges if `kvm.start` or `kvm.enable` is set. If they are missing, nothing is executed or changed.
+3. Run `before_script`. If an entry fails, no change is applied.
+4. Apply `hostname`.
+5. Reconcile `network.interfaces`.
+6. Reconcile `kvm`.
+7. Reconcile the `docker_compose/` deployments (one after the other).
 
 ### `before_script`
 
@@ -111,6 +119,20 @@ Reconciled using `CreateLayer2Bridge` of [networkcardutils](../netutils/networkc
 
 If both are set, offloading is deactivated before the bridge is created.
 
+### `kvm`
+
+Reconciled using [installkvm](../vmutils/kvmutils/installkvm/README.md):
+
+- `kvm.enable`: Uses `Enable` to install missing KVM packages and enable the `libvirtd` systemd service (started on boot). `libvirtd` is **not** started by this option alone.
+- `kvm.start`: Uses `Start` to install missing KVM packages and start the `libvirtd` systemd service. `libvirtd` is **not** enabled by this option alone.
+- Set both options so `libvirtd` is running now **and** after a reboot.
+- If both are set, `libvirtd` is enabled before it is started.
+- The installed packages depend on the package manager of the host:
+    - `apt-get` (Debian/Ubuntu): `qemu-system-x86`, `qemu-utils`, `libvirt-daemon-system`, `libvirt-clients`, `virtinst`, `ovmf`.
+    - `pacman`/`yay` (Arch Linux): `qemu-system-x86`, `qemu-img`, `libvirt`, `virt-install`, `dnsmasq`, `edk2-ovmf`.
+- KVM is reconciled **after** `network.interfaces`, so bridges like `br0` used by the virtual machines already exist when `libvirtd` starts.
+- Idempotent: Already installed packages and an already running/enabled `libvirtd` are left untouched.
+
 ### `docker_compose/<deployment>/`
 
 Every deployment is reconciled using `UpByComposeYamlPath` of [commandexecutordockercomposeutils](../containerutils/dockerutils/dockercomposeutils/commandexecutordockercomposeutils/README.md)
@@ -131,9 +153,13 @@ Every deployment is reconciled using `UpByComposeYamlPath` of [commandexecutordo
 
 - Linux.
 - `bash` (only if `before_script` is configured).
-- Root privileges (only if at least one network interface has `layer2_bridge` or `deactivate_offloading: true`).
+- Root privileges (only if at least one network interface has `layer2_bridge` or `deactivate_offloading: true`, or if `kvm.start` or `kvm.enable` is `true`).
 - `layer2_bridge`: An active and enabled `systemd-networkd`.
 - `deactivate_offloading`: systemd/udev (existing `/etc/systemd/network/` directory).
+- `kvm`:
+    - systemd (to manage the `libvirtd` service).
+    - A supported package manager (`apt-get`, `pacman` or `yay`) with access to the package servers.
+    - A CPU with hardware virtualization support (Intel VT-x/AMD-V) enabled in the BIOS/UEFI to run virtual machines.
 - `docker_compose/`: Docker Compose v2 plugin (`docker compose`) and access to the docker daemon.
 
 ## Validation
@@ -146,6 +172,8 @@ Performed for the whole config before anything is executed or changed:
 - `layer2_bridge` (if set) is a valid interface name and differs from `name`.
 - A layer 2 bridge is used by only one network interface.
 - Nested bridges (a configured `layer2_bridge` also listed as `name`) are not supported.
+- `kvm.start` and `kvm.enable` (if set) are booleans.
+- Root privileges are available if `kvm.start` or `kvm.enable` is `true`.
 - Every deployment directory name is a valid docker compose project name.
 - Every deployment directory contains exactly one compose file which is valid YAML.
 - A top level `name` in a compose file (if set) equals its deployment directory name.
@@ -155,4 +183,7 @@ Performed for the whole config before anything is executed or changed:
 
 - Removing `layer2_bridge` (or the whole entry) does **not** remove the bridge from the host.
 - Removing `deactivate_offloading` or setting it to `false` does **not** reactivate offloading.
+- Removing `kvm.start` or setting it to `false` does **not** stop `libvirtd`.
+- Removing `kvm.enable` or setting it to `false` does **not** disable `libvirtd`.
+- Removing the `kvm` section does **not** uninstall the KVM packages.
 - Removing a whole deployment directory does **not** stop its project. Run `docker compose -p <deployment> down` manually.

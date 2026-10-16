@@ -22,7 +22,12 @@ func IsStaticallyLinkedBinary(ctx context.Context, path string) (bool, error) {
 		return false, tracederrors.TracedErrorEmptyString("path")
 	}
 
-	if !Exists(contextutils.WithSilent(ctx), path) {
+	exists, err := Exists(contextutils.WithSilent(ctx), path)
+	if err != nil {
+		return false, err
+	}
+
+	if !exists {
 		return false, tracederrors.TracedErrorf("Path '%s' does not exist.", path)
 	}
 

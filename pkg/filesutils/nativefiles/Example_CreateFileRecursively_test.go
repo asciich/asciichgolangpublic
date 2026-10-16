@@ -22,23 +22,33 @@ func Test_Example_CreateFileRecursively(t *testing.T) {
 	// After the test run the test directory should be deleted:
 	defer nativefiles.Delete(ctx, testRootDir, &filesoptions.DeleteOptions{})
 
-	// Define the path to the directory to create with multiple subdirs in between:
+	// Define the path to the file to create with multiple subdirs in between:
 	testFile := filepath.Join(testRootDir, "a", "b", "c", "testfile.txt")
 
 	// The testFile should not exist yet:
-	require.False(t, nativefiles.Exists(ctx, testFile))
+	exists, err := nativefiles.Exists(ctx, testFile)
+	require.NoError(t, err)
+	require.False(t, exists)
 
 	// Create the file
 	err = nativefiles.Create(ctx, testFile, &filesoptions.CreateOptions{})
 	require.NoError(t, err)
 
-	// The testFile should now exists:
-	require.True(t, nativefiles.Exists(ctx, testFile))
+	// The testFile should now exist:
+	exists, err = nativefiles.Exists(ctx, testFile)
+	require.NoError(t, err)
+	require.True(t, exists)
 
 	// Just for visualization: The sub directories in between exist of course as well:
-	require.True(t, nativefiles.Exists(ctx, filepath.Join(testRootDir)))
-	require.True(t, nativefiles.Exists(ctx, filepath.Join(testRootDir, "a")))
-	require.True(t, nativefiles.Exists(ctx, filepath.Join(testRootDir, "a", "b")))
-	require.True(t, nativefiles.Exists(ctx, filepath.Join(testRootDir, "a", "b", "c")))
-	require.True(t, nativefiles.Exists(ctx, filepath.Join(testRootDir, "a", "b", "c", "testfile.txt")))
+	for _, path := range []string{
+		testRootDir,
+		filepath.Join(testRootDir, "a"),
+		filepath.Join(testRootDir, "a", "b"),
+		filepath.Join(testRootDir, "a", "b", "c"),
+		filepath.Join(testRootDir, "a", "b", "c", "testfile.txt"),
+	} {
+		exists, err = nativefiles.Exists(ctx, path)
+		require.NoError(t, err)
+		require.True(t, exists, "'%s' must exist.", path)
+	}
 }

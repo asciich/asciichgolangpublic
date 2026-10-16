@@ -27,7 +27,7 @@ func Test_CreateAndDeleteFile(t *testing.T) {
 			err = nativefiles.Delete(ctx, filePath, &filesoptions.DeleteOptions{})
 			require.NoError(t, err)
 
-			require.False(t, nativefiles.Exists(ctx, filePath))
+			requireNotExists(t, ctx, filePath)
 		}
 
 		// Create the file again
@@ -36,7 +36,7 @@ func Test_CreateAndDeleteFile(t *testing.T) {
 			err = nativefiles.Create(ctx, filePath, &filesoptions.CreateOptions{})
 			require.NoError(t, err)
 
-			require.True(t, nativefiles.Exists(ctx, filePath))
+			requireExists(t, ctx, filePath)
 		}
 
 		// Test Delete.
@@ -45,7 +45,7 @@ func Test_CreateAndDeleteFile(t *testing.T) {
 			err = nativefiles.Delete(ctx, filePath, &filesoptions.DeleteOptions{})
 			require.NoError(t, err)
 
-			require.False(t, nativefiles.Exists(ctx, filePath))
+			requireNotExists(t, ctx, filePath)
 		}
 	})
 }
@@ -55,38 +55,38 @@ func Test_CreateAndDeleteDir(t *testing.T) {
 		ctx := getCtx()
 
 		// We use a temporary directory path for testing:
-		filePath, err := tempfiles.CreateTempDir(ctx)
+		dirPath, err := tempfiles.CreateTempDir(ctx)
 		require.NoError(t, err)
-		defer nativefiles.Delete(ctx, filePath, &filesoptions.DeleteOptions{})
-		err = nativefiles.Delete(ctx, filePath, &filesoptions.DeleteOptions{})
+		defer nativefiles.Delete(ctx, dirPath, &filesoptions.DeleteOptions{})
+		err = nativefiles.Delete(ctx, dirPath, &filesoptions.DeleteOptions{})
 		require.NoError(t, err)
 
-		// Test Delete first to ensure the file is absent in any case for the next test steps.
+		// Test Delete first to ensure the directory is absent in any case for the next test steps.
 		// Is done twice to test idempotence.
 		for range 2 {
-			err = nativefiles.Delete(ctx, filePath, &filesoptions.DeleteOptions{})
+			err = nativefiles.Delete(ctx, dirPath, &filesoptions.DeleteOptions{})
 			require.NoError(t, err)
 
-			require.False(t, nativefiles.Exists(ctx, filePath))
+			requireNotExists(t, ctx, dirPath)
 		}
 
-		// Create the file again
+		// Create the directory again
 		// Is done twice to test idempotence.
 		for range 2 {
-			err = nativefiles.CreateDirectory(ctx, filePath, &filesoptions.CreateOptions{})
+			err = nativefiles.CreateDirectory(ctx, dirPath, &filesoptions.CreateOptions{})
 			require.NoError(t, err)
 
-			require.True(t, nativefiles.Exists(ctx, filePath))
-			require.True(t, nativefiles.IsDir(ctx, filePath))
+			requireExists(t, ctx, dirPath)
+			require.True(t, nativefiles.IsDir(ctx, dirPath))
 		}
 
 		// Test Delete.
 		// Is done twice to test idempotence.
 		for range 2 {
-			err = nativefiles.Delete(ctx, filePath, &filesoptions.DeleteOptions{})
+			err = nativefiles.Delete(ctx, dirPath, &filesoptions.DeleteOptions{})
 			require.NoError(t, err)
 
-			require.False(t, nativefiles.Exists(ctx, filePath))
+			requireNotExists(t, ctx, dirPath)
 		}
 	})
 }

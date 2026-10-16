@@ -18,11 +18,33 @@ type hostConfig struct {
 
 	Hostname string        `yaml:"hostname"`
 	Network  networkConfig `yaml:"network"`
+
+	// Optional KVM configuration.
+	KVM KVMConfig `yaml:"kvm"`
 }
 
 // networkConfig represents the optional 'network' section of the host.yaml file.
 type networkConfig struct {
 	Interfaces []NetworkInterface `yaml:"interfaces"`
+}
+
+// KVMConfig is the desired KVM configuration of the host.
+//
+// It represents the optional 'kvm' section of the host.yaml file
+// and is returned by Source.GetKVMConfig.
+type KVMConfig struct {
+	// If true, the KVM packages are installed and libvirtd is ensured to be running (see installkvm.Start).
+	// If false, libvirtd is left untouched (it is NOT stopped).
+	Start bool `yaml:"start"`
+
+	// If true, the KVM packages are installed and libvirtd is ensured to be enabled/ started on boot (see installkvm.Enable).
+	// If false, libvirtd is left untouched (it is NOT disabled).
+	Enable bool `yaml:"enable"`
+}
+
+// hasActions returns true if at least one change is configured for KVM.
+func (k *KVMConfig) hasActions() bool {
+	return k.Start || k.Enable
 }
 
 // NetworkInterface is the desired configuration of a network interface (network card).

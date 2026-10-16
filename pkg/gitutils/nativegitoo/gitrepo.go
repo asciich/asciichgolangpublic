@@ -344,7 +344,10 @@ func (n *NativeGitRepository) Create(ctx context.Context, options *filesoptions.
 
 	logging.LogInfoByCtxf(ctx, "Create directory for git repository '%s' on '%s' started.", path, hostDescription)
 
-	exists := nativefiles.Exists(ctx, path)
+	exists, err := nativefiles.Exists(ctx, path)
+	if err != nil {
+		return err
+	}
 
 	if exists {
 		logging.LogInfoByCtxf(ctx, "Directory '%s' on '%s' already exists.", path, hostDescription)
@@ -408,7 +411,10 @@ func (n *NativeGitRepository) FileByPathExists(ctx context.Context, path string)
 
 	fullPath := filepath.Join(repoPath, path)
 
-	exists = nativefiles.Exists(ctx, fullPath)
+	exists, err = nativefiles.Exists(ctx, fullPath)
+	if err != nil {
+		return false, err
+	}
 
 	return exists, nil
 }

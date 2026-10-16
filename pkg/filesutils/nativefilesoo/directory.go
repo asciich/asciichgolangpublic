@@ -142,7 +142,11 @@ func (d *Directory) Exists(ctx context.Context) (exists bool, err error) {
 		return false, err
 	}
 
-	exists = nativefiles.Exists(ctx, path)
+	exists, err = nativefiles.Exists(ctx, path)
+	if err != nil {
+		return false, err 
+	}
+	
 	return exists, nil
 }
 

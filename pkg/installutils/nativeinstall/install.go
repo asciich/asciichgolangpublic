@@ -24,7 +24,11 @@ func isAlreadyInstalled(ctx context.Context, installPath string, sha256Sum strin
 		return false, nil
 	}
 
-	exists := nativefiles.Exists(ctx, installPath)
+	exists, err := nativefiles.Exists(ctx, installPath)
+	if err != nil {
+		return false, err
+	}
+
 	if !exists {
 		return false, nil
 	}

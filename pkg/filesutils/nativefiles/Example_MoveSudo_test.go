@@ -21,10 +21,12 @@ func Test_Example_moveSudo(t *testing.T) {
 	// Delete the source file when the test is finished:
 	defer nativefiles.Delete(ctx, src, &filesoptions.DeleteOptions{})
 
-	// Define the destination path. /opt is usually not writeable as root and requires sudo.:
+	// Define the destination path. /opt is usually not writeable as a normal user and requires sudo:
 	dst := "/opt/tmp_dst_file_for_mv"
 	// The dst file does not exist yet:
-	require.False(t, nativefiles.Exists(ctx, dst))
+	dstExists, err := nativefiles.Exists(ctx, dst)
+	require.NoError(t, err)
+	require.False(t, dstExists)
 	// Ensure the dst file is deleted after the test:
 	defer nativefiles.Delete(ctx, dst, &filesoptions.DeleteOptions{UseSudo: true})
 
@@ -32,9 +34,14 @@ func Test_Example_moveSudo(t *testing.T) {
 	err = nativefiles.Move(ctx, src, dst, &filesoptions.MoveOptions{UseSudo: true})
 	require.NoError(t, err)
 
-	// Now only the dst files exist:
-	require.False(t, nativefiles.Exists(ctx, src))
-	require.True(t, nativefiles.Exists(ctx, dst))
+	// Now only the dst file exists:
+	srcExists, err := nativefiles.Exists(ctx, src)
+	require.NoError(t, err)
+	require.False(t, srcExists)
+
+	dstExists, err = nativefiles.Exists(ctx, dst)
+	require.NoError(t, err)
+	require.True(t, dstExists)
 
 	// And the dst file has the original content:
 	content2, err := nativefiles.ReadAsString(ctx, dst, &filesoptions.ReadOptions{UseSudo: true})
