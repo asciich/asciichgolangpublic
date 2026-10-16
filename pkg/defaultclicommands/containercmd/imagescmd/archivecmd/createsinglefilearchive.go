@@ -26,7 +26,7 @@ Can be used to pack a single statically linked binary into a container image wit
 
 Example packing this binary itself into a container:
   1. Pack the binary into a container:
-	` + os.Args[0] + ` container images archive create-single-file-archive` + os.Args[0] + ` container images archive create-single-file-archive` + os.Args[0] + ` container images archive create-single-file-archive` + os.Args[0] + `
+	` + os.Args[0] + ` container images archive create-single-file-archive
 `,
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)

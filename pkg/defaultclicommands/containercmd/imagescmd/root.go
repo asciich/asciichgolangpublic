@@ -1,9 +1,10 @@
 package imagescmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/containercmd/imagescmd/archivecmd"
-	"os"
 )
 
 func NewImagesCmd() *cobra.Command {
@@ -19,6 +20,8 @@ Usage:
 	}
 
 	cmd.AddCommand(
+		NewCreateSingleFileDockerImage(),
+
 		archivecmd.NewArchiveCmd(),
 	)
 

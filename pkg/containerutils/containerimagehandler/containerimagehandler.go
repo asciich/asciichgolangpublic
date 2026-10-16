@@ -31,7 +31,7 @@ func ListImageNamesAndTagsInArchive(ctx context.Context, archivePath string) ([]
 	logging.LogInfoByCtxf(ctx, "List image names and tags in container image archive '%s' started.", archivePath)
 	f, err := os.Open(archivePath)
 	if err != nil {
-		return nil, err
+		return nil, tracederrors.TracedErrorf("Failed to open container image archive '%s': %w", archivePath, err)
 	}
 	defer f.Close()
 
@@ -43,7 +43,7 @@ func ListImageNamesAndTagsInArchive(ctx context.Context, archivePath string) ([]
 			break
 		}
 		if err != nil {
-			return nil, err
+			return nil, tracederrors.TracedErrorf("Failed to read container image archive '%s': %w", archivePath, err)
 		}
 
 		if header.Name == "manifest.json" {
@@ -61,9 +61,7 @@ func ListImageNamesAndTagsInArchive(ctx context.Context, archivePath string) ([]
 			}
 
 			for _, d := range data {
-				for _, r := range d.RepoTags {
-					tags = append(tags, r)
-				}
+				tags = append(tags, d.RepoTags...)
 			}
 		}
 	}
@@ -71,9 +69,50 @@ func ListImageNamesAndTagsInArchive(ctx context.Context, archivePath string) ([]
 		return nil, tracederrors.TracedErrorf("No metadata found to list image names and tags in image archive '%s'.", archivePath)
 	}
 
-	logging.LogInfoByCtxf(ctx, "List image names and tags in contaienr image archive '%s' finished.", archivePath)
+	logging.LogInfoByCtxf(ctx, "List image names and tags in container image archive '%s' finished.", archivePath)
 
 	return tags, nil
+}
+
+// applyLayerToFileSet reads all entries of the given layer and applies them to the fileSet.
+// Whiteout entries remove the corresponding file from the fileSet.
+func applyLayerToFileSet(layer v1.Layer, fileSet map[string]bool) error {
+	if layer == nil {
+		return tracederrors.TracedErrorNil("layer")
+	}
+
+	if fileSet == nil {
+		return tracederrors.TracedErrorNil("fileSet")
+	}
+
+	reader, err := layer.Uncompressed()
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to get uncompressed reader: %w", err)
+	}
+	defer reader.Close()
+
+	tr := tar.NewReader(reader)
+	for {
+		header, err := tr.Next()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return tracederrors.TracedErrorf("Failed to read tar data: %w", err)
+		}
+
+		// Handle Whiteouts:
+		// If a file is prefixed with .wh., it indicates a deletion of the file
+		// in the layers beneath it.
+		if strings.Contains(header.Name, ".wh.") {
+			// The actual path being deleted:
+			originalPath := strings.Replace(header.Name, ".wh.", "", 1)
+			delete(fileSet, originalPath)
+		} else {
+			// Otherwise, add/update the file in our set
+			fileSet[header.Name] = true
+		}
+	}
 }
 
 func ListFilesInArchive(ctx context.Context, archivePath string) ([]string, error) {
@@ -95,33 +134,9 @@ func ListFilesInArchive(ctx context.Context, archivePath string) ([]string, erro
 
 	fileSet := make(map[string]bool)
 	for _, layer := range layers {
-		reader, err := layer.Uncompressed()
+		err = applyLayerToFileSet(layer, fileSet)
 		if err != nil {
-			return nil, tracederrors.TracedErrorf("Failed to get uncompressed reader: %w", err)
-		}
-		defer reader.Close()
-
-		tr := tar.NewReader(reader)
-		for {
-			header, err := tr.Next()
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				return nil, tracederrors.TracedErrorf("Failed to read tar data: %w", err)
-			}
-
-			// Handle Whiteouts:
-			// If a file is prefixed with .wh., it indicates a deletion of the file
-			// in the layers beneath it.
-			if strings.Contains(header.Name, ".wh.") {
-				// The actual path being deleted:
-				originalPath := strings.Replace(header.Name, ".wh.", "", 1)
-				delete(fileSet, originalPath)
-			} else {
-				// Otherwise, add/update the file in our set
-				fileSet[header.Name] = true
-			}
+			return nil, err
 		}
 	}
 
@@ -130,7 +145,7 @@ func ListFilesInArchive(ctx context.Context, archivePath string) ([]string, erro
 		files = append(files, path)
 	}
 
-	logging.LogInfoByCtxf(ctx, "List files in container image archive '%s' finished.", archivePath)
+	logging.LogInfoByCtxf(ctx, "List files in container image archive '%s' finished. Found '%d' files.", archivePath, len(files))
 
 	return files, nil
 }
@@ -166,7 +181,7 @@ func FileInArchiveExists(ctx context.Context, archivePath string, pathToCheck st
 
 // Load the image tagged as "imageNameAndTag" from a container image archive.
 //
-// If imageNammeAndTag is empty the tag is evaluated based on the archive content.
+// If imageNameAndTag is empty the tag is evaluated based on the archive content.
 // This will fail when multiple tags are defined in one archive.
 // In the case of multiple tags the tag has to be explicitly defined as imageNameAndTag
 func LoadImageFromArchive(ctx context.Context, archivePath string, imageNameAndTag string) (v1.Image, *name.Tag, error) {
@@ -197,7 +212,7 @@ func LoadImageFromArchive(ctx context.Context, archivePath string, imageNameAndT
 
 	image, err := tarball.ImageFromPath(archivePath, &tag)
 	if err != nil {
-		return nil, nil, tracederrors.TracedErrorf("Failed to load '%s' from container image archive '%s'.", imageNameAndTag, archivePath)
+		return nil, nil, tracederrors.TracedErrorf("Failed to load '%s' from container image archive '%s': %w", imageNameAndTag, archivePath, err)
 	}
 
 	logging.LogInfoByCtxf(ctx, "Load container image from archive '%s' finished.", archivePath)
@@ -240,6 +255,129 @@ func OverwriteArchive(ctx context.Context, archivePath string, tag *name.Tag, im
 	return nil
 }
 
+// CreateSingleFileImage creates an in-memory container image containing only the single file defined in the options.
+//
+// The returned image can be written to an archive (see CreateSingleFileArchive) or loaded into a container runtime like docker.
+func CreateSingleFileImage(ctx context.Context, options *containeroptions.CreateSingleFileArchiveOptions) (v1.Image, *name.Tag, error) {
+	if options == nil {
+		return nil, nil, tracederrors.TracedErrorNil("options")
+	}
+
+	srcFilePath, err := options.GetSourceFilePath()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	pathInImage, err := options.GetPathInImage()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	newImageNameAndTag, err := options.GetNewImageNameAndTag()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	mode, err := options.GetMode()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	architecture, err := options.GetArchitecture()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Create single file container image '%s' with file '%s' as '%s' started.", newImageNameAndTag, srcFilePath, pathInImage)
+
+	// Check if the binary is statically linked (unless SkipStaticLinkCheck is enabled)
+	if !options.GetSkipStaticLinkCheck() {
+		isStaticallyLinked, err := nativefiles.IsStaticallyLinkedBinary(ctx, srcFilePath)
+		if err != nil {
+			return nil, nil, tracederrors.TracedErrorf("Failed to check if '%s' is statically linked: %w.", srcFilePath, err)
+		}
+		if !isStaticallyLinked {
+			return nil, nil, tracederrors.TracedErrorf("The source file '%s' is not a statically linked binary.", srcFilePath)
+		}
+		logging.LogInfoByCtxf(ctx, "Verified that '%s' is statically linked.", srcFilePath)
+	}
+
+	// Parse the image tag
+	tag, err := name.NewTag(newImageNameAndTag)
+	if err != nil {
+		return nil, nil, tracederrors.TracedErrorf("Failed to parse new image name and tag '%s': %w", newImageNameAndTag, err)
+	}
+
+	file, err := os.Open(srcFilePath)
+	if err != nil {
+		return nil, nil, tracederrors.TracedErrorf("Failed to open '%s' to add it to the container image '%s': %w", srcFilePath, newImageNameAndTag, err)
+	}
+	defer file.Close()
+
+	stat, err := file.Stat()
+	if err != nil {
+		return nil, nil, tracederrors.TracedErrorf("Failed to stat '%s' to add it to the container image '%s': %w", srcFilePath, newImageNameAndTag, err)
+	}
+
+	if !stat.Mode().IsRegular() {
+		return nil, nil, tracederrors.TracedErrorf("The source file '%s' is not a regular file.", srcFilePath)
+	}
+
+	var buf bytes.Buffer
+	tw := tar.NewWriter(&buf)
+
+	header := &tar.Header{
+		Typeflag: tar.TypeReg,
+		Name:     pathInImage,
+		Size:     stat.Size(),
+		Mode:     mode,
+	}
+	if err = tw.WriteHeader(header); err != nil {
+		return nil, nil, tracederrors.TracedErrorf("Failed to write tar header for '%s': %w", srcFilePath, err)
+	}
+	if _, err = io.Copy(tw, file); err != nil {
+		return nil, nil, tracederrors.TracedErrorf("Failed to write file content for '%s' into tar: %w", srcFilePath, err)
+	}
+	if err = tw.Close(); err != nil {
+		return nil, nil, tracederrors.TracedErrorf("Failed to close tar writer for '%s': %w", srcFilePath, err)
+	}
+
+	// Create a single layer from the tar buffer
+	layer, err := tarball.LayerFromOpener(
+		func() (io.ReadCloser, error) {
+			return io.NopCloser(bytes.NewReader(buf.Bytes())), nil
+		},
+		tarball.WithMediaType(types.DockerLayer),
+	)
+	if err != nil {
+		return nil, nil, tracederrors.TracedErrorf("Failed to create layer from file '%s': %w", srcFilePath, err)
+	}
+
+	// Start from a completely empty base image and append the single layer
+	newImage, err := mutate.AppendLayers(empty.Image, layer)
+	if err != nil {
+		return nil, nil, tracederrors.TracedErrorf("Failed to append layer to empty image: %w", err)
+	}
+
+	// Fix platform metadata
+	configFile, err := newImage.ConfigFile()
+	if err != nil {
+		return nil, nil, tracederrors.TracedErrorf("Failed to get config file: %w", err)
+	}
+
+	configFile.Architecture = architecture
+	configFile.OS = "linux"
+
+	newImage, err = mutate.ConfigFile(newImage, configFile)
+	if err != nil {
+		return nil, nil, tracederrors.TracedErrorf("Failed to set platform config: %w", err)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Create single file container image '%s' with file '%s' as '%s' finished.", newImageNameAndTag, srcFilePath, pathInImage)
+
+	return newImage, &tag, nil
+}
+
 func CreateSingleFileArchive(ctx context.Context, outputPath string, options *containeroptions.CreateSingleFileArchiveOptions) error {
 	if outputPath == "" {
 		return tracederrors.TracedErrorEmptyString("outputPath")
@@ -254,111 +392,20 @@ func CreateSingleFileArchive(ctx context.Context, outputPath string, options *co
 		return err
 	}
 
-	// Check if the binary is statically linked (unless SkipStaticLinkCheck is enabled)
-	if !options.GetSkipStaticLinkCheck() {
-		isStaticallyLinked, err := nativefiles.IsStaticallyLinkedBinary(ctx, srcFilePath)
-		if err != nil {
-			return tracederrors.TracedErrorf("Failed to check if '%s' is statically linked: %w.", srcFilePath, err)
-		}
-		if !isStaticallyLinked {
-			return tracederrors.TracedErrorf("The source file '%s' is not a statically linked binary.", srcFilePath)
-		}
-		logging.LogInfoByCtxf(ctx, "Verified that '%s' is statically linked.", srcFilePath)
-	}
-
 	pathInArchive, err := options.GetPathInImage()
-	if err != nil {
-		return err
-	}
-
-	newImageNameAndTag, err := options.GetNewImageNameAndTag()
-	if err != nil {
-		return err
-	}
-
-	mode, err := options.GetMode()
-	if err != nil {
-		return err
-	}
-
-	architexture, err := options.GetArchitecture()
 	if err != nil {
 		return err
 	}
 
 	logging.LogInfoByCtxf(ctx, "Create new container image archive '%s' with single file '%s' as '%s' started.", outputPath, srcFilePath, pathInArchive)
 
-	// Parse the image tag
-	tag, err := name.NewTag(newImageNameAndTag)
+	newImage, tag, err := CreateSingleFileImage(ctx, options)
 	if err != nil {
-		return tracederrors.TracedErrorf("Failed to parse new image name and tag '%s': %w", newImageNameAndTag, err)
-	}
-
-	var buf bytes.Buffer
-	tw := tar.NewWriter(&buf)
-
-	file, err := os.Open(srcFilePath)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to open '%s' to add it to the container image archive '%s': %w", srcFilePath, outputPath, err)
-	}
-	defer file.Close()
-
-	stat, err := file.Stat()
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to stat '%s' to add it to the container image archive '%s': %w", srcFilePath, outputPath, err)
-	}
-
-	header := &tar.Header{
-		Name: pathInArchive,
-		Size: stat.Size(),
-		Mode: mode,
-	}
-	if err = tw.WriteHeader(header); err != nil {
-		return tracederrors.TracedErrorf("Failed to write tar header for '%s': %w", srcFilePath, err)
-	}
-	if _, err = io.Copy(tw, file); err != nil {
-		return tracederrors.TracedErrorf("Failed to write file content for '%s' into tar: %w", srcFilePath, err)
-	}
-	if err = tw.Close(); err != nil {
-		return tracederrors.TracedErrorf("Failed to close tar writer for '%s': %w", srcFilePath, err)
-	}
-
-	// Create a single layer from the tar buffer
-	layer, err := tarball.LayerFromOpener(
-		func() (io.ReadCloser, error) {
-			return io.NopCloser(bytes.NewReader(buf.Bytes())), nil
-		},
-		tarball.WithMediaType(types.DockerLayer),
-	)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to create layer from file '%s': %w", srcFilePath, err)
-	}
-
-	// Start from a completely empty base image
-	baseImage := empty.Image
-
-	// Append the single layer to the empty image
-	newImage, err := mutate.AppendLayers(baseImage, layer)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to append layer to empty image: %w", err)
-	}
-
-	// Fix platform metadata
-	configFile, err := newImage.ConfigFile()
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to get config file: %w", err)
-	}
-
-	configFile.Architecture = architexture
-	configFile.OS = "linux"
-
-	newImage, err = mutate.ConfigFile(newImage, configFile)
-	if err != nil {
-		return tracederrors.TracedErrorf("Failed to set platform config: %w", err)
+		return err
 	}
 
 	// Write the new image to the archive
-	err = OverwriteArchive(ctx, outputPath, &tag, newImage)
+	err = OverwriteArchive(ctx, outputPath, tag, newImage)
 	if err != nil {
 		return err
 	}
@@ -376,7 +423,52 @@ func ReadFileFromArchiveAsString(ctx context.Context, archivePath string, toRead
 		return "", err
 	}
 
-	return string(content), err
+	return string(content), nil
+}
+
+// readFileFromLayer searches the given layer for toReadPath.
+// Returns found=true and the content if the file is present in the layer.
+// Returns deleted=true if the layer contains a whiteout for toReadPath.
+func readFileFromLayer(layer v1.Layer, toReadPath string) (content []byte, found bool, deleted bool, err error) {
+	if layer == nil {
+		return nil, false, false, tracederrors.TracedErrorNil("layer")
+	}
+
+	if toReadPath == "" {
+		return nil, false, false, tracederrors.TracedErrorEmptyString("toReadPath")
+	}
+
+	reader, err := layer.Uncompressed()
+	if err != nil {
+		return nil, false, false, tracederrors.TracedErrorf("Failed to get uncompressed reader: %w", err)
+	}
+	defer reader.Close()
+
+	tr := tar.NewReader(reader)
+	for {
+		header, err := tr.Next()
+		if err == io.EOF {
+			return nil, false, false, nil
+		}
+		if err != nil {
+			return nil, false, false, tracederrors.TracedErrorf("Failed to read tar data: %w", err)
+		}
+
+		// 1. Check for Whiteout (Deletion)
+		if header.Name == ".wh."+toReadPath {
+			return nil, false, true, nil
+		}
+
+		// 2. Check for File Match
+		if header.Name == toReadPath {
+			ret, err := io.ReadAll(tr)
+			if err != nil {
+				return nil, false, false, tracederrors.TracedErrorf("Failed to read '%s' from layer: %w", toReadPath, err)
+			}
+
+			return ret, true, false, nil
+		}
+	}
 }
 
 func ReadFileFromArchiveAsBytes(ctx context.Context, archivePath string, toReadPath string) ([]byte, error) {
@@ -388,7 +480,7 @@ func ReadFileFromArchiveAsBytes(ctx context.Context, archivePath string, toReadP
 		return nil, tracederrors.TracedErrorEmptyString("toReadPath")
 	}
 
-	logging.LogInfoByCtxf(ctx, "Read file '%s' from container image archive '%s' started.", archivePath, toReadPath)
+	logging.LogInfoByCtxf(ctx, "Read file '%s' from container image archive '%s' started.", toReadPath, archivePath)
 
 	image, _, err := LoadImageFromArchive(ctx, archivePath, "")
 	if err != nil {
@@ -400,55 +492,35 @@ func ReadFileFromArchiveAsBytes(ctx context.Context, archivePath string, toReadP
 		return nil, tracederrors.TracedErrorf("Failed to get image layers: %w", err)
 	}
 
-	var content []byte
+	// Iterate from the top most layer down. The first match is the effective file content.
 	for i := len(layers) - 1; i >= 0; i-- {
-		reader, err := layers[i].Uncompressed()
-		if err != nil {
-			return nil, tracederrors.TracedErrorf("Failed to get uncompressed reader: %w", err)
-		}
-		defer reader.Close()
-
 		digest, err := layers[i].Digest()
 		if err != nil {
 			return nil, tracederrors.TracedErrorf("Unable to get layer digest: %w", err)
 		}
 
-		tr := tar.NewReader(reader)
-		for {
-			header, err := tr.Next()
-			if err == io.EOF {
-				break
-			}
+		content, found, deleted, err := readFileFromLayer(layers[i], toReadPath)
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("Failed to read '%s' in container image archive '%s' layer '%s': %w", toReadPath, archivePath, digest, err)
+		}
 
-			// 1. Check for Whiteout (Deletion)
-			if header.Name == ".wh."+toReadPath {
-				return nil, tracederrors.TracedErrorf("File was deleted in the upper layer '%s' and is therefore not present in the image archive '%s'.", digest.Hex, archivePath)
-			}
+		if deleted {
+			return nil, tracederrors.TracedErrorf("File '%s' was deleted in the upper layer '%s' and is therefore not present in the image archive '%s'.", toReadPath, digest.Hex, archivePath)
+		}
 
-			// 2. Check for File Match
-			if header.Name == toReadPath {
-				content, err = io.ReadAll(tr)
-				if err != nil {
-					return nil, tracederrors.TracedErrorf("Failed to read '%s' in container image archive '%s'.", toReadPath, archivePath)
-				}
-				logging.LogInfoByCtxf(ctx, "Read file '%s' from container image archive '%s' layer '%s'.", toReadPath, archivePath, digest)
-				break
-			}
+		if found {
+			logging.LogInfoByCtxf(ctx, "Read file '%s' from container image archive '%s' layer '%s'.", toReadPath, archivePath, digest)
+			logging.LogInfoByCtxf(ctx, "Read file '%s' from container image archive '%s' finished.", toReadPath, archivePath)
+			return content, nil
 		}
 	}
 
-	if content == nil {
-		return nil, tracederrors.TracedErrorf("Failed to read '%s' in container image archive '%s'. File was not found.", toReadPath, archivePath)
-	}
-
-	logging.LogInfoByCtxf(ctx, "Read file '%s' from container image archive '%s' finished.", archivePath, toReadPath)
-
-	return content, nil
+	return nil, tracederrors.TracedErrorf("Failed to read '%s' in container image archive '%s'. File was not found.", toReadPath, archivePath)
 }
 
 func DeleteFileInArchive(ctx context.Context, archivePath string, options *containeroptions.DeleteFileFromImageOptions) error {
 	if archivePath == "" {
-		return tracederrors.TracedErrorEmptyString(archivePath)
+		return tracederrors.TracedErrorEmptyString("archivePath")
 	}
 
 	if options == nil {
@@ -470,11 +542,11 @@ func DeleteFileInArchive(ctx context.Context, archivePath string, options *conta
 		return tracederrors.TracedErrorf("Failed to parse tag '%s': %w", newImageNameAndTag, err)
 	}
 
-	logging.LogInfoByCtxf(ctx, "Delete file '%s' from container image archive '%s' started.", pathInArchive, archivePath)
-
 	if !options.OverwriteSourceArchive {
 		return tracederrors.TracedError("Only implemented to overwrite source archive.")
 	}
+
+	logging.LogInfoByCtxf(ctx, "Delete file '%s' from container image archive '%s' started.", pathInArchive, archivePath)
 
 	image, _, err := LoadImageFromArchive(ctx, archivePath, "")
 	if err != nil {
@@ -485,12 +557,17 @@ func DeleteFileInArchive(ctx context.Context, archivePath string, options *conta
 	tw := tar.NewWriter(&buf)
 
 	header := &tar.Header{
-		Name: ".wh." + pathInArchive,
-		Size: 0,
-		Mode: 0644,
+		Typeflag: tar.TypeReg,
+		Name:     ".wh." + pathInArchive,
+		Size:     0,
+		Mode:     0644,
 	}
-	tw.WriteHeader(header)
-	tw.Close()
+	if err = tw.WriteHeader(header); err != nil {
+		return tracederrors.TracedErrorf("Failed to write whiteout tar header for '%s': %w", pathInArchive, err)
+	}
+	if err = tw.Close(); err != nil {
+		return tracederrors.TracedErrorf("Failed to close tar writer for whiteout of '%s': %w", pathInArchive, err)
+	}
 
 	layer, err := tarball.LayerFromOpener(
 		func() (io.ReadCloser, error) {
@@ -514,7 +591,7 @@ func DeleteFileInArchive(ctx context.Context, archivePath string, options *conta
 
 	logging.LogChangedByCtxf(ctx, "Deleted '%s' in container image archive '%s'.", pathInArchive, archivePath)
 
-	logging.LogInfoByCtxf(ctx, "Delete file '%s' from container image archive '%s' started.", pathInArchive, archivePath)
+	logging.LogInfoByCtxf(ctx, "Delete file '%s' from container image archive '%s' finished.", pathInArchive, archivePath)
 
 	return nil
 }
