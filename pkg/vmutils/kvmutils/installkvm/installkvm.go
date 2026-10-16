@@ -38,6 +38,10 @@ func getPackageNames(packageManager *packagemanagergeneric.PackageManagerGeneric
 		ret := []string{
 			"qemu-system-x86",
 			"qemu-img",
+			// Arch splits QEMU into modules. Without these libvirt rejects
+			// domains using video model 'virtio'.
+			"qemu-hw-display-virtio-gpu",
+			"qemu-hw-display-virtio-vga",
 			"libvirt",
 			"virt-install",
 			"dnsmasq",
@@ -110,6 +114,7 @@ func InstallPackages(ctx context.Context) error {
 
 	return nil
 }
+
 // Start ensures all needed KVM packages are installed and the libvirtd service is running on localhost.
 //
 // The libvirtd service is NOT enabled. Use Enable to start libvirtd on boot.

@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefiles"
 	"github.com/asciich/asciichgolangpublic/pkg/hostreconciler"
+	"github.com/asciich/asciichgolangpublic/pkg/hostreconciler/hostreconcileroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/userutils"
 )
 
@@ -41,7 +42,7 @@ func Test_ReconcileOnce_KVM(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("nil KVM config is rejected", func(t *testing.T) {
-		err := hostreconciler.ReconcileOnce(ctx, &kvmTestSource{kvmConfig: nil})
+		err := hostreconciler.ReconcileOnce(ctx, &kvmTestSource{kvmConfig: nil}, &hostreconcileroptions.RunOptions{})
 		require.Error(t, err)
 	})
 
@@ -60,7 +61,7 @@ func Test_ReconcileOnce_KVM(t *testing.T) {
 			kvmConfig:    &hostreconciler.KVMConfig{Start: true, Enable: true},
 		}
 
-		err = hostreconciler.ReconcileOnce(ctx, source)
+		err = hostreconciler.ReconcileOnce(ctx, source, &hostreconcileroptions.RunOptions{})
 		require.Error(t, err)
 
 		exists, err := nativefiles.Exists(ctx, markerPath)
