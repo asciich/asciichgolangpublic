@@ -62,6 +62,13 @@ func CreateXmlForVmAsString(createOptions *kvmutilsoptions.KvmCreateVmOptions) (
 	// attached to the given host bridge (e.g. br0).
 	bridgedNetworkInterface := createOptions.BridgeInterface
 
+	// Additional block devices are optional. They are passed as raw virtio disks
+	// (vdb, vdc, ...) so they can be mounted on block device level inside the VM.
+	blockDeviceAttachments, err := GetBlockDeviceAttachments(createOptions.AdditionalBlockDevices)
+	if err != nil {
+		return "", err
+	}
+
 	libvirtXml, err = gotemplateutils.RenderTemplateFromStringAsString(
 		vmXmlTemplate,
 		map[string]any{
@@ -71,6 +78,7 @@ func CreateXmlForVmAsString(createOptions *kvmutilsoptions.KvmCreateVmOptions) (
 			"BRIDGED_NETWORK_INTERFACE": bridgedNetworkInterface,
 			"RAM_SIZE_KIB":              ramSizeKiB,
 			"CPU_COUNT":                 cpuCount,
+			"ADDITIONAL_BLOCK_DEVICES":  blockDeviceAttachments,
 		},
 	)
 	if err != nil {
@@ -252,4 +260,50 @@ func WriteXmlForVm(ctx context.Context, createOptions *kvmutilsoptions.KvmCreate
 	logging.LogInfoByCtxf(ctx, "Created xml for VM to: '%s'", outputPath)
 
 	return nil
+}
+
+// GetAdditionalBlockDevicesFromXmlString returns all disks of the domain XML which are backed
+// by a host block device (<disk type='block'>) in the order they are defined.
+// The file based root disk is not included.
+func GetAdditionalBlockDevicesFromXmlString(libvirtXml string) ([]BlockDeviceAttachment, error) {
+	if libvirtXml == "" {
+		return nil, tracederrors.TracedErrorEmptyString("libvirtXml")
+	}
+
+	domcfg := &libvirtxml.Domain{}
+	err := domcfg.Unmarshal(libvirtXml)
+	if err != nil {
+		return nil, tracederrors.TracedError(err)
+	}
+
+	ret := []BlockDeviceAttachment{}
+
+	if domcfg.Devices == nil {
+		return ret, nil
+	}
+
+	for _, disk := range domcfg.Devices.Disks {
+		if disk.Source == nil || disk.Source.Block == nil {
+			// Not a block device backed disk (e.g. the qcow2 root disk).
+			continue
+		}
+
+		sourcePath := disk.Source.Block.Dev
+		if sourcePath == "" {
+			return nil, tracederrors.TracedError("Block device disk without source dev found in domain XML.")
+		}
+
+		if disk.Target == nil || disk.Target.Dev == "" {
+			return nil, tracederrors.TracedErrorf("Block device disk '%s' has no target dev in domain XML.", sourcePath)
+		}
+
+		ret = append(ret, BlockDeviceAttachment{
+			SourcePath: sourcePath,
+			TargetDev:  disk.Target.Dev,
+			Serial:     disk.Serial,
+			ReadOnly:   disk.ReadOnly != nil,
+		})
+	}
+
+	return ret, nil
 }

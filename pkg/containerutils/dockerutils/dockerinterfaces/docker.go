@@ -23,6 +23,7 @@ type Docker interface {
 
 	ListContainers(ctx context.Context) ([]containerinterfaces.Container, error)
 	ListContainerNames(ctx context.Context) ([]string, error)
+	ListVolumes(ctx context.Context) ([]string, error)
 
 	PullImage(ctx context.Context, imageName string) (containerinterfaces.Image, error)
 

@@ -21,6 +21,9 @@ type KvmCreateVmOptions struct {
 	BridgeInterface string
 	VmRamSizeGb     int
 	CpuCount        int
+
+	// Optional host block devices passed to the VM as additional raw virtio disks.
+	AdditionalBlockDevices []AdditionalBlockDevice
 }
 
 func NewKvmCreateVmOptions() (k *KvmCreateVmOptions) {
