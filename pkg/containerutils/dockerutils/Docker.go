@@ -50,6 +50,16 @@ func ListContainerNames(ctx context.Context) ([]string, error) {
 	return docker.ListContainerNames(ctx)
 }
 
+// List docker volumes on localhost.
+func ListVolumesNames(ctx context.Context) ([]string, error) {
+	docker, err := GetDockerOnLocalHost()
+	if err != nil {
+		return nil, err
+	}
+
+	return docker.ListVolumes(ctx)
+}
+
 // Pull container image on localhost.
 func PullContainerImage(ctx context.Context, imageName string) (containerinterfaces.Image, error) {
 	docker, err := GetDockerOnLocalHost()

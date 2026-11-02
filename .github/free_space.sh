@@ -16,7 +16,7 @@ function show_space_info() {
 function remove_unused_packages() {
     echo "remove_unused_packages started."
 
-    sudo apt-get remove -y google-chrome-stable firefox powershell mono-devel ruby-full
+    sudo apt-get remove -y google-chrome-stable firefox mono-devel ruby-full
     sudo apt remove '^php8.*$'
     sudo apt-get autoremove -y
     sudo apt-get clean

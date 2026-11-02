@@ -1,8 +1,10 @@
 package dockercmd
 
 import (
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/spf13/cobra"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/containercmd/dockercmd/volumescmd"
 )
 
 func NewDockerCmd() *cobra.Command {
@@ -19,6 +21,7 @@ Usage:
 
 	cmd.AddCommand(
 		NewListContainerNames(),
+		volumescmd.NewVolumesCmd(),
 	)
 
 	return cmd
