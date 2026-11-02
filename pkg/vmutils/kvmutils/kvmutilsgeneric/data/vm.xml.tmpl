@@ -13,7 +13,7 @@
 
   <os>
     <type arch='x86_64' machine='q35'>hvm</type>
-    <boot dev='hd'/>
+    <!-- Boot order is defined per device (see vda) so passed through disks are never booted by accident. -->
   </os>
 
   <features>
@@ -46,7 +46,23 @@
       <driver name='qemu' type='qcow2'/>
       <source file='{{ .DISK_PATH }}'/>
       <target dev='vda' bus='virtio'/>
+      <boot order='1'/>
     </disk>
+
+    {{- range .ADDITIONAL_BLOCK_DEVICES }}
+
+    <disk type='block' device='disk'>
+      <driver name='qemu' type='raw' cache='none' io='native' discard='unmap'/>
+      <source dev='{{ .SourcePath }}'/>
+      <target dev='{{ .TargetDev }}' bus='virtio'/>
+      {{- if .Serial }}
+      <serial>{{ .Serial }}</serial>
+      {{- end }}
+      {{- if .ReadOnly }}
+      <readonly/>
+      {{- end }}
+    </disk>
+    {{- end }}
 
     <controller type='usb' index='0' model='qemu-xhci' ports='15'/>
     <controller type='pci' index='0' model='pcie-root'/>
