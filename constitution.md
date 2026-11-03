@@ -17,6 +17,72 @@
             "github.com/asciich/asciichgolangpublic/pkg/tracederrors"
         )
         ```
+## Function Naming
+
+### `List...` vs. `List...Names`
+
+- Functions returning **objects** and functions returning **names** must be clearly distinguishable by their name:
+    - `List<Resource>s` returns objects representing the resources (e.g. `ListVolumes` returns objects representing the volumes).
+    - `List<Resource>Names` returns a `[]string` containing the names of the resources (e.g. `ListVolumeNames` returns a list of volume names).
+- Whenever a slice of strings (`[]string`) containing names is returned, the `Names` suffix **must** be used.
+- The resource noun stays **singular** in front of the `Names` suffix:
+    - Use: `ListVolumeNames`, `ListContainerNames`, `ListObjectNames`
+    - Instead of: `ListVolumesNames`, `ListContainersNames`, `ListObjectsNames`
+- A function without the `Names` suffix must **not** return a `[]string` of names:
+    - Instead of:
+        ```golang
+        func ListVolumes(ctx context.Context) ([]string, error) // Misleading: returns names, not volume objects
+        ```
+    - Use:
+        ```golang
+        func ListVolumes(ctx context.Context) ([]Volume, error)  // Returns objects representing the volumes
+        func ListVolumeNames(ctx context.Context) ([]string, error) // Returns the names of the volumes
+        ```
+- If both variants exist, the `List...Names` function should reuse the `List...` function (where reasonable) to avoid duplicated code (see [Implementation](#implementation)).
+
+### Sorting of `List...Names` results
+
+- `List...Names` functions **must always** return the names **sorted alphabetically**.
+    - This keeps results the same every time, regardless of the order in which the underlying system (API, shell command, file system, ...) returns them.
+    - It makes output stable for CLI usage, logs, and comparisons in tests.
+- Sort with the standard library right before returning (byte-wise lexicographic order, e.g. uppercase before lowercase):
+    ```golang
+    sort.Strings(ret)
+    ```
+- Callers must be able to rely on the sorting. Do **not** sort the result again after calling a `List...Names` function.
+- The sorting rule applies to **all** implementations (`native...`, `commandexecutor...`, and the convenience functions in the parent package). This way the [Cross-Implementation Testing](#cross-implementation-testing) returns the exact same result for every implementation.
+- Every `List...Names` function needs a test validating that the returned names are sorted:
+    ```golang
+    require.True(t, sort.StringsAreSorted(volumeNames))
+    ```
+
+### Implementation example
+
+```golang
+func ListVolumeNames(ctx context.Context) ([]string, error) {
+    logging.LogInfoByCtxf(ctx, "List volume names started.")
+
+    volumes, err := ListVolumes(ctx)
+    if err != nil {
+        return nil, err
+    }
+
+    ret := []string{}
+    for _, volume := range volumes {
+        name, err := volume.GetName()
+        if err != nil {
+            return nil, err
+        }
+
+        ret = append(ret, name)
+    }
+
+    sort.Strings(ret)
+
+    logging.LogInfoByCtxf(ctx, "List volume names finished. Found '%d' volumes.", len(ret))
+
+    return ret, nil
+}
 
 ## Implementation
 

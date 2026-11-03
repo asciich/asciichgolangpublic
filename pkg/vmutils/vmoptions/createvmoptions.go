@@ -1,7 +1,10 @@
 package vmoptions
 
 import (
+	"slices"
+
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsoptions"
 )
 
@@ -12,6 +15,10 @@ type CreateVmOptions struct {
 	BridgeInterface string
 	VmRamSizeGb     int
 	CpuCount        int
+
+	// Optional host block devices (e.g. '/dev/sda', '/dev/sda1' or '/dev/mapper/abc')
+	// passed to the VM as additional raw virtio disks (vdb, vdc, ... in the given order).
+	AdditionalBlockDevices []kvmutilsoptions.AdditionalBlockDevice
 }
 
 func NewCreateVmOptions() (c *CreateVmOptions) {
@@ -74,6 +81,17 @@ func (c *CreateVmOptions) GetCpuCount() (cpuCount int, err error) {
 	return c.CpuCount, nil
 }
 
+// GetAdditionalBlockDevices returns a copy of the requested block devices.
+// Block devices are optional, so an empty slice is returned when none are set.
+func (c *CreateVmOptions) GetAdditionalBlockDevices() []kvmutilsoptions.AdditionalBlockDevice {
+	ret := slices.Clone(c.AdditionalBlockDevices)
+	if ret == nil {
+		ret = []kvmutilsoptions.AdditionalBlockDevice{}
+	}
+
+	return ret
+}
+
 func (c *CreateVmOptions) SetVmName(vmName string) (err error) {
 	if vmName == "" {
 		return tracederrors.TracedErrorf("vmName is empty string")
@@ -132,6 +150,28 @@ func (c *CreateVmOptions) SetCpuCount(cpuCount int) (err error) {
 	c.CpuCount = cpuCount
 
 	return nil
+}
+
+// SetAdditionalBlockDevices replaces all requested block devices.
+// The format is validated so invalid block devices fail early. nil/ empty removes all block devices.
+func (c *CreateVmOptions) SetAdditionalBlockDevices(blockDevices []kvmutilsoptions.AdditionalBlockDevice) (err error) {
+	_, err = kvmutilsgeneric.GetBlockDeviceAttachments(blockDevices)
+	if err != nil {
+		return err
+	}
+
+	// Clone so later modifications of the caller's slice do not affect the options.
+	c.AdditionalBlockDevices = slices.Clone(blockDevices)
+
+	return nil
+}
+
+// AddAdditionalBlockDevice appends a block device (e.g. for a repeatable CLI flag).
+// The whole list is validated so duplicates of source paths or serials are rejected.
+func (c *CreateVmOptions) AddAdditionalBlockDevice(blockDevice kvmutilsoptions.AdditionalBlockDevice) (err error) {
+	newBlockDevices := append(slices.Clone(c.AdditionalBlockDevices), blockDevice)
+
+	return c.SetAdditionalBlockDevices(newBlockDevices)
 }
 
 func (c *CreateVmOptions) GetBridgeInterfaceOrEmptyStringIfUnset() (string, error) {
