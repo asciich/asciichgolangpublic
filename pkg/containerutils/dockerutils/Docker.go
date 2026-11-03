@@ -69,3 +69,23 @@ func PullContainerImage(ctx context.Context, imageName string) (containerinterfa
 
 	return docker.PullImage(ctx, imageName)
 }
+
+// Backup docker volume on localhost to a tar archive.
+func BackupVolume(ctx context.Context, volumeName string, archivePath string) error {
+	docker, err := GetDockerOnLocalHost()
+	if err != nil {
+		return err
+	}
+
+	return docker.BackupVolume(ctx, volumeName, archivePath)
+}
+
+// Restore docker volume on localhost from a tar archive.
+func RestoreVolume(ctx context.Context, volumeName string, archivePath string) error {
+	docker, err := GetDockerOnLocalHost()
+	if err != nil {
+		return err
+	}
+
+	return docker.RestoreVolume(ctx, volumeName, archivePath)
+}

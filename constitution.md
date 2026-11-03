@@ -83,6 +83,7 @@ func ListVolumeNames(ctx context.Context) ([]string, error) {
 
     return ret, nil
 }
+```
 
 ## Implementation
 
@@ -306,11 +307,163 @@ Usage:
         cmd.Flags().Bool("sudo", false, "Use sudo for the hostnamectl set-hostname command")
 
         // and in the Run function:
-        sudo, err := cmd.Flags().GetBool("sudo")
-        if err != nil {
-            logging.LogGoErrorFatalWithTrace(err)
-        }
+        sudo := mustutils.Must(cmd.Flags().GetBool("sudo"))
         ```
+
+### One file per command
+
+- Every cobra command is implemented in its **own file**. Do **not** define multiple `New...Cmd` functions in the same file.
+- Command packages are named `<name>cmd` (e.g. `backupcmd`) and follow this layout:
+    - `root.go` defines the command the package is named after and registers all subcommands with `AddCommand`. **Every `<name>cmd` package contains at least a `root.go`**, even if it has no subcommands.
+    - Every subcommand lives in its own file named after the subcommand (e.g. `create.go` for `create`, `restore.go` for `restore`).
+    - Do not use suffixes like `_cmd` or `_command` for the filenames. Use `restore.go` instead of `restore_cmd.go`.
+- Function naming:
+    - `root.go` provides `New<Name>Cmd` (e.g. `NewBackupCmd`).
+    - Every subcommand file provides `New<Subcommand>Cmd` (e.g. `NewCreateCmd`, `NewRestoreCmd`).
+    - Only the `New...Cmd` functions are exported. Helpers used by a single command stay private and live in the same file as the command.
+- If a subcommand has subcommands on its own, it gets its own `<subname>cmd` sub package (with its own `root.go`) instead of growing the parent package.
+- The `root.go` only wires the commands together. The actual work is done by reusing library functions (see above), not by implementing logic in the command files.
+
+Use:
+
+```
+backupcmd/
+backupcmd/root.go     // Defines the 'backup' command and includes the subcommands.
+backupcmd/create.go   // Defines the 'backup create' command.
+backupcmd/restore.go  // Defines the 'backup restore' command.
+```
+
+`backupcmd/root.go`:
+
+```golang
+package backupcmd
+
+import (
+    "os"
+
+    "github.com/spf13/cobra"
+)
+
+func NewBackupCmd() *cobra.Command {
+    const short = "Backup and restore docker volumes."
+
+    cmd := &cobra.Command{
+        Use:   "backup",
+        Short: short,
+        Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` container docker volumes backup <create|restore> [flags]
+`,
+    }
+
+    cmd.AddCommand(
+        NewCreateCmd(),
+        NewRestoreCmd(),
+    )
+
+    return cmd
+}
+```
+
+`backupcmd/create.go`:
+
+```golang
+package backupcmd
+
+import (
+    "os"
+
+    "github.com/spf13/cobra"
+    "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/containerutils/dockerutils"
+    "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+    "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/mustutils"
+)
+
+func NewCreateCmd() *cobra.Command {
+    const short = "Backup a docker volume to a tar archive."
+
+    cmd := &cobra.Command{
+        Use:   "create",
+        Short: short,
+        Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` container docker volumes backup create --volume <volume-name> --archive <archive-path>
+
+Usage example:
+    ` + os.Args[0] + ` container docker volumes backup create --volume my-volume --archive /backups/my-volume.tar.gz
+`,
+        Run: func(cmd *cobra.Command, args []string) {
+            ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
+
+            volumeName := mustutils.Must(cmd.Flags().GetString("volume"))
+            archivePath := mustutils.Must(cmd.Flags().GetString("archive"))
+
+            mustutils.Must0(dockerutils.BackupVolume(ctx, volumeName, archivePath))
+        },
+    }
+
+    cmd.Flags().String("volume", "", "Name of the docker volume to backup")
+    cmd.Flags().String("archive", "", "Path to the tar archive file to create")
+
+    mustutils.Must0(cmd.MarkFlagRequired("volume"))
+    mustutils.Must0(cmd.MarkFlagRequired("archive"))
+
+    return cmd
+}
+```
+
+`backupcmd/restore.go`:
+
+```golang
+package backupcmd
+
+import (
+    "os"
+
+    "github.com/spf13/cobra"
+    "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/containerutils/dockerutils"
+    "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+    "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/mustutils"
+)
+
+func NewRestoreCmd() *cobra.Command {
+    const short = "Restore a docker volume from a tar archive."
+
+    cmd := &cobra.Command{
+        Use:   "restore",
+        Short: short,
+        Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` container docker volumes backup restore --volume <volume-name> --archive <archive-path>
+
+Usage example:
+    ` + os.Args[0] + ` container docker volumes backup restore --volume my-volume --archive /backups/my-volume.tar.gz
+`,
+        Run: func(cmd *cobra.Command, args []string) {
+            ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
+
+            volumeName := mustutils.Must(cmd.Flags().GetString("volume"))
+            archivePath := mustutils.Must(cmd.Flags().GetString("archive"))
+
+            mustutils.Must0(dockerutils.RestoreVolume(ctx, volumeName, archivePath))
+        },
+    }
+
+    cmd.Flags().String("volume", "", "Name of the docker volume to restore")
+    cmd.Flags().String("archive", "", "Path to the tar archive file to restore from")
+
+    mustutils.Must0(cmd.MarkFlagRequired("volume"))
+    mustutils.Must0(cmd.MarkFlagRequired("archive"))
+
+    return cmd
+}
+```
+
+Instead of defining `NewBackupCmd` and `NewRestoreCmd` together in one file (e.g. `backupcmd/backup.go`).
+
 
 ## IP Address Handling
 

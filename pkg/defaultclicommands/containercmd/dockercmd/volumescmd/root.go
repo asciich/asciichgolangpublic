@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/containercmd/dockercmd/volumescmd/backupcmd"
 )
 
 func NewVolumesCmd() *cobra.Command {
@@ -19,6 +20,8 @@ Usage:
 	}
 
 	cmd.AddCommand(
+		backupcmd.NewBackupCmd(),
+
 		NewListCmd(),
 	)
 
