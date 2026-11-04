@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/netip"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -282,27 +281,6 @@ func (d *Docker) ListContainerNames(ctx context.Context) ([]string, error) {
 			names = append(names, name)
 		}
 	}
-
-	return names, nil
-}
-func (d *Docker) ListVolumes(ctx context.Context) ([]string, error) {
-	cli, err := client.New(client.FromEnv)
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("unable to create docker client: %w", err)
-	}
-	defer cli.Close()
-
-	volumeList, err := cli.VolumeList(ctx, client.VolumeListOptions{})
-	if err != nil {
-		return nil, tracederrors.TracedErrorf("Failed to list volumes: %w", err)
-	}
-
-	names := make([]string, 0, len(volumeList.Items))
-	for _, v := range volumeList.Items {
-		names = append(names, v.Name)
-	}
-
-	sort.Strings(names)
 
 	return names, nil
 }

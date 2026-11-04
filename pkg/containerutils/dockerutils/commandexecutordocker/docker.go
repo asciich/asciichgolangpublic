@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"reflect"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -450,33 +449,6 @@ func (c *CommandExecutorDocker) ListContainerNames(ctx context.Context) ([]strin
 
 		names = append(names, name)
 	}
-
-	return names, nil
-}
-
-func (c *CommandExecutorDocker) ListVolumes(ctx context.Context) ([]string, error) {
-	executor, err := c.GetCommandExecutor()
-	if err != nil {
-		return nil, err
-	}
-
-	hostDescription, err := c.GetHostDescription()
-	if err != nil {
-		return nil, err
-	}
-
-	output, err := executor.RunCommandAndGetStdoutAsString(ctx, &parameteroptions.RunCommandOptions{
-		Command: []string{"docker", "volume", "ls", "--format", "{{.Name}}"},
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	names := stringsutils.SplitLines(output, true)
-
-	sort.Strings(names)
-
-	logging.LogInfoByCtxf(ctx, "Listed '%d' volumes on host '%s'", len(names), hostDescription)
 
 	return names, nil
 }
