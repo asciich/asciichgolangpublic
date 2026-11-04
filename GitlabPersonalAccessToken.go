@@ -102,7 +102,7 @@ func (t *GitlabPersonalAccessToken) GetTokenRawResponse(ctx context.Context) (na
 
 	nativeResponse, _, err = nativeService.GetSinglePersonalAccessTokenByID(id)
 	if err != nil {
-		return nil, tracederrors.TracedError(err.Error())
+		return nil, tracederrors.TracedError(err)
 	}
 
 	if nativeResponse == nil {

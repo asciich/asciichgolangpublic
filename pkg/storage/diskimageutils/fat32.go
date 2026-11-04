@@ -325,7 +325,7 @@ func fat32DeleteReadFAT(file *os.File, bpb *fat32DeleteBPB) ([]uint32, error) {
 
 	entries := len(fatBytes) / 4
 	fat := make([]uint32, entries)
-	for i := 0; i < entries; i++ {
+	for i := range entries {
 		fat[i] = binary.LittleEndian.Uint32(fatBytes[i*4:i*4+4]) & 0x0FFFFFFF
 	}
 

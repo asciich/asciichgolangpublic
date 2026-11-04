@@ -152,7 +152,7 @@ func (g *GitlabInstance) Authenticate(ctx context.Context, authOptions *GitlabAu
 			gitlab.WithBaseURL(apiV4Url),
 		)
 		if err != nil {
-			return tracederrors.TracedError(err.Error())
+			return tracederrors.TracedError(err)
 		}
 
 		g.nativeClient = nativeClient
@@ -191,7 +191,7 @@ func (g *GitlabInstance) Authenticate(ctx context.Context, authOptions *GitlabAu
 			gitlab.WithBaseURL(apiV4Url),
 		)
 		if err != nil {
-			return tracederrors.TracedError(err.Error())
+			return tracederrors.TracedError(err)
 		}
 
 		g.nativeClient = nativeClient
@@ -1157,7 +1157,7 @@ func (g *GitlabInstance) UseUnauthenticatedClient(ctx context.Context) (err erro
 		gitlab.WithBaseURL(apiV4Url),
 	)
 	if err != nil {
-		return tracederrors.TracedError(err.Error())
+		return tracederrors.TracedError(err)
 	}
 
 	g.nativeClient = nativeClient

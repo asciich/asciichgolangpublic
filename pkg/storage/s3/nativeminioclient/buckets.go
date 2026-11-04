@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/s3options"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"sort"
 )
 
 func ListBuckets(ctx context.Context, client *minio.Client) ([]minio.BucketInfo, error) {
@@ -41,6 +42,8 @@ func ListBucketNames(ctx context.Context, client *minio.Client) ([]string, error
 	for _, b := range buckets {
 		names = append(names, b.Name)
 	}
+
+	sort.Strings(names)
 
 	return names, nil
 }

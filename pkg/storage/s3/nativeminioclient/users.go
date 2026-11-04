@@ -7,6 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/s3options"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"sort"
 )
 
 func ListUsers(ctx context.Context, adminClient *madmin.AdminClient) (map[string]madmin.UserInfo, error) {
@@ -40,6 +41,8 @@ func ListUserNames(ctx context.Context, adminClient *madmin.AdminClient) ([]stri
 	for name := range users {
 		names = append(names, name)
 	}
+
+	sort.Strings(names)
 
 	return names, nil
 }

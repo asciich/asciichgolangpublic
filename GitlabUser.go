@@ -88,7 +88,7 @@ func (u *GitlabUser) AddSshKey(ctx context.Context, sshKey *sshutils.SSHPublicKe
 			},
 		)
 		if err != nil {
-			return tracederrors.TracedError(err.Error())
+			return tracederrors.TracedError(err)
 		}
 
 		logging.LogChangedByCtxf(ctx, "SSH key '%s' added for gitlab user '%s'.", keyMaterial, username)
@@ -181,7 +181,7 @@ func (u *GitlabUser) CreateAccessToken(options *GitlabCreateAccessTokenOptions) 
 		},
 	)
 	if err != nil {
-		return "", tracederrors.TracedError(err.Error())
+		return "", tracederrors.TracedError(err)
 	}
 
 	newToken = nativeToken.Token
@@ -279,7 +279,7 @@ func (u *GitlabUser) GetRawNativeUser() (rawUser *gitlab.User, err error) {
 
 	rawUser, _, err = nativeUserService.GetUser(id, gitlab.GetUsersOptions{})
 	if err != nil {
-		return nil, tracederrors.TracedError(err.Error())
+		return nil, tracederrors.TracedError(err)
 	}
 
 	if rawUser == nil {
@@ -325,7 +325,7 @@ func (u *GitlabUser) GetSshKeysAsString() (sshKeys []string, err error) {
 		&gitlab.ListSSHKeysForUserOptions{},
 	)
 	if err != nil {
-		return nil, tracederrors.TracedError(err.Error())
+		return nil, tracederrors.TracedError(err)
 	}
 
 	sshKeys = []string{}

@@ -11,6 +11,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
+	"sort"
 )
 
 func CreateNamespace(ctx context.Context, clientSet *kubernetes.Clientset, namespaceName string) error {
@@ -232,6 +233,8 @@ func ListSecretNames(ctx context.Context, clientSet *kubernetes.Clientset, names
 		names[i] = secret.Name
 	}
 
+	sort.Strings(names)
+
 	return names, nil
 }
 
@@ -255,6 +258,8 @@ func ListRoleNames(ctx context.Context, clientSet *kubernetes.Clientset, namespa
 	}
 
 	logging.LogInfoByCtxf(ctx, "Found '%d' roles in namespace '%s'.", len(names), namespaceName)
+
+	sort.Strings(names)
 
 	return names, nil
 }

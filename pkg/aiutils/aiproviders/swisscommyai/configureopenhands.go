@@ -30,7 +30,7 @@ func AddLlmProfileToOpenhands(ctx context.Context, openHandsUrl string) error {
 	}
 
 	err = openHands.CreateLlmProfile(ctx, "myai", &openhandsutils.LlmProfileConfig{
-		Model:   "openai/qwen3.5-397b-a17b",
+		Model:   "openai/glm-5.3-flash",
 		ApiKey:  apiKey,
 		BaseUrl: "https://code.myai.swisscom.ch/v1",
 	})

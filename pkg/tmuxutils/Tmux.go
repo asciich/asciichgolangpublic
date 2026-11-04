@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"sort"
 )
 
 type TmuxService struct {
@@ -115,6 +116,8 @@ func (t *TmuxService) ListSessionNames(ctx context.Context) (sessionNames []stri
 	}
 
 	logging.LogInfoByCtxf(ctx, "There are '%d' tmux sessions.", len(sessionNames))
+
+	sort.Strings(sessionNames)
 
 	return sessionNames, nil
 }

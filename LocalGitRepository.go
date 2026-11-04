@@ -631,8 +631,8 @@ func (l *LocalGitRepository) GetAsGoGitRepository() (goGitRepository *git.Reposi
 	goGitRepository, err = git.PlainOpen(repoPath)
 	if err != nil {
 		if errors.Is(err, git.ErrRepositoryNotExists) {
-			toReturn := tracederrors.TracedErrorf("%w: repoPath='%s'", gitgeneric.ErrGitRepositoryDoesNotExist, repoPath)
-			return nil, tracederrors.AddErrorToUnwrapToTracedError(toReturn, err)
+			ret := tracederrors.TracedErrorf("%w: repoPath='%s'", gitgeneric.ErrGitRepositoryDoesNotExist, repoPath)
+			return nil, tracederrors.AddErrorToUnwrapToTracedError(ret, err)
 		}
 		return nil, tracederrors.TracedErrorf("%w: repoPath='%s'", err, repoPath)
 	}
@@ -1051,8 +1051,8 @@ func (l *LocalGitRepository) GetGoGitHead() (head *plumbing.Reference, err error
 	head, err = goGitRepo.Head()
 	if err != nil {
 		if errors.Is(err, plumbing.ErrReferenceNotFound) {
-			toReturn := tracederrors.TracedErrorf("%w", gitgeneric.ErrGitRepositoryHeadNotFound)
-			return nil, tracederrors.AddErrorToUnwrapToTracedError(toReturn, err)
+			ret := tracederrors.TracedErrorf("%w", gitgeneric.ErrGitRepositoryHeadNotFound)
+			return nil, tracederrors.AddErrorToUnwrapToTracedError(ret, err)
 		}
 		return nil, tracederrors.TracedErrorf("%w", err)
 	}

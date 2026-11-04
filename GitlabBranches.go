@@ -161,7 +161,7 @@ func (g *GitlabBranches) DeleteAllBranchesExceptDefaultBranch(ctx context.Contex
 	}
 
 	branchNotDeletedYetFound := false
-	for i := 0; i < 30; i++ {
+	for range 30 {
 		branchNotDeletedYetFound = false
 
 		currentBranchNames, err := g.GetBranchNames(contextutils.WithSilent(ctx))

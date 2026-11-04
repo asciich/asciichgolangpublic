@@ -64,7 +64,7 @@ func GetFieldValuesAsString(structToGetFieldsFrom any) (values []string, err err
 	}
 
 	values = []string{}
-	for i := 0; i < numberOfFields; i++ {
+	for i := range numberOfFields {
 		values = append(values, fmt.Sprintf("%v", structWithoutPointer.Field(i)))
 	}
 

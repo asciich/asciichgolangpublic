@@ -105,7 +105,7 @@ func (r *GitlabRunner) IsStatusOk() (isStatusOk bool, err error) {
 
 	nativeDetails, _, err := nativeRunnerService.GetRunnerDetails(id)
 	if err != nil {
-		return false, tracederrors.TracedError(err.Error())
+		return false, tracederrors.TracedError(err)
 	}
 
 	if !nativeDetails.Online {
@@ -157,7 +157,7 @@ func (r *GitlabRunner) ResetRunnerToken() (runnerToken string, err error) {
 
 	nativeToken, _, err := nativeRunnersService.ResetRunnerAuthenticationToken(id)
 	if err != nil {
-		return "", tracederrors.TracedError(err.Error())
+		return "", tracederrors.TracedError(err)
 	}
 
 	if nativeToken == nil {

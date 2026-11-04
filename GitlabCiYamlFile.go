@@ -255,7 +255,7 @@ func (g *GitlabCiYamlFile) getIncludesAsTextBlock(includes []*GitlabCiYamlInclud
 
 	textBlockBytes, err := yaml.Marshal(includes)
 	if err != nil {
-		return "", tracederrors.TracedError(err.Error())
+		return "", tracederrors.TracedError(err)
 	}
 
 	textBlock = "include:\n" + string(textBlockBytes)
