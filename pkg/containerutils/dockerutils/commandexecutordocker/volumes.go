@@ -162,6 +162,66 @@ func (c *CommandExecutorDocker) ListVolumes(ctx context.Context) ([]string, erro
 	return names, nil
 }
 
+// ListVolumeFileNames returns the names of all files and directories inside
+// the docker volume 'volumeName', relative to the volume root.
+// Hidden files are included and the result is sorted alphabetically.
+//
+// The listing is done in a short living helper container with the volume mounted.
+func (c *CommandExecutorDocker) ListVolumeFileNames(ctx context.Context, volumeName string) ([]string, error) {
+	if volumeName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("volumeName")
+	}
+
+	logging.LogInfoByCtxf(ctx, "List files in docker volume '%s' started.", volumeName)
+
+	executor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	// Fail early with a clear error instead of listing an empty, freshly created volume.
+	volumes, err := c.ListVolumes(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !slices.Contains(volumes, volumeName) {
+		return nil, tracederrors.TracedErrorf("Docker volume '%s' does not exist. Unable to list its files.", volumeName)
+	}
+
+	// busybox find does not know -printf, so the './' prefix is stripped in Go.
+	// The file names are passed as positional parameters to avoid any shell quoting problems.
+	// $0 = "sh", $1 = mount point of the volume
+	cmd := []string{
+		"docker", "run", "--rm",
+		"-v", volumeName + ":" + cmdHelperVolumeDir,
+		cmdVolumeHelperImage,
+		"/bin/sh", "-c", `cd "$1" && find . -mindepth 1 -print`, "sh", cmdHelperVolumeDir,
+	}
+
+	output, err := executor.RunCommandAndGetStdoutAsString(ctx, &parameteroptions.RunCommandOptions{
+		Command: cmd,
+	})
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Listing files in docker volume '%s' failed: %w", volumeName, err)
+	}
+
+	fileNames := []string{}
+	for _, line := range strings.Split(output, "\n") {
+		fileName := strings.TrimPrefix(line, "./")
+		if fileName == "" {
+			continue
+		}
+
+		fileNames = append(fileNames, fileName)
+	}
+
+	sort.Strings(fileNames)
+
+	logging.LogInfoByCtxf(ctx, "List files in docker volume '%s' finished. Found '%d' files.", volumeName, len(fileNames))
+
+	return fileNames, nil
+}
+
 // cmdSplitArchivePath returns the absolute directory and the file name of 'archivePath'.
 //
 // The directory is mounted instead of the file itself, since the file may not exist yet.

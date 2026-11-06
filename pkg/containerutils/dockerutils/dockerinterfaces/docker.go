@@ -26,6 +26,7 @@ type Docker interface {
 	ListVolumes(ctx context.Context) ([]string, error)
 
 	BackupVolume(ctx context.Context, volumeName string, archivePath string) error
+	ListVolumeFileNames(ctx context.Context, volumeName string) ([]string, error)
 	RestoreVolume(ctx context.Context, volumeName string, archivePath string) error
 
 	PullImage(ctx context.Context, imageName string) (containerinterfaces.Image, error)

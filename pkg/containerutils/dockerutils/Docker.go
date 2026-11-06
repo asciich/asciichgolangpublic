@@ -60,6 +60,18 @@ func ListVolumesNames(ctx context.Context) ([]string, error) {
 	return docker.ListVolumes(ctx)
 }
 
+// List the names of all files and directories inside the docker volume
+// 'volumeName' on localhost. Hidden files are included and the result
+// is sorted alphabetically.
+func ListVolumeFileNames(ctx context.Context, volumeName string) ([]string, error) {
+	docker, err := GetDockerOnLocalHost()
+	if err != nil {
+		return nil, err
+	}
+
+	return docker.ListVolumeFileNames(ctx, volumeName)
+}
+
 // Pull container image on localhost.
 func PullContainerImage(ctx context.Context, imageName string) (containerinterfaces.Image, error) {
 	docker, err := GetDockerOnLocalHost()

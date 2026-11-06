@@ -11,6 +11,7 @@ Docker volume related commands.
 ## Subcommands
 
 - [`list`](#list) - List all available docker volumes
+- [`list-files-in-volume`](#list-files-in-volume) - List all files inside a docker volume
 - [`backup`](#backup) - Backup a docker volume to a tar archive
 - [`restore`](#restore) - Restore a docker volume from a tar archive
 
@@ -20,6 +21,22 @@ List all available docker volumes.
 
 ```bash
 <command> container docker volumes list
+```
+
+### list-files-in-volume
+
+List all files inside a docker volume.
+
+A temporary container is started to list all files inside the given volume.
+Hidden files are included and the output is sorted alphabetically.
+
+```bash
+<command> container docker volumes list-files-in-volume --volume <volume-name>
+```
+
+Usage example:
+```bash
+<command> container docker volumes list-files-in-volume --volume my-volume
 ```
 
 ### backup

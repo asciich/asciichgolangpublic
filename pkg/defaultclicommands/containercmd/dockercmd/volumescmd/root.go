@@ -23,6 +23,7 @@ Usage:
 		backupcmd.NewBackupCmd(),
 
 		NewListCmd(),
+		NewListFilesInVolumeCmd(),
 	)
 
 	return cmd
