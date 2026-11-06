@@ -10,6 +10,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	"sort"
 )
 
 type TmuxSession struct {
@@ -229,6 +230,8 @@ func (t *TmuxSession) ListWindowNames(ctx context.Context) (windowsNames []strin
 		len(windowsNames),
 		name,
 	)
+
+	sort.Strings(windowsNames)
 
 	return windowsNames, nil
 }

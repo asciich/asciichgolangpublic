@@ -58,7 +58,7 @@ func (k *GitlabProjectDeployKey) CreateDeployKey(ctx context.Context, createOpti
 		CanPush: &createOptions.WriteAccess,
 	})
 	if err != nil {
-		return tracederrors.TracedError(err.Error())
+		return tracederrors.TracedError(err)
 	}
 
 	logging.LogInfoByCtxf(ctx, "Created project deploy key '%s'", keyName)
@@ -95,7 +95,7 @@ func (k *GitlabProjectDeployKey) Delete(ctx context.Context) (err error) {
 
 		_, err = nativeProjectDeployKeyService.DeleteDeployKey(projectId, keyId)
 		if err != nil {
-			return tracederrors.TracedError(err.Error())
+			return tracederrors.TracedError(err)
 		}
 
 		logging.LogChangedByCtxf(ctx, "Project deploy key '%s' Deleted.", keyName)

@@ -55,7 +55,7 @@ func (t *TestSshServer) StartSshServerInBackground(ctx context.Context) error {
 	}()
 
 	var isOpen bool
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		isOpen, err = netutils.IsTcpPortOpen(contextutils.WithSilent(ctx), "localhost", t.Port)
 		if err != nil {
 			return err
@@ -91,7 +91,7 @@ func (t *TestSshServer) WaitUntilStopped(ctx context.Context) error {
 	var isOpen bool
 	var err error
 
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		isOpen, err = netutils.IsTcpPortOpen(ctx, "localhost", t.Port)
 		if err != nil {
 			return err

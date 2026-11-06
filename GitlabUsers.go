@@ -43,7 +43,7 @@ func (u *GitlabUsers) GetUserId() (userId int, err error) {
 
 	nativeUser, _, err := usersService.CurrentUser()
 	if err != nil {
-		return -1, tracederrors.TracedError(err.Error())
+		return -1, tracederrors.TracedError(err)
 	}
 
 	userId = nativeUser.ID

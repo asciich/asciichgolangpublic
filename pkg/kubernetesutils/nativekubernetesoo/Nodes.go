@@ -7,6 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"sort"
 )
 
 func ListNodeNames(ctx context.Context, clientset *kubernetes.Clientset) ([]string, error) {
@@ -25,6 +26,8 @@ func ListNodeNames(ctx context.Context, clientset *kubernetes.Clientset) ([]stri
 	}
 
 	logging.LogInfoByCtxf(ctx, "The kubernetes cluster has '%d' nodes.", len(nodeNames))
+
+	sort.Strings(nodeNames)
 
 	return nodeNames, nil
 }

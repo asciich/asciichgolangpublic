@@ -10,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"sort"
 )
 
 func CronJobExists(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string, cronJobName string) (bool, error) {
@@ -157,6 +158,8 @@ func ListCronJobs(ctx context.Context, clientset *kubernetes.Clientset, namespac
 	}
 
 	logging.LogInfoByCtxf(ctx, "Found '%d' CronJobs in namespace '%s'.", len(cronJobNames), namespaceName)
+
+	sort.Strings(cronJobNames)
 
 	return cronJobNames, nil
 }

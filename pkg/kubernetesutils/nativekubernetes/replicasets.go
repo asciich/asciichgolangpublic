@@ -13,6 +13,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"sort"
 )
 
 func DeleteReplicaSet(ctx context.Context, clientset *kubernetes.Clientset, replicaSetName string, namespace string) error {
@@ -319,6 +320,8 @@ func ListReplicaSets(ctx context.Context, clientset *kubernetes.Clientset, names
 	}
 
 	logging.LogInfoByCtxf(ctx, "Found '%d' ReplicaSets in namespace '%s'.", len(replicaSetNames), namespaceName)
+
+	sort.Strings(replicaSetNames)
 
 	return replicaSetNames, nil
 }

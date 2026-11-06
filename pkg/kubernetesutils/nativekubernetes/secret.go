@@ -10,6 +10,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"sort"
 )
 
 func CreateSecret(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string, secretName string, data map[string][]byte) error {
@@ -117,6 +118,8 @@ func ListSecrets(ctx context.Context, clientset *kubernetes.Clientset, namespace
 	}
 
 	logging.LogInfoByCtxf(ctx, "Found '%d' secrets in namespace '%s'.", len(secretNames), namespaceName)
+
+	sort.Strings(secretNames)
 
 	return secretNames, nil
 }

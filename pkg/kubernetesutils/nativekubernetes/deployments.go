@@ -13,6 +13,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"sort"
 )
 
 func DeleteDeployment(ctx context.Context, clientset *kubernetes.Clientset, deploymentName string, namespace string) error {
@@ -319,6 +320,8 @@ func ListDeployments(ctx context.Context, clientset *kubernetes.Clientset, names
 	}
 
 	logging.LogInfoByCtxf(ctx, "Found '%d' Deployments in namespace '%s'.", len(deploymentNames), namespaceName)
+
+	sort.Strings(deploymentNames)
 
 	return deploymentNames, nil
 }

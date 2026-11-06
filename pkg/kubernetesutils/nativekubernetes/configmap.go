@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"sort"
 )
 
 func ConfigMapExists(ctx context.Context, clientset *kubernetes.Clientset, namespaceName string, configMapName string) (bool, error) {
@@ -225,6 +226,8 @@ func ListConfigMaps(ctx context.Context, clientset *kubernetes.Clientset, namesp
 	}
 
 	logging.LogInfoByCtxf(ctx, "Found '%d' ConfigMaps in namespace '%s'.", len(configMapNames), namespaceName)
+
+	sort.Strings(configMapNames)
 
 	return configMapNames, nil
 }

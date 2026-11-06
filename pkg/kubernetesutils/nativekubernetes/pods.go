@@ -26,6 +26,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/remotecommand"
+	"sort"
 )
 
 // extractExitCodeFromError attempts to extract an exit code from an error message
@@ -846,6 +847,8 @@ func ListPods(ctx context.Context, clientset *kubernetes.Clientset, namespaceNam
 	}
 
 	logging.LogInfoByCtxf(ctx, "Found '%d' pods in namespace '%s'.", len(podNames), namespaceName)
+
+	sort.Strings(podNames)
 
 	return podNames, nil
 }

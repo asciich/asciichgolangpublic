@@ -13,6 +13,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"sort"
 )
 
 func DeleteDaemonSet(ctx context.Context, clientset *kubernetes.Clientset, daemonSetName string, namespace string) error {
@@ -308,6 +309,8 @@ func ListDaemonSets(ctx context.Context, clientset *kubernetes.Clientset, namesp
 	}
 
 	logging.LogInfoByCtxf(ctx, "Found '%d' DaemonSets in namespace '%s'.", len(daemonSetNames), namespaceName)
+
+	sort.Strings(daemonSetNames)
 
 	return daemonSetNames, nil
 }

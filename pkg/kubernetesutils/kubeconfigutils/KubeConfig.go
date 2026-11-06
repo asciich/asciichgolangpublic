@@ -755,6 +755,8 @@ func (k *KubeConfig) ListContextNames(ctx context.Context) (ret []string, err er
 		ret = append(ret, context.Name)
 	}
 
+	sort.Strings(ret)
+
 	return ret, nil
 }
 

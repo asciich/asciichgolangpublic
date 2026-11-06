@@ -191,7 +191,7 @@ func (g *GitlabBranch) Delete(ctx context.Context, options *GitlabDeleteBranchOp
 		} else {
 			// Deleting is not instantaneous so lets check if deleted branch is really absent.
 			// Especially the branch listing on gitlab side tends to race conditions.
-			for i := 0; i < 30; i++ {
+			for range 30 {
 				gitlabBranches, err := g.GetGitlabBranches()
 				if err != nil {
 					return err
