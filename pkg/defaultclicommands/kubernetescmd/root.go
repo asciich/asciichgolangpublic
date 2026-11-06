@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/kindcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/kubectlcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/longhorncmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/kubernetescmd/pvccmd"
 )
 
 func NewKubernetesCmd() *cobra.Command {
@@ -29,6 +30,7 @@ Usage:
 		kindcmd.NewKindCmd(),
 		kubectlcmd.NewKubectlCmd(),
 		longhorncmd.NewLonghornCmd(),
+		pvccmd.NewPvcCmd(),
 		ListKindNamesCmd(),
 	)
 
