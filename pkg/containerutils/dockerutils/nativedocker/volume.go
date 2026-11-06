@@ -79,7 +79,7 @@ func (d *Docker) BackupVolume(ctx context.Context, volumeName string, archivePat
 	// $0 = "sh", $1 = temporary archive name, $2 = owner (may be empty)
 	script := `tar czf "` + helperBackupDir + `/$1" -C ` + helperVolumeDir + ` . && { [ -z "$2" ] || chown "$2" "` + helperBackupDir + `/$1"; }`
 
-	err = runHelperContainer(
+	_, err = runHelperContainer(
 		ctx,
 		"backup",
 		[]string{"/bin/sh", "-c", script, "sh", tmpName, owner},
@@ -128,7 +128,7 @@ func (d *Docker) RestoreVolume(ctx context.Context, volumeName string, archivePa
 		return tracederrors.TracedErrorf("Archive '%s' is not a regular file.", archivePath)
 	}
 
-	err = runHelperContainer(
+	_, err = runHelperContainer(
 		ctx,
 		"restore",
 		[]string{"tar", "xzf", helperBackupDir + "/" + archiveName, "-C", helperVolumeDir},
@@ -171,13 +171,67 @@ func (d *Docker) ListVolumes(ctx context.Context) ([]string, error) {
 	return names, nil
 }
 
+// ListVolumeFileNames returns the names of all files and directories inside
+// the docker volume 'volumeName', relative to the volume root.
+// Hidden files are included and the result is sorted alphabetically.
+//
+// The listing is done in a short living helper container with the volume mounted.
+func (d *Docker) ListVolumeFileNames(ctx context.Context, volumeName string) ([]string, error) {
+	if volumeName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("volumeName")
+	}
+
+	logging.LogInfoByCtxf(ctx, "List files in docker volume '%s' started.", volumeName)
+
+	// Fail early with a clear error instead of listing an empty, freshly created volume.
+	volumes, err := d.ListVolumes(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !slices.Contains(volumes, volumeName) {
+		return nil, tracederrors.TracedErrorf("Docker volume '%s' does not exist. Unable to list its files.", volumeName)
+	}
+
+	// busybox find does not know -printf, so the './' prefix is stripped in Go.
+	// The file names are passed as positional parameters to avoid any shell quoting problems.
+	// $0 = "sh", $1 = mount point of the volume
+	stdout, err := runHelperContainer(
+		ctx,
+		"list files",
+		[]string{"/bin/sh", "-c", `cd "$1" && find . -mindepth 1 -print`, "sh", helperVolumeDir},
+		[]mount.Mount{
+			{Type: mount.TypeVolume, Source: volumeName, Target: helperVolumeDir},
+		},
+	)
+	if err != nil {
+		return nil, tracederrors.TracedErrorf("Listing files in docker volume '%s' failed: %w", volumeName, err)
+	}
+
+	fileNames := []string{}
+	for _, line := range strings.Split(stdout, "\n") {
+		fileName := strings.TrimPrefix(line, "./")
+		if fileName == "" {
+			continue
+		}
+
+		fileNames = append(fileNames, fileName)
+	}
+
+	sort.Strings(fileNames)
+
+	logging.LogInfoByCtxf(ctx, "List files in docker volume '%s' finished. Found '%d' files.", volumeName, len(fileNames))
+
+	return fileNames, nil
+}
+
 // runHelperContainer runs 'cmd' in a short living container with the given mounts
-// and returns an error if the command does not exit with code 0.
+// and returns the combined stdout of the command.
+// An error is returned if the command does not exit with code 0.
 // 'description' is only used for log and error messages.
-func runHelperContainer(ctx context.Context, description string, cmd []string, mounts []mount.Mount) error {
+func runHelperContainer(ctx context.Context, description string, cmd []string, mounts []mount.Mount) (string, error) {
 	cli, err := client.New(client.FromEnv)
 	if err != nil {
-		return tracederrors.TracedErrorf("unable to create docker client: %w", err)
+		return "", tracederrors.TracedErrorf("unable to create docker client: %w", err)
 	}
 	defer cli.Close()
 
@@ -198,7 +252,7 @@ func runHelperContainer(ctx context.Context, description string, cmd []string, m
 		},
 	})
 	if err != nil {
-		return tracederrors.TracedErrorf("Failed to create %s container: %w", description, err)
+		return "", tracederrors.TracedErrorf("Failed to create %s container: %w", description, err)
 	}
 
 	defer func() {
@@ -217,7 +271,7 @@ func runHelperContainer(ctx context.Context, description string, cmd []string, m
 
 	_, err = cli.ContainerStart(ctx, createResult.ID, client.ContainerStartOptions{})
 	if err != nil {
-		return tracederrors.TracedErrorf("Failed to start %s container: %w", description, err)
+		return "", tracederrors.TracedErrorf("Failed to start %s container: %w", description, err)
 	}
 
 	// The container is not auto-removed, so waiting after the start also works
@@ -226,9 +280,9 @@ func runHelperContainer(ctx context.Context, description string, cmd []string, m
 
 	select {
 	case <-ctx.Done():
-		return tracederrors.TracedErrorf("Context done while waiting for %s container: %w", description, ctx.Err())
+		return "", tracederrors.TracedErrorf("Context done while waiting for %s container: %w", description, ctx.Err())
 	case err := <-waitResult.Error:
-		return tracederrors.TracedErrorf("Error waiting for %s container: %w", description, err)
+		return "", tracederrors.TracedErrorf("Error waiting for %s container: %w", description, err)
 	case result := <-waitResult.Result:
 		if result.StatusCode != 0 {
 			logs, logErr := cli.ContainerLogs(ctx, createResult.ID, client.ContainerLogsOptions{
@@ -238,16 +292,30 @@ func runHelperContainer(ctx context.Context, description string, cmd []string, m
 			if logErr == nil {
 				defer logs.Close()
 				logBytes, _ := io.ReadAll(logs)
-				return tracederrors.TracedErrorf(
+				return "", tracederrors.TracedErrorf(
 					"The %s container exited with code %d. Logs: %s",
 					description, result.StatusCode, strings.TrimSpace(string(logBytes)),
 				)
 			}
-			return tracederrors.TracedErrorf("The %s container exited with code %d", description, result.StatusCode)
+			return "", tracederrors.TracedErrorf("The %s container exited with code %d", description, result.StatusCode)
 		}
 	}
 
-	return nil
+	logs, err := cli.ContainerLogs(ctx, createResult.ID, client.ContainerLogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+	})
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Failed to get logs of %s container: %w", description, err)
+	}
+	defer logs.Close()
+
+	logBytes, err := io.ReadAll(logs)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Failed to read logs of %s container: %w", description, err)
+	}
+
+	return string(logBytes), nil
 }
 
 // splitArchivePath returns the absolute directory and the file name of 'archivePath'.

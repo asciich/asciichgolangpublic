@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"sort"
 	"testing"
 
 	"github.com/moby/moby/client"
@@ -97,6 +98,86 @@ func Test_BackupAndRestoreVolume(t *testing.T) {
 	}
 }
 
+func Test_ListVolumeFileNames(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"commandExecutorDocker"},
+		{"nativeDocker"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				docker := getDockerImplementationByName(tt.implementationName)
+
+				const volumeName = "test-list-volume-files-volume"
+				const testContent = "Hello from test volume!\n"
+
+				// Ensure the volume is absent before the test and cleaned up afterwards:
+				err := runCommandToRemoveVolume(ctx, volumeName)
+				require.NoError(t, err)
+				defer func() {
+					err := runCommandToRemoveVolume(ctx, volumeName)
+					if err != nil {
+						logging.LogErrorByCtxf(ctx, "Failed to cleanup volume '%s': %v", volumeName, err)
+					}
+				}()
+
+				// Create the volume and write some files into it:
+				err = runCommandToCreateVolume(ctx, volumeName)
+				require.NoError(t, err)
+
+				err = writeContentToVolume(ctx, docker, volumeName, "testfile.txt", testContent)
+				require.NoError(t, err)
+
+				err = createDirectoryInVolume(ctx, volumeName, "subdir")
+				require.NoError(t, err)
+
+				err = writeContentToVolume(ctx, docker, volumeName, "subdir/testfile.txt", testContent)
+				require.NoError(t, err)
+
+				// Hidden files have to be listed as well:
+				err = writeContentToVolume(ctx, docker, volumeName, ".hidden", testContent)
+				require.NoError(t, err)
+
+				fileNames, err := docker.ListVolumeFileNames(ctx, volumeName)
+				require.NoError(t, err)
+
+				// The output has to be sorted to be deterministic:
+				require.True(t, sort.StringsAreSorted(fileNames))
+
+				require.EqualValues(
+					t,
+					[]string{".hidden", "subdir", "subdir/testfile.txt", "testfile.txt"},
+					fileNames,
+				)
+			},
+		)
+	}
+}
+
+func createDirectoryInVolume(ctx context.Context, volumeName string, directoryName string) error {
+	cmd := []string{
+		"docker", "run", "--rm",
+		"-v", volumeName + ":/volume",
+		"alpine:latest",
+		"mkdir", "-p", "/volume/" + directoryName,
+	}
+
+	executor := commandexecutorexecoo.Exec()
+	_, err := executor.RunCommandAndGetStdoutAsString(ctx, &parameteroptions.RunCommandOptions{
+		Command: cmd,
+	})
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to create directory '%s' in volume '%s': %w", directoryName, volumeName, err)
+	}
+
+	return nil
+}
+
 func runCommandToCreateVolume(ctx context.Context, volumeName string) error {
 	cli, err := client.New(client.FromEnv)
 	if err != nil {
@@ -148,7 +229,6 @@ func writeContentToVolume(ctx context.Context, docker dockerinterfaces.Docker, v
 
 	return nil
 }
-
 
 func readContentFromVolume(ctx context.Context, docker dockerinterfaces.Docker, volumeName string, filename string) (string, error) {
 	// Use docker run with --rm to read content from the volume
