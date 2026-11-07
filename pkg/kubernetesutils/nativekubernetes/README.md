@@ -27,6 +27,8 @@ You do not need to add manual `time.Sleep` calls after these operations.
 * Namespaces:
     * [Create and delete namespace](Example_CreateAndDeleteNamespace_test.go)
     * [Get namespace UID](Example_GetNamespaceUID_test.go)
+* Persistent volume claims:
+    * [List files in persistent volume claim](Example_ListPersistentVolumeClaimFileNames_test.go): List all files inside a PVC using a temporary pod with the PVC mounted. Hidden files are included, the result is sorted alphabetically.
 * Pods:
     * [Copy file to pod](Example_CopyFileToPod_test.go): Copy a local file to a pod/container.
     * [Copy local file to pod](Example_CopyLocalFileToPod_test.go): Comprehensive examples showing how to copy files to containers (similar to `kubectl cp`).

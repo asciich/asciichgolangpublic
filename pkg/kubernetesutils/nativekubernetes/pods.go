@@ -248,6 +248,26 @@ func CreatePod(ctx context.Context, clientset *kubernetes.Clientset, namespaceNa
 		}
 	}
 
+	// Build volumes and volume mounts from persistent volume claims.
+	// Mounted writable since PVC content may be modified by the executed command.
+	if options.PersistentVolumeClaims != nil {
+		for mountPath, pvcSource := range options.PersistentVolumeClaims {
+			volumeName := "pvc-" + pvcSource.PVCName
+			volumes = append(volumes, corev1.Volume{
+				Name: volumeName,
+				VolumeSource: corev1.VolumeSource{
+					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+						ClaimName: pvcSource.PVCName,
+					},
+				},
+			})
+			volumeMounts = append(volumeMounts, corev1.VolumeMount{
+				Name:      volumeName,
+				MountPath: mountPath,
+			})
+		}
+	}
+
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: podName,

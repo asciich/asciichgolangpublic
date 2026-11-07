@@ -11,6 +11,7 @@ Kubernetes persistent volume claims related commands.
 ## Subcommands
 
 - [`list`](#list) - List all kubernetes persistent volume claims
+- [`list-files-in-pvc`](#list-files-in-pvc) - List all files inside a kubernetes persistent volume claim
 
 ### list
 
@@ -26,6 +27,22 @@ Default is to list the persistent volume claims of all namespaces. Use `--namesp
 Usage example:
 ```bash
 <command> kubernetes pvc list --namespace longhorn-system
+```
+
+### list-files-in-pvc
+
+List all files inside a kubernetes persistent volume claim.
+
+A temporary pod is started to list all files inside the given persistent volume claim.
+Hidden files are included and the output is sorted alphabetically.
+
+```bash
+<command> kubernetes pvc list-files-in-pvc --pvc <pvc-name> [--namespace <namespace>]
+```
+
+Usage example:
+```bash
+<command> kubernetes pvc list-files-in-pvc --pvc my-pvc --namespace longhorn-system
 ```
 
 ## Specifications

@@ -58,6 +58,7 @@ The implementation using exec to call `kubectl` or other commands is useful when
     * [Get namespace UID](nativekubernetes/Example_GetNamespaceUID_test.go)
     * [List namespace names](Example_ListNamespaceNames_test.go)
 * [List node names](Example_ListNodeNames_test.go)
+* [List files in persistent volume claim](nativekubernetes/Example_ListPersistentVolumeClaimFileNames_test.go): List all files inside a PVC using a temporary pod with the PVC mounted.
 * [Secret by name exists](Example_SecretByNameExists_test.go)
 * [Read and write secret](Example_SecretReadAndWrite_test.go)
 * [Validate SSH key in secret](Example_ValidateSSHKeyInSecret_test.go): Test if a Kubernetes secret contains a valid SSH private key by attempting to SSH into a target host.

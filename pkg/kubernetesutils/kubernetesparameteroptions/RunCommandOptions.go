@@ -43,6 +43,15 @@ type KubernetesRunCommandOptions struct {
 	// SecretMounts defines secrets to mount as files in the container
 	// Format: map[mountPath]SecretMountSource
 	SecretMounts map[string]SecretMountSource
+
+	// PersistentVolumeClaims defines persistent volume claims to mount in the container.
+	// Format: map[mountPath]PersistentVolumeClaimSource
+	PersistentVolumeClaims map[string]PersistentVolumeClaimSource
+}
+
+// PersistentVolumeClaimSource defines the persistent volume claim to mount
+type PersistentVolumeClaimSource struct {
+	PVCName string
 }
 
 // SecretEnvVarSource defines the source of a secret for an environment variable

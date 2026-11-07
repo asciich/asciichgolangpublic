@@ -4,6 +4,7 @@ import (
 	"context"
 	"sort"
 
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -44,4 +45,20 @@ func (n *NativeKubernetesCluster) ListPersistentVolumeClaimNames(ctx context.Con
 	}
 
 	return persistentVolumeClaimNames, nil
+}
+
+// ListPersistentVolumeClaimFileNames returns the names of all files and directories
+// inside the persistent volume claim 'pvcName' in namespace 'namespaceName',
+// relative to the PVC root. Hidden files are included and the result is sorted
+// alphabetically.
+//
+// The listing is done in a temporary pod with the PVC mounted. The pod is
+// deleted afterwards.
+func (n *NativeKubernetesCluster) ListPersistentVolumeClaimFileNames(ctx context.Context, namespaceName string, pvcName string) (fileNames []string, err error) {
+	clientSet, err := n.GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	return nativekubernetes.ListPersistentVolumeClaimFileNames(ctx, clientSet, namespaceName, pvcName)
 }
