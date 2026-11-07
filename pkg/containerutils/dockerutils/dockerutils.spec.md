@@ -17,6 +17,7 @@ This document extends the [constitution.md](/constitution.md).
 - The `Image` interface must provide a `Remove(ctx context.Context, options *dockeroptions.RemoveOptions) error` function.
 - The `Docker` interface must provide a `RunCommandInTemporaryContainer` function similar to the `RunCommandInTemporaryPod` in the `kubernetesutils` package.
     - This requires an additional test `Example_RunCommandInTemporaryContainer`.
+- Mounts in the `Mounts` option of the `DockerRunContainerOptions` use the docker `-v` syntax `/host/path:/container/path[:ro|rw]` and are mounted read-write by default. Any other format or mode (e.g. a missing path or an unknown mode like `:foo`) must return an error instead of being silently ignored.
 
 ## Testing
 

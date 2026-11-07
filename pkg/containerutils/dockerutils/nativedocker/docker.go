@@ -48,6 +48,50 @@ func RemoveContainer(ctx context.Context, name string, options *dockeroptions.Re
 	return NewDocker().RemoveContainer(ctx, name, options)
 }
 
+// parseMounts converts mount strings in the docker "-v" style into native docker mounts.
+//
+// Supported formats:
+//   - "/host/path:/container/path"      (read-write, default)
+//   - "/host/path:/container/path:rw"   (read-write)
+//   - "/host/path:/container/path:ro"   (read-only)
+func parseMounts(mountStrings []string) ([]mount.Mount, error) {
+	mounts := make([]mount.Mount, 0, len(mountStrings))
+
+	for _, m := range mountStrings {
+		splitted := strings.Split(m, ":")
+		if len(splitted) < 2 || len(splitted) > 3 {
+			return nil, tracederrors.TracedErrorf("Failed to process mount: '%s'.", m)
+		}
+
+		source := splitted[0]
+		target := splitted[1]
+		if source == "" || target == "" {
+			return nil, tracederrors.TracedErrorf("Failed to process mount '%s': source or target is empty.", m)
+		}
+
+		readOnly := false
+		if len(splitted) == 3 {
+			switch splitted[2] {
+			case "ro":
+				readOnly = true
+			case "rw":
+				readOnly = false
+			default:
+				return nil, tracederrors.TracedErrorf("Failed to process mount '%s': unsupported mode '%s'. Use 'ro' or 'rw'.", m, splitted[2])
+			}
+		}
+
+		mounts = append(mounts, mount.Mount{
+			Type:     mount.TypeBind,
+			Source:   source,
+			Target:   target,
+			ReadOnly: readOnly,
+		})
+	}
+
+	return mounts, nil
+}
+
 func (d *Docker) GetDeepCopyAsDocker() dockerinterfaces.Docker {
 	return &Docker{}
 }
@@ -135,6 +179,7 @@ func (d *Docker) RunContainer(ctx context.Context, options *dockeroptions.Docker
 	if err != nil {
 		return nil, tracederrors.TracedErrorf("Failed to create docker client: %w", err)
 	}
+	defer cli.Close()
 
 	envVars := []string{}
 	if len(options.AdditionalEnvVars) > 0 {
@@ -152,7 +197,7 @@ func (d *Docker) RunContainer(ctx context.Context, options *dockeroptions.Docker
 			listenIpAddress = "0.0.0.0"
 			p = strings.TrimPrefix(p, "0.0.0.0:")
 		}
-		if strings.HasPrefix(p, "127.0.0.1") {
+		if strings.HasPrefix(p, "127.0.0.1:") {
 			listenIpAddress = "127.0.0.1"
 			p = strings.TrimPrefix(p, "127.0.0.1:")
 		}
@@ -190,21 +235,9 @@ func (d *Docker) RunContainer(ctx context.Context, options *dockeroptions.Docker
 		portBindings[containerPort] = []network.PortBinding{hostBinding}
 	}
 
-	mounts := []mount.Mount{}
-	for _, m := range options.Mounts {
-		splitted := strings.Split(m, ":")
-		if len(splitted) != 2 {
-			return nil, tracederrors.TracedErrorf("Failed to process mount: '%s'.", m)
-		}
-
-		toAdd := mount.Mount{
-			Type:     mount.TypeBind,
-			Source:   splitted[0],
-			Target:   splitted[1],
-			ReadOnly: false,
-		}
-
-		mounts = append(mounts, toAdd)
+	mounts, err := parseMounts(options.Mounts)
+	if err != nil {
+		return nil, err
 	}
 
 	exists, err := d.ContainerExists(ctx, name)
@@ -599,21 +632,9 @@ func (d *Docker) RunCommandInTemporaryContainer(ctx context.Context, options *do
 		portBindings[containerPort] = []network.PortBinding{hostBinding}
 	}
 
-	mounts := []mount.Mount{}
-	for _, m := range options.Mounts {
-		splitted := strings.Split(m, ":")
-		if len(splitted) != 2 {
-			return nil, tracederrors.TracedErrorf("Failed to process mount: '%s'.", m)
-		}
-
-		toAdd := mount.Mount{
-			Type:     mount.TypeBind,
-			Source:   splitted[0],
-			Target:   splitted[1],
-			ReadOnly: false,
-		}
-
-		mounts = append(mounts, toAdd)
+	mounts, err := parseMounts(options.Mounts)
+	if err != nil {
+		return nil, err
 	}
 
 	// Step 1: Create and start the container

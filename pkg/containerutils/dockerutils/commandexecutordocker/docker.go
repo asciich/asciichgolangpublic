@@ -545,7 +545,7 @@ func (c *CommandExecutorDocker) ImageExists(ctx context.Context, imageName strin
 		return false, err
 	}
 
-	return false, tracederrors.TracedErrorf("Unknown docker output on stderr: %w", err)
+	return false, tracederrors.TracedErrorf("Unknown docker output on stderr: %s", stderr)
 }
 
 func (c *CommandExecutorDocker) RemoveImage(ctx context.Context, imageName string, options *dockeroptions.RemoveOptions) error {
@@ -623,14 +623,16 @@ func (c *CommandExecutorDocker) RemoveContainer(ctx context.Context, containerNa
 //
 // Implementation note — why we use a run → wait → logs → delete approach:
 // This mirrors the Kubernetes implementation to provide a consistent API across container orchestration platforms.
-// The container is created with --rm flag for automatic cleanup, but we also explicitly remove it
-// to ensure deterministic cleanup and to have full control over the lifecycle.
+// The container is deliberately started WITHOUT the --rm flag. With --rm docker could remove the
+// container as soon as it exits, before the exit code and the logs were fetched.
+// Instead the container is removed explicitly at the end to ensure deterministic cleanup and to have
+// full control over the lifecycle.
 //
 // Steps:
-//  1. `docker run`    — start the container with --rm flag without attaching
+//  1. `docker run`    — start the container (detached, without --rm) without attaching
 //  2. `docker wait`   — block until the container has completed
 //  3. `docker logs`   — fetch the output exactly once
-//  4. `docker rm`     — clean up the container (redundant with --rm but ensures cleanup)
+//  4. `docker rm -f`  — explicitly clean up the container
 func (c *CommandExecutorDocker) RunCommandInTemporaryContainer(ctx context.Context, options *dockeroptions.DockerRunContainerOptions) (*commandoutput.CommandOutput, error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
