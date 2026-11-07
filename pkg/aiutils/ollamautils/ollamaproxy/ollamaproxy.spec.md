@@ -4,7 +4,8 @@
 
 This is a proxy in front of Ollama:
 - Authentication: 
-    - Uses the env var OLLAMA_API_KEY as the shared API key; clients send it OpenAI-style as Authorization: Bearer <key>, and any missing or wrong key is answered with 401 in OpenAI’s error format.
+    - Uses the env var `OLLAMA_API_KEY` as the shared API key; clients send it OpenAI-style as Authorization: Bearer <key>, and any missing or wrong key is answered with 401 in OpenAI’s error format.
+        - Alternatively `OLLAMA_API_KEY_FILE` can be used to specify the file containing the API key.
 - Allow only one request to Ollama at a time.
 - A Prometheus `/metrics` page needs to be exposed:
     - All metrics have the prefix `ollama_proxy_`
