@@ -25,6 +25,11 @@ const (
 	// Name of the environment variable containing the shared API key clients have to send.
 	EnvVarNameOllamaApiKey = "OLLAMA_API_KEY"
 
+	// Name of the environment variable containing the path to a file which contains
+	// the shared API key clients have to send.
+	// Alternative to OLLAMA_API_KEY, handy for docker/kubernetes secrets.
+	EnvVarNameOllamaApiKeyFile = "OLLAMA_API_KEY_FILE"
+
 	// Default values used when no explicit option is given.
 	DefaultOllamaProxyListenAddress = ":11435"
 	DefaultOllamaProxyTargetUrl     = "http://localhost:11434"
@@ -44,8 +49,14 @@ type OllamaProxyOptions struct {
 	TargetUrl string
 
 	// Shared API key the clients have to send as "Authorization: Bearer <key>".
-	// If empty the value of the environment variable OLLAMA_API_KEY is used.
+	// If empty, ApiKeyFile is used. If that is empty as well, the environment
+	// variables OLLAMA_API_KEY or OLLAMA_API_KEY_FILE are used.
 	ApiKey string
+
+	// Path to a file containing the shared API key.
+	// Leading and trailing whitespace (like a trailing newline) is removed.
+	// Must not be used together with ApiKey.
+	ApiKeyFile string
 
 	// Path the prometheus metrics are exposed on. Defaults to DefaultOllamaProxyMetricsPath.
 	// The metrics endpoint is intentionally not protected by the API key so
@@ -73,28 +84,83 @@ func (o *OllamaProxyOptions) GetDeepCopy() *OllamaProxyOptions {
 	return &copy
 }
 
-// GetApiKeyOrDefault returns the configured API key or the one defined by the
-// environment variable OLLAMA_API_KEY.
+// readApiKeyFromFile reads the API key from the given file.
+// Surrounding whitespace (e.g. a trailing newline) is removed.
+func readApiKeyFromFile(ctx context.Context, apiKeyFilePath string) (string, error) {
+	if apiKeyFilePath == "" {
+		return "", tracederrors.TracedError("apiKeyFilePath is empty.")
+	}
+
+	content, err := os.ReadFile(apiKeyFilePath)
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Unable to read API key file '%s': %w", apiKeyFilePath, err)
+	}
+
+	apiKey := strings.TrimSpace(string(content))
+	if apiKey == "" {
+		return "", tracederrors.TracedErrorf("API key file '%s' is empty.", apiKeyFilePath)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Using API key from file '%s'.", apiKeyFilePath)
+
+	return apiKey, nil
+}
+
+// GetApiKeyOrDefault returns the API key the clients have to send.
+//
+// The key is looked up in the following order:
+//  1. The option ApiKey.
+//  2. The file given by the option ApiKeyFile.
+//  3. The environment variable OLLAMA_API_KEY.
+//  4. The file whose path is given by the environment variable OLLAMA_API_KEY_FILE.
+//
+// Defining a key and a key file on the same level (both options or both
+// environment variables) is ambiguous and results in an error.
 func (o *OllamaProxyOptions) GetApiKeyOrDefault(ctx context.Context) (string, error) {
 	if o == nil {
 		return "", tracederrors.TracedErrorNil("o")
+	}
+
+	// Explicit options.
+	if o.ApiKey != "" && o.ApiKeyFile != "" {
+		return "", tracederrors.TracedError("Ambiguous API key configuration: Only one of the options 'ApiKey' and 'ApiKeyFile' can be set.")
 	}
 
 	if o.ApiKey != "" {
 		return o.ApiKey, nil
 	}
 
+	if o.ApiKeyFile != "" {
+		return readApiKeyFromFile(ctx, o.ApiKeyFile)
+	}
+
+	// Environment variables.
 	apiKey := strings.TrimSpace(os.Getenv(EnvVarNameOllamaApiKey))
-	if apiKey == "" {
+	apiKeyFilePath := strings.TrimSpace(os.Getenv(EnvVarNameOllamaApiKeyFile))
+
+	if apiKey != "" && apiKeyFilePath != "" {
 		return "", tracederrors.TracedErrorf(
-			"Unable to get API key for the ollama proxy. Environment variable '%s' is empty or unset.",
+			"Ambiguous API key configuration: Only one of the environment variables '%s' and '%s' can be set.",
 			EnvVarNameOllamaApiKey,
+			EnvVarNameOllamaApiKeyFile,
 		)
 	}
 
-	logging.LogInfoByCtxf(ctx, "Using API key from environment variable '%s'.", EnvVarNameOllamaApiKey)
+	if apiKey != "" {
+		logging.LogInfoByCtxf(ctx, "Using API key from environment variable '%s'.", EnvVarNameOllamaApiKey)
 
-	return apiKey, nil
+		return apiKey, nil
+	}
+
+	if apiKeyFilePath != "" {
+		return readApiKeyFromFile(ctx, apiKeyFilePath)
+	}
+
+	return "", tracederrors.TracedErrorf(
+		"Unable to get API key for the ollama proxy. Environment variables '%s' and '%s' are empty or unset.",
+		EnvVarNameOllamaApiKey,
+		EnvVarNameOllamaApiKeyFile,
+	)
 }
 
 // GetListenAddressOrDefault returns the address the proxy should listen on.
