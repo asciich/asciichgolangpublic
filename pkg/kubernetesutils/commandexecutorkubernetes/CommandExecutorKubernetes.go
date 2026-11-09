@@ -747,20 +747,46 @@ func (c *CommandExecutorKubernetes) DeleteConfigMapByName(ctx context.Context, n
 	return namspace.DeleteConfigMapByName(ctx, configMapName)
 }
 
+// CheckAccessible checks if the kubernetes cluster is reachable and the
+// configured credentials are accepted by the API server.
+//
+// Implementation note: `kubectl get --raw /version` is used on purpose instead of
+// `kubectl auth whoami`. The latter relies on the SelfSubjectReview API which is
+// only enabled by default since Kubernetes 1.28 and therefore fails on older clusters
+// (e.g. kindest/node:v1.27.3) with:
+// "the selfsubjectreviews API is not enabled in the cluster".
+// The /version endpoint is available on every Kubernetes version.
 func (c *CommandExecutorKubernetes) CheckAccessible(ctx context.Context) error {
 	clusterName, err := c.GetName()
 	if err != nil {
 		return err
 	}
 
-	_, err = c.WhoAmI(ctx)
+	executor, err := c.GetCommandExecutor()
 	if err != nil {
-		return tracederrors.TracedErrorf("Cluster '%s' is not reachable.", clusterName)
+		return err
+	}
+
+	kubeContext, err := c.GetCachedKubectlContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = executor.RunCommandAndGetStdoutAsString(ctx, &parameteroptions.RunCommandOptions{
+		Command: []string{
+			"kubectl",
+			"--context", kubeContext,
+			"--request-timeout=10s",
+			"get", "--raw", "/version",
+		},
+	})
+	if err != nil {
+		return tracederrors.TracedErrorf("Cluster '%s' is not reachable: %w", clusterName, err)
 	}
 
 	logging.LogInfoByCtxf(ctx, "Cluster '%s' is reachable.", clusterName)
 
-	return err
+	return nil
 }
 
 func (c *CommandExecutorKubernetes) WhoAmI(ctx context.Context) (*kubernetesgeneric.UserInfo, error) {
