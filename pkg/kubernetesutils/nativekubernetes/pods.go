@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -26,7 +27,6 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/remotecommand"
-	"sort"
 )
 
 // extractExitCodeFromError attempts to extract an exit code from an error message
@@ -117,7 +117,7 @@ func Exec(ctx context.Context, config *rest.Config, namespaceName string, option
 
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		panic(err.Error())
+		return nil, tracederrors.TracedErrorf("Failed to create clientset: %w", err)
 	}
 
 	req := clientset.CoreV1().RESTClient().Post().
@@ -531,21 +531,30 @@ func WaitForPodDeleted(ctx context.Context, clientset *kubernetes.Clientset, nam
 
 	logging.LogInfoByCtxf(ctx, "Wait for pod '%s' in namespace '%s' to be deleted started.", podName, namespaceName)
 
-	_, err := clientset.CoreV1().Pods(namespaceName).Get(ctx, podName, metav1.GetOptions{})
-	if apierrors.IsNotFound(err) {
-		logging.LogInfoByCtxf(ctx, "Pod '%s' in namespace '%s' is already deleted.", podName, err)
-		return nil
+	pod, err := clientset.CoreV1().Pods(namespaceName).Get(ctx, podName, metav1.GetOptions{})
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			logging.LogInfoByCtxf(ctx, "Pod '%s' in namespace '%s' is already deleted.", podName, namespaceName)
+			return nil
+		}
+
+		return tracederrors.TracedErrorf("failed to get pod '%s' in namespace '%s' to wait for its deletion: %w", podName, namespaceName, err)
 	}
 
+	// Start the watch exactly at the state we just read. Without the resource
+	// version a deletion between the Get above and the Watch below would not
+	// produce an event and the function would wait until the timeout.
 	w, err := clientset.CoreV1().Pods(namespaceName).Watch(ctx, metav1.ListOptions{
-		FieldSelector: fmt.Sprintf("metadata.name=%s", podName),
+		FieldSelector:   fmt.Sprintf("metadata.name=%s", podName),
+		ResourceVersion: pod.ResourceVersion,
 	})
 	if err != nil {
 		if apierrors.IsNotFound(err) {
-			logging.LogInfoByCtxf(ctx, "Pod '%s' in namespace '%s' is already deleted.", podName, err)
-		} else {
-			return fmt.Errorf("failed to set up watch for pod %s: %w", podName, err)
+			logging.LogInfoByCtxf(ctx, "Pod '%s' in namespace '%s' is already deleted.", podName, namespaceName)
+			return nil
 		}
+
+		return tracederrors.TracedErrorf("failed to set up watch for pod '%s' in namespace '%s': %w", podName, namespaceName, err)
 	}
 	defer w.Stop()
 

@@ -142,6 +142,23 @@ func (c *CommandExecutorKind) EnsureKubectlConfigPresent(ctx context.Context, cl
 	return nil
 }
 
+// createClusterCommand builds the `kind create cluster` command.
+//
+// The `--image` parameter is only added if a node image is explicitly set in the options.
+// Otherwise the default node image of the installed kind binary is used.
+func createClusterCommand(clusterName string, options *kindparameteroptions.CreateClusterOptions) []string {
+	command := []string{"kind", "create", "cluster", "--name", clusterName}
+
+	nodeImage := options.GetNodeImageOrEmptyIfUnset()
+	if nodeImage != "" {
+		command = append(command, "--image", nodeImage)
+	}
+
+	command = append(command, "2>&1")
+
+	return command
+}
+
 func (c *CommandExecutorKind) CreateCluster(ctx context.Context, options *kindparameteroptions.CreateClusterOptions) (cluster kubernetesinterfaces.KubernetesCluster, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
@@ -170,59 +187,65 @@ func (c *CommandExecutorKind) CreateCluster(ctx context.Context, options *kindpa
 			return nil, err
 		}
 
-		logging.LogInfoByCtxf(ctx, "Going to create kind cluster '%s'. This may take a while...", clusterName)
+		createCommand := createClusterCommand(clusterName, options)
+
+		if options.GetNodeImageOrEmptyIfUnset() == "" {
+			logging.LogInfoByCtxf(ctx, "Going to create kind cluster '%s' using the default node image of kind. This may take a while...", clusterName)
+		} else {
+			logging.LogInfoByCtxf(ctx, "Going to create kind cluster '%s' using node image '%s'. This may take a while...", clusterName, options.GetNodeImageOrEmptyIfUnset())
+		}
 
 		_, err = commandExecutor.RunCommand(
 			commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
 			&parameteroptions.RunCommandOptions{
-				Command: []string{"kind", "create", "cluster", "--name", clusterName, "--image", options.GetNodeImage(), "2>&1"},
+				Command: createCommand,
 			},
 		)
 		if err != nil {
-			if continuousintegration.IsRunningInContinuousIntegration() {
-				logging.LogInfoByCtxf(ctx, "Retry kind cluster '%s' creation in CI.", clusterName)
-
-				// Show known clusters for debugging
-				knownClusterNames, err := c.ListClusterNames(ctx)
-				if err != nil {
-					return nil, err
-				}
-
-				msg := "Known cluster names before retry:\n\n"
-				for _, knowCluster := range knownClusterNames {
-					msg += " - '" + knowCluster + "'\n"
-				}
-				logging.LogInfoByCtx(ctx, msg)
-
-				// Show container names for debugging
-				containerName, err := dockerutils.ListContainerNames(ctx)
-				if err != nil {
-					return nil, err
-				}
-
-				msg = "Currently available containers:\n\n"
-				for _, name := range containerName {
-					msg += " - '" + name + "'\n"
-				}
-				logging.LogInfoByCtx(ctx, msg)
-
-				err = c.DeleteClusterByName(ctx, clusterName)
-				if err != nil {
-					return nil, err
-				}
-
-				_, err = commandExecutor.RunCommand(
-					commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
-					&parameteroptions.RunCommandOptions{
-						Command: []string{"kind", "create", "cluster", "--name", clusterName, "--image", options.GetNodeImage(), "2>&1"},
-					},
-				)
-				if err != nil {
-					return nil, err
-				}
+			if !continuousintegration.IsRunningInContinuousIntegration() {
+				return nil, err
 			}
 
-			return nil, err
+			logging.LogInfoByCtxf(ctx, "Retry kind cluster '%s' creation in CI.", clusterName)
+
+			// Show known clusters for debugging
+			knownClusterNames, listErr := c.ListClusterNames(ctx)
+			if listErr != nil {
+				return nil, listErr
+			}
+
+			msg := "Known cluster names before retry:\n\n"
+			for _, knowCluster := range knownClusterNames {
+				msg += " - '" + knowCluster + "'\n"
+			}
+			logging.LogInfoByCtx(ctx, msg)
+
+			// Show container names for debugging
+			containerNames, listErr := dockerutils.ListContainerNames(ctx)
+			if listErr != nil {
+				return nil, listErr
+			}
+
+			msg = "Currently available containers:\n\n"
+			for _, name := range containerNames {
+				msg += " - '" + name + "'\n"
+			}
+			logging.LogInfoByCtx(ctx, msg)
+
+			deleteErr := c.DeleteClusterByName(ctx, clusterName)
+			if deleteErr != nil {
+				return nil, deleteErr
+			}
+
+			_, retryErr := commandExecutor.RunCommand(
+				commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
+				&parameteroptions.RunCommandOptions{
+					Command: createCommand,
+				},
+			)
+			if retryErr != nil {
+				return nil, retryErr
+			}
 		}
 
 		logging.LogChangedByCtxf(ctx, "Kind cluster '%s' on host '%s' created.", clusterName, hostDescription)
