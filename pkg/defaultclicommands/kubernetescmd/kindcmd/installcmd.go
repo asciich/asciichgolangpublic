@@ -1,12 +1,13 @@
 package kindcmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kindutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"os"
 )
 
 func NewInstallKindCmd() *cobra.Command {
@@ -18,16 +19,27 @@ func NewInstallKindCmd() *cobra.Command {
 		Long: short + `
 
 Usage:
-    ` + os.Args[0] + ` kubernetes kind install`,
+    ` + os.Args[0] + ` kubernetes kind install [--version <version>]
+
+Usage example:
+    ` + os.Args[0] + ` kubernetes kind install --version ` + kindutils.DEFAULT_KIND_VERSION + `
+`,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
-			mustutils.Must0(kindutils.InstallKind(ctx))
+			version, err := cmd.Flags().GetString("version")
+			if err != nil {
+				logging.LogGoErrorFatalWithTrace(err)
+			}
 
-			logging.LogGoodByCtxf(ctx, "KinD installed")
+			mustutils.Must0(kindutils.InstallKind(ctx, version))
+
+			logging.LogGoodByCtxf(ctx, "KinD version '%s' installed.", version)
 		},
 	}
+
+	cmd.Flags().String("version", kindutils.DEFAULT_KIND_VERSION, "The KinD version to install, e.g. "+kindutils.DEFAULT_KIND_VERSION+".")
 
 	return cmd
 }

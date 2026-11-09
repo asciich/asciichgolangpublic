@@ -1003,3 +1003,350 @@ func Test_PodRunCommand_echoHelloWorld(t *testing.T) {
 		)
 	}
 }
+
+// keepAliveCommand keeps a pod running until it is deleted and exits quickly on SIGTERM.
+func keepAliveCommand() []string {
+	return []string{"sh", "-c", "trap \"exit 0\" TERM; while true; do sleep .1; done"}
+}
+
+func pvcYaml(namespaceName string, pvcName string) string {
+	return fmt.Sprintf(`apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: %s
+  namespace: %s
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Mi
+`, pvcName, namespaceName)
+}
+
+func Test_CreatePod_WithSecretAsEnvVar(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		{"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "test-createpod-secret-env"
+				const podName = "createpod-secret-env"
+				const secretName = "test-secret-env"
+				const secretKey = "mykey"
+				const secretValue = "my-secret-env-value"
+				const envVarName = "MY_SECRET_VAR"
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
+
+				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+
+				_, err = kubernetes.CreateSecret(ctx, namespaceName, secretName, &kubernetesparameteroptions.CreateSecretOptions{
+					SecretData: map[string][]byte{
+						secretKey: []byte(secretValue),
+					},
+				})
+				require.NoError(t, err)
+				defer func() {
+					_ = kubernetes.DeleteSecretByName(ctx, namespaceName, secretName)
+				}()
+
+				defer func() {
+					_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+				}()
+
+				_, err = kubernetes.CreatePod(
+					ctx,
+					namespaceName,
+					&kubernetesparameteroptions.KubernetesRunCommandOptions{
+						Image:                    "ubuntu",
+						PodName:                  podName,
+						DeleteAlreadyExistingPod: true,
+						WaitForPodRunning:        true,
+						RunCommandOptions: &parameteroptions.RunCommandOptions{
+							Command: keepAliveCommand(),
+						},
+						SecretEnvVars: map[string]kubernetesparameteroptions.SecretEnvVarSource{
+							envVarName: {
+								SecretName: secretName,
+								SecretKey:  secretKey,
+							},
+						},
+					},
+				)
+				require.NoError(t, err)
+
+				pod, err := kubernetes.GetPodByNames(namespaceName, podName)
+				require.NoError(t, err)
+
+				output, err := pod.RunCommand(
+					ctx,
+					&parameteroptions.RunCommandOptions{
+						Command: []string{"printenv", envVarName},
+					},
+				)
+				require.NoError(t, err)
+
+				stdout, err := output.GetStdoutAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, secretValue+"\n", stdout)
+			},
+		)
+	}
+}
+
+func Test_CreatePod_WithSecretAsFile(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		{"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "test-createpod-secret-file"
+				const podName = "createpod-secret-file"
+				const secretName = "test-secret-file"
+				const secretKey = "mykey"
+				const secretValue = "my-secret-file-value"
+				const mountPath = "/etc/secret"
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
+
+				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+
+				_, err = kubernetes.CreateSecret(ctx, namespaceName, secretName, &kubernetesparameteroptions.CreateSecretOptions{
+					SecretData: map[string][]byte{
+						secretKey: []byte(secretValue),
+					},
+				})
+				require.NoError(t, err)
+				defer func() {
+					_ = kubernetes.DeleteSecretByName(ctx, namespaceName, secretName)
+				}()
+
+				defer func() {
+					_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+				}()
+
+				_, err = kubernetes.CreatePod(
+					ctx,
+					namespaceName,
+					&kubernetesparameteroptions.KubernetesRunCommandOptions{
+						Image:                    "ubuntu",
+						PodName:                  podName,
+						DeleteAlreadyExistingPod: true,
+						WaitForPodRunning:        true,
+						RunCommandOptions: &parameteroptions.RunCommandOptions{
+							Command: keepAliveCommand(),
+						},
+						SecretMounts: map[string]kubernetesparameteroptions.SecretMountSource{
+							mountPath: {
+								SecretName: secretName,
+							},
+						},
+					},
+				)
+				require.NoError(t, err)
+
+				pod, err := kubernetes.GetPodByNames(namespaceName, podName)
+				require.NoError(t, err)
+
+				output, err := pod.RunCommand(
+					ctx,
+					&parameteroptions.RunCommandOptions{
+						Command: []string{"cat", mountPath + "/" + secretKey},
+					},
+				)
+				require.NoError(t, err)
+
+				stdout, err := output.GetStdoutAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, secretValue, stdout)
+			},
+		)
+	}
+}
+
+func Test_CreatePod_WithPersistentVolumeClaim(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		{"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "test-createpod-pvc"
+				const podName = "createpod-pvc"
+				const pvcName = "test-pvc"
+				const mountPath = "/data"
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
+
+				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+
+				namespace, err := kubernetes.GetNamespaceByName(namespaceName)
+				require.NoError(t, err)
+
+				// Deleting the namespace also removes the PVC.
+				defer func() {
+					_ = namespace.Delete(ctx)
+				}()
+
+				_, err = namespace.CreateObject(ctx, &kubernetesparameteroptions.CreateObjectOptions{
+					YamlString: pvcYaml(namespaceName, pvcName),
+				})
+				require.NoError(t, err)
+
+				defer func() {
+					_ = kubernetes.DeletePodByNames(ctx, namespaceName, podName)
+				}()
+
+				_, err = kubernetes.CreatePod(
+					ctx,
+					namespaceName,
+					&kubernetesparameteroptions.KubernetesRunCommandOptions{
+						Image:                    "ubuntu",
+						PodName:                  podName,
+						DeleteAlreadyExistingPod: true,
+						WaitForPodRunning:        true,
+						RunCommandOptions: &parameteroptions.RunCommandOptions{
+							Command: keepAliveCommand(),
+						},
+						PersistentVolumeClaims: map[string]kubernetesparameteroptions.PersistentVolumeClaimSource{
+							mountPath: {
+								PVCName: pvcName,
+							},
+						},
+					},
+				)
+				require.NoError(t, err)
+
+				pod, err := kubernetes.GetPodByNames(namespaceName, podName)
+				require.NoError(t, err)
+
+				// The volume must be mounted and writable.
+				_, err = pod.RunCommand(
+					ctx,
+					&parameteroptions.RunCommandOptions{
+						Command: []string{"sh", "-c", "echo hello_pvc > " + mountPath + "/file.txt"},
+					},
+				)
+				require.NoError(t, err)
+
+				output, err := pod.RunCommand(
+					ctx,
+					&parameteroptions.RunCommandOptions{
+						Command: []string{"cat", mountPath + "/file.txt"},
+					},
+				)
+				require.NoError(t, err)
+
+				stdout, err := output.GetStdoutAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, "hello_pvc\n", stdout)
+			},
+		)
+	}
+}
+
+func Test_RunCommandInTemporaryPod_WithPersistentVolumeClaim(t *testing.T) {
+	tests := []struct {
+		implementationName string
+	}{
+		{"nativeKubernetes"},
+		{"commandExecutorKubernetes"},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			testutils.MustFormatAsTestname(tt),
+			func(t *testing.T) {
+				ctx := getCtx()
+				const namespaceName = "test-temppod-pvc"
+				const pvcName = "test-pvc"
+				const mountPath = "/data"
+
+				kubernetes := getKubernetesByImplementationName(getCtx(), t, tt.implementationName)
+
+				_, err := kubernetes.CreateNamespaceByName(ctx, namespaceName)
+				require.NoError(t, err)
+
+				namespace, err := kubernetes.GetNamespaceByName(namespaceName)
+				require.NoError(t, err)
+
+				// Deleting the namespace also removes the PVC.
+				defer func() {
+					_ = namespace.Delete(ctx)
+				}()
+
+				_, err = namespace.CreateObject(ctx, &kubernetesparameteroptions.CreateObjectOptions{
+					YamlString: pvcYaml(namespaceName, pvcName),
+				})
+				require.NoError(t, err)
+
+				pvcs := map[string]kubernetesparameteroptions.PersistentVolumeClaimSource{
+					mountPath: {
+						PVCName: pvcName,
+					},
+				}
+
+				// First pod writes a file into the PVC.
+				_, err = kubernetes.RunCommandInTemporaryPod(
+					ctx,
+					namespaceName,
+					&kubernetesparameteroptions.KubernetesRunCommandOptions{
+						Image:                    "ubuntu",
+						PodName:                  "pvc-writer",
+						DeleteAlreadyExistingPod: true,
+						PersistentVolumeClaims:   pvcs,
+						RunCommandOptions: &parameteroptions.RunCommandOptions{
+							Command: []string{"bash", "-c", "echo persisted_content > " + mountPath + "/file.txt"},
+						},
+					},
+				)
+				require.NoError(t, err)
+
+				// A second, new pod must see the file. It proves the data is on the
+				// PVC and not in the first pod's container filesystem.
+				output, err := kubernetes.RunCommandInTemporaryPod(
+					ctx,
+					namespaceName,
+					&kubernetesparameteroptions.KubernetesRunCommandOptions{
+						Image:                    "ubuntu",
+						PodName:                  "pvc-reader",
+						DeleteAlreadyExistingPod: true,
+						PersistentVolumeClaims:   pvcs,
+						RunCommandOptions: &parameteroptions.RunCommandOptions{
+							Command: []string{"bash", "-c", "cat " + mountPath + "/file.txt"},
+						},
+					},
+				)
+				require.NoError(t, err)
+
+				stdout, err := output.GetStdoutAsString()
+				require.NoError(t, err)
+				require.EqualValues(t, "persisted_content\n", stdout)
+			},
+		)
+	}
+}
