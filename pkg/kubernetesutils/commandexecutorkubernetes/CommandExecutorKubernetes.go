@@ -820,6 +820,17 @@ func (c *CommandExecutorKubernetes) CreateObject(ctx context.Context, options *k
 //  2. `kubectl wait`   — block until the pod has completed
 //  3. `kubectl logs`   — fetch the output exactly once
 //  4. `kubectl delete` — clean up the pod
+//
+// Additionally:
+//   - An already existing pod with the same name is deleted first if
+//     options.DeleteAlreadyExistingPod is set.
+//   - Secret environment variables, secret mounts and persistent volume claims
+//     are passed to the pod using `--overrides`. The container in the overrides is
+//     named like the pod, so it is merged with the container created by `kubectl run`
+//     (a different name would add a second container).
+//   - The pod is deleted in any case once it was created, also if waiting or reading
+//     the logs fails. Otherwise a failed run leaves a pod behind which makes the next
+//     run fail with "AlreadyExists".
 func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (*commandoutput.CommandOutput, error) {
 	if namespaceName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("namespaceName")
@@ -856,6 +867,22 @@ func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context
 		return nil, err
 	}
 
+	deleteCommand := []string{
+		"kubectl", "--context", kubeContext, "delete", "pod", podName,
+		"--namespace", namespaceName,
+		"--ignore-not-found",
+	}
+
+	// Step 0: Remove a pod left over from a previous run.
+	if options.DeleteAlreadyExistingPod {
+		_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command: deleteCommand,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	// Step 1: Start the pod without attaching.
 	runCommand := []string{
 		"kubectl", "--context", kubeContext, "run", podName,
@@ -864,8 +891,12 @@ func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context
 		"--restart=Never",
 	}
 
-	// Build overrides for secrets (environment variables and mounts)
-	overrides := buildPodOverridesForSecrets(podName, options)
+	// Build overrides for secrets (environment variables and mounts) and persistent volume claims.
+	overrides, err := buildPodOverrides(podName, options)
+	if err != nil {
+		return nil, err
+	}
+
 	if overrides != "" {
 		runCommand = append(runCommand,
 			"--override-type", "strategic",
@@ -883,13 +914,24 @@ func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context
 		return nil, err
 	}
 
+	// Step 4 (registered right after creation): Delete the pod to clean up.
+	// Done in any case so a failure in step 2 or 3 does not leave the pod behind.
+	defer func() {
+		_, deleteErr := commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
+			Command: deleteCommand,
+		})
+		if deleteErr != nil {
+			logging.LogErrorByCtxf(ctx, "Failed to delete temporary pod '%s' in namespace '%s': %v", podName, namespaceName, deleteErr)
+		}
+	}()
+
 	// Step 2: Wait for the pod to complete (Succeeded phase).
 	// Wait for pod phase to be Succeeded to ensure the command has finished executing.
 	waitCommand := []string{
 		"kubectl", "--context", kubeContext, "wait", "pod", podName,
 		"--namespace", namespaceName,
 		"--for=jsonpath={.status.phase}=Succeeded",
-		"--timeout=60s",
+		"--timeout=120s",
 	}
 
 	_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
@@ -912,23 +954,55 @@ func (c *CommandExecutorKubernetes) RunCommandInTemporaryPod(ctx context.Context
 		return nil, err
 	}
 
-	// Step 4: Delete the pod to clean up.
-	deleteCommand := []string{
-		"kubectl", "--context", kubeContext, "delete", "pod", podName,
-		"--namespace", namespaceName,
-	}
-
-	_, err = commandExecutor.RunCommand(ctx, &parameteroptions.RunCommandOptions{
-		Command: deleteCommand,
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	logging.LogInfoByCtxf(ctx, "Run command in temporary pod '%s' in namespace '%s' using container image '%s' finished.", podName, namespaceName, imageName)
 
 	return output, nil
 }
+
+// buildPodOverrides builds the JSON passed to `kubectl run --overrides` (strategic merge).
+//
+// It contains the secret environment variables, the secret mounts and the persistent
+// volume claims of the options. The container is named like the pod to be merged
+// with the container created by `kubectl run`.
+// An empty string is returned if there is nothing to override.
+func buildPodOverrides(podName string, options *kubernetesparameteroptions.KubernetesRunCommandOptions) (string, error) {
+	volumes, volumeMounts := podVolumesFromOptions(options)
+
+	hasEnvVars := len(options.SecretEnvVars) > 0
+	hasVolumes := len(volumes) > 0
+
+	if !hasEnvVars && !hasVolumes {
+		return "", nil
+	}
+
+	container := map[string]any{
+		"name": podName,
+	}
+
+	if hasEnvVars {
+		container["env"] = json.RawMessage(toJsonEnvVarFromSecrets(options.SecretEnvVars))
+	}
+
+	if hasVolumes {
+		container["volumeMounts"] = volumeMounts
+	}
+
+	spec := map[string]any{
+		"containers": []map[string]any{container},
+	}
+
+	if hasVolumes {
+		spec["volumes"] = volumes
+	}
+
+	overrides, err := json.Marshal(map[string]any{"spec": spec})
+	if err != nil {
+		return "", tracederrors.TracedErrorf("Failed to marshal overrides of pod '%s': %w", podName, err)
+	}
+
+	return string(overrides), nil
+}
+
 
 func (c *CommandExecutorKubernetes) ReadSecret(ctx context.Context, namespaceName string, secretName string) (map[string][]byte, error) {
 	contextName, err := c.GetCachedKubectlContext(ctx)

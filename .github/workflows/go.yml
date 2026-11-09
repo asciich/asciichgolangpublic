@@ -19,12 +19,23 @@ jobs:
     - name: Free up space
       run: .github/free_space.sh
 
+    - name: Raise inotify limits
+      run: |
+        sudo sysctl fs.inotify.max_user_watches=524288
+        sudo sysctl fs.inotify.max_user_instances=512
+
+    - name: Show inotify limits and resources
+      run: |
+        sysctl fs.inotify
+        free -m
+        nproc
+
     - name: Install python virtualenv
       run: sudo apt-get install -y python3-virtualenv
 
     - name: Install pinned kind binary
       run: |
-        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.32.0/kind-linux-amd64
+        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.33.0/kind-linux-amd64
         chmod +x ./kind
         sudo mv ./kind /bin/kind
         kind version
@@ -42,3 +53,17 @@ jobs:
       run: go test -timeout 20m ./...
       env:
         RUN_SUDO_TEST: "1"  # Run tests using sudo in CI.
+
+    - name: Export kind logs on failure
+      if: failure()
+      run: |
+        mkdir -p kind-logs
+        for c in $(kind get clusters); do kind export logs "kind-logs/$c" --name "$c" || true; done
+        docker ps -a > kind-logs/docker-ps.txt || true
+
+    - name: Upload kind logs
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: kind-logs
+        path: kind-logs
