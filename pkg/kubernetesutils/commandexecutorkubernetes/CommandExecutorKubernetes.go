@@ -15,10 +15,8 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
-	"github.com/asciich/asciichgolangpublic/pkg/fileformats/jsonutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kuberneteserrors"
-	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
@@ -787,41 +785,6 @@ func (c *CommandExecutorKubernetes) CheckAccessible(ctx context.Context) error {
 	logging.LogInfoByCtxf(ctx, "Cluster '%s' is reachable.", clusterName)
 
 	return nil
-}
-
-func (c *CommandExecutorKubernetes) WhoAmI(ctx context.Context) (*kubernetesgeneric.UserInfo, error) {
-	executor, err := c.GetCommandExecutor()
-	if err != nil {
-		return nil, err
-	}
-
-	kubeContext, err := c.GetCachedKubectlContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	stdout, err := executor.RunCommandAndGetStdoutAsString(ctx, &parameteroptions.RunCommandOptions{
-		Command: []string{"kubectl", "--context", kubeContext, "auth", "whoami", "-ojson"},
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	userName, err := jsonutils.RunJqAgainstJsonStringAsString(stdout, ".status.userInfo.username")
-	if err != nil {
-		return nil, err
-	}
-
-	clusterName, err := c.GetName()
-	if err != nil {
-		return nil, err
-	}
-
-	logging.LogInfoByCtxf(ctx, "Whoami: Kube context '%s' uses user '%s' to log in to cluster '%s'.", kubeContext, userName, clusterName)
-
-	return &kubernetesgeneric.UserInfo{
-		Username: userName,
-	}, nil
 }
 
 func (c *CommandExecutorKubernetes) WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.WaitForPodsOptions) error {
