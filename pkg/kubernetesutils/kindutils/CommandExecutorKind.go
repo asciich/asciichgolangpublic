@@ -175,7 +175,7 @@ func (c *CommandExecutorKind) CreateCluster(ctx context.Context, options *kindpa
 		_, err = commandExecutor.RunCommand(
 			commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
 			&parameteroptions.RunCommandOptions{
-				Command: []string{"kind", "create", "cluster", "--name", clusterName, "2>&1"},
+				Command: []string{"kind", "create", "cluster", "--name", clusterName, "--image", options.GetNodeImage(), "2>&1"},
 			},
 		)
 		if err != nil {
@@ -214,7 +214,7 @@ func (c *CommandExecutorKind) CreateCluster(ctx context.Context, options *kindpa
 				_, err = commandExecutor.RunCommand(
 					commandexecutorgeneric.WithLiveOutputOnStdout(ctx),
 					&parameteroptions.RunCommandOptions{
-						Command: []string{"kind", "create", "cluster", "--name", clusterName, "2>&1"},
+						Command: []string{"kind", "create", "cluster", "--name", clusterName, "--image", options.GetNodeImage(), "2>&1"},
 					},
 				)
 				if err != nil {
