@@ -14,7 +14,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 
-	authenticationv1 "k8s.io/api/authentication/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -521,31 +520,6 @@ func (n *NativeKubernetesCluster) CheckAccessible(ctx context.Context) error {
 
 func (n *NativeKubernetesCluster) GetUserNameByContextName(ctx context.Context, kubeContext string) (string, error) {
 	return kubeconfigutils.GetUserNameByContextName(ctx, kubeContext)
-}
-
-func (n *NativeKubernetesCluster) WhoAmI(ctx context.Context) (*kubernetesgeneric.UserInfo, error) {
-	clusterName, err := n.GetName()
-	if err != nil {
-		return nil, err
-	}
-
-	clientset, err := n.GetClientSet()
-	if err != nil {
-		return nil, err
-	}
-
-	response, err := clientset.AuthenticationV1().SelfSubjectReviews().Create(ctx, &authenticationv1.SelfSubjectReview{}, metav1.CreateOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	var username = response.Status.UserInfo.Username
-
-	logging.LogInfoByCtxf(ctx, "Whoami: Kube config uses user '%s' to log in to cluster '%s'.", username, clusterName)
-
-	return &kubernetesgeneric.UserInfo{
-		Username: username,
-	}, nil
 }
 
 func (n *NativeKubernetesCluster) WaitUntilAllPodsInNamespaceAreRunning(ctx context.Context, namespaceName string, options *kubernetesparameteroptions.WaitForPodsOptions) error {
