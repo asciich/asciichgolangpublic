@@ -14,6 +14,7 @@ import (
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/api/types/mount"
 	"github.com/moby/moby/client"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -207,15 +208,16 @@ func (d *Docker) ListVolumeFileNames(ctx context.Context, volumeName string) ([]
 		return nil, tracederrors.TracedErrorf("Listing files in docker volume '%s' failed: %w", volumeName, err)
 	}
 
-	fileNames := []string{}
-	for _, line := range strings.Split(stdout, "\n") {
-		fileName := strings.TrimPrefix(line, "./")
-		if fileName == "" {
-			continue
-		}
-
-		fileNames = append(fileNames, fileName)
+	// A TTY converts line feeds to carriage return + line feed, so they are
+	// normalized before splitting to get clean file names.
+	// The names are returned sorted to be deterministic.
+	fileNames := stringsutils.SplitLines(stdout, true)
+	for i, fileName := range fileNames {
+		fileNames[i] = strings.TrimPrefix(fileName, "./")
 	}
+	fileNames = slices.DeleteFunc(fileNames, func(fileName string) bool {
+		return fileName == ""
+	})
 
 	sort.Strings(fileNames)
 

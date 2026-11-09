@@ -206,7 +206,7 @@ func (c *CommandExecutorDocker) ListVolumeFileNames(ctx context.Context, volumeN
 	}
 
 	fileNames := []string{}
-	for _, line := range strings.Split(output, "\n") {
+	for _, line := range stringsutils.SplitLines(output, true) {
 		fileName := strings.TrimPrefix(line, "./")
 		if fileName == "" {
 			continue
