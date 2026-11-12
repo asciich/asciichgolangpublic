@@ -8,6 +8,7 @@ require (
 	github.com/containerd/errdefs v1.0.0
 	github.com/digitalocean/go-libvirt v0.0.0-20260814190004-1a83157e1858
 	github.com/diskfs/go-diskfs v1.4.0
+	github.com/docker/docker v28.0.1+incompatible
 	github.com/exoscale/egoscale/v3 v3.1.33
 	github.com/gavv/cobradoc v1.2.0
 	github.com/go-git/go-git/v5 v5.13.1

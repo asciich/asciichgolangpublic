@@ -29,6 +29,11 @@ type Docker interface {
 	ListVolumeFileNames(ctx context.Context, volumeName string) ([]string, error)
 	RestoreVolume(ctx context.Context, volumeName string, archivePath string) error
 
+	// BackupVolumes stores all given volumes in one gzip compressed multi volume archive.
+	BackupVolumes(ctx context.Context, volumeNames []string, archivePath string) error
+	// RestoreVolumes restores all volumes of a multi volume archive. The target volumes are taken from the manifest of the archive.
+	RestoreVolumes(ctx context.Context, archivePath string) error
+
 	PullImage(ctx context.Context, imageName string) (containerinterfaces.Image, error)
 
 	RemoveImage(ctx context.Context, imageName string, options *dockeroptions.RemoveOptions) error
