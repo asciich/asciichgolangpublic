@@ -101,3 +101,24 @@ func RestoreVolume(ctx context.Context, volumeName string, archivePath string) e
 
 	return docker.RestoreVolume(ctx, volumeName, archivePath)
 }
+
+// Backup multiple docker volumes on localhost into one multi volume tar archive.
+func BackupVolumes(ctx context.Context, volumeNames []string, archivePath string) error {
+	docker, err := GetDockerOnLocalHost()
+	if err != nil {
+		return err
+	}
+
+	return docker.BackupVolumes(ctx, volumeNames, archivePath)
+}
+
+// Restore all docker volumes on localhost from a multi volume tar archive.
+// The target volumes are taken from the manifest of the archive.
+func RestoreVolumes(ctx context.Context, archivePath string) error {
+	docker, err := GetDockerOnLocalHost()
+	if err != nil {
+		return err
+	}
+
+	return docker.RestoreVolumes(ctx, archivePath)
+}

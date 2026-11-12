@@ -10,7 +10,9 @@ func NewBackupCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		NewCreateCmd(),
+		NewCreateMultiCmd(),
 		NewRestoreCmd(),
+		NewRestoreMultiCmd(),
 	)
 
 	return cmd
