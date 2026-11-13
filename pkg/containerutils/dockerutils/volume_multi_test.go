@@ -59,6 +59,16 @@ func requireVolumeContent(t *testing.T, ctx context.Context, docker dockerinterf
 	}
 }
 
+func requireVolumeOwnerAndMode(t *testing.T, ctx context.Context, ownerAndMode string, volumeNames ...string) {
+	t.Helper()
+
+	for _, name := range volumeNames {
+		ownerAndModeInVolume, err := getOwnerAndModeInVolume(ctx, name, multiTestFilename)
+		require.NoError(t, err)
+		require.EqualValues(t, ownerAndMode, ownerAndModeInVolume, "UID, GID and access rights of the testfile in volume '%s' should be preserved", name)
+	}
+}
+
 func readManifestOfArchive(t *testing.T, archivePath string) *dockergeneric.Manifest {
 	t.Helper()
 
@@ -117,6 +127,28 @@ func Test_BackupAndRestoreVolumes(t *testing.T) {
 					require.Contains(t, volumes, volumeB)
 
 					requireVolumeContent(t, ctx, docker, volumeA, volumeB)
+				})
+
+				t.Run("round trip keeps uid gid and access rights of all volumes", func(t *testing.T) {
+					// UID, GID and access rights have to be preserved by BackupVolumes and RestoreVolumes:
+					const testOwner = "1234:5678"
+					const testMode = "741"
+					const testOwnerAndMode = testOwner + ":" + testMode
+
+					ensureVolumesWithContent(t, ctx, docker, volumeA, volumeB)
+					require.NoError(t, setOwnerAndModeInVolume(ctx, volumeA, multiTestFilename, testOwner, testMode))
+					require.NoError(t, setOwnerAndModeInVolume(ctx, volumeB, multiTestFilename, testOwner, testMode))
+
+					archivePath := filepath.Join(t.TempDir(), "multi.tar.gz")
+					require.NoError(t, docker.BackupVolumes(ctx, []string{volumeA, volumeB}, archivePath))
+
+					require.NoError(t, runCommandToRemoveVolume(ctx, volumeA))
+					require.NoError(t, runCommandToRemoveVolume(ctx, volumeB))
+
+					require.NoError(t, docker.RestoreVolumes(ctx, archivePath))
+
+					requireVolumeContent(t, ctx, docker, volumeA, volumeB)
+					requireVolumeOwnerAndMode(t, ctx, testOwnerAndMode, volumeA, volumeB)
 				})
 
 				t.Run("manifest lists the sorted volume names without duplicates", func(t *testing.T) {

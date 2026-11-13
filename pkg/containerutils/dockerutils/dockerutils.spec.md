@@ -54,3 +54,4 @@ This document extends the [constitution.md](/constitution.md).
         ```
     - If it does not exist you have to implement it.
     - In any case ensure the `Wait...` functions are tested in all available implementations.
+- The functions in `volume.go` must preserve UID, GID and access rights.
