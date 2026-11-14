@@ -763,6 +763,83 @@ func (c *Container) GetLogs(ctx context.Context) ([]byte, []byte, error) {
 	return stdoutBytes, stderrBytes, nil
 }
 
+func (c *Container) Stop(ctx context.Context) error {
+	containerName, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	isRunning, err := c.IsRunning(ctx)
+	if err != nil {
+		return err
+	}
+
+	if !isRunning {
+		logging.LogInfoByCtxf(ctx, "Container '%s' is not running. Skip stopping container.", containerName)
+		return nil
+	}
+
+	logging.LogInfoByCtxf(ctx, "Stop container '%s' started.", containerName)
+
+	cli, err := client.New(client.FromEnv)
+	if err != nil {
+		return tracederrors.TracedErrorf("unable to create docker client: %w", err)
+	}
+	defer cli.Close()
+
+	_, err = cli.ContainerStop(ctx, containerName, client.ContainerStopOptions{})
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to stop container '%s': %w", containerName, err)
+	}
+
+	logging.LogChangedByCtxf(ctx, "Stopped container '%s'.", containerName)
+
+	return nil
+}
+
+func (c *Container) Start(ctx context.Context) error {
+	containerName, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	isRunning, err := c.IsRunning(ctx)
+	if err != nil {
+		return err
+	}
+
+	if isRunning {
+		logging.LogInfoByCtxf(ctx, "Container '%s' is already running. Skip starting container.", containerName)
+		return nil
+	}
+
+	exists, err := c.Exists(ctx)
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return tracederrors.TracedErrorf("Unable to start container '%s': container does not exist.", containerName)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Start container '%s' started.", containerName)
+
+	cli, err := client.New(client.FromEnv)
+	if err != nil {
+		return tracederrors.TracedErrorf("unable to create docker client: %w", err)
+	}
+	defer cli.Close()
+
+	_, err = cli.ContainerStart(ctx, containerName, client.ContainerStartOptions{})
+	if err != nil {
+		return tracederrors.TracedErrorf("Failed to start container '%s': %w", containerName, err)
+	}
+
+	logging.LogChangedByCtxf(ctx, "Started container '%s'.", containerName)
+
+	return nil
+}
+
 func (c *Container) WaitUntilFinished(ctx context.Context, timeout time.Duration) error {
 	name, err := c.GetName()
 	if err != nil {
