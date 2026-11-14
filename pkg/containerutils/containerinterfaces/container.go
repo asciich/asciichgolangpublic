@@ -47,6 +47,14 @@ type Container interface {
 	// WaitUntilFinished waits until the container finishes execution or the timeout is reached.
 	WaitUntilFinished(ctx context.Context, timeout time.Duration) error
 
+	// Stop a running docker container.
+	// Equivalent to the CLI command 'docker container stop' if docker is used.
+	Stop(ctx context.Context) error
+
+	// Start an existing, stopped docker container.
+	// Equivalent to the CLI command 'docker container start' if docker is used.
+	Start(ctx context.Context) error
+
 	// These Commands can be implemented by embedding the `CommandExecutorBase` struct:
 	IsRunningOnLocalhost() (bool, error)
 	GetCPUArchitecture(context.Context) (string, error)

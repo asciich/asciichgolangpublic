@@ -11,9 +11,12 @@ This document extends the [constitution.md](/constitution.md).
     - For specifying the Dockerfile exclusively one must be set:
         - `DockerfilePath`: The path to an already existing Dockerfile.
         - `DockerfileContent`: Option to directly set the Dockerfile content.
-- The `Container` interface must provide a `GetLogs(ctx context.Context) ([]byte, []byte, err)` function to return stdout and stderr.
-    - Only return `nil` when there is an error. If fetching the log is successful return a empty `[]byte{}` if there is no stderr or stdout data.
-- The `Container` interface must provide a `WaitUntilFinished(context.Context, time.Duration) error` function.
+- The `Container` interface must provide:
+    - A `GetLogs(ctx context.Context) ([]byte, []byte, err)` function to return stdout and stderr.
+        - Only return `nil` when there is an error. If fetching the log is successful return a empty `[]byte{}` if there is no stderr or stdout data.
+    - A `WaitUntilFinished(context.Context, time.Duration) error` function.
+    - A `Stop(ctx context.Context)` function.
+    - A `Start(ctx context.Context)` function.
 - The `Image` interface must provide a `Remove(ctx context.Context, options *dockeroptions.RemoveOptions) error` function.
 - The `Docker` interface must provide a `RunCommandInTemporaryContainer` function similar to the `RunCommandInTemporaryPod` in the `kubernetesutils` package.
     - This requires an additional test `Example_RunCommandInTemporaryContainer`.
@@ -55,3 +58,4 @@ This document extends the [constitution.md](/constitution.md).
     - If it does not exist you have to implement it.
     - In any case ensure the `Wait...` functions are tested in all available implementations.
 - The functions in `volume.go` must preserve UID, GID and access rights.
+- The `Example_StartAndStopContainer_test.go` must show the stop and start functionality of a container.

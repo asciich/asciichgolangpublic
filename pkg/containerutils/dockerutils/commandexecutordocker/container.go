@@ -584,6 +584,91 @@ func (c *CommandExecutorDockerContainer) GetLogs(ctx context.Context) ([]byte, [
 	return stdout, stderr, nil
 }
 
+func (c *CommandExecutorDockerContainer) Stop(ctx context.Context) (err error) {
+	containerName, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return err
+	}
+
+	isRunning, err := c.IsRunning(ctx)
+	if err != nil {
+		return err
+	}
+
+	if !isRunning {
+		logging.LogInfoByCtxf(ctx, "Container '%s' is not running. Skip stopping container.", containerName)
+		return nil
+	}
+
+	logging.LogInfoByCtxf(ctx, "Stop container '%s' started.", containerName)
+
+	_, err = commandExecutor.RunCommand(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{"docker", "stop", containerName},
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	logging.LogChangedByCtxf(ctx, "Stopped container '%s'.", containerName)
+
+	return nil
+}
+
+func (c *CommandExecutorDockerContainer) Start(ctx context.Context) (err error) {
+	containerName, err := c.GetName()
+	if err != nil {
+		return err
+	}
+
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return err
+	}
+
+	isRunning, err := c.IsRunning(ctx)
+	if err != nil {
+		return err
+	}
+
+	if isRunning {
+		logging.LogInfoByCtxf(ctx, "Container '%s' is already running. Skip starting container.", containerName)
+		return nil
+	}
+
+	exists, err := c.Exists(ctx)
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return tracederrors.TracedErrorf("Unable to start container '%s': container does not exist.", containerName)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Start container '%s' started.", containerName)
+
+	_, err = commandExecutor.RunCommand(
+		ctx,
+		&parameteroptions.RunCommandOptions{
+			Command: []string{"docker", "start", containerName},
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	logging.LogChangedByCtxf(ctx, "Started container '%s'.", containerName)
+
+	return nil
+}
+
 func (c *CommandExecutorDockerContainer) WaitUntilFinished(ctx context.Context, timeout time.Duration) error {
 	name, err := c.GetName()
 	if err != nil {
