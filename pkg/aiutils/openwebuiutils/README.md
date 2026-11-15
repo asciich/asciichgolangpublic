@@ -13,7 +13,7 @@ This package provides utilities for working with OpenWebUI, a web interface for 
 ### Starting OpenWebUI Container
 
 ```go
-import "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/aiutils/openwebuiutils"
+import "github.com/asciich/asciichgolangpublic/pkg/aiutils/openwebuiutils"
 
 ctx := context.Background()
 

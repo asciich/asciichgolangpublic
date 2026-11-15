@@ -103,7 +103,7 @@ import (
 	"fmt"
 	"log"
 
-	"gitlab.asciich.ch/tools/truststoreutils.git/pkg/nativetruststoreoo"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/tlsutils/truststoreutils/nativetruststoreoo"
 )
 
 func main() {
@@ -176,7 +176,7 @@ import (
 	"log"
 
 	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/containerutils/dockerutils/nativedocker"
-	"gitlab.asciich.ch/tools/truststoreutils.git/pkg/commandexecutortruststoreoo"
+	"gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/tlsutils/truststoreutils/commandexecutortruststoreoo"
 )
 
 func main() {

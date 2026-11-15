@@ -14,7 +14,7 @@ The `kubeconfigutils` package provides utilities for working with Kubernetes kub
 ## Usage
 
 ```go
-import "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/kubernetesutils/kubeconfigutils"
+import "github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubeconfigutils"
 ```
 
 ### Load a kubeconfig file
