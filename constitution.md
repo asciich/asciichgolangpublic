@@ -2,7 +2,9 @@
 
 ## Imports
 
-- The module path of this repository is `gitlab.asciich.ch/tools/asciichgolangpublic.git`. All packages of this repository must be imported using this module path:
+### Go source code
+
+- The module path of this repository is `gitlab.asciich.ch/tools/asciichgolangpublic.git`. All packages of this repository must be imported using this module path **in Go source files (`*.go`)**:
     - Use:
         ```golang
         import (
@@ -17,6 +19,33 @@
             "github.com/asciich/asciichgolangpublic/pkg/tracederrors"
         )
         ```
+
+### Public vs. private documentation
+
+This repository is also published to `github.com`. Which module path to reference therefore depends on whether the Markdown file is published:
+
+- **`README.md` (root and all sub directories) is public.** It is published to `github.com`:
+    - References to this repository (imports, `go install`, `go get`, links, ...) **must** use `github.com/asciich/asciichgolangpublic`.
+    - References to `gitlab.asciich.ch` **must not** appear in any `README.md`.
+- **`README_PRIVATE.md` is not part of the published repository.**
+    - References to `gitlab.asciich.ch` are allowed and expected here.
+    - Use it for information which only applies to the internal GitLab setup.
+- Do **not** "fix" or "unify" the module path in a `README.md` to match the Go source code. The different paths are intentional.
+    - Avoid changes like this in any `README.md`:
+        ```diff
+         Currently only `go install` is supported:
+         ```bash
+        -go install github.com/asciich/asciichgolangpublic/cmd/asciichgolangpublic@latest
+        +go install gitlab.asciich.ch/tools/asciichgolangpublic.git/cmd/asciichgolangpublic@latest
+         ```
+        ```
+    - This also applies to bulk operations such as search-and-replace, module path renames, refactorings, and automatic code or documentation generation. Review every changed `README.md` before committing.
+- When a Go code snippet is copied from a `.go` file into a `README.md`, replace the `gitlab.asciich.ch/tools/asciichgolangpublic.git` imports with `github.com/asciich/asciichgolangpublic`.
+- Before committing, verify that no public README references the private host. This command must return no matches:
+    ```bash
+    grep -rn "gitlab.asciich.ch" --include=README.md .
+    ```
+
 ## Function Naming
 
 ### `List...` vs. `List...Names`
@@ -657,6 +686,8 @@ pkg/<domain>/<packagename>/
 
 - All `Example_*_test.go` files are meant for documentation. They must all be listed and linked in the corresponding `README.md`. This is done as a bullet point list.
 - All package names mentioned in a markdown file must be a link to the README.md of the mentioned package.
+- Every `README.md` is public (see [Public vs. private documentation](#public-vs-private-documentation)). It must reference this repository using `github.com/asciich/asciichgolangpublic` and never `gitlab.asciich.ch`.
+- Content which is only relevant for the internal GitLab setup (e.g. internal URLs, GitLab CI details, `gitlab.asciich.ch` import paths) belongs in `README_PRIVATE.md`.
 
 
 ## Testing
