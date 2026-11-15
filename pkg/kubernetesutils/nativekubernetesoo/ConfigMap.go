@@ -4,7 +4,10 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/asciich/asciichgolangpublic/pkg/fileformats/yamlutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/nativekubernetes"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	v1 "k8s.io/api/core/v1"
 )
@@ -152,6 +155,57 @@ func (n *NativeConfigMap) GetData(ctx context.Context, fieldName string) (string
 	}
 
 	return nativekubernetes.GetConfigMapField(ctx, clientset, namespaceName, configMapName, fieldName)
+}
+
+func (n *NativeConfigMap) ReadYamlValueAsString(ctx context.Context, yamlPath string) (string, error) {
+	if yamlPath == "" {
+		return "", tracederrors.TracedErrorEmptyString("yamlPath")
+	}
+
+	namespace, err := n.GetNamespace()
+	if err != nil {
+		return "", err
+	}
+
+	namespaceName, err := namespace.GetName()
+	if err != nil {
+		return "", err
+	}
+
+	configMapName, err := n.GetName()
+	if err != nil {
+		return "", err
+	}
+
+	clusterName, err := namespace.GetClusterName()
+	if err != nil {
+		return "", err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Read yaml value '%s' from configmap '%s' in namespace '%s' of kubernetes cluster '%s' started.", yamlPath, configMapName, namespaceName, clusterName)
+
+	data, err := n.GetAllData(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	yamlString, err := kubernetesgeneric.ConfigMapDataToYamlString(configMapName, data)
+	if err != nil {
+		return "", err
+	}
+
+	value, err := yamlutils.RunYqQueryAginstYamlStringAsString(yamlString, yamlPath)
+	if err != nil {
+		return "", err
+	}
+
+	if value == "" || value == "null" {
+		return "", tracederrors.TracedErrorf("ConfigMap '%s' in namespace '%s' of kubernetes cluster '%s' has no value at yaml path '%s'.", configMapName, namespaceName, clusterName, yamlPath)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Read yaml value '%s' from configmap '%s' in namespace '%s' of kubernetes cluster '%s' finished.", yamlPath, configMapName, namespaceName, clusterName)
+
+	return value, nil
 }
 
 func IsConfigMapContentEqual(configMap1 map[string]string, configMap2 map[string]string) bool {

@@ -5,6 +5,8 @@ Work with kubernetes.
 ## Subpackages
 
 * [commandexecutorkubernetes](./commandexecutorkubernetes/README.md): Kubernetes operations using kubectl commands (works remotely via SSH).
+* [kubernetesgeneric](./kubernetesgeneric/README.md): Generic helpers to work with kubernetes, e.g. to parse kubernetes yaml.
+* [kubernetesinterfaces](./kubernetesinterfaces/README.md): Interfaces for the kubernetes objects and the KubernetesCluster itself.
 * [nativekubernetes](./nativekubernetes/README.md): Native Kubernetes operations using client-go library (local only).
 * [nativekubernetesoo](./nativekubernetesoo/README.md): Object-oriented wrapper around nativekubernetes.
 * [kubernetestestsshserver](./kubernetestestsshserver/README.md): Test SSH server for Kubernetes testing.
@@ -29,6 +31,7 @@ The implementation using exec to call `kubectl` or other commands is useful when
 * [Check ReplicaSet by name exists](Example_CheckReplicaSetByNameExists_test.go)
 * [Check Deployment by name exists](Example_CheckDeploymentByNameExists_test.go)
 * [Create and delete ConfigMap](Example_CreateAndDeleteConfigMap_test.go)
+* [Read yaml value from ConfigMap](ConfigMapYamlValue_test.go): Read a specific value from the ConfigMap data by yaml path.
 * [Create and delete CronJob](Example_CreateAndDeleteCronJob_test.go)
 * [Create and delete Deployment](Example_CreateAndDeleteDeployment_test.go)
 * [Create and delete Pod](Example_CreateAndDeletePod_test.go)
@@ -67,4 +70,8 @@ The implementation using exec to call `kubectl` or other commands is useful when
 
 ## Specifications
 
-For specifications see [kubernetesutils.spec.md](kubernetesutils.spec.md)
+For specifications see [kubernetesutils.spec.md](kubernetesutils.spec.md).
+
+To specify which functionality is implemented for each Kubernetes object use:
+    - [kubernetesinterfaces.spec.md](./kubernetesinterfaces/kubernetesinterfaces.spec.md)
+
