@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandoutput"
+	"github.com/asciich/asciichgolangpublic/pkg/fileformats/yamlutils"
+	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/kubernetesutils/kubernetesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -216,6 +218,57 @@ func (c *CommandExecutorConfigMap) GetData(ctx context.Context, fieldName string
 	if !ok {
 		return "", tracederrors.TracedErrorf("ConfigMap '%s' has no field '%s'", c.name, fieldName)
 	}
+
+	return value, nil
+}
+
+func (c *CommandExecutorConfigMap) ReadYamlValueAsString(ctx context.Context, yamlPath string) (string, error) {
+	if yamlPath == "" {
+		return "", tracederrors.TracedErrorEmptyString("yamlPath")
+	}
+
+	configMapName, err := c.GetName()
+	if err != nil {
+		return "", err
+	}
+
+	namespaceName, err := c.GetNamespaceName()
+	if err != nil {
+		return "", err
+	}
+
+	cluster, err := c.GetKubernetesCluster()
+	if err != nil {
+		return "", err
+	}
+
+	clusterName, err := cluster.GetName()
+	if err != nil {
+		return "", err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Read yaml value '%s' from configmap '%s' in namespace '%s' of kubernetes cluster '%s' started.", yamlPath, configMapName, namespaceName, clusterName)
+
+	data, err := c.GetAllData(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	yamlString, err := kubernetesgeneric.ConfigMapDataToYamlString(configMapName, data)
+	if err != nil {
+		return "", err
+	}
+
+	value, err := yamlutils.RunYqQueryAginstYamlStringAsString(yamlString, yamlPath)
+	if err != nil {
+		return "", err
+	}
+
+	if value == "" || value == "null" {
+		return "", tracederrors.TracedErrorf("ConfigMap '%s' in namespace '%s' of kubernetes cluster '%s' has no value at yaml path '%s'.", configMapName, namespaceName, clusterName, yamlPath)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Read yaml value '%s' from configmap '%s' in namespace '%s' of kubernetes cluster '%s' finished.", yamlPath, configMapName, namespaceName, clusterName)
 
 	return value, nil
 }
