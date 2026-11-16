@@ -1,5 +1,9 @@
 # ollamautils specifications
 
+This are the specifications for the [`ollamautils` package](README.md).
+
+This document extends the [constitution.md](/constitution.md).
+
 ## Implementation
 
 - To run Ollama:

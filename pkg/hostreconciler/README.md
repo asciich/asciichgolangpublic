@@ -187,3 +187,7 @@ Performed for the whole config before anything is executed or changed:
 - Removing `kvm.enable` or setting it to `false` does **not** disable `libvirtd`.
 - Removing the `kvm` section does **not** uninstall the KVM packages.
 - Removing a whole deployment directory does **not** stop its project. Run `docker compose -p <deployment> down` manually.
+
+## Specifications
+
+For specifications see [hostreconciler.spec.md](hostreconciler.spec.md)

@@ -1,5 +1,9 @@
 # commandexecutoruserutils specifications
 
+This are the specifications for the [`commandexecutoruserutils` package](README.md).
+
+This document extends the [constitution.md](/constitution.md).
+
 ## Implementation
 
 - `func IsRunningAsRoot(ctx context.Context, commandexecutorinterfaces.CommandExecutor) (bool, error)` can be used to check if running as root.

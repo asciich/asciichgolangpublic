@@ -24,7 +24,7 @@ Usage:
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
 
-			for _, name := range mustutils.Must(dockerutils.ListVolumesNames(ctx)) {
+			for _, name := range mustutils.Must(dockerutils.ListVolumeNames(ctx)) {
 				fmt.Println(name)
 			}
 		},

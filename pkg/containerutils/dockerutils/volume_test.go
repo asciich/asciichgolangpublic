@@ -76,13 +76,13 @@ func Test_BackupAndRestoreVolume_ConvenienceFunctions(t *testing.T) {
 	require.EqualValues(t, testOwner+":"+testMode, ownerAndMode, "UID, GID and access rights should be restored from backup")
 }
 
-func Test_ListVolumesNames(t *testing.T) {
+func Test_ListVolumeNames(t *testing.T) {
 	ctx := getCtx()
 
 	const volumeName = "test-list-volumes-names-volume"
 
 	t.Run("returns alphabetically sorted names", func(t *testing.T) {
-		volumeNames, err := dockerutils.ListVolumesNames(ctx)
+		volumeNames, err := dockerutils.ListVolumeNames(ctx)
 		require.NoError(t, err)
 		require.NotNil(t, volumeNames)
 
@@ -101,14 +101,14 @@ func Test_ListVolumesNames(t *testing.T) {
 			}
 		}()
 
-		volumeNames, err := dockerutils.ListVolumesNames(ctx)
+		volumeNames, err := dockerutils.ListVolumeNames(ctx)
 		require.NoError(t, err)
 		require.NotContains(t, volumeNames, volumeName)
 
 		err = runCommandToCreateVolume(ctx, volumeName)
 		require.NoError(t, err)
 
-		volumeNames, err = dockerutils.ListVolumesNames(ctx)
+		volumeNames, err = dockerutils.ListVolumeNames(ctx)
 		require.NoError(t, err)
 		require.Contains(t, volumeNames, volumeName)
 	})

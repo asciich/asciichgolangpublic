@@ -1,5 +1,9 @@
 # ollamaproxy specifications
 
+This are the specifications for the [`ollamaproxy` package](README.md).
+
+This document extends the parent specifications [ollamautils.spec.md](../ollamautils.spec.md).
+
 ## Implementation
 
 This is a proxy in front of Ollama:
