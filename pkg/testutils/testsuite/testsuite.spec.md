@@ -64,6 +64,27 @@ This document extends the [constitution.md](/constitution.md).
     - `cluster`: The Kubernetes cluster context name.
 - The test passes if the ConfigMap exists.
 
+##### `kubernetes_configmap_yamlvalue_equal`
+- Checks whether a value inside a YAML document stored in a Kubernetes ConfigMap equals an expected value.
+- Required fields:
+    - `resource_name`: The ConfigMap name.
+    - `namespace`: The namespace to look in.
+    - `cluster`: The Kubernetes cluster context name.
+    - `configmap_key`: The key within the ConfigMap `data` that holds the YAML document.
+    - `yaml_path`: The path to the value inside the YAML document, in dot notation. Array elements are addressed by index (e.g. `server.listeners[0].port`).
+    - `expected_value`: The value the YAML path is expected to resolve to.
+- The test passes if the ConfigMap exists, the key exists, its content is valid YAML, the path resolves to a value, and that value equals `expected_value`.
+- Comparison rules:
+    - Scalar values (string, number, boolean) are compared by their string representation. For example, `8080` equals `"8080"`.
+    - Maps and lists are compared structurally, so key order in maps is irrelevant.
+    - Leading and trailing whitespace is not trimmed.
+- The test fails with a distinct, descriptive error message for each of these cases:
+    - The ConfigMap does not exist.
+    - `configmap_key` is not present in the ConfigMap.
+    - The content of the key is not valid YAML.
+    - `yaml_path` does not resolve to a value.
+    - The actual value differs from `expected_value`. The message must contain both the expected and the actual value.
+
 ##### `kubernetes_secret_exists`
 - Checks whether a Kubernetes Secret exists in the specified namespace and cluster.
 - Required fields:

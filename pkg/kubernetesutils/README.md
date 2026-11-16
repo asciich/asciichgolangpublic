@@ -31,7 +31,7 @@ The implementation using exec to call `kubectl` or other commands is useful when
 * [Check ReplicaSet by name exists](Example_CheckReplicaSetByNameExists_test.go)
 * [Check Deployment by name exists](Example_CheckDeploymentByNameExists_test.go)
 * [Create and delete ConfigMap](Example_CreateAndDeleteConfigMap_test.go)
-* [Read yaml value from ConfigMap](ConfigMapYamlValue_test.go): Read a specific value from the ConfigMap data by yaml path.
+* [Read yaml value from ConfigMap](ConfigMapYamlValue_test.go): Read a specific value from the ConfigMap data by yaml path and check if it matches an expected value.
 * [Create and delete CronJob](Example_CreateAndDeleteCronJob_test.go)
 * [Create and delete Deployment](Example_CreateAndDeleteDeployment_test.go)
 * [Create and delete Pod](Example_CreateAndDeletePod_test.go)

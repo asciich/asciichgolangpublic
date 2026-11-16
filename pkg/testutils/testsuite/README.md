@@ -90,6 +90,19 @@ test_cases:
     runbook_links: "https://runbooks.example.com/kubernetes-configmaps"
     hints_for_investigation: "Run 'kubectl get configmaps -n default' to list ConfigMaps."
 
+  # Kubernetes ConfigMap yaml value equal test - check a value inside a yaml document stored in a ConfigMap
+  - name: "Test configmap yaml value equals expected value"
+    test_type: kubernetes_configmap_yamlvalue_equal
+    resource_name: my-configmap
+    namespace: default
+    cluster: kind-asciichgolangpublic
+    configmap_key: values.yaml
+    yaml_path: server.listeners[0].port
+    expected_value: 8080
+    description: "Check that the first listener port inside the yaml document equals the expected value"
+    runbook_links: "https://runbooks.example.com/kubernetes-configmaps"
+    hints_for_investigation: "Run 'kubectl get configmap my-configmap -n default -o yaml' to check the yaml document in key 'values.yaml'."
+
   # Kubernetes Secret exists test
   - name: "Test secret exists"
     test_type: kubernetes_secret_exists
@@ -145,6 +158,7 @@ The following example test files demonstrate the usage of the testsuite package:
 - `Example_KubernetesPodExists_test.go` - Kubernetes pod existence tests
 - `Example_KubernetesReplicaSetExists_test.go` - Kubernetes ReplicaSet existence tests
 - `Example_KubernetesConfigMapExists_test.go` - Kubernetes ConfigMap existence tests
+- `Example_KubernetesConfigMapYamlValueEqual_test.go` - Kubernetes ConfigMap yaml value equality tests
 - `Example_KubernetesSecretExists_test.go` - Kubernetes Secret existence tests
 - `Example_KubernetesDeploymentExists_test.go` - Kubernetes Deployment existence tests
 - `Example_KubernetesCronJobExists_test.go` - Kubernetes CronJob existence tests

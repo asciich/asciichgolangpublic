@@ -14,6 +14,7 @@ func LoadExecuctors() ([]testutilsinterfaces.TestCaseExecutor, error) {
 		&TestCaseExecutorKubernetesPodExists{},
 		&TestCaseExecutorKubernetesReplicaSetExists{},
 		&TestCaseExecutorKubernetesConfigMapExists{},
+		&TestCaseExecutorKubernetesConfigMapYamlValueEqual{},
 		&TestCaseExecutorKubernetesSecretExists{},
 		&TestCaseExecutorKubernetesDeploymentExists{},
 		&TestCaseExecutorKubernetesCronJobExists{},

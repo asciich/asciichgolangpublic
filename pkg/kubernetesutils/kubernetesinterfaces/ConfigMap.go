@@ -8,4 +8,5 @@ type ConfigMap interface {
 	GetAllLabels(ctx context.Context) (map[string]string, error)
 	GetData(ctx context.Context, fieldName string) (string, error)
 	ReadYamlValueAsString(ctx context.Context, yamlPath string) (string, error)
+	IsYamlValueAsStringEqual(ctx context.Context, yamlPath string, expectedValue string) (bool, error)
 }
