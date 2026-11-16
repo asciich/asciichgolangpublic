@@ -208,6 +208,15 @@ func (n *NativeConfigMap) ReadYamlValueAsString(ctx context.Context, yamlPath st
 	return value, nil
 }
 
+func (n *NativeConfigMap) IsYamlValueAsStringEqual(ctx context.Context, yamlPath string, expectedValue string) (bool, error) {
+	currentValue, err := n.ReadYamlValueAsString(ctx, yamlPath)
+	if err != nil {
+		return false, err
+	}
+
+	return currentValue == expectedValue, nil
+}
+
 func IsConfigMapContentEqual(configMap1 map[string]string, configMap2 map[string]string) bool {
 	if len(configMap1) <= 0 && len(configMap2) <= 0 {
 		return true

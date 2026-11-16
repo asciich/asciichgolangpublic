@@ -273,6 +273,15 @@ func (c *CommandExecutorConfigMap) ReadYamlValueAsString(ctx context.Context, ya
 	return value, nil
 }
 
+func (c *CommandExecutorConfigMap) IsYamlValueAsStringEqual(ctx context.Context, yamlPath string, expectedValue string) (bool, error) {
+	currentValue, err := c.ReadYamlValueAsString(ctx, yamlPath)
+	if err != nil {
+		return false, err
+	}
+
+	return currentValue == expectedValue, nil
+}
+
 func (c *CommandExecutorConfigMap) GetNamespaceName() (string, error) {
 	namespace, err := c.GetNamespace()
 	if err != nil {

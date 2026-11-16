@@ -13,6 +13,9 @@ This document extends the parent specifications [kubernetesutils.spec.md](../kub
     - Every entry of the ConfigMap data becomes a top level yaml field named like the entry key. Data entries containing valid yaml are embedded as yaml, all other entries as plain string.
     - Since the entry keys become yaml field names, keys containing dots must be quoted in the yaml path: `."values.yaml".image.tag`.
     - An error is returned if the yaml path does not match a value in the ConfigMap.
+- The `IsYamlValueAsStringEqual(ctx context.Context, yamlPath string, expectedValue string) (bool, error)` can be used to check if a specific string value matches the `expectedValue`.
+    - It reads the value by [ReadYamlValueAsString](#configmap) and compares it to the `expectedValue`.
+    - Like `ReadYamlValueAsString` an error is returned if the yaml path does not match a value in the ConfigMap.
 
 ## Testing
 

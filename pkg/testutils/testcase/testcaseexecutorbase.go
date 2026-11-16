@@ -105,6 +105,33 @@ func (t *TestCaseExecutorBase) GetSecretKey() (string, error) {
 	return testCase.GetSecretKey()
 }
 
+func (t *TestCaseExecutorBase) GetConfigMapKey() (string, error) {
+	testCase, err := t.GetDataAsTestCase()
+	if err != nil {
+		return "", err
+	}
+
+	return testCase.GetConfigMapKey()
+}
+
+func (t *TestCaseExecutorBase) GetYamlPath() (string, error) {
+	testCase, err := t.GetDataAsTestCase()
+	if err != nil {
+		return "", err
+	}
+
+	return testCase.GetYamlPath()
+}
+
+func (t *TestCaseExecutorBase) GetExpectedValue() (any, error) {
+	testCase, err := t.GetDataAsTestCase()
+	if err != nil {
+		return nil, err
+	}
+
+	return testCase.GetExpectedValue()
+}
+
 func (t *TestCaseExecutorBase) GetTargetHost() (string, error) {
 	testCase, err := t.GetDataAsTestCase()
 	if err != nil {

@@ -21,6 +21,9 @@ type TestCase struct {
 	Cluster               string `yaml:"cluster,omitempty"`
 	ResourceName          string `yaml:"resource_name,omitempty"`
 	SecretKey             string `yaml:"secret_key" json:"secret_key"`
+	ConfigMapKey          string `yaml:"configmap_key" json:"configmap_key"`
+	YamlPath              string `yaml:"yaml_path" json:"yaml_path"`
+	ExpectedValue         any    `yaml:"expected_value" json:"expected_value"`
 	TargetHost            string `yaml:"target_host" json:"target_host"`
 	TargetUser            string `yaml:"target_user" json:"target_user"`
 	TargetPort            int    `yaml:"target_port" json:"target_port"`
@@ -159,6 +162,27 @@ func (t *TestCase) GetSecretKey() (string, error) {
 		return "", tracederrors.TracedErrorEmptyString("SecretKey")
 	}
 	return t.SecretKey, nil
+}
+
+func (t *TestCase) GetConfigMapKey() (string, error) {
+	if t.ConfigMapKey == "" {
+		return "", tracederrors.TracedErrorEmptyString("configmap_key")
+	}
+	return t.ConfigMapKey, nil
+}
+
+func (t *TestCase) GetYamlPath() (string, error) {
+	if t.YamlPath == "" {
+		return "", tracederrors.TracedErrorEmptyString("yaml_path")
+	}
+	return t.YamlPath, nil
+}
+
+func (t *TestCase) GetExpectedValue() (any, error) {
+	if t.ExpectedValue == nil {
+		return nil, tracederrors.TracedError("expected_value not set")
+	}
+	return t.ExpectedValue, nil
 }
 
 func (t *TestCase) GetTargetHost() (string, error) {

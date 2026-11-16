@@ -58,6 +58,29 @@ func Test_ReadYamlValueAsStringFromConfigMap(t *testing.T) {
 					_, err := configMap.ReadYamlValueAsString(ctx, ".not.existing.path")
 					require.Error(t, err)
 				})
+
+				t.Run("yaml value equals expected value", func(t *testing.T) {
+					isEqual, err := configMap.IsYamlValueAsStringEqual(ctx, ".\"file.txt\"", "hello_world")
+					require.NoError(t, err)
+					require.True(t, isEqual)
+				})
+
+				t.Run("yaml value differs from expected value", func(t *testing.T) {
+					isEqual, err := configMap.IsYamlValueAsStringEqual(ctx, ".\"file.txt\"", "other_value")
+					require.NoError(t, err)
+					require.False(t, isEqual)
+				})
+
+				t.Run("yaml value in embedded yaml equals expected value", func(t *testing.T) {
+					isEqual, err := configMap.IsYamlValueAsStringEqual(ctx, ".\"values.yaml\".image.tag", "v1.2.3")
+					require.NoError(t, err)
+					require.True(t, isEqual)
+				})
+
+				t.Run("errors on unknown yamlPath", func(t *testing.T) {
+					_, err := configMap.IsYamlValueAsStringEqual(ctx, ".not.existing.path", "hello_world")
+					require.Error(t, err)
+				})
 			},
 		)
 	}
