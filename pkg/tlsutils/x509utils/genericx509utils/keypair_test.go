@@ -303,11 +303,11 @@ func Test_X509CertKeyPair_GetPrivateKeyAsPEMString(t *testing.T) {
 	})
 }
 
-func Test_X509CertKeyPair_IsKeyMatchingCert(t *testing.T) {
+func Test_X509CertKeyPair_IsKeyMatchingCertificate(t *testing.T) {
 	t.Run("cert not set", func(t *testing.T) {
 		pair := loadKeyOnly(t, "/C=CH/O=TestOrg/CN=TestCert")
 
-		isMatching, err := pair.IsKeyMatchingCert()
+		isMatching, err := pair.IsKeyMatchingCertificate()
 		require.Error(t, err)
 		require.False(t, isMatching)
 	})
@@ -315,7 +315,7 @@ func Test_X509CertKeyPair_IsKeyMatchingCert(t *testing.T) {
 	t.Run("key not set", func(t *testing.T) {
 		pair := loadCertOnly(t, "/C=CH/O=TestOrg/CN=TestCert")
 
-		isMatching, err := pair.IsKeyMatchingCert()
+		isMatching, err := pair.IsKeyMatchingCertificate()
 		require.Error(t, err)
 		require.False(t, isMatching)
 	})
@@ -323,7 +323,7 @@ func Test_X509CertKeyPair_IsKeyMatchingCert(t *testing.T) {
 	t.Run("matching cert and key returns true", func(t *testing.T) {
 		pair := loadCertAndKeyPair(t, "/C=CH/O=MatchOrg/CN=MatchCert")
 
-		isMatching, err := pair.IsKeyMatchingCert()
+		isMatching, err := pair.IsKeyMatchingCertificate()
 		require.NoError(t, err)
 		require.True(t, isMatching)
 	})
@@ -331,7 +331,7 @@ func Test_X509CertKeyPair_IsKeyMatchingCert(t *testing.T) {
 	t.Run("mismatched cert and key returns false", func(t *testing.T) {
 		pair := loadMismatchedCertAndKeyPair(t)
 
-		isMatching, err := pair.IsKeyMatchingCert()
+		isMatching, err := pair.IsKeyMatchingCertificate()
 		require.NoError(t, err)
 		require.False(t, isMatching)
 	})

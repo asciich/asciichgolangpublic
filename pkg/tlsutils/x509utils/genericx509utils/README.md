@@ -19,7 +19,7 @@ Holds a private key and its corresponding certificate.
 - `GetPrivateKeyAsPEMString() (string, error)` - Returns the private key as a PEM-encoded string
 - `GetPrivateKey() (crypto.PrivateKey, error)` - Returns the private key
 - `GetPublicKey() (crypto.PublicKey, error)` - Extracts the public key from the private key
-- `IsKeyMatchingCert() (bool, error)` - Checks if the private key matches the certificate
+- `IsKeyMatchingCertificate() (bool, error)` - Checks if the private key matches the certificate
 - `CheckKeyMatchingCertificate() error` - Returns an error if the key doesn't match the certificate
 - `WriteCertificatePemToFile(ctx context.Context, toWrite filesinterfaces.File) error` - Writes the certificate PEM to a file
 - `WritePrivateKeyToFile(ctx context.Context, toWrite filesinterfaces.File) error` - Writes the private key PEM to a file

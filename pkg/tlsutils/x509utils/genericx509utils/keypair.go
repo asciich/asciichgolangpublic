@@ -63,7 +63,7 @@ func (x *X509CertKeyPair) GetPrivateKey() (crypto.PrivateKey, error) {
 	return x.Key, nil
 }
 
-func (x *X509CertKeyPair) IsKeyMatchingCert() (bool, error) {
+func (x *X509CertKeyPair) IsKeyMatchingCertificate() (bool, error) {
 	cert, err := x.GetX509Certificate()
 	if err != nil {
 		return false, err
@@ -83,7 +83,7 @@ func (x *X509CertKeyPair) IsKeyMatchingCert() (bool, error) {
 }
 
 func (x *X509CertKeyPair) CheckKeyMatchingCertificate() error {
-	isMatching, err := x.IsKeyMatchingCert()
+	isMatching, err := x.IsKeyMatchingCertificate()
 	if err != nil {
 		return err
 	}

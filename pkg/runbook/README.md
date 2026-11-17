@@ -12,4 +12,4 @@ A `runbook` (also called workflow in other tools) provides an easy approach to s
 
 ## Specifications
 
-For specifications see [runbook.spec.md](runbook.spec.md) and [constitution.md](/constitution.md).
+For specifications see [runbook.spec.md](runbook.spec.md)

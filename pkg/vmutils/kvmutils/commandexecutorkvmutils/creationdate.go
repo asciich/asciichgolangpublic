@@ -33,7 +33,7 @@ type domainDiskXml struct {
 // getCommandExecutor returns the command executor to use for file operations on
 // the hypervisor host: the local bash executor when running on localhost, the
 // configured host otherwise. This mirrors the selection done in RunKvmCommand.
-func (k *CommandExecutrKvmHypervisor) getCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor, err error) {
+func (k *CommandExecutorKvmHypervisor) getCommandExecutor() (commandExecutor commandexecutorinterfaces.CommandExecutor, err error) {
 	if k.useLocalhost {
 		return commandexecutorbashoo.Bash(), nil
 	}
@@ -48,7 +48,7 @@ func (k *CommandExecutrKvmHypervisor) getCommandExecutor() (commandExecutor comm
 
 // getVmDiskImagePath returns the path of the primary disk image backing the
 // given VM by parsing its domain XML.
-func (k *CommandExecutrKvmHypervisor) getVmDiskImagePath(ctx context.Context, vmName string) (diskImagePath string, err error) {
+func (k *CommandExecutorKvmHypervisor) getVmDiskImagePath(ctx context.Context, vmName string) (diskImagePath string, err error) {
 	if vmName == "" {
 		return "", tracederrors.TracedErrorEmptyString("vmName")
 	}
@@ -85,7 +85,7 @@ func (k *CommandExecutrKvmHypervisor) getVmDiskImagePath(ctx context.Context, vm
 // date of its primary disk image file. libvirt itself does not store a VM
 // creation timestamp, so the disk image's birth date is used as the best
 // available proxy.
-func (k *CommandExecutrKvmHypervisor) GetVmCreationDate(ctx context.Context, vmName string) (creationDate time.Time, err error) {
+func (k *CommandExecutorKvmHypervisor) GetVmCreationDate(ctx context.Context, vmName string) (creationDate time.Time, err error) {
 	if vmName == "" {
 		return time.Time{}, tracederrors.TracedErrorEmptyString("vmName")
 	}
@@ -113,7 +113,7 @@ func (k *CommandExecutrKvmHypervisor) GetVmCreationDate(ctx context.Context, vmN
 // GetVmCreationDateRFC3339 returns the creation date of the VM as an RFC3339
 // formatted string. See GetVmCreationDate for details on how the date is
 // derived.
-func (k *CommandExecutrKvmHypervisor) GetVmCreationDateRFC3339(ctx context.Context, vmName string) (creationDate string, err error) {
+func (k *CommandExecutorKvmHypervisor) GetVmCreationDateRFC3339(ctx context.Context, vmName string) (creationDate string, err error) {
 	if vmName == "" {
 		return "", tracederrors.TracedErrorEmptyString("vmName")
 	}

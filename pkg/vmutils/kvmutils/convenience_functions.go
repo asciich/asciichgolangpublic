@@ -31,7 +31,7 @@ func GetKvmHypervisorByHost(host hostsutilsinterfaces.Host) (kvmutilsinterfaces.
 		return nil, tracederrors.TracedError("host is nil")
 	}
 
-	kvmHypervisor := commandexecutorkvmutils.NewKVMHypervisor()
+	kvmHypervisor := commandexecutorkvmutils.NewKvmHypervisor()
 	err := kvmHypervisor.SetHost(host)
 	if err != nil {
 		return nil, err

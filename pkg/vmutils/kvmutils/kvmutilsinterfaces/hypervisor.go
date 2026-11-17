@@ -14,7 +14,7 @@ type Hypervisor interface {
 
 	DeleteIpDhcpRangeInNetwork(ctx context.Context, networkName string, startIp string, endIp string) error
 	DeleteVolumeByName(ctx context.Context, storagePoolName string, volumeName string) error
-	DeleteVm(ctx context.Context, options *kvmutilsoptions.KvmRemoveVmOptions) error
+	DeleteVm(ctx context.Context, options *kvmutilsoptions.KvmDeleteVmOptions) error
 
 	GetDomainXmlAsString(ctx context.Context, vmName string) (domainXml string, err error)
 

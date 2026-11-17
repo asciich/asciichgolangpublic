@@ -23,14 +23,14 @@ func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions
 	}
 
 	powerShellCommand := []string{
-		"powershell",
+		"powershell.exe",
 		joinedCommand,
 	}
 
 	if optionsToUse.RunAsRoot {
 		joined, err := shelllinehandler.Join([]string{
 			"Start-Process",
-			"powershell",
+			"powershell.exe",
 			"-Verb",
 			"runAs",
 			joinedCommand,
@@ -40,7 +40,7 @@ func RunCommand(ctx context.Context, options *parameteroptions.RunCommandOptions
 		}
 
 		powerShellCommand = []string{
-			"powershell",
+			"powershell.exe",
 			joined,
 		}
 	}

@@ -1,4 +1,4 @@
-# Openhandscmd specifications
+# openhandscmd specifications
 
 This are the specifications for the [`openhandscmd` package](README.md).
 

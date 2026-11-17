@@ -2,7 +2,7 @@
 
 This are the specifications for the [`objectscmd` package](README.md).
 
-This document extends the [constitution.md](/constitution.md).
+This document extends the parent specifications [defaultclicommands.spec.md](../../../../defaultclicommands.spec.md).
 
 ## Implementation
 

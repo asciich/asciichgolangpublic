@@ -373,7 +373,7 @@ func (k *NativeKvmHypervisor) VmByNameExists(ctx context.Context, vmName string)
 	return exists, nil
 }
 
-func (k *NativeKvmHypervisor) DeleteVm(ctx context.Context, removeOptions *kvmutilsoptions.KvmRemoveVmOptions) (err error) {
+func (k *NativeKvmHypervisor) DeleteVm(ctx context.Context, removeOptions *kvmutilsoptions.KvmDeleteVmOptions) (err error) {
 	if removeOptions == nil {
 		return tracederrors.TracedError("removeOptions is nil")
 	}

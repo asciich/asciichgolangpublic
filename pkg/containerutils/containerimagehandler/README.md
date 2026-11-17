@@ -7,3 +7,7 @@ This makes the handling fast and available in buildsystems where no Docker or ot
 
 * [Add and delete files in a container image archive file](./example_addanddeletefilesinarchive_test.go)
 * [Download a container image as archive file](./example_downloadimageasarchive_test.go)
+
+## Specifications
+
+For specifications see [containerimagehandler.spec.md](containerimagehandler.spec.md)

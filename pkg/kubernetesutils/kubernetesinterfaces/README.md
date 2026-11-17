@@ -11,4 +11,4 @@ This package is part of the [`kubernetesutils`](../README.md) package hierarchy.
 
 ## Specifications
 
-For specifications see [kubernetesinterfaces.spec.md](kubernetesinterfaces.spec.md).
+For specifications see [kubernetesinterfaces.spec.md](kubernetesinterfaces.spec.md)

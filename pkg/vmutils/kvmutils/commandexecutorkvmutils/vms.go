@@ -12,7 +12,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/vmutils/kvmutils/kvmutilsoptions"
 )
 
-func (k *CommandExecutrKvmHypervisor) CreateVm(ctx context.Context, createOptions *kvmutilsoptions.KvmCreateVmOptions) (createdVm kvmutilsinterfaces.VM, err error) {
+func (k *CommandExecutorKvmHypervisor) CreateVm(ctx context.Context, createOptions *kvmutilsoptions.KvmCreateVmOptions) (createdVm kvmutilsinterfaces.VM, err error) {
 	if createOptions == nil {
 		return nil, tracederrors.TracedError("createOptions is nil")
 	}

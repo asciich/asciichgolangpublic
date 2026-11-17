@@ -36,4 +36,4 @@ bash -c "cd $(git rev-parse --show-toplevel) && go test -v ./pkg/commandexecutor
 
 ## Specifications
 
-For specifications see [commandexecutor.spec.md](commandexecutor.spec.md) and [constitution.md](/constitution.md).
+For specifications see [commandexecutor.spec.md](commandexecutor.spec.md)
