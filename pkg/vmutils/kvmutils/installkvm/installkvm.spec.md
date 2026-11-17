@@ -1,11 +1,8 @@
 # installkvm specifications
 
-## Implementation
+This are the specifications for the [`installkvm` package](README.md).
 
-- The `InstallPackages(ctx context.Context)` is used to install all needed KVM related system packages.
-- The `Start(ctx context.Context)` Ensures all needed packages are installed and `libvirtd` is running:
-
-# installkvm specifications
+This document extends the parent specifications [kvmutils.spec.md](../kvmutils.spec.md).
 
 ## Implementation
 

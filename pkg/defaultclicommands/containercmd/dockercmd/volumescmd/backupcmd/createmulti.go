@@ -35,7 +35,7 @@ Usage example:
 			archivePath := mustutils.Must(cmd.Flags().GetString("archive"))
 
 			if all {
-				volumeNames = mustutils.Must(dockerutils.ListVolumesNames(ctx))
+				volumeNames = mustutils.Must(dockerutils.ListVolumeNames(ctx))
 			}
 
 			mustutils.Must0(dockerutils.BackupVolumes(ctx, volumeNames, archivePath))

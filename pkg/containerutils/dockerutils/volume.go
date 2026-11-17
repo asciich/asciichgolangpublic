@@ -44,7 +44,7 @@ func RestoreVolumes(ctx context.Context, archivePath string) error {
 }
 
 // List docker volumes on localhost.
-func ListVolumesNames(ctx context.Context) ([]string, error) {
+func ListVolumeNames(ctx context.Context) ([]string, error) {
 	docker, err := GetDockerOnLocalHost()
 	if err != nil {
 		return nil, err
