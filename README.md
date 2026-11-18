@@ -38,6 +38,9 @@ The focus is on ease of use and developer speed instead of algorithm speed and c
 	* [virtualenvutils](pkg/pythonutils/virtualenvutils/): Work with Python's `virtualenv`.
 * [runbook](pkg/runbook/): An easy way to define runbooks (also called workflows in other tools) to automatize tasks step by step.
 * [sshutils](pkg/sshutils/): SSH utilities for key generation, management, and client operations.
+    * Test SSH server implementations for testing SSH-related functionality:
+        * [testsshserver](pkg/sshutils/testsshserver/): Test SSH server running on the local machine.
+        * [kubernetestestsshserver](pkg/kubernetesutils/kubernetestestsshserver/): Test SSH server running as pod inside a Kubernetes cluster.
 * [storage](pkg/storage/):
 	* [S3 storage](pkg/storage/s3/)
 * [testutils](pkg/testutils/README.md):
