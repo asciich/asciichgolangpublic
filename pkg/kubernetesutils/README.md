@@ -70,7 +70,7 @@ The implementation using exec to call `kubectl` or other commands is useful when
 
 ## Specifications
 
-For specifications see [kubernetesutils.spec.md](kubernetesutils.spec.md).
+For specifications see [kubernetesutils.spec.md](kubernetesutils.spec.md)
 
 To specify which functionality is implemented for each Kubernetes object use:
     - [kubernetesinterfaces.spec.md](./kubernetesinterfaces/kubernetesinterfaces.spec.md)

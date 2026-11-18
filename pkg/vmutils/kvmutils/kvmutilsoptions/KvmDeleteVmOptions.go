@@ -4,22 +4,22 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-type KvmRemoveVmOptions struct {
+type KvmDeleteVmOptions struct {
 	VmName              string
 	RemoveVolumes       bool
 	VolumeNamesToRemove []string
 }
 
-func NewKvmRemoveVmOptions() (k *KvmRemoveVmOptions) {
-	return new(KvmRemoveVmOptions)
+func NewKvmDeleteVmOptions() (k *KvmDeleteVmOptions) {
+	return new(KvmDeleteVmOptions)
 }
 
-func (k *KvmRemoveVmOptions) GetRemoveVolumes() (removeVolumes bool, err error) {
+func (k *KvmDeleteVmOptions) GetRemoveVolumes() (removeVolumes bool, err error) {
 
 	return k.RemoveVolumes, nil
 }
 
-func (k *KvmRemoveVmOptions) GetVmName() (vmName string, err error) {
+func (k *KvmDeleteVmOptions) GetVmName() (vmName string, err error) {
 	if k.VmName == "" {
 		return "", tracederrors.TracedErrorf("VmName not set")
 	}
@@ -27,7 +27,7 @@ func (k *KvmRemoveVmOptions) GetVmName() (vmName string, err error) {
 	return k.VmName, nil
 }
 
-func (k *KvmRemoveVmOptions) GetVolumeNamesToRemove() (volumeNamesToRemove []string, err error) {
+func (k *KvmDeleteVmOptions) GetVolumeNamesToRemove() (volumeNamesToRemove []string, err error) {
 	if k.VolumeNamesToRemove == nil {
 		return nil, tracederrors.TracedErrorf("VolumeNamesToRemove not set")
 	}
@@ -39,13 +39,13 @@ func (k *KvmRemoveVmOptions) GetVolumeNamesToRemove() (volumeNamesToRemove []str
 	return k.VolumeNamesToRemove, nil
 }
 
-func (k *KvmRemoveVmOptions) SetRemoveVolumes(removeVolumes bool) (err error) {
+func (k *KvmDeleteVmOptions) SetRemoveVolumes(removeVolumes bool) (err error) {
 	k.RemoveVolumes = removeVolumes
 
 	return nil
 }
 
-func (k *KvmRemoveVmOptions) SetVmName(vmName string) (err error) {
+func (k *KvmDeleteVmOptions) SetVmName(vmName string) (err error) {
 	if vmName == "" {
 		return tracederrors.TracedErrorf("vmName is empty string")
 	}
@@ -55,7 +55,7 @@ func (k *KvmRemoveVmOptions) SetVmName(vmName string) (err error) {
 	return nil
 }
 
-func (k *KvmRemoveVmOptions) SetVolumeNamesToRemove(volumeNamesToRemove []string) (err error) {
+func (k *KvmDeleteVmOptions) SetVolumeNamesToRemove(volumeNamesToRemove []string) (err error) {
 	if volumeNamesToRemove == nil {
 		return tracederrors.TracedErrorf("volumeNamesToRemove is nil")
 	}

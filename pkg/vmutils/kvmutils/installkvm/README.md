@@ -14,4 +14,4 @@ Uses [packagemanager](../../../packagemanager/README.md) to install the packages
 
 ## Specifications
 
-For specifications see [installkvm.spec.md](./installkvm.spec.md).
+For specifications see [installkvm.spec.md](installkvm.spec.md)

@@ -9,7 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func (k *CommandExecutrKvmHypervisor) IsVmPersistent(ctx context.Context, vmName string) (isPersistent bool, err error) {
+func (k *CommandExecutorKvmHypervisor) IsVmPersistent(ctx context.Context, vmName string) (isPersistent bool, err error) {
 	if vmName == "" {
 		return false, tracederrors.TracedErrorEmptyString("vmName")
 	}

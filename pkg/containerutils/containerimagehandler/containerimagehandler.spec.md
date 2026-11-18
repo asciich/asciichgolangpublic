@@ -1,5 +1,9 @@
 # containerimagehandler specifications
 
+This are the specifications for the [`containerimagehandler` package](README.md).
+
+This document extends the [constitution.md](/constitution.md).
+
 ## Implementation:
 
 - The `func PushImage(ctx context.Context, image v1.Image, nameAndTag string, options *containeroptions.PushImageOptions) (string, error)` pushes an image to a repository.

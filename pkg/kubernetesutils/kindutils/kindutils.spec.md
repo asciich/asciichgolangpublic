@@ -2,7 +2,7 @@
 
 This are the specifications for the [`kindutils` package](README.md).
         
-This document extends the [constitution.md](/constitution.md).
+This document extends the parent specifications [kubernetesutils.spec.md](../kubernetesutils.spec.md).
 
 ## Implementation
 

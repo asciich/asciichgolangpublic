@@ -2,7 +2,7 @@
 
 This are the specifications for the [`volumescmd` package](README.md).
 
-This document extends the parent specifications [defaultclicommands.spec.md](../../defaultclicommands.spec.md).
+This document extends the parent specifications [defaultclicommands.spec.md](../../../defaultclicommands.spec.md).
 
 ## Implementation
 

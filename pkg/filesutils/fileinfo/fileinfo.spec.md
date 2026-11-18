@@ -2,7 +2,7 @@
 
 This are the specifications for the [`fileinfo` package](README.md).
 
-This document extends the [constitution.md](/constitution.md).
+This document extends the parent specifications [filesutils.spec.md](../filesutils.spec.md).
 
 ## Testing
 

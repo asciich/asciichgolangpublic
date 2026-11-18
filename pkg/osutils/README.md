@@ -15,4 +15,4 @@ OperatingSystem related implementations.
 
 ## Specifications
 
-For specifications see [osutils.spec.md](osutils.spec.md) and [constitution.md](/constitution.md).
+For specifications see [osutils.spec.md](osutils.spec.md)

@@ -1,4 +1,4 @@
-# Kubernetesinterfaces specifications
+# kubernetesinterfaces specifications
 
 This are the specifications for the [`kubernetesinterfaces` package](README.md).
 

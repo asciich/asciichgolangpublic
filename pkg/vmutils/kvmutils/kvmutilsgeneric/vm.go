@@ -47,7 +47,7 @@ func (k *KvmVm) Delete(ctx context.Context) error {
 
 	return hypervisor.DeleteVm(
 		ctx,
-		&kvmutilsoptions.KvmRemoveVmOptions{
+		&kvmutilsoptions.KvmDeleteVmOptions{
 			VmName: name,
 		},
 	)
