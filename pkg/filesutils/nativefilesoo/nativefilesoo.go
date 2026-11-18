@@ -2,7 +2,6 @@ package nativefilesoo
 
 import (
 	"context"
-	"os"
 	"path/filepath"
 
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
@@ -225,60 +224,26 @@ func (d *Directory) ListFiles(ctx context.Context, listFileOptions *parameteropt
 
 	return files, nil
 }
+
 func (d *Directory) ListSubDirectories(ctx context.Context, options *parameteroptions.ListDirectoryOptions) (subDirectories []filesinterfaces.Directory, err error) {
 	path, err := d.GetPath()
 	if err != nil {
 		return nil, err
 	}
 
-	if options == nil {
-		options = &parameteroptions.ListDirectoryOptions{}
+	subDirectoryPaths, err := nativefiles.ListSubDirectories(ctx, path, options)
+	if err != nil {
+		return nil, err
 	}
 
-	subDirectories = make([]filesinterfaces.Directory, 0)
-
-	if options.Recursive {
-		err = filepath.WalkDir(path, func(entryPath string, entry os.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-
-			if !entry.IsDir() {
-				return nil
-			}
-
-			// Skip the root directory itself
-			if entryPath == path {
-				return nil
-			}
-
-			subDir, err := NewDirectoryByPath(entryPath)
-			if err != nil {
-				return err
-			}
-
-			subDirectories = append(subDirectories, subDir)
-			return nil
-		})
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		entries, err := os.ReadDir(path)
+	subDirectories = make([]filesinterfaces.Directory, 0, len(subDirectoryPaths))
+	for _, subDirectoryPath := range subDirectoryPaths {
+		subDirectory, err := NewDirectoryByPath(subDirectoryPath)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, entry := range entries {
-			if entry.IsDir() {
-				entryPath := filepath.Join(path, entry.Name())
-				subDir, err := NewDirectoryByPath(entryPath)
-				if err != nil {
-					return nil, err
-				}
-				subDirectories = append(subDirectories, subDir)
-			}
-		}
+		subDirectories = append(subDirectories, subDirectory)
 	}
 
 	return subDirectories, nil
