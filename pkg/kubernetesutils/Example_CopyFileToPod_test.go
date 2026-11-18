@@ -21,6 +21,10 @@ func TestCopyFileToPod_nativeKubernetes(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.WithVerbose(context.TODO())
 
+	// Ensure a local kind cluster is available for testing:
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
+	require.NoError(t, err)
+
 	// Get the Kubernetes implementation
 	kubernetes, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+kindutils.SharedClusterName)
 	require.NoError(t, err)
@@ -80,6 +84,10 @@ func TestCopyFileToPod_nativeKubernetes(t *testing.T) {
 func TestCopyFileToPod_commandExecutor(t *testing.T) {
 	ctx := contextutils.WithVerbose(context.TODO())
 
+	// Ensure a local kind cluster is available for testing:
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
+	require.NoError(t, err)
+
 	// Get the Kubernetes implementation
 	kubernetes, err := commandexecutorkubernetes.GetClusterByName("kind-" + kindutils.SharedClusterName)
 	require.NoError(t, err)
@@ -133,6 +141,10 @@ func TestCopyFileToPod_commandExecutor(t *testing.T) {
 // ExampleCopyFileToPod_nestedDirectory demonstrates how to copy a file to a nested directory in a container.
 func TestCopyFileToPod_nestedDirectory(t *testing.T) {
 	ctx := contextutils.WithVerbose(context.TODO())
+
+	// Ensure a local kind cluster is available for testing:
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
+	require.NoError(t, err)
 
 	// Get the Kubernetes implementation
 	kubernetes, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+kindutils.SharedClusterName)

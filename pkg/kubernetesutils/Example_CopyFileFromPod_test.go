@@ -22,6 +22,10 @@ func TestCopyFileFromPod_nativeKubernetes(t *testing.T) {
 	// Enable verbose output
 	ctx := contextutils.WithVerbose(context.TODO())
 
+	// Ensure a local kind cluster is available for testing:
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
+	require.NoError(t, err)
+
 	// Get the Kubernetes implementation
 	kubernetes, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+kindutils.SharedClusterName)
 	require.NoError(t, err)
@@ -92,6 +96,10 @@ func TestCopyFileFromPod_nativeKubernetes(t *testing.T) {
 func TestCopyFileFromPod_commandExecutor(t *testing.T) {
 	ctx := contextutils.WithVerbose(context.TODO())
 
+	// Ensure a local kind cluster is available for testing:
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
+	require.NoError(t, err)
+
 	// Get the Kubernetes implementation
 	kubernetes, err := commandexecutorkubernetes.GetClusterByName("kind-" + kindutils.SharedClusterName)
 	require.NoError(t, err)
@@ -156,6 +164,10 @@ func TestCopyFileFromPod_commandExecutor(t *testing.T) {
 // ExampleCopyFileFromPod_roundTrip demonstrates a complete round-trip: copy a file to a pod and back.
 func TestCopyFileFromPod_roundTrip(t *testing.T) {
 	ctx := contextutils.WithVerbose(context.TODO())
+
+	// Ensure a local kind cluster is available for testing:
+	_, err := kindutils.GetOrCreateSharedCluster(ctx)
+	require.NoError(t, err)
 
 	// Get the Kubernetes implementation
 	kubernetes, err := nativekubernetesoo.GetClusterByName(ctx, "kind-"+kindutils.SharedClusterName)
