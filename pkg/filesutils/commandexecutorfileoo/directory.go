@@ -11,6 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -235,4 +236,37 @@ func (d *Directory) IsEmptyDirectory(ctx context.Context) (isEmpty bool, err err
 	}
 
 	return commandexecutorfile.IsEmptyDirectory(ctx, commandExecutor, path)
+}
+
+func (d *Directory) ListSubDirectories(ctx context.Context, options *parameteroptions.ListDirectoryOptions) (subDirectories []filesinterfaces.Directory, err error) {
+	commandExecutor, err := d.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	dirPath, err := d.GetPath()
+	if err != nil {
+		return nil, err
+	}
+
+	foundPaths, err := commandexecutorfile.ListSubDirectories(ctx, commandExecutor, dirPath, options)
+	if err != nil {
+		return nil, err
+	}
+
+	subDirectories = make([]filesinterfaces.Directory, 0)
+	for _, entryPath := range foundPaths {
+		// Skip the directory itself
+		if entryPath == dirPath {
+			continue
+		}
+
+		subDir, err := NewDirectory(commandExecutor, entryPath)
+		if err != nil {
+			return nil, err
+		}
+		subDirectories = append(subDirectories, subDir)
+	}
+
+	return subDirectories, nil
 }
