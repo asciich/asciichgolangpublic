@@ -29,6 +29,8 @@ For specifications see [filesutils.spec.md](filesutils.spec.md)
 * [Create file and it's parent directories recursively](./nativefiles/Example_CreateFileRecursively_test.go)
 * [Get nativefileoo by path](./Example_NewFileByPath_test.go)
 * [Is file a statically linked binary](./Example_IsStaticallyLinkedBinary_test.go)
+* [List direct sub directories of a local directory](./Example_ListSubDirectories_test.go)
+* [List sub directories recursively](./Example_ListSubDirectoriesRecursive_test.go)
 * [Move file](./nativefiles/Example_Move_test.go)
     * [Move file as root using sudo](./nativefiles/Example_MoveSudo_test.go)
 
