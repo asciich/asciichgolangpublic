@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -41,7 +42,7 @@ func DownloadMainReadmes(ctx context.Context, options *DownloadMainReadmesOption
 		return err
 	}
 
-	projects, err := group.ListProjects(ctx, &asciichgolangpublic.GitlabListProjectsOptions{
+	projects, err := group.ListProjects(ctx, &gitlaboptions.GitlabListProjectsOptions{
 		Recursive: true,
 	})
 	if err != nil {

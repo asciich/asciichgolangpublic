@@ -21,7 +21,7 @@ func NewGitlabRelease() (g *GitlabRelease) {
 	return new(GitlabRelease)
 }
 
-func (g *GitlabRelease) CreateReleaseLink(ctx context.Context, createOptions *GitlabCreateReleaseLinkOptions) (createdReleaseLink *GitlabReleaseLink, err error) {
+func (g *GitlabRelease) CreateReleaseLink(ctx context.Context, createOptions *gitlaboptions.GitlabCreateReleaseLinkOptions) (createdReleaseLink *GitlabReleaseLink, err error) {
 	releaseLinks, err := g.GetGitlabReleaseLinks()
 	if err != nil {
 		return nil, err

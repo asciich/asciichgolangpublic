@@ -161,7 +161,7 @@ func (g *GitlabProject) ListScheduledPipelineNames(ctx context.Context) (schedul
 	return schedules.ListScheduledPipelineNames(ctx)
 }
 
-func (g *GitlabProject) CreateMergeRequest(ctx context.Context, options *GitlabCreateMergeRequestOptions) (createdMergeRequest *GitlabMergeRequest, err error) {
+func (g *GitlabProject) CreateMergeRequest(ctx context.Context, options *gitlaboptions.GitlabCreateMergeRequestOptions) (createdMergeRequest *GitlabMergeRequest, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -310,7 +310,7 @@ func (g *GitlabProject) DeleteAllReleases(ctx context.Context, deleteOptions *gi
 	return nil
 }
 
-func (g *GitlabProject) DeleteBranch(ctx context.Context, branchName string, deleteOptions *GitlabDeleteBranchOptions) (err error) {
+func (g *GitlabProject) DeleteBranch(ctx context.Context, branchName string, deleteOptions *gitlaboptions.GitlabDeleteBranchOptions) (err error) {
 	if branchName == "" {
 		return tracederrors.TracedErrorEmptyString("branchNAme")
 	}

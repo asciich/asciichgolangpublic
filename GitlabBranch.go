@@ -118,7 +118,7 @@ func (g *GitlabBranch) CreateFromDefaultBranch(ctx context.Context) (err error) 
 	return nil
 }
 
-func (g *GitlabBranch) CreateMergeRequest(ctx context.Context, options *GitlabCreateMergeRequestOptions) (mergeRequest *GitlabMergeRequest, err error) {
+func (g *GitlabBranch) CreateMergeRequest(ctx context.Context, options *gitlaboptions.GitlabCreateMergeRequestOptions) (mergeRequest *GitlabMergeRequest, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -147,7 +147,7 @@ func (g *GitlabBranch) CreateMergeRequest(ctx context.Context, options *GitlabCr
 	return mergeRequest, nil
 }
 
-func (g *GitlabBranch) Delete(ctx context.Context, options *GitlabDeleteBranchOptions) (err error) {
+func (g *GitlabBranch) Delete(ctx context.Context, options *gitlaboptions.GitlabDeleteBranchOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}
@@ -743,7 +743,7 @@ func (g *GitlabBranch) SyncFilesToBranchUsingMergeRequest(ctx context.Context, o
 
 		createdMergeRequest, err = syncBranch.CreateMergeRequest(
 			ctx,
-			&GitlabCreateMergeRequestOptions{
+			&gitlaboptions.GitlabCreateMergeRequestOptions{
 				TargetBranchName:                targetBranchName,
 				Title:                           mrTitle,
 				Description:                     mrDescription,

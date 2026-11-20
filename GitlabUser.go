@@ -5,6 +5,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/sshutils"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -142,7 +143,7 @@ func (u *GitlabUser) AddSshKeysFromFilePath(ctx context.Context, sshKeyFilePath 
 	return nil
 }
 
-func (u *GitlabUser) CreateAccessToken(options *GitlabCreateAccessTokenOptions) (newToken string, err error) {
+func (u *GitlabUser) CreateAccessToken(options *gitlaboptions.GitlabCreateAccessTokenOptions) (newToken string, err error) {
 	if options == nil {
 		return "", tracederrors.TracedError("options is nil")
 	}

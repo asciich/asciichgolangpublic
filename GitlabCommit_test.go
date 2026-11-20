@@ -172,7 +172,7 @@ func TestGitlabCommitGetIsMergeCommit(t *testing.T) {
 
 				branch, err := testProject.GetBranchByName("test_merge_commit")
 				require.NoError(t, err)
-				err = branch.Delete(ctx, &GitlabDeleteBranchOptions{})
+				err = branch.Delete(ctx, &gitlaboptions.GitlabDeleteBranchOptions{})
 				require.NoError(t, err)
 
 				err = branch.CreateFromDefaultBranch(ctx)
@@ -200,7 +200,7 @@ func TestGitlabCommitGetIsMergeCommit(t *testing.T) {
 
 				mergeRequest, err := branch.CreateMergeRequest(
 					ctx,
-					&GitlabCreateMergeRequestOptions{
+					&gitlaboptions.GitlabCreateMergeRequestOptions{
 						Title:       "Merge for isMergeCommit test",
 						Description: "Merge for isMergeCommit test",
 					},

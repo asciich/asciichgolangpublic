@@ -156,7 +156,7 @@ func TestGitlabRelease_ReleaseLinks(t *testing.T) {
 				for range 2 {
 					_, err = release.CreateReleaseLink(
 						ctx,
-						&GitlabCreateReleaseLinkOptions{
+						&gitlaboptions.GitlabCreateReleaseLinkOptions{
 							Url:  releaseLink,
 							Name: "testReleaseLink",
 						},

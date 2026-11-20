@@ -1,15 +1,15 @@
-package asciichgolangpublic_test
+package gitlaboptions_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	asciichgolangpublic "github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 )
 
 func TestGitlabCreateMergeRequestOptions_GetDeepCopy(t *testing.T) {
 	t.Run("nil fields", func(t *testing.T) {
-		original := &asciichgolangpublic.GitlabCreateMergeRequestOptions{}
+		original := &gitlaboptions.GitlabCreateMergeRequestOptions{}
 		copy := original.GetDeepCopy()
 
 		require.EqualValues(t, original.SourceBranchName, copy.SourceBranchName)
@@ -42,7 +42,7 @@ func TestGitlabCreateMergeRequestOptions_GetDeepCopy(t *testing.T) {
 	})
 
 	t.Run("with Labels slice", func(t *testing.T) {
-		original := &asciichgolangpublic.GitlabCreateMergeRequestOptions{
+		original := &gitlaboptions.GitlabCreateMergeRequestOptions{
 			SourceBranchName: "feature",
 			TargetBranchName: "main",
 			Title:            "Add feature",
@@ -67,7 +67,7 @@ func TestGitlabCreateMergeRequestOptions_GetDeepCopy(t *testing.T) {
 	})
 
 	t.Run("with all boolean flags set", func(t *testing.T) {
-		original := &asciichgolangpublic.GitlabCreateMergeRequestOptions{
+		original := &gitlaboptions.GitlabCreateMergeRequestOptions{
 			SourceBranchName:                "feature",
 			TargetBranchName:                "main",
 			Title:                           "Add feature",

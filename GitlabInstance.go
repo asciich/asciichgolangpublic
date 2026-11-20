@@ -245,7 +245,7 @@ func (g *GitlabInstance) CheckRunnerStatusOk(ctx context.Context, runnerName str
 	return isStatusOk, nil
 }
 
-func (g *GitlabInstance) CreateAccessToken(options *GitlabCreateAccessTokenOptions) (newToken string, err error) {
+func (g *GitlabInstance) CreateAccessToken(options *gitlaboptions.GitlabCreateAccessTokenOptions) (newToken string, err error) {
 	if options == nil {
 		return "", tracederrors.TracedError("options is nil")
 	}

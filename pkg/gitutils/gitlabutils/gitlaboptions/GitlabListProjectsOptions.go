@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package gitlaboptions
 
 type GitlabListProjectsOptions struct {
 	Recursive bool
