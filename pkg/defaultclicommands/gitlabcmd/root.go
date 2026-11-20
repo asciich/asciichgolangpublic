@@ -2,42 +2,28 @@ package gitlabcmd
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/gitlabcmd/gitlabcmdgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/gitlabcmd/gitlabmetricscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/gitlabcmd/pipelineschedulescmd"
-	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
-	"os"
 )
 
-func NewGitlabCommand() (cmd *cobra.Command) {
+func NewGitlabCommand(options gitlabcmdgeneric.GitlabCmdOptions) (cmd *cobra.Command) {
 	const short = "Gitlab related commands"
 
 	cmd = &cobra.Command{
 		Use:   "gitlab",
 		Short: short,
-		Long: short + `
-
-Usage:
-    ` + os.Args[0] + ` gitlab gitlab`,
 	}
 
 	cmd.AddCommand(
 		NewDownloadMainReadmesCmd(),
+		NewShowFqdnCmd(options),
 
 		gitlabmetricscmd.NewMetricsCommand(),
 		pipelineschedulescmd.NewPipelineSchedulesCmd(),
 	)
 
+	cmd.PersistentFlags().String("url", "", "Url of the Gitlab instance.")
+
 	return cmd
-}
-
-func AddGitlabCommand(rootCmd *cobra.Command) (err error) {
-	if rootCmd == nil {
-		return tracederrors.TracedErrorNil("rootCmd")
-	}
-
-	rootCmd.AddCommand(
-		NewGitlabCommand(),
-	)
-
-	return nil
 }

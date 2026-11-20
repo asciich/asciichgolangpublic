@@ -2,6 +2,7 @@ package defaultclicommands
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/ansiblecmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/certificatescmd"
@@ -34,8 +35,24 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/versioncmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/virtualmachinescmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/wikicmd"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
+
+type genericGitlab struct{}
+
+func (g *genericGitlab) GetGitlabInstance(cmd *cobra.Command, args []string) (*asciichgolangpublic.GitlabInstance, error) {
+	url, err := cmd.Flags().GetString("url")
+	if err != nil {
+		return nil, tracederrors.TracedError(err)
+	}
+
+	if url == "" {
+		logging.LogFatal("Please specify the --url for the gitlab instance.")
+	}
+
+	return asciichgolangpublic.GetGitlabByFQDN(url)
+}
 
 func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 	if rootCmd == nil {
@@ -58,7 +75,7 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 		embeddedsystemscmd.NewEmbeddedSystemsCmd(),
 		errorscmd.NewErrorsCommand(),
 		filescmd.NewFilesCmd(),
-		gitlabcmd.NewGitlabCommand(),
+		gitlabcmd.NewGitlabCommand(&genericGitlab{}),
 		homeautomationcmd.NewHomeAutomationCmd(),
 		hostcmd.NewHostCmd(),
 		httpcmd.NewHttpCmd(),
