@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -40,7 +41,7 @@ func (g *GitlabProjectMergeRequests) GetUserId() (userId int, err error) {
 	return userId, nil
 }
 
-func (g *GitlabProjectMergeRequests) CreateMergeRequest(ctx context.Context, options *GitlabCreateMergeRequestOptions) (createdMergeRequest *GitlabMergeRequest, err error) {
+func (g *GitlabProjectMergeRequests) CreateMergeRequest(ctx context.Context, options *gitlaboptions.GitlabCreateMergeRequestOptions) (createdMergeRequest *GitlabMergeRequest, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -45,7 +46,7 @@ func TestGitlabProjectBranchCreateAndDelete(t *testing.T) {
 
 				err = branch.Delete(
 					ctx,
-					&GitlabDeleteBranchOptions{
+					&gitlaboptions.GitlabDeleteBranchOptions{
 						SkipWaitForDeletion: false,
 					})
 				require.NoError(t, err)
@@ -63,7 +64,7 @@ func TestGitlabProjectBranchCreateAndDelete(t *testing.T) {
 				for i := 0; i < 2; i++ {
 					err := branch.Delete(
 						ctx,
-						&GitlabDeleteBranchOptions{
+						&gitlaboptions.GitlabDeleteBranchOptions{
 							SkipWaitForDeletion: false,
 						})
 					require.NoError(t, err)

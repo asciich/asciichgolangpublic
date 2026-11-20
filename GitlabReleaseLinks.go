@@ -6,6 +6,7 @@ import (
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -18,7 +19,7 @@ func NewGitlabReleaseLinks() (g *GitlabReleaseLinks) {
 	return new(GitlabReleaseLinks)
 }
 
-func (g *GitlabReleaseLinks) CreateReleaseLink(ctx context.Context, createOptions *GitlabCreateReleaseLinkOptions) (createdReleaseLink *GitlabReleaseLink, err error) {
+func (g *GitlabReleaseLinks) CreateReleaseLink(ctx context.Context, createOptions *gitlaboptions.GitlabCreateReleaseLinkOptions) (createdReleaseLink *GitlabReleaseLink, err error) {
 	if createOptions == nil {
 		return nil, tracederrors.TracedErrorNil("createOptions")
 	}

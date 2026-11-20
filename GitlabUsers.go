@@ -152,7 +152,7 @@ func (g *GitlabUsers) GetUsers() (users []*GitlabUser, err error) {
 	return users, nil
 }
 
-func (u *GitlabUsers) CreateAccessToken(options *GitlabCreateAccessTokenOptions) (newToken string, err error) {
+func (u *GitlabUsers) CreateAccessToken(options *gitlaboptions.GitlabCreateAccessTokenOptions) (newToken string, err error) {
 	if options == nil {
 		return "", tracederrors.TracedError("options is nil")
 	}

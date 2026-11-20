@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -311,7 +312,7 @@ func TestGitlabGroupListProjects(t *testing.T) {
 				}
 
 				time.Sleep(3 * time.Second)
-				listedProjectPaths, err := testGroup.ListProjectPaths(ctx, &GitlabListProjectsOptions{})
+				listedProjectPaths, err := testGroup.ListProjectPaths(ctx, &gitlaboptions.GitlabListProjectsOptions{})
 				require.NoError(t, err)
 
 				require.Len(t, listedProjectPaths, nProjects)

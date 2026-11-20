@@ -12,6 +12,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/urlsutils"
@@ -397,7 +398,7 @@ func (g *GitlabGroup) IsSubgroup(ctx context.Context) (isSubgroup bool, err erro
 	return isSubgroup, nil
 }
 
-func (g *GitlabGroup) ListProjectPaths(ctx context.Context, options *GitlabListProjectsOptions) (projectPaths []string, err error) {
+func (g *GitlabGroup) ListProjectPaths(ctx context.Context, options *gitlaboptions.GitlabListProjectsOptions) (projectPaths []string, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -456,7 +457,7 @@ func (g *GitlabGroup) ListProjectPaths(ctx context.Context, options *GitlabListP
 	return projectPaths, nil
 }
 
-func (g *GitlabGroup) ListProjects(ctx context.Context, listProjectOptions *GitlabListProjectsOptions) (projects []*GitlabProject, err error) {
+func (g *GitlabGroup) ListProjects(ctx context.Context, listProjectOptions *gitlaboptions.GitlabListProjectsOptions) (projects []*GitlabProject, err error) {
 	if listProjectOptions == nil {
 		return nil, tracederrors.TracedErrorNil("listProjectOptions")
 	}

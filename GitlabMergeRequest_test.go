@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -34,7 +35,7 @@ func TestMergeRequestCreateAndClose(t *testing.T) {
 
 				const testBranchName string = "mr_test_branch"
 
-				err = testProject.DeleteBranch(ctx, testBranchName, &GitlabDeleteBranchOptions{})
+				err = testProject.DeleteBranch(ctx, testBranchName, &gitlaboptions.GitlabDeleteBranchOptions{})
 				require.NoError(t, err)
 
 				branch, err := testProject.CreateBranchFromDefaultBranch(ctx, testBranchName)
@@ -43,7 +44,7 @@ func TestMergeRequestCreateAndClose(t *testing.T) {
 				for i := 0; i < 2; i++ {
 					mergeRequest, err := branch.CreateMergeRequest(
 						ctx,
-						&GitlabCreateMergeRequestOptions{
+						&gitlaboptions.GitlabCreateMergeRequestOptions{
 							Title: tt.mergeRequestTitle,
 						},
 					)
@@ -116,7 +117,7 @@ func TestMergeRequestCreateAndClose_withLabels(t *testing.T) {
 
 				const testBranchName string = "mr_test_branch"
 
-				err = testProject.DeleteBranch(ctx, testBranchName, &GitlabDeleteBranchOptions{})
+				err = testProject.DeleteBranch(ctx, testBranchName, &gitlaboptions.GitlabDeleteBranchOptions{})
 				require.NoError(t, err)
 
 				branch, err := testProject.CreateBranchFromDefaultBranch(ctx, testBranchName)
@@ -128,7 +129,7 @@ func TestMergeRequestCreateAndClose_withLabels(t *testing.T) {
 
 					mergeRequest, err := testProject.CreateMergeRequest(
 						ctx,
-						&GitlabCreateMergeRequestOptions{
+						&gitlaboptions.GitlabCreateMergeRequestOptions{
 							SourceBranchName: branchName,
 							Title:            tt.mergeRequestTitle,
 							Labels:           tt.labels,

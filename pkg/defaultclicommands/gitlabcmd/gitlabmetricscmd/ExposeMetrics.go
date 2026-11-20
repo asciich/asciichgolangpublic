@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
@@ -144,7 +145,7 @@ func cliExposeMetrics(ctx context.Context, url string, port int, group string) {
 				}
 
 				if g != nil {
-					projects, err := g.ListProjects(contextutils.WithSilent(ctx), &asciichgolangpublic.GitlabListProjectsOptions{Recursive: true})
+					projects, err := g.ListProjects(contextutils.WithSilent(ctx), &gitlaboptions.GitlabListProjectsOptions{Recursive: true})
 					if err != nil {
 						logging.LogGoError(err)
 						error_counter += 1
