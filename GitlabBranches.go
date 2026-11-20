@@ -7,6 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -38,7 +39,7 @@ func (g *GitlabBranches) BranchByNameExists(ctx context.Context, branchName stri
 	return exists, nil
 }
 
-func (g *GitlabBranches) CreateBranch(ctx context.Context, options *GitlabCreateBranchOptions) (createdBranch *GitlabBranch, err error) {
+func (g *GitlabBranches) CreateBranch(ctx context.Context, options *gitlaboptions.GitlabCreateBranchOptions) (createdBranch *GitlabBranch, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -117,7 +118,7 @@ func (g *GitlabBranches) CreateBranchFromDefaultBranch(ctx context.Context, bran
 
 	createdBranch, err = g.CreateBranch(
 		ctx,
-		&GitlabCreateBranchOptions{
+		&gitlaboptions.GitlabCreateBranchOptions{
 			SourceBranchName: sourceBranch,
 			BranchName:       branchName,
 		},

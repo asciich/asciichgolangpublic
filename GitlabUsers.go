@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/randomgenerator"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -174,7 +175,7 @@ func (u *GitlabUsers) CreateAccessToken(options *GitlabCreateAccessTokenOptions)
 	return newToken, nil
 }
 
-func (u *GitlabUsers) CreateUser(ctx context.Context, createUserOptions *GitlabCreateUserOptions) (createdUser *GitlabUser, err error) {
+func (u *GitlabUsers) CreateUser(ctx context.Context, createUserOptions *gitlaboptions.GitlabCreateUserOptions) (createdUser *GitlabUser, err error) {
 	if createUserOptions == nil {
 		return nil, tracederrors.TracedError("createUserOptions is nil")
 	}

@@ -1,15 +1,15 @@
-package asciichgolangpublic_test
+package gitlaboptions_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	asciichgolangpublic "github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 )
 
 func TestGitlabCreateTagOptions_GetDeepCopy(t *testing.T) {
 	t.Run("nil fields", func(t *testing.T) {
-		original := &asciichgolangpublic.GitlabCreateTagOptions{}
+		original := &gitlaboptions.GitlabCreateTagOptions{}
 		copy := original.GetDeepCopy()
 
 		require.EqualValues(t, original.Name, copy.Name)
@@ -25,7 +25,7 @@ func TestGitlabCreateTagOptions_GetDeepCopy(t *testing.T) {
 	})
 
 	t.Run("with values", func(t *testing.T) {
-		original := &asciichgolangpublic.GitlabCreateTagOptions{
+		original := &gitlaboptions.GitlabCreateTagOptions{
 			Name: "v1.0.0",
 			Ref:  "main",
 		}

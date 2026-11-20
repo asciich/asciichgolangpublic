@@ -6,6 +6,7 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -29,7 +30,7 @@ func (g *GitlabCommit) CreateRelease(ctx context.Context, createReleaseOptions *
 		return nil, err
 	}
 
-	createTagOptions := &GitlabCreateTagOptions{
+	createTagOptions := &gitlaboptions.GitlabCreateTagOptions{
 		Name: releaseName,
 	}
 
@@ -46,7 +47,7 @@ func (g *GitlabCommit) CreateRelease(ctx context.Context, createReleaseOptions *
 	return createdRelease, nil
 }
 
-func (g *GitlabCommit) CreateTag(ctx context.Context, createTagOptions *GitlabCreateTagOptions) (createdTag *GitlabTag, err error) {
+func (g *GitlabCommit) CreateTag(ctx context.Context, createTagOptions *gitlaboptions.GitlabCreateTagOptions) (createdTag *GitlabTag, err error) {
 	if createTagOptions == nil {
 		return nil, tracederrors.TracedErrorNil("createTagOptions")
 	}

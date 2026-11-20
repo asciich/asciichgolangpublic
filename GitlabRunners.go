@@ -9,6 +9,7 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -119,7 +120,7 @@ func (r *GitlabRunnersService) RemoveAllRunners(ctx context.Context) (err error)
 	return nil
 }
 
-func (s *GitlabRunnersService) AddRunner(ctx context.Context, newRunnerOptions *GitlabAddRunnerOptions) (createdRunner *GitlabRunner, err error) {
+func (s *GitlabRunnersService) AddRunner(ctx context.Context, newRunnerOptions *gitlaboptions.GitlabAddRunnerOptions) (createdRunner *GitlabRunner, err error) {
 	if newRunnerOptions == nil {
 		return nil, tracederrors.TracedError("newRunnerOptions is nil")
 	}

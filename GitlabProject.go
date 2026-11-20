@@ -269,7 +269,7 @@ func (g *GitlabProject) Delete(ctx context.Context) (err error) {
 
 	err = gitlabProjects.DeleteProject(
 		ctx,
-		&GitlabDeleteProjectOptions{
+		&gitlaboptions.GitlabDeleteProjectOptions{
 			ProjectPath: projectPath,
 		},
 	)
@@ -296,7 +296,7 @@ func (g *GitlabProject) DeleteAllBranchesExceptDefaultBranch(ctx context.Context
 	return nil
 }
 
-func (g *GitlabProject) DeleteAllReleases(ctx context.Context, deleteOptions *GitlabDeleteReleaseOptions) (err error) {
+func (g *GitlabProject) DeleteAllReleases(ctx context.Context, deleteOptions *gitlaboptions.GitlabDeleteReleaseOptions) (err error) {
 	releases, err := g.GetGitlabReleases()
 	if err != nil {
 		return err
@@ -1393,7 +1393,7 @@ func (p *GitlabProject) MakePublic(ctx context.Context) (err error) {
 	return nil
 }
 
-func (p *GitlabProject) RecreateDeployKey(ctx context.Context, keyOptions *GitlabCreateDeployKeyOptions) (err error) {
+func (p *GitlabProject) RecreateDeployKey(ctx context.Context, keyOptions *gitlaboptions.GitlabCreateDeployKeyOptions) (err error) {
 	if keyOptions == nil {
 		return tracederrors.TracedError("keyOptions is nil")
 	}

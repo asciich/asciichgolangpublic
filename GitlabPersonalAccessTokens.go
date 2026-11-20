@@ -9,6 +9,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorbashoo"
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/fileformats/jsonutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -23,7 +24,7 @@ func NewGitlabPersonalAccessTokenService() (tokens *GitlabPersonalAccessTokenSer
 	return new(GitlabPersonalAccessTokenService)
 }
 
-func (p *GitlabPersonalAccessTokenService) CreateToken(ctx context.Context, tokenOptions *GitlabCreatePersonalAccessTokenOptions) (newToken string, err error) {
+func (p *GitlabPersonalAccessTokenService) CreateToken(ctx context.Context, tokenOptions *gitlaboptions.GitlabCreatePersonalAccessTokenOptions) (newToken string, err error) {
 	if tokenOptions == nil {
 		return "", tracederrors.TracedError("tokenOptions is nil")
 	}
@@ -307,7 +308,7 @@ func (p *GitlabPersonalAccessTokenService) GetTokenIdByName(ctx context.Context,
 	return -1, tracederrors.TracedErrorf("No token with name '%s' found.", tokenName)
 }
 
-func (p *GitlabPersonalAccessTokenService) RecreateToken(ctx context.Context, tokenOptions *GitlabCreatePersonalAccessTokenOptions) (newToken string, err error) {
+func (p *GitlabPersonalAccessTokenService) RecreateToken(ctx context.Context, tokenOptions *gitlaboptions.GitlabCreatePersonalAccessTokenOptions) (newToken string, err error) {
 	if tokenOptions == nil {
 		return "", tracederrors.TracedError("tokenOptions is nil")
 	}

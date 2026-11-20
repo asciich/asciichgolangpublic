@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -34,7 +35,7 @@ func (g *GitlabRelease) CreateReleaseLink(ctx context.Context, createOptions *Gi
 	return createdReleaseLink, nil
 }
 
-func (g *GitlabRelease) Delete(ctx context.Context, deleteOptions *GitlabDeleteReleaseOptions) (err error) {
+func (g *GitlabRelease) Delete(ctx context.Context, deleteOptions *gitlaboptions.GitlabDeleteReleaseOptions) (err error) {
 	if deleteOptions == nil {
 		return tracederrors.TracedErrorNil("deleteOptions")
 	}

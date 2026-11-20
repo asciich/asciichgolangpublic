@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"context"
 
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -18,7 +19,7 @@ func NewGitlabProjectDeployKey() (projectDeployKey *GitlabProjectDeployKey) {
 	return new(GitlabProjectDeployKey)
 }
 
-func (k *GitlabProjectDeployKey) CreateDeployKey(ctx context.Context, createOptions *GitlabCreateDeployKeyOptions) (err error) {
+func (k *GitlabProjectDeployKey) CreateDeployKey(ctx context.Context, createOptions *gitlaboptions.GitlabCreateDeployKeyOptions) (err error) {
 	if createOptions == nil {
 		return tracederrors.TracedError("createOptions is nil")
 	}
@@ -220,7 +221,7 @@ func (k *GitlabProjectDeployKey) GetProjectId(ctx context.Context) (id int, err 
 	return id, nil
 }
 
-func (k *GitlabProjectDeployKey) RecreateDeployKey(ctx context.Context, createOptions *GitlabCreateDeployKeyOptions) (err error) {
+func (k *GitlabProjectDeployKey) RecreateDeployKey(ctx context.Context, createOptions *gitlaboptions.GitlabCreateDeployKeyOptions) (err error) {
 	if createOptions == nil {
 		return tracederrors.TracedError("createOptions is nil")
 	}

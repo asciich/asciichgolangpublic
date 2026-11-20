@@ -707,7 +707,7 @@ func (g *GitlabBranch) SyncFilesToBranchUsingMergeRequest(ctx context.Context, o
 
 		syncBranch, err := branches.CreateBranch(
 			ctx,
-			&GitlabCreateBranchOptions{
+			&gitlaboptions.GitlabCreateBranchOptions{
 				SourceBranchName:    targetBranchName,
 				BranchName:          syncBranchName,
 				FailIfAlreadyExists: true,
