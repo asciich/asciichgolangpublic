@@ -30,7 +30,7 @@ func TestGitlabReleaseCreateAndDelete(t *testing.T) {
 				gitlab, err := GetGitlabByFQDN(gitlabFQDN)
 				require.NoError(t, err)
 
-				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				err = gitlab.Authenticate(ctx, &gitlaboptions.GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
 				require.NoError(t, err)
 
 				const projectPath string = "test_group/testproject"
@@ -62,7 +62,7 @@ func TestGitlabReleaseCreateAndDelete(t *testing.T) {
 				for i := 0; i < 2; i++ {
 					release, err = project.CreateReleaseFromLatestCommitInDefaultBranch(
 						ctx,
-						&GitlabCreateReleaseOptions{
+						&gitlaboptions.GitlabCreateReleaseOptions{
 							Name:        releaseName,
 							Description: releaseDescription,
 						},
@@ -117,7 +117,7 @@ func TestGitlabRelease_ReleaseLinks(t *testing.T) {
 				gitlab, err := GetGitlabByFQDN(gitlabFQDN)
 				require.NoError(t, err)
 
-				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				err = gitlab.Authenticate(ctx, &gitlaboptions.GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
 				require.NoError(t, err)
 
 				const projectPath string = "test_group/testproject"
@@ -136,7 +136,7 @@ func TestGitlabRelease_ReleaseLinks(t *testing.T) {
 
 				release, err = project.CreateReleaseFromLatestCommitInDefaultBranch(
 					ctx,
-					&GitlabCreateReleaseOptions{
+					&gitlaboptions.GitlabCreateReleaseOptions{
 						Name:        releaseName,
 						Description: releaseDescription,
 					},
@@ -206,7 +206,7 @@ func TestGitlabRelease_CreateNewPatchRelease(t *testing.T) {
 				gitlab, err := GetGitlabByFQDN(gitlabFQDN)
 				require.NoError(t, err)
 
-				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				err = gitlab.Authenticate(ctx, &gitlaboptions.GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
 				require.NoError(t, err)
 
 				const projectPath string = "test_group/testproject"
@@ -226,7 +226,7 @@ func TestGitlabRelease_CreateNewPatchRelease(t *testing.T) {
 
 				release, err := project.CreateReleaseFromLatestCommitInDefaultBranch(
 					ctx,
-					&GitlabCreateReleaseOptions{
+					&gitlaboptions.GitlabCreateReleaseOptions{
 						Name:        "v1.2.3",
 						Description: releaseDescription,
 					},

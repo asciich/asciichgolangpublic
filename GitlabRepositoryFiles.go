@@ -395,7 +395,7 @@ func (g *GitlabRepositoryFiles) HasRepositoryFiles(ctx context.Context, branchNa
 	return hasRepositoryFiles, nil
 }
 
-func (g *GitlabRepositoryFiles) ReadFileContentAsString(ctx context.Context, options *GitlabReadFileOptions) (content string, err error) {
+func (g *GitlabRepositoryFiles) ReadFileContentAsString(ctx context.Context, options *gitlaboptions.GitlabReadFileOptions) (content string, err error) {
 	if options == nil {
 		return "", tracederrors.TracedErrorNil("options")
 	}

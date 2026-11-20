@@ -20,7 +20,7 @@ func NewGitlabCommit() (g *GitlabCommit) {
 	return new(GitlabCommit)
 }
 
-func (g *GitlabCommit) CreateRelease(ctx context.Context, createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease, err error) {
+func (g *GitlabCommit) CreateRelease(ctx context.Context, createReleaseOptions *gitlaboptions.GitlabCreateReleaseOptions) (createdRelease *GitlabRelease, err error) {
 	if createReleaseOptions == nil {
 		return nil, tracederrors.TracedErrorNil("createReleaseOptions")
 	}

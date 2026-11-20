@@ -46,7 +46,7 @@ func GetGitlabProjectByUrl(ctx context.Context, url *urlsutils.URL, authOptions 
 		return nil, err
 	}
 
-	gitlabAuthenticationOption, ok := authOption.(*GitlabAuthenticationOptions)
+	gitlabAuthenticationOption, ok := authOption.(*gitlaboptions.GitlabAuthenticationOptions)
 	if !ok {
 		return nil, tracederrors.TracedErrorf("Unable to get %v as GitlabAuthenticationOptions", authOption)
 	}
@@ -94,7 +94,7 @@ func (g *GitlabProject) Create(ctx context.Context) (err error) {
 
 	createdProject, err := gitlabProjects.CreateProject(
 		ctx,
-		&GitlabCreateProjectOptions{
+		&gitlaboptions.GitlabCreateProjectOptions{
 			ProjectPath: projectPath,
 		},
 	)
@@ -196,7 +196,7 @@ func (g *GitlabProject) CreateNextMajorReleaseFromLatestCommitInDefaultBranch(ct
 
 	createdRelease, err = g.CreateReleaseFromLatestCommitInDefaultBranch(
 		ctx,
-		&GitlabCreateReleaseOptions{
+		&gitlaboptions.GitlabCreateReleaseOptions{
 			Name:        nextPatchVersionString,
 			Description: description,
 		},
@@ -220,7 +220,7 @@ func (g *GitlabProject) CreateNextMinorReleaseFromLatestCommitInDefaultBranch(ct
 
 	createdRelease, err = g.CreateReleaseFromLatestCommitInDefaultBranch(
 		ctx,
-		&GitlabCreateReleaseOptions{
+		&gitlaboptions.GitlabCreateReleaseOptions{
 			Name:        nextPatchVersionString,
 			Description: description,
 		},
@@ -244,7 +244,7 @@ func (g *GitlabProject) CreateNextPatchReleaseFromLatestCommitInDefaultBranch(ct
 
 	createdRelease, err = g.CreateReleaseFromLatestCommitInDefaultBranch(
 		ctx,
-		&GitlabCreateReleaseOptions{
+		&gitlaboptions.GitlabCreateReleaseOptions{
 			Name:        nextPatchVersionString,
 			Description: description,
 		},
@@ -1088,7 +1088,7 @@ func (g *GitlabProject) ListScheduledPipelines(ctx context.Context) (scheduledPi
 	return scheduled.ListPipelineSchedules(ctx)
 }
 
-func (g *GitlabProject) ReadFileContentAsString(ctx context.Context, options *GitlabReadFileOptions) (content string, err error) {
+func (g *GitlabProject) ReadFileContentAsString(ctx context.Context, options *gitlaboptions.GitlabReadFileOptions) (content string, err error) {
 	if options == nil {
 		return "", tracederrors.TracedErrorNil("options")
 	}
@@ -1162,7 +1162,7 @@ func (g *GitlabProject) WriteFileContentInDefaultBranch(ctx context.Context, wri
 	return gitlabRepositoryFile, nil
 }
 
-func (p *GitlabProject) CreateReleaseFromLatestCommitInDefaultBranch(ctx context.Context, createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease, err error) {
+func (p *GitlabProject) CreateReleaseFromLatestCommitInDefaultBranch(ctx context.Context, createReleaseOptions *gitlaboptions.GitlabCreateReleaseOptions) (createdRelease *GitlabRelease, err error) {
 	if createReleaseOptions == nil {
 		return nil, tracederrors.TracedErrorNil("createReleaseOptions")
 	}

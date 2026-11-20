@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
@@ -25,7 +26,7 @@ func NewAuthenticatedGitlab(ctx context.Context, gitlabUrl string) (*asciichgola
 		return nil, tracederrors.TracedErrorf("No token to authenticate gitlab. Please set the env var '%s' with the gitlab token to use.", DEFAULT_TOKEN_NAME)
 	}
 
-	err = gitlab.Authenticate(ctx, &asciichgolangpublic.GitlabAuthenticationOptions{
+	err = gitlab.Authenticate(ctx, &gitlaboptions.GitlabAuthenticationOptions{
 		AccessToken: token,
 	})
 	if err != nil {

@@ -18,7 +18,7 @@ func NewGitlabTags() (g *GitlabTags) {
 	return new(GitlabTags)
 }
 
-func (g *GitlabTag) CreateRelease(ctx context.Context, createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease, err error) {
+func (g *GitlabTag) CreateRelease(ctx context.Context, createReleaseOptions *gitlaboptions.GitlabCreateReleaseOptions) (createdRelease *GitlabRelease, err error) {
 	if createReleaseOptions == nil {
 		return nil, tracederrors.TracedErrorNil("createReleaseOptions")
 	}
@@ -50,7 +50,7 @@ func (g *GitlabTag) GetGitlabReleases() (gitlabReleases *GitlabReleases, err err
 	return gitlabReleases, nil
 }
 
-func (g *GitlabTag) MustCreateRelease(ctx context.Context, createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease) {
+func (g *GitlabTag) MustCreateRelease(ctx context.Context, createReleaseOptions *gitlaboptions.GitlabCreateReleaseOptions) (createdRelease *GitlabRelease) {
 	createdRelease, err := g.CreateRelease(ctx, createReleaseOptions)
 	if err != nil {
 		logging.LogGoErrorFatal(err)

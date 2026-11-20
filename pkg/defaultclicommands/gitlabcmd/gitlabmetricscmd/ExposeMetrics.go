@@ -82,7 +82,7 @@ func cliExposeMetrics(ctx context.Context, url string, port int, group string) {
 		logging.LogInfoByCtx(ctx, "No '--group' specified to export projects.")
 	}
 
-	mustutils.Must0(gitlab.Authenticate(ctx, &asciichgolangpublic.GitlabAuthenticationOptions{AccessToken: accessToken}))
+	mustutils.Must0(gitlab.Authenticate(ctx, &gitlaboptions.GitlabAuthenticationOptions{AccessToken: accessToken}))
 
 	gitlab_fqdn := mustutils.Must(gitlab.GetFqdn())
 

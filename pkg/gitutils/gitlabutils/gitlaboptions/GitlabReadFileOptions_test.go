@@ -1,15 +1,15 @@
-package asciichgolangpublic_test
+package gitlaboptions_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	asciichgolangpublic "github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 )
 
 func TestGitlabReadFileOptions_GetDeepCopy(t *testing.T) {
 	t.Run("nil fields", func(t *testing.T) {
-		original := &asciichgolangpublic.GitlabReadFileOptions{}
+		original := &gitlaboptions.GitlabReadFileOptions{}
 		copy := original.GetDeepCopy()
 
 		require.EqualValues(t, original.Path, copy.Path)
@@ -25,7 +25,7 @@ func TestGitlabReadFileOptions_GetDeepCopy(t *testing.T) {
 	})
 
 	t.Run("with values", func(t *testing.T) {
-		original := &asciichgolangpublic.GitlabReadFileOptions{
+		original := &gitlaboptions.GitlabReadFileOptions{
 			Path:       "README.md",
 			BranchName: "main",
 		}

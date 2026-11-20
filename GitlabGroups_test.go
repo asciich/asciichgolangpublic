@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -28,7 +29,7 @@ func TestGitlabGroupsGroupByGroupPathExists(t *testing.T) {
 
 				err = gitlab.Authenticate(
 					ctx,
-					&GitlabAuthenticationOptions{
+					&gitlaboptions.GitlabAuthenticationOptions{
 						AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
 					},
 				)
@@ -62,7 +63,7 @@ func TestGitlabGroupsCreateAndDeleteGroup(t *testing.T) {
 
 				err = gitlab.Authenticate(
 					ctx,
-					&GitlabAuthenticationOptions{
+					&gitlaboptions.GitlabAuthenticationOptions{
 						AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
 					},
 				)
