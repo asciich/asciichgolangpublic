@@ -179,7 +179,7 @@ func TestGitlabGroupByPathAndId(t *testing.T) {
 
 				err = gitlab.Authenticate(
 					ctx,
-					&GitlabAuthenticationOptions{
+					&gitlaboptions.GitlabAuthenticationOptions{
 						AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
 					},
 				)
@@ -279,7 +279,7 @@ func TestGitlabGroupListProjects(t *testing.T) {
 
 				err = gitlab.Authenticate(
 					ctx,
-					&GitlabAuthenticationOptions{
+					&gitlaboptions.GitlabAuthenticationOptions{
 						AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
 					},
 				)
@@ -304,7 +304,7 @@ func TestGitlabGroupListProjects(t *testing.T) {
 
 					_, err = gitlab.CreateProject(
 						ctx,
-						&GitlabCreateProjectOptions{
+						&gitlaboptions.GitlabCreateProjectOptions{
 							ProjectPath: projectPath,
 						},
 					)

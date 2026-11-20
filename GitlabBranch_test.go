@@ -28,7 +28,7 @@ func TestGitlabProjectBranchCreateAndDelete(t *testing.T) {
 				require.NoError(t, err)
 
 				err = gitlab.Authenticate(ctx,
-					&GitlabAuthenticationOptions{
+					&gitlaboptions.GitlabAuthenticationOptions{
 						AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
 					},
 				)

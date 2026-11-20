@@ -314,7 +314,7 @@ func (g *GitlabProjects) ProjectByProjectIdExists(ctx context.Context, projectId
 	return true, nil
 }
 
-func (p *GitlabProjects) CreateProject(ctx context.Context, createOptions *GitlabCreateProjectOptions) (createdGitlabProject *GitlabProject, err error) {
+func (p *GitlabProjects) CreateProject(ctx context.Context, createOptions *gitlaboptions.GitlabCreateProjectOptions) (createdGitlabProject *GitlabProject, err error) {
 	if createOptions == nil {
 		return nil, tracederrors.TracedError("createOptions is nil")
 	}

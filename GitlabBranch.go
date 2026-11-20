@@ -532,7 +532,7 @@ func (g *GitlabBranch) GetRepositoryFileSha256Sum(ctx context.Context, filePath 
 	return sha256sum, nil
 }
 
-func (g *GitlabBranch) ReadFileContentAsString(ctx context.Context, options *GitlabReadFileOptions) (content string, err error) {
+func (g *GitlabBranch) ReadFileContentAsString(ctx context.Context, options *gitlaboptions.GitlabReadFileOptions) (content string, err error) {
 	if options == nil {
 		return "", tracederrors.TracedErrorNil("options")
 	}

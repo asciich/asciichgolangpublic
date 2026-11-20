@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -25,7 +26,7 @@ func TestGitlabUserGetCurrentUserName(t *testing.T) {
 				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
 				require.NoError(t, err)
 
-				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				err = gitlab.Authenticate(ctx, &gitlaboptions.GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
 				require.NoError(t, err)
 
 				userName, err := gitlab.GetCurrentUsersName(ctx)

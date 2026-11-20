@@ -57,7 +57,7 @@ func TestGitlabProjectsGetProjectIdAndPath(t *testing.T) {
 				gitlab, err := GetGitlabByFQDN(gitlabFQDN)
 				require.NoError(t, err)
 
-				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{
+				err = gitlab.Authenticate(ctx, &gitlaboptions.GitlabAuthenticationOptions{
 					AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"},
 				})
 				require.NoError(t, err)
@@ -108,7 +108,7 @@ func TestGitlabProjectsGetFileContentAsString(t *testing.T) {
 
 				gitlab, err := GetGitlabByFQDN("gitlab.asciich.ch")
 				require.NoError(t, err)
-				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				err = gitlab.Authenticate(ctx, &gitlaboptions.GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
 				require.NoError(t, err)
 
 				gitlabProject, err := gitlab.GetGitlabProjectByPath(ctx, "test_group/testproject")
@@ -133,7 +133,7 @@ func TestGitlabProjectsGetFileContentAsString(t *testing.T) {
 
 					readBack, err := gitlabProject.ReadFileContentAsString(
 						ctx,
-						&GitlabReadFileOptions{
+						&gitlaboptions.GitlabReadFileOptions{
 							Path: fileName,
 						},
 					)

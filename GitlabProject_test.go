@@ -28,7 +28,7 @@ func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
 				gitlab, err := GetGitlabByFQDN(gitlabFQDN)
 				require.NoError(t, err)
 
-				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				err = gitlab.Authenticate(ctx, &gitlaboptions.GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
 				require.NoError(t, err)
 
 				const projectPath string = "test_group/testproject"
@@ -69,11 +69,11 @@ func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				content, err := defaultBranch.ReadFileContentAsString(ctx, &GitlabReadFileOptions{Path: filePath})
+				content, err := defaultBranch.ReadFileContentAsString(ctx, &gitlaboptions.GitlabReadFileOptions{Path: filePath})
 				require.NoError(t, err)
 				require.EqualValues(t, "hello", content)
 
-				content, err = syncBranch.ReadFileContentAsString(ctx, &GitlabReadFileOptions{Path: filePath})
+				content, err = syncBranch.ReadFileContentAsString(ctx, &gitlaboptions.GitlabReadFileOptions{Path: filePath})
 				require.NoError(t, err)
 				require.EqualValues(t, "world", content)
 
@@ -86,11 +86,11 @@ func TestGitlabProjectSyncFilesToBranch(t *testing.T) {
 				)
 				require.NoError(t, err)
 
-				content, err = defaultBranch.ReadFileContentAsString(ctx, &GitlabReadFileOptions{Path: filePath})
+				content, err = defaultBranch.ReadFileContentAsString(ctx, &gitlaboptions.GitlabReadFileOptions{Path: filePath})
 				require.NoError(t, err)
 				require.EqualValues(t, "world", content)
 
-				content, err = syncBranch.ReadFileContentAsString(ctx, &GitlabReadFileOptions{Path: filePath})
+				content, err = syncBranch.ReadFileContentAsString(ctx, &gitlaboptions.GitlabReadFileOptions{Path: filePath})
 				require.NoError(t, err)
 				require.EqualValues(t, "world", content)
 			},
@@ -117,7 +117,7 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile(t *testing.T) {
 
 				gitlab, err := GetGitlabByFQDN(gitlabFQDN)
 				require.NoError(t, err)
-				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				err = gitlab.Authenticate(ctx, &gitlaboptions.GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
 				require.NoError(t, err)
 
 				const projectPath string = "test_group/testproject"
@@ -158,7 +158,7 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile(t *testing.T) {
 				require.NoError(t, err)
 				require.False(t, exists)
 
-				content, err := syncBranch.ReadFileContentAsString(ctx, &GitlabReadFileOptions{Path: filePath})
+				content, err := syncBranch.ReadFileContentAsString(ctx, &gitlaboptions.GitlabReadFileOptions{Path: filePath})
 				require.NoError(t, err)
 				require.EqualValues(t, "world", content)
 
@@ -170,11 +170,11 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile(t *testing.T) {
 					})
 				require.NoError(t, err)
 
-				content, err = defaultBranch.ReadFileContentAsString(ctx, &GitlabReadFileOptions{Path: filePath})
+				content, err = defaultBranch.ReadFileContentAsString(ctx, &gitlaboptions.GitlabReadFileOptions{Path: filePath})
 				require.NoError(t, err)
 				require.EqualValues(t, "world", content)
 
-				content, err = syncBranch.ReadFileContentAsString(ctx, &GitlabReadFileOptions{Path: filePath})
+				content, err = syncBranch.ReadFileContentAsString(ctx, &gitlaboptions.GitlabReadFileOptions{Path: filePath})
 				require.NoError(t, err)
 				require.EqualValues(t, "world", content)
 			},
@@ -201,7 +201,7 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 
 				gitlab, err := GetGitlabByFQDN(gitlabFQDN)
 				require.NoError(t, err)
-				err = gitlab.Authenticate(ctx, &GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
+				err = gitlab.Authenticate(ctx, &gitlaboptions.GitlabAuthenticationOptions{AccessTokensFromGopass: []string{"hosts/gitlab.asciich.ch/users/reto/access_token"}})
 				require.NoError(t, err)
 
 				const projectPath string = "test_group/testproject"
@@ -244,7 +244,7 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 				require.NoError(t, err)
 				require.False(t, exits)
 
-				content, err := syncBranch.ReadFileContentAsString(ctx, &GitlabReadFileOptions{Path: filePath})
+				content, err := syncBranch.ReadFileContentAsString(ctx, &gitlaboptions.GitlabReadFileOptions{Path: filePath})
 				require.NoError(t, err)
 				require.EqualValues(t, "world", content)
 
@@ -265,7 +265,7 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 				require.NoError(t, err)
 				require.False(t, exists)
 
-				content, err = syncBranch.ReadFileContentAsString(ctx, &GitlabReadFileOptions{Path: filePath})
+				content, err = syncBranch.ReadFileContentAsString(ctx, &gitlaboptions.GitlabReadFileOptions{Path: filePath})
 				require.NoError(t, err)
 				require.EqualValues(t, "world", content)
 
@@ -276,11 +276,11 @@ func TestGitlabProjectSyncFilesToBranch_notExistingTargetFile_usingMR(t *testing
 				require.NoError(t, err)
 				require.True(t, isMerged)
 
-				content, err = defaultBranch.ReadFileContentAsString(ctx, &GitlabReadFileOptions{Path: filePath})
+				content, err = defaultBranch.ReadFileContentAsString(ctx, &gitlaboptions.GitlabReadFileOptions{Path: filePath})
 				require.NoError(t, err)
 				require.EqualValues(t, "world", content)
 
-				content, err = syncBranch.ReadFileContentAsString(ctx, &GitlabReadFileOptions{Path: filePath})
+				content, err = syncBranch.ReadFileContentAsString(ctx, &gitlaboptions.GitlabReadFileOptions{Path: filePath})
 				require.NoError(t, err)
 				require.EqualValues(t, "world", content)
 			},

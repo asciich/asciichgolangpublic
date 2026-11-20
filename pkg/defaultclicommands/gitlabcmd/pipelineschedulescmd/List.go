@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions/authenticationoptions"
@@ -45,7 +46,7 @@ Usage:
 
 func listCmd(ctx context.Context, url string) {
 	access := []authenticationoptions.AuthenticationOption{
-		&asciichgolangpublic.GitlabAuthenticationOptions{
+		&gitlaboptions.GitlabAuthenticationOptions{
 			AccessToken: os.Getenv("GITLAB_ACCESS_TOKEN"),
 			GitlabUrl:   url,
 		},

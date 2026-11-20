@@ -17,7 +17,7 @@ func NewGitlabReleases() (g *GitlabReleases) {
 	return new(GitlabReleases)
 }
 
-func (g *GitlabReleases) CreateRelease(ctx context.Context, createReleaseOptions *GitlabCreateReleaseOptions) (createdRelease *GitlabRelease, err error) {
+func (g *GitlabReleases) CreateRelease(ctx context.Context, createReleaseOptions *gitlaboptions.GitlabCreateReleaseOptions) (createdRelease *GitlabRelease, err error) {
 	if createReleaseOptions == nil {
 		return nil, tracederrors.TracedErrorNil("createReleaseOptions")
 	}

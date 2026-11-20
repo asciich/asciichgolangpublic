@@ -123,7 +123,7 @@ func (g *GitlabInstance) AddRunner(ctx context.Context, newRunnerOptions *gitlab
 	return createdRunner, nil
 }
 
-func (g *GitlabInstance) Authenticate(ctx context.Context, authOptions *GitlabAuthenticationOptions) (err error) {
+func (g *GitlabInstance) Authenticate(ctx context.Context, authOptions *gitlaboptions.GitlabAuthenticationOptions) (err error) {
 	if authOptions == nil {
 		return tracederrors.TracedError("authOptions is nil")
 	}
@@ -299,7 +299,7 @@ func (g *GitlabInstance) CreatePersonalProject(ctx context.Context, projectName 
 	return personalProject, nil
 }
 
-func (g *GitlabInstance) CreateProject(ctx context.Context, createOptions *GitlabCreateProjectOptions) (gitlabProject *GitlabProject, err error) {
+func (g *GitlabInstance) CreateProject(ctx context.Context, createOptions *gitlaboptions.GitlabCreateProjectOptions) (gitlabProject *GitlabProject, err error) {
 	if createOptions == nil {
 		return nil, tracederrors.TracedError("createOptions is nil")
 	}
