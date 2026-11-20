@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package gitlaboptions
 
 type GitlabDeleteReleaseOptions struct {
 	DeleteCorrespondingTag bool

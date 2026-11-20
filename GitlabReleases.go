@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"context"
 
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -77,7 +78,7 @@ func (g *GitlabReleases) CreateRelease(ctx context.Context, createReleaseOptions
 	return createdRelease, nil
 }
 
-func (g *GitlabReleases) DeleteAllReleases(ctx context.Context, options *GitlabDeleteReleaseOptions) (err error) {
+func (g *GitlabReleases) DeleteAllReleases(ctx context.Context, options *gitlaboptions.GitlabDeleteReleaseOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedErrorNil("options")
 	}

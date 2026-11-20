@@ -46,7 +46,7 @@ func TestGitlabReleaseCreateAndDelete(t *testing.T) {
 				for i := 0; i < 2; i++ {
 					err = release.Delete(
 						ctx,
-						&GitlabDeleteReleaseOptions{
+						&gitlaboptions.GitlabDeleteReleaseOptions{
 							DeleteCorrespondingTag: true,
 						},
 					)
@@ -82,7 +82,7 @@ func TestGitlabReleaseCreateAndDelete(t *testing.T) {
 				}
 
 				for i := 0; i < 2; i++ {
-					err = release.Delete(ctx, &GitlabDeleteReleaseOptions{DeleteCorrespondingTag: true})
+					err = release.Delete(ctx, &gitlaboptions.GitlabDeleteReleaseOptions{DeleteCorrespondingTag: true})
 					require.NoError(t, err)
 
 					exists, err := release.Exists(ctx)
@@ -131,7 +131,7 @@ func TestGitlabRelease_ReleaseLinks(t *testing.T) {
 				release, err := project.GetReleaseByName(releaseName)
 				require.NoError(t, err)
 
-				err = release.Delete(ctx, &GitlabDeleteReleaseOptions{DeleteCorrespondingTag: true})
+				err = release.Delete(ctx, &gitlaboptions.GitlabDeleteReleaseOptions{DeleteCorrespondingTag: true})
 				require.NoError(t, err)
 
 				release, err = project.CreateReleaseFromLatestCommitInDefaultBranch(
@@ -173,7 +173,7 @@ func TestGitlabRelease_ReleaseLinks(t *testing.T) {
 
 				err = release.Delete(
 					ctx,
-					&GitlabDeleteReleaseOptions{
+					&gitlaboptions.GitlabDeleteReleaseOptions{
 						DeleteCorrespondingTag: true,
 					},
 				)
@@ -218,7 +218,7 @@ func TestGitlabRelease_CreateNewPatchRelease(t *testing.T) {
 
 				err = project.DeleteAllReleases(
 					ctx,
-					&GitlabDeleteReleaseOptions{
+					&gitlaboptions.GitlabDeleteReleaseOptions{
 						DeleteCorrespondingTag: true,
 					},
 				)

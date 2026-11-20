@@ -10,6 +10,7 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -52,7 +53,7 @@ func (g *GitlabProject) HasNoRepositoryFiles(ctx context.Context, branchName str
 	return hasNoRepositoryFiles, nil
 }
 
-func (g *GitlabProjects) DeleteProject(ctx context.Context, deleteProjectOptions *GitlabDeleteProjectOptions) (err error) {
+func (g *GitlabProjects) DeleteProject(ctx context.Context, deleteProjectOptions *gitlaboptions.GitlabDeleteProjectOptions) (err error) {
 	if deleteProjectOptions == nil {
 		return tracederrors.TracedErrorNil("deleteProjectOptions")
 	}
@@ -216,7 +217,7 @@ func (g *GitlabProjects) GetProjectByProjectPath(ctx context.Context, projectPat
 	if isPersonalProject {
 		ownedProjects, err := g.GetProjectList(
 			ctx,
-			&GitlabgetProjectListOptions{
+			&gitlaboptions.GitlabgetProjectListOptions{
 				Owned: true,
 			},
 		)
@@ -476,7 +477,7 @@ func (p *GitlabProjects) GetNativeProjectsService() (nativeGitlabProject *gitlab
 	return nativeGitlabProject, nil
 }
 
-func (p *GitlabProjects) GetProjectList(ctx context.Context, options *GitlabgetProjectListOptions) (gitlabProjects []*GitlabProject, err error) {
+func (p *GitlabProjects) GetProjectList(ctx context.Context, options *gitlaboptions.GitlabgetProjectListOptions) (gitlabProjects []*GitlabProject, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -542,7 +543,7 @@ func (p *GitlabProjects) GetProjectList(ctx context.Context, options *GitlabgetP
 	return gitlabProjects, nil
 }
 
-func (p *GitlabProjects) GetProjectPathList(ctx context.Context, options *GitlabgetProjectListOptions) (projectPaths []string, err error) {
+func (p *GitlabProjects) GetProjectPathList(ctx context.Context, options *gitlaboptions.GitlabgetProjectListOptions) (projectPaths []string, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}

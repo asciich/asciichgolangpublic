@@ -7,6 +7,7 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/gopassutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -104,7 +105,7 @@ func (g *GitlabInstance) GetCurrentUsersName(ctx context.Context) (currentUserNa
 	return currentUserName, nil
 }
 
-func (g *GitlabInstance) AddRunner(ctx context.Context, newRunnerOptions *GitlabAddRunnerOptions) (createdRunner *GitlabRunner, err error) {
+func (g *GitlabInstance) AddRunner(ctx context.Context, newRunnerOptions *gitlaboptions.GitlabAddRunnerOptions) (createdRunner *GitlabRunner, err error) {
 	if newRunnerOptions == nil {
 		return nil, tracederrors.TracedError("newRunnerOptions is nil")
 	}
@@ -780,7 +781,7 @@ func (g *GitlabInstance) GetProjectIdByPath(ctx context.Context, projectPath str
 	return projectId, nil
 }
 
-func (g *GitlabInstance) GetProjectPathList(ctx context.Context, options *GitlabgetProjectListOptions) (projectPaths []string, err error) {
+func (g *GitlabInstance) GetProjectPathList(ctx context.Context, options *gitlaboptions.GitlabgetProjectListOptions) (projectPaths []string, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -920,7 +921,7 @@ func (g *GitlabInstance) ProjectByProjectPathExists(ctx context.Context, project
 	return projectExists, nil
 }
 
-func (g *GitlabInstance) RecreatePersonalAccessToken(ctx context.Context, createOptions *GitlabCreatePersonalAccessTokenOptions) (newToken string, err error) {
+func (g *GitlabInstance) RecreatePersonalAccessToken(ctx context.Context, createOptions *gitlaboptions.GitlabCreatePersonalAccessTokenOptions) (newToken string, err error) {
 	if createOptions == nil {
 		return "", tracederrors.TracedError("createOptions is nil")
 	}
@@ -952,7 +953,7 @@ func (g *GitlabInstance) RemoveAllRunners(ctx context.Context) (err error) {
 	return nil
 }
 
-func (g *GitlabInstance) ResetAccessToken(ctx context.Context, options *GitlabResetAccessTokenOptions) (err error) {
+func (g *GitlabInstance) ResetAccessToken(ctx context.Context, options *gitlaboptions.GitlabResetAccessTokenOptions) (err error) {
 	if options == nil {
 		return tracederrors.TracedError("options is nil")
 	}
@@ -1022,7 +1023,7 @@ func (g *GitlabInstance) ResetAccessToken(ctx context.Context, options *GitlabRe
 	*/
 }
 
-func (g *GitlabInstance) ResetUserPassword(ctx context.Context, resetOptions *GitlabResetPasswordOptions) (err error) {
+func (g *GitlabInstance) ResetUserPassword(ctx context.Context, resetOptions *gitlaboptions.GitlabResetPasswordOptions) (err error) {
 
 	if resetOptions == nil {
 		return tracederrors.TracedError("resetOptions is nil")

@@ -5,7 +5,7 @@ import (
 )
 
 // TODO: This should become the generic "CreateBranchOptions" to use everywhere.
-// It then should replace GitlabCreateBranchOptions.
+// It then should replace gitlaboptions.GitlabCreateBranchOptions.
 type CreateBranchOptions struct {
 	// Name of the branch to create:
 	Name string

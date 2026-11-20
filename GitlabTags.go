@@ -3,6 +3,7 @@ package asciichgolangpublic
 import (
 	"context"
 
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"github.com/asciich/asciichgolangpublic/pkg/versionutils"
@@ -67,7 +68,7 @@ func (g *GitlabTag) MustGetGitlabReleases() (gitlabReleases *GitlabReleases) {
 	return gitlabReleases
 }
 
-func (g *GitlabTags) CreateTag(ctx context.Context, createTagOptions *GitlabCreateTagOptions) (createdTag *GitlabTag, err error) {
+func (g *GitlabTags) CreateTag(ctx context.Context, createTagOptions *gitlaboptions.GitlabCreateTagOptions) (createdTag *GitlabTag, err error) {
 	if createTagOptions == nil {
 		return nil, tracederrors.TracedErrorNil("createTagOptions")
 	}
