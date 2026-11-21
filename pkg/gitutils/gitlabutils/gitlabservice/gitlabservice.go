@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package gitlabservice
 
 type GitlabService struct{}
 
