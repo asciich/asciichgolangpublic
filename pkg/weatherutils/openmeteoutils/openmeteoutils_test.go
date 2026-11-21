@@ -4,6 +4,7 @@ import (
 	"context"
 	"math"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/weatherutils/openmeteoutils"
@@ -57,5 +58,11 @@ func Test_GetCurrentTemperature(t *testing.T) {
 		// Plausibility check only: The real value changes all the time.
 		require.Greater(t, temperature, -40.0)
 		require.Less(t, temperature, 50.0)
+	})
+
+	t.Run("hourly: end before start", func(t *testing.T) {
+		now := time.Now()
+		_, err := openmeteoutils.GetHourlyTemperatures(context.Background(), 47.3, 7.9, now, now.Add(-2*time.Hour))
+		require.Error(t, err)
 	})
 }
