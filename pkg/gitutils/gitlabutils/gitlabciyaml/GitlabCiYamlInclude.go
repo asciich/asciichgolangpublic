@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package gitlabciyaml
 
 import (
 	"fmt"
