@@ -34,6 +34,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/uuidcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/versioncmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/virtualmachinescmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/weatherutilscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/wikicmd"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -96,6 +97,7 @@ func AddDefaultCommands(rootCmd *cobra.Command) (err error) {
 		uuidcmd.NewUuidCmd(),
 		versioncmd.NewVersionCmd(),
 		virtualmachinescmd.NewVirtualMachinesCmd(),
+		weatherutilscmd.NewWeatherUtilsCmd(),
 		wikicmd.NewWikiCmd(),
 	)
 
