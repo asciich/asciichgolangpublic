@@ -1,8 +1,796 @@
 # AGENTS.md for asciichgolangpublic
 
-## Constitution
+This file contains the rules ("constitution") which apply to the whole repository and its codebase, followed by the workflow instructions for agents.
 
-The [constitution.md](constitution.md) has to be applied to the whole repo and its codebase.
+## Imports
+
+### Go source code
+
+- The module path of this repository is `gitlab.asciich.ch/tools/asciichgolangpublic.git`. All packages of this repository must be imported using this module path **in Go source files (`*.go`)**:
+    - Use:
+        ```golang
+        import (
+            "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/logging"
+            "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/tracederrors"
+        )
+        ```
+    - Instead of:
+        ```golang
+        import (
+            "github.com/asciich/asciichgolangpublic/pkg/logging"
+            "github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+        )
+        ```
+
+### Public vs. private documentation
+
+This repository is also published to `github.com`. Which module path to reference therefore depends on whether the Markdown file is published:
+
+- **`README.md` (root and all sub directories) is public.** It is published to `github.com`:
+    - References to this repository (imports, `go install`, `go get`, links, ...) **must** use `github.com/asciich/asciichgolangpublic`.
+    - References to `gitlab.asciich.ch` **must not** appear in any `README.md`.
+- **`README_PRIVATE.md` is not part of the published repository.**
+    - References to `gitlab.asciich.ch` are allowed and expected here.
+    - Use it for information which only applies to the internal GitLab setup.
+- Do **not** "fix" or "unify" the module path in a `README.md` to match the Go source code. The different paths are intentional.
+    - Avoid changes like this in any `README.md`:
+        ```diff
+         Currently only `go install` is supported:
+         ```bash
+        -go install github.com/asciich/asciichgolangpublic/cmd/asciichgolangpublic@latest
+        +go install gitlab.asciich.ch/tools/asciichgolangpublic.git/cmd/asciichgolangpublic@latest
+         ```
+        ```
+    - This also applies to bulk operations such as search-and-replace, module path renames, refactorings, and automatic code or documentation generation. Review every changed `README.md` before committing.
+- When a Go code snippet is copied from a `.go` file into a `README.md`, replace the `gitlab.asciich.ch/tools/asciichgolangpublic.git` imports with `github.com/asciich/asciichgolangpublic`.
+- Before committing, verify that no public README references the private host. This command must return no matches:
+    ```bash
+    grep -rn "gitlab.asciich.ch" --include=README.md .
+    ```
+
+## Function Naming
+
+### `List...` vs. `List...Names`
+
+- Functions returning **objects** and functions returning **names** must be clearly distinguishable by their name:
+    - `List<Resource>s` returns objects representing the resources (e.g. `ListVolumes` returns objects representing the volumes).
+    - `List<Resource>Names` returns a `[]string` containing the names of the resources (e.g. `ListVolumeNames` returns a list of volume names).
+- Whenever a slice of strings (`[]string`) containing names is returned, the `Names` suffix **must** be used.
+- The resource noun stays **singular** in front of the `Names` suffix:
+    - Use: `ListVolumeNames`, `ListContainerNames`, `ListObjectNames`
+    - Instead of: `ListVolumesNames`, `ListContainersNames`, `ListObjectsNames`
+- A function without the `Names` suffix must **not** return a `[]string` of names:
+    - Instead of:
+        ```golang
+        func ListVolumes(ctx context.Context) ([]string, error) // Misleading: returns names, not volume objects
+        ```
+    - Use:
+        ```golang
+        func ListVolumes(ctx context.Context) ([]Volume, error)  // Returns objects representing the volumes
+        func ListVolumeNames(ctx context.Context) ([]string, error) // Returns the names of the volumes
+        ```
+- If both variants exist, the `List...Names` function should reuse the `List...` function (where reasonable) to avoid duplicated code (see [Implementation](#implementation)).
+
+### Sorting of `List...Names` results
+
+- `List...Names` functions **must always** return the names **sorted alphabetically**.
+    - This keeps results the same every time, regardless of the order in which the underlying system (API, shell command, file system, ...) returns them.
+    - It makes output stable for CLI usage, logs, and comparisons in tests.
+- Sort with the standard library right before returning (byte-wise lexicographic order, e.g. uppercase before lowercase):
+    ```golang
+    sort.Strings(ret)
+    ```
+- Callers must be able to rely on the sorting. Do **not** sort the result again after calling a `List...Names` function.
+- The sorting rule applies to **all** implementations (`native...`, `commandexecutor...`, and the convenience functions in the parent package). This way the [Cross-Implementation Testing](#cross-implementation-testing) returns the exact same result for every implementation.
+- Every `List...Names` function needs a test validating that the returned names are sorted:
+    ```golang
+    require.True(t, sort.StringsAreSorted(volumeNames))
+    ```
+
+### Implementation example
+
+```golang
+func ListVolumeNames(ctx context.Context) ([]string, error) {
+    logging.LogInfoByCtxf(ctx, "List volume names started.")
+
+    volumes, err := ListVolumes(ctx)
+    if err != nil {
+        return nil, err
+    }
+
+    ret := []string{}
+    for _, volume := range volumes {
+        name, err := volume.GetName()
+        if err != nil {
+            return nil, err
+        }
+
+        ret = append(ret, name)
+    }
+
+    sort.Strings(ret)
+
+    logging.LogInfoByCtxf(ctx, "List volume names finished. Found '%d' volumes.", len(ret))
+
+    return ret, nil
+}
+```
+
+## Implementation
+
+- For execution on localhost the `native...` are used. Native in this case means natively implemented in golang without external `exec`
+- For working with jumphosts the CommandExecutor approach is used. Instead of using go native libraries shell commands are used.
+    - Do not rely on the exit code 1 to check if a resource exists:
+        - Instead of `ls abc.txt` where return code 0 means `abc.txt` exists and all others mean either it does not exists or there was an error...
+        - Use a `sh` like `sh -c 'ls abc.txt &>/dev/null && echo yes || echo no'` and check for `yes`, `no` or other values (which indicate an error). This way we are sure the execution itself was performed.
+- The default variable name in small functions is `ret`:
+    - Use:
+        ```golang
+        return ret, nil
+        ```
+    - Instead of:
+        ```golang
+        return toReturn, nil
+        ```
+- For loops with a fixed number of iterations use the integer range form (requires Go 1.22 or newer).
+  This rule also applies to test cases:
+    - Use:
+        ```golang
+        for i := range 2 {
+            // ...
+        }
+        ```
+    - Instead of:
+        ```golang
+        for i := 0; i < 2; i++ {
+            // ...
+        }
+        ```
+    - If the loop variable is not needed omit it, since an unused loop variable does not compile:
+        ```golang
+        for range 2 {
+            // ...
+        }
+        ```
+- Public/ exported functions must be written in an idempotent way.
+    - Use `logging.LogChanged...` to log which change was performed.
+    - Use `logging.LogInfo...` if desired state is already in place.
+- Use `defer` instead of cleanup calls at the end of a function.
+  This rule also applies to test cases.
+  Since all functions are implemented in an idempotent way it is safe to use `defer`:
+    - Use:
+        ```golang
+        defer kubernetes.DeleteClusterRoleByName(ctx, roleName)
+        ```
+    - Instead of:
+        ```golang
+        // Cleanup
+        mustutils.Must0(kubernetes.DeleteClusterRoleByName(ctx, roleName))
+        }// end of the function
+        ```
+- Avoid creating `tracederrors` without assigning them to a variable or return them.
+    - Example:
+        - This is highly likely a mistake:
+            ```golang
+            tracederrors.TracedErrorf("ReadCloser process for command '%s' finished with error: %w", fullCommandJoined, err) // missing return statement in front of the line
+            ```
+        - And must be returned:
+            ```golang
+            return tracederrors.TracedErrorf("ReadCloser process for command '%s' finished with error: %w", fullCommandJoined, err) // correct
+            ```
+- Instead of `tracederrors.TracedError(err.Error())` use `tracederrors.TracedError(err)`. This function has built-in `error` handling.
+- Avoid silent `nil` error returns:
+    - Instead of
+        ```golang
+        func doSomething() error {
+            err := stepA()
+            if err != nil {
+                return nil // Usually this indicates a programming mistake. Correct to return err if it makes sense.
+            }
+
+            err := stepB()
+            if err != nil {
+                return err
+            }
+
+            return nil 
+        }
+        ```
+    - Use:
+        ```golang
+        func doSomething() error {
+            err := stepA()
+            if err != nil {
+                logging.LogInfoByCtxf(ctx, "Reason why its ok to ignore this: %s", err) // If there is really a reason to return nil here add a log message explaining why.
+                return nil 
+            }
+
+            err := stepB()
+            if err != nil {
+                return err
+            }
+
+            return nil 
+        }
+        ```
+    - This rule applies to **library/reusable functions**, which must always return the `error`. CLI commands follow a different, fail-fast convention (see [CLI Commands](#cli-commands)).
+- For filenames:
+    - Do not use `_methods<.extension>` suffix. Instead of `add_methods.go` use `add.go`.
+- This repository is organized in many sub packages which must be used to reduce duplicated code.
+    - Only explicit listed packages can import `os/exec` directly. All other must reuse the functions provided by the `commandexecutor` package:
+        - The `commandexecutor` package must use the `os/exec` directly.
+        - The `osutils` package must use `os/exec` in the `func Which(command string) (string, error)` implementation.
+        - The `nativefiles` or `nativefilesoo` package must be used instead of `os.MkdirAll` or `os.Create`.
+
+## Root Privileges
+
+- Functions which require root privileges (e.g. changing network card settings, writing to `/etc`, managing system services) **must** check if they are running as root **before** starting any work.
+    - Use `userutils.IsRunningAsRoot(ctx)` from `gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/userutils` for this check on localhost.
+    - Use `commandexecutoruserutils.IsRunningAsRoot(ctx, commandExecutor)` for command executors like containers and remote hosts.
+    - The check is done **after** the validation of the input parameters but **before** the "started" log message and before any IO or change is performed. This way a function never leaves a half applied state behind because of missing privileges.
+    - If not running as root, return a `tracederrors` error which names the function/operation and explains that root privileges are required.
+    - Example:
+        ```golang
+        func DeactivateOffloading(ctx context.Context, networkCardName string) error {
+            if networkCardName == "" {
+                return tracederrors.TracedErrorEmptyString("networkCardName")
+            }
+
+            isRoot, err := userutils.IsRunningAsRoot(ctx)
+            if err != nil {
+                return err
+            }
+
+            if !isRoot {
+                return tracederrors.TracedErrorf("Deactivate offloading for network card '%s' requires root privileges.", networkCardName)
+            }
+
+            logging.LogInfoByCtxf(ctx, "Deactivate offloading for network card '%s' started.", networkCardName)
+
+            // ... perform the work
+        }
+        ```
+- Only require root where it is really needed:
+    - Read-only functions (e.g. `Is...`, `Get...`, `List...`) which work as a normal user **must not** require root. This keeps them usable for monitoring and checks.
+- Document in the doc comment of the function if root privileges are required.
+- In `commandexecutor...` implementations the root check must be performed on the **target machine** using the `commandexecutor` (e.g. evaluating `id -u`), since the privileges of the local user are irrelevant for remote execution.
+
+## CLI Commands
+
+- The distinction between **CLI commands** and **library/reusable functions** determines how errors are handled:
+    - In **CLI commands** (e.g. `cobra` command implementations) it mostly makes no sense to handle errors gracefully. Failing fast is the desired behavior. Use the `mustutils` package to fail on error.
+    - In **library/reusable functions** it is important to **always return the `error`** instead of using `panic` or `LogFatal` (see also [Avoid silent `nil` error returns](#implementation)). This keeps the functions reusable and lets the caller decide how to handle failures.
+- Do **not** introduce `...OrLogFatal` convenience functions. Instead reuse the already existing functions that return an `error` and wrap the call with `mustutils.Must...` inside the CLI command.
+    - Use:
+        ```golang
+        func NewMkdirCmd() *cobra.Command {
+            const short = "Ensure a directory exists"
+
+            cmd := &cobra.Command{
+                Use:   "mkdir",
+                Short: short,
+                Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` files mkdir <path>`,
+
+                Run: func(cmd *cobra.Command, args []string) {
+                    ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
+
+                    if len(args) != 1 {
+                        logging.LogFatal("Please specify exactly one path for the directory to create.")
+                    }
+
+                    path := args[0]
+
+                    mustutils.Must0( // Use the mustutils to fail on error ...
+                        nativefiles.CreateDirectory(ctx, path, &filesoptions.CreateOptions{}), // ... and reuse already existing functions.
+                    )
+
+                    logging.LogGoodByCtxf(ctx, "Directory '%s' ensured to exist.", path)
+                },
+            }
+
+            return cmd
+        }
+        ```
+    - Instead of:
+        ```golang
+        func NewMkdirCmd() *cobra.Command {
+            const short = "Ensure a directory exists"
+
+            cmd := &cobra.Command{
+                Use:   "mkdir",
+                Short: short,
+                Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` files mkdir <path>`,
+
+                Run: func(cmd *cobra.Command, args []string) {
+                    ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
+
+                    if len(args) != 1 {
+                        logging.LogFatal("Please specify exactly one path for the directory to create.")
+                    }
+
+                    path := args[0]
+
+                    nativefiles.MkdirAllOrLogFatal(ctx, path) // Do NOT introduce OrLogFatal functions
+
+                    logging.LogGoodByCtxf(ctx, "Directory '%s' ensured to exist.", path)
+                },
+            }
+
+            return cmd
+        }
+        ```
+- Summary of the two flavors:
+    - **CLI command** → fail fast via `mustutils.Must...` on top of an existing error-returning function.
+    - **Library/reusable function** → return the `error`, never `panic`/`LogFatal` and never provide an `...OrLogFatal` variant.
+- CLI flags:
+    - Instead of:
+        ```golang
+        cmd.Flags().BoolVar(&useSudo, "sudo", false, "Use sudo for the hostnamectl set-hostname command")
+        ```
+    - Use:
+        ```golang
+        cmd.Flags().Bool("sudo", false, "Use sudo for the hostnamectl set-hostname command")
+
+        // and in the Run function:
+        sudo := mustutils.Must(cmd.Flags().GetBool("sudo"))
+        ```
+
+### One file per command
+
+- Every cobra command is implemented in its **own file**. Do **not** define multiple `New...Cmd` functions in the same file.
+- Command packages are named `<name>cmd` (e.g. `backupcmd`) and follow this layout:
+    - `root.go` defines the command the package is named after and registers all subcommands with `AddCommand`. **Every `<name>cmd` package contains at least a `root.go`**, even if it has no subcommands.
+    - Every subcommand lives in its own file named after the subcommand (e.g. `create.go` for `create`, `restore.go` for `restore`).
+    - Do not use suffixes like `_cmd` or `_command` for the filenames. Use `restore.go` instead of `restore_cmd.go`.
+- Function naming:
+    - `root.go` provides `New<Name>Cmd` (e.g. `NewBackupCmd`).
+    - Every subcommand file provides `New<Subcommand>Cmd` (e.g. `NewCreateCmd`, `NewRestoreCmd`).
+    - Only the `New...Cmd` functions are exported. Helpers used by a single command stay private and live in the same file as the command.
+- If a subcommand has subcommands on its own, it gets its own `<subname>cmd` sub package (with its own `root.go`) instead of growing the parent package.
+- The `root.go` only wires the commands together. The actual work is done by reusing library functions (see above), not by implementing logic in the command files.
+
+Use:
+
+```
+backupcmd/
+backupcmd/root.go     // Defines the 'backup' command and includes the subcommands.
+backupcmd/create.go   // Defines the 'backup create' command.
+backupcmd/restore.go  // Defines the 'backup restore' command.
+```
+
+`backupcmd/root.go`:
+
+```golang
+package backupcmd
+
+import (
+    "os"
+
+    "github.com/spf13/cobra"
+)
+
+func NewBackupCmd() *cobra.Command {
+    const short = "Backup and restore docker volumes."
+
+    cmd := &cobra.Command{
+        Use:   "backup",
+        Short: short,
+        Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` container docker volumes backup <create|restore> [flags]
+`,
+    }
+
+    cmd.AddCommand(
+        NewCreateCmd(),
+        NewRestoreCmd(),
+    )
+
+    return cmd
+}
+```
+
+`backupcmd/create.go`:
+
+```golang
+package backupcmd
+
+import (
+    "os"
+
+    "github.com/spf13/cobra"
+    "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/containerutils/dockerutils"
+    "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+    "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/mustutils"
+)
+
+func NewCreateCmd() *cobra.Command {
+    const short = "Backup a docker volume to a tar archive."
+
+    cmd := &cobra.Command{
+        Use:   "create",
+        Short: short,
+        Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` container docker volumes backup create --volume <volume-name> --archive <archive-path>
+
+Usage example:
+    ` + os.Args[0] + ` container docker volumes backup create --volume my-volume --archive /backups/my-volume.tar.gz
+`,
+        Run: func(cmd *cobra.Command, args []string) {
+            ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
+
+            volumeName := mustutils.Must(cmd.Flags().GetString("volume"))
+            archivePath := mustutils.Must(cmd.Flags().GetString("archive"))
+
+            mustutils.Must0(dockerutils.BackupVolume(ctx, volumeName, archivePath))
+        },
+    }
+
+    cmd.Flags().String("volume", "", "Name of the docker volume to backup")
+    cmd.Flags().String("archive", "", "Path to the tar archive file to create")
+
+    mustutils.Must0(cmd.MarkFlagRequired("volume"))
+    mustutils.Must0(cmd.MarkFlagRequired("archive"))
+
+    return cmd
+}
+```
+
+`backupcmd/restore.go`:
+
+```golang
+package backupcmd
+
+import (
+    "os"
+
+    "github.com/spf13/cobra"
+    "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/containerutils/dockerutils"
+    "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/contextutils"
+    "gitlab.asciich.ch/tools/asciichgolangpublic.git/pkg/mustutils"
+)
+
+func NewRestoreCmd() *cobra.Command {
+    const short = "Restore a docker volume from a tar archive."
+
+    cmd := &cobra.Command{
+        Use:   "restore",
+        Short: short,
+        Long: short + `
+
+Usage:
+    ` + os.Args[0] + ` container docker volumes backup restore --volume <volume-name> --archive <archive-path>
+
+Usage example:
+    ` + os.Args[0] + ` container docker volumes backup restore --volume my-volume --archive /backups/my-volume.tar.gz
+`,
+        Run: func(cmd *cobra.Command, args []string) {
+            ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
+
+            volumeName := mustutils.Must(cmd.Flags().GetString("volume"))
+            archivePath := mustutils.Must(cmd.Flags().GetString("archive"))
+
+            mustutils.Must0(dockerutils.RestoreVolume(ctx, volumeName, archivePath))
+        },
+    }
+
+    cmd.Flags().String("volume", "", "Name of the docker volume to restore")
+    cmd.Flags().String("archive", "", "Path to the tar archive file to restore from")
+
+    mustutils.Must0(cmd.MarkFlagRequired("volume"))
+    mustutils.Must0(cmd.MarkFlagRequired("archive"))
+
+    return cmd
+}
+```
+
+Instead of defining `NewBackupCmd` and `NewRestoreCmd` together in one file (e.g. `backupcmd/backup.go`).
+
+
+## IP Address Handling
+
+- Whenever an IP address has to be **validated** or is taken as an **input parameter**, the functions provided by the [iputils](./pkg/netutils/iputils/README.md) package **must** be used. Do **not** reimplement IP validation logic (e.g. calling `net.ParseIP` directly) anywhere else in the repository.
+- Whenever an IP address is returned by a function, the functions provided by the [iputils](./pkg/netutils/iputils/README.md) package **must** be used to validate them before they are returned.
+
+### Available functions
+
+The `iputils` package provides two flavors of validation for each IP variant:
+
+- **Boolean check** (`Is...`): returns `(bool, error)`. The `error` is only non-nil for invalid input such as an empty string. The `bool` reports whether the address is valid.
+    - `IsValidIP(ctx, ip)` – valid IPv4 **or** IPv6.
+    - `IsValidIPv4(ctx, ip)` – valid IPv4 only.
+    - `IsValidIPv6(ctx, ip)` – valid IPv6 only.
+- **Assertion check** (`Check...`): returns `error`. Returns `nil` if valid, an empty-string error for empty input, or the matching sentinel error otherwise.
+    - `CheckValidIP(ctx, ip)` – returns `ErrInvalidIP` if invalid.
+    - `CheckValidIPv4(ctx, ip)` – returns `ErrInvalidIPv4` if invalid.
+    - `CheckValidIPv6(ctx, ip)` – returns `ErrInvalidIPv6` if invalid.
+
+### Choosing between `Is...` and `Check...`
+
+- Use the **`Check...`** functions when an invalid IP is an error condition (e.g. validating an input parameter at the start of a function). They integrate directly with the standard early-return error handling:
+    ```golang
+    func ConnectToHost(ctx context.Context, ip string) error {
+        err := iputils.CheckValidIP(ctx, ip)
+        if err != nil {
+            return err
+        }
+
+        // ... continue with a guaranteed valid IP
+    }
+    ```
+- Use the **`Is...`** functions when validity is a normal branching decision rather than an error (e.g. deciding between an IPv4 and IPv6 code path):
+    ```golang
+    isV4, err := iputils.IsValidIPv4(ctx, ip)
+    if err != nil {
+        return err
+    }
+
+    if isV4 {
+        // handle IPv4
+    } else {
+        // handle IPv6
+    }
+    ```
+
+### Sentinel errors and their helpers
+
+- The package exposes the sentinel errors `ErrInvalidIP`, `ErrInvalidIPv4`, and `ErrInvalidIPv6`.
+- To inspect an error returned by the `Check...` functions, use the provided predicates instead of comparing errors directly. They correctly handle wrapped errors via `errors.Is`:
+    - `IsInvalidIPError(err)` – true for any invalid-IP sentinel (`ErrInvalidIP`, `ErrInvalidIPv4`, or `ErrInvalidIPv6`).
+    - `IsInvalidIPv4Error(err)` – true only for `ErrInvalidIPv4`.
+    - `IsInvalidIPv6Error(err)` – true only for `ErrInvalidIPv6`.
+
+### Conventions
+
+- All `iputils` functions take a `context.Context` as their first parameter and log a validation result via `logging.LogInfoByCtxf`. Always pass a proper context through.
+- Empty input strings must be treated as an error (`tracederrors.TracedErrorEmptyString("ip")`), never silently as "invalid". This distinguishes a programming/usage error (missing value) from a genuinely invalid IP.
+- Because `iputils` operates purely on in-memory data (no file/network I/O), it does **not** require `native...` / `commandexecutor...` dual implementations (see [Generic Functions](#generic-functions)).
+
+## Package Organization: Native and CommandExecutor Implementations
+
+- For packages where functions interact with files, network, or external systems, provide **two implementation subpackages**:
+    1. **`native<packagename>`**: Implements the logic using native Go libraries. Works only on the local machine.
+    2. **`commandexecutor<packagename>`**: Implements the logic using the `commandexecutor` in combination with shell commands. This allows execution on remote machines (e.g. over SSH).
+- **Both subpackages must implement the same set of functions** so the functionality stays the same regardless of whether it is executed locally or on a remote machine.
+- The `commandexecutor...` functions take an additional `commandexecutor` parameter compared to their `native...` counterparts.
+
+### Naming Conventions
+
+- The native subpackage is named `native<packagename>` (e.g. `nativex509utils`, `nativetruststoreutils`).
+- The commandexecutor subpackage is named `commandexecutor<packagename>` (e.g. `commandexecutorx509utils`, `commandexecutortruststoreutils`).
+- The parent package (e.g. `x509utils`) provides **convenience functions** that delegate to the `native...` implementation. This allows callers who only need local execution to use the simpler API without explicitly choosing an implementation.
+
+### Adding a New Function
+
+1. Implement the function in **both** `native<packagename>` and `commandexecutor<packagename>`.
+2. Add a convenience wrapper in the parent package that calls the `native...` implementation.
+3. Add an `Example_<FunctionName>_test.go` in the parent package containing a well-commented example test for documentation purposes.
+
+### Generic Functions
+
+- Functions that operate purely on in-memory data (e.g. `GetCommonName(cert *x509.Certificate) (string, error)`) and do **not** require file or network access are placed in a dedicated `generic<packagename>` subpackage (e.g. `genericx509utils`).
+- These functions do not need dual implementations since they have no I/O dependencies.
+
+### Object-Oriented Packages (`oo` suffix)
+
+- For packages that provide procedural/functional APIs (functions taking explicit parameters), an **object-oriented wrapper package** can be provided with the suffix `oo`.
+- Naming: `<packagename>oo` (e.g. `nativefilesoo`, `commandexecutorexecoo`, `commandexecutorbashoo`).
+- The `oo` package defines **structs** that hold state (e.g. a file path, a connection) and provides **methods** on those structs that delegate to the underlying procedural package.
+- The methods retrieve the necessary parameters from the struct's fields instead of requiring them as explicit function arguments.
+- Example:
+    - Procedural style in `nativefiles`:
+        ```golang
+        func Delete(ctx context.Context, pathToDelete string, options *filesoptions.DeleteOptions) error {
+            // implementation
+        }
+        ```
+    - Object-oriented style in `nativefilesoo`:
+        ```golang
+        func (f *File) Delete(ctx context.Context, options *filesoptions.DeleteOptions) error {
+            path, err := f.GetPath()
+            if err != nil {
+                return err
+            }
+            return nativefiles.Delete(ctx, path, options)
+        }
+        ```
+- The `oo` package **must not** reimplement logic. It only wraps calls to the underlying procedural package.
+- This pattern applies to both `native...oo` and `commandexecutor...oo` packages.
+
+### Package Structure Example
+
+```
+pkg/<domain>/<packagename>/
+├── commandexecutor<packagename>/   # Shell-based implementation (works remotely)
+├── native<packagename>/            # Native Go implementation (local only)
+├── generic<packagename>/           # Pure in-memory helpers (no I/O)
+├── <packagename>options/           # Options structs used by the functions
+├── Example_<Function>_test.go      # Documentation examples (one per convenience function)
+├── <packagename>_test.go           # Cross-implementation tests (loop over all impls)
+├── <packagename>.go                # Convenience functions delegating to native impl
+├── README.md
+└──<packagename>.spec.md
+```
+
+### Cross-Implementation Testing
+
+- Tests in the parent package directory validate that **all implementations behave identically**.
+- This is achieved by defining an implementation struct (e.g. `x509Implementation`) that holds function references for each implementation variant.
+- A `getX509Implementations()` function returns a slice of all implementations to test, including:
+    - The convenience functions from the parent package itself.
+    - The `native...` implementation.
+    - The `commandexecutor...` implementations (one per supported executor, e.g. `exec` and `bash`).
+- Every test iterates over all implementations and runs the same assertions for each:
+    ```golang
+    func Test_SomeFunction(t *testing.T) {
+        implementations := getX509Implementations()
+
+        for _, impl := range implementations {
+            impl := impl
+
+            t.Run(impl.Name+"_description of test case", func(t *testing.T) {
+                // test logic using impl.SomeFunction(...)
+            })
+        }
+    }
+    ```
+- Additionally, dedicated tests validate that all implementations return the **exact same result** for identical inputs.
+
+## Logging
+
+- Functions which perform IO or otherwise take longer **must** log a "started" and a "finished" message.
+- Use `logging.LogInfoByCtxf` with a context parameter for both messages.
+- The "started" message is logged **before** the main work begins.
+- The "finished" message is logged **after** the work completes successfully, ideally including a summary (e.g. count of results).
+- Example:
+    ```golang
+    func ListObjectNames(ctx context.Context, client *minio.Client, bucketName string) ([]string, error) {
+    	if client == nil {
+    		return nil, tracederrors.TracedErrorNil("client")
+    	}
+
+    	if bucketName == "" {
+    		return nil, tracederrors.TracedErrorEmptyString("bucketName")
+    	}
+
+    	logging.LogInfoByCtxf(ctx, "List objects in bucket '%s' started.", bucketName)
+
+    	objectChannel := client.ListObjects(ctx, bucketName, minio.ListObjectsOptions{
+    		Recursive: true,
+    	})
+
+    	objectNames := []string{}
+    	for object := range objectChannel {
+    		if object.Err != nil {
+    			return nil, tracederrors.TracedErrorf("There is an object.Err while listing the object in the bucket '%s': %w", bucketName, object.Err)
+    		}
+    		objectNames = append(objectNames, object.Key)
+    	}
+
+    	sort.Strings(objectNames)
+
+    	logging.LogInfoByCtxf(ctx, "List objects in bucket '%s' finished. There are '%d' objects in the bucket.", bucketName, len(objectNames))
+
+    	return objectNames, nil
+    }
+    ```
+
+## Documentation
+
+- All `Example_*_test.go` files are meant for documentation. They must all be listed and linked in the corresponding `README.md`. This is done as a bullet point list.
+- All package names mentioned in a markdown file must be a link to the README.md of the mentioned package.
+- Every `README.md` is public (see [Public vs. private documentation](#public-vs-private-documentation)). It must reference this repository using `github.com/asciich/asciichgolangpublic` and never `gitlab.asciich.ch`.
+- Content which is only relevant for the internal GitLab setup (e.g. internal URLs, GitLab CI details, `gitlab.asciich.ch` import paths) belongs in `README_PRIVATE.md`.
+
+
+## Testing
+
+- In tests use the `require` package for condition checks.
+- Use `require` to check for no error:
+    - Use:
+        ```golang
+        require.NoError(t, err)
+        ```
+    - Instead of:
+        ```golang
+        if err != nil {
+	    	panic(err)
+	    }
+        ```
+    - Use `t.NoError(t, err)` to check for errors. Do not use less specific `t.Nil(t, err)`.
+- Test files must use the external test package (e.g. `package nativegit_test` instead of `package nativegit`) to ensure only exported API is tested.
+- Reuse existing functions to set up test preconditions:
+    - Do **not** reimplement logic in tests (e.g. using raw shell commands via `RunCommand...`) if the repository already provides a function for it. The rule to reuse sub packages and avoid duplicated code (see [Implementation](#implementation)) applies to tests as well.
+    - Since all exported functions are idempotent, they can be used to directly **ensure** the desired precondition (e.g. a file is absent) instead of only **checking** it. This makes tests independent of leftovers from previous runs and of the initial state of the test environment.
+    - Use:
+        ```golang
+        t.Run("creates initiator name file when it does not exist", func(t *testing.T) {
+            err := commandexecutorfile.Delete(ctx, container, "/etc/iscsi/initiatorname.iscsi", &filesoptions.DeleteOptions{})
+            require.NoError(t, err)
+
+            // ... continue with the test logic
+        })
+        ```
+    - Instead of:
+        ```golang
+        t.Run("creates initiator name file when it does not exist", func(t *testing.T) {
+            // First ensure the file does not exist in the container
+            stdout, err := container.RunCommandAndGetStdoutAsString(
+                ctx,
+                &parameteroptions.RunCommandOptions{
+                    Command: []string{"sh", "-c", "test -f /etc/iscsi/initiatorname.iscsi && echo 'exists' || echo 'not exists'"},
+                },
+            )
+            require.NoError(t, err)
+            require.Contains(t, stdout, "not exists")
+
+            // ... continue with the test logic
+        })
+        ```
+- Unit Test Structure:
+    - Use t.Run subtests for distinct assertions
+        - When a single test function validates multiple distinct behaviors or cases, each case must be wrapped in its own t.Run subtest. This provides clearer test output, allows individual subtests to be run in isolation, and makes failures easier to identify.
+        - Instead of:
+            ```golang
+            func TestHost_GetHostByHostnameReturnsCorrectType(t *testing.T) {
+                host, err := hostsutils.GetHostByHostname("localhost")
+                require.NoError(t, err)
+                _, ok := host.(*nativehost.NativeHost)
+                require.True(t, ok, "GetHostByHostname('localhost') must return a NativeHost")
+
+                host, err = hostsutils.GetHostByHostname("example.com")
+                require.NoError(t, err)
+                _, ok = host.(*commandexecutorhost.CommandExecutorHost)
+                require.True(t, ok, "GetHostByHostname('example.com') must return a CommandExecutorHost")
+            }
+            ```
+        - Use:
+            ```
+            func TestHost_GetHostByHostnameReturnsCorrectType(t *testing.T) {
+                t.Run("localhost must return NativeHost", func(t *testing.T) {
+                    host, err := hostsutils.GetHostByHostname("localhost")
+                    require.NoError(t, err)
+                    _, ok := host.(*nativehost.NativeHost)
+                    require.True(t, ok, "GetHostByHostname('localhost') must return a NativeHost")
+                })
+
+                t.Run("any other hostname must return a CommandExecutorHost", func(t *testing.T) {
+                    host, err := hostsutils.GetHostByHostname("example.com")
+                    require.NoError(t, err)
+                    _, ok = host.(*commandexecutorhost.CommandExecutorHost)
+                    require.True(t, ok, "GetHostByHostname('example.com') must return a CommandExecutorHost")
+                })
+            }
+            ```
+- Testing internal/private functions:
+    - By default, private functions are **not** tested directly. They are tested indirectly through the exported API that calls them (see the external test package rule above).
+    - Only if direct testing of a private function is truly required, place these tests in a dedicated file named `<package_name>_internals_test.go`.
+        - This file **must** use the internal test package, i.e. `package <package_name>` **without** the `_test` suffix.
+            - Use:
+                ```golang
+                package nativegit
+                ```
+            - Instead of:
+                ```golang
+                package nativegit_test
+                ```
+        - This is the **only** exception to the external test package rule. All tests of exported API must still reside in external test packages (`package <package_name>_test`).
+        - Keep tests of private functions isolated in the `<package_name>_internals_test.go` file so that the separation between public API tests and internal tests stays explicit and easy to find.
+- All deep copy related functions need unittest (e.g. `GetDeepCopy()`).
+    - It's important to validate maps and slices are handled correctly by the deep copy functions.
+
+## Container handling
+
+- Avoid installing things in containers. Use container images which already include what is needed. Relying on the package servers is not a good practice.
 
 ## Editing files
 
@@ -28,7 +816,7 @@ The [constitution.md](constitution.md) has to be applied to the whole repo and i
         This are the specifications for the [`<packagename>` package](README.md).
         
         This document extends the parent specifications [parent.spec.md](../parent.spec.md). // If there is a parent specification available.
-        This document extends the [constitution.md](/constitution.md). // If there is no parent specification available.
+        This document extends the [AGENTS.md](/AGENTS.md). // If there is no parent specification available.
         ```
 - Whenever a `<packagename>.spec.md` exists the corresponding `README.md` in the same directory must exist as well.
 - A `README.md` without `<packagename>.spec.md` is totally fine.

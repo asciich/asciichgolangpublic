@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlabciyaml"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -179,7 +180,7 @@ func TestGitlabCiYamlFileAddIncludes(t *testing.T) {
 				for i := 0; i < 3; i++ {
 					err = gitlabCiYamlFile.AddInclude(
 						ctx,
-						&GitlabCiYamlInclude{
+						&gitlabciyaml.GitlabCiYamlInclude{
 							Project: "abc",
 							File:    "test.yml",
 							Ref:     "v1234",
@@ -195,7 +196,7 @@ func TestGitlabCiYamlFileAddIncludes(t *testing.T) {
 				for i := 0; i < 3; i++ {
 					err = gitlabCiYamlFile.AddInclude(
 						ctx,
-						&GitlabCiYamlInclude{
+						&gitlabciyaml.GitlabCiYamlInclude{
 							Project: "abc_other",
 							File:    "test2.yml",
 							Ref:     "v12345",
