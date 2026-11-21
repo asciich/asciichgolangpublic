@@ -25,6 +25,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlabciyaml"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -975,13 +976,13 @@ func (l *LocalGitRepository) GetGitStatusOutput(ctx context.Context) (output str
 	return output, nil
 }
 
-func (l *LocalGitRepository) GetGitlabCiYamlFile() (gitlabCiYamlFile *GitlabCiYamlFile, err error) {
+func (l *LocalGitRepository) GetGitlabCiYamlFile() (gitlabCiYamlFile *gitlabciyaml.GitlabCiYamlFile, err error) {
 	ciYamlFile, err := l.GetFileInDirectory(Gitlab().GetDefaultGitlabCiYamlFileName())
 	if err != nil {
 		return nil, err
 	}
 
-	gitlabCiYamlFile, err = GetGitlabCiYamlFileByFile(ciYamlFile)
+	gitlabCiYamlFile, err = gitlabciyaml.GetGitlabCiYamlFileByFile(ciYamlFile)
 	if err != nil {
 		return nil, err
 	}

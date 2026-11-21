@@ -1,14 +1,19 @@
-package asciichgolangpublic
+package gitlabciyaml
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
-	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlabciyaml"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
+
+func getCtx() context.Context {
+	return contextutils.ContextVerbose()
+}
 
 func TestGitlabCiYamlFileGetInclude(t *testing.T) {
 	tests := []struct {
@@ -180,7 +185,7 @@ func TestGitlabCiYamlFileAddIncludes(t *testing.T) {
 				for i := 0; i < 3; i++ {
 					err = gitlabCiYamlFile.AddInclude(
 						ctx,
-						&gitlabciyaml.GitlabCiYamlInclude{
+						&GitlabCiYamlInclude{
 							Project: "abc",
 							File:    "test.yml",
 							Ref:     "v1234",
@@ -196,7 +201,7 @@ func TestGitlabCiYamlFileAddIncludes(t *testing.T) {
 				for i := 0; i < 3; i++ {
 					err = gitlabCiYamlFile.AddInclude(
 						ctx,
-						&gitlabciyaml.GitlabCiYamlInclude{
+						&GitlabCiYamlInclude{
 							Project: "abc_other",
 							File:    "test2.yml",
 							Ref:     "v12345",

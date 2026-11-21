@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package gitlabciyaml
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
-	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlabciyaml"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 	"gopkg.in/yaml.v3"
@@ -63,7 +62,7 @@ func NewGitlabCiYamlFile() (g *GitlabCiYamlFile) {
 	return new(GitlabCiYamlFile)
 }
 
-func (g *GitlabCiYamlFile) AddInclude(ctx context.Context, include *gitlabciyaml.GitlabCiYamlInclude) (err error) {
+func (g *GitlabCiYamlFile) AddInclude(ctx context.Context, include *GitlabCiYamlInclude) (err error) {
 	if include == nil {
 		return tracederrors.TracedError("include is nil")
 	}
@@ -116,7 +115,7 @@ func (g *GitlabCiYamlFile) AddInclude(ctx context.Context, include *gitlabciyaml
 	return nil
 }
 
-func (g *GitlabCiYamlFile) ContainsInclude(ctx context.Context, include *gitlabciyaml.GitlabCiYamlInclude, ignoreVersion bool) (containsInclude bool, err error) {
+func (g *GitlabCiYamlFile) ContainsInclude(ctx context.Context, include *GitlabCiYamlInclude, ignoreVersion bool) (containsInclude bool, err error) {
 	if include == nil {
 		return false, tracederrors.TracedError("include is nil")
 	}
@@ -144,7 +143,7 @@ func (g *GitlabCiYamlFile) ContainsInclude(ctx context.Context, include *gitlabc
 	return false, nil
 }
 
-func (g *GitlabCiYamlFile) GetIncludes(ctx context.Context) (includes []*gitlabciyaml.GitlabCiYamlInclude, err error) {
+func (g *GitlabCiYamlFile) GetIncludes(ctx context.Context) (includes []*GitlabCiYamlInclude, err error) {
 	localPath, err := g.GetLocalPath()
 	if err != nil {
 		return nil, err
@@ -156,7 +155,7 @@ func (g *GitlabCiYamlFile) GetIncludes(ctx context.Context) (includes []*gitlabc
 	}
 
 	type IncludesYaml struct {
-		Includes []*gitlabciyaml.GitlabCiYamlInclude `yaml:"include"`
+		Includes []*GitlabCiYamlInclude `yaml:"include"`
 	}
 
 	includesYaml := new(IncludesYaml)
@@ -194,7 +193,7 @@ func (g *GitlabCiYamlFile) GetTextBlocksWithoutIncludes(ctx context.Context) (te
 	return textBlocks, nil
 }
 
-func (g *GitlabCiYamlFile) RewriteIncludes(ctx context.Context, includes []*gitlabciyaml.GitlabCiYamlInclude) (err error) {
+func (g *GitlabCiYamlFile) RewriteIncludes(ctx context.Context, includes []*GitlabCiYamlInclude) (err error) {
 	blocks, err := g.GetTextBlocksWithoutIncludes(ctx)
 	if err != nil {
 		return err
@@ -245,7 +244,7 @@ func (g *GitlabCiYamlFile) getIncludeBlock(ctx context.Context) (includeBlock st
 	return includeBlock, nil
 }
 
-func (g *GitlabCiYamlFile) getIncludesAsTextBlock(includes []*gitlabciyaml.GitlabCiYamlInclude) (textBlock string, err error) {
+func (g *GitlabCiYamlFile) getIncludesAsTextBlock(includes []*GitlabCiYamlInclude) (textBlock string, err error) {
 	if includes == nil {
 		return "", tracederrors.TracedError("includes is nil")
 	}
