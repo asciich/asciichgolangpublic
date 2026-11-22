@@ -7,6 +7,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/changesummary"
 	"github.com/asciich/asciichgolangpublic/pkg/dependencyutils/dependencyinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/precommitutils"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions/authenticationoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -16,7 +17,7 @@ import (
 var ErrorPreCommitConfigFileContentLoad = errors.New("failed to load preCommitConfigFileContent")
 
 type PreCommitConfigFileContent struct {
-	config *PreCommitConfigFileConfig
+	config *precommitutils.PreCommitConfigFileConfig
 }
 
 func NewPreCommitConfigFileContent() (p *PreCommitConfigFileContent) {
@@ -39,7 +40,7 @@ func (p *PreCommitConfigFileContent) GetAsString() (contentString string, err er
 	return contentString, nil
 }
 
-func (p *PreCommitConfigFileContent) GetConfig() (config *PreCommitConfigFileConfig, err error) {
+func (p *PreCommitConfigFileContent) GetConfig() (config *precommitutils.PreCommitConfigFileConfig, err error) {
 	if p.config == nil {
 		return nil, tracederrors.TracedErrorf("config not set")
 	}
@@ -92,7 +93,7 @@ func (p *PreCommitConfigFileContent) LoadFromString(toLoad string) (err error) {
 		return tracederrors.TracedErrorEmptyString("toLoad")
 	}
 
-	content := NewPreCommitConfigFileConfig()
+	content := precommitutils.NewPreCommitConfigFileConfig()
 	err = yaml.Unmarshal([]byte(toLoad), &content)
 	if err != nil {
 		return tracederrors.TracedErrorf(
@@ -114,7 +115,7 @@ func (p *PreCommitConfigFileContent) LoadFromString(toLoad string) (err error) {
 	return nil
 }
 
-func (p *PreCommitConfigFileContent) SetConfig(config *PreCommitConfigFileConfig) (err error) {
+func (p *PreCommitConfigFileContent) SetConfig(config *precommitutils.PreCommitConfigFileConfig) (err error) {
 	if config == nil {
 		return tracederrors.TracedErrorf("config is nil")
 	}

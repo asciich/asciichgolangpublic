@@ -11,6 +11,7 @@ Utilities for working with Git repositories, branches, commits, and tags.
 * [gitlabutils](./gitlabutils/README.md): GitLab-specific utilities.
 * [nativegit](./nativegit/README.md): Native Git operations using Go libraries (local only).
 * [nativegitoo](./nativegitoo/README.md): Object-oriented wrapper around nativegit.
+* [precommitutils](./precommitutils/README.md): Utilities for pre-commit config files.
 
 ## Implementation Pattern
 
