@@ -1,9 +1,10 @@
-package asciichgolangpublic
+package googlestorage_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/asciich/asciichgolangpublic/pkg/storage/s3/googlestorage"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -24,7 +25,7 @@ func TestGoogleStorageBucketExists(t *testing.T) {
 		t.Run(
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
-				bucket, err := GetGoogleStorageBucketByName(tt.bucketName)
+				bucket, err := googlestorage.GetGoogleStorageBucketByName(tt.bucketName)
 				require.NoError(t, err)
 
 				exists, err := bucket.Exists()

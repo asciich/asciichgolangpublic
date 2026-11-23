@@ -28,6 +28,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlabciyaml"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlabservice"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/nativegitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/shellutils/shelllinehandler"
@@ -1978,7 +1979,7 @@ func (l *LocalGitRepository) SetGitConfigByGoGitConfig(ctx context.Context, conf
 	return nil
 }
 
-func (l *LocalGitRepository) SetRemote(ctx context.Context, remoteName string, remotUrl string) (remote *LocalGitRemote, err error) {
+func (l *LocalGitRepository) SetRemote(ctx context.Context, remoteName string, remotUrl string) (remote *nativegitoo.LocalGitRemote, err error) {
 	if remoteName == "" {
 		return nil, tracederrors.TracedErrorEmptyString("remoteName")
 	}
@@ -2000,7 +2001,7 @@ func (l *LocalGitRepository) SetRemote(ctx context.Context, remoteName string, r
 		return nil, tracederrors.TracedErrorf("Create remote failed: '%w'", err)
 	}
 
-	remote, err = NewLocalGitRemoteByNativeGoGitRemote(nativeRemote)
+	remote, err = nativegitoo.NewLocalGitRemoteByNativeGoGitRemote(nativeRemote)
 	if err != nil {
 		return nil, err
 	}

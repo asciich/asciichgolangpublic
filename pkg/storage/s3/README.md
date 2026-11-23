@@ -2,7 +2,10 @@
 
 Contains S3 storage related implementations.
 
-Currently only the [nativeminioclient](nativeminioclient/) is available.
+Currently the following implementations are available:
+
+- [nativeminioclient](nativeminioclient/): Native minio client implementation.
+- [googlestorage](googlestorage/): Google Cloud Storage buckets, which offer an S3 compatible API.
 
 ## Specifications
 

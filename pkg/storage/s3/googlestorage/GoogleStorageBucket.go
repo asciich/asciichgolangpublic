@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package googlestorage
 
 import (
 	"context"

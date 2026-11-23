@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package precommitutils
 
 import (
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
