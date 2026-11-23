@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/asciich/asciichgolangpublic/pkg/netutils/vpnutils/headscaleutils/commandexecutorheadscale"
+	"github.com/asciich/asciichgolangpublic/pkg/netutils/vpnutils/headscaleutils/headscaleinterfaces"
 )
 
 func (c *CommandExecutorHeadscale) CreateUser(ctx context.Context, userName string) error {
@@ -40,4 +41,13 @@ func (c *CommandExecutorHeadscale) GeneratePreauthKeyForUser(ctx context.Context
 	}
 
 	return commandexecutorheadscale.GeneratePreauthKeyForUser(ctx, commandExectuor, userName)
+}
+
+func (c *CommandExecutorHeadscale) ListUsers(ctx context.Context) ([]headscaleinterfaces.User, error) {
+	commandExecutor, err := c.GetCommandExecutor()
+	if err != nil {
+		return nil, err
+	}
+
+	return commandexecutorheadscale.ListUsers(ctx, commandExecutor)
 }

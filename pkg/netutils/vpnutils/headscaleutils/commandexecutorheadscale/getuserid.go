@@ -9,8 +9,11 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
-func GetUserId(ctx context.Context, commandExectuor commandexecutorinterfaces.CommandExecutor, userName string) (int, error) {
-	if commandExectuor == nil {
+// GetUserId returns the ID of the headscale user with the given username.
+//
+// Returns headscalegeneric.ErrHeadscaleUserNotFound (wrapped) if there is no such user.
+func GetUserId(ctx context.Context, commandExecutor commandexecutorinterfaces.CommandExecutor, userName string) (int, error) {
+	if commandExecutor == nil {
 		return 0, tracederrors.TracedErrorNil("commandExecutor")
 	}
 
@@ -18,24 +21,36 @@ func GetUserId(ctx context.Context, commandExectuor commandexecutorinterfaces.Co
 		return 0, tracederrors.TracedErrorEmptyString("userName")
 	}
 
-	hostDescription, err := commandExectuor.GetHostDescription()
+	hostDescription, err := commandExecutor.GetHostDescription()
 	if err != nil {
 		return 0, err
 	}
 
 	logging.LogInfoByCtxf(ctx, "Get headscale user Id of user '%s' on '%s' started.", userName, hostDescription)
 
-	rawList, err := ListUsersRaw(ctx, commandExectuor)
+	users, err := ListUsers(ctx, commandExecutor)
 	if err != nil {
 		return 0, err
 	}
 
-	var userId int
-	for _, u := range rawList {
-		if u.Name == userName {
-			userId = u.ID
-			break
+	userId := 0
+	for _, user := range users {
+		username, err := user.GetUsername()
+		if err != nil {
+			return 0, err
 		}
+
+		if username != userName {
+			continue
+		}
+
+		id, err := user.GetID()
+		if err != nil {
+			return 0, err
+		}
+
+		userId = int(id)
+		break
 	}
 
 	if userId == 0 {

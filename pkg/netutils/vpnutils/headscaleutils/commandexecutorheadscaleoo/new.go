@@ -7,6 +7,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
+
 type CommandExecutorHeadscale struct {
 	commandExecutor commandexecutorinterfaces.CommandExecutor
 }
@@ -19,7 +20,7 @@ func (c *CommandExecutorHeadscale) GetCommandExecutor() (commandexecutorinterfac
 	return c.commandExecutor, nil
 }
 
-func New(commandExectutor commandexecutorinterfaces.CommandExecutor) (headscaleinterfaces.HeadScale, error) {
+func New(commandExectutor commandexecutorinterfaces.CommandExecutor) (headscaleinterfaces.Headscale, error) {
 	if commandExectutor == nil {
 		return nil, tracederrors.TracedErrorNil("commandExecutor")
 	}
@@ -29,7 +30,7 @@ func New(commandExectutor commandexecutorinterfaces.CommandExecutor) (headscalei
 	}, nil
 }
 
-func NewOnLocalhost() (headscaleinterfaces.HeadScale, error) {
+func NewOnLocalhost() (headscaleinterfaces.Headscale, error) {
 	exec := commandexecutorexecoo.Exec()
 	return New(exec)
 }
