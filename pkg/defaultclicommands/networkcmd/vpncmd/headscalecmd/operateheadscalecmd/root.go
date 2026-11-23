@@ -4,9 +4,13 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/vpncmd/headscalecmd/operateheadscalecmd/operateheadscaleapikeyscmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/vpncmd/headscalecmd/operateheadscalecmd/operateheadscalenodescmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/vpncmd/headscalecmd/operateheadscalecmd/operateheadscaleoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/vpncmd/headscalecmd/operateheadscalecmd/operateheadscaleuserscmd"
 )
 
-func NewOperateCmd(options *OperateOptions) *cobra.Command {
+func NewOperateCmd(options *operateheadscaleoptions.OperateOptions) *cobra.Command {
 	if options == nil {
 		panic("options is nil")
 	}
@@ -27,10 +31,9 @@ Usage:
 	}
 
 	cmd.AddCommand(
-		NewCreatePreauthKeyCmd(options),
-		NewCreateUserCmd(options),
-		NewGetUserIdCmd(options),
-		NewListUsersCmd(options),
+		operateheadscaleapikeyscmd.NewApiKeysCmd(options),
+		operateheadscalenodescmd.NewNodesCmd(options),
+		operateheadscaleuserscmd.NewUsersCmd(options),
 	)
 
 	return cmd
