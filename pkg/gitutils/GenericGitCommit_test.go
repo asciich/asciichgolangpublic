@@ -1,22 +1,53 @@
-package asciichgolangpublic
+package gitutils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
+	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/commandexecutorgitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/nativegitoo"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
+
+func getGitRepositoryToTest(implementationName string) (repo gitinterfaces.GitRepository) {
+	ctx := getCtx()
+
+	if implementationName == "nativegitoo" {
+		repo = mustutils.Must(
+			nativegitoo.NewGitRepositoryFromPath(
+				mustutils.Must(tempfilesoo.CreateEmptyTemporaryDirectoryAndGetPath(ctx)),
+			),
+		)
+	} else if implementationName == "commandexecutorgitoo" {
+		repo = mustutils.Must(commandexecutorgitoo.CreateLocalTemporaryRepository(ctx, &parameteroptions.CreateRepositoryOptions{}))
+	} else {
+		logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)
+	}
+
+	mustutils.Must0(repo.Init(
+		ctx,
+		&parameteroptions.CreateRepositoryOptions{
+			InitializeWithEmptyCommit:   true,
+			InitializeWithDefaultAuthor: true,
+		},
+	))
+
+	return repo
+}
 
 func TestGitCommit_CreateTag(t *testing.T) {
 	tests := []struct {
 		implementationName string
 	}{
-		{"localGitRepository"},
-		{"localCommandExecutorRepository"},
+		{"nativegitoo"},
+		{"commandexecutorgitoo"},
 	}
 
 	for _, tt := range tests {
@@ -81,8 +112,8 @@ func TestGitCommit_ListTagsNames(t *testing.T) {
 	tests := []struct {
 		implementationName string
 	}{
-		{"localGitRepository"},
-		{"localCommandExecutorRepository"},
+		{"nativegitoo"},
+		{"commandexecutorgitoo"},
 	}
 
 	for _, tt := range tests {
@@ -147,8 +178,8 @@ func TestGitCommit_ListVersionTagNames(t *testing.T) {
 	tests := []struct {
 		implementationName string
 	}{
-		{"localGitRepository"},
-		{"localCommandExecutorRepository"},
+		{"nativegitoo"},
+		{"commandexecutorgitoo"},
 	}
 
 	for _, tt := range tests {
@@ -224,8 +255,8 @@ func TestGitCommit_GetNewestTagVersion(t *testing.T) {
 	tests := []struct {
 		implementationName string
 	}{
-		{"localGitRepository"},
-		{"localCommandExecutorRepository"},
+		{"nativegitoo"},
+		{"commandexecutorgitoo"},
 	}
 
 	for _, tt := range tests {
@@ -298,8 +329,8 @@ func TestGitCommit_GetNewestTagVersionOrNilIfUnset(t *testing.T) {
 	tests := []struct {
 		implementationName string
 	}{
-		{"localGitRepository"},
-		{"localCommandExecutorRepository"},
+		{"nativegitoo"},
+		{"commandexecutorgitoo"},
 	}
 
 	for _, tt := range tests {
@@ -393,8 +424,8 @@ func TestGitCommit_HasVersionTag(t *testing.T) {
 	tests := []struct {
 		implementationName string
 	}{
-		{"localGitRepository"},
-		{"localCommandExecutorRepository"},
+		{"nativegitoo"},
+		{"commandexecutorgitoo"},
 	}
 
 	for _, tt := range tests {
