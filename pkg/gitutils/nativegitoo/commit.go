@@ -117,7 +117,18 @@ func (c *NativeGitCommit) HasParentCommit(ctx context.Context) (hasParent bool, 
 }
 
 func (c *NativeGitCommit) CreateTag(ctx context.Context, options *gitparameteroptions.GitRepositoryCreateTagOptions) (gitinterfaces.GitTag, error) {
-	return c.repository.CreateTag(ctx, options)
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	optionsToUse := options.GetDeepCopy()
+
+	err := optionsToUse.SetCommitHash(c.hash)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.repository.CreateTag(ctx, optionsToUse)
 }
 
 func (c *NativeGitCommit) ListTags(ctx context.Context) (tags []gitinterfaces.GitTag, err error) {
@@ -197,12 +208,17 @@ func (c *NativeGitCommit) GetNewestTagVersionOrNilIfUnset(ctx context.Context) (
 			return nil, err
 		}
 
+		if newestVersion == nil {
+			newestVersion = version
+			continue
+		}
+
 		isNewerThan, err := version.IsNewerThan(newestVersion)
 		if err != nil {
 			return nil, err
 		}
 
-		if newestVersion == nil || isNewerThan {
+		if isNewerThan {
 			newestVersion = version
 		}
 	}
