@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/containerutils/dockerutils/nativedocker"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/vpncmd/headscalecmd/operateheadscalecmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/vpncmd/headscalecmd/operateheadscalecmd/operateheadscaleoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils/vpnutils/headscaleutils/commandexecutorheadscaleoo"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils/vpnutils/headscaleutils/headscaleinterfaces"
@@ -31,9 +32,9 @@ Usage:
 	cmd.AddCommand(
 		NewRunServerCmd(),
 		operateheadscalecmd.NewOperateCmd(
-			&operateheadscalecmd.OperateOptions{
+			&operateheadscaleoptions.OperateOptions{
 				RootCmdShort: "Operate the local development environment.",
-				GetHeadScale: func(ctx context.Context, cmd *cobra.Command) headscaleinterfaces.HeadScale {
+				GetHeadScale: func(ctx context.Context, cmd *cobra.Command) headscaleinterfaces.Headscale {
 					containerName, err := cmd.Flags().GetString("container-name")
 					if err != nil {
 						logging.LogGoErrorFatalWithTrace(err)

@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/vpncmd/headscalecmd/localdevcmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/vpncmd/headscalecmd/operateheadscalecmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/vpncmd/headscalecmd/operateheadscalecmd/operateheadscaleoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils/vpnutils/headscaleutils/commandexecutorheadscaleoo"
 	"github.com/asciich/asciichgolangpublic/pkg/netutils/vpnutils/headscaleutils/headscaleinterfaces"
@@ -27,8 +28,8 @@ Usage:
 	cmd.AddCommand(
 		localdevcmd.NewLocalDevCmd(),
 		operateheadscalecmd.NewOperateCmd(
-			&operateheadscalecmd.OperateOptions{
-				GetHeadScale: func(ctx context.Context, cmd *cobra.Command) headscaleinterfaces.HeadScale {
+			&operateheadscaleoptions.OperateOptions{
+				GetHeadScale: func(ctx context.Context, cmd *cobra.Command) headscaleinterfaces.Headscale {
 					headscale, err := commandexecutorheadscaleoo.NewOnLocalhost()
 					if err != nil {
 						logging.LogGoErrorFatalWithTrace(err)

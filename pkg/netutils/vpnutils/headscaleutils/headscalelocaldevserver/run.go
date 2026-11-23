@@ -14,7 +14,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/netutils/vpnutils/headscaleutils/headscaleinterfaces"
 )
 
-func RunLocalDevServer(ctx context.Context, options *RunOptions) (headscale headscaleinterfaces.HeadScale, cancel func() error, err error) {
+func RunLocalDevServer(ctx context.Context, options *RunOptions) (headscale headscaleinterfaces.Headscale, cancel func() error, err error) {
 	if options == nil {
 		options = &RunOptions{}
 	}

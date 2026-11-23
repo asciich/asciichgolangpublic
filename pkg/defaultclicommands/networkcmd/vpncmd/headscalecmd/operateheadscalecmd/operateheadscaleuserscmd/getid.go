@@ -1,4 +1,4 @@
-package operateheadscalecmd
+package operateheadscaleuserscmd
 
 import (
 	"fmt"
@@ -6,20 +6,21 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/vpncmd/headscalecmd/operateheadscalecmd/operateheadscaleoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 )
 
-func NewGetUserIdCmd(options *OperateOptions) *cobra.Command {
+func NewGetUserIdCmd(options *operateheadscaleoptions.OperateOptions) *cobra.Command {
 	const short = "Get the user ID of the given user name."
 
 	cmd := &cobra.Command{
-		Use:   "get-user-id",
+		Use:   "get-id",
 		Short: short,
 		Long: short + `
 
 Usage:
-    ` + os.Args[0] + ` network vpn headscale operate get-user-id`,
+    ` + os.Args[0] + ` network vpn headscale operate users get-id`,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)

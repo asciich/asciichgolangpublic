@@ -1,4 +1,4 @@
-package operateheadscalecmd
+package operateheadscaleoptions
 
 import (
 	"context"
@@ -13,7 +13,7 @@ type OperateOptions struct {
 	RootCmdShort string
 
 	// Get the HeadScale to operate:
-	GetHeadScale func(ctx context.Context, cmd *cobra.Command) headscaleinterfaces.HeadScale
+	GetHeadScale func(ctx context.Context, cmd *cobra.Command) headscaleinterfaces.Headscale
 }
 
 func (o *OperateOptions) GetRootCmdUse() string {

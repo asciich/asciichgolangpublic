@@ -1,23 +1,25 @@
-package operateheadscalecmd
+package operateheadscaleuserscmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/networkcmd/vpncmd/headscalecmd/operateheadscalecmd/operateheadscaleoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
-	"os"
 )
 
-func NewCreateUserCmd(options *OperateOptions) *cobra.Command {
+func NewCreateUserCmd(options *operateheadscaleoptions.OperateOptions) *cobra.Command {
 	const short = "Create a headscale user."
 
 	cmd := &cobra.Command{
-		Use:   "create-user",
+		Use:   "create",
 		Short: short,
 		Long: short + `
 
 Usage:
-    ` + os.Args[0] + ` network vpn headscale operate create-user`,
+    ` + os.Args[0] + ` network vpn headscale operate users create`,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := contextutils.GetVerbosityContextByCobraCmd(cmd)
