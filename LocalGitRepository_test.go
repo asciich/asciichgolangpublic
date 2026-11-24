@@ -6,13 +6,13 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
-	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
-func TestGetCurrentCommitGoGitHash(t *testing.T) {
+func TestGetCurrentCommitHash(t *testing.T) {
 	tests := []struct {
 		bareRepository bool
 	}{
@@ -24,7 +24,7 @@ func TestGetCurrentCommitGoGitHash(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				repo, err := TemporaryGitRepositories().CreateEmptyTemporaryGitRepository(
+				repo, err := gitutils.TemporaryGitRepositories().CreateEmptyTemporaryGitRepository(
 					ctx,
 					&parameteroptions.CreateRepositoryOptions{
 						BareRepository:              tt.bareRepository,
@@ -35,12 +35,15 @@ func TestGetCurrentCommitGoGitHash(t *testing.T) {
 				require.NoError(t, err)
 				defer repo.Delete(ctx, &filesoptions.DeleteOptions{})
 
-				localGitRepo, ok := repo.(*LocalGitRepository)
-				require.True(t, ok)
-
 				hash, err := repo.GetCurrentCommitHash(ctx)
 				require.NoError(t, err)
-				require.EqualValues(t, hash, mustutils.Must(localGitRepo.GetCurrentCommitGoGitHash(ctx)).String())
+
+				commit, err := repo.GetCurrentCommit(ctx)
+				require.NoError(t, err)
+
+				commitHash, err := commit.GetHash(ctx)
+				require.NoError(t, err)
+				require.EqualValues(t, hash, commitHash)
 			},
 		)
 	}
@@ -97,7 +100,7 @@ func TestLocalGitRepositoryGetParentCommits(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				repo, err := TemporaryGitRepositories().CreateEmptyTemporaryGitRepository(
+				repo, err := gitutils.TemporaryGitRepositories().CreateEmptyTemporaryGitRepository(
 					ctx,
 					&parameteroptions.CreateRepositoryOptions{
 						BareRepository:              tt.bareRepository,
@@ -238,7 +241,7 @@ func TestLocalGitRepositoryCreateEmptyTemporaryGitRepository(t *testing.T) {
 			func(t *testing.T) {
 				ctx := getCtx()
 
-				repo, err := TemporaryGitRepositories().CreateEmptyTemporaryGitRepository(
+				repo, err := gitutils.TemporaryGitRepositories().CreateEmptyTemporaryGitRepository(
 					ctx,
 					&parameteroptions.CreateRepositoryOptions{
 						BareRepository:              tt.bareRepository,

@@ -769,7 +769,21 @@ func (n *NativeGitRepository) PullFromRemote(ctx context.Context, pullOptions *g
 }
 
 func (n *NativeGitRepository) Push(ctx context.Context) (err error) {
-	return tracederrors.TracedErrorNotImplemented()
+	path, hostDescription, err := n.GetPathAndHostDescription()
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Push git repository '%s' on '%s' started.", path, hostDescription)
+
+	err = n.PushToRemote(ctx, "origin")
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Push git repository '%s' on '%s' finished.", path, hostDescription)
+
+	return nil
 }
 
 func (n *NativeGitRepository) PushTagsToRemote(ctx context.Context, remoteName string) (err error) {
