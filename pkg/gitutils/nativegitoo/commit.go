@@ -101,7 +101,18 @@ func (c *NativeGitCommit) GetParentCommits(ctx context.Context, options *paramet
 
 	parents = []gitinterfaces.GitCommit{}
 	for _, parentHash := range commitObject.ParentHashes {
-		parents = append(parents, NewNativeGitCommit(parentHash.String(), c.repository))
+		parent := NewNativeGitCommit(parentHash.String(), c.repository)
+
+		parents = append(parents, parent)
+
+		if options != nil && options.IncludeParentsOfParents {
+			parentsOfParent, err := parent.GetParentCommits(ctx, options)
+			if err != nil {
+				return nil, err
+			}
+
+			parents = append(parents, parentsOfParent...)
+		}
 	}
 
 	return parents, nil

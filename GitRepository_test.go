@@ -11,6 +11,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/commandexecutorgitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
@@ -1705,7 +1706,7 @@ func TestGitRepository_GetGitRepositoryByDirectory(t *testing.T) {
 				repoRootDirectory, err := gitRepo.GetRootDirectory(ctx)
 				require.NoError(t, err)
 
-				gitRepo2, err := GetGitRepositoryByDirectory(repoRootDirectory)
+				gitRepo2, err := gitutils.GetGitRepositoryByDirectory(ctx, repoRootDirectory)
 				require.NoError(t, err)
 
 				require.EqualValues(t, mustutils.Must(gitRepo.GetRootDirectoryPath(ctx)), mustutils.Must(gitRepo2.GetRootDirectoryPath(ctx)))
@@ -2046,7 +2047,7 @@ func TestGetGitRepositoryByDirectory_NativeFilesOO(t *testing.T) {
 	require.NoError(t, err)
 
 	// Try to get GitRepository from nativefilesoo.Directory
-	repo, err := GetGitRepositoryByDirectory(tempDir)
+	repo, err := gitutils.GetGitRepositoryByDirectory(ctx, tempDir)
 	require.NoError(t, err)
 	require.NotNil(t, repo)
 

@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package gitutils
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/commandexecutorgitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/nativegitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -66,12 +67,14 @@ func (t TemporaryGitRepositoriesService) CreateEmptyTemporaryGitRepository(ctx c
 		return nil, tracederrors.TracedErrorNil("createRepoOptions")
 	}
 
+	logging.LogInfoByCtxf(ctx, "Create empty temporary git repository started.")
+
 	tempDirectory, err := tempfilesoo.CreateEmptyTemporaryDirectory(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	temporaryGitRepository, err = GetLocalGitRepositoryFromDirectory(tempDirectory)
+	temporaryGitRepository, err = nativegitoo.NewGitRepositoryFromDirectory(tempDirectory)
 	if err != nil {
 		return nil, err
 	}
@@ -88,5 +91,5 @@ func (t TemporaryGitRepositoriesService) CreateEmptyTemporaryGitRepository(ctx c
 
 	logging.LogInfoByCtxf(ctx, "Created temporary local git repository '%s'.", repoPath)
 
-	return temporaryGitRepository, err
+	return temporaryGitRepository, nil
 }

@@ -28,7 +28,7 @@ func Test_NewGitRepositoryFromDirectory(t *testing.T) {
 		dir, err := nativefilesoo.NewDirectoryByPath(tempDir)
 		require.NoError(t, err)
 
-		gitRepo, err := gitutils.NewGitRepositoryFromDirectory(ctx, dir)
+		gitRepo, err := gitutils.GetGitRepositoryByDirectory(ctx, dir)
 		require.NoError(t, err)
 		require.NotNil(t, gitRepo)
 	})
@@ -45,7 +45,7 @@ func Test_NewGitRepositoryFromDirectory(t *testing.T) {
 		dir, err := commandexecutorfileoo.NewDirectory(commandexecutorexecoo.Exec(), tempDir)
 		require.NoError(t, err)
 
-		gitRepo, err := gitutils.NewGitRepositoryFromDirectory(ctx, dir)
+		gitRepo, err := gitutils.GetGitRepositoryByDirectory(ctx, dir)
 		require.NoError(t, err)
 		require.NotNil(t, gitRepo)
 	})
