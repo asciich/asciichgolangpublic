@@ -10,10 +10,38 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/commandexecutorgitoo"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
+	localgitoo "github.com/asciich/asciichgolangpublic/pkg/gitutils/localgitoo"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
+
+func getGitRepositoryToTest(implementationName string) (repo gitinterfaces.GitRepository) {
+	ctx := getCtx()
+
+	if implementationName == "localGitRepository" {
+		repo = localgitoo.MustGetLocalGitRepositoryFromDirectory(
+			mustutils.Must(tempfilesoo.CreateEmptyTemporaryDirectory(ctx)),
+		)
+	} else if implementationName == "localCommandExecutorRepository" {
+		repo = mustutils.Must(commandexecutorgitoo.CreateLocalTemporaryRepository(ctx, &parameteroptions.CreateRepositoryOptions{}))
+	} else {
+		logging.LogFatalWithTracef("unknown implementationName='%s'", implementationName)
+	}
+
+	mustutils.Must0(repo.Init(
+		ctx,
+		&parameteroptions.CreateRepositoryOptions{
+			InitializeWithEmptyCommit:   true,
+			InitializeWithDefaultAuthor: true,
+		},
+	))
+
+	return repo
+}
 
 func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 	ctx := getCtx()
@@ -23,7 +51,7 @@ func TestPreCommitConfigFile_UpdateDependency(t *testing.T) {
 
 	tests := []TestCase{}
 
-	testDataDirectory, err := MustGetLocalGitRepositoryByPath(".").GetDirectoryByPath(ctx, "testdata", "PreCommitConfigFile", "UpdateDependency")
+	testDataDirectory, err := localgitoo.MustGetLocalGitRepositoryByPath(".").GetDirectoryByPath(ctx, "testdata", "PreCommitConfigFile", "UpdateDependency")
 	require.NoError(t, err)
 	for _, testDirectory := range mustutils.Must(testDataDirectory.ListSubDirectories(ctx, &parameteroptions.ListDirectoryOptions{Recursive: false})) {
 		localPath, err := testDirectory.GetLocalPath()

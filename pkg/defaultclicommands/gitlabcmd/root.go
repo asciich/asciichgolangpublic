@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/gitlabcmd/gitlabcmdgeneric"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/gitlabcmd/gitlabmetricscmd"
+	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/gitlabcmd/gitlabprojectscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/gitlabcmd/pipelineschedulescmd"
 )
 
@@ -20,6 +21,7 @@ func NewGitlabCommand(options gitlabcmdgeneric.GitlabCmdOptions) (cmd *cobra.Com
 		NewShowFqdnCmd(options),
 
 		gitlabmetricscmd.NewMetricsCommand(),
+		gitlabprojectscmd.NewProjectsCmd(options),
 		pipelineschedulescmd.NewPipelineSchedulesCmd(),
 	)
 

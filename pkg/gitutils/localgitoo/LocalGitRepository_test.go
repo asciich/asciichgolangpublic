@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package localgitoo_test
 
 import (
 	"testing"
@@ -8,6 +8,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/tempfilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
+	localgitoo "github.com/asciich/asciichgolangpublic/pkg/gitutils/localgitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
@@ -69,7 +70,7 @@ func TestLocalGitRepository_GetLocalGitRepositoryFromDirectory(t *testing.T) {
 				require.NoError(t, err)
 				require.EqualValues(t, "localhost", hostDescription)
 
-				repo, err := GetLocalGitRepositoryFromDirectory(directory)
+				repo, err := localgitoo.GetLocalGitRepositoryFromDirectory(directory)
 				require.NoError(t, err)
 
 				repoPath, err := repo.GetPath()

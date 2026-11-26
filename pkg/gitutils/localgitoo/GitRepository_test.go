@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package localgitoo_test
 
 import (
 	"context"
@@ -15,6 +15,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/commandexecutorgitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitparameteroptions"
+	localgitoo "github.com/asciich/asciichgolangpublic/pkg/gitutils/localgitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
 	"github.com/asciich/asciichgolangpublic/pkg/parameteroptions"
@@ -29,7 +30,7 @@ func getGitRepositoryToTest(implementationName string) (repo gitinterfaces.GitRe
 	ctx := getCtx()
 
 	if implementationName == "localGitRepository" {
-		repo = MustGetLocalGitRepositoryFromDirectory(
+		repo = localgitoo.MustGetLocalGitRepositoryFromDirectory(
 			mustutils.Must(tempfilesoo.CreateEmptyTemporaryDirectory(ctx)),
 		)
 	} else if implementationName == "localCommandExecutorRepository" {
@@ -512,7 +513,7 @@ func TestGitRepository_GetRootDirectory_from_subdirectory(t *testing.T) {
 
 				require.EqualValues(t, expectedRootDirectory, mustutils.Must(repoUsingSubDir1.GetRootDirectoryPath(ctx)))
 
-				repoUsingSubDir2 := MustGetLocalGitRepositoryFromDirectory(subDir)
+				repoUsingSubDir2 := localgitoo.MustGetLocalGitRepositoryFromDirectory(subDir)
 
 				require.EqualValues(t, expectedRootDirectory, mustutils.Must(repoUsingSubDir2.GetRootDirectoryPath(ctx)))
 			},

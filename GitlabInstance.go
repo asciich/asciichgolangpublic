@@ -781,7 +781,7 @@ func (g *GitlabInstance) GetProjectIdByPath(ctx context.Context, projectPath str
 	return projectId, nil
 }
 
-func (g *GitlabInstance) GetProjectPathList(ctx context.Context, options *gitlaboptions.GitlabgetProjectListOptions) (projectPaths []string, err error) {
+func (g *GitlabInstance) ListProjectPaths(ctx context.Context, options *gitlaboptions.GitlabgetProjectListOptions) (projectPaths []string, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -791,7 +791,7 @@ func (g *GitlabInstance) GetProjectPathList(ctx context.Context, options *gitlab
 		return nil, err
 	}
 
-	projectPaths, err = project.GetProjectPathList(ctx, options)
+	projectPaths, err = project.ListProjectPaths(ctx, options)
 	if err != nil {
 		return nil, err
 	}

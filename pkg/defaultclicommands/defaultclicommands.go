@@ -1,6 +1,8 @@
 package defaultclicommands
 
 import (
+	"context"
+
 	"github.com/spf13/cobra"
 	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd"
@@ -36,23 +38,46 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/virtualmachinescmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/weatherutilscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/wikicmd"
-	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/environmentvariables"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlabinterfaces"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 type genericGitlab struct{}
 
-func (g *genericGitlab) GetGitlabInstance(cmd *cobra.Command, args []string) (*asciichgolangpublic.GitlabInstance, error) {
+func (g *genericGitlab) GetGitlabInstance(ctx context.Context, cmd *cobra.Command, args []string) (gitlabinterfaces.GitlabInstance, error) {
 	url, err := cmd.Flags().GetString("url")
 	if err != nil {
 		return nil, tracederrors.TracedError(err)
 	}
 
 	if url == "" {
-		logging.LogFatal("Please specify the --url for the gitlab instance.")
+		tracederrors.TracedError("Please specify the --url for the gitlab instance.")
 	}
 
 	return asciichgolangpublic.GetGitlabByFQDN(url)
+}
+
+func (g *genericGitlab) GetAuthenticatedGitlabInstance(ctx context.Context, cmd *cobra.Command, args []string) (gitlabinterfaces.GitlabInstance, error) {
+	gitlabInstance, err := g.GetGitlabInstance(ctx, cmd, args)
+	if err != nil {
+		return nil, err
+	}
+
+	accessToken, err := environmentvariables.GetEnvValueAsString(ctx, "GITLAB_ACCESS_TOKEN", false)
+	if err != nil {
+		return nil, err
+	}
+
+	err = gitlabInstance.Authenticate(ctx, &gitlaboptions.GitlabAuthenticationOptions{
+		AccessToken: accessToken,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return gitlabInstance, err
 }
 
 func AddDefaultCommands(rootCmd *cobra.Command) (err error) {

@@ -11,6 +11,7 @@ import (
 
 	"github.com/asciich/asciichgolangpublic/pkg/datatypes/stringsutils"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/nativegitlab"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -543,7 +544,7 @@ func (p *GitlabProjects) GetProjectList(ctx context.Context, options *gitlabopti
 	return gitlabProjects, nil
 }
 
-func (p *GitlabProjects) GetProjectPathList(ctx context.Context, options *gitlaboptions.GitlabgetProjectListOptions) (projectPaths []string, err error) {
+func (p *GitlabProjects) ListProjectPaths(ctx context.Context, options *gitlaboptions.GitlabgetProjectListOptions) (projectPaths []string, err error) {
 	if options == nil {
 		return nil, tracederrors.TracedErrorNil("options")
 	}
@@ -583,17 +584,12 @@ func (p *GitlabProjects) ProjectByProjectPathExists(ctx context.Context, project
 		return false, tracederrors.TracedError("projectPath is empty string")
 	}
 
-	_, err = p.GetProjectByProjectPath(ctx, projectPath)
+	nativeClient, err := p.GetNativeClient()
 	if err != nil {
-		if errors.Is(err, ErrGitlabProjectNotFound) {
-			logging.LogInfoByCtxf(ctx, "Gitlab project '%s' does not exist.", projectPath)
-			return false, nil
-		}
 		return false, err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Gitlab project '%s' does exist.", projectPath)
-	return true, nil
+	return nativegitlab.ProjectExists(ctx, nativeClient, projectPath)
 }
 
 func (p *GitlabProjects) SetGitlab(gitlab *GitlabInstance) (err error) {

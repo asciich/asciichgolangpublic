@@ -1,10 +1,13 @@
 package gitlabcmdgeneric
 
 import (
+	"context"
+
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlabinterfaces"
 )
 
 type GitlabCmdOptions interface {
-	GetGitlabInstance(cmd *cobra.Command, args []string) (*asciichgolangpublic.GitlabInstance, error)
+	GetGitlabInstance(ctx context.Context, cmd *cobra.Command, args []string) (gitlabinterfaces.GitlabInstance, error)
+	GetAuthenticatedGitlabInstance(ctx context.Context, cmd *cobra.Command, args []string) (gitlabinterfaces.GitlabInstance, error)
 }
