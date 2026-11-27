@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package localgitoo
 
 import (
 	"context"
@@ -1686,7 +1686,6 @@ func (l *LocalGitRepository) Pull(ctx context.Context) (err error) {
 
 	return nil
 }
-
 func (l *LocalGitRepository) PullFromRemote(ctx context.Context, pullOptions *gitparameteroptions.GitPullFromRemoteOptions) (err error) {
 	if pullOptions == nil {
 		return tracederrors.TracedError("pullOptions not set")
@@ -1711,6 +1710,8 @@ func (l *LocalGitRepository) PullFromRemote(ctx context.Context, pullOptions *gi
 		return err
 	}
 
+	logging.LogInfoByCtxf(ctx, "Pull git repository '%s' on host '%s' from remote '%s' branch '%s' started.", path, hostDescription, remoteName, branchName)
+
 	// TODO implement without calling the git binary.
 	_, err = l.RunGitCommand(
 		ctx,
@@ -1720,7 +1721,7 @@ func (l *LocalGitRepository) PullFromRemote(ctx context.Context, pullOptions *gi
 		return err
 	}
 
-	logging.LogInfoByCtxf(ctx, "Pulled git repository '%s' on host '%s' from remote '%s'.", path, hostDescription, remoteName)
+	logging.LogInfoByCtxf(ctx, "Pull git repository '%s' on host '%s' from remote '%s' branch '%s' finished.", path, hostDescription, remoteName, branchName)
 
 	return nil
 }

@@ -1,4 +1,4 @@
-package asciichgolangpublic
+package localgitoo
 
 import (
 	"context"

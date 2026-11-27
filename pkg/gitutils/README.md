@@ -8,6 +8,7 @@ Utilities for working with Git repositories, branches, commits, and tags.
 * [commandexecutorgitoo](./commandexecutorgitoo/README.md): Object-oriented wrapper around commandexecutorgit.
 * [gitgeneric](./gitgeneric/README.md): Generic Git utilities (pure in-memory operations).
 * [gitinterfaces](./gitinterfaces/README.md): Git interfaces.
+* [localgitoo](./localgitoo/README.md): Legacy object-oriented implementation of a locally available git repository (local only).
 * [gitlabutils](./gitlabutils/README.md): GitLab-specific utilities.
 * [nativegit](./nativegit/README.md): Native Git operations using Go libraries (local only).
 * [nativegitoo](./nativegitoo/README.md): Object-oriented wrapper around nativegit.

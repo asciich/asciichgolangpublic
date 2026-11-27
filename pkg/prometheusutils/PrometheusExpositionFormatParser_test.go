@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	localgitoo "github.com/asciich/asciichgolangpublic/pkg/gitutils/localgitoo"
 	"github.com/asciich/asciichgolangpublic/pkg/testutils"
 )
 
@@ -27,7 +27,7 @@ func TestPrometheusExpositionFormatParserParseExample(t *testing.T) {
 			testutils.MustFormatAsTestname(tt),
 			func(t *testing.T) {
 				ctx := getCtx()
-				gitRepo := asciichgolangpublic.MustGetLocalGitRepositoryByPath(".")
+				gitRepo := localgitoo.MustGetLocalGitRepositoryByPath(".")
 				metricsTxt, err := gitRepo.ReadFileInDirectoryAsString(ctx, "testdata", "PrometheusExpositionFormatParser", "metrics.txt")
 				require.NoError(t, err)
 
