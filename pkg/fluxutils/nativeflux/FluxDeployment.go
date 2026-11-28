@@ -235,8 +235,9 @@ func (f *FluxDeployment) DeleteGitRepository(ctx context.Context, name string, n
 
 		err = dynamicClient.Resource(GetGitRepositoryGVR()).Namespace(namespace).Delete(ctx, name, deleteOptions)
 
-		timeoutCtx, _ := context.WithTimeout(ctx, time.Second*10)
+		timeoutCtx, cancel := context.WithTimeout(ctx, time.Second*10)
 		err = f.WaitUntilGitRepositoryDeleted(timeoutCtx, name, namespace)
+		cancel() // Release the timeout context resources as soon as the wait is over.
 		if err != nil {
 			return err
 		}
@@ -278,8 +279,9 @@ func (f *FluxDeployment) DeleteKustomization(ctx context.Context, name string, n
 
 		err = dynamicClient.Resource(GetKustomizationGVR()).Namespace(namespace).Delete(ctx, name, deleteOptions)
 
-		timeoutCtx, _ := context.WithTimeout(ctx, time.Second*10)
+		timeoutCtx, cancel := context.WithTimeout(ctx, time.Second*10)
 		err = f.WaitUntilKustomizationDeleted(timeoutCtx, name, namespace)
+		cancel() // Release the timeout context resources as soon as the wait is over.
 		if err != nil {
 			return err
 		}
@@ -321,8 +323,9 @@ func (f *FluxDeployment) DeleteHelmRelease(ctx context.Context, name string, nam
 
 		err = dynamicClient.Resource(GetHelmReleaseGVR()).Namespace(namespace).Delete(ctx, name, deleteOptions)
 
-		timeoutCtx, _ := context.WithTimeout(ctx, time.Second*10)
+		timeoutCtx, cancel := context.WithTimeout(ctx, time.Second*10)
 		err = f.WaitUntilHelmReleaseDeleted(timeoutCtx, name, namespace)
+		cancel() // Release the timeout context resources as soon as the wait is over.
 		if err != nil {
 			return err
 		}

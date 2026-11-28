@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/filesoptions"
 	"github.com/asciich/asciichgolangpublic/pkg/filesutils/nativefilesoo"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
@@ -95,7 +94,7 @@ func DownloadMainReadmes(ctx context.Context, options *DownloadMainReadmesOption
 		readmeContent, err := readme.GetContentAsString(ctx)
 		if err != nil {
 			if options.IgnoreNoReadmeMd {
-				if errors.Is(err, asciichgolangpublic.ErrGitlabRepositoryFileDoesNotExist) {
+				if errors.Is(err, ErrGitlabRepositoryFileDoesNotExist) {
 					logging.LogWarnByCtxf(ctx, "The repository %s has no README.md and is therefore ignored.", url)
 					continue
 				}

@@ -11,8 +11,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
@@ -69,7 +69,7 @@ Usage:
 func cliExposeMetrics(ctx context.Context, url string, port int, group string) {
 	logging.LogInfoByCtxf(ctx, "Going to export metrics of Gitlab instance '%s'", url)
 
-	gitlab := mustutils.Must(asciichgolangpublic.GetGitlabByFQDN(url))
+	gitlab := mustutils.Must(gitlabutils.GetGitlabByFQDN(url))
 
 	accessToken := os.Getenv("GITLAB_ACCESS_TOKEN")
 	if accessToken == "" {

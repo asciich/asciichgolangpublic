@@ -13,7 +13,7 @@ import (
 )
 
 func GetDefaultFluxImplementation() fluxinterfaces.Flux {
-	return commandexecutorflux.NewcommandExecutorFlux(commandexecutorbashoo.Bash())
+	return commandexecutorflux.NewCommandExecutorFlux(commandexecutorbashoo.Bash())
 }
 
 func InstallFlux(ctx context.Context, options *fluxparameteroptions.InstalFluxOptions) (fluxinterfaces.FluxDeployment, error) {

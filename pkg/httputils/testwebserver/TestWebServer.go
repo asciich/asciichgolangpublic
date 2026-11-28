@@ -306,8 +306,9 @@ func (t *TestWebServer) StartInBackground(ctx context.Context) (err error) {
 	}
 
 	// This makes it more robust when frequently started and stopped on the same port like in CI.
-	ctxTimeout, _ := context.WithTimeout(ctx, time.Second*30)
+	ctxTimeout, cancel := context.WithTimeout(ctx, time.Second*30)
 	err = netutils.WaitPortAvailableForListening(ctxTimeout, port)
+	cancel() // Release the timeout context resources as soon as the wait is over.
 	if err != nil {
 		return err
 	}
