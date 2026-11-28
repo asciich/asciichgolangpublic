@@ -4,19 +4,18 @@ import (
 	"context"
 	"os"
 
-	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
 
 const DEFAULT_TOKEN_NAME = "GITLAB_TOKEN"
 
-func NewAuthenticatedGitlab(ctx context.Context, gitlabUrl string) (*asciichgolangpublic.GitlabInstance, error) {
+func NewAuthenticatedGitlab(ctx context.Context, gitlabUrl string) (*GitlabInstance, error) {
 	if gitlabUrl == "" {
 		return nil, tracederrors.TracedErrorEmptyString("gitlabUrl")
 	}
 
-	gitlab, err := asciichgolangpublic.GetGitlabByFQDN(gitlabUrl)
+	gitlab, err := GetGitlabByFQDN(gitlabUrl)
 	if err != nil {
 		return nil, err
 	}

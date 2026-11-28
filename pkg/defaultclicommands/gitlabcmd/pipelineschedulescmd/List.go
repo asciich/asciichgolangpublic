@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/logging"
 	"github.com/asciich/asciichgolangpublic/pkg/mustutils"
@@ -51,7 +51,7 @@ func listCmd(ctx context.Context, url string) {
 			GitlabUrl:   url,
 		},
 	}
-	project, err := asciichgolangpublic.GetGitlabProjectByUrlFromString(ctx, url, access)
+	project, err := gitlabutils.GetGitlabProjectByUrlFromString(ctx, url, access)
 	if err != nil {
 		return
 	}

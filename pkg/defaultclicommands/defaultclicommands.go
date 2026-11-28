@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/spf13/cobra"
-	"github.com/asciich/asciichgolangpublic"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/aicmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/ansiblecmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/certificatescmd"
@@ -39,6 +38,7 @@ import (
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/weatherutilscmd"
 	"github.com/asciich/asciichgolangpublic/pkg/defaultclicommands/wikicmd"
 	"github.com/asciich/asciichgolangpublic/pkg/environmentvariables"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlabinterfaces"
 	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
@@ -56,7 +56,7 @@ func (g *genericGitlab) GetGitlabInstance(ctx context.Context, cmd *cobra.Comman
 		tracederrors.TracedError("Please specify the --url for the gitlab instance.")
 	}
 
-	return asciichgolangpublic.GetGitlabByFQDN(url)
+	return gitlabutils.GetGitlabByFQDN(url)
 }
 
 func (g *genericGitlab) GetAuthenticatedGitlabInstance(ctx context.Context, cmd *cobra.Command, args []string) (gitlabinterfaces.GitlabInstance, error) {

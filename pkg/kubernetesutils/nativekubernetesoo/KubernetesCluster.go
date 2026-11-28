@@ -267,7 +267,8 @@ func (n *NativeKubernetesCluster) WaitUntilNamespaceDeleted(ctx context.Context,
 
 	logging.LogInfoByCtxf(ctx, "Wait for kubernetes namespace '%s' to be deleted started (timeout = %s).", namepaceName, timeout)
 
-	ctx, _ = context.WithTimeout(ctx, timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
 	tStart := time.Now()
 	for {
 		if ctx.Err() != nil {
@@ -303,7 +304,8 @@ func (n *NativeKubernetesCluster) WaitUntilNamespaceCreated(ctx context.Context,
 
 	logging.LogInfoByCtxf(ctx, "Wait for kubernetes namespace '%s' to be created started (timeout = %s).", namepaceName, timeout)
 
-	ctx, _ = context.WithTimeout(ctx, timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
 	tStart := time.Now()
 	for {
 		if ctx.Err() != nil {

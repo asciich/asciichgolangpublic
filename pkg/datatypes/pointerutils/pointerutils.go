@@ -3,7 +3,6 @@ package pointerutils
 import (
 	"fmt"
 	"reflect"
-	"unsafe"
 
 	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
 )
@@ -11,7 +10,8 @@ import (
 func CheckIsPointer(objectToTest interface{}) (err error) {
 	isPointer := IsPointer(objectToTest)
 	if !isPointer {
-		return tracederrors.TracedErrorf("'%s' is not a pointer", objectToTest)
+		// %v instead of %s: %s prints garbage like %!s(<nil>) or %!s(int=5) for non-strings
+		return tracederrors.TracedErrorf("'%v' is not a pointer", objectToTest)
 	}
 
 	return nil
@@ -52,11 +52,8 @@ func GetMemoryAddressAsUIntPtr(input interface{}) (memoryAddress uintptr, err er
 		return 0, tracederrors.TracedErrorf("input is not a pointer: '%v'", input)
 	}
 
-	pointer := reflect.ValueOf(input).Pointer()
-
-	var unsafePtr unsafe.Pointer = unsafe.Pointer(pointer)
-
-	memoryAddress = uintptr(unsafePtr)
+	// Pointer() already returns a uintptr, no unsafe.Pointer conversion needed.
+	memoryAddress = reflect.ValueOf(input).Pointer()
 
 	return memoryAddress, nil
 }
@@ -66,7 +63,8 @@ func IsPointer(objectToTest interface{}) (isPointer bool) {
 		return false
 	}
 
-	isPointer = reflect.ValueOf(objectToTest).Kind() == reflect.Ptr
+	// reflect.Ptr is the old name; reflect.Pointer exists since Go 1.18
+	isPointer = reflect.ValueOf(objectToTest).Kind() == reflect.Pointer
 	return isPointer
 }
 

@@ -1,0 +1,452 @@
+package gitlabutils
+
+import (
+	"context"
+	"sort"
+
+	"github.com/asciich/asciichgolangpublic/pkg/contextutils"
+	"github.com/asciich/asciichgolangpublic/pkg/datatypes/slicesutils"
+	"github.com/asciich/asciichgolangpublic/pkg/gitutils/gitlabutils/gitlaboptions"
+	"github.com/asciich/asciichgolangpublic/pkg/logging"
+	"github.com/asciich/asciichgolangpublic/pkg/tracederrors"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
+)
+
+type GitlabRepositoryFiles struct {
+	gitlabProject *GitlabProject
+}
+
+func NewGitlabRepositoryFiles() (g *GitlabRepositoryFiles) {
+	return new(GitlabRepositoryFiles)
+}
+
+func (g *GitlabRepositoryFiles) CreateEmptyFile(ctx context.Context, fileName string, ref string) (createdFile *GitlabRepositoryFile, err error) {
+	if fileName == "" {
+		return nil, tracederrors.TracedErrorEmptyString("fileName")
+	}
+
+	if ref == "" {
+		return nil, tracederrors.TracedErrorEmptyString("ref")
+	}
+
+	createdFile, err = g.WriteFileContent(
+		ctx,
+		&gitlaboptions.GitlabWriteFileOptions{
+			Path:          fileName,
+			Content:       []byte{},
+			CommitMessage: "Create empty file",
+			BranchName:    ref,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdFile, nil
+}
+
+func (g *GitlabRepositoryFiles) DeleteAllRepositoryFiles(ctx context.Context, branchName string) (err error) {
+	if branchName == "" {
+		return tracederrors.TracedErrorEmptyString("branchName")
+	}
+
+	projectUrl, err := g.GetProjectUrl(ctx)
+	if err != nil {
+		return err
+	}
+
+	logging.LogInfoByCtxf(ctx, "Delete all repository files in '%s' started.", projectUrl)
+
+	files, err := g.GetFiles(ctx, branchName)
+	if err != nil {
+		return err
+	}
+
+	for _, toDelete := range files {
+		err = toDelete.Delete(ctx, "Delete all repository files")
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(files) > 0 {
+		logging.LogChangedByCtxf(ctx, "Deleted '%d' files in branch '%s' of gitlab project %s .", len(files), branchName, projectUrl)
+	} else {
+		logging.LogInfoByCtxf(ctx, "Gitlab project '%s' is already empty, no files in branch '%s' to delete.", projectUrl, branchName)
+	}
+
+	logging.LogInfoByCtxf(ctx, "Delete all repository files in %s finished.", projectUrl)
+
+	return nil
+}
+
+func (g *GitlabRepositoryFiles) GetDirectoryNames(ctx context.Context, ref string) (directoryNames []string, err error) {
+	if ref == "" {
+		return nil, tracederrors.TracedErrorEmptyString("ref")
+	}
+
+	fileAndDirectoryNames, err := g.GetFileAndDirectoryNames(ctx, ref)
+	if err != nil {
+		return nil, err
+	}
+
+	directoryNames = []string{}
+	for _, toCheck := range fileAndDirectoryNames {
+		toCheckWithAppendix := toCheck + "/"
+		if slicesutils.AtLeastOneElementStartsWith(fileAndDirectoryNames, toCheckWithAppendix) {
+			directoryNames = append(directoryNames, toCheck)
+		}
+	}
+
+	directoryNames = slicesutils.RemoveDuplicatedStrings(directoryNames)
+
+	sort.Strings(directoryNames)
+
+	return directoryNames, nil
+}
+
+func (g *GitlabRepositoryFiles) GetFileAndDirectoryNames(ctx context.Context, ref string) (fileNames []string, err error) {
+	if ref == "" {
+		return nil, tracederrors.TracedErrorEmptyString("ref")
+	}
+
+	nativeClient, projectId, err := g.GetNativeRepositoriesClientAndProjectid(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	trueBoolean := true
+	nextPage := 1
+
+	for {
+		if nextPage <= 0 {
+			break
+		}
+
+		nativeList, response, err := nativeClient.ListTree(
+			projectId,
+			&gitlab.ListTreeOptions{
+				Ref:       &ref,
+				Recursive: &trueBoolean,
+				ListOptions: gitlab.ListOptions{
+					PerPage: 20,
+					Page:    nextPage,
+				},
+			},
+		)
+		if err != nil {
+			return nil, tracederrors.TracedErrorf("ListTree failed: '%w'", err)
+		}
+
+		for _, entry := range nativeList {
+			toAdd := entry.Path
+			fileNames = append(fileNames, toAdd)
+		}
+
+		nextPage = response.NextPage
+	}
+
+	return fileNames, nil
+}
+
+// ListFileNames returns all file names in the repository at the given ref.
+func (g *GitlabRepositoryFiles) ListFileNames(ctx context.Context, ref string) (fileNames []string, err error) {
+	if ref == "" {
+		return nil, tracederrors.TracedErrorEmptyString("ref")
+	}
+
+	fileAndDirectoryNames, err := g.GetFileAndDirectoryNames(ctx, ref)
+	if err != nil {
+		return nil, err
+	}
+
+	fileNames = []string{}
+	for _, toCheck := range fileAndDirectoryNames {
+		toCheckWithAppendix := toCheck + "/"
+		if slicesutils.AtLeastOneElementStartsWith(fileAndDirectoryNames, toCheckWithAppendix) {
+			continue
+		}
+
+		fileNames = append(fileNames, toCheck)
+	}
+
+	fileNames = slicesutils.RemoveDuplicatedStrings(fileNames)
+
+	sort.Strings(fileNames)
+
+	return fileNames, nil
+}
+
+func (g *GitlabRepositoryFiles) GetFiles(ctx context.Context, ref string) (files []*GitlabRepositoryFile, err error) {
+	if ref == "" {
+		return nil, tracederrors.TracedErrorEmptyString("ref")
+	}
+
+	gitlabProject, err := g.GetGitlabProject()
+	if err != nil {
+		return nil, err
+	}
+
+	fileNames, err := g.ListFileNames(ctx, ref)
+	if err != nil {
+		return nil, err
+	}
+
+	files = []*GitlabRepositoryFile{}
+	for _, name := range fileNames {
+		toAdd := NewGitlabRepositoryFile()
+
+		err = toAdd.SetGitlabProject(gitlabProject)
+		if err != nil {
+			return nil, err
+		}
+
+		err = toAdd.SetBranchName(ref)
+		if err != nil {
+			return nil, err
+		}
+
+		err = toAdd.SetPath(name)
+		if err != nil {
+			return nil, err
+		}
+
+		files = append(files, toAdd)
+	}
+
+	return files, nil
+}
+
+func (g *GitlabRepositoryFiles) GetGitlab() (gitlab *GitlabInstance, err error) {
+	gitlabProject, err := g.GetGitlabProject()
+	if err != nil {
+		return nil, err
+	}
+
+	gitlab, err = gitlabProject.GetGitlab()
+	if err != nil {
+		return nil, err
+	}
+
+	return gitlab, nil
+}
+
+func (g *GitlabRepositoryFiles) GetGitlabProject() (gitlabProject *GitlabProject, err error) {
+	if g.gitlabProject == nil {
+		return nil, tracederrors.TracedErrorf("gitlabProject not set")
+	}
+
+	return g.gitlabProject, nil
+}
+
+func (g *GitlabRepositoryFiles) GetNativeRepositoriesClient() (nativeRepositoriesClient *gitlab.RepositoriesService, err error) {
+	gitlab, err := g.GetGitlab()
+	if err != nil {
+		return nil, err
+	}
+
+	nativeRepositoriesClient, err = gitlab.GetNativeRepositoriesClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return nativeRepositoriesClient, nil
+}
+
+func (g *GitlabRepositoryFiles) GetNativeRepositoriesClientAndProjectid(ctx context.Context) (nativeRepositoriesClient *gitlab.RepositoriesService, projectid int, err error) {
+	nativeRepositoriesClient, err = g.GetNativeRepositoriesClient()
+	if err != nil {
+		return nil, -1, err
+	}
+
+	projectId, err := g.GetProjectId(ctx)
+	if err != nil {
+		return nil, -1, err
+	}
+
+	return nativeRepositoriesClient, projectId, nil
+}
+
+func (g *GitlabRepositoryFiles) GetNativeRepositoryFilesClient() (nativeRepositoryFilesClient *gitlab.RepositoryFilesService, err error) {
+	gitlab, err := g.GetGitlab()
+	if err != nil {
+		return nil, err
+	}
+
+	nativeRepositoryFilesClient, err = gitlab.GetNativeRepositoryFilesClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return nativeRepositoryFilesClient, nil
+}
+
+func (g *GitlabRepositoryFiles) GetNativeRepositoryFilesClientAndProjectId(ctx context.Context) (nativeRepositoryFilesClient *gitlab.RepositoryFilesService, projectId int, err error) {
+	nativeRepositoryFilesClient, err = g.GetNativeRepositoryFilesClient()
+	if err != nil {
+		return nil, -1, err
+	}
+
+	projectId, err = g.GetProjectId(ctx)
+	if err != nil {
+		return nil, -1, err
+	}
+
+	return nativeRepositoryFilesClient, projectId, nil
+}
+
+func (g *GitlabRepositoryFiles) GetProjectId(ctx context.Context) (projectId int, err error) {
+	project, err := g.GetGitlabProject()
+	if err != nil {
+		return -1, err
+	}
+
+	projectId, err = project.GetId(ctx)
+	if err != nil {
+		return -1, err
+	}
+
+	return projectId, nil
+}
+
+func (g *GitlabRepositoryFiles) GetProjectUrl(ctx context.Context) (projectUrl string, err error) {
+	project, err := g.GetGitlabProject()
+	if err != nil {
+		return "", err
+	}
+
+	projectUrl, err = project.GetProjectUrl(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	return projectUrl, nil
+}
+
+func (g *GitlabRepositoryFiles) GetRepositoryFile(options *gitlaboptions.GitlabGetRepositoryFileOptions) (repositoryFile *GitlabRepositoryFile, err error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	repositoryFile = NewGitlabRepositoryFile()
+
+	gitlabProject, err := g.GetGitlabProject()
+	if err != nil {
+		return nil, err
+	}
+
+	err = repositoryFile.SetGitlabProject(gitlabProject)
+	if err != nil {
+		return nil, err
+	}
+
+	path, err := options.GetPath()
+	if err != nil {
+		return nil, err
+	}
+
+	err = repositoryFile.SetPath(path)
+	if err != nil {
+		return nil, err
+	}
+
+	if options.IsBranchNameSet() {
+		branchName, err := options.GetBranchName()
+		if err != nil {
+			return nil, err
+		}
+
+		err = repositoryFile.SetBranchName(branchName)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return repositoryFile, nil
+}
+
+func (g *GitlabRepositoryFiles) HasNoRepositoryFiles(ctx context.Context, branchName string) (hasNoRepositoryFiles bool, err error) {
+	if branchName == "" {
+		return false, tracederrors.TracedErrorEmptyString("branchName")
+	}
+
+	hasRepositoryFile, err := g.HasRepositoryFiles(contextutils.WithSilent(ctx), branchName)
+	if err != nil {
+		return false, err
+	}
+
+	hasNoRepositoryFiles = !hasRepositoryFile
+
+	return hasNoRepositoryFiles, nil
+}
+
+func (g *GitlabRepositoryFiles) HasRepositoryFiles(ctx context.Context, branchName string) (hasRepositoryFiles bool, err error) {
+	if branchName == "" {
+		return false, tracederrors.TracedErrorEmptyString("branchName")
+	}
+
+	fileNameList, err := g.ListFileNames(ctx, branchName)
+	if err != nil {
+		return false, err
+	}
+
+	hasRepositoryFiles = len(fileNameList) > 0
+
+	return hasRepositoryFiles, nil
+}
+
+func (g *GitlabRepositoryFiles) ReadFileContentAsString(ctx context.Context, options *gitlaboptions.GitlabReadFileOptions) (content string, err error) {
+	if options == nil {
+		return "", tracederrors.TracedErrorNil("options")
+	}
+
+	getFileOptions, err := options.GetGitlabGetRepositoryFileOptions()
+	if err != nil {
+		return "", err
+	}
+
+	repositoryFile, err := g.GetRepositoryFile(getFileOptions)
+	if err != nil {
+		return "", err
+	}
+
+	content, err = repositoryFile.GetContentAsString(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	return content, nil
+}
+
+func (g *GitlabRepositoryFiles) SetGitlabProject(gitlabProject *GitlabProject) (err error) {
+	if gitlabProject == nil {
+		return tracederrors.TracedErrorf("gitlabProject is nil")
+	}
+
+	g.gitlabProject = gitlabProject
+
+	return nil
+}
+
+func (g *GitlabRepositoryFiles) WriteFileContent(ctx context.Context, options *gitlaboptions.GitlabWriteFileOptions) (gitlabRepositoryFile *GitlabRepositoryFile, err error) {
+	if options == nil {
+		return nil, tracederrors.TracedErrorNil("options")
+	}
+
+	getFileOptions, err := options.GetGitlabGetRepositoryFileOptions()
+	if err != nil {
+		return nil, err
+	}
+
+	repositoryFile, err := g.GetRepositoryFile(getFileOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	err = repositoryFile.WriteFileContentByBytes(ctx, options.Content, options.CommitMessage)
+	if err != nil {
+		return nil, err
+	}
+
+	return repositoryFile, nil
+}

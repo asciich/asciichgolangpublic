@@ -2,7 +2,6 @@ package commandexecutorflux
 
 import (
 	"context"
-	"os"
 	"time"
 
 	"github.com/asciich/asciichgolangpublic/pkg/commandexecutor/commandexecutorinterfaces"
@@ -21,7 +20,7 @@ type CommandExecutorFlux struct {
 	commandExecutor commandexecutorinterfaces.CommandExecutor
 }
 
-func NewcommandExecutorFlux(executor commandexecutorinterfaces.CommandExecutor) fluxinterfaces.Flux {
+func NewCommandExecutorFlux(executor commandexecutorinterfaces.CommandExecutor) fluxinterfaces.Flux {
 	return &CommandExecutorFlux{
 		commandExecutor: executor,
 	}
@@ -136,8 +135,6 @@ func (c *CommandExecutorFlux) ConfigureFluxInstance(ctx context.Context, cluster
 	resourceYaml += "            path: /spec/template/spec/containers/0/args/-\n"
 	resourceYaml += "            value: --requeue-dependency=5s\n"
 
-	os.WriteFile("debug.yaml", []byte(resourceYaml), 0644)
-
 	resource, err := cluster.GetObjectByNames("flux", "FluxInstance", namespaceName)
 	if err != nil {
 		return err
@@ -150,8 +147,9 @@ func (c *CommandExecutorFlux) ConfigureFluxInstance(ctx context.Context, cluster
 		return err
 	}
 
-	timeoutCtx, _ := context.WithTimeout(ctx, time.Minute*2)
+	timeoutCtx, cancel := context.WithTimeout(ctx, time.Minute*2)
 	err = cluster.WaitUntilAllPodsInNamespaceAreRunning(timeoutCtx, namespaceName, &kubernetesparameteroptions.WaitForPodsOptions{MinNumberOfPods: 4})
+	cancel() // Release the timeout context resources as soon as the wait is over.
 	if err != nil {
 		return err
 	}
